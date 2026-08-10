@@ -35,3 +35,4 @@ npm run preview:western-rules-preview
   完成“默认 Placidus 十体计算 → 整宫 30° 重算”，10 天体 / 12 宫头 / 4 角点 / 23 相位，
   控制台 0 错误、0 页面异常、0 外网请求；local/session storage、Cache Storage 与
   IndexedDB 均为空；桌面与 390×844 手机视口无横向溢出，主按钮高度 48px。同轮新增星盘轮验收：两浏览器均渲染 24 个环段（12 星座 + 12 宫）、10 个天体、35 条线（12 宫头辐条 + 23 相位连线）、34 个文本标签；勾选恒星黄道（岁差值 24.1°）后太阳落点从（112.0, 244.0）平移到（123.2, 191.7），环段与天体数量不变，且两浏览器结果逐字段一致。
+- 可重复自动化门：`npm run test:e2e:western-rules-preview` 在 Edge 与 Chrome 各通过 1/1、共 2/2（约 8 秒），覆盖默认 Placidus 与恒星黄道两次计算，并断言 10 天体、12 宫、4 角、轮盘非空、localStorage/sessionStorage/IndexedDB 全程零写入、控制台 0 问题。
