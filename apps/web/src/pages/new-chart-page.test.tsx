@@ -161,6 +161,26 @@ describe("NewChartPage 时间校准", () => {
     expect(screen.getByLabelText(/出生日期/)).toHaveProperty("value", "1995-08-18");
   });
 
+  it("演示模式显示明确横幅并说明不会自动保存", () => {
+    render(<NewChartPage />);
+
+    const banner = screen.getByText(/演示模式/).closest(".demo-banner");
+    expect(banner?.textContent).toContain("不会自动保存");
+    expect(screen.getByRole("button", { name: "重置演示值" })).toBeTruthy();
+    expect(screen.getByLabelText(/案例别名/)).toHaveProperty("value", "演示案例 · 辰时研究");
+  });
+
+  it("修改演示值后可一键重置并恢复焦点", () => {
+    render(<NewChartPage />);
+
+    fireEvent.change(screen.getByLabelText(/案例别名/), { target: { value: "被改过的草稿" } });
+    expect(screen.getByLabelText(/案例别名/)).toHaveProperty("value", "被改过的草稿");
+
+    fireEvent.click(screen.getByRole("button", { name: "重置演示值" }));
+    expect(screen.getByLabelText(/案例别名/)).toHaveProperty("value", "演示案例 · 辰时研究");
+    expect(document.activeElement).toBe(screen.getByLabelText(/案例别名/));
+  });
+
   it("并列显示原始民用时、UTC 瞬时点与太阳时预览", () => {
     openTimeStep();
 

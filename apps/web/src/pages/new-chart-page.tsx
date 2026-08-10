@@ -613,6 +613,18 @@ export function NewChartPage(props: NewChartPageProps = {}) {
     }
   };
 
+  const resetDemo = () => {
+    if (!useDemo || revisionMode) return;
+    setForm(demoState);
+    setStep(0);
+    setCalculated(null);
+    setCandidateResult(null);
+    setError(null);
+    setValidationField(null);
+    formEditedRef.current = false;
+    aliasInputRef.current?.focus();
+  };
+
   const submit = (event: FormEvent) => {
     event.preventDefault();
     if (step < steps.length - 1) nextStep();
@@ -643,6 +655,14 @@ export function NewChartPage(props: NewChartPageProps = {}) {
           ? `以修订 R${revisionSource!.revision.revisionNumber} 的原始输入、时间校准和规则快照为起点。保存只会追加新 Revision，不覆盖历史版本，也不修改案例别名、标签或笔记。`
           : "每次计算都会保存原始输入、历法转换、UTC 瞬时点、DST 决策、规则快照与确定性哈希。已支持公历、农历/闰月、IANA 校时与固定 +08 节气投影，全部结果仍标记为金标前的工程候选。"}
       />
+
+      {useDemo ? (
+        <div className="demo-banner" role="status">
+          <Info aria-hidden="true" />
+          <p><strong>演示模式</strong> 当前输入是固定演示值（1995-08-18 08:26 北京），不会自动保存；只有显式点击“保存”才会写入本机库。修改字段后可用“重置演示值”恢复。</p>
+          <button type="button" className="secondary-action" onClick={resetDemo}>重置演示值</button>
+        </div>
+      ) : null}
 
       {revisionMode ? <div className="info-panel" role="status"><History aria-hidden="true" /><p><strong>{revisionSource!.caseRecord.alias} · 来源 R{revisionSource!.revision.revisionNumber}</strong> 案例元数据保持只读；只有下方出生输入与规则会进入新修订。</p></div> : null}
       {!revisionMode && rulePackLoading ? <div className="info-panel" role="status"><LoaderCircle aria-hidden="true" /><p><strong>正在核对活动规则包</strong> 最终生成前会再次读取并完整验真；当前可先填写资料。</p></div> : null}
