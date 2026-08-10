@@ -6,6 +6,11 @@ export const RESEARCH_SYSTEM_IDS = Object.freeze([
 
 export type ResearchSystemId = (typeof RESEARCH_SYSTEM_IDS)[number];
 
+export type ResearchSystemDeliveryStatus =
+  | "research_preview"
+  | "isolated_engineering_preview"
+  | "diagnostic_preview";
+
 type ResearchSystemBase = Readonly<{
   systemId: ResearchSystemId;
   label: string;
@@ -24,8 +29,9 @@ export type ActiveResearchSystemRoadmapItem = ResearchSystemBase & Readonly<{
 
 export type PlannedResearchSystemRoadmapItem = ResearchSystemBase & Readonly<{
   status: "planned";
-  deliveryStatus: "not_implemented";
+  deliveryStatus: Exclude<ResearchSystemDeliveryStatus, "research_preview">;
   entryHref: null;
+  progressNote: string;
   independentRequirements: readonly [string, ...string[]];
 }>;
 
@@ -55,9 +61,10 @@ const ZIWEI_DOUSHU_RESEARCH_SYSTEM: PlannedResearchSystemRoadmapItem = Object.fr
   label: "紫微斗数",
   internationalLabel: "Ziwei Doushu",
   status: "planned",
-  deliveryStatus: "not_implemented",
+  deliveryStatus: "isolated_engineering_preview",
   entryHref: null,
-  summary: "隔离契约草案与来源门已建立；当前构建仍没有紫微斗数排盘、保存、检索或备份入口。",
+  summary: "隔离契约、双引擎差分和独立工程资料库已建立；当前主应用仍没有紫微斗数入口。",
+  progressNote: "隔离工程预览：可在独立 4218 地址完成计算、显式保存、重开验真、单 Revision 导出与完整独立备份；主应用无入口，尚未取得专家真值或发布资格。",
   boundary: "不会把宫位、星曜或限运伪装成八字四柱字段，也不会复用八字验收结论。",
   independentRequirements: Object.freeze([
     "独立输入、计算契约与版本",
@@ -71,9 +78,10 @@ const WESTERN_ASTROLOGY_RESEARCH_SYSTEM: PlannedResearchSystemRoadmapItem = Obje
   label: "西洋星盘",
   internationalLabel: "Western Astrology",
   status: "planned",
-  deliveryStatus: "not_implemented",
+  deliveryStatus: "diagnostic_preview",
   entryHref: null,
-  summary: "隔离契约草案与来源门已建立；当前构建仍没有星盘计算、保存、检索或备份入口。",
+  summary: "隔离契约、天文诊断和无存储规则预览已建立；严格星历回执与持久化尚未完成，主应用仍没有星盘入口。",
+  progressNote: "诊断/规则预览：4219 无存储规则预览与 Astronomy Engine 诊断可复算；尚无严格成功回执、独立保存或发布资格，主应用无入口。",
   boundary: "星历、黄道、宫制、相位和坐标必须使用独立事实模型，不能借用八字规则 Profile。",
   independentRequirements: Object.freeze([
     "独立星历、坐标与宫制契约",

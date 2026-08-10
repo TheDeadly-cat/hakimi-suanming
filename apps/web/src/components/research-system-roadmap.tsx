@@ -19,7 +19,9 @@ function ResearchSystemRoadmapCard({ item }: { item: ResearchSystemRoadmapItem }
           </div>
           {item.status === "active"
             ? <StatusPill tone="jade">当前研究预览</StatusPill>
-            : <StatusPill tone="warning">长期规划</StatusPill>}
+            : item.deliveryStatus === "isolated_engineering_preview"
+              ? <StatusPill tone="info">隔离工程预览</StatusPill>
+              : <StatusPill tone="warning">诊断预览</StatusPill>}
         </header>
         <p>{item.summary}</p>
         <p className="research-system-boundary">{item.boundary}</p>
@@ -38,7 +40,7 @@ function ResearchSystemRoadmapCard({ item }: { item: ResearchSystemRoadmapItem }
             <ul className="research-system-scope" aria-label={`${item.label}独立实现要求`}>
               {item.independentRequirements.map((requirement) => <li key={requirement}>{requirement}</li>)}
             </ul>
-            <p className="research-system-state" id={statusId}>契约草案已建立；计算、保存与入口尚未实现，无发布日期。</p>
+            <p className="research-system-state" id={statusId}>{item.progressNote}</p>
           </>
         )}
       </article>

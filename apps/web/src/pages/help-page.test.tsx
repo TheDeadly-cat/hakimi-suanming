@@ -58,7 +58,8 @@ describe("HelpPage", () => {
       expect(planned.querySelector("[tabindex]")).toBeNull();
     }
 
-    expect(within(roadmap).getAllByText("契约草案已建立；计算、保存与入口尚未实现，无发布日期。")).toHaveLength(2);
+    expect(within(roadmap).getByText(/隔离工程预览：可在独立 4218 地址完成计算/)).toBeTruthy();
+    expect(within(roadmap).getByText(/诊断\/规则预览：4219 无存储规则预览与 Astronomy Engine 诊断可复算/)).toBeTruthy();
     expect(within(roadmap).getByText(/跨体系首先只做并列研究，不生成“准确率”或“一致率”/)).toBeTruthy();
   });
 });
