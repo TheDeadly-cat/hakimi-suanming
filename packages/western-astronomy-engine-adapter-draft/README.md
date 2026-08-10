@@ -58,6 +58,12 @@ Node 原始结果继续保留完整 double，不为制造跨运行时相等而�
 
 JPL Horizons 差分仍未形成通过门。本轮已把首个候选查询收窄为 `COMMAND=10`、`CENTER=500@399`、`EPHEM_TYPE=VECTORS`、`TIME_TYPE=UT`、`REF_PLANE=FRAME`、`REF_SYSTEM=ICRF`、`OUT_UNITS=AU-D`、`VEC_TABLE=1`、`VEC_CORR=LT` 与固定 UTC `2025-03-20T09:01:00.000Z`；但当前环境没有从官方端点取得可锁定的响应字节，因此没有创建替代或合成 fixture。下一步仍须固定官方原始响应、完整参数顺序、检索时间、URL/响应摘要，并明确 ICRF/EQJ、UT/UTC、EOP、太阳引力偏折与容差语义；在这些工件经审查前，只能输出不带真值裁决的差分报告。
 
+2026-08-10 新增 `src/strict-receipt-draft.ts`：严格成功回执的失败关闭契约。只有
+`ut1_utc_explicit`、闰秒/EOP/目标中心/ICRF/许可全部绑定，并且存在已验真的官方 JPL
+响应字节与真实领域复核记录时，系统才可能签发 `western-calculation-receipt`；当前实现
+在任何情况下都返回 `issued:false`，并精确报告缺失项。官方字节仍不可达，因此不会出现
+任何自签或合成回执。
+
 2026-08-10 对 JPL Horizons 官方端点的再次尝试（curl/PowerShell/Python 直连与本地代理均走 HTTPS）在 TLS 握手阶段被网络层阻断，未取得任何可锁定字节；该结果不影响规则层，因为规则层明确不依赖官方星历字节。
 
 ## 独立占星规则层
