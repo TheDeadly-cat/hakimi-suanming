@@ -293,6 +293,7 @@ export function DataManagementPage() {
   const deleteFeedbackRef = useRef<HTMLDivElement>(null);
   const deleteTriggerRef = useRef<HTMLButtonElement>(null);
   const deleteInputRef = useRef<HTMLInputElement>(null);
+  const backupAbortRef = useRef<AbortController | null>(null);
 
   const busy = activeOperation !== null;
   const dataMutationLocked = busy || deleteAllOpen || pendingRestore !== null;
@@ -393,6 +394,9 @@ export function DataManagementPage() {
   };
 
   const exportZip = async () => {
+    backupAbortRef.current?.abort();
+    const controller = new AbortController();
+    backupAbortRef.current = controller;
     setActiveOperation("export_zip");
     setBackupFeedback(null);
     try {
@@ -400,7 +404,8 @@ export function DataManagementPage() {
       const artifact = await createFullBackupArtifactOffMainThread(
         snapshot,
         { appVersion: APP_VERSION },
-        "zip"
+        "zip",
+        controller.signal
       );
       const fileName = `hakimi-full-backup-${new Date().toISOString().slice(0, 10)}.zip`;
       const result = await saveBlobFile(fileName, artifact.blob);
@@ -417,14 +422,22 @@ export function DataManagementPage() {
         message: `${delivery.message} 文件包含十六个用户数据分区及附件字节。`
       });
     } catch (reason) {
+      if (typeof reason === "object" && reason !== null && (reason as { code?: string }).code === "BACKUP_WORKER_CANCELLED") {
+        setBackupFeedback({ tone: "info", title: "已取消完整备份生成", message: "没有写入任何备份标记或文件；可稍后重新导出。" });
+        return;
+      }
       setBackupFeedback({ tone: "error", title: "ZIP 备份未完成", message: errorMessage(reason, "无法生成完整 ZIP 备份。") });
     } finally {
+      if (backupAbortRef.current === controller) backupAbortRef.current = null;
       setActiveOperation(null);
       finishFeedback(backupFeedbackRef);
     }
   };
 
   const exportJson = async () => {
+    backupAbortRef.current?.abort();
+    const controller = new AbortController();
+    backupAbortRef.current = controller;
     setActiveOperation("export_json");
     setBackupFeedback(null);
     try {
@@ -432,7 +445,8 @@ export function DataManagementPage() {
       const artifact = await createFullBackupArtifactOffMainThread(
         snapshot,
         { appVersion: APP_VERSION },
-        "json"
+        "json",
+        controller.signal
       );
       const fileName = `hakimi-full-backup-${new Date().toISOString().slice(0, 10)}.json`;
       const result = await saveBlobFile(fileName, artifact.blob);
@@ -449,11 +463,24 @@ export function DataManagementPage() {
         message: `${delivery.message} 该格式适合旧工具互操作，但附件会以内嵌编码增大体积。`
       });
     } catch (reason) {
+      if (typeof reason === "object" && reason !== null && (reason as { code?: string }).code === "BACKUP_WORKER_CANCELLED") {
+        setBackupFeedback({ tone: "info", title: "已取消兼容 JSON 生成", message: "没有写入任何备份标记或文件；可稍后重新导出。" });
+        return;
+      }
       setBackupFeedback({ tone: "error", title: "JSON 备份未完成", message: errorMessage(reason, "无法生成兼容 JSON 备份。") });
     } finally {
+      if (backupAbortRef.current === controller) backupAbortRef.current = null;
       setActiveOperation(null);
       finishFeedback(backupFeedbackRef);
     }
+  };
+
+  const cancelBackupExport = () => {
+    const controller = backupAbortRef.current;
+    if (!controller || controller.signal.aborted) return;
+    controller.abort();
+    backupAbortRef.current = null;
+    setBackupFeedback({ tone: "info", title: "正在取消完整备份生成", message: "Worker 会尽快停止；当前不会写入数据库或备份标记。" });
   };
 
   const chooseBackup = async () => {
@@ -950,6 +977,11 @@ export function DataManagementPage() {
         </div>
 
         <div className="data-action-row">
+          {activeOperation === "export_zip" || activeOperation === "export_json" ? (
+            <button type="button" className="secondary-action" onClick={cancelBackupExport}>
+              取消生成
+            </button>
+          ) : null}
           <button type="button" className="primary-action" disabled={busy || deleteAllOpen} onClick={() => void exportZip()}>
             <FileArchive aria-hidden="true" />{activeOperation === "export_zip" ? "正在生成 ZIP" : "导出完整 ZIP"}
           </button>

@@ -528,6 +528,30 @@ describe("DataManagementPage", () => {
     expect(window.localStorage.getItem("hakimi:backup-health:v1:lastFullBackupExportedAt")).toBeNull();
   });
 
+  it("完整备份生成中可取消，且不写入备份健康标记或触发下载", async () => {
+    mocks.createFullBackupArtifactOffMainThread.mockImplementationOnce(
+      async (_snapshot, _options, _format, signal?: AbortSignal) => {
+        if (!signal) throw new Error("expected abort signal");
+        await new Promise((_resolve, reject) => {
+          signal.addEventListener("abort", () => {
+            reject(Object.assign(new Error("cancelled"), { code: "BACKUP_WORKER_CANCELLED" }));
+          }, { once: true });
+        });
+        throw new Error("unreachable");
+      }
+    );
+    render(<DataManagementPage />);
+    await screen.findByRole("button", { name: "导出完整 ZIP" });
+
+    fireEvent.click(screen.getByRole("button", { name: "导出完整 ZIP" }));
+    const cancel = await screen.findByRole("button", { name: "取消生成" });
+    fireEvent.click(cancel);
+
+    expect(await screen.findByText("已取消完整备份生成")).toBeTruthy();
+    expect(mocks.saveBlobFile).not.toHaveBeenCalled();
+    expect(window.localStorage.getItem("hakimi:backup-health:v1:lastFullBackupExportedAt")).toBeNull();
+  });
+
   it("数据库已删除但有标签页未 ACK 时显示精确部分完成且不谎称删除失败或全部完成", async () => {
     mocks.clearControlledWindowResearchQueryDrafts.mockResolvedValueOnce({
       mode: "controlled_windows",
