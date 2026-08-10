@@ -50,6 +50,34 @@ describe("SettingsPage", () => {
     expect(toggle).toHaveProperty("checked", false);
   });
 
+  it("生成资源与性能报告并展示存储与 long task 统计", async () => {
+    const originalEstimate = navigator.storage?.estimate;
+    try {
+      Object.defineProperty(navigator, "storage", {
+        configurable: true,
+        value: {
+          estimate: async () => ({ usage: 1024 * 1024, quota: 1024 * 1024 * 1024 })
+        }
+      });
+      render(<SettingsPage />);
+
+      fireEvent.click(screen.getByRole("button", { name: "生成资源与性能报告" }));
+
+      expect(await screen.findByText(/1.00 MiB \/ 1.00 GiB/)).toBeTruthy();
+      expect(screen.getAllByText(/主线程 long task/).length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText("当前浏览器未暴露 JS 堆内存")).toBeTruthy();
+    } finally {
+      if (originalEstimate) {
+        Object.defineProperty(navigator, "storage", {
+          configurable: true,
+          value: { estimate: originalEstimate }
+        });
+      } else {
+        Reflect.deleteProperty(navigator, "storage");
+      }
+    }
+  });
+
   it("导出可复现且不含出生资料的 1.2 诊断", async () => {
     render(<SettingsPage />);
     expect(screen.getByText("Dexie 13")).toBeTruthy();

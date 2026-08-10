@@ -47,7 +47,14 @@ import { RUNTIME_TIME_ZONE_DATABASE, RUNTIME_TZDB_VERSION } from "@hakimi/time-c
 import { PageHeading } from "../components/page-heading";
 import { StatusPill } from "../components/status-pill";
 import { useExpertMode } from "../lib/expert-mode";
+import {
+  collectResourceReport,
+  formatBytes,
+  useLongTaskMonitor,
+  type ResourceReportSnapshot
+} from "../lib/resource-report";
 import { resolveFileDelivery } from "../lib/file-transfer-feedback";
+import { formatDateTime } from "../lib/format";
 import { APP_VERSION } from "../lib/app-version";
 import { CURRENT_RELEASE_DATABASE } from "../lib/current-release";
 import { AppLink } from "../lib/router";
@@ -111,6 +118,10 @@ async function buildRuleRegistryDiagnostic() {
 
 export function SettingsPage() {
   const { expertMode, setExpertMode } = useExpertMode();
+  const { samples: longTaskSamples, supported: longTaskSupported } = useLongTaskMonitor();
+  const [resourceReport, setResourceReport] = useState<ResourceReportSnapshot | null>(null);
+  const [resourceBusy, setResourceBusy] = useState(false);
+  const [resourceError, setResourceError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [fileTransferError, setFileTransferError] = useState<string | null>(null);
   const [rulePackPreview, setRulePackPreview] = useState<RulePackIntegrityResult | null>(null);
@@ -258,6 +269,18 @@ export function SettingsPage() {
       setMessage(`${delivery} 诊断不含出生资料、案例别名或笔记，但包含浏览器标识及规则包 ID/摘要。`);
     } catch (reason) {
       setFileTransferError(reason instanceof Error ? reason.message : "诊断文件导出失败。");
+    }
+  };
+
+  const refreshResourceReport = async () => {
+    setResourceBusy(true);
+    setResourceError(null);
+    try {
+      setResourceReport(await collectResourceReport({ longTasks: longTaskSamples }));
+    } catch (reason) {
+      setResourceError(reason instanceof Error ? reason.message : "资源与性能报告生成失败");
+    } finally {
+      setResourceBusy(false);
     }
   };
 
@@ -904,6 +927,38 @@ export function SettingsPage() {
               <input type="checkbox" checked={expertMode} onChange={(event) => setExpertMode(event.target.checked)} />
               <span><strong>专家模式：显示原始标识与完整摘要</strong><small>关闭后恢复标准短摘要视图。</small></span>
             </label>
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <div className="settings-icon"><Download aria-hidden="true" /></div>
+          <div>
+            <p className="eyebrow">本地资源</p>
+            <h2>资源与性能报告</h2>
+            <p>显示当前浏览器站点存储占用、可用的 JS 堆内存与本次页面会话内的主线程 long task。数据只在本机内存与界面中，不写入数据库、不进备份，也不会被远程收集。</p>
+            <div className="backup-actions">
+              <button type="button" className="secondary-action" disabled={resourceBusy} onClick={() => void refreshResourceReport()}>
+                {resourceBusy ? "正在收集…" : "生成资源与性能报告"}
+              </button>
+            </div>
+            {resourceError ? <div className="inline-error" role="alert"><strong>资源报告未完成</strong><p>{resourceError}</p></div> : null}
+            {resourceReport ? (
+              <dl className="metadata-list resource-report-grid">
+                <div><dt>检查时间</dt><dd>{formatDateTime(resourceReport.checkedAt)}</dd></div>
+                <div><dt>存储估算</dt><dd>{resourceReport.storage.supported
+                  ? `${formatBytes(resourceReport.storage.usageBytes ?? 0)} / ${formatBytes(resourceReport.storage.quotaBytes ?? 0)}`
+                  : resourceReport.storage.error ?? "不支持"}</dd></div>
+                <div><dt>JS 堆内存</dt><dd>{resourceReport.memory.supported
+                  ? `${formatBytes(resourceReport.memory.usedJSHeapSizeBytes ?? 0)} 已用 / ${formatBytes(resourceReport.memory.totalJSHeapSizeBytes ?? 0)} 总量`
+                  : "当前浏览器未暴露 JS 堆内存"}</dd></div>
+                <div><dt>主线程 long task</dt><dd>{longTaskSupported
+                  ? `${resourceReport.longTasks.count} 次 · 最长 ${resourceReport.longTasks.maxDurationMs === null ? "无" : `${resourceReport.longTasks.maxDurationMs.toFixed(1)} ms`} · 累计 ${resourceReport.longTasks.totalDurationMs.toFixed(1)} ms`
+                  : "当前浏览器不支持 longtask 观测"}</dd></div>
+                {resourceReport.longTasks.samples.length ? (
+                  <div><dt>最近样本</dt><dd>{resourceReport.longTasks.samples.slice(-3).map((sample) => `${sample.durationMs.toFixed(1)} ms${sample.attribution ? ` · ${sample.attribution}` : ""}`).join("；")}</dd></div>
+                ) : null}
+              </dl>
+            ) : null}
           </div>
         </section>
       </div>

@@ -460,6 +460,7 @@ p { text-wrap: pretty; }
 .expert-mode-toggle input { margin-top: 3px; accent-color: var(--cinnabar-650); }
 .expert-mode-toggle span { display: grid; gap: 3px; }
 .expert-mode-toggle small { color: var(--ink-500); font-size: 12px; line-height: 1.55; }
+.resource-report-grid { margin-top: 14px; }
 .calibration-table { border-top: 1px solid var(--line-200); margin-bottom: 24px; }
 .calibration-table [role="row"] { display: grid; grid-template-columns: minmax(150px, .7fr) minmax(210px, 1fr) auto; gap: 16px; align-items: center; min-height: 58px; padding: 8px 0; border-bottom: 1px solid var(--line-100); }
 .calibration-table [role="cell"]:first-child { display: flex; align-items: center; gap: 8px; color: var(--ink-650); font-size: 13px; }
