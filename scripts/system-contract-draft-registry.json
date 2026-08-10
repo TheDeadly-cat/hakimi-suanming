@@ -281,6 +281,18 @@
         "western-rules-preview-v1"
       ],
       "lockClosures": []
+    },
+    {
+      "directoryName": "cross-system-comparison-draft",
+      "packageName": "@hakimi/cross-system-comparison-draft",
+      "presence": "required",
+      "kind": "contract",
+      "systemId": "cross-system",
+      "dependencies": {},
+      "allowedBareImports": [],
+      "crossDraftEdges": [],
+      "specialChecks": [],
+      "lockClosures": []
     }
   ]
 }

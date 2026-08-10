@@ -172,8 +172,10 @@ function createFixture() {
         compilerOptions: { paths: {} },
         include: ["src/browser-preview/**/*.ts"]
       }));
-    } else {
+    } else if (draft.allowedBareImports.length > 0) {
       write(root, `packages/${draft.directoryName}/src/index.ts`, "import { z } from \"zod\";\nexport const value = z.string();\n");
+    } else {
+      write(root, `packages/${draft.directoryName}/src/index.ts`, "export const value = true;\n");
     }
     lockPackages[`packages/${draft.directoryName}`] = {
       name: draft.packageName,

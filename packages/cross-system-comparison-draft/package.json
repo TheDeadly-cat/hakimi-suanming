@@ -1,0 +1,14 @@
+{
+  "name": "@hakimi/cross-system-comparison-draft",
+  "version": "0.0.0-draft.0",
+  "private": true,
+  "type": "module",
+  "exports": {},
+  "x-hakimi-isolated-draft": {
+    "schemaVersion": 1,
+    "kind": "contract",
+    "systemId": "cross-system",
+    "productionImport": "forbidden",
+    "allowedDraftDependencies": []
+  }
+}
