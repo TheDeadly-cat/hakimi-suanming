@@ -40,7 +40,7 @@ Browser 路径使用独立 IndexedDB `hakimi-ziwei-browser-workspace-draft`，�
 
 ## 证据与声明边界
 
-当前定向草案基线为 Vitest **13 个文件 / 88 项**通过，隔离边界门 **42/42** 通过，并已通过草案 typecheck 与独立 Browser 构建。真实浏览器终验数据应单独记录，不能由构建成功推断。
+当前定向草案基线为 Vitest **13 个文件 / 88 项**通过，隔离边界门 **42/42** 通过，并已通过草案 typecheck 与独立 Browser 构建。2026-08-10 起真实浏览器门由 `npm run test:e2e:ziwei-workspace` 提供：Edge 与 Chrome 各通过 1/1、共 2/2，覆盖计算→保存→重开→跨标签刷新→唯一清空全链路，控制台 0 问题。浏览器通过仍不认证现实来源或专家真值。
 
 内外 SHA-256 都没有密钥，只证明当前字节的结构、自洽性和损坏检测；它们不认证历史 Worker、作者或现实来源。Browser Revision 和完整备份均固定声明 `productionEligible:false`、`expertTruthClaimed:false`、不连接八字 Case/Revision，且不构成命理专家真值。
 

@@ -71,6 +71,7 @@
     "test:e2e:web-v1-flow:v13-to-v15": "playwright test --config apps/web/playwright.web-v1-v13-to-v15-cross-browser.config.ts",
     "test:e2e:web-v1-flow:v13-to-v16": "playwright test --config apps/web/playwright.web-v1-v13-to-v16-cross-browser.config.ts",
     "test:e2e:p2-05-deep-browse": "playwright test --config apps/web/playwright.config.ts p2-05-deep-browse-resource.spec.ts",
+    "test:e2e:ziwei-workspace": "playwright test --config packages/ziwei-workspace-artifact-draft/playwright.workspace.config.ts",
     "test:gold": "vitest run --config apps/web/vitest.config.ts packages/gold-standard/src",
     "test:transit-query-review": "vitest run --config apps/web/vitest.config.ts packages/research-query/src/transit-review.test.ts",
     "audit:tzdb": "node packages/tzdb-core/scripts/verify-artifact.mjs",
