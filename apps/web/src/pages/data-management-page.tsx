@@ -29,6 +29,10 @@ import { StatusPill } from "../components/status-pill";
 import { APP_VERSION } from "../lib/app-version";
 import { resolveFileDelivery } from "../lib/file-transfer-feedback";
 import {
+  clearFullBackupExportMarker,
+  markFullBackupExportedAt
+} from "../lib/backup-health";
+import {
   archiveFullBackupEnvelopeOffMainThread,
   createFullBackupArtifactOffMainThread,
   inspectFullBackupSnapshotOffMainThread,
@@ -406,6 +410,7 @@ export function DataManagementPage() {
         setBackupFeedback({ tone: "info", title: "已取消完整 ZIP 导出", message: delivery.message });
         return;
       }
+      if (delivery.kind === "completed") markFullBackupExportedAt(window.localStorage);
       setBackupFeedback({
         tone: "success",
         title: result.status === "download_requested" ? "完整 ZIP 已生成并请求下载" : "完整 ZIP 已保存",
@@ -437,6 +442,7 @@ export function DataManagementPage() {
         setBackupFeedback({ tone: "info", title: "已取消兼容 JSON 导出", message: delivery.message });
         return;
       }
+      if (delivery.kind === "completed") markFullBackupExportedAt(window.localStorage);
       setBackupFeedback({
         tone: "success",
         title: result.status === "download_requested" ? "兼容 JSON 已生成并请求下载" : "兼容 JSON 已保存",
@@ -603,6 +609,7 @@ export function DataManagementPage() {
         pendingRestore.preparation
       );
       const restored = await applyVerifiedFullBackup(caseRepository, workerVerification.verified);
+      clearFullBackupExportMarker(window.localStorage);
       const restoredSettings = settingsFormFromRecord(restored.payload.appSettings[0]);
       setSettings(restoredSettings);
       updateLocalAppSettings(restoredSettings);
@@ -840,6 +847,7 @@ export function DataManagementPage() {
     setDeleteFeedback(null);
     try {
       await caseRepository.clearAll();
+      clearFullBackupExportMarker(window.localStorage);
       const clearedSettings = defaultSettingsForm();
       setSettings(clearedSettings);
       updateLocalAppSettings(clearedSettings);

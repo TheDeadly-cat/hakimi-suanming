@@ -33,10 +33,12 @@ const unknownHourInput: BirthInput = {
 
 beforeEach(async () => {
   await caseRepository.clearAll();
+  window.localStorage.clear();
 });
 
 afterEach(async () => {
   await caseRepository.clearAll();
+  window.localStorage.clear();
 });
 
 describe("DashboardPage", () => {
@@ -125,5 +127,31 @@ describe("DashboardPage", () => {
     expect(alert.textContent).toContain("没有执行或近似恢复任何查询");
     expect(screen.queryByRole("link", { name: /不得近似恢复/ })).toBeNull();
     expect(screen.getByRole("heading", { name: "等待第一条记录" })).toBeTruthy();
+  });
+
+  it("存在本地记录但从未确认完整备份时显示备份健康警告", async () => {
+    const chart = await calculateChart(exactInput, WORKING_DEFAULT_RULE_PROFILE);
+    await caseRepository.createCase({ alias: "待备份盘", calculated: chart });
+
+    render(<DashboardPage />);
+
+    expect(await screen.findByRole("heading", { name: "备份健康" })).toBeTruthy();
+    expect(screen.getByText("尚未确认完整备份")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /导出完整备份/ }).getAttribute("href")).toBe("/settings/data");
+  });
+
+  it("已确认完整备份后显示上次备份时间而非警告", async () => {
+    const chart = await calculateChart(exactInput, WORKING_DEFAULT_RULE_PROFILE);
+    await caseRepository.createCase({ alias: "已备份盘", calculated: chart });
+    window.localStorage.setItem(
+      "hakimi:backup-health:v1:lastFullBackupExportedAt",
+      "2026-08-10T00:00:00.000Z"
+    );
+
+    render(<DashboardPage />);
+
+    expect(await screen.findByRole("heading", { name: "备份健康" })).toBeTruthy();
+    expect(screen.getByText(/上次完整备份：/)).toBeTruthy();
+    expect(screen.queryByText("尚未确认完整备份")).toBeNull();
   });
 });

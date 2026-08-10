@@ -8,10 +8,12 @@ import {
   HardDriveDownload,
   Layers3
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { AppLink } from "../lib/router";
 import { useResearchSubjectPage } from "../lib/use-cases";
 import { useRecentSavedViews } from "../lib/use-recent-saved-views";
 import { formatDateTime } from "../lib/format";
+import { readLastFullBackupExportedAt } from "../lib/backup-health";
 import {
   presentBaziResearchSubject,
   presentBaziSavedView
@@ -28,6 +30,11 @@ export function DashboardPage() {
   } = useRecentSavedViews();
   const latest = subjects[0];
   const latestPresentation = latest ? presentBaziResearchSubject(latest) : null;
+  const [lastFullBackupExportedAt, setLastFullBackupExportedAt] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLastFullBackupExportedAt(readLastFullBackupExportedAt(window.localStorage));
+  }, []);
 
   return (
     <div className="page page--dashboard">
@@ -105,6 +112,27 @@ export function DashboardPage() {
         </section>
 
         <aside className="dashboard-side-stack" aria-label="研究快捷入口">
+          {!loading && total > 0 ? (
+            <section className="dashboard-panel" aria-labelledby="backup-health-title">
+              <div className="dashboard-panel-heading">
+                <div><p className="eyebrow">Backup health</p><h2 id="backup-health-title">备份健康</h2></div>
+                <HardDriveDownload aria-hidden="true" />
+              </div>
+              {lastFullBackupExportedAt ? (
+                <div className="dashboard-panel-message">
+                  <strong>上次完整备份：{formatDateTime(lastFullBackupExportedAt)}</strong>
+                  <small>这表示导出已请求或保存；请人工确认文件可以打开，并在资料变化后重新备份。</small>
+                </div>
+              ) : (
+                <div className="dashboard-panel-message is-warning" role="status">
+                  <strong>尚未确认完整备份</strong>
+                  <small>已存在本地研究记录；浏览器数据可能被系统清理，请尽快导出完整备份并确认文件可打开。</small>
+                </div>
+              )}
+              <AppLink href="/settings/data" className="text-link">导出完整备份 <ArrowRight aria-hidden="true" /></AppLink>
+            </section>
+          ) : null}
+
           <section className="dashboard-panel" aria-labelledby="saved-view-title">
             <div className="dashboard-panel-heading">
               <div><p className="eyebrow">Saved research</p><h2 id="saved-view-title">最近保存视图</h2></div>

@@ -179,6 +179,7 @@ const verifiedReplacement = {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  window.localStorage.clear();
   mocks.saveBlobFile.mockImplementation(async (filename: string) => ({
     status: "download_requested",
     filename,
@@ -508,6 +509,23 @@ describe("DataManagementPage", () => {
     expect(mocks.clearAll).toHaveBeenCalledTimes(1);
     expect(mocks.clearControlledWindowResearchQueryDrafts).toHaveBeenCalledTimes(1);
     expect(screen.getByText(/已确认 2\/2 个受控标签页，共移除 3 条临时检索草稿/)).toBeTruthy();
+  });
+
+  it("完整备份成功后写入备份健康标记，完整清空后清除该标记", async () => {
+    render(<DataManagementPage />);
+    await screen.findByRole("button", { name: "导出完整 ZIP" });
+
+    fireEvent.click(screen.getByRole("button", { name: "导出完整 ZIP" }));
+    await waitFor(() => expect(mocks.saveBlobFile).toHaveBeenCalledTimes(1));
+    expect(window.localStorage.getItem("hakimi:backup-health:v1:lastFullBackupExportedAt")).not.toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "开始完整清空" }));
+    fireEvent.change(screen.getByLabelText("确认文字"), {
+      target: { value: "删除全部本地数据" }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "永久删除全部数据" }));
+    await waitFor(() => expect(mocks.clearAll).toHaveBeenCalledTimes(1));
+    expect(window.localStorage.getItem("hakimi:backup-health:v1:lastFullBackupExportedAt")).toBeNull();
   });
 
   it("数据库已删除但有标签页未 ACK 时显示精确部分完成且不谎称删除失败或全部完成", async () => {

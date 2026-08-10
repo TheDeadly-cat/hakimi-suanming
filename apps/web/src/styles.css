@@ -288,6 +288,7 @@ p { text-wrap: pretty; }
 .dashboard-panel-heading > svg { width: 19px; height: 19px; color: var(--cinnabar-650); }
 .dashboard-panel-message { margin: 10px 0 16px; color: var(--ink-650); font-size: 13px; line-height: 1.65; }
 .dashboard-panel-message.is-error { color: var(--danger-fg); }
+.dashboard-panel-message.is-warning { color: var(--warning-fg); }
 .saved-view-list, .dashboard-quick-list { display: grid; margin-bottom: 14px; }
 .saved-view-row { display: grid; grid-template-columns: minmax(0, 1fr) 18px; align-items: center; gap: 10px; min-height: 58px; padding: 9px 0; border-top: 1px solid var(--line-100); }
 .saved-view-row > span { display: grid; min-width: 0; gap: 4px; }
