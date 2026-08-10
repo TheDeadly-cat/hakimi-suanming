@@ -46,6 +46,7 @@ import {
 import { RUNTIME_TIME_ZONE_DATABASE, RUNTIME_TZDB_VERSION } from "@hakimi/time-core";
 import { PageHeading } from "../components/page-heading";
 import { StatusPill } from "../components/status-pill";
+import { useExpertMode } from "../lib/expert-mode";
 import { resolveFileDelivery } from "../lib/file-transfer-feedback";
 import { APP_VERSION } from "../lib/app-version";
 import { CURRENT_RELEASE_DATABASE } from "../lib/current-release";
@@ -109,6 +110,7 @@ async function buildRuleRegistryDiagnostic() {
 }
 
 export function SettingsPage() {
+  const { expertMode, setExpertMode } = useExpertMode();
   const [message, setMessage] = useState<string | null>(null);
   const [fileTransferError, setFileTransferError] = useState<string | null>(null);
   const [rulePackPreview, setRulePackPreview] = useState<RulePackIntegrityResult | null>(null);
@@ -218,7 +220,7 @@ export function SettingsPage() {
         databaseName: caseRepository.database.name,
         databaseSchemaVersion: CURRENT_RELEASE_DATABASE.targetSchema,
         fullBackupFormatVersion: FULL_BACKUP_FORMAT_VERSION,
-        userDataPartitionCount: 15,
+        userDataPartitionCount: 16,
         caseCount: storageOverview.activeCaseCount,
         candidateSetCount: storageOverview.activeCandidateSetCount,
         revisionCount: storageOverview.activeRevisionCount
@@ -889,6 +891,19 @@ export function SettingsPage() {
             <h2>导出不含命盘内容的诊断文件</h2>
             <p>包含应用、引擎、数据库、备份、tzdb 边界、规则包 ID/摘要、记录数量、浏览器标识与在线状态；不包含出生资料、案例别名或笔记。</p>
             <button type="button" className="secondary-action" onClick={() => void exportDiagnostic()}><Download aria-hidden="true" />导出诊断 JSON</button>
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <div className="settings-icon"><ShieldCheck aria-hidden="true" /></div>
+          <div>
+            <p className="eyebrow">信息分层</p>
+            <h2>标准模式与专家模式</h2>
+            <p>标准模式使用短摘要和中文说明；专家模式展开原始 Revision/Case ID、完整哈希与复算元数据，便于核对导出工件。此设置只影响本机界面显示，不改变数据、备份或发布身份。</p>
+            <label className="expert-mode-toggle">
+              <input type="checkbox" checked={expertMode} onChange={(event) => setExpertMode(event.target.checked)} />
+              <span><strong>专家模式：显示原始标识与完整摘要</strong><small>关闭后恢复标准短摘要视图。</small></span>
+            </label>
           </div>
         </section>
       </div>

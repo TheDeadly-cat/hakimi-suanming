@@ -11,6 +11,7 @@ import {
 import { createWorkingDefaultRulePackEnvelope, serializeRulePackEnvelope } from "@hakimi/rule-packs";
 import { caseRepository, ruleRegistryRepository } from "@hakimi/storage";
 import { SettingsPage } from "./settings-page";
+import { EXPERT_MODE_KEY } from "../lib/expert-mode";
 
 const { saveTextFileMock, pickTextFileMock } = vi.hoisted(() => ({
   saveTextFileMock: vi.fn(),
@@ -23,6 +24,7 @@ vi.mock("@hakimi/platform", () => ({
 }));
 
 beforeEach(async () => {
+  window.localStorage.clear();
   saveTextFileMock.mockReset().mockImplementation(async (filename: string) => ({
     status: "download_requested",
     filename,
@@ -33,6 +35,21 @@ beforeEach(async () => {
 });
 
 describe("SettingsPage", () => {
+  it("专家模式开关写入本地偏好并可重新读取", async () => {
+    render(<SettingsPage />);
+
+    const toggle = screen.getByLabelText(/专家模式：显示原始标识与完整摘要/);
+    expect(toggle).toHaveProperty("checked", false);
+
+    fireEvent.click(toggle);
+    expect(window.localStorage.getItem(EXPERT_MODE_KEY)).toBe("1");
+    expect(toggle).toHaveProperty("checked", true);
+
+    fireEvent.click(toggle);
+    expect(window.localStorage.getItem(EXPERT_MODE_KEY)).toBeNull();
+    expect(toggle).toHaveProperty("checked", false);
+  });
+
   it("导出可复现且不含出生资料的 1.2 诊断", async () => {
     render(<SettingsPage />);
     expect(screen.getByText("Dexie 13")).toBeTruthy();
@@ -75,7 +92,7 @@ describe("SettingsPage", () => {
       storage: {
         databaseSchemaVersion: 13,
         fullBackupFormatVersion: "1.2.0",
-        userDataPartitionCount: 15
+        userDataPartitionCount: 16
       },
       ruleRegistry: {
         status: "readable",

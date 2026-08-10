@@ -12,15 +12,19 @@ import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
 import { calculatePillarRelations } from "@hakimi/relations-core";
 import { caseRepository, researchRepository } from "@hakimi/storage";
 import { ChartPage, LuckCyclePanel, PillarRelationsPanel } from "./chart-page";
+import { shortHash } from "../lib/format";
+import { EXPERT_MODE_KEY } from "../lib/expert-mode";
 
 beforeEach(() => {
   document.documentElement.dataset.appBootReady = "true";
+  window.localStorage.clear();
 });
 
 afterEach(() => {
   vi.restoreAllMocks();
   delete document.documentElement.dataset.appBootReady;
   window.history.replaceState({}, "", "/");
+  window.localStorage.clear();
 });
 
 const input: BirthInput = {
@@ -130,10 +134,46 @@ describe("ChartPage transit route", () => {
 
     expect(await screen.findByRole("heading", { name: "复算元数据" })).toBeTruthy();
     expect(screen.getByText(binding.packId)).toBeTruthy();
-    expect(screen.getByText(binding.packDigest)).toBeTruthy();
+    expect(screen.getByText(shortHash(binding.packDigest))).toBeTruthy();
     expect(screen.getByText(`${binding.profileId}@${binding.profileVersion} · 精确使用`)).toBeTruthy();
-    expect(screen.getAllByText(binding.profileDigest).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText(shortHash(binding.profileDigest)).length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("未绑定安装包 · 内置或派生规则快照")).toBeNull();
+    expect(screen.queryByText("Case ID")).toBeNull();
+    expect(screen.queryByText("Revision ID")).toBeNull();
+  });
+
+  it("专家模式显示完整摘要与 Case/Revision 原始标识", async () => {
+    const binding = await testRulePackBinding();
+    const revision = await revisionFor(input, binding);
+    const caseRecord: CaseRecord = {
+      schemaVersion: "1.0.0",
+      id: revision.caseId,
+      alias: "规则包来源案例",
+      tags: [],
+      notes: "",
+      createdAt: revision.createdAt,
+      updatedAt: revision.createdAt,
+      latestRevisionId: revision.id,
+      revisionCount: 1,
+      recordVersion: 2,
+      favorite: false,
+      deletedAt: null
+    };
+    vi.spyOn(caseRepository, "getCase").mockResolvedValue({ caseRecord, revisions: [revision] });
+    vi.spyOn(researchRepository, "listEventsByCase").mockResolvedValue([]);
+    vi.spyOn(researchRepository, "listResearchNotesByCase").mockResolvedValue([]);
+    window.localStorage.setItem(EXPERT_MODE_KEY, "1");
+    window.history.replaceState({}, "", `/cases/${caseRecord.id}/revisions/${revision.id}?view=research`);
+
+    render(<ChartPage caseId={caseRecord.id} revisionId={revision.id} />);
+
+    expect(await screen.findByRole("heading", { name: "复算元数据" })).toBeTruthy();
+    expect(await screen.findByText(binding.packDigest)).toBeTruthy();
+    expect((await screen.findAllByText(binding.profileDigest)).length).toBeGreaterThanOrEqual(1);
+    expect(await screen.findByText("Case ID")).toBeTruthy();
+    expect(screen.getByText(revision.caseId)).toBeTruthy();
+    expect(await screen.findByText("Revision ID")).toBeTruthy();
+    expect(screen.getByText(revision.id)).toBeTruthy();
   });
 
   it("在研读页运行本命盘只读复演且不写入新 Revision", async () => {

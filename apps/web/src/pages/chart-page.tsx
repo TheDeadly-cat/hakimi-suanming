@@ -29,6 +29,7 @@ import { StatusPill } from "../components/status-pill";
 import { TransitWorkbench } from "../components/transit-workbench";
 import { useAppBootReady } from "../lib/app-boot-ready";
 import { formatDateTime, shortHash } from "../lib/format";
+import { useExpertMode } from "../lib/expert-mode";
 import { AppLink, navigate, useAppLocation } from "../lib/router";
 import {
   buildChartSearch,
@@ -363,6 +364,7 @@ function ResearchView({
   receiptWritesAllowed: boolean;
 }) {
   const [receiptRefreshToken, setReceiptRefreshToken] = useState(0);
+  const { expertMode } = useExpertMode();
   const saveCalculationSnapshot = useCallback(async (request: RevisionDerivedReplayRequest) => {
     try {
       await caseRepository.appendRevisionCalculationReceipt({ revisionId: revision.id, request });
@@ -401,18 +403,22 @@ function ResearchView({
       <section className="flat-section">
         <div className="section-heading-row"><div><p className="eyebrow">Reproducibility</p><h2>复算元数据</h2></div><StatusPill tone="warning">{revision.manifest.verificationStatus}</StatusPill></div>
         <dl className="metadata-list">
-          <div><dt>结果哈希</dt><dd title={revision.manifest.resultHash}>{revision.manifest.resultHash}</dd></div>
-          <div><dt>规则哈希</dt><dd title={revision.manifest.ruleProfileDigest}>{revision.manifest.ruleProfileDigest}</dd></div>
+          {expertMode ? <>
+            <div><dt>Case ID</dt><dd className="mono">{caseId}</dd></div>
+            <div><dt>Revision ID</dt><dd className="mono">{revision.id}</dd></div>
+          </> : null}
+          <div><dt>结果哈希</dt><dd title={revision.manifest.resultHash}>{expertMode ? revision.manifest.resultHash : shortHash(revision.manifest.resultHash)}</dd></div>
+          <div><dt>规则哈希</dt><dd title={revision.manifest.ruleProfileDigest}>{expertMode ? revision.manifest.ruleProfileDigest : shortHash(revision.manifest.ruleProfileDigest)}</dd></div>
           {revision.rulePackBinding ? <>
             <div><dt>规则包来源</dt><dd>{revision.rulePackBinding.packId}</dd></div>
-            <div><dt>规则包摘要</dt><dd title={revision.rulePackBinding.packDigest}>{revision.rulePackBinding.packDigest}</dd></div>
+            <div><dt>规则包摘要</dt><dd title={revision.rulePackBinding.packDigest}>{expertMode ? revision.rulePackBinding.packDigest : shortHash(revision.rulePackBinding.packDigest)}</dd></div>
             <div><dt>绑定 Profile</dt><dd>{revision.rulePackBinding.profileId}@{revision.rulePackBinding.profileVersion} · {revision.rulePackBinding.useMode === "exact" ? "精确使用" : revision.rulePackBinding.useMode}</dd></div>
-            <div><dt>Profile 摘要</dt><dd title={revision.rulePackBinding.profileDigest}>{revision.rulePackBinding.profileDigest}</dd></div>
+            <div><dt>Profile 摘要</dt><dd title={revision.rulePackBinding.profileDigest}>{expertMode ? revision.rulePackBinding.profileDigest : shortHash(revision.rulePackBinding.profileDigest)}</dd></div>
           </> : <div><dt>规则包来源</dt><dd>未绑定安装包 · 内置或派生规则快照</dd></div>}
           <div><dt>引擎</dt><dd>{revision.manifest.engine.name} {revision.manifest.engine.version}</dd></div>
           <div><dt>上游</dt><dd>{revision.manifest.engine.upstreamName} {revision.manifest.engine.upstreamVersion}</dd></div>
           <div><dt>时区库</dt><dd>{revision.manifest.timeZoneDatabase ? `IANA ${revision.manifest.timeZoneDatabase.ianaVersion} · 固定工件` : "旧版浏览器 Intl · 具体版本未识别"}</dd></div>
-          {revision.manifest.timeZoneDatabase ? <div><dt>tzdb 数据摘要</dt><dd title={revision.manifest.timeZoneDatabase.dataSha256}>{revision.manifest.timeZoneDatabase.dataSha256}</dd></div> : null}
+          {revision.manifest.timeZoneDatabase ? <div><dt>tzdb 数据摘要</dt><dd title={revision.manifest.timeZoneDatabase.dataSha256}>{expertMode ? revision.manifest.timeZoneDatabase.dataSha256 : shortHash(revision.manifest.timeZoneDatabase.dataSha256)}</dd></div> : null}
           <div><dt>DST 解析</dt><dd>{revision.timeCalibration.timeZoneResolution?.status ?? revision.timeCalibration.dstStatus}</dd></div>
           <div><dt>太阳时模型</dt><dd>{revision.timeCalibration.solarTime?.modelId ?? "未生成"}</dd></div>
           <div><dt>Schema</dt><dd>{revision.manifest.schemaVersion} · hash {revision.manifest.hashSchemaVersion}</dd></div>
