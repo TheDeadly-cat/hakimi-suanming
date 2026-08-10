@@ -1,0 +1,14 @@
+{
+  "name": "@hakimi/comparison-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@hakimi/chart-integrity": "*",
+    "@hakimi/contracts": "*",
+    "@hakimi/integrity": "*",
+    "@hakimi/relations-core": "*",
+    "@hakimi/transit-core": "*"
+  }
+}

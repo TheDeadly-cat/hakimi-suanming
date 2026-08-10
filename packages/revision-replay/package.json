@@ -1,0 +1,16 @@
+{
+  "name": "@hakimi/revision-replay",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@hakimi/chart-integrity": "*",
+    "@hakimi/contracts": "*",
+    "@hakimi/integrity": "*",
+    "@hakimi/luck-core": "*",
+    "@hakimi/relations-core": "*",
+    "@hakimi/transit-core": "*",
+    "@js-temporal/polyfill": "0.5.1"
+  }
+}

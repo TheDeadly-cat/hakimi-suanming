@@ -1,0 +1,22 @@
+{
+  "name": "@hakimi/ziwei-workspace-artifact-draft",
+  "version": "0.0.0-draft.0",
+  "private": true,
+  "type": "module",
+  "exports": {},
+  "x-hakimi-isolated-draft": {
+    "schemaVersion": 1,
+    "kind": "workspace",
+    "systemId": "ziwei-doushu",
+    "productionImport": "forbidden",
+    "allowedDraftDependencies": [
+      "@hakimi/ziwei-doushu-contracts-draft",
+      "@hakimi/ziwei-iztro-adapter-draft"
+    ]
+  },
+  "dependencies": {
+    "@hakimi/ziwei-doushu-contracts-draft": "0.0.0-draft.0",
+    "@hakimi/ziwei-iztro-adapter-draft": "0.0.0-draft.0",
+    "zod": "4.4.3"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "proofScope": "npm_tarball_identity_plus_runtime_source_bytes",
+  "retrievedOn": "2026-08-10",
+  "package": {
+    "name": "astronomy-engine",
+    "version": "2.1.19",
+    "tarballUrl": "https://registry.npmjs.org/astronomy-engine/-/astronomy-engine-2.1.19.tgz",
+    "tarballBytes": 493468,
+    "unpackedBytes": 1838627,
+    "fileCount": 8,
+    "shasumSha1": "41b9fd2afb7eba3485e3803cbd9033011f8557af",
+    "integrity": "sha512-8yWKNf7UeNbH458h3sAJ6ZgAjE5jTXp/mNNRFoC20j2SHwZIjAQeEsBB2Q3uCFRaTCCJRv33K2XhkhZQMXoX6w==",
+    "runtimeDependencies": []
+  },
+  "upstreamGit": {
+    "repositoryUrl": "https://github.com/cosinekitty/astronomy",
+    "tag": "v2.1.19",
+    "tagUrl": "https://github.com/cosinekitty/astronomy/releases/tag/v2.1.19",
+    "tagObjectSha": "03084ee684bdcc490273fe85f9df4f1c8fb66199",
+    "peeledCommitSha": "61dc07020aaa6885d2c7f688a4d82beaf6edb9ef",
+    "peeledCommitUrl": "https://github.com/cosinekitty/astronomy/commit/61dc07020aaa6885d2c7f688a4d82beaf6edb9ef"
+  },
+  "publishedFileInventory": [
+    { "path": "README.md", "bytes": 174193 },
+    { "path": "astronomy.browser.js", "bytes": 422170 },
+    { "path": "astronomy.browser.min.js", "bytes": 116424 },
+    { "path": "astronomy.d.ts", "bytes": 156408 },
+    { "path": "astronomy.js", "bytes": 421280 },
+    { "path": "astronomy.min.js", "bytes": 135049 },
+    { "path": "esm/astronomy.js", "bytes": 412025 },
+    { "path": "package.json", "bytes": 1078 }
+  ],
+  "runtimeFiles": [
+    {
+      "path": "esm/astronomy.js",
+      "bytes": 412025,
+      "sha256": "068f1445ed0c636c94818fe6d20d7d125120e605e0bab9fc4675c3d531be5ad7"
+    },
+    {
+      "path": "package.json",
+      "bytes": 1078,
+      "sha256": "d035702763839ae11f41600cf4b8210005672658dcb19cea4a09591078af4931"
+    },
+    {
+      "path": "astronomy.d.ts",
+      "bytes": 156408,
+      "sha256": "fc5f1ede68dbebc32ce2f3f878cb3b261dc1bf8c16422451f0c4092c41fc871e"
+    },
+    {
+      "path": "astronomy.js",
+      "bytes": 421280,
+      "sha256": "729c0ce37cc1a8096034a689039a5f04585ee8184177c638e8c74dec4fa3185a"
+    }
+  ],
+  "license": {
+    "spdx": "MIT",
+    "attribution": "Copyright (c) 2019-2023 Don Cross <cosinekitty@gmail.com>",
+    "standaloneFilePresentInNpmTarball": false,
+    "sourceUrl": "https://raw.githubusercontent.com/cosinekitty/astronomy/61dc07020aaa6885d2c7f688a4d82beaf6edb9ef/LICENSE",
+    "localCopy": "licenses/astronomy-engine-2.1.19-LICENSE.txt",
+    "bytes": 1095,
+    "sha256": "690dd98cb13ba4db77c6327deea852a816892bb9debbad5943405c66972f8023"
+  }
+}

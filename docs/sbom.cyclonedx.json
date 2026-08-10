@@ -1,0 +1,623 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "application",
+      "bom-ref": "pkg:npm/hakimi-bazi-workbench@0.2.0-p0",
+      "name": "hakimi-bazi-workbench",
+      "version": "0.2.0-p0",
+      "purl": "pkg:npm/hakimi-bazi-workbench@0.2.0-p0"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40js-temporal/polyfill@0.5.1",
+      "name": "@js-temporal/polyfill",
+      "version": "0.5.1",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "ISC"
+          }
+        }
+      ],
+      "purl": "pkg:npm/%40js-temporal/polyfill@0.5.1",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "865a0fe7ccd1542452a600f19aa09624d962cc095480916a1b6ca9abbf430afcaff6d1e345830339c3c58f37e5fc0d7f6310ef442673f30bd9be66a94272b015"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@js-temporal/polyfill/-/polyfill-0.5.1.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "hakimi:licenseReview",
+          "value": "standard_notice"
+        },
+        {
+          "name": "hakimi:packageLockPaths",
+          "value": "node_modules/@js-temporal/polyfill"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/dexie@4.4.4",
+      "name": "dexie",
+      "version": "4.4.4",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "purl": "pkg:npm/dexie@4.4.4",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "8c8c2c608f0eb368609ea73a3b8f58c050ca19ce6fe508c6c74c0f569e78de2a75179dd514028c2ed855da9428b107154efdde02c913598b293b1d7de4f33415"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/dexie/-/dexie-4.4.4.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "hakimi:licenseReview",
+          "value": "standard_notice"
+        },
+        {
+          "name": "hakimi:packageLockPaths",
+          "value": "node_modules/dexie"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/fflate@0.8.2",
+      "name": "fflate",
+      "version": "0.8.2",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/fflate@0.8.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "70f254e3b39a02809b834a41bf3b20a533e19a1a88e5e26387f248bbcb4f8f9abe4fb88bbd6fc901852a984eca381e11d59c8487305a210a50a5aadd045e73f0"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/fflate/-/fflate-0.8.2.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "hakimi:licenseReview",
+          "value": "standard_notice"
+        },
+        {
+          "name": "hakimi:packageLockPaths",
+          "value": "node_modules/fflate"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/html-to-image@1.11.13",
+      "name": "html-to-image",
+      "version": "1.11.13",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/html-to-image@1.11.13",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "72e38fa08ed6029ca10449534dbf68aac6b046f674ac785a1f082144b953b9f7e80f50766837a6942aee2de66b50821dbc6ee0b3dc5e10b10f9ba3e1b804aaae"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/html-to-image/-/html-to-image-1.11.13.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "hakimi:licenseReview",
+          "value": "standard_notice"
+        },
+        {
+          "name": "hakimi:packageLockPaths",
+          "value": "node_modules/html-to-image"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/jsbi@4.3.2",
+      "name": "jsbi",
+      "version": "4.3.2",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "purl": "pkg:npm/jsbi@4.3.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "f5fa8c4906e12729127a28b4e67c4a9789ba12a9f63faace958892f82e43aff1cf214ffbc99c6ee6acdbb38d2d81a14e462c360267749a2ae3c5ab5760c9087b"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/jsbi/-/jsbi-4.3.2.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "hakimi:licenseReview",
+          "value": "standard_notice"
+        },
+        {
+          "name": "hakimi:packageLockPaths",
+          "value": "node_modules/jsbi"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/lucide-react@1.28.0",
+      "name": "lucide-react",
+      "version": "1.28.0",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "ISC"
+          }
+        }
+      ],
+      "purl": "pkg:npm/lucide-react@1.28.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "7c044014950bb06b830f2763a7afba6e57a41bfb0120cdbd4deaf32e373d6d050a01c11fad273865029bdb9291cf838c29df3b7194dbe5d82ad30fd3e8ab9f56"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/lucide-react/-/lucide-react-1.28.0.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "hakimi:licenseReview",
+          "value": "standard_notice"
+        },
+        {
+          "name": "hakimi:packageLockPaths",
+          "value": "node_modules/lucide-react"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/lunar-typescript@1.8.6",
+      "name": "lunar-typescript",
+      "version": "1.8.6",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/lunar-typescript@1.8.6",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "e44a384ff727b977eb80ee24e4b0a93861c850ebb3e61085fc87cdbf44f6f56636b21477e878b3f9e70df568e752ec542a1aa5f606ce90f690a2a2c52ad3d134"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/lunar-typescript/-/lunar-typescript-1.8.6.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "hakimi:licenseReview",
+          "value": "standard_notice"
+        },
+        {
+          "name": "hakimi:packageLockPaths",
+          "value": "node_modules/lunar-typescript"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/moment@2.30.1",
+      "name": "moment",
+      "version": "2.30.1",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/moment@2.30.1",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "b849ad3616c33ab58f152fa176314205fcbd7f6628cb3469c1c97e0eaa42ead697db5173b132d055b315fd6ecfccd497eb1fdb842d73037736510e4dcc7ea1a3"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/moment/-/moment-2.30.1.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "hakimi:licenseReview",
+          "value": "standard_notice"
+        },
+        {
+          "name": "hakimi:packageLockPaths",
+          "value": "node_modules/moment"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/moment-timezone@0.5.48",
+      "name": "moment-timezone",
+      "version": "0.5.48",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/moment-timezone@0.5.48",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "7f6d9bf0b57581b4ceda6b368f6cf5dccb8fa20368879533c4bde7ccd018286ada20b9db19cf4d104e9dca28a22efe3a0c645bf00e2483c50a58b8cfb61c411f"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.5.48.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "hakimi:licenseReview",
+          "value": "standard_notice"
+        },
+        {
+          "name": "hakimi:packageLockPaths",
+          "value": "node_modules/moment-timezone-2025b"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/moment-timezone@0.6.3",
+      "name": "moment-timezone",
+      "version": "0.6.3",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/moment-timezone@0.6.3",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "a5510f03f1c21471dbc09d77d32c27cd8b99a6410670fe8369afcec0d79ba40d7c3326de1479908a50061a8bd78168a343cbd0b66b9df6366bce250182cca47e"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.6.3.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "hakimi:licenseReview",
+          "value": "standard_notice"
+        },
+        {
+          "name": "hakimi:packageLockPaths",
+          "value": "node_modules/moment-timezone"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/react@19.2.8",
+      "name": "react",
+      "version": "19.2.8",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/react@19.2.8",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "3d66980352ffabdbb6bbbc58422f98dcbdd87e789eed7c8b79a248095d4c183e8ba6bb01c5c02a1a3632af4798de9f9076c03ec7f22b92de1089ff03eb7f926f"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/react/-/react-19.2.8.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "hakimi:licenseReview",
+          "value": "standard_notice"
+        },
+        {
+          "name": "hakimi:packageLockPaths",
+          "value": "node_modules/react"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/react-dom@19.2.8",
+      "name": "react-dom",
+      "version": "19.2.8",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/react-dom@19.2.8",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "ad5a6b8a67c6046dc347e4ead08406d834f93f12ad8755881839a3e723e6973af86017bbbb213e0eee2856a4c35d948718619746d4c910649278fc9008c06095"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/react-dom/-/react-dom-19.2.8.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "hakimi:licenseReview",
+          "value": "standard_notice"
+        },
+        {
+          "name": "hakimi:packageLockPaths",
+          "value": "node_modules/react-dom"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/scheduler@0.27.0",
+      "name": "scheduler",
+      "version": "0.27.0",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/scheduler@0.27.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "78dbfe5ab55b2aed5fdef6d8253ff1b62179b320391cf20cb5ff48818fe72a0d2c5aacc0504bea63fc66ece71973fa9a7cbc7f88ef4580e99e480a78bf9b62fd"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/scheduler/-/scheduler-0.27.0.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "hakimi:licenseReview",
+          "value": "standard_notice"
+        },
+        {
+          "name": "hakimi:packageLockPaths",
+          "value": "node_modules/scheduler"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/zod@4.4.3",
+      "name": "zod",
+      "version": "4.4.3",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/zod@4.4.3",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "cad10d163209165d94c1882575eda37215b61f09b818914b0e249759d4eb25004837d15cca9ee7e0387124489634024c575fc1a967d6fe4920ef55037072724d"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/zod/-/zod-4.4.3.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "hakimi:licenseReview",
+          "value": "standard_notice"
+        },
+        {
+          "name": "hakimi:packageLockPaths",
+          "value": "node_modules/zod"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:npm/hakimi-bazi-workbench@0.2.0-p0",
+      "dependsOn": [
+        "pkg:npm/%40js-temporal/polyfill@0.5.1",
+        "pkg:npm/dexie@4.4.4",
+        "pkg:npm/fflate@0.8.2",
+        "pkg:npm/html-to-image@1.11.13",
+        "pkg:npm/jsbi@4.3.2",
+        "pkg:npm/lucide-react@1.28.0",
+        "pkg:npm/lunar-typescript@1.8.6",
+        "pkg:npm/moment-timezone@0.5.48",
+        "pkg:npm/moment-timezone@0.6.3",
+        "pkg:npm/moment@2.30.1",
+        "pkg:npm/react-dom@19.2.8",
+        "pkg:npm/react@19.2.8",
+        "pkg:npm/scheduler@0.27.0",
+        "pkg:npm/zod@4.4.3"
+      ]
+    },
+    {
+      "ref": "pkg:npm/%40js-temporal/polyfill@0.5.1",
+      "dependsOn": [
+        "pkg:npm/jsbi@4.3.2"
+      ]
+    },
+    {
+      "ref": "pkg:npm/dexie@4.4.4",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/fflate@0.8.2",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/html-to-image@1.11.13",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/jsbi@4.3.2",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/lucide-react@1.28.0",
+      "dependsOn": [
+        "pkg:npm/react@19.2.8"
+      ]
+    },
+    {
+      "ref": "pkg:npm/lunar-typescript@1.8.6",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/moment@2.30.1",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/moment-timezone@0.5.48",
+      "dependsOn": [
+        "pkg:npm/moment@2.30.1"
+      ]
+    },
+    {
+      "ref": "pkg:npm/moment-timezone@0.6.3",
+      "dependsOn": [
+        "pkg:npm/moment@2.30.1"
+      ]
+    },
+    {
+      "ref": "pkg:npm/react@19.2.8",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/react-dom@19.2.8",
+      "dependsOn": [
+        "pkg:npm/react@19.2.8",
+        "pkg:npm/scheduler@0.27.0"
+      ]
+    },
+    {
+      "ref": "pkg:npm/scheduler@0.27.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/zod@4.4.3",
+      "dependsOn": []
+    }
+  ]
+}

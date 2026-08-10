@@ -1,0 +1,700 @@
+{
+  "schemaVersion": 1,
+  "proofScope": "package_lock_closure_identity_not_installed_bytes",
+  "lockfileVersion": 3,
+  "entryPackage": {
+    "packagePath": "packages/ziwei-fortel-differential-draft",
+    "name": "@hakimi/ziwei-fortel-differential-draft",
+    "version": "0.0.0-draft.0",
+    "dependencies": [
+      {
+        "name": "fortel-ziweidoushu",
+        "requested": "1.3.4",
+        "resolvedPackagePath": "node_modules/fortel-ziweidoushu",
+        "resolvedVersion": "1.3.4"
+      }
+    ]
+  },
+  "rootOverrides": {
+    "fortel-ziweidoushu": "1.3.4",
+    "util": "0.12.5"
+  },
+  "nodes": [
+    {
+      "packagePath": "node_modules/available-typed-arrays",
+      "name": "available-typed-arrays",
+      "version": "1.0.7",
+      "resolved": "https://registry.npmjs.org/available-typed-arrays/-/available-typed-arrays-1.0.7.tgz",
+      "integrity": "sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==",
+      "dependencies": [
+        {
+          "name": "possible-typed-array-names",
+          "requested": "^1.0.0",
+          "resolvedPackagePath": "node_modules/possible-typed-array-names",
+          "resolvedVersion": "1.1.0"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/call-bind",
+      "name": "call-bind",
+      "version": "1.0.9",
+      "resolved": "https://registry.npmjs.org/call-bind/-/call-bind-1.0.9.tgz",
+      "integrity": "sha512-a/hy+pNsFUTR+Iz8TCJvXudKVLAnz/DyeSUo10I5yvFDQJBFU2s9uqQpoSrJlroHUKoKqzg+epxyP9lqFdzfBQ==",
+      "dependencies": [
+        {
+          "name": "call-bind-apply-helpers",
+          "requested": "^1.0.2",
+          "resolvedPackagePath": "node_modules/call-bind-apply-helpers",
+          "resolvedVersion": "1.0.2"
+        },
+        {
+          "name": "es-define-property",
+          "requested": "^1.0.1",
+          "resolvedPackagePath": "node_modules/es-define-property",
+          "resolvedVersion": "1.0.1"
+        },
+        {
+          "name": "get-intrinsic",
+          "requested": "^1.3.0",
+          "resolvedPackagePath": "node_modules/get-intrinsic",
+          "resolvedVersion": "1.3.0"
+        },
+        {
+          "name": "set-function-length",
+          "requested": "^1.2.2",
+          "resolvedPackagePath": "node_modules/set-function-length",
+          "resolvedVersion": "1.2.2"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/call-bind-apply-helpers",
+      "name": "call-bind-apply-helpers",
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz",
+      "integrity": "sha512-Sp1ablJ0ivDkSzjcaJdxEunN5/XvksFJ2sMBFfq6x0ryhQV/2b/KwFe21cMpmHtPOSij8K99/wSfoEuTObmuMQ==",
+      "dependencies": [
+        {
+          "name": "es-errors",
+          "requested": "^1.3.0",
+          "resolvedPackagePath": "node_modules/es-errors",
+          "resolvedVersion": "1.3.0"
+        },
+        {
+          "name": "function-bind",
+          "requested": "^1.1.2",
+          "resolvedPackagePath": "node_modules/function-bind",
+          "resolvedVersion": "1.1.2"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/call-bound",
+      "name": "call-bound",
+      "version": "1.0.4",
+      "resolved": "https://registry.npmjs.org/call-bound/-/call-bound-1.0.4.tgz",
+      "integrity": "sha512-+ys997U96po4Kx/ABpBCqhA9EuxJaQWDQg7295H4hBphv3IZg0boBKuwYpt4YXp6MZ5AmZQnU/tyMTlRpaSejg==",
+      "dependencies": [
+        {
+          "name": "call-bind-apply-helpers",
+          "requested": "^1.0.2",
+          "resolvedPackagePath": "node_modules/call-bind-apply-helpers",
+          "resolvedVersion": "1.0.2"
+        },
+        {
+          "name": "get-intrinsic",
+          "requested": "^1.3.0",
+          "resolvedPackagePath": "node_modules/get-intrinsic",
+          "resolvedVersion": "1.3.0"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/define-data-property",
+      "name": "define-data-property",
+      "version": "1.1.4",
+      "resolved": "https://registry.npmjs.org/define-data-property/-/define-data-property-1.1.4.tgz",
+      "integrity": "sha512-rBMvIzlpA8v6E+SJZoo++HAYqsLrkg7MSfIinMPFhmkorw7X+dOXVJQs+QT69zGkzMyfDnIMN2Wid1+NbL3T+A==",
+      "dependencies": [
+        {
+          "name": "es-define-property",
+          "requested": "^1.0.0",
+          "resolvedPackagePath": "node_modules/es-define-property",
+          "resolvedVersion": "1.0.1"
+        },
+        {
+          "name": "es-errors",
+          "requested": "^1.3.0",
+          "resolvedPackagePath": "node_modules/es-errors",
+          "resolvedVersion": "1.3.0"
+        },
+        {
+          "name": "gopd",
+          "requested": "^1.0.1",
+          "resolvedPackagePath": "node_modules/gopd",
+          "resolvedVersion": "1.2.0"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/dunder-proto",
+      "name": "dunder-proto",
+      "version": "1.0.1",
+      "resolved": "https://registry.npmjs.org/dunder-proto/-/dunder-proto-1.0.1.tgz",
+      "integrity": "sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==",
+      "dependencies": [
+        {
+          "name": "call-bind-apply-helpers",
+          "requested": "^1.0.1",
+          "resolvedPackagePath": "node_modules/call-bind-apply-helpers",
+          "resolvedVersion": "1.0.2"
+        },
+        {
+          "name": "es-errors",
+          "requested": "^1.3.0",
+          "resolvedPackagePath": "node_modules/es-errors",
+          "resolvedVersion": "1.3.0"
+        },
+        {
+          "name": "gopd",
+          "requested": "^1.2.0",
+          "resolvedPackagePath": "node_modules/gopd",
+          "resolvedVersion": "1.2.0"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/es-define-property",
+      "name": "es-define-property",
+      "version": "1.0.1",
+      "resolved": "https://registry.npmjs.org/es-define-property/-/es-define-property-1.0.1.tgz",
+      "integrity": "sha512-e3nRfgfUZ4rNGL232gUgX06QNyyez04KdjFrF+LTRoOXmrOgFKDg4BCdsjW8EnT69eqdYGmRpJwiPVYNrCaW3g==",
+      "dependencies": []
+    },
+    {
+      "packagePath": "node_modules/es-errors",
+      "name": "es-errors",
+      "version": "1.3.0",
+      "resolved": "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz",
+      "integrity": "sha512-Zf5H2Kxt2xjTvbJvP2ZWLEICxA6j+hAmMzIlypy4xcBg1vKVnx89Wy0GbS+kf5cwCVFFzdCFh2XSCFNULS6csw==",
+      "dependencies": []
+    },
+    {
+      "packagePath": "node_modules/es-object-atoms",
+      "name": "es-object-atoms",
+      "version": "1.1.2",
+      "resolved": "https://registry.npmjs.org/es-object-atoms/-/es-object-atoms-1.1.2.tgz",
+      "integrity": "sha512-HWcBoN6NileqtSydK2FqHbS/LoDd2pqrnQHLyJzBj4kOp/ky2MWMN694xOfkK8/SnUsW2DH7EfyVlydKCsm1Zw==",
+      "dependencies": [
+        {
+          "name": "es-errors",
+          "requested": "^1.3.0",
+          "resolvedPackagePath": "node_modules/es-errors",
+          "resolvedVersion": "1.3.0"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/for-each",
+      "name": "for-each",
+      "version": "0.3.5",
+      "resolved": "https://registry.npmjs.org/for-each/-/for-each-0.3.5.tgz",
+      "integrity": "sha512-dKx12eRCVIzqCxFGplyFKJMPvLEWgmNtUrpTiJIR5u97zEhRG8ySrtboPHZXx7daLxQVrl643cTzbab2tkQjxg==",
+      "dependencies": [
+        {
+          "name": "is-callable",
+          "requested": "^1.2.7",
+          "resolvedPackagePath": "node_modules/is-callable",
+          "resolvedVersion": "1.2.7"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/fortel-ziweidoushu",
+      "name": "fortel-ziweidoushu",
+      "version": "1.3.4",
+      "resolved": "https://registry.npmjs.org/fortel-ziweidoushu/-/fortel-ziweidoushu-1.3.4.tgz",
+      "integrity": "sha512-ZcCkzotbgAPKmdU2XjW/l0HQcTjouWYTDezPyggmrUPs/rWReEYefWeE8q+mwI3imeM0s2ntdsNpPdX2xlyQ1A==",
+      "dependencies": [
+        {
+          "name": "util",
+          "requested": "^0.12.5",
+          "resolvedPackagePath": "node_modules/util",
+          "resolvedVersion": "0.12.5"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/function-bind",
+      "name": "function-bind",
+      "version": "1.1.2",
+      "resolved": "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz",
+      "integrity": "sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==",
+      "dependencies": []
+    },
+    {
+      "packagePath": "node_modules/generator-function",
+      "name": "generator-function",
+      "version": "2.0.1",
+      "resolved": "https://registry.npmjs.org/generator-function/-/generator-function-2.0.1.tgz",
+      "integrity": "sha512-SFdFmIJi+ybC0vjlHN0ZGVGHc3lgE0DxPAT0djjVg+kjOnSqclqmj0KQ7ykTOLP6YxoqOvuAODGdcHJn+43q3g==",
+      "dependencies": []
+    },
+    {
+      "packagePath": "node_modules/get-intrinsic",
+      "name": "get-intrinsic",
+      "version": "1.3.0",
+      "resolved": "https://registry.npmjs.org/get-intrinsic/-/get-intrinsic-1.3.0.tgz",
+      "integrity": "sha512-9fSjSaos/fRIVIp+xSJlE6lfwhES7LNtKaCBIamHsjr2na1BiABJPo0mOjjz8GJDURarmCPGqaiVg5mfjb98CQ==",
+      "dependencies": [
+        {
+          "name": "call-bind-apply-helpers",
+          "requested": "^1.0.2",
+          "resolvedPackagePath": "node_modules/call-bind-apply-helpers",
+          "resolvedVersion": "1.0.2"
+        },
+        {
+          "name": "es-define-property",
+          "requested": "^1.0.1",
+          "resolvedPackagePath": "node_modules/es-define-property",
+          "resolvedVersion": "1.0.1"
+        },
+        {
+          "name": "es-errors",
+          "requested": "^1.3.0",
+          "resolvedPackagePath": "node_modules/es-errors",
+          "resolvedVersion": "1.3.0"
+        },
+        {
+          "name": "es-object-atoms",
+          "requested": "^1.1.1",
+          "resolvedPackagePath": "node_modules/es-object-atoms",
+          "resolvedVersion": "1.1.2"
+        },
+        {
+          "name": "function-bind",
+          "requested": "^1.1.2",
+          "resolvedPackagePath": "node_modules/function-bind",
+          "resolvedVersion": "1.1.2"
+        },
+        {
+          "name": "get-proto",
+          "requested": "^1.0.1",
+          "resolvedPackagePath": "node_modules/get-proto",
+          "resolvedVersion": "1.0.1"
+        },
+        {
+          "name": "gopd",
+          "requested": "^1.2.0",
+          "resolvedPackagePath": "node_modules/gopd",
+          "resolvedVersion": "1.2.0"
+        },
+        {
+          "name": "has-symbols",
+          "requested": "^1.1.0",
+          "resolvedPackagePath": "node_modules/has-symbols",
+          "resolvedVersion": "1.1.0"
+        },
+        {
+          "name": "hasown",
+          "requested": "^2.0.2",
+          "resolvedPackagePath": "node_modules/hasown",
+          "resolvedVersion": "2.0.4"
+        },
+        {
+          "name": "math-intrinsics",
+          "requested": "^1.1.0",
+          "resolvedPackagePath": "node_modules/math-intrinsics",
+          "resolvedVersion": "1.1.0"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/get-proto",
+      "name": "get-proto",
+      "version": "1.0.1",
+      "resolved": "https://registry.npmjs.org/get-proto/-/get-proto-1.0.1.tgz",
+      "integrity": "sha512-sTSfBjoXBp89JvIKIefqw7U2CCebsc74kiY6awiGogKtoSGbgjYE/G/+l9sF3MWFPNc9IcoOC4ODfKHfxFmp0g==",
+      "dependencies": [
+        {
+          "name": "dunder-proto",
+          "requested": "^1.0.1",
+          "resolvedPackagePath": "node_modules/dunder-proto",
+          "resolvedVersion": "1.0.1"
+        },
+        {
+          "name": "es-object-atoms",
+          "requested": "^1.0.0",
+          "resolvedPackagePath": "node_modules/es-object-atoms",
+          "resolvedVersion": "1.1.2"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/gopd",
+      "name": "gopd",
+      "version": "1.2.0",
+      "resolved": "https://registry.npmjs.org/gopd/-/gopd-1.2.0.tgz",
+      "integrity": "sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==",
+      "dependencies": []
+    },
+    {
+      "packagePath": "node_modules/has-property-descriptors",
+      "name": "has-property-descriptors",
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/has-property-descriptors/-/has-property-descriptors-1.0.2.tgz",
+      "integrity": "sha512-55JNKuIW+vq4Ke1BjOTjM2YctQIvCT7GFzHwmfZPGo5wnrgkid0YQtnAleFSqumZm4az3n2BS+erby5ipJdgrg==",
+      "dependencies": [
+        {
+          "name": "es-define-property",
+          "requested": "^1.0.0",
+          "resolvedPackagePath": "node_modules/es-define-property",
+          "resolvedVersion": "1.0.1"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/has-symbols",
+      "name": "has-symbols",
+      "version": "1.1.0",
+      "resolved": "https://registry.npmjs.org/has-symbols/-/has-symbols-1.1.0.tgz",
+      "integrity": "sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ==",
+      "dependencies": []
+    },
+    {
+      "packagePath": "node_modules/has-tostringtag",
+      "name": "has-tostringtag",
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/has-tostringtag/-/has-tostringtag-1.0.2.tgz",
+      "integrity": "sha512-NqADB8VjPFLM2V0VvHUewwwsw0ZWBaIdgo+ieHtK3hasLz4qeCRjYcqfB6AQrBggRKppKF8L52/VqdVsO47Dlw==",
+      "dependencies": [
+        {
+          "name": "has-symbols",
+          "requested": "^1.0.3",
+          "resolvedPackagePath": "node_modules/has-symbols",
+          "resolvedVersion": "1.1.0"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/hasown",
+      "name": "hasown",
+      "version": "2.0.4",
+      "resolved": "https://registry.npmjs.org/hasown/-/hasown-2.0.4.tgz",
+      "integrity": "sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==",
+      "dependencies": [
+        {
+          "name": "function-bind",
+          "requested": "^1.1.2",
+          "resolvedPackagePath": "node_modules/function-bind",
+          "resolvedVersion": "1.1.2"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/inherits",
+      "name": "inherits",
+      "version": "2.0.4",
+      "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.4.tgz",
+      "integrity": "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==",
+      "dependencies": []
+    },
+    {
+      "packagePath": "node_modules/is-arguments",
+      "name": "is-arguments",
+      "version": "1.2.0",
+      "resolved": "https://registry.npmjs.org/is-arguments/-/is-arguments-1.2.0.tgz",
+      "integrity": "sha512-7bVbi0huj/wrIAOzb8U1aszg9kdi3KN/CyU19CTI7tAoZYEZoL9yCDXpbXN+uPsuWnP02cyug1gleqq+TU+YCA==",
+      "dependencies": [
+        {
+          "name": "call-bound",
+          "requested": "^1.0.2",
+          "resolvedPackagePath": "node_modules/call-bound",
+          "resolvedVersion": "1.0.4"
+        },
+        {
+          "name": "has-tostringtag",
+          "requested": "^1.0.2",
+          "resolvedPackagePath": "node_modules/has-tostringtag",
+          "resolvedVersion": "1.0.2"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/is-callable",
+      "name": "is-callable",
+      "version": "1.2.7",
+      "resolved": "https://registry.npmjs.org/is-callable/-/is-callable-1.2.7.tgz",
+      "integrity": "sha512-1BC0BVFhS/p0qtw6enp8e+8OD0UrK0oFLztSjNzhcKA3WDuJxxAPXzPuPtKkjEY9UUoEWlX/8fgKeu2S8i9JTA==",
+      "dependencies": []
+    },
+    {
+      "packagePath": "node_modules/is-generator-function",
+      "name": "is-generator-function",
+      "version": "1.1.2",
+      "resolved": "https://registry.npmjs.org/is-generator-function/-/is-generator-function-1.1.2.tgz",
+      "integrity": "sha512-upqt1SkGkODW9tsGNG5mtXTXtECizwtS2kA161M+gJPc1xdb/Ax629af6YrTwcOeQHbewrPNlE5Dx7kzvXTizA==",
+      "dependencies": [
+        {
+          "name": "call-bound",
+          "requested": "^1.0.4",
+          "resolvedPackagePath": "node_modules/call-bound",
+          "resolvedVersion": "1.0.4"
+        },
+        {
+          "name": "generator-function",
+          "requested": "^2.0.0",
+          "resolvedPackagePath": "node_modules/generator-function",
+          "resolvedVersion": "2.0.1"
+        },
+        {
+          "name": "get-proto",
+          "requested": "^1.0.1",
+          "resolvedPackagePath": "node_modules/get-proto",
+          "resolvedVersion": "1.0.1"
+        },
+        {
+          "name": "has-tostringtag",
+          "requested": "^1.0.2",
+          "resolvedPackagePath": "node_modules/has-tostringtag",
+          "resolvedVersion": "1.0.2"
+        },
+        {
+          "name": "safe-regex-test",
+          "requested": "^1.1.0",
+          "resolvedPackagePath": "node_modules/safe-regex-test",
+          "resolvedVersion": "1.1.0"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/is-regex",
+      "name": "is-regex",
+      "version": "1.2.1",
+      "resolved": "https://registry.npmjs.org/is-regex/-/is-regex-1.2.1.tgz",
+      "integrity": "sha512-MjYsKHO5O7mCsmRGxWcLWheFqN9DJ/2TmngvjKXihe6efViPqc274+Fx/4fYj/r03+ESvBdTXK0V6tA3rgez1g==",
+      "dependencies": [
+        {
+          "name": "call-bound",
+          "requested": "^1.0.2",
+          "resolvedPackagePath": "node_modules/call-bound",
+          "resolvedVersion": "1.0.4"
+        },
+        {
+          "name": "gopd",
+          "requested": "^1.2.0",
+          "resolvedPackagePath": "node_modules/gopd",
+          "resolvedVersion": "1.2.0"
+        },
+        {
+          "name": "has-tostringtag",
+          "requested": "^1.0.2",
+          "resolvedPackagePath": "node_modules/has-tostringtag",
+          "resolvedVersion": "1.0.2"
+        },
+        {
+          "name": "hasown",
+          "requested": "^2.0.2",
+          "resolvedPackagePath": "node_modules/hasown",
+          "resolvedVersion": "2.0.4"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/is-typed-array",
+      "name": "is-typed-array",
+      "version": "1.1.15",
+      "resolved": "https://registry.npmjs.org/is-typed-array/-/is-typed-array-1.1.15.tgz",
+      "integrity": "sha512-p3EcsicXjit7SaskXHs1hA91QxgTw46Fv6EFKKGS5DRFLD8yKnohjF3hxoju94b/OcMZoQukzpPpBE9uLVKzgQ==",
+      "dependencies": [
+        {
+          "name": "which-typed-array",
+          "requested": "^1.1.16",
+          "resolvedPackagePath": "node_modules/which-typed-array",
+          "resolvedVersion": "1.1.22"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/math-intrinsics",
+      "name": "math-intrinsics",
+      "version": "1.1.0",
+      "resolved": "https://registry.npmjs.org/math-intrinsics/-/math-intrinsics-1.1.0.tgz",
+      "integrity": "sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==",
+      "dependencies": []
+    },
+    {
+      "packagePath": "node_modules/possible-typed-array-names",
+      "name": "possible-typed-array-names",
+      "version": "1.1.0",
+      "resolved": "https://registry.npmjs.org/possible-typed-array-names/-/possible-typed-array-names-1.1.0.tgz",
+      "integrity": "sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==",
+      "dependencies": []
+    },
+    {
+      "packagePath": "node_modules/safe-regex-test",
+      "name": "safe-regex-test",
+      "version": "1.1.0",
+      "resolved": "https://registry.npmjs.org/safe-regex-test/-/safe-regex-test-1.1.0.tgz",
+      "integrity": "sha512-x/+Cz4YrimQxQccJf5mKEbIa1NzeCRNI5Ecl/ekmlYaampdNLPalVyIcCZNNH3MvmqBugV5TMYZXv0ljslUlaw==",
+      "dependencies": [
+        {
+          "name": "call-bound",
+          "requested": "^1.0.2",
+          "resolvedPackagePath": "node_modules/call-bound",
+          "resolvedVersion": "1.0.4"
+        },
+        {
+          "name": "es-errors",
+          "requested": "^1.3.0",
+          "resolvedPackagePath": "node_modules/es-errors",
+          "resolvedVersion": "1.3.0"
+        },
+        {
+          "name": "is-regex",
+          "requested": "^1.2.1",
+          "resolvedPackagePath": "node_modules/is-regex",
+          "resolvedVersion": "1.2.1"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/set-function-length",
+      "name": "set-function-length",
+      "version": "1.2.2",
+      "resolved": "https://registry.npmjs.org/set-function-length/-/set-function-length-1.2.2.tgz",
+      "integrity": "sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==",
+      "dependencies": [
+        {
+          "name": "define-data-property",
+          "requested": "^1.1.4",
+          "resolvedPackagePath": "node_modules/define-data-property",
+          "resolvedVersion": "1.1.4"
+        },
+        {
+          "name": "es-errors",
+          "requested": "^1.3.0",
+          "resolvedPackagePath": "node_modules/es-errors",
+          "resolvedVersion": "1.3.0"
+        },
+        {
+          "name": "function-bind",
+          "requested": "^1.1.2",
+          "resolvedPackagePath": "node_modules/function-bind",
+          "resolvedVersion": "1.1.2"
+        },
+        {
+          "name": "get-intrinsic",
+          "requested": "^1.2.4",
+          "resolvedPackagePath": "node_modules/get-intrinsic",
+          "resolvedVersion": "1.3.0"
+        },
+        {
+          "name": "gopd",
+          "requested": "^1.0.1",
+          "resolvedPackagePath": "node_modules/gopd",
+          "resolvedVersion": "1.2.0"
+        },
+        {
+          "name": "has-property-descriptors",
+          "requested": "^1.0.2",
+          "resolvedPackagePath": "node_modules/has-property-descriptors",
+          "resolvedVersion": "1.0.2"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/util",
+      "name": "util",
+      "version": "0.12.5",
+      "resolved": "https://registry.npmjs.org/util/-/util-0.12.5.tgz",
+      "integrity": "sha512-kZf/K6hEIrWHI6XqOFUiiMa+79wE/D8Q+NCNAWclkyg3b4d2k7s0QGepNjiABc+aR3N1PAyHL7p6UcLY6LmrnA==",
+      "dependencies": [
+        {
+          "name": "inherits",
+          "requested": "^2.0.3",
+          "resolvedPackagePath": "node_modules/inherits",
+          "resolvedVersion": "2.0.4"
+        },
+        {
+          "name": "is-arguments",
+          "requested": "^1.0.4",
+          "resolvedPackagePath": "node_modules/is-arguments",
+          "resolvedVersion": "1.2.0"
+        },
+        {
+          "name": "is-generator-function",
+          "requested": "^1.0.7",
+          "resolvedPackagePath": "node_modules/is-generator-function",
+          "resolvedVersion": "1.1.2"
+        },
+        {
+          "name": "is-typed-array",
+          "requested": "^1.1.3",
+          "resolvedPackagePath": "node_modules/is-typed-array",
+          "resolvedVersion": "1.1.15"
+        },
+        {
+          "name": "which-typed-array",
+          "requested": "^1.1.2",
+          "resolvedPackagePath": "node_modules/which-typed-array",
+          "resolvedVersion": "1.1.22"
+        }
+      ]
+    },
+    {
+      "packagePath": "node_modules/which-typed-array",
+      "name": "which-typed-array",
+      "version": "1.1.22",
+      "resolved": "https://registry.npmjs.org/which-typed-array/-/which-typed-array-1.1.22.tgz",
+      "integrity": "sha512-fvO4ExWMFsqyhG3AiPAObMuY1lxaqgYcxbc49CNdWDDECOJNgQyvsOWVwbZc+qf3rzRtxojBK+CMEv0Ld5CYpw==",
+      "dependencies": [
+        {
+          "name": "available-typed-arrays",
+          "requested": "^1.0.7",
+          "resolvedPackagePath": "node_modules/available-typed-arrays",
+          "resolvedVersion": "1.0.7"
+        },
+        {
+          "name": "call-bind",
+          "requested": "^1.0.9",
+          "resolvedPackagePath": "node_modules/call-bind",
+          "resolvedVersion": "1.0.9"
+        },
+        {
+          "name": "call-bound",
+          "requested": "^1.0.4",
+          "resolvedPackagePath": "node_modules/call-bound",
+          "resolvedVersion": "1.0.4"
+        },
+        {
+          "name": "for-each",
+          "requested": "^0.3.5",
+          "resolvedPackagePath": "node_modules/for-each",
+          "resolvedVersion": "0.3.5"
+        },
+        {
+          "name": "get-proto",
+          "requested": "^1.0.1",
+          "resolvedPackagePath": "node_modules/get-proto",
+          "resolvedVersion": "1.0.1"
+        },
+        {
+          "name": "gopd",
+          "requested": "^1.2.0",
+          "resolvedPackagePath": "node_modules/gopd",
+          "resolvedVersion": "1.2.0"
+        },
+        {
+          "name": "has-tostringtag",
+          "requested": "^1.0.2",
+          "resolvedPackagePath": "node_modules/has-tostringtag",
+          "resolvedVersion": "1.0.2"
+        }
+      ]
+    }
+  ]
+}
+
+

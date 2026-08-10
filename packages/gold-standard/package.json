@@ -1,0 +1,24 @@
+{
+  "name": "@hakimi/gold-standard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./calendar-divergence-windows": "./src/calendar-divergence-windows.ts",
+    "./calendar-divergence-review": "./src/calendar-divergence-review.ts",
+    "./lunar-conversion": "./src/lunar-conversion.ts",
+    "./release-gate": "./src/release-gate.ts",
+    "./p0-03-differential": "./src/p0-03-differential.ts",
+    "./p0-03-report": "./src/p0-03-report.ts",
+    "./p0-03-summary": "./reports/p0-03-engineering-diagnostic-summary.v1.json"
+  },
+  "dependencies": {
+    "@hakimi/bazi-core": "*",
+    "@hakimi/contracts": "*",
+    "@hakimi/integrity": "*",
+    "@hakimi/rule-profiles": "*",
+    "@hakimi/time-core": "*",
+    "zod": "4.4.3"
+  }
+}

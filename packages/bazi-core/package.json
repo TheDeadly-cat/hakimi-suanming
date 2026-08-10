@@ -1,0 +1,14 @@
+{
+  "name": "@hakimi/bazi-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@hakimi/contracts": "*",
+    "@hakimi/integrity": "*",
+    "@hakimi/luck-core": "*",
+    "@hakimi/time-core": "*",
+    "lunar-typescript": "1.8.6"
+  }
+}

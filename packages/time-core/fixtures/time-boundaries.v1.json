@@ -1,0 +1,105 @@
+{
+  "fixtureVersion": "1.0.0",
+  "scope": "time-normalization-only",
+  "notice": "这些样例只验证时区/DST 归一化，不代表命盘金标已验证。",
+  "cases": [
+    {
+      "id": "tz-shanghai-unique-1995",
+      "date": "1995-08-18",
+      "time": "08:26",
+      "timeZone": "Asia/Shanghai",
+      "policy": "reject",
+      "expected": {
+        "kind": "unique",
+        "status": "resolved_unique",
+        "utcInstant": "1995-08-18T00:26:00Z",
+        "utcOffset": "+08:00",
+        "candidateCount": 1
+      }
+    },
+    {
+      "id": "dst-new-york-overlap-reject-2024",
+      "date": "2024-11-03",
+      "time": "01:30",
+      "timeZone": "America/New_York",
+      "policy": "reject",
+      "expected": {
+        "kind": "overlap",
+        "status": "rejected_overlap",
+        "utcInstant": null,
+        "utcOffset": null,
+        "candidateCount": 2
+      }
+    },
+    {
+      "id": "dst-new-york-overlap-earlier-2024",
+      "date": "2024-11-03",
+      "time": "01:30",
+      "timeZone": "America/New_York",
+      "policy": "earlier",
+      "expected": {
+        "kind": "overlap",
+        "status": "resolved_overlap_earlier",
+        "utcInstant": "2024-11-03T05:30:00Z",
+        "utcOffset": "-04:00",
+        "candidateCount": 2
+      }
+    },
+    {
+      "id": "dst-new-york-overlap-later-2024",
+      "date": "2024-11-03",
+      "time": "01:30",
+      "timeZone": "America/New_York",
+      "policy": "later",
+      "expected": {
+        "kind": "overlap",
+        "status": "resolved_overlap_later",
+        "utcInstant": "2024-11-03T06:30:00Z",
+        "utcOffset": "-05:00",
+        "candidateCount": 2
+      }
+    },
+    {
+      "id": "dst-new-york-gap-reject-2024",
+      "date": "2024-03-10",
+      "time": "02:30",
+      "timeZone": "America/New_York",
+      "policy": "reject",
+      "expected": {
+        "kind": "gap",
+        "status": "rejected_gap",
+        "utcInstant": null,
+        "utcOffset": null,
+        "candidateCount": 2
+      }
+    },
+    {
+      "id": "tz-kathmandu-quarter-hour",
+      "date": "2024-01-15",
+      "time": "12:00",
+      "timeZone": "Asia/Kathmandu",
+      "policy": "reject",
+      "expected": {
+        "kind": "unique",
+        "status": "resolved_unique",
+        "utcInstant": "2024-01-15T06:15:00Z",
+        "utcOffset": "+05:45",
+        "candidateCount": 1
+      }
+    },
+    {
+      "id": "tz-kiritimati-date-line",
+      "date": "2024-01-15",
+      "time": "12:00",
+      "timeZone": "Pacific/Kiritimati",
+      "policy": "reject",
+      "expected": {
+        "kind": "unique",
+        "status": "resolved_unique",
+        "utcInstant": "2024-01-14T22:00:00Z",
+        "utcOffset": "+14:00",
+        "candidateCount": 1
+      }
+    }
+  ]
+}

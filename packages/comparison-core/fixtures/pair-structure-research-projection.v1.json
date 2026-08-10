@@ -1,0 +1,1642 @@
+{
+  "fixtureId": "pair-structure-research-engineering-regression-v1",
+  "fixtureVersion": "1.1.0",
+  "evidenceStatus": "engineering_regression_only",
+  "warning": "仅用于两个不同合成 Case 的工程确定性回归；只含双方各自事实，不是缘分、合婚吉凶、关系结论、命理金标或专家裁决。",
+  "generator": "packages/comparison-core/scripts/update-formal-comparison-golden.mjs",
+  "scenarioId": "different-cases-participant-facts-only-2",
+  "sourceDefinitionSlots": [
+    "A",
+    "C"
+  ],
+  "request": {
+    "schemaVersion": "1.0.0",
+    "kind": "pair_structure_research",
+    "policy": {
+      "mode": "parallel_facts_only",
+      "interpretationIncluded": false,
+      "scoreIncluded": false,
+      "crossChartDerivationIncluded": false,
+      "relationshipConclusionIncluded": false
+    },
+    "subjects": [
+      {
+        "slotId": "A",
+        "caseId": "11111111-1111-4111-8111-111111111111",
+        "revisionId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "manualDirection": null
+      },
+      {
+        "slotId": "B",
+        "caseId": "33333333-3333-4333-8333-333333333333",
+        "revisionId": "cccccccc-cccc-4ccc-8ccc-ccccccccccc3",
+        "manualDirection": null
+      }
+    ],
+    "atInstant": "2024-02-04T08:27:07.000Z"
+  },
+  "expected": {
+    "schemaVersion": "1.0.0",
+    "kind": "pair_structure_research_projection",
+    "policy": {
+      "mode": "parallel_facts_only",
+      "interpretationIncluded": false,
+      "scoreIncluded": false,
+      "crossChartDerivationIncluded": false,
+      "relationshipConclusionIncluded": false
+    },
+    "targetInstant": "2024-02-04T08:27:07.000Z",
+    "participantCount": 2,
+    "distinctCaseCount": 2,
+    "participants": [
+      {
+        "role": "A",
+        "item": {
+          "key": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+          "slotId": "A",
+          "caseId": "11111111-1111-4111-8111-111111111111",
+          "caseAlias": "同盘换日研究",
+          "revisionId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+          "revisionNumber": 1,
+          "revisionSnapshotDigest": "ab81586882c2dc03a4648bfa8b27adbb98e61673e1424417c5bb4ec1227881dc",
+          "resultHash": "9eae8001698eb0ac03c93d82dbc50eaa22dc4e337dd70b2133ae7d8bb724294c",
+          "ruleProfileDigest": "83267fa1d20ed2bcc516deec052275952d83c06ba88c24c00f456d6dc9c9e67c",
+          "rulePackBinding": {
+            "kind": "installed_rule_pack",
+            "packDigest": "1111111111111111111111111111111111111111111111111111111111111111",
+            "profileDigest": "83267fa1d20ed2bcc516deec052275952d83c06ba88c24c00f456d6dc9c9e67c",
+            "packId": "golden-zi-start-pack",
+            "profileId": "ziping-working-zi-start-23",
+            "profileVersion": "0.1.0",
+            "useMode": "exact"
+          },
+          "luckCycleRuleDigest": "c1d0a8f8f817d9c5b1ba2c38e556b43f14c0002cf1b8b0cde90e54298fbb2203",
+          "manualDirection": null
+        },
+        "observationCount": 96,
+        "observationDigest": "8b26483f34634d986a9f20012ee89a4ae22281e414261224e88a466c6e0f15b9",
+        "observations": [
+          {
+            "id": "input.calendar",
+            "category": "input",
+            "label": "原始历法日期",
+            "value": "公历 1995-08-18",
+            "availability": "value"
+          },
+          {
+            "id": "input.civil_time",
+            "category": "input",
+            "label": "原始民用时间",
+            "value": "1995-08-18 23:30 · 精确到分钟",
+            "availability": "value"
+          },
+          {
+            "id": "input.time_zone",
+            "category": "input",
+            "label": "IANA 时区",
+            "value": "Asia/Shanghai",
+            "availability": "value"
+          },
+          {
+            "id": "input.sex",
+            "category": "input",
+            "label": "出生性别",
+            "value": "男",
+            "availability": "value"
+          },
+          {
+            "id": "input.location",
+            "category": "input",
+            "label": "地点与精度",
+            "value": "上海固定样本 · coordinates · 31.230400, 121.473700",
+            "availability": "value"
+          },
+          {
+            "id": "input.source_note",
+            "category": "input",
+            "label": "输入来源说明",
+            "value": "正式对照工程黄金样本；不是现实人物。",
+            "availability": "value"
+          },
+          {
+            "id": "input.complete_snapshot",
+            "category": "input",
+            "label": "完整输入快照（审计）",
+            "value": "{\"schemaVersion\":\"1.0.0\",\"calendarType\":\"gregorian\",\"date\":\"1995-08-18\",\"time\":\"23:30\",\"timePrecision\":\"exact_minute\",\"timeZone\":\"Asia/Shanghai\",\"sex\":\"male\",\"lunarLeapMonth\":false,\"location\":{\"label\":\"上海固定样本\",\"latitude\":31.2304,\"longitude\":121.4737,\"precision\":\"coordinates\"},\"sourceNote\":\"正式对照工程黄金样本；不是现实人物。\"}",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.gregorian_date",
+            "category": "calibration",
+            "label": "解析公历日期",
+            "value": "1995-08-18",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.active_wall",
+            "category": "calibration",
+            "label": "活动民用时",
+            "value": "1995-08-18T23:30:00",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.utc_instant",
+            "category": "calibration",
+            "label": "UTC 瞬时点",
+            "value": "1995-08-18T15:30:00Z",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.utc_offset",
+            "category": "calibration",
+            "label": "UTC 偏移",
+            "value": "+08:00",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.dst",
+            "category": "calibration",
+            "label": "DST 决策",
+            "value": "unique · resolved_unique · reject",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.solar",
+            "category": "calibration",
+            "label": "太阳时状态",
+            "value": "仅对照 · 1995-08-18T23:31:44",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.algorithm",
+            "category": "calibration",
+            "label": "历法解析算法",
+            "value": "hakimi-time-core:gregorian-identity:v1",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.complete_snapshot",
+            "category": "calibration",
+            "label": "完整校时快照（审计）",
+            "value": "{\"schemaVersion\":\"1.0.0\",\"originalCivilDateTime\":\"1995-08-18T23:30:00\",\"activeWallTime\":\"1995-08-18T23:30:00\",\"timeZone\":\"Asia/Shanghai\",\"utcInstant\":\"1995-08-18T15:30:00Z\",\"utcOffset\":\"+08:00\",\"dstStatus\":\"resolved\",\"solarTimePreview\":\"1995-08-18T23:31:44\",\"solarTimeApplied\":false,\"normalizationStatus\":\"instant_resolved\",\"warnings\":[\"地方平太阳时按经度与候选 UTC 偏移换算；视太阳时额外使用 NOAA GML 分数年均时差近似公式。\",\"太阳时仅作并列预览，未应用到活动命盘；该近似模型不能替代天文历表或项目金标准。\"],\"calendarResolution\":{\"inputCalendarType\":\"gregorian\",\"inputDate\":\"1995-08-18\",\"inputLunarLeapMonth\":false,\"resolvedGregorianDate\":\"1995-08-18\",\"algorithmId\":\"hakimi-time-core:gregorian-identity:v1\",\"frame\":\"identity_gregorian\",\"upstreamName\":null,\"upstreamVersion\":null,\"roundTripVerified\":true,\"sourceRefs\":[],\"warnings\":[]},\"timeZoneResolution\":{\"kind\":\"unique\",\"policy\":\"reject\",\"status\":\"resolved_unique\",\"requestedWallTime\":\"1995-08-18T23:30:00\",\"candidates\":[{\"choice\":\"unique\",\"instant\":\"1995-08-18T15:30:00Z\",\"utcOffset\":\"+08:00\",\"utcOffsetMinutes\":480,\"resolvedWallTime\":\"1995-08-18T23:30:00\",\"zonedDateTime\":\"1995-08-18T23:30:00+08:00[Asia/Shanghai]\",\"matchesInputWallTime\":true}],\"selectedCandidate\":{\"choice\":\"unique\",\"instant\":\"1995-08-18T15:30:00Z\",\"utcOffset\":\"+08:00\",\"utcOffsetMinutes\":480,\"resolvedWallTime\":\"1995-08-18T23:30:00\",\"zonedDateTime\":\"1995-08-18T23:30:00+08:00[Asia/Shanghai]\",\"matchesInputWallTime\":true}},\"solarTime\":{\"modelId\":\"noaa-gml-fractional-year-eot-approx-v1\",\"latitude\":31.2304,\"longitude\":121.4737,\"applied\":false,\"selectedVariantChoice\":\"unique\",\"variants\":[{\"candidateChoice\":\"unique\",\"sourceInstant\":\"1995-08-18T15:30:00Z\",\"sourceUtcOffset\":\"+08:00\",\"sourceWallTime\":\"1995-08-18T23:30:00\",\"meanSolarDateTime\":\"1995-08-18T23:35:54\",\"apparentSolarDateTime\":\"1995-08-18T23:31:44\",\"longitudeCorrectionMinutes\":5.8948,\"equationOfTimeMinutes\":-4.155909,\"totalCorrectionMinutes\":1.738891}],\"warnings\":[\"地方平太阳时按经度与候选 UTC 偏移换算；视太阳时额外使用 NOAA GML 分数年均时差近似公式。\",\"太阳时仅作并列预览，未应用到活动命盘；该近似模型不能替代天文历表或项目金标准。\"]}}",
+            "availability": "value"
+          },
+          {
+            "id": "rule.profile",
+            "category": "rule",
+            "label": "RuleProfile 配置快照",
+            "value": "传统子平工作默认 · ziping-working-zi-start-23@0.1.0",
+            "availability": "value"
+          },
+          {
+            "id": "rule.pack_source",
+            "category": "rule",
+            "label": "规则包绑定类型",
+            "value": "installed_rule_pack",
+            "availability": "value"
+          },
+          {
+            "id": "rule.pack_id",
+            "category": "rule",
+            "label": "规则包 packId",
+            "value": "golden-zi-start-pack",
+            "availability": "value"
+          },
+          {
+            "id": "rule.pack_digest",
+            "category": "rule",
+            "label": "规则包 packDigest",
+            "value": "1111111111111111111111111111111111111111111111111111111111111111",
+            "availability": "value"
+          },
+          {
+            "id": "rule.pack_profile_id",
+            "category": "rule",
+            "label": "规则包 profileId",
+            "value": "ziping-working-zi-start-23",
+            "availability": "value"
+          },
+          {
+            "id": "rule.pack_profile_version",
+            "category": "rule",
+            "label": "规则包 profileVersion",
+            "value": "0.1.0",
+            "availability": "value"
+          },
+          {
+            "id": "rule.pack_profile_digest",
+            "category": "rule",
+            "label": "规则包 profileDigest",
+            "value": "83267fa1d20ed2bcc516deec052275952d83c06ba88c24c00f456d6dc9c9e67c",
+            "availability": "value"
+          },
+          {
+            "id": "rule.pack_use_mode",
+            "category": "rule",
+            "label": "规则包 useMode",
+            "value": "exact",
+            "availability": "value"
+          },
+          {
+            "id": "rule.status",
+            "category": "rule",
+            "label": "规则状态",
+            "value": "working_default",
+            "availability": "value"
+          },
+          {
+            "id": "rule.year_boundary",
+            "category": "rule",
+            "label": "年界",
+            "value": "lichun_exact",
+            "availability": "value"
+          },
+          {
+            "id": "rule.month_boundary",
+            "category": "rule",
+            "label": "月界",
+            "value": "jie_exact",
+            "availability": "value"
+          },
+          {
+            "id": "rule.day_boundary",
+            "category": "rule",
+            "label": "换日",
+            "value": "zi_start_23",
+            "availability": "value"
+          },
+          {
+            "id": "rule.zi_basis",
+            "category": "rule",
+            "label": "子时日干基准",
+            "value": "after_day_change",
+            "availability": "value"
+          },
+          {
+            "id": "rule.hour_basis",
+            "category": "rule",
+            "label": "时柱时间基准",
+            "value": "civil_time",
+            "availability": "value"
+          },
+          {
+            "id": "rule.dst",
+            "category": "rule",
+            "label": "DST 歧义规则",
+            "value": "require_user",
+            "availability": "value"
+          },
+          {
+            "id": "rule.solar_time",
+            "category": "rule",
+            "label": "太阳时规则",
+            "value": "关闭 · 显示对照",
+            "availability": "value"
+          },
+          {
+            "id": "rule.luck_cycle",
+            "category": "rule",
+            "label": "起运规则快照",
+            "value": "ziping-working-zi-start-23:luck-cycle-xiaoyun@0.1.0",
+            "availability": "value"
+          },
+          {
+            "id": "rule.digest",
+            "category": "rule",
+            "label": "RuleProfile 摘要",
+            "value": "83267fa1d20ed2bcc516deec052275952d83c06ba88c24c00f456d6dc9c9e67c",
+            "availability": "value"
+          },
+          {
+            "id": "rule.luck_digest",
+            "category": "rule",
+            "label": "起运摘要",
+            "value": "c1d0a8f8f817d9c5b1ba2c38e556b43f14c0002cf1b8b0cde90e54298fbb2203",
+            "availability": "value"
+          },
+          {
+            "id": "rule.complete_snapshot",
+            "category": "rule",
+            "label": "完整规则快照（审计）",
+            "value": "{\"schemaVersion\":\"1.0.0\",\"profileId\":\"ziping-working-zi-start-23\",\"profileVersion\":\"0.1.0\",\"status\":\"working_default\",\"label\":\"传统子平工作默认\",\"notice\":\"工程工作默认，不代表唯一正确流派；1900—2100 仅为声明支持范围，不代表已强验证，当前尚未通过 360 例金标准发布门。\",\"sourceRefs\":[],\"supportedRange\":{\"stronglyVerifiedFrom\":\"1900-01-01\",\"stronglyVerifiedTo\":\"2100-12-31\",\"outsideRangePolicy\":\"experimental_with_warning\"},\"calendar\":{\"yearBoundary\":\"lichun_exact\",\"monthBoundary\":\"jie_exact\",\"dayBoundary\":\"zi_start_23\",\"ziHourDayStemBasis\":\"after_day_change\",\"hourBasis\":\"civil_time\",\"timezoneSource\":\"iana\",\"dstAmbiguity\":\"require_user\",\"locationPrecision\":\"city\"},\"solarTime\":{\"enabled\":false,\"showComparison\":true,\"longitudeSource\":\"location\",\"equationOfTimeModel\":null},\"luckCycle\":{\"directionRule\":\"year_stem_yinyang_and_gender\",\"unknownValuePolicy\":\"require_manual_direction\",\"anchor\":\"directional_jie\",\"startAgeMethod\":\"three_days_one_year_exact_duration\",\"rounding\":\"retain_duration\"},\"layers\":{\"hiddenStems\":true,\"tenGods\":true,\"nayin\":true,\"voidBranches\":true,\"twelveGrowth\":true,\"stemBranchRelations\":true,\"shensha\":false},\"interpretation\":{\"strengthRulePack\":null,\"structureRulePack\":null,\"climateRulePack\":null,\"usefulGodRulePack\":null}}",
+            "availability": "value"
+          },
+          {
+            "id": "calendar.solar_text",
+            "category": "calendar_fact",
+            "label": "公历文本",
+            "value": "1995-08-18 23:30:00",
+            "availability": "value"
+          },
+          {
+            "id": "calendar.lunar_text",
+            "category": "calendar_fact",
+            "label": "农历文本",
+            "value": "一九九五年七月廿三",
+            "availability": "value"
+          },
+          {
+            "id": "calendar.leap_month",
+            "category": "calendar_fact",
+            "label": "结果闰月",
+            "value": "否",
+            "availability": "value"
+          },
+          {
+            "id": "calendar.previous_jie",
+            "category": "calendar_fact",
+            "label": "前一节",
+            "value": "立秋 · 1995-08-08 07:51:44 UTC+08:00",
+            "availability": "value"
+          },
+          {
+            "id": "calendar.next_jie",
+            "category": "calendar_fact",
+            "label": "后一节",
+            "value": "白露 · 1995-09-08 10:48:34 UTC+08:00",
+            "availability": "value"
+          },
+          {
+            "id": "calendar.complete_snapshot",
+            "category": "calendar_fact",
+            "label": "完整历法事实（审计）",
+            "value": "{\"solarText\":\"1995-08-18 23:30:00\",\"lunarText\":\"一九九五年七月廿三\",\"lunarYear\":1995,\"lunarMonth\":7,\"lunarDay\":23,\"isLeapMonth\":false,\"previousJie\":\"立秋 · 1995-08-08 07:51:44 UTC+08:00\",\"nextJie\":\"白露 · 1995-09-08 10:48:34 UTC+08:00\"}",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.ganZhi",
+            "category": "pillar_fact",
+            "label": "年柱干支",
+            "value": "乙亥",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.stem",
+            "category": "pillar_fact",
+            "label": "年柱天干",
+            "value": "乙",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.branch",
+            "category": "pillar_fact",
+            "label": "年柱地支",
+            "value": "亥",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.hiddenStems",
+            "category": "pillar_fact",
+            "label": "年柱藏干",
+            "value": "壬·甲",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.stemTenGod",
+            "category": "pillar_fact",
+            "label": "年柱天干十神",
+            "value": "伤官",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.branchTenGods",
+            "category": "pillar_fact",
+            "label": "年柱地支十神",
+            "value": "比肩·食神",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.wuXing",
+            "category": "pillar_fact",
+            "label": "年柱五行",
+            "value": "木水",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.nayin",
+            "category": "pillar_fact",
+            "label": "年柱纳音",
+            "value": "山头火",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.twelveGrowth",
+            "category": "pillar_fact",
+            "label": "年柱十二长生",
+            "value": "临官",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.xun",
+            "category": "pillar_fact",
+            "label": "年柱旬",
+            "value": "甲戌",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.voidBranches",
+            "category": "pillar_fact",
+            "label": "年柱旬空",
+            "value": "申酉",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.ganZhi",
+            "category": "pillar_fact",
+            "label": "月柱干支",
+            "value": "甲申",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.stem",
+            "category": "pillar_fact",
+            "label": "月柱天干",
+            "value": "甲",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.branch",
+            "category": "pillar_fact",
+            "label": "月柱地支",
+            "value": "申",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.hiddenStems",
+            "category": "pillar_fact",
+            "label": "月柱藏干",
+            "value": "庚·壬·戊",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.stemTenGod",
+            "category": "pillar_fact",
+            "label": "月柱天干十神",
+            "value": "食神",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.branchTenGods",
+            "category": "pillar_fact",
+            "label": "月柱地支十神",
+            "value": "偏印·比肩·七杀",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.wuXing",
+            "category": "pillar_fact",
+            "label": "月柱五行",
+            "value": "木金",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.nayin",
+            "category": "pillar_fact",
+            "label": "月柱纳音",
+            "value": "泉中水",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.twelveGrowth",
+            "category": "pillar_fact",
+            "label": "月柱十二长生",
+            "value": "长生",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.xun",
+            "category": "pillar_fact",
+            "label": "月柱旬",
+            "value": "甲申",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.voidBranches",
+            "category": "pillar_fact",
+            "label": "月柱旬空",
+            "value": "午未",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.ganZhi",
+            "category": "pillar_fact",
+            "label": "日柱干支",
+            "value": "壬午",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.stem",
+            "category": "pillar_fact",
+            "label": "日柱天干",
+            "value": "壬",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.branch",
+            "category": "pillar_fact",
+            "label": "日柱地支",
+            "value": "午",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.hiddenStems",
+            "category": "pillar_fact",
+            "label": "日柱藏干",
+            "value": "丁·己",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.stemTenGod",
+            "category": "pillar_fact",
+            "label": "日柱天干十神",
+            "value": "日主",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.branchTenGods",
+            "category": "pillar_fact",
+            "label": "日柱地支十神",
+            "value": "正财·正官",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.wuXing",
+            "category": "pillar_fact",
+            "label": "日柱五行",
+            "value": "水火",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.nayin",
+            "category": "pillar_fact",
+            "label": "日柱纳音",
+            "value": "杨柳木",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.twelveGrowth",
+            "category": "pillar_fact",
+            "label": "日柱十二长生",
+            "value": "胎",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.xun",
+            "category": "pillar_fact",
+            "label": "日柱旬",
+            "value": "甲戌",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.voidBranches",
+            "category": "pillar_fact",
+            "label": "日柱旬空",
+            "value": "申酉",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.ganZhi",
+            "category": "pillar_fact",
+            "label": "时柱干支",
+            "value": "庚子",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.stem",
+            "category": "pillar_fact",
+            "label": "时柱天干",
+            "value": "庚",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.branch",
+            "category": "pillar_fact",
+            "label": "时柱地支",
+            "value": "子",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.hiddenStems",
+            "category": "pillar_fact",
+            "label": "时柱藏干",
+            "value": "癸",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.stemTenGod",
+            "category": "pillar_fact",
+            "label": "时柱天干十神",
+            "value": "偏印",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.branchTenGods",
+            "category": "pillar_fact",
+            "label": "时柱地支十神",
+            "value": "劫财",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.wuXing",
+            "category": "pillar_fact",
+            "label": "时柱五行",
+            "value": "金水",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.nayin",
+            "category": "pillar_fact",
+            "label": "时柱纳音",
+            "value": "壁上土",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.twelveGrowth",
+            "category": "pillar_fact",
+            "label": "时柱十二长生",
+            "value": "帝旺",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.xun",
+            "category": "pillar_fact",
+            "label": "时柱旬",
+            "value": "甲午",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.voidBranches",
+            "category": "pillar_fact",
+            "label": "时柱旬空",
+            "value": "辰巳",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.relations",
+            "category": "pillar_fact",
+            "label": "盘内干支关系事实",
+            "value": "stem_five_combination · binary · year.stem:乙+hour.stem:庚；stem_clash · binary · month.stem:甲+hour.stem:庚；branch_six_clash · binary · day.branch:午+hour.branch:子；branch_three_harmony · incomplete_set · month.branch:申+hour.branch:子 · 缺 辰；branch_three_meeting · incomplete_set · year.branch:亥+hour.branch:子 · 缺 丑；branch_six_harm · binary · year.branch:亥+month.branch:申",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.revision_snapshot",
+            "category": "evidence",
+            "label": "完整修订摘要",
+            "value": "ab81586882c2dc03a4648bfa8b27adbb98e61673e1424417c5bb4ec1227881dc",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.engine",
+            "category": "evidence",
+            "label": "计算引擎",
+            "value": "hakimi-bazi-core@0.4.0",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.relations_engine",
+            "category": "evidence",
+            "label": "干支关系引擎",
+            "value": "hakimi-relations-core@0.1.0 · 顾问复核未完成",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.interpretation",
+            "category": "evidence",
+            "label": "解释输出",
+            "value": "当前未启用解释结论",
+            "availability": "not_applicable"
+          },
+          {
+            "id": "evidence.upstream",
+            "category": "evidence",
+            "label": "上游版本",
+            "value": "lunar-typescript@1.8.6",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.tzdb",
+            "category": "evidence",
+            "label": "tzdb 版本",
+            "value": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.result_hash",
+            "category": "evidence",
+            "label": "结果摘要",
+            "value": "9eae8001698eb0ac03c93d82dbc50eaa22dc4e337dd70b2133ae7d8bb724294c",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.verification",
+            "category": "evidence",
+            "label": "验证状态",
+            "value": "engineering_preview",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.range",
+            "category": "evidence",
+            "label": "范围状态",
+            "value": "experimental",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.warnings",
+            "category": "evidence",
+            "label": "计算警告",
+            "value": "工程预览：当前结果尚未通过 360 例金标准与 20,000 例随机差分。；年柱与月柱使用已解析瞬时点投影到固定 UTC+08:00 后的精确立春/交节候选；这不是带历史 DST 的 IANA Asia/Shanghai 投影。；日柱与时柱使用 Asia/Shanghai 的本地民用墙时；时干已从最终显示日干与时支重新推导。；真太阳时与平太阳时仅保留对照数据，未应用到活动命盘。；地方平太阳时按经度与候选 UTC 偏移换算；视太阳时额外使用 NOAA GML 分数年均时差近似公式。；太阳时仅作并列预览，未应用到活动命盘；该近似模型不能替代天文历表或项目金标准。；lunar-typescript 仅作为白名单适配后的候选历法实现，不作为规则争议的最终裁判。",
+            "availability": "value"
+          }
+        ],
+        "transit": {
+          "itemKey": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+          "status": "resolved",
+          "resultHash": "134bc1138e285a90e3ad87c699d1ad90fffd43b489e1146da0b76884e729d21e",
+          "target": {
+            "instant": "2024-02-04T08:27:07.000Z",
+            "revisionWallDateTime": "2024-02-04T16:27:07",
+            "fixedPlusEightWallDateTime": "2024-02-04T16:27:07.000",
+            "displayTimeZone": "Asia/Shanghai"
+          },
+          "manualDirection": null,
+          "luckCycleRuleSource": "revision_snapshot",
+          "slots": {
+            "dayun": {
+              "status": "resolved",
+              "nodeType": "dayun",
+              "ganZhi": "辛巳",
+              "label": "第 3 柱",
+              "startInstant": "2019-03-08T20:02:00.000Z",
+              "endExclusiveInstant": "2029-03-08T20:02:00.000Z",
+              "nodeId": "1552075320000.1776ca5e6cbda0e7dd3ab4ca24520e461d34628069c63830e08eb6855973833e"
+            },
+            "xiaoyun": {
+              "status": "resolved",
+              "nodeType": "xiaoyun",
+              "ganZhi": "庚午",
+              "label": "虚岁 30",
+              "startInstant": "2024-02-04T08:27:07.000Z",
+              "endExclusiveInstant": "2025-02-03T14:10:28.000Z",
+              "nodeId": "1707035227000.d1f56a995102569fc43ed3deb21d60f7dffca6ca3ab6596ce91ad9f92a8fc15d"
+            },
+            "year": {
+              "status": "resolved",
+              "nodeType": "year",
+              "ganZhi": "甲辰",
+              "label": "2024 流年",
+              "startInstant": "2024-02-04T08:27:07.000Z",
+              "endExclusiveInstant": "2025-02-03T14:10:28.000Z",
+              "nodeId": "1707035227000.d989571f5ae28e5137fabef1b579c496431d9c828a7f868c695bfed2e7dcda8c"
+            },
+            "month": {
+              "status": "resolved",
+              "nodeType": "month",
+              "ganZhi": "丙寅",
+              "label": "立春月",
+              "startInstant": "2024-02-04T08:27:07.000Z",
+              "endExclusiveInstant": "2024-03-05T02:22:45.000Z",
+              "nodeId": "1707035227000.113188cb23d1edbc94ab04febda3a30382120e2ea4d52bea8420b4a5969351bb"
+            },
+            "day": {
+              "status": "resolved",
+              "nodeType": "day",
+              "ganZhi": "戊戌",
+              "label": "02-03",
+              "startInstant": "2024-02-03T15:00:00.000Z",
+              "endExclusiveInstant": "2024-02-04T15:00:00.000Z",
+              "nodeId": "1706972400000.08ff0a72e14341786051b2acb109a8d1413b1f3642ca9ad25c391ede34699b52"
+            },
+            "hour": {
+              "status": "resolved",
+              "nodeType": "hour",
+              "ganZhi": "庚申",
+              "label": "申时",
+              "startInstant": "2024-02-04T07:00:00.000Z",
+              "endExclusiveInstant": "2024-02-04T09:00:00.000Z",
+              "nodeId": "1707030000000.6d0459ce2ad2108221a662fa36be93a5cc14a2562d5639590b0388b5ed10c302"
+            }
+          },
+          "trackLengths": {
+            "dayun": 10,
+            "xiaoyun": 5,
+            "year": 5,
+            "month": 5,
+            "day": 5,
+            "hour": 5
+          },
+          "warnings": [
+            "运限时间轴是工程预览：只输出时间区间、干支和相对原局日主的天干十神，不输出吉凶预测。",
+            "流年/流月按固定 UTC+08:00 精确立春与十二节；流日/流时按修订 IANA 时区和锁版换日规则并行计算。",
+            "IANA 命名时区投影使用随应用发布、内容寻址的 2026c 数据工件，不读取设备时区库。",
+            "小运采用出生时柱相邻起法并复用大运顺逆：虚岁 1 自出生瞬时点起，随后按固定 UTC+08:00 精确立春增龄；这是当前产品锁版建模选择。",
+            "各层是同一目标瞬时点的并行覆盖区间，不被错误建模成永久父子树。"
+          ],
+          "knownGaps": [
+            "小运原典与后世实务存在多种起法、顺逆和年龄边界；当前出生时柱相邻起法及精确立春边界是产品建模选择，尚非唯一流派结论。",
+            "运限金标案例仍为 0，所有节点 releaseGatePassed=false。",
+            "本地换日或时辰边界若落入 DST 重叠/空档，当前层会标记 unsupported，不会静默选择 earlier/later。",
+            "节令上游精度为秒；1900/2100 边缘窗口仍需独立历表与缓冲区策略验证。"
+          ]
+        },
+        "transitObjectDigest": "86dfc57a1fc53f2cee198da3d8f009e44c3f0ead8d75c99c5e04c16286db452b"
+      },
+      {
+        "role": "B",
+        "item": {
+          "key": "cccccccc-cccc-4ccc-8ccc-ccccccccccc3",
+          "slotId": "B",
+          "caseId": "33333333-3333-4333-8333-333333333333",
+          "caseAlias": "东京同步时点样本",
+          "revisionId": "cccccccc-cccc-4ccc-8ccc-ccccccccccc3",
+          "revisionNumber": 1,
+          "revisionSnapshotDigest": "919497e12ad70237a028e6a76962547a19f57c050831d7373e4d3829986fe640",
+          "resultHash": "7278389c32aafe853f109b4943136f61f796ae7ff45132a5b111c39dbb1f2836",
+          "ruleProfileDigest": "83267fa1d20ed2bcc516deec052275952d83c06ba88c24c00f456d6dc9c9e67c",
+          "rulePackBinding": null,
+          "luckCycleRuleDigest": "c1d0a8f8f817d9c5b1ba2c38e556b43f14c0002cf1b8b0cde90e54298fbb2203",
+          "manualDirection": null
+        },
+        "observationCount": 96,
+        "observationDigest": "3fd9dafc12aaa424263ac7660ca8813584bd0893fd5cd07c91c31a59c915d535",
+        "observations": [
+          {
+            "id": "input.calendar",
+            "category": "input",
+            "label": "原始历法日期",
+            "value": "公历 1995-08-18",
+            "availability": "value"
+          },
+          {
+            "id": "input.civil_time",
+            "category": "input",
+            "label": "原始民用时间",
+            "value": "1995-08-18 23:30 · 精确到分钟",
+            "availability": "value"
+          },
+          {
+            "id": "input.time_zone",
+            "category": "input",
+            "label": "IANA 时区",
+            "value": "Asia/Tokyo",
+            "availability": "value"
+          },
+          {
+            "id": "input.sex",
+            "category": "input",
+            "label": "出生性别",
+            "value": "女",
+            "availability": "value"
+          },
+          {
+            "id": "input.location",
+            "category": "input",
+            "label": "地点与精度",
+            "value": "东京固定样本 · coordinates · 35.676200, 139.650300",
+            "availability": "value"
+          },
+          {
+            "id": "input.source_note",
+            "category": "input",
+            "label": "输入来源说明",
+            "value": "跨时区同步工程样本；不是现实人物。",
+            "availability": "value"
+          },
+          {
+            "id": "input.complete_snapshot",
+            "category": "input",
+            "label": "完整输入快照（审计）",
+            "value": "{\"schemaVersion\":\"1.0.0\",\"calendarType\":\"gregorian\",\"date\":\"1995-08-18\",\"time\":\"23:30\",\"timePrecision\":\"exact_minute\",\"timeZone\":\"Asia/Tokyo\",\"sex\":\"female\",\"lunarLeapMonth\":false,\"location\":{\"label\":\"东京固定样本\",\"latitude\":35.6762,\"longitude\":139.6503,\"precision\":\"coordinates\"},\"sourceNote\":\"跨时区同步工程样本；不是现实人物。\"}",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.gregorian_date",
+            "category": "calibration",
+            "label": "解析公历日期",
+            "value": "1995-08-18",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.active_wall",
+            "category": "calibration",
+            "label": "活动民用时",
+            "value": "1995-08-18T23:30:00",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.utc_instant",
+            "category": "calibration",
+            "label": "UTC 瞬时点",
+            "value": "1995-08-18T14:30:00Z",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.utc_offset",
+            "category": "calibration",
+            "label": "UTC 偏移",
+            "value": "+09:00",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.dst",
+            "category": "calibration",
+            "label": "DST 决策",
+            "value": "unique · resolved_unique · reject",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.solar",
+            "category": "calibration",
+            "label": "太阳时状态",
+            "value": "仅对照 · 1995-08-18T23:44:27",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.algorithm",
+            "category": "calibration",
+            "label": "历法解析算法",
+            "value": "hakimi-time-core:gregorian-identity:v1",
+            "availability": "value"
+          },
+          {
+            "id": "calibration.complete_snapshot",
+            "category": "calibration",
+            "label": "完整校时快照（审计）",
+            "value": "{\"schemaVersion\":\"1.0.0\",\"originalCivilDateTime\":\"1995-08-18T23:30:00\",\"activeWallTime\":\"1995-08-18T23:30:00\",\"timeZone\":\"Asia/Tokyo\",\"utcInstant\":\"1995-08-18T14:30:00Z\",\"utcOffset\":\"+09:00\",\"dstStatus\":\"resolved\",\"solarTimePreview\":\"1995-08-18T23:44:27\",\"solarTimeApplied\":false,\"normalizationStatus\":\"instant_resolved\",\"warnings\":[\"地方平太阳时按经度与候选 UTC 偏移换算；视太阳时额外使用 NOAA GML 分数年均时差近似公式。\",\"太阳时仅作并列预览，未应用到活动命盘；该近似模型不能替代天文历表或项目金标准。\"],\"calendarResolution\":{\"inputCalendarType\":\"gregorian\",\"inputDate\":\"1995-08-18\",\"inputLunarLeapMonth\":false,\"resolvedGregorianDate\":\"1995-08-18\",\"algorithmId\":\"hakimi-time-core:gregorian-identity:v1\",\"frame\":\"identity_gregorian\",\"upstreamName\":null,\"upstreamVersion\":null,\"roundTripVerified\":true,\"sourceRefs\":[],\"warnings\":[]},\"timeZoneResolution\":{\"kind\":\"unique\",\"policy\":\"reject\",\"status\":\"resolved_unique\",\"requestedWallTime\":\"1995-08-18T23:30:00\",\"candidates\":[{\"choice\":\"unique\",\"instant\":\"1995-08-18T14:30:00Z\",\"utcOffset\":\"+09:00\",\"utcOffsetMinutes\":540,\"resolvedWallTime\":\"1995-08-18T23:30:00\",\"zonedDateTime\":\"1995-08-18T23:30:00+09:00[Asia/Tokyo]\",\"matchesInputWallTime\":true}],\"selectedCandidate\":{\"choice\":\"unique\",\"instant\":\"1995-08-18T14:30:00Z\",\"utcOffset\":\"+09:00\",\"utcOffsetMinutes\":540,\"resolvedWallTime\":\"1995-08-18T23:30:00\",\"zonedDateTime\":\"1995-08-18T23:30:00+09:00[Asia/Tokyo]\",\"matchesInputWallTime\":true}},\"solarTime\":{\"modelId\":\"noaa-gml-fractional-year-eot-approx-v1\",\"latitude\":35.6762,\"longitude\":139.6503,\"applied\":false,\"selectedVariantChoice\":\"unique\",\"variants\":[{\"candidateChoice\":\"unique\",\"sourceInstant\":\"1995-08-18T14:30:00Z\",\"sourceUtcOffset\":\"+09:00\",\"sourceWallTime\":\"1995-08-18T23:30:00\",\"meanSolarDateTime\":\"1995-08-18T23:48:36\",\"apparentSolarDateTime\":\"1995-08-18T23:44:27\",\"longitudeCorrectionMinutes\":18.6012,\"equationOfTimeMinutes\":-4.155909,\"totalCorrectionMinutes\":14.445291}],\"warnings\":[\"地方平太阳时按经度与候选 UTC 偏移换算；视太阳时额外使用 NOAA GML 分数年均时差近似公式。\",\"太阳时仅作并列预览，未应用到活动命盘；该近似模型不能替代天文历表或项目金标准。\"]}}",
+            "availability": "value"
+          },
+          {
+            "id": "rule.profile",
+            "category": "rule",
+            "label": "RuleProfile 配置快照",
+            "value": "传统子平工作默认 · ziping-working-zi-start-23@0.1.0",
+            "availability": "value"
+          },
+          {
+            "id": "rule.pack_source",
+            "category": "rule",
+            "label": "规则包绑定类型",
+            "value": "内置 / 未绑定规则快照",
+            "availability": "not_applicable"
+          },
+          {
+            "id": "rule.pack_id",
+            "category": "rule",
+            "label": "规则包 packId",
+            "value": "内置 / 未绑定规则快照",
+            "availability": "not_applicable"
+          },
+          {
+            "id": "rule.pack_digest",
+            "category": "rule",
+            "label": "规则包 packDigest",
+            "value": "内置 / 未绑定规则快照",
+            "availability": "not_applicable"
+          },
+          {
+            "id": "rule.pack_profile_id",
+            "category": "rule",
+            "label": "规则包 profileId",
+            "value": "内置 / 未绑定规则快照",
+            "availability": "not_applicable"
+          },
+          {
+            "id": "rule.pack_profile_version",
+            "category": "rule",
+            "label": "规则包 profileVersion",
+            "value": "内置 / 未绑定规则快照",
+            "availability": "not_applicable"
+          },
+          {
+            "id": "rule.pack_profile_digest",
+            "category": "rule",
+            "label": "规则包 profileDigest",
+            "value": "内置 / 未绑定规则快照",
+            "availability": "not_applicable"
+          },
+          {
+            "id": "rule.pack_use_mode",
+            "category": "rule",
+            "label": "规则包 useMode",
+            "value": "内置 / 未绑定规则快照",
+            "availability": "not_applicable"
+          },
+          {
+            "id": "rule.status",
+            "category": "rule",
+            "label": "规则状态",
+            "value": "working_default",
+            "availability": "value"
+          },
+          {
+            "id": "rule.year_boundary",
+            "category": "rule",
+            "label": "年界",
+            "value": "lichun_exact",
+            "availability": "value"
+          },
+          {
+            "id": "rule.month_boundary",
+            "category": "rule",
+            "label": "月界",
+            "value": "jie_exact",
+            "availability": "value"
+          },
+          {
+            "id": "rule.day_boundary",
+            "category": "rule",
+            "label": "换日",
+            "value": "zi_start_23",
+            "availability": "value"
+          },
+          {
+            "id": "rule.zi_basis",
+            "category": "rule",
+            "label": "子时日干基准",
+            "value": "after_day_change",
+            "availability": "value"
+          },
+          {
+            "id": "rule.hour_basis",
+            "category": "rule",
+            "label": "时柱时间基准",
+            "value": "civil_time",
+            "availability": "value"
+          },
+          {
+            "id": "rule.dst",
+            "category": "rule",
+            "label": "DST 歧义规则",
+            "value": "require_user",
+            "availability": "value"
+          },
+          {
+            "id": "rule.solar_time",
+            "category": "rule",
+            "label": "太阳时规则",
+            "value": "关闭 · 显示对照",
+            "availability": "value"
+          },
+          {
+            "id": "rule.luck_cycle",
+            "category": "rule",
+            "label": "起运规则快照",
+            "value": "ziping-working-zi-start-23:luck-cycle-xiaoyun@0.1.0",
+            "availability": "value"
+          },
+          {
+            "id": "rule.digest",
+            "category": "rule",
+            "label": "RuleProfile 摘要",
+            "value": "83267fa1d20ed2bcc516deec052275952d83c06ba88c24c00f456d6dc9c9e67c",
+            "availability": "value"
+          },
+          {
+            "id": "rule.luck_digest",
+            "category": "rule",
+            "label": "起运摘要",
+            "value": "c1d0a8f8f817d9c5b1ba2c38e556b43f14c0002cf1b8b0cde90e54298fbb2203",
+            "availability": "value"
+          },
+          {
+            "id": "rule.complete_snapshot",
+            "category": "rule",
+            "label": "完整规则快照（审计）",
+            "value": "{\"schemaVersion\":\"1.0.0\",\"profileId\":\"ziping-working-zi-start-23\",\"profileVersion\":\"0.1.0\",\"status\":\"working_default\",\"label\":\"传统子平工作默认\",\"notice\":\"工程工作默认，不代表唯一正确流派；1900—2100 仅为声明支持范围，不代表已强验证，当前尚未通过 360 例金标准发布门。\",\"sourceRefs\":[],\"supportedRange\":{\"stronglyVerifiedFrom\":\"1900-01-01\",\"stronglyVerifiedTo\":\"2100-12-31\",\"outsideRangePolicy\":\"experimental_with_warning\"},\"calendar\":{\"yearBoundary\":\"lichun_exact\",\"monthBoundary\":\"jie_exact\",\"dayBoundary\":\"zi_start_23\",\"ziHourDayStemBasis\":\"after_day_change\",\"hourBasis\":\"civil_time\",\"timezoneSource\":\"iana\",\"dstAmbiguity\":\"require_user\",\"locationPrecision\":\"city\"},\"solarTime\":{\"enabled\":false,\"showComparison\":true,\"longitudeSource\":\"location\",\"equationOfTimeModel\":null},\"luckCycle\":{\"directionRule\":\"year_stem_yinyang_and_gender\",\"unknownValuePolicy\":\"require_manual_direction\",\"anchor\":\"directional_jie\",\"startAgeMethod\":\"three_days_one_year_exact_duration\",\"rounding\":\"retain_duration\"},\"layers\":{\"hiddenStems\":true,\"tenGods\":true,\"nayin\":true,\"voidBranches\":true,\"twelveGrowth\":true,\"stemBranchRelations\":true,\"shensha\":false},\"interpretation\":{\"strengthRulePack\":null,\"structureRulePack\":null,\"climateRulePack\":null,\"usefulGodRulePack\":null}}",
+            "availability": "value"
+          },
+          {
+            "id": "calendar.solar_text",
+            "category": "calendar_fact",
+            "label": "公历文本",
+            "value": "1995-08-18 23:30:00",
+            "availability": "value"
+          },
+          {
+            "id": "calendar.lunar_text",
+            "category": "calendar_fact",
+            "label": "农历文本",
+            "value": "一九九五年七月廿三",
+            "availability": "value"
+          },
+          {
+            "id": "calendar.leap_month",
+            "category": "calendar_fact",
+            "label": "结果闰月",
+            "value": "否",
+            "availability": "value"
+          },
+          {
+            "id": "calendar.previous_jie",
+            "category": "calendar_fact",
+            "label": "前一节",
+            "value": "立秋 · 1995-08-08 07:51:44 UTC+08:00",
+            "availability": "value"
+          },
+          {
+            "id": "calendar.next_jie",
+            "category": "calendar_fact",
+            "label": "后一节",
+            "value": "白露 · 1995-09-08 10:48:34 UTC+08:00",
+            "availability": "value"
+          },
+          {
+            "id": "calendar.complete_snapshot",
+            "category": "calendar_fact",
+            "label": "完整历法事实（审计）",
+            "value": "{\"solarText\":\"1995-08-18 23:30:00\",\"lunarText\":\"一九九五年七月廿三\",\"lunarYear\":1995,\"lunarMonth\":7,\"lunarDay\":23,\"isLeapMonth\":false,\"previousJie\":\"立秋 · 1995-08-08 07:51:44 UTC+08:00\",\"nextJie\":\"白露 · 1995-09-08 10:48:34 UTC+08:00\"}",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.ganZhi",
+            "category": "pillar_fact",
+            "label": "年柱干支",
+            "value": "乙亥",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.stem",
+            "category": "pillar_fact",
+            "label": "年柱天干",
+            "value": "乙",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.branch",
+            "category": "pillar_fact",
+            "label": "年柱地支",
+            "value": "亥",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.hiddenStems",
+            "category": "pillar_fact",
+            "label": "年柱藏干",
+            "value": "壬·甲",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.stemTenGod",
+            "category": "pillar_fact",
+            "label": "年柱天干十神",
+            "value": "伤官",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.branchTenGods",
+            "category": "pillar_fact",
+            "label": "年柱地支十神",
+            "value": "比肩·食神",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.wuXing",
+            "category": "pillar_fact",
+            "label": "年柱五行",
+            "value": "木水",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.nayin",
+            "category": "pillar_fact",
+            "label": "年柱纳音",
+            "value": "山头火",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.twelveGrowth",
+            "category": "pillar_fact",
+            "label": "年柱十二长生",
+            "value": "临官",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.xun",
+            "category": "pillar_fact",
+            "label": "年柱旬",
+            "value": "甲戌",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.year.voidBranches",
+            "category": "pillar_fact",
+            "label": "年柱旬空",
+            "value": "申酉",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.ganZhi",
+            "category": "pillar_fact",
+            "label": "月柱干支",
+            "value": "甲申",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.stem",
+            "category": "pillar_fact",
+            "label": "月柱天干",
+            "value": "甲",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.branch",
+            "category": "pillar_fact",
+            "label": "月柱地支",
+            "value": "申",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.hiddenStems",
+            "category": "pillar_fact",
+            "label": "月柱藏干",
+            "value": "庚·壬·戊",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.stemTenGod",
+            "category": "pillar_fact",
+            "label": "月柱天干十神",
+            "value": "食神",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.branchTenGods",
+            "category": "pillar_fact",
+            "label": "月柱地支十神",
+            "value": "偏印·比肩·七杀",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.wuXing",
+            "category": "pillar_fact",
+            "label": "月柱五行",
+            "value": "木金",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.nayin",
+            "category": "pillar_fact",
+            "label": "月柱纳音",
+            "value": "泉中水",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.twelveGrowth",
+            "category": "pillar_fact",
+            "label": "月柱十二长生",
+            "value": "长生",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.xun",
+            "category": "pillar_fact",
+            "label": "月柱旬",
+            "value": "甲申",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.month.voidBranches",
+            "category": "pillar_fact",
+            "label": "月柱旬空",
+            "value": "午未",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.ganZhi",
+            "category": "pillar_fact",
+            "label": "日柱干支",
+            "value": "壬午",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.stem",
+            "category": "pillar_fact",
+            "label": "日柱天干",
+            "value": "壬",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.branch",
+            "category": "pillar_fact",
+            "label": "日柱地支",
+            "value": "午",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.hiddenStems",
+            "category": "pillar_fact",
+            "label": "日柱藏干",
+            "value": "丁·己",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.stemTenGod",
+            "category": "pillar_fact",
+            "label": "日柱天干十神",
+            "value": "日主",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.branchTenGods",
+            "category": "pillar_fact",
+            "label": "日柱地支十神",
+            "value": "正财·正官",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.wuXing",
+            "category": "pillar_fact",
+            "label": "日柱五行",
+            "value": "水火",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.nayin",
+            "category": "pillar_fact",
+            "label": "日柱纳音",
+            "value": "杨柳木",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.twelveGrowth",
+            "category": "pillar_fact",
+            "label": "日柱十二长生",
+            "value": "胎",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.xun",
+            "category": "pillar_fact",
+            "label": "日柱旬",
+            "value": "甲戌",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.day.voidBranches",
+            "category": "pillar_fact",
+            "label": "日柱旬空",
+            "value": "申酉",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.ganZhi",
+            "category": "pillar_fact",
+            "label": "时柱干支",
+            "value": "庚子",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.stem",
+            "category": "pillar_fact",
+            "label": "时柱天干",
+            "value": "庚",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.branch",
+            "category": "pillar_fact",
+            "label": "时柱地支",
+            "value": "子",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.hiddenStems",
+            "category": "pillar_fact",
+            "label": "时柱藏干",
+            "value": "癸",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.stemTenGod",
+            "category": "pillar_fact",
+            "label": "时柱天干十神",
+            "value": "偏印",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.branchTenGods",
+            "category": "pillar_fact",
+            "label": "时柱地支十神",
+            "value": "劫财",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.wuXing",
+            "category": "pillar_fact",
+            "label": "时柱五行",
+            "value": "金水",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.nayin",
+            "category": "pillar_fact",
+            "label": "时柱纳音",
+            "value": "壁上土",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.twelveGrowth",
+            "category": "pillar_fact",
+            "label": "时柱十二长生",
+            "value": "帝旺",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.xun",
+            "category": "pillar_fact",
+            "label": "时柱旬",
+            "value": "甲午",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.hour.voidBranches",
+            "category": "pillar_fact",
+            "label": "时柱旬空",
+            "value": "辰巳",
+            "availability": "value"
+          },
+          {
+            "id": "pillar.relations",
+            "category": "pillar_fact",
+            "label": "盘内干支关系事实",
+            "value": "stem_five_combination · binary · year.stem:乙+hour.stem:庚；stem_clash · binary · month.stem:甲+hour.stem:庚；branch_six_clash · binary · day.branch:午+hour.branch:子；branch_three_harmony · incomplete_set · month.branch:申+hour.branch:子 · 缺 辰；branch_three_meeting · incomplete_set · year.branch:亥+hour.branch:子 · 缺 丑；branch_six_harm · binary · year.branch:亥+month.branch:申",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.revision_snapshot",
+            "category": "evidence",
+            "label": "完整修订摘要",
+            "value": "919497e12ad70237a028e6a76962547a19f57c050831d7373e4d3829986fe640",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.engine",
+            "category": "evidence",
+            "label": "计算引擎",
+            "value": "hakimi-bazi-core@0.4.0",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.relations_engine",
+            "category": "evidence",
+            "label": "干支关系引擎",
+            "value": "hakimi-relations-core@0.1.0 · 顾问复核未完成",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.interpretation",
+            "category": "evidence",
+            "label": "解释输出",
+            "value": "当前未启用解释结论",
+            "availability": "not_applicable"
+          },
+          {
+            "id": "evidence.upstream",
+            "category": "evidence",
+            "label": "上游版本",
+            "value": "lunar-typescript@1.8.6",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.tzdb",
+            "category": "evidence",
+            "label": "tzdb 版本",
+            "value": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.result_hash",
+            "category": "evidence",
+            "label": "结果摘要",
+            "value": "7278389c32aafe853f109b4943136f61f796ae7ff45132a5b111c39dbb1f2836",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.verification",
+            "category": "evidence",
+            "label": "验证状态",
+            "value": "engineering_preview",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.range",
+            "category": "evidence",
+            "label": "范围状态",
+            "value": "experimental",
+            "availability": "value"
+          },
+          {
+            "id": "evidence.warnings",
+            "category": "evidence",
+            "label": "计算警告",
+            "value": "工程预览：当前结果尚未通过 360 例金标准与 20,000 例随机差分。；年柱与月柱使用已解析瞬时点投影到固定 UTC+08:00 后的精确立春/交节候选；这不是带历史 DST 的 IANA Asia/Shanghai 投影。；日柱与时柱使用 Asia/Tokyo 的本地民用墙时；时干已从最终显示日干与时支重新推导。；真太阳时与平太阳时仅保留对照数据，未应用到活动命盘。；地方平太阳时按经度与候选 UTC 偏移换算；视太阳时额外使用 NOAA GML 分数年均时差近似公式。；太阳时仅作并列预览，未应用到活动命盘；该近似模型不能替代天文历表或项目金标准。；lunar-typescript 仅作为白名单适配后的候选历法实现，不作为规则争议的最终裁判。",
+            "availability": "value"
+          }
+        ],
+        "transit": {
+          "itemKey": "cccccccc-cccc-4ccc-8ccc-ccccccccccc3",
+          "status": "resolved",
+          "resultHash": "1c9dc85cf506a8de44edd2617102de075a47072204a7c7a6980bacb743eb5054",
+          "target": {
+            "instant": "2024-02-04T08:27:07.000Z",
+            "revisionWallDateTime": "2024-02-04T17:27:07",
+            "fixedPlusEightWallDateTime": "2024-02-04T16:27:07.000",
+            "displayTimeZone": "Asia/Tokyo"
+          },
+          "manualDirection": null,
+          "luckCycleRuleSource": "revision_snapshot",
+          "slots": {
+            "dayun": {
+              "status": "resolved",
+              "nodeType": "dayun",
+              "ganZhi": "丁亥",
+              "label": "第 3 柱",
+              "startInstant": "2022-06-20T03:38:00.000Z",
+              "endExclusiveInstant": "2032-06-20T03:38:00.000Z",
+              "nodeId": "1655696280000.ef2655ce4f17789e31571465ddaced3bb546c0bc49953cd0cac5394b0c9f5c2f"
+            },
+            "xiaoyun": {
+              "status": "resolved",
+              "nodeType": "xiaoyun",
+              "ganZhi": "庚午",
+              "label": "虚岁 30",
+              "startInstant": "2024-02-04T08:27:07.000Z",
+              "endExclusiveInstant": "2025-02-03T14:10:28.000Z",
+              "nodeId": "1707035227000.21537fdad183619b89ab26e1b2c3c0589774475762616a2a10d0774478987d83"
+            },
+            "year": {
+              "status": "resolved",
+              "nodeType": "year",
+              "ganZhi": "甲辰",
+              "label": "2024 流年",
+              "startInstant": "2024-02-04T08:27:07.000Z",
+              "endExclusiveInstant": "2025-02-03T14:10:28.000Z",
+              "nodeId": "1707035227000.186deff840d832f5213ce7dd8065580fa35d1b28f38e0faae0250e60700dc600"
+            },
+            "month": {
+              "status": "resolved",
+              "nodeType": "month",
+              "ganZhi": "丙寅",
+              "label": "立春月",
+              "startInstant": "2024-02-04T08:27:07.000Z",
+              "endExclusiveInstant": "2024-03-05T02:22:45.000Z",
+              "nodeId": "1707035227000.14da3924fa0fda9e98d253ca60cbc0ce169ab561542a0ed59c67d0caf045deac"
+            },
+            "day": {
+              "status": "resolved",
+              "nodeType": "day",
+              "ganZhi": "戊戌",
+              "label": "02-03",
+              "startInstant": "2024-02-03T14:00:00.000Z",
+              "endExclusiveInstant": "2024-02-04T14:00:00.000Z",
+              "nodeId": "1706968800000.66b41637a0748d4ddf3c8fc0ee92bb9c43fc1ee492e2d161360259ec18deba1d"
+            },
+            "hour": {
+              "status": "resolved",
+              "nodeType": "hour",
+              "ganZhi": "辛酉",
+              "label": "酉时",
+              "startInstant": "2024-02-04T08:00:00.000Z",
+              "endExclusiveInstant": "2024-02-04T10:00:00.000Z",
+              "nodeId": "1707033600000.c253128823bdc4ab883816f325222ec10fe4565708ca9559d5e981414e87c1da"
+            }
+          },
+          "trackLengths": {
+            "dayun": 10,
+            "xiaoyun": 5,
+            "year": 5,
+            "month": 5,
+            "day": 5,
+            "hour": 5
+          },
+          "warnings": [
+            "运限时间轴是工程预览：只输出时间区间、干支和相对原局日主的天干十神，不输出吉凶预测。",
+            "流年/流月按固定 UTC+08:00 精确立春与十二节；流日/流时按修订 IANA 时区和锁版换日规则并行计算。",
+            "IANA 命名时区投影使用随应用发布、内容寻址的 2026c 数据工件，不读取设备时区库。",
+            "小运采用出生时柱相邻起法并复用大运顺逆：虚岁 1 自出生瞬时点起，随后按固定 UTC+08:00 精确立春增龄；这是当前产品锁版建模选择。",
+            "各层是同一目标瞬时点的并行覆盖区间，不被错误建模成永久父子树。"
+          ],
+          "knownGaps": [
+            "小运原典与后世实务存在多种起法、顺逆和年龄边界；当前出生时柱相邻起法及精确立春边界是产品建模选择，尚非唯一流派结论。",
+            "运限金标案例仍为 0，所有节点 releaseGatePassed=false。",
+            "本地换日或时辰边界若落入 DST 重叠/空档，当前层会标记 unsupported，不会静默选择 earlier/later。",
+            "节令上游精度为秒；1900/2100 边缘窗口仍需独立历表与缓冲区策略验证。"
+          ]
+        },
+        "transitObjectDigest": "9460d0f5c69e1e3ef4b75e5b6c697be77b8f4733b6989a245bedf0530e464703"
+      }
+    ],
+    "manifest": {
+      "algorithmId": "hakimi-comparison-core:pair-structure-research:v1",
+      "hashSchemaVersion": "pair-structure-research-hash-v1",
+      "semanticBoundary": "participant_facts_only",
+      "evidenceStatus": "engineering_projection",
+      "interpretationIncluded": false,
+      "scoreIncluded": false,
+      "compatibilityIncluded": false,
+      "crossChartDerivationIncluded": false,
+      "resultHash": "5ea824404d04c4d6664820b6acaef9e425097a7721de65f666083085407b660e"
+    },
+    "projectionObjectDigest": "449a6b9eab1348bce739dac5912aaa65c49e34d0287393e6202efd0ec6c75331"
+  }
+}

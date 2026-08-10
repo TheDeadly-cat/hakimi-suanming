@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN" data-parity-status="booting" data-parity-matched="0" data-parity-total="5" data-raw-canonical-exact="0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" href="data:," />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+    <meta name="description" content="隔离的 Astronomy Engine Browser/Node 工程一致性门；不保存输入，不生成星盘，不构成专家真值。" />
+    <title>西洋天文 Browser/Node 一致性门</title>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">哈基米 · 西洋星盘前置研究</p>
+          <h1>Browser / Node 一致性门</h1>
+          <p class="lede">
+            构建阶段先通过五个 fresh Node Worker 生成完整参考；当前页面再用五个互不复用的 Browser Worker
+            重放同一请求，并对显式量化的跨运行时稳定投影逐字段精确比较；原始 double 只记录 canonical JSON 是否精确一致，不冒充 Float64 位模式比较。
+          </p>
+        </div>
+        <aside class="safety" aria-label="隔离研究边界">
+          <strong>隔离诊断</strong>
+          <span>不持久化 · 不外联 · 不出断语</span>
+        </aside>
+      </header>
+
+      <section class="status-card" aria-labelledby="status-title">
+        <div>
+          <p class="section-label">当前真实浏览器</p>
+          <h2 id="status-title"><span id="parity-status" data-state="running">准备中</span></h2>
+          <p id="parity-summary" aria-live="polite">正在读取本次构建生成的 Node 参考。</p>
+        </div>
+        <button id="run-parity" type="button" disabled>正在逐个创建 Worker…</button>
+      </section>
+
+      <dl class="identity-grid" aria-label="固定工程身份">
+        <div><dt>引擎</dt><dd>Astronomy Engine 2.1.19</dd></div>
+        <div><dt>构建输入摘要</dt><dd id="source-digest">等待核对</dd></div>
+        <div><dt>投影</dt><dd id="projection-digest">等待核对</dd></div>
+        <div><dt>比较方式</dt><dd>量化稳定投影逐字段完全相等</dd></div>
+      </dl>
+
+      <section class="results" aria-labelledby="results-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-label">固定回归矩阵</p>
+            <h2 id="results-title">五个 UTC 种子</h2>
+          </div>
+          <p>1900 下界、J2000 十体、2024 日食、2025 春分、2100 上界</p>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>种子</th><th>UTC</th><th>范围</th><th>稳定投影</th><th>raw canonical</th><th>耗时</th><th>证据</th></tr>
+            </thead>
+            <tbody id="parity-results"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer>
+        本页证明固定版本在当前浏览器与 Node 的量化工程投影一致；十进制网格半步写入投影自身，但不是 IEEE-754 总误差上限，raw double 不要求 canonical JSON 精确一致，也没有宣称逐字段 Float64 位模式核对。
+        它不证明 JPL 精度、ICRF 严格身份、宫位规则或占星专家真值，
+        也不会写入八字资料库、正式路由、备份或发布 Schema。
+      </footer>
+    </main>
+    <noscript>此隔离一致性门需要 JavaScript 与 Dedicated Worker。</noscript>
+    <script type="module" src="../src/browser-parity/main.ts"></script>
+  </body>
+</html>

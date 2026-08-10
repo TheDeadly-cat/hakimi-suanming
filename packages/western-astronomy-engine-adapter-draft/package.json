@@ -1,0 +1,21 @@
+{
+  "name": "@hakimi/western-astronomy-engine-adapter-draft",
+  "version": "0.0.0-draft.0",
+  "private": true,
+  "type": "module",
+  "exports": {},
+  "x-hakimi-isolated-draft": {
+    "schemaVersion": 1,
+    "kind": "adapter",
+    "systemId": "western-astrology",
+    "productionImport": "forbidden",
+    "allowedDraftDependencies": [
+      "@hakimi/western-astrology-contracts-draft"
+    ]
+  },
+  "dependencies": {
+    "@hakimi/western-astrology-contracts-draft": "0.0.0-draft.0",
+    "astronomy-engine": "2.1.19",
+    "zod": "4.4.3"
+  }
+}

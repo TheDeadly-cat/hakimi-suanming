@@ -1,0 +1,14 @@
+{
+  "format": "hakimi-bazi-rule-pack",
+  "formatVersion": "1.0.0",
+  "minAppVersion": "0.1.0",
+  "profile": {
+    "schemaVersion": "1.0.0",
+    "code": "return globalThis"
+  },
+  "digest": {
+    "algorithm": "sha256-canonical-json-v1",
+    "value": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "metadata": {}
+}

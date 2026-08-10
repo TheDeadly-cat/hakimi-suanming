@@ -1,0 +1,19 @@
+{
+  "name": "@hakimi/backup",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@hakimi/chart-integrity": "*",
+    "@hakimi/contracts": "*",
+    "@hakimi/integrity": "*",
+    "@hakimi/knowledge-core": "*",
+    "@hakimi/rule-packs": "*",
+    "@hakimi/revision-replay": "*",
+    "@hakimi/storage": "*",
+    "@hakimi/time-core": "*",
+    "@hakimi/transit-core": "*",
+    "fflate": "0.8.2"
+  }
+}

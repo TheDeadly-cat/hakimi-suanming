@@ -1,0 +1,22 @@
+{
+  "name": "@hakimi/ziwei-fortel-differential-draft",
+  "version": "0.0.0-draft.0",
+  "private": true,
+  "type": "module",
+  "exports": {},
+  "x-hakimi-isolated-draft": {
+    "schemaVersion": 1,
+    "kind": "differential",
+    "systemId": "ziwei-doushu",
+    "productionImport": "forbidden",
+    "allowedDraftDependencies": [
+      "@hakimi/ziwei-doushu-contracts-draft",
+      "@hakimi/ziwei-iztro-adapter-draft"
+    ]
+  },
+  "dependencies": {
+    "@hakimi/ziwei-doushu-contracts-draft": "0.0.0-draft.0",
+    "@hakimi/ziwei-iztro-adapter-draft": "0.0.0-draft.0",
+    "fortel-ziweidoushu": "1.3.4"
+  }
+}

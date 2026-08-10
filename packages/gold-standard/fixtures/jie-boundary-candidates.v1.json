@@ -1,0 +1,146 @@
+{
+  "fixtureVersion": "1.0.0",
+  "datasetId": "jie-boundary-2024-candidates",
+  "title": "2024 十二节秒级边界候选集",
+  "notice": "这 36 行是待权威历书与命理顾问复核的回归候选，不是已确认金标准；不得用于提高产品 goldCaseCount。",
+  "ruleProfileId": "ziping-working-default",
+  "timeZone": "Asia/Shanghai",
+  "boundaryFrame": "fixed_plus08",
+  "requiredReleaseGoldCaseCount": 360,
+  "boundarySourceRefs": [
+    "https://github.com/6tail/lunar-typescript/blob/0f3e95d15e31f1a7c7b93d624542649347328a20/src/lib/ShouXingUtil.ts#L498-L505",
+    "https://github.com/6tail/lunar-typescript/blob/0f3e95d15e31f1a7c7b93d624542649347328a20/src/lib/Lunar.ts#L141-L214"
+  ],
+  "defaultEvidence": {
+    "status": "candidate",
+    "sourceRefs": [],
+    "independentImplementationRefs": [],
+    "reviewer": null,
+    "reviewedAt": null,
+    "decisionRecordRef": null,
+    "note": "期望值由当前固定上游与自有适配层冻结，只能防回归；仍需独立资料和人工裁决。"
+  },
+  "evidenceOverrides": {},
+  "terms": [
+    {
+      "slug": "xiaohan",
+      "name": "小寒",
+      "boundaryWallDateTime": "2024-01-06T04:49:22",
+      "expected": {
+        "before": { "year": "癸卯", "month": "甲子", "day": "己巳", "hour": "丙寅" },
+        "at": { "year": "癸卯", "month": "乙丑", "day": "己巳", "hour": "丙寅" },
+        "after": { "year": "癸卯", "month": "乙丑", "day": "己巳", "hour": "丙寅" }
+      }
+    },
+    {
+      "slug": "lichun",
+      "name": "立春",
+      "boundaryWallDateTime": "2024-02-04T16:27:07",
+      "expected": {
+        "before": { "year": "癸卯", "month": "乙丑", "day": "戊戌", "hour": "庚申" },
+        "at": { "year": "甲辰", "month": "丙寅", "day": "戊戌", "hour": "庚申" },
+        "after": { "year": "甲辰", "month": "丙寅", "day": "戊戌", "hour": "庚申" }
+      }
+    },
+    {
+      "slug": "jingzhe",
+      "name": "惊蛰",
+      "boundaryWallDateTime": "2024-03-05T10:22:45",
+      "expected": {
+        "before": { "year": "甲辰", "month": "丙寅", "day": "戊辰", "hour": "丁巳" },
+        "at": { "year": "甲辰", "month": "丁卯", "day": "戊辰", "hour": "丁巳" },
+        "after": { "year": "甲辰", "month": "丁卯", "day": "戊辰", "hour": "丁巳" }
+      }
+    },
+    {
+      "slug": "qingming",
+      "name": "清明",
+      "boundaryWallDateTime": "2024-04-04T15:02:17",
+      "expected": {
+        "before": { "year": "甲辰", "month": "丁卯", "day": "戊戌", "hour": "庚申" },
+        "at": { "year": "甲辰", "month": "戊辰", "day": "戊戌", "hour": "庚申" },
+        "after": { "year": "甲辰", "month": "戊辰", "day": "戊戌", "hour": "庚申" }
+      }
+    },
+    {
+      "slug": "lixia",
+      "name": "立夏",
+      "boundaryWallDateTime": "2024-05-05T08:10:05",
+      "expected": {
+        "before": { "year": "甲辰", "month": "戊辰", "day": "己巳", "hour": "戊辰" },
+        "at": { "year": "甲辰", "month": "己巳", "day": "己巳", "hour": "戊辰" },
+        "after": { "year": "甲辰", "month": "己巳", "day": "己巳", "hour": "戊辰" }
+      }
+    },
+    {
+      "slug": "mangzhong",
+      "name": "芒种",
+      "boundaryWallDateTime": "2024-06-05T12:09:54",
+      "expected": {
+        "before": { "year": "甲辰", "month": "己巳", "day": "庚子", "hour": "壬午" },
+        "at": { "year": "甲辰", "month": "庚午", "day": "庚子", "hour": "壬午" },
+        "after": { "year": "甲辰", "month": "庚午", "day": "庚子", "hour": "壬午" }
+      }
+    },
+    {
+      "slug": "xiaoshu",
+      "name": "小暑",
+      "boundaryWallDateTime": "2024-07-06T22:20:03",
+      "expected": {
+        "before": { "year": "甲辰", "month": "庚午", "day": "辛未", "hour": "己亥" },
+        "at": { "year": "甲辰", "month": "辛未", "day": "辛未", "hour": "己亥" },
+        "after": { "year": "甲辰", "month": "辛未", "day": "辛未", "hour": "己亥" }
+      }
+    },
+    {
+      "slug": "liqiu",
+      "name": "立秋",
+      "boundaryWallDateTime": "2024-08-07T08:09:16",
+      "expected": {
+        "before": { "year": "甲辰", "month": "辛未", "day": "癸卯", "hour": "丙辰" },
+        "at": { "year": "甲辰", "month": "壬申", "day": "癸卯", "hour": "丙辰" },
+        "after": { "year": "甲辰", "month": "壬申", "day": "癸卯", "hour": "丙辰" }
+      }
+    },
+    {
+      "slug": "bailu",
+      "name": "白露",
+      "boundaryWallDateTime": "2024-09-07T11:11:20",
+      "expected": {
+        "before": { "year": "甲辰", "month": "壬申", "day": "甲戌", "hour": "庚午" },
+        "at": { "year": "甲辰", "month": "癸酉", "day": "甲戌", "hour": "庚午" },
+        "after": { "year": "甲辰", "month": "癸酉", "day": "甲戌", "hour": "庚午" }
+      }
+    },
+    {
+      "slug": "hanlu",
+      "name": "寒露",
+      "boundaryWallDateTime": "2024-10-08T02:59:57",
+      "expected": {
+        "before": { "year": "甲辰", "month": "癸酉", "day": "乙巳", "hour": "丁丑" },
+        "at": { "year": "甲辰", "month": "甲戌", "day": "乙巳", "hour": "丁丑" },
+        "after": { "year": "甲辰", "month": "甲戌", "day": "乙巳", "hour": "丁丑" }
+      }
+    },
+    {
+      "slug": "lidong",
+      "name": "立冬",
+      "boundaryWallDateTime": "2024-11-07T06:20:04",
+      "expected": {
+        "before": { "year": "甲辰", "month": "甲戌", "day": "乙亥", "hour": "己卯" },
+        "at": { "year": "甲辰", "month": "乙亥", "day": "乙亥", "hour": "己卯" },
+        "after": { "year": "甲辰", "month": "乙亥", "day": "乙亥", "hour": "己卯" }
+      }
+    },
+    {
+      "slug": "daxue",
+      "name": "大雪",
+      "boundaryWallDateTime": "2024-12-06T23:17:03",
+      "expected": {
+        "before": { "year": "甲辰", "month": "乙亥", "day": "乙巳", "hour": "丙子" },
+        "at": { "year": "甲辰", "month": "丙子", "day": "乙巳", "hour": "丙子" },
+        "after": { "year": "甲辰", "month": "丙子", "day": "乙巳", "hour": "丙子" }
+      }
+    }
+  ]
+}

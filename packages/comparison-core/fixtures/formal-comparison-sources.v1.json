@@ -1,0 +1,2524 @@
+{
+  "fixtureId": "formal-comparison-engineering-regression-v1",
+  "fixtureVersion": "1.1.0",
+  "evidenceStatus": "engineering_regression_only",
+  "warning": "仅用于工程确定性回归；不是命理金标、专家裁决或吉凶结论。",
+  "generator": "packages/comparison-core/scripts/update-formal-comparison-golden.mjs",
+  "sourceCount": 4,
+  "sources": [
+    {
+      "schemaVersion": "1.0.0",
+      "slotId": "A",
+      "caseRecord": {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "alias": "同盘换日研究"
+      },
+      "revision": {
+        "schemaVersion": "1.0.0",
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "caseId": "11111111-1111-4111-8111-111111111111",
+        "revisionNumber": 1,
+        "createdAt": "2024-01-01T00:00:00.000Z",
+        "input": {
+          "schemaVersion": "1.0.0",
+          "calendarType": "gregorian",
+          "date": "1995-08-18",
+          "time": "23:30",
+          "timePrecision": "exact_minute",
+          "timeZone": "Asia/Shanghai",
+          "sex": "male",
+          "lunarLeapMonth": false,
+          "location": {
+            "label": "上海固定样本",
+            "latitude": 31.2304,
+            "longitude": 121.4737,
+            "precision": "coordinates"
+          },
+          "sourceNote": "正式对照工程黄金样本；不是现实人物。"
+        },
+        "timeCalibration": {
+          "schemaVersion": "1.0.0",
+          "originalCivilDateTime": "1995-08-18T23:30:00",
+          "activeWallTime": "1995-08-18T23:30:00",
+          "timeZone": "Asia/Shanghai",
+          "utcInstant": "1995-08-18T15:30:00Z",
+          "utcOffset": "+08:00",
+          "dstStatus": "resolved",
+          "solarTimePreview": "1995-08-18T23:31:44",
+          "solarTimeApplied": false,
+          "normalizationStatus": "instant_resolved",
+          "warnings": [
+            "地方平太阳时按经度与候选 UTC 偏移换算；视太阳时额外使用 NOAA GML 分数年均时差近似公式。",
+            "太阳时仅作并列预览，未应用到活动命盘；该近似模型不能替代天文历表或项目金标准。"
+          ],
+          "calendarResolution": {
+            "inputCalendarType": "gregorian",
+            "inputDate": "1995-08-18",
+            "inputLunarLeapMonth": false,
+            "resolvedGregorianDate": "1995-08-18",
+            "algorithmId": "hakimi-time-core:gregorian-identity:v1",
+            "frame": "identity_gregorian",
+            "upstreamName": null,
+            "upstreamVersion": null,
+            "roundTripVerified": true,
+            "sourceRefs": [],
+            "warnings": []
+          },
+          "timeZoneResolution": {
+            "kind": "unique",
+            "policy": "reject",
+            "status": "resolved_unique",
+            "requestedWallTime": "1995-08-18T23:30:00",
+            "candidates": [
+              {
+                "choice": "unique",
+                "instant": "1995-08-18T15:30:00Z",
+                "utcOffset": "+08:00",
+                "utcOffsetMinutes": 480,
+                "resolvedWallTime": "1995-08-18T23:30:00",
+                "zonedDateTime": "1995-08-18T23:30:00+08:00[Asia/Shanghai]",
+                "matchesInputWallTime": true
+              }
+            ],
+            "selectedCandidate": {
+              "choice": "unique",
+              "instant": "1995-08-18T15:30:00Z",
+              "utcOffset": "+08:00",
+              "utcOffsetMinutes": 480,
+              "resolvedWallTime": "1995-08-18T23:30:00",
+              "zonedDateTime": "1995-08-18T23:30:00+08:00[Asia/Shanghai]",
+              "matchesInputWallTime": true
+            }
+          },
+          "solarTime": {
+            "modelId": "noaa-gml-fractional-year-eot-approx-v1",
+            "latitude": 31.2304,
+            "longitude": 121.4737,
+            "applied": false,
+            "selectedVariantChoice": "unique",
+            "variants": [
+              {
+                "candidateChoice": "unique",
+                "sourceInstant": "1995-08-18T15:30:00Z",
+                "sourceUtcOffset": "+08:00",
+                "sourceWallTime": "1995-08-18T23:30:00",
+                "meanSolarDateTime": "1995-08-18T23:35:54",
+                "apparentSolarDateTime": "1995-08-18T23:31:44",
+                "longitudeCorrectionMinutes": 5.8948,
+                "equationOfTimeMinutes": -4.155909,
+                "totalCorrectionMinutes": 1.738891
+              }
+            ],
+            "warnings": [
+              "地方平太阳时按经度与候选 UTC 偏移换算；视太阳时额外使用 NOAA GML 分数年均时差近似公式。",
+              "太阳时仅作并列预览，未应用到活动命盘；该近似模型不能替代天文历表或项目金标准。"
+            ]
+          }
+        },
+        "ruleProfile": {
+          "schemaVersion": "1.0.0",
+          "profileId": "ziping-working-zi-start-23",
+          "profileVersion": "0.1.0",
+          "status": "working_default",
+          "label": "传统子平工作默认",
+          "notice": "工程工作默认，不代表唯一正确流派；1900—2100 仅为声明支持范围，不代表已强验证，当前尚未通过 360 例金标准发布门。",
+          "sourceRefs": [],
+          "supportedRange": {
+            "stronglyVerifiedFrom": "1900-01-01",
+            "stronglyVerifiedTo": "2100-12-31",
+            "outsideRangePolicy": "experimental_with_warning"
+          },
+          "calendar": {
+            "yearBoundary": "lichun_exact",
+            "monthBoundary": "jie_exact",
+            "dayBoundary": "zi_start_23",
+            "ziHourDayStemBasis": "after_day_change",
+            "hourBasis": "civil_time",
+            "timezoneSource": "iana",
+            "dstAmbiguity": "require_user",
+            "locationPrecision": "city"
+          },
+          "solarTime": {
+            "enabled": false,
+            "showComparison": true,
+            "longitudeSource": "location",
+            "equationOfTimeModel": null
+          },
+          "luckCycle": {
+            "directionRule": "year_stem_yinyang_and_gender",
+            "unknownValuePolicy": "require_manual_direction",
+            "anchor": "directional_jie",
+            "startAgeMethod": "three_days_one_year_exact_duration",
+            "rounding": "retain_duration"
+          },
+          "layers": {
+            "hiddenStems": true,
+            "tenGods": true,
+            "nayin": true,
+            "voidBranches": true,
+            "twelveGrowth": true,
+            "stemBranchRelations": true,
+            "shensha": false
+          },
+          "interpretation": {
+            "strengthRulePack": null,
+            "structureRulePack": null,
+            "climateRulePack": null,
+            "usefulGodRulePack": null
+          }
+        },
+        "luckCycleRuleSnapshot": {
+          "schemaVersion": "1.0.0",
+          "ruleId": "ziping-working-zi-start-23:luck-cycle-xiaoyun",
+          "ruleVersion": "0.1.0",
+          "directionRule": "year_stem_yinyang_and_gender",
+          "unknownSexPolicy": "require_manual_direction",
+          "anchor": "directional_jie",
+          "exactBoundaryPolicy": "zero_duration",
+          "startAgeMethod": "three_days_one_year_exact_duration",
+          "componentRatios": {
+            "sourceDaysPerTraditionalYear": 3,
+            "traditionalMonthsPerYear": 12,
+            "traditionalDaysPerMonth": 30,
+            "traditionalHoursPerDay": 24
+          },
+          "handoverCalendar": {
+            "frame": "fixed_plus08",
+            "additionOrder": "years_months_days_time",
+            "overflow": "constrain"
+          },
+          "decadeYears": 10,
+          "decadeCount": 10,
+          "xiaoyun": {
+            "method": "birth_hour_adjacent",
+            "directionRule": "exact_chart_year_stem_and_gender",
+            "directionReuse": "luck_cycle_or_manual_direction",
+            "firstAge": 1,
+            "firstStepOffset": 1,
+            "ageBasis": "nominal_age",
+            "boundaryAlignment": "flow_year_start_exact",
+            "boundaryFrame": "fixed_plus08",
+            "scope": "whole_life",
+            "cycleLength": 60,
+            "intervalPolicy": "half_open",
+            "unknownSexPolicy": "require_manual_direction",
+            "unknownHourPolicy": "unsupported"
+          }
+        },
+        "facts": {
+          "schemaVersion": "1.0.0",
+          "calendar": {
+            "solarText": "1995-08-18 23:30:00",
+            "lunarText": "一九九五年七月廿三",
+            "lunarYear": 1995,
+            "lunarMonth": 7,
+            "lunarDay": 23,
+            "isLeapMonth": false,
+            "previousJie": "立秋 · 1995-08-08 07:51:44 UTC+08:00",
+            "nextJie": "白露 · 1995-09-08 10:48:34 UTC+08:00"
+          },
+          "pillars": {
+            "year": {
+              "name": "year",
+              "label": "年柱",
+              "ganZhi": "乙亥",
+              "stem": "乙",
+              "branch": "亥",
+              "hiddenStems": [
+                "壬",
+                "甲"
+              ],
+              "stemTenGod": "伤官",
+              "branchTenGods": [
+                "比肩",
+                "食神"
+              ],
+              "wuXing": "木水",
+              "nayin": "山头火",
+              "twelveGrowth": "临官",
+              "xun": "甲戌",
+              "voidBranches": "申酉"
+            },
+            "month": {
+              "name": "month",
+              "label": "月柱",
+              "ganZhi": "甲申",
+              "stem": "甲",
+              "branch": "申",
+              "hiddenStems": [
+                "庚",
+                "壬",
+                "戊"
+              ],
+              "stemTenGod": "食神",
+              "branchTenGods": [
+                "偏印",
+                "比肩",
+                "七杀"
+              ],
+              "wuXing": "木金",
+              "nayin": "泉中水",
+              "twelveGrowth": "长生",
+              "xun": "甲申",
+              "voidBranches": "午未"
+            },
+            "day": {
+              "name": "day",
+              "label": "日柱",
+              "ganZhi": "壬午",
+              "stem": "壬",
+              "branch": "午",
+              "hiddenStems": [
+                "丁",
+                "己"
+              ],
+              "stemTenGod": "日主",
+              "branchTenGods": [
+                "正财",
+                "正官"
+              ],
+              "wuXing": "水火",
+              "nayin": "杨柳木",
+              "twelveGrowth": "胎",
+              "xun": "甲戌",
+              "voidBranches": "申酉"
+            },
+            "hour": {
+              "name": "hour",
+              "label": "时柱",
+              "ganZhi": "庚子",
+              "stem": "庚",
+              "branch": "子",
+              "hiddenStems": [
+                "癸"
+              ],
+              "stemTenGod": "偏印",
+              "branchTenGods": [
+                "劫财"
+              ],
+              "wuXing": "金水",
+              "nayin": "壁上土",
+              "twelveGrowth": "帝旺",
+              "xun": "甲午",
+              "voidBranches": "辰巳"
+            }
+          },
+          "fieldProvenance": [
+            {
+              "field": "pillars.year.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:fixed-plus08:year-exact:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:fixed-plus08:month-exact:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:local-civil:day:zi_start_23:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:local-civil:hour:time-gan-from-final-day:zi_start_23:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            }
+          ]
+        },
+        "manifest": {
+          "schemaVersion": "1.0.0",
+          "hashSchemaVersion": "2.0.0",
+          "engine": {
+            "name": "hakimi-bazi-core",
+            "version": "0.4.0",
+            "upstreamName": "lunar-typescript",
+            "upstreamVersion": "1.8.6",
+            "upstreamTagCommit": "0f3e95d15e31f1a7c7b93d624542649347328a20",
+            "upstreamIntegrity": "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA=="
+          },
+          "tzdbVersion": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3",
+          "timeZoneDatabase": {
+            "schemaVersion": "1.0.0",
+            "kind": "bundled_iana_tzdb",
+            "ianaVersion": "2026c",
+            "artifactName": "moment-timezone/data/packed/latest.json",
+            "dataSha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81",
+            "resolver": {
+              "name": "hakimi-tzdb-core",
+              "version": "1.0.0"
+            },
+            "adapter": {
+              "name": "moment-timezone",
+              "version": "0.6.3"
+            },
+            "supportedRange": {
+              "from": "1900-01-01",
+              "to": "2100-12-31"
+            },
+            "snapshotId": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3"
+          },
+          "ruleProfileDigest": "83267fa1d20ed2bcc516deec052275952d83c06ba88c24c00f456d6dc9c9e67c",
+          "luckCycleRuleDigest": "c1d0a8f8f817d9c5b1ba2c38e556b43f14c0002cf1b8b0cde90e54298fbb2203",
+          "resultHash": "9eae8001698eb0ac03c93d82dbc50eaa22dc4e337dd70b2133ae7d8bb724294c",
+          "supportedRangeStatus": "experimental",
+          "verificationStatus": "engineering_preview",
+          "calculatedAt": "2024-01-01T00:00:00.000Z",
+          "warnings": [
+            "工程预览：当前结果尚未通过 360 例金标准与 20,000 例随机差分。",
+            "年柱与月柱使用已解析瞬时点投影到固定 UTC+08:00 后的精确立春/交节候选；这不是带历史 DST 的 IANA Asia/Shanghai 投影。",
+            "日柱与时柱使用 Asia/Shanghai 的本地民用墙时；时干已从最终显示日干与时支重新推导。",
+            "真太阳时与平太阳时仅保留对照数据，未应用到活动命盘。",
+            "地方平太阳时按经度与候选 UTC 偏移换算；视太阳时额外使用 NOAA GML 分数年均时差近似公式。",
+            "太阳时仅作并列预览，未应用到活动命盘；该近似模型不能替代天文历表或项目金标准。",
+            "lunar-typescript 仅作为白名单适配后的候选历法实现，不作为规则争议的最终裁判。"
+          ]
+        },
+        "rulePackBinding": {
+          "kind": "installed_rule_pack",
+          "packDigest": "1111111111111111111111111111111111111111111111111111111111111111",
+          "profileDigest": "83267fa1d20ed2bcc516deec052275952d83c06ba88c24c00f456d6dc9c9e67c",
+          "packId": "golden-zi-start-pack",
+          "profileId": "ziping-working-zi-start-23",
+          "profileVersion": "0.1.0",
+          "useMode": "exact"
+        }
+      },
+      "revisionSnapshotDigest": "ab81586882c2dc03a4648bfa8b27adbb98e61673e1424417c5bb4ec1227881dc"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "slotId": "B",
+      "caseRecord": {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "alias": "同盘换日研究"
+      },
+      "revision": {
+        "schemaVersion": "1.0.0",
+        "id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2",
+        "caseId": "11111111-1111-4111-8111-111111111111",
+        "revisionNumber": 2,
+        "createdAt": "2024-01-01T00:01:00.000Z",
+        "input": {
+          "schemaVersion": "1.0.0",
+          "calendarType": "gregorian",
+          "date": "1995-08-18",
+          "time": "23:30",
+          "timePrecision": "exact_minute",
+          "timeZone": "Asia/Shanghai",
+          "sex": "male",
+          "lunarLeapMonth": false,
+          "location": {
+            "label": "上海固定样本",
+            "latitude": 31.2304,
+            "longitude": 121.4737,
+            "precision": "coordinates"
+          },
+          "sourceNote": "正式对照工程黄金样本；不是现实人物。"
+        },
+        "timeCalibration": {
+          "schemaVersion": "1.0.0",
+          "originalCivilDateTime": "1995-08-18T23:30:00",
+          "activeWallTime": "1995-08-18T23:30:00",
+          "timeZone": "Asia/Shanghai",
+          "utcInstant": "1995-08-18T15:30:00Z",
+          "utcOffset": "+08:00",
+          "dstStatus": "resolved",
+          "solarTimePreview": "1995-08-18T23:31:44",
+          "solarTimeApplied": false,
+          "normalizationStatus": "instant_resolved",
+          "warnings": [
+            "地方平太阳时按经度与候选 UTC 偏移换算；视太阳时额外使用 NOAA GML 分数年均时差近似公式。",
+            "太阳时仅作并列预览，未应用到活动命盘；该近似模型不能替代天文历表或项目金标准。"
+          ],
+          "calendarResolution": {
+            "inputCalendarType": "gregorian",
+            "inputDate": "1995-08-18",
+            "inputLunarLeapMonth": false,
+            "resolvedGregorianDate": "1995-08-18",
+            "algorithmId": "hakimi-time-core:gregorian-identity:v1",
+            "frame": "identity_gregorian",
+            "upstreamName": null,
+            "upstreamVersion": null,
+            "roundTripVerified": true,
+            "sourceRefs": [],
+            "warnings": []
+          },
+          "timeZoneResolution": {
+            "kind": "unique",
+            "policy": "reject",
+            "status": "resolved_unique",
+            "requestedWallTime": "1995-08-18T23:30:00",
+            "candidates": [
+              {
+                "choice": "unique",
+                "instant": "1995-08-18T15:30:00Z",
+                "utcOffset": "+08:00",
+                "utcOffsetMinutes": 480,
+                "resolvedWallTime": "1995-08-18T23:30:00",
+                "zonedDateTime": "1995-08-18T23:30:00+08:00[Asia/Shanghai]",
+                "matchesInputWallTime": true
+              }
+            ],
+            "selectedCandidate": {
+              "choice": "unique",
+              "instant": "1995-08-18T15:30:00Z",
+              "utcOffset": "+08:00",
+              "utcOffsetMinutes": 480,
+              "resolvedWallTime": "1995-08-18T23:30:00",
+              "zonedDateTime": "1995-08-18T23:30:00+08:00[Asia/Shanghai]",
+              "matchesInputWallTime": true
+            }
+          },
+          "solarTime": {
+            "modelId": "noaa-gml-fractional-year-eot-approx-v1",
+            "latitude": 31.2304,
+            "longitude": 121.4737,
+            "applied": false,
+            "selectedVariantChoice": "unique",
+            "variants": [
+              {
+                "candidateChoice": "unique",
+                "sourceInstant": "1995-08-18T15:30:00Z",
+                "sourceUtcOffset": "+08:00",
+                "sourceWallTime": "1995-08-18T23:30:00",
+                "meanSolarDateTime": "1995-08-18T23:35:54",
+                "apparentSolarDateTime": "1995-08-18T23:31:44",
+                "longitudeCorrectionMinutes": 5.8948,
+                "equationOfTimeMinutes": -4.155909,
+                "totalCorrectionMinutes": 1.738891
+              }
+            ],
+            "warnings": [
+              "地方平太阳时按经度与候选 UTC 偏移换算；视太阳时额外使用 NOAA GML 分数年均时差近似公式。",
+              "太阳时仅作并列预览，未应用到活动命盘；该近似模型不能替代天文历表或项目金标准。"
+            ]
+          }
+        },
+        "ruleProfile": {
+          "schemaVersion": "1.0.0",
+          "profileId": "ziping-working-midnight",
+          "profileVersion": "0.1.0",
+          "status": "working_default",
+          "label": "午夜换日对照配置",
+          "notice": "工程工作默认，不代表唯一正确流派；1900—2100 仅为声明支持范围，不代表已强验证，当前尚未通过 360 例金标准发布门。",
+          "sourceRefs": [],
+          "supportedRange": {
+            "stronglyVerifiedFrom": "1900-01-01",
+            "stronglyVerifiedTo": "2100-12-31",
+            "outsideRangePolicy": "experimental_with_warning"
+          },
+          "calendar": {
+            "yearBoundary": "lichun_exact",
+            "monthBoundary": "jie_exact",
+            "dayBoundary": "midnight",
+            "ziHourDayStemBasis": "civil_day",
+            "hourBasis": "civil_time",
+            "timezoneSource": "iana",
+            "dstAmbiguity": "require_user",
+            "locationPrecision": "city"
+          },
+          "solarTime": {
+            "enabled": false,
+            "showComparison": true,
+            "longitudeSource": "location",
+            "equationOfTimeModel": null
+          },
+          "luckCycle": {
+            "directionRule": "year_stem_yinyang_and_gender",
+            "unknownValuePolicy": "require_manual_direction",
+            "anchor": "directional_jie",
+            "startAgeMethod": "three_days_one_year_exact_duration",
+            "rounding": "retain_duration"
+          },
+          "layers": {
+            "hiddenStems": true,
+            "tenGods": true,
+            "nayin": true,
+            "voidBranches": true,
+            "twelveGrowth": true,
+            "stemBranchRelations": true,
+            "shensha": false
+          },
+          "interpretation": {
+            "strengthRulePack": null,
+            "structureRulePack": null,
+            "climateRulePack": null,
+            "usefulGodRulePack": null
+          }
+        },
+        "luckCycleRuleSnapshot": {
+          "schemaVersion": "1.0.0",
+          "ruleId": "ziping-working-midnight:luck-cycle-xiaoyun",
+          "ruleVersion": "0.1.0",
+          "directionRule": "year_stem_yinyang_and_gender",
+          "unknownSexPolicy": "require_manual_direction",
+          "anchor": "directional_jie",
+          "exactBoundaryPolicy": "zero_duration",
+          "startAgeMethod": "three_days_one_year_exact_duration",
+          "componentRatios": {
+            "sourceDaysPerTraditionalYear": 3,
+            "traditionalMonthsPerYear": 12,
+            "traditionalDaysPerMonth": 30,
+            "traditionalHoursPerDay": 24
+          },
+          "handoverCalendar": {
+            "frame": "fixed_plus08",
+            "additionOrder": "years_months_days_time",
+            "overflow": "constrain"
+          },
+          "decadeYears": 10,
+          "decadeCount": 10,
+          "xiaoyun": {
+            "method": "birth_hour_adjacent",
+            "directionRule": "exact_chart_year_stem_and_gender",
+            "directionReuse": "luck_cycle_or_manual_direction",
+            "firstAge": 1,
+            "firstStepOffset": 1,
+            "ageBasis": "nominal_age",
+            "boundaryAlignment": "flow_year_start_exact",
+            "boundaryFrame": "fixed_plus08",
+            "scope": "whole_life",
+            "cycleLength": 60,
+            "intervalPolicy": "half_open",
+            "unknownSexPolicy": "require_manual_direction",
+            "unknownHourPolicy": "unsupported"
+          }
+        },
+        "facts": {
+          "schemaVersion": "1.0.0",
+          "calendar": {
+            "solarText": "1995-08-18 23:30:00",
+            "lunarText": "一九九五年七月廿三",
+            "lunarYear": 1995,
+            "lunarMonth": 7,
+            "lunarDay": 23,
+            "isLeapMonth": false,
+            "previousJie": "立秋 · 1995-08-08 07:51:44 UTC+08:00",
+            "nextJie": "白露 · 1995-09-08 10:48:34 UTC+08:00"
+          },
+          "pillars": {
+            "year": {
+              "name": "year",
+              "label": "年柱",
+              "ganZhi": "乙亥",
+              "stem": "乙",
+              "branch": "亥",
+              "hiddenStems": [
+                "壬",
+                "甲"
+              ],
+              "stemTenGod": "偏财",
+              "branchTenGods": [
+                "伤官",
+                "正财"
+              ],
+              "wuXing": "木水",
+              "nayin": "山头火",
+              "twelveGrowth": "沐浴",
+              "xun": "甲戌",
+              "voidBranches": "申酉"
+            },
+            "month": {
+              "name": "month",
+              "label": "月柱",
+              "ganZhi": "甲申",
+              "stem": "甲",
+              "branch": "申",
+              "hiddenStems": [
+                "庚",
+                "壬",
+                "戊"
+              ],
+              "stemTenGod": "正财",
+              "branchTenGods": [
+                "劫财",
+                "伤官",
+                "正印"
+              ],
+              "wuXing": "木金",
+              "nayin": "泉中水",
+              "twelveGrowth": "帝旺",
+              "xun": "甲申",
+              "voidBranches": "午未"
+            },
+            "day": {
+              "name": "day",
+              "label": "日柱",
+              "ganZhi": "辛巳",
+              "stem": "辛",
+              "branch": "巳",
+              "hiddenStems": [
+                "丙",
+                "庚",
+                "戊"
+              ],
+              "stemTenGod": "日主",
+              "branchTenGods": [
+                "正官",
+                "劫财",
+                "正印"
+              ],
+              "wuXing": "金火",
+              "nayin": "白蜡金",
+              "twelveGrowth": "死",
+              "xun": "甲戌",
+              "voidBranches": "申酉"
+            },
+            "hour": {
+              "name": "hour",
+              "label": "时柱",
+              "ganZhi": "戊子",
+              "stem": "戊",
+              "branch": "子",
+              "hiddenStems": [
+                "癸"
+              ],
+              "stemTenGod": "正印",
+              "branchTenGods": [
+                "食神"
+              ],
+              "wuXing": "土水",
+              "nayin": "霹雳火",
+              "twelveGrowth": "长生",
+              "xun": "甲申",
+              "voidBranches": "午未"
+            }
+          },
+          "fieldProvenance": [
+            {
+              "field": "pillars.year.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:fixed-plus08:year-exact:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:fixed-plus08:month-exact:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:local-civil:day:midnight:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:local-civil:hour:time-gan-from-final-day:midnight:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            }
+          ]
+        },
+        "manifest": {
+          "schemaVersion": "1.0.0",
+          "hashSchemaVersion": "2.0.0",
+          "engine": {
+            "name": "hakimi-bazi-core",
+            "version": "0.4.0",
+            "upstreamName": "lunar-typescript",
+            "upstreamVersion": "1.8.6",
+            "upstreamTagCommit": "0f3e95d15e31f1a7c7b93d624542649347328a20",
+            "upstreamIntegrity": "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA=="
+          },
+          "tzdbVersion": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3",
+          "timeZoneDatabase": {
+            "schemaVersion": "1.0.0",
+            "kind": "bundled_iana_tzdb",
+            "ianaVersion": "2026c",
+            "artifactName": "moment-timezone/data/packed/latest.json",
+            "dataSha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81",
+            "resolver": {
+              "name": "hakimi-tzdb-core",
+              "version": "1.0.0"
+            },
+            "adapter": {
+              "name": "moment-timezone",
+              "version": "0.6.3"
+            },
+            "supportedRange": {
+              "from": "1900-01-01",
+              "to": "2100-12-31"
+            },
+            "snapshotId": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3"
+          },
+          "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+          "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+          "resultHash": "360b4034c2a3e29579cfbfd9a00f6112b562af6f1274f3a54dd6efb743f28951",
+          "supportedRangeStatus": "experimental",
+          "verificationStatus": "engineering_preview",
+          "calculatedAt": "2024-01-01T00:01:00.000Z",
+          "warnings": [
+            "工程预览：当前结果尚未通过 360 例金标准与 20,000 例随机差分。",
+            "年柱与月柱使用已解析瞬时点投影到固定 UTC+08:00 后的精确立春/交节候选；这不是带历史 DST 的 IANA Asia/Shanghai 投影。",
+            "日柱与时柱使用 Asia/Shanghai 的本地民用墙时；时干已从最终显示日干与时支重新推导。",
+            "真太阳时与平太阳时仅保留对照数据，未应用到活动命盘。",
+            "地方平太阳时按经度与候选 UTC 偏移换算；视太阳时额外使用 NOAA GML 分数年均时差近似公式。",
+            "太阳时仅作并列预览，未应用到活动命盘；该近似模型不能替代天文历表或项目金标准。",
+            "lunar-typescript 仅作为白名单适配后的候选历法实现，不作为规则争议的最终裁判。"
+          ]
+        }
+      },
+      "revisionSnapshotDigest": "32eddf79696cb7c161326c5e397d48bcb92f29c596208fcaf429088ea47f251a"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "slotId": "C",
+      "caseRecord": {
+        "id": "33333333-3333-4333-8333-333333333333",
+        "alias": "东京同步时点样本"
+      },
+      "revision": {
+        "schemaVersion": "1.0.0",
+        "id": "cccccccc-cccc-4ccc-8ccc-ccccccccccc3",
+        "caseId": "33333333-3333-4333-8333-333333333333",
+        "revisionNumber": 1,
+        "createdAt": "2024-01-01T00:02:00.000Z",
+        "input": {
+          "schemaVersion": "1.0.0",
+          "calendarType": "gregorian",
+          "date": "1995-08-18",
+          "time": "23:30",
+          "timePrecision": "exact_minute",
+          "timeZone": "Asia/Tokyo",
+          "sex": "female",
+          "lunarLeapMonth": false,
+          "location": {
+            "label": "东京固定样本",
+            "latitude": 35.6762,
+            "longitude": 139.6503,
+            "precision": "coordinates"
+          },
+          "sourceNote": "跨时区同步工程样本；不是现实人物。"
+        },
+        "timeCalibration": {
+          "schemaVersion": "1.0.0",
+          "originalCivilDateTime": "1995-08-18T23:30:00",
+          "activeWallTime": "1995-08-18T23:30:00",
+          "timeZone": "Asia/Tokyo",
+          "utcInstant": "1995-08-18T14:30:00Z",
+          "utcOffset": "+09:00",
+          "dstStatus": "resolved",
+          "solarTimePreview": "1995-08-18T23:44:27",
+          "solarTimeApplied": false,
+          "normalizationStatus": "instant_resolved",
+          "warnings": [
+            "地方平太阳时按经度与候选 UTC 偏移换算；视太阳时额外使用 NOAA GML 分数年均时差近似公式。",
+            "太阳时仅作并列预览，未应用到活动命盘；该近似模型不能替代天文历表或项目金标准。"
+          ],
+          "calendarResolution": {
+            "inputCalendarType": "gregorian",
+            "inputDate": "1995-08-18",
+            "inputLunarLeapMonth": false,
+            "resolvedGregorianDate": "1995-08-18",
+            "algorithmId": "hakimi-time-core:gregorian-identity:v1",
+            "frame": "identity_gregorian",
+            "upstreamName": null,
+            "upstreamVersion": null,
+            "roundTripVerified": true,
+            "sourceRefs": [],
+            "warnings": []
+          },
+          "timeZoneResolution": {
+            "kind": "unique",
+            "policy": "reject",
+            "status": "resolved_unique",
+            "requestedWallTime": "1995-08-18T23:30:00",
+            "candidates": [
+              {
+                "choice": "unique",
+                "instant": "1995-08-18T14:30:00Z",
+                "utcOffset": "+09:00",
+                "utcOffsetMinutes": 540,
+                "resolvedWallTime": "1995-08-18T23:30:00",
+                "zonedDateTime": "1995-08-18T23:30:00+09:00[Asia/Tokyo]",
+                "matchesInputWallTime": true
+              }
+            ],
+            "selectedCandidate": {
+              "choice": "unique",
+              "instant": "1995-08-18T14:30:00Z",
+              "utcOffset": "+09:00",
+              "utcOffsetMinutes": 540,
+              "resolvedWallTime": "1995-08-18T23:30:00",
+              "zonedDateTime": "1995-08-18T23:30:00+09:00[Asia/Tokyo]",
+              "matchesInputWallTime": true
+            }
+          },
+          "solarTime": {
+            "modelId": "noaa-gml-fractional-year-eot-approx-v1",
+            "latitude": 35.6762,
+            "longitude": 139.6503,
+            "applied": false,
+            "selectedVariantChoice": "unique",
+            "variants": [
+              {
+                "candidateChoice": "unique",
+                "sourceInstant": "1995-08-18T14:30:00Z",
+                "sourceUtcOffset": "+09:00",
+                "sourceWallTime": "1995-08-18T23:30:00",
+                "meanSolarDateTime": "1995-08-18T23:48:36",
+                "apparentSolarDateTime": "1995-08-18T23:44:27",
+                "longitudeCorrectionMinutes": 18.6012,
+                "equationOfTimeMinutes": -4.155909,
+                "totalCorrectionMinutes": 14.445291
+              }
+            ],
+            "warnings": [
+              "地方平太阳时按经度与候选 UTC 偏移换算；视太阳时额外使用 NOAA GML 分数年均时差近似公式。",
+              "太阳时仅作并列预览，未应用到活动命盘；该近似模型不能替代天文历表或项目金标准。"
+            ]
+          }
+        },
+        "ruleProfile": {
+          "schemaVersion": "1.0.0",
+          "profileId": "ziping-working-zi-start-23",
+          "profileVersion": "0.1.0",
+          "status": "working_default",
+          "label": "传统子平工作默认",
+          "notice": "工程工作默认，不代表唯一正确流派；1900—2100 仅为声明支持范围，不代表已强验证，当前尚未通过 360 例金标准发布门。",
+          "sourceRefs": [],
+          "supportedRange": {
+            "stronglyVerifiedFrom": "1900-01-01",
+            "stronglyVerifiedTo": "2100-12-31",
+            "outsideRangePolicy": "experimental_with_warning"
+          },
+          "calendar": {
+            "yearBoundary": "lichun_exact",
+            "monthBoundary": "jie_exact",
+            "dayBoundary": "zi_start_23",
+            "ziHourDayStemBasis": "after_day_change",
+            "hourBasis": "civil_time",
+            "timezoneSource": "iana",
+            "dstAmbiguity": "require_user",
+            "locationPrecision": "city"
+          },
+          "solarTime": {
+            "enabled": false,
+            "showComparison": true,
+            "longitudeSource": "location",
+            "equationOfTimeModel": null
+          },
+          "luckCycle": {
+            "directionRule": "year_stem_yinyang_and_gender",
+            "unknownValuePolicy": "require_manual_direction",
+            "anchor": "directional_jie",
+            "startAgeMethod": "three_days_one_year_exact_duration",
+            "rounding": "retain_duration"
+          },
+          "layers": {
+            "hiddenStems": true,
+            "tenGods": true,
+            "nayin": true,
+            "voidBranches": true,
+            "twelveGrowth": true,
+            "stemBranchRelations": true,
+            "shensha": false
+          },
+          "interpretation": {
+            "strengthRulePack": null,
+            "structureRulePack": null,
+            "climateRulePack": null,
+            "usefulGodRulePack": null
+          }
+        },
+        "luckCycleRuleSnapshot": {
+          "schemaVersion": "1.0.0",
+          "ruleId": "ziping-working-zi-start-23:luck-cycle-xiaoyun",
+          "ruleVersion": "0.1.0",
+          "directionRule": "year_stem_yinyang_and_gender",
+          "unknownSexPolicy": "require_manual_direction",
+          "anchor": "directional_jie",
+          "exactBoundaryPolicy": "zero_duration",
+          "startAgeMethod": "three_days_one_year_exact_duration",
+          "componentRatios": {
+            "sourceDaysPerTraditionalYear": 3,
+            "traditionalMonthsPerYear": 12,
+            "traditionalDaysPerMonth": 30,
+            "traditionalHoursPerDay": 24
+          },
+          "handoverCalendar": {
+            "frame": "fixed_plus08",
+            "additionOrder": "years_months_days_time",
+            "overflow": "constrain"
+          },
+          "decadeYears": 10,
+          "decadeCount": 10,
+          "xiaoyun": {
+            "method": "birth_hour_adjacent",
+            "directionRule": "exact_chart_year_stem_and_gender",
+            "directionReuse": "luck_cycle_or_manual_direction",
+            "firstAge": 1,
+            "firstStepOffset": 1,
+            "ageBasis": "nominal_age",
+            "boundaryAlignment": "flow_year_start_exact",
+            "boundaryFrame": "fixed_plus08",
+            "scope": "whole_life",
+            "cycleLength": 60,
+            "intervalPolicy": "half_open",
+            "unknownSexPolicy": "require_manual_direction",
+            "unknownHourPolicy": "unsupported"
+          }
+        },
+        "facts": {
+          "schemaVersion": "1.0.0",
+          "calendar": {
+            "solarText": "1995-08-18 23:30:00",
+            "lunarText": "一九九五年七月廿三",
+            "lunarYear": 1995,
+            "lunarMonth": 7,
+            "lunarDay": 23,
+            "isLeapMonth": false,
+            "previousJie": "立秋 · 1995-08-08 07:51:44 UTC+08:00",
+            "nextJie": "白露 · 1995-09-08 10:48:34 UTC+08:00"
+          },
+          "pillars": {
+            "year": {
+              "name": "year",
+              "label": "年柱",
+              "ganZhi": "乙亥",
+              "stem": "乙",
+              "branch": "亥",
+              "hiddenStems": [
+                "壬",
+                "甲"
+              ],
+              "stemTenGod": "伤官",
+              "branchTenGods": [
+                "比肩",
+                "食神"
+              ],
+              "wuXing": "木水",
+              "nayin": "山头火",
+              "twelveGrowth": "临官",
+              "xun": "甲戌",
+              "voidBranches": "申酉"
+            },
+            "month": {
+              "name": "month",
+              "label": "月柱",
+              "ganZhi": "甲申",
+              "stem": "甲",
+              "branch": "申",
+              "hiddenStems": [
+                "庚",
+                "壬",
+                "戊"
+              ],
+              "stemTenGod": "食神",
+              "branchTenGods": [
+                "偏印",
+                "比肩",
+                "七杀"
+              ],
+              "wuXing": "木金",
+              "nayin": "泉中水",
+              "twelveGrowth": "长生",
+              "xun": "甲申",
+              "voidBranches": "午未"
+            },
+            "day": {
+              "name": "day",
+              "label": "日柱",
+              "ganZhi": "壬午",
+              "stem": "壬",
+              "branch": "午",
+              "hiddenStems": [
+                "丁",
+                "己"
+              ],
+              "stemTenGod": "日主",
+              "branchTenGods": [
+                "正财",
+                "正官"
+              ],
+              "wuXing": "水火",
+              "nayin": "杨柳木",
+              "twelveGrowth": "胎",
+              "xun": "甲戌",
+              "voidBranches": "申酉"
+            },
+            "hour": {
+              "name": "hour",
+              "label": "时柱",
+              "ganZhi": "庚子",
+              "stem": "庚",
+              "branch": "子",
+              "hiddenStems": [
+                "癸"
+              ],
+              "stemTenGod": "偏印",
+              "branchTenGods": [
+                "劫财"
+              ],
+              "wuXing": "金水",
+              "nayin": "壁上土",
+              "twelveGrowth": "帝旺",
+              "xun": "甲午",
+              "voidBranches": "辰巳"
+            }
+          },
+          "fieldProvenance": [
+            {
+              "field": "pillars.year.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:fixed-plus08:year-exact:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:fixed-plus08:month-exact:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:local-civil:day:zi_start_23:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:local-civil:hour:time-gan-from-final-day:zi_start_23:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            }
+          ]
+        },
+        "manifest": {
+          "schemaVersion": "1.0.0",
+          "hashSchemaVersion": "2.0.0",
+          "engine": {
+            "name": "hakimi-bazi-core",
+            "version": "0.4.0",
+            "upstreamName": "lunar-typescript",
+            "upstreamVersion": "1.8.6",
+            "upstreamTagCommit": "0f3e95d15e31f1a7c7b93d624542649347328a20",
+            "upstreamIntegrity": "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA=="
+          },
+          "tzdbVersion": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3",
+          "timeZoneDatabase": {
+            "schemaVersion": "1.0.0",
+            "kind": "bundled_iana_tzdb",
+            "ianaVersion": "2026c",
+            "artifactName": "moment-timezone/data/packed/latest.json",
+            "dataSha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81",
+            "resolver": {
+              "name": "hakimi-tzdb-core",
+              "version": "1.0.0"
+            },
+            "adapter": {
+              "name": "moment-timezone",
+              "version": "0.6.3"
+            },
+            "supportedRange": {
+              "from": "1900-01-01",
+              "to": "2100-12-31"
+            },
+            "snapshotId": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3"
+          },
+          "ruleProfileDigest": "83267fa1d20ed2bcc516deec052275952d83c06ba88c24c00f456d6dc9c9e67c",
+          "luckCycleRuleDigest": "c1d0a8f8f817d9c5b1ba2c38e556b43f14c0002cf1b8b0cde90e54298fbb2203",
+          "resultHash": "7278389c32aafe853f109b4943136f61f796ae7ff45132a5b111c39dbb1f2836",
+          "supportedRangeStatus": "experimental",
+          "verificationStatus": "engineering_preview",
+          "calculatedAt": "2024-01-01T00:02:00.000Z",
+          "warnings": [
+            "工程预览：当前结果尚未通过 360 例金标准与 20,000 例随机差分。",
+            "年柱与月柱使用已解析瞬时点投影到固定 UTC+08:00 后的精确立春/交节候选；这不是带历史 DST 的 IANA Asia/Shanghai 投影。",
+            "日柱与时柱使用 Asia/Tokyo 的本地民用墙时；时干已从最终显示日干与时支重新推导。",
+            "真太阳时与平太阳时仅保留对照数据，未应用到活动命盘。",
+            "地方平太阳时按经度与候选 UTC 偏移换算；视太阳时额外使用 NOAA GML 分数年均时差近似公式。",
+            "太阳时仅作并列预览，未应用到活动命盘；该近似模型不能替代天文历表或项目金标准。",
+            "lunar-typescript 仅作为白名单适配后的候选历法实现，不作为规则争议的最终裁判。"
+          ]
+        }
+      },
+      "revisionSnapshotDigest": "919497e12ad70237a028e6a76962547a19f57c050831d7373e4d3829986fe640"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "slotId": "D",
+      "caseRecord": {
+        "id": "44444444-4444-4444-8444-444444444444",
+        "alias": "旧修订人工顺逆样本"
+      },
+      "revision": {
+        "schemaVersion": "1.0.0",
+        "id": "dddddddd-dddd-4ddd-8ddd-ddddddddddd4",
+        "caseId": "44444444-4444-4444-8444-444444444444",
+        "revisionNumber": 1,
+        "createdAt": "2024-01-01T00:03:00.000Z",
+        "input": {
+          "schemaVersion": "1.0.0",
+          "calendarType": "lunar",
+          "date": "1995-07-23",
+          "time": "21:15",
+          "timePrecision": "exact_minute",
+          "timeZone": "Asia/Shanghai",
+          "sex": "unspecified",
+          "lunarLeapMonth": false,
+          "location": {
+            "label": "旧记录固定样本",
+            "latitude": null,
+            "longitude": null,
+            "precision": "unknown"
+          },
+          "sourceNote": "旧修订降级与人工顺逆工程样本；不是现实人物。"
+        },
+        "timeCalibration": {
+          "schemaVersion": "1.0.0",
+          "originalCivilDateTime": "1995-08-18T21:15:00",
+          "activeWallTime": "1995-08-18T21:15:00",
+          "timeZone": "Asia/Shanghai",
+          "utcInstant": "1995-08-18T13:15:00Z",
+          "utcOffset": "+08:00",
+          "dstStatus": "resolved",
+          "solarTimePreview": null,
+          "solarTimeApplied": false,
+          "normalizationStatus": "instant_resolved",
+          "warnings": [
+            "原始农历输入 1995-07-23 已显式转换为公历 1995-08-18；原值与闰月标记仍单独保存。",
+            "农历转换采用 lunar-typescript 1.8.6 的固定历法表，当前仍是待金标准复核的工程候选。"
+          ],
+          "calendarResolution": {
+            "inputCalendarType": "lunar",
+            "inputDate": "1995-07-23",
+            "inputLunarLeapMonth": false,
+            "resolvedGregorianDate": "1995-08-18",
+            "algorithmId": "hakimi-time-core:lunar-typescript-1.8.6-to-solar:v1",
+            "frame": "fixed_plus08_lunisolar_date",
+            "upstreamName": "lunar-typescript",
+            "upstreamVersion": "1.8.6",
+            "roundTripVerified": true,
+            "sourceRefs": [
+              "https://github.com/6tail/lunar-typescript/blob/0f3e95d15e31f1a7c7b93d624542649347328a20/src/lib/Lunar.ts"
+            ],
+            "warnings": [
+              "原始农历输入 1995-07-23 已显式转换为公历 1995-08-18；原值与闰月标记仍单独保存。",
+              "农历转换采用 lunar-typescript 1.8.6 的固定历法表，当前仍是待金标准复核的工程候选。"
+            ]
+          },
+          "timeZoneResolution": {
+            "kind": "unique",
+            "policy": "reject",
+            "status": "resolved_unique",
+            "requestedWallTime": "1995-08-18T21:15:00",
+            "candidates": [
+              {
+                "choice": "unique",
+                "instant": "1995-08-18T13:15:00Z",
+                "utcOffset": "+08:00",
+                "utcOffsetMinutes": 480,
+                "resolvedWallTime": "1995-08-18T21:15:00",
+                "zonedDateTime": "1995-08-18T21:15:00+08:00[Asia/Shanghai]",
+                "matchesInputWallTime": true
+              }
+            ],
+            "selectedCandidate": {
+              "choice": "unique",
+              "instant": "1995-08-18T13:15:00Z",
+              "utcOffset": "+08:00",
+              "utcOffsetMinutes": 480,
+              "resolvedWallTime": "1995-08-18T21:15:00",
+              "zonedDateTime": "1995-08-18T21:15:00+08:00[Asia/Shanghai]",
+              "matchesInputWallTime": true
+            }
+          },
+          "solarTime": null
+        },
+        "ruleProfile": {
+          "schemaVersion": "1.0.0",
+          "profileId": "ziping-working-zi-start-23",
+          "profileVersion": "0.1.0",
+          "status": "working_default",
+          "label": "传统子平工作默认",
+          "notice": "工程工作默认，不代表唯一正确流派；1900—2100 仅为声明支持范围，不代表已强验证，当前尚未通过 360 例金标准发布门。",
+          "sourceRefs": [],
+          "supportedRange": {
+            "stronglyVerifiedFrom": "1900-01-01",
+            "stronglyVerifiedTo": "2100-12-31",
+            "outsideRangePolicy": "experimental_with_warning"
+          },
+          "calendar": {
+            "yearBoundary": "lichun_exact",
+            "monthBoundary": "jie_exact",
+            "dayBoundary": "zi_start_23",
+            "ziHourDayStemBasis": "after_day_change",
+            "hourBasis": "civil_time",
+            "timezoneSource": "iana",
+            "dstAmbiguity": "require_user",
+            "locationPrecision": "city"
+          },
+          "solarTime": {
+            "enabled": false,
+            "showComparison": true,
+            "longitudeSource": "location",
+            "equationOfTimeModel": null
+          },
+          "luckCycle": {
+            "directionRule": "year_stem_yinyang_and_gender",
+            "unknownValuePolicy": "require_manual_direction",
+            "anchor": "directional_jie",
+            "startAgeMethod": "three_days_one_year_exact_duration",
+            "rounding": "retain_duration"
+          },
+          "layers": {
+            "hiddenStems": true,
+            "tenGods": true,
+            "nayin": true,
+            "voidBranches": true,
+            "twelveGrowth": true,
+            "stemBranchRelations": true,
+            "shensha": false
+          },
+          "interpretation": {
+            "strengthRulePack": null,
+            "structureRulePack": null,
+            "climateRulePack": null,
+            "usefulGodRulePack": null
+          }
+        },
+        "facts": {
+          "schemaVersion": "1.0.0",
+          "calendar": {
+            "solarText": "1995-08-18 21:15:00",
+            "lunarText": "一九九五年七月廿三",
+            "lunarYear": 1995,
+            "lunarMonth": 7,
+            "lunarDay": 23,
+            "isLeapMonth": false,
+            "previousJie": "立秋 · 1995-08-08 07:51:44 UTC+08:00",
+            "nextJie": "白露 · 1995-09-08 10:48:34 UTC+08:00"
+          },
+          "pillars": {
+            "year": {
+              "name": "year",
+              "label": "年柱",
+              "ganZhi": "乙亥",
+              "stem": "乙",
+              "branch": "亥",
+              "hiddenStems": [
+                "壬",
+                "甲"
+              ],
+              "stemTenGod": "偏财",
+              "branchTenGods": [
+                "伤官",
+                "正财"
+              ],
+              "wuXing": "木水",
+              "nayin": "山头火",
+              "twelveGrowth": "沐浴",
+              "xun": "甲戌",
+              "voidBranches": "申酉"
+            },
+            "month": {
+              "name": "month",
+              "label": "月柱",
+              "ganZhi": "甲申",
+              "stem": "甲",
+              "branch": "申",
+              "hiddenStems": [
+                "庚",
+                "壬",
+                "戊"
+              ],
+              "stemTenGod": "正财",
+              "branchTenGods": [
+                "劫财",
+                "伤官",
+                "正印"
+              ],
+              "wuXing": "木金",
+              "nayin": "泉中水",
+              "twelveGrowth": "帝旺",
+              "xun": "甲申",
+              "voidBranches": "午未"
+            },
+            "day": {
+              "name": "day",
+              "label": "日柱",
+              "ganZhi": "辛巳",
+              "stem": "辛",
+              "branch": "巳",
+              "hiddenStems": [
+                "丙",
+                "庚",
+                "戊"
+              ],
+              "stemTenGod": "日主",
+              "branchTenGods": [
+                "正官",
+                "劫财",
+                "正印"
+              ],
+              "wuXing": "金火",
+              "nayin": "白蜡金",
+              "twelveGrowth": "死",
+              "xun": "甲戌",
+              "voidBranches": "申酉"
+            },
+            "hour": {
+              "name": "hour",
+              "label": "时柱",
+              "ganZhi": "己亥",
+              "stem": "己",
+              "branch": "亥",
+              "hiddenStems": [
+                "壬",
+                "甲"
+              ],
+              "stemTenGod": "偏印",
+              "branchTenGods": [
+                "伤官",
+                "正财"
+              ],
+              "wuXing": "土水",
+              "nayin": "平地木",
+              "twelveGrowth": "沐浴",
+              "xun": "甲午",
+              "voidBranches": "辰巳"
+            }
+          },
+          "fieldProvenance": [
+            {
+              "field": "pillars.year.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:fixed-plus08:year-exact:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.year.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:fixed-plus08:month-exact:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.month.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:local-civil:day:zi_start_23:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.day.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.ganZhi",
+              "kind": "rule_derived",
+              "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:local-civil:hour:time-gan-from-final-day:zi_start_23:v1",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.hiddenStems",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.stemTenGod",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.branchTenGods",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.wuXing",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.nayin",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.twelveGrowth",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.xun",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            },
+            {
+              "field": "pillars.hour.voidBranches",
+              "kind": "rule_derived",
+              "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+              "sourceRefs": [],
+              "verificationStatus": "experimental",
+              "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+            }
+          ]
+        },
+        "manifest": {
+          "schemaVersion": "1.0.0",
+          "hashSchemaVersion": "2.0.0",
+          "engine": {
+            "name": "hakimi-bazi-core",
+            "version": "0.4.0",
+            "upstreamName": "lunar-typescript",
+            "upstreamVersion": "1.8.6",
+            "upstreamTagCommit": "0f3e95d15e31f1a7c7b93d624542649347328a20",
+            "upstreamIntegrity": "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA=="
+          },
+          "tzdbVersion": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3",
+          "timeZoneDatabase": {
+            "schemaVersion": "1.0.0",
+            "kind": "bundled_iana_tzdb",
+            "ianaVersion": "2026c",
+            "artifactName": "moment-timezone/data/packed/latest.json",
+            "dataSha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81",
+            "resolver": {
+              "name": "hakimi-tzdb-core",
+              "version": "1.0.0"
+            },
+            "adapter": {
+              "name": "moment-timezone",
+              "version": "0.6.3"
+            },
+            "supportedRange": {
+              "from": "1900-01-01",
+              "to": "2100-12-31"
+            },
+            "snapshotId": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3"
+          },
+          "ruleProfileDigest": "83267fa1d20ed2bcc516deec052275952d83c06ba88c24c00f456d6dc9c9e67c",
+          "resultHash": "05a7b807d940d7d0cc8ed392c492cbfc47c7278ad74ee20753251b0c51b6f9b2",
+          "supportedRangeStatus": "experimental",
+          "verificationStatus": "engineering_preview",
+          "calculatedAt": "2024-01-01T00:03:00.000Z",
+          "warnings": [
+            "工程预览：当前结果尚未通过 360 例金标准与 20,000 例随机差分。",
+            "年柱与月柱使用已解析瞬时点投影到固定 UTC+08:00 后的精确立春/交节候选；这不是带历史 DST 的 IANA Asia/Shanghai 投影。",
+            "日柱与时柱使用 Asia/Shanghai 的本地民用墙时；时干已从最终显示日干与时支重新推导。",
+            "真太阳时与平太阳时仅保留对照数据，未应用到活动命盘。",
+            "原始农历输入 1995-07-23 已显式转换为公历 1995-08-18；原值与闰月标记仍单独保存。",
+            "农历转换采用 lunar-typescript 1.8.6 的固定历法表，当前仍是待金标准复核的工程候选。",
+            "lunar-typescript 仅作为白名单适配后的候选历法实现，不作为规则争议的最终裁判。"
+          ]
+        }
+      },
+      "revisionSnapshotDigest": "5eec7c53fc3c2e1596bdb4e865993a5e8347700ed8229433506446b8935b38d2"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@hakimi/storage",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@hakimi/chart-integrity": "*",
+    "@hakimi/contracts": "*",
+    "@hakimi/integrity": "*",
+    "@hakimi/knowledge-core": "*",
+    "@hakimi/revision-replay": "*",
+    "@hakimi/time-core": "*",
+    "@hakimi/transit-core": "*",
+    "dexie": "4.4.4"
+  }
+}

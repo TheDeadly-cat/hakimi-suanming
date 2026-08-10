@@ -1,0 +1,38 @@
+{
+  "format": "hakimi-p0-03-engineering-diagnostic-summary",
+  "formatVersion": "1.0.0",
+  "classification": "engineering_diagnostic_only",
+  "reportDigest": "fbb761568b71178138c460b5ecdfc2b634690efe58d4349defff3d7117ab3130",
+  "internalDeterminism": {
+    "executed": 20000,
+    "deterministic": 20000,
+    "mismatch": 0,
+    "calculationError": 0
+  },
+  "calendarIndependentDifferential": {
+    "total": 20000,
+    "matched": 19832,
+    "mismatch": 7,
+    "unsupported": 161,
+    "differenceCaseIds": [
+      "p003-18152",
+      "p003-18189",
+      "p003-18221",
+      "p003-18374",
+      "p003-18569",
+      "p003-18614",
+      "p003-18709"
+    ],
+    "differenceYears": [
+      "2089",
+      "2097"
+    ],
+    "differenceClass": "unresolved_calendar_table_difference"
+  },
+  "releaseBoundary": {
+    "countsAsVerifiedGold": false,
+    "verifiedGoldDelta": 0,
+    "fullP003GatePassed": false,
+    "notice": "两遍复算只证明内部确定性；.NET 只差分公历转农历日期字段，二者都不替代 360 例现实审核金标或完整四柱独立真值。"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@hakimi/transit-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@hakimi/chart-integrity": "*",
+    "@hakimi/bazi-core": "*",
+    "@hakimi/contracts": "*",
+    "@hakimi/integrity": "*",
+    "@hakimi/luck-core": "*",
+    "@hakimi/time-core": "*",
+    "@js-temporal/polyfill": "0.5.1",
+    "lunar-typescript": "1.8.6"
+  }
+}

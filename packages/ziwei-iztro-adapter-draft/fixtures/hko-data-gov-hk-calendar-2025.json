@@ -1,0 +1,56 @@
+{
+  "format": "hakimi-ziwei-official-calendar-fixtures/0.1-draft",
+  "claimScope": "calendar_resolution",
+  "productionEligible": false,
+  "expertTruthClaimed": false,
+  "source": {
+    "provider": "Hong Kong Observatory",
+    "datasetPage": "https://data.gov.hk/en-data/dataset/hk-hko-rss-gregorian-lunar-calendar-conversion-table",
+    "resourceUrl": "https://data.weather.gov.hk/weatherAPI/hko_data/calendar/nongli_calendar_2025.csv",
+    "resourceBytes": 14418,
+    "resourceSha256": "d2c5d752f370d3e583bde4950845fb6b4bfce1e1551da913ad14d655014fb32c",
+    "termsUrl": "https://data.gov.hk/tc/terms-and-conditions",
+    "retrievedAt": "2026-08-10T00:00:00.000+08:00",
+    "attribution": "Gregorian-lunar date data supplied by the Hong Kong Observatory through DATA.GOV.HK; intellectual-property attribution remains with the Government of the Hong Kong Special Administrative Region and the Hong Kong Observatory."
+  },
+  "engineeringContext": {
+    "scope": "civil_date_only",
+    "sourceCivilZone": "Asia/Hong_Kong",
+    "utcOffsetReference": "+08:00",
+    "basisUrl": "https://www.hko.gov.hk/en/gts/time/basicterms-localtime.htm",
+    "notProven": [
+      "late_zi_day_boundary",
+      "shichen",
+      "day_pillar",
+      "hour_pillar",
+      "ziwei_chart_rules"
+    ]
+  },
+  "fixtures": [
+    {
+      "fixtureId": "hko.2025.ordinary_month_day_15",
+      "gregorianDate": "2025-05-12",
+      "lunarDate": { "year": 2025, "month": 4, "day": 15, "isLeapMonth": false }
+    },
+    {
+      "fixtureId": "hko.2025.lunar_new_year",
+      "gregorianDate": "2025-01-29",
+      "lunarDate": { "year": 2025, "month": 1, "day": 1, "isLeapMonth": false }
+    },
+    {
+      "fixtureId": "hko.2025.leap_month_day_1",
+      "gregorianDate": "2025-07-25",
+      "lunarDate": { "year": 2025, "month": 6, "day": 1, "isLeapMonth": true }
+    },
+    {
+      "fixtureId": "hko.2025.leap_month_day_15",
+      "gregorianDate": "2025-08-08",
+      "lunarDate": { "year": 2025, "month": 6, "day": 15, "isLeapMonth": true }
+    },
+    {
+      "fixtureId": "hko.2025.leap_month_day_16",
+      "gregorianDate": "2025-08-09",
+      "lunarDate": { "year": 2025, "month": 6, "day": 16, "isLeapMonth": true }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@hakimi/rule-packs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@hakimi/contracts": "*",
+    "@hakimi/integrity": "*",
+    "@hakimi/rule-profiles": "*",
+    "zod": "4.4.3"
+  }
+}

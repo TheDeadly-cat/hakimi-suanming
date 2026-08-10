@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "proofScope": "package_lock_closure_identity_not_installed_bytes",
+  "lockfileVersion": 3,
+  "entryPackage": {
+    "packagePath": "packages/western-astronomy-engine-adapter-draft",
+    "name": "@hakimi/western-astronomy-engine-adapter-draft",
+    "version": "0.0.0-draft.0",
+    "dependencies": [
+      {
+        "name": "astronomy-engine",
+        "requested": "2.1.19",
+        "resolvedPackagePath": "node_modules/astronomy-engine",
+        "resolvedVersion": "2.1.19"
+      }
+    ]
+  },
+  "rootOverrides": {
+    "astronomy-engine": "2.1.19"
+  },
+  "nodes": [
+    {
+      "packagePath": "node_modules/astronomy-engine",
+      "name": "astronomy-engine",
+      "version": "2.1.19",
+      "resolved": "https://registry.npmjs.org/astronomy-engine/-/astronomy-engine-2.1.19.tgz",
+      "integrity": "sha512-8yWKNf7UeNbH458h3sAJ6ZgAjE5jTXp/mNNRFoC20j2SHwZIjAQeEsBB2Q3uCFRaTCCJRv33K2XhkhZQMXoX6w==",
+      "dependencies": []
+    }
+  ]
+}

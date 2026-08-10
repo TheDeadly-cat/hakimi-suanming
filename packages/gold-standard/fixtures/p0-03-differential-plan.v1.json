@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0.0",
+  "planId": "hakimi-p0-03-differential-plan-v1",
+  "generatorVersion": "hakimi-p0-03-stratified-birth-input-generator@1.0.0",
+  "seed": 2654435769,
+  "targetCaseCount": 20000,
+  "calendarFrame": "fixed_utc_plus_08",
+  "calendarType": "gregorian",
+  "timeZone": "Etc/GMT-8",
+  "utcOffset": "+08:00",
+  "timePrecision": "exact_second",
+  "casesPerCell": 250,
+  "location": {
+    "label": "固定 UTC+08:00 工程诊断框架",
+    "latitude": null,
+    "longitude": null,
+    "precision": "unknown"
+  },
+  "eraStrata": [
+    { "id": "era_1900_1929", "fromYear": 1900, "toYear": 1929 },
+    { "id": "era_1930_1969", "fromYear": 1930, "toYear": 1969 },
+    { "id": "era_1970_1999", "fromYear": 1970, "toYear": 1999 },
+    { "id": "era_2000_2029", "fromYear": 2000, "toYear": 2029 },
+    { "id": "era_2030_2100", "fromYear": 2030, "toYear": 2100 }
+  ],
+  "seasonStrata": [
+    { "id": "spring", "months": [2, 3, 4] },
+    { "id": "summer", "months": [5, 6, 7] },
+    { "id": "autumn", "months": [8, 9, 10] },
+    { "id": "winter", "months": [11, 12, 1] }
+  ],
+  "dayPeriodStrata": [
+    { "id": "deep_night", "startHourInclusive": 0, "endHourInclusive": 5 },
+    { "id": "morning", "startHourInclusive": 6, "endHourInclusive": 11 },
+    { "id": "afternoon", "startHourInclusive": 12, "endHourInclusive": 17 },
+    { "id": "evening", "startHourInclusive": 18, "endHourInclusive": 23 }
+  ]
+}

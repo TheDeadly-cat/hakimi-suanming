@@ -1,0 +1,16 @@
+{
+  "name": "@hakimi/research-export",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@hakimi/comparison-core": "*",
+    "@hakimi/chart-integrity": "*",
+    "@hakimi/contracts": "*",
+    "@hakimi/integrity": "*",
+    "@hakimi/revision-replay": "*",
+    "@hakimi/time-core": "*",
+    "zod": "4.4.3"
+  }
+}

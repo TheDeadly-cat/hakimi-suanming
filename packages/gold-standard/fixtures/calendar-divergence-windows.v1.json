@@ -1,0 +1,1942 @@
+{
+  "payload": {
+    "format": "hakimi-calendar-divergence-windows",
+    "formatVersion": "1.0.0",
+    "datasetId": "hakimi-p0-03-calendar-divergence-windows-v1",
+    "title": "2089 与 2097 连续历法差异权威窗口",
+    "classification": "engineering_diagnostic_only",
+    "frame": "fixed_plus08_lunisolar_date",
+    "parentDiagnostic": {
+      "reportDigest": "fbb761568b71178138c460b5ecdfc2b634690efe58d4349defff3d7117ab3130",
+      "planDigest": "f31e467691d45e2dd8795b41a8b67d2c4771fdf71482b06917ed4b2e90089f06",
+      "triggerCaseCount": 7
+    },
+    "normalizedAstronomyEventEnvelopeDigest": "f8fd870a8da3a171b3d14060ae2f6c01a3ef4de220e9fbd3435b348353d37804",
+    "declaredCounts": {
+      "windows": 2,
+      "cases": 64,
+      "divergence": 60,
+      "controls": 4,
+      "triggerCases": 7
+    },
+    "releaseBoundary": {
+      "countsAsVerifiedGold": false,
+      "verifiedGoldDelta": 0,
+      "fullP003GatePassed": false,
+      "notice": "HKO、当前适配器、ICU、.NET 与 USNO 只形成工程诊断和未决根因材料；没有真实双人裁决与版本化 fixture 纳入，不增加 360 例发布金标。"
+    },
+    "sources": [
+      {
+        "sourceId": "hko-calendar-2089-tc",
+        "role": "authoritative",
+        "sourceType": "official_calendar",
+        "title": "2089 年公曆與農曆日期對照表",
+        "version": "2089 Traditional Chinese text table",
+        "sourceRef": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T2089c.txt",
+        "artifacts": [
+          {
+            "label": "T2089c.txt raw bytes",
+            "sha256": "66fc0e954fe9f0e16ee26e43eca3cef7c5e6e4cf224b912277638ec28680c9fe",
+            "sourceRef": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T2089c.txt"
+          }
+        ],
+        "runtime": "静态 UTF-8 文本材料；固定 UTC+08 公历日期定位",
+        "method": "逐日读取 2089-09-03 至 2089-10-04；月份名称行作为初一，其余中文日名按同一月连续展开。",
+        "note": "香港天文台官方历表是本窗口的权威观测来源；远期朔接近午夜时仍须保留一日不确定性。"
+      },
+      {
+        "sourceId": "hko-calendar-2097-tc",
+        "role": "authoritative",
+        "sourceType": "official_calendar",
+        "title": "2097 年公曆與農曆日期對照表",
+        "version": "2097 Traditional Chinese text table",
+        "sourceRef": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T2097c.txt",
+        "artifacts": [
+          {
+            "label": "T2097c.txt raw bytes",
+            "sha256": "7705d23609e37937dff638fb8f78e09edc19a9d17ffd26ea2399853eb2c2ac2e",
+            "sourceRef": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T2097c.txt"
+          }
+        ],
+        "runtime": "静态 UTF-8 文本材料；固定 UTC+08 公历日期定位",
+        "method": "逐日读取 2097-08-06 至 2097-09-06；月份名称行作为初一，其余中文日名按同一月连续展开。",
+        "note": "香港天文台官方历表是本窗口的权威观测来源；远期朔接近午夜时仍须保留一日不确定性。"
+      },
+      {
+        "sourceId": "current-adapter-lunar-typescript-1-8-6",
+        "role": "current_adapter",
+        "sourceType": "software_implementation",
+        "title": "Hakimi 当前 lunar-typescript 历法适配器",
+        "version": "lunar-typescript 1.8.6",
+        "sourceRef": "https://github.com/6tail/lunar-typescript/tree/0f3e95d15e31f1a7c7b93d624542649347328a20",
+        "artifacts": [
+          {
+            "label": "installed distribution snapshot",
+            "sha256": "505dc8eca166977c4e40ec883b22e871cab631811a79ad793ab8e561a2e9ad0f",
+            "sourceRef": "https://www.npmjs.com/package/lunar-typescript/v/1.8.6"
+          }
+        ],
+        "runtime": "Hakimi workspace pinned dependency lunar-typescript 1.8.6",
+        "method": "Solar.fromYmd(gregorian year, month, day).getLunar()；负月份转换为独立闰月布尔值。",
+        "note": "这是被审计的当前适配器，不是独立权威来源。"
+      },
+      {
+        "sourceId": "icu-chinese-calendar-78-3",
+        "role": "crosscheck",
+        "sourceType": "software_implementation",
+        "title": "ICU Chinese calendar through Node Intl",
+        "version": "Node.js 24.16.0 / ICU 78.3 / CLDR 48 / tz 2026b",
+        "sourceRef": "https://github.com/unicode-org/icu/commit/21d1eb0f306e1141c10931e914dfc038c06121da",
+        "artifacts": [
+          {
+            "label": "node.exe runtime",
+            "sha256": "b3094d0b49f9ad602262a9921551737bb97637c05dd357a06ae98188d7290aa3",
+            "sourceRef": "https://nodejs.org/dist/v24.16.0/"
+          },
+          {
+            "label": "ICU chnsecal.cpp",
+            "sha256": "625e63321f41d106b77134c177fe5907baf1507a646427066751c29509b25140",
+            "sourceRef": "https://github.com/unicode-org/icu/blob/21d1eb0f306e1141c10931e914dfc038c06121da/icu4c/source/i18n/chnsecal.cpp"
+          }
+        ],
+        "runtime": "Node.js 24.16.0; ICU 78.3; CLDR 48; tz 2026b; Asia/Shanghai",
+        "method": "Intl.DateTimeFormat('en-u-ca-chinese') 在 Asia/Shanghai 当地 12:00 对每个公历日期调用 formatToParts。",
+        "note": "ICU 与当前适配器在两个完整窗口逐日一致；软件一致不等于人工金标。"
+      },
+      {
+        "sourceId": "dotnet-framework-4-8-chinese-lunisolar",
+        "role": "crosscheck",
+        "sourceType": "software_implementation",
+        "title": "System.Globalization.ChineseLunisolarCalendar",
+        "version": "4.8.9337.0 built by NET481REL1LAST_25H2_C",
+        "sourceRef": "https://learn.microsoft.com/en-us/dotnet/api/system.globalization.chineselunisolarcalendar",
+        "artifacts": [
+          {
+            "label": "mscorlib runtime assembly",
+            "sha256": "a8cae3d326f7d973ca79cba849939d4837ad18d507ef6d5f6ebab802b7fb157a",
+            "sourceRef": "https://learn.microsoft.com/en-us/dotnet/api/system.globalization.chineselunisolarcalendar"
+          }
+        ],
+        "runtime": "Windows x64; mscorlib 4.0.0.0; CLR v4.0.30319",
+        "method": "逐日调用 GetYear/GetMonth/GetDayOfMonth/GetLeapMonth，并把插入式闰月序号还原为月份与闰月布尔值。",
+        "note": "两个窗口各形成连续 30 日一日偏移，并在下一农历月首日重新同步。"
+      },
+      {
+        "sourceId": "usno-moon-phases-2089",
+        "role": "astronomical_reference",
+        "sourceType": "government_astronomy_api",
+        "title": "USNO Moon Phases API 2089",
+        "version": "year=2089 raw API snapshot",
+        "sourceRef": "https://aa.usno.navy.mil/api/moon/phases/year?year=2089",
+        "artifacts": [
+          {
+            "label": "USNO raw JSON response",
+            "sha256": "bf6ddbdd98ea9370856e109c68b81707d1ae7fd36802688c726d9596d8dd63b1",
+            "sourceRef": "https://aa.usno.navy.mil/api/moon/phases/year?year=2089"
+          }
+        ],
+        "runtime": "USNO Astronomical Applications Department public API snapshot",
+        "method": "提取 2089-09-04 15:59 UT New Moon，并按固定 UTC+08 换算为 2089-09-04 23:59。",
+        "note": "仅是独立朔事件证据，不是完整中国农历表；该事件倾向 HKO、当前适配器与 ICU 的日期。"
+      },
+      {
+        "sourceId": "usno-moon-phases-2097",
+        "role": "astronomical_reference",
+        "sourceType": "government_astronomy_api",
+        "title": "USNO Moon Phases API 2097",
+        "version": "year=2097 raw API snapshot",
+        "sourceRef": "https://aa.usno.navy.mil/api/moon/phases/year?year=2097",
+        "artifacts": [
+          {
+            "label": "USNO raw JSON response",
+            "sha256": "9107f88a5dd9e629464614c3f1d3f6b96cb2b497d413b5ce059844e0f995eb9e",
+            "sourceRef": "https://aa.usno.navy.mil/api/moon/phases/year?year=2097"
+          }
+        ],
+        "runtime": "USNO Astronomical Applications Department public API snapshot",
+        "method": "提取 2097-08-07 16:01 UT New Moon，并按固定 UTC+08 换算为 2097-08-08 00:01。",
+        "note": "仅是独立朔事件证据，不是完整中国农历表；该事件倾向 .NET 的日期。"
+      }
+    ],
+    "triggers": [
+      {
+        "caseId": "p003-18374",
+        "inputDigest": "40e9b7d70b279c630df82c12cfa37ec856c00024dd0041976c062c4e82eb176d",
+        "gregorianDate": "2089-09-09",
+        "windowId": "calendar-divergence-2089-month-08"
+      },
+      {
+        "caseId": "p003-18189",
+        "inputDigest": "2abdc9c4640e67951272a642994a61eea5416b8bcd0aa9e1bce2b8c23ea2dde7",
+        "gregorianDate": "2089-09-12",
+        "windowId": "calendar-divergence-2089-month-08"
+      },
+      {
+        "caseId": "p003-18152",
+        "inputDigest": "f688837e2078a49a73f550431afc42a3479f385f8d972cefb04aca79b3b36699",
+        "gregorianDate": "2089-09-22",
+        "windowId": "calendar-divergence-2089-month-08"
+      },
+      {
+        "caseId": "p003-18614",
+        "inputDigest": "05e9543c6b51b9fa31a09e49f0aa8f86e6e4a5f7205ef0df399da5dba708c9d0",
+        "gregorianDate": "2097-08-24",
+        "windowId": "calendar-divergence-2097-month-07"
+      },
+      {
+        "caseId": "p003-18709",
+        "inputDigest": "c1a0e3144c1a3716e0e58c2af36efd9e1b46e79bf1c29e53dfe3424d77ac4817",
+        "gregorianDate": "2097-08-30",
+        "windowId": "calendar-divergence-2097-month-07"
+      },
+      {
+        "caseId": "p003-18569",
+        "inputDigest": "877beba4978dd07778879e54d05d2bd251509d01668bb0eb7735be796183a199",
+        "gregorianDate": "2097-09-04",
+        "windowId": "calendar-divergence-2097-month-07"
+      },
+      {
+        "caseId": "p003-18221",
+        "inputDigest": "c620acbcb6cce20b6d157eac20d5f745d742a095798577573e0dbe08470b2212",
+        "gregorianDate": "2097-09-05",
+        "windowId": "calendar-divergence-2097-month-07"
+      }
+    ],
+    "windows": [
+      {
+        "windowId": "calendar-divergence-2089-month-08",
+        "hkoSourceId": "hko-calendar-2089-tc",
+        "startDate": "2089-09-03",
+        "endDate": "2089-10-04",
+        "expectedCaseCount": 32,
+        "expectedDivergenceCount": 30,
+        "expectedControlCount": 2,
+        "triggerCaseIds": [
+          "p003-18374",
+          "p003-18189",
+          "p003-18152"
+        ],
+        "rootCauseAssessment": {
+          "classification": "near_local_midnight_new_moon_table_boundary",
+          "resolutionStatus": "unresolved",
+          "usnoSourceId": "usno-moon-phases-2089",
+          "newMoonUtc": "2089-09-04T15:59:00.000Z",
+          "fixedPlus08Local": "2089-09-04T23:59:00+08:00",
+          "distanceFromLocalMidnightMinutes": 1,
+          "favors": "hko_current_icu",
+          "normalizedEventEnvelopeDigest": "f8fd870a8da3a171b3d14060ae2f6c01a3ef4de220e9fbd3435b348353d37804",
+          "authorityCaveat": "朔发生在固定 UTC+08 午夜前一分钟；香港天文台说明远期朔接近午夜时日期可有一日不确定，因此只记录倾向，不自动裁决。"
+        },
+        "cases": [
+          {
+            "caseId": "calendar-window-2089-09-03",
+            "ordinal": 0,
+            "gregorianDate": "2089-09-03",
+            "role": "control",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-07-29",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-07-29",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-07-29",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-07-29",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "all_sources_match_control",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-04",
+            "ordinal": 1,
+            "gregorianDate": "2089-09-04",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-01",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-01",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-01",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-07-30",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-05",
+            "ordinal": 2,
+            "gregorianDate": "2089-09-05",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-02",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-02",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-02",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-01",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-06",
+            "ordinal": 3,
+            "gregorianDate": "2089-09-06",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-03",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-03",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-03",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-02",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-07",
+            "ordinal": 4,
+            "gregorianDate": "2089-09-07",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-04",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-04",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-04",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-03",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-08",
+            "ordinal": 5,
+            "gregorianDate": "2089-09-08",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-05",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-05",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-05",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-04",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-09",
+            "ordinal": 6,
+            "gregorianDate": "2089-09-09",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-06",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-06",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-06",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-05",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": [
+              "p003-18374"
+            ]
+          },
+          {
+            "caseId": "calendar-window-2089-09-10",
+            "ordinal": 7,
+            "gregorianDate": "2089-09-10",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-07",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-07",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-07",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-06",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-11",
+            "ordinal": 8,
+            "gregorianDate": "2089-09-11",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-08",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-08",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-08",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-07",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-12",
+            "ordinal": 9,
+            "gregorianDate": "2089-09-12",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-09",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-09",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-09",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-08",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": [
+              "p003-18189"
+            ]
+          },
+          {
+            "caseId": "calendar-window-2089-09-13",
+            "ordinal": 10,
+            "gregorianDate": "2089-09-13",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-10",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-10",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-10",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-09",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-14",
+            "ordinal": 11,
+            "gregorianDate": "2089-09-14",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-11",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-11",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-11",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-10",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-15",
+            "ordinal": 12,
+            "gregorianDate": "2089-09-15",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-12",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-12",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-12",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-11",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-16",
+            "ordinal": 13,
+            "gregorianDate": "2089-09-16",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-13",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-13",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-13",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-12",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-17",
+            "ordinal": 14,
+            "gregorianDate": "2089-09-17",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-14",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-14",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-14",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-13",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-18",
+            "ordinal": 15,
+            "gregorianDate": "2089-09-18",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-15",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-15",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-15",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-14",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-19",
+            "ordinal": 16,
+            "gregorianDate": "2089-09-19",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-16",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-16",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-16",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-15",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-20",
+            "ordinal": 17,
+            "gregorianDate": "2089-09-20",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-17",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-17",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-17",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-16",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-21",
+            "ordinal": 18,
+            "gregorianDate": "2089-09-21",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-18",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-18",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-18",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-17",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-22",
+            "ordinal": 19,
+            "gregorianDate": "2089-09-22",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-19",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-19",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-19",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-18",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": [
+              "p003-18152"
+            ]
+          },
+          {
+            "caseId": "calendar-window-2089-09-23",
+            "ordinal": 20,
+            "gregorianDate": "2089-09-23",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-20",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-20",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-20",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-19",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-24",
+            "ordinal": 21,
+            "gregorianDate": "2089-09-24",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-21",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-21",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-21",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-20",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-25",
+            "ordinal": 22,
+            "gregorianDate": "2089-09-25",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-22",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-22",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-22",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-21",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-26",
+            "ordinal": 23,
+            "gregorianDate": "2089-09-26",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-23",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-23",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-23",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-22",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-27",
+            "ordinal": 24,
+            "gregorianDate": "2089-09-27",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-24",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-24",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-24",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-23",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-28",
+            "ordinal": 25,
+            "gregorianDate": "2089-09-28",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-25",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-25",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-25",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-24",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-29",
+            "ordinal": 26,
+            "gregorianDate": "2089-09-29",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-26",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-26",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-26",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-25",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-09-30",
+            "ordinal": 27,
+            "gregorianDate": "2089-09-30",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-27",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-27",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-27",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-26",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-10-01",
+            "ordinal": 28,
+            "gregorianDate": "2089-10-01",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-28",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-28",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-28",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-27",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-10-02",
+            "ordinal": 29,
+            "gregorianDate": "2089-10-02",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-29",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-29",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-29",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-28",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-10-03",
+            "ordinal": 30,
+            "gregorianDate": "2089-10-03",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-08-30",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-08-30",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-08-30",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-08-29",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2089-10-04",
+            "ordinal": 31,
+            "gregorianDate": "2089-10-04",
+            "role": "control",
+            "observations": {
+              "hko": {
+                "lunarDate": "2089-09-01",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2089-09-01",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2089-09-01",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2089-09-01",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "all_sources_match_control",
+            "triggerCaseIds": []
+          }
+        ]
+      },
+      {
+        "windowId": "calendar-divergence-2097-month-07",
+        "hkoSourceId": "hko-calendar-2097-tc",
+        "startDate": "2097-08-06",
+        "endDate": "2097-09-06",
+        "expectedCaseCount": 32,
+        "expectedDivergenceCount": 30,
+        "expectedControlCount": 2,
+        "triggerCaseIds": [
+          "p003-18614",
+          "p003-18709",
+          "p003-18569",
+          "p003-18221"
+        ],
+        "rootCauseAssessment": {
+          "classification": "near_local_midnight_new_moon_table_boundary",
+          "resolutionStatus": "unresolved",
+          "usnoSourceId": "usno-moon-phases-2097",
+          "newMoonUtc": "2097-08-07T16:01:00.000Z",
+          "fixedPlus08Local": "2097-08-08T00:01:00+08:00",
+          "distanceFromLocalMidnightMinutes": 1,
+          "favors": "dotnet",
+          "normalizedEventEnvelopeDigest": "f8fd870a8da3a171b3d14060ae2f6c01a3ef4de220e9fbd3435b348353d37804",
+          "authorityCaveat": "朔发生在固定 UTC+08 午夜后一分钟；香港天文台说明远期朔接近午夜时日期可有一日不确定，因此只记录倾向，不自动裁决。"
+        },
+        "cases": [
+          {
+            "caseId": "calendar-window-2097-08-06",
+            "ordinal": 0,
+            "gregorianDate": "2097-08-06",
+            "role": "control",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-06-29",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-06-29",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-06-29",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-06-29",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "all_sources_match_control",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-07",
+            "ordinal": 1,
+            "gregorianDate": "2097-08-07",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-01",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-01",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-01",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-06-30",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-08",
+            "ordinal": 2,
+            "gregorianDate": "2097-08-08",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-02",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-02",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-02",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-01",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-09",
+            "ordinal": 3,
+            "gregorianDate": "2097-08-09",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-03",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-03",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-03",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-02",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-10",
+            "ordinal": 4,
+            "gregorianDate": "2097-08-10",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-04",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-04",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-04",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-03",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-11",
+            "ordinal": 5,
+            "gregorianDate": "2097-08-11",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-05",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-05",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-05",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-04",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-12",
+            "ordinal": 6,
+            "gregorianDate": "2097-08-12",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-06",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-06",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-06",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-05",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-13",
+            "ordinal": 7,
+            "gregorianDate": "2097-08-13",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-07",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-07",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-07",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-06",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-14",
+            "ordinal": 8,
+            "gregorianDate": "2097-08-14",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-08",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-08",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-08",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-07",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-15",
+            "ordinal": 9,
+            "gregorianDate": "2097-08-15",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-09",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-09",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-09",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-08",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-16",
+            "ordinal": 10,
+            "gregorianDate": "2097-08-16",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-10",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-10",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-10",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-09",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-17",
+            "ordinal": 11,
+            "gregorianDate": "2097-08-17",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-11",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-11",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-11",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-10",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-18",
+            "ordinal": 12,
+            "gregorianDate": "2097-08-18",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-12",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-12",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-12",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-11",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-19",
+            "ordinal": 13,
+            "gregorianDate": "2097-08-19",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-13",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-13",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-13",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-12",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-20",
+            "ordinal": 14,
+            "gregorianDate": "2097-08-20",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-14",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-14",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-14",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-13",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-21",
+            "ordinal": 15,
+            "gregorianDate": "2097-08-21",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-15",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-15",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-15",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-14",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-22",
+            "ordinal": 16,
+            "gregorianDate": "2097-08-22",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-16",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-16",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-16",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-15",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-23",
+            "ordinal": 17,
+            "gregorianDate": "2097-08-23",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-17",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-17",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-17",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-16",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-24",
+            "ordinal": 18,
+            "gregorianDate": "2097-08-24",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-18",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-18",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-18",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-17",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": [
+              "p003-18614"
+            ]
+          },
+          {
+            "caseId": "calendar-window-2097-08-25",
+            "ordinal": 19,
+            "gregorianDate": "2097-08-25",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-19",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-19",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-19",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-18",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-26",
+            "ordinal": 20,
+            "gregorianDate": "2097-08-26",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-20",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-20",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-20",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-19",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-27",
+            "ordinal": 21,
+            "gregorianDate": "2097-08-27",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-21",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-21",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-21",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-20",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-28",
+            "ordinal": 22,
+            "gregorianDate": "2097-08-28",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-22",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-22",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-22",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-21",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-29",
+            "ordinal": 23,
+            "gregorianDate": "2097-08-29",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-23",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-23",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-23",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-22",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-08-30",
+            "ordinal": 24,
+            "gregorianDate": "2097-08-30",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-24",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-24",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-24",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-23",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": [
+              "p003-18709"
+            ]
+          },
+          {
+            "caseId": "calendar-window-2097-08-31",
+            "ordinal": 25,
+            "gregorianDate": "2097-08-31",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-25",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-25",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-25",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-24",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-09-01",
+            "ordinal": 26,
+            "gregorianDate": "2097-09-01",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-26",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-26",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-26",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-25",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-09-02",
+            "ordinal": 27,
+            "gregorianDate": "2097-09-02",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-27",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-27",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-27",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-26",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-09-03",
+            "ordinal": 28,
+            "gregorianDate": "2097-09-03",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-28",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-28",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-28",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-27",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": []
+          },
+          {
+            "caseId": "calendar-window-2097-09-04",
+            "ordinal": 29,
+            "gregorianDate": "2097-09-04",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-29",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-29",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-29",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-28",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": [
+              "p003-18569"
+            ]
+          },
+          {
+            "caseId": "calendar-window-2097-09-05",
+            "ordinal": 30,
+            "gregorianDate": "2097-09-05",
+            "role": "divergence",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-07-30",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-07-30",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-07-30",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-07-29",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "dotnet_adjacent_month_length_offset",
+            "triggerCaseIds": [
+              "p003-18221"
+            ]
+          },
+          {
+            "caseId": "calendar-window-2097-09-06",
+            "ordinal": 31,
+            "gregorianDate": "2097-09-06",
+            "role": "control",
+            "observations": {
+              "hko": {
+                "lunarDate": "2097-08-01",
+                "lunarLeapMonth": false
+              },
+              "currentAdapter": {
+                "lunarDate": "2097-08-01",
+                "lunarLeapMonth": false
+              },
+              "icu": {
+                "lunarDate": "2097-08-01",
+                "lunarLeapMonth": false
+              },
+              "dotnet": {
+                "lunarDate": "2097-08-01",
+                "lunarLeapMonth": false
+              }
+            },
+            "differenceClass": "all_sources_match_control",
+            "triggerCaseIds": []
+          }
+        ]
+      }
+    ]
+  },
+  "digest": "52ab3d6af80ff086cb1db8b32bf1c14a8ff23f35602faedea48623804f50f931"
+}

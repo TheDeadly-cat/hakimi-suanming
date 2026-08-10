@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+    <meta name="description" content="隔离的紫微斗数工程预览；计算不主动访问外网，不持久化出生输入与结果，不构成专家真值。" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%231f4f8a'/%3E%3C/svg%3E" />
+    <title>紫微工程排盘 · 隔离预览</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#birth-form">跳到出生参数</a>
+    <main class="research-sheet">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">哈基米 · 本地术数研究</p>
+          <h1>紫微工程排盘</h1>
+        </div>
+        <div class="safety-stamp" aria-label="隔离预览，不保存资料">
+          <span>隔离预览</span>
+          <small>不持久化 · 不主动外联</small>
+        </div>
+      </header>
+
+      <p class="scope-note">
+        这里核对的是锁定 <code>iztro 2.5.8</code> 的工程行为。每次排盘都会新建一次性 Worker；计算不持久化出生输入与结果，
+        不进入八字资料库，也不构成专家真值或命理结论。
+      </p>
+
+      <div class="workbench">
+        <aside class="input-rail" aria-labelledby="input-title">
+          <div class="rail-heading">
+            <p class="section-kicker">出生参数</p>
+            <h2 id="input-title">一次计算，不持久化</h2>
+          </div>
+
+          <form id="birth-form" novalidate>
+            <label class="field" for="birth-date">
+              <span>公历日期</span>
+              <input id="birth-date" name="birthDate" type="date" min="1900-01-01" max="2100-12-31" value="1995-08-18" required />
+            </label>
+
+            <label class="field" for="shichen-index">
+              <span>出生时辰</span>
+              <select id="shichen-index" name="shichenIndex" required>
+                <option value="0">早子 · 00:00–01:00</option>
+                <option value="1">丑时 · 01:00–03:00</option>
+                <option value="2">寅时 · 03:00–05:00</option>
+                <option value="3">卯时 · 05:00–07:00</option>
+                <option value="4">辰时 · 07:00–09:00</option>
+                <option value="5">巳时 · 09:00–11:00</option>
+                <option value="6" selected>午时 · 11:00–13:00</option>
+                <option value="7">未时 · 13:00–15:00</option>
+                <option value="8">申时 · 15:00–17:00</option>
+                <option value="9">酉时 · 17:00–19:00</option>
+                <option value="10">戌时 · 19:00–21:00</option>
+                <option value="11">亥时 · 21:00–23:00</option>
+                <option value="12">晚子 · 23:00–24:00</option>
+              </select>
+            </label>
+
+            <fieldset class="sex-field">
+              <legend>排盘用性别</legend>
+              <div class="segmented-control">
+                <label><input type="radio" name="sex" value="male" checked /><span>男</span></label>
+                <label><input type="radio" name="sex" value="female" /><span>女</span></label>
+              </div>
+            </fieldset>
+
+            <button id="calculate-button" type="submit">
+              <span class="button-label">生成十二宫预览</span>
+              <span class="button-progress" aria-hidden="true">正在核对规则…</span>
+            </button>
+            <p id="form-error" class="form-error" role="alert" hidden></p>
+          </form>
+
+          <dl class="rail-facts" aria-label="当前预览边界">
+            <div><dt>历法</dt><dd>公历输入</dd></div>
+            <div><dt>盘型</dt><dd>天盘</dd></div>
+            <div><dt>解释</dt><dd>不包含</dd></div>
+            <div><dt>持久化</dt><dd>否</dd></div>
+          </dl>
+        </aside>
+
+        <section class="chart-stage" aria-labelledby="chart-title">
+          <div class="stage-heading">
+            <div>
+              <p class="section-kicker">十二宫结构</p>
+              <h2 id="chart-title">子至亥 · 固定宫位环</h2>
+            </div>
+            <p id="run-status" class="run-status" aria-live="polite" data-state="idle">等待输入</p>
+          </div>
+
+          <div id="palace-board" class="palace-board" aria-describedby="board-caption" aria-busy="false">
+            <div class="board-center">
+              <span class="center-seal">工程预览</span>
+              <strong id="center-primary">尚未排盘</strong>
+              <p id="center-secondary">输入日期、时辰与排盘用性别后生成结构事实。</p>
+              <dl id="center-summary" class="center-summary" hidden></dl>
+            </div>
+          </div>
+          <p id="board-caption" class="board-caption">宫位采用固定地支方盘位置；星曜只展示本命结构，不提供断语。</p>
+
+          <section id="audit-strip" class="audit-strip" aria-labelledby="audit-title" hidden>
+            <div class="audit-heading">
+              <p class="section-kicker">本次审计摘要</p>
+              <h3 id="audit-title">一次性 Worker 已完成并关闭</h3>
+            </div>
+            <dl class="audit-grid">
+              <div><dt>输入摘要</dt><dd data-audit="input-digest"></dd></div>
+              <div><dt>事实摘要</dt><dd data-audit="facts-digest"></dd></div>
+              <div><dt>规则摘要</dt><dd data-audit="rule-digest"></dd></div>
+              <div><dt>Worker 实例</dt><dd data-audit="worker-id"></dd></div>
+            </dl>
+            <p class="audit-footnote">
+              摘要采用项目 canonical JSON + SHA-256；依赖摘要绑定锁文件闭包身份，但不声称逐字节重验已安装模块。
+            </p>
+          </section>
+        </section>
+      </div>
+    </main>
+
+    <noscript>此隔离预览需要启用 JavaScript 才能在本机 Worker 中排盘。</noscript>
+    <script type="module" src="../src/browser-preview/main.ts"></script>
+  </body>
+</html>

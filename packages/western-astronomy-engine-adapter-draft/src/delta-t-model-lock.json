@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "modelId": "astronomy-engine@2.1.19.DeltaT_EspenakMeeus",
+  "setter": "SetDeltaTFunction(DeltaT_EspenakMeeus)",
+  "utSemantics": "astronomy-engine approximates UT1 and UTC as the same value",
+  "runtimeEsmSha256": "068f1445ed0c636c94818fe6d20d7d125120e605e0bab9fc4675c3d531be5ad7",
+  "sentinels": [
+    {
+      "id": "1900-near-floor",
+      "utDaysSinceJ2000": -36524.49930555555,
+      "utFloat64Hex": "c0e1d58ffa4fa4fa",
+      "deltaTSeconds": -2.7589610876256643,
+      "deltaTFloat64Hex": "c006125a30d24f80"
+    },
+    {
+      "id": "j2000",
+      "utDaysSinceJ2000": 0,
+      "utFloat64Hex": "0000000000000000",
+      "deltaTSeconds": 63.847089569816944,
+      "deltaTFloat64Hex": "404fec6d6e5792c0"
+    },
+    {
+      "id": "post-2016-leap",
+      "utDaysSinceJ2000": 6209.5,
+      "utFloat64Hex": "40b8418000000000",
+      "deltaTSeconds": 69.99302317324205,
+      "deltaTFloat64Hex": "40517f8db1114faa"
+    },
+    {
+      "id": "eclipse-2024",
+      "utDaysSinceJ2000": 8864.2625,
+      "utFloat64Hex": "40c150219999999a",
+      "deltaTSeconds": 74.00816338224394,
+      "deltaTFloat64Hex": "40528085bfb4f0cc"
+    },
+    {
+      "id": "equinox-2025",
+      "utDaysSinceJ2000": 9209.875694444445,
+      "utFloat64Hex": "40c1fcf016c16c17",
+      "deltaTSeconds": 74.5743236976025,
+      "deltaTFloat64Hex": "4052a4c1b82ea150"
+    },
+    {
+      "id": "2050-branch",
+      "utDaysSinceJ2000": 18276.5,
+      "utFloat64Hex": "40d1d92000000000",
+      "deltaTSeconds": 93.00218108862678,
+      "deltaTFloat64Hex": "40574023bc261497"
+    },
+    {
+      "id": "2100-branch",
+      "utDaysSinceJ2000": 36538.5,
+      "utFloat64Hex": "40e1d75000000000",
+      "deltaTSeconds": 202.74182456779712,
+      "deltaTFloat64Hex": "406957bd06e041db"
+    }
+  ]
+}

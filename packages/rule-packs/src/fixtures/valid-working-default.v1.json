@@ -1,0 +1,75 @@
+{
+  "format": "hakimi-bazi-rule-pack",
+  "formatVersion": "1.0.0",
+  "minAppVersion": "0.1.0",
+  "profile": {
+    "schemaVersion": "1.0.0",
+    "profileId": "fixture-working-default",
+    "profileVersion": "0.1.0",
+    "status": "working_default",
+    "label": "Fixture working default",
+    "notice": "Fixture for declarative rule pack import tests only.",
+    "sourceRefs": [],
+    "supportedRange": {
+      "stronglyVerifiedFrom": "1900-01-01",
+      "stronglyVerifiedTo": "2100-12-31",
+      "outsideRangePolicy": "experimental_with_warning"
+    },
+    "calendar": {
+      "yearBoundary": "lichun_exact",
+      "monthBoundary": "jie_exact",
+      "dayBoundary": "zi_start_23",
+      "ziHourDayStemBasis": "after_day_change",
+      "hourBasis": "civil_time",
+      "timezoneSource": "iana",
+      "dstAmbiguity": "require_user",
+      "locationPrecision": "city"
+    },
+    "solarTime": {
+      "enabled": false,
+      "showComparison": true,
+      "longitudeSource": "location",
+      "equationOfTimeModel": null
+    },
+    "luckCycle": {
+      "directionRule": "year_stem_yinyang_and_gender",
+      "unknownValuePolicy": "require_manual_direction",
+      "anchor": "directional_jie",
+      "startAgeMethod": "three_days_one_year_exact_duration",
+      "rounding": "retain_duration"
+    },
+    "layers": {
+      "hiddenStems": true,
+      "tenGods": true,
+      "nayin": true,
+      "voidBranches": true,
+      "twelveGrowth": true,
+      "stemBranchRelations": true,
+      "shensha": false
+    },
+    "interpretation": {
+      "strengthRulePack": null,
+      "structureRulePack": null,
+      "climateRulePack": null,
+      "usefulGodRulePack": null
+    }
+  },
+  "digest": {
+    "algorithm": "sha256-canonical-json-v1",
+    "value": "1b4cd5ce9b7f6384e31bbe717481b53abca34fba9213734d377062c9c909c805"
+  },
+  "metadata": {
+    "packId": "fixture-working-default",
+    "title": "Fixture working default",
+    "description": "A valid declarative fixture for deterministic import tests.",
+    "author": "Hakimi test suite",
+    "license": "UNLICENSED",
+    "sourceRefs": [],
+    "review": {
+      "status": "pending_consultant_review",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "notes": "This fixture is intentionally not consultant reviewed."
+    }
+  }
+}

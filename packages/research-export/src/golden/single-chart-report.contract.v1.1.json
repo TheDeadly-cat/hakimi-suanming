@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "1.0.0",
+  "formatVersion": "1.1.0",
+  "kind": "single_chart_research_report",
+  "title": "八字单盘研究报告",
+  "revisionLabel": "第 1 版 · 历史修订",
+  "pillars": [
+    { "key": "year", "label": "年柱", "ganZhi": "乙亥", "xun": "甲戌", "voidBranches": "申酉" },
+    { "key": "month", "label": "月柱", "ganZhi": "甲申", "xun": "甲申", "voidBranches": "午未" },
+    { "key": "day", "label": "日柱", "ganZhi": "辛巳", "xun": "甲戌", "voidBranches": "申酉" },
+    { "key": "hour", "label": "时柱", "ganZhi": "壬辰", "xun": "甲申", "voidBranches": "午未" }
+  ],
+  "rowLabels": {
+    "case": ["案例", "案例标识", "修订", "标签", "案例备注"],
+    "birth": ["输入历法", "原始日期", "出生时间", "时区", "性别", "地点", "坐标", "来源备注"],
+    "calibration": ["民用公历日期", "历法算法", "原始民用时间", "排盘墙上时间", "UTC 瞬时点", "UTC 偏移", "DST 状态", "时区解析", "真太阳时预览", "太阳时模型", "时间校准警告", "计算警告"],
+    "rules": ["规则方案", "规则状态", "规则说明", "界年 / 换月", "换日 / 子时日干", "时柱时间基准", "DST 歧义", "太阳时", "起运", "启用层", "规则来源"],
+    "integrity": ["引擎", "上游", "时区库", "规则摘要", "运限规则摘要", "结果哈希", "支持范围", "验证状态", "计算时间"]
+  },
+  "counts": {
+    "provenance": 36,
+    "researchNotes": 1,
+    "events": 2,
+    "citations": 1
+  },
+  "events": [
+    {
+      "reference": "66666666-6666-4666-8666-666666666666",
+      "timeRows": [
+        { "label": "时间上下文", "value": "zoned_minute" },
+        { "label": "IANA 时区", "value": "America/New_York" },
+        { "label": "TZDB", "value": "browser-intl-unreported" },
+        { "label": "起始 DST 解析", "value": "overlap / resolved_overlap_earlier / policy=earlier / selected=earlier" },
+        { "label": "起始 UTC 偏移", "value": "-04:00" },
+        { "label": "起始规范 UTC", "value": "2024-11-03T05:30:00Z" }
+      ]
+    },
+    {
+      "reference": "77777777-7777-4777-8777-777777777777",
+      "timeRows": [
+        { "label": "时间上下文", "value": "legacy_floating" },
+        { "label": "时间说明", "value": "历史浮动时间：未记录 IANA 时区，无法换算规范 UTC。" }
+      ]
+    }
+  ],
+  "citation": [
+    {
+      "status": "user_candidate",
+      "targets": ["命盘字段 pillars.day.ganZhi", "证据主题 bazi.pillar.day.ganzhi.v1"],
+      "locator": "section-1 · 第 3-3 行",
+      "distributionPolicy": "local_private_only",
+      "reviewStatus": "unreviewed"
+    }
+  ],
+  "markdown": {
+    "suggestedFileName": "hakimi-chart-r1-full.md",
+    "mimeType": "text/markdown;charset=utf-8",
+    "headings": [
+      "## 案例与出生输入",
+      "## 四柱事实",
+      "## 时间校准",
+      "## 规则与完整性",
+      "## 字段来源与验证状态",
+      "## 研究笔记",
+      "## 真实事件",
+      "## 结构化引用与反证"
+    ]
+  }
+}

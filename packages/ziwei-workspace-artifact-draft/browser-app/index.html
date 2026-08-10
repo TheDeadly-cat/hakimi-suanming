@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'"
+    />
+    <meta
+      name="description"
+      content="独立的紫微工程研究档案：本地计算、显式保存、重开验真和完整备份，不进入八字数据库。"
+    />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='26' height='26' rx='7' fill='%231a4b43'/%3E%3Cpath d='M9 11h14M9 16h14M9 21h9' stroke='%23f7f1df' stroke-width='2'/%3E%3C/svg%3E" />
+    <title>紫微本地研究档案 · 隔离草案</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#birth-form">跳到新建研究</a>
+    <main class="workspace-shell">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">哈基米 · 本地多术数研究</p>
+          <h1>紫微本地研究档案</h1>
+          <p class="masthead-summary">生成完整工程工件，确认后才写入本机；重开时重新验真。</p>
+        </div>
+        <div class="boundary-stamp" aria-label="独立草案，不进入八字资料库">
+          <strong>独立草案</strong>
+          <span>不进入八字库 · 非专家真值</span>
+        </div>
+      </header>
+
+      <section class="status-rail" aria-label="本地档案状态">
+        <div><span>本地档案</span><strong id="revision-count">—</strong></div>
+        <div><span>资料代次</span><strong id="mutation-epoch">—</strong></div>
+        <div><span>本机占用</span><strong id="total-bytes">—</strong></div>
+        <p id="workspace-status" role="status" aria-live="polite" data-state="loading">正在打开独立档案…</p>
+      </section>
+
+      <div class="workspace-grid">
+        <aside class="compose-panel" aria-labelledby="compose-title">
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">01 · 新建研究</p>
+              <h2 id="compose-title">先计算，再决定是否保存</h2>
+            </div>
+          </div>
+
+          <form id="birth-form" novalidate>
+            <label class="field" for="birth-date">
+              <span>公历日期</span>
+              <input id="birth-date" name="birthDate" type="date" min="1900-01-01" max="2100-12-31" value="1995-08-18" required />
+            </label>
+
+            <label class="field" for="shichen-index">
+              <span>出生时辰</span>
+              <select id="shichen-index" name="shichenIndex" required>
+                <option value="0">早子 · 00:00–01:00</option>
+                <option value="1">丑时 · 01:00–03:00</option>
+                <option value="2">寅时 · 03:00–05:00</option>
+                <option value="3">卯时 · 05:00–07:00</option>
+                <option value="4">辰时 · 07:00–09:00</option>
+                <option value="5">巳时 · 09:00–11:00</option>
+                <option value="6" selected>午时 · 11:00–13:00</option>
+                <option value="7">未时 · 13:00–15:00</option>
+                <option value="8">申时 · 15:00–17:00</option>
+                <option value="9">酉时 · 17:00–19:00</option>
+                <option value="10">戌时 · 19:00–21:00</option>
+                <option value="11">亥时 · 21:00–23:00</option>
+                <option value="12">晚子 · 23:00–24:00</option>
+              </select>
+            </label>
+
+            <fieldset class="sex-field">
+              <legend>排盘用性别</legend>
+              <div class="segmented-control">
+                <label><input type="radio" name="sex" value="male" checked /><span>男</span></label>
+                <label><input type="radio" name="sex" value="female" /><span>女</span></label>
+              </div>
+            </fieldset>
+
+            <button id="calculate-button" class="primary-action" type="submit">
+              <span>生成完整工程工件</span>
+              <small>一次性 Worker · 不自动保存</small>
+            </button>
+            <p id="form-error" class="inline-error" role="alert" hidden></p>
+          </form>
+
+          <form id="save-form" class="save-form" hidden>
+            <div class="save-divider"><span>工件已验真</span></div>
+            <label class="field" for="revision-title">
+              <span>档案名称</span>
+              <input id="revision-title" name="title" type="text" maxlength="160" autocomplete="off" required />
+            </label>
+            <label class="field" for="revision-note">
+              <span>研究备注 <small>可选</small></span>
+              <textarea id="revision-note" name="note" maxlength="1000" rows="3"></textarea>
+            </label>
+            <button id="save-button" class="save-action" type="submit">保存到独立本地档案</button>
+            <p class="microcopy">保存会新建不可变 Revision，并推进本地资料代次。</p>
+          </form>
+        </aside>
+
+        <section class="artifact-panel" aria-labelledby="artifact-title">
+          <div class="section-heading artifact-heading">
+            <div>
+              <p class="section-kicker">02 · 当前工件</p>
+              <h2 id="artifact-title">十二宫结构与验真摘要</h2>
+            </div>
+            <span id="artifact-badge" class="artifact-badge" data-state="empty">尚未生成</span>
+          </div>
+
+          <div id="palace-board" class="palace-board" aria-describedby="artifact-caption" aria-busy="false">
+            <div class="board-center">
+              <span>本地工程工件</span>
+              <strong id="center-primary">等待一次计算</strong>
+              <p id="center-secondary">计算完成后可预览，再由你明确决定是否保存。</p>
+              <dl id="center-summary" class="center-summary" hidden></dl>
+            </div>
+          </div>
+          <p id="artifact-caption" class="artifact-caption">这里只呈现结构化工程事实，不提供断语，也不替代专家复核。</p>
+
+          <dl id="artifact-audit" class="artifact-audit" hidden>
+            <div><dt>工件摘要</dt><dd data-audit="artifact"></dd></div>
+            <div><dt>事实摘要</dt><dd data-audit="facts"></dd></div>
+            <div><dt>来源图摘要</dt><dd data-audit="source"></dd></div>
+            <div><dt>本地 Revision</dt><dd data-audit="revision">尚未保存</dd></div>
+          </dl>
+        </section>
+
+        <aside class="archive-panel" aria-labelledby="archive-title">
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">03 · 本地档案</p>
+              <h2 id="archive-title">最近保存</h2>
+            </div>
+            <button id="refresh-button" class="text-action" type="button">刷新</button>
+          </div>
+          <p id="archive-empty" class="empty-state">还没有保存记录。计算不会自动写入，只有点击“保存”才会出现在这里。</p>
+          <ol id="archive-list" class="archive-list" hidden></ol>
+        </aside>
+      </div>
+
+      <section class="safety-panel" aria-labelledby="safety-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">资料安全</p>
+            <h2 id="safety-title">完整备份、恢复与清空</h2>
+          </div>
+          <p>仅作用于 <code>hakimi-ziwei-browser-workspace-draft</code></p>
+        </div>
+        <div class="safety-actions">
+          <button id="backup-button" class="secondary-action" type="button">导出完整紫微档案</button>
+          <label class="file-action" for="restore-file">
+            <span>选择完整备份并检查</span>
+            <input id="restore-file" type="file" accept="application/json,.json" />
+          </label>
+          <button id="restore-button" class="secondary-action" type="button" disabled>确认恢复已检查的备份</button>
+          <div class="clear-control">
+            <label><input id="clear-accepted" type="checkbox" />我已备份，或接受无法恢复</label>
+            <button id="clear-button" class="danger-action" type="button" disabled>清空独立紫微档案</button>
+          </div>
+        </div>
+        <p id="safety-message" class="safety-message" role="status" aria-live="polite">
+          恢复只会新增缺少的 Revision；相同内容跳过，任何身份冲突都会整批停止。
+        </p>
+      </section>
+    </main>
+
+    <noscript>此独立研究档案需要启用 JavaScript 才能在本机计算、验真与保存。</noscript>
+    <script type="module" src="../src/browser-app/main.ts"></script>
+  </body>
+</html>

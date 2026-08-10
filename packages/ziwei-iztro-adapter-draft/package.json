@@ -1,0 +1,21 @@
+{
+  "name": "@hakimi/ziwei-iztro-adapter-draft",
+  "version": "0.0.0-draft.0",
+  "private": true,
+  "type": "module",
+  "exports": {},
+  "x-hakimi-isolated-draft": {
+    "schemaVersion": 1,
+    "kind": "adapter",
+    "systemId": "ziwei-doushu",
+    "productionImport": "forbidden",
+    "allowedDraftDependencies": [
+      "@hakimi/ziwei-doushu-contracts-draft"
+    ]
+  },
+  "dependencies": {
+    "@hakimi/ziwei-doushu-contracts-draft": "0.0.0-draft.0",
+    "iztro": "2.5.8",
+    "zod": "4.4.3"
+  }
+}

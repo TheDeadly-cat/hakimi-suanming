@@ -1,0 +1,22 @@
+{
+  "name": "@hakimi/research-query",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./transit-review": "./src/transit-review.ts"
+  },
+  "dependencies": {
+    "@hakimi/bazi-core": "*",
+    "@hakimi/chart-integrity": "*",
+    "@hakimi/contracts": "*",
+    "@hakimi/integrity": "*",
+    "@hakimi/knowledge-core": "*",
+    "@hakimi/revision-replay": "*",
+    "@hakimi/time-core": "*",
+    "@hakimi/transit-core": "*",
+    "@hakimi/rule-profiles": "*",
+    "zod": "4.4.3"
+  }
+}

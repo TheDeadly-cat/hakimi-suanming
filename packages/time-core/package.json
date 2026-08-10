@@ -1,0 +1,13 @@
+{
+  "name": "@hakimi/time-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@hakimi/contracts": "*",
+    "@hakimi/tzdb-core": "*",
+    "@js-temporal/polyfill": "0.5.1",
+    "lunar-typescript": "1.8.6"
+  }
+}

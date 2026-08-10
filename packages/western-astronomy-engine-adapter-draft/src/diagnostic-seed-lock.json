@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "projectionVersion": "western-astronomy-engine-utc-position/0.1-draft",
+  "engineVersion": "2.1.19",
+  "deltaTModelId": "astronomy-engine@2.1.19.DeltaT_EspenakMeeus",
+  "proofScope": "exact_engine_regression_only_not_external_ephemeris_truth",
+  "seeds": [
+    {
+      "id": "1900-near-floor",
+      "purpose": "lower supported UTC boundary with the complete central-difference window",
+      "utcInstant": "1900-01-01T00:01:00.000Z",
+      "bodyIds": ["sun", "moon"],
+      "requestSha256": "07b4e933b649f3bb045678e6aab30d64028e1d29418a54f5db9fe7cb3d89c466",
+      "resultSha256": "12fd8c435063170094c1f66216b85fdec2dc835cb6e448810ce3e9d986929a6d"
+    },
+    {
+      "id": "j2000-all-bodies",
+      "purpose": "J2000 epoch and canonical ten-body mapping",
+      "utcInstant": "2000-01-01T12:00:00.000Z",
+      "bodyIds": ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"],
+      "requestSha256": "446d3a00d67c803d95dc9563d21afe42ff8d46eb5684c9d2d98d2371058eacc2",
+      "resultSha256": "b744f9c2a8755a7f94cb7d2d8d13247d62b1987d4df9da844ac3a76c71d90e94"
+    },
+    {
+      "id": "eclipse-2024",
+      "purpose": "near solar-lunar conjunction and longitude wrap-sensitive differential",
+      "utcInstant": "2024-04-08T18:18:00.000Z",
+      "bodyIds": ["sun", "moon"],
+      "requestSha256": "52c5eda5b1c43860b976be89015d9b8499bb2211df04c33b29a5e329b4fbf972",
+      "resultSha256": "c8d6b966a9784d50716b8ed4e9a22f84ae3cfb6920766e5e2ca30f6ed22f7742"
+    },
+    {
+      "id": "equinox-2025",
+      "purpose": "true-ecliptic-of-date longitude near the zero-degree wrap",
+      "utcInstant": "2025-03-20T09:01:00.000Z",
+      "bodyIds": ["sun"],
+      "requestSha256": "bea2f86808ae043d3a86da0fd343498d9429d0cc5f9446f722da5becee946e7c",
+      "resultSha256": "6d82f238b448b62f177f07100aa1eb399eb7887b717b683859e080d884d57cca"
+    },
+    {
+      "id": "2100-near-ceiling",
+      "purpose": "upper supported UTC boundary with the complete central-difference window",
+      "utcInstant": "2100-12-31T23:58:59.999Z",
+      "bodyIds": ["sun", "moon", "pluto"],
+      "requestSha256": "da728470fd0d99658a0b56a399f44a343ad0cc3c2a5ba1a2d8e7f12aa8af5a0e",
+      "resultSha256": "03c16fb731a673cf60290dbf4b62fc0135aac5618b469113e9cb03a497c48d75"
+    }
+  ]
+}

@@ -1,0 +1,395 @@
+{
+  "fixtureVersion": "1.0.0",
+  "datasetId": "hko-calendar-conversion-candidates-v1",
+  "title": "首批 24 条公历与农历双向转换权威历表候选",
+  "notice": "每条期望值均人工选自香港天文台公历与农历日期对照表，并冻结来源材料摘要；当前尚无双人裁决，全部保持 candidate，不能增加 verifiedGoldCaseCount。",
+  "frame": "fixed_plus08_lunisolar_date",
+  "requiredCalendarGoldCaseCount": 24,
+  "requiredProjectGoldCaseCount": 360,
+  "reviewPolicy": {
+    "lifecycleVersion": "candidate-only-v1",
+    "verifiedCountingEnabled": false,
+    "notice": "内容寻址审核包与绑定具体审核包的双人裁决预检已经实现；预检不持久化、不自动升级，真实双人裁决尚未纳入新版本 fixture 前，Schema 禁止任何案例进入 verified。"
+  },
+  "sourceLandingPage": "https://www.hko.gov.hk/en/gts/time/conversion.htm",
+  "openDataDataset": "https://data.gov.hk/en-data/dataset/hk-hko-rss-gregorian-lunar-calendar-conversion-table",
+  "reuseTerms": "https://data.gov.hk/en/terms-and-conditions",
+  "knownCaveats": [
+    "香港天文台说明：远期月相与节气计算存在分钟级不确定性；若朔或节气接近午夜，相关日期可能相差一天。",
+    "香港天文台列出的已知新月日期风险点为 2057-09-28、2089-09-04、2097-08-07；本批 24 条未选用这些日期。",
+    "来源材料与被测 lunar-typescript 不同谱系，但在完成两个真实复核身份的逐条裁决前仍不计为 verified 金标。"
+  ],
+  "sources": [
+    {
+      "sourceId": "hko-table-1901-tc",
+      "lineageId": "hong-kong-observatory-calendar",
+      "sourceType": "official_calendar",
+      "title": "1901 年公历与农历日期对照表",
+      "publisher": "香港天文台",
+      "editionOrVersion": "1901 text table",
+      "sourceRef": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T1901c.txt",
+      "accessedAt": "2026-08-01T00:00:00.000Z",
+      "artifactSha256": "1f8c489768bc90b52e06023e58047ec6431e75aa7b808770cc5872393461e3f4",
+      "licenseRef": "https://data.gov.hk/en/terms-and-conditions",
+      "note": "UTF-8 繁体中文逐日文本表；摘要按下载原始字节计算。"
+    },
+    {
+      "sourceId": "hko-table-1903-tc",
+      "lineageId": "hong-kong-observatory-calendar",
+      "sourceType": "official_calendar",
+      "title": "1903 年公历与农历日期对照表",
+      "publisher": "香港天文台",
+      "editionOrVersion": "1903 text table",
+      "sourceRef": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T1903c.txt",
+      "accessedAt": "2026-08-01T00:00:00.000Z",
+      "artifactSha256": "17a56a96f93a37ae5b3c994481c7e83c7216883b924c5fee812a6a446cd8a5cb",
+      "licenseRef": "https://data.gov.hk/en/terms-and-conditions",
+      "note": "UTF-8 繁体中文逐日文本表；摘要按下载原始字节计算。"
+    },
+    {
+      "sourceId": "hko-table-1995-tc",
+      "lineageId": "hong-kong-observatory-calendar",
+      "sourceType": "official_calendar",
+      "title": "1995 年公历与农历日期对照表",
+      "publisher": "香港天文台",
+      "editionOrVersion": "1995 text table",
+      "sourceRef": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T1995c.txt",
+      "accessedAt": "2026-08-01T00:00:00.000Z",
+      "artifactSha256": "17e7951a0babd178b1a8745b9ec15883b7422e6b33c89df77f7100c149be581c",
+      "licenseRef": "https://data.gov.hk/en/terms-and-conditions",
+      "note": "UTF-8 繁体中文逐日文本表；摘要按下载原始字节计算。"
+    },
+    {
+      "sourceId": "hko-table-2012-tc",
+      "lineageId": "hong-kong-observatory-calendar",
+      "sourceType": "official_calendar",
+      "title": "2012 年公历与农历日期对照表",
+      "publisher": "香港天文台",
+      "editionOrVersion": "2012 text table",
+      "sourceRef": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T2012c.txt",
+      "accessedAt": "2026-08-01T00:00:00.000Z",
+      "artifactSha256": "3e9fe288edc47f8bbf7055df6548ce59a3c2587d647aec89b82fed57264b99cf",
+      "licenseRef": "https://data.gov.hk/en/terms-and-conditions",
+      "note": "UTF-8 繁体中文逐日文本表；摘要按下载原始字节计算。"
+    },
+    {
+      "sourceId": "hko-table-2023-tc",
+      "lineageId": "hong-kong-observatory-calendar",
+      "sourceType": "official_calendar",
+      "title": "2023 年公历与农历日期对照表",
+      "publisher": "香港天文台",
+      "editionOrVersion": "2023 text table",
+      "sourceRef": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T2023c.txt",
+      "accessedAt": "2026-08-01T00:00:00.000Z",
+      "artifactSha256": "4a5fc4dbb7a1b78824bc2b0cf9c07083f9487e610cece066102759cd5d23edee",
+      "licenseRef": "https://data.gov.hk/en/terms-and-conditions",
+      "note": "UTF-8 繁体中文逐日文本表；摘要按下载原始字节计算。"
+    },
+    {
+      "sourceId": "hko-table-2023-csv",
+      "lineageId": "hong-kong-observatory-calendar",
+      "sourceType": "official_calendar",
+      "title": "公历与农历对照表 2023 CSV",
+      "publisher": "香港天文台 / DATA.GOV.HK",
+      "editionOrVersion": "2023 CSV",
+      "sourceRef": "https://data.weather.gov.hk/weatherAPI/hko_data/calendar/nongli_calendar_2023.csv",
+      "accessedAt": "2026-08-01T00:00:00.000Z",
+      "artifactSha256": "765361bc4a65ce8bc4687f062d1c8afdb08deba1fb365aaea7c7b44481cb7419",
+      "licenseRef": "https://data.gov.hk/en/terms-and-conditions",
+      "note": "机器可读 CSV；与 2023 文本表同属香港天文台来源谱系，因此不能互算两个独立来源。"
+    },
+    {
+      "sourceId": "hko-table-2025-tc",
+      "lineageId": "hong-kong-observatory-calendar",
+      "sourceType": "official_calendar",
+      "title": "2025 年公历与农历日期对照表",
+      "publisher": "香港天文台",
+      "editionOrVersion": "2025 text table",
+      "sourceRef": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T2025c.txt",
+      "accessedAt": "2026-08-01T00:00:00.000Z",
+      "artifactSha256": "7a2803584dcd12a38a13e3710e643369996f59e690d684b9e3705fc5e988ebc2",
+      "licenseRef": "https://data.gov.hk/en/terms-and-conditions",
+      "note": "UTF-8 繁体中文逐日文本表；摘要按下载原始字节计算。"
+    },
+    {
+      "sourceId": "hko-table-2100-tc",
+      "lineageId": "hong-kong-observatory-calendar",
+      "sourceType": "official_calendar",
+      "title": "2100 年公历与农历日期对照表",
+      "publisher": "香港天文台",
+      "editionOrVersion": "2100 text table",
+      "sourceRef": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T2100c.txt",
+      "accessedAt": "2026-08-01T00:00:00.000Z",
+      "artifactSha256": "e8da3a341c440b2f097c420696f00c71dc1917ac927433dd76b24fb2fa5d5df9",
+      "licenseRef": "https://data.gov.hk/en/terms-and-conditions",
+      "note": "UTF-8 繁体中文逐日文本表；摘要按下载原始字节计算；未来日期须连同天文台不确定性说明阅读。"
+    },
+    {
+      "sourceId": "dotnet-framework-4-8-chinese-lunisolar",
+      "lineageId": "dotnet-chinese-lunisolar-calendar",
+      "sourceType": "software_implementation",
+      "title": "System.Globalization.ChineseLunisolarCalendar",
+      "publisher": "Microsoft",
+      "editionOrVersion": "mscorlib 4.0.0.0; file 4.8.9337.0; CLR v4.0.30319",
+      "sourceRef": "https://learn.microsoft.com/en-us/dotnet/api/system.globalization.chineselunisolarcalendar",
+      "accessedAt": "2026-08-01T00:00:00.000Z",
+      "artifactSha256": "a8cae3d326f7d973ca79cba849939d4837ad18d507ef6d5f6ebab802b7fb157a",
+      "licenseRef": null,
+      "note": "Windows 本机独立差分运行时；支持公历 1901-02-19 至 2101-01-28。闰月使用插入后的 1—13 月序号，审计脚本已还原为月份加独立闰月布尔值。"
+    }
+  ],
+  "independentCrossCheckRuns": [
+    {
+      "runId": "dotnet-framework-4-8-calendar-crosscheck-2026-08-01",
+      "sourceId": "dotnet-framework-4-8-chinese-lunisolar",
+      "executedAt": "2026-08-01T00:00:00.000Z",
+      "environment": "Windows x64; mscorlib 4.0.0.0; file 4.8.9337.0; CLR v4.0.30319",
+      "method": "对每个期望公历日期调用 GetYear/GetMonth/GetDayOfMonth/GetLeapMonth；把插入式闰月序号还原为月份与闰月布尔值，再与冻结农历输入比较。",
+      "matchedCaseIds": [
+        "calendar-hko-1901-01-01",
+        "calendar-hko-1901-01-02",
+        "calendar-hko-1901-01-29",
+        "calendar-hko-1901-02-30",
+        "calendar-hko-1903-regular-05-01",
+        "calendar-hko-1903-regular-05-29",
+        "calendar-hko-1903-leap-05-01",
+        "calendar-hko-1903-leap-05-29",
+        "calendar-hko-1995-07-23",
+        "calendar-hko-1995-regular-08-30",
+        "calendar-hko-1995-leap-08-01",
+        "calendar-hko-1995-leap-08-29",
+        "calendar-hko-2012-leap-04-01",
+        "calendar-hko-2012-leap-04-29",
+        "calendar-hko-2023-regular-02-01",
+        "calendar-hko-2023-regular-02-30",
+        "calendar-hko-2023-leap-02-01",
+        "calendar-hko-2023-leap-02-29",
+        "calendar-hko-2025-regular-06-30",
+        "calendar-hko-2025-leap-06-01",
+        "calendar-hko-2100-01-01",
+        "calendar-hko-2100-11-30",
+        "calendar-hko-2100-12-01"
+      ],
+      "unsupportedCaseIds": ["calendar-hko-1900-12-30"],
+      "mismatches": []
+    }
+  ],
+  "cases": [
+    {
+      "id": "calendar-hko-1900-12-30",
+      "category": "lunar_year_boundary",
+      "coverageTags": ["supported_range_lower_edge", "lunar_new_year_eve", "cross_gregorian_year"],
+      "lunarDate": "1900-12-30",
+      "lunarLeapMonth": false,
+      "expectedGregorianDate": "1901-02-18",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-1901-tc", "locator": "1901年02月18日 三十", "observedLunarDate": "1900-12-30", "observedLunarLeapMonth": false, "observedGregorianDate": "1901-02-18"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-1901-01-01",
+      "category": "lunar_year_boundary",
+      "coverageTags": ["supported_range_lower_edge", "lunar_new_year_first_day"],
+      "lunarDate": "1901-01-01",
+      "lunarLeapMonth": false,
+      "expectedGregorianDate": "1901-02-19",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-1901-tc", "locator": "1901年02月19日 正月", "observedLunarDate": "1901-01-01", "observedLunarLeapMonth": false, "observedGregorianDate": "1901-02-19"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-1901-01-02",
+      "category": "lunar_year_boundary",
+      "coverageTags": ["supported_range_lower_edge", "lunar_new_year_second_day"],
+      "lunarDate": "1901-01-02",
+      "lunarLeapMonth": false,
+      "expectedGregorianDate": "1901-02-20",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-1901-tc", "locator": "1901年02月20日 初二", "observedLunarDate": "1901-01-02", "observedLunarLeapMonth": false, "observedGregorianDate": "1901-02-20"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-1901-01-29",
+      "category": "month_size",
+      "coverageTags": ["supported_range_lower_edge", "regular_small_month_end"],
+      "lunarDate": "1901-01-29",
+      "lunarLeapMonth": false,
+      "expectedGregorianDate": "1901-03-19",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-1901-tc", "locator": "1901年03月19日 廿九", "observedLunarDate": "1901-01-29", "observedLunarLeapMonth": false, "observedGregorianDate": "1901-03-19"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-1901-02-30",
+      "category": "month_size",
+      "coverageTags": ["supported_range_lower_edge", "regular_big_month_end"],
+      "lunarDate": "1901-02-30",
+      "lunarLeapMonth": false,
+      "expectedGregorianDate": "1901-04-18",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-1901-tc", "locator": "1901年04月18日 三十", "observedLunarDate": "1901-02-30", "observedLunarLeapMonth": false, "observedGregorianDate": "1901-04-18"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-1903-regular-05-01",
+      "category": "leap_month",
+      "coverageTags": ["regular_month_before_same_number_leap", "regular_month_first_day"],
+      "lunarDate": "1903-05-01",
+      "lunarLeapMonth": false,
+      "expectedGregorianDate": "1903-05-27",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-1903-tc", "locator": "1903年05月27日 五月", "observedLunarDate": "1903-05-01", "observedLunarLeapMonth": false, "observedGregorianDate": "1903-05-27"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-1903-regular-05-29",
+      "category": "leap_month",
+      "coverageTags": ["regular_month_before_same_number_leap", "regular_small_month_end"],
+      "lunarDate": "1903-05-29",
+      "lunarLeapMonth": false,
+      "expectedGregorianDate": "1903-06-24",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-1903-tc", "locator": "1903年06月24日 廿九（随后为閏五月）", "observedLunarDate": "1903-05-29", "observedLunarLeapMonth": false, "observedGregorianDate": "1903-06-24"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-1903-leap-05-01",
+      "category": "leap_month",
+      "coverageTags": ["leap_month_first_day", "historical_leap_month"],
+      "lunarDate": "1903-05-01",
+      "lunarLeapMonth": true,
+      "expectedGregorianDate": "1903-06-25",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-1903-tc", "locator": "1903年06月25日 閏五月", "observedLunarDate": "1903-05-01", "observedLunarLeapMonth": true, "observedGregorianDate": "1903-06-25"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-1903-leap-05-29",
+      "category": "leap_month",
+      "coverageTags": ["leap_month_last_day", "historical_leap_month"],
+      "lunarDate": "1903-05-29",
+      "lunarLeapMonth": true,
+      "expectedGregorianDate": "1903-07-23",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-1903-tc", "locator": "閏五月區段：1903年07月23日 廿九", "observedLunarDate": "1903-05-29", "observedLunarLeapMonth": true, "observedGregorianDate": "1903-07-23"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-1995-07-23",
+      "category": "regression_anchor",
+      "coverageTags": ["existing_web_flow_anchor", "ordinary_month_middle"],
+      "lunarDate": "1995-07-23",
+      "lunarLeapMonth": false,
+      "expectedGregorianDate": "1995-08-18",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-1995-tc", "locator": "1995年08月18日 廿三", "observedLunarDate": "1995-07-23", "observedLunarLeapMonth": false, "observedGregorianDate": "1995-08-18"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-1995-regular-08-30",
+      "category": "leap_month",
+      "coverageTags": ["regular_month_before_same_number_leap", "regular_big_month_end"],
+      "lunarDate": "1995-08-30",
+      "lunarLeapMonth": false,
+      "expectedGregorianDate": "1995-09-24",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-1995-tc", "locator": "1995年09月24日 三十（随后为閏八月）", "observedLunarDate": "1995-08-30", "observedLunarLeapMonth": false, "observedGregorianDate": "1995-09-24"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-1995-leap-08-01",
+      "category": "leap_month",
+      "coverageTags": ["leap_month_first_day", "late_leap_month"],
+      "lunarDate": "1995-08-01",
+      "lunarLeapMonth": true,
+      "expectedGregorianDate": "1995-09-25",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-1995-tc", "locator": "1995年09月25日 閏八月", "observedLunarDate": "1995-08-01", "observedLunarLeapMonth": true, "observedGregorianDate": "1995-09-25"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-1995-leap-08-29",
+      "category": "leap_month",
+      "coverageTags": ["leap_month_last_day", "late_leap_month"],
+      "lunarDate": "1995-08-29",
+      "lunarLeapMonth": true,
+      "expectedGregorianDate": "1995-10-23",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-1995-tc", "locator": "閏八月區段：1995年10月23日 廿九", "observedLunarDate": "1995-08-29", "observedLunarLeapMonth": true, "observedGregorianDate": "1995-10-23"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-2012-leap-04-01",
+      "category": "leap_month",
+      "coverageTags": ["leap_month_first_day", "different_leap_month_position"],
+      "lunarDate": "2012-04-01",
+      "lunarLeapMonth": true,
+      "expectedGregorianDate": "2012-05-21",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-2012-tc", "locator": "2012年05月21日 閏四月", "observedLunarDate": "2012-04-01", "observedLunarLeapMonth": true, "observedGregorianDate": "2012-05-21"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-2012-leap-04-29",
+      "category": "leap_month",
+      "coverageTags": ["leap_month_last_day", "different_leap_month_position"],
+      "lunarDate": "2012-04-29",
+      "lunarLeapMonth": true,
+      "expectedGregorianDate": "2012-06-18",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-2012-tc", "locator": "閏四月區段：2012年06月18日 廿九", "observedLunarDate": "2012-04-29", "observedLunarLeapMonth": true, "observedGregorianDate": "2012-06-18"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-2023-regular-02-01",
+      "category": "leap_month",
+      "coverageTags": ["regular_month_before_same_number_leap", "machine_readable_source"],
+      "lunarDate": "2023-02-01",
+      "lunarLeapMonth": false,
+      "expectedGregorianDate": "2023-02-20",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-2023-tc", "locator": "2023年2月20日 二月", "observedLunarDate": "2023-02-01", "observedLunarLeapMonth": false, "observedGregorianDate": "2023-02-20"}, {"role": "authoritative", "sourceId": "hko-table-2023-csv", "locator": "20-Feb-23,癸卯年,兔,二月,初一", "observedLunarDate": "2023-02-01", "observedLunarLeapMonth": false, "observedGregorianDate": "2023-02-20"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-2023-regular-02-30",
+      "category": "leap_month",
+      "coverageTags": ["regular_month_before_same_number_leap", "regular_big_month_end", "machine_readable_source"],
+      "lunarDate": "2023-02-30",
+      "lunarLeapMonth": false,
+      "expectedGregorianDate": "2023-03-21",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-2023-tc", "locator": "2023年3月21日 三十", "observedLunarDate": "2023-02-30", "observedLunarLeapMonth": false, "observedGregorianDate": "2023-03-21"}, {"role": "authoritative", "sourceId": "hko-table-2023-csv", "locator": "21-Mar-23,癸卯年,兔,二月,三十", "observedLunarDate": "2023-02-30", "observedLunarLeapMonth": false, "observedGregorianDate": "2023-03-21"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-2023-leap-02-01",
+      "category": "leap_month",
+      "coverageTags": ["leap_month_first_day", "machine_readable_source"],
+      "lunarDate": "2023-02-01",
+      "lunarLeapMonth": true,
+      "expectedGregorianDate": "2023-03-22",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-2023-tc", "locator": "2023年3月22日 閏二月", "observedLunarDate": "2023-02-01", "observedLunarLeapMonth": true, "observedGregorianDate": "2023-03-22"}, {"role": "authoritative", "sourceId": "hko-table-2023-csv", "locator": "22-Mar-23,癸卯年,兔,閏二月,初一", "observedLunarDate": "2023-02-01", "observedLunarLeapMonth": true, "observedGregorianDate": "2023-03-22"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-2023-leap-02-29",
+      "category": "leap_month",
+      "coverageTags": ["leap_month_last_day", "machine_readable_source"],
+      "lunarDate": "2023-02-29",
+      "lunarLeapMonth": true,
+      "expectedGregorianDate": "2023-04-19",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-2023-tc", "locator": "閏二月區段：2023年4月19日 廿九", "observedLunarDate": "2023-02-29", "observedLunarLeapMonth": true, "observedGregorianDate": "2023-04-19"}, {"role": "authoritative", "sourceId": "hko-table-2023-csv", "locator": "19-Apr-23,癸卯年,兔,閏二月,廿九", "observedLunarDate": "2023-02-29", "observedLunarLeapMonth": true, "observedGregorianDate": "2023-04-19"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-2025-regular-06-30",
+      "category": "leap_month",
+      "coverageTags": ["regular_month_before_same_number_leap", "regular_big_month_end"],
+      "lunarDate": "2025-06-30",
+      "lunarLeapMonth": false,
+      "expectedGregorianDate": "2025-07-24",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-2025-tc", "locator": "2025年7月24日 三十（随后为閏六月）", "observedLunarDate": "2025-06-30", "observedLunarLeapMonth": false, "observedGregorianDate": "2025-07-24"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-2025-leap-06-01",
+      "category": "leap_month",
+      "coverageTags": ["leap_month_first_day", "different_leap_month_position"],
+      "lunarDate": "2025-06-01",
+      "lunarLeapMonth": true,
+      "expectedGregorianDate": "2025-07-25",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-2025-tc", "locator": "2025年7月25日 閏六月", "observedLunarDate": "2025-06-01", "observedLunarLeapMonth": true, "observedGregorianDate": "2025-07-25"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-2100-01-01",
+      "category": "supported_range_upper_edge",
+      "coverageTags": ["supported_range_upper_edge", "lunar_new_year_first_day", "future_table"],
+      "lunarDate": "2100-01-01",
+      "lunarLeapMonth": false,
+      "expectedGregorianDate": "2100-02-09",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-2100-tc", "locator": "2100年2月9日 正月", "observedLunarDate": "2100-01-01", "observedLunarLeapMonth": false, "observedGregorianDate": "2100-02-09"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-2100-11-30",
+      "category": "supported_range_upper_edge",
+      "coverageTags": ["supported_range_upper_edge", "latest_complete_lunar_month_in_range", "future_table"],
+      "lunarDate": "2100-11-30",
+      "lunarLeapMonth": false,
+      "expectedGregorianDate": "2100-12-30",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-2100-tc", "locator": "2100年12月30日 三十", "observedLunarDate": "2100-11-30", "observedLunarLeapMonth": false, "observedGregorianDate": "2100-12-30"}], "attestations": [], "decisionRecordRef": null}
+    },
+    {
+      "id": "calendar-hko-2100-12-01",
+      "category": "supported_range_upper_edge",
+      "coverageTags": ["supported_range_upper_edge", "latest_resolvable_gregorian_date", "future_table"],
+      "lunarDate": "2100-12-01",
+      "lunarLeapMonth": false,
+      "expectedGregorianDate": "2100-12-31",
+      "evidence": {"status": "candidate", "observations": [{"role": "authoritative", "sourceId": "hko-table-2100-tc", "locator": "2100年12月31日 十二月", "observedLunarDate": "2100-12-01", "observedLunarLeapMonth": false, "observedGregorianDate": "2100-12-31"}], "attestations": [], "decisionRecordRef": null}
+    }
+  ]
+}

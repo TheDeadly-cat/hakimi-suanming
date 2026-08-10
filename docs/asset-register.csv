@@ -1,0 +1,8 @@
+"file","purpose","creator_or_source","license_or_permission","obtained","production_status","notes"
+"design/concepts/desktop-chart-structure-v1.png","桌面命盘结构视觉概念","OpenAI image generation for this project","Project-generated asset; retain generation provenance","2026-08-01","reference-only","不打入生产包，不从图中切取 UI"
+"design/concepts/mobile-chart-evidence-v1.png","手机命盘与依据抽屉视觉概念","OpenAI image generation for this project","Project-generated asset; retain generation provenance","2026-08-01","reference-only","不打入生产包；正式实现去除 iOS 假壳"
+"design/concepts/desktop-chart-calibration-v1.png","桌面排盘校时视觉概念","OpenAI image generation for this project","Project-generated asset; retain generation provenance","2026-08-01","reference-only","不打入生产包，示例数据不是事实"
+"design/concepts/desktop-rule-compare-v1.png","桌面双规则对照视觉概念","OpenAI image generation for this project","Project-generated asset; retain generation provenance","2026-08-01","reference-only","不打入生产包，不使用概念中的装饰"
+"design/assets/pwa-icon-source-v1.png","PWA 安装图标母版","OpenAI image generation for this project","Project-generated asset; retain generation provenance","2026-08-01","production-source","原创四柱网格与朱砂节点，无竞品资产"
+"apps/web/public/icons/icon-192.png","PWA 192 图标","Derived from pwa-icon-source-v1.png","Same as source asset","2026-08-01","production","高质量双三次缩放"
+"apps/web/public/icons/icon-512.png","PWA 512/maskable 图标","Derived from pwa-icon-source-v1.png","Same as source asset","2026-08-01","production","保留宽安全区用于 maskable 裁切"
