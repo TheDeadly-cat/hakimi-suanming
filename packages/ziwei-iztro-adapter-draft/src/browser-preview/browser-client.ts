@@ -8,10 +8,35 @@ import browserSourceIdentity from "./generated-browser-source-identity.ts";
 import type { ZiweiBirthInputDraft } from "../contract-bridge.ts";
 
 export { createZiweiBrowserDisplayProjection } from "./display-projection.ts";
+export {
+  ZIWEI_NATAL_TRANSFORMATION_PALACE_REVIEW_FEEDBACK_FILENAME,
+  ZIWEI_NATAL_TRANSFORMATION_PALACE_REVIEW_FEEDBACK_MAX_BYTES,
+  createZiweiNatalTransformationPalaceReviewFeedbackTemplate,
+  preflightZiweiNatalTransformationPalaceReviewFeedback,
+  serializeZiweiNatalTransformationPalaceReviewFeedbackTemplate
+} from "./natal-transformation-palace-review-feedback.ts";
+export {
+  ZIWEI_CORE_MINOR_STAR_SANFANG_REVIEW_FEEDBACK_MAX_BYTES,
+  ZIWEI_CORE_MINOR_STAR_SANFANG_REVIEW_FEEDBACK_PROFILE,
+  createZiweiCoreMinorStarSanfangReviewFeedbackTemplate,
+  preflightZiweiCoreMinorStarSanfangReviewFeedback,
+  serializeZiweiCoreMinorStarSanfangReviewFeedbackTemplate,
+  ziweiCoreMinorStarSanfangReviewFeedbackFilename
+} from "./core-minor-star-sanfang-review-feedback.ts";
 export type {
   BrowserProbeDisplayProjection,
   BrowserProbeSuccessResult
 } from "./browser-protocol.ts";
+export type {
+  ZiweiNatalTransformationPalaceReviewFeedbackEnvelope,
+  ZiweiNatalTransformationPalaceReviewFeedbackPreflight,
+  ZiweiNatalTransformationPalaceReviewItem
+} from "./natal-transformation-palace-review-feedback.ts";
+export type {
+  ZiweiCoreMinorStarSanfangReviewFeedbackEnvelope,
+  ZiweiCoreMinorStarSanfangReviewFeedbackItem,
+  ZiweiCoreMinorStarSanfangReviewFeedbackPreflight
+} from "./core-minor-star-sanfang-review-feedback.ts";
 
 export type ZiweiBrowserCalculationOptions = Readonly<{
   timeoutMs?: number;

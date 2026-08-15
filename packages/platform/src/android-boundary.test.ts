@@ -19,7 +19,10 @@ describe("Android migration boundary", () => {
   it("核心计算、存储、备份与导出包不直接调用浏览器 DOM 文件接口", () => {
     const violations: string[] = [];
     for (const packageEntry of readdirSync(packagesRoot, { withFileTypes: true })) {
-      if (!packageEntry.isDirectory() || packageEntry.name === "platform") continue;
+      // Isolated draft packages are private, empty-export, and never reach the
+      // production bundle; their browser-app sources must not be treated as
+      // production Android-facing code here.
+      if (!packageEntry.isDirectory() || packageEntry.name === "platform" || packageEntry.name.endsWith("-draft")) continue;
       const sourceDirectory = join(packagesRoot, packageEntry.name, "src");
       for (const file of productionTypeScriptFiles(sourceDirectory)) {
         const source = readFileSync(file, "utf8");

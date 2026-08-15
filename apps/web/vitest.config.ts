@@ -20,6 +20,7 @@ export default defineConfig({
       "@hakimi/integrity": path.resolve(workspaceRoot, "packages/integrity/src/index.ts"),
       "@hakimi/rule-profiles": path.resolve(workspaceRoot, "packages/rule-profiles/src/index.ts"),
       "@hakimi/bazi-core": path.resolve(workspaceRoot, "packages/bazi-core/src/index.ts"),
+      "@hakimi/bazi-interpretation": path.resolve(workspaceRoot, "packages/bazi-interpretation/src/index.ts"),
       "@hakimi/gold-standard/calendar-divergence-windows": path.resolve(
         workspaceRoot,
         "packages/gold-standard/src/calendar-divergence-windows.ts"

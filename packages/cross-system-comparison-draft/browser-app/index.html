@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" href="data:," />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>跨体系只读并列 · 隔离草案</title>
+  </head>
+  <body>
+    <header>
+      <p class="eyebrow">Readonly cross-system comparison draft</p>
+      <h1>跨体系只读并列（隔离预览）</h1>
+      <p id="workspace-status" role="status" aria-live="polite" data-state="idle">
+        等待一次并列核对；页面不保存任何资料。
+      </p>
+    </header>
+
+    <section aria-labelledby="input-title">
+      <h2 id="input-title">冻结事实摘要与显式人物关联</h2>
+      <p>
+        只接受已冻结的体系事实摘要（不是数据库或 Revision Schema），强制
+        <code>factsFrozen / noScoring / noAutoPersonMerge</code>；人物关联必须是用户显式确认且可删除。
+      </p>
+      <label class="field">
+        <span>完整并列 JSON（含 contentSha256）</span>
+        <textarea id="payload-json" rows="24" spellcheck="false"></textarea>
+      </label>
+      <button id="verify-button" class="primary-action" type="button">验证并列</button>
+      <p id="form-error" class="inline-error" role="alert" hidden></p>
+    </section>
+
+    <section aria-labelledby="result-title" hidden id="result-section">
+      <h2 id="result-title">并列结果</h2>
+      <dl id="result-meta" class="result-meta"></dl>
+      <div id="system-results"></div>
+      <p id="boundary-note" class="boundary-note"></p>
+    </section>
+
+    <section aria-labelledby="reasons-title" hidden id="reasons-section">
+      <h2 id="reasons-title">失败关闭原因</h2>
+      <ul id="reasons-list"></ul>
+    </section>
+
+    <script type="module" src="../src/browser-app/main.ts"></script>
+  </body>
+</html>

@@ -199,7 +199,11 @@ const BOOT_SMOKE_INPUT: BirthInput = {
 
 const EXPECTED_BOOT_RESULT_HASH = "fc1f9b02322e72cbae2b6bab21d295aadff45ae820ac49575c0e323016f2c6b1";
 const EXPECTED_TZDB_DATA_SHA256 = "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81";
-const SHADOW_DATABASE_BOOT_TIMEOUT_MS = 120_000;
+// The shadow boot budget must cover a first-time v13→v16 materialization plus
+// full audit of a 10,000-case library (documented at 35-43 s on the fixed
+// workstation) and the bounded wait for a peer page that is already running
+// the same migration. 300 s is still a fail-closed cap, not an open loop.
+const SHADOW_DATABASE_BOOT_TIMEOUT_MS = 300_000;
 
 async function verifyCalculationCore(): Promise<void> {
   const [{ calculateChart }, { WORKING_DEFAULT_RULE_PROFILE }, { RUNTIME_TIME_ZONE_DATABASE }] = await Promise.all([

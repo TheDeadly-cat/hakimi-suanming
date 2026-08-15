@@ -171,7 +171,7 @@ export function EvidencePanel({ revision, selection, open, onClose }: { revision
         </section>
         <section>
           <div className="evidence-title"><GitCompareArrows aria-hidden="true" /><h3>怎么解</h3></div>
-          <p>当前只展示确定性候选结构，不输出旺衰、格局、调候或用神结论。日柱按“{revision.ruleProfile.calendar.dayBoundary === "zi_start_23" ? "23:00 子初换日" : "00:00 午夜换日"}”计算。</p>
+          <p>此字段依据只证明确定性候选结构；旺衰与十神请到“概览”查看 0.1.0 规则候选，格局、调候与用神仍未下结论。日柱按“{revision.ruleProfile.calendar.dayBoundary === "zi_start_23" ? "23:00 子初换日" : "00:00 午夜换日"}”计算。</p>
         </section>
         <section>
           <div className="evidence-title"><BookOpen aria-hidden="true" /><h3>来源</h3></div>

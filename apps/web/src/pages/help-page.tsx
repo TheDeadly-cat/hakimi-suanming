@@ -7,6 +7,7 @@ import {
 import { FULL_BACKUP_FORMAT_VERSION } from "@hakimi/contracts";
 import { RUNTIME_TIME_ZONE_DATABASE } from "@hakimi/time-core";
 import { PageHeading } from "../components/page-heading";
+import { ResearchContentCatalog } from "../components/research-content-catalog";
 import { ResearchSystemRoadmap } from "../components/research-system-roadmap";
 import { StatusPill } from "../components/status-pill";
 import { APP_VERSION } from "../lib/app-version";
@@ -61,6 +62,8 @@ export function HelpPage() {
       </section>
 
       <ResearchSystemRoadmap />
+
+      <ResearchContentCatalog />
 
       <nav className="help-topic-nav" aria-label="帮助主题">
         {helpTopics.map((topic) => <a key={topic.id} href={`#${topic.id}`}>{topic.label}</a>)}
@@ -119,9 +122,9 @@ export function HelpPage() {
           <div className="help-section-body">
             <div className="help-boundary-note">
               <BotOff aria-hidden="true" />
-              <p><strong>当前版本没有接入 AI Provider、远程模型解读或 AI 对话。</strong>核心排盘、运限、检索、对照、笔记和备份不依赖 AI，也不会为了生成解释而上传出生资料。</p>
+              <p><strong>AI 研究助手默认关闭。</strong>只有你在命盘研读页主动填写自己的 DeepSeek API Key 并点击发送时，才会向 DeepSeek 联网发送你明确选择的四柱、规则身份与问题；核心排盘、运限、检索、对照、笔记和备份不依赖 AI。</p>
             </div>
-            <p>未来若增加 AI，它只能作为可关闭的语言解释层：必须在发送前说明服务商、联网状态和字段范围；项目密钥不得打包进 Web/PWA 或未来 APK，也不得进入完整备份；输出必须引用已冻结事实与来源，不得重算四柱、改写 Revision、把概率语言包装成确定事实，或在没有 Provider 时阻断现有研究闭环。</p>
+            <p>AI 只能是可关闭的语言解释层：发送前必须说明服务商、联网状态和字段范围；项目密钥不得打包进 Web/PWA 或未来 APK，也不得进入完整备份；输出必须引用已冻结事实与来源，不得重算四柱、改写 Revision、把概率语言包装成确定事实，或在没有 Provider 时阻断现有研究闭环。</p>
           </div>
         </section>
 
@@ -167,7 +170,7 @@ export function HelpPage() {
           <div><dt>完整备份</dt><dd>full {FULL_BACKUP_FORMAT_VERSION}</dd></div>
           <div><dt>时区数据</dt><dd>IANA {RUNTIME_TIME_ZONE_DATABASE.ianaVersion}</dd></div>
           <div><dt>账号 / 云同步</dt><dd>未接入</dd></div>
-          <div><dt>AI Provider</dt><dd>未接入</dd></div>
+              <div><dt>AI Provider</dt><dd>DeepSeek（用户自带密钥 · 默认关闭）</dd></div>
         </dl>
       </section>
 

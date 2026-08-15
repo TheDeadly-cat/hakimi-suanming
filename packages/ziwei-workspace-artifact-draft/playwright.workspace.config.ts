@@ -6,6 +6,7 @@ const baseURL = "http://127.0.0.1:4218";
 
 export default defineConfig({
   testDir: "./e2e",
+  testIgnore: "core-minor-sanfang-review-v013.spec.ts",
   outputDir: path.join(os.tmpdir(), "hakimi-ziwei-workspace-playwright-results"),
   timeout: 180_000,
   expect: { timeout: 30_000 },

@@ -27,6 +27,7 @@
       "@hakimi/integrity": ["./packages/integrity/src/index.ts"],
       "@hakimi/rule-profiles": ["./packages/rule-profiles/src/index.ts"],
       "@hakimi/bazi-core": ["./packages/bazi-core/src/index.ts"],
+      "@hakimi/bazi-interpretation": ["./packages/bazi-interpretation/src/index.ts"],
       "@hakimi/gold-standard/calendar-divergence-windows": ["./packages/gold-standard/src/calendar-divergence-windows.ts"],
       "@hakimi/gold-standard/calendar-divergence-review": ["./packages/gold-standard/src/calendar-divergence-review.ts"],
       "@hakimi/gold-standard/lunar-conversion": ["./packages/gold-standard/src/lunar-conversion.ts"],

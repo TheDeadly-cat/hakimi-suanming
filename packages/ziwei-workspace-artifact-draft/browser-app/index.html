@@ -118,7 +118,121 @@
               <dl id="center-summary" class="center-summary" hidden></dl>
             </div>
           </div>
-          <p id="artifact-caption" class="artifact-caption">这里只呈现结构化工程事实，不提供断语，也不替代专家复核。</p>
+          <p id="artifact-caption" class="artifact-caption">盘面为结构化工程事实；十四主星与精确核心十二星的基础、落宫、合参、逐宫复核及当前盘四段式补充均为隔离候选，逐条标注来源并等待专家规则。</p>
+
+          <section id="sanfang-panel" class="sanfang-panel" aria-labelledby="sanfang-title" hidden>
+            <div class="sanfang-heading">
+              <div>
+                <p class="section-kicker">本命事实＋待审内容</p>
+                <h3 id="sanfang-title">三方四正、十四主星、核心十二星与四段式直读</h3>
+              </div>
+              <label for="sanfang-focus">
+                <span>选择问题宫位</span>
+                <select id="sanfang-focus"></select>
+              </label>
+            </div>
+            <p id="sanfang-target-summary" class="sanfang-target-summary"></p>
+            <div id="palace-reading-review" class="palace-reading-review" hidden></div>
+            <section
+              id="core-minor-sanfang-review-panel"
+              class="core-minor-sanfang-review-panel"
+              aria-labelledby="core-minor-sanfang-review-title"
+              aria-busy="false"
+              data-packet-state="unavailable"
+              data-preflight-state="idle"
+              data-current-projection-bound="false"
+              data-identity-verified="false"
+              data-digital-signature-verified="false"
+              data-expert-truth-claimed="false"
+              data-eligible-for-formal-activation="false"
+              data-auto-integration-allowed="false"
+              data-catalog-decision-inheritance-allowed="false"
+              data-artifact-revision-or-storage-mutation-performed="false"
+              data-network-upload-performed="false"
+              data-good-bad-orientation="null"
+              data-event-outcome="null"
+              data-result="null"
+              hidden
+            >
+              <div class="core-minor-sanfang-review-heading">
+                <div>
+                  <p class="section-kicker">v0.13 · 当前盘动态审稿包</p>
+                  <h4 id="core-minor-sanfang-review-title">核心十二辅煞 × 十二组三方四正 occurrence</h4>
+                </div>
+                <span>整盘绑定 · 只读预检</span>
+              </div>
+              <p class="core-minor-sanfang-review-intro">
+                这里把当前盘十二个目标宫的全部三方四正 occurrence 组成一份独立审稿包；下方证据随“问题宫位”切换，整盘模板不会因切宫失效。
+                本区不改写上方四段式、主星、四化或 12／144 条静态候选，也不继承任何审稿决定。
+              </p>
+              <div class="core-minor-sanfang-review-focus" aria-live="polite" aria-atomic="true">
+                <div>
+                  <strong id="core-minor-sanfang-review-focus-title">等待当前盘</strong>
+                  <span id="core-minor-sanfang-review-focus-summary"></span>
+                </div>
+                <span id="core-minor-sanfang-review-focus-count">0 项 occurrence</span>
+              </div>
+              <div
+                id="core-minor-sanfang-review-occurrences"
+                class="core-minor-sanfang-review-occurrences"
+                aria-label="当前问题宫位的核心十二辅煞三方四正 occurrence"
+              ></div>
+              <div class="core-minor-sanfang-review-actions">
+                <button id="core-minor-sanfang-review-prepare" class="secondary-action" type="button" disabled>
+                  准备当前整盘审稿包
+                </button>
+                <button id="core-minor-sanfang-review-download" class="secondary-action" type="button" disabled>
+                  下载已准备 JSON
+                </button>
+                <label class="file-action" for="core-minor-sanfang-review-file" aria-disabled="true">
+                  <span>选择已填写 JSON 并只读预检</span>
+                  <input
+                    id="core-minor-sanfang-review-file"
+                    type="file"
+                    accept="application/json,.json"
+                    disabled
+                  />
+                </label>
+              </div>
+              <dl class="core-minor-sanfang-review-summary">
+                <div><dt>目标宫复核</dt><dd id="core-minor-sanfang-review-review-count">12</dd></div>
+                <div><dt>整盘 occurrence</dt><dd id="core-minor-sanfang-review-occurrence-count">—</dd></div>
+                <div><dt>已裁决</dt><dd id="core-minor-sanfang-review-resolved">0</dd></div>
+                <div><dt>审稿归属</dt><dd id="core-minor-sanfang-review-reviewer">尚未提供</dd></div>
+              </dl>
+              <p
+                id="core-minor-sanfang-review-message"
+                class="core-minor-sanfang-review-message"
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                data-state="idle"
+              >
+                排盘后请显式准备当前整盘模板；不会自动下载、上传或写入本地档案。
+              </p>
+              <ol id="core-minor-sanfang-review-items" class="core-minor-sanfang-review-items" hidden></ol>
+              <p class="core-minor-sanfang-review-privacy">
+                <strong>敏感派生事实：</strong>模板不含出生输入、档案标题、Revision 身份或本地路径，但四宫关系、星曜位置、亮度与本命四化组合仍可能识别一张命盘，请自行保管。
+                SHA-256 只是未加密摘要，不是加密、数字签名或身份核验。导入只在当前页面内存中预检；不发起网络上传，不写入工件、Revision、IndexedDB、Web Storage 或 Cache。
+                即使全部裁决，<code>goodBadOrientation / eventOutcome / result</code> 仍为 <code>null</code>，且不会自动集成、正式激活或回填静态候选。
+              </p>
+            </section>
+            <div id="sanfang-grid" class="sanfang-grid"></div>
+            <p class="sanfang-boundary">
+              宫位、星曜、亮度与生年四化来自已验真盘面；主星基础短解为 <code>neutral_candidate/0.1</code>，
+              十二宫另有 <code>major_star_all_palaces/0.2</code> 共 168 条位置化候选；命财官迁保留逐条人工短解，新增八宫由已登记星曜线索与宫位问题域原创合成。
+              盘面全部主星再生成 <code>combination_review/0.2</code>，只汇总亮度、生年四化、同宫与三方会照事实并提出四个审稿问题，
+              并由 <code>same_star_synthesis_review/0.1</code> 按“位置主线→本星状态→同宫→对宫→两组三合位”组成每颗主星的只读阅读包。
+              当前所选宫位先由 <code>palace_sanfang.four_part_synthesis_candidate/0.1</code> 把既有逐宫、逐星与本命生年四化候选重组为“本宫主题／外部牵引／资源压力观察／矛盾合成”四段；本宫无主星时保持事实空值，不自动借用对宫或三合位主星。
+              核心十二星另有 <code>core_minor_star.neutral_candidate/0.1</code> 共 12 条基础候选及 <code>core_minor_star_all_palaces.neutral_candidate/0.1</code> 共 144 条落宫候选；只按精确星键投影，传统六吉／六煞只作分组，不是吉凶结果。
+              旧 <code>palace_sanfang.first_reading_review/0.1</code> 及四宫事实仍保留在下方供追溯；禄存、天马等范围外 minor 与全部 auxiliary 的核心十二星候选固定为 <code>null</code>，只保留盘面事实。
+              逐宫总览内的 <code>natal_transformation.neutral_candidate/0.1</code> 只把已验真的本命生年禄权科忌连接到四条中性修正候选；无标记时保持空集合。
+              综合结论、好坏方向与事件结果固定为 <code>null</code>；不混入宫干／运限四化，不生成单星吉凶、人格标签、组合断语或评分，任何候选都不能据此评分。
+              结构规则 <code id="sanfang-rule-id"></code> 来自
+              <a id="sanfang-source-link" href="https://docs.iztro.com/learn/basis" target="_blank" rel="noreferrer">iztro 三方四正基础文档</a>；
+              内容来源见各主星与核心十二星候选中的链接。
+            </p>
+          </section>
 
           <dl id="artifact-audit" class="artifact-audit" hidden>
             <div><dt>工件摘要</dt><dd data-audit="artifact"></dd></div>
@@ -140,6 +254,51 @@
           <ol id="archive-list" class="archive-list" hidden></ol>
         </aside>
       </div>
+
+      <section
+        id="review-feedback-panel"
+        class="review-feedback-panel"
+        aria-labelledby="review-feedback-title"
+        data-identity-verified="false"
+        data-digital-signature-verified="false"
+        data-eligible-for-formal-activation="false"
+        data-auto-integration-allowed="false"
+        data-artifact-revision-or-storage-mutation-performed="false"
+        data-good-bad-orientation="null"
+        data-event-outcome="null"
+        data-result="null"
+      >
+        <div class="section-heading review-feedback-heading">
+          <div>
+            <p class="section-kicker">04 · 人工审稿闭环</p>
+            <h2 id="review-feedback-title">四化 × 十二宫 · 48 项审稿反馈</h2>
+          </div>
+          <p>模板 <code>v0.10.0</code> · 只读预检</p>
+        </div>
+        <p class="review-feedback-intro">
+          下载固定模板后，可由你或受邀研究者逐项填写流派、成立条件、反例与条件化方向提案；重新导入只做内存预检和展示，不写入工件、Revision、IndexedDB 或资料代次。
+        </p>
+        <div class="review-feedback-actions">
+          <button id="review-feedback-download" class="secondary-action" type="button">下载 48 项审稿模板</button>
+          <label class="file-action" for="review-feedback-file">
+            <span>选择已填写 JSON 并只读预检</span>
+            <input id="review-feedback-file" type="file" accept="application/json,.json" />
+          </label>
+        </div>
+        <dl id="review-feedback-summary" class="review-feedback-summary">
+          <div><dt>固定总数</dt><dd id="review-feedback-total">48</dd></div>
+          <div><dt>已裁决</dt><dd id="review-feedback-resolved">0</dd></div>
+          <div><dt>未裁决</dt><dd id="review-feedback-unresolved">48</dd></div>
+          <div><dt>审稿归属</dt><dd id="review-feedback-reviewer">尚未提供</dd></div>
+        </dl>
+        <p id="review-feedback-message" class="review-feedback-message" role="status" aria-live="polite" data-state="idle">
+          尚未导入反馈。下载模板并在外部编辑；任何方向都只是待人工核验的提案。
+        </p>
+        <ol id="review-feedback-items" class="review-feedback-items" hidden></ol>
+        <p class="review-feedback-boundary">
+          自述身份不等于已核验身份；文件没有数字签名。即使 48 项全部裁决，<code>goodBadOrientation / eventOutcome / result</code> 仍固定为 <code>null</code>，不会自动集成或正式激活。
+        </p>
+      </section>
 
       <section class="safety-panel" aria-labelledby="safety-title">
         <div class="section-heading">

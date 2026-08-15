@@ -292,7 +292,14 @@
       "allowedBareImports": [],
       "crossDraftEdges": [],
       "specialChecks": [],
-      "lockClosures": []
+      "lockClosures": [],
+      "browserPreview": {
+        "sourceDirectory": "src/browser-app",
+        "allowedBareImports": [],
+        "allowedSharedFiles": [
+          "src/index.ts"
+        ]
+      }
     }
   ]
 }

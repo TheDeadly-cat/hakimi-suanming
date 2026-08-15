@@ -59,7 +59,7 @@ beforeAll(async () => {
   });
   const files = ZIWEI_BROWSER_SOURCE_PATHS.map((path, index) => ({
     path,
-    sha256: (index + 1).toString(16).repeat(64)
+    sha256: (index + 1).toString(16).padStart(64, "0")
   }));
   const sourceProjection = {
     identityVersion: ZIWEI_BROWSER_SOURCE_IDENTITY_VERSION,

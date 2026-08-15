@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FullBackupPayload } from "@hakimi/contracts";
-import type { ResearchDatabaseMutationState } from "@hakimi/storage";
+import { DatabaseGenerationError, type ResearchDatabaseMutationState } from "@hakimi/storage";
 import {
   PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR,
   PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR
@@ -9,7 +9,10 @@ import {
   ReleaseIntegrityCacheError,
   createReleaseIntegrityContractVersion
 } from "./release-integrity-cache";
-import { ReleaseDatabaseCoordinator } from "./release-database-coordinator";
+import {
+  ReleaseDatabaseCoordinator,
+  isPeerMigrationContention
+} from "./release-database-coordinator";
 
 const workerMocks = vi.hoisted(() => ({
   inspectSnapshot: vi.fn()
@@ -195,5 +198,40 @@ describe("ReleaseDatabaseCoordinator target integrity path", () => {
     });
     expect(database.withReleaseMigrationWriteAccess).toHaveBeenCalledTimes(1);
     expect(document.documentElement.dataset.dbIntegrityVerification).toBeUndefined();
+  });
+});
+
+describe("isPeerMigrationContention", () => {
+  it("accepts a live lease held by the peer migration owner", () => {
+    expect(isPeerMigrationContention(new DatabaseGenerationError(
+      "LEASE_HELD",
+      "migration lease is held by another owner"
+    ))).toBe(true);
+  });
+
+  it("accepts a Service Worker freeze rejection for an active peer session", () => {
+    expect(isPeerMigrationContention(new Error(
+      "旧标签页没有全部冻结：MIGRATION_SESSION_ACTIVE"
+    ))).toBe(true);
+  });
+
+  it("accepts a migration conflict that reports the peer migration as already pending", () => {
+    expect(isPeerMigrationContention(new DatabaseGenerationError(
+      "MIGRATION_CONFLICT",
+      "migration v13-to-v16-mutation-state is already pending"
+    ))).toBe(true);
+  });
+
+  it("rejects migration conflicts that are not peer-pending races", () => {
+    expect(isPeerMigrationContention(new DatabaseGenerationError(
+      "MIGRATION_CONFLICT",
+      "target database is already bound to incompatible migration lineage"
+    ))).toBe(false);
+  });
+
+  it("rejects unrelated failures", () => {
+    expect(isPeerMigrationContention(new Error("影子数据库物化后摘要发生变化。"))).toBe(false);
+    expect(isPeerMigrationContention(null)).toBe(false);
+    expect(isPeerMigrationContention(undefined)).toBe(false);
   });
 });

@@ -23,6 +23,8 @@ import type {
 import type { RevisionDerivedReplayRequest } from "@hakimi/revision-replay";
 import { EvidencePanel } from "../components/evidence-panel";
 import { FourPillarsMatrix, type MatrixSelection } from "../components/four-pillars-matrix";
+import { BaziInterpretationPanel, BaziInterpretationSummary } from "../components/bazi-interpretation-panel";
+import { DeepSeekAssistantPanel } from "../components/deepseek-assistant-panel";
 import { ResearchJournal } from "../components/research-journal";
 import { RevisionDerivedReplayPanel } from "../components/revision-derived-replay-panel";
 import { StatusPill } from "../components/status-pill";
@@ -97,7 +99,8 @@ function OverviewView({ revision }: { revision: RevisionRecord }) {
           <div><dt>视太阳时对照</dt><dd>{revision.timeCalibration.solarTimePreview ?? "未提供完整坐标"} · 未采用</dd></div>
         </dl>
       </section>
-      <section className="flat-section limitation-section"><Info aria-hidden="true" /><div><h2>哪些结果还不能下结论</h2><p>当前起运、大运与流年至流时都未通过金标；小运只锁定了出生时柱相邻、精确立春增龄的工程工作口径，仍待专家裁决。旺衰、格局、调候、用神、神煞与吉凶断语也未启用或未完成发布验证。</p></div></section>
+      <BaziInterpretationPanel revision={revision} />
+      <section className="flat-section limitation-section"><Info aria-hidden="true" /><div><h2>哪些结果还不能下最终结论</h2><p>旺衰与十神现已提供可审计的 0.1.0 规则候选、10×4 文案审稿表、“可能补偏 / 可能增偏 / 条件性”平衡方向，以及每柱透干与藏干的全部十神出现项；出现次数不合并计分，首屏焦点也不代表必然最强。格局与救应、寒暖燥湿、合化与生克链、运限引动四道复核门仍未评估，综合喜忌固定为 null。神煞只有用户主动展开的年干/年支基准事实、5×4 位置议题候选、按四柱出现项与同柱复核包；同一神煞落多柱逐项保留但不计分，正式神煞层、综合取向和吉凶解释仍关闭。从格、专旺、化气、用神与运限吉凶也未启用，起运、大运与流年至流时尚未通过人工金标。</p></div></section>
     </div>
   );
 }
@@ -400,6 +403,7 @@ function ResearchView({
         routeManualDirection={transitManualDirection}
         onSaveSnapshot={receiptSchemaAvailable && receiptWritesAllowed ? saveCalculationSnapshot : undefined}
       />
+      <DeepSeekAssistantPanel revision={revision} />
       <section className="flat-section">
         <div className="section-heading-row"><div><p className="eyebrow">Reproducibility</p><h2>复算元数据</h2></div><StatusPill tone="warning">{revision.manifest.verificationStatus}</StatusPill></div>
         <dl className="metadata-list">
@@ -661,7 +665,7 @@ export function ChartPage({ caseId, revisionId }: { caseId: string; revisionId: 
       <div className={`chart-workspace ${view === "structure" ? "" : "chart-workspace--full"}`}>
         <div className="chart-main-pane">
           {view === "overview" ? <OverviewView revision={revision} /> : null}
-          {view === "structure" ? <><section className="matrix-section"><div className="section-heading-row"><div><p className="eyebrow">Four pillars</p><h2>四柱结构矩阵</h2></div><p className="section-help">点击任一字段查看依据</p></div><FourPillarsMatrix facts={revision.facts} selection={selection} onSelect={selectCell} /></section><PillarRelationsPanel revision={revision} /><LuckCyclePanel key={revision.id} revision={revision} /><ProcessTrack revision={revision} /></> : null}
+          {view === "structure" ? <><BaziInterpretationSummary revision={revision} /><section className="matrix-section"><div className="section-heading-row"><div><p className="eyebrow">Four pillars</p><h2>四柱结构矩阵</h2></div><p className="section-help">点击任一字段查看依据</p></div><FourPillarsMatrix facts={revision.facts} selection={selection} onSelect={selectCell} /></section><PillarRelationsPanel revision={revision} /><LuckCyclePanel key={revision.id} revision={revision} /><ProcessTrack revision={revision} /></> : null}
           {view === "transit" ? <TransitWorkbench revision={revision} route={route.transit} snapshot={transitSnapshot} events={transitEvents} loading={transitLoading} error={transitError} onRouteChange={changeTransitRoute} onOpenResearch={openResearchForNode} /> : null}
           {view === "research" ? (
             <ResearchView

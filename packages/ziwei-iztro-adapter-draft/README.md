@@ -54,14 +54,20 @@ node ..\..\apps\web\node_modules\vite\bin\vite.js build --config vite.browser-pr
 node ..\..\apps\web\node_modules\vite\bin\vite.js preview --config vite.browser-preview.config.mjs --configLoader runner --host 127.0.0.1 --port 4216 --strictPort
 ```
 
-然后只在本机打开 `http://127.0.0.1:4216/`。专用 Vite 门在构建时调用既有 Node 适配器生成 digest-bound 规则快照，并注入固定源码图身份；非专用构建触发 sentinel 后会立即失败关闭。源码图当前精确覆盖六个 Browser 计算/验真/显示源文件，以及直接依赖的 `src/contract-bridge.ts` 和 `src/iztro-2.5.8-lock-closure.json`；其中单独保存 `browserWorkerSourceSha256`。Browser Worker 会重新核对规则、表格与依赖闭包摘要，并明确区分 Browser runtime adapter 和 Node 参考引擎身份。独立类型检查与定向验真测试：
+然后只在本机打开 `http://127.0.0.1:4216/`。专用 Vite 门在构建时调用既有 Node 适配器生成 digest-bound 规则快照，并注入固定源码图身份；非专用构建触发 sentinel 后会立即失败关闭。源码图当前精确覆盖 Browser 计算、验真、显示、主星候选、核心十二辅煞星及其 144 条落宫候选、组合事实、逐星合参、逐宫直读、逐宫四段式候选、本命生年四化／十二宫位置化修正及其审稿反馈预检所需的 19 个 TypeScript 源文件，以及 `src/iztro-2.5.8-lock-closure.json`；其中单独保存 `browserWorkerSourceSha256`。Browser Worker 会重新核对规则、表格与依赖闭包摘要，并明确区分 Browser runtime adapter 和 Node 参考引擎身份。独立类型检查与定向验真测试：
 
 ```powershell
 npx tsc --noEmit -p packages/ziwei-iztro-adapter-draft/tsconfig.browser-preview.json
-npx vitest run --config apps/web/vitest.config.ts packages/ziwei-iztro-adapter-draft/src/browser-artifact.test.ts
+npx vitest run --config apps/web/vitest.config.ts packages/ziwei-iztro-adapter-draft/src/browser-artifact.test.ts packages/ziwei-iztro-adapter-draft/src/natal-transformation-palace-review-feedback.test.ts
 ```
 
 四层 SHA-256 与源码图摘要都是无密钥完整性校验：可以发现保存内容和当前构建身份的变化，但不能认证某份历史工件确实由该 Worker 在所记时间执行。工件固定 `productionEligible=false`、`expertTruthClaimed=false`，也明确不包含八字 Case/Revision、生产数据库或完整备份。
+
+v0.10 的 `hakimi.ziwei.natal_transformation_palace_review_feedback/0.1.0` 从当前 48 条四化 × 十二宫候选确定性生成离线审稿模板，并用候选快照、有序 ID 与五来源登记三个 SHA-256 绑定版本。它允许填写自述审稿身份、流派、成立条件、反例与条件化方向提案，但预检固定保持身份未核验、无签名、不可正式激活、不自动整合、不写工件／Revision／IndexedDB，且 `goodBadOrientation / eventOutcome / result` 均为 `null`。完整合同与证据见 `docs/紫微内容-v0.10-四化十二宫审稿反馈模板与只读预检-2026-08-12.md`。
+
+v0.12 新增 `ziwei.core_minor_star.neutral_candidate/0.1` 与 `ziwei.core_minor_star_all_palaces.neutral_candidate/0.1`：只对白名单中的左辅、右弼、文昌、文曲、天魁、天钺、擎羊、陀罗、火星、铃星、地空、地劫建立 12 条基础中性候选和 `12 × 12 = 144` 条落宫候选。`factCategory:"minor"` 只描述 Hakimi 事实投影；传统 `supporting_six / challenging_six` 分组不是个人吉凶结果。禄存、天马、天空、其他 minor 与全部 auxiliary 继续保持候选为 `null`；地空与古籍“天空地劫”的命名冲突显式登记且不充当精确语义支持。亮度按锁定 `starId × earthlyBranchId` 十二支矩阵精确校验，包含擎羊／陀罗的合法空格；本命生年四化也只接受锁定组合。直读正文与用户可见反向提醒分别经过高风险结果词与惊吓性断语门；所有好坏、事件和结果字段仍为 `null`。完整边界见 `docs/紫微内容-v0.12-核心十二辅煞星基础与十二宫144条候选证据-2026-08-13.md`。
+
+v0.13 源码新增 `ziwei.core_minor_star.sanfang_occurrence_review/0.1` 与 `hakimi.ziwei.core_minor_star_sanfang_review_feedback/0.1.0`。它从已验真当前盘和 v0.12 完整候选快照派生一份整盘审稿包：固定 12 个 review；标准盘的十二个核心星曜事实各进入四个三方四正目标组，共 48 个有序 occurrence。组内顺序固定为本宫、对宫 `+6`、三合 `+4`、三合 `-4`，不向空本宫借星。五来源登记只聚合既有核心星曜 2、宫位 2 与几何 1；几何来源只支持关系位置，不支持星义或结果，因此没有新增语义来源。模板不含直接身份和原始输入，但包含敏感派生命盘事实；SHA-256 只是字节绑定，不是加密、签名或身份认证。全部正式激活、评分、自动整合、静态目录决定继承与存储写入保持 `false`，`goodBadOrientation / eventOutcome / result` 保持 `null`。本轮 adapter 定向 Vitest **2 files / 30 tests**、三个相关 typecheck、隔离边界与 108-module 4218 build 已通过，Edge／Chrome 独立场景共 **2/2**；完整合同及证据见 `docs/紫微内容-v0.13-核心十二辅煞三方四正命中复核包与证据-2026-08-14.md`。
 
 当前明确不支持：
 

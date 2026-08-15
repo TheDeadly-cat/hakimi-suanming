@@ -4,6 +4,7 @@
     "apps/web/src",
     "apps/web/e2e",
     "apps/web/playwright.config.ts",
+    "apps/web/playwright.p2-05-heavy.config.ts",
     "apps/web/vite.e2e.config.ts",
     "apps/web/vite.config.ts",
     "apps/web/vite.production-v14.config.ts",

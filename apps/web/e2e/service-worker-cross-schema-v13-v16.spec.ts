@@ -685,6 +685,78 @@ test("双旧 v13 页中一页已确认、另一页仍在万条慢审计时，新
   }
 });
 
+test("首个 v16 试运行页在源冻结被慢旧页拖过时限后自动重试并完成收敛", async () => {
+  test.setTimeout(600_000);
+  const context = await launchFixtureContext();
+  const externalRequests = collectExternalRequests(context, switchServer.origin);
+  try {
+    const stable = await openStableBridge(context, switchServer, sourceV13);
+    const caseId = await createDemoCase(stable.page, switchServer.origin);
+    const sourceBefore = await readNativeDatabase(stable.page, SOURCE_DATABASE);
+    if (!sourceBefore) throw new Error("The v13 freeze-retry source database was not created.");
+
+    await activateTargetGeneration(stable.page);
+
+    // Freeze the already-confirmed v13 tab's main thread for 8 s so its
+    // FREEZE_DATABASE_WRITES ACK arrives after the Service Worker's 5 s
+    // per-client timeout. The v16 trial page must retry instead of dying.
+    const busyPeer = stable.page.evaluate(() => {
+      const deadline = performance.now() + 8_000;
+      while (performance.now() < deadline) {
+        // Intentional busy loop: delays this tab's freeze ACK under test.
+      }
+    });
+
+    const trial = await context.newPage();
+    const trialProblems = collectConsoleProblems(trial);
+    const trialResponse = await trial.goto(`${switchServer.origin}/cases`, {
+      waitUntil: "domcontentloaded"
+    });
+    expect(trialResponse?.fromServiceWorker()).toBe(true);
+    await expect.poll(() => trial.evaluate(() =>
+      document.documentElement.dataset.dbSourceFreezeRetry ?? null
+    ), { timeout: CONVERGENCE_TIMEOUT_MS }).not.toBeNull();
+    expect(await trial.evaluate(() =>
+      document.querySelector('[role="alert"]') === null
+    )).toBe(true);
+
+    await busyPeer;
+    await waitForAppReady(trial);
+    await waitForServiceWorker(trial);
+    await expectPageFixture(trial, healthyV16);
+    await expectCommittedTarget(trial);
+    await expect.poll(() => cacheGeneration(trial, healthyV16)).toMatchObject({
+      bootAttempted: true,
+      bootConfirmed: true
+    });
+    expect(await readMutationState(trial)).toMatchObject({ epoch: 1, verifiedEpoch: 1 });
+    expect(await attemptRepositoryWrite(trial, caseId)).toMatchObject({ ok: true });
+    expect(await trial.evaluate(() =>
+      (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined)?.type
+    )).toBe("navigate");
+    await expect.poll(() => pageReleaseEvidence(trial)).toMatchObject({
+      appBootReady: "true",
+      dbMigrationPhase: "committed",
+      swBootAck: "true"
+    });
+
+    await expect.poll(() => pageReleaseEvidence(stable.page), { timeout: CONVERGENCE_TIMEOUT_MS })
+      .toMatchObject({
+        fixture: healthyV16.name,
+        appBootReady: "true",
+        swBootAck: "true",
+        dbMigrationPhase: "committed"
+      });
+    expectSourceUnchanged(sourceBefore, await readNativeDatabase(stable.page, SOURCE_DATABASE));
+    expect(await readNativeDatabase(stable.page, TARGET_DATABASE)).not.toBeNull();
+    expect(trialProblems).toEqual([]);
+    expect(stable.problems).toEqual([]);
+    expect(externalRequests).toEqual([]);
+  } finally {
+    await context.close();
+  }
+});
+
 test("全新浏览器直接安装 v16 时从空 v13 建立完整目标并确认 clean epoch", async () => {
   const context = await launchFixtureContext();
   const externalRequests = collectExternalRequests(context, switchServer.origin);

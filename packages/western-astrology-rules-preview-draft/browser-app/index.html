@@ -10,7 +10,7 @@
     />
     <meta
       name="description"
-      content="隔离的西洋星盘规则层预览：fresh Worker 天文诊断 + 纯几何黄道/宫位/相位，不保存、不联网、不进入八字数据库。"
+      content="隔离的西洋星盘规则层预览：fresh Worker 天文诊断、纯几何黄道/宫位/相位与来源绑定候选内容，不保存、不联网、不进入八字数据库。"
     />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='26' height='26' rx='7' fill='%232f3e5c'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%23f7f1df' stroke-width='2'/%3E%3Cpath d='M16 4v5M16 23v5M4 16h5M23 16h5' stroke='%23f7f1df' stroke-width='2'/%3E%3C/svg%3E" />
     <title>西洋星盘规则层预览 · 隔离草案</title>
@@ -22,7 +22,7 @@
         <div>
           <p class="eyebrow">哈基米 · 本地多术数研究</p>
           <h1>西洋星盘规则层预览</h1>
-          <p class="masthead-summary">每次计算新建一次性 Worker；只做工程几何，不保存、不联网、不代表专家真值。</p>
+          <p class="masthead-summary">每次计算新建一次性 Worker；呈现工程几何与来源绑定候选，不保存、不联网、不代表专家或科学真值。</p>
         </div>
         <div class="boundary-stamp" aria-label="隔离草案，不进入八字资料库">
           <strong>隔离草案</strong>
@@ -65,10 +65,10 @@
             <label class="field" for="obliquity-deg">
               <span>黄赤交角（演示值）</span>
               <input id="obliquity-deg" name="obliquity" type="number" min="0" max="90" step="0.0001" value="23.436" required />
+            </label>
             <label class="field" for="ayanamsha-deg">
               <span>恒星岁差值（演示值）</span>
               <input id="ayanamsha-deg" name="ayanamsha" type="number" min="0" max="360" step="0.0001" value="24.1" />
-            </label>
             </label>
           </div>
           <div class="field-row">
@@ -138,9 +138,208 @@
         </section>
       </section>
 
+      <section id="content-panel" class="content-panel" aria-labelledby="content-title">
+        <div class="section-heading content-heading">
+          <div>
+            <p class="section-kicker">06 · 来源绑定内容</p>
+            <h2 id="content-title">日月上升首读 × 逐星综合 × 定位星链 · 解读候选</h2>
+          </div>
+          <span class="review-badge">待专家复核</span>
+        </div>
+        <p id="content-boundary" class="content-boundary">
+          完成计算后，这里会显示来源绑定的现代西方占星候选内容；专家结论保持为空。
+        </p>
+        <p class="content-method">
+          阅读顺序：先用太阳、月亮、上升与命主星建立四步导航，再进入每颗天体的逐星综合包，把落座、落宫、主要相位、定位星链与最近四轴放在一起，并核对元素／模式分布及宫头守护星去向。
+          四步导航不是主导排名；页面保留互相补充或矛盾的因素，不自动生成吉凶分数，也不预测健康、财富、婚姻或具体事件。
+        </p>
+        <dl class="content-audit">
+          <div>
+            <dt>绑定的规则事实 SHA-256</dt>
+            <dd><code id="content-facts-hash">尚未生成</code></dd>
+          </div>
+          <div>
+            <dt>专家结果</dt>
+            <dd><code>result:null</code></dd>
+          </div>
+        </dl>
+
+        <section class="candidate-section structural-section" aria-labelledby="first-read-content-title">
+          <h3 id="first-read-content-title">整盘首读（太阳 × 月亮 × 上升 × 命主星）</h3>
+          <p id="first-read-content-empty" class="empty-state">尚未计算。</p>
+          <div id="first-read-content" hidden></div>
+        </section>
+
+        <section class="candidate-section structural-section" aria-labelledby="body-synthesis-content-title">
+          <h3 id="body-synthesis-content-title">逐星综合阅读包（落位 × 相位 × 定位链）</h3>
+          <p id="body-synthesis-content-empty" class="empty-state">尚未计算。</p>
+          <ol id="body-synthesis-content-list" class="body-synthesis-list" hidden></ol>
+        </section>
+
+        <section class="candidate-section structural-section" aria-labelledby="chart-ruler-content-title">
+          <h3 id="chart-ruler-content-title">命主星追踪</h3>
+          <p id="chart-ruler-content-empty" class="empty-state">尚未计算。</p>
+          <div id="chart-ruler-content" hidden></div>
+        </section>
+
+        <section class="candidate-section structural-section" aria-labelledby="dispositor-content-title">
+          <h3 id="dispositor-content-title">定位星链（传统／现代并列）</h3>
+          <p id="dispositor-content-empty" class="empty-state">尚未计算。</p>
+          <ol id="dispositor-content-list" class="content-candidate-list" hidden></ol>
+        </section>
+
+        <section class="candidate-section structural-section" aria-labelledby="angle-proximity-content-title">
+          <h3 id="angle-proximity-content-title">天体到四轴距离账（不预设 orb）</h3>
+          <p id="angle-proximity-content-empty" class="empty-state">尚未计算。</p>
+          <div id="angle-proximity-content" hidden></div>
+        </section>
+
+        <section class="candidate-section structural-section" aria-labelledby="angle-content-title">
+          <h3 id="angle-content-title">四轴落座候选</h3>
+          <p id="angle-content-empty" class="empty-state">尚未计算。</p>
+          <ol id="angle-content-list" class="content-candidate-list" hidden></ol>
+        </section>
+
+        <section class="candidate-section structural-section" aria-labelledby="distribution-content-title">
+          <h3 id="distribution-content-title">元素与模式分布</h3>
+          <p id="distribution-content-empty" class="empty-state">尚未计算。</p>
+          <div id="distribution-content" hidden></div>
+        </section>
+
+        <section class="candidate-section structural-section" aria-labelledby="house-ruler-content-title">
+          <h3 id="house-ruler-content-title">十二宫宫主星追踪</h3>
+          <p id="house-ruler-content-empty" class="empty-state">尚未计算。</p>
+          <ol id="house-ruler-content-list" class="content-candidate-list" hidden></ol>
+        </section>
+
+        <section class="candidate-section" aria-labelledby="placement-content-title">
+          <h3 id="placement-content-title">落位候选</h3>
+          <p id="placement-content-empty" class="empty-state">尚未计算。</p>
+          <ol id="placement-content-list" class="content-candidate-list" hidden></ol>
+        </section>
+
+        <section class="candidate-section" aria-labelledby="aspect-content-title">
+          <h3 id="aspect-content-title">相位候选</h3>
+          <p id="aspect-content-empty" class="empty-state">尚未计算。</p>
+          <ol id="aspect-content-list" class="content-candidate-list" hidden></ol>
+        </section>
+
+        <details class="source-ledger">
+          <summary>来源账与方法边界</summary>
+          <p>
+            术语与象征内容来自占星从业资料；Nature 双盲研究仅作为科学边界来源。
+            来源存在不等于内容获得科学验证，也不等于专家已经认可本项目的组合规则。
+          </p>
+          <ul id="content-sources"></ul>
+        </details>
+      </section>
+
+      <section
+        id="review-feedback-panel"
+        class="review-feedback-panel"
+        aria-labelledby="review-feedback-title"
+        data-identity-verified="false"
+        data-digital-signature-verified="false"
+        data-scientific-validity-established="false"
+        data-eligible-for-formal-activation="false"
+        data-auto-integration-allowed="false"
+        data-rule-artifact-or-storage-mutation-performed="false"
+        data-dynamic-composition-reviewed="false"
+        data-good-bad-orientation="null"
+        data-event-outcome="null"
+        data-result="null"
+      >
+        <div class="section-heading review-feedback-heading">
+          <div>
+            <p class="section-kicker">07 · 人工审稿闭环</p>
+            <h2 id="review-feedback-title">天体、星座、宫位、相位与轴点 · 43 项基础内容审稿</h2>
+          </div>
+          <p>模板 <code>v0.6.0</code> · 只读预检</p>
+        </div>
+        <p class="review-feedback-intro">
+          下载固定模板后，可由你或受邀研究者逐项填写所采用的占星传统、成立条件、反例与条件化方向提案。
+          重新导入只在内存中校验和展示，不写入规则、浏览器存储或正式入口。
+        </p>
+        <div class="review-feedback-actions">
+          <button id="review-feedback-download" class="secondary-action" type="button">下载 43 项审稿模板</button>
+          <label class="file-action" for="review-feedback-file">
+            <span>选择已填写 JSON 并只读预检</span>
+            <input id="review-feedback-file" type="file" accept="application/json,.json" />
+          </label>
+        </div>
+        <dl id="review-feedback-summary" class="review-feedback-summary">
+          <div><dt>固定总数</dt><dd id="review-feedback-total">43</dd></div>
+          <div><dt>已裁决</dt><dd id="review-feedback-resolved">0</dd></div>
+          <div><dt>未裁决</dt><dd id="review-feedback-unresolved">43</dd></div>
+          <div><dt>审稿归属</dt><dd id="review-feedback-reviewer">尚未提供</dd></div>
+        </dl>
+        <p id="review-feedback-message" class="review-feedback-message" role="status" aria-live="polite" data-state="idle">
+          尚未导入反馈。下载模板并在外部编辑；任何方向都只是待人工核验的条件化提案。
+        </p>
+        <ol id="review-feedback-items" class="review-feedback-items" hidden></ol>
+        <p class="review-feedback-boundary">
+          这 43 项只覆盖可复用的基础词条，不覆盖当前盘面动态生成且数量可变的组合卡。自述身份不等于已核验身份；文件没有数字签名，也不建立科学有效性。
+          即使全部裁决，<code>goodBadOrientation / eventOutcome / result</code> 仍固定为 <code>null</code>，不会自动集成或正式激活。
+        </p>
+      </section>
+
+      <section
+        id="dynamic-review-feedback-panel"
+        class="review-feedback-panel"
+        aria-labelledby="dynamic-review-feedback-title"
+        data-current-projection-bound="false"
+        data-identity-verified="false"
+        data-digital-signature-verified="false"
+        data-scientific-validity-established="false"
+        data-eligible-for-formal-activation="false"
+        data-auto-integration-allowed="false"
+        data-network-transmission-performed="false"
+        data-rule-artifact-or-storage-mutation-performed="false"
+        data-primitive-catalog-review-applied="false"
+        data-deterministic-outcome-established="false"
+        data-good-bad-orientation="null"
+        data-event-outcome="null"
+        data-result="null"
+      >
+        <div class="section-heading review-feedback-heading">
+          <div>
+            <p class="section-kicker">08 · 当前盘动态内容审稿</p>
+            <h2 id="dynamic-review-feedback-title">当前已显示命盘 · 动态候选逐卡审稿</h2>
+          </div>
+          <p>模板 <code>v0.7</code> · 独立于 43 项基础审稿</p>
+        </div>
+        <p class="review-feedback-intro">
+          完成排盘后，可主动下载仅含当前盘派生事实、候选文字与来源账的审稿包。包中不含姓名、UTC、地点或表单原值，
+          但精确盘面仍是可关联的敏感“星盘指纹”，不是匿名数据；请自行决定是否交给外部审稿人。
+        </p>
+        <div class="review-feedback-actions">
+          <button id="dynamic-review-feedback-download" class="secondary-action" type="button" disabled>
+            下载当前盘审稿模板
+          </button>
+          <label id="dynamic-review-feedback-file-action" class="file-action is-disabled" for="dynamic-review-feedback-file">
+            只读导入已填写反馈
+            <input id="dynamic-review-feedback-file" type="file" accept="application/json,.json" disabled />
+          </label>
+        </div>
+        <dl class="review-feedback-summary">
+          <div><dt>当前候选</dt><dd id="dynamic-review-feedback-total">—</dd></div>
+          <div><dt>已裁决</dt><dd id="dynamic-review-feedback-resolved">—</dd></div>
+          <div><dt>未裁决</dt><dd id="dynamic-review-feedback-unresolved">—</dd></div>
+          <div><dt>审稿归属</dt><dd id="dynamic-review-feedback-reviewer">尚无当前盘</dd></div>
+        </dl>
+        <p id="dynamic-review-feedback-message" class="review-feedback-message" role="status" aria-live="polite" data-state="idle">
+          先完成一次计算。模板只绑定当前已显示命盘；重算、错误文件或错盘反馈都会清空旧预检结果。
+        </p>
+        <ol id="dynamic-review-feedback-items" class="review-feedback-items" hidden></ol>
+        <p class="review-feedback-boundary">
+          下载是唯一文件输出，不会自动上传或缓存。导入只做当前内存命盘的严格预检，不写规则、存储或正式入口；
+          即使全部通过，也不等于身份核验、签名、科学验证、专家真值、吉凶结论或正式激活。
+        </p>
+      </section>
+
       <p class="microcopy">
         位置来自固定 astronomy-engine 2.1.19 诊断；宫位与相位是纯几何规则层。这里只呈现结构化工程事实，
-        不提供断语，也不替代专家复核。
+        新增文字层只提供来源绑定候选，不替代专家复核，也不构成科学、医疗、财务或人生决策依据。
       </p>
     </main>
 

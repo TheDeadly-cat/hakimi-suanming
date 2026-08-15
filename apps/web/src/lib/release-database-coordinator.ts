@@ -39,6 +39,24 @@ const BRIDGE_DATABASE_OPEN_TIMEOUT_MS = 20_000;
 const DATABASE_DELETE_TIMEOUT_MS = 5_000;
 const SOURCE_FREEZE_RENEW_INTERVAL_MS = 8_000;
 const SOURCE_FREEZE_MESSAGE_TIMEOUT_MS = 7_000;
+const SOURCE_FREEZE_RETRY_BACKOFF_MS = 2_000;
+const SOURCE_FREEZE_MAX_ATTEMPTS = 5;
+const PEER_MIGRATION_POLL_INTERVAL_MS = 1_000;
+const PEER_MIGRATION_WAIT_LIMIT_MS = 240_000;
+
+/**
+ * True when this page lost a startup race to another page that is already
+ * preparing or committing the exact same shadow migration. The peer owns the
+ * migration journal, so this page must wait instead of marking it failed.
+ */
+export function isPeerMigrationContention(cause: unknown): boolean {
+  if (cause instanceof Error && "code" in cause) {
+    const code = (cause as { code?: unknown }).code;
+    if (code === "LEASE_HELD") return true;
+    if (code === "MIGRATION_CONFLICT" && /already pending/iu.test(cause.message)) return true;
+  }
+  return cause instanceof Error && /MIGRATION_SESSION_ACTIVE/iu.test(cause.message);
+}
 
 function timeoutError(action: string, timeoutMs: number): Error {
   return new Error(`${action}在 ${timeoutMs} 毫秒内未完成；可能仍有旧标签页占用数据库。`);
@@ -473,33 +491,77 @@ export class ReleaseDatabaseCoordinator {
     }
 
     const controller = await this.controllerPromise;
-    const existingState = await controller.readCommittedGeneration();
-    if (existingState && samePhysicalGeneration(existingState, this.descriptor)) {
-      if (!acceptsCommittedMigration(this.descriptor, existingState.migrationId)) {
-        throw new Error("当前页面不接受已提交数据库的迁移谱系。请勿在同一 origin 混用发布候选。");
+    // Two old v13 pages can converge to v16 at almost the same time. Only one
+    // page may run the shadow migration; the other must wait for the peer to
+    // commit or fail instead of dying on a page that can never bind. When the
+    // peer commits, the next loop iteration takes the committed path below.
+    while (true) {
+      const existingState = await controller.readCommittedGeneration();
+      if (existingState && samePhysicalGeneration(existingState, this.descriptor)) {
+        await this.bindCommittedTarget(existingState, controller);
+        return;
       }
-      await openExpectedDatabase(
-        this.targetDatabase,
-        this.descriptor.databaseName,
-        this.descriptor.targetSchema
-      );
-      // A committed generation becomes writable after BOOT_OK_ACK, so its live
-      // payload may diverge from the immutable release-time digest. Schema
-      // 13-15 still perform the original full probe; Schema 16 accepts only an
-      // exact clean epoch/contract marker or performs and CAS-commits a new one.
-      await this.verifiedTargetSnapshot();
-      this.committedState = existingState;
-      this.migrationJournal = existingState.migrationId === null
-        ? null
-        : await controller.readMigration(existingState.migrationId);
-      document.documentElement.dataset.dbMigrationPhase = "committed";
-      return;
+      if (existingState && !sameSourceGeneration(existingState, this.descriptor)) {
+        throw new Error("已提交数据库代际既不是当前影子目标，也不是其声明的源代际。");
+      }
+      try {
+        await this.prepareSourceFreezeAndMigration(controller, existingState, {
+          migrationId,
+          sourceGeneration,
+          sourceDatabaseName,
+          sourceSchema
+        });
+        return;
+      } catch (cause) {
+        if (!isPeerMigrationContention(cause)) throw cause;
+        await this.waitForPeerMigrationToSettle(controller, cause);
+      }
     }
-    if (existingState && !sameSourceGeneration(existingState, this.descriptor)) {
-      throw new Error("已提交数据库代际既不是当前影子目标，也不是其声明的源代际。");
-    }
+  }
 
-    await this.freezeSourceClients();
+  private async bindCommittedTarget(
+    existingState: DatabaseGenerationReleaseState,
+    controller: DatabaseGenerationController
+  ): Promise<void> {
+    if (!acceptsCommittedMigration(this.descriptor, existingState.migrationId)) {
+      throw new Error("当前页面不接受已提交数据库的迁移谱系。请勿在同一 origin 混用发布候选。");
+    }
+    if (!this.targetDatabase) throw new Error("目标数据库上下文不完整。");
+    await openExpectedDatabase(
+      this.targetDatabase,
+      this.descriptor.databaseName,
+      this.descriptor.targetSchema
+    );
+    // A committed generation becomes writable after BOOT_OK_ACK, so its live
+    // payload may diverge from the immutable release-time digest. Schema
+    // 13-15 still perform the original full probe; Schema 16 accepts only an
+    // exact clean epoch/contract marker or performs and CAS-commits a new one.
+    await this.verifiedTargetSnapshot();
+    this.committedState = existingState;
+    this.migrationJournal = existingState.migrationId === null
+      ? null
+      : await controller.readMigration(existingState.migrationId);
+    document.documentElement.dataset.dbMigrationPhase = "committed";
+  }
+
+  private async prepareSourceFreezeAndMigration(
+    controller: DatabaseGenerationController,
+    existingState: DatabaseGenerationReleaseState | null,
+    descriptor: {
+      migrationId: string;
+      sourceGeneration: string;
+      sourceDatabaseName: string;
+      sourceSchema: number;
+    }
+  ): Promise<void> {
+    const { storage } = await this.modules();
+    const { migrationId, sourceGeneration, sourceDatabaseName, sourceSchema } = descriptor;
+    // A previous attempt may have frozen the source before losing a lease race
+    // to a peer. Keep that freeze alive and reuse it instead of issuing a
+    // second PREPARE_DATABASE_MIGRATION that the Service Worker would reject.
+    if (!this.sourceClientsFrozen) {
+      await this.freezeSourceClientsWithRetry();
+    }
 
     // A failed migration is terminal for its immutable migrationId, but a
     // blocked IndexedDB delete may have left its physical shadow database in
@@ -670,11 +732,92 @@ export class ReleaseDatabaseCoordinator {
     document.documentElement.dataset.dbMigrationPhase = this.migrationJournal.phase;
   }
 
+  /**
+   * A slow peer tab on a loaded machine can exceed the Service Worker's
+   * per-client freeze timeout (5 s). The freeze has no durable side effect
+   * until every peer ACKs, so a bounded retry is safe and prevents a legal
+   * old page from dying on a transient source-freeze timeout.
+   */
+  private async freezeSourceClientsWithRetry(): Promise<void> {
+    for (let attempt = 1; ; attempt += 1) {
+      try {
+        await this.freezeSourceClients();
+        return;
+      } catch (cause) {
+        if (isPeerMigrationContention(cause)) throw cause;
+        this.assertSourceFreezeHealthy();
+        if (attempt >= SOURCE_FREEZE_MAX_ATTEMPTS) throw cause;
+        document.documentElement.dataset.dbSourceFreezeRetry = String(attempt);
+        await new Promise<void>((resolve) => {
+          window.setTimeout(resolve, SOURCE_FREEZE_RETRY_BACKOFF_MS * attempt);
+        });
+      }
+    }
+  }
+
+  private async waitForPeerMigrationToSettle(
+    controller: DatabaseGenerationController,
+    cause: unknown
+  ): Promise<void> {
+    const migrationId = this.descriptor.migrationId;
+    if (migrationId === null) throw cause;
+    document.documentElement.dataset.dbPeerMigrationWaiting = "true";
+    const deadline = Date.now() + PEER_MIGRATION_WAIT_LIMIT_MS;
+    try {
+      while (true) {
+        this.assertSourceFreezeHealthy();
+        const [state, journal] = await Promise.all([
+          controller.readCommittedGeneration(),
+          controller.readMigration(migrationId)
+        ]);
+        if (state && samePhysicalGeneration(state, this.descriptor)) {
+          if (!acceptsCommittedMigration(this.descriptor, state.migrationId)) {
+            throw new Error("另一页面已把数据库代际提交到当前页面不接受的迁移谱系。");
+          }
+          return;
+        }
+        if (journal?.phase === "failed") {
+          const failure = journal.failure
+            ? `${journal.failure.message}（目标隔离：${journal.failure.targetIsolation}）`
+            : "未知原因";
+          throw new Error(`同一迁移 ${migrationId} 已由另一页面失败：${failure}`, { cause });
+        }
+        if (
+          journal?.phase === "committed" &&
+          (!state || !samePhysicalGeneration(state, this.descriptor))
+        ) {
+          throw new Error(
+            `迁移 ${migrationId} 回执已提交但控制指针不一致；失败关闭，请重新载入当前页面。`,
+            { cause }
+          );
+        }
+        if (Date.now() >= deadline) {
+          throw new Error(
+            `等待另一页面完成迁移 ${migrationId} 超过 ${Math.floor(PEER_MIGRATION_WAIT_LIMIT_MS / 1000)} 秒；请重新载入当前页面后重试。`,
+            { cause }
+          );
+        }
+        await new Promise<void>((resolve) => {
+          window.setTimeout(resolve, PEER_MIGRATION_POLL_INTERVAL_MS);
+        });
+      }
+    } finally {
+      delete document.documentElement.dataset.dbPeerMigrationWaiting;
+    }
+  }
+
   async failPreparedMigration(cause: unknown): Promise<void> {
     let resolution: "ABORT_DATABASE_MIGRATION" | "FINISH_DATABASE_MIGRATION" =
       "ABORT_DATABASE_MIGRATION";
     try {
-      if (this.descriptor.migrationId === null || !this.migrationJournal) return;
+      if (isPeerMigrationContention(cause)) return;
+      if (this.descriptor.migrationId === null || !this.migrationJournal) {
+        // This page never owned a migration journal (for example its freeze
+        // was rejected or it lost the boot race). Mark the failure explicitly
+        // so diagnostics never linger in the misleading "pending" state.
+        document.documentElement.dataset.dbMigrationPhase = "failed";
+        return;
+      }
       if (this.migrationJournal.phase === "committed") {
         // The control pointer already moved atomically. Reopening the source here
         // would create a split-brain writer, so old tabs must converge to target.
@@ -694,6 +837,9 @@ export class ReleaseDatabaseCoordinator {
         } : undefined
       );
       document.documentElement.dataset.dbMigrationPhase = "failed";
+    } catch (failure) {
+      document.documentElement.dataset.dbMigrationPhase = "failed";
+      throw failure;
     } finally {
       await this.notifySourceClients(resolution);
     }
@@ -701,8 +847,24 @@ export class ReleaseDatabaseCoordinator {
 
   async commitForBoot(): Promise<ReleaseBootConfirmation> {
     await this.prepareStorage();
-    if (!this.targetRepository) throw new Error("目标数据库尚未准备。");
     const controller = await this.controllerPromise;
+    // A peer page may commit the same migration while this page is sending its
+    // own BOOT_OK. Wait for the peer to settle and then take the committed
+    // path instead of failing the boot on a lease race.
+    while (true) {
+      try {
+        return await this.commitForBootAttempt(controller);
+      } catch (cause) {
+        if (!isPeerMigrationContention(cause)) throw cause;
+        await this.waitForPeerMigrationToSettle(controller, cause);
+      }
+    }
+  }
+
+  private async commitForBootAttempt(
+    controller: DatabaseGenerationController
+  ): Promise<ReleaseBootConfirmation> {
+    if (!this.targetRepository) throw new Error("目标数据库尚未准备。");
     const target = await this.verifiedTargetSnapshot();
     let state = await controller.readCommittedGeneration();
     if (

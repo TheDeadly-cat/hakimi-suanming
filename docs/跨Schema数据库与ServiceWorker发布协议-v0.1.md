@@ -1,7 +1,7 @@
 # 跨 Schema 数据库与 Service Worker 发布协议 v0.1
 
-> 状态：历史回归证据保留 production-v14 Edge 8/8、v14→v15 Edge + Chrome 18/18 与 direct v13→v15 20/20；当前隔离 direct v13→v16 候选在 Edge、Chrome 各完成 12/12，v13→v16 Web v1 候选双浏览器 2/2，Schema 16 clean 万条容量门双浏览器 2/2；普通 `npm run build` 与默认发布身份仍为 `legacy-v13`  
-> 日期：2026-08-10  
+> 状态：历史回归证据保留 production-v14 Edge 8/8、v14→v15 Edge + Chrome 18/18 与 direct v13→v15 20/20；当前隔离 direct v13→v16 候选在 Edge、Chrome 各完成 13/13（2026-08-11 复跑共 26/26），v13→v16 Web v1 候选双浏览器 2/2（2026-08-10 记录），Schema 16 clean 万条容量门双浏览器 2/2（2026-08-11 复验）；普通 `npm run build` 与默认发布身份仍为 `legacy-v13`  
+> 日期：2026-08-11（更新）；2026-08-10 为首版  
 > 适用：Web/PWA 从一个已确认数据库代际迁移到不兼容的新代际
 
 ## 1. 结论与边界
@@ -88,22 +88,23 @@ v15 把 `revisionCalculationReceipts` 作为第十六个用户分区；v16 保�
 
 ### 5.3 v13 → v16 隔离候选
 
-`npm run test:e2e:cross-schema-v13-v16` 使用与普通构建隔离的冻结描述符，在本机 Microsoft Edge 与 Google Chrome 各通过 12/12；Edge 用时约 4.2 分钟，Chrome 用时约 6.6 分钟。十二个场景与当前 spec 一一对应：
+`npm run test:e2e:cross-schema-v13-v16` 使用与普通构建隔离的冻结描述符。2026-08-11 在当前源码复跑：Edge **13/13（约 5.3 分钟）**、Chrome **13/13（约 5.1 分钟）**，共 **26/26**。十三个场景与当前 spec 一一对应：
 
 1. 两个旧 v13 页面中，一页已完成 `BOOT_OK`，另一页仍在万条案例慢审计；新 v16 Worker 通过正常更新生命周期接管后，两个旧页自动收敛到 v16；
-2. 全新浏览器从空 v13 建立完整 v16 目标并确认 clean epoch；
-3. 富 v13 数据无损直升 v16；业务写入只通过受支持仓储路径把 epoch 标为 dirty，全审计后恢复 clean，再次启动命中完整性缓存；
-4. 多个 v13 页面在迁移期被冻结，真实仓储写入被拒绝，提交后旧页只收敛到 v16；
-5. 影子物化容量不足时保留 v13，v16 目标零创建、控制指针零移动且不发送 `BOOT_OK`；
-6. v16 目标启动校验失败时隔离影子库并保持 v13 可恢复；
-7. v16 目标完整审计摘要不符时删除目标并保留 v13；
-8. 真实 Dexie v16 迁移事务中止时回滚 shadow，`mutationState` 不留下半代；
-9. 控制指针已提交但一次 `BOOT_OK` 中断时保持写锁，刷新后继续完成 clean 收敛；
-10. 陈旧页面持有 v16 target 的 `versionchange` 时超时失败关闭，不提交目标也不改 v13；
-11. dirty v16 全审计期间并发受支持写入使 CAS 失败；旧审计结果不得覆盖新 epoch，随后重新全审计恢复并命中 clean cache；
-12. 目标隔离受阻后，同一 `migrationId` 只允许继续清理、不得续跑迁移；清理完成后，新的 `migrationId` 可从完整 v13 长期重发。
+2. 首个 v16 试运行页在源冻结被慢旧页拖过 5 秒时限后自动重试并完成收敛（2026-08-11 新增：已确认 v13 页主线程被测试占用 8 秒，v16 页首次冻结失败后按 2～6 秒退避最多重试 5 次，随后完成迁移、`BOOT_OK`/ACK、写解锁，不出现失败页）；
+3. 全新浏览器从空 v13 建立完整 v16 目标并确认 clean epoch；
+4. 富 v13 数据无损直升 v16；业务写入只通过受支持仓储路径把 epoch 标为 dirty，全审计后恢复 clean，再次启动命中完整性缓存；
+5. 多个 v13 页面在迁移期被冻结，真实仓储写入被拒绝，提交后旧页只收敛到 v16；
+6. 影子物化容量不足时保留 v13，v16 目标零创建、控制指针零移动且不发送 `BOOT_OK`；
+7. v16 目标启动校验失败时隔离影子库并保持 v13 可恢复；
+8. v16 目标完整审计摘要不符时删除目标并保留 v13；
+9. 真实 Dexie v16 迁移事务中止时回滚 shadow，`mutationState` 不留下半代；
+10. 控制指针已提交但一次 `BOOT_OK` 中断时保持写锁，刷新后继续完成 clean 收敛；
+11. 陈旧页面持有 v16 target 的 `versionchange` 时超时失败关闭，不提交目标也不改 v13；
+12. dirty v16 全审计期间并发受支持写入使 CAS 失败；旧审计结果不得覆盖新 epoch，随后重新全审计恢复并命中 clean cache；
+13. 目标隔离受阻后，同一 `migrationId` 只允许继续清理、不得续跑迁移；清理完成后，新的 `migrationId` 可从完整 v13 长期重发。
 
-上述失败路径均以源 v13、控制指针、目标存在性、`BOOT_OK`/ACK 与 epoch/CAS 状态为失败关闭断言；v16 数据只能经生产仓储与迁移路径形成，不以绕过 mutation epoch 的 raw IndexedDB 写入伪造。`npm run test:e2e:web-v1-flow:v13-to-v16` 在 Edge 与 Chrome 各通过 1/1、共 2/2，证明隔离 candidate 可完成连续 Web v1 数据流。Schema 16 clean 万条容量门也在两浏览器通过：首次完整审计后 `epoch=verifiedEpoch=1`，第二次 clean boot 分别为 Edge 1.072 秒、Chrome 1.066 秒，均在 5 秒预算内。
+上述失败路径均以源 v13、控制指针、目标存在性、`BOOT_OK`/ACK 与 epoch/CAS 状态为失败关闭断言；v16 数据只能经生产仓储与迁移路径形成，不以绕过 mutation epoch 的 raw IndexedDB 写入伪造。2026-08-11 还加入两类防御性生产修复：源冻结失败有界重试（避免慢旧页拖过 5 秒冻结时限后让合法 v16 试运行页死页），以及“同代迁移在途”（`MIGRATION_SESSION_ACTIVE`/`LEASE_HELD`）有界等待后自动绑定已提交代；失败页不再错误停留在 `pending`，影子启动预算提高到 300 秒。`npm run test:e2e:web-v1-flow:v13-to-v16` 在 2026-08-10 于 Edge 与 Chrome 各通过 1/1、共 2/2，证明隔离 candidate 可完成连续 Web v1 数据流（2026-08-11 因本机持续高负载未能在 45 分钟内完成单浏览器复跑，保留历史证据）。Schema 16 clean 万条容量门 2026-08-11 双浏览器复验通过：首次完整审计后 `epoch=verifiedEpoch=1`，第二次 clean boot 分别为 Edge 1.300 秒、Chrome 1.213 秒，均在 5 秒预算内。
 
 这些结果只证明当前代码与固定浏览器环境中的工程复现；不把 v16 提升为默认发布代，不等于整个 Web v1、Firefox 或 Android 已通过，也不构成命理专家真值。
 
@@ -145,4 +146,4 @@ v15 把 `revisionCalculationReceipts` 作为第十六个用户分区；v16 保�
 - P2-05 仍需固定中端设备、重 CandidateSet、长备注、专项 ResearchQuery、真实取消、内存/长任务/存储报告与更极端大库；当前 clean 万条结果只关闭一个子门；
 - 操作系统安装后 standalone 启动、Android 文件/分享 adapter、APK 验收，以及任何把默认构建从 v13 提升到非 v13 代际的独立发布演练与授权。
 
-因此，当前代码已经关闭 direct v13→v16 隔离 candidate 在 Edge 与 Chrome 各 12/12 的双旧页自然接管、富数据、写锁、容量、事务中止、目标校验/摘要、`BOOT_OK` 中断、陈旧 target、dirty epoch/CAS 恢复、同 ID 清理与新 ID 长期重发矩阵；同一候选的 Web v1 双浏览器 2/2 与 clean 万条容量子门也已关闭。v14/v15 结果只作为历史回归证据保留。普通 `npm run build` 与 `dist/web` 的发布身份仍固定为 `legacy-v13`；这些工程证据不等于 v16 已成为默认生产代，不等于整个 Web v1、Android APK 或专家真值已经完成。
+因此，当前代码已经关闭 direct v13→v16 隔离 candidate 在 Edge 与 Chrome 各 13/13（2026-08-11 共 26/26）的双旧页自然接管、慢旧页拖过冻结时限后的自动重试、富数据、写锁、容量、事务中止、目标校验/摘要、`BOOT_OK` 中断、陈旧 target、dirty epoch/CAS 恢复、同 ID 清理与新 ID 长期重发矩阵；同一候选的 Web v1 双浏览器 2/2（2026-08-10 记录）与 clean 万条容量子门（2026-08-11 双浏览器复验通过）也已关闭。v14/v15 结果只作为历史回归证据保留。普通 `npm run build` 与 `dist/web` 的发布身份仍固定为 `legacy-v13`；这些工程证据不等于 v16 已成为默认生产代，不等于整个 Web v1、Android APK 或专家真值已经完成。

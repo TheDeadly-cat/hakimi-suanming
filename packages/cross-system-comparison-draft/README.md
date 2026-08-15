@@ -20,4 +20,14 @@
 npm run test:system-contract-drafts -- --run packages/cross-system-comparison-draft/src/index.test.ts
 ```
 
-当前没有任何主应用入口；第二体系正式 active 之前，主应用不会显示可点击体系切换器。
+## 隔离 4220 浏览器预览（2026-08-11 新增）
+
+`npm run preview:cross-system-browser-preview` 在 `http://127.0.0.1:4220/` 提供只读并列预览：
+
+- 页面内直接调用同一契约验证器，接受完整并列 JSON（含 `contentSha256`），通过后按体系渲染冻结事实表、规则身份与来源，并固定显示
+  `productionEligible=false / expertTruthClaimed=false / successReceiptIssued=false` 边界；
+- 摘要失配、边界提权、未知/重复体系等一律失败关闭并列出原因，不渲染任何事实表；
+- CSP `connect-src 'none'`，不写 localStorage/sessionStorage/IndexedDB/Cache，不进入 `apps/web`，不创建体系切换器；
+- 自动化门 `npm run test:e2e:cross-system-preview`：Edge 与 Chrome 各 3/3、共 **6/6**（默认八字+紫微并列通过 + 零持久化、摘要失配失败关闭、边界提权失败关闭），控制台 0 问题。
+
+该预览仍是隔离工程草案；第二体系正式 active 之前，主应用不会显示可点击体系切换器。
