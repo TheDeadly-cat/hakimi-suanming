@@ -19,7 +19,7 @@ import {
   expectPageFixture,
   holdDatabaseUpgradeOpen,
   installOneShotBootOkInterruption,
-  openBridgeNavigationAfterSwitch,
+  openConfirmedBridgeBeforeSwitch,
   openStableBridge,
   pageReleaseEvidence,
   readNativeDatabase,
@@ -230,8 +230,14 @@ async function switchToTargetAndWaitForActivation(
   target: GenerationFixture,
   confirmedFixture: GenerationFixture = sourceV13
 ): Promise<{ page: Page; problems: string[] }> {
+  const natural = await openConfirmedBridgeBeforeSwitch(context, switchServer, confirmedFixture);
   switchServer.setGeneration(target);
-  const natural = await openBridgeNavigationAfterSwitch(context, switchServer, confirmedFixture);
+  await natural.page.bringToFront();
+  await natural.page.evaluate(async () => {
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (!registration) throw new Error("The confirmed source page has no Service Worker registration.");
+    await registration.update();
+  });
   await expect.poll(() => cacheGeneration(natural.page, target)).toMatchObject({
     bootAttempted: false,
     bootConfirmed: false,
@@ -1031,7 +1037,11 @@ test("direct v15 隔离受阻后同 migrationId 只清理不续跑，新 migrati
     await firstNatural.page.close();
     await stable.page.close();
 
-    const sameIdNatural = await switchToTargetAndWaitForActivation(context, sameMigrationIdRepublishV15);
+    const sameIdRecovered = await openRecoveredSource(context);
+    await expectCommittedControl(sameIdRecovered.page, sourceV13);
+    expectSourceUnchanged(sourceBefore, await readNativeDatabase(sameIdRecovered.page, SOURCE_DATABASE));
+    await activateTargetFromReadyPage(sameIdRecovered.page, sameMigrationIdRepublishV15);
+    const sameIdNatural = sameIdRecovered;
     const sameIdFailure = await openTargetTrial(context, sameMigrationIdRepublishV15);
     await expect(sameIdFailure.page.getByRole("alert").filter({ hasText: "启动完整性检查未通过" }))
       .toBeVisible({ timeout: 30_000 });

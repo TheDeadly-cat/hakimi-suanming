@@ -7,7 +7,7 @@ import {
   formalComparisonSourceSchema,
   pairStructureResearchProjectionSchema,
   pairStructureResearchRequestSchema,
-  revisionRecordSchema,
+  storedRevisionRecordSchema,
   type ComparisonCategory,
   type ComparisonCell,
   type ComparisonCellAvailability,
@@ -399,7 +399,7 @@ function canonicalItems(rawItems: readonly ComparisonItem[]): ComparisonItem[] {
     if (!/^[a-f0-9]{64}$/.test(rawItem.revisionSnapshotDigest)) {
       throw new Error(`对照项目 ${key} 缺少合法的完整修订摘要。`);
     }
-    const revision = revisionRecordSchema.parse(structuredClone(rawItem.revision));
+    const revision = storedRevisionRecordSchema.parse(structuredClone(rawItem.revision));
     if (rawItem.caseId !== revision.caseId) throw new Error(`对照项目 ${key} 的案例与修订归属不一致。`);
     if (revisionIds.has(revision.id)) throw new Error(`同一修订不能重复占用多个对照位：${revision.id}`);
     revisionIds.add(revision.id);

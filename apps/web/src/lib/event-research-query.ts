@@ -12,7 +12,9 @@ function compareCodePoint(left: string, right: string): number {
 
 export function buildEventResearchQuery(record: EventRecord): ResearchEventQuery {
   const binding: ResearchEventQuery["binding"] =
-    record.revisionId && record.transitNodeRef?.namespace === "hakimi-transit-node"
+    record.revisionId
+      && record.transitNodeRef?.namespace === "hakimi-transit-node"
+      && record.transitNodeRef.revisionId === record.revisionId
       ? {
           kind: "context_node",
           caseId: record.caseId,

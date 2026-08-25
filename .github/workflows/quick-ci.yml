@@ -1,0 +1,60 @@
+name: Quick CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quick-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  default-v13:
+    name: Default legacy-v13 gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Set up pinned npm
+        run: npm install --global npm@11.13.0
+
+      - name: Report toolchain
+        run: |
+          node --version
+          npm --version
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify release governance contracts
+        run: npm run check:release-governance
+
+      - name: Test release evidence tooling
+        run: npm run test:release-evidence
+
+      - name: Typecheck default application graph
+        run: npm run typecheck
+
+      - name: Run Vitest suite
+        run: npm test
+
+      - name: Build default legacy-v13 release
+        run: npm run build
+
+      - name: Verify built release storage manifest
+        run: npm run verify:built-release-storage-manifest

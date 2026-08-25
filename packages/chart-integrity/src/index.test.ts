@@ -1,13 +1,22 @@
-import { describe, expect, it } from "vitest";
-import { calculateChart, calculateChartForBundledSnapshot } from "@hakimi/bazi-core";
+import { describe, expect, it, vi } from "vitest";
+import {
+  calculateChart,
+  calculateChartForBundledSnapshot,
+  calculateUnknownHourCandidates
+} from "@hakimi/bazi-core";
 import {
   LEGACY_HASH_SCHEMA_VERSION,
   LEGACY_UNIDENTIFIED_TZDB_VERSION,
+  RESEARCH_SUBJECT_RECORD_VERSION,
   buildCalculatedChartHashPayload,
+  buildUnknownHourCandidateHashPayload,
   buildTimeZoneDatabaseSnapshotId,
+  coreBackupRevisionRecordSchema,
   type BirthInput,
   type CalculatedChart,
-  type RevisionRecord
+  type CandidateSetRecord,
+  type RevisionRecord,
+  type UnknownHourCandidateResult
 } from "@hakimi/contracts";
 import { sha256Hex } from "@hakimi/integrity";
 import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
@@ -16,8 +25,10 @@ import {
   CalculatedChartIntegrityError,
   classifyRevisionNatalReplay,
   replayRevisionNatalChart,
+  verifyCandidateSetRecordIntegrity,
   verifyCalculatedChartIntegrity,
-  verifyRevisionRecordIntegrity
+  verifyRevisionRecordIntegrity,
+  verifyUnknownHourCandidateResultIntegrity
 } from "./index";
 
 const birth: BirthInput = {
@@ -57,6 +68,60 @@ async function resignChart(chart: CalculatedChart): Promise<CalculatedChart> {
   }
   chart.manifest.resultHash = await sha256Hex(buildCalculatedChartHashPayload(chart));
   return chart;
+}
+
+async function currentCandidateSetRecord(): Promise<CandidateSetRecord> {
+  const candidateSet = await calculateUnknownHourCandidates(
+    { ...birth, time: null, timePrecision: "unknown_hour" },
+    WORKING_DEFAULT_RULE_PROFILE
+  );
+  return {
+    schemaVersion: "1.0.0",
+    recordVersion: RESEARCH_SUBJECT_RECORD_VERSION,
+    recordType: "unknown_hour_candidate_set",
+    id: "33333333-3333-4333-8333-333333333333",
+    alias: "candidate integrity",
+    tags: [],
+    notes: "",
+    favorite: false,
+    deletedAt: null,
+    createdAt: "2026-08-24T00:00:00.000Z",
+    updatedAt: "2026-08-24T00:00:00.000Z",
+    candidateSet,
+    snapshotDigest: await sha256Hex(candidateSet)
+  };
+}
+
+async function legacyHistoricalCandidateSet(
+  source: UnknownHourCandidateResult
+): Promise<UnknownHourCandidateResult> {
+  const candidateSet = structuredClone(source);
+  candidateSet.hashSchemaVersion = LEGACY_HASH_SCHEMA_VERSION;
+  candidateSet.tzdbVersion = LEGACY_UNIDENTIFIED_TZDB_VERSION;
+  delete candidateSet.timeZoneDatabase;
+  candidateSet.input.timeZone = "Historical/Only";
+
+  const charts = new Set<CalculatedChart>();
+  for (const candidate of candidateSet.candidates) {
+    candidate.timeCalibration.timeZone = "Historical/Only";
+    if (candidate.chart) charts.add(candidate.chart);
+    for (const variant of candidate.variants) charts.add(variant.chart);
+  }
+  for (const chart of charts) {
+    chart.input.timeZone = "Historical/Only";
+    chart.timeCalibration.timeZone = "Historical/Only";
+    chart.manifest.hashSchemaVersion = LEGACY_HASH_SCHEMA_VERSION;
+    chart.manifest.tzdbVersion = LEGACY_UNIDENTIFIED_TZDB_VERSION;
+    delete chart.manifest.timeZoneDatabase;
+    chart.manifest.resultHash = await sha256Hex(buildCalculatedChartHashPayload(chart));
+  }
+  for (const candidate of candidateSet.candidates) {
+    for (const variant of candidate.variants) {
+      variant.chartResultHash = variant.chart.manifest.resultHash;
+    }
+  }
+  candidateSet.resultHash = await sha256Hex(buildUnknownHourCandidateHashPayload(candidateSet));
+  return candidateSet;
 }
 
 describe("versioned chart integrity", () => {
@@ -134,6 +199,9 @@ describe("Revision natal read-only replay", () => {
     });
     const projection = await replayRevisionNatalChart(revision);
     expect(projection.status).toBe("matched");
+    expect(projection.changedFields).toEqual([]);
+    expect(projection.storedResultHash).toBe(revision.manifest.resultHash);
+    expect(projection.replayedResultHash).toBe(revision.manifest.resultHash);
     expect(projection.timeZoneDatabase).toEqual(RETAINED_TIME_ZONE_DATABASE_2025B);
     expect(projection.replayedChart.timeCalibration.utcOffset).toBe("+01:00");
     expect(projection.replayedChart.manifest.tzdbVersion).toBe(RETAINED_TIME_ZONE_DATABASE_2025B.snapshotId);
@@ -150,6 +218,108 @@ describe("Revision natal read-only replay", () => {
     await expect(classifyRevisionNatalReplay(revision)).resolves.toMatchObject({
       status: "legacy_tzdb_integrity_only"
     });
+  });
+
+  it("keeps a legacy syntactic zone readable without pretending the active resolver recognizes it", async () => {
+    const chart = structuredClone(await calculateChart(birth, WORKING_DEFAULT_RULE_PROFILE));
+    chart.input.timeZone = "Historical/Only";
+    chart.timeCalibration.timeZone = "Historical/Only";
+    chart.manifest.hashSchemaVersion = LEGACY_HASH_SCHEMA_VERSION;
+    chart.manifest.tzdbVersion = LEGACY_UNIDENTIFIED_TZDB_VERSION;
+    delete chart.manifest.timeZoneDatabase;
+    await resignChart(chart);
+    const revision = revisionFromChart(chart);
+
+    expect(coreBackupRevisionRecordSchema.safeParse(revision).success).toBe(true);
+    await expect(verifyRevisionRecordIntegrity(revision)).resolves.toEqual(revision);
+    await expect(classifyRevisionNatalReplay(revision)).resolves.toMatchObject({
+      status: "legacy_tzdb_integrity_only"
+    });
+    await expect(replayRevisionNatalChart(revision)).rejects.toMatchObject({
+      code: "legacy_tzdb_integrity_only"
+    });
+  });
+
+  it("rejects a syntactically valid zone that the exact declared resolver does not contain", async () => {
+    const chart = structuredClone(await calculateChart(birth, WORKING_DEFAULT_RULE_PROFILE));
+    chart.input.timeZone = "Historical/Only";
+    chart.timeCalibration.timeZone = "Historical/Only";
+    await resignChart(chart);
+
+    await expect(verifyRevisionRecordIntegrity(revisionFromChart(chart))).rejects.toThrow(
+      /所声明固定 IANA 数据工件/u
+    );
+  });
+
+  it("takes one accessor-free snapshot before an asynchronous resolver load", async () => {
+    const revision = revisionFromChart(await calculateChart(birth, WORKING_DEFAULT_RULE_PROFILE));
+    const originalFacts = structuredClone(revision.facts);
+    const pending = verifyRevisionRecordIntegrity(revision);
+    revision.facts.calendar.solarText = "mutated after call";
+    await expect(pending).resolves.toMatchObject({ facts: originalFacts });
+
+    let getterCalls = 0;
+    const accessorBacked = structuredClone(revision) as RevisionRecord;
+    const manifest = accessorBacked.manifest;
+    Object.defineProperty(accessorBacked, "manifest", {
+      enumerable: true,
+      configurable: true,
+      get() {
+        getterCalls += 1;
+        return manifest;
+      }
+    });
+    await expect(verifyRevisionRecordIntegrity(accessorBacked)).rejects.toThrow(/声明式数据字段/u);
+    expect(getterCalls).toBe(0);
+  });
+
+  it("rejects non-declarative or amplification-prone Revision inputs before schema normalization", async () => {
+    const withSymbol = revisionFromChart(await calculateChart(birth, WORKING_DEFAULT_RULE_PROFILE));
+    Object.defineProperty(withSymbol, Symbol("hidden"), { value: true });
+    await expect(verifyRevisionRecordIntegrity(withSymbol)).rejects.toThrow(/Symbol/u);
+
+    const cyclic = revisionFromChart(await calculateChart(birth, WORKING_DEFAULT_RULE_PROFILE)) as RevisionRecord & {
+      cycle?: unknown;
+    };
+    cyclic.cycle = cyclic;
+    await expect(verifyRevisionRecordIntegrity(cyclic)).rejects.toThrow(/循环引用/u);
+
+    const sparse = revisionFromChart(await calculateChart(birth, WORKING_DEFAULT_RULE_PROFILE));
+    sparse.manifest.warnings = new Array<string>(2);
+    await expect(verifyRevisionRecordIntegrity(sparse)).rejects.toThrow(/稠密/u);
+
+    const tooDeep = revisionFromChart(await calculateChart(birth, WORKING_DEFAULT_RULE_PROFILE)) as RevisionRecord & {
+      ignored?: unknown;
+    };
+    let cursor: Record<string, unknown> = {};
+    tooDeep.ignored = cursor;
+    for (let depth = 0; depth < 130; depth += 1) {
+      const next: Record<string, unknown> = {};
+      cursor.next = next;
+      cursor = next;
+    }
+    await expect(verifyRevisionRecordIntegrity(tooDeep)).rejects.toThrow(/最大深度/u);
+
+    const tooWide = revisionFromChart(await calculateChart(birth, WORKING_DEFAULT_RULE_PROFILE)) as RevisionRecord & {
+      ignored?: unknown;
+    };
+    const oversizedObject: Record<string, null> = Object.create(null) as Record<string, null>;
+    for (let index = 0; index <= 100_000; index += 1) {
+      oversizedObject[`field${index}`] = null;
+    }
+    tooWide.ignored = oversizedObject;
+    const originalGetOwnPropertyNames = Object.getOwnPropertyNames;
+    const getOwnPropertyNames = vi.spyOn(Object, "getOwnPropertyNames").mockImplementation((value) => {
+      if (value === oversizedObject) {
+        throw new Error("oversized object reached allocating reflection");
+      }
+      return originalGetOwnPropertyNames(value);
+    });
+    try {
+      await expect(verifyRevisionRecordIntegrity(tooWide)).rejects.toThrow(/对象字段超过安全上限/u);
+    } finally {
+      getOwnPropertyNames.mockRestore();
+    }
   });
 
   it("fails closed for unsupported engine, artifact, descriptor, precision and DST boundaries", async () => {
@@ -231,5 +401,60 @@ describe("Revision natal read-only replay", () => {
     expect(projection.status).toBe("mismatch");
     expect(projection.changedFields).toEqual(["facts", "result_hash"]);
     expect(projection.storedResultHash).not.toBe(projection.replayedResultHash);
+  });
+
+  it("validates every CandidateSet chart with the exact selected resolver", async () => {
+    const record = await currentCandidateSetRecord();
+    await expect(verifyCandidateSetRecordIntegrity(record)).resolves.toEqual(record);
+    await expect(verifyUnknownHourCandidateResultIntegrity(record.candidateSet, record.id))
+      .resolves.toEqual(record.candidateSet);
+
+    const detached = structuredClone(record);
+    const firstChart = detached.candidateSet.candidates[0]?.variants[0]?.chart;
+    if (!firstChart) throw new Error("candidate fixture should include one chart");
+    firstChart.input.timeZone = "Historical/Only";
+    await expect(verifyCandidateSetRecordIntegrity(detached)).rejects.toThrow();
+  });
+
+  it("keeps legacy unidentified CandidateSets at stored-content integrity only", async () => {
+    const current = await currentCandidateSetRecord();
+    const candidateSet = await legacyHistoricalCandidateSet(current.candidateSet);
+    const historical: CandidateSetRecord = {
+      ...current,
+      candidateSet,
+      snapshotDigest: await sha256Hex(candidateSet)
+    };
+
+    await expect(verifyUnknownHourCandidateResultIntegrity(candidateSet, historical.id))
+      .resolves.toEqual(candidateSet);
+    await expect(verifyCandidateSetRecordIntegrity(historical)).resolves.toEqual(historical);
+  });
+
+  it("takes one accessor-free CandidateSet snapshot before resolver loading", async () => {
+    const record = await currentCandidateSetRecord();
+    let getterCalls = 0;
+    const accessorBacked = structuredClone(record) as CandidateSetRecord;
+    const candidateSet = accessorBacked.candidateSet;
+    Object.defineProperty(accessorBacked, "candidateSet", {
+      enumerable: true,
+      configurable: true,
+      get() {
+        getterCalls += 1;
+        return candidateSet;
+      }
+    });
+
+    await expect(verifyCandidateSetRecordIntegrity(accessorBacked)).rejects.toThrow(/声明式数据字段/u);
+    expect(getterCalls).toBe(0);
+  });
+
+  it("isolates CandidateSet verification from mutation after the async call begins", async () => {
+    const record = await currentCandidateSetRecord();
+    const expected = structuredClone(record);
+    const pending = verifyCandidateSetRecordIntegrity(record);
+    record.alias = "mutated after call";
+    record.candidateSet.input.timeZone = "Asia/Tokyo";
+
+    await expect(pending).resolves.toEqual(expected);
   });
 });

@@ -3,7 +3,7 @@ import { LunarUtil, Solar, type JieQi } from "lunar-typescript";
 import {
   LEGACY_UNIDENTIFIED_TZDB_VERSION,
   luckCycleRuleSnapshotSchema,
-  revisionRecordSchema,
+  storedRevisionRecordSchema,
   timeZoneDatabaseSnapshotSchema,
   transitNodeRefSchema,
   transitSnapshotSchema,
@@ -788,7 +788,7 @@ async function calculateTransitSnapshotWithDescriptor(
 ): Promise<TransitSnapshot> {
   let parsedRevision: RevisionRecord;
   try {
-    parsedRevision = revisionRecordSchema.parse(rawInput.revision);
+    parsedRevision = storedRevisionRecordSchema.parse(rawInput.revision);
   } catch (cause) {
     throw new TransitCoreError(
       "TRANSIT_CONTEXT_MISMATCH",
@@ -1082,7 +1082,7 @@ function parseHistoricalTransitSnapshotInput(rawInput: unknown): TransitSnapshot
         "TransitSnapshotInput.manualDirection 只能显式为 forward 或 backward。"
       );
     }
-    const parsedRevision = revisionRecordSchema.safeParse(value.revision);
+    const parsedRevision = storedRevisionRecordSchema.safeParse(value.revision);
     if (!parsedRevision.success) {
       throw new TransitCoreError(
         "INVALID_TRANSIT_INPUT",

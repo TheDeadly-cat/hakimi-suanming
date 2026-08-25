@@ -86,6 +86,17 @@ export interface BuildResearchContentCatalogInput {
   systems?: readonly ResearchContentCatalogSystem[];
 }
 
+const RESEARCH_CONTENT_SOURCE_ID_PATTERN = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?)*$/u;
+const MAX_RESEARCH_CONTENT_SOURCE_ID_LENGTH = 160;
+
+export function isResearchContentSourceId(value: unknown): value is string {
+  return typeof value === "string"
+    && value.length > 0
+    && value.length <= MAX_RESEARCH_CONTENT_SOURCE_ID_LENGTH
+    && value === value.trim()
+    && RESEARCH_CONTENT_SOURCE_ID_PATTERN.test(value);
+}
+
 const EXPECTED_COUNTS: Readonly<
   Record<ResearchSystemId, Readonly<{ fixedInventory: number; sourceRegistry: number }>>
 > = Object.freeze({
@@ -145,7 +156,7 @@ const DEFAULT_SYSTEMS: readonly ResearchContentCatalogSystem[] = Object.freeze([
     ]),
     currentGaps: Object.freeze([
       "旺衰权重、阈值与特殊格局仍需命理专家逐项裁决。",
-      "69 项候选尚无具名审稿人、审稿日期或批准结论。",
+      `${BAZI_CONTENT_REVIEW_QUEUE.counts.total} 项候选尚无具名审稿人、审稿日期或批准结论。`,
       "工程可复算不等于传统流派真值，也不授权正式吉凶输出。"
     ]),
     boundary: "这是当前主应用中的可见候选目录；内容可以阅读和导出审稿，但批准数与正式发布数仍为 0。",
@@ -412,7 +423,7 @@ function validateSystem(system: ResearchContentCatalogSystem, expectedId: Resear
   }
   const sourceIds = new Set<string>();
   for (const source of system.representativeSources) {
-    if (!source.sourceId || !source.title || !source.url.startsWith("https://") || sourceIds.has(source.sourceId)) {
+    if (!isResearchContentSourceId(source.sourceId) || !source.title || !source.url.startsWith("https://") || sourceIds.has(source.sourceId)) {
       throw new Error(`${system.label}代表来源无效或重复：${source.sourceId}`);
     }
     sourceIds.add(source.sourceId);
@@ -458,7 +469,7 @@ export function buildResearchContentCatalog(
     formalPublished: 0 as const
   });
   const knownBoundaries = Object.freeze([
-    "69 个八字审稿项、246 条紫微候选和 43 个西洋语义基元使用不同计量单位，不能相加或比较完成度、准确率。",
+    `${BAZI_CONTENT_REVIEW_QUEUE.counts.total} 个八字审稿项、246 条紫微候选和 43 个西洋语义基元使用不同计量单位，不能相加或比较完成度、准确率。`,
     "紫微与西洋数据只来自 2026-08-12 隔离源码静态审计；主应用不导入草案包，也不提供 4218/4219 入口。",
     "来源绑定、工程测试与可复算都不等于专家真值；当前专家批准和正式发布均为 0。"
   ]);

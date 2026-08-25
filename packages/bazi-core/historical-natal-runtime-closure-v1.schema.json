@@ -1,0 +1,414 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hakimi.local/schemas/historical-natal-runtime-closure-v1.schema.json",
+  "title": "Historical natal 0.4.0 current-checkout runtime closure attestation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "gate",
+    "scope",
+    "roots",
+    "workspaceSources",
+    "workspaceManifests",
+    "bundleResolver",
+    "externalPackages",
+    "overallSha256"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "./historical-natal-runtime-closure-v1.schema.json"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "gate": {
+      "const": "hakimi-bazi-core-historical-natal-runtime-closure-v1"
+    },
+    "scope": {
+      "const": "current_checkout_runtime_closure_not_historical_binary_or_expert_attestation"
+    },
+    "roots": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/workspacePath"
+      }
+    },
+    "workspaceSources": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/workspaceSource"
+      }
+    },
+    "workspaceManifests": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/workspaceManifest"
+      }
+    },
+    "bundleResolver": {
+      "$ref": "#/$defs/bundleResolver"
+    },
+    "externalPackages": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/externalPackage"
+      }
+    },
+    "overallSha256": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "workspacePath": {
+      "type": "string",
+      "pattern": "^(?!.*(?:^|/)(?:\\.{1,2})(?:/|$))[A-Za-z0-9@._-]+(?:/[A-Za-z0-9@._-]+)*$"
+    },
+    "packageRequest": {
+      "type": "string",
+      "pattern": "^(?:@[a-z0-9][a-z0-9._-]*/)?[a-z0-9][a-z0-9._-]*$"
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "specifier", "targetKind", "target"],
+      "properties": {
+        "kind": {
+          "enum": ["static-import", "static-export", "dynamic-import"]
+        },
+        "specifier": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!.*\\\\)(?!.*[\\u0000-\\u001f]).+$"
+        },
+        "targetKind": {
+          "enum": ["workspace-source", "external-package"]
+        },
+        "target": {
+          "$ref": "#/$defs/workspacePath"
+        }
+      }
+    },
+    "workspaceSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "packageManifestPath",
+        "lfUtf8Sha256",
+        "byteLength",
+        "edges"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/workspacePath"
+        },
+        "packageManifestPath": {
+          "$ref": "#/$defs/workspacePath"
+        },
+        "lfUtf8Sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "edges": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/edge"
+          }
+        }
+      }
+    },
+    "manifestDependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["request", "range", "targetKind", "target"],
+      "properties": {
+        "request": {
+          "$ref": "#/$defs/packageRequest"
+        },
+        "range": {
+          "type": "string",
+          "minLength": 1
+        },
+        "targetKind": {
+          "enum": ["workspace-manifest", "external-package"]
+        },
+        "target": {
+          "$ref": "#/$defs/workspacePath"
+        }
+      }
+    },
+    "workspaceManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "packageLockPath",
+        "packageName",
+        "version",
+        "exports",
+        "lfUtf8Sha256",
+        "byteLength",
+        "dependencies"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/workspacePath"
+        },
+        "packageLockPath": {
+          "$ref": "#/$defs/workspacePath"
+        },
+        "packageName": {
+          "$ref": "#/$defs/packageRequest"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exports": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lfUtf8Sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "dependencies": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/manifestDependency"
+          }
+        }
+      }
+    },
+    "externalDependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["request", "range", "targetInstallPath"],
+      "properties": {
+        "request": {
+          "$ref": "#/$defs/packageRequest"
+        },
+        "range": {
+          "type": "string",
+          "minLength": 1
+        },
+        "targetInstallPath": {
+          "$ref": "#/$defs/workspacePath"
+        }
+      }
+    },
+    "installedTree": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "fileCount", "directoryCount", "byteLength"],
+      "properties": {
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "fileCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "directoryCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "externalPackage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "installPath",
+        "requestName",
+        "packageName",
+        "version",
+        "resolved",
+        "integrity",
+        "dependencyEdges",
+        "installedTree"
+      ],
+      "properties": {
+        "installPath": {
+          "$ref": "#/$defs/workspacePath"
+        },
+        "requestName": {
+          "$ref": "#/$defs/packageRequest"
+        },
+        "packageName": {
+          "$ref": "#/$defs/packageRequest"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resolved": {
+          "type": "string",
+          "pattern": "^https://registry\\.npmjs\\.org/[^#]+$"
+        },
+        "integrity": {
+          "type": "string",
+          "pattern": "^sha(?:256|384|512)-[A-Za-z0-9+/]+={0,2}$"
+        },
+        "dependencyEdges": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/externalDependency"
+          }
+        },
+        "installedTree": {
+          "$ref": "#/$defs/installedTree"
+        }
+      }
+    },
+    "fileEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "lfUtf8Sha256", "byteLength"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/workspacePath"
+        },
+        "lfUtf8Sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "bundleConfigFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "lfUtf8Sha256", "byteLength", "baseBinding"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/workspacePath"
+        },
+        "lfUtf8Sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "baseBinding": {
+          "enum": ["defines-createWebViteConfig", "createWebViteConfig", "default"]
+        }
+      }
+    },
+    "bundleAlias": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["specifier", "manifestPath", "manifestExport", "target"],
+      "properties": {
+        "specifier": {
+          "$ref": "#/$defs/packageRequest"
+        },
+        "manifestPath": {
+          "$ref": "#/$defs/workspacePath"
+        },
+        "manifestExport": {
+          "type": "string",
+          "pattern": "^\\./[A-Za-z0-9@._-]+(?:/[A-Za-z0-9@._-]+)*$"
+        },
+        "target": {
+          "$ref": "#/$defs/workspacePath"
+        }
+      }
+    },
+    "bundleResolver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "configFiles",
+        "aliases",
+        "scriptManifests",
+        "rootBundleScripts",
+        "webBundleScripts",
+        "rootPrehookCommand",
+        "webPrehookCommand"
+      ],
+      "properties": {
+        "configFiles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/bundleConfigFile"
+          }
+        },
+        "aliases": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/bundleAlias"
+          }
+        },
+        "scriptManifests": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/fileEvidence"
+          }
+        },
+        "rootBundleScripts": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "webBundleScripts": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "rootPrehookCommand": {
+          "type": "string",
+          "minLength": 1
+        },
+        "webPrehookCommand": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
-import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { AppShell } from "./app-shell";
 
 describe("AppShell candidate-set navigation", () => {
@@ -11,7 +11,7 @@ describe("AppShell candidate-set navigation", () => {
     );
 
     const desktopCases = within(screen.getByRole("navigation", { name: "主导航" })).getByRole("link", { name: "案例库" });
-    const mobileCases = within(screen.getByRole("navigation", { name: "手机主导航" })).getByRole("link", { name: "案例" });
+    const mobileCases = within(screen.getByRole("navigation", { name: "手机主导航" })).getByRole("link", { name: "案例库" });
     expect(screen.getByRole("complementary", { name: "研究台侧栏" })).toBeTruthy();
     expect(desktopCases.getAttribute("aria-current")).toBe("page");
     expect(mobileCases.getAttribute("aria-current")).toBe("page");
@@ -24,8 +24,12 @@ describe("AppShell candidate-set navigation", () => {
       </AppShell>
     );
 
-    expect(screen.getByRole("link", { name: "新建排盘" }).getAttribute("aria-current")).toBe("page");
-    expect(screen.getByRole("link", { name: "排盘" }).getAttribute("aria-current")).toBe("page");
+    const desktopCreate = within(screen.getByRole("complementary", { name: "研究台侧栏" }))
+      .getByRole("link", { name: "新建排盘" });
+    const mobileCreate = within(screen.getByRole("navigation", { name: "手机主导航" }))
+      .getByRole("link", { name: "新建排盘" });
+    expect(desktopCreate.getAttribute("aria-current")).toBe("page");
+    expect(mobileCreate.getAttribute("aria-current")).toBe("page");
 
     rerender(
       <AppShell pathname="/settings">
@@ -69,7 +73,7 @@ describe("AppShell candidate-set navigation", () => {
     );
 
     const desktopCompare = within(screen.getByRole("navigation", { name: "主导航" })).getByRole("link", { name: "对照台" });
-    const mobileCompare = within(screen.getByRole("navigation", { name: "手机主导航" })).getByRole("link", { name: "对照" });
+    const mobileCompare = within(screen.getByRole("navigation", { name: "手机主导航" })).getByRole("link", { name: "对照台" });
     expect(desktopCompare.getAttribute("aria-current")).toBe("page");
     expect(mobileCompare.getAttribute("aria-current")).toBe("page");
   });
@@ -91,5 +95,59 @@ describe("AppShell candidate-set navigation", () => {
       </AppShell>
     );
     expect(document.activeElement).toBe(main);
+  });
+
+  it("更换预加载端口后忽略旧端口的迟到失败，不清除新 epoch 的路由族去重", async () => {
+    let rejectFirst!: (reason?: unknown) => void;
+    const firstPreload = vi.fn(() => new Promise<void>((_resolve, reject) => {
+      rejectFirst = reject;
+    }));
+    const secondPreload = vi.fn().mockResolvedValue(undefined);
+    const { rerender } = render(
+      <AppShell pathname="/" onPreloadRoute={firstPreload}>
+        <h1>工作台</h1>
+      </AppShell>
+    );
+    const getDesktopCasesLink = () => within(screen.getByRole("navigation", { name: "主导航" }))
+      .getByRole("link", { name: "案例库" });
+
+    fireEvent.pointerOver(getDesktopCasesLink());
+    expect(firstPreload).toHaveBeenCalledTimes(1);
+    expect(firstPreload).toHaveBeenCalledWith("/cases");
+
+    rerender(
+      <AppShell pathname="/" onPreloadRoute={secondPreload}>
+        <h1>工作台</h1>
+      </AppShell>
+    );
+    fireEvent.pointerOver(getDesktopCasesLink());
+    expect(secondPreload).toHaveBeenCalledTimes(1);
+
+    rejectFirst(new Error("旧预加载端口迟到失败"));
+    await Promise.resolve();
+    await Promise.resolve();
+    fireEvent.pointerOver(getDesktopCasesLink());
+    expect(secondPreload).toHaveBeenCalledTimes(1);
+  });
+
+  it("在全局壳层与研究边界一致暴露 legacy-v13 安全身份", () => {
+    const { container } = render(
+      <AppShell pathname="/">
+        <h1>工作台</h1>
+      </AppShell>
+    );
+    const shell = container.querySelector(".app-shell");
+    const boundary = screen.getByLabelText("研究预览边界");
+
+    for (const node of [shell, boundary]) {
+      expect(node?.getAttribute("data-release-identity")).toBe("legacy-v13");
+      expect(node?.getAttribute("data-schema-family")).toBe("legacy-v13");
+      expect(node?.getAttribute("data-db-generation")).toBe("legacy-v13");
+      expect(node?.getAttribute("data-target-schema")).toBe("13");
+      expect(node?.getAttribute("data-migration-id")).toBe("null");
+      expect(node?.getAttribute("data-mutation-epoch-bypassed")).toBe("false");
+      expect(node?.getAttribute("data-public-release-authorized")).toBe("false");
+      expect(node?.getAttribute("data-expert-truth-claimed")).toBe("false");
+    }
   });
 });

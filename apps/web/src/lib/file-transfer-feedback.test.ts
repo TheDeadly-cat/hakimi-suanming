@@ -8,7 +8,7 @@ describe("file transfer feedback", () => {
       filename: "backup.zip",
       method: "browser_download"
     })).toEqual({
-      kind: "completed",
+      kind: "requested",
       message: "backup.zip 已请求浏览器下载；请在下载列表确认文件已保存并可以打开。"
     });
   });
@@ -18,21 +18,21 @@ describe("file transfer feedback", () => {
     expect(resolveFileDelivery({ status: "shared", filename: "a.md", method: "native" }).message).toContain("系统分享面板");
     expect(resolveFileDelivery({ status: "cancelled", filename: "a.zip", operation: "save" }, "安全备份导出")).toEqual({
       kind: "cancelled",
-      message: "已取消安全备份导出操作；系统没有报告保存或分享成功。"
+      message: "已取消安全备份导出保存；系统没有报告该操作成功。"
     });
     expect(resolveFileDelivery({
       status: "unsupported",
       filename: "a.zip",
       operation: "save",
       reason: "没有文件桥"
-    })).toEqual({ kind: "error", message: "没有文件桥" });
+    })).toEqual({ kind: "error", message: "文件保存不可用：没有文件桥" });
     expect(resolveFileDelivery({
       status: "failed",
       filename: "a.zip",
       operation: "save",
       stage: "close",
       reason: "磁盘提交失败"
-    })).toEqual({ kind: "error", message: "磁盘提交失败" });
+    })).toEqual({ kind: "error", message: "文件保存失败：磁盘提交失败" });
     expect(resolveFileDelivery({
       status: "cancelled",
       filename: "a.zip",
@@ -41,7 +41,12 @@ describe("file transfer feedback", () => {
     }, "安全备份导出").message).toContain("浏览器阻止了该目标");
   });
 
-  it("returns null for cancellation and throws only for an unsupported operation", () => {
+  it("returns null for unconfirmed delivery and throws only for an unsupported operation", () => {
+    expect(requireCompletedFileDelivery({
+      status: "download_requested",
+      filename: "a.zip",
+      method: "browser_download"
+    })).toBeNull();
     expect(requireCompletedFileDelivery({
       status: "cancelled",
       filename: "a.zip",
@@ -53,5 +58,18 @@ describe("file transfer feedback", () => {
       operation: "save",
       reason: "不可用"
     })).toThrow("不可用");
+  });
+
+  it("rejects an unrecognized save failure stage from an untrusted receipt", () => {
+    expect(resolveFileDelivery({
+      status: "failed",
+      filename: "a.zip",
+      operation: "save",
+      stage: "rename",
+      reason: "不应采信"
+    } as unknown as Parameters<typeof resolveFileDelivery>[0])).toEqual({
+      kind: "error",
+      message: "文件交付回执包含不可识别的失败阶段，未据此声明保存或分享成功。"
+    });
   });
 });

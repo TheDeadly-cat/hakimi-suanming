@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { ChartFacts, PillarFact } from "@hakimi/contracts";
 import {
+  BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID,
+  requireEvidenceSubject
+} from "@hakimi/knowledge-core";
+import {
   BAZI_STRENGTH_CLAIM_REGISTRY,
   BAZI_STRENGTH_EVIDENCE_NARRATIVE_PROFILE,
   buildBaziStrengthEvidenceNarrative,
@@ -231,11 +235,100 @@ describe("Bazi strength evidence narrative v0.18", () => {
 
     const promotedPending = structuredClone(BAZI_STRENGTH_CLAIM_REGISTRY) as BaziStrengthClaimRegistry;
     (promotedPending.claims[10] as { displayStatus: string }).displayStatus = "enabled_traditional_context";
-    expect(() => validateBaziStrengthClaimRegistry(promotedPending)).toThrow(/待核 locator/u);
+    expect(() => validateBaziStrengthClaimRegistry(promotedPending)).toThrow(/复核状态与展示状态不一致/u);
 
     const classicNumeric = structuredClone(BAZI_STRENGTH_CLAIM_REGISTRY) as BaziStrengthClaimRegistry;
     (classicNumeric.claims[5].sourceBindingIds as string[]).splice(0, 1, "binding:dtt:month-command");
     expect(() => validateBaziStrengthClaimRegistry(classicNumeric)).toThrow(/内部工程定义/u);
+
+    const forgedRights = structuredClone(BAZI_STRENGTH_CLAIM_REGISTRY) as BaziStrengthClaimRegistry;
+    (forgedRights.sources[3] as unknown as { carrierRightsStatus: string }).carrierRightsStatus = "redistribution_cleared";
+    expect(() => validateBaziStrengthClaimRegistry(forgedRights)).toThrow(/权利边界组合无效/u);
+
+    const missingPinnedRevision = structuredClone(BAZI_STRENGTH_CLAIM_REGISTRY) as BaziStrengthClaimRegistry;
+    (missingPinnedRevision.sources[3] as { stableRevision: string | null }).stableRevision = null;
+    expect(() => validateBaziStrengthClaimRegistry(missingPinnedRevision)).toThrow(/固定版本状态无效/u);
+
+    const credentialedUrl = structuredClone(BAZI_STRENGTH_CLAIM_REGISTRY) as BaziStrengthClaimRegistry;
+    (credentialedUrl.sources[3] as { url: string }).url = "https://user:secret@example.invalid/source";
+    expect(() => validateBaziStrengthClaimRegistry(credentialedUrl)).toThrow(/URL 范围无效/u);
+
+    const disguisedOldId = structuredClone(BAZI_STRENGTH_CLAIM_REGISTRY) as BaziStrengthClaimRegistry;
+    (disguisedOldId.sources[3] as { url: string }).url = "https://zh.wikisource.org/w/index.php?notoldid=2600158";
+    expect(() => validateBaziStrengthClaimRegistry(disguisedOldId)).toThrow(/固定版本与 URL 不一致/u);
+
+    const redirectedCarrier = structuredClone(BAZI_STRENGTH_CLAIM_REGISTRY) as BaziStrengthClaimRegistry;
+    (redirectedCarrier.sources[3] as { url: string }).url = "https://example.invalid/source?oldid=2600158";
+    expect(() => validateBaziStrengthClaimRegistry(redirectedCarrier)).toThrow(/固定版本与 URL 不一致/u);
+
+    const forgedLocatorDigest = structuredClone(BAZI_STRENGTH_CLAIM_REGISTRY) as BaziStrengthClaimRegistry;
+    (forgedLocatorDigest.sourceBindings[0].exactLocator as unknown as { contentSha256: string | null }).contentSha256 = "a".repeat(64);
+    expect(() => validateBaziStrengthClaimRegistry(forgedLocatorDigest)).toThrow(/精确 locator 与反向边界/u);
+
+    const duplicateBoundary = structuredClone(BAZI_STRENGTH_CLAIM_REGISTRY) as BaziStrengthClaimRegistry;
+    (duplicateBoundary.sourceBindings[0].doesNotSupport as string[]).push(
+      duplicateBoundary.sourceBindings[0].doesNotSupport[0]!
+    );
+    expect(() => validateBaziStrengthClaimRegistry(duplicateBoundary)).toThrow(/精确 locator 与反向边界/u);
+
+    const blockedPromotedViaVerifiedBinding = structuredClone(
+      BAZI_STRENGTH_CLAIM_REGISTRY
+    ) as BaziStrengthClaimRegistry;
+    (blockedPromotedViaVerifiedBinding.claims[10].sourceBindingIds as string[]).splice(
+      0,
+      1,
+      "binding:dtt:month-command"
+    );
+    (blockedPromotedViaVerifiedBinding.claims[10] as { displayStatus: string }).displayStatus =
+      "enabled_traditional_context";
+    expect(() => validateBaziStrengthClaimRegistry(blockedPromotedViaVerifiedBinding))
+      .toThrow(/复核状态与展示状态不一致/u);
+  });
+
+  it("requires twelve exact, unique and active interpretive evidence subjects", () => {
+    const bindings = BAZI_STRENGTH_CLAIM_REGISTRY.sourceBindings;
+    const bindingIds = bindings.map((binding) => binding.bindingId);
+    const mappedBindingIds = Object.keys(BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID);
+    const subjects = bindings.map((binding) => requireEvidenceSubject(binding.evidenceSubjectId));
+
+    expect(bindings).toHaveLength(12);
+    expect([...bindingIds].sort()).toEqual([...mappedBindingIds].sort());
+    expect(new Set(subjects.map((subject) => subject.subjectId)).size).toBe(12);
+    expect(subjects.every((subject) => subject.status === "active"
+      && subject.category === "interpretive_claim"
+      && subject.requiredForV1 === false)).toBe(true);
+  });
+
+  it("rejects forged binding keys, duplicate or crossed subjects, and pillar or unknown subjects", () => {
+    const forgedBinding = structuredClone(BAZI_STRENGTH_CLAIM_REGISTRY) as BaziStrengthClaimRegistry;
+    (forgedBinding.sourceBindings[0] as { bindingId: string; evidenceSubjectId: string }).bindingId =
+      "binding:forged:derive-assessment";
+    (forgedBinding.sourceBindings[0] as { bindingId: string; evidenceSubjectId: string }).evidenceSubjectId =
+      "bazi.strength.binding.forged.derive-assessment.v1";
+    expect(() => validateBaziStrengthClaimRegistry(forgedBinding))
+      .toThrow(/显式映射 key 集合不一致/u);
+
+    const duplicateSubject = structuredClone(BAZI_STRENGTH_CLAIM_REGISTRY) as BaziStrengthClaimRegistry;
+    (duplicateSubject.sourceBindings[0] as { evidenceSubjectId: string }).evidenceSubjectId =
+      duplicateSubject.sourceBindings[1]!.evidenceSubjectId;
+    expect(() => validateBaziStrengthClaimRegistry(duplicateSubject)).toThrow(/证据主题必须一一唯一/u);
+
+    const crossedSubjects = structuredClone(BAZI_STRENGTH_CLAIM_REGISTRY) as BaziStrengthClaimRegistry;
+    const firstSubjectId = crossedSubjects.sourceBindings[0]!.evidenceSubjectId;
+    const secondSubjectId = crossedSubjects.sourceBindings[1]!.evidenceSubjectId;
+    (crossedSubjects.sourceBindings[0] as { evidenceSubjectId: string }).evidenceSubjectId = secondSubjectId;
+    (crossedSubjects.sourceBindings[1] as { evidenceSubjectId: string }).evidenceSubjectId = firstSubjectId;
+    expect(() => validateBaziStrengthClaimRegistry(crossedSubjects)).toThrow(/证据主题无法解析/u);
+
+    const pillarSubject = structuredClone(BAZI_STRENGTH_CLAIM_REGISTRY) as BaziStrengthClaimRegistry;
+    (pillarSubject.sourceBindings[0] as { evidenceSubjectId: string }).evidenceSubjectId =
+      "bazi.pillar.day.ganzhi.v1";
+    expect(() => validateBaziStrengthClaimRegistry(pillarSubject)).toThrow(/证据主题无法解析/u);
+
+    const unknownSubject = structuredClone(BAZI_STRENGTH_CLAIM_REGISTRY) as BaziStrengthClaimRegistry;
+    (unknownSubject.sourceBindings[0] as { evidenceSubjectId: string }).evidenceSubjectId =
+      "bazi.strength.binding.core.unknown.v1";
+    expect(() => validateBaziStrengthClaimRegistry(unknownSubject)).toThrow(/证据主题无法解析/u);
   });
 
   it("rejects any altered source-claim snapshot in a built narrative", async () => {

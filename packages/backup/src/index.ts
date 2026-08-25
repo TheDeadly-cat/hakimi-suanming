@@ -165,10 +165,9 @@ import {
 } from "@hakimi/knowledge-core";
 import { verifyCompatibleTransitNodeRef } from "@hakimi/transit-core";
 import {
-  classifyStoredTimeZoneDatabase,
   classifyStoredTimeZoneDatabaseForReplay,
-  resolveEventTimeContext,
-  verifyEventTimeContext
+  verifyStoredEventTimeContextWithBundledArtifact,
+  type EventTimeContextVerificationStatus
 } from "@hakimi/time-core";
 import {
   CalculatedChartIntegrityError,
@@ -669,6 +668,32 @@ export type CreateFullBackupOptions = {
   exportedAt?: string;
 };
 
+export type FullBackupEventTimeTargetVerification = Readonly<{
+  receiptId: string;
+  targetEventId: string;
+  status: EventTimeContextVerificationStatus;
+}>;
+
+export type FullBackupEventTimeRecordVerification = Readonly<{
+  eventId: string;
+  status: EventTimeContextVerificationStatus;
+}>;
+
+export type FullBackupEventTimeVerificationDiagnostics = Readonly<{
+  /** Stable Event-id order; diagnostics are not serialized into the envelope. */
+  events: FullBackupEventTimeRecordVerification[];
+  /** Stable receipt-id order and cross-checked against the Event status map. */
+  targets: FullBackupEventTimeTargetVerification[];
+  /** All Events whose historical resolver bytes are missing or unidentified. */
+  degradedEventCount: number;
+  /** Receipt targets in that same degraded subset. */
+  degradedTargetCount: number;
+}>;
+
+function emptyFullBackupEventTimeVerification(): FullBackupEventTimeVerificationDiagnostics {
+  return { events: [], targets: [], degradedEventCount: 0, degradedTargetCount: 0 };
+}
+
 export type FullBackupPreflightResult = {
   scope: typeof FULL_BACKUP_SCOPE;
   manifest: FullBackupManifest;
@@ -689,6 +714,7 @@ export type FullBackupPreflightResult = {
     | typeof EVENT_TIME_MIGRATION_FULL_BACKUP_FORMAT_VERSION
     | null;
   remainingP111Gaps: typeof FULL_BACKUP_P1_11_REMAINING_GAPS;
+  eventTimeVerification: FullBackupEventTimeVerificationDiagnostics;
 };
 
 export type FullBackupImportPreparation = {
@@ -2712,10 +2738,50 @@ function eventTimeMigrationSnapshotForEvent(record: EventRecord): EventTimeMigra
   };
 }
 
-async function assertEventTimeMigrationReceiptRelationships(payload: FullBackupPayload): Promise<void> {
+function isDegradedEventTimeVerificationStatus(
+  status: EventTimeContextVerificationStatus
+): boolean {
+  return status === "structural_artifact_unavailable" ||
+    status === "structural_legacy_unidentified";
+}
+
+async function verifyFullBackupEventTimeContexts(
+  payload: FullBackupPayload
+): Promise<{
+  records: FullBackupEventTimeRecordVerification[];
+  statusByEventId: Map<string, EventTimeContextVerificationStatus>;
+}> {
+  const records: FullBackupEventTimeRecordVerification[] = [];
+  const statusByEventId = new Map<string, EventTimeContextVerificationStatus>();
+  for (const event of [...payload.events].sort((left, right) => compareText(left.id, right.id))) {
+    try {
+      const verification = await verifyStoredEventTimeContextWithBundledArtifact({
+        datePrecision: event.datePrecision,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        timeContext: event.timeContext
+      });
+      records.push({ eventId: event.id, status: verification.status });
+      statusByEventId.set(event.id, verification.status);
+    } catch (cause) {
+      throw new FullBackupError(
+        "EVENT_TIME_CONTEXT_MISMATCH",
+        `Event ${event.id} cannot be verified against its selected historical artifact.`,
+        { cause }
+      );
+    }
+  }
+  return { records, statusByEventId };
+}
+
+async function assertEventTimeMigrationReceiptRelationships(
+  payload: FullBackupPayload,
+  statusByEventId: ReadonlyMap<string, EventTimeContextVerificationStatus>
+): Promise<FullBackupEventTimeTargetVerification[]> {
   const events = new Map(payload.events.map((record) => [record.id, record]));
   const claimedSourceInterpretations = new Set<string>();
   const claimedTargets = new Set<string>();
+  const verificationTargets: FullBackupEventTimeTargetVerification[] = [];
 
   for (const receipt of payload.eventTimeMigrationReceipts) {
     const source = events.get(receipt.source.recordId);
@@ -2766,57 +2832,43 @@ async function assertEventTimeMigrationReceiptRelationships(payload: FullBackupP
       );
     }
 
-    if (
-      target.timeContext.kind === "zoned_minute" &&
-      classifyStoredTimeZoneDatabase(target.timeContext) === "different_snapshot"
-    ) {
-      const expectedInterpretation = {
-        kind: "zoned_minute" as const,
-        timeZone: target.timeContext.timeZone,
-        startDisambiguation: target.timeContext.start.resolution.policy,
-        endDisambiguation: target.timeContext.end?.resolution.policy ?? null
-      };
-      if (canonicalStringify(receipt.interpretation) !== canonicalStringify(expectedInterpretation)) {
-        throw new FullBackupError(
-          "EVENT_TIME_MIGRATION_INTEGRITY_MISMATCH",
-          `Event time migration receipt ${receipt.id} interpretation does not match its frozen target fields and policies.`
-        );
-      }
-      continue;
+    if (target.timeContext.kind === "legacy_floating") {
+      throw new FullBackupError(
+        "EVENT_TIME_MIGRATION_INTEGRITY_MISMATCH",
+        `Event time migration receipt ${receipt.id} cannot target legacy_floating semantics.`
+      );
+    }
+    const expectedInterpretation = target.timeContext.kind === "calendar_date"
+      ? { kind: "calendar_date" as const }
+      : {
+          kind: "zoned_minute" as const,
+          timeZone: target.timeContext.timeZone,
+          startDisambiguation: target.timeContext.start.resolution.policy,
+          endDisambiguation: target.timeContext.end?.resolution.policy ?? null
+        };
+    if (canonicalStringify(receipt.interpretation) !== canonicalStringify(expectedInterpretation)) {
+      throw new FullBackupError(
+        "EVENT_TIME_MIGRATION_INTEGRITY_MISMATCH",
+        `Event time migration receipt ${receipt.id} interpretation does not match its frozen target fields and policies.`
+      );
     }
 
-    let expectedTargetTimeContext: EventRecord["timeContext"];
-    try {
-      expectedTargetTimeContext = receipt.interpretation.kind === "calendar_date"
-        ? resolveEventTimeContext({
-            datePrecision: source.datePrecision,
-            startDate: source.startDate,
-            endDate: source.endDate
-          })
-        : resolveEventTimeContext({
-            datePrecision: source.datePrecision,
-            startDate: source.startDate,
-            endDate: source.endDate,
-            timeZone: receipt.interpretation.timeZone,
-            startDisambiguation: receipt.interpretation.startDisambiguation,
-            endDisambiguation: receipt.interpretation.endDisambiguation ?? undefined
-          });
-    } catch (cause) {
+    const targetStatus = statusByEventId.get(target.id);
+    if (!targetStatus) {
       throw new FullBackupError(
         "EVENT_TIME_MIGRATION_INTEGRITY_MISMATCH",
-        `Event time migration receipt ${receipt.id} interpretation cannot be resolved.`,
-        { cause }
+        `Event time migration receipt ${receipt.id} target has no Event verification status.`
       );
     }
-    if (
-      canonicalStringify(target.timeContext) !== canonicalStringify(expectedTargetTimeContext)
-    ) {
-      throw new FullBackupError(
-        "EVENT_TIME_MIGRATION_INTEGRITY_MISMATCH",
-        `Event time migration receipt ${receipt.id} target cannot be reproduced from its source interpretation.`
-      );
-    }
+    verificationTargets.push({
+      receiptId: receipt.id,
+      targetEventId: target.id,
+      status: targetStatus
+    });
   }
+  return verificationTargets.sort((left, right) =>
+    compareText(left.receiptId, right.receiptId) || compareText(left.targetEventId, right.targetEventId)
+  );
 }
 
 async function assertRevisionCalculationReceiptRelationships(
@@ -2869,12 +2921,18 @@ async function assertRevisionCalculationReceiptRelationships(
   }
 }
 
-async function assertFullRelationships(payload: FullBackupPayload): Promise<void> {
+async function assertFullRelationships(
+  payload: FullBackupPayload
+): Promise<FullBackupEventTimeVerificationDiagnostics> {
   assertFullUniqueIds(payload);
   assertRuleRegistryRelationships(payload);
   await assertInstalledRulePackIntegrity(payload);
   await assertTzdbMigrationReceiptRelationships(payload);
-  await assertEventTimeMigrationReceiptRelationships(payload);
+  const eventTimeRecords = await verifyFullBackupEventTimeContexts(payload);
+  const eventTimeTargets = await assertEventTimeMigrationReceiptRelationships(
+    payload,
+    eventTimeRecords.statusByEventId
+  );
   await assertRevisionCalculationReceiptRelationships(payload);
   for (const savedView of payload.savedViews) {
     if (savedView.state !== "ready") continue;
@@ -2925,20 +2983,6 @@ async function assertFullRelationships(payload: FullBackupPayload): Promise<void
     }
   }
   for (const event of payload.events) {
-    try {
-      verifyEventTimeContext({
-        datePrecision: event.datePrecision,
-        startDate: event.startDate,
-        endDate: event.endDate,
-        timeContext: event.timeContext
-      });
-    } catch (cause) {
-      throw new FullBackupError(
-        "EVENT_TIME_CONTEXT_MISMATCH",
-        `Event ${event.id} has a time context that cannot be reproduced from its wall time, IANA zone and DST decision.`,
-        { cause }
-      );
-    }
     if (!subjectIds.has(event.caseId)) {
       throw new FullBackupError("ORPHAN_EVENT", `Event ${event.id} references missing research subject ${event.caseId}.`);
     }
@@ -3152,6 +3196,16 @@ async function assertFullRelationships(payload: FullBackupPayload): Promise<void
       }
     }
   }
+  return {
+    events: eventTimeRecords.records,
+    targets: eventTimeTargets,
+    degradedEventCount: eventTimeRecords.records.filter(({ status }) =>
+      isDegradedEventTimeVerificationStatus(status)
+    ).length,
+    degradedTargetCount: eventTimeTargets.filter(({ status }) =>
+      isDegradedEventTimeVerificationStatus(status)
+    ).length
+  };
 }
 
 async function assertCandidateSetSnapshotDigests(
@@ -3473,7 +3527,7 @@ async function migrateVerifiedLegacyFullBackup(
   // signature has been verified, and before the migrated current envelope is produced.
   const payload = migrateLegacyPayload(legacyPayload);
   await assertFullRevisionDigests(payload.revisions);
-  await assertFullRelationships(payload);
+  const eventTimeVerification = await assertFullRelationships(payload);
   const manifest = fullBackupManifestSchema.parse({
     ...envelope.manifest,
     formatVersion: FULL_BACKUP_FORMAT_VERSION,
@@ -3486,6 +3540,7 @@ async function migrateVerifiedLegacyFullBackup(
     payload,
     digests,
     migratedFromFormatVersion: LEGACY_FULL_BACKUP_FORMAT_VERSION,
+    eventTimeVerification,
     remainingP111Gaps: FULL_BACKUP_P1_11_REMAINING_GAPS
   };
 }
@@ -3506,7 +3561,7 @@ async function migrateVerifiedPreviousFullBackup(
   const payload = migratePreviousPayload(previousPayload);
   await assertCandidateSetSnapshotDigests(payload);
   await assertFullRevisionDigests(payload.revisions);
-  await assertFullRelationships(payload);
+  const eventTimeVerification = await assertFullRelationships(payload);
   const manifest = fullBackupManifestSchema.parse({
     ...envelope.manifest,
     formatVersion: FULL_BACKUP_FORMAT_VERSION,
@@ -3519,6 +3574,7 @@ async function migrateVerifiedPreviousFullBackup(
     payload,
     digests,
     migratedFromFormatVersion: PREVIOUS_FULL_BACKUP_FORMAT_VERSION,
+    eventTimeVerification,
     remainingP111Gaps: FULL_BACKUP_P1_11_REMAINING_GAPS
   };
 }
@@ -3541,6 +3597,7 @@ async function migrateVerifiedKnowledgeFullBackup(
   await assertKnowledgeFullRelationships(knowledgePayload);
   const payload = migrateKnowledgePayload(knowledgePayload);
   await assertCandidateSetSnapshotDigests(payload);
+  const eventTimeVerification = emptyFullBackupEventTimeVerification();
   const manifest = fullBackupManifestSchema.parse({
     ...envelope.manifest,
     formatVersion: FULL_BACKUP_FORMAT_VERSION,
@@ -3553,6 +3610,7 @@ async function migrateVerifiedKnowledgeFullBackup(
     payload,
     digests,
     migratedFromFormatVersion: KNOWLEDGE_FULL_BACKUP_FORMAT_VERSION,
+    eventTimeVerification,
     remainingP111Gaps: FULL_BACKUP_P1_11_REMAINING_GAPS
   };
 }
@@ -3572,7 +3630,7 @@ async function migrateVerifiedSourceRightsFullBackup(
   const payload = migrateSourceRightsPayload(sourceRightsPayload);
   await assertCandidateSetSnapshotDigests(payload);
   await assertFullRevisionDigests(payload.revisions);
-  await assertFullRelationships(payload);
+  const eventTimeVerification = await assertFullRelationships(payload);
   const manifest = fullBackupManifestSchema.parse({
     ...envelope.manifest,
     formatVersion: FULL_BACKUP_FORMAT_VERSION,
@@ -3585,6 +3643,7 @@ async function migrateVerifiedSourceRightsFullBackup(
     payload,
     digests,
     migratedFromFormatVersion: SOURCE_RIGHTS_FULL_BACKUP_FORMAT_VERSION,
+    eventTimeVerification,
     remainingP111Gaps: FULL_BACKUP_P1_11_REMAINING_GAPS
   };
 }
@@ -3606,7 +3665,7 @@ async function migrateVerifiedLifecycleFullBackup(
   const payload = migrateLifecyclePayload(lifecyclePayload);
   await assertCandidateSetSnapshotDigests(payload);
   await assertFullRevisionDigests(payload.revisions);
-  await assertFullRelationships(payload);
+  const eventTimeVerification = await assertFullRelationships(payload);
   const manifest = fullBackupManifestSchema.parse({
     ...envelope.manifest,
     formatVersion: FULL_BACKUP_FORMAT_VERSION,
@@ -3619,6 +3678,7 @@ async function migrateVerifiedLifecycleFullBackup(
     payload,
     digests,
     migratedFromFormatVersion: LIFECYCLE_FULL_BACKUP_FORMAT_VERSION,
+    eventTimeVerification,
     remainingP111Gaps: FULL_BACKUP_P1_11_REMAINING_GAPS
   };
 }
@@ -3639,7 +3699,7 @@ async function migrateVerifiedEventTimeFullBackup(
   const payload = migrateEventTimePayload(eventTimePayload);
   await assertCandidateSetSnapshotDigests(payload);
   await assertFullRevisionDigests(payload.revisions);
-  await assertFullRelationships(payload);
+  const eventTimeVerification = await assertFullRelationships(payload);
   const manifest = fullBackupManifestSchema.parse({
     ...envelope.manifest,
     formatVersion: FULL_BACKUP_FORMAT_VERSION,
@@ -3652,6 +3712,7 @@ async function migrateVerifiedEventTimeFullBackup(
     payload,
     digests,
     migratedFromFormatVersion: EVENT_TIME_FULL_BACKUP_FORMAT_VERSION,
+    eventTimeVerification,
     remainingP111Gaps: FULL_BACKUP_P1_11_REMAINING_GAPS
   };
 }
@@ -3672,7 +3733,7 @@ async function migrateVerifiedSavedViewFullBackup(
   const payload = migrateSavedViewPayload(savedViewPayload);
   await assertCandidateSetSnapshotDigests(payload);
   await assertFullRevisionDigests(payload.revisions);
-  await assertFullRelationships(payload);
+  const eventTimeVerification = await assertFullRelationships(payload);
   const manifest = fullBackupManifestSchema.parse({
     ...envelope.manifest,
     formatVersion: FULL_BACKUP_FORMAT_VERSION,
@@ -3685,6 +3746,7 @@ async function migrateVerifiedSavedViewFullBackup(
     payload,
     digests,
     migratedFromFormatVersion: SAVED_VIEW_FULL_BACKUP_FORMAT_VERSION,
+    eventTimeVerification,
     remainingP111Gaps: FULL_BACKUP_P1_11_REMAINING_GAPS
   };
 }
@@ -3705,7 +3767,7 @@ async function migrateVerifiedLocalUserDataFullBackup(
   const payload = migrateLocalUserDataPayload(localUserDataPayload);
   await assertCandidateSetSnapshotDigests(payload);
   await assertFullRevisionDigests(payload.revisions);
-  await assertFullRelationships(payload);
+  const eventTimeVerification = await assertFullRelationships(payload);
   const manifest = fullBackupManifestSchema.parse({
     ...envelope.manifest,
     formatVersion: FULL_BACKUP_FORMAT_VERSION,
@@ -3718,6 +3780,7 @@ async function migrateVerifiedLocalUserDataFullBackup(
     payload,
     digests,
     migratedFromFormatVersion: LOCAL_USER_DATA_FULL_BACKUP_FORMAT_VERSION,
+    eventTimeVerification,
     remainingP111Gaps: FULL_BACKUP_P1_11_REMAINING_GAPS
   };
 }
@@ -3738,7 +3801,7 @@ async function migrateVerifiedRuleRegistryFullBackup(
   const payload = migrateRuleRegistryPayload(ruleRegistryPayload);
   await assertCandidateSetSnapshotDigests(payload);
   await assertFullRevisionDigests(payload.revisions);
-  await assertFullRelationships(payload);
+  const eventTimeVerification = await assertFullRelationships(payload);
   const manifest = fullBackupManifestSchema.parse({
     ...envelope.manifest,
     formatVersion: FULL_BACKUP_FORMAT_VERSION,
@@ -3751,6 +3814,7 @@ async function migrateVerifiedRuleRegistryFullBackup(
     payload,
     digests,
     migratedFromFormatVersion: RULE_REGISTRY_FULL_BACKUP_FORMAT_VERSION,
+    eventTimeVerification,
     remainingP111Gaps: FULL_BACKUP_P1_11_REMAINING_GAPS
   };
 }
@@ -3772,7 +3836,7 @@ async function migrateVerifiedTzdbMigrationFullBackup(
   const payload = migrateTzdbMigrationPayload(tzdbMigrationPayload);
   await assertCandidateSetSnapshotDigests(payload);
   await assertFullRevisionDigests(payload.revisions);
-  await assertFullRelationships(payload);
+  const eventTimeVerification = await assertFullRelationships(payload);
   const manifest = fullBackupManifestSchema.parse({
     ...envelope.manifest,
     formatVersion: FULL_BACKUP_FORMAT_VERSION,
@@ -3785,6 +3849,7 @@ async function migrateVerifiedTzdbMigrationFullBackup(
     payload,
     digests,
     migratedFromFormatVersion: TZDB_MIGRATION_FULL_BACKUP_FORMAT_VERSION,
+    eventTimeVerification,
     remainingP111Gaps: FULL_BACKUP_P1_11_REMAINING_GAPS
   };
 }
@@ -3806,7 +3871,7 @@ async function migrateVerifiedEventTimeMigrationFullBackup(
   const payload = migrateEventTimeMigrationPayload(legacyPayload);
   await assertCandidateSetSnapshotDigests(payload);
   await assertFullRevisionDigests(payload.revisions);
-  await assertFullRelationships(payload);
+  const eventTimeVerification = await assertFullRelationships(payload);
   const manifest = fullBackupManifestSchema.parse({
     ...envelope.manifest,
     formatVersion: FULL_BACKUP_FORMAT_VERSION,
@@ -3819,6 +3884,7 @@ async function migrateVerifiedEventTimeMigrationFullBackup(
     payload,
     digests,
     migratedFromFormatVersion: EVENT_TIME_MIGRATION_FULL_BACKUP_FORMAT_VERSION,
+    eventTimeVerification,
     remainingP111Gaps: FULL_BACKUP_P1_11_REMAINING_GAPS
   };
 }
@@ -3868,13 +3934,14 @@ export async function preflightFullBackup(rawInput: unknown): Promise<FullBackup
   assertFullDigests(envelope.digests, recomputed);
   await assertCandidateSetSnapshotDigests(payload);
   await assertFullRevisionDigests(payload.revisions);
-  await assertFullRelationships(payload);
+  const eventTimeVerification = await assertFullRelationships(payload);
   return {
     scope: FULL_BACKUP_SCOPE,
     manifest: envelope.manifest,
     payload,
     digests: recomputed,
     migratedFromFormatVersion: null,
+    eventTimeVerification,
     remainingP111Gaps: FULL_BACKUP_P1_11_REMAINING_GAPS
   };
 }

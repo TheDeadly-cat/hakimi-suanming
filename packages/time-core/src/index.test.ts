@@ -3,7 +3,11 @@ import {
   LEGACY_UNIDENTIFIED_TZDB_VERSION,
   buildTimeZoneDatabaseSnapshotId
 } from "@hakimi/contracts";
-import type { BirthInput, DstDisambiguationPolicy } from "@hakimi/contracts";
+import type {
+  BirthInput,
+  DstDisambiguationPolicy,
+  TimeZoneDatabaseSnapshot
+} from "@hakimi/contracts";
 import { RETAINED_TIME_ZONE_DATABASE_2025B } from "@hakimi/tzdb-core";
 import {
   LUNAR_TO_SOLAR_ALGORITHM_ID,
@@ -19,11 +23,13 @@ import {
   normalizeBirthTimeForBundledSnapshot,
   preflightCivilMinute,
   resolveBirthCalendarInput,
+  resolveBirthCalendarInputWithResolver,
   resolveEventTimeContext,
   resolveEventTimeContextForBundledSnapshot,
   resolveGregorianCalendarDate,
   verifyEventTimeContext,
-  verifyEventTimeContextWithBundledArtifact
+  verifyEventTimeContextWithBundledArtifact,
+  verifyStoredEventTimeContextWithBundledArtifact
 } from "./index";
 import boundaryFixtures from "../fixtures/time-boundaries.v1.json";
 
@@ -292,6 +298,14 @@ describe("normalizeBirthTime", () => {
 });
 
 describe("bundled snapshot birth-time parallel calculation", () => {
+  it("validates a historical input name against the selected resolver rather than the active resolver", () => {
+    const historicalOnly = birthInput({ timeZone: "Historical/Only" });
+    expect(() => resolveBirthCalendarInput(historicalOnly)).toThrow();
+    expect(resolveBirthCalendarInputWithResolver(historicalOnly, {
+      isTimeZoneName: (timeZone) => timeZone === "Historical/Only"
+    }).originalInput.timeZone).toBe("Historical/Only");
+  });
+
   it("keeps 2026c/2025b/2026c resolver use isolated across a real Casablanca change", async () => {
     const input = birthInput({
       date: "2026-10-01",
@@ -318,6 +332,34 @@ describe("bundled snapshot birth-time parallel calculation", () => {
     expect(retained.timeCalibration).toMatchObject({
       utcInstant: "2026-10-01T11:00:00Z",
       utcOffset: "+01:00"
+    });
+  });
+
+  it("snapshots bundled input and expected descriptor before loading the resolver", async () => {
+    const input = birthInput({
+      date: "2026-10-01",
+      time: "12:00",
+      timeZone: "Africa/Casablanca"
+    });
+    const expectedDescriptor: TimeZoneDatabaseSnapshot = structuredClone(RETAINED_TIME_ZONE_DATABASE_2025B);
+    const pending = normalizeBirthTimeForBundledSnapshot(
+      input,
+      "reject",
+      RETAINED_TIME_ZONE_DATABASE_2025B.snapshotId,
+      expectedDescriptor
+    );
+
+    input.time = "00:00";
+    input.location.label = "mutated after call";
+    expectedDescriptor.artifactName = "tampered/packed.json";
+
+    await expect(pending).resolves.toMatchObject({
+      timeZoneDatabase: RETAINED_TIME_ZONE_DATABASE_2025B,
+      timeCalibration: {
+        originalCivilDateTime: "2026-10-01T12:00:00",
+        utcInstant: "2026-10-01T11:00:00Z",
+        utcOffset: "+01:00"
+      }
     });
   });
 
@@ -601,6 +643,70 @@ describe("Event civil-minute time contexts", () => {
       endDate: input.endDate,
       timeContext: historical
     })).resolves.toEqual(historical);
+    await expect(verifyStoredEventTimeContextWithBundledArtifact({
+      datePrecision: input.datePrecision,
+      startDate: input.startDate,
+      endDate: input.endDate,
+      timeContext: historical
+    })).resolves.toMatchObject({ status: "exact_retained", timeContext: historical });
+    await expect(verifyStoredEventTimeContextWithBundledArtifact({
+      datePrecision: input.datePrecision,
+      startDate: input.startDate,
+      endDate: input.endDate,
+      timeContext: current
+    })).resolves.toMatchObject({ status: "exact_current", timeContext: current });
+  });
+
+  it("keeps unavailable and unidentified Event artifacts explicitly structural", async () => {
+    const current = resolveEventTimeContext({
+      datePrecision: "minute",
+      startDate: "2024-01-15T12:00",
+      endDate: null,
+      timeZone: "Asia/Shanghai"
+    });
+    if (current.kind !== "zoned_minute" || !current.timeZoneDatabase) {
+      throw new Error("Expected an identified zoned_minute context.");
+    }
+    const unavailable = structuredClone(current);
+    if (!unavailable.timeZoneDatabase) throw new Error("Expected descriptor.");
+    unavailable.timeZoneDatabase.dataSha256 = unavailable.timeZoneDatabase.dataSha256.endsWith("0")
+      ? `${unavailable.timeZoneDatabase.dataSha256.slice(0, -1)}1`
+      : `${unavailable.timeZoneDatabase.dataSha256.slice(0, -1)}0`;
+    unavailable.timeZoneDatabase.snapshotId = buildTimeZoneDatabaseSnapshotId(unavailable.timeZoneDatabase);
+    unavailable.tzdbVersion = unavailable.timeZoneDatabase.snapshotId;
+    const unidentified = {
+      ...structuredClone(current),
+      tzdbVersion: LEGACY_UNIDENTIFIED_TZDB_VERSION,
+      timeZoneDatabase: undefined
+    };
+
+    await expect(verifyStoredEventTimeContextWithBundledArtifact({
+      datePrecision: "minute",
+      startDate: "2024-01-15T12:00",
+      endDate: null,
+      timeContext: unavailable
+    })).resolves.toMatchObject({ status: "structural_artifact_unavailable" });
+    await expect(verifyStoredEventTimeContextWithBundledArtifact({
+      datePrecision: "minute",
+      startDate: "2024-01-15T12:00",
+      endDate: null,
+      timeContext: unidentified
+    })).resolves.toMatchObject({ status: "structural_legacy_unidentified" });
+    await expect(verifyStoredEventTimeContextWithBundledArtifact({
+      datePrecision: "day",
+      startDate: "2024-01-15",
+      endDate: null,
+      timeContext: { kind: "calendar_date" }
+    })).resolves.toEqual({ status: "structural_calendar_date", timeContext: { kind: "calendar_date" } });
+    await expect(verifyStoredEventTimeContextWithBundledArtifact({
+      datePrecision: "minute",
+      startDate: "2024-01-15T12:00",
+      endDate: null,
+      timeContext: { kind: "legacy_floating" }
+    })).resolves.toEqual({
+      status: "structural_legacy_floating",
+      timeContext: { kind: "legacy_floating" }
+    });
   });
 
   it("fails historical replay for a descriptor conflict even when snapshotId still matches", async () => {
@@ -618,6 +724,12 @@ describe("Event civil-minute time contexts", () => {
     conflicting.timeZoneDatabase.artifactName = "tampered/packed.json";
 
     expect(classifyStoredTimeZoneDatabaseForReplay(conflicting)).toBe("descriptor_mismatch");
+    expect(() => verifyEventTimeContext({
+      datePrecision: "minute",
+      startDate: "2026-10-01T12:00",
+      endDate: null,
+      timeContext: conflicting
+    })).toThrow(expect.objectContaining({ code: "TZDB_SNAPSHOT_MISMATCH" }));
     await expect(verifyEventTimeContextWithBundledArtifact({
       datePrecision: "minute",
       startDate: "2026-10-01T12:00",
@@ -645,5 +757,101 @@ describe("Event civil-minute time contexts", () => {
       endDate: null,
       timeContext: forged
     })).rejects.toMatchObject({ code: "EVENT_TIME_CONTEXT_MISMATCH" });
+  });
+
+  it("snapshots the complete replay request before the resolver await", async () => {
+    const mutableInput = {
+      datePrecision: "minute" as const,
+      startDate: "2026-10-01T12:00",
+      endDate: null,
+      timeZone: "Africa/Casablanca"
+    };
+    const pending = resolveEventTimeContextForBundledSnapshot(
+      mutableInput,
+      RETAINED_TIME_ZONE_DATABASE_2025B.snapshotId,
+      structuredClone(RETAINED_TIME_ZONE_DATABASE_2025B)
+    );
+    mutableInput.startDate = "2026-10-01T13:00";
+    mutableInput.timeZone = "Asia/Shanghai";
+
+    await expect(pending).resolves.toMatchObject({
+      kind: "zoned_minute",
+      timeZone: "Africa/Casablanca",
+      start: { localDateTime: "2026-10-01T12:00", canonicalUtc: "2026-10-01T11:00:00Z" }
+    });
+
+    const context = await resolveEventTimeContextForBundledSnapshot({
+      datePrecision: "minute",
+      startDate: "2026-10-01T12:00",
+      endDate: null,
+      timeZone: "Africa/Casablanca"
+    }, RETAINED_TIME_ZONE_DATABASE_2025B.snapshotId);
+    const mutableVerification = {
+      datePrecision: "minute" as const,
+      startDate: "2026-10-01T12:00",
+      endDate: null,
+      timeContext: structuredClone(context)
+    };
+    const verification = verifyStoredEventTimeContextWithBundledArtifact(mutableVerification);
+    mutableVerification.startDate = "2026-10-01T13:00";
+    if (mutableVerification.timeContext.kind === "zoned_minute") {
+      mutableVerification.timeContext.start.canonicalUtc = "2026-10-01T11:01:00Z";
+    }
+    await expect(verification).resolves.toMatchObject({ status: "exact_retained", timeContext: context });
+  });
+
+  it("rejects accessors, Symbols, cycles and sparse arrays before replay", async () => {
+    const current = resolveEventTimeContext({
+      datePrecision: "minute",
+      startDate: "2024-01-15T12:00",
+      endDate: null,
+      timeZone: "Asia/Shanghai"
+    });
+    let getterCalls = 0;
+    const accessorInput = {
+      datePrecision: "minute",
+      endDate: null,
+      timeContext: current
+    } as Record<string, unknown>;
+    Object.defineProperty(accessorInput, "startDate", {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return "2024-01-15T12:00";
+      }
+    });
+    await expect(verifyStoredEventTimeContextWithBundledArtifact(accessorInput as never))
+      .rejects.toThrow(/声明式/u);
+    expect(getterCalls).toBe(0);
+
+    const symbolInput = {
+      datePrecision: "minute" as const,
+      startDate: "2024-01-15T12:00",
+      endDate: null,
+      timeContext: current,
+      [Symbol("hidden")]: true
+    };
+    await expect(verifyStoredEventTimeContextWithBundledArtifact(symbolInput))
+      .rejects.toThrow(/Symbol/u);
+
+    const cyclic = {
+      datePrecision: "minute",
+      startDate: "2024-01-15T12:00",
+      endDate: null,
+      timeContext: current
+    } as Record<string, unknown>;
+    cyclic.self = cyclic;
+    await expect(verifyStoredEventTimeContextWithBundledArtifact(cyclic as never))
+      .rejects.toThrow(/循环/u);
+
+    if (current.kind !== "zoned_minute") throw new Error("Expected zoned minute.");
+    const sparse = structuredClone(current);
+    sparse.start.resolution.candidates = new Array(1) as typeof sparse.start.resolution.candidates;
+    await expect(verifyStoredEventTimeContextWithBundledArtifact({
+      datePrecision: "minute",
+      startDate: "2024-01-15T12:00",
+      endDate: null,
+      timeContext: sparse
+    })).rejects.toThrow(/稠密/u);
   });
 });

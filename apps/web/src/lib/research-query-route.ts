@@ -2,6 +2,8 @@ import { isResearchResultKey } from "@hakimi/research-query";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ALLOWED_KEYS = new Set(["draft", "view", "result"]);
+const ALLOWED_SOURCES = new Set(["default", "draft", "view"]);
+const MAX_SEARCH_LENGTH = 512;
 
 export type ResearchQueryRouteState = {
   source: "default" | "draft" | "view";
@@ -28,10 +30,13 @@ export function isStrictResearchResultKey(value: string): boolean {
 }
 
 export function parseResearchQueryRoute(search: string): ResearchQueryRouteParseResult {
+  if (search.length > MAX_SEARCH_LENGTH) {
+    return { state: null, issue: "研究检索链接超过允许长度；为避免解释截断条件，未执行任何回退。" };
+  }
   const params = new URLSearchParams(search);
   const unknownKeys = [...new Set([...params.keys()].filter((key) => !ALLOWED_KEYS.has(key)))];
   if (unknownKeys.length) {
-    return { state: null, issue: `研究检索链接包含未知参数：${unknownKeys.join("、")}。为保护查询语义，未执行任何回退。` };
+    return { state: null, issue: `研究检索链接包含 ${unknownKeys.length} 个未知参数；参数名可能含有私密检索词，因此未回显。为保护查询语义，未执行任何回退。` };
   }
 
   const draftId = oneValue(params, "draft");
@@ -56,7 +61,7 @@ export function parseResearchQueryRoute(search: string): ResearchQueryRouteParse
   return {
     state: {
       source: draftId ? "draft" : viewId ? "view" : "default",
-      referenceId: draftId ?? viewId,
+      referenceId: (draftId ?? viewId)?.toLowerCase() ?? null,
       resultKey,
     },
     issue: null,
@@ -64,6 +69,9 @@ export function parseResearchQueryRoute(search: string): ResearchQueryRouteParse
 }
 
 export function buildResearchQuerySearch(state: ResearchQueryRouteState): string {
+  if (!ALLOWED_SOURCES.has(state.source)) {
+    throw new Error("研究查询路由来源无效。");
+  }
   if (state.source === "default" && state.referenceId !== null) {
     throw new Error("默认研究查询不能携带引用 UUID。");
   }
@@ -75,8 +83,8 @@ export function buildResearchQuerySearch(state: ResearchQueryRouteState): string
   }
 
   const params = new URLSearchParams();
-  if (state.source === "draft") params.set("draft", state.referenceId!);
-  if (state.source === "view") params.set("view", state.referenceId!);
+  if (state.source === "draft") params.set("draft", state.referenceId!.toLowerCase());
+  if (state.source === "view") params.set("view", state.referenceId!.toLowerCase());
   if (state.resultKey) params.set("result", state.resultKey);
   const value = params.toString();
   return value ? `?${value}` : "";

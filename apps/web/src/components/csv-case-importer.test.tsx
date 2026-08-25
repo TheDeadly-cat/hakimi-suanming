@@ -5,16 +5,33 @@ import { CaseImportCancelledError, type CaseImportOptions, type CaseImportPlan }
 import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
 import { caseRepository } from "@hakimi/storage";
 import * as caseImportWorkerClient from "../lib/case-import-worker-client";
-import { CsvCaseImporter } from "./csv-case-importer";
+import { CsvCaseImporter, type CsvCaseImporterProps } from "./csv-case-importer";
 
-const { saveTextFileMock, pickFileMock } = vi.hoisted(() => ({
-  saveTextFileMock: vi.fn(),
-  pickFileMock: vi.fn()
+const {
+  getExportCapabilitiesMock,
+  pickFileMock,
+  saveFileMock,
+  saveFileToChosenLocationMock,
+  shareFileMock,
+  printReportMock
+} = vi.hoisted(() => ({
+  getExportCapabilitiesMock: vi.fn(),
+  pickFileMock: vi.fn(),
+  saveFileMock: vi.fn(),
+  saveFileToChosenLocationMock: vi.fn(),
+  shareFileMock: vi.fn(),
+  printReportMock: vi.fn()
 }));
 
 vi.mock("@hakimi/platform", () => ({
-  saveTextFile: saveTextFileMock,
-  pickFile: pickFileMock
+  pickFile: pickFileMock,
+  webReportExportPort: {
+    getCapabilities: getExportCapabilitiesMock,
+    printReport: printReportMock,
+    saveFile: saveFileMock,
+    saveFileToChosenLocation: saveFileToChosenLocationMock,
+    shareFile: shareFileMock
+  }
 }));
 
 const headers = [
@@ -70,12 +87,57 @@ function fileFor(rows: string[][]) {
   return pickedFileForText("cases.csv", text);
 }
 
+function createMutationEpochHarness() {
+  let current = true;
+  let held = false;
+  const acquireMutation = vi.fn(() => {
+    if (!current || held) return false;
+    held = true;
+    return true;
+  });
+  const releaseMutation = vi.fn(() => {
+    if (!held) throw new Error("测试写锁未持有，不能释放。");
+    held = false;
+  });
+  return {
+    acquireMutation,
+    releaseMutation,
+    invalidate: () => { current = false; },
+    isCurrent: () => current,
+    isHeld: () => held
+  };
+}
+
+type ImporterPropsWithoutMutationEpoch = Omit<CsvCaseImporterProps, "acquireMutation" | "releaseMutation">;
+
+function renderWithMutationEpoch(
+  props: ImporterPropsWithoutMutationEpoch = {},
+  epoch = createMutationEpochHarness()
+) {
+  const view = render(
+    <CsvCaseImporter
+      {...props}
+      acquireMutation={epoch.acquireMutation}
+      releaseMutation={epoch.releaseMutation}
+    />
+  );
+  return { ...view, epoch };
+}
+
 beforeEach(async () => {
-  saveTextFileMock.mockReset().mockImplementation(async (filename: string) => ({
+  getExportCapabilitiesMock.mockReset().mockReturnValue({
+    canDownloadFiles: true,
+    canChooseSaveLocation: false,
+    canShareFiles: false
+  });
+  saveFileMock.mockReset().mockImplementation(async (_blob: Blob, filename: string) => ({
     status: "download_requested",
     filename,
     method: "browser_download"
   }));
+  saveFileToChosenLocationMock.mockReset();
+  shareFileMock.mockReset();
+  printReportMock.mockReset();
   pickFileMock.mockReset();
   await caseRepository.clearAll();
 });
@@ -91,6 +153,14 @@ describe("CsvCaseImporter", () => {
     fireEvent.click(await screen.findByRole("button", { name: "按此映射预检" }));
   }
 
+  async function downloadPreparedFile(expectedCallCount: number) {
+    const dialog = await screen.findByRole("dialog");
+    fireEvent.click(await within(dialog).findByRole("button", { name: /下载文件/ }));
+    await waitFor(() => expect(saveFileMock).toHaveBeenCalledTimes(expectedCallCount));
+    const call = saveFileMock.mock.calls[expectedCallCount - 1] as [Blob, string];
+    return { blob: call[0], dialog, filename: call[1] };
+  }
+
   it("提供模板、显式字段映射，并诚实区分错误行与未知时辰候选组", async () => {
     const picked = fileFor([
       exactRow(),
@@ -100,10 +170,12 @@ describe("CsvCaseImporter", () => {
     pickFileMock.mockResolvedValueOnce(picked);
 
     render(<CsvCaseImporter />);
-    fireEvent.click(screen.getByRole("button", { name: "下载 CSV 模板" }));
-    expect(saveTextFileMock).toHaveBeenCalledTimes(1);
-    expect(saveTextFileMock.mock.calls[0][0]).toBe("hakimi-bazi-case-import-template.csv");
-    expect(saveTextFileMock.mock.calls[0][1]).toContain("案例名,历法,出生日期,出生时间,时间精度,IANA时区");
+    fireEvent.click(screen.getByRole("button", { name: "准备 CSV 模板" }));
+    const templateDelivery = await downloadPreparedFile(1);
+    expect(templateDelivery.filename).toBe("hakimi-bazi-case-import-template.csv");
+    expect(await templateDelivery.blob.text()).toContain("案例名,历法,出生日期,出生时间,时间精度,IANA时区");
+    fireEvent.click(within(templateDelivery.dialog).getByRole("button", { name: "关闭" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 
     await chooseAndPreflight();
     expect(await screen.findByText(/预检完成：3 行中，2 行通过格式校验/)).toBeTruthy();
@@ -118,10 +190,11 @@ describe("CsvCaseImporter", () => {
     expect(unknownHourBoundary?.textContent).toContain("13 个代表性探针");
     expect(screen.getByText(/INVALID_TIME_ZONE/)).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "下载完整预检/导入报告" }));
-    expect(saveTextFileMock).toHaveBeenCalledTimes(2);
-    expect(saveTextFileMock.mock.calls[1][1]).toContain("时辰待考,unknown_hour,可写入候选组");
-    expect(saveTextFileMock.mock.calls[1][1]).toContain("INVALID_TIME_ZONE");
+    fireEvent.click(screen.getByRole("button", { name: "准备完整预检/导入报告" }));
+    const reportDelivery = await downloadPreparedFile(2);
+    const reportText = await reportDelivery.blob.text();
+    expect(reportText).toContain("时辰待考,unknown_hour,可写入候选组");
+    expect(reportText).toContain("INVALID_TIME_ZONE");
   });
 
   it("同时写入 exact_minute 命盘和 unknown_hour 候选组，且不造出生时间", async () => {
@@ -133,7 +206,7 @@ describe("CsvCaseImporter", () => {
     pickFileMock.mockResolvedValueOnce(picked);
     const onImported = vi.fn();
 
-    render(<CsvCaseImporter onImported={onImported} />);
+    const { epoch } = renderWithMutationEpoch({ onImported });
     await chooseAndPreflight();
     await screen.findByText(/预检完成/);
     fireEvent.click(screen.getByRole("button", { name: "导入 2 条记录" }));
@@ -156,6 +229,9 @@ describe("CsvCaseImporter", () => {
     expect(candidateSets).toHaveLength(1);
     expect(candidateSets[0]).toMatchObject({ alias: "时辰待考", candidateSet: { input: { time: null, timePrecision: "unknown_hour" }, probeCount: 13 } });
     expect(screen.getByRole("button", { name: "没有待导入记录" })).toHaveProperty("disabled", true);
+    expect(epoch.acquireMutation).toHaveBeenCalledTimes(1);
+    expect(epoch.releaseMutation).toHaveBeenCalledTimes(1);
+    expect(epoch.isHeld()).toBe(false);
   });
 
   it("可把非模板列显式映射为必填字段", async () => {
@@ -311,7 +387,8 @@ describe("CsvCaseImporter", () => {
     });
     const onImported = vi.fn();
 
-    const view = render(<CsvCaseImporter onImported={onImported} />);
+    const epoch = createMutationEpochHarness();
+    const view = renderWithMutationEpoch({ onImported }, epoch);
     await chooseAndPreflight();
     await screen.findByText(/预检完成/);
     fireEvent.click(screen.getByRole("button", { name: "导入 2 条记录" }));
@@ -322,6 +399,8 @@ describe("CsvCaseImporter", () => {
     await waitFor(async () => expect(await caseRepository.listCases()).toHaveLength(1));
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(onImported).not.toHaveBeenCalled();
+    await waitFor(() => expect(epoch.releaseMutation).toHaveBeenCalledTimes(1));
+    expect(epoch.isHeld()).toBe(false);
   });
 
   it("新文件表头解析失败后清除旧预检计划，不能误提交上一文件", async () => {
@@ -335,7 +414,7 @@ describe("CsvCaseImporter", () => {
     expect(await screen.findByRole("button", { name: "导入 1 条记录" })).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "选择 CSV" }));
-    expect((await screen.findByRole("alert")).textContent).toContain("CSV 表头");
+    expect(await screen.findByText(/CSV 表头/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "导入 1 条记录" })).toBeNull();
     expect(screen.queryByText("cases.csv")).toBeNull();
     expect(await caseRepository.listCases()).toEqual([]);
@@ -345,7 +424,7 @@ describe("CsvCaseImporter", () => {
     const picked = fileFor([exactRow({ 案例名: "已落库但刷新失败" })]);
     pickFileMock.mockResolvedValueOnce(picked);
     const onImported = vi.fn().mockRejectedValue(new Error("模拟刷新失败"));
-    render(<CsvCaseImporter onImported={onImported} />);
+    const { epoch } = renderWithMutationEpoch({ onImported });
 
     await chooseAndPreflight();
     await screen.findByText(/预检完成/);
@@ -354,13 +433,15 @@ describe("CsvCaseImporter", () => {
     expect(await screen.findByText(/成功写入 1 行/)).toBeTruthy();
     expect((await screen.findByRole("alert")).textContent).toContain("数据已经写入，但页面列表刷新失败");
     expect((await caseRepository.listCases()).map((record) => record.alias)).toEqual(["已落库但刷新失败"]);
+    expect(epoch.releaseMutation).toHaveBeenCalledTimes(1);
+    expect(epoch.isHeld()).toBe(false);
   });
 
   it("预检后出现并发重复时，提交事务按 skip 策略原子跳过且不进入重试死循环", async () => {
     const picked = fileFor([exactRow({ 案例名: "待提交案例" })]);
     pickFileMock.mockResolvedValueOnce(picked);
     const onImported = vi.fn();
-    render(<CsvCaseImporter onImported={onImported} />);
+    const { epoch } = renderWithMutationEpoch({ onImported });
     await chooseAndPreflight();
     await screen.findByText(/预检完成/);
 
@@ -383,12 +464,14 @@ describe("CsvCaseImporter", () => {
     expect(screen.getByRole("button", { name: "没有待导入记录" })).toHaveProperty("disabled", true);
     expect((await caseRepository.listCases()).map((record) => record.alias)).toEqual(["另一个页面先写入"]);
     await waitFor(() => expect(onImported).toHaveBeenCalledTimes(1));
+    expect(epoch.releaseMutation).toHaveBeenCalledTimes(1);
+    expect(epoch.isHeld()).toBe(false);
   });
 
   it("预检后出现并发重复时，error 策略明确标错并拒绝第二次写入", async () => {
     const picked = fileFor([exactRow({ 案例名: "应标错案例" })]);
     pickFileMock.mockResolvedValueOnce(picked);
-    render(<CsvCaseImporter />);
+    const { epoch } = renderWithMutationEpoch();
     fireEvent.click(screen.getByRole("button", { name: "选择 CSV" }));
     fireEvent.change(await screen.findByLabelText("重复出生输入策略"), { target: { value: "error" } });
     fireEvent.click(screen.getByRole("button", { name: "按此映射预检" }));
@@ -412,5 +495,28 @@ describe("CsvCaseImporter", () => {
     expect(await screen.findByText(/成功写入 0 行，提交时跳过重复 0 行，失败 1 行/)).toBeTruthy();
     expect(screen.getByText(/本行已按标错策略拒绝写入/)).toBeTruthy();
     expect((await caseRepository.listCases()).map((record) => record.alias)).toEqual(["并发来源"]);
+    expect(epoch.releaseMutation).toHaveBeenCalledTimes(1);
+    expect(epoch.isHeld()).toBe(false);
+  });
+
+  it("mutation epoch 在提交前失效时阻断整批写入", async () => {
+    pickFileMock.mockResolvedValueOnce(fileFor([exactRow({ 案例名: "过期写入" })]));
+    const epoch = createMutationEpochHarness();
+    const createSpy = vi.spyOn(caseRepository, "createCase");
+    renderWithMutationEpoch({}, epoch);
+    await chooseAndPreflight();
+    await screen.findByText(/预检完成/);
+    expect(epoch.isCurrent()).toBe(true);
+
+    epoch.invalidate();
+    fireEvent.click(screen.getByRole("button", { name: "导入 1 条记录" }));
+
+    expect((await screen.findByRole("alert")).textContent).toContain("本次导入尚未启动");
+    expect(epoch.acquireMutation).toHaveBeenCalledTimes(1);
+    expect(epoch.releaseMutation).not.toHaveBeenCalled();
+    expect(epoch.isCurrent()).toBe(false);
+    expect(epoch.isHeld()).toBe(false);
+    expect(createSpy).not.toHaveBeenCalled();
+    expect(await caseRepository.listCases()).toEqual([]);
   });
 });

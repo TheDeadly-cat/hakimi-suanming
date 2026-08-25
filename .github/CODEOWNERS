@@ -1,0 +1,11 @@
+# Repository owner reviews all changes by default.
+* @TheDeadly-cat
+
+# Data-generation, release, persistence, backup, and service-worker changes
+# must remain visible as explicit review surfaces.
+/apps/web/release-protocol.ts @TheDeadly-cat
+/apps/web/vite-release-config.ts @TheDeadly-cat
+/apps/web/public/sw.js @TheDeadly-cat
+/packages/storage/ @TheDeadly-cat
+/packages/backup/ @TheDeadly-cat
+/.github/workflows/ @TheDeadly-cat

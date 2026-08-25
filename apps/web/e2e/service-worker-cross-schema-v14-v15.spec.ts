@@ -17,7 +17,7 @@ import {
   expectPageFixture,
   holdDatabaseUpgradeOpen,
   installOneShotBootOkInterruption,
-  openBridgeNavigationAfterSwitch,
+  openConfirmedBridgeBeforeSwitch,
   openStableBridge,
   pageReleaseEvidence,
   readNativeDatabase,
@@ -190,8 +190,14 @@ async function switchToTargetAndWaitForActivation(
   context: BrowserContext,
   target: GenerationFixture
 ): Promise<{ bridgePage: Page; problems: string[] }> {
+  const natural = await openConfirmedBridgeBeforeSwitch(context, switchServer, sourceV14);
   switchServer.setGeneration(target);
-  const natural = await openBridgeNavigationAfterSwitch(context, switchServer, sourceV14);
+  await natural.page.bringToFront();
+  await natural.page.evaluate(async () => {
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (!registration) throw new Error("The confirmed v14 page has no Service Worker registration.");
+    await registration.update();
+  });
   await expect.poll(() => cacheGeneration(natural.page, target)).toMatchObject({
     bootAttempted: false,
     bootConfirmed: false,

@@ -18,6 +18,7 @@ const CANONICAL_UTC_MINUTE_INSTANT_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:00\
 const ALLOWED_PARAMS = new Set(["item", "at", "dir", "focus", "case", "revision"]);
 const SLOT_IDS = ["A", "B", "C", "D"] as const;
 const FOCUS_SLOT_IDS = ["B", "C", "D"] as const;
+const MAX_SEARCH_LENGTH = 1024;
 
 export class FormalComparisonRouteError extends Error {
   readonly code = "FORMAL_COMPARISON_ROUTE_INVALID" as const;
@@ -32,17 +33,21 @@ function blankSlot(): FormalComparisonRouteSlot {
   return { caseId: null, revisionId: null, manualDirection: null };
 }
 
-function isUuid(value: string | null | undefined): value is string {
-  return Boolean(value && UUID_PATTERN.test(value));
+function isUuid(value: unknown): value is string {
+  return typeof value === "string" && UUID_PATTERN.test(value);
 }
 
-function isCanonicalUtcMinuteInstant(value: string): boolean {
-  return CANONICAL_UTC_MINUTE_INSTANT_PATTERN.test(value) &&
+function isCanonicalUtcMinuteInstant(value: unknown): value is string {
+  return typeof value === "string" &&
+    CANONICAL_UTC_MINUTE_INSTANT_PATTERN.test(value) &&
     Number.isFinite(Date.parse(value)) &&
     new Date(value).toISOString() === value;
 }
 
 export function currentFormalComparisonUtcMinuteInstant(now = new Date()): string {
+  if (!Number.isFinite(now.getTime())) {
+    throw new FormalComparisonRouteError("无法生成正式对照的当前 UTC 分钟。");
+  }
   return `${now.toISOString().slice(0, 16)}:00.000Z`;
 }
 
@@ -53,11 +58,20 @@ function parseItem(value: string, index: number): FormalComparisonRouteSlot {
       `正式对照链接中的第 ${index + 1} 个 item 不是确切 revision:<caseId>:<revisionId>。`
     );
   }
-  return { caseId, revisionId, manualDirection: null };
+  return {
+    caseId: caseId.toLowerCase(),
+    revisionId: revisionId.toLowerCase(),
+    manualDirection: null
+  };
 }
 
 function parseAtInstant(values: string[], fallback: string): string {
-  if (values.length === 0) return fallback;
+  if (values.length === 0) {
+    if (!isCanonicalUtcMinuteInstant(fallback)) {
+      throw new FormalComparisonRouteError("正式对照默认 at 必须是精确到分钟的规范 UTC 瞬时点。");
+    }
+    return fallback;
+  }
   if (values.length !== 1) {
     throw new FormalComparisonRouteError("正式对照链接只能包含一个 at 瞬时点。");
   }
@@ -82,7 +96,11 @@ function parseLegacySlot(params: URLSearchParams): FormalComparisonRouteSlot[] {
       "旧版正式对照链接必须同时提供一个合法的 case 与 revision UUID；未回退到最新修订。"
     );
   }
-  return [{ caseId: caseValues[0], revisionId: revisionValues[0], manualDirection: null }];
+  return [{
+    caseId: caseValues[0].toLowerCase(),
+    revisionId: revisionValues[0].toLowerCase(),
+    manualDirection: null
+  }];
 }
 
 function parseFocusSlot(values: string[], slots: readonly FormalComparisonRouteSlot[]): FormalComparisonFocusSlotId {
@@ -105,10 +123,13 @@ export function parseFormalComparisonRoute(
   search: string,
   fallbackAtInstant = currentFormalComparisonUtcMinuteInstant()
 ): FormalComparisonRouteState {
+  if (search.length > MAX_SEARCH_LENGTH) {
+    throw new FormalComparisonRouteError("正式对照链接超过允许长度；未解析或截断任何盘位条件。");
+  }
   const params = new URLSearchParams(search);
   for (const key of params.keys()) {
     if (!ALLOWED_PARAMS.has(key)) {
-      throw new FormalComparisonRouteError(`正式对照链接包含未知参数 ${key}。`);
+      throw new FormalComparisonRouteError("正式对照链接包含未知参数；参数名未回显。");
     }
   }
 
@@ -124,7 +145,7 @@ export function parseFormalComparisonRoute(
   const slots = itemValues.length > 0
     ? itemValues.map(parseItem)
     : parseLegacySlot(params);
-  const revisionIds = slots.flatMap((slot) => slot.revisionId ? [slot.revisionId] : []);
+  const revisionIds = slots.flatMap((slot) => slot.revisionId ? [slot.revisionId.toLowerCase()] : []);
   if (new Set(revisionIds).size !== revisionIds.length) {
     throw new FormalComparisonRouteError("正式对照链接不能重复同一个 Revision。");
   }
@@ -156,8 +177,18 @@ export function parseFormalComparisonRoute(
 }
 
 export function serializeFormalComparisonRoute(state: FormalComparisonRouteState): string {
+  if (
+    !state
+    || typeof state !== "object"
+    || !Array.isArray(state.slots)
+  ) {
+    throw new FormalComparisonRouteError("正式对照路由必须包含有效槽位列表。");
+  }
   if (state.slots.length > 4) {
     throw new FormalComparisonRouteError("正式对照路由最多只能序列化四个 Revision。");
+  }
+  if (state.slots.length < 1 || state.slots.some((slot) => !slot || typeof slot !== "object")) {
+    throw new FormalComparisonRouteError("正式对照路由必须包含一至四个有效槽位。");
   }
   if (!isCanonicalUtcMinuteInstant(state.atInstant)) {
     throw new FormalComparisonRouteError("正式对照路由只能序列化精确到分钟的规范 UTC 瞬时点。");
@@ -166,8 +197,11 @@ export function serializeFormalComparisonRoute(state: FormalComparisonRouteState
   let encounteredBlank = false;
   const revisionIds: string[] = [];
   for (const [index, slot] of state.slots.entries()) {
+    if (slot.manualDirection !== null && slot.manualDirection !== "forward" && slot.manualDirection !== "backward") {
+      throw new FormalComparisonRouteError(`对照位 ${SLOT_IDS[index] ?? index + 1} 的人工顺逆无效。`);
+    }
     const complete = isUuid(slot.caseId) && isUuid(slot.revisionId);
-    const entirelyBlank = !slot.caseId && !slot.revisionId && !slot.manualDirection;
+    const entirelyBlank = slot.caseId === null && slot.revisionId === null && slot.manualDirection === null;
     if (!complete && !entirelyBlank) {
       throw new FormalComparisonRouteError(`对照位 ${SLOT_IDS[index] ?? index + 1} 的路由状态不完整。`);
     }
@@ -178,10 +212,7 @@ export function serializeFormalComparisonRoute(state: FormalComparisonRouteState
     if (encounteredBlank) {
       throw new FormalComparisonRouteError("正式对照路由不能在空白对照位之后序列化其他 Revision。");
     }
-    if (slot.manualDirection !== null && slot.manualDirection !== "forward" && slot.manualDirection !== "backward") {
-      throw new FormalComparisonRouteError(`对照位 ${SLOT_IDS[index] ?? index + 1} 的人工顺逆无效。`);
-    }
-    revisionIds.push(slot.revisionId!);
+    revisionIds.push(slot.revisionId!.toLowerCase());
   }
   if (new Set(revisionIds).size !== revisionIds.length) {
     throw new FormalComparisonRouteError("正式对照路由不能重复序列化同一个 Revision。");
@@ -190,7 +221,7 @@ export function serializeFormalComparisonRoute(state: FormalComparisonRouteState
   const params = new URLSearchParams();
   for (const slot of state.slots) {
     if (slot.caseId && slot.revisionId) {
-      params.append("item", `revision:${slot.caseId}:${slot.revisionId}`);
+      params.append("item", `revision:${slot.caseId.toLowerCase()}:${slot.revisionId.toLowerCase()}`);
     }
   }
   params.set("at", state.atInstant);

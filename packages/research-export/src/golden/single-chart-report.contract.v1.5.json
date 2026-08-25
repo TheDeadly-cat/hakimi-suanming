@@ -1,0 +1,191 @@
+{
+  "schemaVersion": "1.0.0",
+  "formatVersion": "1.5.0",
+  "kind": "single_chart_research_report",
+  "title": "八字单盘研究报告",
+  "revisionLabel": "第 1 版 · 历史修订",
+  "pillars": [
+    { "key": "year", "label": "年柱", "ganZhi": "乙亥", "xun": "甲戌", "voidBranches": "申酉" },
+    { "key": "month", "label": "月柱", "ganZhi": "甲申", "xun": "甲申", "voidBranches": "午未" },
+    { "key": "day", "label": "日柱", "ganZhi": "辛巳", "xun": "甲戌", "voidBranches": "申酉" },
+    { "key": "hour", "label": "时柱", "ganZhi": "壬辰", "xun": "甲申", "voidBranches": "午未" }
+  ],
+  "rowLabels": {
+    "case": ["案例", "案例标识", "修订", "标签", "案例备注"],
+    "birth": ["输入历法", "原始日期", "出生时间", "时区", "性别", "地点", "坐标", "来源备注"],
+    "calibration": ["民用公历日期", "历法算法", "原始民用时间", "排盘墙上时间", "UTC 瞬时点", "UTC 偏移", "DST 状态", "时区解析", "真太阳时预览", "太阳时模型", "时间校准警告", "计算警告"],
+    "rules": ["规则方案", "规则状态", "规则说明", "界年 / 换月", "换日 / 子时日干", "时柱时间基准", "DST 歧义", "太阳时", "起运", "启用层", "规则来源", "规则包绑定", "规则包 packId", "规则包 packDigest", "规则配置 profileId", "规则配置 profileVersion", "规则配置 profileDigest", "规则包 useMode"],
+    "integrity": ["引擎", "上游", "时区库", "tzdb 数据摘要", "时区解析器", "规则摘要", "运限规则摘要", "结果哈希", "支持范围", "验证状态", "计算时间"]
+  },
+  "calculationSource": {
+    "natalSource": "verified_stored_revision",
+    "downstreamSource": "explicit_projection",
+    "receiptLedgerStatus": "schema_unavailable",
+    "storedHistoricalOutputCompared": false,
+    "comparisonStatus": "not_applicable",
+    "profileId": "hakimi-explicit-derived-replay:relations-0.1.0_luck-0.1.0_transit-1.2.0",
+    "expertEvidenceStatus": "not_verified",
+    "components": [
+      {
+        "key": "relations",
+        "label": "四柱关系",
+        "status": "projected",
+        "executorId": "hakimi-relations-core:pillar-relations-executor:0.1.0"
+      },
+      {
+        "key": "luckCycle",
+        "label": "起运",
+        "status": "projected",
+        "executorId": "hakimi-luck-core:luck-cycle-executor:0.1.0"
+      },
+      {
+        "key": "transit",
+        "label": "Transit",
+        "status": "not_requested",
+        "executorId": null
+      }
+    ]
+  },
+  "interpretationEvidence": {
+    "status": "available",
+    "reason": null,
+    "scope": "strength_engineering_candidate_only",
+    "includeHour": true,
+    "envelopeProfileVersion": "hakimi.bazi.interpretation_evidence_envelope/0.1.0",
+    "envelopeContentVersion": "0.19.0",
+    "statementSequence": [
+      "1|strength-statement:scope|scope|supported|visible_with_evidence|verified|2|true",
+      "2|strength-statement:factor:strength-evidence:month_command:month|factor_ledger|supported|visible_with_evidence|verified|8|true",
+      "3|strength-statement:factor:strength-evidence:visible_stem:year|factor_ledger|supported|visible_with_evidence|verified|5|true",
+      "4|strength-statement:factor:strength-evidence:visible_stem:month|factor_ledger|supported|visible_with_evidence|verified|5|true",
+      "5|strength-statement:factor:strength-evidence:visible_stem:day|factor_ledger|supported|visible_with_evidence|verified|2|true",
+      "6|strength-statement:factor:strength-evidence:visible_stem:hour|factor_ledger|supported|visible_with_evidence|verified|5|true",
+      "7|strength-statement:factor:strength-evidence:first_hidden_stem:year:0|factor_ledger|blocked|withheld|incomplete|5|true",
+      "8|strength-statement:factor:strength-evidence:first_hidden_stem:month:0|factor_ledger|blocked|withheld|incomplete|6|true",
+      "9|strength-statement:factor:strength-evidence:first_hidden_stem:day:0|factor_ledger|blocked|withheld|incomplete|5|true",
+      "10|strength-statement:factor:strength-evidence:first_hidden_stem:hour:0|factor_ledger|blocked|withheld|incomplete|5|true",
+      "11|strength-statement:factor:strength-evidence:other_hidden_stem:year:1|factor_ledger|blocked|withheld|incomplete|5|true",
+      "12|strength-statement:factor:strength-evidence:other_hidden_stem:month:1|factor_ledger|blocked|withheld|incomplete|5|true",
+      "13|strength-statement:factor:strength-evidence:other_hidden_stem:month:2|factor_ledger|blocked|withheld|incomplete|5|true",
+      "14|strength-statement:factor:strength-evidence:other_hidden_stem:day:1|factor_ledger|blocked|withheld|incomplete|5|true",
+      "15|strength-statement:factor:strength-evidence:other_hidden_stem:day:2|factor_ledger|blocked|withheld|incomplete|5|true",
+      "16|strength-statement:factor:strength-evidence:other_hidden_stem:hour:1|factor_ledger|blocked|withheld|incomplete|5|true",
+      "17|strength-statement:factor:strength-evidence:other_hidden_stem:hour:2|factor_ledger|blocked|withheld|incomplete|5|true",
+      "18|strength-statement:month-main-duplication|month_main_duplication|supported|visible_with_evidence|verified|2|true",
+      "19|strength-statement:subtotal|subtotal|supported|visible_with_evidence|verified|5|true",
+      "20|strength-statement:classification|classification|supported|visible_with_evidence|verified|4|true",
+      "21|strength-statement:sensitivity:baseline_current_candidate|sensitivity|supported|visible_with_evidence|verified|1|true",
+      "22|strength-statement:sensitivity:deduplicate_month_main|sensitivity|supported|visible_with_evidence|verified|1|true",
+      "23|strength-statement:sensitivity:equal_presence_deduplicated|sensitivity|supported|visible_with_evidence|verified|1|true",
+      "24|strength-statement:sensitivity:without_month_command_bonus|sensitivity|supported|visible_with_evidence|verified|1|true",
+      "25|strength-statement:sensitivity:without_visible_stems|sensitivity|supported|visible_with_evidence|verified|1|true",
+      "26|strength-statement:sensitivity:without_hidden_stems|sensitivity|supported|visible_with_evidence|verified|1|true",
+      "27|strength-statement:boundary|boundary|advisory|visible_with_caveat|incomplete|2|true"
+    ],
+    "assertionFamilies": [
+      { "kind": "scope", "total": 1, "displayable": 1, "withheld": 0 },
+      { "kind": "factor_ledger", "total": 16, "displayable": 5, "withheld": 11 },
+      { "kind": "month_main_duplication", "total": 1, "displayable": 1, "withheld": 0 },
+      { "kind": "subtotal", "total": 1, "displayable": 1, "withheld": 0 },
+      { "kind": "classification", "total": 1, "displayable": 1, "withheld": 0 },
+      { "kind": "sensitivity", "total": 6, "displayable": 6, "withheld": 0 },
+      { "kind": "boundary", "total": 1, "displayable": 1, "withheld": 0 }
+    ],
+    "coverage": {
+      "statementsTotal": 27,
+      "displayable": 16,
+      "withheld": 11,
+      "assertionFamilies": 7,
+      "referencedSourceBindings": 12,
+      "verifiedSourceBindings": 10,
+      "structuredCitationCoverage": "not_assessed",
+      "distributionRights": "not_assessed"
+    },
+    "sourceBindingSequence": [
+      "binding:core:derive-assessment|hakimi-strength-core-0.1.0|defines_engineering_candidate|stable_symbol|verified|exact_engineering_definition",
+      "binding:policy:factor-inclusion|hakimi-strength-policy-0.1.0|defines_engineering_candidate|stable_symbol|verified|exact_engineering_definition",
+      "binding:policy:direction-map|hakimi-strength-policy-0.1.0|defines_engineering_candidate|stable_symbol|verified|exact_engineering_definition",
+      "binding:policy:weights|hakimi-strength-policy-0.1.0|defines_engineering_candidate|stable_symbol|verified|exact_engineering_definition",
+      "binding:policy:month-duplication|hakimi-strength-policy-0.1.0|defines_engineering_candidate|stable_symbol|verified|exact_engineering_definition",
+      "binding:policy:thresholds|hakimi-strength-policy-0.1.0|defines_engineering_candidate|stable_symbol|verified|exact_engineering_definition",
+      "binding:sensitivity:six-scenarios|hakimi-strength-sensitivity-0.1.0|defines_engineering_candidate|stable_symbol|verified|exact_engineering_definition",
+      "binding:dtt:month-command|dtt-chanwei-wikisource-r2600158|traditional_context_only|chapter_heading|verified|context_only",
+      "binding:smt-v5:relative-relations|smt-v5-wikisource-r2706483|traditional_context_only|chapter_heading|verified|context_only",
+      "binding:smt-v10:whole-chart|smt-siku-v10-wikisource-r761703|traditional_context_only|chapter_heading|verified|context_only",
+      "binding:yhzp:hidden-listing|yhzp-wikisource-r2593607|traditional_context_only|chapter_heading|pending_manual_textual_verification|context_only",
+      "binding:zpzz:review-gates|zpzz-ctext-ch974137-unfrozen|review_question_only|chapter_heading|pending_manual_textual_verification|boundary_only"
+    ],
+    "boundary": {
+      "referenceResolutionEstablishesSemanticTruth": false,
+      "expertTruthClaimed": false,
+      "scientificValidityClaimed": false,
+      "formalActivationAllowed": false,
+      "publicReleaseAuthorized": false,
+      "authenticityClaimed": false,
+      "overallGoodBad": null,
+      "result": null
+    }
+  },
+  "counts": {
+    "provenance": 36,
+    "researchNotes": 1,
+    "events": 2,
+    "eventTimeDerivations": 0,
+    "citations": 1
+  },
+  "events": [
+    {
+      "reference": "66666666-6666-4666-8666-666666666666",
+      "timeRows": [
+        { "label": "时间上下文", "value": "zoned_minute" },
+        { "label": "IANA 时区", "value": "America/New_York" },
+        { "label": "TZDB", "value": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3" },
+        { "label": "起始 DST 解析", "value": "overlap / resolved_overlap_earlier / policy=earlier / selected=earlier" },
+        { "label": "起始 UTC 偏移", "value": "-04:00" },
+        { "label": "起始规范 UTC", "value": "2024-11-03T05:30:00Z" }
+      ]
+    },
+    {
+      "reference": "77777777-7777-4777-8777-777777777777",
+      "timeRows": [
+        { "label": "时间上下文", "value": "legacy_floating" },
+        { "label": "时间说明", "value": "历史浮动时间：未记录 IANA 时区，无法换算规范 UTC。" }
+      ]
+    }
+  ],
+  "citation": [
+    {
+      "status": "user_candidate",
+      "targets": ["命盘字段 pillars.day.ganZhi", "证据主题 bazi.pillar.day.ganzhi.v1"],
+      "locator": "section-1 · 第 3-3 行",
+      "distributionPolicy": "local_private_only",
+      "reviewStatus": "unreviewed"
+    }
+  ],
+  "markdown": {
+    "suggestedFileName": "hakimi-chart-r1-full.md",
+    "mimeType": "text/markdown;charset=utf-8",
+    "frontMatter": [
+      "---",
+      "schemaVersion: \"1.0.0\"",
+      "formatVersion: \"1.5.0\"",
+      "kind: \"single_chart_research_report\"",
+      "format: \"markdown\"",
+      "anonymized: false",
+      "---"
+    ],
+    "headings": [
+      "## 案例与出生输入",
+      "## 四柱事实",
+      "## 时间校准",
+      "## 规则与完整性",
+      "## 下游计算来源",
+      "## 旺衰工程候选解读证据",
+      "## 字段来源与验证状态",
+      "## 研究笔记",
+      "## 真实事件",
+      "## 事件时间迁移血缘",
+      "## 结构化引用与反证"
+    ]
+  }
+}

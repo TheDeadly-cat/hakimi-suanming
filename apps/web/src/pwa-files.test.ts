@@ -55,6 +55,13 @@ describe("PWA static contract", () => {
     const entry = await readFile(path.resolve(import.meta.dirname, "main.tsx"), "utf8");
     const app = await readFile(path.resolve(import.meta.dirname, "app.tsx"), "utf8");
     const viteConfig = await readFile(path.resolve(import.meta.dirname, "../vite.config.ts"), "utf8");
+    const releaseProtocol = await readFile(path.resolve(import.meta.dirname, "../release-protocol.ts"), "utf8");
+    const verifyStorageStart = entry.indexOf("async function verifyStorage");
+    const verifyStorageEnd = entry.indexOf("const BOOT_SMOKE_INPUT", verifyStorageStart);
+
+    expect(verifyStorageStart).toBeGreaterThan(-1);
+    expect(verifyStorageEnd).toBeGreaterThan(verifyStorageStart);
+    const verifyStorageSource = entry.slice(verifyStorageStart, verifyStorageEnd);
 
     expect(worker).toContain('message?.type !== "BOOT_OK"');
     expect(worker).toContain('message?.type === "GET_BUILD_VERSION"');
@@ -84,27 +91,46 @@ describe("PWA static contract", () => {
     expect(entry).toContain("swUpdateChecked");
     expect(entry).toContain("runAppBootReadiness");
     expect(entry).toContain("verifyStorage");
-    expect(entry).toContain('"candidateSets"');
-    expect(entry).toContain('"knowledgeDocuments"');
-    expect(entry).toContain('"sourceRights"');
-    expect(entry).toContain('"citations"');
-    expect(entry).toContain('"attachments"');
-    expect(entry).toContain('"researcherProfiles"');
-    expect(entry).toContain('"appSettings"');
-    expect(entry).toContain('"ruleRegistry"');
-    expect(entry).toContain('"tzdbMigrationReceipts"');
-    expect(entry).toContain('"eventTimeMigrationReceipts"');
-    expect(entry).toContain('"birthFingerprints"');
-    expect(entry).toContain('"mutationState"');
-    expect(entry).toContain("knowledgeRepository.listSourceRights()");
-    expect(entry).toContain("knowledgeRepository.listCitations()");
+    expect(entry).toContain("CURRENT_RELEASE_STORAGE_MANIFEST.requiredStorageTables");
+    expect(entry).toContain("CURRENT_RELEASE_STORAGE_MANIFEST.requiredStorageIndexes");
+    expect(releaseProtocol).toContain('"candidateSets"');
+    expect(releaseProtocol).toContain('"knowledgeDocuments"');
+    expect(releaseProtocol).toContain('"mutationState"');
+    expect(
+      verifyStorageSource.match(/knowledgeRepository\.verifyLocalKnowledgeIntegritySnapshot\(\)/gu) ?? []
+    ).toHaveLength(1);
+    expect(verifyStorageSource).not.toContain("knowledgeRepository.listDocuments()");
+    expect(verifyStorageSource).not.toContain("knowledgeRepository.listSourceRights()");
+    expect(verifyStorageSource).not.toContain("knowledgeRepository.listCitations()");
+    const databaseOpen = verifyStorageSource.indexOf("await caseRepository.database.open();");
+    const requiredTableChecks = verifyStorageSource.indexOf(
+      "CURRENT_RELEASE_STORAGE_MANIFEST.requiredStorageTables"
+    );
+    const requiredIndexChecks = verifyStorageSource.indexOf(
+      "CURRENT_RELEASE_STORAGE_MANIFEST.requiredStorageIndexes"
+    );
+    const knowledgeIntegrityProbe = verifyStorageSource.indexOf(
+      "await knowledgeRepository.verifyLocalKnowledgeIntegritySnapshot();"
+    );
+    const migrationPhaseReady = verifyStorageSource.indexOf(
+      "document.documentElement.dataset.dbMigrationPhase = shadowDatabaseRelease"
+    );
+    expect(databaseOpen).toBeGreaterThan(-1);
+    expect(requiredTableChecks).toBeGreaterThan(databaseOpen);
+    expect(requiredIndexChecks).toBeGreaterThan(requiredTableChecks);
+    expect(knowledgeIntegrityProbe).toBeGreaterThan(requiredIndexChecks);
+    expect(migrationPhaseReady).toBeGreaterThan(knowledgeIntegrityProbe);
     expect(entry).toContain("verifyCalculationCore");
     expect(entry).toContain("bootRouteKey");
     expect(entry).toContain("verifyResolvedRoute");
     expect(app).toContain("RouteReadySignal");
     expect(viteConfig).toContain('meta name="hakimi-build-version"');
     expect(viteConfig).toContain('meta name="hakimi-release-database"');
+    expect(viteConfig).toContain('meta name="hakimi-release-storage-manifest"');
+    expect(viteConfig).toContain('meta name="hakimi-release-storage-manifest-digest"');
+    expect(viteConfig).toContain('meta name="hakimi-release-evidence-id"');
     expect(viteConfig).toContain("__RELEASE_DATABASE_DESCRIPTOR__");
+    expect(viteConfig).toContain("__BRIDGE_RELEASE_DATABASE_DESCRIPTOR__");
     expect(viteConfig).toContain("computeOfflineCacheVersion");
     expect(viteConfig).toContain("htmlDocument: releaseAwareIndex");
     expect(viteConfig).toContain("auditBundledKnowledgeDirectory");

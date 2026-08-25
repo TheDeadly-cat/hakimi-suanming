@@ -1,0 +1,65 @@
+name: Release Evidence
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_label:
+        description: Human release-candidate label; this does not authorize public deployment
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-evidence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  default-v13-evidence:
+    runs-on: windows-latest
+    timeout-minutes: 240
+    env:
+      HAKIMI_RELEASE_LABEL: ${{ inputs.release_label }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm install --global npm@11.13.0
+      - run: npm ci
+      - run: npx playwright install chrome msedge
+      - name: Compute source-bound evidence id
+        shell: pwsh
+        run: |
+          $evidenceId = node scripts/compute-release-evidence-id.mjs --channel default-v13
+          "HAKIMI_RELEASE_EVIDENCE_ID=$evidenceId" >> $env:GITHUB_ENV
+      - run: node scripts/run-release-evidence-command.mjs --id governance --output tmp/release-evidence-receipts/governance.json -- npm run check:release-governance
+      - run: node scripts/run-release-evidence-command.mjs --id evidence-tooling --output tmp/release-evidence-receipts/evidence-tooling.json -- npm run test:release-evidence
+      - run: node scripts/run-release-evidence-command.mjs --id typecheck --output tmp/release-evidence-receipts/typecheck.json -- npm run typecheck
+      - run: node scripts/run-release-evidence-command.mjs --id unit --output tmp/release-evidence-receipts/unit.json -- npm test
+      - run: node scripts/run-release-evidence-command.mjs --id build --output tmp/release-evidence-receipts/build.json -- npm run build
+      - run: node scripts/run-release-evidence-command.mjs --id boot --output tmp/release-evidence-receipts/boot.json -- npm run test:e2e:boot
+      - run: node scripts/run-release-evidence-command.mjs --id pwa --output tmp/release-evidence-receipts/pwa.json -- npm run test:e2e:pwa
+      - run: node scripts/run-release-evidence-command.mjs --id web-v1-flow --output tmp/release-evidence-receipts/web-v1-flow.json -- npm run test:e2e:web-v1-flow
+      - run: node scripts/run-release-evidence-command.mjs --id cross-schema-v13-v16 --output tmp/release-evidence-receipts/cross-schema-v13-v16.json -- npm run test:e2e:cross-schema-v13-v16
+      - run: node scripts/run-release-evidence-command.mjs --id orphaned-v13-recovery --output tmp/release-evidence-receipts/orphaned-v13-recovery.json -- npm run test:e2e:orphaned-v13-recovery
+      - run: node scripts/run-release-evidence-command.mjs --id built-contract --output tmp/release-evidence-receipts/built-contract.json -- npm run verify:built-release-storage-manifest
+      - name: Generate and verify engineering evidence
+        run: >-
+          node scripts/generate-release-evidence.mjs
+          --channel default-v13
+          --dist dist/web
+          --receipts tmp/release-evidence-receipts
+          --output dist/web/release-evidence.json
+          --require-receipts boot,build,built-contract,cross-schema-v13-v16,evidence-tooling,governance,orphaned-v13-recovery,pwa,typecheck,unit,web-v1-flow
+      - run: node scripts/verify-release-evidence.mjs --input dist/web/release-evidence.json --receipts tmp/release-evidence-receipts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hakimi-default-v13-${{ github.run_id }}-${{ github.sha }}
+          path: |
+            dist/web
+            tmp/release-evidence-receipts
+          if-no-files-found: error
+          retention-days: 30

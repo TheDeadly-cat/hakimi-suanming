@@ -43,6 +43,74 @@ const SOURCE_FREEZE_RETRY_BACKOFF_MS = 2_000;
 const SOURCE_FREEZE_MAX_ATTEMPTS = 5;
 const PEER_MIGRATION_POLL_INTERVAL_MS = 1_000;
 const PEER_MIGRATION_WAIT_LIMIT_MS = 240_000;
+const MAX_BUILD_ID_CHARACTERS = 512;
+
+function requireCanonicalBuildId(value: unknown): string {
+  if (
+    typeof value !== "string" ||
+    value.length === 0 ||
+    value.trim() !== value ||
+    Array.from(value).length > MAX_BUILD_ID_CHARACTERS ||
+    /[\p{Cc}\p{Cf}]/u.test(value)
+  ) {
+    throw new Error("数据库代际协调器需要有界且不含控制字符的规范构建号。");
+  }
+  return value;
+}
+
+function migrationProtocolReason(value: unknown): string {
+  return typeof value === "string" &&
+    value.length > 0 &&
+    value.length <= 128 &&
+    /^[A-Za-z0-9][A-Za-z0-9_.:-]*$/u.test(value)
+    ? value
+    : "INVALID_ACK";
+}
+
+function requestMigrationControlAck<Response>(
+  controller: Pick<ServiceWorker, "postMessage">,
+  message: unknown,
+  timeoutMessage: string
+): Promise<Response> {
+  return new Promise((resolve, reject) => {
+    const channel = new MessageChannel();
+    let settled = false;
+    let timeout: number | null = null;
+    const finish = (action: () => void) => {
+      if (settled) return;
+      settled = true;
+      if (timeout !== null) window.clearTimeout(timeout);
+      channel.port1.onmessage = null;
+      channel.port1.onmessageerror = null;
+      try {
+        channel.port1.close();
+      } catch {
+        // Port cleanup must not replace the migration protocol result.
+      }
+      action();
+    };
+    timeout = window.setTimeout(() => {
+      finish(() => reject(new Error(timeoutMessage)));
+    }, SOURCE_FREEZE_MESSAGE_TIMEOUT_MS);
+    channel.port1.onmessage = (event: MessageEvent<unknown>) => {
+      finish(() => resolve((event.data ?? {}) as Response));
+    };
+    channel.port1.onmessageerror = () => {
+      finish(() => reject(new Error("旧标签页迁移控制回执无法解码。")));
+    };
+    try {
+      channel.port1.start();
+      controller.postMessage(message, [channel.port2]);
+    } catch (cause) {
+      try {
+        channel.port2.close();
+      } catch {
+        // A failed transfer may already have detached the second port.
+      }
+      finish(() => reject(cause));
+    }
+  });
+}
 
 /**
  * True when this page lost a startup race to another page that is already
@@ -184,8 +252,8 @@ export class ReleaseDatabaseCoordinator {
     readonly descriptor: ReleaseDatabaseDescriptor,
     readonly buildId: string
   ) {
-    if (!buildId) throw new Error("数据库代际协调器缺少构建号。");
-    this.ownerId = `${descriptor.dbGeneration}:${buildId}:${crypto.randomUUID()}`;
+    const canonicalBuildId = requireCanonicalBuildId(buildId);
+    this.ownerId = `${descriptor.dbGeneration}:${canonicalBuildId}:${crypto.randomUUID()}`;
     this.controllerPromise = import("@hakimi/storage").then(
       ({ DatabaseGenerationController }) => new DatabaseGenerationController()
     );
@@ -278,7 +346,11 @@ export class ReleaseDatabaseCoordinator {
     if (!controller) {
       const sourceDatabaseName = this.descriptor.sourceDatabaseName;
       const databases = typeof indexedDB.databases === "function"
-        ? await indexedDB.databases()
+        ? await withTimeout(
+          indexedDB.databases(),
+          DATABASE_OPEN_TIMEOUT_MS,
+          "枚举已有数据库"
+        )
         : null;
       if (
         sourceDatabaseName !== null &&
@@ -291,7 +363,7 @@ export class ReleaseDatabaseCoordinator {
       throw new Error("跨 Schema 迁移必须由受控页面协调旧标签页写锁。");
     }
     const requestId = crypto.randomUUID();
-    const response = await new Promise<{
+    const response = await requestMigrationControlAck<{
       type?: unknown;
       accepted?: unknown;
       reason?: unknown;
@@ -302,26 +374,14 @@ export class ReleaseDatabaseCoordinator {
       targetSchema?: unknown;
       clientCount?: unknown;
       frozenClientCount?: unknown;
-    }>((resolve, reject) => {
-      const channel = new MessageChannel();
-      const timeout = window.setTimeout(() => {
-        channel.port1.close();
-        reject(new Error("等待旧标签页冻结数据库写入超时。"));
-      }, SOURCE_FREEZE_MESSAGE_TIMEOUT_MS);
-      channel.port1.onmessage = (event) => {
-        window.clearTimeout(timeout);
-        channel.port1.close();
-        resolve(event.data ?? {});
-      };
-      controller.postMessage({
+    }>(controller, {
         type: "PREPARE_DATABASE_MIGRATION",
         requestId,
         migrationId: this.descriptor.migrationId,
         sourceGeneration: this.descriptor.sourceGeneration,
         sourceDatabaseName: this.descriptor.sourceDatabaseName,
         sourceSchema: this.descriptor.sourceSchema
-      }, [channel.port2]);
-    });
+      }, "等待旧标签页冻结数据库写入超时。");
     if (
       response.type !== "PREPARE_DATABASE_MIGRATION_ACK" ||
       response.accepted !== true ||
@@ -331,7 +391,7 @@ export class ReleaseDatabaseCoordinator {
       response.targetDatabaseName !== this.descriptor.databaseName ||
       response.targetSchema !== this.descriptor.targetSchema
     ) {
-      throw new Error(`旧标签页没有全部冻结：${String(response.reason ?? "INVALID_ACK")}`);
+      throw new Error(`旧标签页没有全部冻结：${migrationProtocolReason(response.reason)}`);
     }
     this.sourceFreezeRequestId = requestId;
     this.sourceClientsFrozen = true;
@@ -370,13 +430,7 @@ export class ReleaseDatabaseCoordinator {
       return Promise.reject(new Error("旧标签页写锁续租缺少受控 Service Worker 会话。"));
     }
 
-    const renewal = new Promise<void>((resolve, reject) => {
-      const channel = new MessageChannel();
-      const timeout = window.setTimeout(() => {
-        channel.port1.close();
-        reject(new Error("旧标签页写锁续租超时。"));
-      }, SOURCE_FREEZE_MESSAGE_TIMEOUT_MS);
-      channel.port1.onmessage = (event: MessageEvent<{
+    const renewal = requestMigrationControlAck<{
         type?: unknown;
         accepted?: unknown;
         reason?: unknown;
@@ -385,10 +439,11 @@ export class ReleaseDatabaseCoordinator {
         targetGeneration?: unknown;
         targetDatabaseName?: unknown;
         targetSchema?: unknown;
-      }>) => {
-        window.clearTimeout(timeout);
-        channel.port1.close();
-        const response = event.data;
+      }>(controller, {
+        type: "RENEW_DATABASE_MIGRATION",
+        requestId,
+        migrationId
+      }, "旧标签页写锁续租超时。").then((response) => {
         if (
           response?.type !== "RENEW_DATABASE_MIGRATION_ACK" ||
           response.accepted !== true ||
@@ -398,17 +453,9 @@ export class ReleaseDatabaseCoordinator {
           response.targetDatabaseName !== this.descriptor.databaseName ||
           response.targetSchema !== this.descriptor.targetSchema
         ) {
-          reject(new Error(`旧标签页写锁续租被拒绝：${String(response?.reason ?? "INVALID_ACK")}`));
-          return;
+          throw new Error(`旧标签页写锁续租被拒绝：${migrationProtocolReason(response?.reason)}`);
         }
-        resolve();
-      };
-      controller.postMessage({
-        type: "RENEW_DATABASE_MIGRATION",
-        requestId,
-        migrationId
-      }, [channel.port2]);
-    });
+      });
     const trackedRenewal = renewal.finally(() => {
       if (this.sourceFreezeHeartbeatPromise === trackedRenewal) {
         this.sourceFreezeHeartbeatPromise = null;
@@ -447,7 +494,11 @@ export class ReleaseDatabaseCoordinator {
     if (!this.sourceClientsFrozen || this.descriptor.migrationId === null) return;
     this.stopSourceFreezeHeartbeat();
     await this.sourceFreezeHeartbeatPromise?.catch(() => undefined);
-    navigator.serviceWorker?.controller?.postMessage({
+    const serviceWorkerController = navigator.serviceWorker?.controller;
+    if (!serviceWorkerController) {
+      throw new Error("数据库迁移写锁通知缺少受控 Service Worker 会话；保持当前写锁状态并失败关闭。");
+    }
+    serviceWorkerController.postMessage({
       type,
       requestId: this.sourceFreezeRequestId,
       migrationId: this.descriptor.migrationId
@@ -610,11 +661,18 @@ export class ReleaseDatabaseCoordinator {
 
     this.sourceDatabase = new storage.ResearchDatabase(sourceDatabaseName, {
       targetSchema: sourceSchema,
-      releaseWritesLocked: false
+      releaseWritesLocked: true
     });
     const sourceRepository = new storage.CaseRepository(this.sourceDatabase);
-    await openExpectedDatabase(this.sourceDatabase, sourceDatabaseName, sourceSchema);
-    this.sourceSnapshot = await this.verifiedSnapshot(sourceRepository);
+    try {
+      await openExpectedDatabase(this.sourceDatabase, sourceDatabaseName, sourceSchema);
+      if (!this.sourceDatabase.areReleaseWritesLocked()) {
+        throw new Error("迁移源数据库没有保持发布写锁。\n");
+      }
+      this.sourceSnapshot = await this.verifiedSnapshot(sourceRepository);
+    } finally {
+      this.sourceDatabase.close({ disableAutoOpen: true });
+    }
     this.assertSourceFreezeHealthy();
 
     const sourceBuildId = existingState?.committedBuild ?? `bootstrap-${sourceGeneration}`;

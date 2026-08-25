@@ -1,15 +1,36 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CalendarDivergenceAuditPage } from "./calendar-divergence-audit-page";
 
-const { saveTextFileMock, pickTextFileMock } = vi.hoisted(() => ({
+const {
+  getCapabilitiesMock,
+  pickTextFileMock,
+  printReportMock,
+  saveFileMock,
+  saveFileToChosenLocationMock,
+  saveTextFileMock,
+  shareFileMock
+} = vi.hoisted(() => ({
+  getCapabilitiesMock: vi.fn(),
+  pickTextFileMock: vi.fn(),
+  printReportMock: vi.fn(),
+  saveFileMock: vi.fn(),
+  saveFileToChosenLocationMock: vi.fn(),
   saveTextFileMock: vi.fn(),
-  pickTextFileMock: vi.fn()
+  shareFileMock: vi.fn()
 }));
 
-vi.mock("@hakimi/platform", () => ({
+vi.mock("@hakimi/platform", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@hakimi/platform")>()),
   saveTextFile: saveTextFileMock,
-  pickTextFile: pickTextFileMock
+  pickTextFile: pickTextFileMock,
+  webReportExportPort: {
+    getCapabilities: getCapabilitiesMock,
+    printReport: printReportMock,
+    saveFile: saveFileMock,
+    saveFileToChosenLocation: saveFileToChosenLocationMock,
+    shareFile: shareFileMock
+  }
 }));
 
 function rowFor(date: string): HTMLTableRowElement {
@@ -27,6 +48,34 @@ describe("CalendarDivergenceAuditPage", () => {
       method: "browser_download"
     }));
     pickTextFileMock.mockReset();
+    getCapabilitiesMock.mockReset().mockReturnValue({
+      canDownloadFiles: true,
+      canChooseSaveLocation: false,
+      canShareFiles: false
+    });
+    printReportMock.mockReset().mockResolvedValue(undefined);
+    saveFileMock.mockReset().mockImplementation(async (_blob: Blob, filename: string) => ({
+      status: "download_requested",
+      filename,
+      method: "browser_download"
+    }));
+    saveFileToChosenLocationMock.mockReset();
+    shareFileMock.mockReset();
+  });
+
+  it("只通过平台端口打印，并在适配器拒绝时显示可重试错误", async () => {
+    printReportMock.mockRejectedValueOnce(new Error("打印适配器拒绝了当前请求。"));
+    render(<CalendarDivergenceAuditPage />);
+
+    const printButton = await screen.findByRole("button", { name: "打印当前工程视图" });
+    fireEvent.click(printButton);
+
+    expect((await screen.findByText("打印适配器拒绝了当前请求。")).closest("[role='alert']")).toBeTruthy();
+    expect(printReportMock).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(printButton);
+    await waitFor(() => expect(screen.queryByText("打印适配器拒绝了当前请求。")).toBeNull());
+    expect(printReportMock).toHaveBeenCalledTimes(2);
   });
 
   it("验证冻结摘要后展示两个完整窗口、四路逐日观察和零金标边界", async () => {
@@ -37,9 +86,10 @@ describe("CalendarDivergenceAuditPage", () => {
     expect(await screen.findByRole("heading", { name: "2089 年八月月首窗口" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "2097 年七月月首窗口" })).toBeTruthy();
     expect(document.querySelectorAll("tbody tr")).toHaveLength(64);
-    expect(screen.getByText("verified +0")).toBeTruthy();
-    expect(screen.getByText("engineering diagnostic · unresolved")).toBeTruthy();
-    expect(screen.getByText("不占用 360 金标配额")).toBeTruthy();
+    const page = document.querySelector<HTMLElement>(".calendar-divergence-audit-page");
+    expect(page?.getAttribute("data-engineering-evidence-only")).toBe("true");
+    expect(page?.getAttribute("data-verified-gold-delta")).toBe("0");
+    expect(page?.getAttribute("data-curated-integration-eligible")).toBe("false");
     expect(screen.getByText(/USNO 是天文事件证据，不是第二份完整中国农历表/)).toBeTruthy();
 
     expect(rowFor("2089-09-03").textContent).toContain("2089-07-29");
@@ -54,17 +104,18 @@ describe("CalendarDivergenceAuditPage", () => {
   it("用真实交互筛选 60 日分歧与 7 个原始触发，不改写冻结数据", async () => {
     render(<CalendarDivergenceAuditPage />);
 
-    const divergenceFilter = await screen.findByRole("button", { name: "只看 60 日分歧" });
+    const page = document.querySelector<HTMLElement>(".calendar-divergence-audit-page");
+    const divergenceFilter = await screen.findByRole("button", { name: /连续分歧/ });
     fireEvent.click(divergenceFilter);
     expect(divergenceFilter.getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByText(/当前显示 60 日；筛选不会改变冻结数据/)).toBeTruthy();
+    expect(page?.getAttribute("data-row-filter")).toBe("divergence");
     expect(document.querySelectorAll("tbody tr")).toHaveLength(60);
     expect(document.querySelector("tbody tr.is-control")).toBeNull();
 
-    const triggerFilter = screen.getByRole("button", { name: "只看 7 个原始触发" });
+    const triggerFilter = screen.getByRole("button", { name: /原始触发/ });
     fireEvent.click(triggerFilter);
     expect(triggerFilter.getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByText(/当前显示 7 日；筛选不会改变冻结数据/)).toBeTruthy();
+    expect(page?.getAttribute("data-row-filter")).toBe("trigger");
     expect(document.querySelectorAll("tbody tr")).toHaveLength(7);
     expect(screen.getByText("p003-18374")).toBeTruthy();
     expect(screen.getByText("p003-18221")).toBeTruthy();
@@ -84,19 +135,25 @@ describe("CalendarDivergenceAuditPage", () => {
     expect(screen.getByText("任何未决都阻止整合")).toBeTruthy();
   });
 
-  it("导出并载入 64 日内容寻址候选包，同时保持双审和裁决按钮失败关闭", async () => {
+  it("准备、交付并绑定 64 日内容寻址候选包，同时保持双审和裁决按钮失败关闭", async () => {
     render(<CalendarDivergenceAuditPage />);
 
     expect(await screen.findByRole("button", { name: /预检独立审核 A/ })).toHaveProperty("disabled", true);
     expect(screen.getByRole("button", { name: /预检第三方裁决/ })).toHaveProperty("disabled", true);
 
-    fireEvent.click(screen.getByRole("button", { name: /导出 64 日候选包/ }));
-    await waitFor(() => expect(saveTextFileMock).toHaveBeenCalledTimes(1));
-    const [fileName, raw, mediaType] = saveTextFileMock.mock.calls[0] as [string, string, string];
+    fireEvent.click(screen.getByRole("button", { name: /准备 64 日候选包/ }));
+    const deliveryDialog = await screen.findByRole("dialog", { name: /待交付文件已在本机生成/ });
+    expect(document.querySelector(".calendar-divergence-audit-page")?.getAttribute("data-prepared-delivery")).toBe("ready");
+    expect(document.querySelector(".calendar-divergence-audit-page")?.getAttribute("data-review-binding")).toBe("valid");
+
+    fireEvent.click(within(deliveryDialog).getByRole("button", { name: /下载文件/ }));
+    await waitFor(() => expect(saveFileMock).toHaveBeenCalledTimes(1));
+    const [blob, fileName] = saveFileMock.mock.calls[0] as [Blob, string];
     expect(fileName).toMatch(/^hakimi-calendar-divergence-review-\d{4}-\d{2}-\d{2}\.json$/);
-    expect(raw).toContain('"datasetId":"hakimi-p0-03-calendar-divergence-windows-v1"');
-    expect(mediaType).toBe("application/json;charset=utf-8");
-    expect(screen.getByText(/已请求浏览器下载.*已载入内容寻址的 64 日候选包/)).toBeTruthy();
+    expect(await blob.text()).toContain('"datasetId":"hakimi-p0-03-calendar-divergence-windows-v1"');
+    expect(blob.type).toBe("application/json;charset=utf-8");
+    await waitFor(() => expect(deliveryDialog.getAttribute("data-delivery-state")).toBe("requested"));
+    expect(saveTextFileMock).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: /预检独立审核 A/ })).toHaveProperty("disabled", false);
     expect(screen.getByRole("button", { name: /预检独立审核 B/ })).toHaveProperty("disabled", false);
     expect(screen.getByRole("button", { name: /预检第三方裁决/ })).toHaveProperty("disabled", true);

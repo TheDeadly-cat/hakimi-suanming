@@ -1,8 +1,12 @@
-import { Component, lazy, Suspense, useEffect, useState, type ErrorInfo, type ReactNode } from "react";
+import { AlertTriangle, Home, RefreshCw } from "lucide-react";
+import { Component, lazy, Suspense, useEffect, useRef, useState, type ErrorInfo, type ReactNode } from "react";
 import { AppShell } from "./components/app-shell";
 import type { AppBootFailure } from "./lib/app-boot-failure";
+import { CANDIDATE_SET_ROUTE, CASE_REVISE_ROUTE, CASE_REVISION_ROUTE } from "./lib/app-route-patterns";
+import { CURRENT_RELEASE_ENGINEERING_IDENTITY } from "./lib/current-release";
 import { LocalAppSettingsProvider } from "./lib/local-app-settings";
 import { useAppLocation } from "./lib/router";
+import { safeVisibleText } from "./lib/visible-text";
 import { BootFailureRecoveryPage, type BootFailureRecoveryView } from "./pages/boot-failure-recovery-page";
 
 const loadDashboardPage = () => import("./pages/dashboard-page");
@@ -37,6 +41,18 @@ const CalendarDivergenceAuditPage = lazy(() => loadCalendarDivergenceAuditPage()
 const TransitReviewInboxPage = lazy(() => loadTransitReviewInboxPage().then((module) => ({ default: module.TransitReviewInboxPage })));
 const NotFoundPage = lazy(() => loadNotFoundPage().then((module) => ({ default: module.NotFoundPage })));
 
+const RELEASE_GOVERNANCE_ATTRIBUTES = {
+  "data-release-identity": CURRENT_RELEASE_ENGINEERING_IDENTITY.dbGeneration,
+  "data-target-schema": String(CURRENT_RELEASE_ENGINEERING_IDENTITY.targetSchema),
+  "data-migration-id": CURRENT_RELEASE_ENGINEERING_IDENTITY.migrationId ?? "null",
+  "data-engineering-evidence-only": "true",
+  "data-formal-validation": "false",
+  "data-scientific-validation": "false",
+  "data-public-release-authorized": "false",
+  "data-expert-truth-claimed": "false",
+  "data-mutation-epoch-bypassed": "false"
+} as const;
+
 function loaderForPath(pathname: string): () => Promise<unknown> {
   if (pathname === "/") return loadDashboardPage;
   if (pathname === "/new") return loadNewChartPage;
@@ -50,9 +66,9 @@ function loaderForPath(pathname: string): () => Promise<unknown> {
   if (pathname === "/settings/calendar-divergence-audit") return loadCalendarDivergenceAuditPage;
   if (pathname === "/settings/transit-review-inbox") return loadTransitReviewInboxPage;
   if (pathname === "/settings") return loadSettingsPage;
-  if (/^\/candidate-sets\/[0-9a-f-]+$/i.test(pathname)) return loadCandidateSetPage;
-  if (/^\/cases\/[0-9a-f-]+\/revisions\/[0-9a-f-]+\/revise$/i.test(pathname)) return loadNewChartPage;
-  if (/^\/cases\/[0-9a-f-]+\/revisions\/[0-9a-f-]+$/i.test(pathname)) return loadChartPage;
+  if (CANDIDATE_SET_ROUTE.test(pathname)) return loadCandidateSetPage;
+  if (CASE_REVISE_ROUTE.test(pathname)) return loadNewChartPage;
+  if (CASE_REVISION_ROUTE.test(pathname)) return loadChartPage;
   return loadNotFoundPage;
 }
 
@@ -74,14 +90,14 @@ function resolvePage(pathname: string) {
   if (pathname === "/settings/transit-review-inbox") return <TransitReviewInboxPage />;
   if (pathname === "/settings") return <SettingsPage />;
 
-  const candidateSetMatch = pathname.match(/^\/candidate-sets\/([0-9a-f-]+)$/i);
-  if (candidateSetMatch) return <CandidateSetPage candidateSetId={candidateSetMatch[1]} />;
+  const candidateSetMatch = pathname.match(CANDIDATE_SET_ROUTE);
+  if (candidateSetMatch) return <CandidateSetPage candidateSetId={candidateSetMatch[1].toLowerCase()} />;
 
-  const reviseMatch = pathname.match(/^\/cases\/([0-9a-f-]+)\/revisions\/([0-9a-f-]+)\/revise$/i);
-  if (reviseMatch) return <NewChartPage caseId={reviseMatch[1]} revisionId={reviseMatch[2]} />;
+  const reviseMatch = pathname.match(CASE_REVISE_ROUTE);
+  if (reviseMatch) return <NewChartPage caseId={reviseMatch[1].toLowerCase()} revisionId={reviseMatch[2].toLowerCase()} />;
 
-  const chartMatch = pathname.match(/^\/cases\/([0-9a-f-]+)\/revisions\/([0-9a-f-]+)$/i);
-  if (chartMatch) return <ChartPage caseId={chartMatch[1]} revisionId={chartMatch[2]} />;
+  const chartMatch = pathname.match(CASE_REVISION_ROUTE);
+  if (chartMatch) return <ChartPage caseId={chartMatch[1].toLowerCase()} revisionId={chartMatch[2].toLowerCase()} />;
   return <NotFoundPage />;
 }
 
@@ -103,9 +119,9 @@ function resolvePageTitle(pathname: string, search: string): string {
     if (view === "coverage") return "依据覆盖审计";
     return "个人典籍与引用";
   }
-  if (/^\/candidate-sets\/[0-9a-f-]+$/i.test(pathname)) return "未知时辰候选组";
-  if (/^\/cases\/[0-9a-f-]+\/revisions\/[0-9a-f-]+\/revise$/i.test(pathname)) return "由历史修订派生新版";
-  if (/^\/cases\/[0-9a-f-]+\/revisions\/[0-9a-f-]+$/i.test(pathname)) {
+  if (CANDIDATE_SET_ROUTE.test(pathname)) return "未知时辰候选组";
+  if (CASE_REVISE_ROUTE.test(pathname)) return "由历史修订派生新版";
+  if (CASE_REVISION_ROUTE.test(pathname)) {
     const view = new URLSearchParams(search).get("view");
     if (view === "overview") return "命盘概览";
     if (view === "transit") return "命盘运限";
@@ -116,8 +132,12 @@ function resolvePageTitle(pathname: string, search: string): string {
 }
 
 function RouteReadySignal({ onReady, routeKey }: { onReady?: (routeKey: string) => void; routeKey: string }) {
+  const lastSignaledRouteKeyRef = useRef<string | null>(null);
+
   useEffect(() => {
-    onReady?.(routeKey);
+    if (!onReady || lastSignaledRouteKeyRef.current === routeKey) return;
+    onReady(routeKey);
+    lastSignaledRouteKeyRef.current = routeKey;
   }, [onReady, routeKey]);
   return null;
 }
@@ -170,19 +190,58 @@ function BootFailureShell({
 
 function BootVerificationNotice({ routeMountAllowed }: { routeMountAllowed: boolean }) {
   return (
-    <div className="app-boot-verification" role="status" aria-live="polite" aria-atomic="true">
+    <div
+      {...RELEASE_GOVERNANCE_ATTRIBUTES}
+      className="app-boot-verification"
+      data-cache-confirmation="pending"
+      data-route-mount={routeMountAllowed ? "mounted-inert" : "blocked"}
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      aria-busy="true"
+    >
       <div>
         <span className="button-busy-dot" aria-hidden="true" />
         <strong>{routeMountAllowed ? "正在确认当前页面可安全打开" : "正在检查本地数据与计算核心"}</strong>
         <p>{routeMountAllowed
           ? "当前页面已在不可操作状态下加载；完成渲染与一帧检查前，不会确认新的离线缓存版本。"
           : "普通研究路由尚未挂载；数据库与固定计算烟测通过后，才会加载当前页面。"}</p>
+        <dl className="app-boot-verification__ledger" aria-label="启动门工程收据">
+          <div><dt>发布身份</dt><dd><code>{CURRENT_RELEASE_ENGINEERING_IDENTITY.dbGeneration}</code></dd></div>
+          <div><dt>目标 Schema</dt><dd>{CURRENT_RELEASE_ENGINEERING_IDENTITY.targetSchema}</dd></div>
+          <div><dt>Migration</dt><dd><code>{CURRENT_RELEASE_ENGINEERING_IDENTITY.migrationId ?? "null"}</code></dd></div>
+          <div><dt>路由挂载</dt><dd>{routeMountAllowed ? "已挂载 · 禁止交互" : "尚未挂载"}</dd></div>
+        </dl>
+        <small className="app-boot-verification__boundary">启动门状态仅属于工程运行证据，不代表专家真值、正式验证或公开发布授权。</small>
       </div>
     </div>
   );
 }
 
+function RouteLoadingNotice() {
+  return (
+    <div
+      {...RELEASE_GOVERNANCE_ATTRIBUTES}
+      className="route-loading"
+      data-route-state="loading"
+      role="status"
+      aria-label="正在打开研究页面"
+      aria-live="polite"
+      aria-atomic="true"
+      aria-busy="true"
+    >
+      <div className="route-loading__heading">
+        <span className="button-busy-dot" aria-hidden="true" />
+        <div><strong>正在打开研究页面</strong><small>路由代码与本地设置就绪前保持不可操作</small></div>
+      </div>
+      <div className="route-loading__skeleton" aria-hidden="true"><span /><span /></div>
+    </div>
+  );
+}
+
 function RuntimeFailureShell({ failure }: { failure: Pick<AppBootFailure, "source" | "error"> }) {
+  const visibleFailureSource = safeVisibleText(failure.source, "运行时阶段未识别", 80);
+
   return (
     <div className="boot-failure-shell">
       <a className="skip-link" href="#main-content">跳到主要内容</a>
@@ -194,15 +253,26 @@ function RuntimeFailureShell({ failure }: { failure: Pick<AppBootFailure, "sourc
         <strong>运行时故障</strong>
       </header>
       <main id="main-content" tabIndex={-1}>
-        <div className="page page--boot-recovery">
+        <div
+          {...RELEASE_GOVERNANCE_ATTRIBUTES}
+          className="page page--boot-recovery"
+          data-runtime-failure-source={visibleFailureSource}
+          data-route-mount="failed"
+          data-runtime-recovery="full-document-reload-only"
+        >
           <section className="error-panel app-boot-failure" role="alert" aria-labelledby="runtime-failure-title">
+            <AlertTriangle aria-hidden="true" />
             <div>
               <p className="eyebrow">Runtime failure</p>
               <h1 id="runtime-failure-title">当前页面运行失败</h1>
               <p>本次启动与离线版本确认已经完成；这个后续运行错误不会被误报为启动失败，也不会改写 Service Worker 的启动确认。</p>
-              <p>故障阶段：<code>{failure.source}</code>。为保护本地研究资料，这里不显示原始异常正文或调用栈。</p>
+              <p>故障阶段：<code>{visibleFailureSource}</code>。为保护本地研究资料，这里不显示原始异常正文或调用栈。</p>
               <p><strong>请重新载入当前页面。</strong>如果重复出现，请先保留浏览器资料，再从一次正常启动的设置页导出完整备份。</p>
-              <button type="button" className="primary-action" onClick={() => window.location.reload()}>重新载入当前页</button>
+              <div className="app-runtime-failure-actions" aria-label="运行时故障恢复动作">
+                <button type="button" className="primary-action" onClick={() => window.location.reload()}><RefreshCw aria-hidden="true" />重新载入当前页</button>
+                <a href="/" className="secondary-action" data-navigation="full-document"><Home aria-hidden="true" />重新启动到工作台</a>
+              </div>
+              <p className="app-runtime-failure-boundary">两个动作都会执行完整文档加载并重新经过启动完整性检查；不会沿用当前内存中的故障状态。</p>
             </div>
           </section>
         </div>
@@ -251,7 +321,20 @@ export function App({
   }
 
   if (!routeMountAllowed) {
-    return <div className="app-boot-preflight-shell"><BootVerificationNotice routeMountAllowed={false} /></div>;
+    return (
+      <main
+        {...RELEASE_GOVERNANCE_ATTRIBUTES}
+        id="main-content"
+        className="app-boot-preflight-shell"
+        data-cache-confirmation="pending"
+        data-route-mount="blocked"
+        tabIndex={-1}
+        aria-busy="true"
+        aria-label="启动完整性检查"
+      >
+        <BootVerificationNotice routeMountAllowed={false} />
+      </main>
+    );
   }
 
   return (
@@ -259,7 +342,7 @@ export function App({
       {bootPending ? <BootVerificationNotice routeMountAllowed /> : null}
       <div className={bootPending ? "app-boot-pending-content" : undefined} inert={bootPending ? true : undefined} aria-hidden={bootPending ? true : undefined}>
         <LocalAppSettingsProvider>
-          <AppShell pathname={location.pathname}>
+          <AppShell onPreloadRoute={preloadAppRoute} pathname={location.pathname} search={location.search}>
             <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">已打开：{pageTitle}</p>
             <RouteIntegrityBoundary onFailure={(error) => {
               const phase = onRouteFailure?.(error) ?? (bootPending ? "boot" : "runtime");
@@ -269,7 +352,7 @@ export function App({
                 setRouteRuntimeFailure({ source: "route", error });
               }
             }}>
-              <Suspense fallback={<div className="route-loading" role="status" aria-label="正在打开研究页面"><span /><span /></div>}>
+              <Suspense fallback={<RouteLoadingNotice />}>
                 {resolvePage(location.pathname)}
                 <RouteReadySignal onReady={onRouteReady} routeKey={`${location.pathname}${location.search}`} />
               </Suspense>

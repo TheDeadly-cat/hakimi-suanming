@@ -5,7 +5,7 @@ import {
   LEGACY_CANDIDATE_SET_TZDB_CHANGED_FIELDS,
   candidateSetTzdbComparisonV2Schema,
   legacyCandidateSetTzdbComparisonSchema,
-  unknownHourCandidateResultSchema,
+  storedUnknownHourCandidateResultSchema,
   type CandidateSetTzdbComparisonV2,
   type CandidateSetTzdbResolutionFingerprint,
   type LegacyCandidateSetTzdbComparison,
@@ -108,8 +108,8 @@ export function buildLegacyCandidateSetTzdbComparison(
   sourceCandidateSet: UnknownHourCandidateResult,
   targetCandidateSet: UnknownHourCandidateResult
 ): LegacyCandidateSetTzdbComparison {
-  const source = unknownHourCandidateResultSchema.parse(structuredClone(sourceCandidateSet));
-  const target = unknownHourCandidateResultSchema.parse(structuredClone(targetCandidateSet));
+  const source = storedUnknownHourCandidateResultSchema.parse(structuredClone(sourceCandidateSet));
+  const target = storedUnknownHourCandidateResultSchema.parse(structuredClone(targetCandidateSet));
   const probeDiffs = source.candidates.map((sourceProbe, index) => {
     const targetProbe = target.candidates[index];
     if (!targetProbe || targetProbe.candidateId !== sourceProbe.candidateId) {
@@ -168,8 +168,8 @@ export function buildCandidateSetTzdbComparison(
   sourceCandidateSet: UnknownHourCandidateResult,
   targetCandidateSet: UnknownHourCandidateResult
 ): CandidateSetTzdbComparisonV2 {
-  const source = unknownHourCandidateResultSchema.parse(structuredClone(sourceCandidateSet));
-  const target = unknownHourCandidateResultSchema.parse(structuredClone(targetCandidateSet));
+  const source = storedUnknownHourCandidateResultSchema.parse(structuredClone(sourceCandidateSet));
+  const target = storedUnknownHourCandidateResultSchema.parse(structuredClone(targetCandidateSet));
   const probeDiffs = source.candidates.map((sourceProbe, index) => {
     const targetProbe = target.candidates[index];
     if (!targetProbe || targetProbe.candidateId !== sourceProbe.candidateId) {

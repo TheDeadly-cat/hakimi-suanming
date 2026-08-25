@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync, realpathSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
@@ -7,7 +8,13 @@ import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
 import { computeOfflineCacheVersion, type OfflineBundleEntry } from "./pwa-build";
 import { auditBundledKnowledgeDirectory } from "./bundled-knowledge-audit";
-import type { ReleaseDatabaseDescriptor } from "./release-protocol";
+import {
+  BRIDGE_RELEASE_DATABASE_DESCRIPTOR,
+  releaseStorageManifestForDescriptor,
+  serializeReleaseStorageManifest,
+  type ReleaseDatabaseDescriptor,
+  type ReleaseStorageManifest
+} from "./release-protocol";
 import { DEFAULT_VITE_RELEASE_DATABASE_DESCRIPTOR } from "./vite-release-config";
 
 const appRoot = fileURLToPath(new URL(".", import.meta.url));
@@ -102,6 +109,87 @@ function isolatedSystemContractDraftBoundaryPlugin(): Plugin {
   };
 }
 
+type SerializedViteAlias =
+  | { kind: "string"; find: string; replacement: string; hasCustomResolver: boolean }
+  | { kind: "regexp"; source: string; flags: string; replacement: string; hasCustomResolver: boolean };
+
+const HISTORICAL_NATAL_RUNTIME_ALIAS_SPECIFIERS = [
+  "@hakimi/bazi-core",
+  "@hakimi/contracts",
+  "@hakimi/integrity",
+  "@hakimi/luck-core",
+  "@hakimi/time-core",
+  "@hakimi/tzdb-core"
+] as const;
+
+type SerializedViteAliasResolution = Readonly<{
+  specifier: (typeof HISTORICAL_NATAL_RUNTIME_ALIAS_SPECIFIERS)[number];
+  resolvedId: string | null;
+  external: boolean;
+}>;
+
+function historicalNatalRuntimeClosurePlugin(): Plugin {
+  let resolvedAliases: readonly {
+    find: string | RegExp;
+    replacement: string;
+    customResolver?: unknown;
+  }[] | null = null;
+  return {
+    name: "hakimi-historical-natal-runtime-closure",
+    apply: "build",
+    enforce: "post",
+    configResolved(config) {
+      resolvedAliases = config.resolve.alias;
+    },
+    async buildStart() {
+      if (resolvedAliases === null) {
+        throw new Error("Historical natal runtime-closure gate did not receive the resolved Vite aliases.");
+      }
+      const aliases: SerializedViteAlias[] = resolvedAliases.map((alias) =>
+        typeof alias.find === "string"
+          ? {
+            kind: "string",
+            find: alias.find,
+            replacement: alias.replacement,
+            hasCustomResolver: alias.customResolver !== undefined
+          }
+          : {
+            kind: "regexp",
+            source: alias.find.source,
+            flags: alias.find.flags,
+            replacement: alias.replacement,
+            hasCustomResolver: alias.customResolver !== undefined
+          }
+      );
+      const importer = path.resolve(appRoot, "src/main.tsx");
+      const aliasResolutions: SerializedViteAliasResolution[] = [];
+      for (const specifier of HISTORICAL_NATAL_RUNTIME_ALIAS_SPECIFIERS) {
+        const resolved = await this.resolve(specifier, importer, { skipSelf: true });
+        aliasResolutions.push({
+          specifier,
+          resolvedId: resolved?.id ?? null,
+          external: Boolean(resolved?.external)
+        });
+      }
+      execFileSync(
+        process.execPath,
+        [
+          path.resolve(
+            workspaceRoot,
+            "packages/bazi-core/scripts/verify-historical-natal-runtime-closure.mjs"
+          ),
+          "--check",
+          "--resolved-vite-aliases-json",
+          JSON.stringify(aliases),
+          "--resolved-vite-alias-resolutions-json",
+          JSON.stringify(aliasResolutions)
+        ],
+        { cwd: workspaceRoot, stdio: "inherit" }
+      );
+    }
+  };
+}
+
 function escapeHtmlAttribute(value: string): string {
   return value
     .replaceAll("&", "&amp;")
@@ -114,7 +202,36 @@ function releaseDatabaseMeta(descriptor: ReleaseDatabaseDescriptor): string {
   return `<meta name="hakimi-release-database" content="${escapeHtmlAttribute(JSON.stringify(descriptor))}" />`;
 }
 
-function offlineBundlePlugin(descriptor: ReleaseDatabaseDescriptor): Plugin {
+const BOUND_RELEASE_EVIDENCE_ID = /^hre1-[a-f0-9]{32}$/u;
+const UNBOUND_RELEASE_EVIDENCE_ID = "unbound-local-build";
+
+function releaseEvidenceIdFromEnvironment(): string {
+  const candidate = process.env.HAKIMI_RELEASE_EVIDENCE_ID ?? UNBOUND_RELEASE_EVIDENCE_ID;
+  if (candidate !== UNBOUND_RELEASE_EVIDENCE_ID && !BOUND_RELEASE_EVIDENCE_ID.test(candidate)) {
+    throw new Error("HAKIMI_RELEASE_EVIDENCE_ID 不是规范发布证据 ID。");
+  }
+  return candidate;
+}
+
+function releaseStorageManifestMeta(
+  manifest: ReleaseStorageManifest,
+  releaseEvidenceId: string
+): string {
+  const serialized = serializeReleaseStorageManifest(manifest);
+  const digest = createHash("sha256").update(serialized).digest("hex");
+  return [
+    releaseDatabaseMeta(manifest.database),
+    `<meta name="hakimi-release-storage-manifest" content="${escapeHtmlAttribute(serialized)}" />`,
+    `<meta name="hakimi-release-storage-manifest-digest" content="${digest}" />`,
+    `<meta name="hakimi-release-evidence-id" content="${releaseEvidenceId}" />`
+  ].join("\n  ");
+}
+
+function offlineBundlePlugin(
+  manifest: ReleaseStorageManifest,
+  releaseEvidenceId: string
+): Plugin {
+  const descriptor = manifest.database;
   return {
     name: "hakimi-offline-bundle",
     apply: "build",
@@ -145,12 +262,21 @@ function offlineBundlePlugin(descriptor: ReleaseDatabaseDescriptor): Plugin {
       if (!builtIndex.includes("</head>")) throw new Error("PWA 构建无法注入数据库代际描述符");
       const releaseAwareIndex = builtIndex.replace(
         "</head>",
-        `  ${releaseDatabaseMeta(descriptor)}\n  </head>`
+        `  ${releaseStorageManifestMeta(manifest, releaseEvidenceId)}\n  </head>`
       );
+      const releaseAwareWorkerTemplate = workerTemplate
+        .replace(
+          '"__RELEASE_DATABASE_DESCRIPTOR__"',
+          JSON.stringify(JSON.stringify(descriptor))
+        )
+        .replace(
+          '"__BRIDGE_RELEASE_DATABASE_DESCRIPTOR__"',
+          JSON.stringify(JSON.stringify(BRIDGE_RELEASE_DATABASE_DESCRIPTOR))
+        );
       const fingerprint = computeOfflineCacheVersion({
         bundle: fingerprintBundle,
         publicAssets,
-        workerTemplate,
+        workerTemplate: releaseAwareWorkerTemplate,
         // 数据库代际必须进入应用壳内容指纹；即使 JS 资源图完全相同，
         // v13 bridge 与 v14 shadow 也绝不能共享一个 cache generation。
         htmlDocument: releaseAwareIndex
@@ -161,6 +287,10 @@ function offlineBundlePlugin(descriptor: ReleaseDatabaseDescriptor): Plugin {
         .replace(
           '"__RELEASE_DATABASE_DESCRIPTOR__"',
           JSON.stringify(JSON.stringify(descriptor))
+        )
+        .replace(
+          '"__BRIDGE_RELEASE_DATABASE_DESCRIPTOR__"',
+          JSON.stringify(JSON.stringify(BRIDGE_RELEASE_DATABASE_DESCRIPTOR))
         )
         .replace("const BUILD_ASSETS = [];", `const BUILD_ASSETS = ${JSON.stringify(buildAssets, null, 2)};`);
       const versionedIndex = releaseAwareIndex.replace(
@@ -190,6 +320,8 @@ function bundledKnowledgePlugin(): Plugin {
 }
 
 export function createWebViteConfig(releaseDatabaseDescriptor: ReleaseDatabaseDescriptor) {
+  const releaseStorageManifest = releaseStorageManifestForDescriptor(releaseDatabaseDescriptor);
+  const releaseEvidenceId = releaseEvidenceIdFromEnvironment();
   return defineConfig({
     root: appRoot,
     resolve: {
@@ -203,6 +335,7 @@ export function createWebViteConfig(releaseDatabaseDescriptor: ReleaseDatabaseDe
         "@hakimi/integrity": path.resolve(workspaceRoot, "packages/integrity/src/index.ts"),
         "@hakimi/rule-profiles": path.resolve(workspaceRoot, "packages/rule-profiles/src/index.ts"),
         "@hakimi/bazi-core": path.resolve(workspaceRoot, "packages/bazi-core/src/index.ts"),
+        "@hakimi/bazi-review-context": path.resolve(workspaceRoot, "packages/bazi-review-context/src/index.ts"),
         "@hakimi/bazi-interpretation": path.resolve(workspaceRoot, "packages/bazi-interpretation/src/index.ts"),
         "@hakimi/gold-standard/calendar-divergence-windows": path.resolve(
           workspaceRoot,
@@ -253,9 +386,10 @@ export function createWebViteConfig(releaseDatabaseDescriptor: ReleaseDatabaseDe
     },
     plugins: [
       isolatedSystemContractDraftBoundaryPlugin(),
+      historicalNatalRuntimeClosurePlugin(),
       react(),
       bundledKnowledgePlugin(),
-      offlineBundlePlugin(releaseDatabaseDescriptor)
+      offlineBundlePlugin(releaseStorageManifest, releaseEvidenceId)
     ],
     worker: {
       // Every application Worker is created with { type: "module" }. Keep the emitted

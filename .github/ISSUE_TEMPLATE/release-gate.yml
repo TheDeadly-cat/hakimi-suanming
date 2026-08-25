@@ -1,0 +1,38 @@
+name: Web v1 release and rollback gate
+description: Track one source- and artifact-bound release rehearsal.
+title: "[Release Gate] "
+labels: ["release", "rollback", "release-evidence"]
+body:
+  - type: input
+    id: evidence-id
+    attributes:
+      label: Release Evidence ID
+      placeholder: hre1-...
+    validations:
+      required: true
+  - type: textarea
+    id: source-data
+    attributes:
+      label: Source data provenance
+      description: State whether this is a clean profile, synthetic fixture, or owner-approved real v13 copy. Do not attach sensitive data.
+    validations:
+      required: true
+  - type: checkboxes
+    id: gates
+    attributes:
+      label: Required gates
+      options:
+        - label: App, Service Worker, manifest, and database generation match
+          required: true
+        - label: Offline deep-link and backup restore passed
+          required: true
+        - label: Rollback preserved or exported original v13 without downgrade writes
+          required: true
+        - label: Public claims remain within expert and content-rights evidence
+          required: true
+  - type: textarea
+    id: residual-risk
+    attributes:
+      label: Residual risks and explicit non-authorizations
+    validations:
+      required: true

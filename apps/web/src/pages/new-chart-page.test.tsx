@@ -16,7 +16,7 @@ import { withTimeRules } from "@hakimi/rule-profiles";
 import { createWorkingDefaultRulePackEnvelope, verifyRulePackIntegrity } from "@hakimi/rule-packs";
 import { caseRepository, ruleRegistryRepository } from "@hakimi/storage";
 import { LocalAppSettingsProvider, useLocalAppSettings } from "../lib/local-app-settings";
-import { NewChartPage } from "./new-chart-page";
+import { assertBoundedWizardRuntimePayload, NewChartPage } from "./new-chart-page";
 
 const compactLunarSettings: LocalAppSettingsRecord = {
   schemaVersion: SCHEMA_VERSION,
@@ -330,6 +330,7 @@ describe("NewChartPage 时间校准", () => {
     fireEvent.click(screen.getByRole("button", { name: /下一步/ }));
     expect(screen.getByText("未知时辰候选入口")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /下一步/ }));
+    await waitFor(() => expect(screen.queryByText("正在核对活动规则包")).toBeNull());
     fireEvent.click(screen.getByRole("button", { name: "生成 13 个候选" }));
 
     expect(await screen.findByRole("heading", { name: "13 个代表性候选" })).toBeTruthy();
@@ -355,11 +356,21 @@ describe("NewChartPage 时间校准", () => {
     fireEvent.change(screen.getByLabelText(/出生日期/), { target: { value: "2024-04-07" } });
     fireEvent.click(screen.getByRole("button", { name: /下一步/ }));
     fireEvent.click(screen.getByRole("button", { name: /下一步/ }));
+    await waitFor(() => expect(screen.queryByText("正在核对活动规则包")).toBeNull());
     fireEvent.click(screen.getByRole("button", { name: "生成 13 个候选" }));
 
     expect(await screen.findByText("2 个 DST 变体")).toBeTruthy();
     expect(screen.getByText((_, element) => element?.tagName === "P" && element.textContent?.includes("earlier · +11:00") === true)).toBeTruthy();
     expect(screen.getByText((_, element) => element?.tagName === "P" && element.textContent?.includes("later · +10:30") === true)).toBeTruthy();
+  });
+
+  it("未知时辰候选运行时节点超过有界预算时继续 fail-closed", () => {
+    const oversizedPayload = {
+      groups: Array.from({ length: 100 }, () => Array.from({ length: 256 }, (_, index) => index))
+    };
+
+    expect(() => assertBoundedWizardRuntimePayload(oversizedPayload, "候选集结果"))
+      .toThrow("候选集结果 的运行时节点数量超出页面安全上限。");
   });
 
   it("用活动规则包的精确 profile 计算，并把包摘要写入新 Revision", async () => {

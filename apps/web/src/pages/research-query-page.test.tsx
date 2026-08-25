@@ -8,13 +8,32 @@ import {
 import { calculateChart } from "@hakimi/bazi-core";
 import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
 import { caseRepository, researchRepository } from "@hakimi/storage";
+import { resetPreparedFileDeliveryCoordinatorForTests } from "../components/prepared-file-delivery-coordinator";
 import * as researchQueryAdapter from "../lib/research-query-adapter";
 import { readResearchQueryDraft } from "../lib/research-query-session";
 import { ResearchQueryPage } from "./research-query-page";
 
-const { saveTextFileMock } = vi.hoisted(() => ({ saveTextFileMock: vi.fn() }));
+const {
+  getExportCapabilitiesMock,
+  saveFileMock,
+  saveFileToChosenLocationMock,
+  shareFileMock,
+} = vi.hoisted(() => ({
+  getExportCapabilitiesMock: vi.fn(),
+  saveFileMock: vi.fn(),
+  saveFileToChosenLocationMock: vi.fn(),
+  shareFileMock: vi.fn(),
+}));
 
-vi.mock("@hakimi/platform", () => ({ saveTextFile: saveTextFileMock }));
+vi.mock("@hakimi/platform", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@hakimi/platform")>()),
+  webReportExportPort: {
+    getCapabilities: getExportCapabilitiesMock,
+    saveFile: saveFileMock,
+    saveFileToChosenLocation: saveFileToChosenLocationMock,
+    shareFile: shareFileMock,
+  },
+}));
 
 const input: BirthInput = {
   schemaVersion: "1.0.0",
@@ -30,14 +49,22 @@ const input: BirthInput = {
 };
 
 beforeEach(async () => {
+  resetPreparedFileDeliveryCoordinatorForTests();
   await caseRepository.clearAll();
   window.sessionStorage.clear();
   window.history.replaceState({}, "", "/cases/research");
-  saveTextFileMock.mockReset().mockImplementation(async (filename: string) => ({
+  getExportCapabilitiesMock.mockReset().mockReturnValue({
+    canDownloadFiles: true,
+    canChooseSaveLocation: false,
+    canShareFiles: false,
+  });
+  saveFileMock.mockReset().mockImplementation(async (_blob: Blob, filename: string) => ({
     status: "download_requested",
     filename,
     method: "browser_download"
   }));
+  saveFileToChosenLocationMock.mockReset();
+  shareFileMock.mockReset();
   Object.defineProperty(window, "scrollTo", { configurable: true, value: vi.fn() });
   Object.defineProperty(HTMLElement.prototype, "scrollIntoView", { configurable: true, value: vi.fn() });
 });
@@ -60,7 +87,7 @@ describe("ResearchQueryPage", () => {
     render(<ResearchQueryPage />);
 
     expect(await screen.findByRole("heading", { name: "正式命盘 · 1 条结果" })).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "导出查询快照" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "准备查询快照" })).toBeTruthy();
 
     const search = screen.getByRole("searchbox");
     fireEvent.change(search, { target: { value: "　甲　　案例　" } });
@@ -79,11 +106,15 @@ describe("ResearchQueryPage", () => {
     await waitFor(() => expect(document.activeElement).toBe(resultHeading.closest("section")));
 
     expect(screen.getByText(/文件包含检索词、标签、别名、事件命中及精确本地 ID/)).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "导出查询快照" }));
-    await waitFor(() => expect(saveTextFileMock).toHaveBeenCalledTimes(1));
-    const [fileName, raw, mediaType] = saveTextFileMock.mock.calls[0] as [string, string, string];
+    fireEvent.click(screen.getByRole("button", { name: "准备查询快照" }));
+    const deliveryDialog = await screen.findByRole("dialog", { name: "待交付文件已在本机生成" });
+    expect(saveFileMock).not.toHaveBeenCalled();
+    fireEvent.click(within(deliveryDialog).getByRole("button", { name: /下载文件/ }));
+    await waitFor(() => expect(saveFileMock).toHaveBeenCalledTimes(1));
+    const [blob, fileName] = saveFileMock.mock.calls[0] as [Blob, string];
+    const raw = await blob.text();
     expect(fileName).toMatch(/^hakimi-research-query-.+\.json$/);
-    expect(mediaType).toBe("application/json;charset=utf-8");
+    expect(blob.type).toBe("application/json;charset=utf-8");
     expect(JSON.parse(raw)).toMatchObject({
       manifest: { format: "hakimi-research-query-export", formatVersion: "1.1.0", appVersion: "0.2.0-p0" },
       payload: { query: { text: "甲 案例" }, total: 1 },
@@ -129,7 +160,8 @@ describe("ResearchQueryPage", () => {
     expect(screen.getByRole("searchbox")).toHaveProperty("value", "事 业");
     fireEvent.change(screen.getByLabelText("生命周期"), { target: { value: "trashed" } });
     fireEvent.click(screen.getByLabelText(/我已在下方表单逐项选择/));
-    fireEvent.click(confirmButton);
+    await waitFor(() => expect(screen.getByRole("button", { name: "确认迁移为当前表单条件" })).toHaveProperty("disabled", false));
+    fireEvent.click(screen.getByRole("button", { name: "确认迁移为当前表单条件" }));
 
     await waitFor(() => expect(window.location.search).toBe(`?view=${legacy.id}`));
     const resolved = await researchRepository.getSavedView(legacy.id);
@@ -181,8 +213,8 @@ describe("ResearchQueryPage", () => {
 
     render(<ResearchQueryPage />);
 
-    expect(await screen.findByText("正在验真本地数据 · 1 / 10000")).toBeTruthy();
-    const cancelButton = screen.getByRole("button", { name: "取消查询" });
+    const cancelButton = await screen.findByRole("button", { name: "取消查询" });
+    expect(within(cancelButton.parentElement as HTMLElement).getByText("正在核验本地数据结构 · 1 / 10000")).toBeTruthy();
     fireEvent.click(cancelButton);
 
     await waitFor(() => expect(observedSignal?.aborted).toBe(true));

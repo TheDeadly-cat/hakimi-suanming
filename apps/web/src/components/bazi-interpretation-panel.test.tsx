@@ -40,7 +40,7 @@ describe("BaziInterpretationPanel", () => {
     const revision = await revisionFor(input);
     const { container } = render(<BaziInterpretationSummary revision={revision} />);
 
-    expect(screen.getByRole("heading", { name: "本盘解读已生成" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "本盘工程解读候选已生成，尚未裁决" })).toBeTruthy();
     expect(screen.getByText(/按固定四步阅读.*不选全盘第一主题/)).toBeTruthy();
     const summary = container.querySelector<HTMLElement>(".interpretation-entry-summary");
     expect(summary?.dataset).toMatchObject({
@@ -61,7 +61,7 @@ describe("BaziInterpretationPanel", () => {
       "shensha_gate"
     ]);
     expect(screen.getByText("默认关闭 · 待主动打开")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "打开完整八字解读与研究预览" }).getAttribute("href")).toBe(
+    expect(screen.getByRole("link", { name: "打开完整工程候选与研究预览" }).getAttribute("href")).toBe(
       `/cases/${revision.caseId}/revisions/${revision.id}?view=overview`
     );
   });
@@ -70,6 +70,18 @@ describe("BaziInterpretationPanel", () => {
     const { container } = render(<BaziInterpretationPanel revision={await revisionFor(input)} />);
 
     expect(screen.getByRole("heading", { name: "旺衰与十神解读" })).toBeTruthy();
+    const jumpNav = screen.getByRole("navigation", { name: "八字工程候选页内导航" });
+    expect(within(jumpNav).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
+      "#bazi-first-read-review",
+      "#bazi-strength-ledger",
+      "#bazi-strength-sensitivity",
+      "#bazi-ten-god-reading",
+      "#bazi-shensha-gate",
+      "#bazi-current-chart-review",
+      "#bazi-content-review",
+      "#bazi-interpretation-evidence"
+    ]);
+    expect(within(jumpNav).getAllByRole("link").every((link) => document.querySelector(link.getAttribute("href") ?? "") !== null)).toBe(true);
     const firstRead = container.querySelector<HTMLElement>(".bazi-first-read-review");
     expect(firstRead?.dataset).toMatchObject({
       firstReadVersion: "hakimi.bazi.first_read_review/0.1.0",
@@ -234,13 +246,13 @@ describe("BaziInterpretationPanel", () => {
 
     expect(ledger).toBeTruthy();
     await waitFor(() => {
-      expect(ledger?.dataset.bindingState).toBe("ready");
+      expect(ledger?.dataset.bindingState).toBe("bound");
     });
     expect(ledger?.getAttribute("aria-busy")).toBe("false");
     expect(ledger?.dataset).toMatchObject({
       projectionVersion: "hakimi.bazi.strength_evidence_narrative/0.1.0",
       contentVersion: "0.18.0",
-      bindingState: "ready",
+      bindingState: "bound",
       includeHour: "true",
       claimCount: "12",
       withheldPositionCount: "0",
@@ -254,14 +266,28 @@ describe("BaziInterpretationPanel", () => {
     });
     expect(Number(ledger?.dataset.factorCount)).toBeGreaterThan(0);
     expect(Number(ledger?.dataset.evidenceItemCount) - Number(ledger?.dataset.factorCount)).toBe(1);
-    expect(within(ledger!).getByRole("heading", { name: "旺衰为什么落在这一档" })).toBeTruthy();
+    expect(within(ledger!).getByRole("heading", { name: "旺衰工程分档如何形成" })).toBeTruthy();
     expect(within(ledger!).queryByRole("button")).toBeNull();
+
+    const digestDisclosure = within(ledger!).getByText("完整输入指纹").closest("details");
+    expect(digestDisclosure).not.toBeNull();
+    fireEvent.click(within(digestDisclosure!).getByText("完整输入指纹"));
+    const completeDigests = [...digestDisclosure!.querySelectorAll("code")].map((code) => code.textContent ?? "");
+    expect(completeDigests).toHaveLength(7);
+    expect(completeDigests.every((digest) => /^[a-f0-9]{64}$/.test(digest))).toBe(true);
+
+    const claimLedger = ledger!.querySelector<HTMLDetailsElement>(".bazi-strength-claim-ledger");
+    expect(claimLedger).not.toBeNull();
+    expect(ledger!.querySelectorAll(".bazi-strength-claim-card")).toHaveLength(0);
+    fireEvent.click(within(claimLedger!).getByText("查看 12 条来源—主张账"));
+
+    await waitFor(() => {
+      expect(ledger!.querySelectorAll(".bazi-strength-claim-card")).toHaveLength(12);
+    });
 
     const claims = [...ledger!.querySelectorAll<HTMLElement>(".bazi-strength-claim-card")];
     expect(claims).toHaveLength(12);
-    expect(claims.map((claim) => Number(claim.id.replace("bazi-strength-claim-", "")))).toEqual(
-      Array.from({ length: 12 }, (_, index) => index + 1)
-    );
+    expect(new Set(claims.map((claim) => claim.id)).size).toBe(12);
     expect(claims.every((claim) => (
       claim.dataset.expertTruthClaimed === "false"
       && claim.dataset.scientificValidityClaimed === "false"
@@ -299,6 +325,27 @@ describe("BaziInterpretationPanel", () => {
     expect(within(duplicate!).getByText("月主气重复计权：6", { exact: true })).toBeTruthy();
   });
 
+  it("prepares a current-chart packet explicitly and exposes every full binding digest", async () => {
+    const revision = await revisionFor(input);
+    const sourceBefore = structuredClone(revision);
+    const { container } = render(<BaziInterpretationPanel revision={revision} />);
+    const workbench = container.querySelector<HTMLElement>(".bazi-current-chart-review-workbench");
+    expect(workbench).not.toBeNull();
+
+    fireEvent.click(within(workbench!).getByRole("button", { name: "准备当前盘复核包" }));
+    await waitFor(() => expect(workbench?.dataset.preflightState).toBe("bound"));
+    expect(workbench?.dataset.bindingDigestCount).toBe("8");
+    expect(workbench?.dataset.packetSha256).toMatch(/^[a-f0-9]{64}$/);
+
+    const disclosure = within(workbench!).getByText("完整复核包绑定").closest("details");
+    expect(disclosure).not.toBeNull();
+    fireEvent.click(within(disclosure!).getByText("完整复核包绑定"));
+    const digests = [...disclosure!.querySelectorAll("code")].map((code) => code.textContent ?? "");
+    expect(digests).toHaveLength(8);
+    expect(digests.every((digest) => /^[a-f0-9]{64}$/.test(digest))).toBe(true);
+    expect(revision).toEqual(sourceBefore);
+  });
+
   it("exposes a read-only 69-item content review queue without fabricating any expert decision", async () => {
     const { container } = render(<BaziInterpretationPanel revision={await revisionFor(input)} />);
     const queue = container.querySelector<HTMLElement>(".bazi-content-review-queue");
@@ -316,8 +363,8 @@ describe("BaziInterpretationPanel", () => {
       formalActivationAllowed: "false"
     });
     expect(within(queue!).getByRole("heading", { name: "内容质量审稿台" })).toBeTruthy();
-    expect(within(queue!).getByText("69 项 · 全部未裁决", { exact: true })).toBeTruthy();
-    expect(within(queue!).getByRole("button", { name: "导出 69 项审稿清单 JSON" })).toBeTruthy();
+    expect(within(queue!).getByText(/69\s*项\s*·\s*69\s*未裁决/u)).toBeTruthy();
+    expect(within(queue!).getByRole("button", { name: "准备 69 项审稿清单 JSON" })).toBeTruthy();
     expect(within(queue!).getByText(/hakimi-bazi-content-review-queue-v017\.json/)).toBeTruthy();
     const feedbackWorkbench = queue!.querySelector<HTMLElement>(".bazi-content-review-feedback-workbench");
     expect(feedbackWorkbench).toBeTruthy();
@@ -336,7 +383,7 @@ describe("BaziInterpretationPanel", () => {
       result: "null"
     });
     expect(within(feedbackWorkbench!).getByRole("heading", { name: "审稿反馈工作包" })).toBeTruthy();
-    expect(within(feedbackWorkbench!).getByRole("button", { name: "导出 69 项反馈模板" })).toBeTruthy();
+    expect(within(feedbackWorkbench!).getByRole("button", { name: "准备 69 项反馈模板" })).toBeTruthy();
     expect(within(feedbackWorkbench!).getByRole("button", { name: "预检已填写反馈 JSON" })).toBeTruthy();
     expect(within(feedbackWorkbench!).getByText(/identityVerified:false.*auto integration:false.*mutation:false/)).toBeTruthy();
 
@@ -351,9 +398,14 @@ describe("BaziInterpretationPanel", () => {
       ["shensha_position", "20 未裁决 · 0 已批准"]
     ]);
     const groups = [...queue!.querySelectorAll<HTMLDetailsElement>(".bazi-content-review-groups > details")];
-    expect(groups.map((group) => group.querySelectorAll(":scope > ol > li").length)).toEqual([4, 40, 5, 20]);
-    const reviewItems = [...queue!.querySelectorAll<HTMLElement>("[data-review-item-id]")];
-    expect(reviewItems).toHaveLength(69);
+    expect(groups.map((group) => group.querySelectorAll(":scope > ol > li").length)).toEqual([0, 0, 0, 0]);
+    expect(queue!.querySelectorAll<HTMLElement>("[data-review-item-id]")).toHaveLength(0);
+
+    fireEvent.click(within(groups[0]).getByText("旺衰方法", { exact: true }));
+    expect(groups[0].open).toBe(true);
+    await waitFor(() => expect(groups[0].querySelectorAll("[data-review-item-id]")).toHaveLength(4));
+    const reviewItems = [...groups[0].querySelectorAll<HTMLElement>("[data-review-item-id]")];
+    expect(reviewItems).toHaveLength(4);
     expect(reviewItems.every((item) => (
       item.dataset.decision === "unresolved"
       && item.dataset.reviewer === "null"
@@ -363,8 +415,6 @@ describe("BaziInterpretationPanel", () => {
       && item.dataset.formalActivationAllowed === "false"
     ))).toBe(true);
 
-    fireEvent.click(within(groups[0]).getByText("旺衰方法", { exact: true }));
-    expect(groups[0].open).toBe(true);
     expect(within(groups[0]).getByText("月令主气与首位藏干重复计权", { exact: true })).toBeTruthy();
     expect(within(groups[0]).getAllByText(/decision:unresolved · reviewer:null · reviewedAt:null · result:null/)).toHaveLength(4);
   });
@@ -380,7 +430,7 @@ describe("BaziInterpretationPanel", () => {
     const evidenceLedger = container.querySelector<HTMLElement>(".bazi-strength-evidence-ledger");
     expect(evidenceLedger).toBeTruthy();
     await waitFor(() => {
-      expect(evidenceLedger?.dataset.bindingState).toBe("ready");
+      expect(evidenceLedger?.dataset.bindingState).toBe("bound");
     });
     expect(evidenceLedger?.dataset).toMatchObject({
       projectionVersion: "hakimi.bazi.strength_evidence_narrative/0.1.0",

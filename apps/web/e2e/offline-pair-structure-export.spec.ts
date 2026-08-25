@@ -228,6 +228,7 @@ test("断网后精确双案例仍可首次生成匿名报告与显式完整审�
     "differenceCount"
   ]) expect(markdown).not.toContain(sensitive);
 
+  await deliveryDialog.getByRole("button", { name: "已核对，允许再次下载", exact: true }).click();
   await deliveryDialog.getByRole("button", { name: "关闭文件交付", exact: true }).click();
   await expect(deliveryDialog).toBeHidden();
 

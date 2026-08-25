@@ -1,0 +1,1094 @@
+/* Current-chart review is an evidence workbench, not an interpretation verdict. */
+
+.bazi-current-chart-review-workbench.bazi-current-chart-review-workbench {
+  --chart-review-ink: #233138;
+  --chart-review-muted: #657278;
+  --chart-review-line: rgba(35, 49, 56, 0.16);
+  --chart-review-paper: #f1f2ed;
+  --chart-review-accent: #4d6f8d;
+  --chart-review-bound: #58717c;
+  --chart-review-pending: #a07843;
+  --chart-review-error: #a34f42;
+  position: relative;
+  overflow: hidden;
+  padding: clamp(18px, 2.4vw, 27px);
+  border: 1px solid var(--chart-review-line);
+  border-radius: 7px 24px 7px 7px;
+  background:
+    linear-gradient(112deg, rgba(77, 111, 141, 0.065), transparent 34%),
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(35, 49, 56, 0.024) 31px 32px),
+    var(--chart-review-paper);
+  box-shadow: 0 20px 46px rgba(35, 49, 56, 0.075), inset 0 1px rgba(255, 255, 255, 0.76);
+}
+
+.bazi-current-chart-review-workbench::before {
+  position: absolute;
+  top: 0;
+  right: clamp(20px, 3vw, 38px);
+  width: 76px;
+  height: 4px;
+  background: var(--chart-review-pending);
+  content: "";
+}
+
+.bazi-current-chart-review-workbench[data-preflight-state="bound"]::before {
+  background: var(--chart-review-accent);
+}
+
+.bazi-current-chart-review-workbench[data-preflight-state="valid"]::before {
+  background: var(--chart-review-accent);
+}
+
+.bazi-current-chart-review-workbench[data-preflight-state="invalid"]::before {
+  background: var(--chart-review-error);
+}
+
+.bazi-current-chart-review-workbench > header {
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--chart-review-line);
+}
+
+.bazi-current-chart-review-workbench > header h3 {
+  color: var(--chart-review-ink);
+  font-size: clamp(20px, 2vw, 26px);
+}
+
+.bazi-current-chart-review-actions {
+  gap: 9px;
+}
+
+.bazi-current-chart-review-actions button.secondary-action {
+  position: relative;
+  display: grid;
+  grid-template-columns: 29px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+  justify-content: initial;
+  min-height: 54px;
+  padding: 8px 11px;
+  border-color: var(--chart-review-line);
+  border-radius: 5px 14px 5px 5px;
+  background: rgba(255, 253, 248, 0.64);
+  color: var(--chart-review-ink);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.bazi-current-chart-review-actions button.secondary-action:hover {
+  border-color: color-mix(in srgb, var(--chart-review-accent) 38%, var(--chart-review-line));
+  background: color-mix(in srgb, var(--chart-review-accent) 7%, var(--chart-review-paper));
+}
+
+.bazi-current-chart-review-actions button.secondary-action:focus-visible {
+  outline: 2px solid var(--chart-review-accent);
+  outline-offset: 3px;
+}
+
+.bazi-current-chart-review-actions button.secondary-action::before {
+  display: inline-grid;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--chart-review-accent) 28%, var(--chart-review-line));
+  border-radius: 4px 9px 4px 4px;
+  color: var(--chart-review-accent);
+  content: "01";
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.bazi-current-chart-review-actions button:nth-child(2)::before { content: "02"; }
+.bazi-current-chart-review-actions button:nth-child(3)::before { content: "03"; }
+
+.bazi-current-chart-review-actions button > svg {
+  position: absolute;
+  top: 6px;
+  left: 31px;
+  width: 10px;
+  height: 10px;
+  color: var(--chart-review-muted);
+}
+
+.bazi-current-chart-review-summary,
+.bazi-current-chart-review-bindings {
+  overflow: hidden;
+  border: 1px solid var(--chart-review-line);
+  border-radius: 5px 15px 5px 5px;
+  background: var(--chart-review-line);
+}
+
+.bazi-current-chart-review-summary > div,
+.bazi-current-chart-review-bindings > div {
+  position: relative;
+  border-color: var(--chart-review-line);
+  background: color-mix(in srgb, var(--chart-review-paper) 93%, white);
+}
+
+.bazi-current-chart-review-summary > div:last-child::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--chart-review-accent);
+  content: "";
+}
+
+.bazi-current-chart-review-bindings {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+}
+
+.bazi-current-chart-review-bindings > div {
+  min-width: 0;
+  padding: 9px 10px;
+}
+
+.bazi-current-chart-review-bindings dt {
+  color: var(--chart-review-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.07em;
+}
+
+.bazi-current-chart-review-bindings dd {
+  margin: 4px 0 0;
+  color: var(--chart-review-accent);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 750;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.bazi-current-chart-review-digests {
+  overflow: hidden;
+  border: 1px solid var(--chart-review-line);
+  border-radius: 5px 15px 5px 5px;
+  background: rgba(35, 49, 56, 0.025);
+}
+
+.bazi-current-chart-review-digests > summary {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 46px;
+  padding: 9px 12px;
+  color: var(--chart-review-ink);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 760;
+}
+
+.bazi-current-chart-review-digests > summary small {
+  color: var(--chart-review-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+.bazi-current-chart-review-digests[open] > summary {
+  border-bottom: 1px solid var(--chart-review-line);
+  background: rgba(77, 111, 141, 0.055);
+}
+
+.bazi-current-chart-review-digests > dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  background: var(--chart-review-line);
+}
+
+.bazi-current-chart-review-digests > dl > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 10px 11px;
+  background: color-mix(in srgb, var(--chart-review-paper) 94%, white);
+}
+
+.bazi-current-chart-review-digests dt {
+  color: var(--chart-review-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+}
+
+.bazi-current-chart-review-digests dd {
+  min-width: 0;
+  margin: 0;
+}
+
+.bazi-current-chart-review-digests code {
+  display: block;
+  color: var(--chart-review-ink);
+  font-size: 0.7rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  user-select: all;
+  word-break: break-all;
+}
+
+.bazi-current-chart-review-digests > summary:focus-visible {
+  outline: 2px solid var(--chart-review-accent);
+  outline-offset: -4px;
+}
+
+.bazi-current-chart-review-empty,
+.bazi-current-chart-review-message,
+.bazi-current-chart-review-result,
+.bazi-current-chart-review-privacy {
+  border-radius: 4px 12px 4px 4px;
+  font-size: 0.8rem;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.bazi-current-chart-review-message {
+  padding: 9px 10px;
+  border: 1px solid var(--chart-review-line);
+  background: rgba(255, 253, 248, 0.54);
+}
+
+.bazi-current-chart-review-message[data-tone="success"] {
+  border-color: color-mix(in srgb, var(--chart-review-bound) 34%, var(--chart-review-line));
+  background: rgba(88, 113, 124, 0.07);
+}
+
+.bazi-current-chart-review-message[data-tone="error"] {
+  border-color: color-mix(in srgb, var(--chart-review-error) 36%, var(--chart-review-line));
+  background: rgba(163, 79, 66, 0.07);
+}
+
+.bazi-current-chart-review-privacy {
+  border-left: 3px solid var(--chart-review-pending);
+  background: rgba(160, 120, 67, 0.07);
+}
+
+.bazi-current-chart-review-boundary {
+  display: block;
+  margin-top: 10px;
+  color: var(--chart-review-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.bazi-interpretation-boundary-rail {
+  --interpretation-rail-ink: #26363d;
+  --interpretation-rail-muted: #5e6d73;
+  --interpretation-rail-accent: #4d6f8d;
+  --interpretation-rail-line: rgba(38, 54, 61, 0.16);
+  display: grid;
+  grid-template-columns: auto auto auto minmax(240px, 1fr);
+  gap: 8px 10px;
+  align-items: center;
+  margin: 14px 0 20px;
+  padding: 10px 12px;
+  border: 1px solid var(--interpretation-rail-line);
+  border-left: 3px solid var(--interpretation-rail-accent);
+  border-radius: 5px 15px 5px 5px;
+  background:
+    linear-gradient(96deg, rgba(77, 111, 141, 0.09), transparent 56%),
+    rgba(246, 246, 241, 0.72);
+}
+
+.bazi-interpretation-boundary-rail > span {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, var(--interpretation-rail-accent) 28%, var(--interpretation-rail-line));
+  border-radius: 4px 10px 4px 4px;
+  background: rgba(255, 255, 252, 0.66);
+  color: var(--interpretation-rail-accent);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.035em;
+  white-space: nowrap;
+}
+
+.bazi-interpretation-boundary-rail > p {
+  margin: 0;
+  color: var(--interpretation-rail-muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.bazi-interpretation-jump-nav {
+  --interpretation-rail-ink: #26363d;
+  --interpretation-rail-muted: #5e6d73;
+  --interpretation-rail-accent: #4d6f8d;
+  --interpretation-rail-line: rgba(38, 54, 61, 0.16);
+  position: sticky;
+  z-index: 4;
+  top: 8px;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  margin: 0 0 18px;
+  padding: 7px;
+  border: 1px solid var(--interpretation-rail-line);
+  border-radius: 6px 16px 6px 6px;
+  background: color-mix(in srgb, #f5f5ef 91%, transparent);
+  box-shadow: 0 10px 24px rgba(38, 54, 61, 0.07);
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+
+.bazi-interpretation-jump-nav > a {
+  display: inline-flex;
+  min-height: 38px;
+  flex: 0 0 auto;
+  gap: 7px;
+  align-items: center;
+  padding: 6px 9px;
+  border: 1px solid color-mix(in srgb, var(--interpretation-rail-accent) 24%, var(--interpretation-rail-line));
+  border-radius: 4px 11px 4px 4px;
+  background: rgba(255, 255, 252, 0.72);
+  color: var(--interpretation-rail-ink);
+  font-size: 0.76rem;
+  font-weight: 750;
+  scroll-snap-align: start;
+  white-space: nowrap;
+}
+
+.bazi-interpretation-jump-nav > a > span {
+  color: var(--interpretation-rail-accent);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+}
+
+.bazi-interpretation-jump-nav > a:focus-visible {
+  outline: 2px solid var(--interpretation-rail-accent);
+  outline-offset: 2px;
+}
+
+#bazi-first-read-review,
+#bazi-strength-ledger,
+#bazi-strength-sensitivity,
+#bazi-ten-god-reading,
+#bazi-shensha-gate,
+#bazi-current-chart-review,
+#bazi-content-review,
+#bazi-interpretation-evidence {
+  scroll-margin-top: 76px;
+}
+
+/* Content review reads like a cataloging desk, never a release dashboard. */
+.bazi-content-review-queue.bazi-content-review-queue {
+  --content-review-ink: #24343a;
+  --content-review-muted: #68757a;
+  --content-review-line: rgba(36, 52, 58, 0.16);
+  --content-review-paper: #f4f1e8;
+  --content-review-blue: #486f87;
+  --content-review-ochre: #a3773e;
+  --content-review-error: #a24f43;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(18px, 2.6vw, 30px);
+  border: 1px solid var(--content-review-line);
+  border-radius: 8px 30px 8px 8px;
+  background:
+    radial-gradient(circle at 96% 1%, rgba(72, 111, 135, 0.14), transparent 19rem),
+    linear-gradient(112deg, rgba(163, 119, 62, 0.055), transparent 42%),
+    repeating-linear-gradient(0deg, transparent 0 35px, rgba(36, 52, 58, 0.025) 35px 36px),
+    var(--content-review-paper);
+  box-shadow: 0 24px 56px rgba(36, 52, 58, 0.09), inset 0 1px rgba(255, 255, 255, 0.8);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1200px;
+}
+
+.bazi-content-review-queue::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0 auto auto 0;
+  width: clamp(96px, 18%, 180px);
+  height: 5px;
+  background: linear-gradient(90deg, var(--content-review-ochre), var(--content-review-blue));
+  content: "";
+}
+
+.bazi-content-review-queue::after {
+  position: absolute;
+  z-index: -1;
+  top: 18px;
+  right: 23px;
+  color: rgba(36, 52, 58, 0.055);
+  content: "13 / REVIEW";
+  font-family: var(--font-mono);
+  font-size: clamp(1rem, 2.5vw, 2.2rem);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+
+.bazi-content-review-queue > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+  padding: 4px 0 17px;
+  border-bottom: 1px solid var(--content-review-line);
+}
+
+.bazi-content-review-queue > header small,
+.bazi-content-review-feedback-workbench > header small {
+  color: var(--content-review-blue);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.bazi-content-review-queue > header h3 {
+  margin-top: 5px;
+  color: var(--content-review-ink);
+  font-size: clamp(1.35rem, 2.3vw, 1.85rem);
+  letter-spacing: -0.025em;
+}
+
+.bazi-content-review-queue > header p {
+  max-width: 70ch;
+  color: var(--content-review-muted);
+  line-height: 1.7;
+}
+
+.bazi-content-review-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  margin-top: 18px;
+  padding: 13px 14px;
+  border: 1px solid var(--content-review-line);
+  border-radius: 5px 16px 5px 5px;
+  background: rgba(255, 254, 249, 0.58);
+}
+
+.bazi-content-review-actions p {
+  margin: 0;
+  color: var(--content-review-muted);
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+.bazi-content-review-actions .secondary-action,
+.bazi-content-review-feedback-actions .secondary-action {
+  border-color: color-mix(in srgb, var(--content-review-blue) 32%, var(--content-review-line));
+  border-radius: 4px 12px 4px 4px;
+  background: color-mix(in srgb, var(--content-review-blue) 7%, white);
+  color: var(--content-review-ink);
+}
+
+.bazi-content-review-actions .secondary-action:focus-visible,
+.bazi-content-review-feedback-actions .secondary-action:focus-visible,
+.shensha-research-actions .secondary-action:focus-visible {
+  outline: 2px solid var(--content-review-blue);
+  outline-offset: 3px;
+}
+
+.bazi-content-review-feedback {
+  min-height: 1.6em;
+  margin: 9px 0 0;
+  color: var(--content-review-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.bazi-content-review-feedback[data-tone="error"],
+.bazi-content-review-feedback-status[data-tone="error"] {
+  color: var(--content-review-error);
+}
+
+.bazi-content-review-feedback-workbench {
+  position: relative;
+  overflow: hidden;
+  margin-top: 16px;
+  padding: clamp(15px, 2vw, 22px);
+  border: 1px solid var(--content-review-line);
+  border-radius: 6px 20px 6px 6px;
+  background:
+    linear-gradient(108deg, rgba(72, 111, 135, 0.075), transparent 45%),
+    rgba(255, 254, 249, 0.69);
+}
+
+.bazi-content-review-feedback-workbench::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--content-review-line);
+  content: "";
+}
+
+.bazi-content-review-feedback-workbench[data-preflight-state="valid"]::before {
+  background: var(--content-review-blue);
+}
+
+.bazi-content-review-feedback-workbench[data-preflight-state="validating"]::before {
+  background: var(--content-review-ochre);
+}
+
+.bazi-content-review-feedback-workbench[data-preflight-state="invalid"]::before {
+  background: var(--content-review-error);
+}
+
+.bazi-content-review-feedback-workbench > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+}
+
+.bazi-content-review-feedback-workbench > header h4 {
+  margin-top: 4px;
+  color: var(--content-review-ink);
+  font-size: clamp(1.05rem, 1.7vw, 1.35rem);
+}
+
+.bazi-content-review-feedback-workbench > header p,
+.bazi-content-review-feedback-status,
+.bazi-content-review-feedback-boundary {
+  color: var(--content-review-muted);
+  line-height: 1.65;
+}
+
+.bazi-content-review-feedback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 15px;
+}
+
+.bazi-content-review-feedback-actions svg {
+  width: 15px;
+  height: 15px;
+}
+
+.bazi-content-review-feedback-workbench > dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin: 14px 0 0;
+  border: 1px solid var(--content-review-line);
+  border-radius: 4px 14px 4px 4px;
+  background: var(--content-review-line);
+}
+
+.bazi-content-review-feedback-workbench > dl > div {
+  min-width: 0;
+  padding: 10px 11px;
+  background: rgba(255, 254, 249, 0.9);
+}
+
+.bazi-content-review-feedback-workbench dt {
+  color: var(--content-review-muted);
+  font-size: 0.72rem;
+}
+
+.bazi-content-review-feedback-workbench dd {
+  margin: 4px 0 0;
+  color: var(--content-review-ink);
+  font-size: 0.78rem;
+  font-weight: 720;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.bazi-content-review-feedback-boundary {
+  margin: 12px 0 0;
+  padding-left: 10px;
+  border-left: 3px solid var(--content-review-ochre);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  overflow-wrap: anywhere;
+}
+
+.bazi-content-review-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.bazi-content-review-summary > article {
+  position: relative;
+  min-width: 0;
+  padding: 14px 13px 13px;
+  border: 1px solid var(--content-review-line);
+  border-radius: 5px 15px 5px 5px;
+  background: rgba(255, 254, 249, 0.67);
+}
+
+.bazi-content-review-summary > article::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: color-mix(in srgb, var(--content-review-blue) 72%, transparent);
+  content: "";
+}
+
+.bazi-content-review-summary small,
+.bazi-content-review-summary span {
+  display: block;
+  color: var(--content-review-muted);
+  font-family: var(--font-mono);
+  font-size: 0.69rem;
+}
+
+.bazi-content-review-summary strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--content-review-ink);
+}
+
+.bazi-content-review-summary p {
+  color: var(--content-review-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.bazi-content-review-groups {
+  display: grid;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.bazi-content-review-groups > details {
+  overflow: clip;
+  border: 1px solid var(--content-review-line);
+  border-radius: 5px 16px 5px 5px;
+  background: rgba(255, 254, 249, 0.62);
+}
+
+.bazi-content-review-groups > details[open] {
+  border-color: color-mix(in srgb, var(--content-review-blue) 35%, var(--content-review-line));
+  box-shadow: 0 13px 28px rgba(36, 52, 58, 0.055);
+}
+
+.bazi-content-review-groups > details > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 13px 14px;
+  color: var(--content-review-ink);
+  cursor: pointer;
+}
+
+.bazi-content-review-groups > details > summary:focus-visible {
+  outline: 2px solid var(--content-review-blue);
+  outline-offset: -3px;
+}
+
+.bazi-content-review-groups > details > summary span:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.bazi-content-review-groups > details > summary small,
+.bazi-content-review-groups > details > summary span:last-child {
+  color: var(--content-review-muted);
+  font-size: 0.74rem;
+}
+
+.bazi-content-review-groups > details > ol {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0 13px 14px;
+  list-style: none;
+}
+
+.bazi-content-review-groups > details > ol > li {
+  padding: 13px;
+  border: 1px solid var(--content-review-line);
+  border-radius: 4px 13px 4px 4px;
+  background: color-mix(in srgb, var(--content-review-paper) 62%, white);
+}
+
+.bazi-content-review-groups > details > ol > li > header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bazi-content-review-groups > details > ol > li > header span {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.bazi-content-review-groups > details > ol > li > header em {
+  color: var(--content-review-ochre);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.bazi-content-review-question {
+  display: grid;
+  gap: 4px;
+  padding: 9px 10px;
+  border-left: 3px solid var(--content-review-blue);
+  background: rgba(72, 111, 135, 0.065);
+}
+
+.bazi-content-review-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bazi-content-review-sources > a,
+.bazi-content-review-sources > span {
+  padding: 4px 7px;
+  border: 1px solid var(--content-review-line);
+  border-radius: 3px 9px 3px 3px;
+  background: rgba(255, 255, 255, 0.62);
+  font-size: 0.7rem;
+  overflow-wrap: anywhere;
+}
+
+.bazi-content-review-boundaries {
+  display: grid;
+  gap: 5px;
+  margin: 15px 0 0;
+  padding: 12px 14px 12px 30px;
+  border: 1px dashed color-mix(in srgb, var(--content-review-ochre) 45%, var(--content-review-line));
+  border-radius: 4px 13px 4px 4px;
+  background: rgba(163, 119, 62, 0.055);
+  color: var(--content-review-muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+/* The Shensha layer is visually sealed until the user explicitly opens it. */
+.shensha-research-gate.shensha-research-gate {
+  --shensha-ink: #28383d;
+  --shensha-muted: #68767a;
+  --shensha-line: rgba(40, 56, 61, 0.17);
+  --shensha-accent: #8a683c;
+  position: relative;
+  overflow: hidden;
+  padding: clamp(17px, 2.4vw, 27px);
+  border: 1px solid var(--shensha-line);
+  border-radius: 26px 7px 7px 7px;
+  background:
+    linear-gradient(125deg, rgba(138, 104, 60, 0.1), transparent 33%),
+    repeating-linear-gradient(90deg, transparent 0 47px, rgba(40, 56, 61, 0.02) 47px 48px),
+    #f2efe6;
+  box-shadow: 0 20px 45px rgba(40, 56, 61, 0.075);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 760px;
+}
+
+.shensha-research-gate::before {
+  position: absolute;
+  inset: 0 0 auto auto;
+  width: 72px;
+  height: 5px;
+  background: var(--shensha-accent);
+  content: "";
+}
+
+.shensha-research-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+}
+
+.shensha-research-intro h3 {
+  color: var(--shensha-ink);
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+}
+
+.shensha-research-intro p:not(.eyebrow) {
+  max-width: 78ch;
+  color: var(--shensha-muted);
+  line-height: 1.72;
+}
+
+.shensha-research-actions {
+  display: grid;
+  gap: 9px;
+  justify-items: end;
+}
+
+.shensha-research-actions .secondary-action {
+  border-color: color-mix(in srgb, var(--shensha-accent) 38%, var(--shensha-line));
+  border-radius: 4px 12px 4px 4px;
+  background: rgba(255, 253, 246, 0.68);
+  color: var(--shensha-ink);
+}
+
+.shensha-research-result {
+  margin-top: 17px;
+  padding-top: 16px;
+  border-top: 1px solid var(--shensha-line);
+}
+
+.shensha-research-summary {
+  overflow: hidden;
+  border: 1px solid var(--shensha-line);
+  border-radius: 5px 15px 5px 5px;
+  background: var(--shensha-line);
+}
+
+.shensha-research-summary > div {
+  background: rgba(255, 253, 247, 0.87);
+}
+
+.shensha-research-summary dt {
+  color: var(--shensha-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.shensha-research-summary dd {
+  color: var(--shensha-ink);
+  font-weight: 780;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bazi-current-chart-review-workbench,
+  .bazi-content-review-queue,
+  .shensha-research-gate {
+    animation: bazi-evidence-workbench-enter 420ms cubic-bezier(0.2, 0.72, 0.22, 1) both;
+  }
+
+  .bazi-content-review-groups > details,
+  .bazi-content-review-summary > article {
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  }
+
+  .bazi-content-review-summary > article:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes bazi-evidence-workbench-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .bazi-current-chart-review-bindings {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bazi-current-chart-review-bindings > div:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .bazi-content-review-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bazi-content-review-feedback-workbench > dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .bazi-current-chart-review-workbench.bazi-current-chart-review-workbench {
+    padding: 15px 12px;
+    border-radius: 6px 17px 6px 6px;
+  }
+
+  .bazi-current-chart-review-bindings {
+    grid-template-columns: 1fr;
+  }
+
+  .bazi-current-chart-review-digests > dl {
+    grid-template-columns: 1fr;
+  }
+
+  .bazi-current-chart-review-digests > summary {
+    display: grid;
+    gap: 4px;
+  }
+
+  .bazi-current-chart-review-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bazi-current-chart-review-actions button.secondary-action {
+    width: 100%;
+  }
+
+  .bazi-interpretation-boundary-rail {
+    grid-template-columns: 1fr;
+    padding: 10px;
+  }
+
+  .bazi-interpretation-boundary-rail > span {
+    min-width: 0;
+    justify-content: flex-start;
+    white-space: normal;
+    text-align: left;
+  }
+
+  .bazi-interpretation-boundary-rail > p {
+    grid-column: auto;
+    font-size: 0.84rem;
+  }
+
+  .bazi-interpretation-jump-nav {
+    margin-right: -4px;
+    margin-left: -4px;
+  }
+
+  .bazi-content-review-queue.bazi-content-review-queue,
+  .shensha-research-gate.shensha-research-gate {
+    padding: 15px 12px;
+    border-radius: 6px 18px 6px 6px;
+  }
+
+  .bazi-content-review-queue > header,
+  .bazi-content-review-actions,
+  .bazi-content-review-feedback-workbench > header,
+  .shensha-research-intro {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bazi-content-review-queue > header > :last-child,
+  .bazi-content-review-feedback-workbench > header > :last-child {
+    justify-self: start;
+  }
+
+  .bazi-content-review-actions .secondary-action,
+  .bazi-content-review-feedback-actions .secondary-action,
+  .shensha-research-actions .secondary-action {
+    width: 100%;
+  }
+
+  .bazi-content-review-feedback-actions,
+  .shensha-research-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: stretch;
+  }
+
+  .bazi-content-review-summary,
+  .bazi-content-review-feedback-workbench > dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bazi-content-review-groups > details > summary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .bazi-content-review-groups > details > ol > li > header {
+    align-items: flex-start;
+  }
+}
+
+@media (forced-colors: active) {
+  .bazi-current-chart-review-workbench.bazi-current-chart-review-workbench,
+  .bazi-current-chart-review-actions button.secondary-action,
+  .bazi-current-chart-review-summary,
+  .bazi-current-chart-review-summary > div,
+  .bazi-current-chart-review-bindings,
+  .bazi-current-chart-review-bindings > div,
+  .bazi-current-chart-review-empty,
+  .bazi-current-chart-review-message,
+  .bazi-current-chart-review-result,
+  .bazi-current-chart-review-privacy {
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+    color: CanvasText;
+  }
+
+  .bazi-current-chart-review-digests,
+  .bazi-current-chart-review-digests > dl > div,
+  .bazi-interpretation-jump-nav,
+  .bazi-interpretation-jump-nav > a {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+
+  .bazi-interpretation-boundary-rail,
+  .bazi-interpretation-boundary-rail > span {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .bazi-current-chart-review-workbench::before,
+  .bazi-current-chart-review-summary > div:last-child::after {
+    background: Highlight;
+  }
+
+  .bazi-current-chart-review-privacy {
+    border-left-color: CanvasText;
+  }
+
+  .bazi-current-chart-review-actions button.secondary-action:focus-visible {
+    outline-color: Highlight;
+  }
+
+  .bazi-current-chart-review-digests > summary:focus-visible,
+  .bazi-interpretation-jump-nav > a:focus-visible {
+    outline-color: Highlight;
+  }
+
+  .bazi-content-review-queue.bazi-content-review-queue,
+  .bazi-content-review-actions,
+  .bazi-content-review-feedback-workbench,
+  .bazi-content-review-feedback-workbench > dl,
+  .bazi-content-review-feedback-workbench > dl > div,
+  .bazi-content-review-summary > article,
+  .bazi-content-review-groups > details,
+  .bazi-content-review-groups > details > ol > li,
+  .bazi-content-review-boundaries,
+  .shensha-research-gate.shensha-research-gate,
+  .shensha-research-summary,
+  .shensha-research-summary > div {
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+    color: CanvasText;
+  }
+
+  .bazi-content-review-queue::before,
+  .bazi-content-review-feedback-workbench::before,
+  .shensha-research-gate::before {
+    background: Highlight;
+  }
+
+  .bazi-content-review-queue::after {
+    color: GrayText;
+  }
+}

@@ -1,247 +1,152 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PairStructureResearchProjection } from "@hakimi/contracts";
-import type {
-  FileSaveResult,
-  FileShareResult,
-  FileTransferCapabilities,
-  ReportExportPort
-} from "@hakimi/platform";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 import { PairStructureReportExport } from "./pair-structure-report-export";
 
-const mocks = vi.hoisted(() => ({
-  exportAnonymous: vi.fn(),
-  exportFull: vi.fn()
-}));
+afterEach(cleanup);
 
-vi.mock("@hakimi/research-export", () => ({
-  exportPairStructureAnonymousMarkdown: mocks.exportAnonymous,
-  exportPairStructureFullAuditJson: mocks.exportFull
-}));
+function makeProjection(aliasA = "甲方冻结样本"): PairStructureResearchProjection {
+  const caseA = "11111111-1111-4111-8111-111111111111";
+  const caseB = "22222222-2222-4222-8222-222222222222";
+  const participants = [
+    {
+      role: "A",
+      item: {
+        key: `A-${caseA}`,
+        slotId: "A",
+        caseId: caseA,
+        caseAlias: aliasA,
+        revision: {
+          id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+          caseId: caseA,
+          revisionNumber: 1,
+          manifest: { resultHash: "a".repeat(64) }
+        },
+        revisionSnapshotDigest: "c".repeat(64),
+        manualDirection: null
+      },
+      observationCount: 1,
+      observations: [
+        { id: "day_pillar", category: "pillars", label: "日柱", value: "甲子" }
+      ],
+      transit: {
+        itemKey: `A-${caseA}`,
+        status: "error",
+        reasonCode: "TRANSIT_NOT_AVAILABLE",
+        message: "测试夹具不展开运限。"
+      }
+    },
+    {
+      role: "B",
+      item: {
+        key: `B-${caseB}`,
+        slotId: "B",
+        caseId: caseB,
+        caseAlias: "乙方冻结样本",
+        revision: {
+          id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2",
+          caseId: caseB,
+          revisionNumber: 1,
+          manifest: { resultHash: "b".repeat(64) }
+        },
+        revisionSnapshotDigest: "d".repeat(64),
+        manualDirection: null
+      },
+      observationCount: 1,
+      observations: [
+        { id: "day_pillar", category: "pillars", label: "日柱", value: "乙丑" }
+      ],
+      transit: {
+        itemKey: `B-${caseB}`,
+        status: "error",
+        reasonCode: "TRANSIT_NOT_AVAILABLE",
+        message: "测试夹具不展开运限。"
+      }
+    }
+  ];
 
-const projection = {
-  manifest: { resultHash: "a".repeat(64) }
-} as PairStructureResearchProjection;
-
-const alternateProjection = {
-  manifest: { resultHash: "b".repeat(64) }
-} as PairStructureResearchProjection;
-
-let saveFile: ReturnType<typeof vi.fn<(blob: Blob, filename: string) => Promise<FileSaveResult>>>;
-let saveFileToChosenLocation: ReturnType<typeof vi.fn<(blob: Blob, filename: string) => Promise<FileSaveResult>>>;
-let shareFile: ReturnType<typeof vi.fn<(blob: Blob, filename: string, title?: string) => Promise<FileShareResult>>>;
-let getCapabilities: ReturnType<typeof vi.fn<() => FileTransferCapabilities>>;
-let exportPort: ReportExportPort;
-
-beforeEach(() => {
-  saveFile = vi.fn<(blob: Blob, filename: string) => Promise<FileSaveResult>>().mockImplementation(async (_blob, filename) => ({
-    status: "download_requested",
-    filename,
-    method: "browser_download"
-  }));
-  saveFileToChosenLocation = vi.fn<(blob: Blob, filename: string) => Promise<FileSaveResult>>().mockImplementation(async (blob, filename) => ({
-    status: "saved",
-    filename,
-    method: "file_system_access",
-    bytesWritten: blob.size
-  }));
-  shareFile = vi.fn<(blob: Blob, filename: string, title?: string) => Promise<FileShareResult>>().mockImplementation(async (_blob, filename) => ({
-    status: "shared",
-    filename,
-    method: "web_share"
-  }));
-  getCapabilities = vi.fn<() => FileTransferCapabilities>().mockReturnValue({
-    canDownloadFiles: true,
-    canChooseSaveLocation: true,
-    canShareFiles: true
-  });
-  exportPort = {
-    getCapabilities,
-    saveFile,
-    saveFileToChosenLocation,
-    shareFile,
-    printReport: vi.fn()
-  };
-  mocks.exportAnonymous.mockReset().mockResolvedValue({
-    content: "# 匿名双案例\n",
-    mimeType: "text/markdown;charset=utf-8",
-    suggestedFileName: "pair-anonymous.md"
-  });
-  mocks.exportFull.mockReset().mockResolvedValue({
-    content: "{\"kind\":\"pair\"}\n",
-    mimeType: "application/json;charset=utf-8",
-    suggestedFileName: "pair-full.json"
-  });
-});
+  return {
+    schemaVersion: "1.0.0",
+    kind: "pair_structure_research_projection",
+    policy: {
+      mode: "parallel_facts_only",
+      interpretationIncluded: false,
+      scoreIncluded: false,
+      crossChartDerivationIncluded: false,
+      relationshipConclusionIncluded: false
+    },
+    targetInstant: "2024-02-04T08:27:07.000Z",
+    participants,
+    manifest: {
+      algorithmId: "hakimi-comparison-core:pair-structure-research:v1",
+      hashSchemaVersion: "1.0.0",
+      semanticBoundary: "participant_facts_only",
+      evidenceStatus: "engineering_projection",
+      interpretationIncluded: false,
+      scoreIncluded: false,
+      compatibilityIncluded: false,
+      crossChartDerivationIncluded: false,
+      resultHash: "e".repeat(64)
+    }
+  } as unknown as PairStructureResearchProjection;
+}
 
 describe("PairStructureReportExport", () => {
-  it("默认匿名可直接导出，完整审计必须先逐次确认", async () => {
-    render(<PairStructureReportExport projection={projection} exportPort={exportPort} />);
+  it("只为合法的 facts-only 双案例绑定展示冻结后交付入口", () => {
+    const { container } = render(<PairStructureReportExport projection={makeProjection()} />);
 
-    const anonymousButton = screen.getByRole("button", { name: "导出匿名双案例 Markdown" });
-    const fullButton = screen.getByRole("button", { name: "导出完整审计 JSON" });
-    const confirmation = screen.getByRole("checkbox", { name: /我确认这是包含两位对象可识别资料/ });
-    expect((anonymousButton as HTMLButtonElement).disabled).toBe(false);
-    expect((fullButton as HTMLButtonElement).disabled).toBe(true);
-    expect(screen.getByText(/76 项系统事实和各自六层活动节点/)).toBeTruthy();
+    const participantA = container.querySelector('[data-identity="participant-a"]');
+    const participantB = container.querySelector('[data-identity="participant-b"]');
+    expect(participantA?.querySelector("dt")?.textContent).toBe("对象甲");
+    expect(participantA?.querySelector("dd")?.textContent).toContain("甲方冻结样本 · R1");
+    expect(participantB?.querySelector("dt")?.textContent).toBe("对象乙");
+    expect(participantB?.querySelector("dd")?.textContent).toContain("乙方冻结样本 · R1");
+    expect(screen.getByRole("button", { name: /准备去标识双案例 Markdown/ })).toBeTruthy();
 
-    fireEvent.click(anonymousButton);
-    expect(await screen.findByRole("dialog", { name: "文件已在本机生成" })).toBeTruthy();
-    expect(saveFile).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "下载文件" }));
-    await waitFor(() => expect(saveFile).toHaveBeenCalledTimes(1));
-    expect(mocks.exportAnonymous).toHaveBeenCalledWith(projection);
-    expect(saveFile.mock.calls[0][1]).toBe("pair-anonymous.md");
-    expect(await (saveFile.mock.calls[0][0] as Blob).text()).toBe("# 匿名双案例\n");
-    fireEvent.click(screen.getByRole("button", { name: "关闭" }));
-    await waitFor(() => expect(screen.queryByRole("dialog", { name: "文件已在本机生成" })).toBeNull());
+    const fullAuditAction = screen.getByRole("button", {
+      name: /准备完整审计 JSON/,
+      hidden: true
+    }) as HTMLButtonElement;
+    expect(fullAuditAction.disabled).toBe(true);
+  });
+
+  it("案例别名变化会撤销完整审计确认，即使 manifest hash 没有变化", () => {
+    const { rerender } = render(<PairStructureReportExport projection={makeProjection()} />);
+    const confirmation = screen.getByRole("checkbox", { hidden: true }) as HTMLInputElement;
 
     fireEvent.click(confirmation);
-    expect((fullButton as HTMLButtonElement).disabled).toBe(false);
-    fireEvent.click(fullButton);
-    await waitFor(() => expect(saveFile).toHaveBeenCalledTimes(2));
-    expect(mocks.exportFull).toHaveBeenCalledWith(
-      projection,
-      { acknowledgedSensitiveData: true }
-    );
-    expect(saveFile.mock.calls[1][1]).toBe("pair-full.json");
-    expect((confirmation as HTMLInputElement).checked).toBe(false);
-    expect((fullButton as HTMLButtonElement).disabled).toBe(true);
-    expect(screen.getByRole("status").textContent).toContain("再次导出前需要重新确认");
-  });
-
-  it("匿名文件的下载、指定位置保存和分享复用同一个已冻结 Blob", async () => {
-    render(<PairStructureReportExport projection={projection} exportPort={exportPort} />);
-
-    fireEvent.click(screen.getByRole("button", { name: "导出匿名双案例 Markdown" }));
-    await screen.findByRole("dialog", { name: "文件已在本机生成" });
-
-    fireEvent.click(screen.getByRole("button", { name: "系统分享" }));
-    await waitFor(() => expect(shareFile).toHaveBeenCalledTimes(1));
-    fireEvent.click(screen.getByRole("button", { name: "保存到指定位置" }));
-    await waitFor(() => expect(saveFileToChosenLocation).toHaveBeenCalledTimes(1));
-    fireEvent.click(screen.getByRole("button", { name: "下载文件" }));
-    await waitFor(() => expect(saveFile).toHaveBeenCalledTimes(1));
-
-    const frozenBlob = shareFile.mock.calls[0][0];
-    expect(saveFileToChosenLocation.mock.calls[0][0]).toBe(frozenBlob);
-    expect(saveFile.mock.calls[0][0]).toBe(frozenBlob);
-    expect(await frozenBlob.text()).toBe("# 匿名双案例\n");
-    expect(shareFile.mock.calls[0].slice(1)).toEqual([
-      "pair-anonymous.md",
-      "匿名双案例 Markdown"
-    ]);
-  });
-
-  it("取消匿名文件分享时保留弹层以便重试，且不静默改为下载或保存", async () => {
-    shareFile
-      .mockResolvedValueOnce({
-        status: "cancelled",
-        filename: "pair-anonymous.md",
-        operation: "share"
-      })
-      .mockResolvedValueOnce({
-        status: "shared",
-        filename: "pair-anonymous.md",
-        method: "web_share"
-      });
-    render(<PairStructureReportExport projection={projection} exportPort={exportPort} />);
-
-    fireEvent.click(screen.getByRole("button", { name: "导出匿名双案例 Markdown" }));
-    await screen.findByRole("dialog", { name: "文件已在本机生成" });
-    fireEvent.click(screen.getByRole("button", { name: "系统分享" }));
-
-    expect((await screen.findByRole("status")).textContent).toContain("已取消匿名双案例 Markdown分享操作");
-    expect(screen.queryByRole("alert")).toBeNull();
-    expect(saveFile).not.toHaveBeenCalled();
-    expect(saveFileToChosenLocation).not.toHaveBeenCalled();
-
-    fireEvent.click(screen.getByRole("button", { name: "系统分享" }));
-    await waitFor(() => expect(shareFile).toHaveBeenCalledTimes(2));
-    await waitFor(() => expect(screen.getByRole("status").textContent).toContain("已交给系统分享面板"));
-  });
-
-  it("分享失败时明确显示错误且不静默回退为浏览器下载", async () => {
-    shareFile.mockResolvedValueOnce({
-      status: "failed",
-      filename: "pair-anonymous.md",
-      operation: "share",
-      stage: "share",
-      reason: "系统分享服务拒绝了这份文件。"
-    });
-    render(<PairStructureReportExport projection={projection} exportPort={exportPort} />);
-
-    fireEvent.click(screen.getByRole("button", { name: "导出匿名双案例 Markdown" }));
-    await screen.findByRole("dialog", { name: "文件已在本机生成" });
-    fireEvent.click(screen.getByRole("button", { name: "系统分享" }));
-
-    expect((await screen.findByRole("alert")).textContent).toContain("系统分享服务拒绝了这份文件");
-    expect(shareFile).toHaveBeenCalledTimes(1);
-    expect(saveFile).not.toHaveBeenCalled();
-    expect(saveFileToChosenLocation).not.toHaveBeenCalled();
-  });
-
-  it("验签失败时显示 alert 且不触发下载", async () => {
-    mocks.exportAnonymous.mockRejectedValueOnce(new Error("双案例结构研究投影摘要或内层事实不一致。"));
-    render(<PairStructureReportExport projection={projection} exportPort={exportPort} />);
-
-    fireEvent.click(screen.getByRole("button", { name: "导出匿名双案例 Markdown" }));
-
-    expect((await screen.findByRole("alert")).textContent).toContain("投影摘要或内层事实不一致");
-    expect(saveFile).not.toHaveBeenCalled();
-  });
-
-  it("取消敏感文件保存时不显示成功且保留本次确认以便重试", async () => {
-    saveFile.mockResolvedValueOnce({
-      status: "cancelled",
-      filename: "pair-full.json",
-      operation: "save"
-    });
-    render(<PairStructureReportExport projection={projection} exportPort={exportPort} />);
-    const confirmation = screen.getByRole<HTMLInputElement>("checkbox", { name: /我确认这是包含两位对象可识别资料/ });
-    fireEvent.click(confirmation);
-
-    fireEvent.click(screen.getByRole("button", { name: "导出完整审计 JSON" }));
-
-    expect((await screen.findByRole("status")).textContent).toContain("已取消完整审计文件导出操作");
-    expect(screen.queryByRole("alert")).toBeNull();
     expect(confirmation.checked).toBe(true);
-    expect(screen.getByRole("button", { name: "导出完整审计 JSON" })).toHaveProperty("disabled", false);
+
+    rerender(<PairStructureReportExport projection={makeProjection("甲方冻结样本（已重命名）")} />);
+
+    expect((screen.getByRole("checkbox", { hidden: true }) as HTMLInputElement).checked).toBe(false);
   });
 
-  it("校验期间禁用所有导出动作并给出文字进度", async () => {
-    let resolveOutput!: (value: unknown) => void;
-    mocks.exportAnonymous.mockReturnValueOnce(new Promise((resolve) => { resolveOutput = resolve; }));
-    render(<PairStructureReportExport projection={projection} exportPort={exportPort} />);
+  it("参与方重复 Case 时 fail-close，不暴露任何报告准备动作", () => {
+    const projection = makeProjection();
+    const duplicateCaseId = projection.participants[0].item.caseId;
+    const invalidProjection = {
+      ...projection,
+      participants: [
+        projection.participants[0],
+        {
+          ...projection.participants[1],
+          item: {
+            ...projection.participants[1].item,
+            caseId: duplicateCaseId,
+            revision: {
+              ...projection.participants[1].item.revision,
+              caseId: duplicateCaseId
+            }
+          }
+        }
+      ]
+    } as PairStructureResearchProjection;
 
-    fireEvent.click(screen.getByRole("button", { name: "导出匿名双案例 Markdown" }));
-    expect((await screen.findByRole("button", { name: "正在校验匿名报告" }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole("button", { name: "导出完整审计 JSON" }) as HTMLButtonElement).disabled).toBe(true);
+    const { container } = render(<PairStructureReportExport projection={invalidProjection} />);
 
-    resolveOutput({
-      content: "done",
-      mimeType: "text/markdown;charset=utf-8",
-      suggestedFileName: "done.md"
-    });
-    expect(await screen.findByRole("dialog", { name: "文件已在本机生成" })).toBeTruthy();
-    expect(saveFile).not.toHaveBeenCalled();
-  });
-
-  it("投影摘要变化后通过组件 key 清空敏感确认", () => {
-    const { rerender } = render(
-      <PairStructureReportExport key={projection.manifest.resultHash} projection={projection} exportPort={exportPort} />
-    );
-    const confirmation = screen.getByRole("checkbox", { name: /我确认这是包含两位对象可识别资料/ });
-    fireEvent.click(confirmation);
-    expect((confirmation as HTMLInputElement).checked).toBe(true);
-
-    rerender(
-      <PairStructureReportExport
-        key={alternateProjection.manifest.resultHash}
-        projection={alternateProjection}
-        exportPort={exportPort}
-      />
-    );
-    expect((screen.getByRole("checkbox", { name: /我确认这是包含两位对象可识别资料/ }) as HTMLInputElement).checked).toBe(false);
+    expect(container.querySelector(".pair-export-binding-error")).not.toBeNull();
+    expect(screen.queryByRole("button", { name: /准备去标识双案例 Markdown/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /准备完整审计 JSON/, hidden: true })).toBeNull();
   });
 });

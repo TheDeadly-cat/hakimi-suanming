@@ -5,6 +5,7 @@
   "type": "module",
   "exports": "./src/index.ts",
   "dependencies": {
-    "@hakimi/tzdb-core": "*"
+    "@hakimi/tzdb-core": "*",
+    "zod": "4.4.3"
   }
 }

@@ -1,0 +1,666 @@
+/* Exact A/B export surface with separate anonymous and sensitive paths. */
+
+.pair-research-export {
+  --pair-export-ink: #223036;
+  --pair-export-muted: #58676c;
+  --pair-export-line: rgba(34, 48, 54, 0.16);
+  --pair-export-paper: #f1f2ec;
+  --pair-export-jade: #47776b;
+  --pair-export-blue: #4a6c89;
+  --pair-export-ochre: #875f31;
+  --pair-export-red: #a34f42;
+  --pair-export-slate: #657177;
+  position: relative;
+  overflow: hidden;
+  padding: clamp(18px, 2.5vw, 28px);
+  border: 1px solid var(--pair-export-line);
+  border-radius: 7px 24px 7px 7px;
+  background:
+    linear-gradient(90deg, rgba(74, 108, 137, 0.055) 0 49.8%, transparent 49.8% 50.2%, rgba(101, 113, 119, 0.055) 50.2% 100%),
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(34, 48, 54, 0.024) 31px 32px),
+    var(--pair-export-paper);
+  box-shadow:
+    0 20px 46px rgba(34, 48, 54, 0.075),
+    inset 0 1px rgba(255, 255, 255, 0.76);
+}
+
+.pair-research-export::before,
+.pair-research-export::after {
+  position: absolute;
+  top: 0;
+  width: 42px;
+  height: 4px;
+  content: "";
+}
+
+.pair-research-export::before {
+  right: calc(clamp(18px, 3vw, 38px) + 44px);
+  background: var(--pair-export-blue);
+}
+
+.pair-research-export::after {
+  right: clamp(18px, 3vw, 38px);
+  background: var(--pair-export-slate);
+}
+
+.pair-research-export > .section-heading-row {
+  align-items: flex-start;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--pair-export-line);
+}
+
+.pair-research-export > .section-heading-row h2 {
+  margin: 0;
+  color: var(--pair-export-ink);
+  font-family: var(--font-editorial);
+  font-size: clamp(22px, 2.2vw, 29px);
+  letter-spacing: 0.03em;
+}
+
+.pair-research-export :is(button, input, summary):focus-visible {
+  outline: 3px solid var(--pair-export-blue);
+  outline-offset: 3px;
+}
+
+.pair-research-export > .export-scope-note {
+  margin: 15px 0;
+  padding: 11px 13px;
+  border: 1px solid var(--pair-export-line);
+  border-left: 3px solid var(--pair-export-blue);
+  border-radius: 4px 14px 4px 4px;
+  background: rgba(74, 108, 137, 0.06);
+  color: var(--pair-export-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.pair-research-export > .export-scope-note strong {
+  color: var(--pair-export-blue);
+  font-weight: 800;
+}
+
+.pair-export-binding-error {
+  display: grid;
+  gap: 7px;
+  margin-top: 15px;
+  padding: 15px 17px;
+  border: 1px solid color-mix(in srgb, var(--pair-export-red) 38%, var(--pair-export-line));
+  border-left: 4px solid var(--pair-export-red);
+  border-radius: 4px 14px 4px 4px;
+  background: rgba(163, 79, 66, 0.065);
+}
+
+.pair-export-binding-error strong {
+  color: var(--pair-export-red);
+  font-family: var(--font-editorial);
+  font-size: 15px;
+}
+
+.pair-export-binding-error p {
+  margin: 0;
+  color: var(--pair-export-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.pair-export-identity {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin: 0 0 15px;
+  border: 1px solid var(--pair-export-line);
+  border-radius: 5px 16px 5px 5px;
+  background: var(--pair-export-line);
+}
+
+.pair-export-identity > div {
+  --identity-accent: var(--pair-export-blue);
+  position: relative;
+  min-width: 0;
+  padding: 12px 13px 12px 16px;
+  background: color-mix(in srgb, var(--pair-export-paper) 93%, white);
+}
+
+.pair-export-identity > div[data-identity="participant-b"] { --identity-accent: var(--pair-export-slate); }
+.pair-export-identity > div[data-identity="target"] { --identity-accent: var(--pair-export-ochre); }
+.pair-export-identity > div[data-identity="hash"] { --identity-accent: var(--pair-export-slate); }
+
+.pair-export-identity > div::before {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 7px;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--identity-accent);
+  content: "";
+}
+
+.pair-export-identity dt {
+  color: var(--pair-export-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.pair-export-identity dd {
+  overflow: visible;
+  margin: 5px 0 4px;
+  color: var(--pair-export-ink);
+  font-family: var(--font-editorial);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+  unicode-bidi: plaintext;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.pair-export-identity code {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  unicode-bidi: plaintext;
+  overflow-wrap: anywhere;
+}
+
+.pair-export-identity small {
+  display: block;
+  color: var(--pair-export-muted);
+  font-size: 12px;
+  line-height: 1.45;
+  unicode-bidi: plaintext;
+  overflow-wrap: anywhere;
+}
+
+.pair-export-delivery-boundary {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin: 0 0 15px;
+  padding: 12px 13px;
+  border: 1px solid color-mix(in srgb, var(--pair-export-ochre) 35%, var(--pair-export-line));
+  border-left: 4px solid var(--pair-export-ochre);
+  border-radius: 5px 15px 5px 5px;
+  background:
+    linear-gradient(105deg, rgba(160, 120, 67, 0.09), rgba(255, 253, 248, 0.54));
+}
+
+.pair-export-delivery-boundary > svg {
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  border: 1px solid rgba(160, 120, 67, 0.28);
+  border-radius: 5px 12px 5px 5px;
+  background: rgba(160, 120, 67, 0.08);
+  color: var(--pair-export-ochre);
+}
+
+.pair-export-delivery-boundary strong,
+.pair-export-delivery-boundary p {
+  display: block;
+}
+
+.pair-export-delivery-boundary strong {
+  color: var(--pair-export-ink);
+  font-family: var(--font-editorial);
+  font-size: 14px;
+}
+
+.pair-export-delivery-boundary p {
+  margin: 4px 0 0;
+  color: var(--pair-export-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.pair-export-delivery-boundary > span {
+  justify-self: end;
+  padding: 5px 8px;
+  border: 1px solid color-mix(in srgb, var(--pair-export-red) 34%, var(--pair-export-line));
+  border-radius: 999px;
+  background: rgba(163, 79, 66, 0.065);
+  color: var(--pair-export-red);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  max-width: 19rem;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.pair-export-process {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin: 0 0 15px;
+  padding: 0;
+  border: 1px solid var(--pair-export-line);
+  border-radius: 5px 16px 5px 5px;
+  background: var(--pair-export-line);
+  list-style: none;
+}
+
+.pair-export-process > li {
+  --process-accent: var(--pair-export-slate);
+  position: relative;
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  padding: 11px 11px 11px 16px;
+  background: color-mix(in srgb, var(--pair-export-paper) 94%, white);
+}
+
+.pair-export-process > li::before {
+  position: absolute;
+  top: 11px;
+  bottom: 11px;
+  left: 7px;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--process-accent);
+  content: "";
+}
+
+.pair-export-process > li[data-state="complete"],
+.pair-export-process > li[data-state="available"] {
+  --process-accent: var(--pair-export-blue);
+}
+
+.pair-export-process > li[data-state="working"] {
+  --process-accent: var(--pair-export-ochre);
+  background: color-mix(in srgb, var(--pair-export-ochre) 7%, var(--pair-export-paper));
+}
+
+.pair-export-process > li[data-state="error"] {
+  --process-accent: var(--pair-export-red);
+  background: color-mix(in srgb, var(--pair-export-red) 6%, var(--pair-export-paper));
+}
+
+.pair-export-process span {
+  color: var(--process-accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.pair-export-process strong {
+  color: var(--pair-export-ink);
+  font-family: var(--font-editorial);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.pair-export-process small {
+  color: var(--pair-export-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.pair-export-anonymous,
+.pair-export-sensitive {
+  overflow: hidden;
+  border: 1px solid var(--pair-export-line);
+  border-radius: 6px 18px 6px 6px;
+  background: rgba(255, 253, 248, 0.62);
+  box-shadow: 0 12px 28px rgba(34, 48, 54, 0.055);
+}
+
+.pair-export-anonymous {
+  position: relative;
+  padding: clamp(15px, 2vw, 21px);
+  border-left: 4px solid var(--pair-export-blue);
+}
+
+.pair-export-anonymous::after {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  color: var(--pair-export-blue);
+  content: "DE-IDENTIFIED / RE-ID RISK";
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.pair-export-card-heading {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding-right: 100px;
+}
+
+.pair-export-card-heading > svg {
+  width: 38px;
+  height: 38px;
+  padding: 9px;
+  border: 1px solid color-mix(in srgb, var(--pair-export-blue) 28%, var(--pair-export-line));
+  border-radius: 5px 13px 5px 5px;
+  background: color-mix(in srgb, var(--pair-export-blue) 8%, transparent);
+  color: var(--pair-export-blue);
+}
+
+.pair-export-card-heading h3 {
+  margin: 0 0 5px;
+  color: var(--pair-export-ink);
+  font-family: var(--font-editorial);
+  font-size: 18px;
+}
+
+.pair-export-card-heading p {
+  margin: 0;
+  color: var(--pair-export-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.pair-export-anonymous .privacy-warning {
+  margin: 14px 0 0;
+  padding: 9px 11px;
+  border-left: 3px solid var(--pair-export-ochre);
+  background: rgba(160, 120, 67, 0.065);
+  color: var(--pair-export-ochre);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.pair-export-scope-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 13px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pair-export-scope-list > li {
+  position: relative;
+  min-width: 0;
+  padding: 10px 11px 10px 27px;
+  border: 1px solid var(--pair-export-line);
+  border-radius: 4px 12px 4px 4px;
+  background: color-mix(in srgb, var(--pair-export-paper) 92%, white);
+  color: var(--pair-export-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.pair-export-scope-list > li::before {
+  position: absolute;
+  top: 14px;
+  left: 11px;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--pair-export-blue);
+  content: "";
+  transform: rotate(45deg);
+}
+
+.pair-export-scope-list > li:first-child::before {
+  background: var(--pair-export-ochre);
+}
+
+.pair-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.pair-export-actions :is(.primary-action, .secondary-action) {
+  min-width: min(100%, 260px);
+  border-radius: 5px 14px 5px 5px;
+}
+
+.pair-export-anonymous .pair-export-actions .primary-action {
+  box-shadow: 0 9px 20px rgba(74, 108, 137, 0.14);
+}
+
+.pair-export-sensitive {
+  margin-top: 12px;
+  border-left: 4px solid var(--pair-export-ochre);
+}
+
+.pair-export-sensitive > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  min-height: 58px;
+  padding: 12px 15px;
+  background: rgba(160, 120, 67, 0.055);
+  cursor: pointer;
+}
+
+.pair-export-sensitive > summary:focus-visible {
+  outline: 3px solid var(--pair-export-ochre);
+  outline-offset: 3px;
+}
+
+.pair-export-confirmation input:focus-visible,
+.pair-export-sensitive .pair-export-actions .secondary-action:not(:disabled):focus-visible {
+  outline: 3px solid var(--pair-export-red);
+  outline-offset: 3px;
+}
+
+.pair-export-sensitive > summary > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--pair-export-ink);
+  font-family: var(--font-editorial);
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.pair-export-sensitive > summary svg {
+  width: 18px;
+  height: 18px;
+  color: var(--pair-export-ochre);
+}
+
+.pair-export-sensitive[open] > summary {
+  border-bottom: 1px solid var(--pair-export-line);
+}
+
+.pair-export-sensitive-body {
+  padding: 15px;
+}
+
+.pair-export-sensitive-body > p:first-child {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--pair-export-red);
+  background: rgba(163, 79, 66, 0.065);
+  color: var(--pair-export-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.pair-export-confirmation {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  margin-top: 13px;
+  padding: 13px 14px;
+  border: 1px solid color-mix(in srgb, var(--pair-export-ochre) 34%, var(--pair-export-line));
+  border-radius: 5px 14px 5px 5px;
+  background: rgba(160, 120, 67, 0.06);
+  cursor: pointer;
+}
+
+.pair-export-sensitive[data-confirmed="true"] .pair-export-confirmation {
+  border-color: var(--pair-export-red);
+  background: rgba(163, 79, 66, 0.07);
+}
+
+.pair-export-confirmation input {
+  width: 19px;
+  height: 19px;
+  margin: 2px 0 0;
+  accent-color: var(--pair-export-red);
+}
+
+.pair-export-confirmation strong,
+.pair-export-confirmation small {
+  display: block;
+}
+
+.pair-export-confirmation strong {
+  color: var(--pair-export-ink);
+  font-family: var(--font-editorial);
+  font-size: 14px;
+}
+
+.pair-export-confirmation small {
+  margin-top: 5px;
+  color: var(--pair-export-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.pair-export-sensitive .pair-export-actions .secondary-action:not(:disabled) {
+  border-color: var(--pair-export-red);
+  background: rgba(163, 79, 66, 0.07);
+  color: var(--pair-export-red);
+}
+
+.pair-research-export > :is(.inline-error, .success-message, .muted-copy) {
+  margin-block: 12px;
+  border-radius: 4px 13px 4px 4px;
+}
+
+.pair-research-export > .muted-copy {
+  padding: 10px 12px;
+  border: 1px solid var(--pair-export-line);
+  border-left: 3px solid var(--pair-export-ochre);
+  background: rgba(160, 120, 67, 0.055);
+  color: var(--pair-export-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.pair-research-export[data-active-action]:not([data-active-action="idle"]) :is(.pair-export-anonymous, .pair-export-sensitive) {
+  cursor: progress;
+}
+
+@media (min-width: 681px) and (max-width: 900px) {
+  .pair-export-anonymous {
+    padding-top: 44px;
+  }
+
+  .pair-export-anonymous::after {
+    max-width: calc(100% - 28px);
+    line-height: 1.35;
+    text-align: right;
+  }
+}
+
+@media (max-width: 900px) {
+  .pair-export-identity {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .pair-research-export {
+    padding: 16px 13px;
+    border-radius: 6px 17px 6px 6px;
+  }
+
+  .pair-research-export > .section-heading-row,
+  .pair-export-scope-list {
+    grid-template-columns: 1fr;
+  }
+
+  .pair-export-delivery-boundary {
+    grid-template-columns: 36px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .pair-export-process {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pair-export-delivery-boundary > span {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .pair-export-card-heading {
+    grid-template-columns: 34px minmax(0, 1fr);
+    padding-right: 0;
+  }
+
+  .pair-export-card-heading > svg {
+    width: 34px;
+    height: 34px;
+  }
+
+  .pair-export-anonymous::after {
+    display: none;
+  }
+
+  .pair-export-actions :is(.primary-action, .secondary-action) {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .pair-export-identity {
+    grid-template-columns: 1fr;
+  }
+
+  .pair-export-sensitive > summary {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+}
+
+@media (forced-colors: active) {
+  .pair-research-export,
+  .pair-export-identity,
+  .pair-export-anonymous,
+  .pair-export-sensitive,
+  .pair-export-confirmation,
+  .pair-export-delivery-boundary,
+  .pair-export-delivery-boundary > span,
+  .pair-export-process,
+  .pair-export-process > li,
+  .pair-export-binding-error,
+  .pair-research-export > .muted-copy {
+    border-color: CanvasText;
+    background: Canvas;
+  }
+
+  .pair-export-identity > div::before,
+  .pair-export-scope-list > li::before,
+  .pair-export-process > li::before {
+    background: CanvasText;
+  }
+
+  .pair-research-export :is(button, input, summary):focus-visible,
+  .pair-export-sensitive > summary:focus-visible,
+  .pair-export-confirmation input:focus-visible,
+  .pair-export-sensitive .pair-export-actions .secondary-action:not(:disabled):focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pair-research-export .is-spinning {
+    animation: none;
+  }
+}

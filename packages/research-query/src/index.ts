@@ -39,7 +39,10 @@ import {
   type RevisionCalculationSourceComponentStatuses,
   type RevisionCalculationSourceResolution
 } from "@hakimi/revision-replay";
-import { verifyEventTimeContext } from "@hakimi/time-core";
+import {
+  verifyStoredEventTimeContextWithBundledArtifact,
+  type EventTimeContextVerificationStatus
+} from "@hakimi/time-core";
 import {
   TRANSIT_TIMELINE_VERSION,
   verifyCompatibleTransitNodeRef
@@ -255,7 +258,9 @@ export type ResearchQueryExecutionErrorCode =
   | "INVALID_QUERY"
   | "INVALID_DATASET"
   | "ABORTED"
-  | "INVALID_DATA_EPOCH";
+  | "INVALID_DATA_EPOCH"
+  | "INVALID_OPTIONS"
+  | "PROGRESS_CALLBACK_FAILED";
 
 export class ResearchQueryExecutionError extends Error {
   constructor(
@@ -274,6 +279,7 @@ type VerifiedDataset = {
   candidateSets: CandidateSetRecord[];
   researchNotes: ResearchNoteRecord[];
   events: EventRecord[];
+  eventTimeVerificationStatusByEventId: ReadonlyMap<string, EventTimeContextVerificationStatus>;
   knowledgeDocuments: KnowledgeDocumentRecord[];
   revisionCalculationReceiptLedgerStatus: "available" | "schema_unavailable";
   revisionCalculationReceipts: RevisionCalculationReceipt[];
@@ -309,6 +315,12 @@ const EMPTY_TEXT_MATCH: TextMatch = {
 };
 
 const RESULT_KEY_PATTERN = /^(?:case|candidate_set|event|knowledge):[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const DEFAULT_QUERY_YIELD_EVERY = 50;
+const MAX_QUERY_YIELD_EVERY = 10_000;
+const MAX_RESEARCH_QUERY_EXPORT_CHARACTERS = 32 * 1024 * 1024;
+const MAX_RESEARCH_QUERY_DATASET_SNAPSHOT_DEPTH = 128;
+const MAX_RESEARCH_QUERY_DATASET_SNAPSHOT_NODES = 1_000_000;
+const MAX_RESEARCH_QUERY_DATASET_SNAPSHOT_TEXT_CHARACTERS = 160 * 1024 * 1024;
 const sha256Schema = z.string().regex(/^[a-f0-9]{64}$/);
 const canonicalInstantSchema = z.string().datetime({ offset: true }).refine(
   (value) => new Date(value).toISOString() === value,
@@ -559,9 +571,56 @@ function ensureNotAborted(signal?: AbortSignal): void {
   }
 }
 
+function assertExecutionOptions(value: unknown): asserts value is ExecuteResearchQueryOptions {
+  if (!value || typeof value !== "object") {
+    throw new ResearchQueryExecutionError("INVALID_OPTIONS", "研究查询运行选项必须是对象。");
+  }
+  const options = value as ExecuteResearchQueryOptions;
+  if (
+    options.signal !== undefined &&
+    (!options.signal || typeof options.signal !== "object" || typeof options.signal.aborted !== "boolean")
+  ) {
+    throw new ResearchQueryExecutionError("INVALID_OPTIONS", "研究查询取消信号无效。");
+  }
+  if (options.onProgress !== undefined && typeof options.onProgress !== "function") {
+    throw new ResearchQueryExecutionError("INVALID_OPTIONS", "研究查询进度回调无效。");
+  }
+  if (options.now !== undefined && typeof options.now !== "function") {
+    throw new ResearchQueryExecutionError("INVALID_OPTIONS", "研究查询时钟回调无效。");
+  }
+  if (options.yieldEvery !== undefined && !Number.isSafeInteger(options.yieldEvery)) {
+    throw new ResearchQueryExecutionError("INVALID_OPTIONS", "yieldEvery 必须是安全整数。");
+  }
+  if (
+    options.dataEpoch !== undefined &&
+    (typeof options.dataEpoch !== "string" || !/^[a-f0-9]{64}$/u.test(options.dataEpoch))
+  ) {
+    throw new ResearchQueryExecutionError("INVALID_DATA_EPOCH", "dataEpoch 必须是小写 SHA-256。");
+  }
+}
+
+function reportProgress(
+  options: ExecuteResearchQueryOptions,
+  progress: ResearchQueryProgress
+): void {
+  try {
+    options.onProgress?.(progress);
+  } catch (cause) {
+    ensureNotAborted(options.signal);
+    throw new ResearchQueryExecutionError(
+      "PROGRESS_CALLBACK_FAILED",
+      "研究查询进度回调执行失败。",
+      { cause }
+    );
+  }
+}
+
 async function cooperativeYield(index: number, options: ExecuteResearchQueryOptions): Promise<void> {
   ensureNotAborted(options.signal);
-  const yieldEvery = Math.max(1, options.yieldEvery ?? 50);
+  const yieldEvery = Math.min(
+    MAX_QUERY_YIELD_EVERY,
+    Math.max(1, options.yieldEvery ?? DEFAULT_QUERY_YIELD_EVERY)
+  );
   if (index > 0 && index % yieldEvery === 0) {
     await new Promise<void>((resolve) => globalThis.setTimeout(resolve, 0));
     ensureNotAborted(options.signal);
@@ -570,6 +629,134 @@ async function cooperativeYield(index: number, options: ExecuteResearchQueryOpti
 
 function failDataset(message: string, cause?: unknown): never {
   throw new ResearchQueryExecutionError("INVALID_DATASET", message, cause === undefined ? undefined : { cause });
+}
+
+type ResearchQueryDatasetSnapshotBudget = {
+  nodes: number;
+  textCharacters: number;
+};
+
+function claimResearchQueryDatasetSnapshotText(
+  budget: ResearchQueryDatasetSnapshotBudget,
+  length: number
+): void {
+  budget.textCharacters += length;
+  if (budget.textCharacters > MAX_RESEARCH_QUERY_DATASET_SNAPSHOT_TEXT_CHARACTERS) {
+    throw new TypeError("研究数据声明式快照文本总量超过安全上限。");
+  }
+}
+
+/** Captures the complete caller-owned dataset before verification can yield. */
+function snapshotResearchQueryDatasetValue(
+  value: unknown,
+  depth = 0,
+  ancestors = new WeakSet<object>(),
+  budget: ResearchQueryDatasetSnapshotBudget = { nodes: 0, textCharacters: 0 }
+): unknown {
+  if (depth > MAX_RESEARCH_QUERY_DATASET_SNAPSHOT_DEPTH) {
+    throw new TypeError("研究数据声明式快照超过最大深度。");
+  }
+  budget.nodes += 1;
+  if (budget.nodes > MAX_RESEARCH_QUERY_DATASET_SNAPSHOT_NODES) {
+    throw new TypeError("研究数据声明式快照结构节点总量超过安全上限。");
+  }
+  if (typeof value === "string") {
+    claimResearchQueryDatasetSnapshotText(budget, value.length);
+    return value;
+  }
+  if (value === null || typeof value === "boolean" || value === undefined) return value;
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) throw new TypeError("研究数据声明式快照包含非有限数字。");
+    return value;
+  }
+  if (typeof value !== "object") {
+    throw new TypeError("研究数据声明式快照包含非声明式值。");
+  }
+
+  const objectValue = value as object;
+  if (ancestors.has(objectValue)) {
+    throw new TypeError("研究数据声明式快照包含循环引用。");
+  }
+  // Track only the active path: shared DAG nodes remain valid, while every
+  // expansion is cloned and charged again against the shared global budget.
+  if (Object.getOwnPropertySymbols(objectValue).length > 0) {
+    throw new TypeError("研究数据声明式快照不能包含 Symbol 属性。");
+  }
+  ancestors.add(objectValue);
+  try {
+    if (Array.isArray(objectValue)) {
+      const lengthDescriptor = Object.getOwnPropertyDescriptor(objectValue, "length");
+      if (
+        !lengthDescriptor ||
+        !("value" in lengthDescriptor) ||
+        !Number.isSafeInteger(lengthDescriptor.value) ||
+        lengthDescriptor.value < 0
+      ) {
+        throw new TypeError("研究数据声明式快照包含无效数组长度。");
+      }
+      const length = lengthDescriptor.value as number;
+      if (length > MAX_RESEARCH_QUERY_DATASET_SNAPSHOT_NODES - budget.nodes) {
+        throw new TypeError("研究数据声明式快照数组槽位超过安全上限。");
+      }
+      const propertyNames = Object.getOwnPropertyNames(objectValue);
+      if (propertyNames.length !== length + 1) {
+        throw new TypeError("研究数据声明式快照数组必须稠密且不能包含自定义字段。");
+      }
+      const output = new Array<unknown>(length);
+      for (let index = 0; index < length; index += 1) {
+        const descriptor = Object.getOwnPropertyDescriptor(objectValue, String(index));
+        if (!descriptor || !("value" in descriptor) || !descriptor.enumerable) {
+          throw new TypeError("研究数据声明式快照数组项必须是可枚举数据字段。");
+        }
+        output[index] = snapshotResearchQueryDatasetValue(
+          descriptor.value,
+          depth + 1,
+          ancestors,
+          budget
+        );
+      }
+      return output;
+    }
+
+    const prototype = Object.getPrototypeOf(objectValue);
+    if (prototype !== Object.prototype && prototype !== null) {
+      throw new TypeError("研究数据声明式快照只接受普通对象。");
+    }
+    const propertyNames = Object.getOwnPropertyNames(objectValue);
+    if (propertyNames.length > MAX_RESEARCH_QUERY_DATASET_SNAPSHOT_NODES - budget.nodes) {
+      throw new TypeError("研究数据声明式快照对象字段超过安全上限。");
+    }
+    const output = Object.create(null) as Record<string, unknown>;
+    for (const key of propertyNames) {
+      claimResearchQueryDatasetSnapshotText(budget, key.length);
+      const descriptor = Object.getOwnPropertyDescriptor(objectValue, key);
+      if (!descriptor || !("value" in descriptor) || !descriptor.enumerable) {
+        throw new TypeError("研究数据声明式快照对象字段必须是可枚举数据字段。");
+      }
+      Object.defineProperty(output, key, {
+        value: snapshotResearchQueryDatasetValue(
+          descriptor.value,
+          depth + 1,
+          ancestors,
+          budget
+        ),
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    }
+    return output;
+  } finally {
+    ancestors.delete(objectValue);
+  }
+}
+
+function snapshotResearchQueryDataset(value: unknown): ResearchQuerySnapshot {
+  try {
+    return snapshotResearchQueryDatasetValue(value) as ResearchQuerySnapshot;
+  } catch (cause) {
+    failDataset("研究数据快照不是有界的声明式数据。", cause);
+  }
 }
 
 function ensureUniqueIds<T extends { id: string }>(records: readonly T[], label: string): void {
@@ -581,19 +768,39 @@ function ensureUniqueIds<T extends { id: string }>(records: readonly T[], label:
 }
 
 async function verifyDataset(
-  snapshot: ResearchQuerySnapshot,
+  rawSnapshot: ResearchQuerySnapshot,
   options: ExecuteResearchQueryOptions
 ): Promise<VerifiedDataset> {
+  const snapshot = snapshotResearchQueryDataset(rawSnapshot);
+  if (
+    !snapshot ||
+    typeof snapshot !== "object" ||
+    !Array.isArray(snapshot.cases) ||
+    !Array.isArray(snapshot.revisions) ||
+    !Array.isArray(snapshot.candidateSets) ||
+    !Array.isArray(snapshot.researchNotes) ||
+    !Array.isArray(snapshot.events) ||
+    !Array.isArray(snapshot.knowledgeDocuments)
+  ) {
+    failDataset("研究数据快照缺少必需的数组分区。");
+  }
   const revisionCalculationReceiptLedgerStatus =
     snapshot.revisionCalculationReceiptLedgerStatus ?? "schema_unavailable";
   const rawRevisionCalculationReceipts = snapshot.revisionCalculationReceipts ?? [];
+  if (
+    (revisionCalculationReceiptLedgerStatus !== "available" &&
+      revisionCalculationReceiptLedgerStatus !== "schema_unavailable") ||
+    !Array.isArray(rawRevisionCalculationReceipts)
+  ) {
+    failDataset("计算收据账本状态或分区无效。");
+  }
   const total = snapshot.cases.length + snapshot.revisions.length + snapshot.candidateSets.length +
     snapshot.researchNotes.length + snapshot.events.length + snapshot.knowledgeDocuments.length +
     rawRevisionCalculationReceipts.length;
   let completed = 0;
   const advance = async (): Promise<void> => {
     completed += 1;
-    options.onProgress?.({ phase: "verify", completed, total });
+    reportProgress(options, { phase: "verify", completed, total });
     await cooperativeYield(completed, options);
   };
 
@@ -619,14 +826,16 @@ async function verifyDataset(
       await advance();
     }
     const events: EventRecord[] = [];
+    const eventTimeVerificationStatusByEventId = new Map<string, EventTimeContextVerificationStatus>();
     for (const raw of snapshot.events) {
       const event = fullBackupEventRecordSchema.parse(raw);
-      verifyEventTimeContext({
+      const timeVerification = await verifyStoredEventTimeContextWithBundledArtifact({
         datePrecision: event.datePrecision,
         startDate: event.startDate,
         endDate: event.endDate,
         timeContext: event.timeContext
       });
+      eventTimeVerificationStatusByEventId.set(event.id, timeVerification.status);
       events.push(event);
       await advance();
     }
@@ -730,6 +939,7 @@ async function verifyDataset(
       candidateSets,
       researchNotes,
       events,
+      eventTimeVerificationStatusByEventId,
       knowledgeDocuments,
       revisionCalculationReceiptLedgerStatus,
       revisionCalculationReceipts,
@@ -1024,7 +1234,7 @@ async function executeCaseQuery(
 
   const results: ResearchCaseResult[] = [];
   for (const [index, caseRecord] of dataset.cases.entries()) {
-    options.onProgress?.({ phase: "filter", completed: index, total: dataset.cases.length });
+    reportProgress(options, { phase: "filter", completed: index, total: dataset.cases.length });
     await cooperativeYield(index, options);
     if (!lifecycleMatches(query.lifecycle, caseRecord.deletedAt)) continue;
     if (query.favorites === "only" && !caseRecord.favorite) continue;
@@ -1092,7 +1302,7 @@ async function executeCaseQuery(
       relevanceScore: resultScore(text, extras)
     });
   }
-  options.onProgress?.({ phase: "filter", completed: dataset.cases.length, total: dataset.cases.length });
+  reportProgress(options, { phase: "filter", completed: dataset.cases.length, total: dataset.cases.length });
   return results;
 }
 
@@ -1115,7 +1325,7 @@ async function executeCandidateSetQuery(
   }
   const results: ResearchCandidateSetResult[] = [];
   for (const [index, record] of dataset.candidateSets.entries()) {
-    options.onProgress?.({ phase: "filter", completed: index, total: dataset.candidateSets.length });
+    reportProgress(options, { phase: "filter", completed: index, total: dataset.candidateSets.length });
     await cooperativeYield(index, options);
     if (!lifecycleMatches(query.lifecycle, record.deletedAt)) continue;
     if (query.favorites === "only" && !record.favorite) continue;
@@ -1143,7 +1353,7 @@ async function executeCandidateSetQuery(
       relevanceScore: resultScore(text, extras)
     });
   }
-  options.onProgress?.({ phase: "filter", completed: dataset.candidateSets.length, total: dataset.candidateSets.length });
+  reportProgress(options, { phase: "filter", completed: dataset.candidateSets.length, total: dataset.candidateSets.length });
   return results;
 }
 
@@ -1154,7 +1364,7 @@ async function executeEventQuery(
 ): Promise<ResearchEventResult[]> {
   const results: ResearchEventResult[] = [];
   for (const [index, event] of dataset.events.entries()) {
-    options.onProgress?.({ phase: "filter", completed: index, total: dataset.events.length });
+    reportProgress(options, { phase: "filter", completed: index, total: dataset.events.length });
     await cooperativeYield(index, options);
     const text = eventMatchesStandaloneQuery(event, query);
     if (!text) continue;
@@ -1181,8 +1391,65 @@ async function executeEventQuery(
       matchingEventIds: [event.id]
     });
   }
-  options.onProgress?.({ phase: "filter", completed: dataset.events.length, total: dataset.events.length });
+  reportProgress(options, { phase: "filter", completed: dataset.events.length, total: dataset.events.length });
   return results;
+}
+
+function eventTimeDiagnostic(
+  event: EventRecord,
+  status: EventTimeContextVerificationStatus
+): ResearchQueryDiagnostic | null {
+  if (
+    status === "exact_current" ||
+    status === "exact_retained" ||
+    status === "structural_calendar_date"
+  ) return null;
+  if (status === "structural_legacy_floating") {
+    return {
+      kind: "warning",
+      code: "EVENT_TIME_LEGACY_FLOATING_NO_UTC",
+      subjectId: event.caseId,
+      revisionId: event.revisionId,
+      message: `事件 ${event.id} 仅保留 legacy_floating 民用日期语义；本查询没有生成或推断 UTC/offset。`
+    };
+  }
+  if (status === "structural_legacy_unidentified") {
+    return {
+      kind: "warning",
+      code: "EVENT_TIME_ZONED_UTC_NOT_EVALUATED_LEGACY_TZDB",
+      subjectId: event.caseId,
+      revisionId: event.revisionId,
+      message: `事件 ${event.id} 的 zoned_minute 来自未识别历史 tzdb；保存的 canonicalUtc/offset 仅作为冻结结构保留，未用于本查询的 UTC 排序或投影。`
+    };
+  }
+  if (status === "structural_artifact_unavailable") {
+    return {
+      kind: "warning",
+      code: "EVENT_TIME_ZONED_UTC_NOT_EVALUATED_ARTIFACT_UNAVAILABLE",
+      subjectId: event.caseId,
+      revisionId: event.revisionId,
+      message: `事件 ${event.id} 的冻结 tzdb 工件当前不可用；保存的 canonicalUtc/offset 仅作为冻结结构保留，未用于本查询的 UTC 排序或投影。`
+    };
+  }
+  const exhaustiveStatus: never = status;
+  return exhaustiveStatus;
+}
+
+function appendMatchedEventTimeDiagnostics(
+  results: readonly ResearchQueryResult[],
+  dataset: VerifiedDataset,
+  diagnostics: ResearchQueryDiagnostic[]
+): void {
+  const matchedEventIds = uniqueSorted(results.flatMap((result) => result.matchingEventIds));
+  if (matchedEventIds.length === 0) return;
+  const eventById = new Map(dataset.events.map((event) => [event.id, event]));
+  for (const eventId of matchedEventIds) {
+    const event = eventById.get(eventId);
+    const status = dataset.eventTimeVerificationStatusByEventId.get(eventId);
+    if (!event || !status) continue;
+    const diagnostic = eventTimeDiagnostic(event, status);
+    if (diagnostic) diagnostics.push(diagnostic);
+  }
 }
 
 async function executeKnowledgeQuery(
@@ -1192,7 +1459,7 @@ async function executeKnowledgeQuery(
 ): Promise<ResearchKnowledgeResult[]> {
   const results: ResearchKnowledgeResult[] = [];
   for (const [index, knowledgeDocument] of dataset.knowledgeDocuments.entries()) {
-    options.onProgress?.({ phase: "filter", completed: index, total: dataset.knowledgeDocuments.length });
+    reportProgress(options, { phase: "filter", completed: index, total: dataset.knowledgeDocuments.length });
     await cooperativeYield(index, options);
     if (!matchesAny(query.recordTypes, knowledgeDocument.recordType)) continue;
     const text = matchText(query.text, [
@@ -1221,7 +1488,7 @@ async function executeKnowledgeQuery(
       matchingEventIds: []
     });
   }
-  options.onProgress?.({ phase: "filter", completed: dataset.knowledgeDocuments.length, total: dataset.knowledgeDocuments.length });
+  reportProgress(options, { phase: "filter", completed: dataset.knowledgeDocuments.length, total: dataset.knowledgeDocuments.length });
   return results;
 }
 
@@ -1266,7 +1533,7 @@ export async function digestResearchQuery(input: ResearchQuery): Promise<string>
 }
 
 export function isResearchResultKey(value: string): boolean {
-  return RESULT_KEY_PATTERN.test(value);
+  return typeof value === "string" && RESULT_KEY_PATTERN.test(value);
 }
 
 export function createDefaultResearchQuery(scope: "cases"): ResearchCaseQuery;
@@ -1329,15 +1596,13 @@ export async function executeResearchQuery(
   snapshot: ResearchQuerySnapshot,
   options: ExecuteResearchQueryOptions = {}
 ): Promise<ResearchQueryExecution> {
+  assertExecutionOptions(options);
   ensureNotAborted(options.signal);
   let query: ResearchQuery;
   try {
     query = researchQuerySchema.parse(input);
   } catch (cause) {
     throw new ResearchQueryExecutionError("INVALID_QUERY", "ResearchQuery 未通过严格版本契约。", { cause });
-  }
-  if (options.dataEpoch !== undefined && !/^[a-f0-9]{64}$/.test(options.dataEpoch)) {
-    throw new ResearchQueryExecutionError("INVALID_DATA_EPOCH", "dataEpoch 必须是小写 SHA-256。" );
   }
   const dataset = await verifyDataset(snapshot, options);
   const [queryDigest, resolvedDataEpoch] = await Promise.all([
@@ -1373,17 +1638,28 @@ export async function executeResearchQuery(
   } else {
     results = await executeKnowledgeQuery(query, dataset, options);
   }
+  appendMatchedEventTimeDiagnostics(results, dataset, diagnostics);
   ensureNotAborted(options.signal);
   results = sortResults(results, query);
   diagnostics.sort((left, right) =>
     compareCodePoint(left.kind, right.kind) ||
     compareCodePoint(left.subjectId ?? "", right.subjectId ?? "") ||
     compareCodePoint(left.revisionId ?? "", right.revisionId ?? "") ||
-    compareCodePoint(left.code, right.code)
+    compareCodePoint(left.code, right.code) ||
+    compareCodePoint(left.message, right.message)
   );
-  options.onProgress?.({ phase: "finalize", completed: 1, total: 1 });
+  reportProgress(options, { phase: "finalize", completed: 1, total: 1 });
   ensureNotAborted(options.signal);
-  const executedAt = new Date(options.now?.() ?? Date.now()).toISOString();
+  let executedAt: string;
+  try {
+    executedAt = new Date(options.now?.() ?? Date.now()).toISOString();
+  } catch (cause) {
+    throw new ResearchQueryExecutionError(
+      "INVALID_OPTIONS",
+      "研究查询时钟没有返回有效瞬时点。",
+      { cause }
+    );
+  }
   const resultDigest = await sha256Hex({
     engine: RESEARCH_QUERY_ENGINE,
     queryDigest,
@@ -1484,11 +1760,16 @@ export async function buildResearchQueryExport(
   } catch (cause) {
     throw new ResearchQueryExportError("INVALID_EXPORT", "导出清单中的应用版本或时间无效。", { cause });
   }
+  const [resultsDigest, diagnosticsDigest, payloadDigest] = await Promise.all([
+    sha256Hex(payload.results),
+    sha256Hex(payload.diagnostics),
+    sha256Hex(payload)
+  ]);
   const digestsWithoutEnvelope = {
     query: payload.queryDigest,
-    results: await sha256Hex(payload.results),
-    diagnostics: await sha256Hex(payload.diagnostics),
-    payload: await sha256Hex(payload)
+    results: resultsDigest,
+    diagnostics: diagnosticsDigest,
+    payload: payloadDigest
   };
   const envelope: ResearchQueryExportEnvelope = {
     manifest,
@@ -1505,6 +1786,9 @@ export async function buildResearchQueryExport(
 export async function verifyResearchQueryExport(input: unknown): Promise<ResearchQueryExportEnvelope> {
   let raw: unknown = input;
   if (typeof input === "string") {
+    if (input.length > MAX_RESEARCH_QUERY_EXPORT_CHARACTERS) {
+      throw new ResearchQueryExportError("INVALID_EXPORT", "研究查询导出超过安全读取上限。");
+    }
     try {
       raw = JSON.parse(input);
     } catch (cause) {
@@ -1519,11 +1803,17 @@ export async function verifyResearchQueryExport(input: unknown): Promise<Researc
   }
   const payload = parsed.payload as ResearchQueryExportEnvelope["payload"];
   const manifest = parsed.manifest as ResearchQueryExportEnvelope["manifest"];
+  const [queryDigest, resultsDigest, diagnosticsDigest, payloadDigest] = await Promise.all([
+    sha256Hex(payload.query),
+    sha256Hex(payload.results),
+    sha256Hex(payload.diagnostics),
+    sha256Hex(payload)
+  ]);
   const expected = {
-    query: await sha256Hex(payload.query),
-    results: await sha256Hex(payload.results),
-    diagnostics: await sha256Hex(payload.diagnostics),
-    payload: await sha256Hex(payload)
+    query: queryDigest,
+    results: resultsDigest,
+    diagnostics: diagnosticsDigest,
+    payload: payloadDigest
   };
   const [resultDigest, envelopeDigest] = await Promise.all([
     expectedExecutionResultDigest(payload),

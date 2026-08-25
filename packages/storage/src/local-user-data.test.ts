@@ -1,19 +1,31 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Dexie from "dexie";
+import { calculateChart, calculateUnknownHourCandidates } from "@hakimi/bazi-core";
 import { sha256Hex } from "@hakimi/integrity";
 import {
+  LOCAL_ATTACHMENT_RECORD_VERSION,
   LOCAL_RULE_REGISTRY_RECORD_VERSION,
   SCHEMA_VERSION,
+  citationTargetKeys,
   type ActiveRulePackRecord,
-  type InstalledRulePackRecord
+  type BirthInput,
+  type FullBackupPayload,
+  type InstalledRulePackRecord,
+  type LocalAttachmentRecord
 } from "@hakimi/contracts";
 import {
   CaseRepository,
   FullDataReplaceConflictError,
+  KnowledgeRepository,
+  LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_ENCODED_CHARACTERS,
+  LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_MATCHED_BYTES,
+  LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_MATCHES,
+  LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_SCAN_ROWS,
   LocalAttachmentIntegrityError,
   ResearchDatabase,
   RuleRegistryRepository
 } from "./index";
+import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
 
 const databases: Dexie[] = [];
 
@@ -21,6 +33,37 @@ const PACK_DIGEST_A = "a".repeat(64);
 const PACK_DIGEST_B = "b".repeat(64);
 const PROFILE_DIGEST_A = "c".repeat(64);
 const PROFILE_DIGEST_B = "d".repeat(64);
+
+function storedAttachment(
+  overrides: Partial<LocalAttachmentRecord> = {}
+): LocalAttachmentRecord {
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    recordVersion: LOCAL_ATTACHMENT_RECORD_VERSION,
+    recordType: "local_attachment",
+    id: crypto.randomUUID(),
+    fileName: "metadata.bin",
+    mediaType: "application/octet-stream",
+    byteLength: 1,
+    contentBase64: "AA==",
+    contentHash: "0".repeat(64),
+    description: "",
+    link: null,
+    createdAt: "2026-08-02T00:00:00.000Z",
+    updatedAt: "2026-08-02T00:00:00.000Z",
+    ...overrides
+  };
+}
+
+function indexedAttachmentId(index: number): string {
+  return `00000000-0000-4000-8000-${index.toString(16).padStart(12, "0")}`;
+}
+
+function canonicalZeroBase64(byteLength: number): string {
+  const completeTriples = Math.floor(byteLength / 3);
+  const remainder = byteLength % 3;
+  return "AAAA".repeat(completeTriples) + (remainder === 1 ? "AA==" : remainder === 2 ? "AAA=" : "");
+}
 
 function installedRulePack(
   overrides: Partial<InstalledRulePackRecord> = {}
@@ -75,6 +118,7 @@ function createRepository(now = "2026-08-02T00:00:00.000Z") {
 }
 
 afterEach(async () => {
+  vi.restoreAllMocks();
   const current = databases.splice(0);
   const names = [...new Set(current.map((database) => database.name))];
   for (const database of current) database.close();
@@ -274,6 +318,8 @@ describe("local attachments", () => {
       description: "hakimi-review-inbox:v1",
       link: null
     } as const;
+    const toArray = vi.spyOn(repository.database.attachments, "toArray");
+    const bulkGet = vi.spyOn(repository.database.attachments, "bulkGet");
 
     const results = await Promise.all([
       repository.createAttachmentOnce({ ...shared, fileName: "review-a.json" }),
@@ -286,6 +332,37 @@ describe("local attachments", () => {
     expect(new Set(results.map((result) => result.record.contentHash)).size).toBe(1);
     expect(await repository.database.attachments.count()).toBe(1);
     expect([...(await repository.readAttachmentBytes(results[0]!.record.id))!]).toEqual([...bytes]);
+    expect(toArray).not.toHaveBeenCalled();
+    expect(bulkGet).not.toHaveBeenCalled();
+  });
+
+  it("rejects an over-limit same-media idempotency lookup before reading attachment values", async () => {
+    const repository = createRepository();
+    const records = Array.from(
+      { length: LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_SCAN_ROWS + 1 },
+      (_, index) => storedAttachment({
+        id: indexedAttachmentId(index + 1),
+        mediaType: "application/json",
+        description: "ordinary-json"
+      })
+    );
+    await repository.database.attachments.bulkAdd(records);
+    const toArray = vi.spyOn(repository.database.attachments, "toArray");
+    const bulkGet = vi.spyOn(repository.database.attachments, "bulkGet");
+    const get = vi.spyOn(repository.database.attachments, "get");
+
+    await expect(repository.createAttachmentOnce({
+      fileName: "review.json",
+      mediaType: "application/json",
+      bytes: new TextEncoder().encode('{"format":"hakimi-review"}'),
+      description: "hakimi-review-inbox:v1",
+      link: null
+    })).rejects.toMatchObject({ code: "SCAN_ROW_LIMIT_EXCEEDED" });
+
+    expect(get).not.toHaveBeenCalled();
+    expect(toArray).not.toHaveBeenCalled();
+    expect(bulkGet).not.toHaveBeenCalled();
+    expect(await repository.database.attachments.count()).toBe(records.length);
   });
 
   it("keeps identical bytes when their exact purpose metadata differs", async () => {
@@ -376,7 +453,642 @@ describe("local attachments", () => {
   });
 });
 
-describe("thirteen-partition full data operations", () => {
+describe("bounded local data overview and attachment metadata", () => {
+  it("counts all sixteen user partitions in one targetSchema 13 snapshot without opening the receipt store", async () => {
+    const database = new ResearchDatabase(
+      `hakimi-local-overview-v13-${crypto.randomUUID()}`,
+      { targetSchema: 13 }
+    );
+    databases.push(database);
+    const repository = new CaseRepository(database);
+    const id = crypto.randomUUID();
+    const seeds: ReadonlyArray<readonly [string, Record<string, unknown>]> = [
+      ["cases", { id: crypto.randomUUID() }],
+      ["revisions", { id: crypto.randomUUID() }],
+      ["candidateSets", { id: crypto.randomUUID() }],
+      ["researchNotes", { id: crypto.randomUUID() }],
+      ["events", { id: crypto.randomUUID() }],
+      ["savedViews", { id: crypto.randomUUID() }],
+      ["knowledgeDocuments", { id: crypto.randomUUID() }],
+      ["citations", { id: crypto.randomUUID() }],
+      ["sourceRights", { documentId: id }],
+      ["researcherProfiles", { id: crypto.randomUUID() }],
+      ["appSettings", { id: crypto.randomUUID() }],
+      ["attachments", { id: crypto.randomUUID() }],
+      ["ruleRegistry", { id: crypto.randomUUID() }],
+      ["tzdbMigrationReceipts", { id: crypto.randomUUID() }],
+      ["eventTimeMigrationReceipts", { id: crypto.randomUUID() }]
+    ];
+    for (const [tableName, record] of seeds) await database.table(tableName).add(record);
+
+    expect(database.tables.map((table) => table.name)).not.toContain("revisionCalculationReceipts");
+    await expect(repository.readLocalDataOverview()).resolves.toEqual({
+      counts: {
+        cases: 1,
+        revisions: 1,
+        candidateSets: 1,
+        researchNotes: 1,
+        events: 1,
+        savedViews: 1,
+        knowledgeDocuments: 1,
+        citations: 1,
+        sourceRights: 1,
+        researcherProfiles: 1,
+        appSettings: 1,
+        attachments: 1,
+        ruleRegistry: 1,
+        tzdbMigrationReceipts: 1,
+        eventTimeMigrationReceipts: 1,
+        revisionCalculationReceipts: 0
+      }
+    });
+  });
+
+  it("returns one atomic complete purpose snapshot from 256 sequential value reads without retaining or hashing bodies", async () => {
+    const repository = createRepository();
+    const purpose = "哈基米运限审核收件箱 · 本地未核验 · v1";
+    const records = Array.from(
+      { length: LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_SCAN_ROWS },
+      (_, index) => storedAttachment({
+        id: indexedAttachmentId(index + 1),
+        fileName: `purpose-${index}.json`,
+        mediaType: "application/json",
+        description: index < 2 || index === 3 ? purpose : "ordinary-json",
+        contentHash: index === 2 || index === 3 ? "not-a-sha256" : "0".repeat(64),
+        link: index === 3 ? {
+          kind: "research_subject",
+          subjectId: indexedAttachmentId(900)
+        } : null
+      }) as LocalAttachmentRecord
+    );
+    await repository.database.attachments.bulkAdd(records);
+    const toArray = vi.spyOn(repository.database.attachments, "toArray");
+    const bulkGet = vi.spyOn(repository.database.attachments, "bulkGet");
+    const get = vi.spyOn(repository.database.attachments, "get");
+    const digest = vi.spyOn(globalThis.crypto.subtle, "digest");
+
+    const snapshot = await repository.readAttachmentPurposeMetadataSnapshot({
+      mediaType: "application/json",
+      description: purpose,
+      unlinkedOnly: true
+    });
+
+    expect(snapshot).toMatchObject({
+      filter: { mediaType: "application/json", description: purpose, unlinkedOnly: true },
+      scannedCount: LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_SCAN_ROWS,
+      scannedEncodedCharacters: LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_SCAN_ROWS * 4,
+      matchedDeclaredBytes: 2,
+      contentIntegrityVerified: false,
+      coverage: "complete",
+      atomicStorageSnapshotVerified: true
+    });
+    expect(snapshot.items.map((item) => item.id)).toEqual([
+      indexedAttachmentId(1),
+      indexedAttachmentId(2)
+    ]);
+    expect(snapshot.items.every((item) =>
+      item.contentIntegrity === "unchecked" && !("contentBase64" in item)
+    )).toBe(true);
+    expect(get.mock.calls.map(([id]) => id)).toEqual(
+      records.map((record) => record.id).sort()
+    );
+    expect(toArray).not.toHaveBeenCalled();
+    expect(bulkGet).not.toHaveBeenCalled();
+    expect(digest).not.toHaveBeenCalled();
+  });
+
+  it("rejects a 257th purpose-scan key before reading any attachment value", async () => {
+    const repository = createRepository();
+    const records = Array.from(
+      { length: LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_SCAN_ROWS + 1 },
+      (_, index) => storedAttachment({
+        id: indexedAttachmentId(index + 1),
+        mediaType: "application/json",
+        description: "ordinary-json"
+      })
+    );
+    await repository.database.attachments.bulkAdd(records);
+    const toArray = vi.spyOn(repository.database.attachments, "toArray");
+    const bulkGet = vi.spyOn(repository.database.attachments, "bulkGet");
+    const get = vi.spyOn(repository.database.attachments, "get");
+
+    await expect(repository.readAttachmentPurposeMetadataSnapshot({
+      mediaType: "application/json",
+      description: "review-inbox",
+      unlinkedOnly: true
+    })).rejects.toMatchObject({ code: "SCAN_ROW_LIMIT_EXCEEDED" });
+    expect(get).not.toHaveBeenCalled();
+    expect(toArray).not.toHaveBeenCalled();
+    expect(bulkGet).not.toHaveBeenCalled();
+  });
+
+  it("fails closed on a matching corrupt purpose record after skipping unrelated corruption", async () => {
+    const repository = createRepository();
+    const purpose = "review-inbox";
+    await repository.database.attachments.bulkAdd([
+      {
+        ...storedAttachment({
+          id: indexedAttachmentId(1),
+          mediaType: "application/json",
+          description: "ordinary-json"
+        }),
+        contentHash: "not-a-sha256"
+      } as unknown as LocalAttachmentRecord,
+      {
+        ...storedAttachment({
+          id: indexedAttachmentId(2),
+          mediaType: "application/json",
+          description: purpose
+        }),
+        contentHash: "not-a-sha256"
+      } as unknown as LocalAttachmentRecord
+    ]);
+
+    await expect(repository.readAttachmentPurposeMetadataSnapshot({
+      mediaType: "application/json",
+      description: purpose,
+      unlinkedOnly: true
+    })).rejects.toMatchObject({ name: "ZodError" });
+  });
+
+  it("fails closed when a 65th exact purpose match would be retained", async () => {
+    const repository = createRepository();
+    const purpose = "review-inbox";
+    await repository.database.attachments.bulkAdd(Array.from(
+      { length: LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_MATCHES + 1 },
+      (_, index) => storedAttachment({
+        id: indexedAttachmentId(index + 1),
+        mediaType: "application/json",
+        description: purpose
+      })
+    ));
+
+    await expect(repository.readAttachmentPurposeMetadataSnapshot({
+      mediaType: "application/json",
+      description: purpose,
+      unlinkedOnly: true
+    })).rejects.toMatchObject({ code: "MATCH_LIMIT_EXCEEDED" });
+  });
+
+  it("enforces the aggregate encoded-character scan budget before purpose parsing", async () => {
+    const repository = createRepository();
+    const perRecordByteLength = 16 * 1024 * 1024 + 2;
+    const contentBase64 = canonicalZeroBase64(perRecordByteLength);
+    expect(contentBase64.length * 3).toBeGreaterThan(
+      LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_ENCODED_CHARACTERS
+    );
+    await repository.database.attachments.bulkAdd(Array.from({ length: 3 }, (_, index) =>
+      storedAttachment({
+        id: indexedAttachmentId(index + 1),
+        mediaType: "application/json",
+        byteLength: perRecordByteLength,
+        contentBase64,
+        description: "ordinary-json"
+      })
+    ));
+
+    await expect(repository.readAttachmentPurposeMetadataSnapshot({
+      mediaType: "application/json",
+      description: "review-inbox",
+      unlinkedOnly: true
+    })).rejects.toMatchObject({ code: "SCAN_ENCODED_CHARACTER_LIMIT_EXCEEDED" });
+  });
+
+  it("enforces the matched declared-byte budget without decoding or hashing content", async () => {
+    const repository = createRepository();
+    const purpose = "review-inbox";
+    const perRecordByteLength = 1024 * 1024;
+    const recordCount = LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_MATCHED_BYTES / perRecordByteLength + 1;
+    const contentBase64 = canonicalZeroBase64(perRecordByteLength);
+    expect(perRecordByteLength * (recordCount - 1)).toBeLessThanOrEqual(
+      LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_MATCHED_BYTES
+    );
+    expect(perRecordByteLength * recordCount).toBeGreaterThan(
+      LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_MATCHED_BYTES
+    );
+    expect(contentBase64.length * recordCount).toBeLessThan(
+      LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_ENCODED_CHARACTERS
+    );
+    await repository.database.attachments.bulkAdd(Array.from({ length: recordCount }, (_, index) =>
+      storedAttachment({
+        id: indexedAttachmentId(index + 1),
+        mediaType: "application/json",
+        byteLength: perRecordByteLength,
+        contentBase64,
+        description: purpose
+      })
+    ));
+    const digest = vi.spyOn(globalThis.crypto.subtle, "digest");
+
+    await expect(repository.readAttachmentPurposeMetadataSnapshot({
+      mediaType: "application/json",
+      description: purpose,
+      unlinkedOnly: true
+    })).rejects.toMatchObject({ code: "MATCHED_BYTE_LIMIT_EXCEEDED" });
+    expect(digest).not.toHaveBeenCalled();
+  });
+
+  it("holds a same-count replacement behind the purpose snapshot transaction", async () => {
+    const repository = createRepository();
+    const purpose = "review-inbox";
+    const original = storedAttachment({
+      id: indexedAttachmentId(1),
+      mediaType: "application/json",
+      description: purpose
+    });
+    const replacement = { ...original, description: "ordinary-json" };
+    await repository.database.attachments.add(original);
+    const readStored = repository.database.attachments.get.bind(repository.database.attachments);
+    let concurrentWrite: Promise<unknown> | null = null;
+    vi.spyOn(repository.database.attachments, "get").mockImplementation((async (id: string) => {
+      const raw = await readStored(id);
+      if (concurrentWrite === null) {
+        concurrentWrite = Dexie.ignoreTransaction(() =>
+          repository.database.attachments.put(replacement)
+        );
+      }
+      return raw;
+    }) as never);
+
+    const snapshot = await repository.readAttachmentPurposeMetadataSnapshot({
+      mediaType: "application/json",
+      description: purpose,
+      unlinkedOnly: true
+    });
+    expect(snapshot.items.map((item) => item.id)).toEqual([original.id]);
+    expect(snapshot.coverage).toBe("complete");
+    expect(snapshot.atomicStorageSnapshotVerified).toBe(true);
+
+    expect(concurrentWrite).not.toBeNull();
+    await concurrentWrite!;
+    await expect(repository.readAttachmentPurposeMetadataSnapshot({
+      mediaType: "application/json",
+      description: purpose,
+      unlinkedOnly: true
+    })).resolves.toMatchObject({ items: [], coverage: "complete" });
+  });
+
+  it("pages sixteen plus one attachments by key before strictly sequential metadata reads", async () => {
+    const repository = createRepository();
+    const records = Array.from({ length: 17 }, (_, index) => {
+      const timestamp = new Date(Date.UTC(2026, 7, 2, 0, 0, index)).toISOString();
+      return storedAttachment({
+        fileName: `metadata-${index}.bin`,
+        createdAt: timestamp,
+        updatedAt: timestamp
+      });
+    });
+    await repository.database.attachments.bulkAdd(records);
+    const toArray = vi.spyOn(repository.database.attachments, "toArray");
+    const bulkGet = vi.spyOn(repository.database.attachments, "bulkGet");
+    const get = vi.spyOn(repository.database.attachments, "get");
+
+    const first = await repository.readAttachmentMetadataPage();
+    expect(first).toMatchObject({
+      totalCount: 17,
+      offset: 0,
+      nextOffset: 16,
+      scannedCount: 16,
+      scannedEncodedCharacters: 64,
+      contentIntegrityVerified: false
+    });
+    expect(first.items.map((item) => item.id)).toEqual(
+      [...records]
+        .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
+        .slice(0, 16)
+        .map((record) => record.id)
+    );
+    expect(first.items.every((item) =>
+      item.contentIntegrity === "unchecked" && !("contentBase64" in item)
+    )).toBe(true);
+    expect(toArray).not.toHaveBeenCalled();
+    expect(bulkGet).not.toHaveBeenCalled();
+    expect(get).toHaveBeenCalledTimes(16);
+
+    const second = await repository.readAttachmentMetadataPage({ offset: first.nextOffset! });
+    expect(second).toMatchObject({
+      totalCount: 17,
+      offset: 16,
+      nextOffset: null,
+      scannedCount: 1,
+      scannedEncodedCharacters: 4,
+      contentIntegrityVerified: false
+    });
+    expect(second.items).toHaveLength(1);
+    expect(toArray).not.toHaveBeenCalled();
+    expect(bulkGet).not.toHaveBeenCalled();
+    expect(get).toHaveBeenCalledTimes(17);
+  });
+
+  it("advances a bounded mediaType purpose scan across unrelated corrupt rows without skipping a budget-blocked row", async () => {
+    const repository = createRepository();
+    const purpose = "哈基米运限审核收件箱 · 本地未核验 · v1";
+    const ordinaryCorrupt = {
+      ...storedAttachment({
+        id: "00000000-0000-4000-8000-000000000001",
+        mediaType: "application/json",
+        description: "ordinary-json"
+      }),
+      contentHash: "not-a-sha256"
+    } as unknown as LocalAttachmentRecord;
+    const linkedPurpose = storedAttachment({
+      id: "00000000-0000-4000-8000-000000000002",
+      mediaType: "application/json",
+      description: purpose,
+      link: {
+        kind: "research_subject",
+        subjectId: "00000000-0000-4000-8000-000000000099"
+      }
+    });
+    const matching = storedAttachment({
+      id: "00000000-0000-4000-8000-000000000003",
+      fileName: "review.json",
+      mediaType: "application/json",
+      description: purpose
+    });
+    const otherMediaType = storedAttachment({
+      id: "00000000-0000-4000-8000-000000000004",
+      mediaType: "text/plain",
+      description: purpose
+    });
+    await repository.database.attachments.bulkAdd([
+      ordinaryCorrupt,
+      linkedPurpose,
+      matching,
+      otherMediaType
+    ]);
+
+    const first = await repository.readAttachmentMetadataPage({
+      mediaType: "application/json",
+      description: purpose,
+      unlinkedOnly: true,
+      limit: 3,
+      maxEncodedCharacters: 8
+    });
+    expect(first).toMatchObject({
+      totalCount: 3,
+      offset: 0,
+      items: [],
+      nextOffset: 2,
+      scannedCount: 2,
+      scannedEncodedCharacters: 8,
+      contentIntegrityVerified: false
+    });
+
+    const blocked = await repository.readAttachmentMetadataPage({
+      offset: 2,
+      mediaType: "application/json",
+      description: purpose,
+      unlinkedOnly: true,
+      limit: 1,
+      maxEncodedCharacters: 3
+    });
+    expect(blocked).toMatchObject({
+      totalCount: 3,
+      offset: 2,
+      items: [],
+      nextOffset: 2,
+      scannedCount: 0,
+      scannedEncodedCharacters: 0
+    });
+
+    const final = await repository.readAttachmentMetadataPage({
+      offset: blocked.nextOffset!,
+      mediaType: "application/json",
+      description: purpose,
+      unlinkedOnly: true,
+      limit: 1,
+      maxEncodedCharacters: 4
+    });
+    expect(final).toMatchObject({
+      totalCount: 3,
+      offset: 2,
+      nextOffset: null,
+      scannedCount: 1,
+      scannedEncodedCharacters: 4,
+      contentIntegrityVerified: false,
+      items: [{
+        id: matching.id,
+        fileName: "review.json",
+        contentHash: matching.contentHash,
+        contentIntegrity: "unchecked"
+      }]
+    });
+    expect("contentBase64" in final.items[0]!).toBe(false);
+  });
+
+  it("revalidates every returned non-null attachment link without hashing its content", async () => {
+    const repository = createRepository();
+    const caseId = crypto.randomUUID();
+    await repository.database.cases.add({ id: caseId } as never);
+    const attachment = storedAttachment({
+      link: { kind: "research_subject", subjectId: caseId }
+    });
+    await repository.database.attachments.add(attachment);
+
+    await expect(repository.readAttachmentMetadataPage()).resolves.toMatchObject({
+      items: [{
+        id: attachment.id,
+        contentHash: "0".repeat(64),
+        contentIntegrity: "unchecked"
+      }]
+    });
+    await repository.database.cases.delete(caseId);
+    await expect(repository.readAttachmentMetadataPage()).rejects.toMatchObject({
+      code: "LINK_TARGET_NOT_FOUND"
+    });
+  });
+});
+
+describe("sixteen-partition full data operations", () => {
+  it("rejects a chart-field Citation whose CandidateSet id impersonates a Case id", async () => {
+    const repository = createRepository();
+    const knowledge = new KnowledgeRepository(repository.database, () => "2026-08-02T00:00:00.000Z");
+    const birthInput: BirthInput = {
+      schemaVersion: SCHEMA_VERSION,
+      calendarType: "gregorian",
+      date: "1995-08-18",
+      time: "08:26",
+      timePrecision: "exact_minute",
+      timeZone: "Asia/Shanghai",
+      sex: "male",
+      lunarLeapMonth: false,
+      location: { label: "", latitude: null, longitude: null, precision: "unknown" },
+      sourceNote: ""
+    };
+    const [calculated, candidateResult] = await Promise.all([
+      calculateChart(birthInput, WORKING_DEFAULT_RULE_PROFILE),
+      calculateUnknownHourCandidates(
+        { ...birthInput, time: null, timePrecision: "unknown_hour" },
+        WORKING_DEFAULT_RULE_PROFILE
+      )
+    ]);
+    const caseBundle = await repository.createCase({ alias: "真实案例", calculated });
+    const candidateSet = await repository.createCandidateSet({
+      alias: "不能冒充案例的候选集",
+      candidateSet: candidateResult
+    });
+    const content = "# Source\nverified chart field";
+    const document = await knowledge.createDocument({
+      title: "Chart target source",
+      author: "User",
+      edition: "Local",
+      sourceNote: "",
+      fileName: "chart-target.md",
+      format: "markdown",
+      content,
+      byteSize: new TextEncoder().encode(content).byteLength
+    });
+    await knowledge.createCitation({
+      documentId: document.id,
+      locator: { sectionId: "section-1", startLine: 2, endLine: 2 },
+      annotation: "valid before snapshot corruption",
+      targets: [{
+        kind: "chart_field",
+        caseId: caseBundle.caseRecord.id,
+        revisionId: caseBundle.revisions[0]!.id,
+        field: "pillars.day.ganZhi"
+      }]
+    });
+    const current = await repository.readFullDataSnapshot();
+    const corrupted = structuredClone(current);
+    const revision = corrupted.revisions[0]!;
+    revision.caseId = candidateSet.id;
+    const citation = corrupted.citations[0]!;
+    const target = citation.targets[0]!;
+    if (target.kind !== "chart_field") throw new Error("expected chart-field Citation fixture");
+    target.caseId = candidateSet.id;
+    citation.targetKeys = citationTargetKeys(citation.targets);
+
+    await expect(repository.replaceFullDataSnapshot(corrupted)).rejects.toMatchObject({
+      code: "TARGET_CONTEXT_MISMATCH"
+    });
+    await expect(repository.readFullDataSnapshot()).resolves.toEqual(current);
+  });
+
+  it("rejects accessor-backed snapshot partitions and CAS options without invoking their getters", async () => {
+    const repository = createRepository();
+    const snapshot = await repository.readFullDataSnapshot();
+    const partitionGetter = vi.fn(() => []);
+    Object.defineProperty(snapshot, "savedViews", {
+      configurable: true,
+      enumerable: true,
+      get: partitionGetter
+    });
+
+    await expect(repository.replaceFullDataSnapshot(snapshot)).rejects.toThrow(
+      "Full data snapshot must contain only own enumerable data properties."
+    );
+    expect(partitionGetter).not.toHaveBeenCalled();
+
+    const safeSnapshot = await repository.readFullDataSnapshot();
+    const optionGetter = vi.fn(() => "0".repeat(64));
+    const options = Object.defineProperty({}, "expectedCurrentPayloadDigest", {
+      configurable: true,
+      enumerable: true,
+      get: optionGetter
+    }) as { expectedCurrentPayloadDigest: string };
+
+    await expect(repository.replaceFullDataSnapshot(safeSnapshot, options)).rejects.toThrow(
+      "Full data replacement options cannot contain accessors."
+    );
+    expect(optionGetter).not.toHaveBeenCalled();
+
+    await expect(repository.replaceFullDataSnapshot(safeSnapshot, {
+      expectedCurrentPayloadDigest: "0".repeat(64),
+      unexpected: true
+    } as never)).rejects.toThrow("Full data replacement options must be a plain exact object.");
+    await expect(repository.replaceFullDataSnapshot(safeSnapshot, {
+      expectedCurrentPayloadDigest: "A".repeat(64)
+    })).rejects.toThrow("Expected current full-data payload digest must be a lowercase SHA-256 digest.");
+    const nonEnumerableOptions = Object.defineProperty({}, "expectedCurrentPayloadDigest", {
+      configurable: true,
+      enumerable: false,
+      value: "0".repeat(64),
+      writable: true
+    }) as { expectedCurrentPayloadDigest: string };
+    await expect(repository.replaceFullDataSnapshot(safeSnapshot, nonEnumerableOptions)).rejects.toThrow(
+      "Full data replacement options must use an own enumerable data property."
+    );
+  });
+
+  it.each([
+    ["an extra root partition", (snapshot: FullBackupPayload) => {
+      (snapshot as FullBackupPayload & { unexpectedPartition: unknown }).unexpectedPartition = [];
+    }],
+    ["undefined", (snapshot: FullBackupPayload) => {
+      snapshot.cases.push(undefined as never);
+    }],
+    ["NaN", (snapshot: FullBackupPayload) => {
+      snapshot.cases.push(Number.NaN as never);
+    }],
+    ["Date", (snapshot: FullBackupPayload) => {
+      snapshot.cases.push(new Date() as never);
+    }],
+    ["a custom prototype", (snapshot: FullBackupPayload) => {
+      Object.setPrototypeOf(snapshot, { custom: true });
+    }],
+    ["a custom array prototype", (snapshot: FullBackupPayload) => {
+      const cases: unknown[] = [];
+      Object.setPrototypeOf(cases, Object.create(Array.prototype));
+      snapshot.cases = cases as never;
+    }],
+    ["a sparse array", (snapshot: FullBackupPayload) => {
+      snapshot.cases = new Array(1) as never;
+    }],
+    ["a cycle", (snapshot: FullBackupPayload) => {
+      snapshot.cases.push(snapshot as never);
+    }]
+  ])("fails closed before replacement for declarative snapshot boundary: %s", async (_name, tamper) => {
+    const repository = createRepository();
+    const snapshot = await repository.readFullDataSnapshot();
+    tamper(snapshot);
+
+    await expect(repository.replaceFullDataSnapshot(snapshot)).rejects.toThrow();
+    await expect(repository.readFullDataSnapshot()).resolves.toMatchObject({ cases: [] });
+  });
+
+  it("accepts a shared acyclic declarative value and lets Schema parsing remove aliases", async () => {
+    const repository = createRepository();
+    const snapshot = await repository.readFullDataSnapshot();
+    const sharedEmptyPartition: unknown[] = [];
+    const sharedSnapshot = snapshot as unknown as Record<string, unknown>;
+    for (const partition of Object.keys(snapshot)) sharedSnapshot[partition] = sharedEmptyPartition;
+
+    await expect(repository.replaceFullDataSnapshot(snapshot)).resolves.toBeUndefined();
+    const restored = await repository.readFullDataSnapshot();
+    expect(Object.values(restored).every((partition) => partition.length === 0)).toBe(true);
+    expect(restored.cases).not.toBe(restored.revisions);
+  });
+
+  it("isolates every replacement partition from caller mutation after invocation", async () => {
+    const repository = createRepository();
+    await repository.saveResearcherProfile({ displayName: "Captured researcher" });
+    const snapshot = await repository.readFullDataSnapshot();
+    const captured = structuredClone(snapshot);
+    const options = { expectedCurrentPayloadDigest: await sha256Hex(snapshot) };
+
+    const replacement = repository.replaceFullDataSnapshot(snapshot, options);
+    snapshot.researcherProfiles[0]!.displayName = "Mutated after invocation";
+    options.expectedCurrentPayloadDigest = "0".repeat(64);
+
+    await replacement;
+    await expect(repository.readFullDataSnapshot()).resolves.toEqual(captured);
+  });
+
+  it("accepts the legal singleton boundary and rejects a snapshot above it", async () => {
+    const repository = createRepository();
+    await repository.saveResearcherProfile({ displayName: "Singleton boundary" });
+    const legalSnapshot = await repository.readFullDataSnapshot();
+
+    await expect(repository.replaceFullDataSnapshot(legalSnapshot)).resolves.toBeUndefined();
+
+    const overLimitSnapshot = structuredClone(legalSnapshot);
+    overLimitSnapshot.researcherProfiles.push(structuredClone(overLimitSnapshot.researcherProfiles[0]!));
+    await expect(repository.replaceFullDataSnapshot(overLimitSnapshot)).rejects.toThrow();
+    await expect(repository.readFullDataSnapshot()).resolves.toEqual(legalSnapshot);
+  });
+
   it("aborts an in-flight full snapshot transaction when its signal is cancelled", async () => {
     const repository = createRepository();
     const controller = new AbortController();
@@ -392,6 +1104,75 @@ describe("thirteen-partition full data operations", () => {
 
     casesRead.mockRestore();
     await expect(repository.readFullDataSnapshot()).resolves.toMatchObject({ cases: [] });
+  });
+
+  it("verifies full-snapshot attachment digests with a hard concurrency of one", async () => {
+    const repository = createRepository();
+    const zeroByteHash = "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d";
+    await repository.database.attachments.bulkAdd(Array.from({ length: 3 }, (_, index) =>
+      storedAttachment({
+        id: indexedAttachmentId(index + 1),
+        fileName: `snapshot-${index}.bin`,
+        contentHash: zeroByteHash
+      })
+    ));
+    const originalDigest = globalThis.crypto.subtle.digest.bind(globalThis.crypto.subtle);
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const digest = vi.spyOn(globalThis.crypto.subtle, "digest").mockImplementation(async (algorithm, data) => {
+      inFlight += 1;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      try {
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
+        return await originalDigest(algorithm, data);
+      } finally {
+        inFlight -= 1;
+      }
+    });
+
+    const snapshot = await repository.readFullDataSnapshot();
+
+    expect(snapshot.attachments).toHaveLength(3);
+    expect(digest).toHaveBeenCalledTimes(3);
+    expect(maxInFlight).toBe(1);
+  });
+
+  it("verifies replacement-snapshot attachment digests with a hard concurrency of one", async () => {
+    const repository = createRepository();
+    const zeroByteHash = "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d";
+    await repository.database.attachments.bulkAdd(Array.from({ length: 3 }, (_, index) =>
+      storedAttachment({
+        id: indexedAttachmentId(index + 1),
+        fileName: `restore-${index}.bin`,
+        contentHash: zeroByteHash
+      })
+    ));
+    const snapshot = await repository.readFullDataSnapshot();
+    const originalDigest = globalThis.crypto.subtle.digest.bind(globalThis.crypto.subtle);
+    let attachmentDigestCalls = 0;
+    let attachmentDigestsInFlight = 0;
+    let maxAttachmentDigestsInFlight = 0;
+    vi.spyOn(globalThis.crypto.subtle, "digest").mockImplementation(async (algorithm, data) => {
+      if (data.byteLength !== 1) return originalDigest(algorithm, data);
+      attachmentDigestCalls += 1;
+      attachmentDigestsInFlight += 1;
+      maxAttachmentDigestsInFlight = Math.max(
+        maxAttachmentDigestsInFlight,
+        attachmentDigestsInFlight
+      );
+      try {
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
+        return await originalDigest(algorithm, data);
+      } finally {
+        attachmentDigestsInFlight -= 1;
+      }
+    });
+
+    await repository.replaceFullDataSnapshot(snapshot);
+
+    expect(attachmentDigestCalls).toBe(3);
+    expect(maxAttachmentDigestsInFlight).toBe(1);
+    expect(await repository.database.attachments.count()).toBe(3);
   });
 
   it("snapshots, atomically replaces, CAS-checks, and clears all new partitions", async () => {

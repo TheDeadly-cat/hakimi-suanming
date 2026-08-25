@@ -9,11 +9,14 @@ import {
 } from "@playwright/test";
 import { preflightFullBackupFile } from "@hakimi/backup";
 import {
+  BRIDGE_RELEASE_DATABASE_DESCRIPTOR,
   PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
   PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR,
   PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR
 } from "../release-protocol";
+import { DEFAULT_V13_RELEASE_BROWSER_IDENTITY } from "../playwright.release-browser-matrix.ts";
 import { pageReleaseEvidence } from "./cross-schema-upgrade-helpers";
+import { requireReleaseBrowserRuntimeProduct } from "./release-browser-persistent-context.ts";
 import {
   clearAllLocalData,
   collectConsoleProblems,
@@ -1107,6 +1110,7 @@ async function exportAnonymousMarkdownOffline(page: Page, caseId: string, revisi
   for (const sensitive of [EXACT_ALIAS, EVENT_TITLE, caseId, revisionId]) {
     expect(markdown).not.toContain(sensitive);
   }
+  await dialog.getByRole("button", { name: "已核对，允许再次下载", exact: true }).click();
   await dialog.getByRole("button", { name: "关闭文件交付", exact: true }).click();
 }
 
@@ -1118,9 +1122,16 @@ test("同一批 CSV 数据连续贯穿修订、正式四盘对照、证据链、
 }) => {
   test.setTimeout(480_000);
   if (!baseURL) throw new Error("Playwright baseURL 未配置");
+  const runtimeBrowserVersion = await (
+    await context.newCDPSession(page)
+  ).send("Browser.getVersion");
+  const runtimeBrowserProduct = requireReleaseBrowserRuntimeProduct(
+    test.info().project.name,
+    runtimeBrowserVersion.product
+  );
   test.info().annotations.push({
     type: "browser-version",
-    description: `${test.info().project.name} ${browser.version()}`
+    description: `${test.info().project.name} ${browser.version()} ${runtimeBrowserProduct}`
   });
   page.setDefaultTimeout(15_000);
   page.setDefaultNavigationTimeout(30_000);
@@ -1132,8 +1143,21 @@ test("同一批 CSV 数据连续贯穿修订、正式四盘对照、证据链、
   await waitForAppReady(page);
   await waitForServiceWorker(page);
   const releaseSchema = await page.evaluate(() => Number(document.documentElement.dataset.dbSchema));
-  expect([13, 15, 16]).toContain(releaseSchema);
-  if (releaseSchema >= 15) {
+  const configuredReleaseIdentity = test.info().project.metadata.releaseIdentity;
+  if (configuredReleaseIdentity !== undefined) {
+    expect(configuredReleaseIdentity).toEqual(DEFAULT_V13_RELEASE_BROWSER_IDENTITY);
+    expect(releaseSchema).toBe(DEFAULT_V13_RELEASE_BROWSER_IDENTITY.targetSchema);
+    await expect.poll(() => pageReleaseEvidence(page)).toMatchObject({
+      appBootReady: "true",
+      dbGeneration: DEFAULT_V13_RELEASE_BROWSER_IDENTITY.dbGeneration,
+      dbSchema: String(DEFAULT_V13_RELEASE_BROWSER_IDENTITY.targetSchema),
+      evidenceId: process.env.HAKIMI_RELEASE_EVIDENCE_ID ?? "unbound-local-build",
+      descriptor: BRIDGE_RELEASE_DATABASE_DESCRIPTOR
+    });
+  } else {
+    expect([13, 15, 16]).toContain(releaseSchema);
+  }
+  if (configuredReleaseIdentity === undefined && releaseSchema >= 15) {
     const initialReleaseEvidence = await pageReleaseEvidence(page);
     const expectedReleaseDescriptor = [
       PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,

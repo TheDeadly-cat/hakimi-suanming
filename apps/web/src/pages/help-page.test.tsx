@@ -1,8 +1,33 @@
-import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { HelpPage } from "./help-page";
 
+const { printReportMock } = vi.hoisted(() => ({ printReportMock: vi.fn() }));
+
+vi.mock("@hakimi/platform", () => ({
+  webReportExportPort: { printReport: printReportMock }
+}));
+
+beforeEach(() => {
+  printReportMock.mockReset().mockResolvedValue(undefined);
+});
+
 describe("HelpPage", () => {
+  it("只通过平台端口打印，并在适配器拒绝时显示可重试错误", async () => {
+    printReportMock.mockRejectedValueOnce(new Error("安全指南打印不可用。"));
+    render(<HelpPage />);
+
+    const printButton = screen.getByRole("button", { name: "打印安全指南" });
+    fireEvent.click(printButton);
+
+    expect((await screen.findByText("安全指南打印不可用。")).closest("[role='alert']")).toBeTruthy();
+    expect(printReportMock).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(printButton);
+    await waitFor(() => expect(screen.queryByText("安全指南打印不可用。")).toBeNull());
+    expect(printReportMock).toHaveBeenCalledTimes(2);
+  });
+
   it("提供首次使用清单与可执行的数据安全入口", () => {
     render(<HelpPage />);
 
@@ -24,8 +49,10 @@ describe("HelpPage", () => {
     expect(screen.getByText(/首次完整在线载入并由浏览器确认缓存后/)).toBeTruthy();
     expect(screen.getByText(/规则切换、运限、案例检索、正式对照、知识检索、导入导出与完整备份/)).toBeTruthy();
     expect(screen.getByText(/摘要一致、自动测试通过和两次复算相同/)).toBeTruthy();
-    expect(screen.getByText(/AI 研究助手默认关闭/)).toBeTruthy();
-    expect(screen.getByText(/DeepSeek API Key/)).toBeTruthy();
+    expect(screen.getByText(/应用内 AI Provider 外发保持关闭/)).toBeTruthy();
+    expect(screen.getByText(/不提供 DeepSeek API Key 或发送入口/)).toBeTruthy();
+    expect(screen.getByText(/按需加载时可能请求同源静态代码.*不等于用户数据外发/)).toBeTruthy();
+    expect(screen.getByText(/仅本机结构化草稿验证/)).toBeTruthy();
     expect(screen.getByText(/不是医学、心理危机、法律、财务或人身安全决策系统/)).toBeTruthy();
     expect(screen.queryByText(/已经通过 360 例|自动云备份已开启|AI 已启用/)).toBeNull();
   });
@@ -34,8 +61,9 @@ describe("HelpPage", () => {
     render(<HelpPage />);
 
     const topicNavigation = screen.getByRole("navigation", { name: "帮助主题" });
-    expect(within(topicNavigation).getAllByRole("link")).toHaveLength(6);
+    expect(within(topicNavigation).getAllByRole("link")).toHaveLength(9);
     expect(within(topicNavigation).getByRole("link", { name: "AI 边界" }).getAttribute("href")).toBe("#ai");
+    expect(within(topicNavigation).getByRole("link", { name: "研究目录" }).getAttribute("href")).toBe("#appendix");
     expect(screen.getByText("Dexie 13")).toBeTruthy();
     expect(screen.getAllByText("full 1.2.0").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("IANA 2026c")).toBeTruthy();
@@ -69,22 +97,30 @@ describe("HelpPage", () => {
 
     const catalog = screen.getByRole("region", { name: "跨术数内容总目录" });
     expect(within(catalog).getAllByRole("article")).toHaveLength(3);
-    expect(within(catalog).getByText("3 体系 · 0 专家批准")).toBeTruthy();
+    expect(catalog.getAttribute("data-binding-state")).toBe("bound");
+    expect(catalog.getAttribute("data-scoring-allowed")).toBe("false");
+    expect(catalog.getAttribute("data-public-release-authorized")).toBe("false");
     expect(within(catalog).getByText(/69 个八字审稿项、246 条紫微候选和 43 个西洋语义基元/)).toBeTruthy();
 
     const bazi = within(catalog).getByRole("article", { name: "八字" });
     expect(within(bazi).getByText("69", { selector: "strong" })).toBeTruthy();
     expect(within(bazi).getByText("10", { selector: "strong" })).toBeTruthy();
     expect(within(bazi).getByRole("link", { name: "进入八字研究工作台" }).getAttribute("href")).toBe("/");
-    expect(within(bazi).getAllByRole("link").every((link) => (
-      link.classList.contains("research-content-catalog-entry") || link.getAttribute("target") === "_blank"
-    ))).toBe(true);
+    const baziSourceLinks = within(bazi).getAllByRole("link").filter((link) => link.getAttribute("target") === "_blank");
+    expect(baziSourceLinks.length).toBeGreaterThan(0);
+    expect(baziSourceLinks.every((link) => link.getAttribute("href")?.startsWith("https://"))).toBe(true);
+    expect(within(within(bazi).getByRole("navigation", { name: "八字卡片导航" }))
+      .getByRole("link", { name: "返回快速定位" }).getAttribute("href")).toMatch(/^#/);
 
     const ziwei = within(catalog).getByRole("article", { name: "紫微斗数" });
     expect(within(ziwei).getByText("246", { selector: "strong" })).toBeTruthy();
     expect(within(ziwei).getByText("11", { selector: "strong" })).toBeTruthy();
     expect(ziwei.querySelector(".research-content-catalog-entry")).toBeNull();
-    expect(within(ziwei).getAllByRole("link").every((link) => link.getAttribute("target") === "_blank")).toBe(true);
+    const ziweiSourceLinks = within(ziwei).getAllByRole("link").filter((link) => link.getAttribute("target") === "_blank");
+    expect(ziweiSourceLinks.length).toBeGreaterThan(0);
+    expect(ziweiSourceLinks.every((link) => link.getAttribute("href")?.startsWith("https://"))).toBe(true);
+    expect(within(within(ziwei).getByRole("navigation", { name: "紫微斗数卡片导航" }))
+      .getByRole("link", { name: "返回快速定位" }).getAttribute("href")).toMatch(/^#/);
     expect(ziwei.closest("li")?.getAttribute("data-runtime-reachable")).toBe("false");
     expect(ziwei.closest("li")?.getAttribute("data-entry-href")).toBe("none");
 

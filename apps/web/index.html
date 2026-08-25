@@ -1,16 +1,390 @@
 <!doctype html>
-<html lang="zh-CN">
+<html
+  lang="zh-CN"
+  data-app-boot-ready="false"
+  data-release-contract="legacy-v13"
+  data-target-schema="13"
+  data-migration-id="null"
+  data-engineering-evidence-only="true"
+  data-public-release-authorized="false"
+  data-expert-truth-claimed="false"
+  data-mutation-epoch-bypassed="false"
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#fbf8f1" />
-    <meta name="description" content="可离线使用、规则可追溯的专业八字研究工作台。" />
+    <meta name="description" content="可离线使用、规则与证据状态可追溯的八字研究工作台。" />
     <link rel="icon" href="/brand-mark.svg" type="image/svg+xml" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <title>哈基米八字研究台</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --boot-ink: #24312d;
+        --boot-muted: #66706b;
+        --boot-paper: #fbf7ed;
+        --boot-paper-deep: #eee5d3;
+        --boot-cinnabar: #a54233;
+        --boot-blue: #315f70;
+        --boot-line: rgba(48, 61, 56, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+        margin: 0;
+        background: var(--boot-paper-deep);
+      }
+
+      body {
+        color: var(--boot-ink);
+        font-family: "Noto Sans SC", "Microsoft YaHei UI", sans-serif;
+      }
+
+      .preboot-shell {
+        position: relative;
+        isolation: isolate;
+        display: grid;
+        min-height: 100vh;
+        min-height: 100dvh;
+        place-items: center;
+        overflow: hidden;
+        padding:
+          max(24px, env(safe-area-inset-top))
+          max(18px, env(safe-area-inset-right))
+          max(24px, env(safe-area-inset-bottom))
+          max(18px, env(safe-area-inset-left));
+        background:
+          radial-gradient(circle at 12% 12%, rgba(165, 66, 51, 0.14), transparent 26rem),
+          radial-gradient(circle at 86% 78%, rgba(49, 95, 112, 0.13), transparent 30rem),
+          linear-gradient(145deg, #f2eadb 0%, var(--boot-paper) 48%, #e9dfcc 100%);
+      }
+
+      .preboot-shell::before {
+        position: absolute;
+        z-index: -1;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(48, 61, 56, 0.045) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(48, 61, 56, 0.045) 1px, transparent 1px);
+        background-size: 36px 36px;
+        content: "";
+        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), transparent 84%);
+      }
+
+      .preboot-frame {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(230px, 0.38fr);
+        width: min(100%, 980px);
+        overflow: hidden;
+        border: 1px solid var(--boot-line);
+        border-top: 5px solid var(--boot-cinnabar);
+        border-radius: 10px 38px 10px 38px;
+        background:
+          linear-gradient(112deg, rgba(255, 253, 247, 0.97), rgba(247, 239, 224, 0.95)),
+          var(--boot-paper);
+        box-shadow: 0 32px 90px rgba(52, 46, 34, 0.18);
+      }
+
+      .preboot-frame::after {
+        position: absolute;
+        right: -54px;
+        bottom: -58px;
+        width: 150px;
+        height: 150px;
+        border: 1px solid rgba(165, 66, 51, 0.22);
+        border-radius: 50%;
+        box-shadow:
+          0 0 0 18px rgba(165, 66, 51, 0.045),
+          0 0 0 38px rgba(165, 66, 51, 0.025);
+        content: "";
+      }
+
+      .preboot-primary {
+        min-width: 0;
+        padding: clamp(30px, 6vw, 68px);
+      }
+
+      .preboot-brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .preboot-brand img {
+        width: 48px;
+        height: 48px;
+        filter: drop-shadow(0 8px 14px rgba(70, 46, 34, 0.14));
+      }
+
+      .preboot-kicker {
+        margin: 0;
+        color: var(--boot-cinnabar);
+        font: 800 11px/1.35 "Cascadia Code", "SFMono-Regular", monospace;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+
+      .preboot-brand-name {
+        margin: 4px 0 0;
+        color: var(--boot-muted);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+
+      .preboot-title {
+        max-width: 9ch;
+        margin: clamp(30px, 6vw, 58px) 0 0;
+        font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
+        font-size: clamp(42px, 7vw, 76px);
+        font-weight: 650;
+        letter-spacing: -0.055em;
+        line-height: 1.04;
+        text-wrap: balance;
+      }
+
+      .preboot-lead {
+        max-width: 34rem;
+        margin: 22px 0 0;
+        color: var(--boot-muted);
+        font-size: clamp(15px, 2vw, 17px);
+        line-height: 1.85;
+      }
+
+      .preboot-status {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        width: fit-content;
+        max-width: 100%;
+        margin-top: 30px;
+        padding: 10px 14px;
+        border: 1px solid rgba(49, 95, 112, 0.22);
+        border-radius: 4px 14px 4px 14px;
+        background: rgba(49, 95, 112, 0.07);
+        color: var(--boot-blue);
+        font-size: 13px;
+        font-weight: 750;
+      }
+
+      .preboot-pulse {
+        width: 9px;
+        height: 9px;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        background: var(--boot-blue);
+        box-shadow: 0 0 0 0 rgba(49, 95, 112, 0.28);
+        animation: preboot-pulse 1.8s ease-out infinite;
+      }
+
+      .preboot-aside {
+        position: relative;
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 34px;
+        padding: clamp(28px, 5vw, 54px) clamp(24px, 4vw, 42px);
+        border-left: 1px solid var(--boot-line);
+        background: rgba(234, 225, 207, 0.5);
+      }
+
+      .preboot-aside-label {
+        margin: 0 0 18px;
+        color: var(--boot-muted);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .preboot-ledger {
+        display: grid;
+        gap: 0;
+        margin: 0;
+      }
+
+      .preboot-ledger div {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 14px;
+        padding: 12px 0;
+        border-top: 1px solid var(--boot-line);
+      }
+
+      .preboot-ledger dt,
+      .preboot-ledger dd {
+        margin: 0;
+      }
+
+      .preboot-ledger dt {
+        color: var(--boot-muted);
+        font-size: 12px;
+      }
+
+      .preboot-ledger dd {
+        color: var(--boot-ink);
+        font: 700 12px/1.5 "Cascadia Code", "SFMono-Regular", monospace;
+        overflow-wrap: anywhere;
+        text-align: right;
+      }
+
+      .preboot-boundary {
+        position: relative;
+        z-index: 1;
+        margin: 0;
+        padding-top: 18px;
+        border-top: 1px solid var(--boot-line);
+        color: var(--boot-muted);
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .noscript-shell {
+        display: grid;
+        min-height: 100vh;
+        min-height: 100dvh;
+        place-items: center;
+        padding: 24px;
+        background: linear-gradient(145deg, #f2eadb, var(--boot-paper));
+      }
+
+      .noscript-card {
+        width: min(100%, 680px);
+        padding: clamp(28px, 6vw, 54px);
+        border: 1px solid var(--boot-line);
+        border-top: 5px solid var(--boot-cinnabar);
+        border-radius: 8px 28px 8px 28px;
+        background: rgba(255, 253, 247, 0.96);
+        box-shadow: 0 24px 64px rgba(52, 46, 34, 0.14);
+      }
+
+      .noscript-card h1 {
+        margin: 0;
+        font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
+        font-size: clamp(32px, 7vw, 54px);
+        line-height: 1.1;
+      }
+
+      .noscript-card p {
+        margin: 20px 0 0;
+        color: var(--boot-muted);
+        line-height: 1.8;
+      }
+
+      @keyframes preboot-pulse {
+        0% { box-shadow: 0 0 0 0 rgba(49, 95, 112, 0.3); }
+        70%, 100% { box-shadow: 0 0 0 9px rgba(49, 95, 112, 0); }
+      }
+
+      @media (max-width: 720px) {
+        .preboot-frame {
+          grid-template-columns: 1fr;
+          border-radius: 8px 28px 8px 28px;
+        }
+
+        .preboot-primary {
+          padding-bottom: 34px;
+        }
+
+        .preboot-title {
+          max-width: 8ch;
+        }
+
+        .preboot-aside {
+          gap: 24px;
+          border-top: 1px solid var(--boot-line);
+          border-left: 0;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .preboot-pulse {
+          animation: none;
+          box-shadow: 0 0 0 4px rgba(49, 95, 112, 0.14);
+        }
+      }
+
+      @media (forced-colors: active) {
+        .preboot-shell,
+        .preboot-frame,
+        .preboot-aside,
+        .noscript-shell,
+        .noscript-card {
+          background: Canvas;
+          box-shadow: none;
+          color: CanvasText;
+        }
+
+        .preboot-frame,
+        .preboot-aside,
+        .preboot-status,
+        .noscript-card {
+          border-color: CanvasText;
+        }
+
+        .preboot-pulse {
+          background: Highlight;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main
+        class="preboot-shell"
+        aria-labelledby="preboot-title"
+        aria-describedby="preboot-boundary"
+        aria-busy="true"
+      >
+        <section class="preboot-frame">
+          <div class="preboot-primary">
+            <div class="preboot-brand">
+              <img src="/brand-mark.svg" alt="" width="48" height="48" />
+              <div>
+                <p class="preboot-kicker">Hakimi / Local Research</p>
+                <p class="preboot-brand-name">哈基米八字研究台</p>
+              </div>
+            </div>
+            <h1 class="preboot-title" id="preboot-title">让每一次推演，留下可追溯的路径。</h1>
+            <p class="preboot-lead">正在建立本地研究环境。启动预检只读取必要状态，不会绕过迁移纪元，也不会自动改写研究资料。</p>
+            <div class="preboot-status" role="status" aria-live="polite">
+              <span class="preboot-pulse" aria-hidden="true"></span>
+              <span>正在检查本地工作区与恢复边界</span>
+            </div>
+          </div>
+          <aside class="preboot-aside" aria-label="启动基线">
+            <div>
+              <p class="preboot-aside-label">Boot ledger</p>
+              <dl class="preboot-ledger">
+                <div><dt>Release</dt><dd>legacy-v13</dd></div>
+                <div><dt>Target schema</dt><dd>13</dd></div>
+                <div><dt>Migration</dt><dd>null</dd></div>
+                <div><dt>Mutation</dt><dd>preflight only</dd></div>
+              </dl>
+            </div>
+            <p class="preboot-boundary" id="preboot-boundary">此画面仅表示前端资源已到达并正在预检，不代表数据完整性、术数结论、专家审核或公开发布已获确认。</p>
+          </aside>
+        </section>
+      </main>
+    </div>
+    <noscript>
+      <style>.preboot-shell { display: none !important; }</style>
+      <main class="noscript-shell">
+        <section class="noscript-card" role="alert" aria-labelledby="noscript-title">
+          <h1 id="noscript-title">需要启用 JavaScript</h1>
+          <p>本地研究台依赖 JavaScript 完成只读启动预检、数据库版本协调和界面渲染。当前没有打开、迁移或改写本地研究资料。</p>
+          <p>启用 JavaScript 后正常重新载入即可；不要通过清除站点数据来处理此状态。</p>
+        </section>
+      </main>
+    </noscript>
     <script type="module" src="/src/bootstrap.ts"></script>
   </body>
 </html>

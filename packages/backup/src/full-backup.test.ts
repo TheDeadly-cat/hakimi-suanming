@@ -67,7 +67,8 @@ import {
   buildTimeZoneDatabaseSnapshotId,
   buildUnknownHourCandidateHashPayload,
   citationTargetKeys,
-  eventRecordSchema
+  eventRecordSchema,
+  storedEventRecordSchema
 } from "@hakimi/contracts";
 import { canonicalStringify, encodeCanonicalBase64, sha256Hex } from "@hakimi/integrity";
 import { buildKnowledgeContentSnapshot } from "@hakimi/knowledge-core";
@@ -1102,6 +1103,36 @@ function withDifferentTimeZoneDatabaseSnapshot(record: EventRecord): EventRecord
   return eventRecordSchema.parse(historical);
 }
 
+function asUnavailableHistoricalOnlyEvent(record: EventRecord): EventRecord {
+  const historical = structuredClone(record);
+  if (historical.timeContext.kind !== "zoned_minute" || !historical.timeContext.timeZoneDatabase) {
+    throw new Error("expected an identified zoned Event fixture");
+  }
+  historical.timeContext.timeZone = "Historical/Only";
+  historical.timeContext.timeZoneDatabase.dataSha256 = alteredHex(
+    historical.timeContext.timeZoneDatabase.dataSha256
+  );
+  historical.timeContext.timeZoneDatabase.snapshotId = buildTimeZoneDatabaseSnapshotId(
+    historical.timeContext.timeZoneDatabase
+  );
+  historical.timeContext.tzdbVersion = historical.timeContext.timeZoneDatabase.snapshotId;
+  for (const boundary of [historical.timeContext.start, historical.timeContext.end]) {
+    if (!boundary) continue;
+    for (const candidate of boundary.resolution.candidates) {
+      candidate.zonedDateTime = candidate.zonedDateTime.replace(
+        /\[[^\]]+\]$/,
+        "[Historical/Only]"
+      );
+    }
+    boundary.resolution.selectedCandidate = structuredClone(
+      boundary.resolution.candidates.find(
+        (candidate) => candidate.choice === boundary.resolution.selectedCandidate.choice
+      )!
+    );
+  }
+  return storedEventRecordSchema.parse(historical);
+}
+
 function stableEventRef(envelope: FullBackupEnvelope): TransitNodeRef {
   const ref = envelope.payload.events[0]?.transitNodeRef;
   if (!ref || ref.namespace !== "hakimi-transit-node") {
@@ -1941,6 +1972,12 @@ describe("current-modelled-data full backup", () => {
     const verified = await preflightFullBackup(serializeFullBackup(envelope));
     expect(verified.payload.events.find((record) => record.id === historicalTarget.id)?.timeContext)
       .toEqual(historicalTarget.timeContext);
+    expect(verified.eventTimeVerification.targets).toEqual([{
+      receiptId: receipt.id,
+      targetEventId: historicalTarget.id,
+      status: "structural_artifact_unavailable"
+    }]);
+    expect(verified.eventTimeVerification.degradedTargetCount).toBe(1);
 
     const destination = repositories();
     await importFullBackup(destination.cases, serializeFullBackup(envelope), options);
@@ -1948,6 +1985,74 @@ describe("current-modelled-data full backup", () => {
       .resolves.toEqual([receipt]);
     const restored = await createFullBackup(destination.cases, options);
     expect(restored.payload).toEqual(envelope.payload);
+  });
+
+  it("round-trips a standalone stored-only Historical/Only Event with explicit degraded diagnostics", async () => {
+    const source = repositories();
+    const seeded = await seedModeledData(source.cases, source.research, "historical-only-backup");
+    const current = await source.research.createEvent({
+      caseId: seeded.bundle.caseRecord.id,
+      revisionId: seeded.bundle.revisions.at(-1)!.id,
+      transitNodeRef: null,
+      datePrecision: "minute",
+      startDate: "2025-03-12T12:00",
+      endDate: null,
+      timeZone: "Asia/Shanghai",
+      title: "stored-only historical Event",
+      tags: ["historical"],
+      sourceRefs: ["review:stored-only"],
+      feedback: "unreviewed",
+      body: "preserve without active-zone promotion"
+    });
+    const historical = asUnavailableHistoricalOnlyEvent(current);
+    await source.database.events.put(historical);
+
+    const envelope = await createFullBackup(source.cases, options);
+    const verified = await preflightFullBackup(serializeFullBackup(envelope));
+    expect(verified.eventTimeVerification).toMatchObject({
+      degradedEventCount: 1,
+      degradedTargetCount: 0,
+      targets: []
+    });
+    expect(verified.eventTimeVerification.events.find(({ eventId }) => eventId === historical.id))
+      .toEqual({ eventId: historical.id, status: "structural_artifact_unavailable" });
+
+    const destination = repositories();
+    await importFullBackup(destination.cases, serializeFullBackup(envelope), options);
+    expect((await destination.research.getEvent(historical.id))?.timeContext)
+      .toEqual(historical.timeContext);
+    const restored = await createFullBackup(destination.cases, options);
+    expect(restored.payload).toEqual(envelope.payload);
+    expect(restored.digests).toEqual(envelope.digests);
+  });
+
+  it("rejects a re-signed standalone retained Event whose resolver-derived candidate was tampered", async () => {
+    const source = repositories();
+    const seeded = await seedModeledData(source.cases, source.research, "retained-event-tamper");
+    const retained = await seedRetainedTzdbEvent(
+      source.database,
+      seeded.event,
+      "retained-event-tamper"
+    );
+    const envelope = await createFullBackup(source.cases, options);
+    const baseline = await preflightFullBackup(serializeFullBackup(envelope));
+    expect(baseline.eventTimeVerification.events.find(({ eventId }) => eventId === retained.id))
+      .toEqual({ eventId: retained.id, status: "exact_retained" });
+
+    const stored = envelope.payload.events.find((event) => event.id === retained.id);
+    if (stored?.timeContext.kind !== "zoned_minute") throw new Error("missing retained Event fixture");
+    stored.timeContext.start.resolution.candidates[0]!.zonedDateTime =
+      stored.timeContext.start.resolution.candidates[0]!.zonedDateTime.replace(
+        "12:00:00",
+        "12:00:01"
+      );
+    stored.timeContext.start.resolution.selectedCandidate = structuredClone(
+      stored.timeContext.start.resolution.candidates[0]!
+    );
+    await resign(envelope);
+
+    await expect(preflightFullBackup(serializeFullBackup(envelope)))
+      .rejects.toMatchObject({ code: "EVENT_TIME_CONTEXT_MISMATCH" });
   });
 
   it.each([

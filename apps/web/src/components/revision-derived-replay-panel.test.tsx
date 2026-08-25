@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { calculateChart } from "@hakimi/bazi-core";
 import type { BirthInput, RevisionRecord } from "@hakimi/contracts";
@@ -52,13 +52,17 @@ describe("RevisionDerivedReplayPanel", () => {
 
     expect(screen.getByText("不冒充旧输出")).not.toBeNull();
     expect(screen.getByText(/不会声称“与旧输出一致”/)).not.toBeNull();
-    await userEvent.click(screen.getByRole("button", { name: "生成显式版本派生投影" }));
+    await userEvent.click(screen.getByRole("button", { name: "生成只读显式派生投影" }));
 
-    expect(await screen.findByText("投影完成，源 Revision 未改写")).not.toBeNull();
-    expect(screen.getByText(/条关系事实/)).not.toBeNull();
+    expect(await screen.findByText("本次请求所需组件均已生成，源 Revision 未改写")).not.toBeNull();
+    expect(screen.getByText(/条关系记录/)).not.toBeNull();
     expect(screen.getByText(/10 柱/)).not.toBeNull();
     expect(screen.getByText(/6 层已解析/)).not.toBeNull();
-    expect(screen.getByText(/relations-0\.1\.0_luck-0\.1\.0_transit-1\.2\.0/)).not.toBeNull();
+    expect(screen.getAllByText(/relations-0\.1\.0_luck-0\.1\.0_transit-1\.2\.0/).length).toBeGreaterThan(0);
+    const disclosure = screen.getByText("完整执行绑定").closest("details");
+    expect(disclosure).not.toBeNull();
+    await userEvent.click(within(disclosure!).getByText("完整执行绑定"));
+    expect(within(disclosure!).getByText(revision.manifest.resultHash)).not.toBeNull();
     expect(revision).toEqual(sourceBefore);
   });
 
@@ -66,8 +70,12 @@ describe("RevisionDerivedReplayPanel", () => {
     const { rerender } = render(
       <RevisionDerivedReplayPanel revision={revision} atInstant={null} routeManualDirection={null} />
     );
-    await userEvent.click(screen.getByRole("button", { name: "生成显式版本派生投影" }));
-    expect(await screen.findByText("未请求", { selector: ".status-pill" })).not.toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "生成只读显式派生投影" }));
+    expect(await screen.findByText("本次请求所需组件均已生成，源 Revision 未改写")).not.toBeNull();
+    const transitCard = screen.getByRole("heading", { name: "运限切片" }).closest("article");
+    expect(transitCard).not.toBeNull();
+    expect(transitCard!.getAttribute("data-component-status")).toBe("not_requested");
+    expect(within(transitCard!).getAllByText("未请求")).toHaveLength(2);
 
     rerender(
       <RevisionDerivedReplayPanel
@@ -76,7 +84,7 @@ describe("RevisionDerivedReplayPanel", () => {
         routeManualDirection={null}
       />
     );
-    await waitFor(() => expect(screen.queryByText("投影完成，源 Revision 未改写")).toBeNull());
+    await waitFor(() => expect(screen.queryByText("本次请求所需组件均已生成，源 Revision 未改写")).toBeNull());
     expect(screen.getByText("2026-01-01T00:00:00.000Z")).not.toBeNull();
   });
 
@@ -97,11 +105,11 @@ describe("RevisionDerivedReplayPanel", () => {
     );
     expect((screen.getByRole("combobox", { name: "起运顺逆" }) as HTMLSelectElement).value).toBe("");
     await userEvent.selectOptions(screen.getByRole("combobox", { name: "起运顺逆" }), "forward");
-    await userEvent.click(screen.getByRole("button", { name: "生成显式版本派生投影" }));
+    await userEvent.click(screen.getByRole("button", { name: "生成只读显式派生投影" }));
     expect(await screen.findByText(/顺行 · 10 柱/)).not.toBeNull();
     await userEvent.selectOptions(screen.getByRole("combobox", { name: "起运顺逆" }), "backward");
     expect(screen.queryByText(/顺行 · 10 柱/)).toBeNull();
-    expect(screen.queryByText("投影完成，源 Revision 未改写")).toBeNull();
+    expect(screen.queryByText("本次请求所需组件均已生成，源 Revision 未改写")).toBeNull();
   });
 
   it("does not let an in-flight result from an old target repopulate the changed request", async () => {
@@ -112,7 +120,7 @@ describe("RevisionDerivedReplayPanel", () => {
         routeManualDirection={null}
       />
     );
-    fireEvent.click(screen.getByRole("button", { name: "生成显式版本派生投影" }));
+    fireEvent.click(screen.getByRole("button", { name: "生成只读显式派生投影" }));
     rerender(
       <RevisionDerivedReplayPanel
         revision={revision}
@@ -122,8 +130,8 @@ describe("RevisionDerivedReplayPanel", () => {
     );
     await new Promise((resolve) => window.setTimeout(resolve, 80));
     expect(screen.getByText("2026-01-01T00:00:00.000Z")).not.toBeNull();
-    expect(screen.queryByText("投影完成，源 Revision 未改写")).toBeNull();
-    expect(screen.queryByText("部分模块未能派生，源 Revision 未改写")).toBeNull();
+    expect(screen.queryByText("本次请求所需组件均已生成，源 Revision 未改写")).toBeNull();
+    expect(screen.queryByText("部分所需组件不可用，源 Revision 未改写")).toBeNull();
   });
 
   it("only saves an explicitly requested snapshot and passes the request back for repository recalculation", async () => {
@@ -137,9 +145,9 @@ describe("RevisionDerivedReplayPanel", () => {
       />
     );
 
-    expect(screen.queryByRole("button", { name: "保存此计算快照" })).toBeNull();
-    await userEvent.click(screen.getByRole("button", { name: "生成显式版本派生投影" }));
-    await userEvent.click(await screen.findByRole("button", { name: "保存此计算快照" }));
+    expect(screen.queryByRole("button", { name: "显式追加为计算收据" })).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "生成只读显式派生投影" }));
+    await userEvent.click(await screen.findByRole("button", { name: "显式追加为计算收据" }));
 
     await waitFor(() => expect(onSaveSnapshot).toHaveBeenCalledTimes(1));
     const savedRequest = onSaveSnapshot.mock.calls[0]?.[0];
@@ -148,6 +156,33 @@ describe("RevisionDerivedReplayPanel", () => {
       atInstant: "2026-05-01T00:00:00.000Z"
     });
     expect(savedRequest.profile.profileId).toContain("relations-");
-    expect(await screen.findByText("计算快照已追加到历史收据。")).not.toBeNull();
+    expect(await screen.findByText(/上层回调报告计算快照已追加/)).not.toBeNull();
+    expect(screen.getByText("上层回调状态已返回")).not.toBeNull();
+  });
+
+  it("locks an uncertain save, redacts diagnostics, and requires receipt readback before retry", async () => {
+    const onSaveSnapshot = vi.fn(async (_request: RevisionDerivedReplayRequest): Promise<"saved" | "already_saved"> => {
+      throw new Error("Bearer abc123 C:\\private\\receipt.json https://example.test/write");
+    });
+    render(
+      <RevisionDerivedReplayPanel
+        revision={revision}
+        atInstant="2026-05-01T00:00:00.000Z"
+        routeManualDirection={null}
+        onSaveSnapshot={onSaveSnapshot}
+      />
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "生成只读显式派生投影" }));
+    await userEvent.click(await screen.findByRole("button", { name: "显式追加为计算收据" }));
+
+    expect(await screen.findByText("保存提交状态未确认")).not.toBeNull();
+    expect(screen.getByText(/凭据已隐藏/)).not.toBeNull();
+    expect(screen.getByText(/本地路径已隐藏/)).not.toBeNull();
+    expect(screen.getByText(/链接已隐藏/)).not.toBeNull();
+    expect(screen.queryByText(/abc123/)).toBeNull();
+    const lockedButton = screen.getByRole("button", { name: "保存状态待重新读取" }) as HTMLButtonElement;
+    expect(lockedButton.disabled).toBe(true);
+    expect(onSaveSnapshot).toHaveBeenCalledTimes(1);
   });
 });

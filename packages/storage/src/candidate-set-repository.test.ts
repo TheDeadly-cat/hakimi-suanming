@@ -44,6 +44,29 @@ afterEach(async () => {
 });
 
 describe("unknown-hour candidate-set persistence", () => {
+  it("keeps the ordinary create path active-resolver-only", async () => {
+    const { database, cases } = repositories();
+    const historical = structuredClone(
+      await calculateUnknownHourCandidates(unknownHourInput, WORKING_DEFAULT_RULE_PROFILE)
+    );
+    historical.input.timeZone = "Historical/Only";
+    for (const candidate of historical.candidates) {
+      candidate.timeCalibration.timeZone = "Historical/Only";
+      const charts = [
+        ...(candidate.chart ? [candidate.chart] : []),
+        ...candidate.variants.map((variant) => variant.chart)
+      ];
+      for (const chart of charts) {
+        chart.input.timeZone = "Historical/Only";
+        chart.timeCalibration.timeZone = "Historical/Only";
+      }
+    }
+
+    await expect(cases.createCandidateSet({ alias: "must not persist", candidateSet: historical }))
+      .rejects.toThrow();
+    expect(await database.candidateSets.count()).toBe(0);
+  });
+
   it("stores and reopens all 13 probes without inventing a primary chart", async () => {
     const { cases } = repositories();
     const candidateSet = await calculateUnknownHourCandidates(unknownHourInput, WORKING_DEFAULT_RULE_PROFILE);

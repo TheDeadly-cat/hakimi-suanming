@@ -1,5 +1,12 @@
+import {
+  BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID,
+  evidenceSubjectIdForBaziStrengthBinding,
+  isSingleChartReportEvidenceSubjectId,
+  requireEvidenceSubject
+} from "@hakimi/knowledge-core";
+
 export const BAZI_STRENGTH_CLAIM_REGISTRY_PROFILE = Object.freeze({
-  projectionVersion: "hakimi.bazi.strength_claim_registry/0.1.0",
+  projectionVersion: "hakimi.bazi.strength_claim_registry/0.2.0",
   contentVersion: "0.18.0",
   scope: "strength_traditional_context_engineering_policy_and_review_boundaries" as const,
   reviewStatus: "candidate_pending_expert_review" as const,
@@ -19,6 +26,17 @@ export type BaziStrengthClaimSourceVerification =
   | "source_warning_unresolved"
   | "locator_only_unfrozen";
 
+export type BaziStrengthClaimWorkRightsStatus =
+  | "internal_project_source"
+  | "historical_work_public_domain_candidate"
+  | "historical_and_commentary_layers_require_separate_audit";
+
+export type BaziStrengthClaimCarrierRightsStatus =
+  | "local_repository_only"
+  | "community_transcription_reuse_requires_site_license_audit"
+  | "incomplete_transcription_source_warning"
+  | "link_and_locator_only_no_redistribution_clearance";
+
 export interface BaziStrengthClaimSource {
   sourceId: string;
   order: number;
@@ -28,8 +46,8 @@ export interface BaziStrengthClaimSource {
   url: string;
   stableRevision: string | null;
   verificationStatus: BaziStrengthClaimSourceVerification;
-  workRightsStatus: string;
-  carrierRightsStatus: string;
+  workRightsStatus: BaziStrengthClaimWorkRightsStatus;
+  carrierRightsStatus: BaziStrengthClaimCarrierRightsStatus;
   usageBoundary: string;
   expertTruthClaimed: false;
   scientificValidityClaimed: false;
@@ -46,6 +64,7 @@ export type BaziStrengthClaimLocatorVerification =
 
 export interface BaziStrengthClaimSourceBinding {
   bindingId: string;
+  evidenceSubjectId: string;
   order: number;
   sourceId: string;
   sourceType: BaziStrengthClaimSourceType;
@@ -247,6 +266,7 @@ const sources: readonly BaziStrengthClaimSource[] = Object.freeze([
 const sourceBindings: readonly BaziStrengthClaimSourceBinding[] = Object.freeze([
   Object.freeze({
     bindingId: "binding:core:derive-assessment",
+    evidenceSubjectId: BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID["binding:core:derive-assessment"],
     order: 1,
     sourceId: "hakimi-strength-core-0.1.0",
     sourceType: "engineering_contract" as const,
@@ -258,6 +278,7 @@ const sourceBindings: readonly BaziStrengthClaimSourceBinding[] = Object.freeze(
   }),
   Object.freeze({
     bindingId: "binding:policy:factor-inclusion",
+    evidenceSubjectId: BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID["binding:policy:factor-inclusion"],
     order: 2,
     sourceId: "hakimi-strength-policy-0.1.0",
     sourceType: "engineering_contract" as const,
@@ -269,6 +290,7 @@ const sourceBindings: readonly BaziStrengthClaimSourceBinding[] = Object.freeze(
   }),
   Object.freeze({
     bindingId: "binding:policy:direction-map",
+    evidenceSubjectId: BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID["binding:policy:direction-map"],
     order: 3,
     sourceId: "hakimi-strength-policy-0.1.0",
     sourceType: "engineering_contract" as const,
@@ -280,6 +302,7 @@ const sourceBindings: readonly BaziStrengthClaimSourceBinding[] = Object.freeze(
   }),
   Object.freeze({
     bindingId: "binding:policy:weights",
+    evidenceSubjectId: BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID["binding:policy:weights"],
     order: 4,
     sourceId: "hakimi-strength-policy-0.1.0",
     sourceType: "engineering_contract" as const,
@@ -291,6 +314,7 @@ const sourceBindings: readonly BaziStrengthClaimSourceBinding[] = Object.freeze(
   }),
   Object.freeze({
     bindingId: "binding:policy:month-duplication",
+    evidenceSubjectId: BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID["binding:policy:month-duplication"],
     order: 5,
     sourceId: "hakimi-strength-policy-0.1.0",
     sourceType: "engineering_contract" as const,
@@ -302,6 +326,7 @@ const sourceBindings: readonly BaziStrengthClaimSourceBinding[] = Object.freeze(
   }),
   Object.freeze({
     bindingId: "binding:policy:thresholds",
+    evidenceSubjectId: BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID["binding:policy:thresholds"],
     order: 6,
     sourceId: "hakimi-strength-policy-0.1.0",
     sourceType: "engineering_contract" as const,
@@ -313,6 +338,7 @@ const sourceBindings: readonly BaziStrengthClaimSourceBinding[] = Object.freeze(
   }),
   Object.freeze({
     bindingId: "binding:sensitivity:six-scenarios",
+    evidenceSubjectId: BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID["binding:sensitivity:six-scenarios"],
     order: 7,
     sourceId: "hakimi-strength-sensitivity-0.1.0",
     sourceType: "engineering_contract" as const,
@@ -324,6 +350,7 @@ const sourceBindings: readonly BaziStrengthClaimSourceBinding[] = Object.freeze(
   }),
   Object.freeze({
     bindingId: "binding:dtt:month-command",
+    evidenceSubjectId: BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID["binding:dtt:month-command"],
     order: 8,
     sourceId: "dtt-chanwei-wikisource-r2600158",
     sourceType: "public_domain_classic_transcription" as const,
@@ -335,6 +362,7 @@ const sourceBindings: readonly BaziStrengthClaimSourceBinding[] = Object.freeze(
   }),
   Object.freeze({
     bindingId: "binding:smt-v5:relative-relations",
+    evidenceSubjectId: BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID["binding:smt-v5:relative-relations"],
     order: 9,
     sourceId: "smt-v5-wikisource-r2706483",
     sourceType: "public_domain_classic_transcription" as const,
@@ -346,6 +374,7 @@ const sourceBindings: readonly BaziStrengthClaimSourceBinding[] = Object.freeze(
   }),
   Object.freeze({
     bindingId: "binding:smt-v10:whole-chart",
+    evidenceSubjectId: BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID["binding:smt-v10:whole-chart"],
     order: 10,
     sourceId: "smt-siku-v10-wikisource-r761703",
     sourceType: "public_domain_classic_transcription" as const,
@@ -357,6 +386,7 @@ const sourceBindings: readonly BaziStrengthClaimSourceBinding[] = Object.freeze(
   }),
   Object.freeze({
     bindingId: "binding:yhzp:hidden-listing",
+    evidenceSubjectId: BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID["binding:yhzp:hidden-listing"],
     order: 11,
     sourceId: "yhzp-wikisource-r2593607",
     sourceType: "public_domain_classic_transcription" as const,
@@ -368,6 +398,7 @@ const sourceBindings: readonly BaziStrengthClaimSourceBinding[] = Object.freeze(
   }),
   Object.freeze({
     bindingId: "binding:zpzz:review-gates",
+    evidenceSubjectId: BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID["binding:zpzz:review-gates"],
     order: 12,
     sourceId: "zpzz-ctext-ch974137-unfrozen",
     sourceType: "review_gate_locator" as const,
@@ -574,14 +605,103 @@ function isVerifiedSource(source: BaziStrengthClaimSource): boolean {
     || source.verificationStatus === "locator_verified_in_pinned_revision";
 }
 
+const SOURCE_GOVERNANCE_BY_VERIFICATION = Object.freeze({
+  repository_policy_verified: Object.freeze({
+    sourceType: "engineering_contract",
+    workRightsStatus: "internal_project_source",
+    carrierRightsStatus: "local_repository_only",
+    urlScope: "repository",
+    stableRevisionRequired: true
+  }),
+  locator_verified_in_pinned_revision: Object.freeze({
+    sourceType: "public_domain_classic_transcription",
+    workRightsStatus: "historical_work_public_domain_candidate",
+    carrierRightsStatus: "community_transcription_reuse_requires_site_license_audit",
+    urlScope: "external_pinned",
+    stableRevisionRequired: true
+  }),
+  source_warning_unresolved: Object.freeze({
+    sourceType: "public_domain_classic_transcription",
+    workRightsStatus: "historical_work_public_domain_candidate",
+    carrierRightsStatus: "incomplete_transcription_source_warning",
+    urlScope: "external_pinned",
+    stableRevisionRequired: true
+  }),
+  locator_only_unfrozen: Object.freeze({
+    sourceType: "review_gate_locator",
+    workRightsStatus: "historical_and_commentary_layers_require_separate_audit",
+    carrierRightsStatus: "link_and_locator_only_no_redistribution_clearance",
+    urlScope: "external_unfrozen",
+    stableRevisionRequired: false
+  })
+} as const satisfies Record<BaziStrengthClaimSourceVerification, Readonly<{
+  sourceType: BaziStrengthClaimSourceType;
+  workRightsStatus: BaziStrengthClaimWorkRightsStatus;
+  carrierRightsStatus: BaziStrengthClaimCarrierRightsStatus;
+  urlScope: "repository" | "external_pinned" | "external_unfrozen";
+  stableRevisionRequired: boolean;
+}>>);
+
+const SOURCE_BINDING_LOCATOR_KINDS = new Set(["stable_symbol", "chapter_heading", "anchor_phrase"]);
+const SOURCE_BINDING_EVIDENCE_ROLES = new Set<BaziStrengthClaimEvidenceRole>([
+  "defines_engineering_candidate",
+  "traditional_context_only",
+  "review_question_only"
+]);
+const SOURCE_BINDING_PARAMETER_SUPPORT = new Set([
+  "exact_engineering_definition",
+  "context_only",
+  "boundary_only"
+]);
+const SOURCE_BINDING_LOCATOR_VERIFICATION = new Set<BaziStrengthClaimLocatorVerification>([
+  "verified",
+  "pending_manual_textual_verification"
+]);
+
+function isSafeRegistrySourceUrl(value: string): boolean {
+  if (value.startsWith("/packages/")) {
+    return !value.includes("..") && !value.includes("?") && !value.includes("#");
+  }
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "https:"
+      && parsed.username === ""
+      && parsed.password === ""
+      && parsed.hash === "";
+  } catch {
+    return false;
+  }
+}
+
+function parseSafeExternalRegistrySourceUrl(value: string): URL | null {
+  if (!isSafeRegistrySourceUrl(value) || value.startsWith("/packages/")) return null;
+  return new URL(value);
+}
+
 export function validateBaziStrengthClaimRegistry(registry: BaziStrengthClaimRegistry): void {
   if (registry.profile.projectionVersion !== BAZI_STRENGTH_CLAIM_REGISTRY_PROFILE.projectionVersion
     || registry.profile.contentVersion !== "0.18.0") {
     throw new Error("旺衰来源—主张注册表 profile 不匹配");
   }
   assertUniqueOrdered(registry.sources, registry.sources.map((source) => source.sourceId), "旺衰来源");
-  assertUniqueOrdered(registry.sourceBindings, registry.sourceBindings.map((binding) => binding.bindingId), "旺衰来源定位");
+  const bindingIds = registry.sourceBindings.map((binding) => binding.bindingId);
+  assertUniqueOrdered(registry.sourceBindings, bindingIds, "旺衰来源定位");
   assertUniqueOrdered(registry.claims, registry.claims.map((entry) => entry.claimId), "旺衰主张");
+  const mappedBindingIds = Object.keys(BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID);
+  const bindingIdSet = new Set(bindingIds);
+  const mappedBindingIdSet = new Set(mappedBindingIds);
+  if (registry.sourceBindings.length !== 12
+    || mappedBindingIds.length !== 12
+    || bindingIds.some((bindingId) => !mappedBindingIdSet.has(bindingId))
+    || mappedBindingIds.some((bindingId) => !bindingIdSet.has(bindingId))) {
+    throw new Error("旺衰来源定位与证据主题显式映射 key 集合不一致");
+  }
+  const bindingEvidenceSubjectIds = registry.sourceBindings.map((binding) => binding.evidenceSubjectId);
+  const mappedEvidenceSubjectIds = Object.values(BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECT_ID_BY_BINDING_ID);
+  if (new Set(bindingEvidenceSubjectIds).size !== bindingEvidenceSubjectIds.length
+    || new Set(mappedEvidenceSubjectIds).size !== mappedEvidenceSubjectIds.length) {
+    throw new Error("旺衰来源定位证据主题必须一一唯一");
+  }
 
   const sourceById = new Map(registry.sources.map((source) => [source.sourceId, source] as const));
   const bindingById = new Map(registry.sourceBindings.map((binding) => [binding.bindingId, binding] as const));
@@ -589,12 +709,34 @@ export function validateBaziStrengthClaimRegistry(registry: BaziStrengthClaimReg
     if (!source.title.trim() || !source.editionOrCarrier.trim() || !source.usageBoundary.trim()) {
       throw new Error(`旺衰来源字段不得为空：${source.sourceId}`);
     }
-    if (!source.url.startsWith("https://") && !source.url.startsWith("/packages/")) {
+    if (!isSafeRegistrySourceUrl(source.url)) {
       throw new Error(`旺衰来源 URL 范围无效：${source.sourceId}`);
     }
-    if (source.stableRevision && source.url.startsWith("https://")
-      && !source.url.includes(`oldid=${source.stableRevision}`)) {
-      throw new Error(`旺衰来源固定版本与 URL 不一致：${source.sourceId}`);
+    const governance = SOURCE_GOVERNANCE_BY_VERIFICATION[source.verificationStatus];
+    if (!governance
+      || source.sourceType !== governance.sourceType
+      || source.workRightsStatus !== governance.workRightsStatus
+      || source.carrierRightsStatus !== governance.carrierRightsStatus) {
+      throw new Error(`旺衰来源类型、核验状态与权利边界组合无效：${source.sourceId}`);
+    }
+    if ((governance.urlScope === "repository") !== source.url.startsWith("/packages/")) {
+      throw new Error(`旺衰来源 URL 与来源类型不一致：${source.sourceId}`);
+    }
+    if (governance.stableRevisionRequired !== Boolean(source.stableRevision?.trim())) {
+      throw new Error(`旺衰来源固定版本状态无效：${source.sourceId}`);
+    }
+    const externalUrl = parseSafeExternalRegistrySourceUrl(source.url);
+    if (governance.urlScope === "external_pinned") {
+      const oldIds = externalUrl?.searchParams.getAll("oldid") ?? [];
+      if (externalUrl?.origin !== "https://zh.wikisource.org"
+        || oldIds.length !== 1
+        || oldIds[0] !== source.stableRevision) {
+        throw new Error(`旺衰来源固定版本与 URL 不一致：${source.sourceId}`);
+      }
+    }
+    if (governance.urlScope === "external_unfrozen"
+      && externalUrl?.origin !== "https://ctext.org") {
+      throw new Error(`旺衰 review gate 来源载体不受支持：${source.sourceId}`);
     }
     if (source.expertTruthClaimed !== false || source.scientificValidityClaimed !== false) {
       throw new Error(`旺衰来源不得声称专家或科学真值：${source.sourceId}`);
@@ -606,7 +748,34 @@ export function validateBaziStrengthClaimRegistry(registry: BaziStrengthClaimReg
     if (!source || source.sourceType !== binding.sourceType) {
       throw new Error(`旺衰来源定位无法解析：${binding.bindingId}`);
     }
-    if (!binding.exactLocator.value.trim() || binding.doesNotSupport.length === 0) {
+    const expectedEvidenceSubjectId = evidenceSubjectIdForBaziStrengthBinding(binding.bindingId);
+    let evidenceSubject: ReturnType<typeof requireEvidenceSubject>;
+    try {
+      evidenceSubject = requireEvidenceSubject(binding.evidenceSubjectId);
+    } catch {
+      throw new Error(`旺衰来源定位证据主题无法解析：${binding.bindingId}`);
+    }
+    if (!expectedEvidenceSubjectId
+      || binding.evidenceSubjectId !== expectedEvidenceSubjectId
+      || !isSingleChartReportEvidenceSubjectId(binding.evidenceSubjectId)
+      || evidenceSubject.subjectId !== binding.evidenceSubjectId
+      || evidenceSubject.status !== "active"
+      || evidenceSubject.category !== "interpretive_claim"
+      || evidenceSubject.requiredForV1 !== false) {
+      throw new Error(`旺衰来源定位证据主题无法解析：${binding.bindingId}`);
+    }
+    if (!SOURCE_BINDING_EVIDENCE_ROLES.has(binding.evidenceRole)
+      || !SOURCE_BINDING_PARAMETER_SUPPORT.has(binding.parameterSupport)
+      || !SOURCE_BINDING_LOCATOR_KINDS.has(binding.exactLocator.kind)
+      || !SOURCE_BINDING_LOCATOR_VERIFICATION.has(binding.exactLocator.verificationStatus)) {
+      throw new Error(`旺衰来源定位包含未知枚举：${binding.bindingId}`);
+    }
+    if (!binding.exactLocator.value.trim()
+      || binding.exactLocator.contentSha256 !== null
+      || !binding.supports.trim()
+      || binding.doesNotSupport.length === 0
+      || new Set(binding.doesNotSupport).size !== binding.doesNotSupport.length
+      || binding.doesNotSupport.some((entry) => !entry.trim())) {
       throw new Error(`旺衰来源定位必须含精确 locator 与反向边界：${binding.bindingId}`);
     }
     const expectedVerified = isVerifiedSource(source) && binding.exactLocator.verificationStatus === "verified";
@@ -624,6 +793,11 @@ export function validateBaziStrengthClaimRegistry(registry: BaziStrengthClaimReg
     "classification_threshold",
     "duplication_policy"
   ]);
+  const displayStatusByReviewStatus = Object.freeze({
+    internal_only: "enabled_engineering_candidate",
+    candidate_pending_expert_review: "enabled_traditional_context",
+    blocked_source_verification: "withheld_pending_verified_locator_or_review"
+  } as const satisfies Record<BaziStrengthClaim["reviewStatus"], BaziStrengthClaim["displayStatus"]>);
   for (const entry of registry.claims) {
     if (!entry.candidateStatement.trim() || entry.factInputs.length === 0 && entry.claimType !== "traditional_rationale") {
       throw new Error(`旺衰主张内容或事实输入为空：${entry.claimId}`);
@@ -634,6 +808,9 @@ export function validateBaziStrengthClaimRegistry(registry: BaziStrengthClaimReg
     const resolved = entry.sourceBindingIds.map((bindingId) => bindingById.get(bindingId));
     if (resolved.some((binding) => !binding)) throw new Error(`旺衰主张引用未知来源定位：${entry.claimId}`);
     const bindings = resolved as BaziStrengthClaimSourceBinding[];
+    if (entry.displayStatus !== displayStatusByReviewStatus[entry.reviewStatus]) {
+      throw new Error(`旺衰主张复核状态与展示状态不一致：${entry.claimId}`);
+    }
     if (entry.displayStatus !== "withheld_pending_verified_locator_or_review"
       && bindings.some((binding) => binding.exactLocator.verificationStatus !== "verified")) {
       throw new Error(`启用主张不得依赖待核 locator：${entry.claimId}`);

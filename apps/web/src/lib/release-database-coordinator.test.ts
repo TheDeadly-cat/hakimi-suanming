@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FullBackupPayload } from "@hakimi/contracts";
 import { DatabaseGenerationError, type ResearchDatabaseMutationState } from "@hakimi/storage";
 import {
+  BRIDGE_RELEASE_DATABASE_DESCRIPTOR,
   PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR,
   PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR
 } from "../../release-protocol";
@@ -67,6 +68,28 @@ afterEach(() => {
 });
 
 describe("ReleaseDatabaseCoordinator target integrity path", () => {
+  it("keeps the exact legacy-v13 bridge identity on the original full-snapshot path", async () => {
+    const repository = {
+      readFullDataSnapshot: vi.fn().mockResolvedValue(payload),
+      readMutationState: vi.fn()
+    };
+    const coordinator = testableCoordinator(
+      new ReleaseDatabaseCoordinator(BRIDGE_RELEASE_DATABASE_DESCRIPTOR, "build-v13"),
+      repository,
+      {}
+    );
+
+    await expect(coordinator.verifiedTargetSnapshot()).resolves.toMatchObject({ digest });
+    expect(repository.readFullDataSnapshot).toHaveBeenCalledTimes(1);
+    expect(repository.readMutationState).not.toHaveBeenCalled();
+    expect(workerMocks.inspectSnapshot).toHaveBeenCalledTimes(1);
+    expect(workerMocks.inspectSnapshot).toHaveBeenCalledWith(payload, expect.objectContaining({
+      appVersion: expect.any(String),
+      exportedAt: expect.any(String)
+    }));
+    expect(document.documentElement.dataset.dbIntegrityVerification).toBeUndefined();
+  });
+
   it("keeps Schema 15 on the original full-snapshot path", async () => {
     const repository = {
       readFullDataSnapshot: vi.fn().mockResolvedValue(payload),

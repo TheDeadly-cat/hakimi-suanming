@@ -1,27 +1,51 @@
 import {
+  BRIDGE_RELEASE_STORAGE_MANIFEST,
+  PRODUCTION_V13_TO_V15_RELEASE_STORAGE_MANIFEST,
+  PRODUCTION_V13_TO_V16_RELEASE_STORAGE_MANIFEST,
+  PRODUCTION_V14_RELEASE_STORAGE_MANIFEST,
+  PRODUCTION_V15_RELEASE_STORAGE_MANIFEST,
   PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
   PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR,
   PRODUCTION_V14_RELEASE_DATABASE_DESCRIPTOR,
   PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR,
-  releaseDatabaseDescriptorForDefaultViteBuild
+  releaseStorageManifestForDefaultViteBuild,
+  serializeReleaseStorageManifest
 } from "./release-protocol";
 
 /** Generic Vite entry: v13 unless the isolated cross-Schema harness is active. */
+export const DEFAULT_VITE_RELEASE_STORAGE_MANIFEST =
+  releaseStorageManifestForDefaultViteBuild(process.env, process.argv);
 export const DEFAULT_VITE_RELEASE_DATABASE_DESCRIPTOR =
-  releaseDatabaseDescriptorForDefaultViteBuild(process.env, process.argv);
+  DEFAULT_VITE_RELEASE_STORAGE_MANIFEST.database;
+
+if (
+  DEFAULT_VITE_RELEASE_DATABASE_DESCRIPTOR.dbGeneration === "legacy-v13" &&
+  serializeReleaseStorageManifest(DEFAULT_VITE_RELEASE_STORAGE_MANIFEST) !==
+    serializeReleaseStorageManifest(BRIDGE_RELEASE_STORAGE_MANIFEST)
+) {
+  throw new Error("普通 Vite 构建必须复用冻结的 v13 发布存储清单。");
+}
 
 /** Explicit production-v14 entry: frozen and independent of process.env. */
 export const PRODUCTION_V14_VITE_RELEASE_DATABASE_DESCRIPTOR =
   PRODUCTION_V14_RELEASE_DATABASE_DESCRIPTOR;
+export const PRODUCTION_V14_VITE_RELEASE_STORAGE_MANIFEST =
+  PRODUCTION_V14_RELEASE_STORAGE_MANIFEST;
 
 /** Explicit production-v15 candidate: frozen and independent of process.env. */
 export const PRODUCTION_V15_VITE_RELEASE_DATABASE_DESCRIPTOR =
   PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR;
+export const PRODUCTION_V15_VITE_RELEASE_STORAGE_MANIFEST =
+  PRODUCTION_V15_RELEASE_STORAGE_MANIFEST;
 
 /** Explicit v13 -> v15 direct-hop candidate: frozen and independent of process.env. */
 export const PRODUCTION_V13_TO_V15_VITE_RELEASE_DATABASE_DESCRIPTOR =
   PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR;
+export const PRODUCTION_V13_TO_V15_VITE_RELEASE_STORAGE_MANIFEST =
+  PRODUCTION_V13_TO_V15_RELEASE_STORAGE_MANIFEST;
 
 /** Explicit v13 -> v16 direct-hop candidate: frozen and independent of process.env. */
 export const PRODUCTION_V13_TO_V16_VITE_RELEASE_DATABASE_DESCRIPTOR =
   PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR;
+export const PRODUCTION_V13_TO_V16_VITE_RELEASE_STORAGE_MANIFEST =
+  PRODUCTION_V13_TO_V16_RELEASE_STORAGE_MANIFEST;

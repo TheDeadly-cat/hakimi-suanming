@@ -1,0 +1,566 @@
+.four-pillars-matrix-frame {
+  min-width: 0;
+}
+
+.matrix-binding-failure {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--cinnabar-650) 42%, var(--line-200));
+  border-left: 4px solid var(--cinnabar-650);
+  border-radius: 5px 16px 5px 5px;
+  background: color-mix(in srgb, var(--cinnabar-100) 72%, var(--paper-1));
+}
+
+.matrix-binding-failure strong {
+  color: var(--cinnabar-700, #8f4439);
+  font-family: var(--font-editorial);
+  font-size: 15px;
+}
+
+.matrix-binding-failure p {
+  margin: 0;
+  color: var(--ink-650);
+  font-size: 0.8rem;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.matrix-utility-bar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 0 2px;
+}
+
+.matrix-utility-bar__identity {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.matrix-utility-bar__identity > span {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--jade-700) 24%, var(--line-200));
+  border-radius: 4px 12px 4px 4px;
+  background: var(--jade-50);
+  color: var(--jade-750);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.matrix-utility-bar__identity p {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+}
+
+.matrix-utility-bar__identity strong {
+  color: var(--ink-750);
+  font-family: var(--font-editorial);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+}
+
+.matrix-utility-bar__identity small {
+  color: var(--ink-450);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.matrix-element-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: flex-end;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.matrix-element-key li {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  padding: 4px 7px;
+  border: 1px solid var(--line-200);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper-1) 74%, transparent);
+  color: var(--ink-550);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.matrix-element-key li > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: currentColor;
+  transform: rotate(45deg);
+}
+
+.matrix-element-key .element-wood { color: #326b58; }
+.matrix-element-key .element-fire { color: #a34e3f; }
+.matrix-element-key .element-earth { color: #8a673a; }
+.matrix-element-key .element-metal { color: #59666b; }
+.matrix-element-key .element-water { color: #3f5f78; }
+
+.matrix-fact-boundary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px 13px;
+  align-items: center;
+  margin: 0 0 10px;
+  padding: 9px 11px;
+  border: 1px solid color-mix(in srgb, var(--ochre-500) 30%, var(--line-200));
+  border-left: 3px solid var(--ochre-500);
+  border-radius: 4px 13px 4px 4px;
+  background: color-mix(in srgb, var(--ochre-50) 68%, var(--paper-1));
+}
+
+.matrix-fact-boundary strong {
+  color: var(--ochre-700, #7d5d35);
+  font-family: var(--font-editorial);
+  font-size: 13px;
+}
+
+.matrix-fact-boundary p,
+.matrix-selection-recovery {
+  margin: 0;
+  color: var(--ink-550);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.matrix-fact-boundary > span {
+  color: var(--ochre-700, #7d5d35);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.matrix-selection-recovery {
+  margin-bottom: 9px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--cinnabar-500);
+  background: color-mix(in srgb, var(--cinnabar-50) 64%, transparent);
+}
+
+.matrix-reading-compass {
+  display: grid;
+  grid-template-columns: minmax(210px, 0.78fr) minmax(0, 1.22fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.matrix-reading-compass__item {
+  --compass-accent: var(--jade-700);
+  position: relative;
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+  overflow: hidden;
+  padding: 11px 12px 10px 16px;
+  border: 1px solid color-mix(in srgb, var(--compass-accent) 24%, var(--line-200));
+  border-radius: 5px 15px 5px 5px;
+  background:
+    linear-gradient(112deg, color-mix(in srgb, var(--compass-accent) 8%, transparent), transparent 58%),
+    var(--paper-1);
+}
+
+.matrix-reading-compass__item::before {
+  position: absolute;
+  top: 11px;
+  bottom: 11px;
+  left: 7px;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--compass-accent);
+  content: "";
+}
+
+.matrix-reading-compass__anchor[data-element="wood"] { --compass-accent: #326b58; }
+.matrix-reading-compass__anchor[data-element="fire"] { --compass-accent: #a34e3f; }
+.matrix-reading-compass__anchor[data-element="earth"] { --compass-accent: #8a673a; }
+.matrix-reading-compass__anchor[data-element="metal"] { --compass-accent: #59666b; }
+.matrix-reading-compass__anchor[data-element="water"] { --compass-accent: #3f5f78; }
+
+.matrix-reading-compass__selection[data-recovered="true"] {
+  --compass-accent: var(--cinnabar-600);
+}
+
+.matrix-reading-compass__selection[data-navigation-state="pending-activation"] {
+  --compass-accent: var(--ochre-600, #8a673a);
+  border-style: dashed;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--compass-accent) 9%, transparent);
+}
+
+.matrix-reading-compass__selection[data-value-state="missing"] {
+  border-style: dashed;
+}
+
+.matrix-reading-compass__eyebrow,
+.matrix-reading-compass__boundary {
+  color: color-mix(in srgb, var(--compass-accent) 78%, var(--ink-650));
+  font-family: var(--font-mono);
+  font-size: 0.73rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  line-height: 1.45;
+}
+
+.matrix-reading-compass__eyebrow {
+  text-transform: uppercase;
+}
+
+.matrix-reading-compass__boundary {
+  color: var(--ink-450);
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.matrix-reading-compass__content {
+  display: flex;
+  min-width: 0;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.matrix-reading-compass__glyph {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--compass-accent) 34%, var(--line-200));
+  border-radius: 4px 12px 4px 4px;
+  background: color-mix(in srgb, var(--compass-accent) 8%, var(--paper-1));
+  color: var(--compass-accent);
+  font-family: var(--font-editorial);
+  font-size: 23px;
+  line-height: 1;
+}
+
+.matrix-reading-compass__content p {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  margin: 0 auto 0 0;
+}
+
+.matrix-reading-compass__content b {
+  color: var(--ink-750);
+  font-family: var(--font-editorial);
+  font-size: 13px;
+}
+
+.matrix-reading-compass__content small {
+  color: var(--ink-450);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.matrix-reading-compass__value {
+  max-width: 58%;
+  color: var(--compass-accent);
+  font-family: var(--font-editorial);
+  font-size: clamp(16px, 2vw, 21px);
+  line-height: 1.2;
+  text-align: right;
+  unicode-bidi: plaintext;
+  overflow-wrap: anywhere;
+}
+
+.four-pillars-matrix-frame > .matrix-scroll {
+  overscroll-behavior-inline: contain;
+  scroll-padding-inline: 48px;
+  scrollbar-color: var(--line-300) transparent;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+.four-pillars-matrix-frame > .matrix-scroll:focus-within {
+  outline: 3px solid color-mix(in srgb, var(--jade-700) 26%, transparent);
+  outline-offset: 3px;
+}
+
+.four-pillars-matrix-frame > .matrix-scroll:focus-visible {
+  outline-color: color-mix(in srgb, var(--ochre-500) 54%, var(--jade-700));
+}
+
+.four-pillars-matrix-frame .matrix-cell {
+  min-height: 44px;
+}
+
+.four-pillars-matrix-frame .matrix-cell__value {
+  display: block;
+  max-width: 100%;
+  white-space: normal;
+  unicode-bidi: plaintext;
+  overflow-wrap: anywhere;
+}
+
+.four-pillars-matrix-frame .pillars-matrix thead th[data-selected="true"] {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.62), transparent),
+    var(--jade-100);
+  color: var(--jade-750);
+  box-shadow: inset 0 -3px var(--jade-700);
+}
+
+.four-pillars-matrix-frame .pillars-matrix thead th[data-day-master="true"] {
+  box-shadow: inset 0 -2px color-mix(in srgb, var(--ochre-500) 72%, transparent);
+}
+
+.four-pillars-matrix-frame .pillars-matrix td[data-day-master="true"] {
+  background: color-mix(in srgb, var(--ochre-50) 28%, transparent);
+}
+
+.four-pillars-matrix-frame .pillars-matrix td[data-day-master="true"][data-selected-column="true"] {
+  background: color-mix(in srgb, var(--jade-100) 38%, var(--ochre-50));
+}
+
+.four-pillars-matrix-frame .pillars-matrix thead th:not(:first-child) {
+  position: sticky;
+}
+
+.matrix-column-heading__index,
+.matrix-column-heading__label,
+.four-pillars-matrix-frame .pillars-matrix thead th small {
+  display: block;
+}
+
+.matrix-column-heading__index {
+  margin-bottom: 2px;
+  color: var(--ink-350);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  line-height: 1;
+}
+
+.matrix-column-heading__label {
+  line-height: 1.1;
+}
+
+.four-pillars-matrix-frame .pillars-matrix thead th small {
+  margin-top: 3px;
+  color: var(--ochre-700, #7d5d35);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.matrix-column-heading__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  justify-content: center;
+}
+
+.four-pillars-matrix-frame .pillars-matrix thead th small[data-role="missing"] {
+  color: var(--cinnabar-650);
+}
+
+.four-pillars-matrix-frame .pillars-matrix thead th small[data-role="coverage"] {
+  padding: 2px 5px;
+  border: 1px solid color-mix(in srgb, var(--ink-350) 28%, transparent);
+  border-radius: 3px 8px 3px 3px;
+  background: color-mix(in srgb, var(--ink-350) 7%, transparent);
+  color: var(--ink-550);
+  letter-spacing: 0.04em;
+}
+
+.four-pillars-matrix-frame .pillars-matrix thead th small[data-role="coverage"][data-complete="true"] {
+  border-color: color-mix(in srgb, var(--jade-700) 28%, transparent);
+  background: color-mix(in srgb, var(--jade-100) 62%, transparent);
+  color: var(--jade-750);
+}
+
+.four-pillars-matrix-frame .pillars-matrix tbody th[data-selected="true"] {
+  color: var(--jade-750);
+  box-shadow: inset 3px 0 var(--jade-700);
+}
+
+.four-pillars-matrix-frame .pillars-matrix td[data-selected-column="true"] {
+  background: rgba(221, 234, 228, 0.24);
+}
+
+.four-pillars-matrix-frame .matrix-cell[data-value-state="missing"] {
+  border-style: dashed;
+  background: repeating-linear-gradient(135deg, rgba(103, 117, 122, 0.07) 0 5px, transparent 5px 10px);
+  color: var(--ink-400);
+  font-family: var(--font-mono);
+}
+
+.four-pillars-matrix-frame .matrix-main-row .matrix-cell__value {
+  font-family: var(--font-editorial);
+  font-size: clamp(1.05rem, 2.5vw, 1.28rem);
+  font-weight: 760;
+  line-height: 1;
+}
+
+.matrix-scroll-cue {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .matrix-reading-compass {
+    grid-template-columns: 1fr;
+  }
+
+  .matrix-utility-bar {
+    align-items: flex-end;
+  }
+
+  .matrix-element-key {
+    max-width: 190px;
+  }
+
+  .matrix-scroll-cue {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 0 8px auto;
+    padding: 5px 8px;
+    border: 1px solid var(--line-200);
+    border-radius: 999px;
+    background: var(--jade-50);
+    color: var(--ink-650);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.45;
+  }
+
+  .matrix-scroll-cue svg {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 auto;
+    color: var(--jade-700);
+  }
+}
+
+@media (max-width: 520px) {
+  .matrix-utility-bar {
+    display: grid;
+    gap: 9px;
+  }
+
+  .matrix-element-key {
+    max-width: none;
+    justify-content: flex-start;
+  }
+
+  .matrix-fact-boundary {
+    grid-template-columns: 1fr;
+  }
+
+  .matrix-fact-boundary > span {
+    white-space: normal;
+  }
+
+  .matrix-utility-bar__identity > span {
+    width: 34px;
+    height: 34px;
+  }
+
+  .four-pillars-matrix-frame .matrix-cell {
+    min-height: 48px;
+  }
+
+  .matrix-reading-compass__selection .matrix-reading-compass__content {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .matrix-reading-compass__selection .matrix-reading-compass__value {
+    max-width: 100%;
+    text-align: left;
+  }
+}
+
+@media (forced-colors: active) {
+  .matrix-utility-bar__identity > span,
+  .matrix-binding-failure,
+  .matrix-fact-boundary,
+  .matrix-selection-recovery,
+  .matrix-reading-compass__item,
+  .matrix-reading-compass__glyph,
+  .matrix-element-key li,
+  .four-pillars-matrix-frame > .matrix-scroll,
+  .four-pillars-matrix-frame .pillars-matrix th,
+  .four-pillars-matrix-frame .pillars-matrix td,
+  .four-pillars-matrix-frame .matrix-scroll-cue {
+    border-color: CanvasText;
+    color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  .matrix-element-key li > span {
+    border: 1px solid CanvasText;
+    background: CanvasText;
+  }
+
+  .matrix-reading-compass__item::before {
+    background: CanvasText;
+  }
+
+  .four-pillars-matrix-frame .pillars-matrix thead th[data-selected="true"],
+  .four-pillars-matrix-frame .pillars-matrix tbody th[data-selected="true"] {
+    border-color: Highlight;
+    color: HighlightText;
+    background: Highlight;
+    box-shadow: none;
+  }
+
+  .four-pillars-matrix-frame .pillars-matrix td[data-selected-column="true"] {
+    background: Canvas;
+  }
+
+  .four-pillars-matrix-frame > .matrix-scroll:focus-within,
+  .four-pillars-matrix-frame .matrix-cell:focus-visible {
+    outline-color: Highlight;
+  }
+
+  .four-pillars-matrix-frame .matrix-cell.is-selected {
+    border-color: Highlight;
+    outline: 2px solid Highlight;
+    outline-offset: -3px;
+    color: LinkText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  .four-pillars-matrix-frame .matrix-cell.is-selected::after {
+    background: Highlight;
+  }
+}

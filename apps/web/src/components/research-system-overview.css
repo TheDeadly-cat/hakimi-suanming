@@ -1,0 +1,1054 @@
+/*
+ * Research registry atlas.
+ * The axis separates runtime reachability from source maturity. It is not a
+ * score, ranking, release indicator, or expert-truth claim.
+ */
+
+:where(.research-system-card, .research-content-catalog-card) {
+  --atlas-ink: #1e2b30;
+  --atlas-muted: #657377;
+  --atlas-line: rgba(30, 43, 48, 0.16);
+  --atlas-paper: #f1f2eb;
+  --atlas-verdigris: #4d7773;
+  --atlas-brass: #ad874e;
+  --atlas-alert: #9d493d;
+  --atlas-state: var(--atlas-brass);
+  position: relative;
+  min-width: 0;
+  list-style: none;
+  isolation: isolate;
+  animation: research-atlas-reveal 420ms cubic-bezier(0.22, 0.75, 0.25, 1) both;
+}
+
+:where(.research-system-card, .research-content-catalog-card):nth-child(2) {
+  animation-delay: 70ms;
+}
+
+:where(.research-system-card, .research-content-catalog-card):nth-child(3) {
+  animation-delay: 140ms;
+}
+
+:where(.research-system-card, .research-content-catalog-card)::before {
+  position: absolute;
+  z-index: 3;
+  top: 1.1rem;
+  bottom: 1.1rem;
+  left: 0;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--atlas-state) 34%, transparent),
+    var(--atlas-state) 38%,
+    color-mix(in srgb, var(--atlas-state) 18%, transparent)
+  );
+  content: "";
+}
+
+:where(.research-system-card, .research-content-catalog-card)::after {
+  position: absolute;
+  z-index: 4;
+  top: var(--atlas-marker-position, 52%);
+  left: -4px;
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--atlas-paper);
+  border-radius: 2px;
+  background: var(--atlas-state);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--atlas-state) 72%, var(--atlas-ink));
+  content: "";
+  transform: rotate(45deg);
+}
+
+:where(.research-system-card, .research-content-catalog-card) > article {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--atlas-line);
+  border-radius: 6px 18px 6px 6px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--atlas-state) 7%, transparent), transparent 18%),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 31px,
+      rgba(30, 43, 48, 0.032) 31px,
+      rgba(30, 43, 48, 0.032) 32px
+    ),
+    var(--atlas-paper);
+  box-shadow:
+    0 18px 42px rgba(30, 43, 48, 0.08),
+    inset 0 1px rgba(255, 255, 255, 0.72);
+}
+
+:where(.research-system-card, .research-content-catalog-card) > article > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.55rem 0.9rem;
+  align-items: start;
+  padding: 1.35rem 1.25rem 1rem 1.5rem;
+  border-bottom: 1px solid var(--atlas-line);
+  background: rgba(255, 255, 255, 0.38);
+}
+
+:where(.research-system-card, .research-content-catalog-card) > article > header::before {
+  grid-column: 1 / -1;
+  color: var(--atlas-state);
+  content: "RESEARCH REGISTER";
+  font-family: var(--font-mono, "Cascadia Code", monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.research-system-card--active,
+.research-content-catalog-card--live_active {
+  --atlas-marker-position: 18%;
+  --atlas-state: var(--atlas-verdigris);
+}
+
+.research-system-card--active > article > header::before {
+  content: "RUNTIME REGISTER";
+}
+
+.research-content-catalog-card--live_active > article > header::before {
+  content: "LIVE CONTENT CATALOG";
+}
+
+.research-system-card[data-delivery-status="isolated_engineering_preview"] {
+  --atlas-marker-position: 53%;
+  --atlas-state: var(--atlas-brass);
+}
+
+.research-system-card[data-delivery-status="isolated_engineering_preview"] > article > header::before {
+  content: "ISOLATED ENGINEERING SOURCE";
+}
+
+.research-system-card:not(.research-system-card--active):not([data-delivery-status="isolated_engineering_preview"]) {
+  --atlas-marker-position: 78%;
+  --atlas-state: var(--atlas-alert);
+}
+
+.research-system-card:not(.research-system-card--active):not([data-delivery-status="isolated_engineering_preview"]) > article > header::before {
+  content: "DIAGNOSTIC SOURCE FILE";
+}
+
+.research-content-catalog-card:not(.research-content-catalog-card--live_active) {
+  --atlas-marker-position: 58%;
+  --atlas-state: var(--atlas-brass);
+}
+
+.research-content-catalog-card:not(.research-content-catalog-card--live_active) > article > header::before {
+  content: "STATIC CONTENT SNAPSHOT";
+}
+
+:where(.research-system-card, .research-content-catalog-card) h3 {
+  margin: 0;
+  color: var(--atlas-ink);
+  font-family: var(--font-display, Georgia, serif);
+  font-size: clamp(1.2rem, 1rem + 0.45vw, 1.55rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+}
+
+:where(.research-system-card, .research-content-catalog-card) h4 {
+  margin: 0 0 0.65rem;
+  color: var(--atlas-ink);
+  font-family: var(--font-body, sans-serif);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+:where(.research-system-card, .research-content-catalog-card) p {
+  color: var(--atlas-muted);
+  line-height: 1.72;
+}
+
+:where(.research-system-card, .research-content-catalog-card) > article > p,
+:where(.research-system-card, .research-content-catalog-card) > article > section,
+:where(.research-system-card, .research-content-catalog-card) > article > div,
+:where(.research-system-card, .research-content-catalog-card) > article > details,
+:where(.research-system-card, .research-content-catalog-card) > article > a {
+  margin-right: 1.25rem;
+  margin-left: 1.5rem;
+}
+
+:where(.research-system-card, .research-content-catalog-card) > article > section,
+:where(.research-system-card, .research-content-catalog-card) > article > div {
+  padding-block: 0.9rem;
+  border-bottom: 1px solid rgba(30, 43, 48, 0.1);
+}
+
+:where(.research-system-card, .research-content-catalog-card) ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:where(.research-system-card, .research-content-catalog-card) ul li {
+  position: relative;
+  padding: 0.36rem 0 0.36rem 1rem;
+  color: var(--atlas-ink);
+  line-height: 1.55;
+}
+
+:where(.research-system-card, .research-content-catalog-card) ul li::before {
+  position: absolute;
+  top: 0.92rem;
+  left: 0;
+  width: 0.42rem;
+  height: 1px;
+  background: var(--atlas-state);
+  content: "";
+}
+
+.research-content-catalog-card dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  border-block: 1px solid var(--atlas-line);
+  background: var(--atlas-line);
+}
+
+.research-content-catalog-card dl > div {
+  min-width: 0;
+  padding: 0.85rem 1rem;
+  background: color-mix(in srgb, var(--atlas-paper) 94%, white);
+}
+
+.research-content-catalog-card dt {
+  display: flex;
+  gap: 0.32rem;
+  align-items: center;
+  color: var(--atlas-muted);
+  font-family: var(--font-mono, "Cascadia Code", monospace);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.research-content-catalog-card dt > svg {
+  flex: 0 0 auto;
+  width: 0.72rem;
+  height: 0.72rem;
+}
+
+.research-content-catalog-metrics > div[data-metric-state="locked"] {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--atlas-brass) 9%, transparent), transparent 66%),
+    color-mix(in srgb, var(--atlas-paper) 94%, white);
+}
+
+.research-content-catalog-metrics > div[data-metric-state="locked"] dd strong {
+  color: var(--atlas-brass);
+}
+
+.research-content-catalog-card dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.42rem;
+  align-items: baseline;
+  margin: 0.3rem 0 0;
+  color: var(--atlas-ink);
+  font-family: var(--font-display, Georgia, serif);
+  font-size: clamp(1.2rem, 1rem + 0.55vw, 1.75rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.research-content-catalog-card dd strong {
+  font: inherit;
+}
+
+.research-content-catalog-card dd span {
+  color: var(--atlas-muted);
+  font-family: var(--font-body, sans-serif);
+  font-size: 0.68rem;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.research-content-catalog-sections li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.research-content-catalog-sections li strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.research-content-catalog-sections li small {
+  color: var(--atlas-muted);
+}
+
+.research-content-catalog-sections li em {
+  grid-column: 1 / -1;
+  width: fit-content;
+  padding: 0.18rem 0.42rem;
+  border: 1px solid color-mix(in srgb, var(--atlas-state) 28%, var(--atlas-line));
+  border-radius: 999px;
+  color: var(--atlas-state);
+  font-family: var(--font-mono, "Cascadia Code", monospace);
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+}
+
+.research-content-catalog-sources a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  align-items: center;
+  min-height: 2.75rem;
+  overflow-wrap: anywhere;
+}
+
+.research-content-catalog-sources a > span {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.research-content-catalog-source-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.18rem 0.55rem;
+  color: var(--atlas-muted);
+  font-size: 0.65rem;
+}
+
+.research-content-catalog-source-meta > span:last-child {
+  font-family: var(--font-mono, "Cascadia Code", monospace);
+  overflow-wrap: anywhere;
+}
+
+.research-content-catalog-sources a strong {
+  color: var(--atlas-ink);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.research-content-catalog-sources a code {
+  color: var(--atlas-muted);
+  font-family: var(--font-mono, "Cascadia Code", monospace);
+  font-size: 0.62rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.research-content-catalog-sources a:hover strong {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.research-content-catalog-sources a > svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+:where(.research-system-card, .research-content-catalog-card) details {
+  margin-top: 0.8rem;
+  margin-bottom: 0.8rem;
+  border: 1px solid var(--atlas-line);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.42);
+}
+
+:where(.research-system-card, .research-content-catalog-card) summary {
+  min-height: 2.75rem;
+  padding: 0.75rem 0.85rem;
+  color: var(--atlas-ink);
+  cursor: pointer;
+  font-weight: 750;
+  list-style-position: inside;
+}
+
+.research-content-catalog-evidence code {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.research-content-catalog-evidence summary small {
+  margin-left: 0.35rem;
+  color: var(--atlas-muted);
+  font-family: var(--font-mono, "Cascadia Code", monospace);
+  font-size: 0.62rem;
+}
+
+.research-content-catalog-evidence-boundary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: start;
+  padding: 0.65rem 0.7rem;
+  border-left: 3px solid var(--atlas-brass);
+  background: color-mix(in srgb, var(--atlas-brass) 8%, transparent);
+  font-size: 0.7rem;
+  line-height: 1.6;
+}
+
+.research-content-catalog-evidence-boundary > svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  margin-top: 0.15rem;
+  color: var(--atlas-brass);
+}
+
+:where(.research-system-card, .research-content-catalog-card) details[open] summary {
+  border-bottom: 1px solid var(--atlas-line);
+}
+
+:where(.research-system-card, .research-content-catalog-card) details > :not(summary) {
+  margin-inline: 0.85rem;
+}
+
+:where(.research-system-card, .research-content-catalog-card) a {
+  color: color-mix(in srgb, var(--atlas-state) 78%, var(--atlas-ink));
+  font-weight: 750;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
+:where(.research-system-card, .research-content-catalog-card) a:hover {
+  color: var(--atlas-ink);
+}
+
+:where(.research-system-card, .research-content-catalog-card) a:focus-visible,
+:where(.research-system-card, .research-content-catalog-card) summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--atlas-state) 45%, transparent);
+  outline-offset: 3px;
+}
+
+.research-content-catalog-entry,
+.research-system-card > article > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin-top: 0.9rem;
+  margin-bottom: 1.1rem;
+  padding: 0.62rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--atlas-state) 60%, transparent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--atlas-state) 10%, transparent);
+  text-decoration: none;
+}
+
+.research-content-catalog-no-entry {
+  display: flex;
+  min-height: 2.75rem;
+  gap: 0.55rem;
+  align-items: center;
+  padding: 0.7rem 0.85rem;
+  border: 1px dashed var(--atlas-line);
+  color: var(--atlas-muted);
+}
+
+.research-content-catalog-no-entry > svg {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+}
+
+.research-content-catalog-boundary,
+.research-system-boundary {
+  padding: 0.8rem 0.9rem;
+  border-left: 3px solid var(--atlas-state);
+  background: color-mix(in srgb, var(--atlas-state) 7%, transparent);
+  overflow-wrap: anywhere;
+}
+
+.research-content-catalog-route {
+  --catalog-route-accent: var(--atlas-verdigris);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(210px, 0.85fr);
+  gap: 0.65rem 0.8rem;
+  align-items: center;
+  margin-top: 0.8rem;
+  margin-bottom: 0.15rem;
+  padding: 0.72rem 0.8rem !important;
+  border: 1px solid color-mix(in srgb, var(--catalog-route-accent) 26%, var(--atlas-line)) !important;
+  border-left: 3px solid var(--catalog-route-accent) !important;
+  border-radius: 4px 12px 4px 4px;
+  background: color-mix(in srgb, var(--catalog-route-accent) 7%, rgba(255, 255, 255, 0.52));
+}
+
+.research-content-catalog-route[data-route-state="snapshot"] {
+  --catalog-route-accent: var(--atlas-brass);
+}
+
+.research-content-catalog-route__index {
+  padding: 0.24rem 0.38rem;
+  border: 1px solid color-mix(in srgb, var(--catalog-route-accent) 32%, var(--atlas-line));
+  border-radius: 2px 7px 2px 2px;
+  color: var(--catalog-route-accent);
+  font-family: var(--font-mono, "Cascadia Code", monospace);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.research-content-catalog-route > p,
+.research-content-catalog-route__gap {
+  display: grid;
+  min-width: 0;
+  gap: 0.18rem;
+}
+
+.research-content-catalog-route > p {
+  margin: 0;
+}
+
+.research-content-catalog-route > p small,
+.research-content-catalog-route__gap b {
+  color: var(--catalog-route-accent);
+  font-family: var(--font-mono, "Cascadia Code", monospace);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.research-content-catalog-route > p strong {
+  color: var(--atlas-ink);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.research-content-catalog-route__gap {
+  padding-left: 0.75rem;
+  border-left: 1px solid color-mix(in srgb, var(--catalog-route-accent) 22%, var(--atlas-line));
+}
+
+.research-content-catalog-route__gap small {
+  color: var(--atlas-muted);
+  font-size: 0.65rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.research-system-next-step {
+  --next-step-accent: var(--atlas-verdigris);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(180px, 0.75fr);
+  gap: 0.65rem 0.8rem;
+  align-items: center;
+  margin-top: 0.8rem;
+  margin-bottom: 0.15rem;
+  padding: 0.72rem 0.8rem !important;
+  border: 1px solid color-mix(in srgb, var(--next-step-accent) 26%, var(--atlas-line)) !important;
+  border-left: 3px solid var(--next-step-accent) !important;
+  border-radius: 4px 12px 4px 4px;
+  background: color-mix(in srgb, var(--next-step-accent) 7%, rgba(255, 255, 255, 0.52));
+}
+
+.research-system-next-step[data-next-step-state="locked"] {
+  --next-step-accent: var(--atlas-brass);
+}
+
+.research-system-next-step__index {
+  padding: 0.24rem 0.38rem;
+  border: 1px solid color-mix(in srgb, var(--next-step-accent) 32%, var(--atlas-line));
+  border-radius: 2px 7px 2px 2px;
+  color: var(--next-step-accent);
+  font-family: var(--font-mono, "Cascadia Code", monospace);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.research-system-next-step > p {
+  display: grid;
+  min-width: 0;
+  gap: 0.18rem;
+  margin: 0;
+}
+
+.research-system-next-step > p small {
+  color: var(--next-step-accent);
+  font-family: var(--font-mono, "Cascadia Code", monospace);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+}
+
+.research-system-next-step > p strong {
+  color: var(--atlas-ink);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.research-system-next-step__boundary {
+  min-width: 0;
+  padding-left: 0.75rem;
+  border-left: 1px solid color-mix(in srgb, var(--next-step-accent) 22%, var(--atlas-line));
+  color: var(--atlas-muted);
+  font-size: 0.65rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.research-system-state {
+  padding-bottom: 1rem;
+  color: var(--atlas-ink);
+  font-weight: 700;
+}
+
+.research-system-card-ledger {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0;
+  border-block: 1px solid var(--atlas-line);
+  background: var(--atlas-line);
+}
+
+.research-system-card-ledger > div {
+  min-width: 0;
+  padding: 0.7rem 0.8rem;
+  background: color-mix(in srgb, var(--atlas-paper) 94%, white);
+}
+
+.research-system-card-ledger dt {
+  color: var(--atlas-muted);
+  font-family: var(--font-mono, "Cascadia Code", monospace);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.research-system-card-ledger dd {
+  margin: 0.28rem 0 0;
+  color: var(--atlas-state);
+  font-size: 0.78rem;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.research-system-no-entry {
+  display: flex;
+  min-height: 2.75rem;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.65rem 0.8rem;
+  border: 1px dashed var(--atlas-line);
+  color: var(--atlas-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.research-system-no-entry svg {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
+.research-atlas-ledger {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin: 1rem 0 0;
+  border: 1px solid rgba(30, 43, 48, 0.14);
+  border-radius: 5px 16px 5px 5px;
+  background: rgba(30, 43, 48, 0.14);
+}
+
+.research-atlas-ledger > div {
+  --ledger-accent: #4d7773;
+  position: relative;
+  min-width: 0;
+  padding: 0.75rem 0.85rem 0.85rem;
+  background: #f1f2eb;
+}
+
+.research-atlas-ledger > div::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--ledger-accent);
+  content: "";
+}
+
+.research-atlas-ledger > div[data-ledger-state="locked"] {
+  --ledger-accent: #ad874e;
+}
+
+.research-atlas-ledger dt {
+  color: #657377;
+  font-family: var(--font-mono, "Cascadia Code", monospace);
+  font-size: 0.63rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.research-atlas-ledger dd {
+  margin: 0.3rem 0 0;
+  color: var(--ledger-accent);
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.research-atlas-state-key {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.65rem 1rem;
+  align-items: center;
+  margin-top: 0.65rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid rgba(30, 43, 48, 0.12);
+  border-radius: 4px 12px 4px 4px;
+  background: rgba(241, 242, 235, 0.7);
+}
+
+.research-atlas-state-key > strong {
+  color: #1e2b30;
+  font-family: var(--font-mono, "Cascadia Code", monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.research-atlas-state-key ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.research-atlas-state-key li {
+  --key-accent: #4d7773;
+  position: relative;
+  padding-left: 0.75rem;
+  color: #657377;
+  font-size: 0.7rem;
+}
+
+.research-atlas-state-key li::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 2px;
+  background: var(--key-accent);
+  content: "";
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.research-atlas-state-key li[data-atlas-state="isolated"] { --key-accent: #ad874e; }
+.research-atlas-state-key li[data-atlas-state="diagnostic"],
+.research-atlas-state-key li[data-atlas-state="approval"] { --key-accent: #9d493d; }
+
+.research-atlas-integrity-error {
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(157, 73, 61, 0.32);
+  border-left: 4px solid #9d493d;
+  border-radius: 4px 14px 4px 4px;
+  background: rgba(157, 73, 61, 0.07);
+}
+
+.research-atlas-integrity-error strong {
+  color: #873e35;
+  font-family: var(--font-display, Georgia, serif);
+}
+
+.research-atlas-integrity-error p {
+  margin: 0.35rem 0 0;
+  color: #657377;
+  line-height: 1.6;
+}
+
+:where(.research-system-roadmap, .research-content-catalog-grid) {
+  position: relative;
+  display: grid;
+  gap: clamp(0.85rem, 1.5vw, 1.25rem);
+  margin: 1.1rem 0 0;
+  padding: 3.25rem clamp(0.75rem, 1.6vw, 1.25rem) clamp(0.75rem, 1.6vw, 1.25rem);
+  border: 1px solid rgba(30, 43, 48, 0.13);
+  border-radius: 8px 24px 8px 8px;
+  background:
+    linear-gradient(rgba(241, 242, 235, 0.9), rgba(241, 242, 235, 0.9)),
+    repeating-linear-gradient(90deg, transparent 0, transparent 47px, rgba(30, 43, 48, 0.07) 47px, rgba(30, 43, 48, 0.07) 48px),
+    repeating-linear-gradient(0deg, transparent 0, transparent 47px, rgba(30, 43, 48, 0.07) 47px, rgba(30, 43, 48, 0.07) 48px);
+}
+
+:where(.research-system-roadmap, .research-content-catalog-grid)::before {
+  position: absolute;
+  top: 1.15rem;
+  left: clamp(0.8rem, 1.8vw, 1.35rem);
+  color: #1e2b30;
+  font-family: var(--font-mono, "Cascadia Code", monospace);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.research-system-roadmap::before {
+  content: "SYSTEM DELIVERY ATLAS / NOT A SCORE";
+}
+
+.research-content-catalog-grid::before {
+  content: "CONTENT REGISTRY / COUNTS ARE NOT RANKINGS";
+}
+
+.research-system-roadmap {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.research-content-catalog-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.research-content-catalog-grid > .research-content-catalog-card--live_active {
+  grid-column: 1 / -1;
+}
+
+.research-content-catalog-section > .research-content-catalog-count-boundary {
+  position: relative;
+  display: grid;
+  gap: 0.35rem;
+  overflow: hidden;
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(173, 135, 78, 0.28);
+  border-left: 4px solid #ad874e;
+  border-radius: 4px 14px 4px 4px;
+  background:
+    linear-gradient(105deg, rgba(173, 135, 78, 0.1), transparent 45%),
+    rgba(241, 242, 235, 0.78);
+}
+
+.research-content-catalog-count-boundary strong {
+  color: #8b6a3f;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 0.9rem;
+}
+
+.research-content-catalog-count-boundary p {
+  margin: 0;
+  color: #657377;
+  font-size: 0.74rem;
+  line-height: 1.65;
+}
+
+@media (max-width: 1040px) {
+  :where(.research-system-roadmap, .research-content-catalog-grid) {
+    grid-template-columns: 1fr;
+  }
+
+  .research-content-catalog-grid > .research-content-catalog-card--live_active {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 680px) {
+  :where(.research-system-roadmap, .research-content-catalog-grid) {
+    padding: 3rem 0.55rem 0.55rem;
+    border-radius: 6px 16px 6px 6px;
+  }
+
+  :where(.research-system-card, .research-content-catalog-card) > article > header {
+    grid-template-columns: 1fr;
+    padding: 1.15rem 1rem 0.85rem 1.25rem;
+  }
+
+  :where(.research-system-card, .research-content-catalog-card) > article > p,
+  :where(.research-system-card, .research-content-catalog-card) > article > section,
+  :where(.research-system-card, .research-content-catalog-card) > article > div,
+  :where(.research-system-card, .research-content-catalog-card) > article > details,
+  :where(.research-system-card, .research-content-catalog-card) > article > a {
+    margin-right: 0.9rem;
+    margin-left: 1.25rem;
+  }
+
+  .research-content-catalog-card dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .research-atlas-ledger {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .research-atlas-state-key,
+  .research-system-card-ledger {
+    grid-template-columns: 1fr;
+  }
+
+  .research-content-catalog-route,
+  .research-system-next-step {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .research-content-catalog-route__gap,
+  .research-system-next-step__boundary {
+    grid-column: 1 / -1;
+    padding: 0.55rem 0 0;
+    border-left: 0;
+  }
+
+  .research-content-catalog-route__gap {
+    border-top: 1px solid color-mix(in srgb, var(--catalog-route-accent) 22%, var(--atlas-line));
+  }
+
+  .research-content-catalog-sources a {
+    align-items: start;
+  }
+
+  .research-content-catalog-entry {
+    display: flex;
+    justify-content: center;
+  }
+
+  .research-system-next-step__boundary {
+    border-top: 1px solid color-mix(in srgb, var(--next-step-accent) 22%, var(--atlas-line));
+  }
+}
+
+@media (max-width: 420px) {
+  .research-content-catalog-card dl,
+  .research-atlas-ledger {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.research-system-card, .research-content-catalog-card) {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  :where(.research-system-card, .research-content-catalog-card) > article,
+  :where(.research-system-card, .research-content-catalog-card) > article > header,
+  :where(.research-system-card, .research-content-catalog-card) details,
+  .research-system-roadmap,
+  .research-content-catalog-grid,
+  .research-content-catalog-section > .research-content-catalog-count-boundary,
+  .research-content-catalog-no-entry,
+  .research-content-catalog-boundary,
+  .research-content-catalog-evidence-boundary,
+  .research-system-boundary,
+  .research-system-card-ledger,
+  .research-system-card-ledger > div,
+  .research-content-catalog-route,
+  .research-content-catalog-route__index,
+  .research-system-next-step,
+  .research-system-next-step__index,
+  .research-system-no-entry,
+  .research-atlas-ledger,
+  .research-atlas-ledger > div,
+  .research-atlas-state-key,
+  .research-atlas-integrity-error {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
+    color: CanvasText;
+  }
+
+  :where(.research-system-card, .research-content-catalog-card)::before,
+  :where(.research-system-card, .research-content-catalog-card)::after,
+  :where(.research-system-card, .research-content-catalog-card) ul li::before {
+    border-color: Canvas;
+    background: Highlight;
+  }
+
+  .research-atlas-ledger > div::after,
+  .research-atlas-state-key li::before {
+    background: CanvasText;
+  }
+
+  :where(.research-system-card, .research-content-catalog-card) a {
+    color: LinkText;
+  }
+
+  .research-content-catalog-route__gap,
+  .research-system-next-step__boundary {
+    border-color: CanvasText;
+  }
+}
+
+@keyframes research-atlas-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Registry copy is data-driven; no identifier may widen the atlas column. */
+:where(.research-system-card, .research-content-catalog-card) > article > header > *,
+:where(.research-system-card, .research-content-catalog-card) :where(h3, h4, p, li, dt, dd, strong, small, code) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+:where(.research-system-card, .research-content-catalog-card) h3 {
+  text-wrap: balance;
+}
+
+:where(.research-system-card, .research-content-catalog-card) p {
+  text-wrap: pretty;
+}
+
+@media screen {
+  :where(.research-system-card, .research-content-catalog-card) {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 560px;
+  }
+}
+
+@media (max-width: 420px) {
+  .research-content-catalog-sections li {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .research-content-catalog-sections li small {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-contrast: more) and (forced-colors: none) {
+  :where(.research-system-card, .research-content-catalog-card) {
+    --atlas-muted: #45555a;
+    --atlas-line: rgba(30, 43, 48, 0.38);
+  }
+
+  .research-atlas-ledger,
+  .research-atlas-state-key,
+  .research-content-catalog-route,
+  .research-system-next-step {
+    border-width: 2px;
+  }
+}

@@ -80,21 +80,52 @@ describe("RevisionCalculationReceiptsPanel", () => {
     const getRevision = vi.spyOn(caseRepository, "getRevision").mockResolvedValue(revision);
     render(<RevisionCalculationReceiptsPanel revisionId={revision.id} refreshToken={0} />);
 
-    expect(await screen.findByText("2 条内容验真通过")).not.toBeNull();
-    const list = screen.getByRole("list", { name: "历史计算收据列表" });
-    expect(within(list).getAllByRole("listitem")).toHaveLength(2);
+    expect(await screen.findAllByText("2 条收据完整性已核对")).toHaveLength(2);
+    const list = screen.getByRole("list", { name: /历史计算收据列表/ });
+    expect(list.querySelectorAll(":scope > .revision-receipt-card")).toHaveLength(2);
     expect(within(list).getByText("创建基线")).not.toBeNull();
     expect(within(list).getByText("显式计算快照")).not.toBeNull();
-    expect(screen.getByText(/不是数字签名/)).not.toBeNull();
+    expect(within(list).getAllByText("内容验真通过")).toHaveLength(2);
+    expect(within(list).getAllByText("尚未执行")).toHaveLength(2);
+    expect(screen.getAllByText(/不是数字签名/)).toHaveLength(2);
 
     const explicitCard = within(list).getByText("显式计算快照").closest("li");
     expect(explicitCard).not.toBeNull();
-    await userEvent.click(within(explicitCard!).getByText("查看绑定与复演"));
-    await userEvent.click(within(explicitCard!).getByRole("button", { name: "按保存版本精确复演" }));
+    await userEvent.click(within(explicitCard!).getByText("查看绑定与精确复演"));
+    await userEvent.click(within(explicitCard!).getByText("完整摘要核对值"));
+    expect(within(explicitCard!).getByText(receipts[1]!.receiptDigest)).not.toBeNull();
+    expect(within(explicitCard!).getByText(receipts[1]!.sourceRevision.natalResultHash)).not.toBeNull();
+    await userEvent.click(within(explicitCard!).getByRole("button", { name: "按收据保存 Profile 精确复演" }));
 
-    expect(await within(explicitCard!).findByText("历史输出与保存版本精确复演一致")).not.toBeNull();
+    expect(await within(explicitCard!).findByText("历史保存输出与保存版本精确复演逐组件一致")).not.toBeNull();
+    expect(within(explicitCard!).getByText("保存输出一致")).not.toBeNull();
     expect(getReceipt).toHaveBeenCalledWith(receipts[1]?.id);
     expect(getRevision).toHaveBeenCalledWith(revision.id);
+  });
+
+  it("keeps a failed exact replay unconfirmed and retries from fresh repository reads", async () => {
+    vi.spyOn(caseRepository, "listRevisionCalculationReceipts").mockResolvedValue([...receipts]);
+    const getReceipt = vi.spyOn(caseRepository, "getRevisionCalculationReceipt")
+      .mockRejectedValueOnce(new Error("Bearer abc123 C:\\secret\\receipt.json https://example.test/replay"))
+      .mockResolvedValue(receipts[1] ?? null);
+    vi.spyOn(caseRepository, "getRevision").mockResolvedValue(revision);
+    render(<RevisionCalculationReceiptsPanel revisionId={revision.id} refreshToken={0} />);
+
+    const list = await screen.findByRole("list", { name: /历史计算收据列表/ });
+    const explicitCard = within(list).getByText("显式计算快照").closest("li");
+    expect(explicitCard).not.toBeNull();
+    await userEvent.click(within(explicitCard!).getByText("查看绑定与精确复演"));
+    await userEvent.click(within(explicitCard!).getByRole("button", { name: "按收据保存 Profile 精确复演" }));
+
+    expect(await within(explicitCard!).findByText("精确复演未完成")).not.toBeNull();
+    expect(within(explicitCard!).getByText("失败关闭")).not.toBeNull();
+    expect(within(explicitCard!).getByText(/凭据已隐藏/)).not.toBeNull();
+    expect(within(explicitCard!).queryByText(/abc123/)).toBeNull();
+    const retry = within(explicitCard!).getByRole("button", { name: "重新读取并精确复演" });
+    await userEvent.click(retry);
+
+    expect(await within(explicitCard!).findByText("历史保存输出与保存版本精确复演逐组件一致")).not.toBeNull();
+    expect(getReceipt).toHaveBeenCalledTimes(2);
   });
 
   it("states that an older Revision remains empty instead of backfilling outputs", async () => {
@@ -111,7 +142,7 @@ describe("RevisionCalculationReceiptsPanel", () => {
     render(<RevisionCalculationReceiptsPanel revisionId={revision.id} refreshToken={0} />);
 
     expect(await screen.findByText("历史收据未展示")).not.toBeNull();
-    expect(screen.getByText(/任一记录无法验真时，整段历史都会失败关闭/)).not.toBeNull();
+    expect(screen.getByText(/任一记录无法完成内部完整性核对时，当前索引都会失败关闭/)).not.toBeNull();
     await waitFor(() => expect(screen.queryByRole("list", { name: "历史计算收据列表" })).toBeNull());
   });
 });

@@ -1,0 +1,1894 @@
+.page--data-management {
+  --data-rule: rgba(31, 76, 62, 0.15);
+  --data-wash: rgba(221, 234, 228, 0.32);
+}
+
+.data-management-masthead {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(285px, 0.42fr);
+  gap: clamp(34px, 5vw, 72px);
+  align-items: end;
+  overflow: hidden;
+  padding: clamp(28px, 4vw, 50px) clamp(20px, 3.5vw, 44px);
+  border-top: 1px solid var(--line-200);
+  border-bottom: 1px solid var(--line-200);
+  background: linear-gradient(110deg, rgba(255, 253, 248, 0.98) 0 62%, rgba(221, 234, 228, 0.48) 100%);
+}
+
+.data-management-masthead::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  opacity: 0.46;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0, transparent 31px, var(--data-rule) 32px),
+    linear-gradient(90deg, transparent 70%, var(--data-rule) 70.1%, transparent 70.2%);
+  mask-image: linear-gradient(90deg, transparent 0 43%, #000 76%);
+}
+
+.data-management-masthead::after {
+  content: "LOCAL / BACKUP / RESTORE";
+  position: absolute;
+  top: 15px;
+  right: 18px;
+  color: var(--cinnabar-650);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+}
+
+.data-management-masthead .page-heading {
+  margin: 0;
+}
+
+.data-management-masthead .page-heading h1 {
+  max-width: 11ch;
+  font-size: clamp(36px, 5vw, 60px);
+  line-height: 1.06;
+  text-wrap: balance;
+}
+
+.data-health-strip {
+  display: grid;
+  margin: 0;
+  border-top: 2px solid var(--ink-650);
+  border-bottom: 1px solid var(--line-200);
+}
+
+.data-health-strip > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+  gap: 16px;
+  align-items: baseline;
+  padding: 12px 2px;
+  border-top: 1px solid var(--line-100);
+}
+
+.data-health-strip > div:first-child {
+  border-top: 0;
+}
+
+.data-health-strip dt {
+  color: var(--ink-650);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.data-health-strip dd {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink-900);
+  font-family: var(--font-editorial);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-health-strip [data-state="attention"] dd {
+  color: var(--warning-fg);
+}
+
+.data-health-strip [data-state="checking"] dd {
+  color: var(--ink-500);
+}
+
+.data-health-strip [data-state="unavailable"] dd {
+  color: var(--cinnabar-650);
+}
+
+.data-section-rail {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.72fr) minmax(0, 2fr);
+  gap: 1px;
+  margin-top: 18px;
+  border: 1px solid var(--line-200);
+  background: var(--line-200);
+  box-shadow: 0 14px 34px rgba(31, 49, 42, 0.08);
+}
+
+@media (min-width: 1081px) {
+  .data-section-rail {
+    position: sticky;
+    top: max(12px, env(safe-area-inset-top));
+    z-index: 12;
+    background: color-mix(in srgb, var(--line-200) 88%, transparent);
+    backdrop-filter: blur(12px);
+  }
+}
+
+.data-section-rail-status {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  gap: 12px;
+  align-items: center;
+  padding: 15px 18px;
+  color: #fffdf8;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.06), transparent 52%),
+    var(--ink-900);
+}
+
+.data-section-rail-status::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--jade-300), var(--jade-700) 55%, transparent 92%);
+  content: "";
+}
+
+.data-section-rail-status[data-state="busy"]::after,
+.data-section-rail-status[data-state="checking"]::after {
+  background: linear-gradient(90deg, #e9bd67, #fff0bd 46%, transparent 76%);
+  background-size: 190% 100%;
+  animation: data-control-scan 1.45s linear infinite;
+}
+
+.data-section-rail-status[data-state="error"]::after {
+  background: linear-gradient(90deg, #e67868, #ffc1b7 58%, transparent 92%);
+}
+
+.data-section-rail-status > span:last-child,
+.data-section-rail-status strong,
+.data-section-rail-status small {
+  display: block;
+  min-width: 0;
+}
+
+.data-section-rail-status small {
+  margin-bottom: 3px;
+  color: rgba(255, 253, 248, 0.62);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+}
+
+.data-section-rail-status strong {
+  overflow: hidden;
+  font-family: var(--font-editorial);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-section-status-dot {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  background: var(--jade-300);
+  box-shadow: 0 0 0 4px rgba(255, 253, 248, 0.08);
+}
+
+.data-section-rail-status[data-state="busy"] .data-section-status-dot,
+.data-section-rail-status[data-state="checking"] .data-section-status-dot {
+  background: #e9bd67;
+  animation: data-control-pulse 1.4s ease-in-out infinite;
+}
+
+.data-section-rail-status[data-state="error"] .data-section-status-dot {
+  background: #e67868;
+}
+
+.data-section-rail-links {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1px;
+  min-width: 0;
+  background: var(--line-200);
+}
+
+.data-section-rail-links a {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 72px;
+  align-content: center;
+  padding: 11px 13px 10px;
+  overflow: hidden;
+  color: var(--ink-800);
+  text-decoration: none;
+  background: rgba(255, 253, 248, 0.96);
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.data-section-rail-links a::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--jade-700);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 150ms ease;
+}
+
+.data-section-rail-links a:hover,
+.data-section-rail-links a:focus-visible {
+  color: var(--jade-900);
+  background: var(--jade-100);
+}
+
+.data-section-rail-links a[aria-current="location"] {
+  color: var(--jade-900);
+  background:
+    linear-gradient(108deg, color-mix(in srgb, var(--jade-100) 82%, white), rgba(255, 253, 248, 0.96));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--jade-700) 28%, transparent);
+}
+
+.data-section-rail-links a[aria-current="location"]::after {
+  transform: scaleX(1);
+}
+
+.data-section-rail-links a[aria-current="location"] > span {
+  color: var(--jade-900);
+}
+
+.data-section-rail-links a[data-state="attention"][aria-current="location"] {
+  color: var(--warning-fg);
+  background: color-mix(in srgb, var(--warning-bg) 72%, var(--paper-raised));
+}
+
+.data-section-rail-links a[data-state="danger"][aria-current="location"] {
+  color: var(--danger-fg);
+  background: color-mix(in srgb, var(--danger-bg) 78%, var(--paper-raised));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger-fg) 34%, transparent);
+}
+
+.data-section-rail-links a:hover::after,
+.data-section-rail-links a:focus-visible::after,
+.data-section-rail-links a[data-state="attention"]::after,
+.data-section-rail-links a[data-state="danger"]::after {
+  transform: scaleX(1);
+}
+
+.data-section-rail-links a[data-state="attention"]::after {
+  background: var(--warning-fg);
+}
+
+.data-section-rail-links a[data-state="danger"]::after {
+  background: var(--danger-fg);
+}
+
+.data-section-rail-links a > span {
+  color: var(--cinnabar-650);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.data-section-rail-links a strong,
+.data-section-rail-links a small {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-section-rail-links a strong {
+  margin-top: 3px;
+  font-family: var(--font-editorial);
+  font-size: 14px;
+}
+
+.data-section-rail-links a small {
+  margin-top: 2px;
+  color: var(--ink-550);
+  font-size: 11px;
+}
+
+.page--data-management #data-overview-title,
+.page--data-management #full-backup-title,
+.page--data-management #researcher-profile-title,
+.page--data-management #attachments-title,
+.page--data-management #delete-all-title {
+  scroll-margin-top: 24px;
+}
+
+@keyframes data-control-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.82); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes data-control-scan {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+.page--data-management .data-card {
+  margin-top: 24px;
+  padding: clamp(22px, 3vw, 34px);
+  border: 0;
+  border-top: 2px solid var(--ink-650);
+  border-bottom: 1px solid var(--line-200);
+  border-radius: 0;
+  background: rgba(255, 253, 248, 0.76);
+}
+
+.page--data-management .data-card:not(.data-overview):not(.data-backup-card),
+.page--data-management .legacy-backup-tools {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 520px;
+}
+
+.page--data-management .data-overview {
+  background: linear-gradient(108deg, rgba(255, 253, 248, 0.94), var(--data-wash));
+}
+
+.page--data-management .data-overview-loading {
+  width: fit-content;
+  margin-top: 18px;
+  padding: 10px 13px;
+  border-left: 2px solid var(--jade-700);
+  background: var(--jade-100);
+  color: var(--jade-900);
+  font-size: 12px;
+}
+
+.page--data-management .data-overview-unavailable {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid rgba(176, 58, 46, 0.26);
+  border-left: 3px solid var(--cinnabar-650);
+  background: linear-gradient(135deg, rgba(176, 58, 46, 0.08), rgba(255, 253, 248, 0.8));
+}
+
+.page--data-management .data-overview-unavailable > svg {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  color: var(--cinnabar-650);
+}
+
+.page--data-management .data-overview-unavailable strong {
+  color: var(--ink-900);
+  font-family: var(--font-editorial);
+  font-size: 17px;
+}
+
+.page--data-management .data-overview-unavailable p {
+  margin: 5px 0 0;
+  color: var(--ink-700);
+  line-height: 1.6;
+}
+
+.page--data-management .data-overview-unavailable small {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink-550);
+  line-height: 1.5;
+}
+
+.page--data-management .data-overview-unavailable .secondary-action {
+  align-self: center;
+  white-space: nowrap;
+}
+
+.page--data-management:not([data-local-state="ready"]) .partition-count-grid dd {
+  color: var(--ink-400);
+}
+
+.page--data-management .data-destructive-commit-receipt {
+  display: grid;
+  gap: 16px;
+  margin: 24px 0;
+  padding: clamp(20px, 3vw, 30px);
+  border: 1px solid rgba(156, 92, 47, 0.42);
+  border-top: 3px solid var(--cinnabar-650);
+  background:
+    radial-gradient(circle at 91% 12%, rgba(170, 57, 41, 0.11), transparent 30%),
+    linear-gradient(120deg, rgba(255, 253, 248, 0.98), rgba(245, 226, 187, 0.42));
+  box-shadow: 0 18px 42px rgba(45, 38, 28, 0.09);
+}
+
+.page--data-management .data-destructive-commit-receipt > header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 13px;
+  align-items: start;
+}
+
+.page--data-management .data-destructive-commit-receipt > header > svg {
+  width: 22px;
+  height: 22px;
+  margin-top: 3px;
+  color: var(--cinnabar-650);
+}
+
+.page--data-management .data-destructive-commit-receipt h2 {
+  margin: 4px 0 0;
+  font-family: var(--font-editorial);
+  font-size: clamp(23px, 3vw, 32px);
+  line-height: 1.16;
+  text-wrap: balance;
+}
+
+.page--data-management .data-destructive-commit-receipt > p,
+.page--data-management .data-destructive-commit-receipt > small {
+  max-width: 82ch;
+  margin: 0;
+  color: var(--ink-650);
+  line-height: 1.7;
+}
+
+.page--data-management .data-destructive-commit-receipt > dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 1px;
+  background: var(--line-100);
+}
+
+.page--data-management .data-destructive-commit-receipt > dl > div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px 13px;
+  background: rgba(255, 253, 248, 0.84);
+}
+
+.page--data-management .data-destructive-commit-receipt dt {
+  color: var(--ink-550);
+  font-size: 10px;
+  font-weight: 760;
+  letter-spacing: 0.08em;
+}
+
+.page--data-management .data-destructive-commit-receipt dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink-900);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.page--data-management .data-destructive-commit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.page--data-management .data-backup-card {
+  border-top-color: var(--cinnabar-650);
+  background: linear-gradient(180deg, rgba(243, 237, 225, 0.5), rgba(255, 253, 248, 0.84) 260px);
+}
+
+.page--data-management .data-card-heading {
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line-200);
+}
+
+.page--data-management .data-card-heading h2 {
+  font-family: var(--font-editorial);
+  font-size: clamp(23px, 2.7vw, 32px);
+  line-height: 1.18;
+  text-wrap: balance;
+}
+
+.page--data-management .data-card-heading > div:nth-child(2) > p:last-child {
+  max-width: 900px;
+  color: var(--ink-650);
+  line-height: 1.65;
+}
+
+.page--data-management .data-card-icon {
+  border: 1px solid var(--line-200);
+  border-radius: 50%;
+  background: rgba(255, 253, 248, 0.8);
+}
+
+.page--data-management .partition-count-grid {
+  margin-top: 18px;
+  border-top: 1px solid var(--line-200);
+  border-bottom: 1px solid var(--line-200);
+}
+
+.page--data-management .partition-count-grid > div {
+  padding: 11px 10px;
+  border-color: var(--line-100);
+}
+
+.page--data-management .partition-count-grid dd {
+  color: var(--jade-700);
+  font-family: var(--font-editorial);
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.page--data-management .data-storage-note {
+  align-items: flex-start;
+  margin-top: 18px;
+  border-left: 2px solid var(--jade-300);
+  background: rgba(221, 234, 228, 0.28);
+}
+
+.data-storage-copy {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 10px;
+}
+
+.data-storage-copy > p {
+  margin: 0;
+}
+
+.data-storage-meter {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.data-storage-meter meter {
+  width: 100%;
+  height: 8px;
+  accent-color: var(--jade-700);
+}
+
+.data-storage-meter small {
+  color: var(--ink-650);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.page--data-management .data-sensitive-warning {
+  margin-top: 20px;
+  border-left: 3px solid var(--cinnabar-650);
+  background: rgba(243, 237, 225, 0.72);
+}
+
+.page--data-management .data-action-row {
+  margin-top: 18px;
+}
+
+.page--data-management .restore-preflight {
+  margin-top: 22px;
+  padding: clamp(20px, 3vw, 30px);
+  border: 1px solid rgba(156, 92, 47, 0.38);
+  border-left: 3px solid var(--cinnabar-650);
+  border-radius: 0;
+  background: rgba(255, 253, 248, 0.9);
+}
+
+.page--data-management .restore-preflight > header h3 {
+  font-family: var(--font-editorial);
+  font-size: clamp(24px, 3vw, 34px);
+}
+
+.page--data-management .restore-count-list {
+  border-top: 1px solid var(--line-200);
+}
+
+.page--data-management .restore-count-list > li {
+  border-radius: 0;
+  background: rgba(243, 237, 225, 0.4);
+}
+
+.page--data-management .restore-count-list .is-changed {
+  color: var(--warning-fg);
+  font-weight: 760;
+}
+
+.page--data-management .restore-confirmation {
+  margin-top: 22px;
+  padding: clamp(18px, 2.5vw, 24px);
+  border: 1px solid rgba(156, 92, 47, 0.32);
+  border-top: 2px solid var(--cinnabar-650);
+  background: rgba(243, 237, 225, 0.5);
+}
+
+.page--data-management .restore-confirmation > h4 {
+  font-family: var(--font-editorial);
+  font-size: clamp(20px, 2.2vw, 26px);
+}
+
+.page--data-management .restore-manifest-facts code {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  color: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page--data-management .restore-gate-progress {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px 0 18px;
+  padding: 0;
+  list-style: none;
+}
+
+.page--data-management .restore-gate-progress > li {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--line-200);
+  background: rgba(255, 253, 248, 0.72);
+}
+
+.page--data-management .restore-gate-progress > li > span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-weight: 760;
+}
+
+.page--data-management .restore-gate-progress > li div,
+.page--data-management .restore-gate-progress > li strong,
+.page--data-management .restore-gate-progress > li small {
+  min-width: 0;
+}
+
+.page--data-management .restore-gate-progress > li strong,
+.page--data-management .restore-gate-progress > li small {
+  display: block;
+}
+
+.page--data-management .restore-gate-progress > li small {
+  margin-top: 2px;
+}
+
+.page--data-management .restore-gate-progress > li[data-state="complete"] {
+  border-color: rgba(45, 117, 83, 0.48);
+  background: rgba(224, 241, 229, 0.66);
+}
+
+.page--data-management .restore-gate-progress > li[data-state="current"] {
+  border-color: rgba(156, 92, 47, 0.5);
+  background: rgba(245, 226, 187, 0.58);
+  box-shadow: inset 3px 0 0 var(--cinnabar-650);
+}
+
+.page--data-management .restore-gate-progress > li[data-state="locked"] {
+  background: rgba(243, 237, 225, 0.3);
+  color: var(--ink-500);
+}
+
+.page--data-management .data-two-column {
+  gap: 18px;
+  margin-top: 0;
+}
+
+.page--data-management .data-two-column > .data-card {
+  height: 100%;
+}
+
+.page--data-management .attachment-upload-row {
+  margin-top: 18px;
+}
+
+.page--data-management .attachment-list {
+  margin-top: 18px;
+  border-top: 1px solid var(--line-200);
+}
+
+.page--data-management .attachment-list > li {
+  border-radius: 0;
+  background: transparent;
+  transition: background-color 150ms ease;
+}
+
+.page--data-management .attachment-list > li:hover,
+.page--data-management .attachment-list > li:focus-within {
+  background: rgba(221, 234, 228, 0.24);
+}
+
+.page--data-management .attachment-main > div {
+  min-width: 0;
+}
+
+.page--data-management .attachment-main strong,
+.page--data-management .attachment-main small,
+.page--data-management .attachment-main p,
+.page--data-management .restore-preflight > header p {
+  overflow-wrap: anywhere;
+}
+
+.page--data-management .legacy-backup-tools {
+  padding: 0;
+  background: rgba(243, 237, 225, 0.34);
+}
+
+.page--data-management .legacy-backup-tools > summary {
+  min-height: 64px;
+  padding: 12px 18px;
+}
+
+.page--data-management .legacy-backup-tools[open] > summary {
+  border-bottom: 1px solid var(--line-200);
+  color: var(--jade-700);
+  background: var(--data-wash);
+}
+
+.page--data-management .data-danger-zone {
+  border: 1px solid rgba(151, 55, 45, 0.34);
+  border-top: 3px solid var(--danger-fg);
+  background: linear-gradient(108deg, rgba(255, 253, 248, 0.92), rgba(151, 55, 45, 0.07));
+}
+
+.page--data-management .delete-all-confirm {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(151, 55, 45, 0.28);
+}
+
+.page--data-management .delete-confirm-heading {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.page--data-management .delete-confirm-heading > strong {
+  font-family: var(--font-editorial);
+  font-size: clamp(19px, 2.2vw, 25px);
+  line-height: 1.25;
+}
+
+.page--data-management .delete-all-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid rgba(151, 55, 45, 0.2);
+  border-bottom: 1px solid rgba(151, 55, 45, 0.2);
+}
+
+.page--data-management .delete-all-facts > div {
+  min-width: 0;
+  padding: 13px 12px;
+  border-left: 1px solid rgba(151, 55, 45, 0.16);
+  background: rgba(255, 253, 248, 0.58);
+}
+
+.page--data-management .delete-all-facts > div:first-child {
+  border-left: 0;
+}
+
+.page--data-management .delete-all-facts dt {
+  color: var(--ink-650);
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: 0.07em;
+}
+
+.page--data-management .delete-all-facts dd,
+.page--data-management .delete-all-facts dd > span,
+.page--data-management .delete-all-facts dd > small {
+  display: block;
+  min-width: 0;
+}
+
+.page--data-management .delete-all-facts dd {
+  margin: 7px 0 0;
+}
+
+.page--data-management .delete-all-facts dd > span {
+  color: var(--ink-900);
+  font-family: var(--font-editorial);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.page--data-management .delete-all-facts dd > small {
+  margin-top: 4px;
+  color: var(--ink-550);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.page--data-management .delete-all-facts [data-state="missing"] dd > span {
+  color: var(--danger-fg);
+}
+
+.page--data-management .delete-backup-choice {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.page--data-management .delete-backup-choice legend {
+  margin-bottom: 9px;
+  color: var(--ink-900);
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.page--data-management .delete-backup-choice label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 14px 15px;
+  border: 1px solid var(--line-200);
+  background: rgba(255, 253, 248, 0.68);
+  cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.page--data-management .delete-backup-choice label[data-state="selected"] {
+  border-color: rgba(45, 117, 83, 0.46);
+  background: rgba(224, 241, 229, 0.54);
+}
+
+.page--data-management .delete-backup-choice label:focus-within {
+  outline: 2px solid var(--jade-700);
+  outline-offset: 2px;
+}
+
+.page--data-management .delete-backup-choice label.is-danger[data-state="selected"] {
+  border-color: rgba(151, 55, 45, 0.48);
+  background: rgba(151, 55, 45, 0.08);
+}
+
+.page--data-management .delete-backup-choice label.is-danger:focus-within {
+  outline-color: var(--danger-fg);
+}
+
+.page--data-management .delete-backup-choice input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--jade-700);
+}
+
+.page--data-management .delete-backup-choice .is-danger input {
+  accent-color: var(--danger-fg);
+}
+
+.page--data-management .delete-backup-choice span,
+.page--data-management .delete-backup-choice strong,
+.page--data-management .delete-backup-choice small {
+  display: block;
+  min-width: 0;
+}
+
+.page--data-management .delete-backup-choice strong {
+  color: var(--ink-900);
+  font-size: 13px;
+}
+
+.page--data-management .delete-backup-choice small {
+  margin-top: 4px;
+  color: var(--ink-600);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.page--data-management .delete-no-backup-warning {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 11px;
+  align-items: start;
+  padding: 13px 14px;
+  border: 1px solid rgba(151, 55, 45, 0.34);
+  border-left: 3px solid var(--danger-fg);
+  background: rgba(151, 55, 45, 0.09);
+}
+
+.page--data-management .delete-no-backup-warning > svg {
+  width: 19px;
+  height: 19px;
+  color: var(--danger-fg);
+}
+
+.page--data-management .delete-no-backup-warning p,
+.page--data-management .delete-no-backup-warning strong,
+.page--data-management .delete-no-backup-warning span {
+  display: block;
+  margin: 0;
+}
+
+.page--data-management .delete-no-backup-warning span {
+  margin-top: 3px;
+  color: var(--ink-650);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.data-management-back-link[aria-disabled="true"] {
+  opacity: 0.58;
+  cursor: wait;
+}
+
+.page--data-management .data-backup-receipt {
+  margin-top: 20px;
+  padding: clamp(18px, 2.6vw, 26px);
+  border: 1px solid rgba(45, 117, 83, 0.32);
+  border-left: 3px solid var(--jade-700);
+  background:
+    linear-gradient(135deg, rgba(224, 241, 229, 0.58), rgba(255, 253, 248, 0.9) 58%),
+    rgba(255, 253, 248, 0.88);
+}
+
+.page--data-management .data-backup-receipt[data-delivery="requested"] {
+  border-color: rgba(156, 92, 47, 0.38);
+  border-left-color: var(--cinnabar-650);
+  background: linear-gradient(135deg, rgba(245, 226, 187, 0.44), rgba(255, 253, 248, 0.92) 58%);
+}
+
+.page--data-management .data-backup-receipt > header {
+  display: flex;
+  gap: 18px;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.page--data-management .data-backup-receipt h3 {
+  margin: 4px 0 0;
+  font-family: var(--font-editorial);
+  font-size: clamp(20px, 2.3vw, 27px);
+  line-height: 1.2;
+}
+
+.page--data-management .data-backup-receipt > header > span {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  border: 1px solid currentColor;
+  color: var(--jade-800);
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: 0.04em;
+}
+
+.page--data-management .data-backup-receipt[data-delivery="requested"] > header > span {
+  color: var(--warning-fg);
+}
+
+.page--data-management .data-backup-receipt dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 18px 0 0;
+  border-top: 1px solid var(--line-200);
+  border-bottom: 1px solid var(--line-200);
+}
+
+.page--data-management .data-backup-receipt dl > div {
+  min-width: 0;
+  padding: 12px;
+  border-top: 1px solid var(--line-100);
+  border-left: 1px solid var(--line-100);
+}
+
+.page--data-management .data-backup-receipt dl > div:nth-child(-n + 3) {
+  border-top: 0;
+}
+
+.page--data-management .data-backup-receipt dl > div:nth-child(3n + 1) {
+  border-left: 0;
+}
+
+.page--data-management .data-backup-receipt dt {
+  color: var(--ink-550);
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: 0.06em;
+}
+
+.page--data-management .data-backup-receipt dd {
+  margin: 6px 0 0;
+  color: var(--ink-900);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.page--data-management .data-backup-receipt__file {
+  grid-column: span 2;
+}
+
+.page--data-management .data-backup-receipt dl > div:nth-child(6) {
+  border-left: 0;
+}
+
+.page--data-management .data-backup-receipt__digest {
+  grid-column: 1 / -1;
+}
+
+.page--data-management .data-backup-receipt__digest code {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.page--data-management .data-backup-receipt > p {
+  margin: 14px 0 0;
+  color: var(--ink-650);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+@media (max-width: 1080px) {
+  .data-management-masthead {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 30px;
+  }
+
+  .data-health-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .data-health-strip > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
+    border-top: 0;
+    border-left: 1px solid var(--line-100);
+  }
+
+  .data-health-strip > div:first-child {
+    border-left: 0;
+  }
+
+  .data-health-strip dd {
+    text-align: left;
+  }
+
+  .data-section-rail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page--data-management .delete-all-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page--data-management .delete-all-facts > div:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .page--data-management .delete-all-facts > div:nth-child(n + 3) {
+    border-top: 1px solid rgba(151, 55, 45, 0.16);
+  }
+}
+
+@media (max-width: 767px) {
+  .page--data-management .data-destructive-commit-receipt {
+    padding: 18px 14px;
+  }
+
+  .page--data-management .data-destructive-commit-receipt > header {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .page--data-management .data-destructive-commit-receipt > header > .status-pill {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .page--data-management .data-destructive-commit-receipt > dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page--data-management .data-destructive-commit-actions,
+  .page--data-management .data-destructive-commit-actions > * {
+    width: 100%;
+  }
+
+  .page--data-management .data-destructive-commit-actions > * {
+    justify-content: center;
+  }
+
+  .page--data-management .data-overview-unavailable {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .page--data-management .data-overview-unavailable .secondary-action {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+
+  .data-management-masthead {
+    gap: 24px;
+    padding: 38px 15px 22px;
+  }
+
+  .data-management-masthead .page-heading h1 {
+    font-size: clamp(34px, 11vw, 46px);
+  }
+
+  .data-management-masthead .page-actions,
+  .data-management-masthead .page-actions > * {
+    width: 100%;
+  }
+
+  .page--data-management .data-backup-receipt > header {
+    display: grid;
+  }
+
+  .page--data-management .data-backup-receipt > header > span {
+    justify-self: start;
+  }
+
+  .page--data-management .data-backup-receipt dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page--data-management .data-backup-receipt dl > div,
+  .page--data-management .data-backup-receipt dl > div:nth-child(-n + 3),
+  .page--data-management .data-backup-receipt dl > div:nth-child(3n + 1) {
+    grid-column: auto;
+    border-top: 1px solid var(--line-100);
+    border-left: 0;
+  }
+
+  .page--data-management .data-backup-receipt dl > div:first-child {
+    border-top: 0;
+  }
+
+  .data-health-strip > div {
+    padding: 10px 7px;
+  }
+
+  .data-health-strip dt {
+    font-size: 10px;
+  }
+
+  .data-health-strip dd {
+    font-size: 13px;
+  }
+
+  .data-section-rail-status {
+    padding: 12px 14px;
+  }
+
+  .data-section-rail-links {
+    display: flex;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: 1px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+
+  .data-section-rail-links a {
+    min-height: 68px;
+    flex: 0 0 148px;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .page--data-management .data-card,
+  .page--data-management .restore-preflight {
+    padding: 18px 13px;
+  }
+
+  .page--data-management .data-card-heading {
+    padding-bottom: 14px;
+  }
+
+  .page--data-management .delete-confirm-heading {
+    display: grid;
+  }
+
+  .data-storage-meter {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
+  }
+
+  .page--data-management .data-card:not(.data-overview):not(.data-backup-card),
+  .page--data-management .legacy-backup-tools {
+    contain-intrinsic-size: 0 660px;
+  }
+}
+
+@media (pointer: coarse) {
+  .page--data-management .privacy-toggle,
+  .page--data-management .delete-backup-choice label {
+    min-height: 52px;
+  }
+
+  .page--data-management .privacy-toggle input,
+  .page--data-management .delete-backup-choice input {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+@media (max-width: 520px) {
+  .page--data-management .data-action-row,
+  .page--data-management .data-action-row > * {
+    width: 100%;
+  }
+
+  .data-health-strip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .data-health-strip > div,
+  .data-health-strip > div:first-child {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    border-top: 1px solid var(--line-100);
+    border-left: 0;
+  }
+
+  .data-health-strip > div:first-child {
+    border-top: 0;
+  }
+
+  .data-health-strip dd {
+    overflow: visible;
+    text-align: right;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .page--data-management .delete-all-facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page--data-management .delete-all-facts > div,
+  .page--data-management .delete-all-facts > div:nth-child(odd) {
+    border-top: 1px solid rgba(151, 55, 45, 0.16);
+    border-left: 0;
+  }
+
+  .page--data-management .delete-all-facts > div:first-child {
+    border-top: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .page--data-management .restore-gate-progress {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (forced-colors: active) {
+  .data-management-masthead,
+  .data-section-rail,
+  .data-section-rail-status,
+  .data-section-rail-links,
+  .data-section-rail-links a,
+  .page--data-management .data-card,
+  .page--data-management .data-overview-loading,
+  .page--data-management .data-overview-unavailable,
+  .page--data-management .restore-preflight,
+  .page--data-management .restore-confirmation,
+  .page--data-management .restore-gate-progress > li,
+  .page--data-management .legacy-backup-tools,
+  .page--data-management .delete-all-facts,
+  .page--data-management .delete-backup-choice label,
+  .page--data-management .delete-no-backup-warning {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+
+  .page--data-management .data-destructive-commit-receipt,
+  .page--data-management .data-destructive-commit-receipt > dl,
+  .page--data-management .data-destructive-commit-receipt > dl > div {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+
+  .page--data-management .data-backup-receipt {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+
+  .data-section-rail-status,
+  .data-section-rail-status small,
+  .data-section-rail-links a,
+  .data-section-rail-links a small {
+    color: CanvasText;
+  }
+
+  .data-section-status-dot {
+    background: Highlight;
+  }
+
+  .data-health-strip [data-state="attention"] dd,
+  .page--data-management .data-danger-zone {
+    color: LinkText;
+  }
+}
+
+.data-section-rail-status[data-state="attention"] {
+  border-color: rgba(214, 158, 62, 0.54);
+  background:
+    linear-gradient(110deg, rgba(184, 120, 24, 0.27), rgba(255, 253, 248, 0.04) 72%),
+    var(--ink-900);
+  color: #fff8e8;
+  box-shadow: inset 0 0 0 1px rgba(239, 190, 96, 0.18);
+}
+
+.data-section-rail-status[data-state="attention"]::after {
+  background: linear-gradient(90deg, #d69e3e, #ffe4a3 56%, transparent 94%);
+}
+
+.data-section-rail-status[data-state="attention"] .data-section-status-dot {
+  background: #d69e3e;
+  box-shadow: 0 0 0 4px rgba(239, 190, 96, 0.15);
+}
+
+.page--data-management .data-destructive-commit-receipt {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(168, 109, 25, 0.38);
+  border-left: 4px solid #b87818;
+  background:
+    linear-gradient(118deg, rgba(255, 233, 181, 0.5), transparent 48%),
+    #fffaf0;
+  box-shadow: 0 18px 42px rgba(65, 46, 22, 0.1);
+}
+
+.page--data-management .data-destructive-commit-receipt::before {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  right: 0;
+  width: 118px;
+  height: 118px;
+  border-radius: 0 0 0 100%;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(184, 120, 24, 0.08) 0,
+    rgba(184, 120, 24, 0.08) 8px,
+    transparent 8px,
+    transparent 16px
+  );
+  content: "";
+  pointer-events: none;
+}
+
+.page--data-management .data-destructive-commit-receipt::after {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, #9f5f12, #e0ad53 52%, transparent 94%);
+  content: "";
+  pointer-events: none;
+}
+
+.page--data-management[data-write-reconciliation-required="true"] .data-section-rail {
+  border-color: rgba(184, 120, 24, 0.38);
+  box-shadow: 0 18px 42px rgba(91, 60, 17, 0.1);
+}
+
+.page--data-management .data-destructive-commit-receipt > header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.page--data-management .data-destructive-commit-receipt > header > svg {
+  width: 22px;
+  height: 22px;
+  color: #a66514;
+}
+
+.page--data-management .data-destructive-commit-receipt .eyebrow {
+  color: #805519;
+}
+
+.page--data-management .data-destructive-commit-receipt > p {
+  max-width: 76ch;
+  color: rgba(52, 42, 28, 0.82);
+}
+
+.page--data-management .data-destructive-commit-receipt dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.page--data-management .data-destructive-commit-receipt dl > div {
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid rgba(168, 109, 25, 0.18);
+  background: rgba(255, 253, 248, 0.72);
+}
+
+.page--data-management .data-destructive-commit-receipt dt {
+  color: rgba(92, 61, 19, 0.7);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.page--data-management .data-destructive-commit-receipt dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  color: var(--ink-900);
+  font-weight: 750;
+}
+
+.page--data-management .data-destructive-commit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.page--data-management .data-destructive-commit-actions .primary-action {
+  border-color: #315f6c;
+  background: #315f6c;
+  color: #fffdf8;
+}
+
+.page--data-management .data-destructive-commit-actions .primary-action:hover {
+  border-color: #244c57;
+  background: #244c57;
+}
+
+.page--data-management .data-destructive-commit-receipt > small {
+  display: block;
+  padding-top: 10px;
+  border-top: 1px solid rgba(168, 109, 25, 0.2);
+  color: rgba(78, 58, 30, 0.72);
+  line-height: 1.65;
+}
+
+.page--data-management .restore-preflight {
+  border-left: 3px solid #3e7888;
+}
+
+.page--data-management .restore-confirmation {
+  border-left: 3px solid #b87818;
+  background:
+    linear-gradient(115deg, rgba(255, 233, 181, 0.28), transparent 54%),
+    rgba(255, 253, 248, 0.9);
+}
+
+.page--data-management .restore-gate-progress {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid rgba(55, 49, 39, 0.12);
+  background: rgba(55, 49, 39, 0.035);
+}
+
+.page--data-management .restore-gate-progress > [data-state] {
+  min-width: 0;
+  border: 1px solid rgba(55, 49, 39, 0.15);
+  background: rgba(255, 253, 248, 0.72);
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.page--data-management .restore-gate-progress > [data-state="complete"] {
+  border-color: rgba(42, 111, 80, 0.34);
+  background: rgba(222, 241, 229, 0.72);
+}
+
+.page--data-management .restore-gate-progress > [data-state="current"] {
+  border-color: rgba(184, 120, 24, 0.62);
+  background: rgba(255, 240, 203, 0.82);
+  box-shadow: 0 0 0 2px rgba(184, 120, 24, 0.09);
+}
+
+.page--data-management .restore-gate-progress > [data-state="locked"] {
+  border-style: dashed;
+  background: rgba(55, 49, 39, 0.04);
+  opacity: 0.7;
+}
+
+@media (max-width: 720px) {
+  .page--data-management .data-destructive-commit-receipt > header {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .page--data-management .data-destructive-commit-receipt > header > :last-child {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .page--data-management .data-destructive-commit-receipt dl,
+  .page--data-management .restore-gate-progress {
+    grid-template-columns: 1fr;
+  }
+
+  .page--data-management .data-destructive-commit-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .page--data-management .data-destructive-commit-actions > * {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (forced-colors: active) {
+  .data-section-rail-status[data-state="attention"] {
+    border-color: Highlight;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+
+  .data-section-rail-status[data-state="attention"] .data-section-status-dot {
+    background: Highlight;
+    box-shadow: none;
+  }
+
+  .data-section-rail-status[data-state="attention"]::after {
+    background: Highlight;
+  }
+
+  .page--data-management .data-destructive-commit-receipt,
+  .page--data-management .restore-preflight,
+  .page--data-management .restore-confirmation,
+  .page--data-management .restore-gate-progress,
+  .page--data-management .restore-gate-progress > [data-state] {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+
+  .page--data-management .data-destructive-commit-receipt {
+    border-left-color: Highlight;
+  }
+
+  .page--data-management .data-destructive-commit-receipt::before,
+  .page--data-management .data-destructive-commit-receipt::after {
+    display: none;
+  }
+
+  .page--data-management .data-destructive-commit-receipt > header > svg,
+  .page--data-management .data-destructive-commit-receipt .eyebrow,
+  .page--data-management .data-destructive-commit-receipt > p,
+  .page--data-management .data-destructive-commit-receipt dt,
+  .page--data-management .data-destructive-commit-receipt dd,
+  .page--data-management .data-destructive-commit-receipt > small {
+    color: CanvasText;
+  }
+
+  .page--data-management .restore-gate-progress > [data-state="current"] {
+    border: 2px solid Highlight;
+  }
+
+  .page--data-management .restore-gate-progress > [data-state="complete"] {
+    border-color: LinkText;
+  }
+
+  .page--data-management .restore-gate-progress > [data-state="locked"] {
+    border-style: dashed;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .data-section-rail-status .data-section-status-dot {
+    animation: none;
+  }
+
+  .data-section-rail-status::after {
+    animation: none;
+  }
+
+  .data-section-rail-links a,
+  .data-section-rail-links a::after {
+    transition: none;
+  }
+
+  .page--data-management .delete-backup-choice label {
+    transition: none;
+  }
+}
+
+/* Semantic refinement: operational information is distinct from verified completion. */
+.page--data-management {
+  --data-info: #4b7181;
+  --data-reading: #6e9bad;
+  --data-info-wash: rgba(75, 113, 129, 0.08);
+}
+
+.page--data-management .data-management-masthead::after,
+.page--data-management .data-masthead::after {
+  font-size: 10px;
+}
+
+.page--data-management .data-section-rail-status[data-state="ready"] {
+  border-bottom-color: color-mix(in srgb, var(--data-info) 30%, var(--line-200));
+  background-image: linear-gradient(90deg, var(--data-info-wash), transparent 72%);
+}
+
+.page--data-management .data-section-rail-status[data-state="ready"] .data-section-status-dot {
+  background: var(--data-info);
+  box-shadow: 0 0 0 4px var(--data-info-wash);
+}
+
+.page--data-management .data-section-rail-status[data-state="ready"]::after {
+  background: linear-gradient(90deg, var(--data-reading), var(--data-info) 55%, transparent 92%);
+}
+
+.page--data-management .data-section-rail-status strong {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.page--data-management .data-section-rail-links a {
+  text-decoration-color: color-mix(in srgb, var(--data-info) 58%, transparent);
+}
+
+.page--data-management .data-section-rail-links a:not([data-state="attention"]):not([data-state="danger"])::after {
+  background: var(--data-info);
+}
+
+.page--data-management .data-section-rail-links a:hover {
+  color: var(--data-info);
+  background: var(--data-info-wash);
+}
+
+.page--data-management .data-section-rail-links a:focus-visible,
+.page--data-management .restore-preflight:focus-visible,
+.page--data-management .data-feedback:focus-visible,
+.page--data-management .legacy-backup-tools > summary:focus-visible {
+  outline: 3px solid var(--data-info);
+  outline-offset: 3px;
+}
+
+.page--data-management .restore-preflight:focus-visible {
+  outline-color: var(--warning-fg);
+}
+
+.page--data-management[data-local-state="loading"] .data-overview-loading,
+.page--data-management[data-local-state="loading"] .data-overview-state {
+  color: var(--data-info);
+  border-color: color-mix(in srgb, var(--data-info) 34%, var(--line-200));
+  background: var(--data-info-wash);
+}
+
+.page--data-management .data-partition-count,
+.page--data-management .data-partition-card > strong {
+  color: var(--data-info);
+}
+
+.page--data-management .data-storage-note {
+  border-color: color-mix(in srgb, var(--data-info) 30%, var(--line-200));
+  background: var(--data-info-wash);
+}
+
+.page--data-management .data-storage-meter meter {
+  accent-color: var(--data-info);
+}
+
+.page--data-management .restore-manifest-facts code {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.page--data-management .attachment-list > li:hover,
+.page--data-management .attachment-list > li:focus-within {
+  border-color: color-mix(in srgb, var(--data-info) 28%, var(--line-200));
+  background: var(--data-info-wash);
+}
+
+.page--data-management .legacy-backup-tools[open] {
+  border-color: color-mix(in srgb, var(--data-info) 30%, var(--line-200));
+  background: var(--data-info-wash);
+}
+
+.page--data-management .legacy-backup-tools[open] > summary {
+  color: var(--data-info);
+}
+
+.page--data-management .delete-backup-choice input {
+  accent-color: var(--data-info);
+}
+
+.page--data-management .delete-backup-choice input:focus-visible {
+  outline: 3px solid var(--data-info);
+  outline-offset: 3px;
+}
+
+.page--data-management .delete-backup-choice label:not(.is-danger)[data-state="selected"] {
+  border-color: color-mix(in srgb, var(--data-info) 50%, var(--line-200));
+  background: var(--data-info-wash);
+}
+
+.page--data-management .data-backup-receipt[data-delivery="saved"] {
+  border-color: color-mix(in srgb, var(--data-info) 38%, var(--line-200));
+  border-left-color: var(--data-info);
+  background:
+    linear-gradient(135deg, var(--data-info-wash), rgba(255, 253, 248, 0.92) 58%),
+    rgba(255, 253, 248, 0.88);
+}
+
+.page--data-management .data-backup-receipt[data-delivery="saved"] > header > span {
+  color: var(--data-info);
+}
+
+.page--data-management .data-backup-receipt[data-delivery="requested"] {
+  border-left-color: var(--warning-fg);
+}
+
+@media (max-width: 760px) {
+  .page--data-management .data-section-rail-links {
+    scrollbar-color: var(--data-info) transparent;
+    scrollbar-gutter: stable;
+  }
+}
+
+@media (max-width: 767px) {
+  .page--data-management .attachment-list > li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+    padding-block: 16px;
+  }
+
+  .page--data-management .attachment-main,
+  .page--data-management .attachment-actions,
+  .page--data-management .attachment-delete-confirm {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .page--data-management .attachment-actions,
+  .page--data-management .attachment-delete-confirm {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .page--data-management .attachment-actions > *,
+  .page--data-management .attachment-delete-confirm > button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .page--data-management .attachment-delete-confirm > strong {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 440px) {
+  .page--data-management .attachment-actions,
+  .page--data-management .attachment-delete-confirm {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page--data-management .attachment-delete-confirm > strong {
+    grid-column: auto;
+  }
+}
+
+@media (forced-colors: active) {
+  .page--data-management .data-section-rail-links a:focus-visible,
+  .page--data-management .restore-preflight:focus-visible,
+  .page--data-management .data-feedback:focus-visible,
+  .page--data-management .legacy-backup-tools > summary:focus-visible,
+  .page--data-management .delete-backup-choice input:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* Final readability pass for generated receipts and user-provided metadata. */
+.page--data-management :is(
+  .data-feedback strong,
+  .data-feedback p,
+  .data-backup-receipt dd,
+  .data-destructive-commit-receipt p,
+  .data-destructive-commit-receipt small,
+  .restore-preflight p,
+  .restore-preflight dd,
+  .restore-preflight code,
+  .attachment-main strong,
+  .attachment-main small,
+  .attachment-main p,
+  .attachment-main code,
+  .attachment-delete-confirm strong,
+  .delete-all-facts dd
+) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  unicode-bidi: plaintext;
+}
+
+.page--data-management .data-health-strip dt,
+.page--data-management .data-section-rail-status small,
+.page--data-management .data-section-rail-links a > span,
+.page--data-management .data-destructive-commit-receipt dt,
+.page--data-management .delete-all-facts dt {
+  font-size: 11px;
+}
+
+.page--data-management .data-section-rail-links a small,
+.page--data-management .data-storage-meter small,
+.page--data-management .delete-all-facts dd > small,
+.page--data-management .data-backup-receipt > p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.page--data-management .data-feedback p,
+.page--data-management .attachment-main small {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media print {
+  .page--data-management {
+    gap: 14px;
+  }
+
+  .page--data-management .data-management-masthead {
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.38fr);
+    padding: 20px;
+  }
+
+  .page--data-management .data-management-masthead::before,
+  .page--data-management .data-management-masthead::after,
+  .page--data-management .data-section-rail,
+  .page--data-management button,
+  .page--data-management .data-management-back-link,
+  .page--data-management .attachment-upload-row,
+  .page--data-management .delete-all-confirm {
+    display: none;
+  }
+
+  .page--data-management .data-card,
+  .page--data-management .legacy-backup-tools,
+  .page--data-management .data-backup-receipt,
+  .page--data-management .data-destructive-commit-receipt,
+  .page--data-management .restore-preflight {
+    content-visibility: visible;
+    contain: none;
+    break-inside: avoid;
+    box-shadow: none;
+  }
+}

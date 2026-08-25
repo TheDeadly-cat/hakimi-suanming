@@ -18,8 +18,14 @@ import {
   type FullBackupWorkerResponse,
   type FullBackupWorkerSerializedError
 } from "./full-backup-worker-protocol";
+import { safeVisibleText } from "./visible-text";
+import { disposeWorkerSafely } from "./worker-lifecycle";
 
 type WorkerLike = Pick<Worker, "postMessage" | "terminate" | "onmessage" | "onerror" | "onmessageerror">;
+const MAX_BACKUP_WORKER_ERROR_TEXT_CODE_POINTS = 512;
+const MAX_BACKUP_WORKER_JOB_ID_CODE_POINTS = 128;
+const CANONICAL_SHA256_DIGEST = /^[0-9a-f]{64}$/u;
+const CANONICAL_WORKER_JOB_ID = /^[A-Za-z0-9._:-]+$/u;
 
 export type FullBackupWorkerRuntime = {
   createWorker?: () => WorkerLike;
@@ -65,35 +71,138 @@ function canUseBrowserWorker(runtime: FullBackupWorkerRuntime): boolean {
 }
 
 function nextJobId(runtime: FullBackupWorkerRuntime): string {
-  return runtime.createJobId?.() ?? crypto.randomUUID();
+  let jobId: unknown;
+  try {
+    jobId = runtime.createJobId?.() ?? globalThis.crypto?.randomUUID?.();
+  } catch {
+    throw new FullBackupWorkerProtocolError(
+      "BACKUP_WORKER_JOB_ID_UNAVAILABLE",
+      "无法生成备份 Worker 任务标识。"
+    );
+  }
+  if (
+    typeof jobId !== "string"
+    || jobId.length === 0
+    || jobId !== jobId.trim()
+    || Array.from(jobId).length > MAX_BACKUP_WORKER_JOB_ID_CODE_POINTS
+    || !CANONICAL_WORKER_JOB_ID.test(jobId)
+  ) {
+    throw new FullBackupWorkerProtocolError(
+      "BACKUP_WORKER_JOB_ID_INVALID",
+      "备份 Worker 任务标识不符合安全格式。"
+    );
+  }
+  return jobId;
 }
 
 function restoreWorkerError(serialized: FullBackupWorkerSerializedError): Error {
-  if (serialized.category === "cancelled" || serialized.code === "BACKUP_WORKER_CANCELLED") {
+  const message = safeVisibleText(
+    serialized.message,
+    "备份 Worker 返回了未说明的错误。",
+    MAX_BACKUP_WORKER_ERROR_TEXT_CODE_POINTS
+  );
+  const code = safeVisibleText(serialized.code, "", 128);
+  if (serialized.category === "cancelled" || code === "BACKUP_WORKER_CANCELLED") {
     return new FullBackupWorkerCancelledError();
   }
-  if (serialized.category === "archive" && serialized.code) {
+  if (serialized.category === "archive" && code) {
     return new FullBackupArchiveError(
-      serialized.code as FullBackupArchiveErrorCode,
-      serialized.message
+      code as FullBackupArchiveErrorCode,
+      message
     );
   }
-  if (serialized.category === "backup" && serialized.code) {
-    return new FullBackupError(serialized.code as FullBackupErrorCode, serialized.message);
+  if (serialized.category === "backup" && code) {
+    return new FullBackupError(code as FullBackupErrorCode, message);
   }
   if (serialized.category === "protocol") {
     return new FullBackupWorkerProtocolError(
-      serialized.code ?? "BACKUP_WORKER_PROTOCOL_ERROR",
-      serialized.message
+      code || "BACKUP_WORKER_PROTOCOL_ERROR",
+      message
     );
   }
-  const error = new Error(serialized.message);
-  error.name = serialized.name;
-  if (serialized.code) (error as Error & { code?: string }).code = serialized.code;
+  const error = new Error(message);
+  error.name = safeVisibleText(serialized.name, "Error", 128) || "Error";
+  if (code) (error as Error & { code?: string }).code = code;
   return error;
 }
 
 type SuccessfulWorkerResponse = Exclude<FullBackupWorkerResponse, { type: "error" }>;
+
+function isRecord(value: unknown): value is Record<PropertyKey, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isPositiveSafeInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
+function hasCanonicalDigest(value: unknown): value is string {
+  return typeof value === "string" && CANONICAL_SHA256_DIGEST.test(value);
+}
+
+function validateSuccessfulWorkerResponse(
+  message: SuccessfulWorkerResponse,
+  request: FullBackupWorkerRequest
+): string | null {
+  switch (message.type) {
+    case "artifact_ready":
+      if (
+        (message.output !== "zip" && message.output !== "json")
+        || typeof Blob === "undefined"
+        || !(message.blob instanceof Blob)
+        || !isPositiveSafeInteger(message.outputByteLength)
+        || message.outputByteLength !== message.blob.size
+        || !isPositiveSafeInteger(message.canonicalJsonByteLength)
+        || !hasCanonicalDigest(message.payloadDigest)
+      ) {
+        return "备份 Worker 返回了不一致的成品文件元数据。";
+      }
+      if (request.type === "create_from_snapshot" && message.output !== request.output) {
+        return "备份 Worker 返回的成品格式与请求不一致。";
+      }
+      return null;
+    case "preparation_ready":
+      if (
+        !isRecord(message.preparation)
+        || (message.sourceContainer !== "zip" && message.sourceContainer !== "json")
+        || !isPositiveSafeInteger(message.sourceByteLength)
+        || !isPositiveSafeInteger(message.decodedJsonByteLength)
+        || !isPositiveSafeInteger(message.canonicalJsonByteLength)
+        || !hasCanonicalDigest(message.payloadDigest)
+      ) {
+        return "备份 Worker 返回了无效的导入预检元数据。";
+      }
+      if (request.type !== "prepare_import" || message.sourceByteLength !== request.blob.size) {
+        return "备份 Worker 返回的来源字节数与导入文件不一致。";
+      }
+      return null;
+    case "verified_ready":
+      return isRecord(message.verified)
+        ? null
+        : "备份 Worker 返回了无效的替换验证结果。";
+    case "snapshot_verified":
+      return hasCanonicalDigest(message.payloadDigest)
+        && isPositiveSafeInteger(message.canonicalJsonByteLength)
+        ? null
+        : "备份 Worker 返回了无效的快照验证元数据。";
+  }
+}
+
+function guardWorkerResponse(
+  fail: (reason: unknown) => void,
+  handle: (event: MessageEvent<FullBackupWorkerResponse>) => void
+): (event: MessageEvent<FullBackupWorkerResponse>) => void {
+  return (event) => {
+    try {
+      handle(event);
+    } catch {
+      fail(new FullBackupWorkerProtocolError(
+        "BACKUP_WORKER_RESPONSE_INVALID",
+        "备份 Worker 返回了结构无效的响应。"
+      ));
+    }
+  };
+}
 
 async function runWorkerJob<T extends SuccessfulWorkerResponse["type"]>(
   request: FullBackupWorkerRequest,
@@ -109,7 +218,7 @@ async function runWorkerJob<T extends SuccessfulWorkerResponse["type"]>(
   return new Promise((resolve, reject) => {
     const cleanup = () => {
       signal?.removeEventListener("abort", abort);
-      worker.terminate();
+      disposeWorkerSafely(worker);
     };
     const fail = (reason: unknown) => {
       if (settled) return;
@@ -132,7 +241,7 @@ async function runWorkerJob<T extends SuccessfulWorkerResponse["type"]>(
       fail(new FullBackupWorkerCancelledError());
     };
 
-    worker.onmessage = (event: MessageEvent<FullBackupWorkerResponse>) => {
+    worker.onmessage = guardWorkerResponse(fail, (event: MessageEvent<FullBackupWorkerResponse>) => {
       if (settled) return;
       const message = event.data;
       if (
@@ -159,19 +268,31 @@ async function runWorkerJob<T extends SuccessfulWorkerResponse["type"]>(
       if (message.type !== expectedType) {
         fail(new FullBackupWorkerProtocolError(
           "BACKUP_WORKER_RESPONSE_TYPE_INVALID",
-          `备份 Worker 返回了意外结果：${message.type}。`
+          `备份 Worker 返回了意外结果：${safeVisibleText(message.type, "未知", 64)}。`
+        ));
+        return;
+      }
+      const invalidResult = validateSuccessfulWorkerResponse(message, request);
+      if (invalidResult) {
+        fail(new FullBackupWorkerProtocolError(
+          "BACKUP_WORKER_RESULT_INVALID",
+          invalidResult
         ));
         return;
       }
       settled = true;
       cleanup();
       resolve(message as Extract<SuccessfulWorkerResponse, { type: T }>);
-    };
+    });
     worker.onerror = (event: ErrorEvent) => {
       event.preventDefault?.();
       fail(new FullBackupWorkerProtocolError(
         "BACKUP_WORKER_CRASH",
-        event.message || "备份 Worker 运行失败。"
+        safeVisibleText(
+          event.message,
+          "备份 Worker 运行失败。",
+          MAX_BACKUP_WORKER_ERROR_TEXT_CODE_POINTS
+        )
       ));
     };
     worker.onmessageerror = () => fail(new FullBackupWorkerProtocolError(
@@ -179,6 +300,10 @@ async function runWorkerJob<T extends SuccessfulWorkerResponse["type"]>(
       "备份 Worker 返回了无法解析的数据。"
     ));
     signal?.addEventListener("abort", abort, { once: true });
+    if (signal?.aborted) {
+      abort();
+      return;
+    }
     try {
       worker.postMessage(request);
     } catch (reason) {
@@ -195,7 +320,7 @@ function requestBase(runtime: FullBackupWorkerRuntime) {
   } as const;
 }
 
-export function createFullBackupArtifactOffMainThread(
+export async function createFullBackupArtifactOffMainThread(
   snapshot: FullBackupPayload,
   options: CreateFullBackupOptions,
   output: "zip" | "json",
@@ -211,7 +336,7 @@ export function createFullBackupArtifactOffMainThread(
   }, "artifact_ready", signal, runtime);
 }
 
-export function archiveFullBackupEnvelopeOffMainThread(
+export async function archiveFullBackupEnvelopeOffMainThread(
   envelope: FullBackupEnvelope,
   signal?: AbortSignal,
   runtime: FullBackupWorkerRuntime = {}
@@ -223,7 +348,7 @@ export function archiveFullBackupEnvelopeOffMainThread(
   }, "artifact_ready", signal, runtime);
 }
 
-export function prepareFullBackupImportOffMainThread(
+export async function prepareFullBackupImportOffMainThread(
   blob: Blob,
   currentSnapshot: FullBackupPayload,
   options: CreateFullBackupOptions,
@@ -239,7 +364,7 @@ export function prepareFullBackupImportOffMainThread(
   }, "preparation_ready", signal, runtime);
 }
 
-export function inspectFullBackupSnapshotOffMainThread(
+export async function inspectFullBackupSnapshotOffMainThread(
   snapshot: FullBackupPayload,
   options: CreateFullBackupOptions,
   signal?: AbortSignal,
@@ -253,7 +378,7 @@ export function inspectFullBackupSnapshotOffMainThread(
   }, "snapshot_verified", signal, runtime);
 }
 
-export function verifyPreparedFullBackupOffMainThread(
+export async function verifyPreparedFullBackupOffMainThread(
   preparation: FullBackupImportPreparation,
   signal?: AbortSignal,
   runtime: FullBackupWorkerRuntime = {}

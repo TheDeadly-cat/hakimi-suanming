@@ -1,0 +1,1437 @@
+.calendar-divergence-audit-page {
+  --calendar-info: #4b7181;
+  --calendar-info-wash: rgba(75, 113, 129, 0.08);
+  --calendar-grid-line: rgba(75, 113, 129, 0.05);
+  --calendar-shadow: 0 22px 58px rgba(48, 43, 32, 0.06);
+  isolation: isolate;
+}
+
+.calendar-divergence-audit-page .calendar-audit-integrity-gate {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  margin-top: 28px;
+  padding: clamp(22px, 3vw, 34px);
+  border: 1px solid var(--ochre-400);
+  border-left: 4px solid var(--ochre-400);
+  border-radius: 2px 16px 16px 2px;
+  background:
+    linear-gradient(112deg, var(--warning-bg), rgba(255, 255, 255, 0.4) 68%, transparent),
+    var(--paper-raised);
+  box-shadow: var(--calendar-shadow);
+  animation: calendar-audit-enter 400ms ease-out both;
+}
+
+.calendar-divergence-audit-page .calendar-audit-integrity-gate[data-state="invalid"] {
+  border-color: var(--cinnabar-650);
+  background:
+    linear-gradient(112deg, rgba(170, 57, 41, 0.1), rgba(255, 255, 255, 0.42) 68%, transparent),
+    var(--paper-raised);
+}
+
+.calendar-divergence-audit-page .calendar-audit-integrity-gate > svg {
+  width: 28px;
+  height: 28px;
+  color: var(--cinnabar-650);
+}
+
+.calendar-divergence-audit-page .calendar-audit-integrity-gate h2 {
+  margin: 0;
+  font-size: clamp(23px, 2.6vw, 31px);
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.calendar-divergence-audit-page .calendar-audit-integrity-gate p {
+  max-width: 76ch;
+  margin: 10px 0 0;
+  line-height: 1.75;
+}
+
+.calendar-divergence-audit-page .calendar-audit-integrity-gate .secondary-action {
+  margin-top: 18px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-lead {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(24px, 5vw, 64px);
+  align-items: center;
+  overflow: hidden;
+  margin-top: 28px;
+  padding: clamp(24px, 3.3vw, 40px);
+  border: 1px solid var(--ochre-400);
+  border-top: 4px solid var(--cinnabar-650);
+  border-left-width: 1px;
+  border-radius: 2px 18px 18px 2px;
+  background:
+    linear-gradient(112deg, var(--warning-bg), rgba(255, 255, 255, 0.34) 58%, transparent 78%),
+    linear-gradient(var(--calendar-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--calendar-grid-line) 1px, transparent 1px),
+    var(--paper-raised);
+  background-size: auto, 36px 36px, 36px 36px, auto;
+  box-shadow: var(--calendar-shadow);
+  animation: calendar-audit-enter 400ms ease-out both;
+}
+
+.calendar-divergence-audit-page .calendar-audit-lead::after {
+  position: absolute;
+  top: -50px;
+  right: -38px;
+  width: 145px;
+  height: 145px;
+  border: 1px solid rgba(170, 57, 41, 0.18);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.calendar-divergence-audit-page .calendar-audit-lead > * {
+  position: relative;
+  z-index: 1;
+}
+
+.calendar-divergence-audit-page .calendar-audit-lead h2 {
+  font-size: clamp(28px, 3.3vw, 43px);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.calendar-divergence-audit-page .calendar-audit-lead > div:first-child > p:last-child {
+  max-width: 76ch;
+  color: var(--ink-650);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.calendar-divergence-audit-page .calendar-audit-state {
+  min-width: 224px;
+  padding: 7px 0 7px 26px;
+  border-left: 1px solid var(--ochre-400);
+}
+
+.calendar-divergence-audit-page .calendar-audit-state strong {
+  color: var(--cinnabar-650);
+  font-size: 34px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-metrics {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  overflow: hidden;
+  border-left: 3px solid var(--calendar-info);
+  border-radius: 2px 12px 12px 2px;
+  box-shadow: 0 11px 30px rgba(48, 43, 32, 0.04);
+}
+
+.calendar-divergence-audit-page .calendar-audit-metrics > div {
+  padding: 18px 15px;
+  border-right: 1px solid var(--line-100);
+}
+
+.calendar-divergence-audit-page .calendar-audit-metrics > div:nth-child(6n) {
+  border-right: 0;
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-map {
+  margin-top: 22px;
+  padding: clamp(22px, 3vw, 32px);
+  border: 1px solid var(--line-200);
+  border-radius: 14px 2px 14px 2px;
+  background: var(--ink-900);
+  color: var(--paper-raised);
+  box-shadow: var(--calendar-shadow);
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-map > header {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.78fr) minmax(0, 1.22fr);
+  gap: clamp(24px, 5vw, 70px);
+  align-items: end;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-map .eyebrow {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-map h2 {
+  margin: 0;
+  color: var(--paper-raised);
+  font-family: var(--font-editorial);
+  font-size: clamp(25px, 2.8vw, 34px);
+  font-weight: 600;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-map > header > p {
+  max-width: 690px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.68);
+  line-height: 1.7;
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-scale {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(64px, 11vw, 150px);
+  margin-top: 26px;
+  padding: 24px 0 3px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-scale::before {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.28);
+  content: "";
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-scale article {
+  position: relative;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 13px;
+  min-width: 0;
+  padding-top: 24px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-scale article::before {
+  position: absolute;
+  top: 1px;
+  width: 11px;
+  height: 11px;
+  border: 3px solid var(--ink-900);
+  border-radius: 50%;
+  background: var(--cinnabar-650);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.42);
+  content: "";
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-scale article.is-before {
+  justify-self: end;
+  text-align: right;
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-scale article.is-before::before {
+  right: 12%;
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-scale article.is-after::before {
+  left: 12%;
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-scale article > span {
+  padding-top: 5px;
+  color: var(--cinnabar-650);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-scale article div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-scale article small {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 11px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-scale article strong {
+  color: var(--paper-raised);
+  font-family: var(--font-editorial);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.05;
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-scale article p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-origin {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  min-width: 120px;
+  padding: 0 10px;
+  background: var(--ink-900);
+  transform: translateX(-50%);
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-origin i {
+  width: 2px;
+  height: 16px;
+  background: var(--paper-raised);
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-origin strong {
+  color: var(--paper-raised);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-midnight-origin span {
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 10px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-boundary-note {
+  border-top: 3px solid var(--indigo-650);
+  border-radius: 2px 12px 12px 2px;
+  box-shadow: 0 11px 30px rgba(48, 43, 32, 0.04);
+}
+
+.calendar-divergence-audit-page .calendar-audit-evidence-workspace {
+  position: relative;
+}
+
+.calendar-divergence-audit-page .calendar-audit-toolbar {
+  display: flex;
+  gap: 18px;
+  align-items: end;
+  justify-content: space-between;
+  margin-top: 32px;
+  padding-bottom: 14px;
+  border-bottom: 3px solid var(--ink-900);
+}
+
+.calendar-divergence-audit-page .calendar-audit-toolbar button {
+  display: inline-grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 11px;
+  align-items: center;
+  min-height: 44px;
+  padding: 7px 8px 7px 13px;
+  border: 1px solid var(--line-200);
+  border-radius: 7px;
+  color: var(--ink-700);
+  background: var(--paper-raised);
+  font: inherit;
+  text-align: left;
+}
+
+.calendar-divergence-audit-page .calendar-audit-toolbar button.is-active {
+  color: var(--calendar-info);
+  background: var(--calendar-info-wash);
+  box-shadow: inset 0 -3px var(--calendar-info);
+}
+
+.calendar-divergence-audit-page .calendar-audit-toolbar button > span {
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.calendar-divergence-audit-page .calendar-audit-toolbar button > strong {
+  display: grid;
+  min-width: 30px;
+  height: 28px;
+  place-items: center;
+  padding: 0 6px;
+  border-left: 1px solid var(--line-200);
+  color: var(--ink-550);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-toolbar button.is-active > strong {
+  border-left-color: color-mix(in srgb, var(--calendar-info) 34%, var(--line-200));
+  color: var(--calendar-info);
+}
+
+.calendar-divergence-audit-page .calendar-audit-toolbar button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-toolbar > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-toolbar > p {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 1px 8px;
+  align-items: end;
+  min-width: 180px;
+  margin: 0;
+  padding-left: 14px;
+  border-left: 2px solid var(--calendar-info);
+  color: var(--ink-650);
+}
+
+.calendar-divergence-audit-page .calendar-audit-toolbar > p > span {
+  grid-column: 1 / -1;
+  color: var(--ink-550);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.calendar-divergence-audit-page .calendar-audit-toolbar > p > strong {
+  color: var(--calendar-info);
+  font-family: var(--font-editorial);
+  font-size: 25px;
+  line-height: 1;
+}
+
+.calendar-divergence-audit-page .calendar-audit-toolbar > p > small {
+  color: var(--ink-650);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.calendar-divergence-audit-page .calendar-audit-reading-rail {
+  position: sticky;
+  top: max(12px, env(safe-area-inset-top));
+  z-index: 7;
+  display: grid;
+  grid-template-columns: minmax(190px, 0.6fr) minmax(360px, 1.4fr);
+  gap: 12px 18px;
+  align-items: center;
+  margin: 10px 0 18px;
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--calendar-info) 34%, var(--line-200));
+  border-left: 4px solid var(--calendar-info);
+  border-radius: 2px 11px 11px 2px;
+  background: color-mix(in srgb, var(--paper-raised) 96%, var(--calendar-info-wash));
+  box-shadow: 0 10px 28px rgba(48, 43, 32, 0.09);
+}
+
+.calendar-divergence-audit-page .calendar-audit-reading-rail__scope {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 9px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.calendar-divergence-audit-page .calendar-audit-reading-rail__scope small {
+  grid-column: 1 / -1;
+  color: var(--ink-550);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.calendar-divergence-audit-page .calendar-audit-reading-rail__scope strong {
+  color: var(--ink-900);
+  font-family: var(--font-editorial);
+  font-size: 17px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-reading-rail__scope span {
+  min-width: 0;
+  color: var(--ink-650);
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+
+.calendar-divergence-audit-page .calendar-audit-window-jumps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-window-jumps a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  padding: 7px 9px;
+  border: 1px solid var(--line-200);
+  border-radius: 7px;
+  color: var(--ink-700);
+  background: var(--paper-raised);
+  text-decoration: none;
+}
+
+.calendar-divergence-audit-page .calendar-audit-window-jumps a[aria-current="location"] {
+  border-color: color-mix(in srgb, var(--calendar-info) 54%, var(--line-200));
+  color: var(--calendar-info);
+  background: var(--calendar-info-wash);
+  box-shadow: inset 0 -3px var(--calendar-info);
+}
+
+.calendar-divergence-audit-page .calendar-audit-window-jumps a > span {
+  color: var(--calendar-info);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.calendar-divergence-audit-page .calendar-audit-window-jumps a > strong {
+  min-width: 0;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.calendar-divergence-audit-page .calendar-audit-window-jumps a:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-window {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 1650px;
+  border-top: 4px solid var(--cinnabar-650);
+  border-radius: 2px 15px 15px 2px;
+  box-shadow: var(--calendar-shadow);
+  scroll-margin-top: 108px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-window > header {
+  padding: 24px 26px;
+  background:
+    linear-gradient(110deg, var(--calendar-info-wash), transparent 72%),
+    var(--paper-raised);
+}
+
+.calendar-divergence-audit-page .calendar-audit-window > header h2 {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.calendar-divergence-audit-page .calendar-audit-root-cause {
+  background: var(--warning-bg);
+}
+
+.calendar-divergence-audit-page .calendar-audit-table-wrap {
+  max-height: min(72vh, 760px);
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.calendar-divergence-audit-page .calendar-audit-table caption {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--line-200);
+  background: var(--paper-raised);
+  text-align: left;
+}
+
+.calendar-divergence-audit-page .calendar-audit-table caption span,
+.calendar-divergence-audit-page .calendar-audit-table caption small {
+  display: block;
+}
+
+.calendar-divergence-audit-page .calendar-audit-table caption span {
+  color: var(--ink-900);
+  font-family: var(--font-editorial);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.calendar-divergence-audit-page .calendar-audit-table caption small {
+  margin-top: 4px;
+  color: var(--ink-550);
+  font-size: 11px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-table thead {
+  position: sticky;
+  z-index: 4;
+  top: 0;
+}
+
+.calendar-divergence-audit-page .calendar-audit-table thead th {
+  background: var(--paper-deep);
+  box-shadow: inset 0 -1px 0 var(--line-200);
+}
+
+.calendar-divergence-audit-page .calendar-audit-table tbody th {
+  position: sticky;
+  z-index: 2;
+  left: 0;
+  background: var(--paper-raised);
+  box-shadow: inset -1px 0 0 var(--line-100);
+}
+
+.calendar-divergence-audit-page .calendar-audit-table tbody tr {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 48px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-table tbody tr.is-divergence:nth-child(even) > * {
+  background: rgba(170, 57, 41, 0.025);
+}
+
+.calendar-divergence-audit-page .calendar-audit-sources,
+.calendar-divergence-audit-page .calendar-audit-review-protocol {
+  content-visibility: auto;
+  margin-top: 38px;
+  padding-top: 30px;
+  border-top: 4px double var(--ink-900);
+}
+
+.calendar-divergence-audit-page .calendar-audit-sources {
+  contain-intrinsic-size: 0 1100px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-protocol {
+  contain-intrinsic-size: 0 860px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-source-grid article {
+  border-top: 3px solid var(--calendar-info);
+  border-radius: 2px 11px 11px 2px;
+  box-shadow: 0 12px 32px rgba(48, 43, 32, 0.04);
+}
+
+.calendar-divergence-audit-page .calendar-audit-source-grid article > p {
+  color: var(--ink-650);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.calendar-divergence-audit-page .calendar-audit-source-grid article > a {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  min-height: 44px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-source-unavailable {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  color: var(--ink-550);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.calendar-divergence-audit-page .calendar-audit-source-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 14px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-source-grid dd,
+.calendar-divergence-audit-page .calendar-audit-source-grid code {
+  overflow-wrap: anywhere;
+}
+
+.calendar-divergence-audit-page .calendar-audit-source-grid article:nth-child(odd) {
+  border-top-color: var(--indigo-650);
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-protocol ol {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--line-200);
+  border-radius: 10px 2px 10px 2px;
+  list-style: none;
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-protocol ol > li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 8px;
+  align-content: start;
+  min-width: 0;
+  padding: 17px 14px;
+  border-left: 1px solid var(--line-100);
+  background: var(--paper-raised);
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-protocol ol > li:first-child {
+  border-left: 0;
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-protocol ol > li::before {
+  position: absolute;
+  top: 0;
+  right: 14px;
+  left: 14px;
+  height: 3px;
+  background: var(--line-200);
+  content: "";
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-protocol ol > li[data-state="ready"]::before {
+  background: var(--calendar-info);
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-protocol ol > li[data-state="attention"]::before {
+  background: var(--ochre-500);
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-protocol ol > li[data-state="locked"]::before {
+  background: var(--cinnabar-650);
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-protocol ol > li > .status-pill {
+  grid-column: 2;
+  justify-self: start;
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-protocol ol h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-protocol ol p {
+  margin: 5px 0 0;
+  color: var(--ink-650);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-protocol li > strong {
+  border: 1px solid color-mix(in srgb, var(--calendar-info) 34%, var(--line-200));
+  background: var(--paper-raised);
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-console {
+  border-top: 3px solid var(--calendar-info);
+  border-radius: 2px 11px 11px 2px;
+  box-shadow: 0 12px 32px rgba(48, 43, 32, 0.04);
+}
+
+.calendar-divergence-audit-page .calendar-audit-delivery-boundary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 13px;
+  align-items: center;
+  margin-bottom: 14px;
+  padding: 15px 16px;
+  border: 1px solid var(--ochre-400);
+  border-left: 4px solid var(--ochre-500);
+  border-radius: 2px 12px 12px 2px;
+  background:
+    radial-gradient(circle at 0 0, rgba(178, 123, 52, 0.17), transparent 36%),
+    linear-gradient(115deg, var(--warning-bg), var(--paper-raised) 72%);
+}
+
+.calendar-divergence-audit-page .calendar-audit-delivery-boundary > svg {
+  width: 21px;
+  height: 21px;
+  color: var(--ochre-500);
+}
+
+.calendar-divergence-audit-page .calendar-audit-delivery-boundary .eyebrow {
+  margin: 0 0 2px;
+  color: #8a5a28;
+}
+
+.calendar-divergence-audit-page .calendar-audit-delivery-boundary strong {
+  color: var(--ink-900);
+  font-family: var(--font-editorial);
+  font-size: 16px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-delivery-boundary p:last-child {
+  margin: 4px 0 0;
+  color: var(--ink-650);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.calendar-divergence-audit-page .calendar-audit-delivery-boundary > span {
+  padding: 5px 8px;
+  border: 1px solid currentColor;
+  color: #8a5a28;
+  font-size: 11px;
+  font-weight: 760;
+  white-space: nowrap;
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 8px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-actions > button {
+  width: 100%;
+  min-height: 44px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-operation {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  margin-top: 12px;
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--calendar-info) 34%, var(--line-200));
+  border-left: 3px solid var(--calendar-info);
+  background: var(--calendar-info-wash);
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-operation > svg {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  color: var(--calendar-info);
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-operation strong {
+  font-size: 13px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-operation p {
+  margin: 3px 0 0;
+  color: var(--ink-650);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-message,
+.calendar-divergence-audit-page .calendar-audit-review-error {
+  margin: 12px 0 0;
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--calendar-info) 30%, var(--line-200));
+  border-left: 3px solid var(--calendar-info);
+  background: var(--calendar-info-wash);
+  color: var(--ink-700);
+  line-height: 1.6;
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-error {
+  border-color: color-mix(in srgb, var(--cinnabar-650) 30%, var(--line-200));
+  border-left-color: var(--cinnabar-650);
+  background: var(--danger-bg);
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-protocol ol > li[data-state="structure"]::before {
+  background: var(--calendar-info);
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  overflow: hidden;
+  margin-top: 14px;
+  padding: clamp(16px, 2.6vw, 22px);
+  border: 1px solid color-mix(in srgb, var(--calendar-info) 34%, var(--line-200));
+  border-left: 4px solid var(--calendar-info);
+  border-radius: 2px 12px 12px 2px;
+  background:
+    radial-gradient(circle at 100% 0, var(--calendar-info-wash), transparent 34%),
+    linear-gradient(115deg, var(--calendar-info-wash), var(--paper-raised) 68%);
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt[data-delivery="prepared"] {
+  border-color: var(--ochre-400);
+  border-left-color: var(--ochre-500);
+  background:
+    radial-gradient(circle at 100% 0, rgba(178, 123, 52, 0.16), transparent 34%),
+    linear-gradient(115deg, var(--warning-bg), var(--paper-raised) 68%);
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt[data-binding="invalid"] {
+  border-color: color-mix(in srgb, var(--cinnabar-650) 42%, var(--line-200));
+  border-left-color: var(--cinnabar-650);
+  background: linear-gradient(115deg, rgba(170, 57, 41, 0.1), var(--paper-raised) 68%);
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt > header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--line-200);
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt > header > svg {
+  width: 23px;
+  height: 23px;
+  color: var(--calendar-info);
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt[data-delivery="prepared"] > header > svg {
+  color: var(--ochre-500);
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt .eyebrow {
+  margin: 0 0 2px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt h3 {
+  margin: 0;
+  font-family: var(--font-editorial);
+  font-size: clamp(19px, 2.4vw, 25px);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt > header > span {
+  padding: 5px 8px;
+  border: 1px solid currentColor;
+  color: var(--calendar-info);
+  font-size: 11px;
+  font-weight: 760;
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt[data-delivery="prepared"] > header > span {
+  color: #8a5a28;
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt[data-binding="invalid"] > header > svg,
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt[data-binding="invalid"] > header > span {
+  color: var(--cinnabar-650);
+}
+
+.calendar-divergence-audit-page .calendar-audit-binding-error {
+  margin: 12px 0 0;
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--cinnabar-650) 34%, var(--line-200));
+  border-left: 4px solid var(--cinnabar-650);
+  background: rgba(170, 57, 41, 0.08);
+  color: var(--ink-700);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid var(--line-200);
+  border-left: 1px solid var(--line-200);
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt dl > div {
+  min-width: 0;
+  padding: 10px 11px;
+  border-right: 1px solid var(--line-200);
+  border-bottom: 1px solid var(--line-200);
+  background: rgba(255, 253, 248, 0.58);
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt dt {
+  color: var(--ink-550);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt dd {
+  margin: 5px 0 0;
+  overflow-wrap: anywhere;
+  color: var(--ink-900);
+  font-size: 12px;
+  font-weight: 680;
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt code {
+  font-size: 11px;
+  word-break: break-all;
+}
+
+.calendar-divergence-audit-page .calendar-audit-bundle-receipt > p {
+  margin: 0;
+  padding-left: 11px;
+  border-left: 3px solid currentColor;
+  color: var(--ink-650);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-console dd,
+.calendar-divergence-audit-page .calendar-audit-release-boundary code {
+  overflow-wrap: anywhere;
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-chain dd {
+  display: grid;
+  gap: 4px;
+}
+
+.calendar-divergence-audit-page .calendar-audit-review-chain code {
+  color: var(--ink-550);
+  font-size: 10px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  unicode-bidi: plaintext;
+  word-break: break-all;
+}
+
+.calendar-divergence-audit-page .calendar-audit-print-boundary {
+  display: none;
+}
+
+.calendar-divergence-audit-page .calendar-audit-release-boundary {
+  border-radius: 2px 10px 10px 2px;
+}
+
+.calendar-divergence-audit-page :is(
+  .calendar-audit-integrity-gate p,
+  .calendar-audit-root-cause :is(strong, p),
+  .calendar-audit-table :is(th, td, small),
+  .calendar-audit-source-grid :is(h3, p, dd),
+  .calendar-audit-review-message,
+  .calendar-audit-review-error,
+  .calendar-audit-binding-error,
+  .calendar-audit-bundle-receipt dd,
+  .calendar-audit-review-console > dl dd,
+  .calendar-audit-release-boundary :is(p, code)
+) {
+  overflow-wrap: anywhere;
+  unicode-bidi: plaintext;
+}
+
+@keyframes calendar-audit-enter {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 980px) {
+  .calendar-divergence-audit-page .calendar-audit-midnight-map > header {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 11px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-metrics > div:nth-child(n+4) {
+    border-top: 1px solid var(--line-100);
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-metrics > div:nth-child(3n) {
+    border-right: 0;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-review-protocol ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-review-protocol ol > li:nth-child(3) {
+    border-left: 0;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-review-protocol ol > li:nth-child(5) {
+    grid-column: 1 / -1;
+    border-left: 0;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-review-protocol ol > li:nth-child(n+3) {
+    border-top: 1px solid var(--line-100);
+  }
+}
+
+@media (max-width: 767px) {
+  .calendar-divergence-audit-page .page-actions,
+  .calendar-divergence-audit-page .page-actions > * {
+    width: 100%;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-integrity-gate {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    margin-top: 22px;
+    padding: 20px 14px;
+    border-radius: 2px 13px 13px 2px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-integrity-gate .secondary-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-lead {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    margin-top: 22px;
+    padding: 20px 14px;
+    border-radius: 2px 13px 13px 2px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-lead h2 {
+    font-size: 29px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-state {
+    min-width: 0;
+    padding: 14px 0 0;
+    border-top: 1px solid var(--ochre-400);
+    border-left: 0;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-metrics > div:nth-child(n+3) {
+    border-top: 1px solid var(--line-100);
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-metrics > div:nth-child(3n) {
+    border-right: 1px solid var(--line-100);
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-metrics > div:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-midnight-map {
+    padding: 20px 13px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-midnight-scale {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 34px;
+    padding-top: 54px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-midnight-scale::before {
+    top: 42px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-midnight-scale article,
+  .calendar-divergence-audit-page .calendar-audit-midnight-scale article.is-before {
+    justify-self: stretch;
+    text-align: left;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-midnight-scale article.is-before::before,
+  .calendar-divergence-audit-page .calendar-audit-midnight-scale article.is-after::before {
+    top: -18px;
+    left: 18%;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-midnight-origin {
+    top: 15px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-window > header {
+    padding: 19px 14px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-window > header h2 {
+    font-size: 25px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-toolbar > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-toolbar button {
+    min-height: 46px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-toolbar > p {
+    min-width: 0;
+    padding: 10px 0 0;
+    border-top: 1px solid var(--line-200);
+    border-left: 0;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-reading-rail {
+    top: calc(72px + env(safe-area-inset-top));
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 10px 11px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-window-jumps {
+    gap: 6px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-window-jumps a {
+    align-content: center;
+    padding: 6px 8px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-window {
+    scroll-margin-top: 178px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-bundle-receipt > header,
+  .calendar-divergence-audit-page .calendar-audit-delivery-boundary,
+  .calendar-divergence-audit-page .calendar-audit-bundle-receipt dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-bundle-receipt > header > span {
+    justify-self: start;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-delivery-boundary > span {
+    justify-self: start;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-table-wrap {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-table,
+  .calendar-divergence-audit-page .calendar-audit-table tbody,
+  .calendar-divergence-audit-page .calendar-audit-table tr {
+    display: block;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-table tbody th {
+    position: static;
+    box-shadow: none;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-table caption {
+    display: block;
+    padding: 12px 10px;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-table tbody tr {
+    margin-top: 10px;
+    padding: 7px 10px;
+    border: 1px solid var(--line-200);
+    border-left: 3px solid var(--cinnabar-650);
+    background: var(--paper-raised);
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-table tbody tr.is-control {
+    border-left-color: var(--calendar-info);
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-table tbody th,
+  .calendar-divergence-audit-page .calendar-audit-table tbody td {
+    display: grid;
+    grid-template-columns: minmax(96px, 0.42fr) minmax(0, 1fr);
+    gap: 10px;
+    padding: 8px 0;
+    border: 0;
+    border-top: 1px solid var(--line-100);
+    text-align: left;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-table tbody th:first-child {
+    border-top: 0;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-table tbody th::before,
+  .calendar-divergence-audit-page .calendar-audit-table tbody td::before {
+    color: var(--ink-500);
+    content: attr(data-label);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-review-protocol ol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-review-protocol ol > li,
+  .calendar-divergence-audit-page .calendar-audit-review-protocol ol > li:nth-child(3) {
+    grid-column: auto;
+    border-top: 1px solid var(--line-100);
+    border-left: 0;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-review-protocol ol > li:first-child {
+    border-top: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .calendar-divergence-audit-page .calendar-audit-delivery-boundary > span {
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .calendar-divergence-audit-page .calendar-audit-integrity-gate,
+  .calendar-divergence-audit-page .calendar-audit-lead {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .calendar-divergence-audit-page .calendar-audit-lead,
+  .calendar-divergence-audit-page .calendar-audit-toolbar button,
+  .calendar-divergence-audit-page .calendar-audit-toolbar > p,
+  .calendar-divergence-audit-page .calendar-audit-reading-rail,
+  .calendar-divergence-audit-page .calendar-audit-window-jumps a,
+  .calendar-divergence-audit-page .calendar-audit-review-protocol ol,
+  .calendar-divergence-audit-page .calendar-audit-review-operation,
+  .calendar-divergence-audit-page .calendar-audit-delivery-boundary,
+  .calendar-divergence-audit-page .calendar-audit-bundle-receipt,
+  .calendar-divergence-audit-page .calendar-audit-binding-error,
+  .calendar-divergence-audit-page .calendar-audit-bundle-receipt dl > div,
+  .calendar-divergence-audit-page .calendar-audit-table caption,
+  .calendar-divergence-audit-page .calendar-audit-table tbody tr {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-window-jumps a[aria-current="location"] {
+    color: HighlightText;
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+}
+
+@media print {
+  @page {
+    margin: 11mm;
+  }
+
+  .calendar-divergence-audit-page {
+    display: block;
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    background: #fff;
+    color: #17140f;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-print-boundary {
+    display: grid;
+    gap: 4pt;
+    margin: 0 0 14pt;
+    padding: 8pt 10pt;
+    border: 1pt solid #4b7181;
+    border-left-width: 3pt;
+    font-size: 9pt;
+    line-height: 1.45;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-print-boundary code {
+    font-size: 8pt;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+  }
+
+  .calendar-divergence-audit-page :is(
+    .page-actions,
+    .calendar-audit-toolbar,
+    .calendar-audit-reading-rail,
+    .calendar-audit-review-actions,
+    .calendar-audit-review-operation,
+    .calendar-audit-delivery-boundary
+  ) {
+    display: none !important;
+  }
+
+  .calendar-divergence-audit-page :is(
+    .calendar-audit-window,
+    .calendar-audit-table tbody tr,
+    .calendar-audit-sources,
+    .calendar-audit-review-protocol
+  ) {
+    content-visibility: visible !important;
+    contain: none !important;
+  }
+
+  .calendar-divergence-audit-page :is(
+    .calendar-audit-lead,
+    .calendar-audit-midnight-map,
+    .calendar-audit-window,
+    .calendar-audit-source-grid article,
+    .calendar-audit-review-console,
+    .calendar-audit-bundle-receipt,
+    .calendar-audit-release-boundary
+  ) {
+    box-shadow: none !important;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-midnight-map {
+    border: 1pt solid #4d5866;
+    background: #fff;
+    color: #17140f;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-midnight-map :is(h2, strong) {
+    color: #17140f;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-midnight-map :is(.eyebrow, p, small, span) {
+    color: #4d5866;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-midnight-origin {
+    background: #fff;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-table-wrap {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-table thead,
+  .calendar-divergence-audit-page .calendar-audit-table tbody th {
+    position: static;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-table thead {
+    display: table-header-group;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-table tbody tr,
+  .calendar-divergence-audit-page .calendar-audit-source-grid article,
+  .calendar-divergence-audit-page .calendar-audit-bundle-receipt > header {
+    break-inside: avoid;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-window + .calendar-audit-window {
+    break-before: page;
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-review-protocol ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .calendar-divergence-audit-page .calendar-audit-review-protocol ol > li:nth-child(5) {
+    grid-column: 1 / -1;
+  }
+
+  .calendar-divergence-audit-page a {
+    color: inherit;
+    text-decoration: none;
+  }
+}

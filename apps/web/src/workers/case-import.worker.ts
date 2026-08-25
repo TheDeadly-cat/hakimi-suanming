@@ -2,9 +2,11 @@ import {
   CaseImportCancelledError,
   CaseImportConfigurationError,
   iterateCaseImportFromSource,
-  readCaseImportHeadersFromSource
+  readCaseImportHeadersFromSource,
+  type CaseImportConfigurationIssue
 } from "@hakimi/case-import";
 import { createBlobCsvSource } from "../lib/case-import-blob-source";
+import { safeVisibleText } from "../lib/visible-text";
 import type {
   CaseImportWorkerRequest,
   CaseImportWorkerResponse,
@@ -27,24 +29,87 @@ type PendingBatchAck = {
 
 let pendingBatchAck: PendingBatchAck | null = null;
 let activeProtocolError: Error | null = null;
+const MAX_WORKER_ERROR_TEXT_CODE_POINTS = 512;
+const MAX_WORKER_CONFIGURATION_ISSUES = 100;
+
+function serializeConfigurationIssues(value: unknown): CaseImportConfigurationIssue[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const issues: CaseImportConfigurationIssue[] = [];
+  for (const candidate of value.slice(0, MAX_WORKER_CONFIGURATION_ISSUES)) {
+    if (!candidate || typeof candidate !== "object") continue;
+    const record = candidate as Record<string, unknown>;
+    const code = safeVisibleText(record.code, "", 128);
+    const message = safeVisibleText(
+      record.message,
+      "CSV 配置问题未提供说明。",
+      MAX_WORKER_ERROR_TEXT_CODE_POINTS
+    );
+    if (!code || !message) continue;
+    issues.push({ ...record, code, message } as CaseImportConfigurationIssue);
+  }
+  return issues.length > 0 ? issues : undefined;
+}
 
 function serializeError(reason: unknown): CaseImportWorkerSerializedError {
-  if (reason instanceof CaseImportConfigurationError) {
-    return {
-      name: reason.name,
-      message: reason.message,
-      code: reason.code,
-      issues: reason.issues
-    };
-  }
-  if (reason instanceof CaseImportCancelledError) {
-    return { name: reason.name, message: reason.message, code: reason.code };
-  }
-  if (reason instanceof Error) {
-    const code = "code" in reason && typeof reason.code === "string" ? reason.code : undefined;
-    return { name: reason.name, message: reason.message, ...(code ? { code } : {}) };
+  try {
+    if (reason instanceof CaseImportConfigurationError) {
+      const issues = serializeConfigurationIssues(reason.issues);
+      return {
+        name: "CaseImportConfigurationError",
+        message: safeVisibleText(
+          reason.message,
+          "CSV 导入配置无效。",
+          MAX_WORKER_ERROR_TEXT_CODE_POINTS
+        ),
+        code: safeVisibleText(reason.code, "CASE_IMPORT_CONFIGURATION_INVALID", 128),
+        ...(issues ? { issues } : {})
+      };
+    }
+    if (reason instanceof CaseImportCancelledError) {
+      return { name: reason.name, message: reason.message, code: reason.code };
+    }
+    if (reason instanceof Error) {
+      const code = "code" in reason && typeof reason.code === "string"
+        ? safeVisibleText(reason.code, "", 128)
+        : "";
+      return {
+        name: safeVisibleText(reason.name, "Error", 128) || "Error",
+        message: safeVisibleText(
+          reason.message,
+          "CSV Worker 预检失败。",
+          MAX_WORKER_ERROR_TEXT_CODE_POINTS
+        ),
+        ...(code ? { code } : {})
+      };
+    }
+  } catch {
+    // Malformed error objects degrade to a stable runtime error.
   }
   return { name: "Error", message: "CSV Worker 预检失败。" };
+}
+
+function postError(reason: unknown): void {
+  try {
+    workerScope.postMessage({ type: "error", error: serializeError(reason) });
+  } catch {
+    // The worker cannot report a secondary failure when its channel is broken.
+  }
+}
+
+function workerProtocolError(message: string, code: string): Error {
+  const error = new Error(message);
+  error.name = "CaseImportWorkerProtocolError";
+  (error as Error & { code: string }).code = code;
+  return error;
+}
+
+function rejectProtocolViolation(error: Error): void {
+  activeProtocolError = error;
+  if (activeController) {
+    activeController.abort();
+    return;
+  }
+  postError(error);
 }
 
 function batchAckProtocolError(expected: number | null, received: number): Error {
@@ -97,7 +162,7 @@ function acknowledgeBatch(batchNumber: number): void {
     if (pending) pending.reject(error);
     activeController?.abort();
     if (pending === null && activeController === null) {
-      workerScope.postMessage({ type: "error", error: serializeError(error) });
+      postError(error);
     }
     return;
   }
@@ -105,7 +170,6 @@ function acknowledgeBatch(batchNumber: number): void {
 }
 
 async function runStart(message: Extract<CaseImportWorkerRequest, { type: "start" }>): Promise<void> {
-  activeController?.abort();
   const controller = new AbortController();
   activeController = controller;
   activeProtocolError = null;
@@ -129,10 +193,7 @@ async function runStart(message: Extract<CaseImportWorkerRequest, { type: "start
     }
   } catch (reason) {
     controller.abort();
-    workerScope.postMessage({
-      type: "error",
-      error: serializeError(activeProtocolError ?? reason)
-    });
+    postError(activeProtocolError ?? reason);
   } finally {
     if (activeController === controller) {
       activeController = null;
@@ -142,7 +203,6 @@ async function runStart(message: Extract<CaseImportWorkerRequest, { type: "start
 }
 
 async function runReadHeaders(message: Extract<CaseImportWorkerRequest, { type: "read_headers" }>): Promise<void> {
-  activeController?.abort();
   const controller = new AbortController();
   activeController = controller;
   activeProtocolError = null;
@@ -151,7 +211,7 @@ async function runReadHeaders(message: Extract<CaseImportWorkerRequest, { type: 
     const headers = await readCaseImportHeadersFromSource(source, { signal: controller.signal });
     workerScope.postMessage({ type: "headers", headers });
   } catch (reason) {
-    workerScope.postMessage({ type: "error", error: serializeError(reason) });
+    postError(activeProtocolError ?? reason);
   } finally {
     if (activeController === controller) {
       activeController = null;
@@ -161,19 +221,56 @@ async function runReadHeaders(message: Extract<CaseImportWorkerRequest, { type: 
 }
 
 workerScope.onmessage = (event) => {
-  if (event.data.type === "cancel") {
-    activeController?.abort();
-    return;
+  try {
+    const message = event.data as unknown;
+    if (!message || typeof message !== "object") {
+      rejectProtocolViolation(workerProtocolError(
+        "CSV Worker 收到了结构无效的消息。",
+        "WORKER_MESSAGE_INVALID"
+      ));
+      return;
+    }
+    const type = (message as { type?: unknown }).type;
+    if (type === "cancel") {
+      activeController?.abort();
+      return;
+    }
+    if (type === "batch_ack") {
+      const batchNumber = (message as { batchNumber?: unknown }).batchNumber;
+      if (!Number.isInteger(batchNumber) || (batchNumber as number) < 1) {
+        rejectProtocolViolation(workerProtocolError(
+          "CSV Worker 收到了无效的批次确认编号。",
+          "WORKER_BATCH_ACK_INVALID"
+        ));
+        return;
+      }
+      acknowledgeBatch(batchNumber as number);
+      return;
+    }
+    if (type !== "read_headers" && type !== "start") {
+      rejectProtocolViolation(workerProtocolError(
+        "CSV Worker 收到了未知任务类型。",
+        "WORKER_OPERATION_INVALID"
+      ));
+      return;
+    }
+    if (activeController !== null) {
+      rejectProtocolViolation(workerProtocolError(
+        "CSV Worker 一次只能处理一个任务。",
+        "WORKER_JOB_ACTIVE"
+      ));
+      return;
+    }
+    if (type === "read_headers") {
+      void runReadHeaders(message as Extract<CaseImportWorkerRequest, { type: "read_headers" }>);
+      return;
+    }
+    void runStart(message as Extract<CaseImportWorkerRequest, { type: "start" }>);
+  } catch (reason) {
+    rejectProtocolViolation(reason instanceof Error
+      ? reason
+      : workerProtocolError("CSV Worker 消息处理失败。", "WORKER_MESSAGE_INVALID"));
   }
-  if (event.data.type === "batch_ack") {
-    acknowledgeBatch(event.data.batchNumber);
-    return;
-  }
-  if (event.data.type === "read_headers") {
-    void runReadHeaders(event.data);
-    return;
-  }
-  void runStart(event.data);
 };
 
 export {};

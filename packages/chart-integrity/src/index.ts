@@ -2,19 +2,186 @@ import {
   HASH_SCHEMA_VERSION,
   buildCalculatedChartHashPayload,
   buildUnknownHourCandidateHashPayload,
+  calculationManifestSchema,
   calculatedChartSchema,
-  candidateSetRecordSchema,
-  revisionRecordSchema,
+  createCalculatedChartSchemaForTimeZoneName,
+  createCandidateSetRecordSchemaForTimeZoneName,
+  createRevisionRecordSchemaForTimeZoneName,
+  createUnknownHourCandidateResultSchemaForTimeZoneName,
+  storedCalculatedChartSchema,
+  storedCandidateSetRecordSchema,
+  storedRevisionRecordSchema,
+  storedUnknownHourCandidateResultSchema,
   type CalculatedChart,
+  type CalculationManifest,
   type CandidateSetRecord,
-  type RevisionRecord
+  type RevisionRecord,
+  type TimeZoneNamePredicate,
+  type UnknownHourCandidateResult
 } from "@hakimi/contracts";
 import {
   inspectRuleProfileCompatibility,
   lookupHistoricalNatalChartExecutor
 } from "@hakimi/bazi-core";
 import { canonicalStringify, sha256Hex } from "@hakimi/integrity";
-import { classifyStoredTimeZoneDatabaseForReplay } from "@hakimi/time-core";
+import {
+  classifyStoredTimeZoneDatabaseForReplay,
+  loadBundledTimeZoneCalculationContext,
+  type BundledTimeZoneCalculationContext
+} from "@hakimi/time-core";
+
+const MAX_REVISION_INPUT_NODES = 100_000;
+const MAX_REVISION_INPUT_TEXT_CHARACTERS = 4_000_000;
+const MAX_REVISION_INPUT_DEPTH = 128;
+
+type RevisionInputBudget = {
+  nodes: number;
+  textCharacters: number;
+};
+
+function claimRevisionInputText(budget: RevisionInputBudget, length: number): void {
+  budget.textCharacters += length;
+  if (budget.textCharacters > MAX_REVISION_INPUT_TEXT_CHARACTERS) {
+    throw new TypeError("Revision 声明式输入文本总量超过安全上限。");
+  }
+}
+
+function countOwnEnumerableProperties(
+  value: object,
+  maximum: number,
+  overflowMessage: string,
+  budget?: RevisionInputBudget
+): number {
+  let count = 0;
+  for (const key in value) {
+    if (!Object.prototype.hasOwnProperty.call(value, key)) continue;
+    count += 1;
+    if (count > maximum) throw new TypeError(overflowMessage);
+    if (budget) claimRevisionInputText(budget, key.length);
+  }
+  return count;
+}
+
+/** Creates one bounded, accessor-free snapshot before any asynchronous resolver load. */
+function snapshotRevisionInput(
+  value: unknown,
+  path = "Revision",
+  depth = 0,
+  ancestors = new WeakSet<object>(),
+  budget: RevisionInputBudget = { nodes: 0, textCharacters: 0 }
+): unknown {
+  if (depth > MAX_REVISION_INPUT_DEPTH) {
+    throw new TypeError(`Revision 声明式输入超过最大深度 ${MAX_REVISION_INPUT_DEPTH}。`);
+  }
+  budget.nodes += 1;
+  if (budget.nodes > MAX_REVISION_INPUT_NODES) {
+    throw new TypeError("Revision 声明式输入结构节点总量超过安全上限。");
+  }
+  if (typeof value === "string") {
+    claimRevisionInputText(budget, value.length);
+    return value;
+  }
+  if (value === null || typeof value === "boolean" || value === undefined) return value;
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) throw new TypeError(`${path} 包含非有限数字。`);
+    return value;
+  }
+  if (typeof value !== "object") {
+    throw new TypeError(`${path} 包含非声明式 JSON 值：${typeof value}。`);
+  }
+
+  if (ancestors.has(value)) throw new TypeError(`${path} 包含循环引用。`);
+  if (Object.getOwnPropertySymbols(value).length > 0) {
+    throw new TypeError(`${path} 不能包含 Symbol 属性。`);
+  }
+  ancestors.add(value);
+  try {
+    if (Array.isArray(value)) {
+      const lengthDescriptor = Object.getOwnPropertyDescriptor(value, "length");
+      if (!lengthDescriptor || !("value" in lengthDescriptor) ||
+        !Number.isSafeInteger(lengthDescriptor.value) || lengthDescriptor.value < 0) {
+        throw new TypeError(`${path}.length 不是声明式数组长度。`);
+      }
+      const length = lengthDescriptor.value as number;
+      if (length > MAX_REVISION_INPUT_NODES - budget.nodes) {
+        throw new TypeError("Revision 声明式输入数组槽位超过安全上限。");
+      }
+      const enumerablePropertyCount = countOwnEnumerableProperties(
+        value,
+        length,
+        "Revision 声明式输入数组字段超过安全上限。"
+      );
+      if (enumerablePropertyCount !== length) {
+        throw new TypeError(`${path} 必须是稠密且没有自定义字段的数组。`);
+      }
+      if (Object.getOwnPropertyNames(value).length !== length + 1) {
+        throw new TypeError(`${path} 必须是稠密且没有自定义字段的数组。`);
+      }
+      const output = new Array<unknown>(length);
+      for (let index = 0; index < length; index += 1) {
+        const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+        if (!descriptor || !("value" in descriptor) || !descriptor.enumerable) {
+          throw new TypeError(`${path}[${index}] 必须是可枚举的声明式数据项。`);
+        }
+        output[index] = snapshotRevisionInput(
+          descriptor.value,
+          `${path}[${index}]`,
+          depth + 1,
+          ancestors,
+          budget
+        );
+      }
+      return output;
+    }
+
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) {
+      throw new TypeError(`${path} 必须是普通声明式对象。`);
+    }
+    const enumerablePropertyCount = countOwnEnumerableProperties(
+      value,
+      MAX_REVISION_INPUT_NODES - budget.nodes,
+      "Revision 声明式输入对象字段超过安全上限。",
+      budget
+    );
+    const propertyNames = Object.getOwnPropertyNames(value);
+    if (propertyNames.length !== enumerablePropertyCount) {
+      throw new TypeError(`${path} 必须仅包含可枚举的声明式数据字段。`);
+    }
+    const output: Record<string, unknown> = {};
+    for (const key of propertyNames) {
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      if (!descriptor || !("value" in descriptor) || !descriptor.enumerable) {
+        throw new TypeError(`${path}.${key} 必须是可枚举的声明式数据字段。`);
+      }
+      Object.defineProperty(output, key, {
+        value: snapshotRevisionInput(
+          descriptor.value,
+          `${path}.${key}`,
+          depth + 1,
+          ancestors,
+          budget
+        ),
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    }
+    return output;
+  } finally {
+    ancestors.delete(value);
+  }
+}
+
+function readRevisionManifest(snapshot: unknown): CalculationManifest {
+  if (snapshot === null || typeof snapshot !== "object" || Array.isArray(snapshot)) {
+    return calculationManifestSchema.parse(undefined);
+  }
+  const descriptor = Object.getOwnPropertyDescriptor(snapshot, "manifest");
+  return calculationManifestSchema.parse(
+    descriptor && "value" in descriptor ? descriptor.value : undefined
+  );
+}
 
 export class CandidateSetIntegrityError extends Error {
   readonly code = "CANDIDATE_SET_INTEGRITY_MISMATCH" as const;
@@ -59,11 +226,16 @@ function assertChartStructure(chart: CalculatedChart, chartId: string): void {
   }
 }
 
-export async function verifyCalculatedChartIntegrity(
+type CalculatedChartSchemaLike = {
+  parse(raw: unknown): CalculatedChart;
+};
+
+async function verifyCalculatedChartIntegrityWithSchema(
   raw: unknown,
-  chartId = "unsaved-chart"
+  chartId: string,
+  schema: CalculatedChartSchemaLike
 ): Promise<CalculatedChart> {
-  const chart = calculatedChartSchema.parse(raw);
+  const chart = schema.parse(raw);
   assertChartStructure(chart, chartId);
   const [ruleProfileDigest, luckCycleRuleDigest, resultHash] = await Promise.all([
     sha256Hex(chart.ruleProfile),
@@ -85,9 +257,47 @@ export async function verifyCalculatedChartIntegrity(
   return chart;
 }
 
-export async function verifyRevisionRecordIntegrity(raw: unknown): Promise<RevisionRecord> {
-  const revision = revisionRecordSchema.parse(raw);
-  await verifyCalculatedChartIntegrity({
+export async function verifyCalculatedChartIntegrity(
+  raw: unknown,
+  chartId = "unsaved-chart"
+): Promise<CalculatedChart> {
+  return verifyCalculatedChartIntegrityWithSchema(raw, chartId, calculatedChartSchema);
+}
+
+type VerifiedRevisionRecordContext = {
+  revision: RevisionRecord;
+  timeZoneContext: BundledTimeZoneCalculationContext | null;
+};
+
+async function verifyRevisionRecordIntegrityWithContext(
+  raw: unknown
+): Promise<VerifiedRevisionRecordContext> {
+  const snapshot = snapshotRevisionInput(raw);
+  const manifest = readRevisionManifest(snapshot);
+  const tzdbStatus = classifyStoredTimeZoneDatabaseForReplay(manifest);
+  let timeZoneContext: BundledTimeZoneCalculationContext | null = null;
+  let revision: RevisionRecord;
+  let chartSchema: CalculatedChartSchemaLike = storedCalculatedChartSchema;
+
+  if (tzdbStatus === "current_exact" || tzdbStatus === "retained_exact") {
+    if (!manifest.timeZoneDatabase) {
+      throw new TypeError("可识别 Revision 缺少完整时区工件描述符。");
+    }
+    timeZoneContext = await loadBundledTimeZoneCalculationContext(
+      manifest.timeZoneDatabase.snapshotId,
+      manifest.timeZoneDatabase
+    );
+    revision = createRevisionRecordSchemaForTimeZoneName(
+      timeZoneContext.resolver.isTimeZoneName
+    ).parse(snapshot);
+    chartSchema = createCalculatedChartSchemaForTimeZoneName(
+      timeZoneContext.resolver.isTimeZoneName
+    );
+  } else {
+    revision = storedRevisionRecordSchema.parse(snapshot);
+  }
+
+  await verifyCalculatedChartIntegrityWithSchema({
     input: revision.input,
     timeCalibration: revision.timeCalibration,
     ruleProfile: revision.ruleProfile,
@@ -95,16 +305,33 @@ export async function verifyRevisionRecordIntegrity(raw: unknown): Promise<Revis
     luckCycleRuleSnapshot: revision.luckCycleRuleSnapshot,
     facts: revision.facts,
     manifest: revision.manifest
-  }, revision.id);
-  return revision;
+  }, revision.id, chartSchema);
+  return { revision, timeZoneContext };
+}
+
+export async function verifyRevisionRecordIntegrity(raw: unknown): Promise<RevisionRecord> {
+  return (await verifyRevisionRecordIntegrityWithContext(raw)).revision;
+}
+
+async function verifyRevisionSnapshotIntegrityWithContext(raw: unknown): Promise<{
+  revision: RevisionRecord;
+  revisionSnapshotDigest: string;
+  timeZoneContext: BundledTimeZoneCalculationContext | null;
+}> {
+  const { revision, timeZoneContext } = await verifyRevisionRecordIntegrityWithContext(raw);
+  return {
+    revision,
+    revisionSnapshotDigest: await sha256Hex(revision),
+    timeZoneContext
+  };
 }
 
 export async function verifyRevisionSnapshotIntegrity(raw: unknown): Promise<{
   revision: RevisionRecord;
   revisionSnapshotDigest: string;
 }> {
-  const revision = await verifyRevisionRecordIntegrity(raw);
-  return { revision, revisionSnapshotDigest: await sha256Hex(revision) };
+  const { revision, revisionSnapshotDigest } = await verifyRevisionSnapshotIntegrityWithContext(raw);
+  return { revision, revisionSnapshotDigest };
 }
 
 export type RevisionNatalReplayUnavailableStatus =
@@ -115,6 +342,10 @@ export type RevisionNatalReplayUnavailableStatus =
   | "unsupported_rule_semantics"
   | "unsupported_input_precision"
   | "unresolved_dst_selection";
+
+export type RevisionNatalReplayErrorCode =
+  | RevisionNatalReplayUnavailableStatus
+  | "executor_output_invalid";
 
 type RevisionNatalReplayCapabilityBase = {
   revisionId: string;
@@ -158,7 +389,7 @@ export type RevisionNatalReplayProjection = {
 
 export class RevisionNatalReplayError extends Error {
   constructor(
-    readonly code: RevisionNatalReplayUnavailableStatus,
+    readonly code: RevisionNatalReplayErrorCode,
     message: string
   ) {
     super(message);
@@ -191,10 +422,10 @@ function unavailableReplayCapability(
  * retained natal executor and exact bundled tzdb. Integrity is verified first;
  * an unsupported record never falls back to the current executor or tzdb.
  */
-export async function classifyRevisionNatalReplay(
-  raw: unknown
-): Promise<RevisionNatalReplayCapability> {
-  const { revision, revisionSnapshotDigest } = await verifyRevisionSnapshotIntegrity(raw);
+function classifyVerifiedRevisionNatalReplay(
+  revision: RevisionRecord,
+  revisionSnapshotDigest: string
+): RevisionNatalReplayCapability {
   const base = replayCapabilityBase(revision, revisionSnapshotDigest);
   const executor = lookupHistoricalNatalChartExecutor(revision.manifest.engine);
   if (!executor) {
@@ -277,8 +508,39 @@ export async function classifyRevisionNatalReplay(
   };
 }
 
+export async function classifyRevisionNatalReplay(
+  raw: unknown
+): Promise<RevisionNatalReplayCapability> {
+  const { revision, revisionSnapshotDigest } = await verifyRevisionSnapshotIntegrity(raw);
+  return classifyVerifiedRevisionNatalReplay(revision, revisionSnapshotDigest);
+}
+
 function sameReplayValue(left: unknown, right: unknown): boolean {
+  if (left === undefined || right === undefined) return left === right;
   return canonicalStringify(left) === canonicalStringify(right);
+}
+
+function assertExactReplayIdentity(
+  revision: RevisionRecord,
+  replayedChart: CalculatedChart
+): void {
+  if (
+    !sameReplayValue(replayedChart.input, revision.input) ||
+    !sameReplayValue(replayedChart.ruleProfile, revision.ruleProfile) ||
+    !sameReplayValue(replayedChart.rulePackBinding, revision.rulePackBinding) ||
+    !sameReplayValue(replayedChart.manifest.engine, revision.manifest.engine) ||
+    replayedChart.manifest.hashSchemaVersion !== revision.manifest.hashSchemaVersion ||
+    replayedChart.manifest.tzdbVersion !== revision.manifest.tzdbVersion ||
+    !sameReplayValue(
+      replayedChart.manifest.timeZoneDatabase,
+      revision.manifest.timeZoneDatabase
+    )
+  ) {
+    throw new RevisionNatalReplayError(
+      "executor_output_invalid",
+      "精确复演执行器返回盘没有保持源 Revision 的输入、规则或时区身份。"
+    );
+  }
 }
 
 /**
@@ -289,13 +551,17 @@ function sameReplayValue(left: unknown, right: unknown): boolean {
 export async function replayRevisionNatalChart(
   raw: unknown
 ): Promise<RevisionNatalReplayProjection> {
-  const { revision, revisionSnapshotDigest } = await verifyRevisionSnapshotIntegrity(raw);
-  const capability = await classifyRevisionNatalReplay(revision);
+  const {
+    revision,
+    revisionSnapshotDigest,
+    timeZoneContext
+  } = await verifyRevisionSnapshotIntegrityWithContext(raw);
+  const capability = classifyVerifiedRevisionNatalReplay(revision, revisionSnapshotDigest);
   if (capability.status !== "replayable_exact") {
     throw new RevisionNatalReplayError(capability.status, capability.reason);
   }
   const executor = lookupHistoricalNatalChartExecutor(revision.manifest.engine);
-  if (!executor || !revision.manifest.timeZoneDatabase) {
+  if (!executor || !revision.manifest.timeZoneDatabase || !timeZoneContext) {
     throw new RevisionNatalReplayError(
       "unsupported_engine",
       "复演能力在执行前发生变化；未找到精确执行器或时区描述符。"
@@ -310,7 +576,7 @@ export async function replayRevisionNatalChart(
     (selectedChoice === "earlier" || selectedChoice === "later")
       ? selectedChoice
       : undefined;
-  const replayedChart = await executor.calculateChart(
+  const calculatedReplay = await executor.calculateChart(
     revision.input,
     revision.ruleProfile,
     revision.manifest.timeZoneDatabase.snapshotId,
@@ -320,6 +586,12 @@ export async function replayRevisionNatalChart(
       ...(dstResolutionOverride ? { dstResolutionOverride } : {})
     }
   );
+  const replayedChart = await verifyCalculatedChartIntegrityWithSchema(
+    calculatedReplay,
+    `${revision.id}:readonly-replay`,
+    createCalculatedChartSchemaForTimeZoneName(timeZoneContext.resolver.isTimeZoneName)
+  );
+  assertExactReplayIdentity(revision, replayedChart);
 
   const changedFields: RevisionNatalReplayChangedField[] = [];
   if (!sameReplayValue(revision.timeCalibration, replayedChart.timeCalibration)) {
@@ -355,35 +627,105 @@ export async function replayRevisionNatalChart(
   };
 }
 
-/** Strict shape plus all independently recomputable candidate-set digests. */
-export async function verifyCandidateSetRecordIntegrity(raw: unknown): Promise<CandidateSetRecord> {
-  const record = candidateSetRecordSchema.parse(raw);
-  const charts = record.candidateSet.candidates.flatMap((candidate) => [
+type CandidateSetValidationContext = {
+  isTimeZoneName: TimeZoneNamePredicate | null;
+  chartSchema: CalculatedChartSchemaLike;
+};
+
+async function resolveCandidateSetValidationContext(
+  candidateSet: UnknownHourCandidateResult
+): Promise<CandidateSetValidationContext> {
+  const tzdbStatus = classifyStoredTimeZoneDatabaseForReplay(candidateSet);
+  if (tzdbStatus !== "current_exact" && tzdbStatus !== "retained_exact") {
+    return { isTimeZoneName: null, chartSchema: storedCalculatedChartSchema };
+  }
+  if (!candidateSet.timeZoneDatabase) {
+    throw new TypeError("可识别 CandidateSet 缺少完整时区工件描述符。");
+  }
+  const timeZoneContext = await loadBundledTimeZoneCalculationContext(
+    candidateSet.timeZoneDatabase.snapshotId,
+    candidateSet.timeZoneDatabase
+  );
+  return {
+    isTimeZoneName: timeZoneContext.resolver.isTimeZoneName,
+    chartSchema: createCalculatedChartSchemaForTimeZoneName(
+      timeZoneContext.resolver.isTimeZoneName
+    )
+  };
+}
+
+async function verifyUnknownHourCandidateResultWithSchema(
+  candidateSet: UnknownHourCandidateResult,
+  candidateSetId: string,
+  chartSchema: CalculatedChartSchemaLike
+): Promise<UnknownHourCandidateResult> {
+  const charts = candidateSet.candidates.flatMap((candidate) => [
     ...(candidate.chart ? [candidate.chart] : []),
     ...candidate.variants.map((variant) => variant.chart)
   ]);
-  const [snapshotDigest, ruleProfileDigest, resultHash] = await Promise.all([
-    sha256Hex(record.candidateSet),
-    sha256Hex(record.candidateSet.ruleProfile),
-    sha256Hex(buildUnknownHourCandidateHashPayload(record.candidateSet))
+  const [ruleProfileDigest, resultHash] = await Promise.all([
+    sha256Hex(candidateSet.ruleProfile),
+    sha256Hex(buildUnknownHourCandidateHashPayload(candidateSet))
   ]);
-  if (snapshotDigest !== record.snapshotDigest) {
-    throw new CandidateSetIntegrityError(record.id, "snapshot");
+  if (ruleProfileDigest !== candidateSet.ruleProfileDigest) {
+    throw new CandidateSetIntegrityError(candidateSetId, "rule_profile");
   }
-  if (ruleProfileDigest !== record.candidateSet.ruleProfileDigest) {
-    throw new CandidateSetIntegrityError(record.id, "rule_profile");
-  }
-  if (resultHash !== record.candidateSet.resultHash) {
-    throw new CandidateSetIntegrityError(record.id, "result");
+  if (resultHash !== candidateSet.resultHash) {
+    throw new CandidateSetIntegrityError(candidateSetId, "result");
   }
   try {
-    await Promise.all(charts.map((chart, index) => verifyCalculatedChartIntegrity(
+    await Promise.all(charts.map((chart, index) => verifyCalculatedChartIntegrityWithSchema(
       chart,
-      `${record.id}:probe-chart-${index}`
+      `${candidateSetId}:probe-chart-${index}`,
+      chartSchema
     )));
   } catch (cause) {
     if (!(cause instanceof CalculatedChartIntegrityError)) throw cause;
-    throw new CandidateSetIntegrityError(record.id, "result");
+    throw new CandidateSetIntegrityError(candidateSetId, "result");
+  }
+  return candidateSet;
+}
+
+/** Strict shape plus all independently recomputable candidate-result digests. */
+export async function verifyUnknownHourCandidateResultIntegrity(
+  raw: unknown,
+  candidateSetId = "unsaved-candidate-set"
+): Promise<UnknownHourCandidateResult> {
+  const snapshot = snapshotRevisionInput(raw, "CandidateSet.result");
+  const storedCandidateSet = storedUnknownHourCandidateResultSchema.parse(snapshot);
+  const validationContext = await resolveCandidateSetValidationContext(storedCandidateSet);
+  const candidateSet = validationContext.isTimeZoneName === null
+    ? storedCandidateSet
+    : createUnknownHourCandidateResultSchemaForTimeZoneName(
+        validationContext.isTimeZoneName
+      ).parse(snapshot);
+  return verifyUnknownHourCandidateResultWithSchema(
+    candidateSet,
+    candidateSetId,
+    validationContext.chartSchema
+  );
+}
+
+/** Strict shape plus all independently recomputable candidate-set digests. */
+export async function verifyCandidateSetRecordIntegrity(raw: unknown): Promise<CandidateSetRecord> {
+  const snapshot = snapshotRevisionInput(raw, "CandidateSet");
+  const storedRecord = storedCandidateSetRecordSchema.parse(snapshot);
+  const validationContext = await resolveCandidateSetValidationContext(storedRecord.candidateSet);
+  const record = validationContext.isTimeZoneName === null
+    ? storedRecord
+    : createCandidateSetRecordSchemaForTimeZoneName(
+        validationContext.isTimeZoneName
+      ).parse(snapshot);
+  const [snapshotDigest] = await Promise.all([
+    sha256Hex(record.candidateSet),
+    verifyUnknownHourCandidateResultWithSchema(
+      record.candidateSet,
+      record.id,
+      validationContext.chartSchema
+    )
+  ]);
+  if (snapshotDigest !== record.snapshotDigest) {
+    throw new CandidateSetIntegrityError(record.id, "snapshot");
   }
   return record;
 }

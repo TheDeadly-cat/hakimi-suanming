@@ -14,12 +14,25 @@ import { RUNTIME_TZDB_VERSION } from "@hakimi/time-core";
 import { RETAINED_TIME_ZONE_DATABASE_2025B } from "@hakimi/tzdb-core";
 import { CandidateSetPage } from "./candidate-set-page";
 
-const { saveTextFileMock } = vi.hoisted(() => ({
-  saveTextFileMock: vi.fn()
+const {
+  getExportCapabilitiesMock,
+  saveFileMock,
+  saveFileToChosenLocationMock,
+  shareFileMock
+} = vi.hoisted(() => ({
+  getExportCapabilitiesMock: vi.fn(),
+  saveFileMock: vi.fn(),
+  saveFileToChosenLocationMock: vi.fn(),
+  shareFileMock: vi.fn()
 }));
 
 vi.mock("@hakimi/platform", () => ({
-  saveTextFile: saveTextFileMock
+  webReportExportPort: {
+    getCapabilities: getExportCapabilitiesMock,
+    saveFile: saveFileMock,
+    saveFileToChosenLocation: saveFileToChosenLocationMock,
+    shareFile: shareFileMock
+  }
 }));
 
 const loadingCandidateSetId = "11111111-1111-4111-8111-111111111111";
@@ -51,11 +64,18 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await caseRepository.clearAll();
-  saveTextFileMock.mockImplementation(async (filename: string) => ({
+  getExportCapabilitiesMock.mockReset().mockReturnValue({
+    canDownloadFiles: true,
+    canChooseSaveLocation: false,
+    canShareFiles: false
+  });
+  saveFileMock.mockReset().mockImplementation(async (_blob: Blob, filename: string) => ({
     status: "download_requested",
     filename,
     method: "browser_download"
   }));
+  saveFileToChosenLocationMock.mockReset();
+  shareFileMock.mockReset();
 });
 
 async function storeCandidateSet(): Promise<CandidateSetRecord> {
@@ -132,7 +152,10 @@ function makeMigrationReceipt(source: CandidateSetRecord, target: CandidateSetRe
 
 afterEach(async () => {
   vi.restoreAllMocks();
-  saveTextFileMock.mockReset();
+  getExportCapabilitiesMock.mockReset();
+  saveFileMock.mockReset();
+  saveFileToChosenLocationMock.mockReset();
+  shareFileMock.mockReset();
   window.history.replaceState({}, "", "/");
   await caseRepository.clearAll();
 });
@@ -167,8 +190,12 @@ describe("CandidateSetPage", () => {
     expect(within(variants).getAllByRole("listitem")).toHaveLength(2);
     expect(within(variants).getByText("DST earlier")).toBeTruthy();
     expect(within(variants).getByText("DST later")).toBeTruthy();
-    expect(screen.getByText("不选主盘")).toBeTruthy();
+    expect(screen.getByText("筛选不选主盘")).toBeTruthy();
     expect(screen.getByText("未绑定安装包 · 内置或派生规则快照")).toBeTruthy();
+    const resolverCapability = screen.getByLabelText("候选组 resolver 复核能力");
+    expect(resolverCapability.getAttribute("data-replay-status")).toBe("current_exact");
+    expect(within(resolverCapability).getByText("当前 resolver 工件可核对")).toBeTruthy();
+    expect(within(resolverCapability).getByText(/尚未重跑 13 个历史探针/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: /主盘/ })).toBeNull();
     expect(screen.getByRole("heading", { name: "候选组研究记录" })).toBeTruthy();
     expect(await screen.findByText("还没有研究笔记。")).toBeTruthy();
@@ -275,6 +302,10 @@ describe("CandidateSetPage", () => {
 
     render(<CandidateSetPage candidateSetId={source.id} />);
 
+    const resolverCapability = await screen.findByLabelText("候选组 resolver 复核能力");
+    expect(resolverCapability.getAttribute("data-replay-status")).toBe("legacy_unidentified");
+    expect(within(resolverCapability).getByText("降级读取 · 旧 tzdb 未识别")).toBeTruthy();
+    expect(within(resolverCapability).getByText(/无法认领 exact resolver/)).toBeTruthy();
     expect(await screen.findByRole("heading", { name: "时区快照并列复算" })).toBeTruthy();
     expect(screen.getByText(/基准记录保持只读/)).toBeTruthy();
     expect(screen.getByText(/不是原历史 App 的运行结果/)).toBeTruthy();
@@ -302,6 +333,24 @@ describe("CandidateSetPage", () => {
     expect(await screen.findByRole("heading", { name: "并列复算目标" })).toBeTruthy();
   });
 
+  it("描述符冲突不能仅凭 snapshotId 冒充随包 exact resolver", async () => {
+    const source = structuredClone(await storeCandidateSet());
+    if (!source.candidateSet.timeZoneDatabase) throw new Error("测试候选组缺少时区工件");
+    const originalDigest = source.candidateSet.timeZoneDatabase.dataSha256;
+    source.candidateSet.timeZoneDatabase.dataSha256 = `${originalDigest.startsWith("0") ? "1" : "0"}${originalDigest.slice(1)}`;
+    vi.spyOn(caseRepository, "getCandidateSet").mockResolvedValue(source);
+    vi.spyOn(caseRepository, "listTzdbMigrationReceiptsForCandidateSet").mockResolvedValue([]);
+
+    render(<CandidateSetPage candidateSetId={source.id} />);
+
+    const resolverCapability = await screen.findByLabelText("候选组 resolver 复核能力");
+    expect(resolverCapability.getAttribute("data-replay-status")).toBe("descriptor_mismatch");
+    expect(within(resolverCapability).getByText("时区工件描述符冲突")).toBeTruthy();
+    expect(within(resolverCapability).getByText(/不会把相同 snapshotId 当作工件匹配/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "按 IANA 2026c 并列复算" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "按 IANA 2025b 并列复算" })).toBeNull();
+  });
+
   it("tzdb 派生失败时保留源记录并显示明确错误", async () => {
     const source = asLegacyCandidateSet(await storeCandidateSet());
     vi.spyOn(caseRepository, "getCandidateSet").mockResolvedValue(source);
@@ -314,8 +363,10 @@ describe("CandidateSetPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "按 IANA 2026c 并列复算" }));
 
     const alert = await screen.findByRole("alert");
-    expect(within(alert).getByText("没有生成并列候选组")).toBeTruthy();
-    expect(within(alert).getByText("源快照摘要已经变化")).toBeTruthy();
+    expect(within(alert).getByRole("heading", { name: "提交结果未知，停止重复派生" })).toBeTruthy();
+    expect(within(alert).getByText(/源快照摘要已经变化/)).toBeTruthy();
+    expect(within(alert).getByText(/仓库异常不证明事务未发生/)).toBeTruthy();
+    expect(document.querySelector(".candidate-set-page")?.getAttribute("data-write-reconciliation-required")).toBe("true");
     expect(screen.queryByRole("link", { name: /打开并列候选组/ })).toBeNull();
   });
 
@@ -362,7 +413,7 @@ describe("CandidateSetPage", () => {
     expect(screen.queryByRole("checkbox", { name: /按目标快照生成并列候选组/ })).toBeNull();
     expect(within(screen.getByRole("region", { name: "基准快照" })).getByText("旧版浏览器 Intl · 具体版本未识别")).toBeTruthy();
     expect(within(screen.getByRole("region", { name: "并列复算快照" })).getByText(`IANA ${target.candidateSet.timeZoneDatabase?.ianaVersion}`)).toBeTruthy();
-    expect(screen.getByText("仅摘要改变 13")).toBeTruthy();
+    expect(screen.getByLabelText("13 探针并列复算分类摘要").textContent).toContain("仅摘要改变13");
     expect(screen.getByText(/冻结的旧比较格式/)).toBeTruthy();
     const table = screen.getByRole("table", { name: "候选组 tzdb 并列复算 13 探针行为与摘要分类" });
     expect(within(table).getAllByRole("row")).toHaveLength(14);
@@ -396,8 +447,8 @@ describe("CandidateSetPage", () => {
     const sourcePage = render(<CandidateSetPage candidateSetId={source.id} />);
 
     expect(await screen.findByRole("heading", { name: "时区快照并列复算" })).toBeTruthy();
-    expect(screen.getByText("2025b", { exact: true })).toBeTruthy();
-    expect(screen.getByText(RETAINED_TIME_ZONE_DATABASE_2025B.dataSha256)).toBeTruthy();
+    expect(await screen.findByRole("button", { name: "按 IANA 2025b 并列复算" })).toBeTruthy();
+    expect(screen.getByText("目标数据摘要").closest("div")?.textContent).toContain(RETAINED_TIME_ZONE_DATABASE_2025B.dataSha256);
     fireEvent.click(screen.getByRole("checkbox", { name: /按目标快照生成并列候选组/ }));
     fireEvent.click(screen.getByRole("button", { name: "按 IANA 2025b 并列复算" }));
 
@@ -439,14 +490,20 @@ describe("CandidateSetPage", () => {
     const record = await storeCandidateSet();
 
     render(<CandidateSetPage candidateSetId={record.id} />);
-    fireEvent.click(await screen.findByRole("button", { name: "导出候选组 JSON" }));
+    fireEvent.click(await screen.findByRole("button", { name: "准备完整候选组 JSON" }));
 
-    await waitFor(() => expect(saveTextFileMock).toHaveBeenCalledTimes(1));
-    const [filename, raw, mediaType] = saveTextFileMock.mock.calls[0] as [string, string, string];
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog.getAttribute("data-delivery-state")).toBe("prepared");
+    expect(within(dialog).getByRole("heading", { name: "待交付文件已在本机生成" })).toBeTruthy();
+    expect(within(dialog).queryByRole("button", { name: /系统分享/ })).toBeNull();
+    expect(saveFileMock).not.toHaveBeenCalled();
+    fireEvent.click(within(dialog).getByRole("button", { name: /下载文件/ }));
+    await waitFor(() => expect(saveFileMock).toHaveBeenCalledTimes(1));
+    const [blob, filename] = saveFileMock.mock.calls[0] as [Blob, string];
     expect(filename).toBe(`hakimi-unknown-hour-candidate-set-${record.id}.json`);
-    expect(mediaType).toBe("application/json;charset=utf-8");
+    expect(blob.type).toBe("application/json;charset=utf-8");
 
-    const exported = JSON.parse(raw) as CandidateSetRecord;
+    const exported = JSON.parse(await blob.text()) as CandidateSetRecord;
     expect(exported.id).toBe(record.id);
     expect(exported.recordType).toBe("unknown_hour_candidate_set");
     expect(exported.candidateSet.input.time).toBeNull();

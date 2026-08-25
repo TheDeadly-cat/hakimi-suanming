@@ -1,0 +1,64 @@
+name: Migration CI
+
+on:
+  pull_request:
+    paths:
+      - ".node-version"
+      - ".npmrc"
+      - "package.json"
+      - "package-lock.json"
+      - "apps/web/package.json"
+      - "apps/web/index.html"
+      - "apps/web/public/sw.js"
+      - "apps/web/release-protocol.ts"
+      - "apps/web/src/bootstrap.ts"
+      - "apps/web/src/main.tsx"
+      - "apps/web/src/lib/app-version.ts"
+      - "apps/web/src/lib/current-release.ts"
+      - "apps/web/src/lib/full-backup-worker-protocol.ts"
+      - "apps/web/src/lib/orphaned-v13-rescue.ts"
+      - "apps/web/src/lib/preboot-database-inventory.ts"
+      - "apps/web/src/lib/release-database-coordinator.ts"
+      - "apps/web/src/lib/release-integrity-cache.ts"
+      - "apps/web/src/lib/service-worker-boot-ack.ts"
+      - "apps/web/src/lib/storage-capacity-gate.ts"
+      - "apps/web/e2e/**"
+      - "apps/web/playwright*.config.ts"
+      - "apps/web/vite*.ts"
+      - "packages/backup/**"
+      - "packages/contracts/**"
+      - "packages/integrity/**"
+      - "packages/storage/**"
+      - "scripts/**"
+      - ".github/workflows/migration-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: migration-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  v13-to-v16:
+    runs-on: windows-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm install --global npm@11.13.0
+      - run: npm ci
+      - run: npx playwright install chrome msedge
+      - run: npm run check:release-governance
+      - run: node --test scripts/verify-release-governance.test.mjs
+      - run: npm run build:production-v13-to-v16:candidate
+      - run: node scripts/verify-built-release-storage-manifest.mjs tmp/release-config-production-v13-to-v16
+      - run: npm run test:e2e:cross-schema-upgrade
+      - run: npm run test:e2e:cross-schema-v13-v15
+      - run: npm run test:e2e:cross-schema-v14-v15
+      - run: npm run test:e2e:cross-schema-v13-v16
+      - run: npm run test:e2e:orphaned-v13-recovery

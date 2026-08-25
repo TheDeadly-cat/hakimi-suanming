@@ -10,19 +10,7 @@ const SUPPORTED_RELEASE_PROTOCOL_VERSION = 1;
 const CLIENT_FREEZE_LEASE_MS = 30_000;
 const CLIENT_DRAFT_CLEANUP_TIMEOUT_MS = 5_000;
 const RELEASE_DATABASE = JSON.parse("__RELEASE_DATABASE_DESCRIPTOR__");
-const LEGACY_BRIDGE_DATABASE = Object.freeze({
-  protocolVersion: 1,
-  dbGeneration: "legacy-v13",
-  databaseName: "hakimi-bazi-research",
-  targetSchema: 13,
-  minReadableSchema: 13,
-  maxReadableSchema: 13,
-  migrationId: null,
-  acceptedCommittedMigrationIds: [null],
-  sourceGeneration: null,
-  sourceDatabaseName: null,
-  sourceSchema: null
-});
+const LEGACY_BRIDGE_DATABASE = Object.freeze(JSON.parse("__BRIDGE_RELEASE_DATABASE_DESCRIPTOR__"));
 const BUILD_ASSETS = [];
 const APP_SHELL = [
   "/",
@@ -944,14 +932,18 @@ function clearClientFreezeSession(session) {
 
 function startClientFreezeSessionLease(session) {
   if (session.leaseTimer !== null) clearTimeout(session.leaseTimer);
-  const timeout = setTimeout(() => {
+  const timeout = setTimeout(async () => {
     if (activeClientFreezeSession !== session) return;
     activeClientFreezeSession = null;
-    void broadcastMigrationResolutionToClientIds(
-      session.peerClientIds,
-      session.migrationId,
-      "DATABASE_MIGRATION_ABORTED"
-    );
+    try {
+      await broadcastMigrationResolutionToClientIds(
+        session.peerClientIds,
+        session.migrationId,
+        "DATABASE_MIGRATION_ABORTED"
+      );
+    } catch (error) {
+      console.error("Failed to broadcast an expired database migration lease.", error);
+    }
   }, Math.max(0, session.leaseDeadline - Date.now()));
   // Node's unit-test timer supports unref; browsers return a numeric handle.
   timeout?.unref?.();

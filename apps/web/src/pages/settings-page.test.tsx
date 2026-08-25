@@ -1,4 +1,5 @@
 ﻿import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createCalendarConversionReviewBundle,
@@ -10,20 +11,46 @@ import {
 } from "@hakimi/research-query/transit-review";
 import { createWorkingDefaultRulePackEnvelope, serializeRulePackEnvelope } from "@hakimi/rule-packs";
 import { caseRepository, ruleRegistryRepository } from "@hakimi/storage";
+import { resetPreparedFileDeliveryCoordinatorForTests } from "../components/prepared-file-delivery-coordinator";
 import { SettingsPage } from "./settings-page";
 import { EXPERT_MODE_KEY } from "../lib/expert-mode";
 
-const { saveTextFileMock, pickTextFileMock } = vi.hoisted(() => ({
+const {
+  saveTextFileMock,
+  pickTextFileMock,
+  getDeliveryCapabilitiesMock,
+  savePreparedFileMock,
+  savePreparedFileToChosenLocationMock,
+  sharePreparedFileMock,
+  printPreparedReportMock
+} = vi.hoisted(() => ({
   saveTextFileMock: vi.fn(),
-  pickTextFileMock: vi.fn()
+  pickTextFileMock: vi.fn(),
+  getDeliveryCapabilitiesMock: vi.fn(),
+  savePreparedFileMock: vi.fn(),
+  savePreparedFileToChosenLocationMock: vi.fn(),
+  sharePreparedFileMock: vi.fn(),
+  printPreparedReportMock: vi.fn()
 }));
 
-vi.mock("@hakimi/platform", () => ({
-  saveTextFile: saveTextFileMock,
-  pickTextFile: pickTextFileMock
-}));
+vi.mock("@hakimi/platform", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@hakimi/platform")>();
+  return {
+    ...actual,
+    saveTextFile: saveTextFileMock,
+    pickTextFile: pickTextFileMock,
+    webReportExportPort: {
+      getCapabilities: getDeliveryCapabilitiesMock,
+      saveFile: savePreparedFileMock,
+      saveFileToChosenLocation: savePreparedFileToChosenLocationMock,
+      shareFile: sharePreparedFileMock,
+      printReport: printPreparedReportMock
+    }
+  };
+});
 
 beforeEach(async () => {
+  resetPreparedFileDeliveryCoordinatorForTests();
   window.localStorage.clear();
   saveTextFileMock.mockReset().mockImplementation(async (filename: string) => ({
     status: "download_requested",
@@ -31,6 +58,19 @@ beforeEach(async () => {
     method: "browser_download"
   }));
   pickTextFileMock.mockReset();
+  getDeliveryCapabilitiesMock.mockReset().mockReturnValue({
+    canDownloadFiles: true,
+    canChooseSaveLocation: false,
+    canShareFiles: false
+  });
+  savePreparedFileMock.mockReset().mockImplementation(async (_blob: Blob, filename: string) => ({
+    status: "download_requested",
+    filename,
+    method: "browser_download"
+  }));
+  savePreparedFileToChosenLocationMock.mockReset();
+  sharePreparedFileMock.mockReset();
+  printPreparedReportMock.mockReset();
   await caseRepository.clearAll();
 });
 
@@ -85,10 +125,17 @@ describe("SettingsPage", () => {
     expect(screen.getByText("IANA 2025b · 随当前应用构建保留")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "加载并检查历史时区数据" }));
     expect(await screen.findByText(/历史时区数据 1\/1 已载入且行为哨兵通过/)).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "导出诊断 JSON" }));
+    fireEvent.click(screen.getByRole("button", { name: "准备诊断 JSON" }));
 
-    await waitFor(() => expect(saveTextFileMock).toHaveBeenCalledTimes(1));
-    const [fileName, raw, mediaType] = saveTextFileMock.mock.calls[0] as [string, string, string];
+    const deliveryDialog = await screen.findByRole("dialog", { name: /待交付文件已在本机生成/ });
+    expect(within(deliveryDialog).queryByRole("button", { name: /系统分享/ })).toBeNull();
+    expect(savePreparedFileMock).not.toHaveBeenCalled();
+    expect(saveTextFileMock).not.toHaveBeenCalled();
+    fireEvent.click(within(deliveryDialog).getByRole("button", { name: /下载文件/ }));
+
+    await waitFor(() => expect(savePreparedFileMock).toHaveBeenCalledTimes(1));
+    const [diagnosticBlob, fileName] = savePreparedFileMock.mock.calls[0] as [Blob, string];
+    const raw = await diagnosticBlob.text();
     const diagnostic = JSON.parse(raw) as {
       format: string;
       formatVersion: string;
@@ -112,7 +159,7 @@ describe("SettingsPage", () => {
     };
 
     expect(fileName).toMatch(/^hakimi-diagnostic-/);
-    expect(mediaType).toBe("application/json;charset=utf-8");
+    expect(diagnosticBlob.type).toBe("application/json;charset=utf-8");
     expect(diagnostic).toMatchObject({
       format: "hakimi-bazi-diagnostic",
       formatVersion: "1.2.0",
@@ -143,7 +190,8 @@ describe("SettingsPage", () => {
     expect(diagnostic.defaultRule.profileDigest).toMatch(/^[a-f0-9]{64}$/);
     expect(raw).not.toContain("birthInput");
     expect(raw).not.toContain("note");
-    expect(await screen.findByText(/但包含浏览器标识及规则包 ID\/摘要/)).toBeTruthy();
+    expect(within(deliveryDialog).getByText(/但包含数据库名称、浏览器标识、在线状态、记录数量以及规则包 ID\/摘要/)).toBeTruthy();
+    expect(await within(deliveryDialog).findByText(/已请求浏览器下载/, { selector: ".prepared-delivery-feedback" })).toBeTruthy();
   });
 
   it("把完整数据操作迁到独立页面，同时显示失败关闭的 360 配额总账", async () => {
@@ -153,7 +201,9 @@ describe("SettingsPage", () => {
     expect(screen.getByRole("link", { name: "打开数据管理" }).getAttribute("href")).toBe("/settings/data");
     expect(screen.getByRole("heading", { name: "金标准候选审核" })).toBeTruthy();
     expect(screen.getByText(/现有 36 行节气边界数据均为回归候选，已验证 0 行/)).toBeTruthy();
-    expect(await screen.findByText("360 例项目发布门仍关闭")).toBeTruthy();
+    const goldAuditSection = screen.getByRole("heading", { name: "金标准候选审核" }).closest("section");
+    expect(goldAuditSection).not.toBeNull();
+    expect(await within(goldAuditSection as HTMLElement).findByText("360 例工程金标配额门仍关闭")).toBeTruthy();
     expect(screen.getByText(/合计 60 个 candidate、0 个 verified/)).toBeTruthy();
     expect(screen.getByText("300")).toBeTruthy();
     expect(await screen.findByText("20,000 例工程诊断已冻结，仍有历表差异待裁决")).toBeTruthy();
@@ -208,9 +258,13 @@ describe("SettingsPage", () => {
     expect(active?.activeDigest).toBe(envelope.digest.value);
     expect(active?.activeProfileDigest).toMatch(/^[a-f0-9]{64}$/);
 
-    fireEvent.click(screen.getByRole("button", { name: "导出诊断 JSON" }));
-    await waitFor(() => expect(saveTextFileMock).toHaveBeenCalledTimes(1));
-    const diagnostic = JSON.parse(saveTextFileMock.mock.calls[0]?.[1] as string) as {
+    fireEvent.click(screen.getByRole("button", { name: "准备诊断 JSON" }));
+    const deliveryDialog = await screen.findByRole("dialog", { name: /待交付文件已在本机生成/ });
+    expect(savePreparedFileMock).not.toHaveBeenCalled();
+    fireEvent.click(within(deliveryDialog).getByRole("button", { name: /下载文件/ }));
+    await waitFor(() => expect(savePreparedFileMock).toHaveBeenCalledTimes(1));
+    const [diagnosticBlob] = savePreparedFileMock.mock.calls[0] as [Blob, string];
+    const diagnostic = JSON.parse(await diagnosticBlob.text()) as {
       ruleRegistry: {
         status: string;
         installedCount: number;
@@ -257,7 +311,9 @@ describe("SettingsPage", () => {
     expect(envelope.digest).toMatch(/^[a-f0-9]{64}$/);
     expect(envelope.payload.candidates).toHaveLength(36);
     expect(envelope.payload.dataset.requiredReleaseGoldCaseCount).toBe(360);
-    expect(await screen.findByText(/不会改变当前 0 金标状态/)).toBeTruthy();
+    const goldAuditSection = screen.getByRole("heading", { name: "金标准候选审核" }).closest("section");
+    expect(goldAuditSection).not.toBeNull();
+    expect(await within(goldAuditSection as HTMLElement).findByText(/合计 60 个 candidate、0 个 verified/)).toBeTruthy();
   });
 
   it("按需载入农历模块，导出并预检绑定当前 fixture 的 24 对审核包", async () => {
@@ -285,8 +341,10 @@ describe("SettingsPage", () => {
     expect(new Set(envelope.payload.candidates.map((candidate) => candidate.id)).size).toBe(24);
     expect(envelope.payload.candidates.every((candidate) => /^[a-f0-9]{64}$/.test(candidate.candidateDigest))).toBe(true);
     expect(envelope.payload.reviewPolicy.currentVerifiedCount).toBe(0);
-    expect(await screen.findByText(/当前仍为 0 条人工验证金标/)).toBeTruthy();
-    expect(screen.getByText("审核包已绑定到当前页面")).toBeTruthy();
+    expect(await screen.findByText("审核包已绑定到当前页面")).toBeTruthy();
+    const calendarAuditSection = screen.getByRole("heading", { name: "农历转换候选审核" }).closest("section");
+    expect(calendarAuditSection).not.toBeNull();
+    expect(within(calendarAuditSection as HTMLElement).getByText(/人工 verified 为 0/)).toBeTruthy();
     expect(screen.getByRole("button", { name: /预检农历双人裁决/ })).toHaveProperty("disabled", false);
   });
 
@@ -337,8 +395,10 @@ describe("SettingsPage", () => {
     expect(envelope.payload.candidates).toHaveLength(18);
     expect(new Set(envelope.payload.candidates.map((candidate) => candidate.id)).size).toBe(18);
     expect(envelope.payload.candidates.every((candidate) => /^[a-f0-9]{64}$/.test(candidate.candidateDigest))).toBe(true);
-    expect(await screen.findByText(/人工验证金标仍为 0/)).toBeTruthy();
-    expect(screen.getByText("运限审核包已绑定到当前页面")).toBeTruthy();
+    expect(await screen.findByText("运限审核包已绑定到当前页面", {}, { timeout: 20_000 })).toBeTruthy();
+    const transitAuditSection = screen.getByRole("heading", { name: "运限查询专家审核" }).closest("section");
+    expect(transitAuditSection).not.toBeNull();
+    expect(within(transitAuditSection as HTMLElement).getByText(/当前全部是工程候选，人工验证金标为 0/)).toBeTruthy();
     expect(screen.getByRole("button", { name: /预检独立审核 A/ })).toHaveProperty("disabled", false);
     expect(screen.getByRole("button", { name: /预检独立审核 B/ })).toHaveProperty("disabled", false);
     expect(screen.getByRole("button", { name: /预检运限最终裁决/ })).toHaveProperty("disabled", true);

@@ -7,14 +7,17 @@ import {
   type LocalAppSettingsRecord
 } from "@hakimi/contracts";
 import { AppShell } from "../components/app-shell";
+import { resetPreparedFileDeliveryCoordinatorForTests } from "../components/prepared-file-delivery-coordinator";
 import { LocalAppSettingsProvider } from "../lib/local-app-settings";
 import { DataManagementPage } from "./data-management-page";
 
 const mocks = vi.hoisted(() => ({
   readFullDataSnapshot: vi.fn(),
+  readLocalDataOverview: vi.fn(),
   readResearcherProfile: vi.fn(),
   readAppSettings: vi.fn(),
   listAttachments: vi.fn(),
+  readAttachmentMetadataPage: vi.fn(),
   saveResearcherProfile: vi.fn(),
   saveAppSettings: vi.fn(),
   createAttachment: vi.fn(),
@@ -34,12 +37,19 @@ const mocks = vi.hoisted(() => ({
   clearControlledWindowResearchQueryDrafts: vi.fn()
 }));
 
+const lifecycleAttachmentBoundary = vi.hoisted(() => ({
+  mediaType: "application/vnd.hakimi.bazi-citation-applicability-observation-pair-lifecycle+json",
+  description: "hakimi.bazi.citation-applicability-observation-pair-lifecycle.local-sensitive/1"
+}));
+
 vi.mock("@hakimi/storage", () => ({
   caseRepository: {
     readFullDataSnapshot: mocks.readFullDataSnapshot,
+    readLocalDataOverview: mocks.readLocalDataOverview,
     readResearcherProfile: mocks.readResearcherProfile,
     readAppSettings: mocks.readAppSettings,
     listAttachments: mocks.listAttachments,
+    readAttachmentMetadataPage: mocks.readAttachmentMetadataPage,
     saveResearcherProfile: mocks.saveResearcherProfile,
     saveAppSettings: mocks.saveAppSettings,
     createAttachment: mocks.createAttachment,
@@ -69,14 +79,31 @@ vi.mock("../lib/storage-capacity-gate", async (importOriginal) => ({
   assessStorageCapacity: mocks.assessStorageCapacity
 }));
 
-vi.mock("@hakimi/platform", () => ({
+vi.mock("@hakimi/platform", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@hakimi/platform")>(),
   pickFile: mocks.pickFile,
   saveBlobFile: mocks.saveBlobFile,
-  decodeUtf8Blob: async (blob: Blob) => blob.text()
+  decodeUtf8Blob: async (blob: Blob) => blob.text(),
+  webReportExportPort: {
+    getCapabilities: () => ({
+      canDownloadFiles: true,
+      canChooseSaveLocation: false,
+      canShareFiles: false
+    }),
+    printReport: vi.fn(),
+    saveFile: async (blob: Blob, filename: string) => mocks.saveBlobFile(filename, blob)
+  }
 }));
 
 vi.mock("../lib/local-user-data-cleanup", () => ({
   clearControlledWindowResearchQueryDrafts: mocks.clearControlledWindowResearchQueryDrafts
+}));
+
+vi.mock("../lib/bazi-citation-observation-lifecycle-store", () => ({
+  BAZI_CITATION_OBSERVATION_LIFECYCLE_ATTACHMENT_MEDIA_TYPE:
+    lifecycleAttachmentBoundary.mediaType,
+  BAZI_CITATION_OBSERVATION_LIFECYCLE_ATTACHMENT_DESCRIPTION:
+    lifecycleAttachmentBoundary.description
 }));
 
 const partitionCounts = {
@@ -112,6 +139,63 @@ const snapshot = {
   tzdbMigrationReceipts: [{}],
   eventTimeMigrationReceipts: [{}, {}],
   revisionCalculationReceipts: [{}, {}, {}]
+};
+
+const attachmentMetadata = [
+  {
+    id: "attachment-1",
+    fileName: "原始材料.pdf",
+    mediaType: "application/pdf",
+    byteLength: 1024,
+    description: "访谈材料",
+    contentHash: "a".repeat(64),
+    createdAt: "2026-08-02T00:00:00.000Z",
+    link: null,
+    contentIntegrity: "unchecked"
+  },
+  {
+    id: "attachment-2",
+    fileName: "校时照片.png",
+    mediaType: "image/png",
+    byteLength: 2048,
+    description: "",
+    contentHash: "b".repeat(64),
+    createdAt: "2026-08-02T00:00:00.000Z",
+    link: null,
+    contentIntegrity: "unchecked"
+  }
+] as const;
+
+const attachmentMetadataPage = {
+  totalCount: 2,
+  offset: 0,
+  items: attachmentMetadata,
+  nextOffset: null,
+  scannedEncodedCharacters: 4096,
+  contentIntegrityVerified: false
+} as const;
+
+const seventeenAttachmentCounts = {
+  ...partitionCounts,
+  attachments: 17
+};
+
+const firstSixteenAttachmentMetadata = Array.from({ length: 16 }, (_, index) => ({
+  ...attachmentMetadata[0],
+  id: `bounded-attachment-${index + 1}`,
+  fileName: `有界附件-${String(index + 1).padStart(2, "0")}.pdf`,
+  byteLength: 1024,
+  description: "",
+  contentHash: (index + 1).toString(16).padStart(64, "0")
+}));
+
+const seventeenAttachmentMetadataPage = {
+  totalCount: 17,
+  offset: 0,
+  items: firstSixteenAttachmentMetadata,
+  nextOffset: 16,
+  scannedEncodedCharacters: 32 * 1024,
+  contentIntegrityVerified: false
 };
 
 const comfortableSettingsRecord: LocalAppSettingsRecord = {
@@ -156,12 +240,12 @@ const admittedPlan = {
   logicalPayloadBytes: 4096,
   estimatedPersistedPayloadBytes: 5120,
   rollbackReserveBytes: 5120,
-  fixedHeadroomBytes: 32 * 1024 * 1024,
+  fixedHeadroomBytes: 53_687_092,
   usageBytes: 1024,
   quotaBytes: 1024 * 1024 * 1024,
   availableBytes: 1024 * 1024 * 1024 - 1024,
-  requiredAdditionalBytes: 32 * 1024 * 1024 + 10240,
-  admissionToken: "admitted"
+  requiredAdditionalBytes: 53_697_332,
+  admissionToken: `1:full_restore:${"c".repeat(64)}:1024:1073741824:53697332:2026-08-03T00:00:00.000Z`
 } as const;
 
 const insufficientPlan = {
@@ -179,6 +263,7 @@ const verifiedReplacement = {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  resetPreparedFileDeliveryCoordinatorForTests();
   window.localStorage.clear();
   mocks.saveBlobFile.mockImplementation(async (filename: string) => ({
     status: "download_requested",
@@ -198,6 +283,7 @@ beforeEach(() => {
     failedClients: []
   });
   mocks.readFullDataSnapshot.mockResolvedValue(snapshot);
+  mocks.readLocalDataOverview.mockResolvedValue({ counts: partitionCounts });
   mocks.readResearcherProfile.mockResolvedValue({
     displayName: "研究者甲",
     organization: "本地研究室",
@@ -208,28 +294,9 @@ beforeEach(() => {
     defaultCalendarType: "gregorian",
     preferredDensity: "comfortable"
   });
-  mocks.listAttachments.mockResolvedValue([
-    {
-      id: "attachment-1",
-      fileName: "原始材料.pdf",
-      mediaType: "application/pdf",
-      byteLength: 1024,
-      description: "访谈材料",
-      contentHash: "a".repeat(64),
-      createdAt: "2026-08-02T00:00:00.000Z",
-      link: null
-    },
-    {
-      id: "attachment-2",
-      fileName: "校时照片.png",
-      mediaType: "image/png",
-      byteLength: 2048,
-      description: "",
-      contentHash: "b".repeat(64),
-      createdAt: "2026-08-02T00:00:00.000Z",
-      link: null
-    }
-  ]);
+  mocks.listAttachments.mockResolvedValue(attachmentMetadata);
+  mocks.readAttachmentMetadataPage.mockResolvedValue(attachmentMetadataPage);
+  mocks.readAttachmentBytes.mockResolvedValue(new Uint8Array([1, 2, 3]));
   const artifact = {
     output: "zip",
     blob: new Blob([new Uint8Array([1, 2, 3])], { type: "application/zip" }),
@@ -260,11 +327,56 @@ beforeEach(() => {
   mocks.assessStorageCapacity.mockResolvedValue(admittedPlan);
 });
 
+async function deliverPreparedFile(): Promise<void> {
+  const previousCalls = mocks.saveBlobFile.mock.calls.length;
+  const dialog = await screen.findByRole("dialog", { name: "待交付文件已在本机生成" });
+  expect(dialog.dataset.sharePolicy).toBe("blocked_sensitive");
+  expect(mocks.saveBlobFile).toHaveBeenCalledTimes(previousCalls);
+  fireEvent.click(within(dialog).getByRole("button", { name: /^下载文件/ }));
+  await waitFor(() => expect(mocks.saveBlobFile).toHaveBeenCalledTimes(previousCalls + 1));
+  await waitFor(() => {
+    expect(["completed", "requested", "cancelled"]).toContain(dialog.dataset.deliveryOutcome);
+  });
+  if (dialog.dataset.deliveryOutcome === "requested") {
+    fireEvent.click(within(dialog).getByRole("button", { name: "已核对，允许再次下载" }));
+  }
+  fireEvent.click(within(dialog).getByRole("button", { name: "关闭" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+}
+
+async function openDeleteAllConfirmation(
+  decision: "verified_backup" | "accept_without_backup" = "accept_without_backup"
+): Promise<HTMLInputElement> {
+  const trigger = screen.getByRole("button", { name: "开始完整清空" });
+  await waitFor(() => expect(trigger).toHaveProperty("disabled", false));
+  fireEvent.click(trigger);
+  const choice = await screen.findByLabelText(decision === "verified_backup"
+    ? /我已人工核对一份可用的完整 ZIP/
+    : /我明确接受没有可恢复副本仍继续/);
+  fireEvent.click(choice);
+  const confirmation = screen.getByLabelText(/确认文字：输入/);
+  await waitFor(() => expect(confirmation).toHaveProperty("disabled", false));
+  return confirmation as HTMLInputElement;
+}
+
+async function enterDeleteAllText(confirmation: HTMLInputElement): Promise<HTMLButtonElement> {
+  fireEvent.change(confirmation, { target: { value: "删除全部本地数据" } });
+  const deleteButton = screen.getByRole<HTMLButtonElement>("button", { name: "永久删除全部数据" });
+  await waitFor(() => expect(deleteButton).toHaveProperty("disabled", false));
+  return deleteButton;
+}
+
 describe("DataManagementPage", () => {
   it("显示十六分区、未加密警告、资料偏好、附件和最后的完整危险区", async () => {
     render(<DataManagementPage />);
 
     expect(await screen.findByRole("heading", { name: "此浏览器中的十六个用户数据分区" })).toBeTruthy();
+    await waitFor(() => {
+      expect(mocks.readLocalDataOverview).toHaveBeenCalledTimes(1);
+      expect(mocks.readAttachmentMetadataPage).toHaveBeenCalledTimes(1);
+    });
+    expect(mocks.readFullDataSnapshot).not.toHaveBeenCalled();
+    expect(mocks.listAttachments).not.toHaveBeenCalled();
     for (const label of [
       "命盘案例", "命盘修订", "未知时辰候选组", "研究笔记", "事件", "保存视图",
       "用户文献", "结构化引用", "来源权利记录", "研究者资料", "应用设置", "附件", "规则包仓库", "候选组时区并列复算凭证", "事件时间迁移凭证", "Revision 计算收据"
@@ -272,8 +384,8 @@ describe("DataManagementPage", () => {
       expect(screen.getAllByText(label).length).toBeGreaterThan(0);
     }
     expect(screen.getByText("备份是未加密的敏感明文")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "导出完整 ZIP" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "导出兼容 JSON" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "准备完整 ZIP" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "准备兼容 JSON" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "研究者资料" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "本机研究偏好" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "附件库" })).toBeTruthy();
@@ -281,6 +393,27 @@ describe("DataManagementPage", () => {
     expect(screen.getByText(/规则包仓库、活动选择器、两类时间迁移凭证与 Revision 计算收据/)).toBeTruthy();
     expect(screen.getByText(/请求当前所有受控标签页删除本应用的临时检索草稿；没有返回确认的标签页会单独列出/)).toBeTruthy();
     expect(screen.getByText("旧版 core 备份兼容检查")).toBeTruthy();
+  });
+
+  it("概览读取失败后的重试仍只使用轻量概览与附件元数据分页 API", async () => {
+    mocks.readLocalDataOverview
+      .mockRejectedValueOnce(new Error("overview temporarily unavailable"))
+      .mockResolvedValueOnce({ counts: partitionCounts });
+    render(<DataManagementPage />);
+
+    expect(await screen.findByText("本机数据清单不可用")).toBeTruthy();
+    expect(mocks.readFullDataSnapshot).not.toHaveBeenCalled();
+    expect(mocks.listAttachments).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "重新读取本地概览" }));
+
+    expect(await screen.findByRole("heading", { name: "此浏览器中的十六个用户数据分区" })).toBeTruthy();
+    await waitFor(() => {
+      expect(mocks.readLocalDataOverview).toHaveBeenCalledTimes(2);
+      expect(mocks.readAttachmentMetadataPage).toHaveBeenCalledTimes(2);
+    });
+    expect(mocks.readFullDataSnapshot).not.toHaveBeenCalled();
+    expect(mocks.listAttachments).not.toHaveBeenCalled();
   });
 
   it("全量恢复显示十六分区差异，重复安全下载会重置两个显式确认", async () => {
@@ -321,27 +454,33 @@ describe("DataManagementPage", () => {
       snapshot,
       expect.objectContaining({ appVersion: expect.any(String) })
     );
+    expect(mocks.readFullDataSnapshot).toHaveBeenCalledTimes(1);
+    expect(mocks.listAttachments).not.toHaveBeenCalled();
     expect(screen.getAllByText("命盘案例").length).toBeGreaterThan(0);
     const restoreButton = screen.getByRole("button", { name: "确认替换并恢复" });
     expect(restoreButton).toHaveProperty("disabled", true);
 
-    fireEvent.click(screen.getByRole("button", { name: "先下载当前安全备份" }));
-    await waitFor(() => expect(mocks.saveBlobFile).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole("button", { name: "先准备当前安全备份" }));
+    await deliverPreparedFile();
     const safetyConfirmation = screen.getByLabelText(/我已确认安全备份文件保存成功并可以打开/);
     const replacementConfirmation = screen.getByLabelText(/我理解恢复会替换此浏览器中的全部十六个用户数据分区/);
     fireEvent.click(safetyConfirmation);
     fireEvent.click(replacementConfirmation);
     expect(restoreButton).toHaveProperty("disabled", false);
 
-    fireEvent.click(screen.getByRole("button", { name: "重新下载当前安全备份" }));
-    await waitFor(() => expect(mocks.saveBlobFile).toHaveBeenCalledTimes(2));
+    fireEvent.click(screen.getByRole("button", { name: "重新准备当前安全备份" }));
+    await deliverPreparedFile();
     expect(safetyConfirmation).toHaveProperty("checked", false);
     expect(replacementConfirmation).toHaveProperty("checked", false);
     expect(restoreButton).toHaveProperty("disabled", true);
 
-    fireEvent.click(safetyConfirmation);
-    fireEvent.click(replacementConfirmation);
-    fireEvent.click(restoreButton);
+    const safetyConfirmationAfterRepeat = screen.getByLabelText(/我已确认安全备份文件保存成功并可以打开/);
+    fireEvent.click(safetyConfirmationAfterRepeat);
+    await waitFor(() => expect(screen.getByLabelText(/我理解恢复会替换此浏览器中的全部十六个用户数据分区/)).toHaveProperty("disabled", false));
+    fireEvent.click(screen.getByLabelText(/我理解恢复会替换此浏览器中的全部十六个用户数据分区/));
+    await waitFor(() => expect(screen.getByRole("button", { name: "确认替换并恢复" })).toHaveProperty("disabled", false));
+    fireEvent.click(screen.getByRole("button", { name: "确认替换并恢复" }));
+    await waitFor(() => expect(mocks.verifyPreparedFullBackupOffMainThread).toHaveBeenCalledTimes(1));
     const success = await screen.findByText("完整恢复成功");
     await waitFor(() => expect(success.parentElement).toBe(document.activeElement));
     expect(mocks.verifyPreparedFullBackupOffMainThread).toHaveBeenCalledWith(preparation);
@@ -357,17 +496,18 @@ describe("DataManagementPage", () => {
       type: "application/json",
       blob: new Blob(["{}"], { type: "application/json" })
     });
-    mocks.saveBlobFile.mockResolvedValueOnce({
+    mocks.saveBlobFile.mockImplementationOnce(async (filename: string) => ({
       status: "cancelled",
-      filename: "hakimi-before-restore-2026-08-03.zip",
+      filename,
       operation: "save"
-    });
+    }));
     render(<DataManagementPage />);
     await screen.findByRole("button", { name: "选择 ZIP / JSON 预检" });
 
     fireEvent.click(screen.getByRole("button", { name: "选择 ZIP / JSON 预检" }));
     await screen.findByRole("heading", { name: "预检通过，尚未写入" });
-    fireEvent.click(screen.getByRole("button", { name: "先下载当前安全备份" }));
+    fireEvent.click(screen.getByRole("button", { name: "先准备当前安全备份" }));
+    await deliverPreparedFile();
 
     expect(await screen.findByText("已取消安全备份导出")).toBeTruthy();
     expect(screen.getByLabelText(/我已确认安全备份文件保存成功并可以打开/)).toHaveProperty("disabled", true);
@@ -389,8 +529,8 @@ describe("DataManagementPage", () => {
 
     expect(await screen.findByText("容量准入未通过：可用空间不足")).toBeTruthy();
     expect(screen.getByText(/浏览器报告可用 1.0 KiB/)).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "先下载当前安全备份" }));
-    await waitFor(() => expect(mocks.saveBlobFile).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole("button", { name: "先准备当前安全备份" }));
+    await deliverPreparedFile();
     expect(screen.getByLabelText(/我已确认安全备份文件保存成功并可以打开/)).toHaveProperty("disabled", true);
     expect(screen.getByRole("button", { name: "确认替换并恢复" })).toHaveProperty("disabled", true);
     expect(mocks.verifyPreparedFullBackupOffMainThread).not.toHaveBeenCalled();
@@ -410,8 +550,8 @@ describe("DataManagementPage", () => {
     render(<DataManagementPage />);
     fireEvent.click(await screen.findByRole("button", { name: "选择 ZIP / JSON 预检" }));
     await screen.findByRole("heading", { name: "预检通过，尚未写入" });
-    fireEvent.click(screen.getByRole("button", { name: "先下载当前安全备份" }));
-    await waitFor(() => expect(mocks.saveBlobFile).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole("button", { name: "先准备当前安全备份" }));
+    await deliverPreparedFile();
     fireEvent.click(screen.getByLabelText(/我已确认安全备份文件保存成功并可以打开/));
     const replacement = screen.getByLabelText(/我理解恢复会替换此浏览器中的全部十六个用户数据分区/);
     fireEvent.click(replacement);
@@ -435,13 +575,18 @@ describe("DataManagementPage", () => {
     render(<DataManagementPage />);
     fireEvent.click(await screen.findByRole("button", { name: "选择 ZIP / JSON 预检" }));
     await screen.findByRole("heading", { name: "预检通过，尚未写入" });
-    fireEvent.click(screen.getByRole("button", { name: "先下载当前安全备份" }));
-    await waitFor(() => expect(mocks.saveBlobFile).toHaveBeenCalledTimes(1));
-    fireEvent.click(screen.getByLabelText(/我已确认安全备份文件保存成功并可以打开/));
-    fireEvent.click(screen.getByLabelText(/我理解恢复会替换此浏览器中的全部十六个用户数据分区/));
-    fireEvent.click(screen.getByRole("button", { name: "确认替换并恢复" }));
+    fireEvent.click(screen.getByRole("button", { name: "先准备当前安全备份" }));
+    await deliverPreparedFile();
+    const safetyConfirmation = screen.getByLabelText(/我已确认安全备份文件保存成功并可以打开/);
+    fireEvent.click(safetyConfirmation);
+    const replacementConfirmation = screen.getByLabelText(/我理解恢复会替换此浏览器中的全部十六个用户数据分区/);
+    await waitFor(() => expect(replacementConfirmation).toHaveProperty("disabled", false));
+    fireEvent.click(replacementConfirmation);
+    const restoreButton = screen.getByRole("button", { name: "确认替换并恢复" });
+    await waitFor(() => expect(restoreButton).toHaveProperty("disabled", false));
+    fireEvent.click(restoreButton);
 
-    expect(await screen.findByText("浏览器配额不足，恢复事务已中止")).toBeTruthy();
+    expect(await screen.findByText("浏览器配额不足，恢复事务已回滚")).toBeTruthy();
     expect(screen.getByText(/已重新核对当前十六分区摘要与安全备份一致/)).toBeTruthy();
     expect(mocks.inspectFullBackupSnapshotOffMainThread).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("heading", { name: "预检通过，尚未写入" })).toBeTruthy();
@@ -481,6 +626,8 @@ describe("DataManagementPage", () => {
     await waitFor(() => expect(mocks.saveAppSettings).toHaveBeenCalledWith(expect.objectContaining({ preferredDensity: "compact" })));
     await waitFor(() => expect(view.container.querySelector(".app-shell")?.getAttribute("data-density")).toBe("compact"));
 
+    const overviewCallsBeforeUpload = mocks.readLocalDataOverview.mock.calls.length;
+    const metadataCallsBeforeUpload = mocks.readAttachmentMetadataPage.mock.calls.length;
     fireEvent.change(screen.getByLabelText("本次附件说明（可选）"), { target: { value: "补充材料" } });
     fireEvent.click(screen.getByRole("button", { name: "选择并保存附件" }));
     await waitFor(() => expect(mocks.createAttachment).toHaveBeenCalledWith(expect.objectContaining({
@@ -488,20 +635,191 @@ describe("DataManagementPage", () => {
       mediaType: "text/plain",
       description: "补充材料"
     })));
+    expect(await screen.findByText("附件已保存")).toBeTruthy();
+    await waitFor(() => {
+      expect(mocks.readLocalDataOverview).toHaveBeenCalledTimes(overviewCallsBeforeUpload + 1);
+      expect(mocks.readAttachmentMetadataPage).toHaveBeenCalledTimes(metadataCallsBeforeUpload + 1);
+    });
+    expect(mocks.readFullDataSnapshot).not.toHaveBeenCalled();
+    expect(mocks.listAttachments).not.toHaveBeenCalled();
     expect(mocks.pickFile).toHaveBeenCalledWith({ maxBytes: 10 * 1024 * 1024 });
+  });
+
+  it("拒绝通过通用附件入口保存保留的 lifecycle MIME", async () => {
+    mocks.pickFile.mockResolvedValueOnce({
+      name: "forged-lifecycle.json",
+      size: 4,
+      type: `${lifecycleAttachmentBoundary.mediaType.toUpperCase()}; Charset=UTF-8`,
+      blob: new Blob(["test"], { type: lifecycleAttachmentBoundary.mediaType })
+    });
+    render(<DataManagementPage />);
+    await screen.findByText("原始材料.pdf");
+
+    fireEvent.click(screen.getByRole("button", { name: "选择并保存附件" }));
+
+    expect(await screen.findByText("请使用专用 lifecycle 审阅库")).toBeTruthy();
+    expect(screen.getByText(/通用附件入口不会创建、覆盖或降级处理它/u)).toBeTruthy();
+    expect(mocks.createAttachment).not.toHaveBeenCalled();
+  });
+
+  it("从通用下载和删除路径隔离精确 purpose 与 purpose 不匹配的保留 lifecycle MIME", async () => {
+    const protectedAttachment = {
+      ...attachmentMetadata[0],
+      id: "protected-lifecycle",
+      fileName: "protected-lifecycle.json",
+      mediaType: lifecycleAttachmentBoundary.mediaType,
+      description: lifecycleAttachmentBoundary.description,
+      contentHash: "c".repeat(64)
+    };
+    const mismatchedPurposeAttachment = {
+      ...attachmentMetadata[0],
+      id: "mismatched-lifecycle",
+      fileName: "mismatched-lifecycle.json",
+      mediaType: lifecycleAttachmentBoundary.mediaType,
+      description: "not-the-reserved-purpose",
+      contentHash: "d".repeat(64)
+    };
+    mocks.readLocalDataOverview.mockResolvedValue({
+      counts: { ...partitionCounts, attachments: 3 }
+    });
+    mocks.readAttachmentMetadataPage.mockResolvedValue({
+      ...attachmentMetadataPage,
+      totalCount: 3,
+      items: [attachmentMetadata[0], protectedAttachment, mismatchedPurposeAttachment]
+    });
+    render(<DataManagementPage />);
+
+    const protectedName = await screen.findByText("protected-lifecycle.json");
+    const protectedRow = protectedName.closest("li");
+    if (!protectedRow) throw new Error("protected attachment row missing");
+    expect(within(protectedRow).getByText("受保护的 lifecycle 审阅库工件")).toBeTruthy();
+    expect(within(protectedRow).queryByRole("button", { name: "下载" })).toBeNull();
+    expect(within(protectedRow).queryByRole("button", { name: "删除" })).toBeNull();
+    expect(within(protectedRow).queryByText(/永久删除此附件/u)).toBeNull();
+
+    const mismatchedName = screen.getByText("mismatched-lifecycle.json");
+    const mismatchedRow = mismatchedName.closest("li");
+    if (!mismatchedRow) throw new Error("mismatched attachment row missing");
+    expect(within(mismatchedRow).getByText("保留 lifecycle MIME 的 purpose 不匹配")).toBeTruthy();
+    expect(within(mismatchedRow).queryByText("受保护的 lifecycle 审阅库工件")).toBeNull();
+    expect(within(mismatchedRow).queryByRole("button", { name: "下载" })).toBeNull();
+    expect(within(mismatchedRow).queryByRole("button", { name: "删除" })).toBeNull();
+    expect(within(mismatchedRow).queryByText(/永久删除此附件/u)).toBeNull();
+
+    expect(mocks.readAttachmentBytes).not.toHaveBeenCalled();
+    expect(mocks.deleteAttachment).not.toHaveBeenCalled();
+  });
+
+  it("分页加载附件元数据，并以绑定内容摘要读取下载字节", async () => {
+    mocks.readAttachmentMetadataPage
+      .mockResolvedValueOnce({
+        totalCount: 2,
+        offset: 0,
+        items: [attachmentMetadata[0]],
+        nextOffset: 1,
+        scannedEncodedCharacters: 2048,
+        contentIntegrityVerified: false
+      })
+      .mockResolvedValueOnce({
+        totalCount: 2,
+        offset: 1,
+        items: [attachmentMetadata[1]],
+        nextOffset: null,
+        scannedEncodedCharacters: 2048,
+        contentIntegrityVerified: false
+      });
+    render(<DataManagementPage />);
+
+    expect(await screen.findByText("原始材料.pdf")).toBeTruthy();
+    expect(screen.queryByText("校时照片.png")).toBeNull();
+    expect(mocks.readAttachmentMetadataPage).toHaveBeenNthCalledWith(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "加载更多附件元数据" }));
+
+    expect(await screen.findByText("校时照片.png")).toBeTruthy();
+    expect(mocks.readAttachmentMetadataPage).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ offset: 1 })
+    );
+    expect(mocks.readFullDataSnapshot).not.toHaveBeenCalled();
+    expect(mocks.listAttachments).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "下载" })[0]!);
+    await waitFor(() => expect(mocks.readAttachmentBytes).toHaveBeenCalledWith(
+      "attachment-1",
+      { expectedContentHash: "a".repeat(64) }
+    ));
+  });
+
+  it("重新读取同一附件的新摘要时关闭旧删除确认", async () => {
+    const refreshedContentHash = "c".repeat(64);
+    const refreshedAttachmentPage = {
+      ...attachmentMetadataPage,
+      items: [
+        { ...attachmentMetadata[0], contentHash: refreshedContentHash },
+        attachmentMetadata[1]
+      ]
+    };
+    mocks.readLocalDataOverview
+      .mockResolvedValueOnce({ counts: partitionCounts })
+      .mockRejectedValueOnce(new Error("post-write reread failed"))
+      .mockResolvedValueOnce({ counts: partitionCounts });
+    mocks.readAttachmentMetadataPage
+      .mockResolvedValueOnce(attachmentMetadataPage)
+      .mockResolvedValueOnce(refreshedAttachmentPage)
+      .mockResolvedValueOnce(refreshedAttachmentPage);
+    render(<DataManagementPage />);
+
+    await screen.findByText("原始材料.pdf");
+    fireEvent.click(screen.getAllByRole("button", { name: "删除" })[0]!);
+    expect(screen.getByRole("group", { name: "确认删除附件 原始材料.pdf" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "保存研究者资料" }));
+    expect(await screen.findByText("研究者资料已保存，概览刷新失败")).toBeTruthy();
+    await waitFor(() => expect(mocks.readAttachmentMetadataPage).toHaveBeenCalledTimes(2));
+    expect(screen.queryByRole("group", { name: "确认删除附件 原始材料.pdf" })).toBeNull();
+
+    const retry = screen.getByRole<HTMLButtonElement>("button", { name: "重新读取本地概览" });
+    await waitFor(() => expect(retry).toHaveProperty("disabled", false));
+    fireEvent.click(retry);
+
+    expect(await screen.findByTitle(refreshedContentHash)).toBeTruthy();
+    await waitFor(() => expect(mocks.readAttachmentMetadataPage).toHaveBeenCalledTimes(3));
+    expect(screen.queryByRole("group", { name: "确认删除附件 原始材料.pdf" })).toBeNull();
+    expect(mocks.deleteAttachment).not.toHaveBeenCalled();
+  });
+
+  it("直接确认删除在无关重渲染后仍使用展开时的旧摘要", async () => {
+    render(<DataManagementPage />);
+
+    await screen.findByText("原始材料.pdf");
+    fireEvent.click(screen.getAllByRole("button", { name: "删除" })[0]!);
+    fireEvent.change(screen.getByLabelText("本次附件说明（可选）"), { target: { value: "触发无关重渲染" } });
+    expect(screen.getByDisplayValue("触发无关重渲染")).toBeTruthy();
+
+    const confirmation = screen.getByRole("group", { name: "确认删除附件 原始材料.pdf" });
+    fireEvent.click(within(confirmation).getByRole("button", { name: "确认删除" }));
+
+    await waitFor(() => expect(mocks.deleteAttachment).toHaveBeenCalledWith(
+      "attachment-1",
+      { expectedContentHash: "a".repeat(64) }
+    ));
   });
 
   it("完整清空要求精确输入，并在十六分区与全部受控标签草稿清理后聚焦成功结果", async () => {
     render(<DataManagementPage />);
     const trigger = await screen.findByRole("button", { name: "开始完整清空" });
+    await waitFor(() => expect(trigger).toHaveProperty("disabled", false));
     trigger.focus();
     fireEvent.click(trigger);
-    const confirmation = screen.getByLabelText("确认文字");
-    await waitFor(() => expect(document.activeElement).toBe(confirmation));
+    const initialChoice = await screen.findByLabelText(/我已人工核对一份可用的完整 ZIP/);
+    await waitFor(() => expect(document.activeElement).toBe(initialChoice));
+    fireEvent.click(screen.getByLabelText(/我明确接受没有可恢复副本仍继续/));
+    const confirmation = screen.getByLabelText(/确认文字：输入/);
+    await waitFor(() => expect(confirmation).toHaveProperty("disabled", false));
     const deleteButton = screen.getByRole("button", { name: "永久删除全部数据" });
     expect(deleteButton).toHaveProperty("disabled", true);
-    fireEvent.change(confirmation, { target: { value: "删除全部本地数据" } });
-    expect(deleteButton).toHaveProperty("disabled", false);
+    expect(await enterDeleteAllText(confirmation)).toBe(deleteButton);
 
     fireEvent.click(deleteButton);
     const success = await screen.findByText("十六个本地数据分区与临时检索草稿已全部清除");
@@ -511,43 +829,79 @@ describe("DataManagementPage", () => {
     expect(screen.getByText(/已确认 2\/2 个受控标签页，共移除 3 条临时检索草稿/)).toBeTruthy();
   });
 
-  it("完整备份成功后写入备份健康标记，完整清空后清除该标记", async () => {
+  it("完整备份只有下载请求时保留 requested 收据且不写入备份健康标记", async () => {
     render(<DataManagementPage />);
-    await screen.findByRole("button", { name: "导出完整 ZIP" });
+    const exportButton = await screen.findByRole("button", { name: "准备完整 ZIP" });
+    await waitFor(() => expect(exportButton).toHaveProperty("disabled", false));
 
-    fireEvent.click(screen.getByRole("button", { name: "导出完整 ZIP" }));
-    await waitFor(() => expect(mocks.saveBlobFile).toHaveBeenCalledTimes(1));
+    fireEvent.click(exportButton);
+    await waitFor(() => expect(mocks.readFullDataSnapshot).toHaveBeenCalledTimes(1));
+    const exportSnapshotSignal = mocks.readFullDataSnapshot.mock.calls[0]?.[0]?.signal as AbortSignal | undefined;
+    expect(exportSnapshotSignal).toBeDefined();
+    expect(exportSnapshotSignal?.aborted).toBe(false);
+    expect(mocks.readFullDataSnapshot).toHaveBeenCalledWith({ signal: exportSnapshotSignal });
+    await deliverPreparedFile();
+
+    const receipt = screen.getByRole("heading", { name: "最近一次完整备份工程回执" }).closest("section");
+    expect(receipt?.getAttribute("data-delivery")).toBe("requested");
+    expect(within(receipt as HTMLElement).getByText("仅已请求下载")).toBeTruthy();
+    expect(within(receipt as HTMLElement).getByText("requested")).toBeTruthy();
+    expect(window.localStorage.getItem("hakimi:backup-health:v1:lastFullBackupExportedAt")).toBeNull();
+  });
+
+  it("完整备份成功后写入备份健康标记，完整清空后清除该标记", async () => {
+    mocks.saveBlobFile.mockImplementationOnce(async (filename: string, blob: Blob) => ({
+      status: "saved",
+      filename,
+      method: "native",
+      bytesWritten: blob.size
+    }));
+    render(<DataManagementPage />);
+    const exportButton = await screen.findByRole("button", { name: "准备完整 ZIP" });
+    await waitFor(() => expect(exportButton).toHaveProperty("disabled", false));
+
+    fireEvent.click(exportButton);
+    await deliverPreparedFile();
     expect(window.localStorage.getItem("hakimi:backup-health:v1:lastFullBackupExportedAt")).not.toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "开始完整清空" }));
-    fireEvent.change(screen.getByLabelText("确认文字"), {
-      target: { value: "删除全部本地数据" }
-    });
-    fireEvent.click(screen.getByRole("button", { name: "永久删除全部数据" }));
+    const confirmation = await openDeleteAllConfirmation("verified_backup");
+    fireEvent.click(await enterDeleteAllText(confirmation));
     await waitFor(() => expect(mocks.clearAll).toHaveBeenCalledTimes(1));
     expect(window.localStorage.getItem("hakimi:backup-health:v1:lastFullBackupExportedAt")).toBeNull();
   });
 
-  it("完整备份生成中可取消，且不写入备份健康标记或触发下载", async () => {
-    mocks.createFullBackupArtifactOffMainThread.mockImplementationOnce(
-      async (_snapshot, _options, _format, signal?: AbortSignal) => {
-        if (!signal) throw new Error("expected abort signal");
-        await new Promise((_resolve, reject) => {
-          signal.addEventListener("abort", () => {
-            reject(Object.assign(new Error("cancelled"), { code: "BACKUP_WORKER_CANCELLED" }));
-          }, { once: true });
-        });
-        throw new Error("unreachable");
-      }
-    );
+  it("完整备份只读快照事务中可取消，且不启动 Worker、下载或备份健康标记", async () => {
+    let snapshotSignal: AbortSignal | undefined;
+    let releaseAbortedSnapshot: (() => void) | undefined;
+    mocks.readFullDataSnapshot.mockImplementationOnce(async (options?: { signal?: AbortSignal }) => {
+      if (!options?.signal) throw new Error("expected snapshot abort signal");
+      snapshotSignal = options.signal;
+      await new Promise<void>((resolve) => {
+        if (options.signal?.aborted) resolve();
+        else options.signal?.addEventListener("abort", () => resolve(), { once: true });
+      });
+      await new Promise<void>((resolve) => {
+        releaseAbortedSnapshot = resolve;
+      });
+      throw Object.assign(new Error("cancelled"), { name: "AbortError" });
+    });
     render(<DataManagementPage />);
-    await screen.findByRole("button", { name: "导出完整 ZIP" });
+    const exportButton = await screen.findByRole("button", { name: "准备完整 ZIP" });
+    await waitFor(() => expect(exportButton).toHaveProperty("disabled", false));
 
-    fireEvent.click(screen.getByRole("button", { name: "导出完整 ZIP" }));
+    fireEvent.click(exportButton);
     const cancel = await screen.findByRole("button", { name: "取消生成" });
+    await waitFor(() => expect(snapshotSignal).toBeDefined());
+    expect(mocks.readFullDataSnapshot).toHaveBeenCalledWith({ signal: snapshotSignal });
+    expect(mocks.createFullBackupArtifactOffMainThread).not.toHaveBeenCalled();
     fireEvent.click(cancel);
 
-    expect(await screen.findByText("已取消完整备份生成")).toBeTruthy();
+    await waitFor(() => expect(snapshotSignal?.aborted).toBe(true));
+    expect(screen.getByText(/只读数据库事务或 Worker 会在当前不可中断步骤结束后尽快停止/)).toBeTruthy();
+    await waitFor(() => expect(releaseAbortedSnapshot).toBeTypeOf("function"));
+    releaseAbortedSnapshot?.();
+    expect(await screen.findByText("已取消完整 ZIP 生成")).toBeTruthy();
+    expect(mocks.createFullBackupArtifactOffMainThread).not.toHaveBeenCalled();
     expect(mocks.saveBlobFile).not.toHaveBeenCalled();
     expect(window.localStorage.getItem("hakimi:backup-health:v1:lastFullBackupExportedAt")).toBeNull();
   });
@@ -571,11 +925,8 @@ describe("DataManagementPage", () => {
       }
     });
     render(<DataManagementPage />);
-    fireEvent.click(await screen.findByRole("button", { name: "开始完整清空" }));
-    fireEvent.change(screen.getByLabelText("确认文字"), {
-      target: { value: "删除全部本地数据" }
-    });
-    fireEvent.click(screen.getByRole("button", { name: "永久删除全部数据" }));
+    const confirmation = await openDeleteAllConfirmation();
+    fireEvent.click(await enterDeleteAllText(confirmation));
 
     expect(await screen.findByText("十六个本地数据分区已删除，部分临时草稿未确认")).toBeTruthy();
     expect(screen.getByText(/已确认 2\/3 个受控标签页/)).toBeTruthy();
@@ -605,11 +956,8 @@ describe("DataManagementPage", () => {
     expect(await screen.findByDisplayValue("America/New_York")).toBeTruthy();
     await waitFor(() => expect(view.container.querySelector(".app-shell")?.getAttribute("data-density")).toBe("compact"));
 
-    fireEvent.click(screen.getByRole("button", { name: "开始完整清空" }));
-    fireEvent.change(screen.getByLabelText("确认文字"), {
-      target: { value: "删除全部本地数据" }
-    });
-    fireEvent.click(screen.getByRole("button", { name: "永久删除全部数据" }));
+    const confirmation = await openDeleteAllConfirmation();
+    fireEvent.click(await enterDeleteAllText(confirmation));
 
     await waitFor(() => expect(mocks.clearAll).toHaveBeenCalledTimes(1));
     await waitFor(() => {
@@ -640,9 +988,8 @@ describe("DataManagementPage", () => {
   });
 
   it("恢复事务已提交但后置读取失败时不误报恢复失败", async () => {
-    mocks.readFullDataSnapshot
-      .mockResolvedValueOnce(snapshot)
-      .mockResolvedValueOnce(snapshot)
+    mocks.readLocalDataOverview
+      .mockResolvedValueOnce({ counts: partitionCounts })
       .mockRejectedValueOnce(new Error("post-commit refresh failed"));
     mocks.pickFile.mockResolvedValueOnce({
       name: "incoming.zip",
@@ -655,8 +1002,8 @@ describe("DataManagementPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "选择 ZIP / JSON 预检" }));
     await screen.findByRole("heading", { name: "预检通过，尚未写入" });
-    fireEvent.click(screen.getByRole("button", { name: "先下载当前安全备份" }));
-    await waitFor(() => expect(mocks.saveBlobFile).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole("button", { name: "先准备当前安全备份" }));
+    await deliverPreparedFile();
     fireEvent.click(screen.getByLabelText(/我已确认安全备份文件保存成功并可以打开/));
     fireEvent.click(screen.getByLabelText(/我理解恢复会替换此浏览器中的全部十六个用户数据分区/));
     fireEvent.click(screen.getByRole("button", { name: "确认替换并恢复" }));
@@ -667,25 +1014,44 @@ describe("DataManagementPage", () => {
     expect(screen.queryByRole("heading", { name: "预检通过，尚未写入" })).toBeNull();
   });
 
-  it("清空事务已提交但后置读取失败时不误报删除失败", async () => {
-    mocks.readFullDataSnapshot
-      .mockResolvedValueOnce(snapshot)
-      .mockRejectedValueOnce(new Error("post-commit refresh failed"));
+  it.each([
+    ["returned", "完整清空已提交，空状态尚未核对"],
+    ["unknown", "完整清空调用异常，提交结果未知"]
+  ] as const)("仅列首 16 个附件时，完整清空 %s 回执保留 17 个附件总数", async (outcome, receiptTitle) => {
+    mocks.readLocalDataOverview.mockResolvedValue({ counts: seventeenAttachmentCounts });
+    mocks.readAttachmentMetadataPage.mockResolvedValue(seventeenAttachmentMetadataPage);
+    if (outcome === "returned") {
+      mocks.readLocalDataOverview
+        .mockResolvedValueOnce({ counts: seventeenAttachmentCounts })
+        .mockRejectedValueOnce(new Error("post-commit refresh failed"));
+      mocks.clearAll.mockResolvedValueOnce(undefined);
+    } else {
+      mocks.clearAll.mockRejectedValueOnce(new Error("delete outcome unavailable"));
+    }
     render(<DataManagementPage />);
-    fireEvent.click(await screen.findByRole("button", { name: "开始完整清空" }));
-    fireEvent.change(screen.getByLabelText("确认文字"), {
-      target: { value: "删除全部本地数据" }
-    });
-    fireEvent.click(screen.getByRole("button", { name: "永久删除全部数据" }));
 
-    expect(await screen.findByText("十六分区与临时草稿已清，概览刷新失败")).toBeTruthy();
+    await screen.findByText("有界附件-01.pdf");
+    expect(screen.getByText("17 个附件 · 已列 16")).toBeTruthy();
+    expect(screen.getByText("16/17 个已列")).toBeTruthy();
+    expect(screen.getByText(/本次分页已列 16\/17 个附件元数据/)).toBeTruthy();
+
+    const confirmation = await openDeleteAllConfirmation();
+    const impactSummary = screen.getByLabelText("本次完整清空影响摘要");
+    expect(within(impactSummary).getByText("17 个；已列元数据声明 16 KiB")).toBeTruthy();
+    expect(within(impactSummary).getByText("总字节未全量读取；删除事务覆盖全部附件")).toBeTruthy();
+    fireEvent.click(await enterDeleteAllText(confirmation));
+
+    const receiptHeading = await screen.findByRole("heading", { name: receiptTitle });
+    const receipt = receiptHeading.closest("section");
+    expect(receipt).not.toBeNull();
+    expect(within(receipt as HTMLElement).getByText("72 条 · 17 个附件（已列 16 条元数据）")).toBeTruthy();
     expect(mocks.clearAll).toHaveBeenCalledTimes(1);
     expect(screen.queryByText("完整清空未完成")).toBeNull();
   });
 
   it("研究者资料已提交但后置读取失败时不误报未保存", async () => {
-    mocks.readFullDataSnapshot
-      .mockResolvedValueOnce(snapshot)
+    mocks.readLocalDataOverview
+      .mockResolvedValueOnce({ counts: partitionCounts })
       .mockRejectedValueOnce(new Error("post-commit refresh failed"));
     render(<DataManagementPage />);
     await screen.findByDisplayValue("研究者甲");
@@ -698,8 +1064,8 @@ describe("DataManagementPage", () => {
   });
 
   it("附件已删除但后置读取失败时清除确认门且不误报未删除", async () => {
-    mocks.readFullDataSnapshot
-      .mockResolvedValueOnce(snapshot)
+    mocks.readLocalDataOverview
+      .mockResolvedValueOnce({ counts: partitionCounts })
       .mockRejectedValueOnce(new Error("post-commit refresh failed"));
     render(<DataManagementPage />);
     await screen.findByText("原始材料.pdf");
@@ -708,7 +1074,10 @@ describe("DataManagementPage", () => {
     fireEvent.click(within(confirmation).getByRole("button", { name: "确认删除" }));
 
     expect(await screen.findByText("附件已删除，列表刷新失败")).toBeTruthy();
-    expect(mocks.deleteAttachment).toHaveBeenCalledWith("attachment-1");
+    expect(mocks.deleteAttachment).toHaveBeenCalledWith(
+      "attachment-1",
+      { expectedContentHash: "a".repeat(64) }
+    );
     expect(screen.queryByText("附件未删除")).toBeNull();
     expect(screen.queryByRole("group", { name: "确认删除附件 原始材料.pdf" })).toBeNull();
   });

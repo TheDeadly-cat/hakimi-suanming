@@ -86,6 +86,98 @@ function zoneOffsetSeconds(artifact, zoneName, epochMilliseconds) {
   return -zone.offsets[index] * 60;
 }
 
+export function inspectZoneAndLinkNameSet(artifact) {
+  if (!artifact || typeof artifact !== "object" || !Array.isArray(artifact.zones) || !Array.isArray(artifact.links)) {
+    fail("synthetic or reviewed artifact is missing Zone/Link arrays");
+  }
+  const zoneNames = new Set();
+  for (const packedZone of artifact.zones) {
+    if (typeof packedZone !== "string" || !packedZone.includes("|")) {
+      fail(`${artifact.version} contains a malformed packed Zone identity`);
+    }
+    const name = packedZone.split("|", 1)[0];
+    if (!name || /\s/u.test(name)) fail(`${artifact.version} contains a packed Zone without a valid name`);
+    if (zoneNames.has(name)) fail(`${artifact.version} contains duplicate Zone name ${name}`);
+    zoneNames.add(name);
+  }
+  const rightAliases = new Set();
+  const names = new Set(zoneNames);
+  const adjacency = new Map();
+  const connect = (left, right) => {
+    if (!adjacency.has(left)) adjacency.set(left, new Set());
+    if (!adjacency.has(right)) adjacency.set(right, new Set());
+    adjacency.get(left).add(right);
+    adjacency.get(right).add(left);
+  };
+  for (const packedLink of artifact.links) {
+    if (typeof packedLink !== "string") fail(`${artifact.version} contains a non-string packed Link identity`);
+    const parts = packedLink.split("|");
+    if (parts.length !== 2 || !parts[0] || !parts[1] || /\s/u.test(parts[0]) || /\s/u.test(parts[1])) {
+      fail(`${artifact.version} contains a malformed packed Link identity`);
+    }
+    const [left, right] = parts;
+    if (left === right) fail(`${artifact.version} contains a self-referential Link identity ${left}`);
+    if (rightAliases.has(right)) fail(`${artifact.version} contains duplicate Link alias/right identity ${right}`);
+    if (zoneNames.has(right)) fail(`${artifact.version} Link alias/right identity duplicates Zone name ${right}`);
+    rightAliases.add(right);
+    names.add(left);
+    names.add(right);
+    connect(left, right);
+  }
+  const reachableNames = new Set(zoneNames);
+  const queue = [...zoneNames];
+  for (let index = 0; index < queue.length; index += 1) {
+    const current = queue[index];
+    for (const neighbor of adjacency.get(current) ?? []) {
+      if (reachableNames.has(neighbor)) continue;
+      reachableNames.add(neighbor);
+      queue.push(neighbor);
+    }
+  }
+  const unreachableLinkEndpoints = [...names]
+    .filter((name) => !reachableNames.has(name))
+    .sort();
+  if (unreachableLinkEndpoints.length > 0) {
+    fail(
+      `${artifact.version} contains Link endpoints unreachable from every Zone: ` +
+      JSON.stringify(unreachableLinkEndpoints.slice(0, 12))
+    );
+  }
+  return {
+    names: reachableNames,
+    zoneNameCount: zoneNames.size,
+    linkAliasCount: rightAliases.size
+  };
+}
+
+export function compareZoneAndLinkNameSets(activeArtifact, retainedArtifact) {
+  const activeInspection = inspectZoneAndLinkNameSet(activeArtifact);
+  const retainedInspection = inspectZoneAndLinkNameSet(retainedArtifact);
+  const activeNames = activeInspection.names;
+  const retainedNames = retainedInspection.names;
+  const activeOnly = [...activeNames].filter((name) => !retainedNames.has(name)).sort();
+  const retainedOnly = [...retainedNames].filter((name) => !activeNames.has(name)).sort();
+  if (activeOnly.length > 0 || retainedOnly.length > 0) {
+    fail(
+      `reviewed ${retainedArtifact.version}/${activeArtifact.version} Zone+Link endpoint name sets differ; ` +
+      `active-only=${JSON.stringify(activeOnly.slice(0, 12))}, ` +
+      `retained-only=${JSON.stringify(retainedOnly.slice(0, 12))}`
+    );
+  }
+  const sortedNames = [...activeNames].sort();
+  return {
+    activeIanaVersion: activeArtifact.version,
+    retainedIanaVersion: retainedArtifact.version,
+    equal: true,
+    nameCount: sortedNames.length,
+    activeZoneNameCount: activeInspection.zoneNameCount,
+    activeLinkAliasCount: activeInspection.linkAliasCount,
+    retainedZoneNameCount: retainedInspection.zoneNameCount,
+    retainedLinkAliasCount: retainedInspection.linkAliasCount,
+    sortedNamesSha256: createHash("sha256").update(sortedNames.join("\n"), "utf8").digest("hex")
+  };
+}
+
 export function verifyTzdbArtifact() {
   const lock = JSON.parse(readFileSync(lockPath, "utf8"));
   const verified = EXPECTED.map((expected) => verifyOneArtifact(expected, lock));
@@ -97,6 +189,7 @@ export function verifyTzdbArtifact() {
   if (activeOffsetSeconds !== 0 || retainedOffsetSeconds !== 3_600) {
     fail(`reviewed 2025b→2026c behavior sentinel drifted: retained=${retainedOffsetSeconds}, active=${activeOffsetSeconds}`);
   }
+  const zoneAndLinkNameSet = compareZoneAndLinkNameSets(active.data, retained.data);
 
   return {
     gate: "hakimi-tzdb-artifact-registry-v2",
@@ -109,7 +202,8 @@ export function verifyTzdbArtifact() {
       retainedOffsetSeconds,
       activeIanaVersion: active.ianaVersion,
       activeOffsetSeconds
-    }
+    },
+    zoneAndLinkNameSet
   };
 }
 

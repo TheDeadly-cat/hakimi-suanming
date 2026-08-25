@@ -1,6 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Dexie from "dexie";
-import type { BirthInput, RulePackBinding, RuleProfile } from "@hakimi/contracts";
+import {
+  citationTargetKeys,
+  type BirthInput,
+  type CitationTarget,
+  type RulePackBinding,
+  type RuleProfile
+} from "@hakimi/contracts";
 import { calculateChart, digestRuleProfile } from "@hakimi/bazi-core";
 import { WORKING_DEFAULT_RULE_PROFILE, withDayBoundary } from "@hakimi/rule-profiles";
 import {
@@ -227,6 +233,121 @@ describe("CaseRepository", () => {
     expect(snapshot.citations.map((record) => record.id)).not.toContain(secondCitation.id);
     expect(snapshot.knowledgeDocuments.map((record) => record.id)).toEqual([knowledgeDocument.id]);
     expect(snapshot.sourceRights).toHaveLength(1);
+  });
+
+  it("单盘快照纳入合法强弱绑定 subject，忽略非保留命名空间未知 subject，并对 mixed-target 引用只收录一次", async () => {
+    const repository = createRepository();
+    const knowledge = new KnowledgeRepository(repository.database, () => "2026-08-01T00:00:00.000Z");
+    const bundle = await repository.createCase({
+      alias: "强弱绑定证据导出",
+      calculated: await calculateChart(input, WORKING_DEFAULT_RULE_PROFILE)
+    });
+    const revision = bundle.revisions[0];
+    const source = "# 第一章\n绑定正文\n混合目标正文\n范围外正文";
+    const knowledgeDocument = await knowledge.createDocument({
+      title: "强弱绑定来源",
+      author: "用户",
+      edition: "本地版",
+      sourceNote: "",
+      fileName: "strength-binding.md",
+      format: "markdown",
+      content: source,
+      byteSize: new TextEncoder().encode(source).byteLength
+    });
+    const bindingCitation = await knowledge.createCitation({
+      documentId: knowledgeDocument.id,
+      locator: { sectionId: "section-1", startLine: 2, endLine: 2 },
+      annotation: "合法强弱绑定证据",
+      targets: [{
+        kind: "evidence_subject",
+        subjectId: "bazi.strength.binding.policy.weights.v1"
+      }]
+    });
+    const mixedCitation = await knowledge.createCitation({
+      documentId: knowledgeDocument.id,
+      locator: { sectionId: "section-1", startLine: 3, endLine: 3 },
+      annotation: "同一引用同时命中命盘字段与强弱绑定",
+      targets: [
+        {
+          kind: "chart_field",
+          caseId: bundle.caseRecord.id,
+          revisionId: revision.id,
+          field: "pillars.day.ganZhi"
+        },
+        {
+          kind: "evidence_subject",
+          subjectId: "bazi.strength.binding.policy.weights.v1"
+        }
+      ]
+    });
+    const outOfScopeCitation = await knowledge.createCitation({
+      documentId: knowledgeDocument.id,
+      locator: { sectionId: "section-1", startLine: 4, endLine: 4 },
+      annotation: "随后模拟为非保留命名空间未知 subject",
+      targets: [{
+        kind: "evidence_subject",
+        subjectId: "bazi.strength.binding.policy.weights.v1"
+      }]
+    });
+    const outOfScopeTargets: CitationTarget[] = [{
+      kind: "evidence_subject",
+      subjectId: "other.report.subject.v1"
+    }];
+    await repository.database.citations.put({
+      ...outOfScopeCitation,
+      targets: outOfScopeTargets,
+      targetKeys: citationTargetKeys(outOfScopeTargets)
+    });
+
+    const snapshot = await repository.readSingleChartExportSnapshot(bundle.caseRecord.id, revision.id);
+    const citationIds = snapshot.citations.map((record) => record.id);
+
+    expect(new Set(citationIds)).toEqual(new Set([bindingCitation.id, mixedCitation.id]));
+    expect(citationIds).not.toContain(outOfScopeCitation.id);
+    expect(citationIds.filter((citationId) => citationId === mixedCitation.id)).toHaveLength(1);
+    expect(snapshot.knowledgeDocuments.map((record) => record.id)).toEqual([knowledgeDocument.id]);
+  });
+
+  it.each([
+    "bazi.pillar.day.unknown.v1",
+    "bazi.strength.binding.policy.unknown.v1"
+  ])("单盘快照对保留命名空间未知 subject %s 以 TARGET_NOT_FOUND 失败关闭", async (subjectId) => {
+    const repository = createRepository();
+    const knowledge = new KnowledgeRepository(repository.database, () => "2026-08-01T00:00:00.000Z");
+    const bundle = await repository.createCase({
+      alias: "未知保留 subject",
+      calculated: await calculateChart(input, WORKING_DEFAULT_RULE_PROFILE)
+    });
+    const revision = bundle.revisions[0];
+    const source = "# 第一章\n可信正文";
+    const knowledgeDocument = await knowledge.createDocument({
+      title: "未知保留 subject 来源",
+      author: "用户",
+      edition: "本地版",
+      sourceNote: "",
+      fileName: "unknown-reserved-subject.md",
+      format: "markdown",
+      content: source,
+      byteSize: new TextEncoder().encode(source).byteLength
+    });
+    const citation = await knowledge.createCitation({
+      documentId: knowledgeDocument.id,
+      locator: { sectionId: "section-1", startLine: 2, endLine: 2 },
+      annotation: "随后模拟为保留命名空间未知 subject",
+      targets: [{
+        kind: "evidence_subject",
+        subjectId: "bazi.strength.binding.policy.weights.v1"
+      }]
+    });
+    const unknownTargets: CitationTarget[] = [{ kind: "evidence_subject", subjectId }];
+    await repository.database.citations.put({
+      ...citation,
+      targets: unknownTargets,
+      targetKeys: citationTargetKeys(unknownTargets)
+    });
+
+    await expect(repository.readSingleChartExportSnapshot(bundle.caseRecord.id, revision.id))
+      .rejects.toMatchObject({ code: "TARGET_NOT_FOUND" });
   });
 
   it("单盘导出快照在来源权利哈希被篡改时失败关闭", async () => {

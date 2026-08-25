@@ -6,6 +6,12 @@
 
 项目后续工作的统一入口是 [项目完善总纲与实施指引 v0.1](./docs/项目完善总纲与实施指引-v0.1.md)。它集中说明当前基线、产品与领域边界、工程发布门、体验路线、多术数准入、Must/Should/Later、停止线和待确认决定；字段级语义仍以各专项协议为准。
 
+## 当前权威发布状态
+
+普通 Web/PWA 构建固定为 `legacy-v13 / targetSchema 13 / migrationId null`。Schema 16 仅是独立输出目录中的工程候选，不是默认版本，也没有公开发布授权。当前产品定位是本地优先研究工具和工程预览；工程哈希、迁移矩阵或 Release Evidence 均不代表命理专家真值。
+
+权威边界见 [当前发布状态](./docs/status/current-release-status.md)、[Web v1 发布章程](./docs/Web-v1发布章程与兼容范围-v0.1-2026-08-21.md)、[发布代际台账](./docs/release/release-generation-history.json) 和 [发布回滚手册](./docs/release/web-v1-release-and-rollback-runbook.md)。在所有者确认许可证策略前，本项目明确保留全部权利，不声称是开源项目。
+
 由 DeepSeek 接续开发时，先阅读 [DeepSeek 后续工作启动指引](./docs/DeepSeek后续工作启动指引-2026-08-10.md)。该指引记录 2026-08-10 用户确认的本地保存、内容、Android 顺序、Git 基线授权和部署历史未知等决定，以及第一批安全工作包。
 
 ## 本地运行

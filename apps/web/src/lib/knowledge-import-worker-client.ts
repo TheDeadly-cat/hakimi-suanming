@@ -1,11 +1,15 @@
 import {
   decodeKnowledgeBlob,
   KnowledgeImportDecodeError,
+  MAX_KNOWLEDGE_IMPORT_BYTES,
   type KnowledgeImportWorkerRequest,
   type KnowledgeImportWorkerResponse
 } from "./knowledge-import-worker-protocol";
+import { safeVisibleText } from "./visible-text";
+import { disposeWorkerSafely } from "./worker-lifecycle";
 
 type WorkerLike = Pick<Worker, "postMessage" | "terminate" | "onmessage" | "onerror" | "onmessageerror">;
+const MAX_KNOWLEDGE_WORKER_ERROR_CODE_POINTS = 512;
 
 export type KnowledgeImportWorkerRuntime = {
   createWorker?: () => WorkerLike;
@@ -24,11 +28,17 @@ function canUseWorker(runtime: KnowledgeImportWorkerRuntime): boolean {
 }
 
 function restoreError(error: Extract<KnowledgeImportWorkerResponse, { type: "error" }>["error"]): Error {
-  if (error.code === "FILE_TOO_LARGE" || error.code === "INVALID_UTF8" || error.code === "IMPORT_CANCELLED") {
-    return new KnowledgeImportDecodeError(error.code, error.message);
+  const code = safeVisibleText(error.code, "", 128);
+  const message = safeVisibleText(
+    error.message,
+    "资料解码 Worker 返回了未说明的错误。",
+    MAX_KNOWLEDGE_WORKER_ERROR_CODE_POINTS
+  );
+  if (code === "FILE_TOO_LARGE" || code === "INVALID_UTF8" || code === "IMPORT_CANCELLED") {
+    return new KnowledgeImportDecodeError(code, message);
   }
-  const restored = new Error(error.message);
-  restored.name = error.name;
+  const restored = new Error(message);
+  restored.name = safeVisibleText(error.name, "Error", 128) || "Error";
   return restored;
 }
 
@@ -37,15 +47,26 @@ export async function decodeKnowledgeFileOffMainThread(
   signal?: AbortSignal,
   runtime: KnowledgeImportWorkerRuntime = {}
 ): Promise<string> {
-  if (!canUseWorker(runtime)) return decodeKnowledgeBlob(blob, signal);
+  if (
+    typeof Blob === "undefined"
+    || !(blob instanceof Blob)
+    || !Number.isSafeInteger(blob.size)
+    || blob.size < 0
+  ) {
+    throw new TypeError("资料来源不是可读取的 Blob 文件。");
+  }
   if (signal?.aborted) throw new KnowledgeImportDecodeError("IMPORT_CANCELLED", "资料读取已取消。");
+  if (blob.size > MAX_KNOWLEDGE_IMPORT_BYTES) {
+    throw new KnowledgeImportDecodeError("FILE_TOO_LARGE", "单份资料不能超过 2 MiB。");
+  }
+  if (!canUseWorker(runtime)) return decodeKnowledgeBlob(blob, signal);
   const worker = runtime.createWorker?.() ?? createBrowserWorker();
   let settled = false;
 
   return new Promise<string>((resolve, reject) => {
     const cleanup = () => {
       signal?.removeEventListener("abort", abort);
-      worker.terminate();
+      disposeWorkerSafely(worker);
     };
     const fail = (reason: unknown) => {
       if (settled) return;
@@ -63,20 +84,46 @@ export async function decodeKnowledgeFileOffMainThread(
       fail(new KnowledgeImportDecodeError("IMPORT_CANCELLED", "资料读取已取消。"));
     };
     worker.onmessage = (event: MessageEvent<KnowledgeImportWorkerResponse>) => {
-      if (event.data.type === "error") {
-        fail(restoreError(event.data.error));
-        return;
+      if (settled) return;
+      try {
+        if (event.data.type === "error") {
+          fail(restoreError(event.data.error));
+          return;
+        }
+        if (event.data.type !== "decoded" || typeof event.data.content !== "string") {
+          fail(new Error("资料解码 Worker 返回了结构无效的数据。"));
+          return;
+        }
+        const contentByteLength = new TextEncoder().encode(event.data.content).byteLength;
+        if (
+          event.data.content.length > MAX_KNOWLEDGE_IMPORT_BYTES
+          || contentByteLength > MAX_KNOWLEDGE_IMPORT_BYTES
+          || contentByteLength > blob.size
+        ) {
+          fail(new Error("资料解码 Worker 返回了超过来源字节边界的数据。"));
+          return;
+        }
+        settled = true;
+        cleanup();
+        resolve(event.data.content);
+      } catch {
+        fail(new Error("资料解码 Worker 返回了结构无效的数据。"));
       }
-      settled = true;
-      cleanup();
-      resolve(event.data.content);
     };
     worker.onerror = (event: ErrorEvent) => {
       event.preventDefault?.();
-      fail(new Error(event.message || "资料解码 Worker 运行失败。"));
+      fail(new Error(safeVisibleText(
+        event.message,
+        "资料解码 Worker 运行失败。",
+        MAX_KNOWLEDGE_WORKER_ERROR_CODE_POINTS
+      )));
     };
     worker.onmessageerror = () => fail(new Error("资料解码 Worker 返回了无法解析的数据。"));
     signal?.addEventListener("abort", abort, { once: true });
+    if (signal?.aborted) {
+      abort();
+      return;
+    }
     try {
       worker.postMessage({ type: "decode", blob } satisfies KnowledgeImportWorkerRequest);
     } catch (reason) {

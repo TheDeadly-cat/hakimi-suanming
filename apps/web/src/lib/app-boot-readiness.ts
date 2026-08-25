@@ -17,10 +17,11 @@ export type AppBootReadinessDependencies = {
 };
 
 export const APP_BOOT_READINESS_TIMEOUT_MS = 15_000;
+const MAX_BROWSER_TIMEOUT_MS = 2_147_483_647;
 
 export class AppBootReadinessTimeoutError extends Error {
   constructor(readonly timeoutMs: number) {
-    super(`应用启动完整性检查在 ${timeoutMs} 毫秒内未完成；可能仍有旧标签页占用本地数据库。`);
+    super(`应用启动完整性检查在 ${timeoutMs} 毫秒内未完成；可能是旧标签页占用本地数据库、路由未完成或设备响应过慢。`);
     this.name = "AppBootReadinessTimeoutError";
   }
 }
@@ -54,19 +55,25 @@ export async function runAppBootReadiness(
   let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
   let storageReady = false;
   let firstProbeFailure: AppBootProbeError | null = null;
-  let failureNotified = false;
   let gateClosed = false;
+  const notifyFailureSafely = (failure: {
+    error: Error;
+    source: AppBootFailureSource;
+    storageReady: boolean;
+  }) => {
+    try {
+      dependencies.notifyFailure?.(failure);
+    } catch {
+      // Notification is an observer side effect. Its failure must not replace
+      // the authoritative readiness result or reopen the boot gate.
+    }
+  };
   const rememberProbeFailure = (failure: AppBootProbeError) => {
     if (gateClosed || firstProbeFailure) return;
     firstProbeFailure = failure;
-    failureNotified = true;
-    dependencies.notifyFailure?.({
-      error: failure.original,
-      source: failure.source,
-      storageReady
-    });
   };
   const captureProbe = async (source: AppBootFailureSource, probe: () => Promise<void>) => {
+    if (gateClosed) return;
     try {
       await runProbe(source, probe);
     } catch (reason) {
@@ -79,8 +86,15 @@ export async function runAppBootReadiness(
   };
   try {
     const timeoutMs = dependencies.timeoutMs ?? APP_BOOT_READINESS_TIMEOUT_MS;
-    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
-      throw new AppBootProbeError("timeout", new Error("应用启动完整性检查超时必须是正数毫秒"));
+    if (
+      !Number.isSafeInteger(timeoutMs)
+      || timeoutMs <= 0
+      || timeoutMs > MAX_BROWSER_TIMEOUT_MS
+    ) {
+      throw new AppBootProbeError(
+        "timeout",
+        new Error(`应用启动完整性检查超时必须是 1 到 ${MAX_BROWSER_TIMEOUT_MS} 的整数毫秒`)
+      );
     }
     const readiness = (async () => {
       const preflightResults = await Promise.allSettled([
@@ -107,7 +121,7 @@ export async function runAppBootReadiness(
         timeoutHandle = setTimeout(() => reject(new AppBootReadinessTimeoutError(timeoutMs)), timeoutMs);
       })
     ]);
-    return { ready: true, error: null, storageReady: true };
+    return Object.freeze({ ready: true, error: null, storageReady: true });
   } catch (reason) {
     const effectiveReason = reason instanceof AppBootReadinessTimeoutError && firstProbeFailure
       ? firstProbeFailure
@@ -117,16 +131,14 @@ export async function runAppBootReadiness(
       : effectiveReason instanceof AppBootReadinessTimeoutError
         ? { source: "timeout" as const, error: effectiveReason }
         : { source: "timeout" as const, error: normalizeBootError(effectiveReason, "application boot readiness failed") };
-    const result = {
+    Object.freeze(failure.error);
+    const result = Object.freeze({
       ready: false,
       error: failure.error,
       source: failure.source,
       storageReady
-    } as const;
-    if (!failureNotified) {
-      failureNotified = true;
-      dependencies.notifyFailure?.(result);
-    }
+    } as const);
+    notifyFailureSafely(result);
     return result;
   } finally {
     gateClosed = true;

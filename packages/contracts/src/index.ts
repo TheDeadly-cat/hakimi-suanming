@@ -73,6 +73,26 @@ const ianaTimeZoneSchema = z.string().min(1, "请选择 IANA 时区").refine(
   "不是固定 IANA 2026c 数据工件可识别的时区"
 );
 
+export type TimeZoneNamePredicate = (timeZone: string) => boolean;
+
+function resolverRelativeIanaTimeZoneSchema(isTimeZoneName: TimeZoneNamePredicate) {
+  return z.string().min(1, "请选择 IANA 时区").refine(
+    isTimeZoneName,
+    "不是所声明固定 IANA 数据工件可识别的时区"
+  );
+}
+
+// A stored Revision can outlive the active tzdb. This schema checks only the
+// declarative IANA-name shape; chart-integrity must still bind the value to the
+// exact content-addressed resolver before replay or any semantic use.
+const storedIanaTimeZoneNameSchema = z.string()
+  .min(1, "请选择 IANA 时区")
+  .max(255)
+  .regex(
+    /^[A-Za-z0-9._+-]+(?:\/[A-Za-z0-9._+-]+)*$/,
+    "不是可声明的 IANA 时区名称"
+  );
+
 export const birthInputSchema = z
   .object({
     schemaVersion: z.literal(SCHEMA_VERSION),
@@ -139,12 +159,38 @@ export const birthInputSchema = z
     }
   });
 
+export function createBirthInputSchemaForTimeZoneName(
+  isTimeZoneName: TimeZoneNamePredicate
+) {
+  return birthInputSchema.safeExtend({
+    timeZone: resolverRelativeIanaTimeZoneSchema(isTimeZoneName)
+  });
+}
+
+export const storedBirthInputSchema = birthInputSchema.safeExtend({
+  timeZone: storedIanaTimeZoneNameSchema
+});
+
 export type UnknownHourBirthInput = z.infer<typeof birthInputSchema> & {
   time: null;
   timePrecision: "unknown_hour";
 };
 
 export const unknownHourBirthInputSchema = birthInputSchema.strict().refine(
+  (value): value is UnknownHourBirthInput => value.timePrecision === "unknown_hour" && value.time === null,
+  { path: ["timePrecision"], message: "未知时辰入口只接受 timePrecision=unknown_hour 且 time=null" }
+);
+
+export function createUnknownHourBirthInputSchemaForTimeZoneName(
+  isTimeZoneName: TimeZoneNamePredicate
+) {
+  return createBirthInputSchemaForTimeZoneName(isTimeZoneName).strict().refine(
+    (value): value is UnknownHourBirthInput => value.timePrecision === "unknown_hour" && value.time === null,
+    { path: ["timePrecision"], message: "未知时辰入口只接受 timePrecision=unknown_hour 且 time=null" }
+  );
+}
+
+export const storedUnknownHourBirthInputSchema = storedBirthInputSchema.strict().refine(
   (value): value is UnknownHourBirthInput => value.timePrecision === "unknown_hour" && value.time === null,
   { path: ["timePrecision"], message: "未知时辰入口只接受 timePrecision=unknown_hour 且 time=null" }
 );
@@ -398,6 +444,30 @@ export const normalizedTimeCalibrationSchema = timeCalibrationSchema.extend({
   solarTime: solarTimeDetailsSchema.nullable()
 });
 
+export function createTimeCalibrationSchemaForTimeZoneName(
+  isTimeZoneName: TimeZoneNamePredicate
+) {
+  return timeCalibrationSchema.safeExtend({
+    timeZone: resolverRelativeIanaTimeZoneSchema(isTimeZoneName)
+  });
+}
+
+export function createNormalizedTimeCalibrationSchemaForTimeZoneName(
+  isTimeZoneName: TimeZoneNamePredicate
+) {
+  return normalizedTimeCalibrationSchema.safeExtend({
+    timeZone: resolverRelativeIanaTimeZoneSchema(isTimeZoneName)
+  });
+}
+
+export const storedTimeCalibrationSchema = timeCalibrationSchema.safeExtend({
+  timeZone: storedIanaTimeZoneNameSchema
+});
+
+export const storedNormalizedTimeCalibrationSchema = normalizedTimeCalibrationSchema.safeExtend({
+  timeZone: storedIanaTimeZoneNameSchema
+});
+
 export const pillarFactSchema = z.object({
   name: z.enum(["year", "month", "day", "hour"]),
   label: z.enum(["年柱", "月柱", "日柱", "时柱"]),
@@ -571,6 +641,20 @@ export const calculatedChartSchema = z.object({
   luckCycleRuleSnapshot: luckCycleRuleSnapshotSchema.optional(),
   facts: chartFactsSchema,
   manifest: calculationManifestSchema
+});
+
+export function createCalculatedChartSchemaForTimeZoneName(
+  isTimeZoneName: TimeZoneNamePredicate
+) {
+  return calculatedChartSchema.safeExtend({
+    input: createBirthInputSchemaForTimeZoneName(isTimeZoneName),
+    timeCalibration: createTimeCalibrationSchemaForTimeZoneName(isTimeZoneName)
+  });
+}
+
+export const storedCalculatedChartSchema = calculatedChartSchema.safeExtend({
+  input: storedBirthInputSchema,
+  timeCalibration: storedTimeCalibrationSchema
 });
 
 export function buildHashableBirthInput(input: z.infer<typeof birthInputSchema>) {
@@ -758,10 +842,14 @@ const unresolvedUnknownHourProbeCandidateSchema = z.strictObject({
   unresolvedReason: unknownHourProbeUnresolvedReasonSchema
 });
 
-export const unknownHourProbeCandidateSchema = z.discriminatedUnion("status", [
-  calculatedUnknownHourProbeCandidateSchema,
-  unresolvedUnknownHourProbeCandidateSchema
-]).superRefine((value, context) => {
+type UnknownHourProbeCandidateRefinementInput =
+  | z.infer<typeof calculatedUnknownHourProbeCandidateSchema>
+  | z.infer<typeof unresolvedUnknownHourProbeCandidateSchema>;
+
+function validateUnknownHourProbeCandidate(
+  value: UnknownHourProbeCandidateRefinementInput,
+  context: z.RefinementCtx
+): void {
   const choices = new Set<string>();
   for (const [index, variant] of value.variants.entries()) {
     const expectedVariantId = `${value.candidateId}@${variant.choice}`;
@@ -896,7 +984,32 @@ export const unknownHourProbeCandidateSchema = z.discriminatedUnion("status", [
       });
     }
   }
-});
+}
+
+export const unknownHourProbeCandidateSchema = z.discriminatedUnion("status", [
+  calculatedUnknownHourProbeCandidateSchema,
+  unresolvedUnknownHourProbeCandidateSchema
+]).superRefine(validateUnknownHourProbeCandidate);
+
+function createUnknownHourProbeCandidateSchemaForTimeZoneSchemas(
+  normalizedTimeCalibration: z.ZodType,
+  calculatedChart: z.ZodType
+): typeof unknownHourProbeCandidateSchema {
+  const normalizedSchema = normalizedTimeCalibration as typeof strictUnknownHourTimeCalibrationSchema;
+  const chartSchema = calculatedChart as typeof strictUnknownHourCalculatedChartSchema;
+  const variant = unknownHourProbeVariantSchema.safeExtend({ chart: chartSchema });
+  const calculated = calculatedUnknownHourProbeCandidateSchema.safeExtend({
+    timeCalibration: normalizedSchema,
+    chart: chartSchema,
+    variants: z.array(variant).length(1)
+  });
+  const unresolved = unresolvedUnknownHourProbeCandidateSchema.safeExtend({
+    timeCalibration: normalizedSchema,
+    variants: z.array(variant).max(2)
+  });
+  return z.discriminatedUnion("status", [calculated, unresolved])
+    .superRefine(validateUnknownHourProbeCandidate) as typeof unknownHourProbeCandidateSchema;
+}
 
 export const unknownHourCandidateResultSchema = z.strictObject({
   schemaVersion: z.literal(SCHEMA_VERSION),
@@ -1127,6 +1240,29 @@ export const unknownHourCandidateResultSchema = z.strictObject({
   }
 });
 
+export function createUnknownHourCandidateResultSchemaForTimeZoneName(
+  isTimeZoneName: TimeZoneNamePredicate
+): typeof unknownHourCandidateResultSchema {
+  const candidateSchema = createUnknownHourProbeCandidateSchemaForTimeZoneSchemas(
+    createNormalizedTimeCalibrationSchemaForTimeZoneName(isTimeZoneName).strict(),
+    createCalculatedChartSchemaForTimeZoneName(isTimeZoneName).strict()
+  );
+  return unknownHourCandidateResultSchema.safeExtend({
+    input: createUnknownHourBirthInputSchemaForTimeZoneName(isTimeZoneName),
+    candidates: z.array(candidateSchema).length(UNKNOWN_HOUR_PROBE_CANDIDATE_IDS.length)
+  }) as typeof unknownHourCandidateResultSchema;
+}
+
+const storedUnknownHourProbeCandidateSchema = createUnknownHourProbeCandidateSchemaForTimeZoneSchemas(
+  storedNormalizedTimeCalibrationSchema.strict(),
+  storedCalculatedChartSchema.strict()
+);
+
+export const storedUnknownHourCandidateResultSchema = unknownHourCandidateResultSchema.safeExtend({
+  input: storedUnknownHourBirthInputSchema,
+  candidates: z.array(storedUnknownHourProbeCandidateSchema).length(UNKNOWN_HOUR_PROBE_CANDIDATE_IDS.length)
+}) as typeof unknownHourCandidateResultSchema;
+
 export type UnknownHourProbeCandidateBase = z.infer<typeof unknownHourProbeCandidateBaseSchema>;
 export type UnknownHourProbeVariant = z.infer<typeof unknownHourProbeVariantSchema>;
 export type UnknownHourProbeCandidate = z.infer<typeof unknownHourProbeCandidateSchema>;
@@ -1236,6 +1372,20 @@ export const revisionRecordSchema = z.object({
       message: "rule-pack binding profileDigest must equal manifest.ruleProfileDigest"
     });
   }
+});
+
+export function createRevisionRecordSchemaForTimeZoneName(
+  isTimeZoneName: TimeZoneNamePredicate
+) {
+  return revisionRecordSchema.safeExtend({
+    input: createBirthInputSchemaForTimeZoneName(isTimeZoneName),
+    timeCalibration: createTimeCalibrationSchemaForTimeZoneName(isTimeZoneName)
+  });
+}
+
+export const storedRevisionRecordSchema = revisionRecordSchema.safeExtend({
+  input: storedBirthInputSchema,
+  timeCalibration: storedTimeCalibrationSchema
 });
 
 const canonicalShortTextSchema = (maximum: number) => z
@@ -1579,7 +1729,7 @@ const formalComparisonSourceShapeSchema = z.strictObject({
     id: z.string().uuid(),
     alias: canonicalShortTextSchema(80)
   }),
-  revision: revisionRecordSchema,
+  revision: storedRevisionRecordSchema,
   revisionSnapshotDigest: sha256Schema
 }).superRefine((value, context) => {
   if (value.caseRecord.id !== value.revision.caseId) {
@@ -1633,7 +1783,7 @@ export const comparisonItemSchema = z.strictObject({
   slotId: formalComparisonSlotIdSchema,
   manualDirection: z.enum(["forward", "backward"]).nullable(),
   revisionSnapshotDigest: sha256Schema,
-  revision: revisionRecordSchema
+  revision: storedRevisionRecordSchema
 }).superRefine((value, context) => {
   if (value.key !== value.revision.id) {
     context.addIssue({ code: "custom", path: ["key"], message: "对照项目键必须等于确切 Revision ID" });
@@ -2119,36 +2269,57 @@ export const eventZonedMinuteBoundarySchema = z.strictObject({
   }
 });
 
-export const eventTimeContextSchema = z.discriminatedUnion("kind", [
-  z.strictObject({ kind: z.literal("legacy_floating") }),
-  z.strictObject({ kind: z.literal("calendar_date") }),
-  z.strictObject({
-    kind: z.literal("zoned_minute"),
-    timeZone: ianaTimeZoneSchema,
-    tzdbVersion: tzdbVersionSchema,
-    timeZoneDatabase: timeZoneDatabaseSnapshotSchema.optional(),
-    start: eventZonedMinuteBoundarySchema,
-    end: eventZonedMinuteBoundarySchema.nullable()
-  })
-]).superRefine((value, context) => {
-  if (value.kind !== "zoned_minute") return;
-  validateTzdbBinding(value, context);
-  for (const [boundaryName, boundary] of [["start", value.start], ["end", value.end]] as const) {
-    if (!boundary) continue;
-    for (const [index, candidate] of boundary.resolution.candidates.entries()) {
-      if (!candidate.zonedDateTime.endsWith(`[${value.timeZone}]`) || !candidate.zonedDateTime.includes(candidate.utcOffset)) {
-        context.addIssue({
-          code: "custom",
-          path: [boundaryName, "resolution", "candidates", index, "zonedDateTime"],
-          message: "候选 ZonedDateTime 必须绑定记录中的 IANA 时区与 UTC offset"
-        });
+function eventTimeContextSchemaForTimeZoneSchema(timeZoneSchema: z.ZodType<string>) {
+  return z.discriminatedUnion("kind", [
+    z.strictObject({ kind: z.literal("legacy_floating") }),
+    z.strictObject({ kind: z.literal("calendar_date") }),
+    z.strictObject({
+      kind: z.literal("zoned_minute"),
+      timeZone: timeZoneSchema,
+      tzdbVersion: tzdbVersionSchema,
+      timeZoneDatabase: timeZoneDatabaseSnapshotSchema.optional(),
+      start: eventZonedMinuteBoundarySchema,
+      end: eventZonedMinuteBoundarySchema.nullable()
+    })
+  ]).superRefine((value, context) => {
+    if (value.kind !== "zoned_minute") return;
+    validateTzdbBinding(value, context);
+    for (const [boundaryName, boundary] of [["start", value.start], ["end", value.end]] as const) {
+      if (!boundary) continue;
+      for (const [index, candidate] of boundary.resolution.candidates.entries()) {
+        if (!candidate.zonedDateTime.endsWith(`[${value.timeZone}]`) || !candidate.zonedDateTime.includes(candidate.utcOffset)) {
+          context.addIssue({
+            code: "custom",
+            path: [boundaryName, "resolution", "candidates", index, "zonedDateTime"],
+            message: "候选 ZonedDateTime 必须绑定记录中的 IANA 时区与 UTC offset"
+          });
+        }
       }
     }
-  }
-  if (value.end && value.end.canonicalUtc < value.start.canonicalUtc) {
-    context.addIssue({ code: "custom", path: ["end", "canonicalUtc"], message: "事件结束 UTC 不能早于起始 UTC" });
-  }
-});
+    if (value.end && value.end.canonicalUtc < value.start.canonicalUtc) {
+      context.addIssue({ code: "custom", path: ["end", "canonicalUtc"], message: "事件结束 UTC 不能早于起始 UTC" });
+    }
+  });
+}
+
+/** Active-write Event context. Its zone name must exist in the current bundled resolver. */
+export const eventTimeContextSchema = eventTimeContextSchemaForTimeZoneSchema(ianaTimeZoneSchema);
+
+/** Resolver-bound Event context used only after one exact tzdb artifact has been selected. */
+export function createEventTimeContextSchemaForTimeZoneName(
+  isTimeZoneName: TimeZoneNamePredicate
+) {
+  return eventTimeContextSchemaForTimeZoneSchema(resolverRelativeIanaTimeZoneSchema(isTimeZoneName));
+}
+
+/**
+ * Stored Event contexts outlive the active tzdb. This validates declarative
+ * structure and descriptor self-binding only; semantic replay must use the
+ * exact selected resolver before canonical UTC is treated as verified.
+ */
+export const storedEventTimeContextSchema = eventTimeContextSchemaForTimeZoneSchema(
+  storedIanaTimeZoneNameSchema
+);
 
 const legacyEventRecordV1Shape = {
   schemaVersion: z.literal(SCHEMA_VERSION),
@@ -2245,6 +2416,20 @@ export const eventRecordSchema = z.strictObject({
   }
 });
 
+/** Exact selected-resolver Event schema; never use this as an active write widening. */
+export function createEventRecordSchemaForTimeZoneName(
+  isTimeZoneName: TimeZoneNamePredicate
+) {
+  return eventRecordSchema.safeExtend({
+    timeContext: createEventTimeContextSchemaForTimeZoneName(isTimeZoneName)
+  });
+}
+
+/** Stored Event schema. Zone membership is intentionally deferred to exact replay. */
+export const storedEventRecordSchema = eventRecordSchema.safeExtend({
+  timeContext: storedEventTimeContextSchema
+});
+
 export type LegacyEventRecordV1 = z.infer<typeof legacyEventRecordV1Schema>;
 
 /** Pure shape migration: preserves every legacy value and deliberately infers no time zone or UTC instant. */
@@ -2316,6 +2501,18 @@ export const eventTimeMigrationSnapshotSchema = z.strictObject({
   }
 });
 
+export function createEventTimeMigrationSnapshotSchemaForTimeZoneName(
+  isTimeZoneName: TimeZoneNamePredicate
+) {
+  return eventTimeMigrationSnapshotSchema.safeExtend({
+    timeContext: createEventTimeContextSchemaForTimeZoneName(isTimeZoneName)
+  });
+}
+
+export const storedEventTimeMigrationSnapshotSchema = eventTimeMigrationSnapshotSchema.safeExtend({
+  timeContext: storedEventTimeContextSchema
+});
+
 export const eventTimeMigrationEndpointSchema = z.strictObject({
   kind: z.literal("event"),
   recordId: z.string().uuid(),
@@ -2323,15 +2520,46 @@ export const eventTimeMigrationEndpointSchema = z.strictObject({
   snapshotDigest: sha256Schema
 });
 
-export const eventTimeMigrationInterpretationSchema = z.discriminatedUnion("kind", [
-  z.strictObject({ kind: z.literal("calendar_date") }),
-  z.strictObject({
-    kind: z.literal("zoned_minute"),
-    timeZone: ianaTimeZoneSchema,
-    startDisambiguation: dstDisambiguationPolicySchema,
-    endDisambiguation: dstDisambiguationPolicySchema.nullable()
-  })
-]);
+export function createEventTimeMigrationEndpointSchemaForTimeZoneName(
+  isTimeZoneName: TimeZoneNamePredicate
+) {
+  return eventTimeMigrationEndpointSchema.safeExtend({
+    snapshot: createEventTimeMigrationSnapshotSchemaForTimeZoneName(isTimeZoneName)
+  });
+}
+
+export const storedEventTimeMigrationEndpointSchema = eventTimeMigrationEndpointSchema.safeExtend({
+  snapshot: storedEventTimeMigrationSnapshotSchema
+});
+
+function eventTimeMigrationInterpretationSchemaForTimeZoneSchema(
+  timeZoneSchema: z.ZodType<string>
+) {
+  return z.discriminatedUnion("kind", [
+    z.strictObject({ kind: z.literal("calendar_date") }),
+    z.strictObject({
+      kind: z.literal("zoned_minute"),
+      timeZone: timeZoneSchema,
+      startDisambiguation: dstDisambiguationPolicySchema,
+      endDisambiguation: dstDisambiguationPolicySchema.nullable()
+    })
+  ]);
+}
+
+/** Active-write interpretation accepted by the explicit new-ID derivation flow. */
+export const eventTimeMigrationInterpretationSchema =
+  eventTimeMigrationInterpretationSchemaForTimeZoneSchema(ianaTimeZoneSchema);
+
+export function createEventTimeMigrationInterpretationSchemaForTimeZoneName(
+  isTimeZoneName: TimeZoneNamePredicate
+) {
+  return eventTimeMigrationInterpretationSchemaForTimeZoneSchema(
+    resolverRelativeIanaTimeZoneSchema(isTimeZoneName)
+  );
+}
+
+export const storedEventTimeMigrationInterpretationSchema =
+  eventTimeMigrationInterpretationSchemaForTimeZoneSchema(storedIanaTimeZoneNameSchema);
 
 export const eventTimeMigrationReceiptSchema = z.strictObject({
   schemaVersion: z.literal(SCHEMA_VERSION),
@@ -2402,10 +2630,31 @@ export const eventTimeMigrationReceiptSchema = z.strictObject({
   }
 });
 
+export function createEventTimeMigrationReceiptSchemaForTimeZoneName(
+  isTimeZoneName: TimeZoneNamePredicate
+) {
+  const endpointSchema = createEventTimeMigrationEndpointSchemaForTimeZoneName(isTimeZoneName);
+  return eventTimeMigrationReceiptSchema.safeExtend({
+    source: endpointSchema,
+    target: endpointSchema,
+    interpretation: createEventTimeMigrationInterpretationSchemaForTimeZoneName(isTimeZoneName)
+  });
+}
+
+export const storedEventTimeMigrationReceiptSchema = eventTimeMigrationReceiptSchema.safeExtend({
+  source: storedEventTimeMigrationEndpointSchema,
+  target: storedEventTimeMigrationEndpointSchema,
+  interpretation: storedEventTimeMigrationInterpretationSchema
+});
+
 export type EventTimeMigrationSnapshot = z.infer<typeof eventTimeMigrationSnapshotSchema>;
 export type EventTimeMigrationEndpoint = z.infer<typeof eventTimeMigrationEndpointSchema>;
 export type EventTimeMigrationInterpretation = z.infer<typeof eventTimeMigrationInterpretationSchema>;
 export type EventTimeMigrationReceipt = z.infer<typeof eventTimeMigrationReceiptSchema>;
+export type StoredEventTimeMigrationSnapshot = z.infer<typeof storedEventTimeMigrationSnapshotSchema>;
+export type StoredEventTimeMigrationEndpoint = z.infer<typeof storedEventTimeMigrationEndpointSchema>;
+export type StoredEventTimeMigrationInterpretation = z.infer<typeof storedEventTimeMigrationInterpretationSchema>;
+export type StoredEventTimeMigrationReceipt = z.infer<typeof storedEventTimeMigrationReceiptSchema>;
 
 export type SerializableFilterValue = null | boolean | number | string | SerializableFilterValue[] | {
   [key: string]: SerializableFilterValue;
@@ -3099,6 +3348,48 @@ export const candidateSetRecordSchema = z.strictObject({
   }
 });
 
+const storedLegacyCandidateSetRecordV1Shape = {
+  ...legacyCandidateSetRecordV1Shape,
+  candidateSet: storedUnknownHourCandidateResultSchema
+} as const;
+
+export const storedLegacyCandidateSetRecordV1Schema = z.strictObject(
+  storedLegacyCandidateSetRecordV1Shape
+).refine(
+  (value) => value.updatedAt >= value.createdAt,
+  { path: ["updatedAt"], message: "updatedAt must not precede createdAt" }
+);
+
+export const storedCandidateSetRecordSchema = z.strictObject({
+  ...storedLegacyCandidateSetRecordV1Shape,
+  recordVersion: z.literal(RESEARCH_SUBJECT_RECORD_VERSION),
+  favorite: z.boolean(),
+  deletedAt: z.string().datetime().nullable()
+}).superRefine((value, context) => {
+  if (value.updatedAt < value.createdAt) {
+    context.addIssue({
+      code: "custom",
+      path: ["updatedAt"],
+      message: "updatedAt must not precede createdAt"
+    });
+  }
+  if (value.deletedAt !== null && value.deletedAt > value.updatedAt) {
+    context.addIssue({
+      code: "custom",
+      path: ["deletedAt"],
+      message: "deletedAt must not follow updatedAt"
+    });
+  }
+});
+
+export function createCandidateSetRecordSchemaForTimeZoneName(
+  isTimeZoneName: TimeZoneNamePredicate
+) {
+  return candidateSetRecordSchema.safeExtend({
+    candidateSet: createUnknownHourCandidateResultSchemaForTimeZoneName(isTimeZoneName)
+  });
+}
+
 export type LegacyCandidateSetRecordV1 = z.infer<typeof legacyCandidateSetRecordV1Schema>;
 export type CandidateSetRecord = z.infer<typeof candidateSetRecordSchema>;
 export type ResearchSubjectRecord = z.infer<typeof caseRecordSchema> | CandidateSetRecord;
@@ -3718,9 +4009,13 @@ function exactStoredRecordSchema<Output>(schema: z.ZodType<Output>, label: strin
 }
 
 export const coreBackupCaseRecordSchema = exactStoredRecordSchema(caseRecordSchema, "Case");
-export const coreBackupRevisionRecordSchema = exactStoredRecordSchema(revisionRecordSchema, "Revision");
+export const coreBackupRevisionRecordSchema = exactStoredRecordSchema(storedRevisionRecordSchema, "Revision");
 export const legacyCoreBackupCaseRecordSchema = exactStoredRecordSchema(legacyCaseRecordV1Schema, "Case v1");
-const preRulePackBindingRevisionRecordSchema = z.object(preRulePackBindingRevisionRecordShape);
+const preRulePackBindingRevisionRecordSchema = z.object({
+  ...preRulePackBindingRevisionRecordShape,
+  input: storedBirthInputSchema,
+  timeCalibration: storedTimeCalibrationSchema
+});
 export const legacyCoreBackupRevisionRecordSchema = exactStoredRecordSchema(
   preRulePackBindingRevisionRecordSchema,
   "Revision without rule-pack binding"
@@ -3795,16 +4090,20 @@ export const fullBackupRevisionRecordSchema = coreBackupRevisionRecordSchema;
 export const legacyFullBackupCaseRecordSchema = legacyCoreBackupCaseRecordSchema;
 export const legacyFullBackupRevisionRecordSchema = legacyCoreBackupRevisionRecordSchema;
 export const fullBackupResearchNoteRecordSchema = exactStoredRecordSchema(researchNoteRecordSchema, "ResearchNote");
-export const fullBackupEventRecordSchema = exactStoredRecordSchema(eventRecordSchema, "Event");
+export const fullBackupEventRecordSchema = exactStoredRecordSchema(storedEventRecordSchema, "Event");
+const frozenEventTimeFullBackupEventRecordSchema = exactStoredRecordSchema(
+  eventRecordSchema,
+  "Event"
+);
 export const legacyFullBackupEventRecordSchema = exactStoredRecordSchema(legacyEventRecordV1Schema, "Event v1");
 export const fullBackupSavedViewRecordSchema = exactStoredRecordSchema(savedViewRecordSchema, "SavedView");
 export const legacyFullBackupSavedViewRecordSchema = exactStoredRecordSchema(
   legacySavedViewRecordV1Schema,
   "SavedView v1"
 );
-export const fullBackupCandidateSetRecordSchema = exactStoredRecordSchema(candidateSetRecordSchema, "CandidateSet");
+export const fullBackupCandidateSetRecordSchema = exactStoredRecordSchema(storedCandidateSetRecordSchema, "CandidateSet");
 export const legacyFullBackupCandidateSetRecordSchema = exactStoredRecordSchema(
-  legacyCandidateSetRecordV1Schema,
+  storedLegacyCandidateSetRecordV1Schema,
   "CandidateSet v1"
 );
 export const fullBackupKnowledgeDocumentRecordSchema = exactStoredRecordSchema(
@@ -3834,6 +4133,10 @@ export const fullBackupTzdbMigrationReceiptRecordSchema = exactStoredRecordSchem
   "TzdbMigrationReceipt"
 );
 export const fullBackupEventTimeMigrationReceiptRecordSchema = exactStoredRecordSchema(
+  storedEventTimeMigrationReceiptSchema,
+  "EventTimeMigrationReceipt"
+);
+const frozenEventTimeMigrationFullBackupReceiptRecordSchema = exactStoredRecordSchema(
   eventTimeMigrationReceiptSchema,
   "EventTimeMigrationReceipt"
 );
@@ -3867,7 +4170,7 @@ const lifecycleFullBackupCaseRecordV2Schema = exactStoredRecordSchema(
 );
 const lifecycleFullBackupCandidateSetRecordV2Schema = exactStoredRecordSchema(
   z.strictObject({
-    ...legacyCandidateSetRecordV1Shape,
+    ...storedLegacyCandidateSetRecordV1Shape,
     recordVersion: z.literal(2),
     favorite: z.boolean(),
     deletedAt: z.string().datetime().nullable()
@@ -4167,7 +4470,7 @@ export const eventTimeFullBackupPayloadSchema = z.strictObject({
   revisions: z.array(legacyFullBackupRevisionRecordSchema),
   candidateSets: z.array(lifecycleFullBackupCandidateSetRecordV2Schema),
   researchNotes: z.array(fullBackupResearchNoteRecordSchema),
-  events: z.array(fullBackupEventRecordSchema),
+  events: z.array(frozenEventTimeFullBackupEventRecordSchema),
   savedViews: z.array(legacyFullBackupSavedViewRecordSchema),
   knowledgeDocuments: z.array(fullBackupKnowledgeDocumentRecordSchema),
   citations: z.array(fullBackupCitationRecordSchema),
@@ -4227,7 +4530,7 @@ export const savedViewFullBackupPayloadSchema = z.strictObject({
   revisions: z.array(legacyFullBackupRevisionRecordSchema),
   candidateSets: z.array(fullBackupCandidateSetRecordSchema),
   researchNotes: z.array(fullBackupResearchNoteRecordSchema),
-  events: z.array(fullBackupEventRecordSchema),
+  events: z.array(frozenEventTimeFullBackupEventRecordSchema),
   savedViews: z.array(fullBackupSavedViewRecordSchema),
   knowledgeDocuments: z.array(fullBackupKnowledgeDocumentRecordSchema),
   citations: z.array(fullBackupCitationRecordSchema),
@@ -4287,7 +4590,7 @@ export const localUserDataFullBackupPayloadSchema = z.strictObject({
   revisions: z.array(legacyFullBackupRevisionRecordSchema),
   candidateSets: z.array(fullBackupCandidateSetRecordSchema),
   researchNotes: z.array(fullBackupResearchNoteRecordSchema),
-  events: z.array(fullBackupEventRecordSchema),
+  events: z.array(frozenEventTimeFullBackupEventRecordSchema),
   savedViews: z.array(fullBackupSavedViewRecordSchema),
   knowledgeDocuments: z.array(fullBackupKnowledgeDocumentRecordSchema),
   citations: z.array(fullBackupCitationRecordSchema),
@@ -4352,7 +4655,7 @@ export const ruleRegistryFullBackupPayloadSchema = z.strictObject({
   revisions: z.array(fullBackupRevisionRecordSchema),
   candidateSets: z.array(fullBackupCandidateSetRecordSchema),
   researchNotes: z.array(fullBackupResearchNoteRecordSchema),
-  events: z.array(fullBackupEventRecordSchema),
+  events: z.array(frozenEventTimeFullBackupEventRecordSchema),
   savedViews: z.array(fullBackupSavedViewRecordSchema),
   knowledgeDocuments: z.array(fullBackupKnowledgeDocumentRecordSchema),
   citations: z.array(fullBackupCitationRecordSchema),
@@ -4420,7 +4723,7 @@ export const tzdbMigrationFullBackupPayloadSchema = z.strictObject({
   revisions: z.array(fullBackupRevisionRecordSchema),
   candidateSets: z.array(fullBackupCandidateSetRecordSchema),
   researchNotes: z.array(fullBackupResearchNoteRecordSchema),
-  events: z.array(fullBackupEventRecordSchema),
+  events: z.array(frozenEventTimeFullBackupEventRecordSchema),
   savedViews: z.array(fullBackupSavedViewRecordSchema),
   knowledgeDocuments: z.array(fullBackupKnowledgeDocumentRecordSchema),
   citations: z.array(fullBackupCitationRecordSchema),
@@ -4491,7 +4794,7 @@ export const eventTimeMigrationFullBackupPayloadSchema = z.strictObject({
   revisions: z.array(fullBackupRevisionRecordSchema),
   candidateSets: z.array(fullBackupCandidateSetRecordSchema),
   researchNotes: z.array(fullBackupResearchNoteRecordSchema),
-  events: z.array(fullBackupEventRecordSchema),
+  events: z.array(frozenEventTimeFullBackupEventRecordSchema),
   savedViews: z.array(fullBackupSavedViewRecordSchema),
   knowledgeDocuments: z.array(fullBackupKnowledgeDocumentRecordSchema),
   citations: z.array(fullBackupCitationRecordSchema),
@@ -4501,7 +4804,7 @@ export const eventTimeMigrationFullBackupPayloadSchema = z.strictObject({
   appSettings: z.array(fullBackupAppSettingsRecordSchema).max(1),
   ruleRegistry: z.array(fullBackupRuleRegistryRecordSchema),
   tzdbMigrationReceipts: z.array(fullBackupTzdbMigrationReceiptRecordSchema),
-  eventTimeMigrationReceipts: z.array(fullBackupEventTimeMigrationReceiptRecordSchema)
+  eventTimeMigrationReceipts: z.array(frozenEventTimeMigrationFullBackupReceiptRecordSchema)
 });
 
 export const eventTimeMigrationFullBackupEnvelopeSchema = z.strictObject({
@@ -4642,6 +4945,8 @@ export type EventMinuteTimeZoneResolution = z.infer<typeof eventMinuteTimeZoneRe
 export type EventZonedMinuteBoundary = z.infer<typeof eventZonedMinuteBoundarySchema>;
 export type EventTimeContext = z.infer<typeof eventTimeContextSchema>;
 export type EventRecord = z.infer<typeof eventRecordSchema>;
+export type StoredEventTimeContext = z.infer<typeof storedEventTimeContextSchema>;
+export type StoredEventRecord = z.infer<typeof storedEventRecordSchema>;
 export type SavedViewFilters = z.infer<typeof savedViewFiltersSchema>;
 export type SavedViewSort = z.infer<typeof savedViewSortSchema>;
 export type SavedViewRecord = z.infer<typeof savedViewRecordSchema>;

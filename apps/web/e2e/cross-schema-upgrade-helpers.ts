@@ -286,13 +286,26 @@ export async function pageReleaseEvidence(page: Page) {
       dbMigrationPhase: document.documentElement.dataset.dbMigrationPhase ?? null,
       dbStorageAdmission: document.documentElement.dataset.dbStorageAdmission ?? null,
       buildVersion: document.querySelector<HTMLMetaElement>('meta[name="hakimi-build-version"]')?.content ?? null,
+      evidenceId: document.querySelector<HTMLMetaElement>('meta[name="hakimi-release-evidence-id"]')?.content ?? null,
       descriptor: rawDescriptor ? JSON.parse(rawDescriptor) as ReleaseDatabaseDescriptor : null
     };
   });
 }
 
 export async function expectPageFixture(page: Page, fixture: GenerationFixture): Promise<void> {
-  await expect.poll(() => pageReleaseEvidence(page)).toMatchObject({
+  await expect.poll(async () => {
+    try {
+      return await pageReleaseEvidence(page);
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.includes("Execution context was destroyed, most likely because of a navigation")
+      ) {
+        return {};
+      }
+      throw error;
+    }
+  }).toMatchObject({
     fixture: fixture.name,
     appBootReady: "true",
     dbGeneration: fixture.descriptor.dbGeneration,
@@ -621,17 +634,18 @@ export async function openStableBridge(
   return { page, problems };
 }
 
-export async function openBridgeNavigationAfterSwitch(
+export async function openConfirmedBridgeBeforeSwitch(
   context: BrowserContext,
   server: SwitchServer,
   stableFixture: GenerationFixture
 ): Promise<{ page: Page; problems: string[] }> {
+  server.setGeneration(stableFixture);
   const page = await context.newPage();
   const problems = collectConsoleProblems(page);
-  // The boot gate deliberately waits for a rendered animation frame before it
-  // confirms a cache generation. Keep the trial tab foregrounded so Chromium
-  // does not indefinitely throttle that safety frame when several historical
-  // generation tabs remain open for rollback assertions.
+  // Establish a genuinely confirmed historical tab before switching the
+  // deployment. Opening it after the switch races clients.claim(): the new
+  // worker correctly cannot prove which cache supplied that unbound client and
+  // forces a convergence reload with CLIENT_NOT_BOUND_TO_GENERATION.
   await page.bringToFront();
   const response = await page.goto(`${server.origin}/settings`, { waitUntil: "domcontentloaded" });
   // A preceding download can move Chromium focus to its internal downloads
@@ -641,6 +655,7 @@ export async function openBridgeNavigationAfterSwitch(
   await page.evaluate(() => window.focus());
   expect(response?.fromServiceWorker()).toBe(true);
   await waitForForegroundAppReady(page);
+  await waitForServiceWorker(page);
   await expectPageFixture(page, stableFixture);
   return { page, problems };
 }

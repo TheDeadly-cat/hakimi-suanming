@@ -1,20 +1,32 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   KnowledgeCoreError,
   KnowledgeIntegrityError,
+  BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECTS,
   EVIDENCE_SUBJECTS,
+  SINGLE_CHART_REPORT_EVIDENCE_SUBJECTS,
   buildEvidenceCoverageReport,
   buildKnowledgeContentSnapshot,
   buildKnowledgeSections,
+  createKnowledgeDocumentCitationIntegrityVerifier,
   extractKnowledgeQuote,
   inferKnowledgeFormat,
+  isReservedSingleChartReportEvidenceSubjectId,
+  isSingleChartReportEvidenceSubjectId,
   normalizeKnowledgeContent,
+  requireEvidenceSubject,
   searchKnowledgeDocuments,
   validateBundledKnowledgeRelease,
   verifyCitationIntegrity,
   verifyKnowledgeDocumentIntegrity
 } from "./index";
-import { citationTargetKeys, type CitationRecord, type KnowledgeDocumentRecord, type SourceRightsRecord } from "@hakimi/contracts";
+import {
+  citationRecordSchema,
+  citationTargetKeys,
+  type CitationRecord,
+  type KnowledgeDocumentRecord,
+  type SourceRightsRecord
+} from "@hakimi/contracts";
 
 const timestamp = "2026-08-01T00:00:00.000Z";
 
@@ -35,6 +47,34 @@ async function documentFixture(): Promise<KnowledgeDocumentRecord> {
     editVersion: 1,
     createdAt: timestamp,
     updatedAt: timestamp
+  };
+}
+
+function citationFixture(
+  document: KnowledgeDocumentRecord,
+  overrides: Partial<CitationRecord> = {}
+): CitationRecord {
+  const targets = [{
+    kind: "research_note" as const,
+    noteId: "33333333-3333-4333-8333-333333333333"
+  }];
+  return {
+    schemaVersion: "1.0.0",
+    id: "22222222-2222-4222-8222-222222222222",
+    documentId: document.id,
+    documentContentHash: document.contentHash,
+    locator: { sectionId: "section-2", startLine: 3, endLine: 3 },
+    quote: "藏干正文",
+    annotation: "待与其他版本对读",
+    targets,
+    targetKeys: citationTargetKeys(targets),
+    status: "user_candidate",
+    reviewAttestations: [],
+    decisionNote: "",
+    editVersion: 1,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    ...overrides
   };
 }
 
@@ -105,11 +145,317 @@ describe("knowledge-core", () => {
     await expect(verifyCitationIntegrity({ ...citation, quote: "篡改" }, document)).rejects.toMatchObject({ mismatch: "quote" });
   });
 
+  it("accepts the aggregate explicit Citation text maxima within the bounded input snapshot", async () => {
+    const content = "甲".repeat(20_000);
+    const snapshot = await buildKnowledgeContentSnapshot(content, "text");
+    const document: KnowledgeDocumentRecord = {
+      schemaVersion: "1.0.0",
+      id: "11111111-1111-4111-8111-111111111111",
+      recordType: "user_knowledge_document",
+      title: "聚合上限资料",
+      author: "",
+      edition: "",
+      sourceNote: "",
+      fileName: "聚合上限.txt",
+      format: "text",
+      byteSize: new TextEncoder().encode(content).byteLength,
+      ...snapshot,
+      editVersion: 1,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    const targets = Array.from({ length: 100 }, (_, index) => ({
+      kind: "evidence_subject" as const,
+      subjectId: `a${String(index).padStart(3, "0")}${"x".repeat(156)}`
+    }));
+    const reviewAttestations = Array.from({ length: 20 }, (_, index) => {
+      const prefix = `reviewer-${String(index).padStart(2, "0")}`;
+      return {
+        reviewerId: `${prefix}${"x".repeat(120 - prefix.length)}`,
+        reviewedAt: timestamp,
+        note: "乙".repeat(2_000)
+      };
+    });
+    const citation = citationRecordSchema.parse({
+      schemaVersion: "1.0.0",
+      id: "22222222-2222-4222-8222-222222222222",
+      documentId: document.id,
+      documentContentHash: document.contentHash,
+      locator: { sectionId: "section-1", startLine: 1, endLine: 1 },
+      quote: content,
+      annotation: "丙".repeat(20_000),
+      targets,
+      targetKeys: citationTargetKeys(targets),
+      status: "user_candidate",
+      reviewAttestations,
+      decisionNote: "丁".repeat(4_000),
+      editVersion: 1,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    });
+    const boundedFieldTextCharacters = citation.quote.length
+      + citation.annotation.length
+      + citation.decisionNote.length
+      + citation.reviewAttestations.reduce(
+        (sum, attestation) => sum + attestation.reviewerId.length + attestation.note.length,
+        0
+      )
+      + citation.targets.reduce(
+        (sum, target) => sum + target.kind.length + (target.kind === "evidence_subject" ? target.subjectId.length : 0),
+        0
+      )
+      + citation.targetKeys.reduce((sum, targetKey) => sum + targetKey.length, 0);
+    expect(boundedFieldTextCharacters).toBeGreaterThan(100_000);
+
+    const verifier = await createKnowledgeDocumentCitationIntegrityVerifier(document);
+    expect(verifier.verifyCitation(citation)).toEqual(citation);
+  });
+
+  it("verifies many citations against one frozen document with exactly one content digest and no partial batch", async () => {
+    const document = await documentFixture();
+    const first = citationFixture(document);
+    const second = citationFixture(document, {
+      id: "22222222-2222-4222-8222-222222222223",
+      locator: { sectionId: "section-7", startLine: 8, endLine: 8 },
+      quote: "十神正文"
+    });
+    const expectedContentBytes = new TextEncoder().encode(document.content);
+    const originalDigest = globalThis.crypto.subtle.digest.bind(globalThis.crypto.subtle);
+    let contentDigestCalls = 0;
+    const digest = vi.spyOn(globalThis.crypto.subtle, "digest").mockImplementation((algorithm, data) => {
+      const bytes = ArrayBuffer.isView(data)
+        ? new Uint8Array(data.buffer, data.byteOffset, data.byteLength)
+        : new Uint8Array(data);
+      if (
+        bytes.byteLength === expectedContentBytes.byteLength
+        && bytes.every((byte, index) => byte === expectedContentBytes[index])
+      ) {
+        contentDigestCalls += 1;
+      }
+      return originalDigest(algorithm, data);
+    });
+
+    try {
+      const verifier = await createKnowledgeDocumentCitationIntegrityVerifier(document);
+      const verified = verifier.verifyCitations([first, second]);
+
+      expect(verified).toEqual([first, second]);
+      expect(contentDigestCalls).toBe(1);
+      expect(Object.isFrozen(verifier)).toBe(true);
+      expect(Object.isFrozen(verifier.document)).toBe(true);
+      expect(Object.isFrozen(verifier.document.sections)).toBe(true);
+      expect(Object.isFrozen(verified)).toBe(true);
+      expect(Object.isFrozen(verified[0])).toBe(true);
+      expect(Object.isFrozen(verified[0]!.locator)).toBe(true);
+
+      expect(() => verifier.verifyCitations([first, { ...second, quote: "末项篡改" }]))
+        .toThrowError(KnowledgeIntegrityError);
+      expect(contentDigestCalls).toBe(1);
+
+      let parseFailure: unknown;
+      try {
+        verifier.verifyCitations([
+          { ...first, quote: "首项语义失配" },
+          { ...second, excerpt: "末项未知字段" }
+        ]);
+      } catch (cause) {
+        parseFailure = cause;
+      }
+      expect(parseFailure).toMatchObject({ name: "ZodError" });
+      expect(parseFailure).not.toBeInstanceOf(KnowledgeIntegrityError);
+    } finally {
+      digest.mockRestore();
+    }
+  });
+
+  it("rejects an oversized batch before inspecting a hostile tail accessor", async () => {
+    const document = await documentFixture();
+    const citation = citationFixture(document);
+    const verifier = await createKnowledgeDocumentCitationIntegrityVerifier(document);
+    const tailGetter = vi.fn(() => citation);
+    const oversizedBatch = new Array<unknown>(1_025).fill(citation);
+    Object.defineProperty(oversizedBatch, "1024", {
+      enumerable: true,
+      configurable: true,
+      get: tailGetter
+    });
+
+    expect(() => verifier.verifyCitations(oversizedBatch)).toThrowError(
+      /Citation integrity batch input cannot exceed 1024 items/u
+    );
+    expect(tailGetter).not.toHaveBeenCalled();
+  });
+
+  it("applies the same bounded per-item text budget to single and batch verification", async () => {
+    const document = await documentFixture();
+    const verifier = await createKnowledgeDocumentCitationIntegrityVerifier(document);
+    const oversizedTimestamp = `2026-08-01T00:00:00.${"0".repeat(260_000)}Z`;
+    const oversizedCitation = {
+      ...citationFixture(document),
+      createdAt: oversizedTimestamp,
+      updatedAt: oversizedTimestamp
+    };
+    expect(citationRecordSchema.safeParse(oversizedCitation).success).toBe(true);
+
+    expect(() => verifier.verifyCitation(oversizedCitation)).toThrowError(
+      /Citation integrity input exceeds the declarative text budget/u
+    );
+    expect(() => verifier.verifyCitations([oversizedCitation])).toThrowError(
+      /Citation integrity input exceeds the declarative text budget/u
+    );
+  });
+
+  it("rejects document and citation accessors without invoking them", async () => {
+    const document = await documentFixture();
+    const documentGetter = vi.fn(() => document.content);
+    const hostileDocument = { ...document } as Record<string, unknown>;
+    Object.defineProperty(hostileDocument, "content", {
+      enumerable: true,
+      get: documentGetter
+    });
+
+    await expect(createKnowledgeDocumentCitationIntegrityVerifier(hostileDocument))
+      .rejects.toBeInstanceOf(TypeError);
+    expect(documentGetter).not.toHaveBeenCalled();
+
+    const verifier = await createKnowledgeDocumentCitationIntegrityVerifier(document);
+    const citation = citationFixture(document);
+    const citationGetter = vi.fn(() => citation.quote);
+    const hostileCitation = { ...citation } as Record<string, unknown>;
+    Object.defineProperty(hostileCitation, "quote", {
+      enumerable: true,
+      get: citationGetter
+    });
+    expect(() => verifier.verifyCitation(hostileCitation)).toThrowError(TypeError);
+    expect(citationGetter).not.toHaveBeenCalled();
+
+    const itemGetter = vi.fn(() => citation);
+    const hostileBatch = [citation] as unknown[];
+    Object.defineProperty(hostileBatch, "0", {
+      enumerable: true,
+      get: itemGetter
+    });
+    expect(() => verifier.verifyCitations(hostileBatch)).toThrowError(TypeError);
+    expect(itemGetter).not.toHaveBeenCalled();
+  });
+
+  it("rejects Symbol properties, custom prototypes, sparse arrays and cycles before schema parsing", async () => {
+    const document = await documentFixture();
+
+    const symbolDocument = { ...document } as Record<PropertyKey, unknown>;
+    symbolDocument[Symbol("hostile")] = true;
+    await expect(createKnowledgeDocumentCitationIntegrityVerifier(symbolDocument))
+      .rejects.toBeInstanceOf(TypeError);
+
+    const prototypeDocument = Object.assign(Object.create({ hostile: true }), document);
+    await expect(createKnowledgeDocumentCitationIntegrityVerifier(prototypeDocument))
+      .rejects.toBeInstanceOf(TypeError);
+
+    const sparseDocument = { ...document, sections: new Array(1) };
+    await expect(createKnowledgeDocumentCitationIntegrityVerifier(sparseDocument))
+      .rejects.toBeInstanceOf(TypeError);
+
+    const cyclicDocument = { ...document } as Record<string, unknown>;
+    cyclicDocument.self = cyclicDocument;
+    await expect(createKnowledgeDocumentCitationIntegrityVerifier(cyclicDocument))
+      .rejects.toBeInstanceOf(TypeError);
+  });
+
+  it("captures inputs before awaiting and keeps returned document and citation snapshots immutable", async () => {
+    const document = await documentFixture();
+    const mutableDocument = structuredClone(document);
+    const pending = createKnowledgeDocumentCitationIntegrityVerifier(mutableDocument);
+    mutableDocument.content = "调用返回后的异步篡改";
+    mutableDocument.contentHash = "f".repeat(64);
+    mutableDocument.sections[0]!.title = "篡改章节";
+
+    const verifier = await pending;
+    expect(verifier.document).toEqual(document);
+    expect(() => {
+      (verifier.document as KnowledgeDocumentRecord).content = "返回后篡改";
+    }).toThrowError(TypeError);
+    expect(() => {
+      (verifier.document.sections as KnowledgeDocumentRecord["sections"])[0]!.title = "返回后篡改章节";
+    }).toThrowError(TypeError);
+
+    const mutableCitation = structuredClone(citationFixture(document));
+    const verifiedCitation = verifier.verifyCitation(mutableCitation);
+    mutableCitation.quote = "返回后篡改引用";
+    mutableCitation.targetKeys[0] = "research_note:44444444-4444-4444-8444-444444444444";
+    expect(verifiedCitation.quote).toBe("藏干正文");
+    expect(verifiedCitation.targetKeys).toEqual(citationFixture(document).targetKeys);
+    expect(() => {
+      (verifiedCitation as CitationRecord).quote = "篡改冻结引用";
+    }).toThrowError(TypeError);
+  });
+
+  it("fails closed for every document binding, locator, quote and target-key mismatch", async () => {
+    const document = await documentFixture();
+    await expect(createKnowledgeDocumentCitationIntegrityVerifier({
+      ...document,
+      content: document.content.replace("藏干正文", "篡改正文")
+    })).rejects.toMatchObject({ mismatch: "contentHash" });
+
+    const verifier = await createKnowledgeDocumentCitationIntegrityVerifier(document);
+    const citation = citationFixture(document);
+    expect(() => verifier.verifyCitation({
+      ...citation,
+      documentId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+    })).toThrowError(KnowledgeIntegrityError);
+    expect(() => verifier.verifyCitation({
+      ...citation,
+      documentContentHash: "0".repeat(64)
+    })).toThrowError(KnowledgeIntegrityError);
+    expect(() => verifier.verifyCitation({
+      ...citation,
+      locator: { sectionId: "section-7", startLine: 3, endLine: 3 }
+    })).toThrowError(KnowledgeIntegrityError);
+    expect(() => verifier.verifyCitation({ ...citation, quote: "篡改引用" }))
+      .toThrowError(KnowledgeIntegrityError);
+    expect(() => verifier.verifyCitation({
+      ...citation,
+      targetKeys: ["research_note:44444444-4444-4444-8444-444444444444"]
+    })).toThrow();
+    expect(() => verifier.verifyCitation({ ...citation, excerpt: "伪造搜索摘要" }))
+      .toThrow();
+  });
+
   it("registers all 36 pillar evidence subjects exactly once", () => {
     expect(EVIDENCE_SUBJECTS).toHaveLength(36);
     expect(new Set(EVIDENCE_SUBJECTS.map((subject) => subject.subjectId)).size).toBe(36);
     expect(new Set(EVIDENCE_SUBJECTS.flatMap((subject) => subject.fieldPaths)).size).toBe(36);
     expect(EVIDENCE_SUBJECTS.some((subject) => subject.fieldPaths.includes("pillars.hour.xun"))).toBe(true);
+    const subject = requireEvidenceSubject("bazi.pillar.day.ganzhi.v1");
+    expect(Object.isFrozen(subject)).toBe(true);
+    expect(Object.isFrozen(subject.algorithmIds)).toBe(true);
+    expect(Object.isFrozen(subject.fieldPaths)).toBe(true);
+    expect(Object.isFrozen(subject.ruleProfilePaths)).toBe(true);
+    expect(() => (subject.fieldPaths as string[]).push("pillars.day.tampered"))
+      .toThrow(TypeError);
+    expect(requireEvidenceSubject(subject.subjectId)).toBe(subject);
+  });
+
+  it("registers twelve strength binding subjects without inflating the frozen pillar denominator", () => {
+    expect(EVIDENCE_SUBJECTS).toHaveLength(36);
+    expect(BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECTS).toHaveLength(12);
+    expect(SINGLE_CHART_REPORT_EVIDENCE_SUBJECTS).toHaveLength(48);
+    expect(new Set(SINGLE_CHART_REPORT_EVIDENCE_SUBJECTS.map((subject) => subject.subjectId)).size)
+      .toBe(48);
+    expect(BAZI_STRENGTH_BINDING_EVIDENCE_SUBJECTS.every((subject) => (
+      subject.category === "interpretive_claim"
+      && subject.requiredForV1 === false
+      && subject.algorithmIds.length === 0
+      && subject.fieldPaths.length === 0
+      && subject.ruleProfilePaths.length === 0
+      && Object.isFrozen(subject)
+    ))).toBe(true);
+
+    const subjectId = "bazi.strength.binding.policy.weights.v1";
+    expect(isSingleChartReportEvidenceSubjectId(subjectId)).toBe(true);
+    expect(isReservedSingleChartReportEvidenceSubjectId(subjectId)).toBe(true);
+    expect(requireEvidenceSubject(subjectId).category).toBe("interpretive_claim");
+    expect(isSingleChartReportEvidenceSubjectId("bazi.strength.binding.policy.unknown.v1")).toBe(false);
+    expect(isReservedSingleChartReportEvidenceSubjectId("bazi.strength.binding.policy.unknown.v1")).toBe(true);
   });
 
   it("derives deterministic, non-inflating coverage while keeping rights separate from verification", async () => {

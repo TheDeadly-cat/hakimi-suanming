@@ -1,0 +1,14 @@
+{
+  "name": "@hakimi/bazi-review-context",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@hakimi/chart-integrity": "*",
+    "@hakimi/contracts": "*",
+    "@hakimi/integrity": "*",
+    "@hakimi/knowledge-core": "*",
+    "@hakimi/storage": "*"
+  }
+}

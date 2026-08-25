@@ -16,6 +16,7 @@ import {
   buildUnknownHourCandidateHashPayload,
   eventRecordSchema,
   migrateLegacySavedViewRecordV1,
+  storedEventRecordSchema,
   type BirthInput,
   type CalculatedChart,
   type EventRecord,
@@ -33,6 +34,10 @@ import {
   RETAINED_TZDB_2025B_SNAPSHOT_ID
 } from "@hakimi/tzdb-core";
 import {
+  resolveEventTimeContextForBundledSnapshot,
+  verifyStoredEventTimeContextWithBundledArtifact
+} from "@hakimi/time-core";
+import {
   ADVANCED_CASE_QUERY,
   ADVANCED_CASE_QUERY_DIGEST
 } from "../../research-query/test-fixtures/advanced-case-query";
@@ -45,7 +50,8 @@ import {
   buildCandidateSetTzdbComparison,
   buildLegacyCandidateSetTzdbComparison,
   buildEventTimeMigrationSnapshot,
-  computeEventRecordDigest
+  computeEventRecordDigest,
+  verifyEventTimeMigrationReceiptRelationshipsWithStatus
 } from "./index";
 
 const openDatabases: Dexie[] = [];
@@ -260,6 +266,46 @@ function withDifferentTimeZoneDatabaseSnapshot(record: EventRecord): EventRecord
   );
   historical.timeContext.tzdbVersion = historical.timeContext.timeZoneDatabase.snapshotId;
   return eventRecordSchema.parse(historical);
+}
+
+function withMismatchedBundledEventDescriptor(record: EventRecord): EventRecord {
+  const mismatched = structuredClone(record);
+  if (mismatched.timeContext.kind !== "zoned_minute" || !mismatched.timeContext.timeZoneDatabase) {
+    throw new Error("expected an identified zoned Event fixture");
+  }
+  mismatched.timeContext.timeZoneDatabase.artifactName =
+    `${mismatched.timeContext.timeZoneDatabase.artifactName}.unregistered`;
+  return eventRecordSchema.parse(mismatched);
+}
+
+function asUnavailableHistoricalOnlyEvent(record: EventRecord): EventRecord {
+  const historical = structuredClone(record);
+  if (historical.timeContext.kind !== "zoned_minute" || !historical.timeContext.timeZoneDatabase) {
+    throw new Error("expected an identified zoned Event fixture");
+  }
+  historical.timeContext.timeZone = "Historical/Only";
+  historical.timeContext.timeZoneDatabase.dataSha256 = alteredHex(
+    historical.timeContext.timeZoneDatabase.dataSha256
+  );
+  historical.timeContext.timeZoneDatabase.snapshotId = buildTimeZoneDatabaseSnapshotId(
+    historical.timeContext.timeZoneDatabase
+  );
+  historical.timeContext.tzdbVersion = historical.timeContext.timeZoneDatabase.snapshotId;
+  for (const boundary of [historical.timeContext.start, historical.timeContext.end]) {
+    if (!boundary) continue;
+    for (const candidate of boundary.resolution.candidates) {
+      candidate.zonedDateTime = candidate.zonedDateTime.replace(
+        /\[[^\]]+\]$/,
+        "[Historical/Only]"
+      );
+    }
+    boundary.resolution.selectedCandidate = structuredClone(
+      boundary.resolution.candidates.find(
+        (candidate) => candidate.choice === boundary.resolution.selectedCandidate.choice
+      )!
+    );
+  }
+  return storedEventRecordSchema.parse(historical);
 }
 
 function savedCaseQuery(text: string): ResearchCaseQuery {
@@ -1486,6 +1532,15 @@ describe("Event legacy time semantic derivation", () => {
     const historicalReceipt = structuredClone(derived.receipt);
     historicalReceipt.target.snapshot = buildEventTimeMigrationSnapshot(historicalTarget);
     historicalReceipt.target.snapshotDigest = await sha256Hex(historicalReceipt.target.snapshot);
+    await expect(verifyEventTimeMigrationReceiptRelationshipsWithStatus(
+      [historicalReceipt],
+      [source, historicalTarget]
+    )).resolves.toMatchObject({
+      replayStatuses: [{
+        receiptId: historicalReceipt.id,
+        targetStatus: "structural_artifact_unavailable"
+      }]
+    });
     await database.transaction("rw", database.events, database.eventTimeMigrationReceipts, async () => {
       await database.events.put(historicalTarget);
       await database.eventTimeMigrationReceipts.put(historicalReceipt);
@@ -1498,6 +1553,33 @@ describe("Event legacy time semantic derivation", () => {
     await restored.cases.replaceFullDataSnapshot(snapshot);
     await expect(restored.research.listEventTimeMigrationReceiptsForEvent(historicalTarget.id))
       .resolves.toEqual([historicalReceipt]);
+  });
+
+  it("hard-fails an Event receipt whose registered snapshot descriptor conflicts", async () => {
+    const { research, source } = await seedLegacyOverlapEvent();
+    const derived = await research.deriveLegacyEventTime({
+      sourceEventId: source.id,
+      expectedSourceRecordDigest: await computeEventRecordDigest(source),
+      confirmed: true,
+      interpretation: {
+        kind: "zoned_minute",
+        timeZone: "America/New_York",
+        startDisambiguation: "earlier",
+        endDisambiguation: null
+      }
+    });
+    const mismatchedTarget = withMismatchedBundledEventDescriptor(derived.target);
+    const mismatchedReceipt = structuredClone(derived.receipt);
+    if (mismatchedReceipt.target.snapshot.timeContext.kind !== "zoned_minute") {
+      throw new Error("expected zoned receipt fixture");
+    }
+    mismatchedReceipt.target.snapshot.timeContext = structuredClone(mismatchedTarget.timeContext);
+    mismatchedReceipt.target.snapshotDigest = await sha256Hex(mismatchedReceipt.target.snapshot);
+
+    await expect(verifyEventTimeMigrationReceiptRelationshipsWithStatus(
+      [mismatchedReceipt],
+      [source, mismatchedTarget]
+    )).rejects.toMatchObject({ code: "TZDB_SNAPSHOT_MISMATCH" });
   });
 
   it("includes the Event receipt ledger in full-replace CAS even when only the current receipt table changed", async () => {
@@ -1548,7 +1630,99 @@ describe("Event legacy time semantic derivation", () => {
     expect(contentEdited.timeContext).toEqual(historical.timeContext);
     await expect(research.updateEvent(historical.id, { startDate: "2025-03-12T12:01" }))
       .rejects.toMatchObject({ code: "HISTORICAL_EVENT_TIME_DERIVATION_REQUIRED" });
+    await expect(research.updateEvent(historical.id, { revisionId: null }))
+      .rejects.toMatchObject({ code: "HISTORICAL_EVENT_TIME_DERIVATION_REQUIRED" });
+    const deleted = await research.softDeleteEvent(historical.id);
+    expect(deleted.timeContext).toEqual(historical.timeContext);
+    const restored = await research.restoreEvent(historical.id);
+    expect(restored.timeContext).toEqual(historical.timeContext);
     expect((await research.getEvent(historical.id))?.startDate).toBe("2025-03-12T12:00");
+  });
+
+  it("preserves a stored-only Historical/Only Event while keeping its time semantics immutable", async () => {
+    const { database, cases, research } = createRepositories();
+    const bundle = await seedCase(cases, "stored-only historical Event case");
+    const current = await research.createEvent({
+      ...eventInput(bundle.caseRecord.id, bundle.revisions[0].id),
+      datePrecision: "minute",
+      startDate: "2025-03-12T12:00",
+      endDate: null,
+      timeZone: "Asia/Shanghai"
+    });
+    const historical = asUnavailableHistoricalOnlyEvent(current);
+    await database.events.put(historical);
+
+    await expect(verifyStoredEventTimeContextWithBundledArtifact({
+      datePrecision: historical.datePrecision,
+      startDate: historical.startDate,
+      endDate: historical.endDate,
+      timeContext: historical.timeContext
+    })).resolves.toMatchObject({ status: "structural_artifact_unavailable" });
+    expect((await research.getEvent(historical.id))?.timeContext).toEqual(historical.timeContext);
+    expect((await research.listEventsByCase(historical.caseId))[0]?.timeContext)
+      .toEqual(historical.timeContext);
+
+    const edited = await research.updateEvent(historical.id, {
+      title: "stored-only reviewed",
+      tags: ["historical"],
+      sourceRefs: ["review:stored-only"],
+      feedback: "supports",
+      body: "metadata remains editable"
+    });
+    expect(edited).toMatchObject({
+      title: "stored-only reviewed",
+      tags: ["historical"],
+      sourceRefs: ["review:stored-only"],
+      feedback: "supports",
+      body: "metadata remains editable"
+    });
+    expect(edited.timeContext).toEqual(historical.timeContext);
+    expect((await research.softDeleteEvent(historical.id)).timeContext).toEqual(historical.timeContext);
+    expect((await research.restoreEvent(historical.id)).timeContext).toEqual(historical.timeContext);
+
+    await expect(research.updateEvent(historical.id, { startDate: "2025-03-12T12:01" }))
+      .rejects.toMatchObject({ code: "HISTORICAL_EVENT_TIME_DERIVATION_REQUIRED" });
+    await expect(research.updateEvent(historical.id, { timeZone: "Asia/Shanghai" }))
+      .rejects.toMatchObject({ code: "HISTORICAL_EVENT_TIME_DERIVATION_REQUIRED" });
+  });
+
+  it("exactly verifies every retained Event before a full snapshot replacement write", async () => {
+    const source = createRepositories();
+    const bundle = await seedCase(source.cases, "retained Event restore source");
+    const current = await source.research.createEvent({
+      ...eventInput(bundle.caseRecord.id, bundle.revisions[0].id),
+      datePrecision: "minute",
+      startDate: "2025-03-12T12:00",
+      endDate: null,
+      timeZone: "Asia/Shanghai"
+    });
+    const retainedTimeContext = await resolveEventTimeContextForBundledSnapshot({
+      datePrecision: current.datePrecision,
+      startDate: current.startDate,
+      endDate: current.endDate,
+      timeZone: "Asia/Shanghai"
+    }, RETAINED_TZDB_2025B_SNAPSHOT_ID);
+    const snapshot = await source.cases.readFullDataSnapshot();
+    snapshot.events[0] = storedEventRecordSchema.parse({
+      ...snapshot.events[0],
+      timeContext: retainedTimeContext
+    });
+
+    const validDestination = createRepositories();
+    await expect(validDestination.cases.replaceFullDataSnapshot(snapshot)).resolves.toBeUndefined();
+
+    const tampered = structuredClone(snapshot);
+    const tamperedContext = tampered.events[0]?.timeContext;
+    if (tamperedContext?.kind !== "zoned_minute") throw new Error("expected retained Event fixture");
+    tamperedContext.start.resolution.candidates[0]!.zonedDateTime =
+      tamperedContext.start.resolution.candidates[0]!.zonedDateTime.replace("12:00:00", "12:00:01");
+    tamperedContext.start.resolution.selectedCandidate = structuredClone(
+      tamperedContext.start.resolution.candidates[0]!
+    );
+    const invalidDestination = createRepositories();
+    await expect(invalidDestination.cases.replaceFullDataSnapshot(tampered))
+      .rejects.toMatchObject({ code: "EVENT_TIME_CONTEXT_MISMATCH" });
+    expect(await invalidDestination.database.events.count()).toBe(0);
   });
 
   it("cascades Event receipts when a parent Case or CandidateSet is permanently deleted", async () => {

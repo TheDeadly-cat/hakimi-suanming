@@ -5,10 +5,12 @@
   "type": "module",
   "exports": "./src/index.ts",
   "dependencies": {
+    "@hakimi/bazi-interpretation": "*",
     "@hakimi/comparison-core": "*",
     "@hakimi/chart-integrity": "*",
     "@hakimi/contracts": "*",
     "@hakimi/integrity": "*",
+    "@hakimi/knowledge-core": "*",
     "@hakimi/revision-replay": "*",
     "@hakimi/time-core": "*",
     "zod": "4.4.3"

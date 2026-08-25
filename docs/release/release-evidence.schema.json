@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hakimi.invalid/schemas/release-evidence-v1.json",
+  "title": "Hakimi engineering release evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evidenceType",
+    "evidenceId",
+    "generatedAt",
+    "source",
+    "release",
+    "toolchain",
+    "policyFiles",
+    "testReceipts",
+    "artifacts",
+    "gates",
+    "claims"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "evidenceType": { "const": "engineering_release_evidence" },
+    "evidenceId": { "pattern": "^hre1-[a-f0-9]{32}$" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit", "branch", "dirty", "untrackedSourceFileCount", "sourceTreeDigest", "packageLockSha256"],
+      "properties": {
+        "repository": { "type": ["string", "null"] },
+        "commit": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+        "branch": { "type": "string" },
+        "dirty": { "type": "boolean" },
+        "untrackedSourceFileCount": { "type": "integer", "minimum": 0 },
+        "sourceTreeDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "packageLockSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channel", "candidateLabel", "descriptor", "manifestVersion", "manifestDigest", "buildVersion", "builtEvidenceId", "evidenceIdBound", "requiredReceiptIds"],
+      "properties": {
+        "channel": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" },
+        "candidateLabel": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "descriptor": {
+          "type": "object",
+          "required": ["dbGeneration", "databaseName", "targetSchema", "migrationId"],
+          "properties": {
+            "dbGeneration": { "type": "string" },
+            "databaseName": { "type": "string" },
+            "targetSchema": { "type": "integer" },
+            "migrationId": { "type": ["string", "null"] }
+          }
+        },
+        "manifestVersion": { "const": 1 },
+        "manifestDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "buildVersion": { "type": "string", "pattern": "^[a-f0-9]{12}$" },
+        "builtEvidenceId": { "type": "string" },
+        "evidenceIdBound": { "type": "boolean" },
+        "requiredReceiptIds": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" } }
+      }
+    },
+    "toolchain": { "type": "object" },
+    "policyFiles": { "type": "array", "items": { "type": "object", "required": ["path", "sha256"] } },
+    "testReceipts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "evidenceId", "status", "exitCode", "command", "browserResultSummary", "path", "sha256"],
+        "properties": {
+          "browserResultSummary": { "type": ["object", "null"] }
+        }
+      }
+    },
+    "artifacts": { "type": "object", "required": ["root", "count", "artifactSetDigest", "files"] },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceTreeClean", "evidenceIdBound", "defaultReleaseDescriptorMatched", "requiredReceiptsPresent", "allRecordedReceiptsPassed", "policyReceiptSetMatched", "policyReceiptCommandsMatched", "browserResultSummariesMatched", "engineeringGatePassed", "releaseHistoryOwnerConfirmed", "hostingSecurityVerified", "publicDeploymentAuthorized", "licenseOwnerSelectionRecorded", "expertClaimsAuthorized"],
+      "properties": {
+        "sourceTreeClean": { "type": "boolean" },
+        "evidenceIdBound": { "type": "boolean" },
+        "defaultReleaseDescriptorMatched": { "type": "boolean" },
+        "requiredReceiptsPresent": { "type": "boolean" },
+        "allRecordedReceiptsPassed": { "type": "boolean" },
+        "policyReceiptSetMatched": { "type": "boolean" },
+        "policyReceiptCommandsMatched": { "type": "boolean" },
+        "browserResultSummariesMatched": { "type": "boolean" },
+        "engineeringGatePassed": { "type": "boolean" },
+        "releaseHistoryOwnerConfirmed": { "type": "boolean" },
+        "hostingSecurityVerified": { "type": "boolean" },
+        "publicDeploymentAuthorized": { "type": "boolean" },
+        "licenseOwnerSelectionRecorded": { "type": "boolean" },
+        "expertClaimsAuthorized": { "type": "boolean" }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engineeringEvidenceOnly", "codeSignature", "expertSignature", "contentRightsGrant", "publicReleaseAuthorized"],
+      "properties": {
+        "engineeringEvidenceOnly": { "const": true },
+        "codeSignature": { "const": false },
+        "expertSignature": { "const": false },
+        "contentRightsGrant": { "const": false },
+        "publicReleaseAuthorized": { "const": false }
+      }
+    }
+  }
+}

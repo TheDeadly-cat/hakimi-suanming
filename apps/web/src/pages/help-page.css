@@ -1,0 +1,1515 @@
+.page--help {
+  --help-info: #4b7181;
+  --help-reading: #6e9bad;
+  --help-info-wash: rgba(75, 113, 129, 0.08);
+  --help-grid-line: rgba(75, 113, 129, 0.055);
+  --help-shadow: 0 24px 70px rgba(48, 43, 32, 0.08);
+  isolation: isolate;
+}
+
+.page--help :is(a, button, summary):focus-visible {
+  outline: 3px solid var(--help-info);
+  outline-offset: 3px;
+}
+
+.page--help .help-start {
+  position: relative;
+  display: grid;
+  grid-template-areas:
+    "intro ledger"
+    "checklist checklist";
+  grid-template-columns: minmax(0, 1.12fr) minmax(300px, 0.58fr);
+  gap: 30px clamp(28px, 4vw, 54px);
+  overflow: hidden;
+  margin-top: 30px;
+  padding: clamp(24px, 3.5vw, 44px);
+  border: 1px solid var(--line-200);
+  border-top: 4px solid var(--help-info);
+  border-radius: 2px 22px 22px 2px;
+  background:
+    linear-gradient(110deg, var(--help-info-wash), rgba(255, 255, 255, 0.36) 54%, transparent 74%),
+    linear-gradient(var(--help-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--help-grid-line) 1px, transparent 1px),
+    var(--paper-raised);
+  background-size: auto, 36px 36px, 36px 36px, auto;
+  box-shadow: var(--help-shadow);
+  animation: help-page-rise 420ms ease-out both;
+}
+
+.page--help .help-start::after {
+  position: absolute;
+  top: 26px;
+  right: -34px;
+  width: 126px;
+  height: 126px;
+  border: 1px solid rgba(170, 57, 41, 0.18);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.page--help .help-start-copy {
+  z-index: 1;
+  display: grid;
+  grid-area: intro;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 18px;
+}
+
+.page--help .help-start-copy > svg {
+  width: 34px;
+  height: 34px;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--help-info) 38%, var(--line-200));
+  border-radius: 50%;
+  box-sizing: content-box;
+  background: var(--paper-raised);
+  color: var(--help-info);
+}
+
+.page--help .help-start h2 {
+  max-width: 620px;
+  margin-bottom: 12px;
+  font-size: clamp(28px, 3.4vw, 44px);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.page--help .help-start-copy p:not(.eyebrow) {
+  max-width: 690px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.page--help .help-release-ledger {
+  z-index: 1;
+  grid-area: ledger;
+  align-self: start;
+  padding: 21px 22px 19px;
+  border-top: 3px solid var(--cinnabar-650);
+  border-radius: 2px 14px 14px 2px;
+  background: var(--ink-900);
+  color: var(--paper-raised);
+  box-shadow: 0 18px 36px rgba(26, 31, 27, 0.16);
+}
+
+.page--help .help-release-ledger-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.page--help .help-release-ledger-heading span,
+.page--help .help-release-ledger dt {
+  color: rgba(255, 255, 255, 0.62);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.page--help .help-release-ledger-heading strong {
+  color: var(--paper-raised);
+  font-size: 13px;
+}
+
+.page--help .help-release-ledger dl {
+  display: grid;
+  gap: 0;
+  margin: 11px 0 0;
+}
+
+.page--help .help-release-ledger dl > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.page--help .help-release-ledger dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--paper-raised);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.page--help .help-release-ledger p {
+  margin: 14px 0 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.page--help .help-start-checklist {
+  z-index: 1;
+  grid-area: checklist;
+  padding-top: 24px;
+  border-top: 1px solid var(--line-200);
+}
+
+.page--help .help-checklist-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  margin-bottom: 14px;
+}
+
+.page--help .help-checklist-heading > span {
+  padding-top: 3px;
+  color: var(--cinnabar-650);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.page--help .help-checklist-heading p {
+  margin: 0 0 3px;
+}
+
+.page--help .help-checklist-heading h3 {
+  margin: 0;
+  font-family: var(--font-editorial);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.page--help .help-first-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid var(--line-200);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.page--help .help-first-steps li {
+  grid-template-columns: 28px minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  align-content: start;
+  align-items: start;
+  gap: 10px 7px;
+  padding: 17px 15px 15px;
+  border-top: 0;
+  border-left: 1px solid var(--line-100);
+}
+
+.page--help .help-first-steps li:first-child {
+  border-left: 0;
+}
+
+.page--help .help-first-steps li::before {
+  grid-row: 1 / -1;
+  padding-top: 2px;
+}
+
+.page--help .help-first-steps li > span,
+.page--help .help-first-steps li > a {
+  grid-column: 2;
+}
+
+.page--help .help-first-steps li > a {
+  align-self: end;
+  justify-self: start;
+  min-height: 44px;
+  white-space: normal;
+}
+
+.page--help .help-task-router {
+  overflow: hidden;
+  margin-top: 24px;
+  border: 1px solid var(--line-200);
+  border-radius: 2px 16px 16px 2px;
+  background: var(--paper-raised);
+  box-shadow: 0 16px 44px rgba(48, 43, 32, 0.055);
+  animation: help-page-rise 420ms 45ms ease-out both;
+}
+
+.page--help .help-task-router-heading {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.28fr);
+  gap: clamp(24px, 5vw, 70px);
+  align-items: end;
+  padding: 22px clamp(20px, 3vw, 32px);
+  border-bottom: 1px solid var(--line-200);
+}
+
+.page--help .help-task-router-heading h2 {
+  margin: 0;
+  font-family: var(--font-editorial);
+  font-size: clamp(23px, 2.5vw, 31px);
+  font-weight: 600;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.page--help .help-task-router-heading > p {
+  max-width: 690px;
+  margin: 0;
+  color: var(--ink-650);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.page--help .help-task-routes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line-200);
+}
+
+.page--help .help-task-route {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 17px;
+  gap: 11px;
+  align-items: start;
+  min-width: 0;
+  min-height: 156px;
+  padding: 20px 17px 18px;
+  background: var(--paper-raised);
+  color: var(--ink-900);
+  text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.page--help .help-task-route--urgent {
+  background:
+    radial-gradient(circle at 12% 10%, rgba(216, 164, 95, 0.14), transparent 42%),
+    var(--ink-900);
+  color: var(--paper-raised);
+}
+
+.page--help .help-task-route-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line-200);
+  border-radius: 50%;
+  color: var(--help-info);
+}
+
+.page--help .help-task-route--urgent .help-task-route-icon {
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #d8a45f;
+}
+
+.page--help .help-task-route-icon svg,
+.page--help .help-task-route > svg {
+  width: 16px;
+  height: 16px;
+}
+
+.page--help .help-task-route > svg {
+  margin-top: 9px;
+  color: var(--help-info);
+}
+
+.page--help .help-task-route--urgent > svg {
+  color: #d8a45f;
+}
+
+.page--help .help-task-route-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.page--help .help-task-route-copy small {
+  color: var(--help-info);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+}
+
+.page--help .help-task-route--urgent .help-task-route-copy small {
+  color: #d8a45f;
+}
+
+.page--help .help-task-route-copy strong {
+  font-family: var(--font-editorial);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.page--help .help-task-route-copy > span {
+  color: var(--ink-650);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.page--help .help-task-route--urgent .help-task-route-copy > span {
+  color: rgba(255, 255, 255, 0.67);
+}
+
+.page--help .help-task-route:hover {
+  background: var(--help-info-wash);
+  color: var(--help-info);
+  transform: translateY(-2px);
+}
+
+.page--help .help-task-route--urgent:hover {
+  background: var(--ink-800);
+  color: var(--paper-raised);
+}
+
+.page--help .help-task-route:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 3px solid var(--help-info);
+  outline-offset: -4px;
+}
+
+.page--help .help-evidence-guide {
+  margin-top: 34px;
+  padding: clamp(24px, 3.2vw, 38px);
+  border: 1px solid var(--line-200);
+  border-radius: 18px 2px 18px 2px;
+  background: var(--paper-raised);
+  box-shadow: 0 18px 55px rgba(48, 43, 32, 0.055);
+  animation: help-page-rise 420ms 70ms ease-out both;
+}
+
+.page--help .help-evidence-heading {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.72fr) minmax(0, 1.28fr);
+  gap: clamp(24px, 5vw, 70px);
+  align-items: end;
+  padding-bottom: 22px;
+  border-bottom: 3px solid var(--ink-900);
+}
+
+.page--help .help-evidence-heading h2,
+.page--help .help-appendix-heading h2 {
+  margin: 0;
+  font-family: var(--font-editorial);
+  font-size: clamp(25px, 2.8vw, 34px);
+  font-weight: 600;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.page--help .help-evidence-heading > p,
+.page--help .help-appendix-heading > p {
+  max-width: 700px;
+  margin: 0;
+  color: var(--ink-650);
+  line-height: 1.75;
+}
+
+.page--help .help-evidence-levels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.page--help .help-evidence-card {
+  position: relative;
+  min-width: 0;
+  padding: 23px 22px 21px;
+  border-bottom: 1px solid var(--line-200);
+  border-left: 1px solid var(--line-100);
+}
+
+.page--help .help-evidence-card:first-child {
+  border-left: 0;
+}
+
+.page--help .help-evidence-card::before {
+  position: absolute;
+  top: 0;
+  right: 22px;
+  left: 22px;
+  height: 3px;
+  background: var(--jade-700);
+  content: "";
+}
+
+.page--help .help-evidence-card--trace::before {
+  background: var(--help-info);
+}
+
+.page--help .help-evidence-card--closed::before {
+  background: var(--cinnabar-650);
+}
+
+.page--help .help-evidence-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 17px;
+  padding-top: 3px;
+}
+
+.page--help .help-evidence-card-meta span {
+  color: var(--cinnabar-650);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.page--help .help-evidence-card-meta small {
+  padding: 3px 7px;
+  border: 1px solid var(--line-200);
+  border-radius: 999px;
+  color: var(--ink-650);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.page--help .help-evidence-card h3 {
+  margin: 0 0 9px;
+  font-family: var(--font-editorial);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.page--help .help-evidence-card p {
+  margin: 0 0 16px;
+  color: var(--ink-650);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.page--help .help-evidence-card > strong {
+  display: block;
+  padding-top: 13px;
+  border-top: 1px solid var(--line-100);
+  color: var(--ink-900);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.page--help .help-capability-register {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.page--help .help-capability-item {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  gap: 13px;
+  padding: 15px 16px;
+  border-left: 3px solid var(--jade-700);
+  background: var(--jade-50);
+}
+
+.page--help .help-capability-item--trace {
+  border-left-color: var(--help-info);
+  background: var(--help-info-wash);
+}
+
+.page--help .help-capability-item--closed {
+  border-left-color: var(--cinnabar-650);
+  background: var(--danger-bg);
+}
+
+.page--help .help-capability-item > span {
+  padding-top: 3px;
+  color: var(--ink-650);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.page--help .help-capability-item div {
+  display: grid;
+  gap: 3px;
+}
+
+.page--help .help-capability-item small {
+  color: var(--ink-650);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.page--help .help-capability-item strong {
+  font-size: 13px;
+}
+
+.page--help .help-capability-item p {
+  margin: 3px 0 0;
+  color: var(--ink-650);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.page--help .help-topic-nav {
+  position: sticky;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  z-index: 6;
+  display: grid;
+  grid-template-columns: minmax(112px, 0.72fr) minmax(0, 5.28fr);
+  overflow: hidden;
+  margin-top: 36px;
+  border: 1px solid var(--line-200);
+  border-left: 3px solid var(--cinnabar-650);
+  border-radius: 2px 12px 12px 2px;
+  background: var(--paper-raised);
+  box-shadow: 0 14px 34px rgba(48, 43, 32, 0.08);
+}
+
+.page--help .help-topic-progress {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.page--help .help-topic-progress > span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--help-reading), var(--help-info));
+  transition: transform 180ms ease-out;
+}
+
+.page--help .help-topic-nav-label {
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  padding: 10px 16px;
+  border-right: 1px solid var(--line-200);
+  background: var(--ink-900);
+  color: var(--paper-raised);
+}
+
+.page--help .help-topic-nav-label small {
+  color: rgba(255, 255, 255, 0.58);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.page--help .help-topic-nav-label strong {
+  font-family: var(--font-editorial);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.page--help .help-topic-nav-links {
+  display: flex;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-padding-inline: 12px;
+  scrollbar-color: var(--help-reading) transparent;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+
+.page--help .help-topic-nav-links a {
+  position: relative;
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  flex: 1 0 112px;
+  min-height: 52px;
+  padding: 8px 12px;
+  border-left: 1px solid var(--line-100);
+  color: var(--ink-800);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.page--help .help-topic-nav-links a:first-child {
+  border-left: 0;
+}
+
+.page--help .help-topic-nav-links a > span {
+  color: var(--cinnabar-650);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.page--help .help-topic-nav-links a:hover,
+.page--help .help-topic-nav-links a:focus-visible,
+.page--help .help-topic-nav-links a[aria-current="location"] {
+  background: var(--help-info-wash);
+  color: var(--help-info);
+}
+
+.page--help .help-topic-nav-links a[aria-current="location"] {
+  box-shadow: inset 0 -3px var(--help-info);
+}
+
+.page--help .help-topic-nav-links a:focus-visible {
+  z-index: 1;
+  outline: 3px solid var(--help-info);
+  outline-offset: -3px;
+}
+
+.page--help .help-sections {
+  border-top: 0;
+}
+
+.page--help .help-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 360px;
+  scroll-margin-top: 88px;
+  padding: 40px 0;
+}
+
+.page--help .help-section:target {
+  background: linear-gradient(90deg, var(--help-info-wash), transparent 62%);
+  box-shadow: inset 3px 0 var(--help-info);
+}
+
+.page--help .help-section:target .help-section-heading > span {
+  color: var(--help-info);
+}
+
+.page--help .help-section:focus {
+  outline: 0;
+}
+
+.page--help .help-section:focus-visible {
+  outline: 3px solid var(--help-info);
+  outline-offset: 4px;
+}
+
+.page--help .help-anchor-section {
+  scroll-margin-top: 88px;
+}
+
+.page--help .help-anchor-section:target {
+  background: linear-gradient(90deg, var(--jade-50), transparent 62%);
+  box-shadow: inset 3px 0 var(--jade-700);
+}
+
+.page--help .help-anchor-section:focus {
+  outline: 0;
+}
+
+.page--help .help-anchor-section:focus-visible {
+  outline: 3px solid var(--help-info);
+  outline-offset: 4px;
+}
+
+.page--help .help-section-heading > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page--help .help-section-heading > span::after {
+  width: 36px;
+  height: 1px;
+  background: var(--cinnabar-650);
+  content: "";
+}
+
+.page--help .help-section-heading h2 {
+  font-size: 23px;
+  text-wrap: balance;
+}
+
+.page--help .help-section-body li::marker {
+  color: var(--cinnabar-650);
+}
+
+.page--help .help-boundary-note {
+  border-top: 1px solid rgba(170, 57, 41, 0.22);
+  border-right: 1px solid rgba(170, 57, 41, 0.14);
+  border-bottom: 1px solid rgba(170, 57, 41, 0.14);
+  border-radius: 2px 10px 10px 2px;
+}
+
+.page--help .help-system {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 320px;
+  padding: 30px;
+  border: 1px solid var(--line-200);
+  border-top: 4px solid var(--help-info);
+  border-radius: 2px 16px 16px 2px;
+  background:
+    linear-gradient(115deg, var(--help-info-wash), transparent 46%),
+    var(--paper-raised);
+  box-shadow: 0 16px 44px rgba(48, 43, 32, 0.05);
+}
+
+.page--help .help-system dl > div {
+  padding: 13px 0;
+}
+
+.page--help .help-faq {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 360px;
+  max-width: none;
+  margin-top: 42px;
+}
+
+.page--help .help-faq details {
+  background: var(--paper-raised);
+}
+
+.page--help .help-faq summary {
+  position: relative;
+  min-height: 58px;
+  padding-right: 42px;
+  padding-left: 14px;
+  list-style: none;
+}
+
+.page--help .help-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.page--help .help-faq summary::after {
+  position: absolute;
+  right: 14px;
+  color: var(--cinnabar-650);
+  font-family: var(--font-mono);
+  font-size: 18px;
+  content: "+";
+}
+
+.page--help .help-faq details[open] summary::after {
+  content: "−";
+}
+
+.page--help .help-faq details p {
+  max-width: 900px;
+  padding-right: 42px;
+  padding-left: 14px;
+}
+
+.page--help .help-appendix {
+  margin-top: 54px;
+  padding-top: 34px;
+  border-top: 4px double var(--ink-900);
+}
+
+.page--help .help-appendix-heading {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.72fr) minmax(0, 1.28fr);
+  gap: clamp(24px, 5vw, 70px);
+  align-items: end;
+}
+
+.page--help .help-appendix > .research-system-roadmap-section,
+.page--help .help-appendix > .research-content-catalog-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 860px;
+}
+
+.page--help:focus {
+  outline: 0;
+}
+
+.page--help .help-back-to-top {
+  display: flex;
+  width: min(100%, 310px);
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 38px auto 0;
+  padding: 12px 16px;
+  border: 1px solid var(--line-200);
+  border-top: 3px solid var(--cinnabar-650);
+  border-radius: 2px 12px 12px 2px;
+  background: linear-gradient(110deg, var(--paper-raised), var(--help-info-wash));
+  color: var(--ink-900);
+  text-decoration: none;
+  box-shadow: 0 12px 28px rgba(48, 43, 32, 0.07);
+  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.page--help .help-back-to-top span,
+.page--help .help-back-to-top small,
+.page--help .help-back-to-top strong {
+  display: block;
+}
+
+.page--help .help-back-to-top small {
+  color: var(--ink-550);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.page--help .help-back-to-top strong {
+  margin-top: 2px;
+  font-family: var(--font-editorial);
+  font-size: 15px;
+}
+
+.page--help .help-back-to-top svg {
+  width: 19px;
+  height: 19px;
+  color: var(--cinnabar-650);
+}
+
+.page--help .help-back-to-top:hover,
+.page--help .help-back-to-top:focus-visible {
+  border-color: var(--help-reading);
+  box-shadow: 0 16px 34px rgba(48, 43, 32, 0.11);
+  transform: translateY(-2px);
+}
+
+.page--help .help-back-to-top:focus-visible {
+  outline: 3px solid var(--help-info);
+  outline-offset: 3px;
+}
+
+@keyframes help-page-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 960px) {
+  .page--help .help-start {
+    grid-template-areas:
+      "intro"
+      "ledger"
+      "checklist";
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page--help .help-release-ledger {
+    display: grid;
+    grid-template-columns: minmax(190px, 0.55fr) minmax(260px, 1fr);
+    gap: 0 24px;
+  }
+
+  .page--help .help-release-ledger-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: flex-start;
+    border-bottom: 0;
+  }
+
+  .page--help .help-release-ledger p {
+    grid-column: 2;
+  }
+
+  .page--help .help-first-steps,
+  .page--help .help-evidence-levels,
+  .page--help .help-capability-register {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page--help .help-task-router-heading {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .page--help .help-task-routes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page--help .help-first-steps li:nth-child(3),
+  .page--help .help-first-steps li:nth-child(4),
+  .page--help .help-evidence-card:nth-child(3) {
+    border-top: 1px solid var(--line-100);
+  }
+
+  .page--help .help-first-steps li:nth-child(3),
+  .page--help .help-evidence-card:nth-child(3) {
+    border-left: 0;
+  }
+
+  .page--help .help-evidence-card:last-child,
+  .page--help .help-capability-item:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .page--help .help-evidence-heading,
+  .page--help .help-appendix-heading {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .page--help .help-topic-nav {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .page--help .help-topic-nav-links {
+    min-width: 0;
+  }
+
+  .page--help .help-topic-nav-links a {
+    flex: 0 0 132px;
+    scroll-snap-align: start;
+  }
+}
+
+@media (max-width: 767px) {
+  .page--help .help-start {
+    gap: 22px;
+    margin-top: 22px;
+    padding: 19px 14px;
+    border-radius: 2px 14px 14px 2px;
+  }
+
+  .page--help .help-start-copy {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 11px;
+  }
+
+  .page--help .help-start-copy > svg {
+    width: 22px;
+    height: 22px;
+    padding: 5px;
+  }
+
+  .page--help .help-start h2 {
+    font-size: 28px;
+  }
+
+  .page--help .help-release-ledger {
+    display: block;
+    padding: 18px 16px;
+  }
+
+  .page--help .help-release-ledger-heading {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .page--help .help-release-ledger p {
+    grid-column: auto;
+  }
+
+  .page--help .help-first-steps,
+  .page--help .help-evidence-levels,
+  .page--help .help-capability-register {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page--help .help-task-router {
+    border-radius: 2px 13px 13px 2px;
+  }
+
+  .page--help .help-task-router-heading {
+    padding: 19px 14px;
+  }
+
+  .page--help .help-task-routes {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: clamp(250px, 82vw, 330px);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: 1px;
+    scroll-snap-type: inline proximity;
+    scrollbar-gutter: stable;
+    scrollbar-color: var(--help-reading) transparent;
+    scrollbar-width: thin;
+  }
+
+  .page--help .help-task-route {
+    min-height: 0;
+    padding: 17px 14px;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .page--help .help-first-steps li,
+  .page--help .help-first-steps li:nth-child(3),
+  .page--help .help-first-steps li:nth-child(4) {
+    grid-template-columns: 27px minmax(0, 1fr);
+    padding: 15px 13px;
+    border-top: 1px solid var(--line-100);
+    border-left: 0;
+  }
+
+  .page--help .help-first-steps li:first-child {
+    border-top: 0;
+  }
+
+  .page--help .help-evidence-guide {
+    padding: 21px 14px;
+    border-radius: 13px 2px 13px 2px;
+  }
+
+  .page--help .help-evidence-card,
+  .page--help .help-evidence-card:nth-child(3) {
+    grid-column: auto;
+    padding: 21px 10px 19px;
+    border-top: 1px solid var(--line-100);
+    border-left: 0;
+  }
+
+  .page--help .help-evidence-card:first-child {
+    border-top: 0;
+  }
+
+  .page--help .help-capability-item,
+  .page--help .help-capability-item:last-child {
+    grid-column: auto;
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .page--help .help-section-heading > span::after {
+    width: 22px;
+  }
+
+  .page--help .help-system {
+    padding: 21px 14px;
+  }
+
+  .page--help .help-appendix {
+    margin-top: 44px;
+    padding-top: 26px;
+  }
+
+  .page--help .help-topic-nav {
+    top: calc(6px + env(safe-area-inset-top, 0px));
+    margin-top: 28px;
+    border-radius: 2px 9px 9px 2px;
+  }
+
+  .page--help .help-topic-nav-label {
+    padding: 9px 11px;
+  }
+
+  .page--help .help-topic-nav-label small {
+    font-size: 10px;
+  }
+
+  .page--help .help-topic-nav-label strong {
+    font-size: 13px;
+  }
+
+  .page--help .help-topic-nav-links a {
+    flex-basis: 112px;
+    min-height: 50px;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .page--help .help-section {
+    scroll-margin-top: 76px;
+  }
+
+  .page--help .help-anchor-section {
+    scroll-margin-top: 76px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page--help .help-start,
+  .page--help .help-task-router,
+  .page--help .help-evidence-guide {
+    animation: none;
+  }
+
+  .page--help .help-task-route {
+    transition: none;
+  }
+
+  .page--help .help-task-route:hover {
+    transform: none;
+  }
+
+  .page--help .help-topic-nav-links a {
+    transition: none;
+  }
+
+  .page--help .help-back-to-top {
+    transition: none;
+  }
+
+  .page--help .help-back-to-top:hover,
+  .page--help .help-back-to-top:focus-visible {
+    transform: none;
+  }
+
+  .page--help .help-topic-progress > span {
+    transition: none;
+  }
+}
+
+@media (max-width: 430px) {
+  .page--help .help-release-ledger-heading,
+  .page--help .help-release-ledger dl > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
+    align-items: start;
+  }
+
+  .page--help .help-release-ledger dd {
+    text-align: left;
+  }
+
+  .page--help .help-capability-item,
+  .page--help .help-capability-item:last-child {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page--help .help-topic-nav {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page--help .help-topic-nav-label {
+    display: none;
+  }
+
+  .page--help .help-topic-nav-links a {
+    flex-basis: 106px;
+  }
+
+  .page--help .help-back-to-top {
+    width: 100%;
+  }
+}
+
+@media (prefers-contrast: more) and (forced-colors: none) {
+  .page--help {
+    --help-info: #315c6e;
+    --help-info-wash: rgba(49, 92, 110, 0.14);
+    --help-grid-line: rgba(49, 92, 110, 0.13);
+  }
+
+  .page--help .help-start,
+  .page--help .help-task-router,
+  .page--help .help-evidence-guide,
+  .page--help .help-topic-nav,
+  .page--help .help-system,
+  .page--help .help-faq details {
+    border-width: 2px;
+  }
+}
+
+@media (forced-colors: active) {
+  .page--help .help-start,
+  .page--help .help-task-router,
+  .page--help .help-release-ledger,
+  .page--help .help-evidence-guide,
+  .page--help .help-evidence-card,
+  .page--help .help-capability-item,
+  .page--help .help-topic-nav,
+  .page--help .help-topic-nav-label,
+  .page--help .help-system,
+  .page--help .help-faq details {
+    border-color: CanvasText;
+    color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  .page--help .help-task-routes {
+    background: CanvasText;
+  }
+
+  .page--help .help-task-route,
+  .page--help .help-task-route--urgent {
+    background: Canvas;
+    color: LinkText;
+  }
+
+  .page--help .help-task-route-icon,
+  .page--help .help-task-route--urgent .help-task-route-icon {
+    border-color: LinkText;
+    color: LinkText;
+  }
+
+  .page--help .help-task-route-copy small,
+  .page--help .help-task-route--urgent .help-task-route-copy small,
+  .page--help .help-task-route-copy > span,
+  .page--help .help-task-route--urgent .help-task-route-copy > span,
+  .page--help .help-task-route > svg,
+  .page--help .help-task-route--urgent > svg {
+    color: LinkText;
+  }
+
+  .page--help .help-back-to-top {
+    border-color: CanvasText;
+    color: LinkText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  .page--help .help-release-ledger-heading span,
+  .page--help .help-release-ledger-heading strong,
+  .page--help .help-release-ledger dt,
+  .page--help .help-release-ledger dd,
+  .page--help .help-release-ledger p,
+  .page--help .help-topic-nav-label small,
+  .page--help .help-topic-nav-label strong {
+    color: CanvasText;
+  }
+
+  .page--help .help-topic-nav-links a[aria-current="location"],
+  .page--help .help-topic-nav-links a:focus-visible,
+  .page--help .help-section:target,
+  .page--help .help-section:focus-visible,
+  .page--help .help-anchor-section:target,
+  .page--help .help-anchor-section:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: -3px;
+    color: LinkText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  .page--help .help-topic-progress > span {
+    background: Highlight;
+  }
+
+  .page--help :is(a, button, summary):focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* Final guide-reading pass for dense boundaries and long-form instructions. */
+.page--help :is(
+  .help-release-ledger dd,
+  .help-release-ledger p,
+  .help-first-steps small,
+  .help-task-route-copy,
+  .help-evidence-card p,
+  .help-evidence-card strong,
+  .help-capability-item,
+  .help-section-body,
+  .help-system dd,
+  .help-faq details p
+) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  unicode-bidi: plaintext;
+}
+
+.page--help :is(
+  .help-start-copy p:not(.eyebrow),
+  .help-release-ledger p,
+  .help-task-router-heading > p,
+  .help-task-route-copy > span,
+  .help-evidence-heading > p,
+  .help-evidence-card p,
+  .help-evidence-card strong,
+  .help-section-body p,
+  .help-section-body li,
+  .help-faq details p,
+  .help-appendix-heading > p
+) {
+  text-wrap: pretty;
+}
+
+.page--help .help-release-ledger-heading span,
+.page--help .help-release-ledger dt,
+.page--help .help-checklist-heading > span,
+.page--help .help-task-route-copy small,
+.page--help .help-topic-nav-label small {
+  font-size: 12px;
+}
+
+.page--help .help-release-ledger p,
+.page--help .help-task-route-copy > span {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.page--help .help-section-body :is(p, li),
+.page--help .help-faq details p {
+  line-height: 1.75;
+}
+
+.page--help .help-topic-nav-links {
+  scrollbar-gutter: stable;
+}
+
+.page--help :is(
+  .help-release-ledger-heading,
+  .help-topic-nav-links a,
+  .help-back-to-top,
+  .help-capability-item > span,
+  .help-capability-item > div
+) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.page--help .help-faq summary {
+  min-height: 48px;
+  text-wrap: pretty;
+}
+
+@media (forced-colors: none) {
+  .page--help .help-faq details {
+    border-left: 3px solid transparent;
+  }
+
+  .page--help .help-faq details[open] {
+    border-left-color: var(--help-info);
+    background:
+      linear-gradient(90deg, var(--help-info-wash), transparent 58%),
+      var(--paper-raised);
+  }
+
+  .page--help .help-faq details[open] summary {
+    color: var(--help-info);
+  }
+
+  .page--help .help-faq details[open] p {
+    padding-top: 14px;
+    border-top: 1px solid var(--line-100);
+  }
+}
+
+@media print {
+  @page {
+    margin: 14mm;
+  }
+
+  .page--help {
+    --help-info: #263f49;
+    --help-info-wash: transparent;
+    --help-grid-line: transparent;
+    color: #111;
+  }
+
+  .page--help .page-actions,
+  .page--help .help-topic-nav,
+  .page--help .help-back-to-top,
+  .page--help .help-appendix {
+    display: none !important;
+  }
+
+  .page--help :is(
+    .help-section,
+    .help-system,
+    .help-faq,
+    .help-faq details,
+    .research-system-roadmap-section,
+    .research-content-catalog-section
+  ) {
+    content-visibility: visible !important;
+    contain: none !important;
+  }
+
+  .page--help :is(
+    .help-start,
+    .help-task-router,
+    .help-evidence-guide,
+    .help-release-ledger,
+    .help-system,
+    .help-faq details,
+    .help-task-route,
+    .help-capability-item
+  ) {
+    color: #111;
+    background: #fff;
+    box-shadow: none;
+  }
+
+  .page--help .help-start {
+    display: block;
+    margin-top: 18px;
+    padding: 18px;
+    border: 1px solid #444;
+  }
+
+  .page--help .help-start::after {
+    display: none;
+  }
+
+  .page--help .help-release-ledger {
+    margin-top: 18px;
+    border: 1px solid #444;
+  }
+
+  .page--help .help-release-ledger :is(
+    .help-release-ledger-heading span,
+    .help-release-ledger-heading strong,
+    dt,
+    dd,
+    p
+  ) {
+    color: #111;
+  }
+
+  .page--help .help-start-checklist {
+    margin-top: 18px;
+  }
+
+  .page--help .help-first-steps,
+  .page--help .help-task-routes,
+  .page--help .help-evidence-levels,
+  .page--help .help-capability-register {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page--help .help-task-route {
+    min-height: 0;
+    border: 1px solid #aaa;
+  }
+
+  .page--help .help-task-route :is(small, span, svg) {
+    color: #111;
+  }
+
+  .page--help :is(
+    .help-start-copy,
+    .help-release-ledger,
+    .help-first-steps > li,
+    .help-task-route,
+    .help-evidence-card,
+    .help-capability-item,
+    .help-section,
+    .help-system,
+    .help-faq details
+  ) {
+    break-inside: avoid;
+  }
+
+  .page--help .help-section {
+    padding: 22px 0;
+  }
+
+  .page--help .help-section:target,
+  .page--help .help-anchor-section:target {
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .page--help .help-faq details:not([open]) > :not(summary) {
+    display: block !important;
+  }
+}

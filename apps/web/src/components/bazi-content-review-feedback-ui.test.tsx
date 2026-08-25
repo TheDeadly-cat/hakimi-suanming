@@ -11,6 +11,7 @@ import {
 } from "@hakimi/platform";
 import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
 import { BaziInterpretationPanel } from "./bazi-interpretation-panel";
+import { resetPreparedFileDeliveryCoordinatorForTests } from "./prepared-file-delivery-coordinator";
 
 const input: BirthInput = {
   schemaVersion: "1.0.0",
@@ -52,6 +53,7 @@ let lastPickOptions: PickFileOptions | undefined;
 let nextSaveResult: FileSaveResult;
 
 beforeEach(() => {
+  resetPreparedFileDeliveryCoordinatorForTests();
   nextPickedFile = null;
   savedPayloads = [];
   lastPickOptions = undefined;
@@ -91,15 +93,29 @@ afterEach(() => {
   restoreFileTransferPort = null;
 });
 
+async function downloadPreparedFile(expectedFilename: string): Promise<FilePayload> {
+  const previousCount = savedPayloads.length;
+  const dialog = await screen.findByRole("dialog", { name: "待交付文件已在本机生成" });
+  expect(dialog.dataset.sharePolicy).toBe("blocked_sensitive");
+  expect(savedPayloads).toHaveLength(previousCount);
+  fireEvent.click(within(dialog).getByRole("button", { name: /^下载文件/ }));
+  await waitFor(() => expect(savedPayloads).toHaveLength(previousCount + 1));
+  const payload = savedPayloads[previousCount]!;
+  expect(payload.filename).toBe(expectedFilename);
+  fireEvent.click(await within(dialog).findByRole("button", { name: "已核对，允许再次下载" }));
+  fireEvent.click(within(dialog).getByRole("button", { name: "关闭" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  return payload;
+}
+
 describe("Bazi content review feedback workbench", () => {
   it("exports a bound template, preflights attributed feedback, and clears a stale result after invalid input", async () => {
     const { container } = render(<BaziInterpretationPanel revision={await revisionForTest()} />);
     const workbench = container.querySelector<HTMLElement>(".bazi-content-review-feedback-workbench")!;
 
-    fireEvent.click(within(workbench).getByRole("button", { name: "导出 69 项反馈模板" }));
-    await waitFor(() => expect(savedPayloads).toHaveLength(1));
-    expect(savedPayloads[0]?.filename).toBe("hakimi-bazi-content-review-feedback-v017.json");
-    const template = JSON.parse(await savedPayloads[0]!.blob.text()) as {
+    fireEvent.click(within(workbench).getByRole("button", { name: "准备 69 项反馈模板" }));
+    const savedTemplate = await downloadPreparedFile("hakimi-bazi-content-review-feedback-v017.json");
+    const template = JSON.parse(await savedTemplate.blob.text()) as {
       reviewer: Record<string, string | boolean>;
       reviewSession: Record<string, string>;
       items: Array<Record<string, unknown>>;
@@ -149,7 +165,7 @@ describe("Bazi content review feedback workbench", () => {
       chartOrStorageMutationPerformed: "false",
       result: "null"
     });
-    expect(within(workbench).getByText(/只读预检通过：filled-feedback\.json · 已裁决 1\/69/)).toBeTruthy();
+    expect(within(workbench).getByText(/只读结构预检通过：filled-feedback\.json · 已裁决 1\/69/)).toBeTruthy();
     expect(within(workbench).getByText("1 已裁决 · 68 未决", { exact: true })).toBeTruthy();
     expect(within(workbench).getByText("界面审稿人 · reviewer-ui-001", { exact: true })).toBeTruthy();
 
@@ -189,11 +205,11 @@ describe("Bazi content review feedback workbench", () => {
       chartOrStorageMutationPerformed: "false",
       result: "null"
     });
-    expect(within(workbench).getByRole("button", { name: "导出本盘反馈模板" }).hasAttribute("disabled")).toBe(true);
+    expect(within(workbench).getByRole("button", { name: "准备本盘反馈模板" }).hasAttribute("disabled")).toBe(true);
     expect(within(workbench).getByRole("button", { name: "预检本盘反馈 JSON" }).hasAttribute("disabled")).toBe(true);
 
     fireEvent.click(within(workbench).getByRole("button", { name: "准备当前盘复核包" }));
-    await waitFor(() => expect(workbench.dataset.preflightState).toBe("ready"));
+    await waitFor(() => expect(workbench.dataset.preflightState).toBe("bound"));
     expect(workbench.dataset.factsSha256).toMatch(/^[a-f0-9]{64}$/u);
     expect(workbench.dataset.strengthPolicySha256).toMatch(/^[a-f0-9]{64}$/u);
     expect(workbench.dataset.strengthAssessmentSha256).toMatch(/^[a-f0-9]{64}$/u);
@@ -206,10 +222,9 @@ describe("Bazi content review feedback workbench", () => {
       4 + Number(workbench.dataset.tenGodOccurrenceCount) + Number(workbench.dataset.shenshaOccurrenceCount)
     );
 
-    fireEvent.click(within(workbench).getByRole("button", { name: "导出本盘反馈模板" }));
-    await waitFor(() => expect(savedPayloads).toHaveLength(1));
-    expect(savedPayloads[0]?.filename).toBe("hakimi-bazi-current-chart-hit-review-v018.json");
-    const template = JSON.parse(await savedPayloads[0]!.blob.text()) as {
+    fireEvent.click(within(workbench).getByRole("button", { name: "准备本盘反馈模板" }));
+    const savedTemplate = await downloadPreparedFile("hakimi-bazi-current-chart-hit-review-v018.json");
+    const template = JSON.parse(await savedTemplate.blob.text()) as {
       packet: { counts: { total: number }; factsProjection: unknown };
       reviewer: Record<string, string | boolean>;
       reviewSession: Record<string, string>;
@@ -291,7 +306,7 @@ describe("Bazi content review feedback workbench", () => {
       currentChartBound: "false",
       reviewerAttributionComplete: "false"
     });
-    expect(within(workbench).getByRole("button", { name: "导出本盘反馈模板" }).hasAttribute("disabled")).toBe(true);
+    expect(within(workbench).getByRole("button", { name: "准备本盘反馈模板" }).hasAttribute("disabled")).toBe(true);
     expect(screen.queryByText(`1 已裁决 · ${template.packet.counts.total - 1} 未决`, { exact: true })).toBeNull();
   });
 
@@ -300,7 +315,7 @@ describe("Bazi content review feedback workbench", () => {
     const workbench = container.querySelector<HTMLElement>(".bazi-current-chart-review-workbench")!;
 
     fireEvent.click(within(workbench).getByRole("button", { name: "准备当前盘复核包" }));
-    await waitFor(() => expect(workbench.dataset.preflightState).toBe("ready"));
+    await waitFor(() => expect(workbench.dataset.preflightState).toBe("bound"));
 
     nextSaveResult = {
       status: "failed",
@@ -309,11 +324,18 @@ describe("Bazi content review feedback workbench", () => {
       stage: "download",
       reason: "测试下载交付失败"
     };
-    fireEvent.click(within(workbench).getByRole("button", { name: "导出本盘反馈模板" }));
+    fireEvent.click(within(workbench).getByRole("button", { name: "准备本盘反馈模板" }));
+    const dialog = await screen.findByRole("dialog", { name: "待交付文件已在本机生成" });
+    expect(savedPayloads).toHaveLength(0);
+    fireEvent.click(within(dialog).getByRole("button", { name: /^下载文件/ }));
 
-    await waitFor(() => expect(within(workbench).getByText("测试下载交付失败", { exact: true })).toBeTruthy());
-    expect(workbench.dataset.preflightState).toBe("ready");
+    expect(await within(dialog).findByText(/测试下载交付失败/)).toBeTruthy();
+    expect(dialog.dataset.deliveryState).toBe("unknown");
+    expect(workbench.dataset.preflightState).toBe("bound");
     expect(workbench.dataset.currentChartBound).toBe("false");
     expect(savedPayloads).toHaveLength(1);
+    fireEvent.click(within(dialog).getByRole("button", { name: "我已核对，允许再次交付" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "关闭" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 });

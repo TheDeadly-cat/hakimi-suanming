@@ -199,6 +199,7 @@ test("断网后精确修订仍可导出匿名 Markdown、2× PNG 并调用打印
     text: markdown,
     title: "匿名单盘 Markdown"
   });
+  await deliveryDialog.getByRole("button", { name: "已核对，允许再次下载", exact: true }).click();
   await deliveryDialog.getByRole("button", { name: "关闭文件交付", exact: true }).click();
 
   await page.getByRole("button", { name: "预览 PNG / PDF", exact: true }).click();

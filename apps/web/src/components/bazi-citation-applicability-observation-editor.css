@@ -1,0 +1,292 @@
+.bazi-applicability-editor {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid color-mix(in srgb, var(--line) 76%, var(--info) 24%);
+  border-radius: 1.1rem;
+  background: color-mix(in srgb, var(--surface) 94%, var(--info) 6%);
+}
+
+.bazi-applicability-editor__header,
+.bazi-applicability-editor__citation > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.bazi-applicability-editor__header h3,
+.bazi-applicability-editor__citation h4,
+.bazi-applicability-editor__header p,
+.bazi-applicability-editor__citation p {
+  margin: 0;
+}
+
+.bazi-applicability-editor__header h3 {
+  margin-block: 0.22rem 0.35rem;
+  font-size: clamp(1.08rem, 2vw, 1.35rem);
+}
+
+.bazi-applicability-editor__header p:not(.eyebrow),
+.bazi-applicability-editor__citation header p,
+.bazi-applicability-editor__hint {
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+.bazi-applicability-editor__privacy,
+.bazi-applicability-editor__boundary,
+.bazi-applicability-editor__error,
+.bazi-applicability-editor__stale,
+.bazi-applicability-editor__receipt {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 0.8rem;
+}
+
+.bazi-applicability-editor__privacy,
+.bazi-applicability-editor__boundary {
+  border: 1px solid color-mix(in srgb, var(--line) 78%, var(--info) 22%);
+  background: color-mix(in srgb, var(--surface-raised) 90%, var(--info) 10%);
+}
+
+.bazi-applicability-editor__error,
+.bazi-applicability-editor__stale {
+  border: 1px solid color-mix(in srgb, var(--line) 62%, var(--cinnabar) 38%);
+  background: color-mix(in srgb, var(--surface-raised) 90%, var(--cinnabar) 10%);
+}
+
+.bazi-applicability-editor__receipt {
+  border: 1px solid color-mix(in srgb, var(--line) 68%, var(--info) 32%);
+  background: color-mix(in srgb, var(--surface-raised) 88%, var(--info) 12%);
+}
+
+.bazi-applicability-editor__privacy p,
+.bazi-applicability-editor__boundary p,
+.bazi-applicability-editor__error p,
+.bazi-applicability-editor__stale p,
+.bazi-applicability-editor__receipt p {
+  margin: 0;
+  line-height: 1.65;
+}
+
+.bazi-applicability-editor__privacy > svg,
+.bazi-applicability-editor__boundary > svg,
+.bazi-applicability-editor__error > svg,
+.bazi-applicability-editor__stale > svg,
+.bazi-applicability-editor__receipt > svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+  margin-top: 0.2rem;
+}
+
+.bazi-applicability-editor__form {
+  display: grid;
+  gap: 1rem;
+}
+
+.bazi-applicability-editor__form > fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  background: var(--surface-raised);
+}
+
+.bazi-applicability-editor__form legend {
+  padding-inline: 0.35rem;
+  font-weight: 750;
+}
+
+.bazi-applicability-editor__hint {
+  margin: 0 0 0.85rem;
+}
+
+.bazi-applicability-editor__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.bazi-applicability-editor label {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+  font-weight: 650;
+}
+
+.bazi-applicability-editor label > span {
+  font-size: 0.9rem;
+}
+
+.bazi-applicability-editor input,
+.bazi-applicability-editor select,
+.bazi-applicability-editor textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 0.72rem 0.78rem;
+  border: 1px solid var(--line-strong, var(--line));
+  border-radius: 0.65rem;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+}
+
+.bazi-applicability-editor textarea {
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.bazi-applicability-editor input:focus-visible,
+.bazi-applicability-editor select:focus-visible,
+.bazi-applicability-editor textarea:focus-visible,
+.bazi-applicability-editor summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--info) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.bazi-applicability-editor [aria-invalid="true"] {
+  border-color: var(--cinnabar);
+}
+
+.bazi-applicability-editor__wide {
+  grid-column: 1 / -1;
+}
+
+.bazi-applicability-editor__time-button {
+  align-self: end;
+  justify-self: start;
+}
+
+.bazi-applicability-editor__citations {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.bazi-applicability-editor__counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.bazi-applicability-editor__counts span {
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.bazi-applicability-editor__citation {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--surface) 96%, var(--info) 4%);
+}
+
+.bazi-applicability-editor__citation h4 {
+  margin-block: 0.18rem;
+  font-size: 1rem;
+}
+
+.bazi-applicability-editor__citation code {
+  overflow-wrap: anywhere;
+}
+
+.bazi-applicability-editor__citation-fields {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.bazi-applicability-editor details {
+  padding: 0.75rem;
+  border: 1px dashed var(--line-strong, var(--line));
+  border-radius: 0.7rem;
+}
+
+.bazi-applicability-editor summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.bazi-applicability-editor details[open] > summary {
+  margin-bottom: 0.8rem;
+}
+
+.bazi-applicability-editor details label + label {
+  margin-top: 0.8rem;
+}
+
+.bazi-applicability-editor__reset-confirm {
+  padding: 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--line) 60%, var(--cinnabar) 40%);
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--surface) 90%, var(--cinnabar) 10%);
+}
+
+.bazi-applicability-editor__reset-confirm p {
+  margin: 0 0 0.65rem;
+}
+
+.bazi-applicability-editor__reset-confirm > div,
+.bazi-applicability-editor__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.bazi-applicability-editor__actions {
+  justify-content: space-between;
+}
+
+@media (max-width: 720px) {
+  .bazi-applicability-editor__header,
+  .bazi-applicability-editor__citation > header {
+    display: grid;
+  }
+
+  .bazi-applicability-editor__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bazi-applicability-editor__wide {
+    grid-column: auto;
+  }
+
+  .bazi-applicability-editor__actions,
+  .bazi-applicability-editor__reset-confirm > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bazi-applicability-editor__actions button,
+  .bazi-applicability-editor__reset-confirm button {
+    width: 100%;
+  }
+}
+
+@media (forced-colors: active) {
+  .bazi-applicability-editor,
+  .bazi-applicability-editor__form > fieldset,
+  .bazi-applicability-editor__citation,
+  .bazi-applicability-editor__privacy,
+  .bazi-applicability-editor__boundary,
+  .bazi-applicability-editor__error,
+  .bazi-applicability-editor__stale,
+  .bazi-applicability-editor__receipt {
+    border-color: CanvasText;
+  }
+}
+
+@media print {
+  .bazi-applicability-editor__actions,
+  .bazi-applicability-editor__time-button {
+    display: none;
+  }
+}

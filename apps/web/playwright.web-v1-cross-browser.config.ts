@@ -1,8 +1,18 @@
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "@playwright/test";
+import {
+  DEFAULT_V13_RELEASE_BROWSER_IDENTITY,
+  RELEASE_BROWSER_MATRIX,
+  releaseBrowserNativeDeviceOptions
+} from "./playwright.release-browser-matrix.ts";
 
 const baseURL = "http://127.0.0.1:4197";
+const strictReporter = fileURLToPath(new URL(
+  "./playwright.release-browser-strict-reporter.ts",
+  import.meta.url
+));
 
 export default defineConfig({
   testDir: "./e2e",
@@ -11,8 +21,12 @@ export default defineConfig({
   timeout: 360_000,
   expect: { timeout: 15_000 },
   fullyParallel: false,
+  forbidOnly: true,
   workers: 1,
-  reporter: "line",
+  reporter: [
+    ["line"],
+    [strictReporter, { receiptId: "web-v1-flow", expectedTestsPerProject: 1 }]
+  ],
   use: {
     baseURL,
     acceptDownloads: true,
@@ -21,22 +35,18 @@ export default defineConfig({
     screenshot: "only-on-failure",
     video: "off"
   },
-  projects: [
-    {
-      name: "msedge",
-      use: {
-        channel: "msedge",
-        viewport: { width: 1280, height: 720 }
-      }
+  projects: RELEASE_BROWSER_MATRIX.map((browser) => ({
+    name: browser.projectName,
+    metadata: {
+      releaseBrowserId: browser.policyId,
+      browserChannel: browser.channel,
+      releaseIdentity: DEFAULT_V13_RELEASE_BROWSER_IDENTITY
     },
-    {
-      name: "chrome",
-      use: {
-        channel: "chrome",
-        viewport: { width: 1280, height: 720 }
-      }
+    use: {
+      ...releaseBrowserNativeDeviceOptions(browser),
+      channel: browser.channel
     }
-  ],
+  })),
   webServer: {
     command: "npm run serve:e2e --workspace @hakimi/web",
     url: `${baseURL}/`,

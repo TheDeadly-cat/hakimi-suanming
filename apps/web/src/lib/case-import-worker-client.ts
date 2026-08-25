@@ -5,12 +5,15 @@ import {
   CaseImportConfigurationError,
   readCaseImportHeaders,
   readCaseImportHeadersFromSource,
+  type CaseImportConfigurationIssue,
   type CaseImportOptions,
   type CaseImportPlan,
   type CaseImportRow,
   type CaseImportCandidate
 } from "@hakimi/case-import";
 import { createBlobCsvSource } from "./case-import-blob-source";
+import { safeVisibleText } from "./visible-text";
+import { disposeWorkerSafely } from "./worker-lifecycle";
 import type {
   CaseImportWorkerRequest,
   CaseImportWorkerResponse,
@@ -18,6 +21,8 @@ import type {
 } from "./case-import-worker-protocol";
 
 type WorkerLike = Pick<Worker, "postMessage" | "terminate" | "onmessage" | "onerror" | "onmessageerror">;
+const MAX_WORKER_ERROR_TEXT_CODE_POINTS = 512;
+const MAX_WORKER_CONFIGURATION_ISSUES = 100;
 
 export type CaseImportWorkerRuntime = {
   createWorker?: () => WorkerLike;
@@ -32,14 +37,36 @@ function createBrowserWorker(): Worker {
   });
 }
 
-function restoreWorkerError(serialized: CaseImportWorkerSerializedError): Error {
-  if (serialized.code === "IMPORT_CANCELLED") return new CaseImportCancelledError();
-  if (serialized.name === "CaseImportConfigurationError" && serialized.issues) {
-    return new CaseImportConfigurationError(serialized.issues);
+function restoreConfigurationIssues(value: unknown, fallback: string): CaseImportConfigurationIssue[] | null {
+  if (!Array.isArray(value)) return null;
+  const issues: CaseImportConfigurationIssue[] = [];
+  for (const candidate of value.slice(0, MAX_WORKER_CONFIGURATION_ISSUES)) {
+    if (!candidate || typeof candidate !== "object") continue;
+    const record = candidate as Record<string, unknown>;
+    const code = safeVisibleText(record.code, "", 128);
+    const message = safeVisibleText(record.message, fallback, MAX_WORKER_ERROR_TEXT_CODE_POINTS);
+    if (!code || !message) continue;
+    issues.push({ ...record, code, message } as CaseImportConfigurationIssue);
   }
-  const error = new Error(serialized.message);
-  error.name = serialized.name;
-  if (serialized.code) (error as Error & { code?: string }).code = serialized.code;
+  return issues.length > 0 ? issues : null;
+}
+
+function restoreWorkerError(serialized: CaseImportWorkerSerializedError): Error {
+  const name = safeVisibleText(serialized.name, "Error", 128) || "Error";
+  const message = safeVisibleText(
+    serialized.message,
+    "CSV Worker 返回了未说明的错误。",
+    MAX_WORKER_ERROR_TEXT_CODE_POINTS
+  );
+  const code = safeVisibleText(serialized.code, "", 128);
+  if (code === "IMPORT_CANCELLED") return new CaseImportCancelledError();
+  const issues = restoreConfigurationIssues(serialized.issues, message);
+  if (name === "CaseImportConfigurationError" && issues) {
+    return new CaseImportConfigurationError(issues);
+  }
+  const error = new Error(message);
+  error.name = name;
+  if (code) (error as Error & { code?: string }).code = code;
   return error;
 }
 
@@ -51,6 +78,19 @@ function toWorkerBlob(source: string | Blob): Blob {
   return typeof source === "string"
     ? new Blob([source], { type: "text/csv;charset=utf-8" })
     : source;
+}
+
+function guardWorkerMessage<T>(
+  fail: (reason: unknown) => void,
+  handle: (event: MessageEvent<T>) => void
+): (event: MessageEvent<T>) => void {
+  return (event) => {
+    try {
+      handle(event);
+    } catch (reason) {
+      fail(reason);
+    }
+  };
 }
 
 /** Keeps even an abnormally large or quoted first record away from the browser main thread. */
@@ -72,7 +112,7 @@ export async function readCaseImportHeadersOffMainThread(
   return new Promise<string[]>((resolve, reject) => {
     const cleanup = () => {
       signal?.removeEventListener("abort", abort);
-      worker.terminate();
+      disposeWorkerSafely(worker);
     };
     const fail = (reason: unknown) => {
       if (settled) return;
@@ -89,23 +129,38 @@ export async function readCaseImportHeadersOffMainThread(
       }
       fail(new CaseImportCancelledError());
     };
-    worker.onmessage = (event: MessageEvent<CaseImportWorkerResponse>) => {
+    worker.onmessage = guardWorkerMessage(fail, (event: MessageEvent<CaseImportWorkerResponse>) => {
       if (settled) return;
       if (event.data.type === "error") {
         fail(restoreWorkerError(event.data.error));
         return;
       }
-      if (event.data.type !== "headers") return;
+      if (event.data.type !== "headers") {
+        fail(new Error("CSV Worker 在表头读取阶段返回了不受支持的响应。"));
+        return;
+      }
+      if (!Array.isArray(event.data.headers) || event.data.headers.some((header) => typeof header !== "string")) {
+        fail(new Error("CSV Worker 返回了无效的表头列表。"));
+        return;
+      }
       settled = true;
       cleanup();
       resolve(event.data.headers);
-    };
+    });
     worker.onerror = (event: ErrorEvent) => {
       event.preventDefault?.();
-      fail(new Error(event.message || "CSV Worker 读取表头失败。"));
+      fail(new Error(safeVisibleText(
+        event.message,
+        "CSV Worker 读取表头失败。",
+        MAX_WORKER_ERROR_TEXT_CODE_POINTS
+      )));
     };
     worker.onmessageerror = () => fail(new Error("CSV Worker 返回了无法解析的表头。"));
     signal?.addEventListener("abort", abort, { once: true });
+    if (signal?.aborted) {
+      abort();
+      return;
+    }
     try {
       worker.postMessage({
         type: "read_headers",
@@ -147,7 +202,7 @@ export async function buildCaseImportPlanOffMainThread(
   return new Promise<CaseImportPlan>((resolve, reject) => {
     const cleanup = () => {
       options.signal?.removeEventListener("abort", abort);
-      worker.terminate();
+      disposeWorkerSafely(worker);
     };
     const fail = (reason: unknown) => {
       if (settled) return;
@@ -165,7 +220,7 @@ export async function buildCaseImportPlanOffMainThread(
       fail(new CaseImportCancelledError());
     };
 
-    worker.onmessage = (event: MessageEvent<CaseImportWorkerResponse>) => {
+    worker.onmessage = guardWorkerMessage(fail, (event: MessageEvent<CaseImportWorkerResponse>) => {
       if (settled) return;
       const message = event.data;
       if (message.type === "error") {
@@ -181,10 +236,25 @@ export async function buildCaseImportPlanOffMainThread(
         return;
       }
       if (message.type === "batch") {
-        const batchNumber = message.batch.batchNumber;
+        const batch = message.batch;
         if (
-          !Number.isInteger(batchNumber)
-          || batchNumber !== message.batch.progress.batchNumber
+          !batch
+          || typeof batch !== "object"
+          || Array.isArray(batch)
+          || !Array.isArray(batch.rows)
+          || !Array.isArray(batch.imports)
+          || !batch.progress
+          || typeof batch.progress !== "object"
+          || Array.isArray(batch.progress)
+        ) {
+          fail(new Error("CSV Worker 返回了结构无效的导入批次。"));
+          return;
+        }
+        const batchNumber = batch.batchNumber;
+        if (
+          !Number.isSafeInteger(batchNumber)
+          || batchNumber < 1
+          || batchNumber !== batch.progress.batchNumber
           || batchNumber !== nextBatchNumber
           || pendingBatchNumber !== null
         ) {
@@ -194,11 +264,11 @@ export async function buildCaseImportPlanOffMainThread(
           return;
         }
         pendingBatchNumber = batchNumber;
-        rows.push(...message.batch.rows);
-        imports.push(...message.batch.imports);
+        rows.push(...batch.rows);
+        imports.push(...batch.imports);
         progressQueue = progressQueue.then(async () => {
           if (settled) return;
-          await options.onProgress?.(message.batch.progress);
+          await options.onProgress?.(batch.progress);
           if (settled) return;
           if (pendingBatchNumber !== batchNumber) {
             throw new Error(`CSV Worker 批次确认状态异常：${batchNumber}。`);
@@ -212,7 +282,10 @@ export async function buildCaseImportPlanOffMainThread(
         progressQueue.catch(fail);
         return;
       }
-      if (message.type !== "complete") return;
+      if (message.type !== "complete") {
+        fail(new Error("CSV Worker 在导入预检阶段返回了不受支持的响应。"));
+        return;
+      }
       if (pendingBatchNumber !== null) {
         fail(new Error(`CSV Worker 在批次 ${pendingBatchNumber} 确认前提前结束。`));
         return;
@@ -228,14 +301,22 @@ export async function buildCaseImportPlanOffMainThread(
           hasRowErrors: message.summary.stats.invalidRows > 0,
           allowsPartialImport: true
         });
-      }, fail);
-    };
+      }).catch(fail);
+    });
     worker.onerror = (event: ErrorEvent) => {
       event.preventDefault?.();
-      fail(new Error(event.message || "CSV Worker 运行失败。"));
+      fail(new Error(safeVisibleText(
+        event.message,
+        "CSV Worker 运行失败。",
+        MAX_WORKER_ERROR_TEXT_CODE_POINTS
+      )));
     };
     worker.onmessageerror = () => fail(new Error("CSV Worker 返回了无法解析的数据。"));
     options.signal?.addEventListener("abort", abort, { once: true });
+    if (options.signal?.aborted) {
+      abort();
+      return;
+    }
 
     try {
       worker.postMessage({

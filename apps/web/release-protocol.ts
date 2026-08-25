@@ -14,7 +14,88 @@ export type ReleaseDatabaseDescriptor = {
   sourceSchema: number | null;
 };
 
-export const BRIDGE_RELEASE_DATABASE_DESCRIPTOR: ReleaseDatabaseDescriptor = Object.freeze({
+export const RELEASE_STORAGE_MANIFEST_VERSION = 1 as const;
+
+export type ReleaseStorageIndexRequirement = Readonly<{
+  tableName: string;
+  indexName: string;
+  keyPath: readonly string[];
+  compound: boolean;
+  unique: boolean;
+  multi: boolean;
+}>;
+
+export type ReleaseStorageManifest = Readonly<{
+  manifestVersion: typeof RELEASE_STORAGE_MANIFEST_VERSION;
+  database: ReleaseDatabaseDescriptor;
+  requiredStorageTables: readonly string[];
+  requiredStorageIndexes: readonly ReleaseStorageIndexRequirement[];
+}>;
+
+const BASE_REQUIRED_STORAGE_TABLES = Object.freeze([
+  "cases",
+  "revisions",
+  "candidateSets",
+  "researchNotes",
+  "events",
+  "savedViews",
+  "knowledgeDocuments",
+  "sourceRights",
+  "citations",
+  "attachments",
+  "researcherProfiles",
+  "appSettings",
+  "ruleRegistry",
+  "tzdbMigrationReceipts",
+  "eventTimeMigrationReceipts",
+  "birthFingerprints"
+] as const);
+
+function storageContractForSchema(targetSchema: number): Readonly<{
+  requiredStorageTables: readonly string[];
+  requiredStorageIndexes: readonly ReleaseStorageIndexRequirement[];
+}> {
+  if (![13, 14, 15, 16].includes(targetSchema)) {
+    throw new Error(`发布存储清单不支持目标 Schema ${String(targetSchema)}。`);
+  }
+  const requiredStorageTables = [
+    ...BASE_REQUIRED_STORAGE_TABLES,
+    ...(targetSchema >= 15 ? ["revisionCalculationReceipts"] : []),
+    ...(targetSchema >= 16 ? ["mutationState"] : [])
+  ];
+  const requiredStorageIndexes = targetSchema >= 14
+    ? ["researchNotes", "events"].map((tableName) => Object.freeze({
+        tableName,
+        indexName: "[caseId+updatedAt]",
+        keyPath: Object.freeze(["caseId", "updatedAt"]),
+        compound: true,
+        unique: false,
+        multi: false
+      } satisfies ReleaseStorageIndexRequirement))
+    : [];
+  return Object.freeze({
+    requiredStorageTables: Object.freeze(requiredStorageTables),
+    requiredStorageIndexes: Object.freeze(requiredStorageIndexes)
+  });
+}
+
+function defineReleaseStorageManifest(
+  database: ReleaseDatabaseDescriptor
+): ReleaseStorageManifest {
+  const frozenDatabase = Object.freeze({
+    ...database,
+    acceptedCommittedMigrationIds: Object.freeze([...database.acceptedCommittedMigrationIds])
+  });
+  const storageContract = storageContractForSchema(frozenDatabase.targetSchema);
+  return Object.freeze({
+    manifestVersion: RELEASE_STORAGE_MANIFEST_VERSION,
+    database: frozenDatabase,
+    requiredStorageTables: storageContract.requiredStorageTables,
+    requiredStorageIndexes: storageContract.requiredStorageIndexes
+  });
+}
+
+export const BRIDGE_RELEASE_STORAGE_MANIFEST = defineReleaseStorageManifest({
   protocolVersion: RELEASE_PROTOCOL_VERSION,
   dbGeneration: "legacy-v13",
   databaseName: "hakimi-bazi-research",
@@ -27,13 +108,14 @@ export const BRIDGE_RELEASE_DATABASE_DESCRIPTOR: ReleaseDatabaseDescriptor = Obj
   sourceDatabaseName: null,
   sourceSchema: null
 });
+export const BRIDGE_RELEASE_DATABASE_DESCRIPTOR = BRIDGE_RELEASE_STORAGE_MANIFEST.database;
 
 /**
  * The first production shadow generation for Schema 14. This descriptor is a
  * release artifact rather than deployment input: environment variables must
  * never be able to alter its source or target database identity.
  */
-export const PRODUCTION_V14_RELEASE_DATABASE_DESCRIPTOR = Object.freeze({
+export const PRODUCTION_V14_RELEASE_STORAGE_MANIFEST = defineReleaseStorageManifest({
   protocolVersion: RELEASE_PROTOCOL_VERSION,
   dbGeneration: "research-v14-case-activity",
   databaseName: "hakimi-bazi-research.generation.research-v14-case-activity",
@@ -46,13 +128,15 @@ export const PRODUCTION_V14_RELEASE_DATABASE_DESCRIPTOR = Object.freeze({
   sourceDatabaseName: "hakimi-bazi-research",
   sourceSchema: 13
 } satisfies ReleaseDatabaseDescriptor);
+export const PRODUCTION_V14_RELEASE_DATABASE_DESCRIPTOR =
+  PRODUCTION_V14_RELEASE_STORAGE_MANIFEST.database;
 
 /**
  * Non-default Schema 15 release candidate. Its source identity is derived from
  * the frozen production-v14 descriptor so the candidate cannot silently skip
  * or reinterpret the v14 shadow generation.
  */
-export const PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR = Object.freeze({
+export const PRODUCTION_V15_RELEASE_STORAGE_MANIFEST = defineReleaseStorageManifest({
   protocolVersion: RELEASE_PROTOCOL_VERSION,
   dbGeneration: "research-v15-revision-calculation-receipts",
   databaseName: "hakimi-bazi-research.generation.research-v15-revision-calculation-receipts",
@@ -67,6 +151,8 @@ export const PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR = Object.freeze({
   sourceDatabaseName: PRODUCTION_V14_RELEASE_DATABASE_DESCRIPTOR.databaseName,
   sourceSchema: PRODUCTION_V14_RELEASE_DATABASE_DESCRIPTOR.targetSchema
 } satisfies ReleaseDatabaseDescriptor);
+export const PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR =
+  PRODUCTION_V15_RELEASE_STORAGE_MANIFEST.database;
 
 /**
  * Isolated direct-hop candidate for installations whose last confirmed
@@ -74,7 +160,7 @@ export const PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR = Object.freeze({
  * v15 physical target identity with the adjacent v14 -> v15 candidate while
  * using a distinct migration receipt identity and the exact v13 source.
  */
-export const PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR = Object.freeze({
+export const PRODUCTION_V13_TO_V15_RELEASE_STORAGE_MANIFEST = defineReleaseStorageManifest({
   protocolVersion: RELEASE_PROTOCOL_VERSION,
   dbGeneration: PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR.dbGeneration,
   databaseName: PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR.databaseName,
@@ -89,6 +175,8 @@ export const PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR = Object.freeze({
   sourceDatabaseName: BRIDGE_RELEASE_DATABASE_DESCRIPTOR.databaseName,
   sourceSchema: BRIDGE_RELEASE_DATABASE_DESCRIPTOR.targetSchema
 } satisfies ReleaseDatabaseDescriptor);
+export const PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR =
+  PRODUCTION_V13_TO_V15_RELEASE_STORAGE_MANIFEST.database;
 
 /**
  * Isolated Schema 16 candidate for the only currently supported installed
@@ -96,7 +184,7 @@ export const PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR = Object.freeze({
  * candidate, so this release deliberately performs one self-contained shadow
  * migration instead of requiring users to traverse unpublished shell hops.
  */
-export const PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR = Object.freeze({
+export const PRODUCTION_V13_TO_V16_RELEASE_STORAGE_MANIFEST = defineReleaseStorageManifest({
   protocolVersion: RELEASE_PROTOCOL_VERSION,
   dbGeneration: "research-v16-mutation-state",
   databaseName: "hakimi-bazi-research.generation.research-v16-mutation-state",
@@ -111,6 +199,8 @@ export const PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR = Object.freeze({
   sourceDatabaseName: BRIDGE_RELEASE_DATABASE_DESCRIPTOR.databaseName,
   sourceSchema: BRIDGE_RELEASE_DATABASE_DESCRIPTOR.targetSchema
 } satisfies ReleaseDatabaseDescriptor);
+export const PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR =
+  PRODUCTION_V13_TO_V16_RELEASE_STORAGE_MANIFEST.database;
 
 const SAFE_IDENTIFIER = /^[a-z0-9][a-z0-9._-]{0,95}$/iu;
 const SAFE_DATABASE_NAME = /^[a-z0-9][a-z0-9._-]{0,127}$/iu;
@@ -220,6 +310,36 @@ export function parseReleaseDatabaseDescriptor(input: unknown): ReleaseDatabaseD
   return descriptor;
 }
 
+export function releaseStorageManifestForDescriptor(
+  descriptor: ReleaseDatabaseDescriptor
+): ReleaseStorageManifest {
+  return defineReleaseStorageManifest(parseReleaseDatabaseDescriptor(descriptor));
+}
+
+export function parseReleaseStorageManifest(input: unknown): ReleaseStorageManifest {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new Error("发布存储清单必须是对象。");
+  }
+  const value = input as Record<string, unknown>;
+  if (value.manifestVersion !== RELEASE_STORAGE_MANIFEST_VERSION) {
+    throw new Error(`不支持的发布存储清单版本：${String(value.manifestVersion)}`);
+  }
+  const manifest = releaseStorageManifestForDescriptor(
+    parseReleaseDatabaseDescriptor(value.database)
+  );
+  if (JSON.stringify(value.requiredStorageTables) !== JSON.stringify(manifest.requiredStorageTables)) {
+    throw new Error("发布存储清单的必需表与目标 Schema 不一致。");
+  }
+  if (JSON.stringify(value.requiredStorageIndexes) !== JSON.stringify(manifest.requiredStorageIndexes)) {
+    throw new Error("发布存储清单的必需索引与目标 Schema 不一致。");
+  }
+  return manifest;
+}
+
+export function serializeReleaseStorageManifest(manifest: ReleaseStorageManifest): string {
+  return JSON.stringify(parseReleaseStorageManifest(manifest));
+}
+
 function envNullable(value: string | undefined): string | null {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
@@ -265,6 +385,14 @@ export function releaseDatabaseDescriptorFromEnvironment(
   });
 }
 
+export function releaseStorageManifestFromEnvironment(
+  environment: Record<string, string | undefined>
+): ReleaseStorageManifest {
+  return releaseStorageManifestForDescriptor(
+    releaseDatabaseDescriptorFromEnvironment(environment)
+  );
+}
+
 /**
  * Selects the descriptor used by the ordinary Vite configuration.
  *
@@ -279,15 +407,22 @@ export function releaseDatabaseDescriptorForDefaultViteBuild(
   environment: Record<string, string | undefined>,
   argv: readonly string[] = []
 ): ReleaseDatabaseDescriptor {
+  return releaseStorageManifestForDefaultViteBuild(environment, argv).database;
+}
+
+export function releaseStorageManifestForDefaultViteBuild(
+  environment: Record<string, string | undefined>,
+  argv: readonly string[] = []
+): ReleaseStorageManifest {
   const fixtureLabel = environment.HAKIMI_CROSS_SCHEMA_FIXTURE?.trim();
   const fixtureOutputDirectory = environment.HAKIMI_CROSS_SCHEMA_OUT_DIR?.trim();
   const explicitCrossSchemaConfig = argv.some((argument) => (
     /(?:^|\/)vite\.cross-schema-upgrade\.config\.ts$/iu.test(argument.replaceAll("\\", "/"))
   ));
   if (fixtureLabel && fixtureOutputDirectory && explicitCrossSchemaConfig) {
-    return releaseDatabaseDescriptorFromEnvironment(environment);
+    return releaseStorageManifestFromEnvironment(environment);
   }
-  return BRIDGE_RELEASE_DATABASE_DESCRIPTOR;
+  return BRIDGE_RELEASE_STORAGE_MANIFEST;
 }
 
 export function isShadowDatabaseRelease(descriptor: ReleaseDatabaseDescriptor): boolean {

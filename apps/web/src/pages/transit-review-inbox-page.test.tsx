@@ -1,11 +1,13 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { StrictMode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TransitReviewInboxProjection } from "../lib/transit-review-inbox";
+import { resetPreparedFileDeliveryCoordinatorForTests } from "../components/prepared-file-delivery-coordinator";
 import { TransitReviewInboxPage } from "./transit-review-inbox-page";
 
 const mocks = vi.hoisted(() => ({
   pickFile: vi.fn(),
+  getCapabilities: vi.fn(),
   saveBlobFile: vi.fn(),
   saveTextFile: vi.fn(),
   importArtifact: vi.fn(),
@@ -16,11 +18,19 @@ const mocks = vi.hoisted(() => ({
   serializeBundle: vi.fn()
 }));
 
-vi.mock("@hakimi/platform", () => ({
-  pickFile: mocks.pickFile,
-  saveBlobFile: mocks.saveBlobFile,
-  saveTextFile: mocks.saveTextFile
-}));
+vi.mock("@hakimi/platform", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@hakimi/platform")>();
+  return {
+    ...actual,
+    pickFile: mocks.pickFile,
+    saveBlobFile: mocks.saveBlobFile,
+    saveTextFile: mocks.saveTextFile,
+    webReportExportPort: {
+      getCapabilities: mocks.getCapabilities,
+      saveFile: mocks.saveBlobFile
+    }
+  };
+});
 
 vi.mock("@hakimi/research-query/transit-review", () => ({
   createTransitQueryReviewBundle: mocks.createBundle,
@@ -38,8 +48,8 @@ vi.mock("../lib/transit-review-inbox", () => ({
 const artifact = {
   attachmentId: "11111111-1111-4111-8111-111111111111",
   fileName: "review-bundle.json",
-  byteLength: 320,
-  rawContentHash: "a".repeat(64),
+  byteLength: 2,
+  rawContentHash: "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
   importedAt: "2026-08-03T01:00:00.000Z",
   kind: "review_bundle" as const,
   artifactDigest: "b".repeat(64),
@@ -66,16 +76,16 @@ function projection(overrides: Partial<TransitReviewInboxProjection> = {}): Tran
       reviewBundleDigest: artifact.reviewBundleDigest,
       bundleArtifactIds: [artifact.attachmentId],
       currentBundle: true,
-      candidates: [{
-        candidateId: "transit-review-dayun-resolved",
-        candidateDigest: "c".repeat(64),
-        title: "大运目标节点",
-        nodeType: "dayun",
+      candidates: Array.from({ length: 18 }, (_, index) => ({
+        candidateId: index === 0 ? "transit-review-dayun-resolved" : `transit-review-candidate-${index + 1}`,
+        candidateDigest: (index + 1).toString(16).padStart(64, "0"),
+        title: index === 0 ? "大运目标节点" : `候选节点 ${index + 1}`,
+        nodeType: "dayun" as const,
         reviewArtifactIds: [],
         passedReviewCount: 0,
         adjudicationArtifactIds: [],
         passedAdjudicationCount: 0
-      }],
+      })),
       orphanArtifactIds: []
     }],
     summary: {
@@ -92,7 +102,13 @@ function projection(overrides: Partial<TransitReviewInboxProjection> = {}): Tran
 
 describe("TransitReviewInboxPage", () => {
   beforeEach(() => {
+    resetPreparedFileDeliveryCoordinatorForTests();
     Object.values(mocks).forEach((mock) => mock.mockReset());
+    mocks.getCapabilities.mockReturnValue({
+      canDownloadFiles: true,
+      canChooseSaveLocation: false,
+      canShareFiles: false
+    });
     mocks.readProjection.mockResolvedValue(projection());
     mocks.saveBlobFile.mockResolvedValue({
       status: "download_requested",
@@ -113,8 +129,8 @@ describe("TransitReviewInboxPage", () => {
     expect(screen.getByRole("heading", { name: "结构通过不等于专家身份已验证" })).toBeTruthy();
     expect(screen.getByText("专家金标增量").previousElementSibling?.textContent).toBe("0");
     expect(await screen.findByText("大运目标节点")).toBeTruthy();
-    expect(screen.getByText("尚无结构通过的审核")).toBeTruthy();
-    expect(screen.getAllByText("当前候选包")).toHaveLength(2);
+    expect(screen.getAllByText("尚无结构通过的审核")).toHaveLength(18);
+    expect(screen.getAllByText("当前候选包")).toHaveLength(3);
     expect(screen.getByText(/原件进入完整备份/)).toBeTruthy();
     expect(screen.getByRole("link", { name: /返回设置/ }).getAttribute("href")).toBe("/settings");
   });
@@ -126,9 +142,31 @@ describe("TransitReviewInboxPage", () => {
       type: "application/json",
       blob: new Blob(["{}"], { type: "application/json" })
     });
+    const emptyProjection = projection({
+      artifacts: [],
+      batches: [],
+      summary: {
+        storedArtifacts: 0,
+        currentBundles: 0,
+        passedIndependentReviews: 0,
+        passedAdjudications: 0,
+        waitingDependencies: 0,
+        failedOrCorrupt: 0
+      }
+    });
+    mocks.readProjection
+      .mockReset()
+      .mockResolvedValueOnce(projection())
+      .mockResolvedValueOnce(projection())
+      .mockResolvedValueOnce(emptyProjection);
     mocks.importArtifact.mockResolvedValue({
-      artifact: { kind: "independent_review" },
-      attachment: {},
+      artifact,
+      attachment: {
+        id: artifact.attachmentId,
+        fileName: artifact.fileName,
+        contentHash: artifact.rawContentHash,
+        byteLength: artifact.byteLength
+      },
       created: false
     });
     mocks.readBytes.mockResolvedValue(new TextEncoder().encode("{}"));
@@ -141,9 +179,15 @@ describe("TransitReviewInboxPage", () => {
     expect(await screen.findByText("相同原件已存在")).toBeTruthy();
     expect(mocks.importArtifact).toHaveBeenCalledWith(expect.objectContaining({ fileName: "expert-return.json" }));
 
-    fireEvent.click(screen.getByRole("button", { name: /导出原件/ }));
+    fireEvent.click(screen.getByRole("button", { name: /准备原件/ }));
     await waitFor(() => expect(mocks.readBytes).toHaveBeenCalledWith(artifact));
-    expect(mocks.saveBlobFile).toHaveBeenCalled();
+    const deliveryDialog = await screen.findByRole("dialog", { name: /待交付文件已在本机生成/ });
+    expect(mocks.saveBlobFile).not.toHaveBeenCalled();
+    fireEvent.click(within(deliveryDialog).getByRole("button", { name: /下载文件/ }));
+    await waitFor(() => expect(mocks.saveBlobFile).toHaveBeenCalledWith(expect.any(Blob), artifact.fileName));
+    fireEvent.click(within(deliveryDialog).getByRole("button", { name: "已核对，允许再次下载" }));
+    fireEvent.click(within(deliveryDialog).getByRole("button", { name: "关闭" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 
     fireEvent.click(screen.getByRole("button", { name: "删除" }));
     expect(screen.getByRole("group", { name: `确认删除审核原件 ${artifact.fileName}` })).toBeTruthy();

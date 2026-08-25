@@ -1,0 +1,1313 @@
+.page--compare {
+  --compare-rule: rgba(31, 76, 62, 0.16);
+  --compare-wash: rgba(221, 234, 228, 0.34);
+  --compare-info: #4b7181;
+  --compare-reading: #6e9bad;
+  --compare-info-wash: rgba(75, 113, 129, 0.08);
+  --compare-stage-accent: #ad751d;
+}
+
+.page--compare[data-stage="verifying"] {
+  --compare-stage-accent: #6e9bad;
+}
+
+.page--compare[data-stage="projected"] {
+  --compare-stage-accent: #4b7181;
+}
+
+.page--compare[data-rule-mutation="call_unknown"] {
+  --compare-stage-accent: var(--warning-fg);
+}
+
+.page--compare[data-rule-mutation="returned_unreconciled"] {
+  --compare-stage-accent: var(--cinnabar-650);
+}
+
+.page--compare[data-route-binding-state="failed"] .compare-masthead {
+  box-shadow: inset 0 -4px 0 var(--cinnabar-650);
+}
+
+.page--compare[data-write-reconciliation-required="true"] .comparison-session {
+  border-top-color: var(--warning-fg);
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 18px, rgba(156, 92, 47, 0.035) 18px 36px),
+    linear-gradient(180deg, rgba(243, 237, 225, 0.48), transparent 52%);
+}
+
+.page--compare .compare-masthead {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.42fr);
+  gap: clamp(34px, 5vw, 72px);
+  align-items: end;
+  overflow: hidden;
+  padding: clamp(28px, 4vw, 50px) clamp(20px, 3.5vw, 44px);
+  border-top: 1px solid var(--line-200);
+  border-bottom: 1px solid var(--line-200);
+  background:
+    linear-gradient(112deg, rgba(255, 253, 248, 0.97) 0 60%, rgba(221, 234, 228, 0.48) 100%);
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--compare-stage-accent) 52%, transparent);
+  animation: comparison-surface-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.page--compare .compare-masthead::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  opacity: 0.48;
+  background-image:
+    linear-gradient(90deg, transparent 49.8%, var(--compare-rule) 50%, transparent 50.2%),
+    repeating-linear-gradient(0deg, transparent 0, transparent 35px, var(--compare-rule) 36px);
+  mask-image: linear-gradient(90deg, transparent 0 42%, #000 72%);
+}
+
+.page--compare .compare-masthead::after {
+  content: "A / B / C / D";
+  position: absolute;
+  top: 15px;
+  right: 18px;
+  color: var(--compare-stage-accent);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.page--compare .compare-masthead .page-heading {
+  margin: 0;
+}
+
+.page--compare .compare-masthead .page-heading h1 {
+  max-width: 12ch;
+  font-size: clamp(36px, 5vw, 60px);
+  line-height: 1.06;
+  text-wrap: balance;
+}
+
+.page--compare .comparison-progress {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  border-top: 2px solid var(--ink-650);
+  border-bottom: 1px solid var(--line-200);
+  list-style: none;
+}
+
+.page--compare .comparison-progress li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px 2px;
+  border-top: 1px solid var(--line-100);
+}
+
+.page--compare .comparison-progress li:first-child {
+  border-top: 0;
+}
+
+.page--compare .comparison-progress li > span {
+  color: var(--ink-400);
+  font-family: var(--font-editorial);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.page--compare .comparison-progress li > div {
+  display: grid;
+  gap: 3px;
+}
+
+.page--compare .comparison-progress strong {
+  font-family: var(--font-editorial);
+  font-size: 14px;
+}
+
+.page--compare .comparison-progress small {
+  color: var(--ink-650);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.page--compare .comparison-progress li::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--line-200);
+  border-radius: 50%;
+  background: var(--paper-raised);
+  transform: translateY(-50%);
+}
+
+.page--compare .comparison-progress li[data-state="active"]::after {
+  border-color: var(--compare-stage-accent);
+  background: color-mix(in srgb, var(--compare-stage-accent) 18%, var(--paper-raised));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--compare-stage-accent) 14%, transparent);
+}
+
+.page--compare .comparison-progress li[data-state="complete"]::after {
+  border-color: var(--jade-700);
+  background: var(--jade-700);
+}
+
+.page--compare .comparison-session {
+  margin-top: 26px;
+  padding: clamp(20px, 3vw, 34px) 0 30px;
+  border-top: 2px solid var(--ink-650);
+  border-bottom: 1px solid var(--line-200);
+  background: linear-gradient(180deg, rgba(243, 237, 225, 0.34), transparent 52%);
+  animation: comparison-surface-enter 480ms 60ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.page--compare .comparison-session[data-ready="true"] {
+  border-top-color: var(--compare-stage-accent);
+}
+
+.page--compare .comparison-session > .section-heading-row,
+.page--compare .comparison-session > .comparison-session-intro,
+.page--compare .comparison-session > .center-loading,
+.page--compare .comparison-session > .comparison-library-unavailable,
+.page--compare .comparison-session > .empty-list,
+.page--compare .comparison-session > .comparison-rule-variant {
+  margin-right: clamp(14px, 2.5vw, 28px);
+  margin-left: clamp(14px, 2.5vw, 28px);
+}
+
+.page--compare .comparison-session-intro {
+  max-width: 900px;
+  color: var(--ink-650);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.page--compare .comparison-session-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 18px clamp(14px, 2.5vw, 28px) 0;
+  padding: 1px;
+  border-top: 2px solid var(--ink-650);
+  border-bottom: 1px solid var(--line-200);
+  background: var(--line-100);
+}
+
+.page--compare .comparison-session-facts > div {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  padding: 12px 13px 13px;
+  background: rgba(255, 253, 248, 0.84);
+}
+
+.page--compare .comparison-session-facts > div::after {
+  position: absolute;
+  right: 10px;
+  bottom: 0;
+  left: 10px;
+  height: 2px;
+  background: var(--line-200);
+  content: "";
+}
+
+.page--compare .comparison-session-facts > div[data-state="bound"]::after {
+  background: var(--compare-info);
+}
+
+.page--compare .comparison-session-facts > div[data-state="checking"]::after {
+  background: var(--compare-reading);
+}
+
+.page--compare .comparison-session-facts > div[data-state="failed"]::after {
+  background: var(--cinnabar-650);
+}
+
+.page--compare .comparison-route-sync-error {
+  margin-top: 18px;
+}
+
+.page--compare .comparison-session-facts dt {
+  color: var(--ink-550);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.page--compare .comparison-session-facts dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--ink-800);
+  font-family: var(--font-editorial);
+  font-size: 13px;
+  font-weight: 700;
+  unicode-bidi: plaintext;
+  overflow-wrap: anywhere;
+}
+
+.page--compare .comparison-session-facts time {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.page--compare .comparison-session-operation {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  margin: 16px clamp(14px, 2.5vw, 28px) 0;
+  padding: 13px 15px;
+  border: 1px solid var(--line-200);
+  border-left: 3px solid var(--compare-info);
+  background: linear-gradient(110deg, var(--compare-info-wash), rgba(255, 253, 248, 0.86));
+}
+
+.page--compare .comparison-session-operation > svg {
+  width: 20px;
+  height: 20px;
+  color: var(--compare-info);
+}
+
+.page--compare .comparison-session-operation strong,
+.page--compare .comparison-session-operation small {
+  display: block;
+}
+
+.page--compare .comparison-session-operation small {
+  margin-top: 4px;
+  color: var(--ink-650);
+  line-height: 1.55;
+}
+
+.page--compare .comparison-rule-commit-issue {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+  padding: clamp(18px, 3vw, 28px);
+  border: 1px solid rgba(170, 57, 41, 0.32);
+  border-top: 3px solid var(--cinnabar-650);
+  background:
+    radial-gradient(circle at 92% 12%, rgba(170, 57, 41, 0.12), transparent 29%),
+    linear-gradient(120deg, rgba(255, 253, 248, 0.98), rgba(243, 237, 225, 0.8));
+  box-shadow: 0 16px 36px rgba(45, 38, 28, 0.08);
+}
+
+.page--compare .comparison-rule-commit-issue[data-phase="call_unknown"] {
+  border-color: rgba(156, 92, 47, 0.4);
+  border-top-color: var(--warning-fg);
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 14px, rgba(156, 92, 47, 0.045) 14px 28px),
+    linear-gradient(120deg, rgba(255, 253, 248, 0.98), rgba(243, 237, 225, 0.9));
+}
+
+.page--compare .comparison-rule-commit-issue[data-phase="call_unknown"] > header > svg {
+  color: var(--warning-fg);
+}
+
+.page--compare .comparison-rule-commit-issue > header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.page--compare .comparison-rule-commit-issue > header > svg {
+  width: 21px;
+  height: 21px;
+  margin-top: 3px;
+  color: var(--cinnabar-650);
+}
+
+.page--compare .comparison-rule-commit-issue h2 {
+  margin: 4px 0 0;
+  font-family: var(--font-editorial);
+  font-size: clamp(22px, 3vw, 30px);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.page--compare .comparison-rule-commit-issue > p {
+  max-width: 80ch;
+  margin: 0;
+  color: var(--ink-700);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.page--compare .comparison-rule-commit-issue > dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 1px;
+  background: var(--line-100);
+}
+
+.page--compare .comparison-rule-commit-issue > dl > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 11px 12px;
+  background: rgba(255, 253, 248, 0.88);
+}
+
+.page--compare .comparison-rule-commit-issue > dl > div[data-wide="true"] {
+  grid-column: 1 / -1;
+  border-left: 3px solid var(--warning-fg);
+}
+
+.page--compare .comparison-rule-commit-issue dt {
+  color: var(--ink-550);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.page--compare .comparison-rule-commit-issue dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink-900);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  unicode-bidi: plaintext;
+}
+
+.page--compare .comparison-rule-commit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.page--compare .comparison-library-unavailable {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid rgba(176, 58, 46, 0.28);
+  border-left: 3px solid var(--cinnabar-650);
+  background: linear-gradient(135deg, rgba(176, 58, 46, 0.08), rgba(255, 253, 248, 0.78));
+}
+
+.page--compare .comparison-library-unavailable__mark {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  color: var(--cinnabar-650);
+  background: var(--cinnabar-100);
+}
+
+.page--compare .comparison-library-unavailable__mark svg {
+  width: 19px;
+  height: 19px;
+}
+
+.page--compare .comparison-library-unavailable .eyebrow {
+  margin: 0 0 3px;
+}
+
+.page--compare .comparison-library-unavailable strong {
+  color: var(--ink-900);
+  font-family: var(--font-display);
+  font-size: 18px;
+}
+
+.page--compare .comparison-library-unavailable p:not(.eyebrow) {
+  margin: 5px 0 0;
+  color: var(--ink-700);
+  line-height: 1.55;
+}
+
+.page--compare .comparison-library-unavailable small {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink-550);
+  line-height: 1.5;
+}
+
+.page--compare .comparison-library-unavailable .secondary-action {
+  align-self: center;
+  white-space: nowrap;
+}
+
+.page--compare .comparison-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  justify-content: center;
+}
+
+.page--compare .comparison-empty-actions > * {
+  justify-content: center;
+}
+
+.page--compare .comparison-slot-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+  padding: 0 clamp(14px, 2.5vw, 28px);
+}
+
+.page--compare .comparison-slot-card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line-200);
+  border-top: 3px solid var(--line-200);
+  background: rgba(255, 253, 248, 0.74);
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.page--compare .comparison-slot-card.is-baseline {
+  border-top-color: var(--ink-650);
+}
+
+.page--compare .comparison-slot-card.is-complete {
+  border-color: color-mix(in srgb, var(--compare-info) 38%, var(--line-200));
+  background: linear-gradient(145deg, rgba(255, 253, 248, 0.9), var(--compare-info-wash));
+}
+
+.page--compare .comparison-slot-card.is-complete.is-baseline {
+  border-top-color: var(--ink-650);
+}
+
+.page--compare .comparison-slot-card.is-complete::after {
+  content: "BOUND";
+  position: absolute;
+  right: 12px;
+  bottom: 9px;
+  color: var(--compare-info);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.page--compare .comparison-slot-card:focus-within {
+  border-color: var(--compare-info);
+  transform: translateY(-1px);
+}
+
+.page--compare .comparison-slot-list:focus-visible {
+  outline: 3px solid var(--compare-info);
+  outline-offset: 4px;
+}
+
+.page--compare .comparison-slot-card > header {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 34px;
+  gap: 10px;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line-100);
+}
+
+.page--compare .comparison-slot-card > header > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.page--compare .comparison-slot-card > header strong {
+  font-family: var(--font-editorial);
+  font-size: 16px;
+}
+
+.page--compare .comparison-slot-card > header small {
+  color: var(--ink-650);
+  font-size: 11px;
+}
+
+.page--compare .comparison-slot-card > dl {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border-top: 1px solid var(--line-100);
+}
+
+.page--compare .comparison-slot-card > dl > div {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr);
+  gap: 9px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line-100);
+}
+
+.page--compare .comparison-slot-card dt,
+.page--compare .comparison-slot-card dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.45;
+  unicode-bidi: plaintext;
+}
+
+.page--compare .comparison-slot-card dt {
+  color: var(--ink-650);
+}
+
+.page--compare .comparison-explicit-choice {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 11px 12px;
+  border: 1px solid var(--line-200);
+  border-left: 3px solid var(--warning-fg);
+  background: linear-gradient(110deg, rgba(156, 92, 47, 0.07), rgba(255, 253, 248, 0.78));
+}
+
+.page--compare .comparison-explicit-choice > span {
+  color: var(--warning-fg);
+  font-family: var(--font-editorial);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.page--compare .comparison-explicit-choice strong,
+.page--compare .comparison-explicit-choice small {
+  display: block;
+}
+
+.page--compare .comparison-explicit-choice strong {
+  color: var(--ink-900);
+  font-size: 13px;
+}
+
+.page--compare .comparison-explicit-choice small {
+  margin-top: 4px;
+  color: var(--ink-650);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.page--compare .comparison-slot-actions {
+  margin-top: auto;
+  padding-top: 2px;
+}
+
+.page--compare .comparison-add-slot {
+  min-height: 250px;
+  border: 1px dashed color-mix(in srgb, var(--compare-info) 38%, var(--line-200));
+  background: color-mix(in srgb, var(--compare-info) 4%, transparent);
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.page--compare .comparison-add-slot:hover,
+.page--compare .comparison-add-slot:focus-visible {
+  border-color: var(--compare-info);
+  background: var(--compare-info-wash);
+}
+
+.page--compare .comparison-add-slot:focus-visible,
+.page--compare .comparison-difference-index a:focus-visible {
+  outline: 3px solid var(--compare-info);
+  outline-offset: 2px;
+}
+
+.page--compare .comparison-rule-variant {
+  margin-top: 20px;
+  border-left: 3px solid var(--cinnabar-650);
+  background: rgba(243, 237, 225, 0.52);
+}
+
+.formal-comparison-workspace {
+  margin-top: 30px;
+}
+
+.page--compare .comparison-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px 30px;
+  padding: clamp(22px, 3vw, 34px);
+  border-top: 2px solid var(--ink-650);
+  border-bottom: 1px solid var(--line-200);
+  background: linear-gradient(105deg, rgba(255, 253, 248, 0.94), var(--compare-wash));
+}
+
+.page--compare .comparison-summary.has-differences {
+  border-top-color: var(--compare-info);
+}
+
+.page--compare .comparison-summary h2 {
+  margin: 4px 0 8px;
+  font-family: var(--font-editorial);
+  font-size: clamp(25px, 3vw, 36px);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.page--compare .comparison-summary > div > p:last-child {
+  max-width: 820px;
+  margin: 0;
+  color: var(--ink-650);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.page--compare .comparison-summary > .status-pill {
+  align-self: start;
+}
+
+.page--compare .comparison-reading-boundary {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 13px;
+  align-items: start;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--compare-info) 28%, var(--line-200));
+  border-left: 4px solid var(--compare-info);
+  background:
+    linear-gradient(105deg, var(--compare-info-wash), rgba(255, 253, 248, 0.72) 64%),
+    repeating-linear-gradient(90deg, transparent 0 47px, rgba(75, 113, 129, 0.035) 47px 48px);
+}
+
+.page--compare .comparison-reading-boundary > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--compare-info) 38%, transparent);
+  color: var(--compare-info);
+  font-family: var(--font-editorial);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.page--compare .comparison-reading-boundary strong {
+  color: var(--ink-900);
+  font-family: var(--font-editorial);
+  font-size: 15px;
+}
+
+.page--compare .comparison-reading-boundary p {
+  max-width: 86ch;
+  margin: 4px 0 0;
+  color: var(--ink-650);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.page--compare .comparison-difference-index {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  border-top: 1px solid var(--line-200);
+  border-bottom: 1px solid var(--line-200);
+}
+
+.page--compare .comparison-difference-index a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  border-left: 1px solid var(--line-100);
+  color: var(--ink-650);
+}
+
+.page--compare .comparison-difference-index a:first-child {
+  border-left: 0;
+}
+
+.page--compare .comparison-difference-index a:hover,
+.page--compare .comparison-difference-index a:focus-visible {
+  color: var(--compare-info);
+  background: var(--compare-info-wash);
+}
+
+.page--compare .comparison-difference-index strong {
+  color: var(--compare-info);
+  font-family: var(--font-editorial);
+  font-size: 18px;
+}
+
+.page--compare .comparison-difference-index a[data-state="changed"] {
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--compare-info) 52%, transparent);
+}
+
+.page--compare .comparison-difference-index a[data-state="same"] {
+  color: var(--ink-500);
+}
+
+.page--compare .comparison-difference-index a[data-state="same"] strong {
+  color: var(--ink-400);
+}
+
+.page--compare .comparison-difference-toggle {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin: 0;
+}
+
+.page--compare .comparison-mobile-switcher {
+  margin-top: 16px;
+  padding: 10px;
+  border: 1px solid var(--line-200);
+  border-top: 1px solid var(--line-200);
+  border-bottom: 1px solid var(--line-200);
+  background: color-mix(in srgb, var(--paper-raised) 94%, var(--compare-info) 6%);
+  box-shadow: 0 12px 24px rgba(31, 76, 62, 0.07);
+}
+
+.page--compare .comparison-mobile-identity {
+  gap: 5px;
+  border-left: 3px solid var(--compare-info);
+}
+
+.page--compare .comparison-mobile-identity strong,
+.page--compare .comparison-mobile-identity small {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.page--compare .comparison-mobile-identity strong {
+  color: var(--ink-900);
+  font-family: var(--font-editorial);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.page--compare .comparison-mobile-identity small {
+  color: var(--ink-650);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.page--compare .comparison-mobile-switcher button[aria-pressed="true"] {
+  border-color: var(--compare-info);
+  background: var(--compare-info-wash);
+  color: var(--compare-info);
+}
+
+.page--compare .comparison-mobile-switcher > .status-pill {
+  align-self: start;
+  justify-self: start;
+  white-space: nowrap;
+}
+
+.page--compare .comparison-mobile-switcher[data-difference-state="same"] > .status-pill {
+  color: var(--ink-650);
+}
+
+.page--compare .comparison-matrix-scroll {
+  margin-top: 18px;
+  border-top: 2px solid var(--ink-650);
+  border-bottom: 1px solid var(--line-200);
+}
+
+.page--compare .comparison-transit-section {
+  margin-top: 34px;
+  padding-top: 24px;
+  border-top: 2px solid var(--ink-650);
+}
+
+.page--compare .comparison-transit-intro {
+  max-width: 88ch;
+  margin: 9px 0 0;
+  color: var(--ink-650);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.page--compare .comparison-transit-form {
+  padding: 16px;
+  border: 1px solid var(--line-200);
+  border-left: 4px solid var(--compare-info);
+  background:
+    linear-gradient(110deg, var(--compare-info-wash), rgba(255, 253, 248, 0.86) 58%),
+    var(--paper-raised);
+}
+
+.page--compare .comparison-transit-form[data-state="draft"] {
+  border-left-color: var(--warning-fg);
+  background: linear-gradient(110deg, var(--warning-bg), rgba(255, 253, 248, 0.88) 64%);
+}
+
+.page--compare .comparison-transit-form[data-state="committed"][data-route-binding="failed"] {
+  border-left-color: var(--cinnabar-650);
+  background: linear-gradient(110deg, var(--danger-bg), rgba(255, 253, 248, 0.88) 64%);
+}
+
+.page--compare .comparison-transit-commit-state {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: center;
+  margin: 10px 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-100);
+  color: var(--ink-650);
+  font-size: 12px;
+}
+
+.page--compare .comparison-transit-form > code {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid var(--line-100);
+  background: rgba(255, 253, 248, 0.72);
+  color: var(--ink-800);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.page--compare .comparison-evidence-footer {
+  border-left-color: var(--compare-info);
+  background:
+    linear-gradient(105deg, var(--compare-info-wash), rgba(255, 253, 248, 0.9)),
+    var(--paper-raised);
+}
+
+.page--compare .comparison-evidence-footer span,
+.page--compare .comparison-evidence-footer p,
+.page--compare .comparison-evidence-footer small {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.page--compare .comparison-evidence-footer span {
+  color: var(--ink-900);
+  font-family: var(--font-editorial);
+  font-weight: 700;
+}
+
+.page--compare .comparison-evidence-footer code {
+  font-size: 11px;
+}
+
+.page--compare .comparison-evidence-footer small {
+  color: var(--ink-550);
+}
+
+@keyframes comparison-surface-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1100px) {
+  .page--compare .compare-masthead {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 30px;
+  }
+
+  .page--compare .comparison-progress {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .page--compare .comparison-progress li {
+    grid-template-columns: 30px minmax(0, 1fr);
+    border-top: 0;
+    border-left: 1px solid var(--line-100);
+  }
+
+  .page--compare .comparison-progress li:first-child {
+    border-left: 0;
+  }
+
+  .page--compare .comparison-difference-index {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .page--compare .comparison-session-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page--compare .comparison-difference-index a:nth-child(4) {
+    border-left: 0;
+  }
+
+  .page--compare .comparison-difference-index a:nth-child(n + 4) {
+    border-top: 1px solid var(--line-100);
+  }
+}
+
+@media (max-width: 767px) {
+  .page--compare .compare-masthead {
+    gap: 24px;
+    padding: 38px 15px 22px;
+  }
+
+  .page--compare .compare-masthead .page-heading h1 {
+    font-size: clamp(34px, 11vw, 46px);
+  }
+
+  .page--compare .comparison-progress li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
+    padding: 10px 7px;
+  }
+
+  .page--compare .comparison-progress li::after {
+    top: 9px;
+    right: 7px;
+    transform: none;
+  }
+
+  .page--compare .comparison-progress strong {
+    font-size: 12px;
+  }
+
+  .page--compare .comparison-progress small {
+    font-size: 11px;
+  }
+
+  .page--compare .comparison-session {
+    padding-top: 20px;
+  }
+
+  .page--compare .comparison-slot-list {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: clamp(260px, 84vw, 360px);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    padding-bottom: 4px;
+    scroll-padding-inline: 1px;
+    scroll-snap-type: inline proximity;
+    scrollbar-color: var(--compare-info) transparent;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    box-shadow: inset -22px 0 24px -27px var(--compare-info);
+  }
+
+  .page--compare .comparison-slot-list:focus-visible {
+    outline-offset: 2px;
+  }
+
+  .page--compare .comparison-mobile-switcher {
+    position: sticky;
+    top: calc(72px + env(safe-area-inset-top));
+    z-index: 8;
+    border-top: 3px solid var(--compare-info);
+    background: color-mix(in srgb, var(--paper-raised) 94%, transparent);
+    box-shadow: 0 12px 28px rgba(31, 76, 62, 0.12);
+    backdrop-filter: blur(12px);
+  }
+
+  .page--compare .comparison-mobile-switcher[data-difference-state="same"] {
+    border-top-color: var(--ink-500);
+  }
+
+  .page--compare :is(.comparison-slot-card, .comparison-add-slot) {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .page--compare .comparison-session-facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page--compare .comparison-session-facts dd {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .page--compare .comparison-rule-commit-issue {
+    padding: 18px 14px;
+  }
+
+  .page--compare .comparison-rule-commit-issue > header {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .page--compare .comparison-rule-commit-issue > header > .status-pill {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .page--compare .comparison-rule-commit-issue > dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page--compare .comparison-rule-commit-actions,
+  .page--compare .comparison-rule-commit-actions > * {
+    width: 100%;
+  }
+
+  .page--compare .comparison-rule-commit-actions > * {
+    justify-content: center;
+  }
+
+  .page--compare .comparison-library-unavailable {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .page--compare .comparison-library-unavailable .secondary-action {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+
+  .page--compare .comparison-empty-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+  }
+
+  .page--compare .comparison-add-slot {
+    min-height: 132px;
+  }
+
+  .page--compare .comparison-slot-card {
+    padding: 16px 13px;
+  }
+
+  .page--compare .comparison-summary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 20px 14px;
+  }
+
+  .page--compare .comparison-summary > .status-pill {
+    justify-self: start;
+  }
+
+  .page--compare .comparison-reading-boundary {
+    grid-template-columns: 34px minmax(0, 1fr);
+    padding: 13px;
+  }
+
+  .page--compare .comparison-reading-boundary > span {
+    width: 31px;
+    height: 31px;
+    font-size: 20px;
+  }
+
+  .page--compare .comparison-transit-form {
+    padding: 13px;
+  }
+
+  .page--compare .comparison-difference-index {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page--compare .comparison-difference-index a,
+  .page--compare .comparison-difference-index a:nth-child(4) {
+    border-left: 1px solid var(--line-100);
+  }
+
+  .page--compare .comparison-difference-index a:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .page--compare .comparison-difference-index a:nth-child(n + 3) {
+    border-top: 1px solid var(--line-100);
+  }
+}
+
+@media (pointer: coarse) {
+  .page--compare .comparison-library-unavailable button,
+  .page--compare .comparison-slot-card select,
+  .page--compare .comparison-slot-card button,
+  .page--compare .comparison-rule-variant button,
+  .page--compare .comparison-difference-index a,
+  .page--compare .comparison-difference-toggle,
+  .page--compare .comparison-mobile-switcher button,
+  .page--compare .comparison-transit-form input,
+  .page--compare .comparison-transit-form button {
+    min-height: 44px;
+  }
+
+  .page--compare .comparison-rule-commit-actions > * {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .page--compare .comparison-mobile-switcher {
+    background: var(--paper-raised);
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .page--compare .comparison-slot-list:focus-visible,
+  .page--compare .comparison-mobile-switcher {
+    border-color: var(--ink-750);
+    outline-color: var(--ink-750);
+  }
+}
+
+@media (forced-colors: active) {
+  .page--compare .comparison-slot-list,
+  .page--compare .comparison-mobile-switcher {
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  .page--compare .compare-masthead,
+  .page--compare .comparison-session,
+  .page--compare .comparison-session-facts,
+  .page--compare .comparison-session-facts > div,
+  .page--compare .comparison-library-unavailable,
+  .page--compare .comparison-session-operation,
+  .page--compare .comparison-rule-commit-issue,
+  .page--compare .comparison-rule-commit-issue > dl,
+  .page--compare .comparison-rule-commit-issue > dl > div,
+  .page--compare .comparison-slot-card,
+  .page--compare .comparison-explicit-choice,
+  .page--compare .comparison-summary,
+  .page--compare .comparison-reading-boundary,
+  .page--compare .comparison-mobile-switcher,
+  .page--compare .comparison-transit-form,
+  .page--compare .comparison-evidence-footer,
+  .page--compare .comparison-matrix-scroll {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+
+  .page--compare .comparison-session-facts > div[data-state="bound"]::after,
+  .page--compare .comparison-session-facts > div[data-state="checking"]::after,
+  .page--compare .comparison-difference-index a[data-state="changed"] {
+    background: Highlight;
+    box-shadow: inset 0 -2px 0 Highlight;
+  }
+
+  .page--compare .comparison-progress li[data-state="active"]::after,
+  .page--compare .comparison-progress li[data-state="complete"]::after {
+    border-color: Highlight;
+    background: Highlight;
+  }
+
+  .page--compare .comparison-add-slot:focus-visible,
+  .page--compare .comparison-difference-index a:focus-visible {
+    outline-color: Highlight;
+  }
+
+  .page--compare .compare-masthead,
+  .page--compare .comparison-session {
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page--compare .compare-masthead,
+  .page--compare .comparison-session,
+  .page--compare .comparison-slot-card,
+  .page--compare .comparison-add-slot {
+    animation: none;
+    transition: none;
+  }
+
+  .page--compare .spin {
+    animation: none;
+  }
+}
+
+/* Final evidence-readability pass for stored labels, rule identities and digests. */
+.page--compare :is(
+  .comparison-session-facts dd,
+  .comparison-library-unavailable p,
+  .comparison-slot-card dd,
+  .comparison-explicit-choice small,
+  .comparison-rule-commit-issue > p,
+  .comparison-rule-commit-issue dd,
+  .comparison-mobile-identity,
+  .comparison-evidence-footer code,
+  .comparison-evidence-footer small,
+  .error-panel p,
+  .settings-message
+) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  unicode-bidi: plaintext;
+}
+
+.page--compare :is(
+  .comparison-session-intro,
+  .comparison-library-unavailable p,
+  .comparison-rule-commit-issue > p,
+  .comparison-summary > div > p:last-child,
+  .comparison-reading-boundary p,
+  .comparison-transit-intro,
+  .comparison-evidence-footer p,
+  .comparison-evidence-footer small
+) {
+  text-wrap: pretty;
+}
+
+.page--compare .comparison-progress small,
+.page--compare .comparison-session-facts dt,
+.page--compare .comparison-rule-commit-issue dt,
+.page--compare .comparison-slot-card > header small,
+.page--compare .comparison-mobile-identity small,
+.page--compare .comparison-evidence-footer code {
+  font-size: 12px;
+}
+
+.page--compare .comparison-slot-card.is-complete::after {
+  font-size: 11px;
+}
+
+.page--compare [id^="compare-section-"] {
+  scroll-margin-top: clamp(72px, 10vh, 120px);
+}
+
+@media print {
+  .page--compare .comparison-progress,
+  .page--compare .comparison-mode-nav,
+  .page--compare .comparison-slot-list,
+  .page--compare .comparison-rule-variant,
+  .page--compare .comparison-session-operation,
+  .page--compare .comparison-rule-commit-actions,
+  .page--compare .comparison-difference-toggle,
+  .page--compare .comparison-mobile-switcher,
+  .page--compare .comparison-transit-form button {
+    display: none !important;
+  }
+
+  .page--compare,
+  .page--compare .formal-comparison-workspace,
+  .page--compare .comparison-summary,
+  .page--compare .comparison-transit-section,
+  .page--compare .comparison-matrix-scroll {
+    content-visibility: visible;
+    contain: none;
+  }
+
+  .page--compare .compare-masthead,
+  .page--compare .comparison-session,
+  .page--compare .comparison-summary,
+  .page--compare .comparison-transit-section,
+  .page--compare .comparison-evidence-footer {
+    box-shadow: none;
+  }
+
+  .page--compare .compare-masthead,
+  .page--compare .comparison-summary,
+  .page--compare .comparison-evidence-footer {
+    break-inside: avoid;
+  }
+
+  .page--compare .comparison-matrix-scroll {
+    overflow: visible;
+  }
+}

@@ -42,7 +42,7 @@ import type {
 } from "./strength-sensitivity-review";
 
 export const BAZI_STRENGTH_EVIDENCE_NARRATIVE_PROFILE = Object.freeze({
-  projectionVersion: "hakimi.bazi.strength_evidence_narrative/0.1.0",
+  projectionVersion: "hakimi.bazi.strength_evidence_narrative/0.2.0",
   contentVersion: "0.18.0",
   calculationScope: "current_chart_strength_evidence_and_engineering_sensitivity" as const,
   orderPolicy: "month_command_then_visible_then_first_hidden_then_other_hidden" as const,

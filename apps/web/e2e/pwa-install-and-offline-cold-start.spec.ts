@@ -1,5 +1,8 @@
-﻿import { chromium, expect, test } from "@playwright/test";
+﻿import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { BRIDGE_RELEASE_DATABASE_DESCRIPTOR } from "../release-protocol";
+import { DEFAULT_V13_RELEASE_BROWSER_IDENTITY } from "../playwright.release-browser-matrix.ts";
+import { pageReleaseEvidence } from "./cross-schema-upgrade-helpers";
 import {
   MOBILE_VIEWPORT,
   collectConsoleProblems,
@@ -7,6 +10,10 @@ import {
   waitForAppReady,
   waitForServiceWorker
 } from "./full-backup-helpers";
+import {
+  launchReleasePersistentContext,
+  requireReleaseBrowserRuntimeProduct
+} from "./release-browser-persistent-context.ts";
 
 test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可离线冷启动深链", async ({
   baseURL
@@ -16,23 +23,36 @@ test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可
   // Playwright 的默认隔离 context 会被 Chromium 固定判为 in-incognito，无法证明
   // 产品自身的安装资格。这里使用测试输出目录中的一次性持久 profile，仍不接触
   // 用户真实浏览器资料，同时让 Page.getInstallabilityErrors 审计产品本身。
-  const context = await chromium.launchPersistentContext(testInfo.outputPath("edge-pwa-profile"), {
-    channel: "msedge",
-    headless: true,
-    acceptDownloads: true,
-    serviceWorkers: "allow",
-    viewport: MOBILE_VIEWPORT
+  const context = await launchReleasePersistentContext({
+    projectName: testInfo.project.name,
+    userDataDir: testInfo.outputPath(`${testInfo.project.name}-pwa-profile`)
   });
   const page = context.pages()[0] ?? await context.newPage();
+  await page.setViewportSize(MOBILE_VIEWPORT);
   const onlineProblems = collectConsoleProblems(page);
   try {
     await page.goto(`${baseURL}/`, { waitUntil: "domcontentloaded" });
     await waitForAppReady(page);
     await waitForServiceWorker(page);
     await expect(page).toHaveTitle("工作台 · 哈基米八字研究台");
+    expect(testInfo.project.metadata.releaseIdentity).toEqual(
+      DEFAULT_V13_RELEASE_BROWSER_IDENTITY
+    );
+    await expect.poll(() => pageReleaseEvidence(page)).toMatchObject({
+      appBootReady: "true",
+      dbGeneration: DEFAULT_V13_RELEASE_BROWSER_IDENTITY.dbGeneration,
+      dbSchema: String(DEFAULT_V13_RELEASE_BROWSER_IDENTITY.targetSchema),
+      evidenceId: process.env.HAKIMI_RELEASE_EVIDENCE_ID ?? "unbound-local-build",
+      descriptor: BRIDGE_RELEASE_DATABASE_DESCRIPTOR
+    });
 
     const devtools = await context.newCDPSession(page);
     await devtools.send("Page.enable");
+    const runtimeBrowserVersion = await devtools.send("Browser.getVersion");
+    requireReleaseBrowserRuntimeProduct(
+      testInfo.project.name,
+      runtimeBrowserVersion.product
+    );
     const [installability, appManifest] = await Promise.all([
       devtools.send("Page.getInstallabilityErrors"),
       devtools.send("Page.getAppManifest")

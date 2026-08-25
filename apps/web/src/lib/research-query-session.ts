@@ -3,6 +3,8 @@ import { z } from "zod";
 
 const DRAFT_STORAGE_PREFIX = "hakimi:research-query-draft:v1:";
 const DRAFT_CONTRACT = "hakimi-research-query-draft@1" as const;
+const MAX_DRAFT_STORAGE_CHARACTERS = 64 * 1024;
+const MAX_SESSION_STORAGE_KEY_COUNT = 100_000;
 const uuidSchema = z.string().uuid();
 const draftEnvelopeSchema = z.strictObject({
   contract: z.literal(DRAFT_CONTRACT),
@@ -22,7 +24,7 @@ export type ResearchQueryDraftCleanupResult = {
 };
 
 function storageKey(draftId: string): string {
-  return `${DRAFT_STORAGE_PREFIX}${draftId}`;
+  return `${DRAFT_STORAGE_PREFIX}${draftId.toLowerCase()}`;
 }
 
 export function writeResearchQueryDraft(
@@ -31,8 +33,16 @@ export function writeResearchQueryDraft(
   sourceViewId: string | null = null,
 ): ResearchQueryDraftEnvelope {
   uuidSchema.parse(draftId);
-  const draft = draftEnvelopeSchema.parse({ contract: DRAFT_CONTRACT, query, sourceViewId });
-  window.sessionStorage.setItem(storageKey(draftId), JSON.stringify(draft));
+  const draft = draftEnvelopeSchema.parse({
+    contract: DRAFT_CONTRACT,
+    query,
+    sourceViewId: sourceViewId?.toLowerCase() ?? null,
+  });
+  const serialized = JSON.stringify(draft);
+  if (serialized.length > MAX_DRAFT_STORAGE_CHARACTERS) {
+    throw new Error("研究检索草稿超过当前会话允许的安全体积，未写入浏览器存储。");
+  }
+  window.sessionStorage.setItem(storageKey(draftId), serialized);
   return draft;
 }
 
@@ -48,9 +58,17 @@ export function readResearchQueryDraft(draftId: string): ResearchQueryDraftReadR
   if (!uuidSchema.safeParse(draftId).success) {
     return { draft: null, issue: "研究检索草稿引用不是有效 UUID；未执行任何回退。" };
   }
-  const stored = window.sessionStorage.getItem(storageKey(draftId));
+  let stored: string | null;
+  try {
+    stored = window.sessionStorage.getItem(storageKey(draftId));
+  } catch {
+    return { draft: null, issue: "当前标签页无法读取研究检索会话存储；未执行任何回退。" };
+  }
   if (stored === null) {
     return { draft: null, issue: "这个研究检索草稿不在当前标签页会话中，可能已关闭或失效；未执行任何回退。" };
+  }
+  if (stored.length > MAX_DRAFT_STORAGE_CHARACTERS) {
+    return { draft: null, issue: "研究检索草稿体积异常；为避免解析不完整条件，未执行任何回退。" };
   }
   try {
     const parsed = draftEnvelopeSchema.safeParse(JSON.parse(stored));
@@ -75,25 +93,40 @@ export function removeResearchQueryDraft(draftId: string): void {
 export function clearResearchQueryDrafts(
   storage: Pick<Storage, "length" | "key" | "removeItem"> = window.sessionStorage,
 ): ResearchQueryDraftCleanupResult {
-  const matchingKeys: string[] = [];
-  for (let index = 0; index < storage.length; index += 1) {
-    const key = storage.key(index);
-    if (key?.startsWith(DRAFT_STORAGE_PREFIX)) matchingKeys.push(key);
-  }
+  const listMatchingKeys = (): Set<string> => {
+    const length = storage.length;
+    if (!Number.isSafeInteger(length) || length < 0 || length > MAX_SESSION_STORAGE_KEY_COUNT) {
+      throw new RangeError("当前会话存储键数量超过草稿清理安全枚举上限。");
+    }
+    const keys = new Set<string>();
+    for (let index = 0; index < length; index += 1) {
+      const key = storage.key(index);
+      if (key !== null && typeof key !== "string") {
+        throw new TypeError("当前会话存储返回了无效键名。");
+      }
+      if (key?.startsWith(DRAFT_STORAGE_PREFIX)) keys.add(key);
+    }
+    return keys;
+  };
 
-  let removedDraftCount = 0;
-  let failedDraftCount = 0;
+  const matchingKeys = listMatchingKeys();
   for (const key of matchingKeys) {
     try {
       storage.removeItem(key);
-      removedDraftCount += 1;
     } catch {
-      failedDraftCount += 1;
+      // The verification pass below remains authoritative for completion.
     }
   }
-  return {
-    matchedDraftCount: matchingKeys.length,
-    removedDraftCount,
+
+  const remainingKeys = listMatchingKeys();
+  for (const key of remainingKeys) matchingKeys.add(key);
+  let failedDraftCount = 0;
+  for (const key of matchingKeys) {
+    if (remainingKeys.has(key)) failedDraftCount += 1;
+  }
+  return Object.freeze({
+    matchedDraftCount: matchingKeys.size,
+    removedDraftCount: matchingKeys.size - failedDraftCount,
     failedDraftCount,
-  };
+  });
 }

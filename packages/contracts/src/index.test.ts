@@ -32,6 +32,12 @@ import {
   SCHEMA_VERSION,
   SOURCE_RIGHTS_FULL_BACKUP_FORMAT_VERSION,
   birthInputSchema,
+  createBirthInputSchemaForTimeZoneName,
+  createCandidateSetRecordSchemaForTimeZoneName,
+  createEventRecordSchemaForTimeZoneName,
+  createEventTimeMigrationReceiptSchemaForTimeZoneName,
+  createEventTimeContextSchemaForTimeZoneName,
+  createUnknownHourCandidateResultSchemaForTimeZoneName,
   candidateSetRecordSchema,
   candidateSetTzdbComparisonSchema,
   candidateSetTzdbProbeDiffSchema,
@@ -39,10 +45,14 @@ import {
   citationRecordSchema,
   citationTargetKeys,
   eventRecordSchema,
+  eventTimeContextSchema,
   eventTimeMigrationReceiptSchema,
   eventTimeFullBackupEnvelopeSchema,
   eventTimeMigrationFullBackupEnvelopeSchema,
   fullBackupEnvelopeSchema,
+  fullBackupCandidateSetRecordSchema,
+  fullBackupEventRecordSchema,
+  fullBackupEventTimeMigrationReceiptRecordSchema,
   isCandidateSetRecord,
   knowledgeDocumentRecordSchema,
   knowledgeFullBackupEnvelopeSchema,
@@ -76,6 +86,12 @@ import {
   savedViewFullBackupPayloadSchema,
   savedViewRecordSchema,
   sourceRightsRecordSchema,
+  storedBirthInputSchema,
+  storedCandidateSetRecordSchema,
+  storedEventRecordSchema,
+  storedEventTimeContextSchema,
+  storedEventTimeMigrationReceiptSchema,
+  storedUnknownHourCandidateResultSchema,
   tzdbMigrationReceiptSchema,
   tzdbMigrationFullBackupEnvelopeSchema,
   tzdbMigrationFullBackupManifestSchema,
@@ -146,6 +162,19 @@ describe("birthInputSchema", () => {
 
   it("拒绝不存在的 IANA 时区", () => {
     expect(birthInputSchema.safeParse({ ...validBirthInput, timeZone: "China/Nowhere" }).success).toBe(false);
+  });
+
+  it("把当前写入时区、存储形状与指定 resolver 的名称判定分开", () => {
+    const historicalOnly = { ...validBirthInput, timeZone: "Historical/Only" };
+    expect(birthInputSchema.safeParse(historicalOnly).success).toBe(false);
+    expect(storedBirthInputSchema.safeParse(historicalOnly).success).toBe(true);
+    expect(storedBirthInputSchema.safeParse({ ...historicalOnly, timeZone: "bad zone" }).success).toBe(false);
+
+    const resolverRelative = createBirthInputSchemaForTimeZoneName(
+      (timeZone) => timeZone === "Historical/Only"
+    );
+    expect(resolverRelative.safeParse(historicalOnly).success).toBe(true);
+    expect(resolverRelative.safeParse(validBirthInput).success).toBe(false);
   });
 });
 
@@ -445,6 +474,63 @@ describe("event time semantic derivation receipt contracts", () => {
 
   it("accepts an explicit new-ID derivation bound to the current content-addressed tzdb", () => {
     expect(eventTimeMigrationReceiptSchema.safeParse(receipt).success).toBe(true);
+  });
+
+  it("separates active-write, stored and selected-resolver Event schemas recursively", () => {
+    const historicalOnlyContext = structuredClone(targetTimeContext);
+    historicalOnlyContext.timeZone = "Historical/Only";
+    historicalOnlyContext.start.resolution.candidates = historicalOnlyContext.start.resolution.candidates.map(
+      (candidate) => ({
+        ...candidate,
+        zonedDateTime: candidate.zonedDateTime.replace("[Asia/Shanghai]", "[Historical/Only]")
+      })
+    );
+    historicalOnlyContext.start.resolution.selectedCandidate = {
+      ...historicalOnlyContext.start.resolution.selectedCandidate,
+      zonedDateTime: historicalOnlyContext.start.resolution.selectedCandidate.zonedDateTime.replace(
+        "[Asia/Shanghai]",
+        "[Historical/Only]"
+      )
+    };
+    const historicalEvent = {
+      ...eventFixture,
+      datePrecision: "minute" as const,
+      startDate: sourceSnapshot.startDate,
+      timeContext: historicalOnlyContext
+    };
+    const historicalReceipt = {
+      ...receipt,
+      target: {
+        ...receipt.target,
+        snapshot: { ...targetSnapshot, timeContext: historicalOnlyContext }
+      },
+      interpretation: { ...receipt.interpretation, timeZone: "Historical/Only" }
+    };
+    const selectedResolver = (timeZone: string) => timeZone === "Historical/Only";
+
+    expect(eventTimeContextSchema.safeParse(historicalOnlyContext).success).toBe(false);
+    expect(eventRecordSchema.safeParse(historicalEvent).success).toBe(false);
+    expect(eventTimeMigrationReceiptSchema.safeParse(historicalReceipt).success).toBe(false);
+
+    expect(storedEventTimeContextSchema.safeParse(historicalOnlyContext).success).toBe(true);
+    expect(storedEventRecordSchema.safeParse(historicalEvent).success).toBe(true);
+    expect(storedEventTimeMigrationReceiptSchema.safeParse(historicalReceipt).success).toBe(true);
+    expect(fullBackupEventRecordSchema.safeParse(historicalEvent).success).toBe(true);
+    expect(fullBackupEventTimeMigrationReceiptRecordSchema.safeParse(historicalReceipt).success).toBe(true);
+
+    expect(createEventTimeContextSchemaForTimeZoneName(selectedResolver)
+      .safeParse(historicalOnlyContext).success).toBe(true);
+    expect(createEventRecordSchemaForTimeZoneName(selectedResolver)
+      .safeParse(historicalEvent).success).toBe(true);
+    expect(createEventTimeMigrationReceiptSchemaForTimeZoneName(selectedResolver)
+      .safeParse(historicalReceipt).success).toBe(true);
+    expect(createEventRecordSchemaForTimeZoneName((timeZone) => timeZone === "Asia/Shanghai")
+      .safeParse(historicalEvent).success).toBe(false);
+
+    expect(storedEventRecordSchema.safeParse({
+      ...historicalEvent,
+      timeContext: { ...historicalOnlyContext, timeZone: "bad zone" }
+    }).success).toBe(false);
   });
 
   it("accepts a non-minute derivation without inventing IANA, DST, or UTC semantics", () => {
@@ -1519,6 +1605,58 @@ describe("full-backup contract generations", () => {
 });
 
 describe("unknown-hour candidate-set persistence contracts", () => {
+  it("separates current, stored, and resolver-relative time-zone validation across every nested CandidateSet chart", async () => {
+    const { calculateUnknownHourCandidates } = await import("@hakimi/bazi-core");
+    const current = await calculateUnknownHourCandidates(
+      birthInputSchema.parse({ ...validBirthInput, time: null, timePrecision: "unknown_hour" }),
+      WORKING_DEFAULT_RULE_PROFILE
+    );
+    const historical = structuredClone(current);
+    historical.input.timeZone = "Historical/Only";
+    for (const candidate of historical.candidates) {
+      candidate.timeCalibration.timeZone = "Historical/Only";
+      const charts = [
+        ...(candidate.chart ? [candidate.chart] : []),
+        ...candidate.variants.map((variant) => variant.chart)
+      ];
+      for (const chart of charts) {
+        chart.input.timeZone = "Historical/Only";
+        chart.timeCalibration.timeZone = "Historical/Only";
+      }
+    }
+
+    expect(unknownHourCandidateResultSchema.safeParse(historical).success).toBe(false);
+    expect(storedUnknownHourCandidateResultSchema.safeParse(historical).success).toBe(true);
+    expect(createUnknownHourCandidateResultSchemaForTimeZoneName(
+      (timeZone) => timeZone === "Historical/Only"
+    ).safeParse(historical).success).toBe(true);
+    expect(createUnknownHourCandidateResultSchemaForTimeZoneName(
+      (timeZone) => timeZone === "Asia/Shanghai"
+    ).safeParse(historical).success).toBe(false);
+
+    const record = {
+      schemaVersion: SCHEMA_VERSION,
+      recordVersion: RESEARCH_SUBJECT_RECORD_VERSION,
+      recordType: "unknown_hour_candidate_set",
+      id: "10000000-0000-4000-8000-000000000009",
+      alias: "historical candidate set",
+      tags: ["research"],
+      notes: "",
+      favorite: false,
+      deletedAt: null,
+      createdAt: "2026-08-01T00:00:00.000Z",
+      updatedAt: "2026-08-01T00:00:00.000Z",
+      candidateSet: historical,
+      snapshotDigest: "9".repeat(64)
+    };
+    expect(candidateSetRecordSchema.safeParse(record).success).toBe(false);
+    expect(storedCandidateSetRecordSchema.safeParse(record).success).toBe(true);
+    expect(createCandidateSetRecordSchemaForTimeZoneName(
+      (timeZone) => timeZone === "Historical/Only"
+    ).safeParse(record).success).toBe(true);
+    expect(fullBackupCandidateSetRecordSchema.safeParse(record).success).toBe(true);
+  });
+
   it("accepts a complete candidate set and narrows research-subject records", async () => {
     const { calculateUnknownHourCandidates } = await import("@hakimi/bazi-core");
     const candidateSet = await calculateUnknownHourCandidates(

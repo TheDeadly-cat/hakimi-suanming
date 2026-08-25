@@ -1127,10 +1127,17 @@ test("rejects drift in closure resolved URLs, requested edges, and root override
 
 test("direct workspace Vite builds retain the gate and reject a resolved alias into a draft", async () => {
   const configPath = path.resolve(workspaceRoot, "apps/web/vite.config.ts");
-  const resolved = await resolveConfig({ configFile: configPath, logLevel: "silent" }, "build");
+  const resolved = await resolveConfig({ configFile: configPath, configLoader: "runner", logLevel: "silent" }, "build");
   assert.ok(resolved.plugins.some((plugin) => plugin.name === "hakimi-isolated-system-contract-draft-boundary"));
 
-  const loaded = await loadConfigFromFile({ command: "build", mode: "production" }, configPath);
+  const loaded = await loadConfigFromFile(
+    { command: "build", mode: "production" },
+    configPath,
+    undefined,
+    "silent",
+    undefined,
+    "runner"
+  );
   assert.ok(loaded);
   loaded.config.resolve ??= {};
   const replacement = path.resolve(workspaceRoot, "packages/ziwei-doushu-contracts-draft/src/index.ts");

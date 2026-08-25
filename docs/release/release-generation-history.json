@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "ledgerId": "hakimi-web-release-generation-history-v1",
+  "historyEvidenceStatus": "unconfirmed_by_owner",
+  "policy": "Only an evidenced distributed generation may be admitted. Until owner evidence exists, v13 is the sole fail-closed source assumption.",
+  "allowedMigrationSources": [
+    {
+      "dbGeneration": "legacy-v13",
+      "databaseName": "hakimi-bazi-research",
+      "targetSchema": 13,
+      "migrationId": null,
+      "admission": "supported_by_fail_closed_default",
+      "distributionEvidence": "not_yet_confirmed"
+    }
+  ],
+  "generations": [
+    {
+      "dbGeneration": "legacy-v13",
+      "targetSchema": 13,
+      "channel": "default-v13",
+      "defaultBuild": true,
+      "publicDistribution": "unknown",
+      "migrationAdmission": "source_default"
+    },
+    {
+      "dbGeneration": "research-v14-case-activity",
+      "targetSchema": 14,
+      "channel": "historical-candidate",
+      "defaultBuild": false,
+      "publicDistribution": "unproven",
+      "migrationAdmission": "forbidden_until_evidenced"
+    },
+    {
+      "dbGeneration": "research-v15-revision-calculation-receipts",
+      "targetSchema": 15,
+      "channel": "historical-candidate",
+      "defaultBuild": false,
+      "publicDistribution": "unproven",
+      "migrationAdmission": "forbidden_until_evidenced"
+    },
+    {
+      "dbGeneration": "research-v16-mutation-state",
+      "targetSchema": 16,
+      "channel": "schema16-candidate",
+      "defaultBuild": false,
+      "publicDistribution": "not_authorized",
+      "migrationAdmission": "candidate_from_v13_only"
+    }
+  ],
+  "ownerEvidenceRequired": [
+    "distributed build hash",
+    "database name and schema",
+    "service worker cache generation",
+    "migration id",
+    "distribution date and user scope",
+    "representative read-only data sample fingerprint"
+  ]
+}

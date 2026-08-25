@@ -1,0 +1,654 @@
+{
+  "$schema": "./historical-natal-runtime-closure-v1.schema.json",
+  "schemaVersion": "1.0.0",
+  "gate": "hakimi-bazi-core-historical-natal-runtime-closure-v1",
+  "scope": "current_checkout_runtime_closure_not_historical_binary_or_expert_attestation",
+  "roots": [
+    "packages/bazi-core/src/historical-natal-chart-executor-0.4.0.ts",
+    "packages/bazi-core/src/index.ts"
+  ],
+  "workspaceSources": [
+    {
+      "path": "packages/bazi-core/src/historical-natal-chart-executor-0.4.0.ts",
+      "packageManifestPath": "packages/bazi-core/package.json",
+      "lfUtf8Sha256": "09ce6e7516e38359ed37c7bc4b71c27c00f0be21244c2ecefd3966ff89450117",
+      "byteLength": 26573,
+      "edges": [
+        {
+          "kind": "static-import",
+          "specifier": "./unsupported-calculation-error",
+          "targetKind": "workspace-source",
+          "target": "packages/bazi-core/src/unsupported-calculation-error.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "@hakimi/contracts",
+          "targetKind": "workspace-source",
+          "target": "packages/contracts/src/index.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "@hakimi/integrity",
+          "targetKind": "workspace-source",
+          "target": "packages/integrity/src/index.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "@hakimi/luck-core",
+          "targetKind": "workspace-source",
+          "target": "packages/luck-core/src/index.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "@hakimi/time-core",
+          "targetKind": "workspace-source",
+          "target": "packages/time-core/src/index.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "lunar-typescript",
+          "targetKind": "external-package",
+          "target": "node_modules/lunar-typescript"
+        }
+      ]
+    },
+    {
+      "path": "packages/bazi-core/src/index.ts",
+      "packageManifestPath": "packages/bazi-core/package.json",
+      "lfUtf8Sha256": "73e0be8dbb2f40132158ee5dba26e493e18b686f9c888552c3e596c713301b2f",
+      "byteLength": 46483,
+      "edges": [
+        {
+          "kind": "static-export",
+          "specifier": "./unsupported-calculation-error",
+          "targetKind": "workspace-source",
+          "target": "packages/bazi-core/src/unsupported-calculation-error.ts"
+        },
+        {
+          "kind": "static-export",
+          "specifier": "@hakimi/integrity",
+          "targetKind": "workspace-source",
+          "target": "packages/integrity/src/index.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "./historical-natal-chart-executor-0.4.0",
+          "targetKind": "workspace-source",
+          "target": "packages/bazi-core/src/historical-natal-chart-executor-0.4.0.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "./unsupported-calculation-error",
+          "targetKind": "workspace-source",
+          "target": "packages/bazi-core/src/unsupported-calculation-error.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "@hakimi/contracts",
+          "targetKind": "workspace-source",
+          "target": "packages/contracts/src/index.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "@hakimi/integrity",
+          "targetKind": "workspace-source",
+          "target": "packages/integrity/src/index.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "@hakimi/luck-core",
+          "targetKind": "workspace-source",
+          "target": "packages/luck-core/src/index.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "@hakimi/time-core",
+          "targetKind": "workspace-source",
+          "target": "packages/time-core/src/index.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "lunar-typescript",
+          "targetKind": "external-package",
+          "target": "node_modules/lunar-typescript"
+        }
+      ]
+    },
+    {
+      "path": "packages/bazi-core/src/unsupported-calculation-error.ts",
+      "packageManifestPath": "packages/bazi-core/package.json",
+      "lfUtf8Sha256": "3427769eaedd105af4a1ce7856cd91dfeb1f277529bf1412c750efb9ceba018e",
+      "byteLength": 163,
+      "edges": []
+    },
+    {
+      "path": "packages/contracts/src/index.ts",
+      "packageManifestPath": "packages/contracts/package.json",
+      "lfUtf8Sha256": "a7c9add04188f2fb9f9da46d2fce39c70a709d5a28872f1c7cb866c1e8e6756f",
+      "byteLength": 225571,
+      "edges": [
+        {
+          "kind": "static-import",
+          "specifier": "@hakimi/tzdb-core",
+          "targetKind": "workspace-source",
+          "target": "packages/tzdb-core/src/index.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "zod",
+          "targetKind": "external-package",
+          "target": "node_modules/zod"
+        }
+      ]
+    },
+    {
+      "path": "packages/integrity/src/index.ts",
+      "packageManifestPath": "packages/integrity/package.json",
+      "lfUtf8Sha256": "339054573ac1bb70d18ad3250b425e41d2c865dd47cf14086bd869512342ba9b",
+      "byteLength": 11169,
+      "edges": []
+    },
+    {
+      "path": "packages/luck-core/src/index.ts",
+      "packageManifestPath": "packages/luck-core/package.json",
+      "lfUtf8Sha256": "d3bbd22585ed37cfc1009e7efc62e95328aa561d2bddab1fa4fac53aa57c2710",
+      "byteLength": 43695,
+      "edges": [
+        {
+          "kind": "static-import",
+          "specifier": "lunar-typescript",
+          "targetKind": "external-package",
+          "target": "node_modules/lunar-typescript"
+        }
+      ]
+    },
+    {
+      "path": "packages/time-core/src/index.ts",
+      "packageManifestPath": "packages/time-core/package.json",
+      "lfUtf8Sha256": "5d8980e980477215c1dfcb202d2104783306ef74511cec23fb15dfe36c67452b",
+      "byteLength": 52377,
+      "edges": [
+        {
+          "kind": "static-import",
+          "specifier": "@hakimi/contracts",
+          "targetKind": "workspace-source",
+          "target": "packages/contracts/src/index.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "@hakimi/tzdb-core",
+          "targetKind": "workspace-source",
+          "target": "packages/tzdb-core/src/index.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "@js-temporal/polyfill",
+          "targetKind": "external-package",
+          "target": "node_modules/@js-temporal/polyfill"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "lunar-typescript",
+          "targetKind": "external-package",
+          "target": "node_modules/lunar-typescript"
+        }
+      ]
+    },
+    {
+      "path": "packages/tzdb-core/src/artifacts/iana-2025b.ts",
+      "packageManifestPath": "packages/tzdb-core/package.json",
+      "lfUtf8Sha256": "b1236071105653538a259d929a57e7cd2bb97928429cefaef2ead9dd5019e613",
+      "byteLength": 396,
+      "edges": [
+        {
+          "kind": "static-import",
+          "specifier": "moment-timezone-2025b/data/packed/latest.json",
+          "targetKind": "external-package",
+          "target": "node_modules/moment-timezone-2025b"
+        }
+      ]
+    },
+    {
+      "path": "packages/tzdb-core/src/index.ts",
+      "packageManifestPath": "packages/tzdb-core/package.json",
+      "lfUtf8Sha256": "7c144f6446b3fdba55f7b7b947fe242348ba5010025af36868c39436bfea638e",
+      "byteLength": 7819,
+      "edges": [
+        {
+          "kind": "dynamic-import",
+          "specifier": "./artifacts/iana-2025b.ts",
+          "targetKind": "workspace-source",
+          "target": "packages/tzdb-core/src/artifacts/iana-2025b.ts"
+        },
+        {
+          "kind": "static-export",
+          "specifier": "./packed-resolver.ts",
+          "targetKind": "workspace-source",
+          "target": "packages/tzdb-core/src/packed-resolver.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "./packed-resolver.ts",
+          "targetKind": "workspace-source",
+          "target": "packages/tzdb-core/src/packed-resolver.ts"
+        },
+        {
+          "kind": "static-import",
+          "specifier": "moment-timezone",
+          "targetKind": "external-package",
+          "target": "node_modules/moment-timezone"
+        }
+      ]
+    },
+    {
+      "path": "packages/tzdb-core/src/packed-resolver.ts",
+      "packageManifestPath": "packages/tzdb-core/package.json",
+      "lfUtf8Sha256": "bc13da5d2d9b8309aaad972662f8a31761a40afffbd9226bdf80159d43e5081f",
+      "byteLength": 8495,
+      "edges": [
+        {
+          "kind": "static-import",
+          "specifier": "moment-timezone",
+          "targetKind": "external-package",
+          "target": "node_modules/moment-timezone"
+        }
+      ]
+    }
+  ],
+  "workspaceManifests": [
+    {
+      "path": "packages/bazi-core/package.json",
+      "packageName": "@hakimi/bazi-core",
+      "version": "0.1.0",
+      "exports": "./src/index.ts",
+      "lfUtf8Sha256": "ee2e5832809c10cb90a12442c024855bc2b0e92fd0901237dc4482be638bdfab",
+      "byteLength": 303,
+      "dependencies": [
+        {
+          "request": "@hakimi/contracts",
+          "range": "*",
+          "targetKind": "workspace-manifest",
+          "target": "packages/contracts/package.json"
+        },
+        {
+          "request": "@hakimi/integrity",
+          "range": "*",
+          "targetKind": "workspace-manifest",
+          "target": "packages/integrity/package.json"
+        },
+        {
+          "request": "@hakimi/luck-core",
+          "range": "*",
+          "targetKind": "workspace-manifest",
+          "target": "packages/luck-core/package.json"
+        },
+        {
+          "request": "@hakimi/time-core",
+          "range": "*",
+          "targetKind": "workspace-manifest",
+          "target": "packages/time-core/package.json"
+        },
+        {
+          "request": "lunar-typescript",
+          "range": "1.8.6",
+          "targetKind": "external-package",
+          "target": "node_modules/lunar-typescript"
+        }
+      ],
+      "packageLockPath": "packages/bazi-core"
+    },
+    {
+      "path": "packages/contracts/package.json",
+      "packageName": "@hakimi/contracts",
+      "version": "0.1.0",
+      "exports": "./src/index.ts",
+      "lfUtf8Sha256": "6053a6b6ffd8baf0de20b5c6afed9a1bf8674dfce77fbbae4be5d6199a3a9801",
+      "byteLength": 200,
+      "dependencies": [
+        {
+          "request": "@hakimi/tzdb-core",
+          "range": "*",
+          "targetKind": "workspace-manifest",
+          "target": "packages/tzdb-core/package.json"
+        },
+        {
+          "request": "zod",
+          "range": "4.4.3",
+          "targetKind": "external-package",
+          "target": "node_modules/zod"
+        }
+      ],
+      "packageLockPath": "packages/contracts"
+    },
+    {
+      "path": "packages/integrity/package.json",
+      "packageName": "@hakimi/integrity",
+      "version": "0.1.0",
+      "exports": "./src/index.ts",
+      "lfUtf8Sha256": "075b2ba767f2a3f9186a2e0c7d26f671557c3f35e24cf7f24e0be2be1533e4b3",
+      "byteLength": 126,
+      "dependencies": [],
+      "packageLockPath": "packages/integrity"
+    },
+    {
+      "path": "packages/luck-core/package.json",
+      "packageName": "@hakimi/luck-core",
+      "version": "0.1.0",
+      "exports": "./src/index.ts",
+      "lfUtf8Sha256": "8ac629cb9043e36ae83f3381267a581bd0cb0fc4812aba2770e98963537e1ebc",
+      "byteLength": 183,
+      "dependencies": [
+        {
+          "request": "lunar-typescript",
+          "range": "1.8.6",
+          "targetKind": "external-package",
+          "target": "node_modules/lunar-typescript"
+        }
+      ],
+      "packageLockPath": "packages/luck-core"
+    },
+    {
+      "path": "packages/time-core/package.json",
+      "packageName": "@hakimi/time-core",
+      "version": "0.1.0",
+      "exports": "./src/index.ts",
+      "lfUtf8Sha256": "a910ec5b93c1380fc675376dfa46a435bca842df7ef1615404d732e692eb2d89",
+      "byteLength": 281,
+      "dependencies": [
+        {
+          "request": "@hakimi/contracts",
+          "range": "*",
+          "targetKind": "workspace-manifest",
+          "target": "packages/contracts/package.json"
+        },
+        {
+          "request": "@hakimi/tzdb-core",
+          "range": "*",
+          "targetKind": "workspace-manifest",
+          "target": "packages/tzdb-core/package.json"
+        },
+        {
+          "request": "@js-temporal/polyfill",
+          "range": "0.5.1",
+          "targetKind": "external-package",
+          "target": "node_modules/@js-temporal/polyfill"
+        },
+        {
+          "request": "lunar-typescript",
+          "range": "1.8.6",
+          "targetKind": "external-package",
+          "target": "node_modules/lunar-typescript"
+        }
+      ],
+      "packageLockPath": "packages/time-core"
+    },
+    {
+      "path": "packages/tzdb-core/package.json",
+      "packageName": "@hakimi/tzdb-core",
+      "version": "0.1.0",
+      "exports": "./src/index.ts",
+      "lfUtf8Sha256": "fb12b19a6f6c971185bd2f2c9226fe50ad816595e3acec4f0a0b373593136236",
+      "byteLength": 241,
+      "dependencies": [
+        {
+          "request": "moment-timezone",
+          "range": "0.6.3",
+          "targetKind": "external-package",
+          "target": "node_modules/moment-timezone"
+        },
+        {
+          "request": "moment-timezone-2025b",
+          "range": "npm:moment-timezone@0.5.48",
+          "targetKind": "external-package",
+          "target": "node_modules/moment-timezone-2025b"
+        }
+      ],
+      "packageLockPath": "packages/tzdb-core"
+    }
+  ],
+  "bundleResolver": {
+    "configFiles": [
+      {
+        "path": "apps/web/vite.config.ts",
+        "lfUtf8Sha256": "96ed96d3fedc7c5efd4810ee844f6b6c0c749cc179820cdc1f4a55a04dbfc9e8",
+        "byteLength": 16930,
+        "baseBinding": "defines-createWebViteConfig"
+      },
+      {
+        "path": "apps/web/vite.cross-schema-upgrade.config.ts",
+        "lfUtf8Sha256": "9983bbbd4d89e81c30e6be0d2f0ababc1584bd5f0e317931c81b3b2f26edd1c6",
+        "byteLength": 8244,
+        "baseBinding": "default"
+      },
+      {
+        "path": "apps/web/vite.e2e.config.ts",
+        "lfUtf8Sha256": "3bd547808152cc8de7226184a195be5d16db67013bc28fa25e95cf03a9a5fe80",
+        "byteLength": 619,
+        "baseBinding": "default"
+      },
+      {
+        "path": "apps/web/vite.production-v13-to-v15.config.ts",
+        "lfUtf8Sha256": "3c2751b329a4f0841e88c956c9f637d01572313823d985a13dd7626d306e8e16",
+        "byteLength": 820,
+        "baseBinding": "createWebViteConfig"
+      },
+      {
+        "path": "apps/web/vite.production-v13-to-v16.config.ts",
+        "lfUtf8Sha256": "96f7eaf03805af4388534f38af6489f2d339f079ac19bedd1ea3d054d3acafc1",
+        "byteLength": 815,
+        "baseBinding": "createWebViteConfig"
+      },
+      {
+        "path": "apps/web/vite.production-v14.config.ts",
+        "lfUtf8Sha256": "3d20732378899d7aedafafd020844bf663eac265a700273d9c73a201a3c76a90",
+        "byteLength": 460,
+        "baseBinding": "createWebViteConfig"
+      },
+      {
+        "path": "apps/web/vite.production-v15.config.ts",
+        "lfUtf8Sha256": "a76b54d1b2a2a7734f5f4a24bd2c59b08052579448dd7e9437b69b1ab2ff06d4",
+        "byteLength": 748,
+        "baseBinding": "createWebViteConfig"
+      },
+      {
+        "path": "apps/web/vite.sw-upgrade.config.ts",
+        "lfUtf8Sha256": "a032c5703221f42973a745807b7e7f370b13f9ae2c694df2b4ece27ee3f63b81",
+        "byteLength": 2417,
+        "baseBinding": "default"
+      }
+    ],
+    "aliases": [
+      {
+        "specifier": "@hakimi/bazi-core",
+        "manifestPath": "packages/bazi-core/package.json",
+        "manifestExport": "./src/index.ts",
+        "target": "packages/bazi-core/src/index.ts"
+      },
+      {
+        "specifier": "@hakimi/contracts",
+        "manifestPath": "packages/contracts/package.json",
+        "manifestExport": "./src/index.ts",
+        "target": "packages/contracts/src/index.ts"
+      },
+      {
+        "specifier": "@hakimi/integrity",
+        "manifestPath": "packages/integrity/package.json",
+        "manifestExport": "./src/index.ts",
+        "target": "packages/integrity/src/index.ts"
+      },
+      {
+        "specifier": "@hakimi/luck-core",
+        "manifestPath": "packages/luck-core/package.json",
+        "manifestExport": "./src/index.ts",
+        "target": "packages/luck-core/src/index.ts"
+      },
+      {
+        "specifier": "@hakimi/time-core",
+        "manifestPath": "packages/time-core/package.json",
+        "manifestExport": "./src/index.ts",
+        "target": "packages/time-core/src/index.ts"
+      },
+      {
+        "specifier": "@hakimi/tzdb-core",
+        "manifestPath": "packages/tzdb-core/package.json",
+        "manifestExport": "./src/index.ts",
+        "target": "packages/tzdb-core/src/index.ts"
+      }
+    ],
+    "scriptManifests": [
+      {
+        "path": "apps/web/package.json",
+        "lfUtf8Sha256": "6d9512150dffd2dce33fbd9c431f86f1f559fd32c848fcff2b0ce1fab032cdab",
+        "byteLength": 3201
+      },
+      {
+        "path": "package.json",
+        "lfUtf8Sha256": "09bd62a4b505f86a8a17dac6b9eb8932635479d03cce3c1ed38dbd5f9514b3f5",
+        "byteLength": 16354
+      }
+    ],
+    "rootBundleScripts": [
+      "build",
+      "build:production-v13-to-v15:candidate",
+      "build:production-v13-to-v16:candidate",
+      "build:production-v14",
+      "build:production-v15:candidate"
+    ],
+    "webBundleScripts": [
+      "build",
+      "build:e2e",
+      "build:production-v13-to-v15:candidate",
+      "build:production-v13-to-v16:candidate",
+      "build:production-v14",
+      "build:production-v15:candidate"
+    ],
+    "rootPrehookCommand": "npm run check:historical-natal-build-attestation",
+    "webPrehookCommand": "npm --prefix ../.. run check:historical-natal-build-attestation"
+  },
+  "externalPackages": [
+    {
+      "installPath": "node_modules/@js-temporal/polyfill",
+      "requestName": "@js-temporal/polyfill",
+      "packageName": "@js-temporal/polyfill",
+      "version": "0.5.1",
+      "resolved": "https://registry.npmjs.org/@js-temporal/polyfill/-/polyfill-0.5.1.tgz",
+      "integrity": "sha512-hloP58zRVCRSpgDxmqCWJNlizAlUgJFqG2ypq79DCvyv9tHjRYMDOcPFjzfl/A1/YxDvRCZz8wvZvmapQnKwFQ==",
+      "dependencyEdges": [
+        {
+          "request": "jsbi",
+          "range": "^4.3.0",
+          "targetInstallPath": "node_modules/jsbi"
+        }
+      ],
+      "installedTree": {
+        "sha256": "5d8ca98b4528f215ce0339db5b66f9099e13d8e786715351de6962d0a91b16fa",
+        "fileCount": 38,
+        "directoryCount": 2,
+        "byteLength": 2981675
+      }
+    },
+    {
+      "installPath": "node_modules/jsbi",
+      "requestName": "jsbi",
+      "packageName": "jsbi",
+      "version": "4.3.2",
+      "resolved": "https://registry.npmjs.org/jsbi/-/jsbi-4.3.2.tgz",
+      "integrity": "sha512-9fqMSQbhJykSeii05nxKl4m6Eqn2P6rOlYiS+C5Dr/HPIU/7yZxu5qzbs40tgaFORiw2Amd0mirjxatXYMkIew==",
+      "dependencyEdges": [],
+      "installedTree": {
+        "sha256": "171cf86a45af430d707ed140f29b1972ec2a7cbdf5289537a17a4e0fd80497c0",
+        "fileCount": 10,
+        "directoryCount": 1,
+        "byteLength": 583518
+      }
+    },
+    {
+      "installPath": "node_modules/lunar-typescript",
+      "requestName": "lunar-typescript",
+      "packageName": "lunar-typescript",
+      "version": "1.8.6",
+      "resolved": "https://registry.npmjs.org/lunar-typescript/-/lunar-typescript-1.8.6.tgz",
+      "integrity": "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA==",
+      "dependencyEdges": [],
+      "installedTree": {
+        "sha256": "468bdab11050aa5fab181543f49d85a75267ecebff55974ad8b6bd2988dd87d4",
+        "fileCount": 78,
+        "directoryCount": 2,
+        "byteLength": 1360545
+      }
+    },
+    {
+      "installPath": "node_modules/moment",
+      "requestName": "moment",
+      "packageName": "moment",
+      "version": "2.30.1",
+      "resolved": "https://registry.npmjs.org/moment/-/moment-2.30.1.tgz",
+      "integrity": "sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==",
+      "dependencyEdges": [],
+      "installedTree": {
+        "sha256": "9d8faf47d8abe8dc755d1a9546155b228f637658ac7d57aefd5b9d87bde10616",
+        "fileCount": 539,
+        "directoryCount": 16,
+        "byteLength": 4350323
+      }
+    },
+    {
+      "installPath": "node_modules/moment-timezone",
+      "requestName": "moment-timezone",
+      "packageName": "moment-timezone",
+      "version": "0.6.3",
+      "resolved": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.6.3.tgz",
+      "integrity": "sha512-pVEPA/HCFHHbwJ130ywnzYuZpkEGcP6Daa/OwNebpA18MybeFHmQilAGGovXgWijQ8vQtmud9jZrziUBgsykfg==",
+      "dependencyEdges": [
+        {
+          "request": "moment",
+          "range": "^2.29.4",
+          "targetInstallPath": "node_modules/moment"
+        }
+      ],
+      "installedTree": {
+        "sha256": "685fc5190c08f3da4e3c96a853aaeb5b0af4d2fc49681c30ec6acff8e72d3c95",
+        "fileCount": 26,
+        "directoryCount": 4,
+        "byteLength": 2810298
+      }
+    },
+    {
+      "installPath": "node_modules/moment-timezone-2025b",
+      "requestName": "moment-timezone-2025b",
+      "packageName": "moment-timezone",
+      "version": "0.5.48",
+      "resolved": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.5.48.tgz",
+      "integrity": "sha512-f22b8LV1gbTO2ms2j2z13MuPogNoh5UzxL3nzNAYKGraILnbGc9NEE6dyiiiLv46DGRb8A4kg8UKWLjPthxBHw==",
+      "dependencyEdges": [
+        {
+          "request": "moment",
+          "range": "^2.29.4",
+          "targetInstallPath": "node_modules/moment"
+        }
+      ],
+      "installedTree": {
+        "sha256": "251984cf4ad2ab3cd152dfd7bd77b3ae86f1861acd466bfb9734c7e40217c128",
+        "fileCount": 22,
+        "directoryCount": 4,
+        "byteLength": 2843422
+      }
+    },
+    {
+      "installPath": "node_modules/zod",
+      "requestName": "zod",
+      "packageName": "zod",
+      "version": "4.4.3",
+      "resolved": "https://registry.npmjs.org/zod/-/zod-4.4.3.tgz",
+      "integrity": "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==",
+      "dependencyEdges": [],
+      "installedTree": {
+        "sha256": "2b90cab29a2eb252749affa67299a196c6fbf3f0952054e2c49fb65e5104988a",
+        "fileCount": 718,
+        "directoryCount": 29,
+        "byteLength": 4558122
+      }
+    }
+  ],
+  "overallSha256": "2788ee8934a417f32e78c827ce31eb441e9238214f96be2e3b7a2330a3b7dbe0"
+}

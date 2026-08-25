@@ -1,7 +1,7 @@
 import { Download, Upload } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { RevisionRecord } from "@hakimi/contracts";
-import { pickTextFile, saveBlobFile } from "@hakimi/platform";
+import { pickTextFile, webReportExportPort } from "@hakimi/platform";
 import {
   BAZI_CONTENT_REVIEW_FEEDBACK_FILENAME,
   BAZI_CONTENT_REVIEW_FEEDBACK_PROFILE,
@@ -39,10 +39,92 @@ import {
   type TenGodOccurrenceReviewResult,
   type TenGodStrengthSensitivityReview
 } from "@hakimi/bazi-interpretation";
-import { resolveFileDelivery } from "../lib/file-transfer-feedback";
+import { shortHash } from "../lib/format";
 import { AppLink } from "../lib/router";
 import { BaziStrengthEvidenceLedgerPanel } from "./bazi-strength-evidence-ledger";
+import {
+  PreparedFileDeliveryDialog,
+  type PreparedFileArtifact
+} from "./prepared-file-delivery-dialog";
 import { StatusPill } from "./status-pill";
+import "./bazi-interpretation-panel.css";
+
+const unsafeInterpretationRenderTextPattern = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/u;
+const unsafeInterpretationSourceUrlPattern = /[\u0000-\u0020\u007F\u202A-\u202E\u2066-\u2069]/u;
+const sensitiveInterpretationCredentialPattern = /\b(?:api[_-]?key|access[_-]?token|refresh[_-]?token|authorization|bearer|secret|password)\b(?:\s*[:=]\s*|\s+)[^\s,;]+/giu;
+const visibleInterpretationUrlPattern = /\b(?:https?|file):\/\/[^\s"'<>]+/giu;
+const localInterpretationWindowsPathPattern = /(?:[a-z]:\\|\\\\)[^\s"'<>]+/giu;
+const localInterpretationUserPathPattern = /\/(?:users|home)\/[^\s"'<>]+/giu;
+const interpretationStackTracePattern = /\bstack\s*trace\b.*$/iu;
+const MAX_INTERPRETATION_INLINE_CHARACTERS = 220;
+const MAX_INTERPRETATION_IDENTIFIER_CHARACTERS = 256;
+const INTERPRETATION_COLLECTION_LIMITS = Object.freeze({
+  pillars: 8,
+  strengthFactors: 128,
+  sensitivityScenarios: 128,
+  tenGodSensitivityItems: 32,
+  occurrenceItems: 256,
+  firstReadSteps: 8,
+  themeItems: 16,
+  sources: 128
+});
+
+function interpretationCodePointLengthExceeds(value: string, maximumCharacters: number): boolean {
+  let count = 0;
+  for (const _character of value) {
+    count += 1;
+    if (count > maximumCharacters) return true;
+  }
+  return false;
+}
+
+function safeInterpretationInlineText(
+  value: unknown,
+  fallback: string,
+  maximumCharacters = MAX_INTERPRETATION_INLINE_CHARACTERS
+): string {
+  if (typeof value !== "string") return fallback;
+  const normalized = value.replace(/\s+/gu, " ").trim();
+  if (!normalized
+    || interpretationCodePointLengthExceeds(normalized, maximumCharacters)
+    || unsafeInterpretationRenderTextPattern.test(normalized)) return fallback;
+  return normalized;
+}
+
+function safeInterpretationErrorMessage(reason: unknown, fallback: string): string {
+  if (!(reason instanceof Error)) return fallback;
+  const message = safeInterpretationInlineText(reason.message, fallback);
+  return message
+    .replace(sensitiveInterpretationCredentialPattern, "[凭据已隐藏]")
+    .replace(visibleInterpretationUrlPattern, "[链接已隐藏]")
+    .replace(localInterpretationWindowsPathPattern, "[本地路径已隐藏]")
+    .replace(localInterpretationUserPathPattern, "[本地路径已隐藏]")
+    .replace(interpretationStackTracePattern, "[调用栈已隐藏]");
+}
+
+function isSafeInterpretationIdentifier(value: unknown): value is string {
+  return typeof value === "string"
+    && value.trim().length > 0
+    && value === value.trim()
+    && !/\s/u.test(value)
+    && !interpretationCodePointLengthExceeds(value, MAX_INTERPRETATION_IDENTIFIER_CHARACTERS)
+    && !unsafeInterpretationRenderTextPattern.test(value);
+}
+
+function safeInterpretationSourceUrl(value: unknown): value is string {
+  if (typeof value !== "string" || unsafeInterpretationSourceUrlPattern.test(value)) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}
+
+function interpretationSourceHost(value: string): string {
+  const hostname = new URL(value).hostname.toLowerCase();
+  return hostname.startsWith("www.") ? hostname.slice(4) : hostname;
+}
 
 function useBaziInterpretation(revision: RevisionRecord) {
   const includeHour = revision.input.timePrecision !== "unknown_hour" && revision.input.timePrecision !== "date_only";
@@ -53,6 +135,21 @@ function useBaziInterpretation(revision: RevisionRecord) {
 }
 
 type CurrentChartReviewOperation = "idle" | "preparing" | "exporting" | "choosing" | "validating";
+type CurrentChartPacketState = "unprepared" | "bound" | "valid" | "invalid";
+
+function currentChartReviewStatus(
+  operation: CurrentChartReviewOperation,
+  packetState: CurrentChartPacketState
+): { tone: "neutral" | "warning" | "info" | "cinnabar"; label: string } {
+  if (operation === "preparing") return { tone: "info", label: "正在准备" };
+  if (operation === "exporting") return { tone: "info", label: "正在准备" };
+  if (operation === "choosing") return { tone: "info", label: "等待选择" };
+  if (operation === "validating") return { tone: "info", label: "正在预检" };
+  if (packetState === "invalid") return { tone: "cinnabar", label: "反馈预检失败" };
+  if (packetState === "valid") return { tone: "neutral", label: "结构预检通过" };
+  if (packetState === "bound") return { tone: "warning", label: "模板已绑定" };
+  return { tone: "neutral", label: "尚未准备" };
+}
 
 function BaziCurrentChartHitReviewPanel({
   revision,
@@ -66,7 +163,16 @@ function BaziCurrentChartHitReviewPanel({
   tenGodOccurrences: TenGodOccurrenceReviewResult;
 }) {
   const includeHour = includeReliableHour(revision);
-  const bindingKey = `${revision.id}:${revision.manifest.resultHash}:${includeHour ? "hour" : "no-hour"}`;
+  const bindingKey = JSON.stringify([
+    revision.id,
+    revision.manifest.resultHash,
+    includeHour ? "hour" : "no-hour",
+    interpretation.profile.rulePackId,
+    interpretation.profile.ruleVersion,
+    interpretation.profile.editorialVersion,
+    strengthSensitivity.profile.projectionVersion,
+    tenGodOccurrences.profile.projectionVersion
+  ]);
   const bindingKeyRef = useRef(bindingKey);
   const epochRef = useRef(0);
   const operationTokenRef = useRef(0);
@@ -86,6 +192,7 @@ function BaziCurrentChartHitReviewPanel({
     text: string;
     marksPreflightInvalid?: boolean;
   } | null>(null);
+  const [preparedDelivery, setPreparedDelivery] = useState<PreparedFileArtifact | null>(null);
 
   useEffect(() => {
     bindingKeyRef.current = bindingKey;
@@ -96,18 +203,30 @@ function BaziCurrentChartHitReviewPanel({
     setTemplateState(null);
     setPreflightState(null);
     setMessage(null);
+    setPreparedDelivery(null);
   }, [bindingKey]);
 
   const template = templateState?.bindingKey === bindingKey ? templateState.template : null;
   const preflight = preflightState?.bindingKey === bindingKey ? preflightState.preflight : null;
   const currentMessage = message?.bindingKey === bindingKey ? message : null;
   const busy = operation !== "idle";
-  const packetState = template ? (preflight ? "valid" : currentMessage?.marksPreflightInvalid ? "invalid" : "ready") : "unprepared";
+  const packetState: CurrentChartPacketState = template ? (preflight ? "valid" : currentMessage?.marksPreflightInvalid ? "invalid" : "bound") : "unprepared";
+  const statusDisplay = currentChartReviewStatus(operation, packetState);
   const shenshaRuleHitCount = template
     ? new Set(template.packet.items
       .filter((item) => item.category === "shensha_occurrence")
       .map((item) => item.candidateSnapshot.ruleId)).size
     : 0;
+  const packetBindingDigests = template ? [
+    { label: "Facts projection", value: template.packet.bindings.factsProjectionSha256 },
+    { label: "Strength policy", value: template.packet.bindings.strengthPolicySha256 },
+    { label: "Strength assessment", value: template.packet.bindings.strengthAssessmentSha256 },
+    { label: "Strength sensitivity", value: template.packet.bindings.strengthSensitivitySha256 },
+    { label: "Evidence narrative", value: template.packet.bindings.strengthEvidenceNarrativeSha256 },
+    { label: "Claim registry", value: template.packet.bindings.strengthClaimRegistrySha256 },
+    { label: "Ordered review items", value: template.packet.bindings.orderedReviewItemIdsSha256 },
+    { label: "Packet", value: template.packetSha256 }
+  ] as const : [];
 
   const beginOperation = (next: CurrentChartReviewOperation) => {
     if (busyRef.current) return null;
@@ -133,12 +252,13 @@ function BaziCurrentChartHitReviewPanel({
   const preparePacket = async () => {
     const capture = beginOperation("preparing");
     if (!capture) return;
+    setTemplateState(null);
     setPreflightState(null);
     setMessage(null);
     try {
       const shensha = deriveShenshaResearchFacts(revision.facts, { includeHour });
       const shenshaOccurrences = buildShenshaOccurrenceReview(revision.facts, shensha);
-      const prepared = await createBaziCurrentChartHitReviewTemplate({
+      const buildInput = {
         facts: revision.facts,
         includeHour,
         interpretation,
@@ -147,13 +267,29 @@ function BaziCurrentChartHitReviewPanel({
         shensha,
         shenshaOccurrences,
         shenshaGate: "explicit_research_preview_included"
-      });
+      } as const;
+      const prepared = await createBaziCurrentChartHitReviewTemplate(buildInput);
+      const independentlyRebuilt = await createBaziCurrentChartHitReviewTemplate(buildInput);
+      const generatedPreflight = await preflightBaziCurrentChartHitReview(
+        serializeBaziCurrentChartHitReview(prepared),
+        independentlyRebuilt
+      );
+      if (
+        !generatedPreflight.currentChartBound
+        || generatedPreflight.resolvedCount !== 0
+        || generatedPreflight.unresolvedCount !== prepared.packet.counts.total
+        || generatedPreflight.counts.total !== prepared.packet.counts.total
+        || generatedPreflight.reviewerAttributionComplete
+      ) {
+        throw new Error("新生成的本盘复核模板未通过空白模板绑定校验，已拒绝进入页面状态。");
+      }
+      const verifiedTemplate = generatedPreflight.envelope;
       if (!isCurrentOperation(capture)) return;
-      setTemplateState({ bindingKey, template: prepared });
+      setTemplateState({ bindingKey, template: verifiedTemplate });
       setMessage({
         bindingKey,
-        tone: "success",
-        text: `本盘复核包已在内存准备：${prepared.packet.counts.total} 项；神煞研究由本次按钮显式触发。未写入命盘或数据库。`
+        tone: "info",
+        text: `本盘复核包已独立重建并完成序列化往返校验：${verifiedTemplate.packet.counts.total} 项；神煞研究由本次按钮显式触发。未写入命盘或数据库。`
       });
     } catch (reason) {
       if (!isCurrentOperation(capture)) return;
@@ -161,39 +297,39 @@ function BaziCurrentChartHitReviewPanel({
       setMessage({
         bindingKey,
         tone: "error",
-        text: reason instanceof Error ? reason.message : "无法准备当前盘命中复核包。"
+        text: safeInterpretationErrorMessage(reason, "无法准备当前盘命中复核包。")
       });
     } finally {
       finishOperation(capture);
     }
   };
 
-  const exportPacket = async () => {
+  const preparePacketDelivery = () => {
     if (!template) return;
     const capture = beginOperation("exporting");
     if (!capture) return;
     setMessage(null);
     try {
       const content = serializeBaziCurrentChartHitReview(template);
-      const result = await saveBlobFile(
-        BAZI_CURRENT_CHART_HIT_REVIEW_FILENAME,
-        new Blob([content], { type: "application/json;charset=utf-8" })
-      );
       if (!isCurrentOperation(capture)) return;
-      const delivery = resolveFileDelivery(result, "当前盘命中复核包导出");
+      setPreparedDelivery({
+        blob: new Blob([content], { type: "application/json;charset=utf-8" }),
+        filename: BAZI_CURRENT_CHART_HIT_REVIEW_FILENAME,
+        title: "当前盘命中复核包",
+        description: "含当前盘四柱与派生命中事实，可形成命盘指纹；仅用于离线人工复核，不代表专家真值、正式内容或发布授权。",
+        sharePolicy: "blocked_sensitive"
+      });
       setMessage({
         bindingKey,
-        tone: delivery.kind === "error" ? "error" : delivery.kind === "cancelled" ? "info" : "success",
-        text: delivery.kind === "error"
-          ? delivery.message
-          : `${delivery.message} 文件含当前盘四柱与派生命中事实，请按敏感资料保管；摘要不是加密。`
+        tone: "info",
+        text: "本盘反馈模板已在本机内存中准备；尚未保存或下载。请在交付对话框再次确认，文件含命盘指纹，SHA-256 不是加密。"
       });
     } catch (reason) {
       if (!isCurrentOperation(capture)) return;
       setMessage({
         bindingKey,
         tone: "error",
-        text: reason instanceof Error ? reason.message : "无法导出当前盘命中复核包。"
+        text: safeInterpretationErrorMessage(reason, "无法准备当前盘命中复核包。")
       });
     } finally {
       finishOperation(capture);
@@ -220,13 +356,14 @@ function BaziCurrentChartHitReviewPanel({
       const checked = await preflightBaziCurrentChartHitReview(file.text, template);
       if (!isCurrentOperation(capture)) return;
       setPreflightState({ bindingKey, preflight: checked });
+      const selectedFileName = safeInterpretationInlineText(file.name, "所选 JSON 文件", 180);
       const reviewerLabel = checked.reviewerAttributionComplete
-        ? `${checked.envelope.reviewer.displayName}（${checked.envelope.reviewer.reviewerId}）`
+        ? `${safeInterpretationInlineText(checked.envelope.reviewer.displayName, "未命名审稿人", 80)}（${safeInterpretationInlineText(checked.envelope.reviewer.reviewerId, "未提供审稿人 ID", 128)}）`
         : "尚未填写审稿归属";
       setMessage({
         bindingKey,
-        tone: "success",
-        text: `当前盘只读预检通过：${file.name} · 已裁决 ${checked.resolvedCount}/${checked.counts.total} · ${reviewerLabel}。未写入命盘或数据库。`
+        tone: "info",
+        text: `当前盘只读结构预检通过：${selectedFileName} · 已裁决 ${checked.resolvedCount}/${checked.counts.total} · ${reviewerLabel}。这不核验身份、专家真值或内容正确性；未写入命盘或数据库。`
       });
     } catch (reason) {
       if (!isCurrentOperation(capture)) return;
@@ -234,7 +371,7 @@ function BaziCurrentChartHitReviewPanel({
       setMessage({
         bindingKey,
         tone: "error",
-        text: reason instanceof Error ? reason.message : "当前盘复核反馈预检失败。",
+        text: safeInterpretationErrorMessage(reason, "当前盘复核反馈预检失败。"),
         marksPreflightInvalid: true
       });
     } finally {
@@ -244,6 +381,7 @@ function BaziCurrentChartHitReviewPanel({
 
   return (
     <section
+      id="bazi-current-chart-review"
       className="bazi-current-chart-review-workbench"
       aria-labelledby="bazi-current-chart-review-title"
       data-packet-version={BAZI_CURRENT_CHART_HIT_REVIEW_PROFILE.formatVersion}
@@ -262,71 +400,110 @@ function BaziCurrentChartHitReviewPanel({
       data-shensha-rule-hit-count={shenshaRuleHitCount}
       data-shensha-occurrence-count={template?.packet.counts.shenshaOccurrences ?? 0}
       data-total-count={template?.packet.counts.total ?? 0}
+      data-binding-digest-count={packetBindingDigests.length}
       data-operation-state={operation}
       data-preflight-state={packetState}
       data-current-chart-bound={preflight?.currentChartBound ?? false}
       data-reviewer-attribution-complete={preflight?.reviewerAttributionComplete ?? false}
+      data-schema-family="legacy-v13"
+      data-release-identity="legacy-v13"
+      data-db-generation="13"
+      data-target-schema="13"
+      data-migration-id="null"
+      data-engineering-evidence-only="true"
       data-expert-truth-claimed="false"
       data-scientific-validity-claimed="false"
       data-formal-activation-allowed="false"
       data-auto-integration-allowed="false"
       data-catalog-decision-inheritance-applied="false"
       data-network-transmission-performed="false"
+      data-mutation-epoch-bypassed="false"
+      data-mutation-mode="read-only-no-mutation"
       data-chart-or-storage-mutation-performed="false"
+      data-record-write-performed="false"
       data-good-bad-orientation="null"
       data-event-outcome="null"
       data-result="null"
+      aria-busy={busy}
     >
+      {preparedDelivery ? (
+        <PreparedFileDeliveryDialog
+          artifact={preparedDelivery}
+          exportPort={webReportExportPort}
+          onClose={() => setPreparedDelivery(null)}
+        />
+      ) : null}
       <header>
         <div>
           <small>Current chart hit review · v0.18</small>
           <h3 id="bazi-current-chart-review-title">本盘实际命中复核包</h3>
           <p>显式准备后，只收本盘 4 项旺衰方法、实际十神出现项与实际神煞落柱命中；不把全量 69 项目录的决定继承到本盘，也不把本盘意见反写成全局批准。</p>
         </div>
-        <StatusPill tone={template ? "info" : "warning"}>{template ? `${template.packet.counts.total} 项已绑定` : "尚未准备"}</StatusPill>
+        <StatusPill tone={statusDisplay.tone}>{statusDisplay.label}</StatusPill>
       </header>
 
       <div className="bazi-current-chart-review-actions">
-        <button type="button" className="secondary-action" disabled={busy} onClick={() => void preparePacket()}>
+        <button type="button" className="secondary-action" disabled={busy} aria-busy={operation === "preparing"} onClick={() => void preparePacket()}>
           {operation === "preparing" ? "正在准备…" : template ? "重新准备当前盘包" : "准备当前盘复核包"}
         </button>
-        <button type="button" className="secondary-action" disabled={busy || !template} onClick={() => void exportPacket()}>
+        <button type="button" className="secondary-action" disabled={busy || !template} aria-busy={operation === "exporting"} onClick={preparePacketDelivery}>
           <Download size={14} aria-hidden="true" />
-          {operation === "exporting" ? "正在导出…" : "导出本盘反馈模板"}
+          {operation === "exporting" ? "正在准备…" : "准备本盘反馈模板"}
         </button>
-        <button type="button" className="secondary-action" disabled={busy || !template} onClick={() => void chooseReviewFile()}>
+        <button type="button" className="secondary-action" disabled={busy || !template} aria-busy={operation === "choosing" || operation === "validating"} onClick={() => void chooseReviewFile()}>
           <Upload size={14} aria-hidden="true" />
           {operation === "choosing" || operation === "validating" ? "正在只读预检…" : "预检本盘反馈 JSON"}
         </button>
       </div>
 
       {template ? (
-        <dl className="bazi-current-chart-review-summary">
-          <div><dt>旺衰方法</dt><dd>{template.packet.counts.strengthMethod}</dd></div>
-          <div><dt>十神出现</dt><dd>{template.packet.counts.tenGodOccurrences}</dd></div>
-          <div><dt>神煞规则命中</dt><dd>{shenshaRuleHitCount}</dd></div>
-          <div><dt>神煞落柱出现</dt><dd>{template.packet.counts.shenshaOccurrences}</dd></div>
-          <div><dt>本盘合计</dt><dd>{template.packet.counts.total}</dd></div>
-        </dl>
+        <>
+          <dl className="bazi-current-chart-review-summary" aria-label="本盘复核项目数量">
+            <div><dt>旺衰方法</dt><dd>{template.packet.counts.strengthMethod}</dd></div>
+            <div><dt>十神出现</dt><dd>{template.packet.counts.tenGodOccurrences}</dd></div>
+            <div><dt>神煞规则命中</dt><dd>{shenshaRuleHitCount}</dd></div>
+            <div><dt>神煞落柱出现</dt><dd>{template.packet.counts.shenshaOccurrences}</dd></div>
+            <div><dt>本盘合计</dt><dd>{template.packet.counts.total}</dd></div>
+          </dl>
+          <dl className="bazi-current-chart-review-bindings" aria-label="本盘复核包绑定摘要">
+            <div><dt>事实投影</dt><dd title={template.packet.bindings.factsProjectionSha256}>{shortHash(template.packet.bindings.factsProjectionSha256)}</dd></div>
+            <div><dt>旺衰政策</dt><dd title={template.packet.bindings.strengthPolicySha256}>{shortHash(template.packet.bindings.strengthPolicySha256)}</dd></div>
+            <div><dt>项目顺序</dt><dd title={template.packet.bindings.orderedReviewItemIdsSha256}>{shortHash(template.packet.bindings.orderedReviewItemIdsSha256)}</dd></div>
+            <div><dt>复核包</dt><dd title={template.packetSha256}>{shortHash(template.packetSha256)}</dd></div>
+            <div><dt>时柱范围</dt><dd>{includeHour ? "已纳入" : "已扣留"}</dd></div>
+          </dl>
+          <details className="bazi-current-chart-review-digests">
+            <summary><span>完整复核包绑定</span><small>{packetBindingDigests.length} 项 SHA-256 · 可选择核对</small></summary>
+            <dl aria-label="本盘复核包完整绑定摘要">
+              {packetBindingDigests.map((digest) => (
+                <div key={digest.label}><dt>{digest.label}</dt><dd><code>{digest.value}</code></dd></div>
+              ))}
+            </dl>
+          </details>
+        </>
       ) : (
-        <p className="bazi-current-chart-review-empty">神煞仍默认关闭；点击“准备当前盘复核包”才会在内存中显式运行本次只读神煞研究并建立完整绑定。</p>
+        <p className="bazi-current-chart-review-empty" role={operation === "preparing" ? "status" : undefined}>
+          {operation === "preparing"
+            ? "正在内存中重新建立当前盘事实与复核包绑定；上一份模板已隐藏，完成前不会展示旧计数或摘要。"
+            : "神煞仍默认关闭；点击“准备当前盘复核包”才会在内存中显式运行本次只读神煞研究并建立完整绑定。"}
+        </p>
       )}
 
       {preflight ? (
-        <div className="bazi-current-chart-review-result" role="status">
+        <div className="bazi-current-chart-review-result" role="group" aria-label="本盘反馈预检摘要">
           <strong>{preflight.resolvedCount} 已裁决 · {preflight.unresolvedCount} 未决</strong>
           <span>{preflight.reviewerAttributionComplete
-            ? `${preflight.envelope.reviewer.displayName} · ${preflight.envelope.reviewer.reviewerId}`
+            ? `${safeInterpretationInlineText(preflight.envelope.reviewer.displayName, "未命名审稿人", 80)} · ${safeInterpretationInlineText(preflight.envelope.reviewer.reviewerId, "未提供审稿人 ID", 128)}`
             : "未填写人工意见，可作为空白模板重新导出"}</span>
         </div>
       ) : null}
-      {currentMessage ? <p className="bazi-current-chart-review-message" data-tone={currentMessage.tone} role="status">{currentMessage.text}</p> : null}
+      {currentMessage ? <p className="bazi-current-chart-review-message" data-tone={currentMessage.tone} role={currentMessage.tone === "error" ? "alert" : "status"} aria-atomic="true">{currentMessage.text}</p> : null}
 
       <p className="bazi-current-chart-review-privacy">
         隐私提示：文件不含案例 ID、姓名、原始出生日期时间或地点，但含完整四柱和派生命中，可形成可关联的命盘指纹；不会自动上传，SHA-256 不是加密或签名。
       </p>
       <small className="bazi-current-chart-review-boundary">
-        policy {BAZI_STRENGTH_POLICY.policyVersion} · identity:false · signature:false · expert truth:false · scientific validity:false · formal activation:false · catalog inheritance:false · network:false · mutation:false · good/bad:null · event:null · result:null
+        legacy-v13 · targetSchema 13 · migrationId null · policy {BAZI_STRENGTH_POLICY.policyVersion} · identity:false · signature:false · expert truth:false · scientific validity:false · formal activation:false · catalog inheritance:false · network:false · mutation:false · record write:false · good/bad:null · event:null · result:null
       </small>
     </section>
   );
@@ -360,7 +537,7 @@ function BaziFirstReadSteps({ review }: { review: BaziFirstReadReview }) {
         >
           <header>
             <div><small>0{step.order} · {step.eyebrow}</small><h3>{step.title}</h3></div>
-            <StatusPill tone={step.availability === "not_requested" ? "warning" : "info"}>
+            <StatusPill tone={step.availability === "not_requested" ? "warning" : "neutral"}>
               {firstReadAvailabilityLabel(step.availability)}
             </StatusPill>
           </header>
@@ -382,6 +559,17 @@ const themeFilterLabels: Readonly<Record<BaziThemeIndexId, string>> = Object.fre
   hour: "时柱",
   shensha: "神煞"
 });
+
+const interpretationJumpLinks = [
+  { href: "#bazi-first-read-review", label: "首读" },
+  { href: "#bazi-strength-ledger", label: "旺衰账" },
+  { href: "#bazi-strength-sensitivity", label: "敏感性" },
+  { href: "#bazi-ten-god-reading", label: "十神" },
+  { href: "#bazi-shensha-gate", label: "神煞" },
+  { href: "#bazi-current-chart-review", label: "本盘复核" },
+  { href: "#bazi-content-review", label: "内容审稿" },
+  { href: "#bazi-interpretation-evidence", label: "来源边界" }
+] as const;
 
 function BaziThemeIndex({ review }: { review: BaziThemeIndexReview }) {
   const [filter, setFilter] = useState<BaziThemeIndexId>("all");
@@ -440,7 +628,7 @@ function BaziThemeIndex({ review }: { review: BaziThemeIndexReview }) {
           >
             <header>
               <div><small>0{item.order} · {item.eyebrow}</small><h4>{item.label}</h4></div>
-              <StatusPill tone={item.availability === "not_requested" ? "warning" : "info"}>
+              <StatusPill tone={item.availability === "not_requested" ? "warning" : "neutral"}>
                 {firstReadAvailabilityLabel(item.availability)}
               </StatusPill>
             </header>
@@ -459,10 +647,18 @@ function BaziThemeIndex({ review }: { review: BaziThemeIndexReview }) {
   );
 }
 
+type ContentReviewOperation =
+  | "idle"
+  | "exporting_queue"
+  | "exporting_feedback"
+  | "choosing_feedback"
+  | "validating_feedback";
+
 function BaziContentReviewQueuePanel() {
-  const [exporting, setExporting] = useState(false);
-  const [feedbackBusy, setFeedbackBusy] = useState(false);
+  const operationRef = useRef<ContentReviewOperation>("idle");
+  const [operation, setOperation] = useState<ContentReviewOperation>("idle");
   const [feedbackPreflight, setFeedbackPreflight] = useState<BaziContentReviewFeedbackPreflight | null>(null);
+  const [openCategories, setOpenCategories] = useState<Set<BaziContentReviewCategory>>(() => new Set());
   const [exportFeedback, setExportFeedback] = useState<{
     tone: "success" | "info" | "error";
     message: string;
@@ -470,7 +666,9 @@ function BaziContentReviewQueuePanel() {
   const [feedbackMessage, setFeedbackMessage] = useState<{
     tone: "success" | "info" | "error";
     message: string;
+    marksPreflightInvalid?: boolean;
   } | null>(null);
+  const [preparedDelivery, setPreparedDelivery] = useState<PreparedFileArtifact | null>(null);
   const itemsByCategory = useMemo(() => {
     const map = new Map<BaziContentReviewCategory, typeof BAZI_CONTENT_REVIEW_QUEUE.items>();
     for (const group of BAZI_CONTENT_REVIEW_QUEUE.groups) {
@@ -485,62 +683,80 @@ function BaziContentReviewQueuePanel() {
     () => new Map(BAZI_CONTENT_REVIEW_QUEUE.sources.map((source) => [source.id, source] as const)),
     []
   );
+  const busy = operation !== "idle";
 
-  const exportQueue = async () => {
-    setExporting(true);
+  const beginOperation = (nextOperation: ContentReviewOperation): boolean => {
+    if (operationRef.current !== "idle") return false;
+    operationRef.current = nextOperation;
+    setOperation(nextOperation);
+    return true;
+  };
+
+  const transitionOperation = (nextOperation: ContentReviewOperation) => {
+    operationRef.current = nextOperation;
+    setOperation(nextOperation);
+  };
+
+  const finishOperation = () => {
+    operationRef.current = "idle";
+    setOperation("idle");
+  };
+
+  const prepareQueueDelivery = () => {
+    if (!beginOperation("exporting_queue")) return;
     setExportFeedback(null);
     try {
       const content = serializeBaziContentReviewQueue(BAZI_CONTENT_REVIEW_QUEUE);
-      const result = await saveBlobFile(
-        BAZI_CONTENT_REVIEW_EXPORT_FILENAME,
-        new Blob([content], { type: "application/json;charset=utf-8" })
-      );
-      const delivery = resolveFileDelivery(result, "八字内容审稿清单导出");
+      setPreparedDelivery({
+        blob: new Blob([content], { type: "application/json;charset=utf-8" }),
+        filename: BAZI_CONTENT_REVIEW_EXPORT_FILENAME,
+        title: "八字内容审稿清单",
+        description: "69 项只读未裁决内容候选快照；不会写回命盘或数据库，也不代表专家真值、正式启用或发布授权。",
+        sharePolicy: "blocked_sensitive"
+      });
       setExportFeedback({
-        tone: delivery.kind === "error" ? "error" : delivery.kind === "cancelled" ? "info" : "success",
-        message: delivery.kind === "error"
-          ? delivery.message
-          : `${delivery.message} 清单仍是只读未裁决快照，不会写回命盘或数据库。`
+        tone: "info",
+        message: "69 项审稿清单已在本机内存中准备；尚未保存或下载。请在交付对话框再次确认。"
       });
     } catch (reason) {
       setExportFeedback({
         tone: "error",
-        message: reason instanceof Error ? reason.message : "无法导出八字内容审稿清单。"
+        message: safeInterpretationErrorMessage(reason, "无法准备八字内容审稿清单。")
       });
     } finally {
-      setExporting(false);
+      finishOperation();
     }
   };
 
-  const exportFeedbackTemplate = async () => {
-    setFeedbackBusy(true);
+  const prepareFeedbackTemplateDelivery = async () => {
+    if (!beginOperation("exporting_feedback")) return;
     setFeedbackMessage(null);
     try {
       const template = await createBaziContentReviewFeedbackTemplate();
       const content = serializeBaziContentReviewFeedbackTemplate(template);
-      const result = await saveBlobFile(
-        BAZI_CONTENT_REVIEW_FEEDBACK_FILENAME,
-        new Blob([content], { type: "application/json;charset=utf-8" })
-      );
-      const delivery = resolveFileDelivery(result, "八字内容审稿反馈模板导出");
+      setPreparedDelivery({
+        blob: new Blob([content], { type: "application/json;charset=utf-8" }),
+        filename: BAZI_CONTENT_REVIEW_FEEDBACK_FILENAME,
+        title: "八字内容审稿反馈模板",
+        description: "与 69 项候选快照及摘要绑定的空白人工反馈模板；离线填写后仍只允许本机结构预检，不核验审稿人身份或内容真值。",
+        sharePolicy: "blocked_sensitive"
+      });
       setFeedbackMessage({
-        tone: delivery.kind === "error" ? "error" : delivery.kind === "cancelled" ? "info" : "success",
-        message: delivery.kind === "error"
-          ? delivery.message
-          : `${delivery.message} 请离线填写 reviewer、reviewSession 与逐项 decision；模板本身不会批准内容。`
+        tone: "info",
+        message: "审稿反馈模板已在本机内存中准备；尚未保存或下载。请在交付对话框再次确认，模板本身不会批准内容。"
       });
     } catch (reason) {
       setFeedbackMessage({
         tone: "error",
-        message: reason instanceof Error ? reason.message : "无法导出八字内容审稿反馈模板。"
+        message: safeInterpretationErrorMessage(reason, "无法准备八字内容审稿反馈模板。")
       });
     } finally {
-      setFeedbackBusy(false);
+      finishOperation();
     }
   };
 
   const chooseFeedbackFile = async () => {
-    setFeedbackBusy(true);
+    if (!beginOperation("choosing_feedback")) return;
     setFeedbackMessage(null);
     try {
       const file = await pickTextFile({
@@ -551,32 +767,49 @@ function BaziContentReviewQueuePanel() {
         setFeedbackMessage({ tone: "info", message: "已取消选择；当前预检结果没有变化。" });
         return;
       }
+      setFeedbackPreflight(null);
+      transitionOperation("validating_feedback");
       const preflight = await preflightBaziContentReviewFeedback(file.text);
       setFeedbackPreflight(preflight);
+      const selectedFileName = safeInterpretationInlineText(file.name, "所选 JSON 文件", 180);
       const reviewerLabel = preflight.reviewerAttributionComplete
-        ? `${preflight.envelope.reviewer.displayName}（${preflight.envelope.reviewer.reviewerId}）`
+        ? `${safeInterpretationInlineText(preflight.envelope.reviewer.displayName, "未命名审稿人", 80)}（${safeInterpretationInlineText(preflight.envelope.reviewer.reviewerId, "未提供审稿人 ID", 128)}）`
         : "尚未填写审稿归属";
       setFeedbackMessage({
-        tone: "success",
-        message: `只读预检通过：${file.name} · 已裁决 ${preflight.resolvedCount}/69 · ${reviewerLabel}。未写入命盘或数据库。`
+        tone: "info",
+        message: `只读结构预检通过：${selectedFileName} · 已裁决 ${preflight.resolvedCount}/${BAZI_CONTENT_REVIEW_QUEUE.counts.total} · ${reviewerLabel}。这不核验身份、专家真值或内容正确性；未写入命盘或数据库。`
       });
     } catch (reason) {
       setFeedbackPreflight(null);
       setFeedbackMessage({
         tone: "error",
-        message: reason instanceof Error ? reason.message : "八字内容审稿反馈预检失败。"
+        message: safeInterpretationErrorMessage(reason, "八字内容审稿反馈预检失败。"),
+        marksPreflightInvalid: true
       });
     } finally {
-      setFeedbackBusy(false);
+      finishOperation();
     }
   };
 
-  const feedbackPreflightState = feedbackPreflight
-    ? "valid"
-    : feedbackMessage?.tone === "error" ? "invalid" : "not_loaded";
+  const setCategoryOpen = (category: BaziContentReviewCategory, open: boolean) => {
+    setOpenCategories((current) => {
+      if (current.has(category) === open) return current;
+      const next = new Set(current);
+      if (open) next.add(category);
+      else next.delete(category);
+      return next;
+    });
+  };
+
+  const feedbackPreflightState = operation === "validating_feedback"
+    ? "validating"
+    : feedbackPreflight
+      ? "valid"
+      : feedbackMessage?.marksPreflightInvalid ? "invalid" : "not_loaded";
 
   return (
     <section
+      id="bazi-content-review"
       className="bazi-content-review-queue"
       aria-labelledby="bazi-content-review-title"
       data-review-queue-version={BAZI_CONTENT_REVIEW_QUEUE.profile.projectionVersion}
@@ -586,30 +819,52 @@ function BaziContentReviewQueuePanel() {
       data-approved-count={BAZI_CONTENT_REVIEW_QUEUE.counts.approve}
       data-revised-count={BAZI_CONTENT_REVIEW_QUEUE.counts.revise}
       data-rejected-count={BAZI_CONTENT_REVIEW_QUEUE.counts.reject}
+      data-operation-state={operation}
+      data-schema-family="legacy-v13"
+      data-release-identity="legacy-v13"
+      data-db-generation="13"
+      data-target-schema="13"
+      data-migration-id="null"
+      data-engineering-evidence-only="true"
       data-expert-truth-claimed="false"
       data-formal-activation-allowed="false"
+      data-public-release-authorized="false"
+      data-mutation-epoch-bypassed="false"
+      data-mutation-mode="read-only-no-mutation"
+      data-chart-or-storage-mutation-performed="false"
+      data-record-write-performed="false"
+      aria-busy={busy}
     >
+      {preparedDelivery ? (
+        <PreparedFileDeliveryDialog
+          artifact={preparedDelivery}
+          exportPort={webReportExportPort}
+          onClose={() => setPreparedDelivery(null)}
+        />
+      ) : null}
       <header>
         <div>
           <small>Content governance · review export</small>
           <h3 id="bazi-content-review-title">内容质量审稿台</h3>
           <p>把旺衰方法、十神落柱、神煞取法与神煞落柱集中到同一份可追溯目录；先逐条审，再谈正式启用。</p>
         </div>
-        <StatusPill tone="warning">69 项 · 全部未裁决</StatusPill>
+        <StatusPill tone="warning">{BAZI_CONTENT_REVIEW_QUEUE.counts.total} 项 · {BAZI_CONTENT_REVIEW_QUEUE.counts.unresolved} 未裁决</StatusPill>
       </header>
 
       <div className="bazi-content-review-actions">
         <p>允许的未来状态是批准、退修或驳回；当前没有任何审稿人、时间、理由或专家真值。</p>
-        <button type="button" className="secondary-action" disabled={exporting} onClick={exportQueue}>
-          {exporting ? "正在准备 JSON…" : "导出 69 项审稿清单 JSON"}
+        <button type="button" className="secondary-action" disabled={busy} aria-busy={operation === "exporting_queue"} onClick={prepareQueueDelivery}>
+          {operation === "exporting_queue" ? "正在准备 JSON…" : `准备 ${BAZI_CONTENT_REVIEW_QUEUE.counts.total} 项审稿清单 JSON`}
         </button>
       </div>
       <p
         className="bazi-content-review-feedback"
         data-tone={exportFeedback?.tone ?? "idle"}
-        aria-live="polite"
+        role={exportFeedback?.tone === "error" ? "alert" : "status"}
+        aria-live={exportFeedback?.tone === "error" ? "assertive" : "polite"}
+        aria-atomic="true"
       >
-        {exportFeedback?.message ?? `固定文件名：${BAZI_CONTENT_REVIEW_EXPORT_FILENAME} · 只读导出`}
+        {exportFeedback?.message ?? `固定文件名：${BAZI_CONTENT_REVIEW_EXPORT_FILENAME} · 只读本机准备`}
       </p>
 
       <section
@@ -617,44 +872,62 @@ function BaziContentReviewQueuePanel() {
         aria-labelledby="bazi-content-review-feedback-title"
         data-feedback-format={BAZI_CONTENT_REVIEW_FEEDBACK_PROFILE.formatVersion}
         data-workflow-mode={BAZI_CONTENT_REVIEW_FEEDBACK_PROFILE.workflowMode}
+        data-release-identity="legacy-v13"
+        data-db-generation="13"
+        data-target-schema="13"
+        data-migration-id="null"
         data-preflight-state={feedbackPreflightState}
         data-resolved-count={feedbackPreflight?.resolvedCount ?? 0}
-        data-unresolved-count={feedbackPreflight?.unresolvedCount ?? 69}
+        data-unresolved-count={feedbackPreflight?.unresolvedCount ?? BAZI_CONTENT_REVIEW_QUEUE.counts.total}
         data-reviewer-attribution-complete={String(feedbackPreflight?.reviewerAttributionComplete ?? false)}
         data-identity-verified="false"
         data-digital-signature-verified="false"
         data-eligible-for-formal-activation="false"
         data-auto-integration-allowed="false"
+        data-mutation-epoch-bypassed="false"
+        data-mutation-mode="read-only-no-mutation"
         data-chart-or-storage-mutation-performed="false"
+        data-record-write-performed="false"
         data-result="null"
+        data-operation-state={operation}
       >
         <header>
           <div>
             <small>Human review handoff · local preflight</small>
             <h4 id="bazi-content-review-feedback-title">审稿反馈工作包</h4>
-            <p>导出自带 69 项候选快照与 SHA-256 绑定的空白模板；填写后只能在本机做结构与覆盖预检。</p>
+            <p>导出自带 {BAZI_CONTENT_REVIEW_QUEUE.counts.total} 项候选快照与 SHA-256 绑定的空白模板；填写后只能在本机做结构与覆盖预检。</p>
           </div>
-          <StatusPill tone="info">身份未核验 · 不自动整合</StatusPill>
+          <StatusPill tone="neutral">身份未核验 · 不自动整合</StatusPill>
         </header>
         <div className="bazi-content-review-feedback-actions">
           <button
             type="button"
             className="secondary-action"
-            disabled={feedbackBusy}
-            onClick={() => void exportFeedbackTemplate()}
+            disabled={busy}
+            aria-busy={operation === "exporting_feedback"}
+            onClick={() => void prepareFeedbackTemplateDelivery()}
           >
-            <Download aria-hidden="true" />导出 69 项反馈模板
+            <Download aria-hidden="true" />准备 {BAZI_CONTENT_REVIEW_QUEUE.counts.total} 项反馈模板
           </button>
           <button
             type="button"
             className="secondary-action"
-            disabled={feedbackBusy}
+            disabled={busy}
+            aria-busy={operation === "choosing_feedback" || operation === "validating_feedback"}
             onClick={() => void chooseFeedbackFile()}
           >
             <Upload aria-hidden="true" />预检已填写反馈 JSON
           </button>
         </div>
-        {feedbackBusy ? <p className="bazi-content-review-feedback-status" role="status">正在执行模板绑定与只读预检…</p> : null}
+        {operation !== "idle" && operation !== "exporting_queue" ? (
+          <p className="bazi-content-review-feedback-status" role="status">
+            {operation === "exporting_feedback"
+              ? "正在建立绑定反馈模板…"
+              : operation === "choosing_feedback"
+                ? "等待选择本地反馈 JSON…"
+                : "正在执行模板绑定与只读预检…"}
+          </p>
+        ) : null}
         {feedbackMessage ? (
           <p
             className="bazi-content-review-feedback-status"
@@ -671,15 +944,15 @@ function BaziContentReviewQueuePanel() {
         <dl aria-label="八字内容审稿反馈预检状态">
           <div><dt>反馈格式</dt><dd>{BAZI_CONTENT_REVIEW_FEEDBACK_PROFILE.formatVersion}</dd></div>
           <div><dt>队列绑定</dt><dd>{feedbackPreflight ? `sha256:${feedbackPreflight.envelope.queueBinding.queueSha256}` : "等待载入"}</dd></div>
-          <div><dt>逐项决定</dt><dd>{feedbackPreflight ? `${feedbackPreflight.resolvedCount} 已裁决 · ${feedbackPreflight.unresolvedCount} 未决` : "0 已裁决 · 69 未决"}</dd></div>
+          <div><dt>逐项决定</dt><dd>{feedbackPreflight ? `${feedbackPreflight.resolvedCount} 已裁决 · ${feedbackPreflight.unresolvedCount} 未决` : `0 已裁决 · ${BAZI_CONTENT_REVIEW_QUEUE.counts.total} 未决`}</dd></div>
           <div><dt>审稿归属</dt><dd>{feedbackPreflight?.reviewerAttributionComplete
-            ? `${feedbackPreflight.envelope.reviewer.displayName} · ${feedbackPreflight.envelope.reviewer.reviewerId}`
+            ? `${safeInterpretationInlineText(feedbackPreflight.envelope.reviewer.displayName, "未命名审稿人", 80)} · ${safeInterpretationInlineText(feedbackPreflight.envelope.reviewer.reviewerId, "未提供审稿人 ID", 128)}`
             : "尚未完整填写"}</dd></div>
           <div><dt>身份 / 签名</dt><dd>未核验 / 无数字签名</dd></div>
           <div><dt>正式整合</dt><dd>禁止自动整合 · 需要线下核验与代码审查</dd></div>
         </dl>
         <p className="bazi-content-review-feedback-boundary">
-          即使 69 项全部填完，预检仍固定 identityVerified:false · digitalSignatureVerified:false · formal activation:false · auto integration:false · mutation:false · result:null。
+          legacy-v13 · targetSchema 13 · migrationId null。即使 {BAZI_CONTENT_REVIEW_QUEUE.counts.total} 项全部填完，预检仍固定 identityVerified:false · digitalSignatureVerified:false · formal activation:false · auto integration:false · mutation:false · record write:false · result:null。
         </p>
       </section>
 
@@ -698,12 +971,12 @@ function BaziContentReviewQueuePanel() {
         {BAZI_CONTENT_REVIEW_QUEUE.groups.map((group) => {
           const items = itemsByCategory.get(group.category) ?? [];
           return (
-            <details key={group.category} data-category={group.category}>
+            <details key={group.category} data-category={group.category} onToggle={(event) => setCategoryOpen(group.category, event.currentTarget.open)}>
               <summary>
                 <span><strong>{group.label}</strong><small>{group.description}</small></span>
                 <span>{group.itemCount} 项 · 未裁决</span>
               </summary>
-              <ol aria-label={`${group.label}审稿项`}>
+              {openCategories.has(group.category) ? <ol aria-label={`${group.label}审稿项`}>
                 {items.map((item) => (
                   <li
                     key={item.reviewItemId}
@@ -728,11 +1001,11 @@ function BaziContentReviewQueuePanel() {
                       <div className="bazi-content-review-sources">
                         {item.sourceRefIds.map((sourceId) => {
                           const source = sourceById.get(sourceId);
-                          if (!source) return null;
-                          return source.url.startsWith("https://") ? (
-                            <a key={source.id} href={source.url} target="_blank" rel="noreferrer">{source.title}</a>
-                          ) : (
-                            <span key={source.id}>{source.title}</span>
+                          if (!source) return <span key={sourceId}>来源引用缺失：{sourceId}</span>;
+                           return safeInterpretationSourceUrl(source.url) ? (
+                             <a key={source.id} href={source.url} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer" aria-label={`${source.title}（在新窗口打开）`}>{source.title}</a>
+                           ) : (
+                             <span key={source.id}>{source.title} · 外链未开放</span>
                           );
                         })}
                       </div>
@@ -740,7 +1013,7 @@ function BaziContentReviewQueuePanel() {
                     <small>decision:unresolved · reviewer:null · reviewedAt:null · result:null</small>
                   </li>
                 ))}
-              </ol>
+              </ol> : null}
             </details>
           );
         })}
@@ -762,8 +1035,10 @@ function ShenshaResearchPreview({
   interpretation: BaziInterpretationResult;
   tenGodSensitivityReview: TenGodStrengthSensitivityReview;
 }) {
-  const [expanded, setExpanded] = useState(false);
   const includeHour = includeReliableHour(revision);
+  const bindingKey = `${revision.id}:${revision.manifest.resultHash}:${includeHour ? "hour" : "no-hour"}`;
+  const [expansion, setExpansion] = useState(() => ({ bindingKey, expanded: false }));
+  const expanded = expansion.bindingKey === bindingKey && expansion.expanded;
   const preview = useMemo(
     () => {
       if (!expanded) return null;
@@ -778,6 +1053,11 @@ function ShenshaResearchPreview({
   );
   const result = preview?.shensha ?? null;
   const occurrenceReview = preview?.occurrences ?? null;
+  const safeShenshaSourceRefs = useMemo(
+    () => (result?.sourceRefs ?? []).filter((source) => safeInterpretationSourceUrl(source.url)),
+    [result]
+  );
+  const rejectedShenshaSourceCount = (result?.sourceRefs.length ?? 0) - safeShenshaSourceRefs.length;
   const synthesisByEditorialId = useMemo(
     () => new Map(
       (preview?.synthesis.items ?? []).map((item) => [item.shenshaPositionEditorialId, item] as const)
@@ -790,21 +1070,41 @@ function ShenshaResearchPreview({
   );
 
   return (
-    <section id="bazi-shensha-gate" className="shensha-research-gate" aria-labelledby="shensha-research-title">
+    <section
+      id="bazi-shensha-gate"
+      className="shensha-research-gate"
+      aria-labelledby="shensha-research-title"
+      data-schema-family="legacy-v13"
+      data-release-identity="legacy-v13"
+      data-db-generation="13"
+      data-target-schema="13"
+      data-migration-id="null"
+      data-engineering-evidence-only="true"
+      data-expert-truth-claimed="false"
+      data-formal-activation-allowed="false"
+      data-public-release-authorized="false"
+      data-mutation-epoch-bypassed="false"
+      data-mutation-mode="read-only-no-mutation"
+      data-chart-or-storage-mutation-performed="false"
+      data-record-write-performed="false"
+    >
       <div className="shensha-research-intro">
         <div>
           <p className="eyebrow">Shensha fact registry</p>
           <h3 id="shensha-research-title">神煞事实研究预览</h3>
-          <p>当前修订的正式神煞层仍为{revision.ruleProfile.layers.shensha ? "开启" : "关闭"}。这里仅在你主动展开后，临时运行《三命通会》年柱基准候选，并显示 5×4 原创位置议题；不写入案例、不改变规则快照，也不自动解释吉凶。</p>
+          <p>发布基线固定为 legacy-v13 / targetSchema 13 / migrationId null。当前修订的正式神煞层仍为{revision.ruleProfile.layers.shensha ? "开启" : "关闭"}；这里只在你主动展开后临时运行《三命通会》年柱基准候选，并显示 5×4 原创位置议题，不写入案例、不改变规则快照，也不自动解释吉凶。</p>
         </div>
         <div className="shensha-research-actions">
-          <StatusPill tone="info">默认关闭 · 只读候选</StatusPill>
+          <StatusPill tone="neutral">默认关闭 · 只读候选</StatusPill>
           <button
             type="button"
             className="secondary-action"
             aria-expanded={expanded}
             aria-controls="shensha-research-result"
-            onClick={() => setExpanded((value) => !value)}
+            onClick={() => setExpansion((current) => ({
+              bindingKey,
+              expanded: current.bindingKey === bindingKey ? !current.expanded : true
+            }))}
           >
             {expanded ? "收起研究预览" : "打开只读研究预览"}
           </button>
@@ -840,7 +1140,7 @@ function ShenshaResearchPreview({
                   >
                     <header>
                       <div><small>{pillar.positionLabel}</small><strong>{pillar.ganZhi}</strong></div>
-                      <StatusPill tone="info">
+                      <StatusPill tone="neutral">
                         {pillar.availability === "uncertain_hour" ? "时柱关闭" : `${pillar.occurrenceCount} 项命中`}
                       </StatusPill>
                     </header>
@@ -949,7 +1249,7 @@ function ShenshaResearchPreview({
                                   <small>Same-pillar review</small>
                                   <strong>{synthesis.tenGod ?? "未映射十神"} × {synthesis.shenshaName}</strong>
                                 </div>
-                                <StatusPill tone="info">
+                                <StatusPill tone="neutral">
                                   {directionSensitivity?.effectiveBalanceDirectionLabel ?? synthesis.tenGodBalanceDirectionLabel}
                                 </StatusPill>
                               </header>
@@ -989,9 +1289,10 @@ function ShenshaResearchPreview({
               ))}
             </ul>
             <ul className="interpretation-source-list">
-              {result.sourceRefs.filter((source) => source.url.startsWith("https://")).map((source) => (
-                <li key={source.id}><a href={source.url} target="_blank" rel="noreferrer">{source.title}</a><span>{source.usage}</span></li>
+              {safeShenshaSourceRefs.map((source) => (
+                <li key={source.id}><a href={source.url} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer" aria-label={`${source.title}（在新窗口打开）`}>{source.title}</a><span>{source.usage}</span></li>
               ))}
+              {rejectedShenshaSourceCount ? <li data-source-state="rejected" role="alert">已拒绝显示 {rejectedShenshaSourceCount} 条非安全 HTTPS、带凭据或含控制字符的神煞来源地址。</li> : null}
             </ul>
             <ul>{result.knownGaps.map((gap) => <li key={gap}>{gap}</li>)}</ul>
           </details>
@@ -1015,16 +1316,28 @@ export function BaziInterpretationSummary({ revision }: { revision: RevisionReco
       data-selected-primary-theme="null"
       data-overall-good-bad="null"
       data-result="null"
+      data-expert-truth-claimed="false"
+      data-public-release-authorized="false"
+      data-schema-family="legacy-v13"
+      data-release-identity="legacy-v13"
+      data-db-generation="13"
+      data-target-schema="13"
+      data-migration-id="null"
+      data-engineering-evidence-only="true"
+      data-mutation-epoch-bypassed="false"
+      data-mutation-mode="read-only-no-mutation"
+      data-chart-or-storage-mutation-performed="false"
+      data-record-write-performed="false"
     >
       <div className="interpretation-entry-heading">
-        <p className="eyebrow">Interpretation ready</p>
-        <h2 id="interpretation-entry-title">本盘解读已生成</h2>
+        <p className="eyebrow">Interpretation candidate generated</p>
+        <h2 id="interpretation-entry-title">本盘工程解读候选已生成，尚未裁决</h2>
         <p>{firstRead.directSummary}</p>
       </div>
       <BaziFirstReadSteps review={firstRead} />
       <div className="interpretation-entry-action">
         <StatusPill tone="warning">固定顺序 · 非主题排名 · 待专家复核</StatusPill>
-        <AppLink href={`/cases/${revision.caseId}/revisions/${revision.id}?view=overview`} className="secondary-action">打开完整八字解读与研究预览</AppLink>
+        <AppLink href={`/cases/${revision.caseId}/revisions/${revision.id}?view=overview`} className="secondary-action">打开完整工程候选与研究预览</AppLink>
       </div>
     </section>
   );
@@ -1076,10 +1389,140 @@ export function BaziInterpretationPanel({ revision }: { revision: RevisionRecord
   const supportFactors = result.strength.factors.filter((factor) => factor.direction === "support");
   const demandFactors = result.strength.factors.filter((factor) => factor.direction === "demand");
   const includeHour = includeReliableHour(revision);
-  const strengthEvidenceBindingKey = `${revision.id}:${revision.manifest.resultHash}:${includeHour ? "hour" : "no-hour"}`;
+  const strengthEvidenceBindingKey = JSON.stringify([
+    revision.id,
+    revision.manifest.resultHash,
+    includeHour ? "hour" : "no-hour"
+  ]);
+  const interpretationBindingIssue = useMemo(() => {
+    const projectionCollectionSizes = [
+      [result.pillars.length, INTERPRETATION_COLLECTION_LIMITS.pillars],
+      [result.strength.factors.length, INTERPRETATION_COLLECTION_LIMITS.strengthFactors],
+      [sensitivityReview.scenarios.length, INTERPRETATION_COLLECTION_LIMITS.sensitivityScenarios],
+      [tenGodSensitivityReview.items.length, INTERPRETATION_COLLECTION_LIMITS.tenGodSensitivityItems],
+      [occurrenceReview.occurrenceCount, INTERPRETATION_COLLECTION_LIMITS.occurrenceItems],
+      [firstRead.steps.length, INTERPRETATION_COLLECTION_LIMITS.firstReadSteps],
+      [themeIndex.items.length, INTERPRETATION_COLLECTION_LIMITS.themeItems],
+      [result.sourceRefs.length, INTERPRETATION_COLLECTION_LIMITS.sources]
+    ] as const;
+    if (projectionCollectionSizes.some(([size, maximum]) => !Number.isSafeInteger(size) || size < 0 || size > maximum)) {
+      return "解读投影超过当前安全展示规模。";
+    }
+    const pillarPositions = result.pillars.map((reading) => reading.position);
+    const orientationPositions = orientationReview.items.map((item) => item.position);
+    const occurrencePositions = occurrenceReview.pillars.map((pillar) => pillar.position);
+    if (new Set(pillarPositions).size !== pillarPositions.length) return "解读结果包含重复四柱位置。";
+    if (new Set(orientationPositions).size !== orientationPositions.length) return "十神方向投影包含重复四柱位置。";
+    if (new Set(occurrencePositions).size !== occurrencePositions.length) return "十神出现项投影包含重复四柱位置。";
+    if (
+      orientationPositions.length !== pillarPositions.length
+      || occurrencePositions.length !== pillarPositions.length
+      || pillarPositions.some((position) => !orientationByPosition.has(position) || !occurrencesByPosition.has(position))
+    ) {
+      return "四柱解读、十神方向与全柱出现项没有形成一一绑定。";
+    }
+    const factorIds = result.strength.factors.map((factor) => factor.id);
+    if (new Set(factorIds).size !== factorIds.length) return "旺衰因素账包含重复稳定 ID。";
+    const scenarioIds = sensitivityReview.scenarios.map((scenario) => scenario.id);
+    if (new Set(scenarioIds).size !== scenarioIds.length) return "旺衰敏感性场景包含重复稳定 ID。";
+    const sensitivityContentIds = tenGodSensitivityReview.items.map((item) => item.contentId);
+    const sensitivityTenGods = tenGodSensitivityReview.items.map((item) => item.tenGod);
+    if (
+      new Set(sensitivityContentIds).size !== sensitivityContentIds.length
+      || new Set(sensitivityTenGods).size !== sensitivityTenGods.length
+    ) {
+      return "十神敏感性传播层包含重复内容 ID 或十神键。";
+    }
+    const sourceIds = result.sourceRefs.map((source) => source.id);
+    if (new Set(sourceIds).size !== sourceIds.length) return "解读来源登记包含重复来源 ID。";
+    const projectionIdentifiers = [
+      ...pillarPositions,
+      ...orientationPositions,
+      ...occurrencePositions,
+      ...factorIds,
+      ...scenarioIds,
+      ...sensitivityContentIds,
+      ...sourceIds,
+      result.profile.rulePackId,
+      result.profile.ruleVersion,
+      result.profile.editorialVersion,
+      sensitivityReview.profile.projectionVersion,
+      tenGodSensitivityReview.profile.projectionVersion,
+      firstRead.profile.projectionVersion,
+      themeIndex.profile.projectionVersion
+    ];
+    if (projectionIdentifiers.some((identifier) => !isSafeInterpretationIdentifier(identifier))) {
+      return "解读投影包含空白、超长或不可安全显示的稳定标识符。";
+    }
+    return null;
+  }, [
+    firstRead,
+    occurrenceReview,
+    occurrencesByPosition,
+    orientationByPosition,
+    orientationReview,
+    result,
+    sensitivityReview,
+    themeIndex,
+    tenGodSensitivityReview
+  ]);
+  const safeInterpretationSources = useMemo(
+    () => result.sourceRefs.filter((source) => safeInterpretationSourceUrl(source.url)),
+    [result.sourceRefs]
+  );
+  const rejectedInterpretationSourceCount = result.sourceRefs.length - safeInterpretationSources.length;
+
+  if (interpretationBindingIssue) {
+    return (
+      <section
+        className="flat-section bazi-interpretation-panel"
+        aria-labelledby="bazi-interpretation-title"
+        data-projection-state="invalid"
+        data-schema-family="legacy-v13"
+        data-release-family="legacy-v13"
+        data-release-identity="legacy-v13"
+        data-db-generation="13"
+        data-target-schema="13"
+        data-migration-id="null"
+        data-engineering-evidence-only="true"
+        data-mutation-epoch-bypassed="false"
+        data-mutation-mode="read-only-no-mutation"
+        data-chart-or-storage-mutation-performed="false"
+        data-record-write-performed="false"
+        data-expert-truth-claimed="false"
+        data-public-release-authorized="false"
+      >
+        <div className="section-heading-row">
+          <div><p className="eyebrow">Interpretation projection blocked</p><h2 id="bazi-interpretation-title">旺衰与十神候选已关闭</h2></div>
+          <StatusPill tone="cinnabar">投影绑定异常</StatusPill>
+        </div>
+        <div className="bazi-interpretation-binding-error" role="alert">
+          <strong>主解读没有形成可核对的一一绑定</strong>
+          <p>{interpretationBindingIssue} 系统没有静默省略四柱卡、覆盖重复稳定键或继续展示局部结论。</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section className="flat-section bazi-interpretation-panel" aria-labelledby="bazi-interpretation-title">
+    <section
+      className="flat-section bazi-interpretation-panel"
+      aria-labelledby="bazi-interpretation-title"
+      data-projection-state="bound"
+      data-schema-family="legacy-v13"
+      data-release-family="legacy-v13"
+      data-release-identity="legacy-v13"
+      data-db-generation="13"
+      data-target-schema="13"
+      data-migration-id="null"
+      data-engineering-evidence-only="true"
+      data-mutation-epoch-bypassed="false"
+      data-mutation-mode="read-only-no-mutation"
+      data-chart-or-storage-mutation-performed="false"
+      data-record-write-performed="false"
+      data-expert-truth-claimed="false"
+      data-public-release-authorized="false"
+    >
       <div className="section-heading-row">
         <div>
           <p className="eyebrow">Interpretation candidate</p>
@@ -1087,9 +1530,21 @@ export function BaziInterpretationPanel({ revision }: { revision: RevisionRecord
         </div>
         <StatusPill tone="warning">规则候选 · 待专家复核</StatusPill>
       </div>
-      <p className="section-help">先给明确结果，再公开月令、透干与藏干的因素账。特殊格局、合化、调候和运限尚未纳入最终裁决。</p>
+      <p className="section-help">先给当前工程候选，再公开月令、透干与藏干的因素账。特殊格局、合化、调候和运限尚未纳入最终裁决。</p>
+      <div className="bazi-interpretation-boundary-rail" role="note" aria-label="八字解读工程边界">
+        <span>legacy-v13 · Schema 13</span>
+        <span>工程候选</span>
+        <span>只读投影</span>
+        <p>一一绑定与结构预检只证明当前页面能追到对应工程输入，不证明内容正确、专家采信、科学有效或已获公开发布授权。</p>
+      </div>
+      <nav className="bazi-interpretation-jump-nav" aria-label="八字工程候选页内导航">
+        {interpretationJumpLinks.map((link, index) => (
+          <a key={link.href} href={link.href}><span>{String(index + 1).padStart(2, "0")}</span>{link.label}</a>
+        ))}
+      </nav>
 
       <section
+        id="bazi-first-read-review"
         className="bazi-first-read-review"
         aria-labelledby="bazi-first-read-title"
         data-first-read-version={firstRead.profile.projectionVersion}
@@ -1101,7 +1556,7 @@ export function BaziInterpretationPanel({ revision }: { revision: RevisionRecord
       >
         <header>
           <div><small>First read navigation</small><h3 id="bazi-first-read-title">整盘首读：先看哪四件事</h3></div>
-          <StatusPill tone="info">固定顺序 · 不排名</StatusPill>
+          <StatusPill tone="neutral">固定顺序 · 不排名</StatusPill>
         </header>
         <p>{firstRead.directSummary}</p>
         <BaziFirstReadSteps review={firstRead} />
@@ -1123,6 +1578,7 @@ export function BaziInterpretationPanel({ revision }: { revision: RevisionRecord
           <div><dt>泄耗克侧</dt><dd>{result.strength.demandWeight}</dd></div>
           <div><dt>规则</dt><dd>{result.profile.ruleVersion}</dd></div>
         </dl>
+        <small className="strength-ledger-boundary">两侧数字是当前规则包的工程计权，不是概率、准确率、现实强度测量或专家裁决。</small>
       </div>
 
       <div className="strength-factor-columns">
@@ -1131,7 +1587,7 @@ export function BaziInterpretationPanel({ revision }: { revision: RevisionRecord
           {supportFactors.length ? (
             <ul>{supportFactors.map((factor) => (
               <li key={factor.id}>
-                <div><strong>{factor.label}</strong><span>权重 {factor.weight}</span></div>
+                <div><strong>{factor.label}</strong><span>工程权重 {factor.weight}</span></div>
                 <p>{factor.tenGod} · {factor.detail}</p>
               </li>
             ))}</ul>
@@ -1142,7 +1598,7 @@ export function BaziInterpretationPanel({ revision }: { revision: RevisionRecord
           {demandFactors.length ? (
             <ul>{demandFactors.map((factor) => (
               <li key={factor.id}>
-                <div><strong>{factor.label}</strong><span>权重 {factor.weight}</span></div>
+                <div><strong>{factor.label}</strong><span>工程权重 {factor.weight}</span></div>
                 <p>{factor.tenGod} · {factor.detail}</p>
               </li>
             ))}</ul>
@@ -1160,15 +1616,22 @@ export function BaziInterpretationPanel({ revision }: { revision: RevisionRecord
       />
 
       <details
+        id="bazi-strength-sensitivity"
         className="strength-sensitivity-review"
         data-stability={sensitivityReview.stability}
+        data-projection-version={sensitivityReview.profile.projectionVersion}
+        data-baseline-rule-pack-id={sensitivityReview.baselineRulePackId}
+        data-baseline-rule-version={sensitivityReview.baselineRuleVersion}
+        data-scenario-count={sensitivityReview.scenarios.length}
         data-expert-verdict="null"
         data-selected-official-scenario="null"
         data-overall-good-bad="null"
       >
         <summary>
           <span><small>Engineering sensitivity audit</small><strong>查看旺衰判定敏感性</strong></span>
-          <StatusPill tone="info">{sensitivityReview.stabilityLabel}</StatusPill>
+          <StatusPill tone={sensitivityReview.stability === "stable_across_engineering_scenarios" ? "neutral" : "warning"}>
+            {sensitivityReview.stabilityLabel}
+          </StatusPill>
         </summary>
         <div className="strength-sensitivity-body">
           <p className="strength-sensitivity-direct">{sensitivityReview.directSummary}</p>
@@ -1177,43 +1640,68 @@ export function BaziInterpretationPanel({ revision }: { revision: RevisionRecord
             <span>{sensitivityReview.duplicateMonthMain.directSummary}</span>
           </div>
           <div className="strength-scenario-grid" role="list" aria-label="旺衰工程敏感性场景">
-            {sensitivityReview.scenarios.map((scenario) => (
-              <article
-                key={scenario.id}
-                role="listitem"
-                data-scenario-id={scenario.id}
-                data-strength-band={scenario.band}
-                data-role={scenario.role}
-                data-official-rule-candidate="false"
-                data-overall-good-bad="null"
-              >
-                <header>
-                  <div>
-                    <small>{scenario.role === "current_candidate_baseline" ? "当前比较基线" : "仅敏感性场景"}</small>
-                    <h4>{scenario.label}</h4>
-                  </div>
-                  <StatusPill tone="info">{scenario.bandLabel}</StatusPill>
-                </header>
-                <dl>
-                  <div><dt>支持侧</dt><dd>{scenario.supportWeight}</dd></div>
-                  <div><dt>泄耗克侧</dt><dd>{scenario.demandWeight}</dd></div>
-                  <div><dt>支持占比</dt><dd>{scenario.supportRatio === null ? "—" : `${(scenario.supportRatio * 100).toFixed(1)}%`}</dd></div>
-                </dl>
-                <p>{scenario.purpose}</p>
-                <footer>
-                  <small>纳入 {scenario.includedFactorIds.length} · 排除 {scenario.excludedFactorIds.length}</small>
-                  <small>正式规则候选:false · overall:null</small>
-                </footer>
-              </article>
-            ))}
+            {sensitivityReview.scenarios.map((scenario) => {
+              const baselineComparison = scenario.role === "current_candidate_baseline"
+                ? "baseline"
+                : !scenario.agreesWithBaselineBand && !scenario.agreesWithBaselineDirection
+                  ? "band_and_direction_changed"
+                  : !scenario.agreesWithBaselineDirection
+                    ? "direction_changed"
+                    : !scenario.agreesWithBaselineBand
+                      ? "band_changed"
+                      : "matched";
+              return (
+                <article
+                  key={scenario.id}
+                  role="listitem"
+                  data-scenario-id={scenario.id}
+                  data-strength-band={scenario.band}
+                  data-role={scenario.role}
+                  data-baseline-comparison={baselineComparison}
+                  data-agrees-with-baseline-band={scenario.agreesWithBaselineBand}
+                  data-agrees-with-baseline-direction={scenario.agreesWithBaselineDirection}
+                  data-official-rule-candidate="false"
+                  data-overall-good-bad="null"
+                >
+                  <header>
+                    <div>
+                      <small>{scenario.role === "current_candidate_baseline" ? "当前比较基线" : "仅敏感性场景"}</small>
+                      <h4>{scenario.label}</h4>
+                    </div>
+                    <StatusPill tone={baselineComparison.includes("changed") ? "warning" : "neutral"}>{scenario.bandLabel}</StatusPill>
+                  </header>
+                  <dl>
+                    <div><dt>支持侧</dt><dd>{scenario.supportWeight}</dd></div>
+                    <div><dt>泄耗克侧</dt><dd>{scenario.demandWeight}</dd></div>
+                    <div><dt>规则权重占比</dt><dd>{scenario.supportRatio === null ? "—" : `${(scenario.supportRatio * 100).toFixed(1)}%`}</dd></div>
+                  </dl>
+                  <p className="strength-scenario-comparison" data-comparison={baselineComparison}>
+                    {baselineComparison === "baseline"
+                      ? "当前候选基线"
+                      : baselineComparison === "band_and_direction_changed"
+                        ? "分档与支持／泄耗方向均变化"
+                        : baselineComparison === "direction_changed"
+                          ? "支持／泄耗方向变化"
+                          : baselineComparison === "band_changed"
+                            ? "分档变化"
+                            : "与基线同档同向"}
+                  </p>
+                  <p>{scenario.purpose}</p>
+                  <footer>
+                    <small>纳入 {scenario.includedFactorIds.length} · 排除 {scenario.excludedFactorIds.length}</small>
+                    <small>正式规则候选:false · overall:null</small>
+                  </footer>
+                </article>
+              );
+            })}
           </div>
           <section className="ten-god-sensitivity-matrix" aria-labelledby="ten-god-sensitivity-title">
             <header>
               <div>
                 <small>Downstream propagation</small>
-                <h4 id="ten-god-sensitivity-title">十神方向随六场景如何变化</h4>
+                <h4 id="ten-god-sensitivity-title">十神方向随 {sensitivityReview.scenarios.length} 个场景如何变化</h4>
               </div>
-              <StatusPill tone="info">
+              <StatusPill tone="neutral">
                 分歧 {tenGodSensitivityReview.sensitiveTenGodCount} · 一致 {tenGodSensitivityReview.stableTenGodCount}
               </StatusPill>
             </header>
@@ -1243,7 +1731,7 @@ export function BaziInterpretationPanel({ revision }: { revision: RevisionRecord
           <section className="strength-expert-review-questions" aria-labelledby="strength-expert-review-title">
             <div>
               <small>Expert review queue</small>
-              <h4 id="strength-expert-review-title">需要命理专家裁决的 4 个问题</h4>
+              <h4 id="strength-expert-review-title">需要命理专家裁决的 {sensitivityReview.expertReviewQuestions.length} 个问题</h4>
             </div>
             <ol>{sensitivityReview.expertReviewQuestions.map((question) => <li key={question}>{question}</li>)}</ol>
           </section>
@@ -1256,8 +1744,8 @@ export function BaziInterpretationPanel({ revision }: { revision: RevisionRecord
         </div>
       </details>
 
-      <div className="ten-god-reading-heading">
-        <div><p className="eyebrow">Ten Gods × position</p><h3>十神落在四柱，分别在说什么</h3></div>
+      <div id="bazi-ten-god-reading" className="ten-god-reading-heading">
+        <div><p className="eyebrow">Ten Gods × position</p><h3>十神落在四柱，当前工程候选如何阅读</h3></div>
         <p>先按六场景一致性显示“可能补偏 / 可能增偏 / 条件性”，再公开基线与四道反转复核门；它不是十神的永久吉凶标签。</p>
       </div>
       <div className="ten-god-reading-grid" role="list" aria-label="四柱十神位置解读">
@@ -1282,7 +1770,7 @@ export function BaziInterpretationPanel({ revision }: { revision: RevisionRecord
           >
             <header>
               <div><small>{reading.positionLabel}</small><strong>{reading.ganZhi}</strong></div>
-              <StatusPill tone="info">{directionSensitivity?.effectiveBalanceDirectionLabel ?? review.balanceDirectionLabel}</StatusPill>
+              <StatusPill tone="neutral">{directionSensitivity?.effectiveBalanceDirectionLabel ?? review.balanceDirectionLabel}</StatusPill>
             </header>
             <h4>{reading.focusTenGod ?? "暂不解释"}</h4>
             <p>{reading.directSummary}</p>
@@ -1332,7 +1820,7 @@ export function BaziInterpretationPanel({ revision }: { revision: RevisionRecord
                           <small>{item.sourceLabel} · {item.isPrimaryDisplayFocus ? "首屏焦点" : "补充出现项"}</small>
                           <strong>{item.tenGod}</strong>
                         </div>
-                        <StatusPill tone="info">{itemSensitivity?.effectiveBalanceDirectionLabel ?? item.balanceDirectionLabel}</StatusPill>
+                        <StatusPill tone="neutral">{itemSensitivity?.effectiveBalanceDirectionLabel ?? item.balanceDirectionLabel}</StatusPill>
                       </header>
                       <p>{item.directSummary}</p>
                       {itemSensitivity ? <p className="ten-god-sensitivity-link">{itemSensitivity.directSummary}</p> : null}
@@ -1369,7 +1857,7 @@ export function BaziInterpretationPanel({ revision }: { revision: RevisionRecord
 
       <BaziContentReviewQueuePanel />
 
-      <details className="known-gaps interpretation-evidence">
+      <details id="bazi-interpretation-evidence" className="known-gaps interpretation-evidence">
         <summary>查看规则版本、来源和未关闭边界</summary>
         <dl>
           <div><dt>规则包</dt><dd>{result.profile.rulePackId}</dd></div>
@@ -1377,19 +1865,33 @@ export function BaziInterpretationPanel({ revision }: { revision: RevisionRecord
           <div><dt>十神审稿表</dt><dd>{result.profile.editorialVersion} · {result.profile.editorialCoverage}</dd></div>
           <div><dt>旺衰敏感性层</dt><dd>{sensitivityReview.profile.projectionVersion} · {sensitivityReview.stabilityLabel}</dd></div>
           <div><dt>十神敏感性传播层</dt><dd>{tenGodSensitivityReview.profile.projectionVersion} · {tenGodSensitivityReview.items.length} 神</dd></div>
-          <div><dt>整盘首读层</dt><dd>{firstRead.profile.projectionVersion} · 固定 4 步</dd></div>
-          <div><dt>主题索引层</dt><dd>{themeIndex.profile.projectionVersion} · 固定 5 入口</dd></div>
-          <div><dt>内容审稿清单</dt><dd>{BAZI_CONTENT_REVIEW_QUEUE.profile.projectionVersion} · 69 项未裁决</dd></div>
+          <div><dt>整盘首读层</dt><dd>{firstRead.profile.projectionVersion} · 固定 {firstRead.steps.length} 步</dd></div>
+          <div><dt>主题索引层</dt><dd>{themeIndex.profile.projectionVersion} · 固定 {themeIndex.items.length} 入口</dd></div>
+          <div><dt>内容审稿清单</dt><dd>{BAZI_CONTENT_REVIEW_QUEUE.profile.projectionVersion} · {BAZI_CONTENT_REVIEW_QUEUE.counts.unresolved} 项未裁决</dd></div>
           <div><dt>平衡方向层</dt><dd>{orientationReview.profile.projectionVersion}</dd></div>
           <div><dt>全柱出现项</dt><dd>{occurrenceReview.profile.projectionVersion} · {occurrenceReview.occurrenceCount} 项</dd></div>
           <div><dt>审阅状态</dt><dd>{result.profile.reviewStatus}</dd></div>
           <div><dt>文案权利</dt><dd>{result.profile.rights}</dd></div>
         </dl>
-        <ul className="interpretation-source-list">
-          {result.sourceRefs.filter((source) => source.url.startsWith("https://")).map((source) => (
-            <li key={source.id}><a href={source.url} target="_blank" rel="noreferrer">{source.title}</a><span>{source.usage}</span></li>
-          ))}
+        <ul className="interpretation-source-list" aria-label="八字工程候选代表来源">
+          {safeInterpretationSources.map((source) => {
+            const sourceHost = interpretationSourceHost(source.url);
+            return (
+              <li key={source.id} data-source-id={source.id} data-source-state="safe-https">
+                <a href={source.url} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer" aria-label={`${source.title}，来源域名 ${sourceHost}，在新窗口打开`}>
+                  <strong>{source.title}</strong><small>{sourceHost}</small>
+                </a>
+                <code title={source.id}>{source.id}</code>
+                <span>{source.usage}</span>
+              </li>
+            );
+          })}
+          {rejectedInterpretationSourceCount ? (
+            <li data-source-state="rejected" role="alert">已拒绝显示 {rejectedInterpretationSourceCount} 条非安全 HTTPS、带凭据或含控制字符的来源地址。</li>
+          ) : null}
+          {!safeInterpretationSources.length && !rejectedInterpretationSourceCount ? <li data-source-state="empty">当前未登记代表来源。</li> : null}
         </ul>
+        <h4 className="interpretation-boundaries-title">当前未关闭边界</h4>
         <ul>{result.strength.knownGaps.map((gap) => <li key={gap}>{gap}</li>)}</ul>
       </details>
     </section>

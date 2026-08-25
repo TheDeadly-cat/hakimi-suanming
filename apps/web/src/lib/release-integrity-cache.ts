@@ -73,6 +73,7 @@ export type ReleaseIntegrityCacheErrorCode =
   | "INVALID_CONTRACT"
   | "INVALID_INSPECTION"
   | "INVALID_SNAPSHOT_EPOCH"
+  | "INVALID_VERIFICATION_TIME"
   | "VERIFICATION_MARKER_MISMATCH";
 
 export class ReleaseIntegrityCacheError extends Error {
@@ -86,15 +87,47 @@ export class ReleaseIntegrityCacheError extends Error {
 }
 
 const LOWERCASE_SHA256 = /^[a-f0-9]{64}$/u;
+const MAX_CONTRACT_IDENTITY_CHARACTERS = 512;
+const RELEASE_INTEGRITY_CONTRACT_VERSION_PREFIX =
+  `${RELEASE_INTEGRITY_CACHE_PROTOCOL}.v${RELEASE_INTEGRITY_CACHE_PROTOCOL_VERSION}.sha256.`;
 
-function requireCanonicalIdentityValue(value: string, field: string): string {
-  if (value.length === 0 || value.trim() !== value) {
+function requireCanonicalIdentityValue(value: unknown, field: string): string {
+  if (
+    typeof value !== "string" ||
+    value.length === 0 ||
+    value.trim() !== value ||
+    Array.from(value).length > MAX_CONTRACT_IDENTITY_CHARACTERS ||
+    /[\p{Cc}\p{Cf}]/u.test(value)
+  ) {
     throw new ReleaseIntegrityCacheError(
       "INVALID_CONTRACT",
-      `${field} must be a canonical non-empty string.`
+      `${field} must be a bounded canonical string without control characters.`
     );
   }
   return value;
+}
+
+function isReleaseIntegrityContractVersion(value: unknown): value is string {
+  return typeof value === "string" &&
+    value.startsWith(RELEASE_INTEGRITY_CONTRACT_VERSION_PREFIX) &&
+    LOWERCASE_SHA256.test(value.slice(RELEASE_INTEGRITY_CONTRACT_VERSION_PREFIX.length));
+}
+
+function requireReleaseIntegrityContractVersion(value: unknown): string {
+  const contractVersion = requireCanonicalIdentityValue(value, "contractVersion");
+  if (!isReleaseIntegrityContractVersion(contractVersion)) {
+    throw new ReleaseIntegrityCacheError(
+      "INVALID_CONTRACT",
+      "contractVersion must be the exact current release-integrity SHA-256 identity."
+    );
+  }
+  return contractVersion;
+}
+
+function isCanonicalUtcInstant(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  const milliseconds = Date.parse(value);
+  return Number.isFinite(milliseconds) && new Date(milliseconds).toISOString() === value;
 }
 
 /**
@@ -133,7 +166,13 @@ export async function createReleaseIntegrityContractVersion(
       operation: "inspect_snapshot"
     }
   });
-  return `${RELEASE_INTEGRITY_CACHE_PROTOCOL}.v${RELEASE_INTEGRITY_CACHE_PROTOCOL_VERSION}.sha256.${digest}`;
+  if (!LOWERCASE_SHA256.test(digest)) {
+    throw new ReleaseIntegrityCacheError(
+      "INVALID_CONTRACT",
+      "Release-integrity contract hashing returned a non-canonical digest."
+    );
+  }
+  return `${RELEASE_INTEGRITY_CONTRACT_VERSION_PREFIX}${digest}`;
 }
 
 /**
@@ -150,7 +189,7 @@ export function hasCleanReleaseIntegrityEvidence(
   verifiedContractVersion: string;
   verifiedAt: string;
 } {
-  if (state === null || contractVersion.length === 0) return false;
+  if (state === null || !isReleaseIntegrityContractVersion(contractVersion)) return false;
   return (
     Number.isSafeInteger(state.epoch) &&
     state.epoch >= 0 &&
@@ -158,8 +197,7 @@ export function hasCleanReleaseIntegrityEvidence(
     typeof state.verifiedPayloadDigest === "string" &&
     LOWERCASE_SHA256.test(state.verifiedPayloadDigest) &&
     state.verifiedContractVersion === contractVersion &&
-    typeof state.verifiedAt === "string" &&
-    state.verifiedAt.length > 0
+    isCanonicalUtcInstant(state.verifiedAt)
   );
 }
 
@@ -183,10 +221,7 @@ function requireSnapshotEpoch(
 export async function verifyReleaseIntegrity(
   options: VerifyReleaseIntegrityOptions
 ): Promise<ReleaseIntegrityEvidence> {
-  const contractVersion = requireCanonicalIdentityValue(
-    options.contractVersion,
-    "contractVersion"
-  );
+  const contractVersion = requireReleaseIntegrityContractVersion(options.contractVersion);
   const cachedState = await options.repository.readMutationState();
   if (hasCleanReleaseIntegrityEvidence(cachedState, contractVersion)) {
     return {
@@ -212,6 +247,9 @@ export async function verifyReleaseIntegrity(
 
   const inspected = await options.inspectSnapshot(snapshot.payload);
   if (
+    !inspected ||
+    typeof inspected !== "object" ||
+    typeof inspected.payloadDigest !== "string" ||
     !LOWERCASE_SHA256.test(inspected.payloadDigest) ||
     !Number.isSafeInteger(inspected.canonicalJsonByteLength) ||
     inspected.canonicalJsonByteLength < 0
@@ -223,6 +261,12 @@ export async function verifyReleaseIntegrity(
   }
 
   const verifiedAt = (options.now ?? (() => new Date().toISOString()))();
+  if (!isCanonicalUtcInstant(verifiedAt)) {
+    throw new ReleaseIntegrityCacheError(
+      "INVALID_VERIFICATION_TIME",
+      "Mutation verification time must be a canonical UTC instant."
+    );
+  }
   const marked = await options.database.withReleaseMigrationWriteAccess(() =>
     options.repository.markMutationStateVerified({
       expectedEpoch: snapshot.epoch,

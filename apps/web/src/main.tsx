@@ -8,7 +8,11 @@ import {
 } from "./lib/app-boot-failure";
 import { AppBootFailureLatch, type LatchedAppBootFailure } from "./lib/app-boot-failure-latch";
 import { runAppBootReadiness, type AppBootReadinessResult } from "./lib/app-boot-readiness";
-import { CURRENT_RELEASE_DATABASE } from "./lib/current-release";
+import {
+  CURRENT_RELEASE_DATABASE,
+  CURRENT_RELEASE_STORAGE_MANIFEST,
+  CURRENT_RELEASE_STORAGE_MANIFEST_DIGEST
+} from "./lib/current-release";
 import {
   ReleaseDatabaseCoordinator,
   type ReleaseBootConfirmation
@@ -20,7 +24,10 @@ import {
   shouldReloadUnboundPreviousGeneration,
   type ServiceWorkerBootAcknowledgement
 } from "./lib/service-worker-boot-ack";
-import { isShadowDatabaseRelease } from "../release-protocol";
+import {
+  isShadowDatabaseRelease,
+  serializeReleaseStorageManifest
+} from "../release-protocol";
 import "./styles.css";
 
 const pageBuildVersion = document.querySelector<HTMLMetaElement>('meta[name="hakimi-build-version"]')?.content;
@@ -32,6 +39,7 @@ globalThis.__HAKIMI_RESEARCH_DATABASE_RUNTIME__ = {
 };
 document.documentElement.dataset.dbGeneration = CURRENT_RELEASE_DATABASE.dbGeneration;
 document.documentElement.dataset.dbSchema = String(CURRENT_RELEASE_DATABASE.targetSchema);
+document.documentElement.dataset.dbManifestDigest = CURRENT_RELEASE_STORAGE_MANIFEST_DIGEST ?? "development";
 document.documentElement.dataset.dbMigrationPhase = shadowDatabaseRelease ? "pending" : "bridge";
 // Pages may canonicalize shareable URLs after they mount. Mark the whole
 // readiness window explicitly so those effects cannot change the route that
@@ -121,6 +129,15 @@ async function verifyStorage(): Promise<void> {
     await releaseDatabaseCoordinator.prepareStorage();
     const { caseRepository, knowledgeRepository } = await import("@hakimi/storage");
     await caseRepository.database.open();
+    if (CURRENT_RELEASE_STORAGE_MANIFEST_DIGEST) {
+      const { sha256Hex } = await import("@hakimi/integrity");
+      const actualManifestDigest = await sha256Hex(
+        serializeReleaseStorageManifest(CURRENT_RELEASE_STORAGE_MANIFEST)
+      );
+      if (actualManifestDigest !== CURRENT_RELEASE_STORAGE_MANIFEST_DIGEST) {
+        throw new Error("发布存储清单摘要与构建注入值不一致。");
+      }
+    }
     if (
       caseRepository.database.name !== CURRENT_RELEASE_DATABASE.databaseName ||
       caseRepository.database.verno !== CURRENT_RELEASE_DATABASE.targetSchema
@@ -129,54 +146,27 @@ async function verifyStorage(): Promise<void> {
         `本地数据库代际不匹配：期望 ${CURRENT_RELEASE_DATABASE.databaseName}@${CURRENT_RELEASE_DATABASE.targetSchema}。`
       );
     }
-    const requiredStorageTables = [
-      "cases",
-      "revisions",
-      "candidateSets",
-      "researchNotes",
-      "events",
-      "savedViews",
-      "knowledgeDocuments",
-      "sourceRights",
-      "citations",
-      "attachments",
-      "researcherProfiles",
-      "appSettings",
-      "ruleRegistry",
-      "tzdbMigrationReceipts",
-      "eventTimeMigrationReceipts",
-      "birthFingerprints"
-    ];
-    if (CURRENT_RELEASE_DATABASE.targetSchema >= 15) {
-      requiredStorageTables.push("revisionCalculationReceipts");
-    }
-    if (CURRENT_RELEASE_DATABASE.targetSchema >= 16) {
-      requiredStorageTables.push("mutationState");
-    }
-    await Promise.all(requiredStorageTables.map(
+    await Promise.all(CURRENT_RELEASE_STORAGE_MANIFEST.requiredStorageTables.map(
       (tableName) => caseRepository.database.table(tableName).limit(1).primaryKeys()
     ));
-    if (CURRENT_RELEASE_DATABASE.targetSchema >= 14) {
-      for (const tableName of ["researchNotes", "events"] as const) {
-        const index = caseRepository.database
-          .table(tableName)
-          .schema.indexes.find((candidate) => candidate.name === "[caseId+updatedAt]");
-        if (
-          !index ||
-          !index.compound ||
-          index.unique ||
-          index.multi ||
-          !Array.isArray(index.keyPath) ||
-          index.keyPath.join("\u0000") !== "caseId\u0000updatedAt"
-        ) {
-          throw new Error(`Dexie v14 缺少 ${tableName} 的 [caseId+updatedAt] 案例活动流索引。`);
-        }
+    for (const requirement of CURRENT_RELEASE_STORAGE_MANIFEST.requiredStorageIndexes) {
+      const index = caseRepository.database
+        .table(requirement.tableName)
+        .schema.indexes.find((candidate) => candidate.name === requirement.indexName);
+      if (
+        !index ||
+        index.compound !== requirement.compound ||
+        index.unique !== requirement.unique ||
+        index.multi !== requirement.multi ||
+        !Array.isArray(index.keyPath) ||
+        index.keyPath.join("\u0000") !== requirement.keyPath.join("\u0000")
+      ) {
+        throw new Error(
+          `Dexie ${requirement.tableName} 缺少发布清单要求的 ${requirement.indexName} 索引。`
+        );
       }
     }
-    await Promise.all([
-      knowledgeRepository.listSourceRights(),
-      knowledgeRepository.listCitations()
-    ]);
+    await knowledgeRepository.verifyLocalKnowledgeIntegritySnapshot();
     document.documentElement.dataset.dbMigrationPhase = shadowDatabaseRelease ? "verified" : "bridge_ready";
   } catch (cause) {
     await releaseDatabaseCoordinator.failPreparedMigration(cause).catch(() => undefined);
@@ -204,6 +194,13 @@ const EXPECTED_TZDB_DATA_SHA256 = "43f7878a298740ff6acabb9c726c7e5431a94bdca79ab
 // workstation) and the bounded wait for a peer page that is already running
 // the same migration. 300 s is still a fail-closed cap, not an open loop.
 const SHADOW_DATABASE_BOOT_TIMEOUT_MS = 300_000;
+
+function isBoundedProtocolString(value: unknown, maxLength: number): value is string {
+  return typeof value === "string"
+    && value.length > 0
+    && value.length <= maxLength
+    && value === value.trim();
+}
 
 async function verifyCalculationCore(): Promise<void> {
   const [{ calculateChart }, { WORKING_DEFAULT_RULE_PROFILE }, { RUNTIME_TIME_ZONE_DATABASE }] = await Promise.all([
@@ -352,7 +349,7 @@ function RootApp({
       }
     });
     return () => { active = false; };
-  }, [readiness]);
+  }, [readiness, releaseConfirmationReady]);
   const handleRouteFailure = useCallback((error: Error): "boot" | "runtime" => {
     if (bootConfirmationSent) {
       runtimeFailureLatch.report("route", error);
@@ -383,6 +380,10 @@ createRoot(root).render(
     />
   </StrictMode>
 );
+
+if (shadowDatabaseRelease && (!import.meta.env.PROD || !("serviceWorker" in navigator))) {
+  rejectReleaseInteraction?.(new Error("候选数据库代际必须在支持 Service Worker 的生产环境中完成交互确认。"));
+}
 
 if ("serviceWorker" in navigator) {
   installControlledWindowDraftCleanupHandler();
@@ -461,13 +462,21 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
     const message = event.data;
     if (message?.type === "FREEZE_DATABASE_WRITES") {
       const responsePort = event.ports[0];
+      if (!responsePort) return;
+      const respond = (payload: Record<string, unknown>) => {
+        try {
+          responsePort.postMessage(payload);
+        } catch {
+          // The migration coordinator owns timeout and retry if its port closes.
+        }
+      };
       void (async () => {
         const isSource =
           message.sourceGeneration === CURRENT_RELEASE_DATABASE.dbGeneration &&
           message.sourceDatabaseName === CURRENT_RELEASE_DATABASE.databaseName &&
           message.sourceSchema === CURRENT_RELEASE_DATABASE.targetSchema;
         if (!isSource) {
-          responsePort?.postMessage({
+          respond({
             type: "DATABASE_WRITES_FROZEN",
             requestId: message.requestId,
             accepted: true,
@@ -475,17 +484,38 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
           });
           return;
         }
+        let sourceWritesLocked = false;
         try {
           if (
-            typeof message.migrationId !== "string" ||
-            typeof message.targetGeneration !== "string" ||
-            typeof message.targetDatabaseName !== "string" ||
-            !Number.isSafeInteger(message.targetSchema)
+            !isBoundedProtocolString(message.migrationId, 128) ||
+            !isBoundedProtocolString(message.targetGeneration, 128) ||
+            !isBoundedProtocolString(message.targetDatabaseName, 512) ||
+            !Number.isSafeInteger(message.targetSchema) ||
+            Number(message.targetSchema) <= 0
           ) {
             throw new Error("旧标签页收到的迁移冻结消息无效。");
           }
+          if (frozenMigration) {
+            const matchesExistingFreeze =
+              frozenMigration.migrationId === message.migrationId &&
+              frozenMigration.targetGeneration === message.targetGeneration &&
+              frozenMigration.targetDatabaseName === message.targetDatabaseName &&
+              frozenMigration.targetSchema === message.targetSchema;
+            if (!matchesExistingFreeze) {
+              throw new Error("旧标签页已绑定另一项数据库迁移冻结请求。");
+            }
+            scheduleFrozenMigrationRecovery();
+            respond({
+              type: "DATABASE_WRITES_FROZEN",
+              requestId: message.requestId,
+              accepted: true,
+              reason: "SOURCE_CLOSED"
+            });
+            return;
+          }
           const { caseRepository } = await import("@hakimi/storage");
           caseRepository.database.lockReleaseWrites();
+          sourceWritesLocked = true;
           // Close the current connection to create a clean snapshot boundary,
           // but keep Dexie's auto-open path enabled. Any later repository write
           // reaches the DBCore release lock and fails with the explicit
@@ -500,14 +530,19 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
           };
           document.documentElement.dataset.dbSourceWriteFrozen = "true";
           scheduleFrozenMigrationRecovery();
-          responsePort?.postMessage({
+          respond({
             type: "DATABASE_WRITES_FROZEN",
             requestId: message.requestId,
             accepted: true,
             reason: "SOURCE_CLOSED"
           });
         } catch (reason) {
-          responsePort?.postMessage({
+          if (sourceWritesLocked) {
+            if (frozenMigration?.timer != null) window.clearTimeout(frozenMigration.timer);
+            frozenMigration = null;
+            await reopenSourceDatabase().catch(() => window.location.reload());
+          }
+          respond({
             type: "DATABASE_WRITES_FROZEN",
             requestId: message.requestId,
             accepted: false,
@@ -565,10 +600,12 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
           )
         ) {
           document.documentElement.dataset.swGenerationConvergence = "reload";
+          const convergenceError = new Error("Service Worker 已接管新数据库代际；当前旧页面将重新载入并安全收敛。");
           reportBootFailure(
             "storage",
-            new Error("Service Worker 已接管新数据库代际；当前旧页面将重新载入并安全收敛。")
+            convergenceError
           );
+          reject(convergenceError);
           window.location.reload();
           return;
         }
@@ -587,17 +624,24 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
         }
         resolve();
       };
-      document.documentElement.dataset.swBootSignalSent = "true";
-      controller.postMessage({
-        type: "BOOT_OK",
-        buildVersion: pageBuildVersion,
-        protocolVersion: CURRENT_RELEASE_DATABASE.protocolVersion,
-        dbGeneration: CURRENT_RELEASE_DATABASE.dbGeneration,
-        dbSchemaVersion: CURRENT_RELEASE_DATABASE.targetSchema,
-        migrationId: CURRENT_RELEASE_DATABASE.migrationId,
-        committedMigrationId: confirmation.state.migrationId,
-        migrationReceiptDigest: confirmation.migrationReceiptDigest
-      }, [channel.port2]);
+      try {
+        controller.postMessage({
+          type: "BOOT_OK",
+          buildVersion: pageBuildVersion,
+          protocolVersion: CURRENT_RELEASE_DATABASE.protocolVersion,
+          dbGeneration: CURRENT_RELEASE_DATABASE.dbGeneration,
+          dbSchemaVersion: CURRENT_RELEASE_DATABASE.targetSchema,
+          migrationId: CURRENT_RELEASE_DATABASE.migrationId,
+          committedMigrationId: confirmation.state.migrationId,
+          migrationReceiptDigest: confirmation.migrationReceiptDigest
+        }, [channel.port2]);
+        document.documentElement.dataset.swBootSignalSent = "true";
+      } catch (reason) {
+        window.clearTimeout(timeout);
+        channel.port1.close();
+        channel.port2.close();
+        reject(reason);
+      }
     });
 
     const confirmActiveWorkerBoot = (): Promise<void> => {
@@ -728,6 +772,11 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
       })
       .catch((error: unknown) => {
         document.documentElement.dataset.swRegistered = "false";
+        if (shadowDatabaseRelease) {
+          rejectReleaseInteraction?.(
+            error instanceof Error ? error : new Error("Service Worker 生命周期未能完成数据库代际确认。")
+          );
+        }
         console.error("Service Worker 注册失败", error);
       });
   };

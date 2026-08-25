@@ -1,0 +1,1077 @@
+.page--boot-recovery {
+  --boot-line: color-mix(in srgb, var(--ink-900, #201a16) 18%, transparent);
+  --boot-danger: #a83d32;
+  --boot-jade: #176b5b;
+  --boot-info: #4b7181;
+  --boot-reading: #6e9bad;
+  --boot-info-wash: rgba(75, 113, 129, 0.09);
+  width: min(100%, 1180px);
+  margin-inline: auto;
+  gap: 1rem;
+}
+
+.page--boot-recovery .app-boot-failure {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: clamp(1rem, 3vw, 2rem);
+  overflow: hidden;
+  padding: clamp(1.35rem, 4vw, 2.75rem);
+  border: 1px solid var(--boot-line);
+  border-top: 5px solid var(--boot-danger);
+  background:
+    linear-gradient(112deg, color-mix(in srgb, var(--danger-bg, #f8e9e4) 78%, transparent), transparent 56%),
+    repeating-linear-gradient(90deg, transparent 0 31px, color-mix(in srgb, var(--ink-900, #201a16) 4%, transparent) 31px 32px),
+    var(--paper-raised, #fffaf0);
+  box-shadow: 0 22px 60px color-mix(in srgb, var(--ink-900, #201a16) 11%, transparent);
+  animation: boot-recovery-rise 420ms ease-out both;
+}
+
+.page--boot-recovery .app-boot-failure::after {
+  content: "FAIL CLOSED";
+  position: absolute;
+  z-index: -1;
+  top: -2.3rem;
+  right: -1.2rem;
+  width: 10rem;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--boot-danger) 28%, transparent);
+  border-radius: 50%;
+  color: color-mix(in srgb, var(--boot-danger) 26%, transparent);
+  font: 700 0.66rem/1 var(--font-mono, monospace);
+  letter-spacing: 0.14em;
+  transform: rotate(14deg);
+}
+
+.page--boot-recovery .app-boot-failure > svg {
+  width: 2rem;
+  height: 2rem;
+  color: var(--boot-danger);
+}
+
+.page--boot-recovery .app-boot-failure h1 {
+  max-width: 16ch;
+  margin: 0.18rem 0 0.9rem;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.page--boot-recovery .app-boot-failure__content {
+  min-width: 0;
+}
+
+.page--boot-recovery .app-boot-failure p {
+  max-width: 78ch;
+}
+
+.page--boot-recovery .app-boot-failure__lead {
+  margin: 0;
+  color: var(--ink-700, #4e453e);
+  font-size: 1rem;
+  line-height: 1.68;
+}
+
+.page--boot-recovery .app-boot-failure__directive {
+  display: grid;
+  gap: 0.38rem;
+  max-width: 78ch;
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--boot-danger) 34%, transparent);
+  border-left: 5px solid var(--boot-danger);
+  background: color-mix(in srgb, var(--danger-bg, #f8e9e4) 78%, var(--paper-raised, #fffaf0));
+}
+
+.page--boot-recovery .app-boot-failure__directive strong {
+  color: var(--boot-danger);
+  font-size: 0.9rem;
+}
+
+.page--boot-recovery .app-boot-failure__directive span {
+  color: var(--ink-650, #5d554d);
+  font-size: 0.82rem;
+  line-height: 1.58;
+}
+
+.page--boot-recovery .app-boot-failure__facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 78ch;
+  margin: 1rem 0 0;
+  border-top: 1px solid var(--boot-line);
+  border-left: 1px solid var(--boot-line);
+  background: color-mix(in srgb, var(--paper-raised, #fffaf0) 76%, transparent);
+}
+
+.page--boot-recovery .app-boot-failure__facts > div {
+  position: relative;
+  min-width: 0;
+  padding: 0.72rem 0.78rem 0.72rem 0.95rem;
+  border-right: 1px solid var(--boot-line);
+  border-bottom: 1px solid var(--boot-line);
+}
+
+.page--boot-recovery .app-boot-failure__facts > div::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--boot-info);
+  content: "";
+}
+
+.page--boot-recovery .app-boot-failure__facts > div[data-state="closed"]::before {
+  background: var(--boot-danger);
+}
+
+.page--boot-recovery .app-boot-failure__facts dt {
+  color: var(--ink-600, #665e55);
+  font: 700 0.65rem/1.2 var(--font-mono, monospace);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.page--boot-recovery .app-boot-failure__facts dd {
+  margin: 0.3rem 0 0;
+  overflow-wrap: anywhere;
+  color: var(--ink-900, #201a16);
+  font-size: 0.82rem;
+  font-weight: 760;
+}
+
+.page--boot-recovery .app-boot-failure__technical {
+  max-width: 78ch;
+  margin-top: 0.85rem;
+  border-top: 1px solid var(--boot-line);
+  border-bottom: 1px solid var(--boot-line);
+  background: color-mix(in srgb, var(--paper-raised, #fffaf0) 68%, transparent);
+}
+
+.page--boot-recovery .app-boot-failure__technical > summary {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0.8rem;
+  color: var(--ink-700, #4e453e);
+  font: 700 0.76rem/1.3 var(--font-mono, monospace);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  list-style: none;
+}
+
+.page--boot-recovery .app-boot-failure__technical > summary::-webkit-details-marker {
+  display: none;
+}
+
+.page--boot-recovery .app-boot-failure__technical > summary::after {
+  color: var(--boot-danger);
+  content: "+";
+  font-size: 1.1rem;
+}
+
+.page--boot-recovery .app-boot-failure__technical[open] > summary::after {
+  content: "−";
+}
+
+.page--boot-recovery .app-boot-failure__technical > summary:hover,
+.page--boot-recovery .app-boot-failure__technical > summary:focus-visible {
+  color: var(--boot-info);
+  background: var(--boot-info-wash);
+}
+
+.page--boot-recovery .app-boot-failure__technical > summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--boot-info) 55%, white);
+  outline-offset: -3px;
+}
+
+.page--boot-recovery .app-boot-failure__technical > div {
+  padding: 0.2rem 0.8rem 0.8rem;
+  border-top: 1px solid var(--boot-line);
+}
+
+.page--boot-recovery .app-boot-failure__technical p {
+  margin: 0.7rem 0 0;
+  color: var(--ink-600, #665e55);
+  font-size: 0.78rem;
+  line-height: 1.58;
+}
+
+.page--boot-recovery code {
+  overflow-wrap: anywhere;
+}
+
+.page--boot-recovery .recovery-runbook {
+  padding: clamp(1.1rem, 3vw, 2rem);
+  border: 1px solid var(--boot-line);
+  background: color-mix(in srgb, var(--paper-raised, #fffaf0) 94%, var(--boot-info) 6%);
+  box-shadow: 0 14px 38px color-mix(in srgb, var(--ink-900, #201a16) 8%, transparent);
+  animation: boot-recovery-rise 480ms 70ms ease-out both;
+}
+
+.page--boot-recovery .recovery-runbook__heading {
+  display: grid;
+  grid-template-columns: minmax(13rem, 0.7fr) minmax(18rem, 1.3fr);
+  gap: 2rem;
+  align-items: end;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--boot-line);
+}
+
+.page--boot-recovery .recovery-runbook__heading h2,
+.page--boot-recovery .boot-recovery-card h2,
+.page--boot-recovery .boot-recovery-retry h2 {
+  margin: 0.15rem 0 0;
+  font-size: clamp(1.4rem, 3vw, 2.15rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+.page--boot-recovery .recovery-runbook__heading > p {
+  margin: 0;
+  color: var(--ink-600, #665e55);
+}
+
+.page--boot-recovery .recovery-runbook__kicker,
+.page--boot-recovery .recovery-runbook__steps small,
+.page--boot-recovery .recovery-target-lock small {
+  color: var(--boot-info);
+  font: 700 0.7rem/1.2 var(--font-mono, monospace);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.page--boot-recovery .recovery-runbook__steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 1.25rem 0;
+  list-style: none;
+}
+
+.page--boot-recovery .recovery-runbook__steps li {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-width: 0;
+  min-height: 12.5rem;
+  gap: 0.85rem;
+  padding: 1rem;
+  border-left: 1px solid var(--boot-line);
+}
+
+.page--boot-recovery .recovery-runbook__steps li:last-child {
+  border-right: 1px solid var(--boot-line);
+}
+
+.page--boot-recovery .recovery-runbook__steps li::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--boot-info);
+}
+
+.page--boot-recovery .recovery-runbook__steps li[data-state="complete"]::before {
+  background: var(--boot-jade);
+}
+
+.page--boot-recovery .recovery-runbook__steps li[data-state="closed"]::before,
+.page--boot-recovery .recovery-runbook__steps li[data-state="locked"]::before {
+  background: var(--boot-danger);
+}
+
+.page--boot-recovery .recovery-runbook__steps li[data-state="waiting"]::before {
+  background: #d5a44a;
+}
+
+.page--boot-recovery .recovery-runbook__steps li[data-state="attention"]::before {
+  background: #d5a44a;
+}
+
+.page--boot-recovery .recovery-runbook__steps li[data-state="active"]::before {
+  background: linear-gradient(90deg, var(--boot-info), var(--boot-reading), var(--boot-info));
+  background-size: 200% 100%;
+  animation: boot-recovery-progress 1.35s linear infinite;
+}
+
+.page--boot-recovery .recovery-runbook__index {
+  color: color-mix(in srgb, var(--ink-900, #201a16) 42%, transparent);
+  font: 700 1.65rem/1 var(--font-mono, monospace);
+}
+
+.page--boot-recovery .recovery-runbook__steps strong {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 1rem;
+}
+
+.page--boot-recovery .recovery-runbook__steps p {
+  margin: 0.48rem 0 0;
+  color: var(--ink-600, #665e55);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.page--boot-recovery .recovery-runbook__steps em {
+  width: fit-content;
+  padding: 0.25rem 0.48rem;
+  border: 1px solid currentColor;
+  color: var(--boot-info);
+  font: normal 700 0.72rem/1 var(--font-mono, monospace);
+}
+
+.page--boot-recovery .recovery-runbook__steps li[data-state="complete"] em {
+  color: var(--boot-jade);
+}
+
+.page--boot-recovery .recovery-runbook__steps li[data-state="closed"] em,
+.page--boot-recovery .recovery-runbook__steps li[data-state="locked"] em {
+  color: var(--boot-danger);
+}
+
+.page--boot-recovery .recovery-runbook__steps li[data-state="waiting"] em {
+  color: #9a6429;
+}
+
+.page--boot-recovery .recovery-runbook__steps li[data-state="attention"] em {
+  color: #9a6429;
+}
+
+.page--boot-recovery .recovery-runbook__ledger {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid var(--boot-line);
+  border-left: 1px solid var(--boot-line);
+}
+
+.page--boot-recovery .recovery-runbook__ledger > div {
+  min-width: 0;
+  padding: 0.9rem 1rem;
+  border-right: 1px solid var(--boot-line);
+  border-bottom: 1px solid var(--boot-line);
+}
+
+.page--boot-recovery .recovery-runbook__ledger dt {
+  color: var(--ink-600, #665e55);
+  font-size: 0.72rem;
+}
+
+.page--boot-recovery .recovery-runbook__ledger dd {
+  margin: 0.3rem 0 0;
+  font: 700 0.84rem/1.45 var(--font-mono, monospace);
+  overflow-wrap: anywhere;
+}
+
+.page--boot-recovery .recovery-target-lock {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 1.15rem;
+  border: 1px solid color-mix(in srgb, var(--boot-info) 34%, transparent);
+  background: var(--boot-info-wash);
+}
+
+.page--boot-recovery .recovery-target-lock[data-state="closed"] {
+  border-color: color-mix(in srgb, var(--boot-danger) 38%, transparent);
+  background: color-mix(in srgb, var(--danger-bg, #f8e9e4) 82%, transparent);
+}
+
+.page--boot-recovery .recovery-target-lock > svg {
+  color: var(--boot-info);
+}
+
+.page--boot-recovery .recovery-target-lock[data-state="closed"] > svg {
+  color: var(--boot-danger);
+}
+
+.page--boot-recovery .recovery-target-lock strong {
+  display: block;
+  margin-top: 0.2rem;
+}
+
+.page--boot-recovery .recovery-target-lock p {
+  margin: 0.25rem 0 0;
+  color: var(--ink-600, #665e55);
+}
+
+.page--boot-recovery .recovery-target-lock > code {
+  max-width: 23rem;
+  padding-left: 1rem;
+  border-left: 1px solid var(--boot-line);
+  text-align: right;
+}
+
+.page--boot-recovery .recovery-direct-delivery-boundary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 1.15rem;
+  border: 1px solid color-mix(in srgb, #b27b34 42%, transparent);
+  border-left: 5px solid #b27b34;
+  background:
+    radial-gradient(circle at 0 0, color-mix(in srgb, #d5a44a 17%, transparent), transparent 38%),
+    color-mix(in srgb, #f5e2bb 48%, var(--paper-raised, #fffaf0));
+}
+
+.page--boot-recovery .recovery-direct-delivery-boundary[data-sensitivity="full-research"] {
+  border-color: color-mix(in srgb, var(--boot-danger) 44%, transparent);
+  border-left-color: var(--boot-danger);
+  background:
+    radial-gradient(circle at 0 0, color-mix(in srgb, var(--boot-danger) 14%, transparent), transparent 38%),
+    color-mix(in srgb, var(--danger-bg, #f8e9e4) 76%, var(--paper-raised, #fffaf0));
+}
+
+.page--boot-recovery .recovery-direct-delivery-boundary > svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  color: #9a6429;
+}
+
+.page--boot-recovery .recovery-direct-delivery-boundary[data-sensitivity="full-research"] > svg {
+  color: var(--boot-danger);
+}
+
+.page--boot-recovery .recovery-direct-delivery-boundary small,
+.page--boot-recovery .recovery-direct-delivery-boundary strong {
+  display: block;
+}
+
+.page--boot-recovery .recovery-direct-delivery-boundary small {
+  color: #8a5a28;
+  font: 700 0.68rem/1.2 var(--font-mono, monospace);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.page--boot-recovery .recovery-direct-delivery-boundary strong {
+  margin-top: 0.22rem;
+  color: var(--ink-900, #201a16);
+  font-size: 1rem;
+}
+
+.page--boot-recovery .recovery-direct-delivery-boundary p {
+  margin: 0.35rem 0 0;
+  color: var(--ink-600, #665e55);
+  font-size: 0.82rem;
+  line-height: 1.62;
+}
+
+.page--boot-recovery .recovery-direct-delivery-boundary > span {
+  padding: 0.34rem 0.55rem;
+  border: 1px solid currentColor;
+  color: #8a5a28;
+  font: 700 0.7rem/1.2 var(--font-mono, monospace);
+  white-space: nowrap;
+}
+
+.page--boot-recovery .recovery-direct-delivery-boundary[data-sensitivity="full-research"] > span {
+  color: var(--boot-danger);
+}
+
+.page--boot-recovery .boot-recovery-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid var(--boot-line);
+  background: var(--paper-raised, #fffaf0);
+}
+
+.page--boot-recovery .boot-recovery-nav a {
+  display: flex;
+  min-height: 3.5rem;
+  gap: 0.55rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem 1rem;
+  color: var(--ink-600, #665e55);
+  text-decoration: none;
+}
+
+.page--boot-recovery .boot-recovery-nav a + a {
+  border-left: 1px solid var(--boot-line);
+}
+
+.page--boot-recovery .boot-recovery-nav a.is-active {
+  color: var(--paper-raised, #fffaf0);
+  background: var(--ink-900, #201a16);
+}
+
+.page--boot-recovery .boot-recovery-nav a[aria-disabled="true"] {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.page--boot-recovery .boot-recovery-nav svg,
+.page--boot-recovery .boot-recovery-retry__action svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.page--boot-recovery .boot-recovery-nav-note {
+  margin: -0.35rem 0 0;
+  padding: 0 0.2rem;
+  color: var(--ink-600, #665e55);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.page--boot-recovery .recovery-operation-status,
+.page--boot-recovery .boot-recovery-feedback {
+  border-left: 4px solid var(--boot-info);
+  background: color-mix(in srgb, var(--boot-info-wash) 78%, var(--paper-raised, #fffaf0));
+}
+
+.page--boot-recovery .recovery-operation-status,
+.page--boot-recovery .boot-recovery-feedback[data-tone="info"] {
+  border-left-color: var(--boot-info);
+  background: color-mix(in srgb, var(--boot-info-wash) 78%, var(--paper-raised, #fffaf0));
+}
+
+.page--boot-recovery .boot-recovery-feedback[data-tone="error"] {
+  border-left-color: var(--boot-danger);
+  background: color-mix(in srgb, var(--danger-bg, #f8e9e4) 82%, var(--paper-raised, #fffaf0));
+}
+
+.page--boot-recovery .boot-recovery-receipt {
+  overflow: hidden;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid color-mix(in srgb, var(--boot-info) 32%, transparent);
+  border-left: 4px solid var(--boot-info);
+  background:
+    linear-gradient(112deg, var(--boot-info-wash), transparent 66%),
+    var(--paper-raised, #fffaf0);
+  box-shadow: 0 14px 38px color-mix(in srgb, var(--ink-900, #201a16) 8%, transparent);
+  animation: boot-recovery-rise 420ms ease-out both;
+}
+
+.page--boot-recovery .boot-recovery-receipt--diagnostic {
+  border-left-color: var(--boot-reading);
+  background:
+    linear-gradient(112deg, color-mix(in srgb, var(--boot-reading) 8%, transparent), transparent 66%),
+    var(--paper-raised, #fffaf0);
+}
+
+.page--boot-recovery .boot-recovery-receipt[data-delivery="requested"] {
+  border-color: color-mix(in srgb, #b27b34 42%, transparent);
+  border-left-color: #b27b34;
+  background:
+    linear-gradient(112deg, color-mix(in srgb, #f5e2bb 58%, transparent), transparent 66%),
+    var(--paper-raised, #fffaf0);
+}
+
+.page--boot-recovery .boot-recovery-receipt > header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.8rem;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--boot-line);
+}
+
+.page--boot-recovery .boot-recovery-receipt > header > svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--boot-info);
+}
+
+.page--boot-recovery .boot-recovery-receipt--diagnostic > header > svg,
+.page--boot-recovery .boot-recovery-receipt--diagnostic > header > span {
+  color: var(--boot-reading);
+}
+
+.page--boot-recovery .boot-recovery-receipt[data-delivery="requested"] > header > svg {
+  color: #9a6429;
+}
+
+.page--boot-recovery .boot-recovery-receipt h2 {
+  margin: 0.12rem 0 0;
+  font-size: clamp(1.35rem, 2.8vw, 1.9rem);
+  line-height: 1.1;
+}
+
+.page--boot-recovery .boot-recovery-receipt > header > span {
+  padding: 0.34rem 0.55rem;
+  border: 1px solid currentColor;
+  color: var(--boot-info);
+  font-size: 0.72rem;
+  font-weight: 760;
+}
+
+.page--boot-recovery .boot-recovery-receipt[data-delivery="requested"] > header > span {
+  color: #8a5a28;
+}
+
+.page--boot-recovery .boot-recovery-receipt dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 1rem 0 0;
+  border-top: 1px solid var(--boot-line);
+  border-left: 1px solid var(--boot-line);
+}
+
+.page--boot-recovery .boot-recovery-receipt dl > div {
+  min-width: 0;
+  padding: 0.8rem;
+  border-right: 1px solid var(--boot-line);
+  border-bottom: 1px solid var(--boot-line);
+  background: color-mix(in srgb, var(--paper-raised, #fffaf0) 78%, transparent);
+}
+
+.page--boot-recovery .boot-recovery-receipt dt {
+  color: var(--ink-600, #665e55);
+  font-size: 0.72rem;
+}
+
+.page--boot-recovery .boot-recovery-receipt dd {
+  margin: 0.35rem 0 0;
+  overflow-wrap: anywhere;
+  color: var(--ink-900, #201a16);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.page--boot-recovery .boot-recovery-receipt > p {
+  margin: 0.9rem 0 0;
+  padding-left: 0.75rem;
+  border-left: 3px solid currentColor;
+  color: var(--ink-600, #665e55);
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+.page--boot-recovery .boot-recovery-card {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.35rem, 3vw, 2.25rem);
+  border: 1px solid var(--boot-line);
+  background: var(--paper-raised, #fffaf0);
+  animation: boot-recovery-rise 420ms 120ms ease-out both;
+}
+
+.page--boot-recovery .boot-recovery-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: var(--boot-info);
+}
+
+.page--boot-recovery .boot-recovery-card p:not(.eyebrow) {
+  max-width: 76ch;
+  color: var(--ink-600, #665e55);
+}
+
+.page--boot-recovery .boot-recovery-card .primary-action {
+  margin-top: 0.4rem;
+}
+
+.page--boot-recovery .boot-recovery-retry {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 1.1rem;
+  align-items: center;
+  padding: clamp(1.1rem, 3vw, 1.6rem);
+  border: 1px solid var(--boot-line);
+  background:
+    linear-gradient(135deg, transparent 55%, var(--boot-info-wash)),
+    var(--paper-raised, #fffaf0);
+}
+
+.page--boot-recovery .boot-recovery-retry__icon {
+  display: grid;
+  width: 3.25rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid var(--boot-line);
+  border-radius: 50%;
+  color: var(--boot-info);
+}
+
+.page--boot-recovery .boot-recovery-retry__icon svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.page--boot-recovery .boot-recovery-retry__copy > p:not(.eyebrow) {
+  max-width: 68ch;
+  margin: 0.55rem 0 0;
+  color: var(--ink-600, #665e55);
+}
+
+.page--boot-recovery .boot-recovery-retry__checkpoint {
+  display: grid;
+  gap: 0.28rem;
+  max-width: 68ch;
+  margin-top: 0.9rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--boot-info) 28%, transparent);
+  border-left: 4px solid var(--boot-info);
+  background: var(--boot-info-wash);
+}
+
+.page--boot-recovery .boot-recovery-retry__checkpoint[data-state="requested"],
+.page--boot-recovery .boot-recovery-retry__checkpoint[data-state="diagnostic_only"],
+.page--boot-recovery .boot-recovery-retry__checkpoint[data-state="pending"] {
+  border-color: color-mix(in srgb, #b27b34 38%, transparent);
+  border-left-color: #b27b34;
+  background: color-mix(in srgb, #f5e2bb 52%, transparent);
+}
+
+.page--boot-recovery .boot-recovery-retry__checkpoint > span {
+  color: var(--boot-info);
+  font: 700 0.66rem/1.2 var(--font-mono, monospace);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.page--boot-recovery .boot-recovery-retry__checkpoint[data-state="requested"] > span,
+.page--boot-recovery .boot-recovery-retry__checkpoint[data-state="diagnostic_only"] > span,
+.page--boot-recovery .boot-recovery-retry__checkpoint[data-state="pending"] > span {
+  color: #8a5a28;
+}
+
+.page--boot-recovery .boot-recovery-retry__checkpoint > strong {
+  font-size: 0.86rem;
+}
+
+.page--boot-recovery .boot-recovery-retry__checkpoint > small {
+  color: var(--ink-600, #665e55);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.page--boot-recovery .boot-recovery-retry__action {
+  display: inline-flex;
+  min-height: 2.9rem;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.72rem 1rem;
+  border: 1px solid var(--ink-900, #201a16);
+  color: var(--paper-raised, #fffaf0);
+  background: var(--ink-900, #201a16);
+  font: 700 0.84rem/1 var(--font-mono, monospace);
+  cursor: pointer;
+}
+
+.page--boot-recovery .boot-recovery-retry__action:disabled {
+  cursor: wait;
+  opacity: 0.52;
+}
+
+.page--boot-recovery .boot-recovery-retry__action:not(:disabled):hover {
+  background: var(--boot-info);
+  border-color: var(--boot-info);
+}
+
+.page--boot-recovery .boot-recovery-retry__action:focus-visible,
+.page--boot-recovery .boot-recovery-nav a:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--boot-info) 55%, white);
+  outline-offset: 3px;
+}
+
+.page--boot-recovery :is(
+  .app-boot-failure__technical p,
+  .app-boot-failure__facts dd,
+  .recovery-runbook__steps p,
+  .recovery-runbook__ledger dd,
+  .recovery-target-lock :is(p, code),
+  .recovery-direct-delivery-boundary p,
+  .boot-recovery-feedback :is(strong, p),
+  .boot-recovery-receipt :is(dd, p, code),
+  .boot-recovery-retry__checkpoint :is(strong, small)
+) {
+  overflow-wrap: anywhere;
+  unicode-bidi: plaintext;
+}
+
+@keyframes boot-recovery-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes boot-recovery-progress {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.page--boot-recovery .recovery-runbook__ledger dt,
+.page--boot-recovery .boot-recovery-receipt dt {
+  font-size: 0.78rem;
+}
+
+.page--boot-recovery .recovery-runbook__ledger dd,
+.page--boot-recovery .boot-recovery-receipt dd,
+.page--boot-recovery .boot-recovery-receipt p,
+.page--boot-recovery .boot-recovery-nav-note,
+.page--boot-recovery .boot-recovery-retry__action {
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.page--boot-recovery .boot-recovery-receipt__digest {
+  grid-column: 1 / -1;
+}
+
+.page--boot-recovery .boot-recovery-receipt__digest code {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.page--boot-recovery .boot-recovery-card .primary-action,
+.page--boot-recovery .boot-recovery-nav__link {
+  min-height: 3rem;
+}
+
+@media (max-width: 900px) {
+  .page--boot-recovery .recovery-runbook__steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page--boot-recovery .recovery-runbook__steps li:nth-child(n + 3) {
+    border-top: 1px solid var(--boot-line);
+  }
+
+  .page--boot-recovery .recovery-runbook__steps li:nth-child(2) {
+    border-right: 1px solid var(--boot-line);
+  }
+
+  .page--boot-recovery .recovery-runbook__ledger {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page--boot-recovery .boot-recovery-receipt dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page--boot-recovery .recovery-target-lock {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .page--boot-recovery .recovery-target-lock > code {
+    grid-column: 2;
+    max-width: none;
+    padding: 0.7rem 0 0;
+    border-top: 1px solid var(--boot-line);
+    border-left: 0;
+    text-align: left;
+  }
+
+  .page--boot-recovery .boot-recovery-retry {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .page--boot-recovery .boot-recovery-retry__action {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 767px) {
+  .page--boot-recovery .app-boot-failure {
+    grid-template-columns: 1fr;
+  }
+
+  .page--boot-recovery .app-boot-failure h1 {
+    font-size: clamp(2rem, 12vw, 3.2rem);
+  }
+
+  .page--boot-recovery .app-boot-failure__facts {
+    grid-template-columns: 1fr;
+  }
+
+  .page--boot-recovery .recovery-runbook__heading,
+  .page--boot-recovery .recovery-runbook__steps,
+  .page--boot-recovery .recovery-runbook__ledger,
+  .page--boot-recovery .boot-recovery-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .page--boot-recovery .boot-recovery-receipt dl {
+    grid-template-columns: 1fr;
+  }
+
+  .page--boot-recovery .boot-recovery-receipt > header {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .page--boot-recovery .boot-recovery-receipt > header > span {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .page--boot-recovery .recovery-runbook__heading {
+    gap: 0.75rem;
+  }
+
+  .page--boot-recovery .recovery-runbook__steps li {
+    min-height: 0;
+    border-top: 1px solid var(--boot-line);
+    border-right: 1px solid var(--boot-line);
+  }
+
+  .page--boot-recovery .recovery-runbook__steps li:first-child {
+    border-top: 0;
+  }
+
+  .page--boot-recovery .boot-recovery-nav a + a {
+    border-top: 1px solid var(--boot-line);
+    border-left: 0;
+  }
+
+  .page--boot-recovery .recovery-target-lock,
+  .page--boot-recovery .recovery-direct-delivery-boundary,
+  .page--boot-recovery .boot-recovery-retry {
+    grid-template-columns: 1fr;
+  }
+
+  .page--boot-recovery .recovery-target-lock > code,
+  .page--boot-recovery .recovery-direct-delivery-boundary > span,
+  .page--boot-recovery .boot-recovery-retry__action {
+    grid-column: 1;
+  }
+
+  .page--boot-recovery .recovery-direct-delivery-boundary > span {
+    justify-self: start;
+    white-space: normal;
+  }
+
+  .page--boot-recovery .boot-recovery-card .primary-action,
+  .page--boot-recovery .boot-recovery-retry__action {
+    width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+@media screen {
+  .page--boot-recovery .recovery-direct-delivery-boundary,
+  .page--boot-recovery .boot-recovery-card,
+  .page--boot-recovery .boot-recovery-receipt,
+  .page--boot-recovery .boot-recovery-retry {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 260px;
+  }
+}
+
+@media (pointer: coarse) {
+  .page--boot-recovery .app-boot-failure__technical > summary {
+    min-height: 3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page--boot-recovery .app-boot-failure,
+  .page--boot-recovery .recovery-runbook,
+  .page--boot-recovery .boot-recovery-card,
+  .page--boot-recovery .boot-recovery-receipt,
+  .page--boot-recovery .recovery-runbook__steps li[data-state="active"]::before {
+    animation: none;
+  }
+}
+
+@media (prefers-contrast: more) and (forced-colors: none) {
+  .page--boot-recovery {
+    --boot-line: color-mix(in srgb, var(--ink-900, #201a16) 42%, transparent);
+    --boot-info: #315c6e;
+    --boot-info-wash: rgba(49, 92, 110, 0.15);
+  }
+
+  .page--boot-recovery .app-boot-failure,
+  .page--boot-recovery .recovery-runbook,
+  .page--boot-recovery .recovery-target-lock,
+  .page--boot-recovery .recovery-direct-delivery-boundary,
+  .page--boot-recovery .boot-recovery-card,
+  .page--boot-recovery .boot-recovery-receipt,
+  .page--boot-recovery .boot-recovery-retry {
+    border-width: 2px;
+  }
+}
+
+@media (forced-colors: active) {
+  .page--boot-recovery .app-boot-failure,
+  .page--boot-recovery .app-boot-failure__directive,
+  .page--boot-recovery .app-boot-failure__facts,
+  .page--boot-recovery .app-boot-failure__facts > div,
+  .page--boot-recovery .app-boot-failure__technical,
+  .page--boot-recovery .app-boot-failure__technical > summary,
+  .page--boot-recovery .app-boot-failure__technical > div,
+  .page--boot-recovery .recovery-runbook,
+  .page--boot-recovery .recovery-target-lock,
+  .page--boot-recovery .recovery-direct-delivery-boundary,
+  .page--boot-recovery .boot-recovery-nav,
+  .page--boot-recovery .boot-recovery-card,
+  .page--boot-recovery .boot-recovery-receipt,
+  .page--boot-recovery .recovery-operation-status,
+  .page--boot-recovery .boot-recovery-feedback,
+  .page--boot-recovery .boot-recovery-retry__checkpoint,
+  .page--boot-recovery .boot-recovery-retry {
+    border-color: CanvasText;
+    background: Canvas;
+  }
+
+  .page--boot-recovery .boot-recovery-nav a.is-active,
+  .page--boot-recovery .boot-recovery-retry__action {
+    color: HighlightText;
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+
+  .page--boot-recovery .recovery-runbook__steps li::before,
+  .page--boot-recovery .boot-recovery-card::before {
+    background: CanvasText;
+  }
+}
+
+@media print {
+  .page--boot-recovery {
+    max-width: none;
+    gap: 1rem;
+  }
+
+  .page--boot-recovery .boot-recovery-nav,
+  .page--boot-recovery .boot-recovery-nav-note,
+  .page--boot-recovery .recovery-operation-status,
+  .page--boot-recovery .primary-action,
+  .page--boot-recovery .boot-recovery-retry__action {
+    display: none;
+  }
+
+  .page--boot-recovery .app-boot-failure,
+  .page--boot-recovery .recovery-runbook,
+  .page--boot-recovery .recovery-target-lock,
+  .page--boot-recovery .recovery-direct-delivery-boundary,
+  .page--boot-recovery .boot-recovery-card,
+  .page--boot-recovery .boot-recovery-receipt,
+  .page--boot-recovery .boot-recovery-retry {
+    break-inside: avoid;
+    box-shadow: none;
+    animation: none;
+  }
+
+  .page--boot-recovery .app-boot-failure__technical > summary {
+    display: none;
+  }
+
+  .page--boot-recovery .app-boot-failure__technical > div {
+    display: block !important;
+  }
+}

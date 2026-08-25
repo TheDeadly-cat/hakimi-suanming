@@ -4,7 +4,8 @@ import {
   type BirthInput,
   type PillarFact,
   type RulePackBinding,
-  type RuleProfile
+  type RuleProfile,
+  type TimeZoneDatabaseSnapshot
 } from "@hakimi/contracts";
 import { WORKING_DEFAULT_RULE_PROFILE, withDayBoundary, withTimeRules } from "@hakimi/rule-profiles";
 import { RETAINED_TIME_ZONE_DATABASE_2025B } from "@hakimi/tzdb-core";
@@ -641,6 +642,41 @@ describe("bundled-snapshot natal chart replay", () => {
     expect(current.manifest.resultHash).not.toBe(retainedA.manifest.resultHash);
   });
 
+  it("snapshots chart inputs, profile and options before loading the bundled resolver", async () => {
+    const mutableInput = birthAt("2024-11-03", "01:30", "America/New_York");
+    const mutableProfile: RuleProfile = structuredClone(withTimeRules({
+      dayBoundary: "zi_start_23",
+      dstAmbiguity: "require_user"
+    }));
+    const mutableBinding = await rulePackBindingFor(mutableProfile);
+    const expectedDescriptor: TimeZoneDatabaseSnapshot = structuredClone(RUNTIME_TIME_ZONE_DATABASE);
+    const mutableOptions: Parameters<typeof calculateChartForBundledSnapshot>[3] = {
+      expectedTimeZoneDatabase: expectedDescriptor,
+      dstResolutionOverride: "earlier",
+      rulePackBinding: mutableBinding
+    };
+    const pending = calculateChartForBundledSnapshot(
+      mutableInput,
+      mutableProfile,
+      RUNTIME_TZDB_VERSION,
+      mutableOptions
+    );
+
+    mutableInput.time = "02:30";
+    mutableProfile.calendar.dayBoundary = "midnight";
+    mutableOptions.dstResolutionOverride = "later";
+    mutableBinding.packId = "mutated-after-call";
+    expectedDescriptor.artifactName = "tampered/packed.json";
+
+    const result = await pending;
+    expect(result.input.time).toBe("01:30");
+    expect(result.ruleProfile.calendar.dayBoundary).toBe("zi_start_23");
+    expect(result.timeCalibration.utcInstant).toBe("2024-11-03T05:30:00Z");
+    expect(result.timeCalibration.timeZoneResolution?.status).toBe("resolved_overlap_earlier");
+    expect(result.rulePackBinding?.packId).toBe("test-installed-pack");
+    expect(result.manifest.timeZoneDatabase).toEqual(RUNTIME_TIME_ZONE_DATABASE);
+  });
+
   it("fails closed for an unavailable snapshot or a conflicting complete descriptor", async () => {
     const unavailableSnapshot = "iana-tzdb@2024a/sha256:" + "0".repeat(64) +
       "/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3";
@@ -754,6 +790,63 @@ describe("calculateUnknownHourCandidates", () => {
         )).toBe(true);
       }
     }
+  });
+
+  it("snapshots current and bundled CandidateSet inputs before either resolver load", async () => {
+    const currentInput = unknownHourAt("2026-10-01", "Africa/Casablanca");
+    const bundledInput = structuredClone(currentInput);
+    const currentProfile: RuleProfile = structuredClone(WORKING_DEFAULT_RULE_PROFILE);
+    const bundledProfile: RuleProfile = structuredClone(WORKING_DEFAULT_RULE_PROFILE);
+    const expectedDescriptor: TimeZoneDatabaseSnapshot = structuredClone(RETAINED_TIME_ZONE_DATABASE_2025B);
+    const bundledOptions: Parameters<typeof calculateUnknownHourCandidatesForBundledSnapshot>[3] = {
+      expectedTimeZoneDatabase: expectedDescriptor
+    };
+    const currentPending = calculateUnknownHourCandidates(currentInput, currentProfile);
+    const bundledPending = calculateUnknownHourCandidatesForBundledSnapshot(
+      bundledInput,
+      bundledProfile,
+      RETAINED_TIME_ZONE_DATABASE_2025B.snapshotId,
+      bundledOptions
+    );
+
+    currentInput.date = "2026-10-02";
+    bundledInput.date = "2026-10-02";
+    currentProfile.calendar.dayBoundary = "midnight";
+    bundledProfile.calendar.dayBoundary = "midnight";
+    expectedDescriptor.artifactName = "tampered/packed.json";
+
+    const [current, bundled] = await Promise.all([currentPending, bundledPending]);
+    expect(current.input.date).toBe("2026-10-01");
+    expect(bundled.input.date).toBe("2026-10-01");
+    expect(current.ruleProfile.calendar.dayBoundary).toBe("zi_start_23");
+    expect(bundled.ruleProfile.calendar.dayBoundary).toBe("zi_start_23");
+    expect(current.timeZoneDatabase).toEqual(RUNTIME_TIME_ZONE_DATABASE);
+    expect(bundled.timeZoneDatabase).toEqual(RETAINED_TIME_ZONE_DATABASE_2025B);
+  });
+
+  it("keeps current CandidateSet creation active-only while bundled replay defers names to its selected resolver", async () => {
+    const historicalOnly = unknownHourAt("2026-10-01", "Historical/Only");
+    const currentError = await calculateUnknownHourCandidates(
+      historicalOnly,
+      WORKING_DEFAULT_RULE_PROFILE
+    ).then(() => null, (cause: unknown) => cause);
+    const bundledError = await calculateUnknownHourCandidatesForBundledSnapshot(
+      historicalOnly,
+      WORKING_DEFAULT_RULE_PROFILE,
+      RETAINED_TIME_ZONE_DATABASE_2025B.snapshotId,
+      { expectedTimeZoneDatabase: RETAINED_TIME_ZONE_DATABASE_2025B }
+    ).then(() => null, (cause: unknown) => cause);
+
+    expect(currentError).toMatchObject({
+      issues: expect.arrayContaining([
+        expect.objectContaining({ message: expect.stringContaining("固定 IANA 2026c") })
+      ])
+    });
+    expect(bundledError).toMatchObject({
+      issues: expect.arrayContaining([
+        expect.objectContaining({ message: expect.stringContaining("所声明固定 IANA") })
+      ])
+    });
   });
 
   it("fails bundled-snapshot CandidateSet calculation for unknown or conflicting artifact identity", async () => {

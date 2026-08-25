@@ -17,6 +17,8 @@ export type PreparedOrphanedV13Artifact = {
   canonicalJsonByteLength: number;
   capturedAt: string;
   filename: string;
+  sourceDatabaseName: string;
+  sourceNativeVersion: number;
 };
 
 type LockedResearchDatabase = {
@@ -45,6 +47,8 @@ type ArtifactResult = {
   payloadDigest: string;
 };
 
+const LOWERCASE_SHA256 = /^[a-f0-9]{64}$/u;
+
 export type OrphanedV13RescueRuntime = {
   inspect?: typeof inspectPrebootRecoveryState;
   openVerifiedSource?: (
@@ -69,6 +73,54 @@ function assertSameOrphanedSource(
     state.sourceNativeVersion !== expected.sourceNativeVersion
   ) {
     throw new Error("只读救援开始后本地数据库状态发生变化；本次没有生成或下载备份。");
+  }
+}
+
+function assertRescueDescriptor(
+  disposition: OrphanedV13Disposition,
+  descriptor: ReleaseDatabaseDescriptor
+): void {
+  if (
+    descriptor.migrationId === null ||
+    descriptor.sourceSchema !== 13 ||
+    descriptor.sourceDatabaseName !== disposition.sourceDatabaseName ||
+    disposition.sourceNativeVersion !== 130
+  ) {
+    throw new Error("只读救援描述符与已核验的孤立 v13 源不一致。");
+  }
+}
+
+function assertVerifiedSourceHandle(
+  value: unknown,
+  disposition: OrphanedV13Disposition
+): asserts value is VerifiedV13NativeDatabase {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    (value as VerifiedV13NativeDatabase).sourceDatabaseName !== disposition.sourceDatabaseName ||
+    (value as VerifiedV13NativeDatabase).sourceNativeVersion !== disposition.sourceNativeVersion ||
+    !(value as VerifiedV13NativeDatabase).database ||
+    typeof (value as VerifiedV13NativeDatabase).database.close !== "function"
+  ) {
+    throw new Error("只读救援打开的源句柄与已核验 v13 源不一致。");
+  }
+}
+
+function assertPreparedArtifact(value: unknown): asserts value is ArtifactResult {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    (value as ArtifactResult).output !== "zip" ||
+    !((value as ArtifactResult).blob instanceof Blob) ||
+    !Number.isSafeInteger((value as ArtifactResult).outputByteLength) ||
+    (value as ArtifactResult).outputByteLength <= 0 ||
+    (value as ArtifactResult).blob.size !== (value as ArtifactResult).outputByteLength ||
+    !Number.isSafeInteger((value as ArtifactResult).canonicalJsonByteLength) ||
+    (value as ArtifactResult).canonicalJsonByteLength < 0 ||
+    typeof (value as ArtifactResult).payloadDigest !== "string" ||
+    !LOWERCASE_SHA256.test((value as ArtifactResult).payloadDigest)
+  ) {
+    throw new Error("只读救援 Worker 没有返回完整且可核验的 ZIP 工件。");
   }
 }
 
@@ -101,14 +153,25 @@ export async function captureOrphanedV13Backup(
   descriptor: ReleaseDatabaseDescriptor,
   runtime: OrphanedV13RescueRuntime = {}
 ): Promise<PreparedOrphanedV13Artifact> {
+  assertRescueDescriptor(disposition, descriptor);
   const inspect = runtime.inspect ?? inspectPrebootRecoveryState;
   const before = await inspect(descriptor);
   assertSameOrphanedSource(before, disposition);
 
-  const sourceHandle = await (
+  const sourceHandle: unknown = await (
     runtime.openVerifiedSource?.(disposition.sourceDatabaseName) ??
     openVerifiedExistingV13Database(disposition.sourceDatabaseName)
   );
+  try {
+    assertVerifiedSourceHandle(sourceHandle, disposition);
+  } catch (reason) {
+    try {
+      (sourceHandle as VerifiedV13NativeDatabase | null)?.database?.close?.();
+    } catch {
+      // A malformed injected handle must not mask the identity failure.
+    }
+    throw reason;
+  }
   let nativeGuardOpen = true;
   let database: LockedResearchDatabase | null = null;
   let snapshot: FullBackupPayload;
@@ -135,19 +198,24 @@ export async function captureOrphanedV13Backup(
     nativeGuardOpen = false;
     snapshot = await storage.createRepository(database).readFullDataSnapshot();
   } finally {
-    database?.close({ disableAutoOpen: true });
-    if (nativeGuardOpen) sourceHandle.database.close();
+    try {
+      database?.close({ disableAutoOpen: true });
+    } finally {
+      if (nativeGuardOpen) sourceHandle.database.close();
+    }
   }
 
-  const capturedAt = (runtime.now?.() ?? new Date()).toISOString();
+  const capturedDate = runtime.now?.() ?? new Date();
+  if (!(capturedDate instanceof Date) || !Number.isFinite(capturedDate.getTime())) {
+    throw new Error("只读救援捕获时间无效；本次没有生成可交付备份。");
+  }
+  const capturedAt = capturedDate.toISOString();
   const createArtifact = runtime.createArtifact ?? defaultCreateArtifact;
-  const artifact = await createArtifact(snapshot, {
+  const artifact: unknown = await createArtifact(snapshot, {
     appVersion: APP_VERSION,
     exportedAt: capturedAt
   }, "zip");
-  if (artifact.output !== "zip" || artifact.blob.size !== artifact.outputByteLength) {
-    throw new Error("只读救援 Worker 没有返回完整的 ZIP 工件。");
-  }
+  assertPreparedArtifact(artifact);
 
   const after = await inspect(descriptor);
   assertSameOrphanedSource(after, disposition);
@@ -157,6 +225,8 @@ export async function captureOrphanedV13Backup(
     outputByteLength: artifact.outputByteLength,
     canonicalJsonByteLength: artifact.canonicalJsonByteLength,
     capturedAt,
-    filename: `hakimi-v13-read-only-rescue-${capturedAt.slice(0, 10)}.zip`
+    filename: `hakimi-v13-read-only-rescue-${capturedAt.slice(0, 10)}.zip`,
+    sourceDatabaseName: disposition.sourceDatabaseName,
+    sourceNativeVersion: disposition.sourceNativeVersion
   };
 }

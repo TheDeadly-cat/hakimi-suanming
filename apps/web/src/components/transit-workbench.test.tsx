@@ -72,6 +72,34 @@ describe("TransitWorkbench", () => {
     expect(screen.getByRole("heading", { name: "当前最细活动节点" })).toBeTruthy();
   });
 
+  it("区分未应用的本地时间草稿，并按 Revision 时区提交规范 UTC", async () => {
+    const { revision, atInstant, snapshot } = await fixture();
+    const onRouteChange = vi.fn();
+    const { container } = render(<TransitWorkbench
+      revision={revision}
+      route={routeState(atInstant)}
+      snapshot={snapshot}
+      events={[]}
+      loading={false}
+      error={null}
+      onRouteChange={onRouteChange}
+      onOpenResearch={() => undefined}
+    />);
+
+    await screen.findByText("与当前切片同步");
+    const timeInput = screen.getByLabelText(/目标时间/);
+    fireEvent.change(timeInput, { target: { value: "2026-08-02T12:30:00" } });
+
+    expect(screen.getByText("本地时间尚未应用")).toBeTruthy();
+    expect(container.querySelector(".transit-workbench")?.getAttribute("data-time-draft-state")).toBe("edited");
+
+    fireEvent.click(screen.getByRole("button", { name: "定位切片" }));
+    expect(onRouteChange).toHaveBeenCalledWith(expect.objectContaining({
+      atInstant: "2026-08-02T04:30:00Z",
+      selection: null,
+    }));
+  });
+
   it("点击节点把节点类型、稳定 ID 和节点起点交给 URL 状态层", async () => {
     const { revision, atInstant, snapshot } = await fixture();
     const onRouteChange = vi.fn();
@@ -216,9 +244,9 @@ describe("TransitWorkbench", () => {
     const nextRoute = onRouteChange.mock.calls[0][0] as TransitRouteState;
     rerender(<TransitWorkbench {...props} route={nextRoute} />);
     expect(container.querySelectorAll(".transit-track")).toHaveLength(2);
-    expect(container.querySelector("#transit-track-month")).toBeTruthy();
-    expect(container.querySelector("#transit-track-day")).toBeTruthy();
-    expect(container.querySelector("#transit-track-year")).toBeNull();
+    expect(container.querySelector('.transit-track[data-track="month"]')).toBeTruthy();
+    expect(container.querySelector('.transit-track[data-track="day"]')).toBeTruthy();
+    expect(container.querySelector('.transit-track[data-track="year"]')).toBeNull();
     expect(container.querySelector(".transit-view-controls")?.getAttribute("data-snapshot-hash")).toBe(initialHash);
   });
 
@@ -249,7 +277,7 @@ describe("TransitWorkbench", () => {
     expect(onRouteChange.mock.calls[0][1]).toEqual({ replace: true });
 
     rerender(<TransitWorkbench {...props} route={filteredRoute} />);
-    expect(container.querySelector("#transit-track-year")).toBeNull();
+    expect(container.querySelector('.transit-track[data-track="year"]')).toBeNull();
     expect(container.querySelector(".transit-hidden-selection")).toBeTruthy();
 
     fireEvent.click(container.querySelector<HTMLButtonElement>(".transit-hidden-selection button")!);

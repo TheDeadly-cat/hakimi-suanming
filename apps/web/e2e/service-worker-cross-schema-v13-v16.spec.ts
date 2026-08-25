@@ -24,7 +24,7 @@ import {
   expectPageFixture,
   holdDatabaseUpgradeOpen,
   installOneShotBootOkInterruption,
-  openBridgeNavigationAfterSwitch,
+  openConfirmedBridgeBeforeSwitch,
   openStableBridge,
   pageReleaseEvidence,
   readNativeDatabase,
@@ -274,12 +274,18 @@ async function switchToTargetAndWaitForActivation(
   context: BrowserContext,
   target: GenerationFixture
 ): Promise<{ bridgePage: Page; problems: string[] }> {
-  switchServer.setGeneration(target);
-  const natural = await openBridgeNavigationAfterSwitch(
+  const natural = await openConfirmedBridgeBeforeSwitch(
     context,
     switchServer,
     sourceV13
   );
+  switchServer.setGeneration(target);
+  await natural.page.bringToFront();
+  await natural.page.evaluate(async () => {
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (!registration) throw new Error("The confirmed v13 page has no Service Worker registration.");
+    await registration.update();
+  });
   await expect.poll(() => cacheGeneration(natural.page, target), {
     timeout: ACTIVATION_TIMEOUT_MS
   }).toMatchObject({
@@ -1323,10 +1329,16 @@ test("v16 隔离受阻后同 migrationId 只清理不续跑，新 migrationId �
     await firstNatural.bridgePage.close();
     await stable.page.close();
 
-    const sameIdNatural = await switchToTargetAndWaitForActivation(
-      context,
-      sameMigrationIdRepublishV16
-    );
+    // The failed v16 worker is still active and must serve the committed v13
+    // rollback shell. Confirm that page first; temporarily serving v13 sw.js
+    // here would install an artificial downgrade candidate and mask the real
+    // same-migrationId republish path.
+    const sameIdRecovered = await openRecoveredSource(context);
+    await activateTargetGeneration(sameIdRecovered.page, sameMigrationIdRepublishV16);
+    const sameIdNatural = {
+      bridgePage: sameIdRecovered.page,
+      problems: sameIdRecovered.problems
+    };
     const sameIdFailure = await openTargetTrial(context, sameMigrationIdRepublishV16);
     await expect(sameIdFailure.page.getByRole("alert").filter({ hasText: "启动完整性检查未通过" }))
       .toBeVisible({ timeout: 35_000 });

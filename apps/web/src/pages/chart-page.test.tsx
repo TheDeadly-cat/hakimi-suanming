@@ -4,13 +4,19 @@ import {
   eventRecordSchema,
   type BirthInput,
   type CaseRecord,
+  type EventRecord,
   type RevisionRecord,
   type RulePackBinding
 } from "@hakimi/contracts";
 import { calculateChart, digestRuleProfile } from "@hakimi/bazi-core";
 import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
 import { calculatePillarRelations } from "@hakimi/relations-core";
-import { caseRepository, researchRepository } from "@hakimi/storage";
+import {
+  RESEARCH_JOURNAL_SNAPSHOT_PROFILE,
+  caseRepository,
+  researchRepository,
+  type ResearchJournalSnapshot
+} from "@hakimi/storage";
 import { ChartPage, LuckCyclePanel, PillarRelationsPanel } from "./chart-page";
 import { shortHash } from "../lib/format";
 import { EXPERT_MODE_KEY } from "../lib/expert-mode";
@@ -68,6 +74,30 @@ async function testRulePackBinding(): Promise<RulePackBinding> {
     profileVersion: WORKING_DEFAULT_RULE_PROFILE.profileVersion,
     useMode: "exact"
   };
+}
+
+function mockResearchJournalSnapshot(caseId: string, events: readonly EventRecord[] = []) {
+  const snapshot: ResearchJournalSnapshot = {
+    caseId,
+    profile: RESEARCH_JOURNAL_SNAPSHOT_PROFILE,
+    notes: [],
+    events,
+    citationIndex: { status: "loaded", records: [] },
+    receiptIndex: { status: "loaded", records: [] },
+    boundary: {
+      atomicStorageSnapshotVerified: true,
+      caseIdBound: true,
+      transactionMode: "readonly",
+      mutationEpochRead: false,
+      mutationEpochRevalidationPerformed: false,
+      storageMutationPerformed: false,
+      schemaOrReleaseIdentityMutationPerformed: false,
+      expertTruthClaimed: false,
+      publicReleaseAuthorized: false,
+      formalActivationAllowed: false
+    }
+  };
+  return vi.spyOn(researchRepository, "readResearchJournalSnapshot").mockResolvedValue(snapshot);
 }
 
 describe("LuckCyclePanel", () => {
@@ -128,18 +158,28 @@ describe("ChartPage transit route", () => {
     vi.spyOn(caseRepository, "getCase").mockResolvedValue({ caseRecord, revisions: [revision] });
     vi.spyOn(researchRepository, "listEventsByCase").mockResolvedValue([]);
     vi.spyOn(researchRepository, "listResearchNotesByCase").mockResolvedValue([]);
+    mockResearchJournalSnapshot(caseRecord.id);
     window.history.replaceState({}, "", `/cases/${caseRecord.id}/revisions/${revision.id}?view=research`);
 
     render(<ChartPage caseId={caseRecord.id} revisionId={revision.id} />);
 
-    expect(await screen.findByRole("heading", { name: "复算元数据" })).toBeTruthy();
+    const metadataHeading = await screen.findByRole("heading", { name: "复算元数据" });
+    const metadata = metadataHeading.closest("section");
+    expect(metadata).not.toBeNull();
     expect(screen.getByText(binding.packId)).toBeTruthy();
     expect(screen.getByText(shortHash(binding.packDigest))).toBeTruthy();
     expect(screen.getByText(`${binding.profileId}@${binding.profileVersion} · 精确使用`)).toBeTruthy();
     expect(screen.getAllByText(shortHash(binding.profileDigest)).length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("未绑定安装包 · 内置或派生规则快照")).toBeNull();
-    expect(screen.queryByText("Case ID")).toBeNull();
-    expect(screen.queryByText("Revision ID")).toBeNull();
+    expect(within(metadata!).queryByText("Case ID")).toBeNull();
+    expect(within(metadata!).queryByText("Revision ID")).toBeNull();
+    const exportBinding = await screen.findByLabelText("当前导出来源短标识");
+    expect(within(exportBinding).getByText("案例短标识")).toBeTruthy();
+    expect(within(exportBinding).getByText(shortHash(caseRecord.id))).toBeTruthy();
+    expect(within(exportBinding).getByText("修订短标识")).toBeTruthy();
+    expect(within(exportBinding).getByText(shortHash(revision.id))).toBeTruthy();
+    expect(within(exportBinding).queryByText(caseRecord.id)).toBeNull();
+    expect(within(exportBinding).queryByText(revision.id)).toBeNull();
   });
 
   it("专家模式显示完整摘要与 Case/Revision 原始标识", async () => {
@@ -162,18 +202,62 @@ describe("ChartPage transit route", () => {
     vi.spyOn(caseRepository, "getCase").mockResolvedValue({ caseRecord, revisions: [revision] });
     vi.spyOn(researchRepository, "listEventsByCase").mockResolvedValue([]);
     vi.spyOn(researchRepository, "listResearchNotesByCase").mockResolvedValue([]);
+    mockResearchJournalSnapshot(caseRecord.id);
     window.localStorage.setItem(EXPERT_MODE_KEY, "1");
     window.history.replaceState({}, "", `/cases/${caseRecord.id}/revisions/${revision.id}?view=research`);
 
     render(<ChartPage caseId={caseRecord.id} revisionId={revision.id} />);
 
-    expect(await screen.findByRole("heading", { name: "复算元数据" })).toBeTruthy();
+    const metadataHeading = await screen.findByRole("heading", { name: "复算元数据" });
+    const metadata = metadataHeading.closest("section");
+    expect(metadata).not.toBeNull();
     expect(await screen.findByText(binding.packDigest)).toBeTruthy();
     expect((await screen.findAllByText(binding.profileDigest)).length).toBeGreaterThanOrEqual(1);
-    expect(await screen.findByText("Case ID")).toBeTruthy();
-    expect(screen.getByText(revision.caseId)).toBeTruthy();
-    expect(await screen.findByText("Revision ID")).toBeTruthy();
-    expect(screen.getByText(revision.id)).toBeTruthy();
+    expect(within(metadata!).getByText("Case ID")).toBeTruthy();
+    expect(within(metadata!).getByText(revision.caseId)).toBeTruthy();
+    expect(within(metadata!).getByText("Revision ID")).toBeTruthy();
+    expect(within(metadata!).getByText(revision.id)).toBeTruthy();
+    const exportBinding = await screen.findByLabelText("当前导出来源完整标识");
+    expect(within(exportBinding).getByText(revision.caseId)).toBeTruthy();
+    expect(within(exportBinding).getByText(revision.id)).toBeTruthy();
+  });
+
+  it("在研读页按派生复演、出生时间扰动、DeepSeek 的顺序展示且扰动默认不运行", async () => {
+    const revision = await revisionFor(input);
+    const caseRecord: CaseRecord = {
+      schemaVersion: "1.0.0",
+      id: revision.caseId,
+      alias: "七点扰动入口案例",
+      tags: [],
+      notes: "",
+      createdAt: revision.createdAt,
+      updatedAt: revision.createdAt,
+      latestRevisionId: revision.id,
+      revisionCount: 1,
+      recordVersion: 2,
+      favorite: false,
+      deletedAt: null
+    };
+    vi.spyOn(caseRepository, "getCase").mockResolvedValue({ caseRecord, revisions: [revision] });
+    vi.spyOn(researchRepository, "listEventsByCase").mockResolvedValue([]);
+    vi.spyOn(researchRepository, "listResearchNotesByCase").mockResolvedValue([]);
+    mockResearchJournalSnapshot(caseRecord.id);
+    window.history.replaceState({}, "", `/cases/${caseRecord.id}/revisions/${revision.id}?view=research`);
+
+    render(<ChartPage caseId={caseRecord.id} revisionId={revision.id} />);
+
+    const derivedPanel = (await screen.findByRole("heading", { name: "显式版本派生投影" })).closest("section");
+    const perturbationPanel = screen.getByRole("heading", { name: "出生时间扰动：七点四柱投影" }).closest("section");
+    const deepSeekPanel = screen.getByRole("heading", { name: "本机 AI 断言草稿验证器" }).closest("section");
+    expect(derivedPanel).not.toBeNull();
+    expect(perturbationPanel).not.toBeNull();
+    expect(deepSeekPanel).not.toBeNull();
+    expect(derivedPanel!.compareDocumentPosition(perturbationPanel!) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
+    expect(perturbationPanel!.compareDocumentPosition(deepSeekPanel!) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
+    expect(perturbationPanel?.dataset.state).toBe("idle");
+    expect(within(perturbationPanel!).getByRole("button", { name: "运行七点民用时间扰动" })).toBeTruthy();
+    expect(within(perturbationPanel!).queryByRole("heading", { name: "七点扰动报告" })).toBeNull();
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 
   it("在研读页运行本命盘只读复演且不写入新 Revision", async () => {
@@ -196,6 +280,7 @@ describe("ChartPage transit route", () => {
     vi.spyOn(caseRepository, "getCase").mockResolvedValue({ caseRecord, revisions: [revision] });
     vi.spyOn(researchRepository, "listEventsByCase").mockResolvedValue([]);
     vi.spyOn(researchRepository, "listResearchNotesByCase").mockResolvedValue([]);
+    mockResearchJournalSnapshot(caseRecord.id);
     const addRevision = vi.spyOn(caseRepository, "addRevision");
     const listReceipts = vi.spyOn(caseRepository, "listRevisionCalculationReceipts");
     window.history.replaceState({}, "", `/cases/${caseRecord.id}/revisions/${revision.id}?view=research`);
@@ -232,6 +317,7 @@ describe("ChartPage transit route", () => {
     vi.spyOn(caseRepository, "getCase").mockResolvedValue({ caseRecord, revisions: [revision] });
     vi.spyOn(researchRepository, "listEventsByCase").mockResolvedValue([]);
     vi.spyOn(researchRepository, "listResearchNotesByCase").mockResolvedValue([]);
+    mockResearchJournalSnapshot(caseRecord.id);
     const pathname = `/cases/${caseRecord.id}/revisions/${revision.id}`;
     window.history.replaceState({}, "", `${pathname}?view=transit&at=2026-08-01T12%3A00%3A00Z&scale=day&track=year&track=month`);
 
@@ -245,7 +331,7 @@ describe("ChartPage transit route", () => {
     fireEvent.click(within(yearSection!).getAllByRole("button")[0]);
     await waitFor(() => expect(window.location.search).toContain("node=year%3A"));
 
-    fireEvent.click(screen.getByRole("button", { name: "到研读页记录事件" }));
+    fireEvent.click(await screen.findByRole("button", { name: "到研读页记录事件" }, { timeout: 10_000 }));
     expect(await screen.findByText(/绑定所选year节点/)).toBeTruthy();
     const researchParams = new URLSearchParams(window.location.search);
     expect(researchParams.get("scale")).toBe("day");
@@ -344,6 +430,7 @@ describe("ChartPage transit route", () => {
     vi.spyOn(caseRepository, "getCase").mockResolvedValue({ caseRecord, revisions: [revision] });
     vi.spyOn(researchRepository, "listEventsByCase").mockResolvedValue([record]);
     vi.spyOn(researchRepository, "listResearchNotesByCase").mockResolvedValue([]);
+    mockResearchJournalSnapshot(caseRecord.id, [record]);
     window.history.replaceState({}, "", `/cases/${caseRecord.id}/revisions/${revision.id}?view=research&event=${record.id}`);
 
     render(<ChartPage caseId={caseRecord.id} revisionId={revision.id} />);
@@ -397,13 +484,18 @@ describe("ChartPage transit route", () => {
     vi.spyOn(caseRepository, "getCase").mockResolvedValue({ caseRecord, revisions: [first, second] });
     vi.spyOn(researchRepository, "listEventsByCase").mockResolvedValue([record]);
     vi.spyOn(researchRepository, "listResearchNotesByCase").mockResolvedValue([]);
+    mockResearchJournalSnapshot(caseRecord.id, [record]);
     window.history.replaceState({}, "", `/cases/${caseRecord.id}/revisions/${first.id}?view=research&event=${record.id}`);
 
     render(<ChartPage caseId={caseRecord.id} revisionId={first.id} />);
 
-    const alert = await screen.findByRole("alert");
+    const alert = await screen.findByRole("alert", { name: "地址或深链参数未全部接受" });
     expect(alert.textContent).toContain("属于其他 Revision");
     expect(alert.textContent).toContain("不会在当前修订近似定位");
+    expect(screen.getAllByRole("alert")).toHaveLength(1);
+    const journalError = screen.getByText("无法定位事件").closest(".inline-error");
+    expect(journalError?.getAttribute("role")).toBeNull();
+    expect(journalError?.getAttribute("data-parent-announcement")).toBe("present");
     expect(document.querySelector(".event-card--selected")).toBeNull();
   });
 

@@ -4,8 +4,20 @@ import {
   type AppBootFailureSource
 } from "./app-boot-failure";
 
-export type LatchedAppBootFailure = Pick<AppBootFailure, "source" | "error">;
+export type LatchedAppBootFailure = Readonly<Pick<AppBootFailure, "source" | "error">>;
 export type AppBootFailureListener = (failure: LatchedAppBootFailure) => void;
+
+function notifyListenerSafely(
+  listener: AppBootFailureListener,
+  failure: LatchedAppBootFailure
+): void {
+  try {
+    listener(failure);
+  } catch {
+    // A subscriber is an observer; it cannot replace or interrupt the latched
+    // startup failure that recovery UI and release coordination rely on.
+  }
+}
 
 export class AppBootFailureLatch {
   private failure: LatchedAppBootFailure | null = null;
@@ -16,17 +28,23 @@ export class AppBootFailureLatch {
   }
 
   report(source: AppBootFailureSource, reason: unknown): LatchedAppBootFailure {
-    this.failure ??= {
+    if (this.failure) return this.failure;
+
+    const error = normalizeBootError(reason, `${source} boot failure`);
+    Object.freeze(error);
+    const failure: LatchedAppBootFailure = Object.freeze({
       source,
-      error: normalizeBootError(reason, `${source} boot failure`)
-    };
-    for (const listener of this.listeners) listener(this.failure);
-    return this.failure;
+      error
+    });
+    this.failure = failure;
+
+    for (const listener of [...this.listeners]) notifyListenerSafely(listener, failure);
+    return failure;
   }
 
   subscribe(listener: AppBootFailureListener): () => void {
     this.listeners.add(listener);
-    if (this.failure) listener(this.failure);
+    if (this.failure) notifyListenerSafely(listener, this.failure);
     return () => {
       this.listeners.delete(listener);
     };

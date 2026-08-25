@@ -152,11 +152,28 @@ async function createWorkerHarness(descriptor: ReleaseDescriptor = BRIDGE_DESCRI
   const workerPath = path.resolve(import.meta.dirname, "../public/sw.js");
   const workerSource = (await readFile(workerPath, "utf8"))
     .replace("__CACHE_VERSION__", CURRENT_VERSION)
-    .replace("__RELEASE_DATABASE_DESCRIPTOR__", encodedDescriptor(descriptor));
+    .replace("__RELEASE_DATABASE_DESCRIPTOR__", encodedDescriptor(descriptor))
+    .replace("__BRIDGE_RELEASE_DATABASE_DESCRIPTOR__", encodedDescriptor(BRIDGE_DESCRIPTOR));
   const cacheStore = new Map<string, FakeCache>();
   const indexedDB = new IDBFactory();
   const listeners = new Map<string, (event: WorkerEvent) => void>();
   const windowClients = new Map<string, FakeWindowClient>();
+  const timerTasks = new Set<Promise<unknown>>();
+  const trackedSetTimeout = (
+    callback: (...args: unknown[]) => unknown,
+    delay?: number,
+    ...args: unknown[]
+  ) => setTimeout(() => {
+    const result = callback(...args);
+    const thenable = result as { then?: unknown } | null;
+    if (!thenable || typeof thenable.then !== "function") return;
+    const task = Promise.resolve(result);
+    timerTasks.add(task);
+    void task.then(
+      () => timerTasks.delete(task),
+      () => timerTasks.delete(task)
+    );
+  }, delay);
   const deleteCache = vi.fn(async (cacheName: string) => cacheStore.delete(cacheName));
   const claim = vi.fn(async () => undefined);
   const skipWaiting = vi.fn(async () => undefined);
@@ -205,8 +222,12 @@ async function createWorkerHarness(descriptor: ReleaseDescriptor = BRIDGE_DESCRI
     caches,
     fetch: fetchRequest,
     self: workerSelf,
-    setTimeout
+    setTimeout: trackedSetTimeout
   });
+
+  const flushTimerTasks = async () => {
+    while (timerTasks.size > 0) await Promise.allSettled([...timerTasks]);
+  };
 
   const dispatch = async (type: string, event: WorkerEvent = {}) => {
     const pending: Promise<unknown>[] = [];
@@ -294,6 +315,7 @@ async function createWorkerHarness(descriptor: ReleaseDescriptor = BRIDGE_DESCRI
     deleteCache,
     dispatch,
     fetchRequest,
+    flushTimerTasks,
     indexedDB,
     matchAllClients,
     seedGeneration,
@@ -425,14 +447,6 @@ function draftCleanupResponder(options: {
       failedDraftCount
     });
   };
-}
-
-async function waitForCondition(predicate: () => boolean) {
-  for (let attempt = 0; attempt < 200; attempt += 1) {
-    if (predicate()) return;
-    await new Promise<void>((resolve) => setImmediate(resolve));
-  }
-  expect(predicate()).toBe(true);
 }
 
 describe("Service Worker upgrade safety", () => {
@@ -1412,9 +1426,7 @@ describe("Service Worker upgrade safety", () => {
       expect(firstAcks[0]).toMatchObject({ accepted: true });
 
       await vi.advanceTimersByTimeAsync(30_000);
-      await waitForCondition(() =>
-        source.messages.some((message) => message.type === "DATABASE_MIGRATION_ABORTED")
-      );
+      await harness.flushTimerTasks();
       expect(source.messages.map((message) => message.type)).toEqual([
         "FREEZE_DATABASE_WRITES",
         "DATABASE_MIGRATION_ABORTED"
@@ -1478,9 +1490,7 @@ describe("Service Worker upgrade safety", () => {
       expect(newlyControlledSource.messages.some((message) => message.type === "DATABASE_MIGRATION_ABORTED")).toBe(false);
 
       await vi.advanceTimersByTimeAsync(20_000);
-      await waitForCondition(() =>
-        source.messages.some((message) => message.type === "DATABASE_MIGRATION_ABORTED")
-      );
+      await harness.flushTimerTasks();
       expect(source.messages.map((message) => message.type)).toEqual([
         "FREEZE_DATABASE_WRITES",
         "FREEZE_DATABASE_WRITES",
@@ -1533,9 +1543,7 @@ describe("Service Worker upgrade safety", () => {
       expect(source.messages.map((message) => message.type)).toEqual(["FREEZE_DATABASE_WRITES"]);
 
       await vi.advanceTimersByTimeAsync(10_000);
-      await waitForCondition(() =>
-        source.messages.some((message) => message.type === "DATABASE_MIGRATION_ABORTED")
-      );
+      await harness.flushTimerTasks();
       expect(source.messages.map((message) => message.type)).toEqual([
         "FREEZE_DATABASE_WRITES",
         "DATABASE_MIGRATION_ABORTED"
@@ -1602,9 +1610,7 @@ describe("Service Worker upgrade safety", () => {
 
       await harness.setCommittedState(committedState(TARGET_DESCRIPTOR, CURRENT_VERSION));
       await vi.advanceTimersByTimeAsync(30_000);
-      await waitForCondition(() =>
-        source.messages.some((message) => message.type === "DATABASE_MIGRATION_COMMITTED")
-      );
+      await harness.flushTimerTasks();
 
       expect(source.messages.map((message) => message.type)).toEqual([
         "FREEZE_DATABASE_WRITES",

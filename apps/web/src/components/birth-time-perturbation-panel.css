@@ -1,0 +1,293 @@
+.birth-time-perturbation-panel {
+  display: grid;
+  gap: 18px;
+  overflow: hidden;
+  border-top: 4px solid #4a6b88;
+  background:
+    radial-gradient(circle at 100% 0, rgba(74, 107, 136, 0.11), transparent 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(246, 248, 250, 0.94));
+}
+
+.birth-time-perturbation-panel[data-state="processing"] {
+  border-top-color: #5b7892;
+}
+
+.birth-time-perturbation-panel[data-state="failed"],
+.birth-time-perturbation-panel[data-report-status="inconclusive_due_to_blocked_offsets"] {
+  border-top-color: #a44a3f;
+}
+
+.birth-time-perturbation-boundary,
+.birth-time-perturbation-unavailable {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 15px 16px;
+  border: 1px solid rgba(74, 107, 136, 0.22);
+  border-left: 4px solid #4a6b88;
+  border-radius: 7px 16px 7px 7px;
+  background: rgba(74, 107, 136, 0.06);
+}
+
+.birth-time-perturbation-boundary > svg,
+.birth-time-perturbation-unavailable > svg {
+  width: 25px;
+  height: 25px;
+  color: #4a6b88;
+}
+
+.birth-time-perturbation-boundary strong {
+  display: block;
+  color: #2f4f68;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.birth-time-perturbation-boundary p,
+.birth-time-perturbation-unavailable p,
+.birth-time-perturbation-action-row p {
+  margin: 5px 0 0;
+  color: #645e57;
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+.birth-time-perturbation-unavailable {
+  border-color: rgba(125, 111, 92, 0.22);
+  border-left-color: #7d6f5c;
+  background: rgba(125, 111, 92, 0.06);
+}
+
+.birth-time-perturbation-unavailable > svg {
+  color: #7d6f5c;
+}
+
+.birth-time-perturbation-action-row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border: 1px solid rgba(74, 107, 136, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.birth-time-perturbation-action-row > p {
+  max-width: 680px;
+  margin: 0;
+  text-align: right;
+}
+
+.birth-time-perturbation-result {
+  display: grid;
+  gap: 16px;
+  outline: none;
+}
+
+.birth-time-perturbation-result:focus-visible {
+  border-radius: 8px;
+  box-shadow: 0 0 0 3px rgba(74, 107, 136, 0.2);
+}
+
+.birth-time-perturbation-result > header,
+.birth-time-perturbation-scenarios > li > header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.birth-time-perturbation-result > header small,
+.birth-time-perturbation-scenarios header small {
+  display: block;
+  color: #796f65;
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.birth-time-perturbation-result > header h3 {
+  margin: 3px 0 0;
+  color: #2f3c47;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+
+.birth-time-perturbation-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.birth-time-perturbation-metrics > div {
+  display: grid;
+  gap: 4px;
+  padding: 13px 14px;
+  border: 1px solid rgba(74, 107, 136, 0.16);
+  border-radius: 7px 13px 7px 7px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.birth-time-perturbation-metrics span,
+.birth-time-perturbation-binding span {
+  color: #766f66;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.birth-time-perturbation-metrics strong {
+  color: #35556f;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
+
+.birth-time-perturbation-scenarios {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.birth-time-perturbation-scenarios > li {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px 15px;
+  border: 1px solid rgba(74, 107, 136, 0.16);
+  border-radius: 8px 16px 8px 8px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.birth-time-perturbation-scenarios > li[data-scenario-status="blocked"] {
+  border-color: rgba(164, 74, 63, 0.24);
+  background: rgba(164, 74, 63, 0.045);
+}
+
+.birth-time-perturbation-scenarios header strong {
+  display: block;
+  margin-top: 3px;
+  color: #343e47;
+  font-size: 0.91rem;
+}
+
+.birth-time-perturbation-scenario-detail {
+  display: grid;
+  gap: 8px;
+}
+
+.birth-time-perturbation-scenario-detail p {
+  margin: 0;
+  color: #514c46;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.birth-time-perturbation-scenario-detail > small {
+  color: #7b7268;
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.birth-time-perturbation-scenario-detail > code,
+.birth-time-perturbation-scenario-detail details code,
+.birth-time-perturbation-binding code {
+  overflow-wrap: anywhere;
+  color: #3f617c;
+  font-size: 0.7rem;
+}
+
+.birth-time-perturbation-scenario-detail details {
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: rgba(74, 107, 136, 0.055);
+}
+
+.birth-time-perturbation-scenario-detail summary {
+  cursor: pointer;
+  color: #4a6b88;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.birth-time-perturbation-scenario-detail ul {
+  display: grid;
+  gap: 5px;
+  margin: 9px 0 0;
+  padding-left: 18px;
+}
+
+.birth-time-perturbation-binding {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(74, 107, 136, 0.16);
+  border-radius: 9px;
+  background: rgba(74, 107, 136, 0.04);
+}
+
+.birth-time-perturbation-binding > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.birth-time-perturbation-binding strong {
+  overflow-wrap: anywhere;
+  color: #3f464c;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.birth-time-perturbation-result-boundary {
+  margin: 0;
+  padding: 11px 13px;
+  border-left: 3px solid #8a6a45;
+  color: #6f614f;
+  background: rgba(154, 106, 49, 0.06);
+  font-size: 0.76rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .birth-time-perturbation-metrics,
+  .birth-time-perturbation-binding {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .birth-time-perturbation-action-row,
+  .birth-time-perturbation-result > header,
+  .birth-time-perturbation-scenarios > li > header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .birth-time-perturbation-action-row > p {
+    text-align: left;
+  }
+
+  .birth-time-perturbation-scenarios,
+  .birth-time-perturbation-metrics,
+  .birth-time-perturbation-binding {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (forced-colors: active) {
+  .birth-time-perturbation-panel,
+  .birth-time-perturbation-boundary,
+  .birth-time-perturbation-unavailable,
+  .birth-time-perturbation-action-row,
+  .birth-time-perturbation-scenarios > li,
+  .birth-time-perturbation-metrics > div,
+  .birth-time-perturbation-binding {
+    border-color: CanvasText;
+  }
+}

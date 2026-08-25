@@ -1,7 +1,9 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { calculateChart, calculateUnknownHourCandidates } from "@hakimi/bazi-core";
 import {
+  LEGACY_UNIDENTIFIED_TZDB_VERSION,
   RESEARCH_QUERY_VERSION,
+  buildTimeZoneDatabaseSnapshotId,
   researchQueryHeavenlyStemSchema,
   type BirthInput,
   type CandidateSetRecord,
@@ -23,7 +25,11 @@ import {
   type RevisionCalculationReceipt
 } from "@hakimi/revision-replay";
 import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
-import { resolveEventTimeContext } from "@hakimi/time-core";
+import {
+  resolveEventTimeContext,
+  resolveEventTimeContextForBundledSnapshot
+} from "@hakimi/time-core";
+import { RETAINED_TIME_ZONE_DATABASE_2025B } from "@hakimi/tzdb-core";
 import {
   COMPATIBLE_TRANSIT_TIMELINE_VERSION_V1_1,
   TRANSIT_TIMELINE_VERSION,
@@ -144,6 +150,38 @@ function event(
     createdAt: "2026-07-03T00:00:00.000Z",
     updatedAt: "2026-07-03T00:00:00.000Z"
   };
+}
+
+type ZonedMinuteEventTimeContext = Extract<EventRecord["timeContext"], { kind: "zoned_minute" }>;
+
+function minuteEvent(
+  id: string,
+  title: string,
+  timeContext: ZonedMinuteEventTimeContext,
+  updatedAt: string
+): EventRecord {
+  return {
+    ...event(id, title, ["时间边界"], "unreviewed", null),
+    datePrecision: "minute",
+    startDate: timeContext.start.localDateTime,
+    endDate: timeContext.end?.localDateTime ?? null,
+    timeContext,
+    updatedAt
+  };
+}
+
+function rewriteStoredStartInstant(
+  timeContext: ZonedMinuteEventTimeContext,
+  instant: string
+): ZonedMinuteEventTimeContext {
+  const rewritten = structuredClone(timeContext);
+  const selectedChoice = rewritten.start.resolution.selectedCandidate.choice;
+  const selected = rewritten.start.resolution.candidates.find((candidate) => candidate.choice === selectedChoice);
+  if (!selected) throw new Error("zoned event fixture lacks its selected start candidate");
+  selected.instant = instant;
+  rewritten.start.resolution.selectedCandidate.instant = instant;
+  rewritten.start.canonicalUtc = instant;
+  return rewritten;
 }
 
 let snapshot: ResearchQuerySnapshot;
@@ -619,6 +657,138 @@ describe("ResearchQuery executor v1", () => {
     expect(knowledge.results.every((result) => isResearchResultKey(result.key))).toBe(true);
   });
 
+  it("精确复核 retained Event，但不把其 UTC 投影进查询结果", async () => {
+    const retainedContext = await resolveEventTimeContextForBundledSnapshot({
+      datePrecision: "minute",
+      startDate: "2025-03-12T12:00",
+      endDate: null,
+      timeZone: "Africa/Casablanca"
+    }, RETAINED_TIME_ZONE_DATABASE_2025B.snapshotId, RETAINED_TIME_ZONE_DATABASE_2025B);
+    if (retainedContext.kind !== "zoned_minute") throw new Error("expected retained zoned-minute fixture");
+    const retainedEvent = minuteEvent(
+      "5ccccccc-cccc-4ccc-8ccc-cccccccccccc",
+      "retained 时区事件",
+      retainedContext,
+      "2026-07-03T03:00:00.000Z"
+    );
+    const execution = await executeResearchQuery({
+      ...createDefaultResearchQuery("events"),
+      text: "retained"
+    }, { ...snapshot, events: [retainedEvent] });
+
+    expect(execution.results.map((result) => result.key)).toEqual([`event:${retainedEvent.id}`]);
+    expect(JSON.stringify(execution.results)).not.toContain("canonicalUtc");
+    expect(execution.diagnostics.some((item) => item.code.startsWith("EVENT_TIME_ZONED_UTC_NOT_EVALUATED")))
+      .toBe(false);
+
+    const forgedContext = rewriteStoredStartInstant(retainedContext, "2030-01-01T00:00:00Z");
+    await expect(executeResearchQuery(createDefaultResearchQuery("events"), {
+      ...snapshot,
+      events: [{ ...retainedEvent, timeContext: forgedContext }]
+    })).rejects.toMatchObject({ code: "INVALID_DATASET" });
+  });
+
+  it("对 unavailable 与 unidentified zoned Event 只检索元数据并给出稳定降级诊断", async () => {
+    const current = resolveEventTimeContext({
+      datePrecision: "minute",
+      startDate: "2025-03-12T12:00",
+      endDate: null,
+      timeZone: "Asia/Shanghai"
+    });
+    if (current.kind !== "zoned_minute" || !current.timeZoneDatabase) {
+      throw new Error("expected identified current zoned-minute fixture");
+    }
+
+    const unavailable = rewriteStoredStartInstant(current, "2030-01-01T00:00:00Z");
+    if (!unavailable.timeZoneDatabase) throw new Error("expected unavailable descriptor fixture");
+    unavailable.timeZoneDatabase.dataSha256 = unavailable.timeZoneDatabase.dataSha256.startsWith("0")
+      ? `1${unavailable.timeZoneDatabase.dataSha256.slice(1)}`
+      : `0${unavailable.timeZoneDatabase.dataSha256.slice(1)}`;
+    unavailable.timeZoneDatabase.snapshotId = buildTimeZoneDatabaseSnapshotId(unavailable.timeZoneDatabase);
+    unavailable.tzdbVersion = unavailable.timeZoneDatabase.snapshotId;
+
+    const unidentified = rewriteStoredStartInstant(current, "2020-01-01T00:00:00Z");
+    unidentified.tzdbVersion = LEGACY_UNIDENTIFIED_TZDB_VERSION;
+    delete unidentified.timeZoneDatabase;
+
+    const unavailableEvent = minuteEvent(
+      "5ddddddd-dddd-4ddd-8ddd-dddddddddddd",
+      "降级工件事件",
+      unavailable,
+      "2026-07-03T01:00:00.000Z"
+    );
+    const unidentifiedEvent = minuteEvent(
+      "5eeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+      "降级未知事件",
+      unidentified,
+      "2026-07-03T02:00:00.000Z"
+    );
+    const legacyFloatingEvent: EventRecord = {
+      ...event("5fffffff-ffff-4fff-8fff-ffffffffffff", "旧浮动事件", [], "unreviewed", null),
+      timeContext: { kind: "legacy_floating" }
+    };
+    const degradedSnapshot = {
+      ...snapshot,
+      events: [unidentifiedEvent, legacyFloatingEvent, unavailableEvent]
+    };
+    const query = {
+      ...createDefaultResearchQuery("events"),
+      text: "降级",
+      sort: { field: "updatedAt" as const, direction: "asc" as const }
+    };
+    const first = await executeResearchQuery(query, degradedSnapshot);
+    const second = await executeResearchQuery(query, {
+      ...degradedSnapshot,
+      events: [...degradedSnapshot.events].reverse()
+    });
+
+    expect(first.results.map((result) => result.key)).toEqual([
+      `event:${unavailableEvent.id}`,
+      `event:${unidentifiedEvent.id}`
+    ]);
+    expect(second.results).toEqual(first.results);
+    expect(second.diagnostics).toEqual(first.diagnostics);
+    expect(JSON.stringify(first.results)).not.toMatch(/canonicalUtc|utcOffset/u);
+    expect(first.diagnostics.map((item) => item.code)).toEqual([
+      "EVENT_TIME_ZONED_UTC_NOT_EVALUATED_ARTIFACT_UNAVAILABLE",
+      "EVENT_TIME_ZONED_UTC_NOT_EVALUATED_LEGACY_TZDB"
+    ]);
+    expect(first.diagnostics.every((item) => item.kind === "warning" && item.message.includes("未用于本查询的 UTC 排序或投影")))
+      .toBe(true);
+
+    const legacy = await executeResearchQuery({
+      ...createDefaultResearchQuery("events"),
+      text: "旧浮动"
+    }, degradedSnapshot);
+    expect(legacy.diagnostics.map((item) => item.code)).toEqual(["EVENT_TIME_LEGACY_FLOATING_NO_UTC"]);
+  });
+
+  it("descriptor mismatch Event 不能降级为结构性可读", async () => {
+    const current = resolveEventTimeContext({
+      datePrecision: "minute",
+      startDate: "2025-03-12T12:00",
+      endDate: null,
+      timeZone: "Asia/Shanghai"
+    });
+    if (current.kind !== "zoned_minute" || !current.timeZoneDatabase) {
+      throw new Error("expected identified current zoned-minute fixture");
+    }
+    const mismatched = structuredClone(current);
+    if (!mismatched.timeZoneDatabase) throw new Error("expected descriptor mismatch fixture");
+    mismatched.timeZoneDatabase.artifactName = "tampered/event-time.json";
+    const mismatchedEvent = minuteEvent(
+      "51111111-aaaa-4aaa-8aaa-111111111111",
+      "描述符冲突事件",
+      mismatched,
+      "2026-07-03T04:00:00.000Z"
+    );
+
+    await expect(executeResearchQuery(createDefaultResearchQuery("events"), {
+      ...snapshot,
+      events: [mismatchedEvent]
+    })).rejects.toMatchObject({ code: "INVALID_DATASET" });
+  });
+
   it("context_case 只命中指定 Case，拒绝同名同标签的跨案例事件", async () => {
     const caseOnlyA = event(
       "5aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
@@ -710,6 +880,99 @@ describe("ResearchQuery executor v1", () => {
       name: "ResearchQueryExecutionError",
       code: "INVALID_DATASET"
     });
+  });
+
+  it("在首个 cooperative yield 前快照完整 dataset，后续 Event 与其他分区修改不会混入", async () => {
+    const mutable = structuredClone(snapshot);
+    const query = createDefaultResearchQuery("events");
+    const now = () => "2026-08-02T01:00:00.000Z";
+    const baseline = await executeResearchQuery(query, structuredClone(mutable), { now });
+    let mutationScheduled = false;
+    let resolveMutation!: () => void;
+    const mutationApplied = new Promise<void>((resolve) => {
+      resolveMutation = resolve;
+    });
+
+    const executionPromise = executeResearchQuery(query, mutable, {
+      now,
+      yieldEvery: 1,
+      onProgress(progress) {
+        if (mutationScheduled || progress.phase !== "verify" || progress.completed !== 1) return;
+        mutationScheduled = true;
+        globalThis.setTimeout(() => {
+          mutable.events.at(-1)!.title = "yield 后注入的事件标题";
+          mutable.knowledgeDocuments[0]!.title = "yield 后注入的知识标题";
+          resolveMutation();
+        }, 0);
+      }
+    });
+
+    const [execution] = await Promise.all([executionPromise, mutationApplied]);
+    expect(mutationScheduled).toBe(true);
+    expect(mutable.events.at(-1)?.title).toBe("yield 后注入的事件标题");
+    expect(mutable.knowledgeDocuments[0]?.title).toBe("yield 后注入的知识标题");
+    expect(execution).toEqual(baseline);
+  });
+
+  it("拒绝 dataset accessor 且不执行 getter，也不进入进度或 yield 窗口", async () => {
+    const accessorBacked = structuredClone(snapshot);
+    const events = accessorBacked.events;
+    let accessorReads = 0;
+    let progressCalls = 0;
+    Object.defineProperty(accessorBacked, "events", {
+      enumerable: true,
+      configurable: true,
+      get() {
+        accessorReads += 1;
+        return events;
+      }
+    });
+
+    await expect(executeResearchQuery(createDefaultResearchQuery("events"), accessorBacked, {
+      yieldEvery: 1,
+      onProgress() {
+        progressCalls += 1;
+      }
+    })).rejects.toMatchObject({
+      name: "ResearchQueryExecutionError",
+      code: "INVALID_DATASET"
+    });
+    expect(accessorReads).toBe(0);
+    expect(progressCalls).toBe(0);
+  });
+
+  it("对完整 dataset 执行声明式深度预算，并在边界之外失败关闭", async () => {
+    const nestedArray = (arrayDepth: number): unknown => {
+      let value: unknown = null;
+      for (let depth = 0; depth < arrayDepth; depth += 1) value = [value];
+      return value;
+    };
+    const atBoundary = structuredClone(snapshot) as ResearchQuerySnapshot & { budgetProbe: unknown };
+    atBoundary.budgetProbe = nestedArray(127);
+    await expect(executeResearchQuery(createDefaultResearchQuery("events"), atBoundary))
+      .resolves.toBeDefined();
+
+    const beyondBoundary = structuredClone(snapshot) as ResearchQuerySnapshot & { budgetProbe: unknown };
+    beyondBoundary.budgetProbe = nestedArray(128);
+    await expect(executeResearchQuery(createDefaultResearchQuery("events"), beyondBoundary))
+      .rejects.toMatchObject({ code: "INVALID_DATASET" });
+  });
+
+  it("拒绝 Symbol、循环与稀疏数组 dataset", async () => {
+    const symbolBacked = structuredClone(snapshot);
+    Object.defineProperty(symbolBacked, Symbol("hidden"), { value: true, enumerable: true });
+    await expect(executeResearchQuery(createDefaultResearchQuery("events"), symbolBacked))
+      .rejects.toMatchObject({ code: "INVALID_DATASET" });
+
+    const circular = structuredClone(snapshot) as ResearchQuerySnapshot & { circular?: unknown };
+    circular.circular = circular;
+    await expect(executeResearchQuery(createDefaultResearchQuery("events"), circular))
+      .rejects.toMatchObject({ code: "INVALID_DATASET" });
+
+    const sparse = structuredClone(snapshot);
+    sparse.events = new Array<EventRecord>(1);
+    await expect(executeResearchQuery(createDefaultResearchQuery("events"), sparse))
+      .rejects.toMatchObject({ code: "INVALID_DATASET" });
   });
 
   it("事件中的正式运限节点引用必须按锁版 Revision 精确复算", async () => {

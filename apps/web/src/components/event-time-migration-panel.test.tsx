@@ -9,7 +9,12 @@ import {
   type EventTimeMigrationSnapshot
 } from "@hakimi/contracts";
 import { resolveEventTimeContext } from "@hakimi/time-core";
-import { EventTimeMigrationPanel, EventTimeMigrationRelations } from "./event-time-migration-panel";
+import {
+  EventTimeMigrationPanel,
+  EventTimeMigrationRelations,
+  type EventTimeMigrationReconciledResult,
+  type ReconcileEventTimeMigrationResult
+} from "./event-time-migration-panel";
 
 const caseId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 const revisionId = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
@@ -126,7 +131,10 @@ describe("EventTimeMigrationPanel", () => {
       startDate: "2025-11-02T01:30"
     });
     const originalSource = structuredClone(source);
-    const derive = vi.fn(async (interpretation: EventTimeMigrationInterpretation) => derivedResult(source, interpretation));
+    const derive = vi.fn(async (
+      interpretation: EventTimeMigrationInterpretation,
+      reconcile: ReconcileEventTimeMigrationResult
+    ) => reconcile(derivedResult(source, interpretation)));
     const onDerived = vi.fn();
 
     render(
@@ -178,7 +186,7 @@ describe("EventTimeMigrationPanel", () => {
       timeZone: "America/New_York",
       startDisambiguation: "later",
       endDisambiguation: null
-    });
+    }, expect.any(Function));
     expect(onDerived).toHaveBeenCalledTimes(1);
     expect(screen.getByText("新事件和时间迁移凭证已生成，旧事件未改写")).toBeTruthy();
     expect(screen.getAllByText(caseId).length).toBeGreaterThanOrEqual(2);
@@ -227,7 +235,10 @@ describe("EventTimeMigrationPanel", () => {
       precision: "day",
       startDate: "2022-06-18"
     });
-    const derive = vi.fn(async (interpretation: EventTimeMigrationInterpretation) => derivedResult(source, interpretation));
+    const derive = vi.fn(async (
+      interpretation: EventTimeMigrationInterpretation,
+      reconcile: ReconcileEventTimeMigrationResult
+    ) => reconcile(derivedResult(source, interpretation)));
 
     render(
       <EventTimeMigrationPanel
@@ -246,9 +257,9 @@ describe("EventTimeMigrationPanel", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: /保留旧事件并生成新 ID/ }));
     fireEvent.click(screen.getByRole("button", { name: "生成并列事件" }));
     await screen.findByText("新事件和时间迁移凭证已生成，旧事件未改写");
-    expect(derive).toHaveBeenCalledWith({ kind: "calendar_date" });
+    expect(derive).toHaveBeenCalledWith({ kind: "calendar_date" }, expect.any(Function));
     const result = await derive.mock.results[0].value;
-    expect(result.target.timeContext).toEqual({ kind: "calendar_date" });
+    expect(result.result.target.timeContext).toEqual({ kind: "calendar_date" });
   });
 
   it("只阻止完全相同解释，已有 earlier 时仍允许选择 later", async () => {
@@ -285,7 +296,77 @@ describe("EventTimeMigrationPanel", () => {
     expect((screen.getByRole("checkbox", { name: /保留旧事件并生成新 ID/ }) as HTMLInputElement).disabled).toBe(false);
   });
 
-  it("可从事件关系展开完整凭证并复核冻结谱系", () => {
+  it("未知提交会隐藏敏感诊断并锁定原地重试", async () => {
+    const source = legacyEvent({
+      id: "12121212-1212-4121-8121-121212121212",
+      precision: "day",
+      startDate: "2022-06-18"
+    });
+    const derive = vi.fn(async (_interpretation: EventTimeMigrationInterpretation) => {
+      throw new Error("Bearer abc123 C:\\private\\migration.json https://example.test/derive");
+    });
+    const onDerived = vi.fn();
+
+    render(
+      <EventTimeMigrationPanel
+        source={source}
+        defaultTimeZone="Asia/Shanghai"
+        existingReceipts={[]}
+        buildEventHref={eventHref}
+        derive={derive}
+        onDerived={onDerived}
+        onCancel={vi.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /保留旧事件并生成新 ID/ }));
+    fireEvent.click(screen.getByRole("button", { name: "生成并列事件" }));
+
+    expect(await screen.findByText("派生调用结果未知，禁止原地重试")).toBeTruthy();
+    expect(screen.getByText("提交结果待核对")).toBeTruthy();
+    expect(screen.getByText(/凭据已隐藏/)).toBeTruthy();
+    expect(screen.getByText(/本地路径已隐藏/)).toBeTruthy();
+    expect(screen.getByText(/链接已隐藏/)).toBeTruthy();
+    expect(screen.queryByText(/abc123/)).toBeNull();
+    expect(screen.queryByRole("button", { name: "生成并列事件" })).toBeNull();
+    expect(derive).toHaveBeenCalledTimes(1);
+    expect(onDerived).not.toHaveBeenCalled();
+  });
+
+  it("拒绝没有绑定本次提交后核对 token 的返回值", async () => {
+    const source = legacyEvent({
+      id: "34343434-3434-4343-8343-343434343434",
+      precision: "day",
+      startDate: "2022-06-18"
+    });
+    const derive = vi.fn(async (interpretation: EventTimeMigrationInterpretation) => (
+      derivedResult(source, interpretation) as unknown as EventTimeMigrationReconciledResult
+    ));
+    const onDerived = vi.fn();
+
+    render(
+      <EventTimeMigrationPanel
+        source={source}
+        defaultTimeZone="Asia/Shanghai"
+        existingReceipts={[]}
+        buildEventHref={eventHref}
+        derive={derive}
+        onDerived={onDerived}
+        onCancel={vi.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /保留旧事件并生成新 ID/ }));
+    fireEvent.click(screen.getByRole("button", { name: "生成并列事件" }));
+
+    expect(await screen.findByText("派生端口已返回，结果绑定尚未闭环")).toBeTruthy();
+    expect(screen.getByText(/没有绑定本次提交后核对握手/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "生成并列事件" })).toBeNull();
+    expect(derive).toHaveBeenCalledTimes(1);
+    expect(onDerived).not.toHaveBeenCalled();
+  });
+
+  it("可从事件关系展开完整凭证并复核冻结谱系", async () => {
     const source = legacyEvent({
       id: "99999999-9999-4999-8999-999999999999",
       precision: "day",
@@ -304,10 +385,15 @@ describe("EventTimeMigrationPanel", () => {
     const disclosure = screen.getByText("展开完整迁移凭证").closest("details");
     expect(disclosure).not.toBeNull();
     fireEvent.click(within(disclosure!).getByText("展开完整迁移凭证"));
-    expect(within(disclosure!).getAllByText(caseId)).toHaveLength(2);
+    await waitFor(() => expect(within(disclosure!).getAllByText(caseId)).toHaveLength(2));
     expect(within(disclosure!).getAllByText(revisionId)).toHaveLength(2);
     expect(within(disclosure!).getAllByText("namespace=future-transit-node")).toHaveLength(2);
     expect(within(disclosure!).getAllByText("nodeType=year")).toHaveLength(2);
     expect(within(disclosure!).getAllByText("nodeId=legacy-year-node-01")).toHaveLength(2);
+    const digestDisclosure = within(disclosure!).getByText("完整端点摘要").closest("details");
+    expect(digestDisclosure).not.toBeNull();
+    fireEvent.click(within(digestDisclosure!).getByText("完整端点摘要"));
+    expect(within(digestDisclosure!).getByText("a".repeat(64))).toBeTruthy();
+    expect(within(digestDisclosure!).getByText("b".repeat(64))).toBeTruthy();
   });
 });

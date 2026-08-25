@@ -42,6 +42,12 @@ export type CaseImportConfigurationErrorCode =
   | "INVALID_CHUNK_SIZE"
   | "INVALID_PARSE_CHARACTER_BUDGET"
   | "INVALID_TAG_SEPARATOR"
+  | "INVALID_OPTIONS"
+  | "INVALID_MAPPING"
+  | "UNKNOWN_MAPPING_FIELD"
+  | "INVALID_COLUMN_SELECTOR"
+  | "INVALID_DUPLICATE_POLICY"
+  | "INVALID_EXISTING_FINGERPRINT"
   | "ROW_LIMIT_EXCEEDED";
 
 export type CaseImportRowErrorCode =
@@ -324,6 +330,25 @@ export type CaseImportPlan = CaseImportIterationSummary & {
 };
 
 const REQUIRED_MAPPING_FIELDS = ["alias", "date", "timePrecision", "timeZone", "sex"] as const;
+const ALL_MAPPING_FIELDS = new Set<string>([
+  "alias",
+  "calendarType",
+  "date",
+  "time",
+  "timePrecision",
+  "timeZone",
+  "sex",
+  "lunarLeapMonth",
+  "locationLabel",
+  "latitude",
+  "longitude",
+  "locationPrecision",
+  "tags",
+  "sourceNote"
+]);
+const MAX_MAPPING_SELECTOR_CHARACTERS = 256;
+const MAX_EXISTING_FINGERPRINTS = 100_000;
+const VERSIONED_FINGERPRINT_PATTERN = /^[A-Za-z0-9@._-]{1,128}:[a-f0-9]{64}$/u;
 
 const ENUM_ALIASES = {
   calendarType: new Map<string, BirthInput["calendarType"]>([
@@ -612,8 +637,14 @@ export function createRfc4180CsvIncrementalParser(
   options: { maxRecords?: number; recordCharacterLimit?: number } = {}
 ): IncrementalRfc4180CsvParser {
   if (
+    options.maxRecords !== undefined &&
+    (!Number.isSafeInteger(options.maxRecords) || options.maxRecords < 0)
+  ) {
+    throw new RangeError("maxRecords 必须是大于等于 0 的安全整数");
+  }
+  if (
     options.recordCharacterLimit !== undefined
-    && (!Number.isInteger(options.recordCharacterLimit) || options.recordCharacterLimit < 0)
+    && (!Number.isSafeInteger(options.recordCharacterLimit) || options.recordCharacterLimit < 0)
   ) {
     throw new RangeError("recordCharacterLimit 必须是大于等于 0 的整数");
   }
@@ -635,6 +666,7 @@ export function parseRfc4180Csv(
   source: string,
   options: { maxRecords?: number; recordCharacterLimit?: number } = {}
 ): ParsedCsv {
+  if (typeof source !== "string") throw new TypeError("CSV Source 必须是字符串");
   const parser = createRfc4180CsvIncrementalParser(options);
   parser.write(source);
   return parser.finish();
@@ -663,8 +695,9 @@ export async function parseRfc4180CsvAsync(
   source: string,
   options: AsyncCsvParseOptions = {}
 ): Promise<ParsedCsv> {
+  if (typeof source !== "string") throw new TypeError("CSV Source 必须是字符串");
   const characterBudget = options.characterBudget ?? DEFAULT_CSV_PARSE_CHARACTER_BUDGET;
-  if (!Number.isInteger(characterBudget) || characterBudget < 1) {
+  if (!Number.isSafeInteger(characterBudget) || characterBudget < 1) {
     throw new RangeError("characterBudget 必须是大于 0 的整数");
   }
   throwIfAborted(options.signal);
@@ -702,18 +735,18 @@ export async function* iterateRfc4180CsvRecords(
   options: AsyncCsvRecordIteratorOptions = {}
 ): AsyncGenerator<ParsedCsvRecord, CsvParseProgress, void> {
   const characterBudget = options.characterBudget ?? DEFAULT_CSV_PARSE_CHARACTER_BUDGET;
-  if (!Number.isInteger(characterBudget) || characterBudget < 1) {
+  if (!Number.isSafeInteger(characterBudget) || characterBudget < 1) {
     throw new RangeError("characterBudget 必须是大于 0 的整数");
   }
   if (
     options.firstRecordCharacterLimit !== undefined
-    && (!Number.isInteger(options.firstRecordCharacterLimit) || options.firstRecordCharacterLimit < 0)
+    && (!Number.isSafeInteger(options.firstRecordCharacterLimit) || options.firstRecordCharacterLimit < 0)
   ) {
     throw new RangeError("firstRecordCharacterLimit 必须是大于等于 0 的整数");
   }
   if (
     options.recordCharacterLimit !== undefined
-    && (!Number.isInteger(options.recordCharacterLimit) || options.recordCharacterLimit < 0)
+    && (!Number.isSafeInteger(options.recordCharacterLimit) || options.recordCharacterLimit < 0)
   ) {
     throw new RangeError("recordCharacterLimit 必须是大于等于 0 的整数");
   }
@@ -722,7 +755,7 @@ export async function* iterateRfc4180CsvRecords(
   const knownTotalCharacters = sourceIsString ? source.length : options.totalCharacters;
   if (
     knownTotalCharacters !== undefined
-    && (!Number.isInteger(knownTotalCharacters) || knownTotalCharacters < 0)
+    && (!Number.isSafeInteger(knownTotalCharacters) || knownTotalCharacters < 0)
   ) {
     throw new RangeError("totalCharacters 必须是大于等于 0 的整数");
   }
@@ -747,6 +780,7 @@ export async function* iterateRfc4180CsvRecords(
 
   const chunks = typeof source === "string" ? [source] : source;
   for await (const chunk of chunks) {
+    if (typeof chunk !== "string") throw new TypeError("CSV 字符流只能产生字符串块");
     let chunkOffset = 0;
     while (chunkOffset < chunk.length) {
       throwIfAborted(options.signal);
@@ -833,10 +867,13 @@ function throwSourceConfigurationIssue(
 }
 
 function validateRepeatableCsvSource(source: RepeatableDecodedCsvSource): void {
+  if (!source || typeof source !== "object" || typeof source.open !== "function") {
+    throwSourceConfigurationIssue("CSV_SOURCE_PROGRESS_INVALID", "CSV Source 必须实现可重复打开协议");
+  }
   if (source.unit !== "utf8_bytes" && source.unit !== "utf16_code_units") {
     throwSourceConfigurationIssue("CSV_SOURCE_PROGRESS_INVALID", "CSV Source 的进度单位无效");
   }
-  if (!Number.isInteger(source.totalUnits) || source.totalUnits < 0) {
+  if (!Number.isSafeInteger(source.totalUnits) || source.totalUnits < 0) {
     throwSourceConfigurationIssue(
       "CSV_SOURCE_TOTAL_INVALID",
       "CSV Source 的 totalUnits 必须是大于等于 0 的整数"
@@ -865,7 +902,8 @@ export function createStringCsvSource(
   source: string,
   chunkCharacters = DEFAULT_CSV_PARSE_CHARACTER_BUDGET
 ): RepeatableDecodedCsvSource {
-  if (!Number.isInteger(chunkCharacters) || chunkCharacters < 1) {
+  if (typeof source !== "string") throw new TypeError("CSV Source 必须是字符串");
+  if (!Number.isSafeInteger(chunkCharacters) || chunkCharacters < 1) {
     throw new RangeError("chunkCharacters 必须是大于 0 的整数");
   }
   return {
@@ -1043,6 +1081,7 @@ export async function readCaseImportHeadersFromSource(
  * remain valid and do not terminate the scan early.
  */
 export function readCaseImportHeaders(source: string): string[] {
+  if (typeof source !== "string") throw new TypeError("CSV Source 必须是字符串");
   const input = source.charCodeAt(0) === 0xfeff ? source.slice(1) : source;
   let inQuotes = false;
   let atCellStart = true;
@@ -1107,12 +1146,21 @@ type PreparedImport = {
 };
 
 function validateCaseImportOptions(options: CaseImportOptions): void {
+  if (!options || typeof options !== "object") {
+    throw new CaseImportConfigurationError([{
+      code: "INVALID_OPTIONS",
+      message: "案例导入选项必须是对象"
+    }]);
+  }
   const configurationIssues: CaseImportConfigurationIssue[] = [];
-  if (!Number.isInteger(options.chunkSize ?? 100) || (options.chunkSize ?? 100) < 1) {
+  if (!options.mapping || typeof options.mapping !== "object" || Array.isArray(options.mapping)) {
+    configurationIssues.push({ code: "INVALID_MAPPING", message: "案例导入必须提供字段映射对象" });
+  }
+  if (!Number.isSafeInteger(options.chunkSize ?? 100) || (options.chunkSize ?? 100) < 1) {
     configurationIssues.push({ code: "INVALID_CHUNK_SIZE", message: "chunkSize 必须是大于 0 的整数" });
   }
   if (
-    !Number.isInteger(options.parseCharacterBudget ?? DEFAULT_CSV_PARSE_CHARACTER_BUDGET)
+    !Number.isSafeInteger(options.parseCharacterBudget ?? DEFAULT_CSV_PARSE_CHARACTER_BUDGET)
     || (options.parseCharacterBudget ?? DEFAULT_CSV_PARSE_CHARACTER_BUDGET) < 1
   ) {
     configurationIssues.push({
@@ -1120,8 +1168,45 @@ function validateCaseImportOptions(options: CaseImportOptions): void {
       message: "parseCharacterBudget 必须是大于 0 的整数"
     });
   }
-  if ((options.tagSeparator ?? "|").length === 0) {
+  const tagSeparator = options.tagSeparator ?? "|";
+  if (
+    typeof tagSeparator !== "string" ||
+    tagSeparator.length === 0 ||
+    Array.from(tagSeparator).length > 16
+  ) {
     configurationIssues.push({ code: "INVALID_TAG_SEPARATOR", field: "tags", message: "标签分隔符不能为空" });
+  }
+  if (
+    options.duplicatePolicy !== undefined &&
+    options.duplicatePolicy !== "skip" &&
+    options.duplicatePolicy !== "import_copy" &&
+    options.duplicatePolicy !== "error"
+  ) {
+    configurationIssues.push({ code: "INVALID_DUPLICATE_POLICY", message: "重复策略必须是 skip、import_copy 或 error" });
+  }
+  if (
+    options.existingFingerprints !== undefined &&
+    (typeof options.existingFingerprints !== "object" ||
+      options.existingFingerprints === null ||
+      typeof options.existingFingerprints[Symbol.iterator] !== "function")
+  ) {
+    configurationIssues.push({ code: "INVALID_EXISTING_FINGERPRINT", message: "已有指纹集合必须可迭代" });
+  }
+  for (const [name, callback] of [
+    ["onProgress", options.onProgress],
+    ["onParseProgress", options.onParseProgress],
+    ["onSourceProgress", options.onSourceProgress],
+    ["yieldControl", options.yieldControl]
+  ] as const) {
+    if (callback !== undefined && typeof callback !== "function") {
+      configurationIssues.push({ code: "INVALID_OPTIONS", message: `${name} 必须是函数` });
+    }
+  }
+  if (
+    options.signal !== undefined &&
+    (!options.signal || typeof options.signal !== "object" || typeof options.signal.aborted !== "boolean")
+  ) {
+    configurationIssues.push({ code: "INVALID_OPTIONS", message: "案例导入取消信号无效" });
   }
   if (configurationIssues.length > 0) throw new CaseImportConfigurationError(configurationIssues);
 }
@@ -1140,7 +1225,15 @@ function prepareImportFromHeaders(headers: string[], options: CaseImportOptions)
   }
 
   const resolved: Partial<Record<CaseImportField, number>> = {};
-  for (const [field, selector] of Object.entries(rawMapping) as Array<[CaseImportField, CsvColumnSelector | undefined]>) {
+  for (const [rawField, selector] of Object.entries(rawMapping)) {
+    if (!ALL_MAPPING_FIELDS.has(rawField)) {
+      configurationIssues.push({
+        code: "UNKNOWN_MAPPING_FIELD",
+        message: `未知字段映射：${rawField}`
+      });
+      continue;
+    }
+    const field = rawField as CaseImportField;
     if (selector === undefined) continue;
     if (typeof selector === "number") {
       if (!Number.isInteger(selector) || selector < 0 || selector >= headers.length) {
@@ -1153,6 +1246,20 @@ function prepareImportFromHeaders(headers: string[], options: CaseImportOptions)
       } else {
         resolved[field] = selector;
       }
+      continue;
+    }
+
+    if (
+      typeof selector !== "string" ||
+      selector.length === 0 ||
+      Array.from(selector).length > MAX_MAPPING_SELECTOR_CHARACTERS ||
+      /[\p{Cc}\p{Cf}]/u.test(selector)
+    ) {
+      configurationIssues.push({
+        code: "INVALID_COLUMN_SELECTOR",
+        field,
+        message: `${field} 的列选择器无效`
+      });
       continue;
     }
 
@@ -1532,6 +1639,35 @@ function throwIfAborted(signal: AbortSignal | undefined): void {
   if (signal?.aborted) throw new CaseImportCancelledError();
 }
 
+function collectExistingFingerprints(values: Iterable<string> | undefined): Set<string> {
+  const fingerprints = new Set<string>();
+  if (values === undefined) return fingerprints;
+  try {
+    for (const value of values) {
+      if (typeof value !== "string" || !VERSIONED_FINGERPRINT_PATTERN.test(value)) {
+        throw new CaseImportConfigurationError([{
+          code: "INVALID_EXISTING_FINGERPRINT",
+          message: "已有出生指纹不是规范版本化 SHA-256"
+        }]);
+      }
+      fingerprints.add(value);
+      if (fingerprints.size > MAX_EXISTING_FINGERPRINTS) {
+        throw new CaseImportConfigurationError([{
+          code: "INVALID_EXISTING_FINGERPRINT",
+          message: `已有出生指纹不能超过 ${MAX_EXISTING_FINGERPRINTS} 条`
+        }]);
+      }
+    }
+  } catch (cause) {
+    if (cause instanceof CaseImportConfigurationError) throw cause;
+    throw new CaseImportConfigurationError([{
+      code: "INVALID_EXISTING_FINGERPRINT",
+      message: "已有出生指纹集合无法读取"
+    }]);
+  }
+  return fingerprints;
+}
+
 async function defaultYieldControl(): Promise<void> {
   await new Promise<void>((resolve) => globalThis.setTimeout(resolve, 0));
 }
@@ -1561,7 +1697,7 @@ export async function* iterateCaseImportFromSource(
   const { prepared, counts, headerRecord } = firstPass;
   throwIfAborted(options.signal);
   const duplicatePolicy = options.duplicatePolicy ?? "skip";
-  const existing = new Set(options.existingFingerprints ?? []);
+  const existing = collectExistingFingerprints(options.existingFingerprints);
   const seenInCsv = new Set<string>();
   const chunkSize = options.chunkSize ?? 100;
   const tagSeparator = options.tagSeparator ?? "|";

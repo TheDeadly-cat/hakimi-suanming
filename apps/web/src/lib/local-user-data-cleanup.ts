@@ -12,6 +12,12 @@ export const CONTROLLED_WINDOW_DRAFT_CLEANUP_ACK =
 export const CONTROLLED_WINDOW_DRAFT_CLEANUP_RESULT =
   "CLEAR_RESEARCH_QUERY_SESSION_DRAFTS_ACROSS_CLIENTS_ACK" as const;
 
+const MAX_PROTOCOL_TOKEN_CHARACTERS = 128;
+const MAX_CONTROLLED_CLIENT_COUNT = 1_024;
+const MAX_DRAFT_COUNT = 1_000_000;
+const DEFAULT_CLEANUP_TIMEOUT_MS = 8_000;
+const MAX_CLEANUP_TIMEOUT_MS = 60_000;
+
 type SessionStorageCleanupTarget = Pick<Storage, "length" | "key" | "removeItem">;
 
 type ServiceWorkerMessageTarget = {
@@ -44,8 +50,52 @@ export type ControlledWindowDraftCleanupResult = {
   currentWindowFallback?: ResearchQueryDraftCleanupResult;
 };
 
-function nonNegativeInteger(value: unknown): value is number {
-  return Number.isSafeInteger(value) && Number(value) >= 0;
+function protocolToken(value: unknown): value is string {
+  return typeof value === "string" &&
+    value.length > 0 &&
+    value.length <= MAX_PROTOCOL_TOKEN_CHARACTERS &&
+    /^[A-Za-z0-9][A-Za-z0-9_.:-]*$/u.test(value);
+}
+
+function nonNegativeInteger(value: unknown, maximum = MAX_DRAFT_COUNT): value is number {
+  return Number.isSafeInteger(value) && Number(value) >= 0 && Number(value) <= maximum;
+}
+
+function cleanupTimeout(timeoutMs: unknown): number {
+  return Number.isSafeInteger(timeoutMs) &&
+    Number(timeoutMs) > 0 &&
+    Number(timeoutMs) <= MAX_CLEANUP_TIMEOUT_MS
+    ? Number(timeoutMs)
+    : DEFAULT_CLEANUP_TIMEOUT_MS;
+}
+
+function freezeControlledWindowResult(
+  result: ControlledWindowDraftCleanupResult,
+): ControlledWindowDraftCleanupResult {
+  const failedClients = Object.freeze(result.failedClients.map((failure) => Object.freeze({ ...failure })))
+    as unknown as ControlledWindowDraftCleanupFailure[];
+  return Object.freeze({
+    ...result,
+    failedClients,
+    ...(result.currentWindowFallback
+      ? { currentWindowFallback: Object.freeze({ ...result.currentWindowFallback }) }
+      : {}),
+  });
+}
+
+function failedCurrentWindowResult(reason: string): ControlledWindowDraftCleanupResult {
+  return freezeControlledWindowResult({
+    mode: "current_window_only",
+    complete: false,
+    reason,
+    requestedClientCount: 1,
+    acknowledgedClientCount: 0,
+    clearedClientCount: 0,
+    matchedDraftCount: 0,
+    removedDraftCount: 0,
+    failedDraftCount: 0,
+    failedClients: [{ clientId: "current-window", reason: "SESSION_STORAGE_CLEANUP_FAILED" }],
+  });
 }
 
 function currentWindowOnlyResult(
@@ -55,7 +105,7 @@ function currentWindowOnlyResult(
   try {
     const cleanup = clearResearchQueryDrafts(storage);
     const localComplete = cleanup.failedDraftCount === 0;
-    return {
+    return freezeControlledWindowResult({
       mode: "current_window_only",
       complete: false,
       reason,
@@ -66,20 +116,9 @@ function currentWindowOnlyResult(
       failedClients: localComplete
         ? []
         : [{ clientId: "current-window", reason: "SESSION_STORAGE_CLEANUP_PARTIAL" }],
-    };
+    });
   } catch {
-    return {
-      mode: "current_window_only",
-      complete: false,
-      reason,
-      requestedClientCount: 1,
-      acknowledgedClientCount: 0,
-      clearedClientCount: 0,
-      matchedDraftCount: 0,
-      removedDraftCount: 0,
-      failedDraftCount: 0,
-      failedClients: [{ clientId: "current-window", reason: "SESSION_STORAGE_CLEANUP_FAILED" }],
-    };
+    return failedCurrentWindowResult(reason);
   }
 }
 
@@ -87,66 +126,92 @@ function parseControlledWindowCleanupResult(
   value: unknown,
   requestId: string,
 ): ControlledWindowDraftCleanupResult | null {
-  if (!value || typeof value !== "object") return null;
-  const acknowledgement = value as Record<string, unknown>;
-  if (
-    acknowledgement.type !== CONTROLLED_WINDOW_DRAFT_CLEANUP_RESULT ||
-    acknowledgement.requestId !== requestId ||
-    typeof acknowledgement.accepted !== "boolean" ||
-    typeof acknowledgement.reason !== "string" ||
-    !nonNegativeInteger(acknowledgement.requestedClientCount) ||
-    !nonNegativeInteger(acknowledgement.acknowledgedClientCount) ||
-    !nonNegativeInteger(acknowledgement.clearedClientCount) ||
-    !nonNegativeInteger(acknowledgement.matchedDraftCount) ||
-    !nonNegativeInteger(acknowledgement.removedDraftCount) ||
-    !nonNegativeInteger(acknowledgement.failedDraftCount) ||
-    !Array.isArray(acknowledgement.failedClients)
-  ) return null;
-
-  const failedClients: ControlledWindowDraftCleanupFailure[] = [];
-  for (const candidate of acknowledgement.failedClients) {
+  try {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+    const acknowledgement = value as Record<string, unknown>;
     if (
-      !candidate ||
-      typeof candidate !== "object" ||
-      typeof (candidate as Record<string, unknown>).clientId !== "string" ||
-      typeof (candidate as Record<string, unknown>).reason !== "string"
+      acknowledgement.type !== CONTROLLED_WINDOW_DRAFT_CLEANUP_RESULT ||
+      acknowledgement.requestId !== requestId ||
+      typeof acknowledgement.accepted !== "boolean" ||
+      !protocolToken(acknowledgement.reason) ||
+      !nonNegativeInteger(acknowledgement.requestedClientCount, MAX_CONTROLLED_CLIENT_COUNT) ||
+      !nonNegativeInteger(acknowledgement.acknowledgedClientCount, MAX_CONTROLLED_CLIENT_COUNT) ||
+      !nonNegativeInteger(acknowledgement.clearedClientCount, MAX_CONTROLLED_CLIENT_COUNT) ||
+      !nonNegativeInteger(acknowledgement.matchedDraftCount) ||
+      !nonNegativeInteger(acknowledgement.removedDraftCount) ||
+      !nonNegativeInteger(acknowledgement.failedDraftCount) ||
+      !Array.isArray(acknowledgement.failedClients) ||
+      acknowledgement.failedClients.length > MAX_CONTROLLED_CLIENT_COUNT
     ) return null;
-    failedClients.push({
-      clientId: (candidate as Record<string, string>).clientId,
-      reason: (candidate as Record<string, string>).reason,
+
+    const failedClients: ControlledWindowDraftCleanupFailure[] = [];
+    const failedClientIds = new Set<string>();
+    for (const candidate of acknowledgement.failedClients) {
+      const failure = candidate as Record<string, unknown>;
+      if (
+        !candidate ||
+        typeof candidate !== "object" ||
+        Array.isArray(candidate) ||
+        !protocolToken(failure.clientId) ||
+        failedClientIds.has(failure.clientId) ||
+        !protocolToken(failure.reason)
+      ) return null;
+      failedClientIds.add(failure.clientId);
+      failedClients.push({
+        clientId: failure.clientId,
+        reason: failure.reason,
+      });
+    }
+
+    const requestedClientCount = Number(acknowledgement.requestedClientCount);
+    const acknowledgedClientCount = Number(acknowledgement.acknowledgedClientCount);
+    const clearedClientCount = Number(acknowledgement.clearedClientCount);
+    const matchedDraftCount = Number(acknowledgement.matchedDraftCount);
+    const removedDraftCount = Number(acknowledgement.removedDraftCount);
+    const failedDraftCount = Number(acknowledgement.failedDraftCount);
+    if (
+      requestedClientCount === 0 ||
+      acknowledgedClientCount > requestedClientCount ||
+      clearedClientCount > acknowledgedClientCount ||
+      removedDraftCount + failedDraftCount !== matchedDraftCount ||
+      failedClients.length !== requestedClientCount - clearedClientCount ||
+      (acknowledgement.accepted === true && (
+        acknowledgedClientCount !== requestedClientCount ||
+        clearedClientCount !== requestedClientCount ||
+        failedClients.length !== 0 ||
+        failedDraftCount !== 0
+      ))
+    ) return null;
+
+    return freezeControlledWindowResult({
+      mode: "controlled_windows",
+      complete: acknowledgement.accepted === true,
+      reason: acknowledgement.reason,
+      requestedClientCount,
+      acknowledgedClientCount,
+      clearedClientCount,
+      matchedDraftCount,
+      removedDraftCount,
+      failedDraftCount,
+      failedClients,
     });
+  } catch {
+    return null;
   }
+}
 
-  const requestedClientCount = Number(acknowledgement.requestedClientCount);
-  const acknowledgedClientCount = Number(acknowledgement.acknowledgedClientCount);
-  const clearedClientCount = Number(acknowledgement.clearedClientCount);
-  const matchedDraftCount = Number(acknowledgement.matchedDraftCount);
-  const removedDraftCount = Number(acknowledgement.removedDraftCount);
-  const failedDraftCount = Number(acknowledgement.failedDraftCount);
-  if (
-    acknowledgedClientCount > requestedClientCount ||
-    clearedClientCount > acknowledgedClientCount ||
-    removedDraftCount + failedDraftCount !== matchedDraftCount ||
-    failedClients.length !== requestedClientCount - clearedClientCount ||
-    (acknowledgement.accepted === true && (
-      clearedClientCount !== requestedClientCount ||
-      failedClients.length !== 0 ||
-      failedDraftCount !== 0
-    ))
-  ) return null;
-
-  return {
-    mode: "controlled_windows",
-    complete: acknowledgement.accepted === true,
-    reason: acknowledgement.reason,
-    requestedClientCount,
-    acknowledgedClientCount,
-    clearedClientCount,
-    matchedDraftCount,
-    removedDraftCount,
-    failedDraftCount,
-    failedClients,
-  };
+function postCleanupAcknowledgement(port: MessagePort, message: unknown): void {
+  try {
+    port.postMessage(message);
+  } catch {
+    // A response failure cannot be repaired locally and must not become a
+    // window-level startup error.
+  }
+  try {
+    port.close();
+  } catch {
+    // The service worker timeout remains the remote authoritative fallback.
+  }
 }
 
 export function installControlledWindowDraftCleanupHandler(
@@ -154,27 +219,28 @@ export function installControlledWindowDraftCleanupHandler(
   storage: SessionStorageCleanupTarget = window.sessionStorage,
 ): () => void {
   const listener: EventListener = (rawEvent) => {
-    const event = rawEvent as MessageEvent<Record<string, unknown>>;
-    if (event.data?.type !== CONTROLLED_WINDOW_DRAFT_CLEANUP_REQUEST) return;
-    const responsePort = event.ports?.[0];
-    if (!responsePort) return;
-    const requestId = event.data.requestId;
-    if (typeof requestId !== "string" || requestId.length === 0) {
-      responsePort.postMessage({
-        type: CONTROLLED_WINDOW_DRAFT_CLEANUP_ACK,
-        requestId: typeof requestId === "string" ? requestId : "",
-        accepted: false,
-        reason: "PROTOCOL_MISMATCH",
-        matchedDraftCount: 0,
-        removedDraftCount: 0,
-        failedDraftCount: 0,
-      });
-      return;
-    }
-
+    let responsePort: MessagePort | undefined;
+    let requestId = "";
     try {
+      const event = rawEvent as MessageEvent<Record<string, unknown>>;
+      if (event.data?.type !== CONTROLLED_WINDOW_DRAFT_CLEANUP_REQUEST) return;
+      responsePort = event.ports?.[0];
+      if (!responsePort) return;
+      requestId = protocolToken(event.data.requestId) ? event.data.requestId : "";
+      if (!requestId) {
+        postCleanupAcknowledgement(responsePort, {
+          type: CONTROLLED_WINDOW_DRAFT_CLEANUP_ACK,
+          requestId: "",
+          accepted: false,
+          reason: "PROTOCOL_MISMATCH",
+          matchedDraftCount: 0,
+          removedDraftCount: 0,
+          failedDraftCount: 0,
+        });
+        return;
+      }
       const cleanup: ResearchQueryDraftCleanupResult = clearResearchQueryDrafts(storage);
-      responsePort.postMessage({
+      postCleanupAcknowledgement(responsePort, {
         type: CONTROLLED_WINDOW_DRAFT_CLEANUP_ACK,
         requestId,
         accepted: cleanup.failedDraftCount === 0,
@@ -182,7 +248,8 @@ export function installControlledWindowDraftCleanupHandler(
         ...cleanup,
       });
     } catch {
-      responsePort.postMessage({
+      if (!responsePort) return;
+      postCleanupAcknowledgement(responsePort, {
         type: CONTROLLED_WINDOW_DRAFT_CLEANUP_ACK,
         requestId,
         accepted: false,
@@ -194,7 +261,13 @@ export function installControlledWindowDraftCleanupHandler(
     }
   };
   target.addEventListener("message", listener);
-  return () => target.removeEventListener("message", listener);
+  return () => {
+    try {
+      target.removeEventListener("message", listener);
+    } catch {
+      // Listener teardown is best effort during page disposal.
+    }
+  };
 }
 
 export async function clearControlledWindowResearchQueryDrafts(options: {
@@ -204,58 +277,115 @@ export async function clearControlledWindowResearchQueryDrafts(options: {
   requestId?: string;
   createMessageChannel?: () => MessageChannel;
 } = {}): Promise<ControlledWindowDraftCleanupResult> {
-  const storage = options.storage ?? window.sessionStorage;
-  const serviceWorker = options.serviceWorker ?? (
-    typeof navigator !== "undefined" && "serviceWorker" in navigator
-      ? navigator.serviceWorker
-      : null
-  );
-  const controller = serviceWorker?.controller;
+  let storage: SessionStorageCleanupTarget;
+  try {
+    storage = options?.storage ?? window.sessionStorage;
+  } catch {
+    return failedCurrentWindowResult("SESSION_STORAGE_UNAVAILABLE");
+  }
+  let serviceWorker: ServiceWorkerControllerTarget | null;
+  try {
+    serviceWorker = options?.serviceWorker ?? (
+      typeof navigator !== "undefined" && "serviceWorker" in navigator
+        ? navigator.serviceWorker
+        : null
+    );
+  } catch {
+    return currentWindowOnlyResult("SERVICE_WORKER_UNAVAILABLE", storage);
+  }
+  let controller: ServiceWorkerControllerTarget["controller"];
+  try {
+    controller = serviceWorker?.controller ?? null;
+  } catch {
+    return currentWindowOnlyResult("SERVICE_WORKER_CONTROLLER_UNREADABLE", storage);
+  }
   if (!controller) return currentWindowOnlyResult("NO_SERVICE_WORKER_CONTROLLER", storage);
 
-  const requestId = options.requestId ?? crypto.randomUUID();
-  const createMessageChannel = options.createMessageChannel ?? (() => new MessageChannel());
+  let requestId: string | undefined;
+  let createMessageChannel: (() => MessageChannel) | undefined;
+  let timeoutMs: unknown;
+  try {
+    requestId = options?.requestId;
+    createMessageChannel = options?.createMessageChannel;
+    timeoutMs = options?.timeoutMs;
+  } catch {
+    return currentWindowOnlyResult("CLEANUP_OPTIONS_UNREADABLE", storage);
+  }
+  if (requestId === undefined) {
+    try {
+      requestId = globalThis.crypto?.randomUUID?.();
+    } catch {
+      return currentWindowOnlyResult("REQUEST_ID_UNAVAILABLE", storage);
+    }
+    if (requestId === undefined) {
+      return currentWindowOnlyResult("REQUEST_ID_UNAVAILABLE", storage);
+    }
+  }
+  if (!protocolToken(requestId)) {
+    return currentWindowOnlyResult("INVALID_CLEANUP_REQUEST_ID", storage);
+  }
+  if (createMessageChannel !== undefined && typeof createMessageChannel !== "function") {
+    return currentWindowOnlyResult("MESSAGE_CHANNEL_UNAVAILABLE", storage);
+  }
+  const createChannel = createMessageChannel ?? (() => new MessageChannel());
   let channel: MessageChannel;
   try {
-    channel = createMessageChannel();
+    channel = createChannel();
+    if (!channel?.port1 || !channel.port2) throw new TypeError("Invalid MessageChannel");
   } catch {
     return currentWindowOnlyResult("MESSAGE_CHANNEL_UNAVAILABLE", storage);
   }
 
   return new Promise((resolve) => {
     let settled = false;
+    let timeout: ReturnType<typeof setTimeout> | null = null;
     const finish = (result: ControlledWindowDraftCleanupResult) => {
       if (settled) return;
       settled = true;
-      window.clearTimeout(timeout);
-      channel.port1.close();
-      resolve(result);
-    };
-    const timeout = window.setTimeout(() => {
-      finish(currentWindowOnlyResult("SERVICE_WORKER_CLEANUP_TIMEOUT", storage));
-    }, options.timeoutMs ?? 8_000);
-    channel.port1.onmessage = (event: MessageEvent<unknown>) => {
-      const parsed = parseControlledWindowCleanupResult(event.data, requestId);
-      if (!parsed) {
-        finish(currentWindowOnlyResult("INVALID_SERVICE_WORKER_ACK", storage));
-        return;
+      if (timeout !== null) globalThis.clearTimeout(timeout);
+      for (const port of [channel.port1, channel.port2]) {
+        try {
+          port.onmessage = null;
+          port.onmessageerror = null;
+        } catch {
+          // Continue closing both channel endpoints.
+        }
+        try {
+          port.close();
+        } catch {
+          // A transferred or already-closed port must not prevent completion.
+        }
       }
-      if (parsed.complete) {
-        finish(parsed);
-        return;
-      }
-      const localFallback = currentWindowOnlyResult("INCOMPLETE_SERVICE_WORKER_ACK", storage);
-      finish({
-        ...parsed,
-        currentWindowFallback: {
-          matchedDraftCount: localFallback.matchedDraftCount,
-          removedDraftCount: localFallback.removedDraftCount,
-          failedDraftCount: localFallback.failedDraftCount,
-        },
-      });
+      resolve(freezeControlledWindowResult(result));
     };
-    channel.port1.start?.();
     try {
+      timeout = globalThis.setTimeout(() => {
+        finish(currentWindowOnlyResult("SERVICE_WORKER_CLEANUP_TIMEOUT", storage));
+      }, cleanupTimeout(timeoutMs));
+      channel.port1.onmessage = (event: MessageEvent<unknown>) => {
+        const parsed = parseControlledWindowCleanupResult(event.data, requestId);
+        if (!parsed) {
+          finish(currentWindowOnlyResult("INVALID_SERVICE_WORKER_ACK", storage));
+          return;
+        }
+        if (parsed.complete) {
+          finish(parsed);
+          return;
+        }
+        const localFallback = currentWindowOnlyResult("INCOMPLETE_SERVICE_WORKER_ACK", storage);
+        finish(freezeControlledWindowResult({
+          ...parsed,
+          currentWindowFallback: {
+            matchedDraftCount: localFallback.matchedDraftCount,
+            removedDraftCount: localFallback.removedDraftCount,
+            failedDraftCount: localFallback.failedDraftCount,
+          },
+        }));
+      };
+      channel.port1.onmessageerror = () => {
+        finish(currentWindowOnlyResult("SERVICE_WORKER_ACK_UNREADABLE", storage));
+      };
+      channel.port1.start();
       controller.postMessage({
         type: REQUEST_CONTROLLED_WINDOW_DRAFT_CLEANUP,
         requestId,

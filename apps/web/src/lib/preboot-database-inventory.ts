@@ -3,6 +3,8 @@ import type { ReleaseDatabaseDescriptor } from "../../release-protocol";
 export const RELEASE_CONTROL_DATABASE_NAME = "hakimi-bazi-release-control";
 export const LEGACY_V13_NATIVE_VERSION = 130;
 export const RESEARCH_GENERATION_DATABASE_PREFIX = "hakimi-bazi-research.generation.";
+const MAX_DATABASE_NAME_CHARACTERS = 512;
+const PREBOOT_PROBE_TIMEOUT_MS = 5_000;
 
 /**
  * Frozen physical Dexie v13 contract. This module intentionally does not import
@@ -85,6 +87,46 @@ export class PrebootDatabaseInventoryError extends Error {
     super(message);
     this.name = "PrebootDatabaseInventoryError";
   }
+}
+
+function canonicalDatabaseName(value: unknown): value is string {
+  return typeof value === "string" &&
+    value.length > 0 &&
+    value.trim() === value &&
+    Array.from(value).length <= MAX_DATABASE_NAME_CHARACTERS &&
+    !/[\p{Cc}\p{Cf}]/u.test(value);
+}
+
+function requireCanonicalDatabaseName(value: unknown): string {
+  if (!canonicalDatabaseName(value)) {
+    throw new PrebootDatabaseInventoryError(
+      "SOURCE_NAME_INVALID",
+      "The v13 source database name is not a bounded canonical string."
+    );
+  }
+  return value;
+}
+
+function withPrebootProbeTimeout<Value>(
+  operation: Promise<Value>,
+  code: string,
+  message: string
+): Promise<Value> {
+  return new Promise((resolve, reject) => {
+    const timeout = globalThis.setTimeout(() => {
+      reject(new PrebootDatabaseInventoryError(code, message));
+    }, PREBOOT_PROBE_TIMEOUT_MS);
+    operation.then(
+      (value) => {
+        globalThis.clearTimeout(timeout);
+        resolve(value);
+      },
+      (reason) => {
+        globalThis.clearTimeout(timeout);
+        reject(reason);
+      }
+    );
+  });
 }
 
 function normalizeKeyPath(keyPath: string | string[] | null): string | readonly string[] | null {
@@ -236,19 +278,37 @@ function sanitizedRelevantInventory(
         name.startsWith(RESEARCH_GENERATION_DATABASE_PREFIX)
       )
     ) return [];
+    if (!canonicalDatabaseName(name)) {
+      throw new PrebootDatabaseInventoryError(
+        "INVENTORY_NAME_INVALID",
+        "A related database has an unsafe or non-canonical name."
+      );
+    }
     return [{
       name,
-      version: typeof database.version === "number" && Number.isSafeInteger(database.version)
+      version: typeof database.version === "number" &&
+        Number.isSafeInteger(database.version) &&
+        database.version > 0
         ? database.version
         : null
     }];
-  }).sort((left, right) => left.name.localeCompare(right.name));
+  }).sort((left, right) => left.name < right.name ? -1 : left.name > right.name ? 1 : 0);
+}
+
+function inventoryHasDuplicateNames(inventory: readonly SanitizedDatabaseInventoryEntry[]): boolean {
+  const names = new Set<string>();
+  for (const database of inventory) {
+    if (names.has(database.name)) return true;
+    names.add(database.name);
+  }
+  return false;
 }
 
 export async function openVerifiedExistingV13Database(
   sourceDatabaseName: string,
   runtime: PrebootInventoryRuntime = {}
 ): Promise<VerifiedV13NativeDatabase> {
+  const canonicalSourceDatabaseName = requireCanonicalDatabaseName(sourceDatabaseName);
   const factory = browserIndexedDB(runtime);
   if (!factory) {
     throw new PrebootDatabaseInventoryError(
@@ -257,15 +317,35 @@ export async function openVerifiedExistingV13Database(
     );
   }
   return new Promise((resolve, reject) => {
-    const request = factory.open(sourceDatabaseName);
+    let request: IDBOpenDBRequest;
+    try {
+      request = factory.open(canonicalSourceDatabaseName);
+    } catch {
+      reject(new PrebootDatabaseInventoryError(
+        "SOURCE_OPEN_FAILED",
+        "The v13 source could not be opened for a read-only structure probe."
+      ));
+      return;
+    }
     let settled = false;
+    const timeout = globalThis.setTimeout(() => {
+      fail(new PrebootDatabaseInventoryError(
+        "SOURCE_OPEN_TIMEOUT",
+        "The v13 source did not complete its read-only structure probe in time."
+      ));
+    }, PREBOOT_PROBE_TIMEOUT_MS);
     const fail = (error: Error) => {
       if (settled) return;
       settled = true;
+      globalThis.clearTimeout(timeout);
       reject(error);
     };
     request.onupgradeneeded = () => {
-      request.transaction?.abort();
+      try {
+        request.transaction?.abort();
+      } catch {
+        // The failure below remains authoritative even if the request already aborted.
+      }
       fail(new PrebootDatabaseInventoryError(
         "SOURCE_DISAPPEARED",
         "The v13 source disappeared after inventory; an empty replacement was not created."
@@ -293,9 +373,10 @@ export async function openVerifiedExistingV13Database(
         return;
       }
       settled = true;
+      globalThis.clearTimeout(timeout);
       resolve({
         database,
-        sourceDatabaseName,
+        sourceDatabaseName: canonicalSourceDatabaseName,
         sourceNativeVersion: LEGACY_V13_NATIVE_VERSION
       });
     };
@@ -316,9 +397,22 @@ export async function inspectPrebootRecoveryState(
 
   let inventory: readonly SanitizedDatabaseInventoryEntry[];
   try {
-    inventory = sanitizedRelevantInventory(await factory.databases(), descriptor);
-  } catch {
-    return { kind: "ambiguous", reasonCode: "INVENTORY_UNAVAILABLE", inventory: [] };
+    inventory = sanitizedRelevantInventory(await withPrebootProbeTimeout(
+      factory.databases(),
+      "INVENTORY_TIMEOUT",
+      "IndexedDB inventory did not complete in time."
+    ), descriptor);
+  } catch (reason) {
+    return {
+      kind: "ambiguous",
+      reasonCode: reason instanceof PrebootDatabaseInventoryError
+        ? reason.code
+        : "INVENTORY_UNAVAILABLE",
+      inventory: []
+    };
+  }
+  if (inventoryHasDuplicateNames(inventory)) {
+    return { kind: "ambiguous", reasonCode: "INVENTORY_DUPLICATE_NAMES", inventory };
   }
   if (inventory.some((database) => database.name === RELEASE_CONTROL_DATABASE_NAME)) {
     return { kind: "normal", reasonCode: "CONTROL_PRESENT", inventory };
@@ -355,11 +449,21 @@ export async function inspectPrebootRecoveryState(
   }
   if (serviceWorker) {
     try {
-      if ((await serviceWorker.getRegistrations!()).length > 0) {
+      if ((await withPrebootProbeTimeout(
+        serviceWorker.getRegistrations!(),
+        "SERVICE_WORKER_STATE_TIMEOUT",
+        "Service Worker registration inventory did not complete in time."
+      )).length > 0) {
         return { kind: "ambiguous", reasonCode: "SERVICE_WORKER_PRESENT", inventory };
       }
-    } catch {
-      return { kind: "ambiguous", reasonCode: "SERVICE_WORKER_STATE_UNAVAILABLE", inventory };
+    } catch (reason) {
+      return {
+        kind: "ambiguous",
+        reasonCode: reason instanceof PrebootDatabaseInventoryError
+          ? reason.code
+          : "SERVICE_WORKER_STATE_UNAVAILABLE",
+        inventory
+      };
     }
   }
 

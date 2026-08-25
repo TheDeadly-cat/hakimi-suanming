@@ -1,0 +1,197 @@
+.bazi-lifecycle-file-workbench {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--ink, #20201e) 18%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--paper, #fffdf7) 96%, var(--cinnabar, #a63226) 4%);
+}
+
+.bazi-lifecycle-file-workbench__header,
+.bazi-lifecycle-file-workbench__actions,
+.bazi-lifecycle-file-workbench__selection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.bazi-lifecycle-file-workbench__header > div {
+  max-width: 72ch;
+}
+
+.bazi-lifecycle-file-workbench__header h5,
+.bazi-lifecycle-file-workbench__header p {
+  margin: 0.2rem 0;
+}
+
+.bazi-lifecycle-file-workbench__result,
+.bazi-lifecycle-file-workbench__withholding,
+.bazi-lifecycle-file-workbench__catalog,
+.bazi-lifecycle-file-workbench__coordinator,
+.bazi-lifecycle-file-workbench__store-save,
+.bazi-lifecycle-file-workbench__store-delete,
+.bazi-lifecycle-file-workbench__verified-copies {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.bazi-lifecycle-file-workbench__catalog,
+.bazi-lifecycle-file-workbench__coordinator,
+.bazi-lifecycle-file-workbench__verified-copies {
+  padding: 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--ink, #20201e) 15%, transparent);
+  border-radius: 0.8rem;
+}
+
+.bazi-lifecycle-file-workbench__catalog-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.bazi-lifecycle-file-workbench__catalog h6,
+.bazi-lifecycle-file-workbench__catalog p,
+.bazi-lifecycle-file-workbench__coordinator p,
+.bazi-lifecycle-file-workbench__verified-copies h6,
+.bazi-lifecycle-file-workbench__verified-copies p,
+.bazi-lifecycle-file-workbench__store-save p,
+.bazi-lifecycle-file-workbench__store-delete p {
+  margin: 0;
+}
+
+.bazi-lifecycle-file-workbench__catalog-items,
+.bazi-lifecycle-file-workbench__verified-copies ol {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.bazi-lifecycle-file-workbench__catalog-items li,
+.bazi-lifecycle-file-workbench__verified-copies li {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.7rem;
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--paper, #fffdf7) 88%, transparent);
+}
+
+.bazi-lifecycle-file-workbench__catalog-items label,
+.bazi-lifecycle-file-workbench__store-save label,
+.bazi-lifecycle-file-workbench__store-delete label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.bazi-lifecycle-file-workbench__store-delete label:last-of-type {
+  display: grid;
+}
+
+.bazi-lifecycle-file-workbench__store-delete input[type="text"] {
+  width: 100%;
+  min-height: 2.6rem;
+}
+
+.bazi-lifecycle-file-workbench__catalog-warning {
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, #b97913 14%, transparent);
+}
+
+.bazi-lifecycle-file-workbench__digest-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.65rem;
+}
+
+.bazi-lifecycle-file-workbench__digest-grid > div,
+.bazi-lifecycle-file-workbench__records li {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0.7rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--paper, #fffdf7) 88%, transparent);
+}
+
+.bazi-lifecycle-file-workbench code {
+  overflow-wrap: anywhere;
+}
+
+.bazi-lifecycle-file-workbench__records {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.65rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.bazi-lifecycle-file-workbench__withholding,
+.bazi-lifecycle-file-workbench__store-save,
+.bazi-lifecycle-file-workbench__store-delete {
+  margin: 0;
+  padding: 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--ink, #20201e) 15%, transparent);
+  border-radius: 0.8rem;
+}
+
+.bazi-lifecycle-file-workbench__withholding label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.bazi-lifecycle-file-workbench__withholding select {
+  width: 100%;
+  min-height: 2.6rem;
+}
+
+.bazi-lifecycle-file-workbench__eligibility,
+.bazi-lifecycle-file-workbench__verified,
+.bazi-lifecycle-file-workbench__notice,
+.bazi-lifecycle-file-workbench__error,
+.bazi-lifecycle-file-workbench__boundary {
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.75rem;
+}
+
+.bazi-lifecycle-file-workbench__eligibility,
+.bazi-lifecycle-file-workbench__verified,
+.bazi-lifecycle-file-workbench__notice {
+  background: color-mix(in srgb, #1c6b55 10%, transparent);
+}
+
+.bazi-lifecycle-file-workbench__error {
+  background: color-mix(in srgb, var(--cinnabar, #a63226) 12%, transparent);
+}
+
+.bazi-lifecycle-file-workbench__boundary {
+  background: color-mix(in srgb, var(--ink, #20201e) 6%, transparent);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 560px) {
+  .bazi-lifecycle-file-workbench {
+    padding: 0.8rem;
+  }
+
+  .bazi-lifecycle-file-workbench__header,
+  .bazi-lifecycle-file-workbench__actions,
+  .bazi-lifecycle-file-workbench__selection,
+  .bazi-lifecycle-file-workbench__catalog-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .bazi-lifecycle-file-workbench button,
+  .bazi-lifecycle-file-workbench select {
+    width: 100%;
+  }
+}

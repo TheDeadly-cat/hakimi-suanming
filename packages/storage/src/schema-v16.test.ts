@@ -10,7 +10,6 @@ import {
   RESEARCH_DATABASE_MAX_SCHEMA_VERSION,
   RESEARCH_DATABASE_MUTATION_STATE_ID,
   RESEARCH_DATABASE_MUTATION_STATE_PROTOCOL_VERSION,
-  RESEARCH_DATABASE_SCHEMA_VERSION,
   ReleaseDatabaseWriteLockedError,
   ResearchDatabase,
   ResearchDatabaseMutationStateError
@@ -89,8 +88,7 @@ afterEach(async () => {
 });
 
 describe("ResearchDatabase schema v16 mutation epoch", () => {
-  it("keeps schema 14 as the default and exposes v16 only by explicit opt-in", async () => {
-    expect(RESEARCH_DATABASE_SCHEMA_VERSION).toBe(14);
+  it("exposes v16 only by explicit opt-in", async () => {
     expect(RESEARCH_DATABASE_MAX_SCHEMA_VERSION).toBe(16);
 
     const database = createDatabase();

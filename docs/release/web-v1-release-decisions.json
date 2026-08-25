@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "decisionSetId": "web-v1-defaults-2026-08-21",
+  "status": "defaults_active_pending_owner_confirmation",
+  "defaultRelease": {
+    "dbGeneration": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "schema16PromotionAuthorized": false
+  },
+  "releaseHistory": {
+    "status": "unconfirmed_by_owner",
+    "admissionPolicy": "v13_only_fail_closed_default"
+  },
+  "browserSupport": {
+    "supportedEngineeringMatrix": ["desktop-chrome", "desktop-edge"],
+    "androidReleaseClaimAuthorized": false,
+    "firefoxReleaseClaimAuthorized": false,
+    "safariReleaseClaimAuthorized": false
+  },
+  "licensing": {
+    "status": "rights_reserved_default",
+    "openSourceClaimAuthorized": false,
+    "ownerFinalSelectionRecorded": false
+  },
+  "domainClaims": {
+    "positioning": "research_tool_engineering_preview",
+    "expertValidatedClaimAuthorized": false,
+    "verifiedGoldCaseCount": 0
+  },
+  "backupPrivacy": {
+    "format": "plaintext_unencrypted",
+    "acceptedContext": "trusted_personal_device_with_explicit_warning",
+    "sharedDeviceClaimAuthorized": false
+  },
+  "hosting": {
+    "platform": "unselected",
+    "publicDeploymentAuthorized": false,
+    "securityHeadersVerified": false
+  },
+  "aiByok": {
+    "webV1CoreGate": false,
+    "failureMustNotBlockCore": true
+  },
+  "releaseEvidence": {
+    "defaultV13RequiredReceiptCommands": {
+      "boot": ["npm", "run", "test:e2e:boot"],
+      "build": ["npm", "run", "build"],
+      "built-contract": ["npm", "run", "verify:built-release-storage-manifest"],
+      "cross-schema-v13-v16": ["npm", "run", "test:e2e:cross-schema-v13-v16"],
+      "evidence-tooling": ["npm", "run", "test:release-evidence"],
+      "governance": ["npm", "run", "check:release-governance"],
+      "orphaned-v13-recovery": ["npm", "run", "test:e2e:orphaned-v13-recovery"],
+      "pwa": ["npm", "run", "test:e2e:pwa"],
+      "typecheck": ["npm", "run", "typecheck"],
+      "unit": ["npm", "test"],
+      "web-v1-flow": ["npm", "run", "test:e2e:web-v1-flow"]
+    }
+  },
+  "approvals": []
+}

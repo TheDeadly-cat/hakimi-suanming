@@ -1,19 +1,21 @@
 import {
   caseRecordSchema,
-  eventRecordSchema,
   researchNoteRecordSchema,
-  revisionRecordSchema,
+  storedEventRecordSchema,
+  storedRevisionRecordSchema,
   type CaseRecord,
-  type EventRecord,
   type ResearchNoteRecord,
   type RulePackBinding,
-  type RevisionRecord
+  type RevisionRecord,
+  type StoredEventRecord
 } from "@hakimi/contracts";
 import { z } from "zod";
 import {
-  compareEventsForResearchExport,
+  compareVerifiedEventsForResearchExport,
   eventTimeExportDetails,
-  verifyEventForResearchExport
+  verifyEventForResearchExport,
+  verifyEventForResearchExportWithBundledArtifact,
+  type VerifiedEventForResearchExport
 } from "./event-time";
 import { REIDENTIFICATION_WARNING } from "./privacy";
 
@@ -63,9 +65,9 @@ const exactContractRecord = <Output>(schema: z.ZodType<Output>, label: string) =
   });
 
 const exactCaseRecordSchema = exactContractRecord(caseRecordSchema, "Case");
-const exactRevisionRecordSchema = exactContractRecord(revisionRecordSchema, "Revision");
+const exactRevisionRecordSchema = exactContractRecord(storedRevisionRecordSchema, "Revision");
 const exactResearchNoteRecordSchema = exactContractRecord(researchNoteRecordSchema, "ResearchNote");
-const exactEventRecordSchema = exactContractRecord(eventRecordSchema, "Event");
+const exactEventRecordSchema = exactContractRecord(storedEventRecordSchema, "Event");
 
 export const researchExportInputSchema = z.strictObject({
   caseRecord: exactCaseRecordSchema,
@@ -111,6 +113,15 @@ export type ResearchExportInput = z.infer<typeof researchExportInputSchema>;
 export type ResearchExportOptions = z.input<typeof researchExportOptionsSchema>;
 export type ResearchExportDocument = z.infer<typeof researchExportDocumentSchema>;
 
+type VerifiedResearchExportEvent = Readonly<{
+  event: StoredEventRecord;
+  verification: VerifiedEventForResearchExport;
+}>;
+
+type CanonicalResearchExportInput = ResearchExportInput & Readonly<{
+  eventVerifications: ReadonlyMap<string, VerifiedEventForResearchExport>;
+}>;
+
 function compareText(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
@@ -123,8 +134,10 @@ function assertUniqueIds(records: Array<{ id: string }>, label: string): void {
   }
 }
 
-function canonicalizeInput(raw: unknown): ResearchExportInput {
-  const input = researchExportInputSchema.parse(raw);
+function canonicalizeVerifiedInput(
+  input: ResearchExportInput,
+  verifiedEvents: readonly VerifiedResearchExportEvent[]
+): CanonicalResearchExportInput {
   const caseId = input.caseRecord.id;
   const revisions = [...input.revisions].sort((left, right) =>
     left.revisionNumber - right.revisionNumber || compareText(left.id, right.id)
@@ -132,11 +145,18 @@ function canonicalizeInput(raw: unknown): ResearchExportInput {
   const researchNotes = [...input.researchNotes].sort((left, right) =>
     compareText(left.createdAt, right.createdAt) || compareText(left.id, right.id)
   );
-  const events = [...input.events].sort(compareEventsForResearchExport);
+  const orderedVerifiedEvents = [...verifiedEvents].sort((left, right) =>
+    compareVerifiedEventsForResearchExport(left.verification, right.verification)
+  );
+  const events = orderedVerifiedEvents.map(({ event }) => event);
 
   assertUniqueIds(revisions, "Revision");
   assertUniqueIds(researchNotes, "ResearchNote");
   assertUniqueIds(events, "Event");
+  const eventVerifications = new Map(orderedVerifiedEvents.map(({ event, verification }) => [
+    event.id,
+    verification
+  ]));
   const revisionIds = new Set(revisions.map((revision) => revision.id));
   const revisionsById = new Map(revisions.map((revision) => [revision.id, revision]));
 
@@ -164,7 +184,6 @@ function canonicalizeInput(raw: unknown): ResearchExportInput {
     }
   }
   for (const event of events) {
-    verifyEventForResearchExport(event);
     if (event.caseId !== caseId) throw new Error(`Event ${event.id} 不属于 Case ${caseId}`);
     if (event.revisionId !== null && !revisionIds.has(event.revisionId)) {
       throw new Error(`Event ${event.id} 引用了不存在的 Revision ${event.revisionId}`);
@@ -184,7 +203,27 @@ function canonicalizeInput(raw: unknown): ResearchExportInput {
     }
   }
 
-  return { caseRecord: input.caseRecord, revisions, researchNotes, events };
+  return { caseRecord: input.caseRecord, revisions, researchNotes, events, eventVerifications };
+}
+
+function canonicalizeInput(raw: unknown): CanonicalResearchExportInput {
+  const input = researchExportInputSchema.parse(raw);
+  return canonicalizeVerifiedInput(input, input.events.map((event) => ({
+    event,
+    verification: verifyEventForResearchExport(event)
+  })));
+}
+
+async function canonicalizeInputWithBundledEventTime(
+  raw: unknown
+): Promise<CanonicalResearchExportInput> {
+  // Zod clones the complete stored input before the first resolver await.
+  const input = researchExportInputSchema.parse(raw);
+  const verifiedEvents = await Promise.all(input.events.map(async (event) => ({
+    event,
+    verification: await verifyEventForResearchExportWithBundledArtifact(event)
+  })));
+  return canonicalizeVerifiedInput(input, verifiedEvents);
 }
 
 function resolveOptions(options?: ResearchExportOptions): { anonymized: boolean } {
@@ -233,15 +272,18 @@ function noteAnchorText(note: ResearchNoteRecord, revisionAliases: Map<string, s
   return `修订 ${revision} / ${note.anchor.pillar}.${note.anchor.field}`;
 }
 
-function dateRange(event: EventRecord): string {
+function dateRange(event: StoredEventRecord): string {
   if (event.datePrecision === "unknown") return "未知";
   if (!event.endDate || event.endDate === event.startDate) return event.startDate ?? "—";
   return `${event.startDate} 至 ${event.endDate}`;
 }
 
-function eventTimeMarkdownRows(event: EventRecord, anonymized: boolean): string[] {
+function eventTimeMarkdownRows(
+  verification: VerifiedEventForResearchExport,
+  anonymized: boolean
+): string[] {
   if (anonymized) return ["- 时间上下文：（匿名模式已移除）"];
-  const details = eventTimeExportDetails(event);
+  const details = eventTimeExportDetails(verification);
   const rows = [`- 时间上下文：${inlineValue(details.kind)}`];
   if (details.notice) rows.push(`- 时间说明：${inlineValue(details.notice)}`);
   if (details.kind !== "zoned_minute") return rows;
@@ -294,12 +336,10 @@ function markdownRevision(
   return lines;
 }
 
-export function exportResearchMarkdown(
-  rawInput: ResearchExportInput,
-  rawOptions?: ResearchExportOptions
+function renderResearchMarkdown(
+  input: CanonicalResearchExportInput,
+  anonymized: boolean
 ): ResearchExportDocument {
-  const input = canonicalizeInput(rawInput);
-  const { anonymized } = resolveOptions(rawOptions);
   const revisionAliases = new Map(input.revisions.map((revision, index) => [
     revision.id,
     anonymized ? anonymizedReference("R", index) : revision.id
@@ -353,7 +393,7 @@ export function exportResearchMarkdown(
       "",
       `- 事件标识：${inlineValue(displayId(event.id, anonymized, anonymizedReference("E", index)))}`,
       `- 日期：${anonymized ? "（匿名模式已移除）" : `${inlineValue(dateRange(event))}（${inlineValue(event.datePrecision)}）`}`,
-      ...eventTimeMarkdownRows(event, anonymized),
+      ...eventTimeMarkdownRows(input.eventVerifications.get(event.id)!, anonymized),
       `- 关联修订：${inlineValue(revisionRef)}`,
       `- 运限节点：${event.transitNodeRef
         ? anonymized ? "（匿名模式已移除）" : inlineValue(JSON.stringify(event.transitNodeRef))
@@ -381,6 +421,28 @@ export function exportResearchMarkdown(
     warnings: [REIDENTIFICATION_WARNING],
     content
   });
+}
+
+export function exportResearchMarkdown(
+  rawInput: ResearchExportInput,
+  rawOptions?: ResearchExportOptions
+): ResearchExportDocument {
+  return renderResearchMarkdown(
+    canonicalizeInput(rawInput),
+    resolveOptions(rawOptions).anonymized
+  );
+}
+
+/** Async exact-replay entrypoint for current and officially retained Event tzdb artifacts. */
+export async function exportResearchMarkdownWithBundledEventTime(
+  rawInput: ResearchExportInput,
+  rawOptions?: ResearchExportOptions
+): Promise<ResearchExportDocument> {
+  const { anonymized } = resolveOptions(rawOptions);
+  return renderResearchMarkdown(
+    await canonicalizeInputWithBundledEventTime(rawInput),
+    anonymized
+  );
 }
 
 /**
@@ -453,7 +515,7 @@ function emptyCsvRow(): CsvRow {
   return Object.fromEntries(CSV_COLUMNS.map((column) => [column, ""])) as CsvRow;
 }
 
-function csvRows(input: ResearchExportInput, anonymized: boolean): CsvRow[] {
+function csvRows(input: CanonicalResearchExportInput, anonymized: boolean): CsvRow[] {
   const revisionRefs = new Map(input.revisions.map((revision, index) => [
     revision.id,
     anonymized ? anonymizedReference("R", index) : revision.id
@@ -539,7 +601,7 @@ function csvRows(input: ResearchExportInput, anonymized: boolean): CsvRow[] {
   }
 
   for (const [index, event] of input.events.entries()) {
-    const time = eventTimeExportDetails(event);
+    const time = eventTimeExportDetails(input.eventVerifications.get(event.id)!);
     rows.push({
       ...emptyCsvRow(),
       record_type: "event",
@@ -574,12 +636,10 @@ function csvRows(input: ResearchExportInput, anonymized: boolean): CsvRow[] {
   return rows;
 }
 
-export function exportResearchCsv(
-  rawInput: ResearchExportInput,
-  rawOptions?: ResearchExportOptions
+function renderResearchCsv(
+  input: CanonicalResearchExportInput,
+  anonymized: boolean
 ): ResearchExportDocument {
-  const input = canonicalizeInput(rawInput);
-  const { anonymized } = resolveOptions(rawOptions);
   const header = CSV_COLUMNS.map(encodeCsvCell).join(",");
   const body = csvRows(input, anonymized).map((row) =>
     CSV_COLUMNS.map((column) => encodeCsvCell(row[column])).join(",")
@@ -596,6 +656,28 @@ export function exportResearchCsv(
     warnings: [REIDENTIFICATION_WARNING],
     content
   });
+}
+
+export function exportResearchCsv(
+  rawInput: ResearchExportInput,
+  rawOptions?: ResearchExportOptions
+): ResearchExportDocument {
+  return renderResearchCsv(
+    canonicalizeInput(rawInput),
+    resolveOptions(rawOptions).anonymized
+  );
+}
+
+/** Async exact-replay entrypoint for current and officially retained Event tzdb artifacts. */
+export async function exportResearchCsvWithBundledEventTime(
+  rawInput: ResearchExportInput,
+  rawOptions?: ResearchExportOptions
+): Promise<ResearchExportDocument> {
+  const { anonymized } = resolveOptions(rawOptions);
+  return renderResearchCsv(
+    await canonicalizeInputWithBundledEventTime(rawInput),
+    anonymized
+  );
 }
 
 export * from "./single-chart-report";

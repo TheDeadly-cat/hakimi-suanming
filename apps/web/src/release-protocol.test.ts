@@ -1,11 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
+  BRIDGE_RELEASE_STORAGE_MANIFEST,
   BRIDGE_RELEASE_DATABASE_DESCRIPTOR,
+  PRODUCTION_V13_TO_V16_RELEASE_STORAGE_MANIFEST,
+  PRODUCTION_V14_RELEASE_STORAGE_MANIFEST,
+  PRODUCTION_V15_RELEASE_STORAGE_MANIFEST,
   PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
   PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR,
   PRODUCTION_V14_RELEASE_DATABASE_DESCRIPTOR,
   PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR,
   parseReleaseDatabaseDescriptor,
+  parseReleaseStorageManifest,
+  serializeReleaseStorageManifest,
   releaseDatabaseDescriptorForDefaultViteBuild
 } from "../release-protocol";
 import {
@@ -29,6 +35,52 @@ const productionV14Environment = {
 } as const;
 
 describe("release database production configuration", () => {
+  it("derives each frozen storage contract from the same release manifest", () => {
+    expect(Object.isFrozen(BRIDGE_RELEASE_STORAGE_MANIFEST)).toBe(true);
+    expect(BRIDGE_RELEASE_STORAGE_MANIFEST.database).toBe(BRIDGE_RELEASE_DATABASE_DESCRIPTOR);
+    expect(BRIDGE_RELEASE_STORAGE_MANIFEST.requiredStorageTables).toHaveLength(16);
+    expect(BRIDGE_RELEASE_STORAGE_MANIFEST.requiredStorageTables).not.toContain("revisionCalculationReceipts");
+    expect(BRIDGE_RELEASE_STORAGE_MANIFEST.requiredStorageTables).not.toContain("mutationState");
+    expect(BRIDGE_RELEASE_STORAGE_MANIFEST.requiredStorageIndexes).toEqual([]);
+
+    expect(PRODUCTION_V14_RELEASE_STORAGE_MANIFEST.requiredStorageIndexes).toEqual([
+      {
+        tableName: "researchNotes",
+        indexName: "[caseId+updatedAt]",
+        keyPath: ["caseId", "updatedAt"],
+        compound: true,
+        unique: false,
+        multi: false
+      },
+      {
+        tableName: "events",
+        indexName: "[caseId+updatedAt]",
+        keyPath: ["caseId", "updatedAt"],
+        compound: true,
+        unique: false,
+        multi: false
+      }
+    ]);
+    expect(PRODUCTION_V15_RELEASE_STORAGE_MANIFEST.requiredStorageTables)
+      .toContain("revisionCalculationReceipts");
+    expect(PRODUCTION_V13_TO_V16_RELEASE_STORAGE_MANIFEST.requiredStorageTables)
+      .toContain("mutationState");
+  });
+
+  it("rejects storage tables or indexes that drift from the target Schema", () => {
+    expect(() => parseReleaseStorageManifest({
+      ...PRODUCTION_V14_RELEASE_STORAGE_MANIFEST,
+      requiredStorageTables: PRODUCTION_V14_RELEASE_STORAGE_MANIFEST.requiredStorageTables.slice(1)
+    })).toThrow("必需表与目标 Schema 不一致");
+    expect(() => parseReleaseStorageManifest({
+      ...PRODUCTION_V14_RELEASE_STORAGE_MANIFEST,
+      requiredStorageIndexes: []
+    })).toThrow("必需索引与目标 Schema 不一致");
+    expect(serializeReleaseStorageManifest(
+      parseReleaseStorageManifest(PRODUCTION_V14_RELEASE_STORAGE_MANIFEST)
+    )).toBe(serializeReleaseStorageManifest(PRODUCTION_V14_RELEASE_STORAGE_MANIFEST));
+  });
+
   it("parses the frozen production v14 descriptor as a separate shadow database", () => {
     expect(Object.isFrozen(PRODUCTION_V14_RELEASE_DATABASE_DESCRIPTOR)).toBe(true);
     expect(parseReleaseDatabaseDescriptor(PRODUCTION_V14_RELEASE_DATABASE_DESCRIPTOR)).toEqual({

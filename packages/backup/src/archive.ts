@@ -16,6 +16,9 @@ const FIXED_DOS_TIME = 0;
 // 2020-01-01. DOS dates store years since 1980, months from 1, and days from 1.
 const FIXED_DOS_DATE = ((2020 - 1980) << 9) | (1 << 5) | 1;
 const FULL_BACKUP_ARCHIVE_ENTRY_BYTES = new TextEncoder().encode(FULL_BACKUP_ARCHIVE_ENTRY);
+const MAX_ZIP32_BYTES = 0xffffffff;
+const MIN_FULL_BACKUP_ARCHIVE_BYTES = 30 + FULL_BACKUP_ARCHIVE_ENTRY_BYTES.byteLength +
+  46 + FULL_BACKUP_ARCHIVE_ENTRY_BYTES.byteLength + 22;
 const CRC32_TABLE = new Uint32Array(256);
 
 for (let index = 0; index < CRC32_TABLE.length; index += 1) {
@@ -32,13 +35,37 @@ export type FullBackupArchiveErrorCode =
   | "ARCHIVE_UNSUPPORTED"
   | "ARCHIVE_ENTRY_INVALID"
   | "ARCHIVE_CONTENT_TOO_LARGE"
-  | "ARCHIVE_CONTENT_INVALID";
+  | "ARCHIVE_CONTENT_INVALID"
+  | "ARCHIVE_LIMIT_INVALID"
+  | "ARCHIVE_CREATE_FAILED";
 
 export class FullBackupArchiveError extends Error {
   constructor(readonly code: FullBackupArchiveErrorCode, message: string, options?: ErrorOptions) {
     super(message, options);
     this.name = "FullBackupArchiveError";
   }
+}
+
+function requireByteLimit(value: unknown, fallback: number, label: string): number {
+  const resolved = value ?? fallback;
+  if (
+    !Number.isSafeInteger(resolved) ||
+    Number(resolved) <= 0 ||
+    Number(resolved) > MAX_ZIP32_BYTES
+  ) {
+    throw new FullBackupArchiveError(
+      "ARCHIVE_LIMIT_INVALID",
+      `${label}必须是 1～${MAX_ZIP32_BYTES} 字节的安全整数。`
+    );
+  }
+  return Number(resolved);
+}
+
+function isUint8ArrayBytes(value: unknown): value is Uint8Array {
+  return typeof value === "object" &&
+    value !== null &&
+    ArrayBuffer.isView(value) &&
+    Object.prototype.toString.call(value) === "[object Uint8Array]";
 }
 
 function readUint16(bytes: Uint8Array, offset: number): number {
@@ -233,8 +260,31 @@ export function createFullBackupArchiveFromJson(
   json: string,
   options: { maxArchiveBytes?: number; maxJsonBytes?: number } = {}
 ): Uint8Array {
-  const maxArchiveBytes = options.maxArchiveBytes ?? DEFAULT_MAX_FULL_BACKUP_ARCHIVE_BYTES;
-  const maxJsonBytes = options.maxJsonBytes ?? DEFAULT_MAX_FULL_BACKUP_JSON_BYTES;
+  if (typeof json !== "string") {
+    throw new FullBackupArchiveError("ARCHIVE_CONTENT_INVALID", "备份 JSON 必须是字符串。");
+  }
+  const maxArchiveBytes = requireByteLimit(
+    options.maxArchiveBytes,
+    DEFAULT_MAX_FULL_BACKUP_ARCHIVE_BYTES,
+    "备份 ZIP 上限"
+  );
+  const maxJsonBytes = requireByteLimit(
+    options.maxJsonBytes,
+    DEFAULT_MAX_FULL_BACKUP_JSON_BYTES,
+    "备份 JSON 上限"
+  );
+  if (json.length > maxJsonBytes) {
+    throw new FullBackupArchiveError(
+      "ARCHIVE_CONTENT_TOO_LARGE",
+      `备份 JSON 超过 ${Math.round(maxJsonBytes / 1024 / 1024)} MB 安全上限。`
+    );
+  }
+  if (maxArchiveBytes < MIN_FULL_BACKUP_ARCHIVE_BYTES) {
+    throw new FullBackupArchiveError(
+      "ARCHIVE_TOO_LARGE",
+      `备份 ZIP 超过 ${Math.round(maxArchiveBytes / 1024 / 1024)} MB 安全上限。`
+    );
+  }
   const jsonBytes = new TextEncoder().encode(json);
   if (jsonBytes.byteLength > maxJsonBytes) {
     throw new FullBackupArchiveError(
@@ -249,7 +299,16 @@ export function createFullBackupArchiveFromJson(
   // deliberately tiny one-entry container ourselves also freezes every header
   // field and makes the output byte-for-byte deterministic across Realms.
   const fileNameBytes = FULL_BACKUP_ARCHIVE_ENTRY_BYTES;
-  const compressed = deflateSync(jsonBytes, { level: 6 });
+  let compressed: Uint8Array;
+  try {
+    compressed = deflateSync(jsonBytes, { level: 6 });
+  } catch (cause) {
+    throw new FullBackupArchiveError(
+      "ARCHIVE_CREATE_FAILED",
+      "备份 JSON 无法完成确定性压缩。",
+      { cause }
+    );
+  }
   const checksum = crc32(jsonBytes);
   const localHeaderBytes = 30 + fileNameBytes.byteLength;
   const centralDirectoryOffset = localHeaderBytes + compressed.byteLength;
@@ -262,7 +321,16 @@ export function createFullBackupArchiveFromJson(
       `备份 ZIP 超过 ${Math.round(maxArchiveBytes / 1024 / 1024)} MB 安全上限。`
     );
   }
-  const output = new Uint8Array(archiveBytes);
+  let output: Uint8Array;
+  try {
+    output = new Uint8Array(archiveBytes);
+  } catch (cause) {
+    throw new FullBackupArchiveError(
+      "ARCHIVE_CREATE_FAILED",
+      "浏览器无法为备份 ZIP 分配连续内存。",
+      { cause }
+    );
+  }
 
   writeUint32(output, 0, LOCAL_FILE_HEADER_SIGNATURE);
   writeUint16(output, 4, ZIP_VERSION_2_0);
@@ -313,8 +381,19 @@ export function readFullBackupArchiveJson(
   input: Uint8Array,
   options: { maxArchiveBytes?: number; maxJsonBytes?: number } = {}
 ): string {
-  const maxArchiveBytes = options.maxArchiveBytes ?? DEFAULT_MAX_FULL_BACKUP_ARCHIVE_BYTES;
-  const maxJsonBytes = options.maxJsonBytes ?? DEFAULT_MAX_FULL_BACKUP_JSON_BYTES;
+  if (!isUint8ArrayBytes(input)) {
+    throw new FullBackupArchiveError("ARCHIVE_INVALID", "备份 ZIP 必须是 Uint8Array 字节视图。");
+  }
+  const maxArchiveBytes = requireByteLimit(
+    options.maxArchiveBytes,
+    DEFAULT_MAX_FULL_BACKUP_ARCHIVE_BYTES,
+    "备份 ZIP 上限"
+  );
+  const maxJsonBytes = requireByteLimit(
+    options.maxJsonBytes,
+    DEFAULT_MAX_FULL_BACKUP_JSON_BYTES,
+    "备份 JSON 上限"
+  );
   if (input.byteLength > maxArchiveBytes) {
     throw new FullBackupArchiveError(
       "ARCHIVE_TOO_LARGE",
@@ -347,5 +426,7 @@ export function readFullBackupArchiveJson(
 }
 
 export function looksLikeZip(input: Uint8Array): boolean {
-  return input.byteLength >= 4 && readUint32(input, 0) === 0x04034b50;
+  return isUint8ArrayBytes(input) &&
+    input.byteLength >= 4 &&
+    readUint32(input, 0) === LOCAL_FILE_HEADER_SIGNATURE;
 }

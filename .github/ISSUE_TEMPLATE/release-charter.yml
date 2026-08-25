@@ -1,0 +1,38 @@
+name: Web v1 release charter
+description: Record release scope, generation, compatibility, claims, rights, and approvers.
+title: "[Release Charter] "
+labels: ["release", "priority:blocker", "type:planning"]
+body:
+  - type: markdown
+    attributes:
+      value: Engineering evidence, expert validation, content rights, and public release authorization must remain separate.
+  - type: textarea
+    id: distribution-history
+    attributes:
+      label: Proven distribution history
+      description: List each evidenced build hash, database generation, Schema, migration id, date, and user scope.
+    validations:
+      required: true
+  - type: dropdown
+    id: default-generation
+    attributes:
+      label: Proposed default generation
+      options:
+        - legacy-v13 (recommended until all gates close)
+        - schema16-candidate (requires migration and rollback approval)
+    validations:
+      required: true
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Browser and device support
+      description: Distinguish tested, supported, experimental, and explicitly unsupported targets.
+    validations:
+      required: true
+  - type: textarea
+    id: approvals
+    attributes:
+      label: Named approvers and external decisions
+      description: Include repository owner, release reviewer, rights owner, domain reviewer, and hosting owner.
+    validations:
+      required: true

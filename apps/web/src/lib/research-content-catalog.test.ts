@@ -4,6 +4,7 @@ import {
   RESEARCH_CONTENT_CATALOG,
   RESEARCH_CONTENT_CATALOG_PROFILE,
   buildResearchContentCatalog,
+  isResearchContentSourceId,
   type ResearchContentCatalogSystem
 } from "./research-content-catalog";
 import { RESEARCH_SYSTEM_IDS } from "./research-system-roadmap";
@@ -89,6 +90,20 @@ describe("research content catalog", () => {
     expect(RESEARCH_CONTENT_CATALOG.knownBoundaries.join(" ")).toMatch(/不能相加|不等于专家真值/);
   });
 
+  it("来源 ID 只接受受限的小写点分段，并拒绝路径、空段、空白与大写", () => {
+    const sourceIds = RESEARCH_CONTENT_CATALOG.systems.flatMap((system) => (
+      system.representativeSources.map((source) => source.sourceId)
+    ));
+
+    expect(sourceIds).toContain("ziwei.classic.zwdsql.volume1.wikisource.2026_08_12");
+    expect(sourceIds.filter((sourceId) => sourceId.includes(".")).length).toBeGreaterThan(0);
+    expect(sourceIds.every(isResearchContentSourceId)).toBe(true);
+
+    for (const invalidSourceId of ["../x", "a..b", " a.b", "a.b ", "a b", "A.b"]) {
+      expect(isResearchContentSourceId(invalidSourceId)).toBe(false);
+    }
+  });
+
   it("对数量、隔离入口、来源协议和结论字段篡改均失效关闭", () => {
     const replaceSystem = (
       systemId: ResearchContentCatalogSystem["systemId"],
@@ -117,6 +132,17 @@ describe("research content catalog", () => {
         ))
       }))
     })).toThrow(/代表来源无效/);
+
+    for (const invalidSourceId of ["../x", "a..b", " a.b", "a.b ", "a b", "A.b"]) {
+      expect(() => buildResearchContentCatalog({
+        systems: replaceSystem("western-astrology", (system) => ({
+          ...system,
+          representativeSources: system.representativeSources.map((source, index) => (
+            index === 0 ? { ...source, sourceId: invalidSourceId } : source
+          ))
+        }))
+      })).toThrow(/代表来源无效/);
+    }
 
     const truthTamper = replaceSystem("bazi", (system) => ({
       ...system,

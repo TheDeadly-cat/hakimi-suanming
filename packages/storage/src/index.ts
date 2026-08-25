@@ -21,9 +21,12 @@ import {
   citationRecordSchema,
   eventRecordSchema,
   eventTimeMigrationReceiptSchema,
-  eventTimeMigrationSnapshotSchema,
+  storedEventRecordSchema,
+  storedEventTimeMigrationReceiptSchema,
+  storedEventTimeMigrationSnapshotSchema,
   formalComparisonRequestSchema,
   formalComparisonSourceSchema,
+  fullBackupPayloadSchema,
   knowledgeDocumentRecordSchema,
   localAppSettingsRecordSchema,
   localAttachmentRecordSchema,
@@ -37,6 +40,8 @@ import {
   revisionRecordSchema,
   savedViewRecordSchema,
   sourceRightsRecordSchema,
+  storedBirthInputSchema,
+  storedUnknownHourCandidateResultSchema,
   tzdbMigrationReceiptSchema,
   unknownHourCandidateResultSchema,
   type CalculatedChart,
@@ -84,6 +89,7 @@ import {
 import {
   verifyCalculatedChartIntegrity,
   verifyCandidateSetRecordIntegrity,
+  verifyUnknownHourCandidateResultIntegrity,
   verifyRevisionRecordIntegrity,
   verifyRevisionSnapshotIntegrity
 } from "@hakimi/chart-integrity";
@@ -92,6 +98,7 @@ export {
   CandidateSetIntegrityError,
   verifyCalculatedChartIntegrity,
   verifyCandidateSetRecordIntegrity,
+  verifyUnknownHourCandidateResultIntegrity,
   verifyRevisionRecordIntegrity,
   verifyRevisionSnapshotIntegrity
 } from "@hakimi/chart-integrity";
@@ -102,14 +109,24 @@ import {
   sha256Hex
 } from "@hakimi/integrity";
 import {
+  KnowledgeIntegrityError,
   MAX_KNOWLEDGE_DOCUMENT_BYTES,
+  KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_LIMITS,
+  buildKnowledgeCitationSetConflictInventory,
+  buildKnowledgeSourceAwareRetrievalPacket,
   buildKnowledgeContentSnapshot,
+  createKnowledgeDocumentCitationIntegrityVerifier,
   extractKnowledgeQuote,
+  isReservedSingleChartReportEvidenceSubjectId,
+  isSingleChartReportEvidenceSubjectId,
   requireEvidenceSubject,
   searchKnowledgeDocuments,
   verifyCitationIntegrity,
   verifyKnowledgeDocumentIntegrity,
-  type KnowledgeSearchHit
+  type BuildKnowledgeSourceAwareRetrievalPacketInput,
+  type KnowledgeCitationSetConflictInventory,
+  type KnowledgeSearchHit,
+  type KnowledgeSourceAwareRetrievalPacket
 } from "@hakimi/knowledge-core";
 import { resolveTransitNodeRef } from "@hakimi/transit-core";
 import {
@@ -117,13 +134,20 @@ import {
   classifyStoredTimeZoneDatabaseForReplay,
   RUNTIME_TZDB_VERSION,
   resolveEventTimeContext,
-  verifyEventTimeContext
+  verifyEventTimeContext,
+  verifyStoredEventTimeContextWithBundledArtifact,
+  type EventTimeContextVerificationStatus
 } from "@hakimi/time-core";
 import type {
   RevisionCalculationReceipt,
   RevisionDerivedReplayRequest
 } from "@hakimi/revision-replay";
-import Dexie, { type DBCore, type DBCoreTransaction, type EntityTable } from "dexie";
+import Dexie, {
+  type DBCore,
+  type DBCoreTransaction,
+  type EntityTable,
+  type Transaction
+} from "dexie";
 import {
   CoreDataIdentityConflictError,
   CoreDataReplaceBlockedError,
@@ -133,6 +157,25 @@ import {
   buildLegacyCandidateSetTzdbComparison,
   type DependentDataCounts
 } from "./worker-safe";
+import {
+  LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_ENCODED_CHARACTERS,
+  LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_MATCHED_BYTES,
+  LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_MATCHES,
+  LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_SCAN_ROWS,
+  LocalAttachmentPurposeMetadataSnapshotLimitError,
+  assertExactUnlinkedAttachmentCreateCapacity,
+  assertLocalAttachmentPurposeCapacityTotals,
+  type LocalAttachmentPurposeMetadataSnapshotLimitCode
+} from "./local-attachment-purpose-capacity";
+
+export {
+  LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_ENCODED_CHARACTERS,
+  LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_MATCHED_BYTES,
+  LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_MATCHES,
+  LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_SCAN_ROWS,
+  LocalAttachmentPurposeMetadataSnapshotLimitError,
+  type LocalAttachmentPurposeMetadataSnapshotLimitCode
+} from "./local-attachment-purpose-capacity";
 
 export * from "./database-generation";
 export {
@@ -145,9 +188,7 @@ export {
   type DependentDataCounts
 } from "./worker-safe";
 
-/** The default release generation remains pinned to schema 14. */
-export const RESEARCH_DATABASE_SCHEMA_VERSION = 14 as const;
-/** Schemas above the default are available only to callers that opt in with targetSchema. */
+/** Production callers must supply a runtime release manifest; storage has no implicit default Schema. */
 export const RESEARCH_DATABASE_MAX_SCHEMA_VERSION = 16 as const;
 export const RESEARCH_DATABASE_LEGACY_NAME = "hakimi-bazi-research" as const;
 export const RESEARCH_DATABASE_MUTATION_STATE_STORE = "mutationState" as const;
@@ -189,6 +230,48 @@ export type FullDataSnapshotWithMutationState = Readonly<{
   mutationState: ResearchDatabaseMutationState | null;
 }>;
 
+export type LocalDataPartitionCounts = Readonly<{
+  cases: number;
+  revisions: number;
+  candidateSets: number;
+  researchNotes: number;
+  events: number;
+  savedViews: number;
+  knowledgeDocuments: number;
+  citations: number;
+  sourceRights: number;
+  researcherProfiles: number;
+  appSettings: number;
+  attachments: number;
+  ruleRegistry: number;
+  tzdbMigrationReceipts: number;
+  eventTimeMigrationReceipts: number;
+  revisionCalculationReceipts: number;
+}>;
+
+export type LocalDataOverview = Readonly<{
+  counts: LocalDataPartitionCounts;
+}>;
+
+/**
+ * Storage-owned projection consumed by the research-query adapter. It omits
+ * every local partition that cannot affect research-query execution.
+ */
+export type ResearchQueryStorageSnapshot = Readonly<{
+  cases: readonly CaseRecord[];
+  revisions: readonly RevisionRecord[];
+  candidateSets: readonly CandidateSetRecord[];
+  researchNotes: readonly ResearchNoteRecord[];
+  events: readonly EventRecord[];
+  knowledgeDocuments: readonly KnowledgeDocumentRecord[];
+  revisionCalculationReceiptLedgerStatus: "available" | "schema_unavailable";
+  revisionCalculationReceipts: readonly RevisionCalculationReceipt[];
+}>;
+
+export type ReadResearchQuerySnapshotOptions = Readonly<{
+  signal?: AbortSignal;
+}>;
+
 type RevisionReplayModule = typeof import("@hakimi/revision-replay");
 let revisionReplayModulePromise: Promise<RevisionReplayModule> | null = null;
 
@@ -210,15 +293,18 @@ declare global {
   var __HAKIMI_RESEARCH_DATABASE_RUNTIME__: ResearchDatabaseRuntimeConfiguration | undefined;
 }
 
-function configuredResearchDatabaseRuntime(): ResearchDatabaseRuntimeConfiguration {
-  const configured = globalThis.__HAKIMI_RESEARCH_DATABASE_RUNTIME__;
-  if (!configured) {
-    return {
-      databaseName: RESEARCH_DATABASE_LEGACY_NAME,
-      targetSchema: RESEARCH_DATABASE_SCHEMA_VERSION,
-      releaseWritesLocked: false
-    };
+export class ResearchDatabaseRuntimeConfigurationError extends Error {
+  readonly code = "RUNTIME_CONFIGURATION_REQUIRED" as const;
+
+  constructor(message = "ResearchDatabase 需要显式 targetSchema 或已安装的运行时代际配置。") {
+    super(message);
+    this.name = "ResearchDatabaseRuntimeConfigurationError";
   }
+}
+
+function configuredResearchDatabaseRuntime(): ResearchDatabaseRuntimeConfiguration | undefined {
+  const configured = globalThis.__HAKIMI_RESEARCH_DATABASE_RUNTIME__;
+  if (!configured) return undefined;
   if (
     typeof configured.databaseName !== "string" ||
     !/^[a-z0-9][a-z0-9._-]{0,127}$/iu.test(configured.databaseName) ||
@@ -413,17 +499,11 @@ export type ResearchDatabaseOptions = {
   releaseWritesLocked?: boolean;
 };
 
-function parseVerifiedEventRecord(input: unknown): EventRecord {
-  const record = eventRecordSchema.parse(input);
-  if (
-    record.timeContext.kind === "zoned_minute" &&
-    classifyStoredTimeZoneDatabase(record.timeContext) !== "current_exact"
-  ) {
-    // A frozen historical tzdb cannot be replayed with today's resolver. Keep it
-    // readable and content-editable, while updateEvent blocks every same-ID
-    // mutation of its time semantics below.
-    return record;
-  }
+function parseStoredEventRecord(input: unknown): EventRecord {
+  const record = storedEventRecordSchema.parse(input);
+  // This synchronous boundary provides current exact replay and rejects any
+  // registered-descriptor conflict. Retained or unavailable artifacts remain
+  // structural until an async relationship/backup boundary reports its status.
   verifyEventTimeContext({
     datePrecision: record.datePrecision,
     startDate: record.startDate,
@@ -433,15 +513,20 @@ function parseVerifiedEventRecord(input: unknown): EventRecord {
   return record;
 }
 
+function parseCurrentEventRecord(input: unknown): EventRecord {
+  const record = eventRecordSchema.parse(input);
+  return parseStoredEventRecord(record);
+}
+
 /** Canonical full-record CAS digest used by the explicit legacy-time review flow. */
 export async function computeEventRecordDigest(input: unknown): Promise<string> {
-  return sha256Hex(parseVerifiedEventRecord(input));
+  return sha256Hex(parseStoredEventRecord(input));
 }
 
 /** Immutable time-and-lineage projection bound into every Event migration receipt endpoint. */
 export function buildEventTimeMigrationSnapshot(input: unknown): EventTimeMigrationSnapshot {
-  const record = parseVerifiedEventRecord(input);
-  return eventTimeMigrationSnapshotSchema.parse({
+  const record = parseStoredEventRecord(input);
+  return storedEventTimeMigrationSnapshotSchema.parse({
     formatVersion: EVENT_TIME_MIGRATION_SNAPSHOT_FORMAT_VERSION,
     eventRecordVersion: record.recordVersion,
     caseId: record.caseId,
@@ -736,7 +821,7 @@ function researchSubjectPageCursor(
 }
 
 async function createStoredBirthFingerprint(input: BirthInput): Promise<string> {
-  const parsed = birthInputSchema.parse(input);
+  const parsed = storedBirthInputSchema.parse(input);
   return `${BIRTH_FINGERPRINT_VERSION}:${await sha256Hex(buildBirthFingerprintPayload(parsed))}`;
 }
 
@@ -935,12 +1020,16 @@ export class ResearchDatabase extends Dexie {
   private readonly migrationWriteTransactions = new WeakSet<IDBTransaction>();
 
   constructor(
-    name = configuredResearchDatabaseRuntime().databaseName,
+    name?: string,
     options: ResearchDatabaseOptions = {}
   ) {
-    super(name);
     const runtime = configuredResearchDatabaseRuntime();
-    const targetSchema = options.targetSchema ?? runtime.targetSchema;
+    const resolvedName = name ?? runtime?.databaseName;
+    const targetSchema = options.targetSchema ?? runtime?.targetSchema;
+    if (!resolvedName || targetSchema === undefined) {
+      throw new ResearchDatabaseRuntimeConfigurationError();
+    }
+    super(resolvedName);
     if (
       !Number.isSafeInteger(targetSchema) ||
       targetSchema < 1 ||
@@ -949,7 +1038,7 @@ export class ResearchDatabase extends Dexie {
       throw new Error(`ResearchDatabase 不支持目标 Schema ${String(targetSchema)}。`);
     }
     this.targetSchemaVersion = targetSchema;
-    this.releaseWritesLocked = options.releaseWritesLocked ?? runtime.releaseWritesLocked;
+    this.releaseWritesLocked = options.releaseWritesLocked ?? runtime?.releaseWritesLocked ?? false;
     const trackMutationEpoch = targetSchema >= 16;
     this.use({
       stack: "dbcore",
@@ -1157,7 +1246,7 @@ export class ResearchDatabase extends Dexie {
       const storedEvents = await eventTable.toArray() as Array<Record<string, unknown>>;
       const events = storedEvents.map((record) => (
         record.recordVersion === EVENT_RECORD_VERSION
-          ? parseVerifiedEventRecord(record)
+          ? parseStoredEventRecord(record)
           : migrateLegacyEventRecordV1(record as LegacyEventRecordV1)
       ));
       if (events.length > 0) await eventTable.bulkPut(events);
@@ -1560,6 +1649,166 @@ export type CreateAttachmentOnceResult = {
   created: boolean;
 };
 
+export type UnlinkedLocalAttachmentExactIdentity = Readonly<{
+  id: string;
+  fileName: string;
+  mediaType: string;
+  byteLength: number;
+  contentHash: string;
+  description: string;
+  link: null;
+  createdAt: string;
+  updatedAt: string;
+}>;
+
+export type LocalAttachmentMetadata = Readonly<
+  Omit<LocalAttachmentRecord, "contentBase64"> & {
+    /** Metadata and link target were checked, but stored content bytes were not decoded or hashed. */
+    contentIntegrity: "unchecked";
+  }
+>;
+
+export type LocalAttachmentMetadataPage = Readonly<{
+  /** Exact count of the mediaType-indexed scan collection, not merely returned purpose matches. */
+  totalCount: number;
+  /** Offset into the mediaType-indexed scan collection (or the updatedAt index when unfiltered). */
+  offset: number;
+  items: readonly LocalAttachmentMetadata[];
+  /** Offset of the first unscanned row; null only when this scan collection is exhausted. */
+  nextOffset: number | null;
+  /** Rows admitted within this call's bounded scan, including purpose-filtered rows. */
+  scannedCount: number;
+  /** Sum of contentBase64 UTF-16 code units for the admitted scan rows. */
+  scannedEncodedCharacters: number;
+  contentIntegrityVerified: false;
+}>;
+
+export type ReadAttachmentPurposeMetadataSnapshotOptions = Readonly<{
+  mediaType: string;
+  description: string;
+  unlinkedOnly: true;
+}>;
+
+export type LocalAttachmentPurposeMetadataSnapshot = Readonly<{
+  filter: ReadAttachmentPurposeMetadataSnapshotOptions;
+  items: readonly LocalAttachmentMetadata[];
+  scannedCount: number;
+  scannedEncodedCharacters: number;
+  matchedDeclaredBytes: number;
+  contentIntegrityVerified: false;
+  coverage: "complete";
+  atomicStorageSnapshotVerified: true;
+}>;
+
+export type ReadAttachmentMetadataPageOptions = Readonly<{
+  offset?: number;
+  /** Scan rows per call, not a promise that this many purpose matches exist. */
+  limit?: number;
+  /** Uses the declared mediaType index before any attachment values are read. */
+  mediaType?: string;
+  /** Exact purpose filter applied before the full attachment Schema parse. */
+  description?: string;
+  /** When true, only records whose stored link value is exactly null are purpose matches. */
+  unlinkedOnly?: boolean;
+  /** Bounded work budget measured in contentBase64 UTF-16 code units. */
+  maxEncodedCharacters?: number;
+}>;
+
+const LOCAL_ATTACHMENT_METADATA_PAGE_LIMIT = 16;
+const LOCAL_ATTACHMENT_METADATA_PAGE_MAX_ENCODED_CHARACTERS = 32 * 1024 * 1024;
+const LOCAL_ATTACHMENT_CONTRACT_MAX_ENCODED_CHARACTERS = 4 * Math.ceil(MAX_LOCAL_ATTACHMENT_BYTES / 3);
+const LOCAL_ATTACHMENT_MEDIA_TYPE_PATTERN =
+  /^[a-z0-9][a-z0-9!#$&^_.+-]{0,126}\/[a-z0-9][a-z0-9!#$&^_.+-]{0,126}$/;
+
+type NormalizedAttachmentMetadataPageOptions = Readonly<{
+  offset: number;
+  limit: number;
+  mediaType: string | undefined;
+  description: string | undefined;
+  unlinkedOnly: boolean;
+  maxEncodedCharacters: number;
+}>;
+
+function normalizeAttachmentMetadataPageOptions(
+  options: ReadAttachmentMetadataPageOptions
+): NormalizedAttachmentMetadataPageOptions {
+  const offset = options.offset ?? 0;
+  if (!Number.isSafeInteger(offset) || offset < 0) {
+    throw new RangeError("Attachment metadata page offset must be a non-negative safe integer.");
+  }
+  const limit = options.limit ?? LOCAL_ATTACHMENT_METADATA_PAGE_LIMIT;
+  if (!Number.isSafeInteger(limit) || limit < 1 || limit > LOCAL_ATTACHMENT_METADATA_PAGE_LIMIT) {
+    throw new RangeError(`Attachment metadata page limit must be an integer between 1 and ${LOCAL_ATTACHMENT_METADATA_PAGE_LIMIT}.`);
+  }
+  const maxEncodedCharacters = options.maxEncodedCharacters ??
+    LOCAL_ATTACHMENT_METADATA_PAGE_MAX_ENCODED_CHARACTERS;
+  if (
+    !Number.isSafeInteger(maxEncodedCharacters) ||
+    maxEncodedCharacters < 1 ||
+    maxEncodedCharacters > LOCAL_ATTACHMENT_METADATA_PAGE_MAX_ENCODED_CHARACTERS
+  ) {
+    throw new RangeError(
+      `Attachment metadata encoded-character budget must be an integer between 1 and ${LOCAL_ATTACHMENT_METADATA_PAGE_MAX_ENCODED_CHARACTERS}.`
+    );
+  }
+  const { mediaType, description } = options;
+  if (mediaType !== undefined && (
+    typeof mediaType !== "string" ||
+    !LOCAL_ATTACHMENT_MEDIA_TYPE_PATTERN.test(mediaType)
+  )) {
+    throw new TypeError("Attachment metadata mediaType filter must be a canonical MIME type.");
+  }
+  if (description !== undefined && (
+    typeof description !== "string" ||
+    description.length > 2_000 ||
+    description !== description.trim()
+  )) {
+    throw new TypeError("Attachment metadata description filter must be canonical text of at most 2000 characters.");
+  }
+  const unlinkedOnly = options.unlinkedOnly ?? false;
+  if (typeof unlinkedOnly !== "boolean") {
+    throw new TypeError("Attachment metadata unlinkedOnly filter must be a boolean.");
+  }
+  return { offset, limit, mediaType, description, unlinkedOnly, maxEncodedCharacters };
+}
+
+function storedAttachmentEncodedCharacterLength(input: unknown): number {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) {
+    throw new TypeError("Stored attachment must be an object.");
+  }
+  const descriptor = Object.getOwnPropertyDescriptor(input, "contentBase64");
+  if (!descriptor || !("value" in descriptor) || typeof descriptor.value !== "string") {
+    throw new TypeError("Stored attachment contentBase64 must be an own data string.");
+  }
+  const length = descriptor.value.length;
+  if (length > LOCAL_ATTACHMENT_CONTRACT_MAX_ENCODED_CHARACTERS) {
+    throw new RangeError("Stored attachment exceeds the contract Base64 character limit.");
+  }
+  return length;
+}
+
+function storedAttachmentMatchesMetadataPurpose(
+  input: unknown,
+  options: Pick<NormalizedAttachmentMetadataPageOptions, "description" | "unlinkedOnly">
+): boolean {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) return false;
+  if (options.description !== undefined) {
+    const descriptor = Object.getOwnPropertyDescriptor(input, "description");
+    if (!descriptor || !("value" in descriptor) || descriptor.value !== options.description) return false;
+  }
+  if (options.unlinkedOnly) {
+    const descriptor = Object.getOwnPropertyDescriptor(input, "link");
+    if (!descriptor || !("value" in descriptor) || descriptor.value !== null) return false;
+  }
+  return true;
+}
+
+function localAttachmentMetadata(record: LocalAttachmentRecord): LocalAttachmentMetadata {
+  const { contentBase64: _discardedContentBase64, ...metadata } = record;
+  void _discardedContentBase64;
+  return { ...metadata, contentIntegrity: "unchecked" };
+}
+
 async function prepareLocalAttachmentRecord(
   input: CreateAttachmentInput,
   now: () => string
@@ -1747,9 +1996,20 @@ export class DuplicateKnowledgeDocumentError extends Error {
 export type KnowledgeRepositoryErrorCode =
   | "DOCUMENT_NOT_FOUND"
   | "CITATION_NOT_FOUND"
+  | "KNOWLEDGE_INTEGRITY_COVERAGE_CONFLICT"
+  | "KNOWLEDGE_INTEGRITY_DATABASE_NOT_OPEN"
   | "SOURCE_RIGHTS_NOT_FOUND"
   | "SOURCE_RIGHTS_CONFLICT"
   | "SOURCE_RIGHTS_UPDATE_FORBIDDEN"
+  | "SOURCE_AWARE_RETRIEVAL_BOUNDARY_MISMATCH"
+  | "SOURCE_AWARE_RETRIEVAL_DATABASE_NOT_OPEN"
+  | "SOURCE_AWARE_RETRIEVAL_RESOURCE_LIMIT_EXCEEDED"
+  | "SOURCE_AWARE_RETRIEVAL_SNAPSHOT_REVALIDATION_FAILED"
+  | "SOURCE_AWARE_RETRIEVAL_SNAPSHOT_STALE"
+  | "CITATION_REVIEW_WORKSET_BOUNDARY_MISMATCH"
+  | "CITATION_REVIEW_WORKSET_TARGET_SCHEMA_MISMATCH"
+  | "CITATION_REVIEW_WORKSET_SNAPSHOT_REVALIDATION_FAILED"
+  | "CITATION_REVIEW_WORKSET_SNAPSHOT_STALE"
   | "EDIT_VERSION_CONFLICT"
   | "TARGET_NOT_FOUND"
   | "TARGET_CONTEXT_MISMATCH";
@@ -1810,7 +2070,14 @@ function isSingleChartCitationTarget(
   if (target.kind === "chart_field") {
     return target.caseId === caseId && target.revisionId === revisionId;
   }
-  return target.subjectId.startsWith("bazi.pillar.");
+  if (isReservedSingleChartReportEvidenceSubjectId(target.subjectId)
+    && !isSingleChartReportEvidenceSubjectId(target.subjectId)) {
+    throw new KnowledgeRepositoryError(
+      "TARGET_NOT_FOUND",
+      `Citation references unknown reserved evidence subject ${target.subjectId}.`
+    );
+  }
+  return isSingleChartReportEvidenceSubjectId(target.subjectId);
 }
 
 function assertCaseBundleRelationship(caseRecord: CaseRecord, revisions: readonly RevisionRecord[]): void {
@@ -2119,14 +2386,33 @@ function canonicalEventTimeMigrationInterpretation(
   };
 }
 
-async function verifyEventTimeMigrationReceiptRelationships(
+export type EventTimeMigrationReceiptReplayStatus = Readonly<{
+  receiptId: string;
+  targetStatus: EventTimeContextVerificationStatus;
+}>;
+
+export type EventTimeMigrationReceiptRelationshipVerification = Readonly<{
+  receipts: EventTimeMigrationReceipt[];
+  replayStatuses: EventTimeMigrationReceiptReplayStatus[];
+}>;
+
+/**
+ * Verifies immutable endpoint relationships for stored receipts. A bundled
+ * descriptor is replayed exactly through its own resolver; an unavailable or
+ * unidentified artifact remains explicitly structural and is never retried
+ * against the active resolver.
+ */
+export async function verifyEventTimeMigrationReceiptRelationshipsWithStatus(
   rawReceipts: readonly unknown[],
   events: readonly EventRecord[]
-): Promise<EventTimeMigrationReceipt[]> {
+): Promise<EventTimeMigrationReceiptRelationshipVerification> {
   const eventById = new Map(events.map((record) => [record.id, record]));
-  const receipts = rawReceipts.map((rawReceipt) => eventTimeMigrationReceiptSchema.parse(rawReceipt));
+  const receipts = rawReceipts.map((rawReceipt) =>
+    storedEventTimeMigrationReceiptSchema.parse(rawReceipt)
+  );
   const claimedTargets = new Map<string, string>();
   const claimedInterpretations = new Map<string, string>();
+  const replayStatuses: EventTimeMigrationReceiptReplayStatus[] = [];
 
   for (const receipt of receipts) {
     const previousTarget = claimedTargets.get(receipt.target.recordId);
@@ -2176,39 +2462,45 @@ async function verifyEventTimeMigrationReceiptRelationships(
     }
 
     const targetTimeContext = receipt.target.snapshot.timeContext;
-    if (
-      targetTimeContext.kind === "zoned_minute" &&
-      classifyStoredTimeZoneDatabase(targetTimeContext) === "different_snapshot"
-    ) {
-      if (!sameJsonValue(
-        canonicalEventTimeMigrationInterpretation(targetTimeContext),
-        receipt.interpretation
-      )) {
-        throw new EventTimeMigrationError(
-          "RECEIPT_RELATION_MISMATCH",
-          `Event time migration receipt ${receipt.id} interpretation does not match its frozen target fields and policies.`
-        );
-      }
-      continue;
+    if (targetTimeContext.kind === "legacy_floating") {
+      throw new EventTimeMigrationError(
+        "RECEIPT_RELATION_MISMATCH",
+        `Event time migration receipt ${receipt.id} cannot target legacy_floating semantics.`
+      );
+    }
+    if (!sameJsonValue(
+      canonicalEventTimeMigrationInterpretation(targetTimeContext),
+      receipt.interpretation
+    )) {
+      throw new EventTimeMigrationError(
+        "RECEIPT_RELATION_MISMATCH",
+        `Event time migration receipt ${receipt.id} interpretation does not match its frozen target fields and policies.`
+      );
     }
 
-    let reproduced: EventRecord["timeContext"];
     try {
-      reproduced = resolveEventTimeMigrationInterpretation(receipt.source.snapshot, receipt.interpretation);
+      const verification = await verifyStoredEventTimeContextWithBundledArtifact({
+        datePrecision: receipt.target.snapshot.datePrecision,
+        startDate: receipt.target.snapshot.startDate,
+        endDate: receipt.target.snapshot.endDate,
+        timeContext: targetTimeContext
+      });
+      replayStatuses.push({ receiptId: receipt.id, targetStatus: verification.status });
     } catch (cause) {
       throw new EventTimeMigrationError(
         "RECEIPT_RELATION_MISMATCH",
-        `Event time migration receipt ${receipt.id} cannot replay its stored interpretation.${cause instanceof Error ? ` ${cause.message}` : ""}`
-      );
-    }
-    if (!sameJsonValue(reproduced, targetTimeContext)) {
-      throw new EventTimeMigrationError(
-        "RECEIPT_RELATION_MISMATCH",
-        `Event time migration receipt ${receipt.id} does not reproduce its target context.`
+        `Event time migration receipt ${receipt.id} cannot verify its stored target against the selected historical artifact.${cause instanceof Error ? ` ${cause.message}` : ""}`
       );
     }
   }
-  return receipts;
+  return { receipts, replayStatuses };
+}
+
+async function verifyEventTimeMigrationReceiptRelationships(
+  rawReceipts: readonly unknown[],
+  events: readonly EventRecord[]
+): Promise<EventTimeMigrationReceipt[]> {
+  return (await verifyEventTimeMigrationReceiptRelationshipsWithStatus(rawReceipts, events)).receipts;
 }
 
 function canonicalFullDataSnapshotForDigest(snapshot: FullBackupPayload): FullBackupPayload {
@@ -2248,6 +2540,212 @@ function canonicalFullDataSnapshotForDigest(snapshot: FullBackupPayload): FullBa
       compare(left.createdAt, right.createdAt) || compare(left.id, right.id)
     )
   };
+}
+
+type DeclarativeSnapshotFrame = {
+  target: object;
+  entries: Array<readonly [string, unknown]>;
+  nextEntry: number;
+  state: { target: object; visiting: boolean };
+  depth: number;
+};
+
+type DeclarativeCaptureLimits = Readonly<{
+  maxDepth: number;
+  maxTextCharacters: number;
+  maxValueNodes: number;
+}>;
+
+function declarativeSnapshotPrimitive(value: unknown): value is null | boolean | number | string {
+  return value === null
+    || typeof value === "boolean"
+    || typeof value === "string"
+    || (typeof value === "number" && Number.isFinite(value));
+}
+
+/**
+ * Takes an accessor-free synchronous own-data copy before validation can yield.
+ * JavaScript cannot reliably identify a Proxy, so reflection traps may run;
+ * ordinary accessor property values are never obtained through property access.
+ */
+function captureDeclarativeOwnData(
+  input: unknown,
+  subject: string,
+  limits?: DeclarativeCaptureLimits
+): unknown {
+  if (declarativeSnapshotPrimitive(input) || typeof input !== "object") {
+    throw new TypeError(`${subject} must be an ordinary JSON object.`);
+  }
+
+  const states = new WeakMap<object, { target: object; visiting: boolean }>();
+  let textCharacters = 0;
+  let valueNodes = 1;
+  const assertResourceLimits = (): void => {
+    if (!limits) return;
+    if (textCharacters > limits.maxTextCharacters) {
+      throw new TypeError(`${subject} exceeds ${limits.maxTextCharacters} text characters.`);
+    }
+    if (valueNodes > limits.maxValueNodes) {
+      throw new TypeError(`${subject} exceeds ${limits.maxValueNodes} value nodes.`);
+    }
+  };
+  const accountEntry = (key: string, value: unknown): void => {
+    if (!limits) return;
+    textCharacters += key.length + (typeof value === "string" ? value.length : 0);
+    assertResourceLimits();
+  };
+  const createFrame = (source: object, depth: number): DeclarativeSnapshotFrame => {
+    if (limits && depth > limits.maxDepth) {
+      throw new TypeError(`${subject} exceeds maximum depth ${limits.maxDepth}.`);
+    }
+    const ownKeys = Reflect.ownKeys(source);
+    if (limits) {
+      const dataKeyCount = Array.isArray(source)
+        ? ownKeys.reduce((count, key) => count + (key === "length" ? 0 : 1), 0)
+        : ownKeys.length;
+      valueNodes += dataKeyCount * 2;
+      assertResourceLimits();
+    }
+    const descriptors = Object.getOwnPropertyDescriptors(source);
+    const entries: Array<readonly [string, unknown]> = [];
+    let target: object;
+
+    if (Array.isArray(source)) {
+      if (Object.getPrototypeOf(source) !== Array.prototype) {
+        throw new TypeError(`${subject} arrays must have the ordinary Array prototype.`);
+      }
+      const lengthDescriptor = descriptors.length;
+      if (!lengthDescriptor || !Object.hasOwn(lengthDescriptor, "value")) {
+        throw new TypeError(`${subject} arrays must expose an own data length.`);
+      }
+      const length = lengthDescriptor.value as unknown;
+      if (!Number.isSafeInteger(length) || (length as number) < 0 || (length as number) > 0xffff_ffff) {
+        throw new TypeError(`${subject} arrays must have a valid array length.`);
+      }
+      target = new Array(length as number);
+      for (const key of ownKeys) {
+        if (key === "length") continue;
+        if (typeof key !== "string" || !/^(?:0|[1-9]\d*)$/u.test(key)) {
+          throw new TypeError(`${subject} arrays cannot contain symbols or named properties.`);
+        }
+        const index = Number(key);
+        if (!Number.isSafeInteger(index) || index >= (length as number)) {
+          throw new TypeError(`${subject} arrays contain an invalid index.`);
+        }
+        const descriptor = descriptors[key];
+        if (!descriptor || !descriptor.enumerable || !Object.hasOwn(descriptor, "value")) {
+          throw new TypeError(`${subject} must contain only own enumerable data properties.`);
+        }
+        accountEntry(key, descriptor.value);
+        entries.push([key, descriptor.value]);
+      }
+      if (entries.length !== length) {
+        throw new TypeError(`${subject} arrays must be dense own-data arrays.`);
+      }
+    } else {
+      const prototype = Object.getPrototypeOf(source);
+      if (prototype !== Object.prototype && prototype !== null) {
+        throw new TypeError(`${subject} objects must have an ordinary or null prototype.`);
+      }
+      target = Object.create(null) as object;
+      for (const key of ownKeys) {
+        if (typeof key !== "string") {
+          throw new TypeError(`${subject} objects cannot contain symbol properties.`);
+        }
+        const descriptor = descriptors[key];
+        if (!descriptor || !descriptor.enumerable || !Object.hasOwn(descriptor, "value")) {
+          throw new TypeError(`${subject} must contain only own enumerable data properties.`);
+        }
+        accountEntry(key, descriptor.value);
+        entries.push([key, descriptor.value]);
+      }
+    }
+
+    const state = { target, visiting: true };
+    states.set(source, state);
+    return { target, entries, nextEntry: 0, state, depth };
+  };
+
+  const root = createFrame(input, 1);
+  const stack = [root];
+  while (stack.length > 0) {
+    const frame = stack[stack.length - 1]!;
+    const entry = frame.entries[frame.nextEntry];
+    if (!entry) {
+      frame.state.visiting = false;
+      stack.pop();
+      continue;
+    }
+    frame.nextEntry += 1;
+    const [key, value] = entry;
+    if (declarativeSnapshotPrimitive(value)) {
+      Object.defineProperty(frame.target, key, {
+        configurable: true,
+        enumerable: true,
+        value,
+        writable: true
+      });
+      continue;
+    }
+    if (typeof value !== "object" || value === null) {
+      throw new TypeError(`${subject} must contain only ordinary JSON values.`);
+    }
+    const existing = states.get(value);
+    if (existing?.visiting) {
+      throw new TypeError(`${subject} cannot contain cycles.`);
+    }
+    const child = existing
+      ? null
+      : createFrame(value, frame.depth + 1);
+    const target = existing?.target ?? child!.target;
+    Object.defineProperty(frame.target, key, {
+      configurable: true,
+      enumerable: true,
+      value: target,
+      writable: true
+    });
+    if (child) stack.push(child);
+  }
+
+  return root.target;
+}
+
+/**
+ * Full-backup arrays have no aggregate row limit, so this intentionally adds no
+ * guessed total-record or total-text budget; the existing contracts remain the
+ * only size/shape authority.
+ */
+function captureDeclarativeFullDataSnapshot(input: unknown): FullBackupPayload {
+  return fullBackupPayloadSchema.parse(captureDeclarativeOwnData(input, "Full data snapshot"));
+}
+
+function captureExpectedCurrentPayloadDigest(
+  options: { expectedCurrentPayloadDigest?: string }
+): string | undefined {
+  if (
+    options === null
+    || typeof options !== "object"
+    || Array.isArray(options)
+    || ![Object.prototype, null].includes(Object.getPrototypeOf(options))
+    || Reflect.ownKeys(options).some((key) => key !== "expectedCurrentPayloadDigest")
+  ) {
+    throw new TypeError("Full data replacement options must be a plain exact object.");
+  }
+  const descriptor = Object.getOwnPropertyDescriptor(options, "expectedCurrentPayloadDigest");
+  if (descriptor && !Object.hasOwn(descriptor, "value")) {
+    throw new TypeError("Full data replacement options cannot contain accessors.");
+  }
+  if (descriptor && !descriptor.enumerable) {
+    throw new TypeError("Full data replacement options must use an own enumerable data property.");
+  }
+  const expectedCurrentPayloadDigest = descriptor?.value as unknown;
+  if (
+    expectedCurrentPayloadDigest !== undefined
+    && (typeof expectedCurrentPayloadDigest !== "string" || !LOWERCASE_SHA256.test(expectedCurrentPayloadDigest))
+  ) {
+    throw new TypeError("Expected current full-data payload digest must be a lowercase SHA-256 digest.");
+  }
+  return expectedCurrentPayloadDigest;
 }
 
 function assertFullDataUniqueIds(snapshot: FullBackupPayload): void {
@@ -2294,6 +2792,19 @@ export async function verifyLocalAttachmentIntegrity(input: unknown): Promise<Lo
   return record;
 }
 
+async function verifyLocalAttachmentRecordsSequentially(
+  inputs: readonly unknown[],
+  signal?: AbortSignal
+): Promise<LocalAttachmentRecord[]> {
+  const verified: LocalAttachmentRecord[] = [];
+  for (const input of inputs) {
+    signal?.throwIfAborted();
+    verified.push(await verifyLocalAttachmentIntegrity(input));
+  }
+  signal?.throwIfAborted();
+  return verified;
+}
+
 function canonicalLocalAttachmentLink(link: LocalAttachmentLink | null): string {
   if (link === null) return "null";
   if (link.kind === "research_subject") return `research_subject:${link.subjectId}`;
@@ -2301,6 +2812,422 @@ function canonicalLocalAttachmentLink(link: LocalAttachmentLink | null): string 
   if (link.kind === "research_note") return `research_note:${link.noteId}`;
   if (link.kind === "event") return `event:${link.eventId}`;
   return `knowledge_document:${link.documentId}`;
+}
+
+const UNLINKED_LOCAL_ATTACHMENT_EXACT_IDENTITY_KEYS = [
+  "byteLength",
+  "contentHash",
+  "createdAt",
+  "description",
+  "fileName",
+  "id",
+  "link",
+  "mediaType",
+  "updatedAt"
+] as const;
+const CREATE_ATTACHMENT_INPUT_REQUIRED_KEYS = ["bytes", "fileName", "mediaType"] as const;
+const CREATE_ATTACHMENT_INPUT_OPTIONAL_KEYS = ["description", "link"] as const;
+const LOCAL_ATTACHMENT_EXACT_SOURCE_MAX = 16;
+const UUID_TEXT_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
+const ISO_UTC_DATE_TIME_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/u;
+const TYPED_ARRAY_BYTE_LENGTH_GETTER = Object.getOwnPropertyDescriptor(
+  Object.getPrototypeOf(Uint8Array.prototype) as object,
+  "byteLength"
+)?.get;
+const LOCAL_UINT8_ARRAY_PROTOTYPE = Uint8Array.prototype;
+const LOCAL_UINT8_ARRAY_CONSTRUCTOR = Uint8Array;
+const UINT8_ARRAY_SET = Uint8Array.prototype.set;
+
+function captureExactOwnDataObject(
+  rawInput: unknown,
+  subject: string,
+  requiredKeys: readonly string[],
+  optionalKeys: readonly string[] = []
+): Readonly<Record<string, unknown>> {
+  if (typeof rawInput !== "object" || rawInput === null || Array.isArray(rawInput)) {
+    throw new TypeError(`${subject} must be a plain exact object.`);
+  }
+  const prototype = Object.getPrototypeOf(rawInput);
+  if (prototype !== Object.prototype && prototype !== null) {
+    throw new TypeError(`${subject} must have the ordinary or null prototype.`);
+  }
+  const ownKeys = Reflect.ownKeys(rawInput);
+  if (ownKeys.some((key) => typeof key !== "string")) {
+    throw new TypeError(`${subject} cannot contain symbol properties.`);
+  }
+  const allowed = new Set<string>([...requiredKeys, ...optionalKeys]);
+  const stringKeys = ownKeys as string[];
+  if (
+    stringKeys.some((key) => !allowed.has(key)) ||
+    requiredKeys.some((key) => !stringKeys.includes(key))
+  ) {
+    throw new TypeError(`${subject} must contain exactly its declared keys.`);
+  }
+  const descriptors = Object.getOwnPropertyDescriptors(rawInput);
+  const snapshot: Record<string, unknown> = Object.create(null) as Record<string, unknown>;
+  for (const key of stringKeys) {
+    const descriptor = descriptors[key];
+    if (!descriptor || !descriptor.enumerable || !Object.hasOwn(descriptor, "value")) {
+      throw new TypeError(`${subject} must contain only own enumerable data properties.`);
+    }
+    Object.defineProperty(snapshot, key, {
+      configurable: false,
+      enumerable: true,
+      value: descriptor.value,
+      writable: false
+    });
+  }
+  return Object.freeze(snapshot);
+}
+
+function captureExactAttachmentBytes(rawBytes: unknown): Uint8Array {
+  // ArrayBuffer.isView uses an internal-slot check and rejects Proxy wrappers
+  // without consulting their getPrototypeOf traps.
+  if (!ArrayBuffer.isView(rawBytes)) {
+    throw new TypeError("Attachment bytes must be an ordinary Uint8Array.");
+  }
+  if (
+    Object.getPrototypeOf(rawBytes) !== LOCAL_UINT8_ARRAY_PROTOTYPE ||
+    TYPED_ARRAY_BYTE_LENGTH_GETTER === undefined
+  ) {
+    throw new TypeError("Attachment bytes must be an ordinary Uint8Array.");
+  }
+  // Typed-array indexes are intrinsic data slots, not accessor properties.
+  // Enumerating their descriptors would allocate up to twenty million key
+  // strings under the attachment contract. Treat the local-prototype view as
+  // the binary leaf and copy only its indexed bytes. A captured native
+  // constructor plus native set avoids consulting caller-controlled
+  // constructor or Symbol.species properties.
+  const byteLength = Reflect.apply(TYPED_ARRAY_BYTE_LENGTH_GETTER, rawBytes, []) as number;
+  if (byteLength > MAX_LOCAL_ATTACHMENT_BYTES) {
+    throw new RangeError(`Attachment cannot exceed ${MAX_LOCAL_ATTACHMENT_BYTES} bytes.`);
+  }
+  const copy = new LOCAL_UINT8_ARRAY_CONSTRUCTOR(byteLength);
+  Reflect.apply(UINT8_ARRAY_SET, copy, [rawBytes]);
+  return copy;
+}
+
+function captureExactUnlinkedAttachmentIdentity(
+  rawIdentity: unknown,
+  subject: string
+): UnlinkedLocalAttachmentExactIdentity {
+  const snapshot = captureExactOwnDataObject(
+    rawIdentity,
+    subject,
+    UNLINKED_LOCAL_ATTACHMENT_EXACT_IDENTITY_KEYS
+  );
+  const {
+    id,
+    fileName,
+    mediaType,
+    byteLength,
+    contentHash,
+    description,
+    link,
+    createdAt,
+    updatedAt
+  } = snapshot;
+  if (typeof id !== "string" || !UUID_TEXT_PATTERN.test(id)) {
+    throw new TypeError(`${subject}.id must be a UUID.`);
+  }
+  if (
+    typeof fileName !== "string" ||
+    fileName.length < 1 ||
+    fileName.length > 255 ||
+    fileName !== fileName.trim() ||
+    /[\\/\p{Cc}\p{Cf}]/u.test(fileName) ||
+    fileName === "." ||
+    fileName === ".."
+  ) {
+    throw new TypeError(`${subject}.fileName must be a canonical local attachment file name.`);
+  }
+  if (typeof mediaType !== "string" || !LOCAL_ATTACHMENT_MEDIA_TYPE_PATTERN.test(mediaType)) {
+    throw new TypeError(`${subject}.mediaType must be a canonical MIME type.`);
+  }
+  if (!Number.isSafeInteger(byteLength) || Number(byteLength) < 0 || Number(byteLength) > MAX_LOCAL_ATTACHMENT_BYTES) {
+    throw new TypeError(`${subject}.byteLength must be a valid local attachment byte length.`);
+  }
+  if (typeof contentHash !== "string" || !LOWERCASE_SHA256.test(contentHash)) {
+    throw new TypeError(`${subject}.contentHash must be a lowercase SHA-256 digest.`);
+  }
+  if (
+    typeof description !== "string" ||
+    description.length > 2_000 ||
+    description !== description.trim()
+  ) {
+    throw new TypeError(`${subject}.description must be canonical text of at most 2000 characters.`);
+  }
+  if (link !== null) {
+    throw new TypeError(`${subject}.link must be null.`);
+  }
+  if (
+    typeof createdAt !== "string" ||
+    typeof updatedAt !== "string" ||
+    !ISO_UTC_DATE_TIME_PATTERN.test(createdAt) ||
+    !ISO_UTC_DATE_TIME_PATTERN.test(updatedAt) ||
+    !Number.isFinite(Date.parse(createdAt)) ||
+    !Number.isFinite(Date.parse(updatedAt)) ||
+    Date.parse(updatedAt) < Date.parse(createdAt)
+  ) {
+    throw new TypeError(`${subject} timestamps must be ordered ISO UTC date-times.`);
+  }
+  return Object.freeze({
+    id,
+    fileName,
+    mediaType,
+    byteLength: Number(byteLength),
+    contentHash,
+    description,
+    link: null,
+    createdAt,
+    updatedAt
+  });
+}
+
+function captureExactUnlinkedAttachmentSources(
+  rawSources: readonly UnlinkedLocalAttachmentExactIdentity[]
+): readonly UnlinkedLocalAttachmentExactIdentity[] {
+  if (!Array.isArray(rawSources) || Object.getPrototypeOf(rawSources) !== Array.prototype) {
+    throw new TypeError("Attachment sources must be an ordinary exact array.");
+  }
+  const descriptors = Object.getOwnPropertyDescriptors(rawSources);
+  const lengthDescriptor = Object.getOwnPropertyDescriptor(rawSources, "length");
+  if (!lengthDescriptor || !Object.hasOwn(lengthDescriptor, "value")) {
+    throw new TypeError("Attachment sources must expose an own data length.");
+  }
+  const length = lengthDescriptor.value as unknown;
+  if (!Number.isSafeInteger(length) || Number(length) < 0 || Number(length) > LOCAL_ATTACHMENT_EXACT_SOURCE_MAX) {
+    throw new RangeError(`Attachment sources must contain between 0 and ${LOCAL_ATTACHMENT_EXACT_SOURCE_MAX} identities.`);
+  }
+  const ownKeys = Reflect.ownKeys(rawSources);
+  if (ownKeys.length !== Number(length) + 1) {
+    throw new TypeError("Attachment sources must be a dense exact array without named properties.");
+  }
+  const sources: UnlinkedLocalAttachmentExactIdentity[] = [];
+  const sourceIds = new Set<string>();
+  for (let index = 0; index < Number(length); index += 1) {
+    const descriptor = descriptors[String(index)];
+    if (!descriptor || !descriptor.enumerable || !Object.hasOwn(descriptor, "value")) {
+      throw new TypeError("Attachment sources must be a dense own-data array.");
+    }
+    const source = captureExactUnlinkedAttachmentIdentity(
+      descriptor.value,
+      `Attachment source ${index}`
+    );
+    if (sourceIds.has(source.id)) {
+      throw new TypeError(`Attachment sources cannot repeat id ${source.id}.`);
+    }
+    sourceIds.add(source.id);
+    sources.push(source);
+  }
+  for (const key of ownKeys) {
+    if (key === "length") continue;
+    if (typeof key !== "string" || !/^(?:0|[1-9]\d*)$/u.test(key) || Number(key) >= Number(length)) {
+      throw new TypeError("Attachment sources cannot contain symbols or named properties.");
+    }
+  }
+  return Object.freeze(sources);
+}
+
+function captureExactUnlinkedCreateAttachmentInput(
+  rawInput: CreateAttachmentInput
+): CreateAttachmentInput {
+  const snapshot = captureExactOwnDataObject(
+    rawInput,
+    "Attachment create input",
+    CREATE_ATTACHMENT_INPUT_REQUIRED_KEYS,
+    CREATE_ATTACHMENT_INPUT_OPTIONAL_KEYS
+  );
+  if (snapshot.link !== undefined && snapshot.link !== null) {
+    throw new TypeError("Exact-source attachment successors must be unlinked.");
+  }
+  return Object.freeze({
+    fileName: snapshot.fileName as string,
+    mediaType: snapshot.mediaType as string,
+    bytes: captureExactAttachmentBytes(snapshot.bytes),
+    ...(Object.hasOwn(snapshot, "description")
+      ? { description: snapshot.description as string | undefined }
+      : {}),
+    link: null
+  });
+}
+
+function matchesExactUnlinkedAttachmentIdentity(
+  record: LocalAttachmentRecord,
+  identity: UnlinkedLocalAttachmentExactIdentity
+): boolean {
+  return record.id === identity.id &&
+    record.fileName === identity.fileName &&
+    record.mediaType === identity.mediaType &&
+    record.byteLength === identity.byteLength &&
+    record.contentHash === identity.contentHash &&
+    record.description === identity.description &&
+    record.link === null &&
+    record.createdAt === identity.createdAt &&
+    record.updatedAt === identity.updatedAt;
+}
+
+async function readVerifiedExactUnlinkedAttachment(
+  table: EntityTable<LocalAttachmentRecord, "id">,
+  identity: UnlinkedLocalAttachmentExactIdentity,
+  operation: "source" | "delete"
+): Promise<LocalAttachmentRecord> {
+  const raw = await table.get(identity.id);
+  if (raw === undefined) {
+    throw new LocalAttachmentIntegrityError(
+      "ATTACHMENT_NOT_FOUND",
+      `Attachment ${identity.id} does not exist for exact ${operation}.`
+    );
+  }
+  const verified = await Dexie.waitFor(verifyLocalAttachmentIntegrity(raw));
+  if (!matchesExactUnlinkedAttachmentIdentity(verified, identity)) {
+    throw new LocalAttachmentIntegrityError(
+      "ATTACHMENT_CHANGED",
+      `Attachment ${identity.id} changed after its exact identity was captured.`
+    );
+  }
+  return verified;
+}
+
+async function findExistingAttachmentForIdempotentCreate(
+  table: EntityTable<LocalAttachmentRecord, "id">,
+  record: LocalAttachmentRecord
+): Promise<LocalAttachmentRecord | null> {
+  const candidateIds = await table
+    .where("mediaType")
+    .equals(record.mediaType)
+    .limit(LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_SCAN_ROWS + 1)
+    .primaryKeys();
+  if (candidateIds.length > LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_SCAN_ROWS) {
+    throw new LocalAttachmentPurposeMetadataSnapshotLimitError(
+      "SCAN_ROW_LIMIT_EXCEEDED",
+      `Attachment idempotency lookup cannot scan more than ${LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_SCAN_ROWS} same-media rows.`
+    );
+  }
+  const targetLink = canonicalLocalAttachmentLink(record.link);
+  let scannedEncodedCharacters = 0;
+  let existing: LocalAttachmentRecord | null = null;
+  for (const id of candidateIds) {
+    const raw = await table.get(id);
+    if (raw === undefined) {
+      throw new LocalAttachmentIntegrityError(
+        "ATTACHMENT_NOT_FOUND",
+        `Attachment ${String(id)} disappeared inside a write transaction.`
+      );
+    }
+    const encodedCharacters = storedAttachmentEncodedCharacterLength(raw);
+    if (
+      scannedEncodedCharacters + encodedCharacters >
+      LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_ENCODED_CHARACTERS
+    ) {
+      throw new LocalAttachmentPurposeMetadataSnapshotLimitError(
+        "SCAN_ENCODED_CHARACTER_LIMIT_EXCEEDED",
+        "Attachment idempotency lookup exceeded its Base64 encoded-character scan budget."
+      );
+    }
+    scannedEncodedCharacters += encodedCharacters;
+    const hashDescriptor = Object.getOwnPropertyDescriptor(raw, "contentHash");
+    if (!hashDescriptor || !("value" in hashDescriptor) || hashDescriptor.value !== record.contentHash) {
+      continue;
+    }
+    const candidate = localAttachmentRecordSchema.parse(raw);
+    if (
+      candidate.description !== record.description ||
+      canonicalLocalAttachmentLink(candidate.link) !== targetLink
+    ) continue;
+    if (
+      existing === null ||
+      candidate.createdAt < existing.createdAt ||
+      (candidate.createdAt === existing.createdAt && candidate.id < existing.id)
+    ) {
+      existing = candidate;
+    }
+  }
+  return existing === null
+    ? null
+    : Dexie.waitFor(verifyLocalAttachmentIntegrity(existing));
+}
+
+type ExactUnlinkedAttachmentCreateAdmission = Readonly<{
+  existing: LocalAttachmentRecord | null;
+  sameMediaRows: number;
+  scannedEncodedCharacters: number;
+  exactPurposeMatches: number;
+  matchedDeclaredBytes: number;
+}>;
+
+async function inspectExactUnlinkedAttachmentCreateAdmission(
+  table: EntityTable<LocalAttachmentRecord, "id">,
+  record: LocalAttachmentRecord
+): Promise<ExactUnlinkedAttachmentCreateAdmission> {
+  const candidateIds = await table
+    .where("mediaType")
+    .equals(record.mediaType)
+    .limit(LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_SCAN_ROWS + 1)
+    .primaryKeys();
+  assertLocalAttachmentPurposeCapacityTotals({
+    sameMediaRows: candidateIds.length,
+    scannedEncodedCharacters: 0,
+    exactPurposeMatches: 0,
+    matchedDeclaredBytes: 0
+  });
+
+  let scannedEncodedCharacters = 0;
+  let exactPurposeMatches = 0;
+  let matchedDeclaredBytes = 0;
+  let existing: LocalAttachmentRecord | null = null;
+  for (const id of candidateIds) {
+    const raw = await table.get(id);
+    if (raw === undefined) {
+      throw new LocalAttachmentIntegrityError(
+        "ATTACHMENT_NOT_FOUND",
+        `Attachment ${String(id)} disappeared inside a write transaction.`
+      );
+    }
+    const encodedCharacters = storedAttachmentEncodedCharacterLength(raw);
+    const nextScannedEncodedCharacters = scannedEncodedCharacters + encodedCharacters;
+    assertLocalAttachmentPurposeCapacityTotals({
+      sameMediaRows: candidateIds.length,
+      scannedEncodedCharacters: nextScannedEncodedCharacters,
+      exactPurposeMatches,
+      matchedDeclaredBytes
+    });
+    scannedEncodedCharacters = nextScannedEncodedCharacters;
+    if (!storedAttachmentMatchesMetadataPurpose(raw, {
+      description: record.description,
+      unlinkedOnly: true
+    })) continue;
+
+    const candidate = localAttachmentRecordSchema.parse(raw);
+    const nextExactPurposeMatches = exactPurposeMatches + 1;
+    const nextMatchedDeclaredBytes = matchedDeclaredBytes + candidate.byteLength;
+    assertLocalAttachmentPurposeCapacityTotals({
+      sameMediaRows: candidateIds.length,
+      scannedEncodedCharacters,
+      exactPurposeMatches: nextExactPurposeMatches,
+      matchedDeclaredBytes: nextMatchedDeclaredBytes
+    });
+    exactPurposeMatches = nextExactPurposeMatches;
+    matchedDeclaredBytes = nextMatchedDeclaredBytes;
+    if (candidate.contentHash !== record.contentHash) continue;
+    if (
+      existing === null ||
+      candidate.createdAt < existing.createdAt ||
+      (candidate.createdAt === existing.createdAt && candidate.id < existing.id)
+    ) {
+      existing = candidate;
+    }
+  }
+
+  return Object.freeze({
+    existing: existing === null
+      ? null
+      : await Dexie.waitFor(verifyLocalAttachmentIntegrity(existing)),
+    sameMediaRows: candidateIds.length,
+    scannedEncodedCharacters,
+    exactPurposeMatches,
+    matchedDeclaredBytes
+  });
 }
 
 type LocalAttachmentReferenceIndex = {
@@ -2379,16 +3306,43 @@ async function assertStoredLocalAttachmentLink(
   );
 }
 
-async function deleteAttachmentsMatching(
+type LocalAttachmentLinkDeleteSelection = Readonly<{
+  researchSubjectIds?: readonly string[];
+  revisionCaseIds?: readonly string[];
+  revisionIds?: readonly string[];
+  researchNoteIds?: readonly string[];
+  eventIds?: readonly string[];
+  knowledgeDocumentIds?: readonly string[];
+}>;
+
+function uniqueCodeUnitSorted(values: readonly string[]): string[] {
+  return [...new Set(values)].sort((left, right) => left < right ? -1 : left > right ? 1 : 0);
+}
+
+async function deleteAttachmentsByLinkIndexes(
   table: EntityTable<LocalAttachmentRecord, "id">,
-  shouldDelete: (link: LocalAttachmentLink | null) => boolean
+  selection: LocalAttachmentLinkDeleteSelection
 ): Promise<void> {
-  const attachments = await table.toArray();
-  const ids = attachments
-    .map((attachment) => localAttachmentRecordSchema.parse(attachment))
-    .filter((attachment) => shouldDelete(attachment.link))
-    .map((attachment) => attachment.id);
-  if (ids.length > 0) await table.bulkDelete(ids);
+  const ids = new Set<string>();
+  const collect = async (index: string, rawValues: readonly string[] | undefined): Promise<void> => {
+    const values = uniqueCodeUnitSorted(rawValues ?? []);
+    if (values.length === 0) return;
+    const matchingIds = await table.where(index).anyOf(values).primaryKeys();
+    for (const id of matchingIds) ids.add(id);
+  };
+
+  // These are declared attachment indexes in every supported local schema.
+  // Querying primary keys avoids materializing Base64 bodies merely to decide
+  // which linked records must be removed by an enclosing lifecycle transaction.
+  await collect("link.subjectId", selection.researchSubjectIds);
+  await collect("link.caseId", selection.revisionCaseIds);
+  await collect("link.revisionId", selection.revisionIds);
+  await collect("link.noteId", selection.researchNoteIds);
+  await collect("link.eventId", selection.eventIds);
+  await collect("link.documentId", selection.knowledgeDocumentIds);
+
+  const sortedIds = uniqueCodeUnitSorted([...ids]);
+  if (sortedIds.length > 0) await table.bulkDelete(sortedIds);
 }
 
 async function pruneCitationTargets(
@@ -2618,6 +3572,166 @@ export class CaseRepository {
     return { researchNotes, events, savedViews, citations, attachments };
   }
 
+  /** Exact sixteen-partition counts from one read transaction; no stored values are materialized. */
+  async readLocalDataOverview(): Promise<LocalDataOverview> {
+    return this.database.transaction(
+      "r",
+      [
+        this.database.cases,
+        this.database.revisions,
+        this.database.candidateSets,
+        this.database.researchNotes,
+        this.database.events,
+        this.database.savedViews,
+        this.database.knowledgeDocuments,
+        this.database.citations,
+        this.database.sourceRights,
+        this.database.researcherProfiles,
+        this.database.appSettings,
+        this.database.attachments,
+        this.database.ruleRegistry,
+        this.database.tzdbMigrationReceipts,
+        this.database.eventTimeMigrationReceipts,
+        ...(this.database.targetSchemaVersion >= 15
+          ? [this.database.revisionCalculationReceipts]
+          : [])
+      ],
+      async () => {
+        const [
+          cases,
+          revisions,
+          candidateSets,
+          researchNotes,
+          events,
+          savedViews,
+          knowledgeDocuments,
+          citations,
+          sourceRights,
+          researcherProfiles,
+          appSettings,
+          attachments,
+          ruleRegistry,
+          tzdbMigrationReceipts,
+          eventTimeMigrationReceipts,
+          revisionCalculationReceipts
+        ] = await Promise.all([
+          this.database.cases.count(),
+          this.database.revisions.count(),
+          this.database.candidateSets.count(),
+          this.database.researchNotes.count(),
+          this.database.events.count(),
+          this.database.savedViews.count(),
+          this.database.knowledgeDocuments.count(),
+          this.database.citations.count(),
+          this.database.sourceRights.count(),
+          this.database.researcherProfiles.count(),
+          this.database.appSettings.count(),
+          this.database.attachments.count(),
+          this.database.ruleRegistry.count(),
+          this.database.tzdbMigrationReceipts.count(),
+          this.database.eventTimeMigrationReceipts.count(),
+          this.database.targetSchemaVersion >= 15
+            ? this.database.revisionCalculationReceipts.count()
+            : Promise.resolve(0)
+        ]);
+        return {
+          counts: {
+            cases,
+            revisions,
+            candidateSets,
+            researchNotes,
+            events,
+            savedViews,
+            knowledgeDocuments,
+            citations,
+            sourceRights,
+            researcherProfiles,
+            appSettings,
+            attachments,
+            ruleRegistry,
+            tzdbMigrationReceipts,
+            eventTimeMigrationReceipts,
+            revisionCalculationReceipts
+          }
+        };
+      }
+    );
+  }
+
+  /**
+   * Captures exactly the partitions consumed by research-query execution.
+   * Every read stays inside one readonly transaction; an AbortSignal aborts
+   * that native transaction and is rechecked across the asynchronous capture
+   * boundary. The research-query engine owns the single strict integrity and
+   * relationship verification pass over this projection.
+   */
+  async readResearchQuerySnapshot(
+    options: ReadResearchQuerySnapshotOptions = {}
+  ): Promise<ResearchQueryStorageSnapshot> {
+    const signal = options.signal;
+    const receiptLedgerAvailable = this.database.targetSchemaVersion >= 15;
+    let transaction: Transaction | null = null;
+    const abortTransaction = () => transaction?.abort();
+    signal?.throwIfAborted();
+    signal?.addEventListener("abort", abortTransaction, { once: true });
+    try {
+      const snapshot = await this.database.transaction(
+        "r",
+        [
+          this.database.cases,
+          this.database.revisions,
+          this.database.candidateSets,
+          this.database.researchNotes,
+          this.database.events,
+          this.database.knowledgeDocuments,
+          ...(receiptLedgerAvailable ? [this.database.revisionCalculationReceipts] : [])
+        ],
+        async () => {
+          transaction = Dexie.currentTransaction;
+          signal?.throwIfAborted();
+          const [
+            cases,
+            revisions,
+            candidateSets,
+            researchNotes,
+            events,
+            knowledgeDocuments,
+            revisionCalculationReceipts
+          ] = await Promise.all([
+            this.database.cases.toArray(),
+            this.database.revisions.toArray(),
+            this.database.candidateSets.toArray(),
+            this.database.researchNotes.toArray(),
+            this.database.events.toArray(),
+            this.database.knowledgeDocuments.toArray(),
+            receiptLedgerAvailable
+              ? this.database.revisionCalculationReceipts.toArray()
+              : Promise.resolve([])
+          ]);
+          signal?.throwIfAborted();
+          return {
+            cases,
+            revisions,
+            candidateSets,
+            researchNotes,
+            events,
+            knowledgeDocuments,
+            revisionCalculationReceiptLedgerStatus:
+              receiptLedgerAvailable ? "available" as const : "schema_unavailable" as const,
+            revisionCalculationReceipts
+          };
+        }
+      );
+      signal?.throwIfAborted();
+      return snapshot;
+    } catch (reason) {
+      signal?.throwIfAborted();
+      throw reason;
+    } finally {
+      signal?.removeEventListener("abort", abortTransaction);
+    }
+  }
+
   async readResearcherProfile(): Promise<LocalResearcherProfileRecord | null> {
     const record = await this.database.researcherProfiles.get(LOCAL_RESEARCHER_PROFILE_ID);
     return record ? localResearcherProfileRecordSchema.parse(record) : null;
@@ -2685,13 +3799,181 @@ export class CaseRepository {
       ],
       async () => {
         const records = await this.database.attachments.toArray();
-        const verified = await Dexie.waitFor(Promise.all(records.map((record) => verifyLocalAttachmentIntegrity(record))));
+        const verified = await Dexie.waitFor(verifyLocalAttachmentRecordsSequentially(records));
         for (const record of verified) await assertStoredLocalAttachmentLink(this.database, record);
         return verified.sort((left, right) =>
           right.updatedAt.localeCompare(left.updatedAt) || left.id.localeCompare(right.id)
         );
       }
     );
+  }
+
+  /**
+   * Bounded metadata scan over inline attachment records. IndexedDB still has to
+   * clone each selected value because metadata and Base64 share one record, so
+   * this method locates keys first and then reads values strictly one at a time.
+   *
+   * Unfiltered scans are ordered by updatedAt descending (and IndexedDB primary
+   * key descending for equal index keys). A mediaType scan follows that exact
+   * index and therefore uses primary-key ascending order within the equal key.
+   */
+  async readAttachmentMetadataPage(
+    rawOptions: ReadAttachmentMetadataPageOptions = {}
+  ): Promise<LocalAttachmentMetadataPage> {
+    const options = normalizeAttachmentMetadataPageOptions(rawOptions);
+    return this.database.transaction(
+      "r",
+      [
+        this.database.attachments,
+        this.database.cases,
+        this.database.revisions,
+        this.database.candidateSets,
+        this.database.researchNotes,
+        this.database.events,
+        this.database.knowledgeDocuments
+      ],
+      async () => {
+        const mediaType = options.mediaType;
+        const createScanCollection = () => mediaType === undefined
+          ? this.database.attachments.orderBy("updatedAt").reverse()
+          : this.database.attachments.where("mediaType").equals(mediaType);
+        const [totalCount, candidateIds] = await Promise.all([
+          createScanCollection().count(),
+          createScanCollection()
+            .offset(options.offset)
+            .limit(options.limit + 1)
+            .primaryKeys()
+        ]);
+
+        const items: LocalAttachmentMetadata[] = [];
+        let scannedCount = 0;
+        let scannedEncodedCharacters = 0;
+        for (const id of candidateIds.slice(0, options.limit)) {
+          const raw = await this.database.attachments.get(id);
+          if (raw === undefined) {
+            throw new LocalAttachmentIntegrityError(
+              "ATTACHMENT_NOT_FOUND",
+              `Attachment ${String(id)} disappeared inside a read transaction.`
+            );
+          }
+          const encodedCharacters = storedAttachmentEncodedCharacterLength(raw);
+          if (scannedEncodedCharacters + encodedCharacters > options.maxEncodedCharacters) break;
+          scannedCount += 1;
+          scannedEncodedCharacters += encodedCharacters;
+          if (!storedAttachmentMatchesMetadataPurpose(raw, options)) continue;
+          const record = localAttachmentRecordSchema.parse(raw);
+          await assertStoredLocalAttachmentLink(this.database, record);
+          items.push(localAttachmentMetadata(record));
+        }
+
+        const scannedThroughOffset = options.offset + scannedCount;
+        return {
+          totalCount,
+          offset: options.offset,
+          items,
+          nextOffset: scannedThroughOffset < totalCount ? scannedThroughOffset : null,
+          scannedCount,
+          scannedEncodedCharacters,
+          contentIntegrityVerified: false
+        };
+      }
+    );
+  }
+
+  /**
+   * One-transaction, fail-closed purpose snapshot for consumers that must know
+   * whether they covered the complete bounded mediaType collection. Inline
+   * Base64 still enters JavaScript one record at a time under the legacy schema;
+   * it is never returned, decoded, hashed, or retained by this projection.
+   */
+  async readAttachmentPurposeMetadataSnapshot(
+    rawOptions: ReadAttachmentPurposeMetadataSnapshotOptions
+  ): Promise<LocalAttachmentPurposeMetadataSnapshot> {
+    if (!rawOptions || rawOptions.unlinkedOnly !== true) {
+      throw new TypeError("Attachment purpose snapshots require unlinkedOnly=true.");
+    }
+    const normalized = normalizeAttachmentMetadataPageOptions({
+      mediaType: rawOptions.mediaType,
+      description: rawOptions.description,
+      unlinkedOnly: true
+    });
+    if (normalized.mediaType === undefined || normalized.description === undefined) {
+      throw new TypeError("Attachment purpose snapshots require exact mediaType and description filters.");
+    }
+    const filter = {
+      mediaType: normalized.mediaType,
+      description: normalized.description,
+      unlinkedOnly: true
+    } as const;
+
+    return this.database.transaction("r", this.database.attachments, async () => {
+      const candidateIds = await this.database.attachments
+        .where("mediaType")
+        .equals(filter.mediaType)
+        .limit(LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_SCAN_ROWS + 1)
+        .primaryKeys();
+      if (candidateIds.length > LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_SCAN_ROWS) {
+        throw new LocalAttachmentPurposeMetadataSnapshotLimitError(
+          "SCAN_ROW_LIMIT_EXCEEDED",
+          `Attachment purpose snapshot cannot scan more than ${LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_SCAN_ROWS} indexed rows.`
+        );
+      }
+
+      const items: LocalAttachmentMetadata[] = [];
+      let scannedEncodedCharacters = 0;
+      let matchedDeclaredBytes = 0;
+      for (const id of candidateIds) {
+        const raw = await this.database.attachments.get(id);
+        if (raw === undefined) {
+          throw new LocalAttachmentIntegrityError(
+            "ATTACHMENT_NOT_FOUND",
+            `Attachment ${String(id)} disappeared inside a read transaction.`
+          );
+        }
+        const encodedCharacters = storedAttachmentEncodedCharacterLength(raw);
+        if (
+          scannedEncodedCharacters + encodedCharacters >
+          LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_ENCODED_CHARACTERS
+        ) {
+          throw new LocalAttachmentPurposeMetadataSnapshotLimitError(
+            "SCAN_ENCODED_CHARACTER_LIMIT_EXCEEDED",
+            "Attachment purpose snapshot exceeded its Base64 encoded-character scan budget."
+          );
+        }
+        scannedEncodedCharacters += encodedCharacters;
+        if (!storedAttachmentMatchesMetadataPurpose(raw, filter)) continue;
+
+        const record = localAttachmentRecordSchema.parse(raw);
+        if (items.length >= LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_MATCHES) {
+          throw new LocalAttachmentPurposeMetadataSnapshotLimitError(
+            "MATCH_LIMIT_EXCEEDED",
+            `Attachment purpose snapshot cannot retain more than ${LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_MATCHES} matches.`
+          );
+        }
+        if (
+          matchedDeclaredBytes + record.byteLength >
+          LOCAL_ATTACHMENT_PURPOSE_METADATA_MAX_MATCHED_BYTES
+        ) {
+          throw new LocalAttachmentPurposeMetadataSnapshotLimitError(
+            "MATCHED_BYTE_LIMIT_EXCEEDED",
+            "Attachment purpose snapshot exceeded its matched declared-byte budget."
+          );
+        }
+        matchedDeclaredBytes += record.byteLength;
+        items.push(localAttachmentMetadata(record));
+      }
+
+      return {
+        filter,
+        items,
+        scannedCount: candidateIds.length,
+        scannedEncodedCharacters,
+        matchedDeclaredBytes,
+        contentIntegrityVerified: false,
+        coverage: "complete",
+        atomicStorageSnapshotVerified: true
+      };
+    });
   }
 
   async createAttachment(input: CreateAttachmentInput): Promise<LocalAttachmentRecord> {
@@ -2718,7 +4000,7 @@ export class CaseRepository {
   async createAttachmentOnce(input: CreateAttachmentInput): Promise<CreateAttachmentOnceResult> {
     // Byte copying, Base64 encoding and Web Crypto hashing intentionally happen
     // before opening IndexedDB. The write transaction only performs the atomic
-    // content-addressed lookup, relationship check and possible insertion.
+    // bounded content-addressed lookup, relationship check and possible insertion.
     const record = await prepareLocalAttachmentRecord(input, this.now);
     return this.database.transaction(
       "rw",
@@ -2732,25 +4014,13 @@ export class CaseRepository {
         this.database.knowledgeDocuments
       ],
       async () => {
-        const rawCandidates = await this.database.attachments
-          .filter((candidate) => candidate.contentHash === record.contentHash)
-          .toArray();
-        const targetLink = canonicalLocalAttachmentLink(record.link);
-        const matches = rawCandidates
-          .map((candidate) => localAttachmentRecordSchema.parse(candidate))
-          .filter((candidate) =>
-            candidate.description === record.description &&
-            candidate.mediaType === record.mediaType &&
-            canonicalLocalAttachmentLink(candidate.link) === targetLink
-          )
-          .sort((left, right) =>
-            left.createdAt.localeCompare(right.createdAt) || left.id.localeCompare(right.id)
-          );
-        const existing = matches[0];
+        const existing = await findExistingAttachmentForIdempotentCreate(
+          this.database.attachments,
+          record
+        );
         if (existing) {
-          const verified = await Dexie.waitFor(verifyLocalAttachmentIntegrity(existing));
-          await assertStoredLocalAttachmentLink(this.database, verified);
-          return { record: verified, created: false };
+          await assertStoredLocalAttachmentLink(this.database, existing);
+          return { record: existing, created: false };
         }
 
         await assertStoredLocalAttachmentLink(this.database, record);
@@ -2758,6 +4028,48 @@ export class CaseRepository {
         return { record, created: true };
       }
     );
+  }
+
+  /**
+   * Creates one immutable unlinked successor only while every caller-selected
+   * unlinked source still has its complete captured metadata and byte digest.
+   * Inputs are synchronously reduced to accessor-free exact snapshots before
+   * hashing or opening IndexedDB. v13 uses only the existing attachment store;
+   * no mutation-state capability is consulted or emulated here.
+   */
+  async createAttachmentOnceWithExactUnlinkedSources(
+    rawInput: CreateAttachmentInput,
+    rawSources: readonly UnlinkedLocalAttachmentExactIdentity[]
+  ): Promise<CreateAttachmentOnceResult> {
+    const input = captureExactUnlinkedCreateAttachmentInput(rawInput);
+    const sources = captureExactUnlinkedAttachmentSources(rawSources);
+    const record = await prepareLocalAttachmentRecord(input, this.now);
+    return this.database.transaction("rw", this.database.attachments, async () => {
+      for (const source of sources) {
+        await readVerifiedExactUnlinkedAttachment(
+          this.database.attachments,
+          source,
+          "source"
+        );
+      }
+
+      const admission = await inspectExactUnlinkedAttachmentCreateAdmission(
+        this.database.attachments,
+        record
+      );
+      if (admission.existing) return { record: admission.existing, created: false };
+
+      assertExactUnlinkedAttachmentCreateCapacity({
+        sameMediaRows: admission.sameMediaRows,
+        scannedEncodedCharacters: admission.scannedEncodedCharacters,
+        exactPurposeMatches: admission.exactPurposeMatches,
+        matchedDeclaredBytes: admission.matchedDeclaredBytes,
+        successorEncodedCharacters: storedAttachmentEncodedCharacterLength(record),
+        successorDeclaredBytes: record.byteLength
+      });
+      await this.database.attachments.add(record);
+      return { record, created: true };
+    });
   }
 
   async readAttachmentBytes(
@@ -2813,6 +4125,24 @@ export class CaseRepository {
         );
       }
       await this.database.attachments.delete(id);
+    });
+  }
+
+  /** Deletes exactly one verified unlinked immutable copy, never merely an id/hash pair. */
+  async deleteExactUnlinkedAttachment(
+    rawIdentity: UnlinkedLocalAttachmentExactIdentity
+  ): Promise<void> {
+    const identity = captureExactUnlinkedAttachmentIdentity(
+      rawIdentity,
+      "Attachment delete identity"
+    );
+    await this.database.transaction("rw", this.database.attachments, async () => {
+      await readVerifiedExactUnlinkedAttachment(
+        this.database.attachments,
+        identity,
+        "delete"
+      );
+      await this.database.attachments.delete(identity.id);
     });
   }
 
@@ -2958,18 +4288,32 @@ export class CaseRepository {
           );
         }
 
-        const candidateSet = unknownHourCandidateResultSchema.parse(structuredClone(input.candidateSet));
+        const structurallyStoredCandidateSet = storedUnknownHourCandidateResultSchema.parse(
+          input.candidateSet
+        );
+        if (structurallyStoredCandidateSet.tzdbVersion === source.candidateSet.tzdbVersion) {
+          throw new CandidateSetTzdbMigrationError(
+            "SAME_TZDB",
+            candidateSetTzdbBoundaryMessage("SAME_TZDB")
+          );
+        }
         const expectedTargetSnapshotId = input.expectedTargetSnapshotId ?? RUNTIME_TZDB_VERSION;
+        const targetSnapshotIssue = candidateSetTargetSnapshotIssue(
+          structurallyStoredCandidateSet,
+          expectedTargetSnapshotId
+        );
+        if (targetSnapshotIssue !== null) {
+          throw new CandidateSetTzdbMigrationError(targetSnapshotIssue.code, targetSnapshotIssue.message);
+        }
+        const candidateSet = await Dexie.waitFor(
+          verifyUnknownHourCandidateResultIntegrity(structurallyStoredCandidateSet)
+        );
         const boundaryMismatch = candidateSetTzdbDerivationBoundaryMismatch(source.candidateSet, candidateSet);
         if (boundaryMismatch !== null) {
           throw new CandidateSetTzdbMigrationError(
             boundaryMismatch,
             candidateSetTzdbBoundaryMessage(boundaryMismatch)
           );
-        }
-        const targetSnapshotIssue = candidateSetTargetSnapshotIssue(candidateSet, expectedTargetSnapshotId);
-        if (targetSnapshotIssue !== null) {
-          throw new CandidateSetTzdbMigrationError(targetSnapshotIssue.code, targetSnapshotIssue.message);
         }
         const existingReceipts = (await this.database.tzdbMigrationReceipts.toArray())
           .map((rawReceipt) => tzdbMigrationReceiptSchema.parse(rawReceipt));
@@ -3009,7 +4353,7 @@ export class CaseRepository {
             `CandidateSet lineage for ${source.id} already contains snapshot ${candidateSetSnapshotDigest}.`
           );
         }
-        const target = await Dexie.waitFor(this.verifyCandidateSetRecord(candidateSetRecordSchema.parse({
+        const target = await Dexie.waitFor(this.verifyCandidateSetRecord({
           ...source,
           id: crypto.randomUUID(),
           deletedAt: null,
@@ -3017,7 +4361,7 @@ export class CaseRepository {
           updatedAt: timestamp,
           candidateSet,
           snapshotDigest: candidateSetSnapshotDigest
-        })));
+        }));
         const fingerprintRecord = await Dexie.waitFor(candidateFingerprintRecord(target));
         const comparison = buildCandidateSetTzdbComparison(source.candidateSet, target.candidateSet);
         const receipt = tzdbMigrationReceiptSchema.parse({
@@ -3299,13 +4643,13 @@ export class CaseRepository {
       if (current.deletedAt !== null) {
         throw new ResearchSubjectLifecycleError("SUBJECT_IN_TRASH", "Restore the candidate set before editing it.");
       }
-      const next = candidateSetRecordSchema.parse({
+      const next = await Dexie.waitFor(this.verifyCandidateSetRecord({
         ...current,
         alias: input.alias,
         tags: input.tags,
         notes: input.notes,
         updatedAt: new Date().toISOString()
-      });
+      }));
       await this.database.candidateSets.put(next);
       return next;
     });
@@ -3340,11 +4684,11 @@ export class CaseRepository {
           "Restore the candidate set before changing its favorite state."
         );
       }
-      const next = candidateSetRecordSchema.parse({
+      const next = await Dexie.waitFor(this.verifyCandidateSetRecord({
         ...current,
         favorite,
         updatedAt: new Date().toISOString()
-      });
+      }));
       await this.database.candidateSets.put(next);
       return next;
     });
@@ -3370,7 +4714,11 @@ export class CaseRepository {
       const current = await Dexie.waitFor(this.verifyCandidateSetRecord(raw));
       if (current.deletedAt !== null) return current;
       const timestamp = new Date().toISOString();
-      const next = candidateSetRecordSchema.parse({ ...current, deletedAt: timestamp, updatedAt: timestamp });
+      const next = await Dexie.waitFor(this.verifyCandidateSetRecord({
+        ...current,
+        deletedAt: timestamp,
+        updatedAt: timestamp
+      }));
       await this.database.candidateSets.put(next);
       return next;
     });
@@ -3398,7 +4746,11 @@ export class CaseRepository {
       if (current.deletedAt === null) {
         throw new ResearchSubjectLifecycleError("SUBJECT_NOT_TRASHED", "The candidate set is not in the trash.");
       }
-      const next = candidateSetRecordSchema.parse({ ...current, deletedAt: null, updatedAt: new Date().toISOString() });
+      const next = await Dexie.waitFor(this.verifyCandidateSetRecord({
+        ...current,
+        deletedAt: null,
+        updatedAt: new Date().toISOString()
+      }));
       await this.database.candidateSets.put(next);
       return next;
     });
@@ -3696,7 +5048,7 @@ export class CaseRepository {
           .filter((record) => isSingleChartNote(record, revisionId))
           .sort((left, right) => left.createdAt.localeCompare(right.createdAt) || left.id.localeCompare(right.id));
         const events = rawEvents
-          .map((record) => parseVerifiedEventRecord(record))
+          .map((record) => parseStoredEventRecord(record))
           .filter((record) => isSingleChartEvent(record, revisionId))
           .sort((left, right) => (left.startDate ?? "9999").localeCompare(right.startDate ?? "9999")
             || left.createdAt.localeCompare(right.createdAt)
@@ -3901,10 +5253,11 @@ export class CaseRepository {
         this.database.eventTimeMigrationReceipts
       ],
       async () => {
-        const candidateSet = await this.database.candidateSets.get(candidateSetId);
-        if (!candidateSet) {
+        const rawCandidateSet = await this.database.candidateSets.get(candidateSetId);
+        if (!rawCandidateSet) {
           throw new ResearchSubjectLifecycleError("SUBJECT_NOT_FOUND", "The candidate set does not exist.");
         }
+        const candidateSet = await Dexie.waitFor(this.verifyCandidateSetRecord(rawCandidateSet));
         if (candidateSet.deletedAt === null) {
           throw new ResearchSubjectLifecycleError(
             "SUBJECT_NOT_TRASHED",
@@ -3922,11 +5275,11 @@ export class CaseRepository {
           (target.kind === "event" && eventIdSet.has(target.eventId)) ||
           (target.kind === "chart_field" && target.caseId === candidateSetId)
         );
-        await deleteAttachmentsMatching(this.database.attachments, (link) => link !== null && (
-          (link.kind === "research_subject" && link.subjectId === candidateSetId) ||
-          (link.kind === "research_note" && noteIdSet.has(link.noteId)) ||
-          (link.kind === "event" && eventIdSet.has(link.eventId))
-        ));
+        await deleteAttachmentsByLinkIndexes(this.database.attachments, {
+          researchSubjectIds: [candidateSetId],
+          researchNoteIds: noteIds,
+          eventIds
+        });
         await deleteEventTimeMigrationReceiptsForEvents(this.database.eventTimeMigrationReceipts, eventIds);
         await this.database.researchNotes.where("caseId").equals(candidateSetId).delete();
         await this.database.events.where("caseId").equals(candidateSetId).delete();
@@ -4079,9 +5432,9 @@ export class CaseRepository {
             : Promise.resolve([])
         ]);
         await Dexie.waitFor(Promise.all(savedViews.map((record) => parseVerifiedSavedViewRecord(record))));
-        const verifiedAttachments = await Dexie.waitFor(Promise.all(
-          attachments.map((record) => verifyLocalAttachmentIntegrity(record))
-        ));
+        const verifiedAttachments = await Dexie.waitFor(
+          verifyLocalAttachmentRecordsSequentially(attachments, signal)
+        );
         const references: LocalAttachmentReferenceIndex = {
           subjectIds: new Set([...cases.map((record) => record.id), ...candidateSets.map((record) => record.id)]),
           caseIds: new Set(cases.map((record) => record.id)),
@@ -4103,7 +5456,7 @@ export class CaseRepository {
         const tzdbMigrationReceipts = await Dexie.waitFor(
           verifyTzdbMigrationReceiptRelationships(tzdbMigrationReceiptsRaw, verifiedCandidateSets)
         );
-        const verifiedEvents = events.map((record) => parseVerifiedEventRecord(record));
+        const verifiedEvents = events.map((record) => parseStoredEventRecord(record));
         const eventTimeMigrationReceipts = await Dexie.waitFor(
           verifyEventTimeMigrationReceiptRelationships(eventTimeMigrationReceiptsRaw, verifiedEvents)
         );
@@ -4235,7 +5588,9 @@ export class CaseRepository {
         if (conflictingIds.length > 0) {
           throw new CoreDataIdentityConflictError(conflictingIds);
         }
-        const retainedCandidateSets = await this.database.candidateSets.toArray();
+        const retainedCandidateSets = await Dexie.waitFor(Promise.all(
+          (await this.database.candidateSets.toArray()).map((record) => this.verifyCandidateSetRecord(record))
+        ));
         const retainedCandidateFingerprints = await Dexie.waitFor(Promise.all(
           retainedCandidateSets.map((candidateSet) => candidateFingerprintRecord(candidateSet))
         ));
@@ -4256,9 +5611,11 @@ export class CaseRepository {
    * research data and therefore is not subject to CoreDataReplaceBlockedError.
    */
   async replaceFullDataSnapshot(
-    snapshot: FullBackupPayload,
+    callerOwnedSnapshot: FullBackupPayload,
     options: { expectedCurrentPayloadDigest?: string } = {}
   ): Promise<void> {
+    const snapshot = captureDeclarativeFullDataSnapshot(callerOwnedSnapshot);
+    const expectedCurrentPayloadDigest = captureExpectedCurrentPayloadDigest(options);
     if (
       this.database.targetSchemaVersion < 15 &&
       snapshot.revisionCalculationReceipts.length > 0
@@ -4269,6 +5626,14 @@ export class CaseRepository {
       );
     }
     assertFullDataUniqueIds(snapshot);
+    // Snapshot every stored Event and receipt before the first asynchronous
+    // verification step so a caller cannot swap historical time semantics
+    // while another partition is being checked.
+    const events = snapshot.events.map((record) => parseStoredEventRecord(record));
+    const structurallyStoredEventTimeMigrationReceipts =
+      snapshot.eventTimeMigrationReceipts.map((record) =>
+        storedEventTimeMigrationReceiptSchema.parse(record)
+      );
     const ruleRegistry = parseAndValidateRuleRegistryRecords(snapshot.ruleRegistry);
     const cases = snapshot.cases.map((record) => caseRecordSchema.parse(record));
     const revisions = await Promise.all(snapshot.revisions.map((record) => verifyRevisionRecordIntegrity(record)));
@@ -4301,13 +5666,18 @@ export class CaseRepository {
       candidateSets
     );
     const researchNotes = snapshot.researchNotes.map((record) => researchNoteRecordSchema.parse(record));
-    const events = snapshot.events.map((record) => parseVerifiedEventRecord(record));
+    await Promise.all(events.map((event) => verifyStoredEventTimeContextWithBundledArtifact({
+      datePrecision: event.datePrecision,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      timeContext: event.timeContext
+    })));
     const eventTimeMigrationReceipts = await verifyEventTimeMigrationReceiptRelationships(
-      snapshot.eventTimeMigrationReceipts,
+      structurallyStoredEventTimeMigrationReceipts,
       events
     );
     const savedViews = await Promise.all(snapshot.savedViews.map((record) => parseVerifiedSavedViewRecord(record)));
-    const attachments = await Promise.all(snapshot.attachments.map((record) => verifyLocalAttachmentIntegrity(record)));
+    const attachments = await verifyLocalAttachmentRecordsSequentially(snapshot.attachments);
     if (snapshot.researcherProfiles.length > 1 || snapshot.appSettings.length > 1) {
       throw new Error("Local singleton partitions may contain at most one record each.");
     }
@@ -4315,9 +5685,17 @@ export class CaseRepository {
       localResearcherProfileRecordSchema.parse(record)
     );
     const appSettings = snapshot.appSettings.map((record) => localAppSettingsRecordSchema.parse(record));
-    const knowledgeDocuments = await Promise.all(
-      snapshot.knowledgeDocuments.map((record) => verifyKnowledgeDocumentIntegrity(record))
-    );
+    const knowledgeDocuments: KnowledgeDocumentRecord[] = [];
+    const citationVerifierByDocumentId = new Map<
+      string,
+      Awaited<ReturnType<typeof createKnowledgeDocumentCitationIntegrityVerifier>>
+    >();
+    for (const record of snapshot.knowledgeDocuments) {
+      const verifier = await createKnowledgeDocumentCitationIntegrityVerifier(record);
+      const knowledgeDocument = knowledgeDocumentRecordSchema.parse(verifier.document);
+      knowledgeDocuments.push(knowledgeDocument);
+      citationVerifierByDocumentId.set(knowledgeDocument.id, verifier);
+    }
     const documentById = new Map(knowledgeDocuments.map((record) => [record.id, record]));
     if (new Set(knowledgeDocuments.map((record) => record.contentHash)).size !== knowledgeDocuments.length) {
       throw new DuplicateKnowledgeDocumentError();
@@ -4357,19 +5735,20 @@ export class CaseRepository {
         );
       }
     }
-    const citations = await Promise.all(snapshot.citations.map((record) => {
+    const citations = snapshot.citations.map((record) => {
       const parsed = citationRecordSchema.parse(record);
-      const knowledgeDocument = documentById.get(parsed.documentId);
-      if (!knowledgeDocument) throw new KnowledgeRepositoryError("DOCUMENT_NOT_FOUND", `引用 ${parsed.id} 的资料不存在。`);
-      return verifyCitationIntegrity(parsed, knowledgeDocument);
-    }));
-    const subjectIds = new Set([...cases.map((record) => record.id), ...candidateSets.map((record) => record.id)]);
+      const verifier = citationVerifierByDocumentId.get(parsed.documentId);
+      if (!verifier) throw new KnowledgeRepositoryError("DOCUMENT_NOT_FOUND", `引用 ${parsed.id} 的资料不存在。`);
+      return citationRecordSchema.parse(verifier.verifyCitation(parsed));
+    });
+    const caseIds = new Set(cases.map((record) => record.id));
+    const subjectIds = new Set([...caseIds, ...candidateSets.map((record) => record.id)]);
     const revisionById = new Map(revisions.map((record) => [record.id, record]));
     const noteIds = new Set(researchNotes.map((record) => record.id));
     const eventIds = new Set(events.map((record) => record.id));
     const attachmentReferences: LocalAttachmentReferenceIndex = {
       subjectIds,
-      caseIds: new Set(cases.map((record) => record.id)),
+      caseIds,
       revisionById,
       noteIds,
       eventIds,
@@ -4398,7 +5777,7 @@ export class CaseRepository {
         if (target.kind === "chart_field") {
           const revision = revisionById.get(target.revisionId);
           if (
-            !subjectIds.has(target.caseId) ||
+            !caseIds.has(target.caseId) ||
             !revision ||
             revision.caseId !== target.caseId ||
             !hasOwnDataPath(revision.facts, target.field)
@@ -4437,7 +5816,7 @@ export class CaseRepository {
           : [])
       ],
       async () => {
-        if (options.expectedCurrentPayloadDigest) {
+        if (expectedCurrentPayloadDigest !== undefined) {
           const [
             currentCases,
             currentRevisions,
@@ -4494,7 +5873,7 @@ export class CaseRepository {
             eventTimeMigrationReceipts: currentEventTimeMigrationReceipts,
             revisionCalculationReceipts: currentRevisionCalculationReceipts
           })));
-          if (currentDigest !== options.expectedCurrentPayloadDigest) {
+          if (currentDigest !== expectedCurrentPayloadDigest) {
             throw new FullDataReplaceConflictError();
           }
         }
@@ -4584,12 +5963,13 @@ export class CaseRepository {
           (target.kind === "event" && eventIdSet.has(target.eventId)) ||
           (target.kind === "chart_field" && (target.caseId === caseId || revisionIdSet.has(target.revisionId)))
         );
-        await deleteAttachmentsMatching(this.database.attachments, (link) => link !== null && (
-          (link.kind === "research_subject" && link.subjectId === caseId) ||
-          (link.kind === "revision" && (link.caseId === caseId || revisionIdSet.has(link.revisionId))) ||
-          (link.kind === "research_note" && noteIdSet.has(link.noteId)) ||
-          (link.kind === "event" && eventIdSet.has(link.eventId))
-        ));
+        await deleteAttachmentsByLinkIndexes(this.database.attachments, {
+          researchSubjectIds: [caseId],
+          revisionCaseIds: [caseId],
+          revisionIds,
+          researchNoteIds: noteIds,
+          eventIds
+        });
          await deleteEventTimeMigrationReceiptsForEvents(this.database.eventTimeMigrationReceipts, eventIds);
          if (this.database.targetSchemaVersion >= 15) {
            await this.database.revisionCalculationReceipts
@@ -4833,11 +6213,627 @@ export type ResearchSearchPage = {
   nextCursor: ResearchSubjectPageCursor | null;
 };
 
+const RESEARCH_JOURNAL_INDEX_RECORD_LIMIT = 10_000;
+const RESEARCH_JOURNAL_RECEIPT_RECORD_LIMIT = 512;
+const RESEARCH_JOURNAL_TARGET_KEY_BATCH_SIZE = 128;
+const RESEARCH_JOURNAL_CITATION_INDEX_ENTRY_LIMIT = RESEARCH_JOURNAL_INDEX_RECORD_LIMIT * 100;
+const RESEARCH_JOURNAL_RECEIPT_INDEX_ENTRY_LIMIT = RESEARCH_JOURNAL_RECEIPT_RECORD_LIMIT * 2;
+const RESEARCH_JOURNAL_CITATION_KNOWLEDGE_UTF8_BUDGET = 64 * 1024 * 1024;
+const RESEARCH_JOURNAL_RECEIPT_UTF8_BUDGET = 8 * 1024 * 1024;
+const RESEARCH_JOURNAL_UUID = /^(?:00000000-0000-0000-0000-000000000000|[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/iu;
+
+export const RESEARCH_JOURNAL_SNAPSHOT_PROFILE = Object.freeze({
+  transactionMode: "readonly" as const,
+  storeNames: Object.freeze([
+    "cases",
+    "candidateSets",
+    "researchNotes",
+    "events",
+    "citations",
+    "knowledgeDocuments",
+    "eventTimeMigrationReceipts"
+  ]),
+  maxResearchNoteRecords: RESEARCH_JOURNAL_INDEX_RECORD_LIMIT,
+  maxEventRecords: RESEARCH_JOURNAL_INDEX_RECORD_LIMIT,
+  maxCitationRecords: RESEARCH_JOURNAL_INDEX_RECORD_LIMIT,
+  maxEventTimeMigrationReceiptRecords: RESEARCH_JOURNAL_RECEIPT_RECORD_LIMIT,
+  maxCitationIndexEntries: RESEARCH_JOURNAL_CITATION_INDEX_ENTRY_LIMIT,
+  maxEventTimeMigrationReceiptIndexEntries: RESEARCH_JOURNAL_RECEIPT_INDEX_ENTRY_LIMIT,
+  targetKeyBatchSize: RESEARCH_JOURNAL_TARGET_KEY_BATCH_SIZE,
+  maxCitationAndKnowledgeUtf8Bytes: RESEARCH_JOURNAL_CITATION_KNOWLEDGE_UTF8_BUDGET,
+  maxReceiptUtf8Bytes: RESEARCH_JOURNAL_RECEIPT_UTF8_BUDGET,
+  maximumKnowledgeDocumentDigestConcurrency: 1 as const,
+  citationDiscovery: "exact_target_keys_multi_entry_index" as const,
+  citationIndexInvariantDependency: "startup_gate_verified_target_keys_index" as const,
+  detectsOutOfBandPostStartupMissingCitationIndexWrites: false as const,
+  receiptIndexInvariantDependency: "startup_gate_verified_event_time_receipt_endpoint_indexes" as const,
+  detectsOutOfBandPostStartupMissingReceiptIndexWrites: false as const
+});
+
+export type ResearchJournalAuxiliaryErrorCode =
+  | "CITATION_DATA_INVALID"
+  | "CITATION_RESOURCE_LIMIT_EXCEEDED"
+  | "RECEIPT_DATA_INVALID"
+  | "RECEIPT_RESOURCE_LIMIT_EXCEEDED";
+
+export type ResearchJournalAuxiliaryIndex<T> =
+  | Readonly<{ status: "loaded"; records: readonly T[] }>
+  | Readonly<{ status: "error"; code: ResearchJournalAuxiliaryErrorCode; message: string }>;
+
+type ResearchJournalAuxiliaryError = Extract<
+  ResearchJournalAuxiliaryIndex<never>,
+  { status: "error" }
+>;
+
+export type ResearchJournalSnapshot = Readonly<{
+  caseId: string;
+  profile: typeof RESEARCH_JOURNAL_SNAPSHOT_PROFILE;
+  notes: readonly ResearchNoteRecord[];
+  events: readonly EventRecord[];
+  citationIndex: ResearchJournalAuxiliaryIndex<CitationRecord>;
+  receiptIndex: ResearchJournalAuxiliaryIndex<EventTimeMigrationReceipt>;
+  boundary: Readonly<{
+    atomicStorageSnapshotVerified: true;
+    caseIdBound: true;
+    transactionMode: "readonly";
+    mutationEpochRead: false;
+    mutationEpochRevalidationPerformed: false;
+    storageMutationPerformed: false;
+    schemaOrReleaseIdentityMutationPerformed: false;
+    expertTruthClaimed: false;
+    publicReleaseAuthorized: false;
+    formalActivationAllowed: false;
+  }>;
+}>;
+
+export type ReadResearchJournalSnapshotOptions = Readonly<{
+  signal?: AbortSignal;
+}>;
+
+export type ResearchJournalSnapshotErrorCode =
+  | "RESEARCH_JOURNAL_DATABASE_NOT_OPEN"
+  | "RESEARCH_JOURNAL_CORE_RESOURCE_LIMIT_EXCEEDED"
+  | "RESEARCH_JOURNAL_CORE_DATA_INVALID";
+
+export class ResearchJournalSnapshotError extends Error {
+  constructor(readonly code: ResearchJournalSnapshotErrorCode, message: string) {
+    super(message);
+    this.name = "ResearchJournalSnapshotError";
+  }
+}
+
+function utf8ByteLength(value: string): number {
+  let bytes = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    const codeUnit = value.charCodeAt(index);
+    if (codeUnit <= 0x7f) bytes += 1;
+    else if (codeUnit <= 0x7ff) bytes += 2;
+    else if (codeUnit >= 0xd800 && codeUnit <= 0xdbff && index + 1 < value.length) {
+      const next = value.charCodeAt(index + 1);
+      if (next >= 0xdc00 && next <= 0xdfff) {
+        bytes += 4;
+        index += 1;
+      } else {
+        bytes += 3;
+      }
+    } else bytes += 3;
+  }
+  return bytes;
+}
+
+function deepFreezeResearchJournalValue<T>(value: T, seen = new WeakSet<object>()): T {
+  if (value === null || (typeof value !== "object" && typeof value !== "function")) return value;
+  const object = value as object;
+  if (seen.has(object)) return value;
+  seen.add(object);
+  for (const key of Reflect.ownKeys(object)) {
+    deepFreezeResearchJournalValue(Reflect.get(object, key), seen);
+  }
+  return Object.freeze(value);
+}
+
+function researchJournalAuxiliaryError(
+  code: ResearchJournalAuxiliaryErrorCode,
+  message: string
+): ResearchJournalAuxiliaryError {
+  return Object.freeze({ status: "error" as const, code, message });
+}
+
+function compareJournalRecordRecency(
+  left: { id: string; updatedAt: string },
+  right: { id: string; updatedAt: string }
+): number {
+  return right.updatedAt.localeCompare(left.updatedAt) || left.id.localeCompare(right.id);
+}
+
 export class ResearchRepository {
   constructor(
     readonly database = new ResearchDatabase(),
     private readonly now: () => string = () => new Date().toISOString()
   ) {}
+
+  /**
+   * Captures the complete default Research Journal projection for one Case from
+   * one explicitly-opened readonly IndexedDB transaction. Citation discovery
+   * intentionally depends on the startup-verified targetKeys index invariant;
+   * this focused reader cannot discover an out-of-band missing-index write made
+   * after that gate.
+   */
+  async readResearchJournalSnapshot(
+    caseId: string,
+    options: ReadResearchJournalSnapshotOptions = {}
+  ): Promise<ResearchJournalSnapshot> {
+    if (
+      options === null
+      || typeof options !== "object"
+      || Array.isArray(options)
+      || ![Object.prototype, null].includes(Object.getPrototypeOf(options))
+      || Reflect.ownKeys(options).some((key) => key !== "signal")
+    ) {
+      throw new TypeError("Research Journal snapshot options must be a plain exact object.");
+    }
+    const signalDescriptor = Object.getOwnPropertyDescriptor(options, "signal");
+    if (
+      signalDescriptor
+      && (!Object.hasOwn(signalDescriptor, "value") || signalDescriptor.get || signalDescriptor.set)
+    ) {
+      throw new TypeError("Research Journal snapshot options cannot contain accessors.");
+    }
+    const signal = signalDescriptor?.value as AbortSignal | undefined;
+    if (
+      signal !== undefined
+      && (
+        signal === null
+        || typeof signal !== "object"
+        || typeof signal.throwIfAborted !== "function"
+        || typeof signal.addEventListener !== "function"
+        || typeof signal.removeEventListener !== "function"
+      )
+    ) {
+      throw new TypeError("Research Journal snapshot signal must be an AbortSignal.");
+    }
+    if (!this.database.isOpen()) {
+      throw new ResearchJournalSnapshotError(
+        "RESEARCH_JOURNAL_DATABASE_NOT_OPEN",
+        "研究日志快照要求数据库已由启动流程显式打开；本方法不会隐式建库或升级。"
+      );
+    }
+
+    type CapturedCitationPartition =
+      | Readonly<{
+          status: "captured";
+          citations: CitationRecord[];
+          documents: KnowledgeDocumentRecord[];
+        }>
+      | ResearchJournalAuxiliaryError;
+    type CapturedReceiptPartition =
+      | Readonly<{
+          status: "captured";
+          receipts: EventTimeMigrationReceipt[];
+          relatedEvents: EventRecord[];
+        }>
+      | ResearchJournalAuxiliaryError;
+
+    let transaction: Transaction | null = null;
+    const abortTransaction = () => {
+      if (!transaction) return;
+      try {
+        transaction.abort();
+      } catch {
+        // A signal can arrive after native commit but before the Dexie promise is
+        // delivered. The signal check below remains authoritative in that race.
+      }
+    };
+    signal?.throwIfAborted();
+    signal?.addEventListener("abort", abortTransaction, { once: true });
+    try {
+      const captured = await this.database.transaction(
+        "r",
+        [
+          this.database.cases,
+          this.database.candidateSets,
+          this.database.researchNotes,
+          this.database.events,
+          this.database.citations,
+          this.database.knowledgeDocuments,
+          this.database.eventTimeMigrationReceipts
+        ],
+        async () => {
+          transaction = Dexie.currentTransaction;
+          signal?.throwIfAborted();
+          await this.requireCase(caseId, { allowTrashed: true });
+
+          const [rawNotes, rawEvents] = await Promise.all([
+            this.database.researchNotes
+              .where("caseId")
+              .equals(caseId)
+              .limit(RESEARCH_JOURNAL_INDEX_RECORD_LIMIT + 1)
+              .toArray(),
+            this.database.events
+              .where("caseId")
+              .equals(caseId)
+              .limit(RESEARCH_JOURNAL_INDEX_RECORD_LIMIT + 1)
+              .toArray()
+          ]);
+          signal?.throwIfAborted();
+          if (
+            rawNotes.length > RESEARCH_JOURNAL_INDEX_RECORD_LIMIT
+            || rawEvents.length > RESEARCH_JOURNAL_INDEX_RECORD_LIMIT
+          ) {
+            throw new ResearchJournalSnapshotError(
+              "RESEARCH_JOURNAL_CORE_RESOURCE_LIMIT_EXCEEDED",
+              `研究日志拒绝读取超过 ${RESEARCH_JOURNAL_INDEX_RECORD_LIMIT} 条笔记或事件的 Case。`
+            );
+          }
+
+          const noteIds = new Set<string>();
+          const notes = rawNotes.map((raw, index) => {
+            const parsed = researchNoteRecordSchema.safeParse(raw);
+            if (!parsed.success || parsed.data.caseId !== caseId || noteIds.has(parsed.data.id)) {
+              throw new ResearchJournalSnapshotError(
+                "RESEARCH_JOURNAL_CORE_DATA_INVALID",
+                `研究日志笔记索引第 ${index + 1} 条不符合当前 Case 的严格契约。`
+              );
+            }
+            noteIds.add(parsed.data.id);
+            return parsed.data;
+          }).sort(compareJournalRecordRecency);
+          const eventIds = new Set<string>();
+          const events = rawEvents.map((raw, index) => {
+            let parsed: EventRecord;
+            try {
+              parsed = parseStoredEventRecord(raw);
+            } catch (cause) {
+              throw new ResearchJournalSnapshotError(
+                "RESEARCH_JOURNAL_CORE_DATA_INVALID",
+                `研究日志事件索引第 ${index + 1} 条不符合当前契约。`
+              );
+            }
+            if (parsed.caseId !== caseId || eventIds.has(parsed.id)) {
+              throw new ResearchJournalSnapshotError(
+                "RESEARCH_JOURNAL_CORE_DATA_INVALID",
+                `研究日志事件索引第 ${index + 1} 条不属于当前 Case 或包含重复 ID。`
+              );
+            }
+            eventIds.add(parsed.id);
+            return parsed;
+          }).sort(compareJournalRecordRecency);
+
+          const targetKeys = [
+            ...notes.map((note) => `research_note:${note.id}`),
+            ...events.map((event) => `event:${event.id}`)
+          ].sort(compareCanonicalCodeUnits);
+          const exactTargetKeys = new Set(targetKeys);
+          const citationIds = new Set<string>();
+          let scannedCitationIndexEntries = 0;
+          let citationPartitionError: ResearchJournalAuxiliaryError | null = null;
+          for (
+            let offset = 0;
+            offset < targetKeys.length && citationPartitionError === null;
+            offset += RESEARCH_JOURNAL_TARGET_KEY_BATCH_SIZE
+          ) {
+            signal?.throwIfAborted();
+            const batch = targetKeys.slice(offset, offset + RESEARCH_JOURNAL_TARGET_KEY_BATCH_SIZE);
+            const remainingEntries = RESEARCH_JOURNAL_CITATION_INDEX_ENTRY_LIMIT - scannedCitationIndexEntries;
+            const rawIds = await this.database.citations
+              .where("targetKeys")
+              .anyOf(batch)
+              .limit(remainingEntries + 1)
+              .primaryKeys();
+            if (rawIds.length > remainingEntries) {
+              citationPartitionError = researchJournalAuxiliaryError(
+                "CITATION_RESOURCE_LIMIT_EXCEEDED",
+                "当前 Case 关联的知识引用索引扫描超过安全上限。"
+              );
+              break;
+            }
+            scannedCitationIndexEntries += rawIds.length;
+            for (const rawId of rawIds) {
+              if (typeof rawId !== "string" || !RESEARCH_JOURNAL_UUID.test(rawId)) {
+                citationPartitionError = researchJournalAuxiliaryError(
+                  "CITATION_DATA_INVALID",
+                  "知识引用索引返回了不符合契约的主键。"
+                );
+                break;
+              }
+              citationIds.add(rawId);
+              if (citationIds.size > RESEARCH_JOURNAL_INDEX_RECORD_LIMIT) {
+                citationPartitionError = researchJournalAuxiliaryError(
+                  "CITATION_RESOURCE_LIMIT_EXCEEDED",
+                  `当前 Case 关联的知识引用超过 ${RESEARCH_JOURNAL_INDEX_RECORD_LIMIT} 条安全上限。`
+                );
+                break;
+              }
+            }
+          }
+
+          const citations: CitationRecord[] = [];
+          const documents: KnowledgeDocumentRecord[] = [];
+          let citationKnowledgeUtf8Bytes = 0;
+          if (citationPartitionError === null) {
+            for (const citationId of [...citationIds].sort(compareCanonicalCodeUnits)) {
+              signal?.throwIfAborted();
+              const rawCitation = await this.database.citations.get(citationId);
+              if (!rawCitation) {
+                citationPartitionError = researchJournalAuxiliaryError(
+                  "CITATION_DATA_INVALID",
+                  "知识引用索引主键无法在同一只读事务中复现。"
+                );
+                break;
+              }
+              const parsed = citationRecordSchema.safeParse(rawCitation);
+              if (
+                !parsed.success
+                || !parsed.data.targetKeys.some((targetKey) => exactTargetKeys.has(targetKey))
+              ) {
+                citationPartitionError = researchJournalAuxiliaryError(
+                  "CITATION_DATA_INVALID",
+                  "知识引用不符合契约或没有当前 Case 的精确目标。"
+                );
+                break;
+              }
+              citationKnowledgeUtf8Bytes += utf8ByteLength(JSON.stringify(parsed.data));
+              if (citationKnowledgeUtf8Bytes > RESEARCH_JOURNAL_CITATION_KNOWLEDGE_UTF8_BUDGET) {
+                citationPartitionError = researchJournalAuxiliaryError(
+                  "CITATION_RESOURCE_LIMIT_EXCEEDED",
+                  "当前 Case 关联的知识引用超过引用与资料总文本预算。"
+                );
+                break;
+              }
+              citations.push(parsed.data);
+            }
+          }
+
+          if (citationPartitionError === null) {
+            const documentIds = [...new Set(citations.map((citation) => citation.documentId))]
+              .sort(compareCanonicalCodeUnits);
+            for (const documentId of documentIds) {
+              signal?.throwIfAborted();
+              const rawDocument = await this.database.knowledgeDocuments.get(documentId);
+              if (!rawDocument) {
+                citationPartitionError = researchJournalAuxiliaryError(
+                  "CITATION_DATA_INVALID",
+                  "当前 Case 的知识引用缺少绑定资料。"
+                );
+                break;
+              }
+              const parsed = knowledgeDocumentRecordSchema.safeParse(rawDocument);
+              if (!parsed.success || parsed.data.id !== documentId) {
+                citationPartitionError = researchJournalAuxiliaryError(
+                  "CITATION_DATA_INVALID",
+                  "当前 Case 的引用资料不符合严格契约。"
+                );
+                break;
+              }
+              citationKnowledgeUtf8Bytes += utf8ByteLength(JSON.stringify(parsed.data));
+              if (citationKnowledgeUtf8Bytes > RESEARCH_JOURNAL_CITATION_KNOWLEDGE_UTF8_BUDGET) {
+                citationPartitionError = researchJournalAuxiliaryError(
+                  "CITATION_RESOURCE_LIMIT_EXCEEDED",
+                  "当前 Case 关联的知识引用与资料正文超过 64 MiB 总预算。"
+                );
+                break;
+              }
+              documents.push(parsed.data);
+            }
+          }
+          const citationCapture: CapturedCitationPartition = citationPartitionError ?? Object.freeze({
+            status: "captured" as const,
+            citations,
+            documents
+          });
+
+          const receiptIds = new Set<string>();
+          let scannedReceiptIndexEntries = 0;
+          let receiptPartitionError: ResearchJournalAuxiliaryError | null = null;
+          const sortedEventIds = [...eventIds].sort(compareCanonicalCodeUnits);
+          for (const indexName of ["source.recordId", "target.recordId"] as const) {
+            for (
+              let offset = 0;
+              offset < sortedEventIds.length && receiptPartitionError === null;
+              offset += RESEARCH_JOURNAL_TARGET_KEY_BATCH_SIZE
+            ) {
+              signal?.throwIfAborted();
+              const batch = sortedEventIds.slice(offset, offset + RESEARCH_JOURNAL_TARGET_KEY_BATCH_SIZE);
+              const remainingEntries = RESEARCH_JOURNAL_RECEIPT_INDEX_ENTRY_LIMIT - scannedReceiptIndexEntries;
+              const rawIds = await this.database.eventTimeMigrationReceipts
+                .where(indexName)
+                .anyOf(batch)
+                .limit(remainingEntries + 1)
+                .primaryKeys();
+              if (rawIds.length > remainingEntries) {
+                receiptPartitionError = researchJournalAuxiliaryError(
+                  "RECEIPT_RESOURCE_LIMIT_EXCEEDED",
+                  "当前 Case 关联的事件时间迁移凭证索引扫描超过安全上限。"
+                );
+                break;
+              }
+              scannedReceiptIndexEntries += rawIds.length;
+              for (const rawId of rawIds) {
+                if (typeof rawId !== "string" || !RESEARCH_JOURNAL_UUID.test(rawId)) {
+                  receiptPartitionError = researchJournalAuxiliaryError(
+                    "RECEIPT_DATA_INVALID",
+                    "事件时间迁移凭证索引返回了不符合契约的主键。"
+                  );
+                  break;
+                }
+                receiptIds.add(rawId);
+                if (receiptIds.size > RESEARCH_JOURNAL_RECEIPT_RECORD_LIMIT) {
+                  receiptPartitionError = researchJournalAuxiliaryError(
+                    "RECEIPT_RESOURCE_LIMIT_EXCEEDED",
+                    `当前 Case 关联的事件时间迁移凭证超过 ${RESEARCH_JOURNAL_RECEIPT_RECORD_LIMIT} 条安全上限。`
+                  );
+                  break;
+                }
+              }
+            }
+          }
+
+          const receipts: EventTimeMigrationReceipt[] = [];
+          const relatedEventById = new Map(events.map((record) => [record.id, record]));
+          let receiptUtf8Bytes = 0;
+          if (receiptPartitionError === null) {
+            for (const receiptId of [...receiptIds].sort(compareCanonicalCodeUnits)) {
+              signal?.throwIfAborted();
+              const rawReceipt = await this.database.eventTimeMigrationReceipts.get(receiptId);
+              if (!rawReceipt) {
+                receiptPartitionError = researchJournalAuxiliaryError(
+                  "RECEIPT_DATA_INVALID",
+                  "事件时间迁移凭证索引主键无法在同一只读事务中复现。"
+                );
+                break;
+              }
+              const parsed = storedEventTimeMigrationReceiptSchema.safeParse(rawReceipt);
+              if (!parsed.success) {
+                receiptPartitionError = researchJournalAuxiliaryError(
+                  "RECEIPT_DATA_INVALID",
+                  "事件时间迁移凭证不符合严格契约。"
+                );
+                break;
+              }
+              receiptUtf8Bytes += utf8ByteLength(JSON.stringify(parsed.data));
+              if (receiptUtf8Bytes > RESEARCH_JOURNAL_RECEIPT_UTF8_BUDGET) {
+                receiptPartitionError = researchJournalAuxiliaryError(
+                  "RECEIPT_RESOURCE_LIMIT_EXCEEDED",
+                  "当前 Case 关联的事件时间迁移凭证超过有界文本预算。"
+                );
+                break;
+              }
+              receipts.push(parsed.data);
+              for (const endpointId of [parsed.data.source.recordId, parsed.data.target.recordId]) {
+                if (relatedEventById.has(endpointId)) continue;
+                const rawEndpoint = await this.database.events.get(endpointId);
+                if (!rawEndpoint) {
+                  receiptPartitionError = researchJournalAuxiliaryError(
+                    "RECEIPT_DATA_INVALID",
+                    "事件时间迁移凭证引用了缺失 Event。"
+                  );
+                  break;
+                }
+                let endpoint: EventRecord;
+                try {
+                  endpoint = parseStoredEventRecord(rawEndpoint);
+                } catch (cause) {
+                  receiptPartitionError = researchJournalAuxiliaryError(
+                    "RECEIPT_DATA_INVALID",
+                    "事件时间迁移凭证引用了无效 Event。"
+                  );
+                  break;
+                }
+                if (endpoint.caseId !== caseId) {
+                  receiptPartitionError = researchJournalAuxiliaryError(
+                    "RECEIPT_DATA_INVALID",
+                    "事件时间迁移凭证跨越了不同 Case。"
+                  );
+                  break;
+                }
+                receiptPartitionError = researchJournalAuxiliaryError(
+                  "RECEIPT_DATA_INVALID",
+                  "事件时间迁移凭证的同 Case 端点未出现在严格 Event 索引中。"
+                );
+                break;
+              }
+              if (receiptPartitionError !== null) break;
+            }
+          }
+          const receiptCapture: CapturedReceiptPartition = receiptPartitionError ?? Object.freeze({
+            status: "captured" as const,
+            receipts,
+            relatedEvents: [...relatedEventById.values()]
+          });
+
+          signal?.throwIfAborted();
+          return Object.freeze({ notes, events, citationCapture, receiptCapture });
+        }
+      );
+      transaction = null;
+      signal?.throwIfAborted();
+
+      let citationIndex: ResearchJournalAuxiliaryIndex<CitationRecord>;
+      if (captured.citationCapture.status === "error") {
+        citationIndex = captured.citationCapture;
+      } else {
+        try {
+          const verifierByDocumentId = new Map<string, Awaited<ReturnType<typeof createKnowledgeDocumentCitationIntegrityVerifier>>>();
+          for (const document of captured.citationCapture.documents) {
+            signal?.throwIfAborted();
+            const verifier = await createKnowledgeDocumentCitationIntegrityVerifier(document);
+            signal?.throwIfAborted();
+            verifierByDocumentId.set(document.id, verifier);
+          }
+          const verifiedCitations = captured.citationCapture.citations.map((citation) => {
+            const verifier = verifierByDocumentId.get(citation.documentId);
+            if (!verifier) {
+              throw new KnowledgeIntegrityError(
+                "documentContentHash",
+                `引用 ${citation.id} 缺少同一快照内的资料。`
+              );
+            }
+            return verifier.verifyCitation(citation);
+          }).sort(compareJournalRecordRecency);
+          citationIndex = Object.freeze({ status: "loaded" as const, records: verifiedCitations });
+        } catch (cause) {
+          signal?.throwIfAborted();
+          if (!(cause instanceof KnowledgeIntegrityError)) throw cause;
+          citationIndex = researchJournalAuxiliaryError(
+            "CITATION_DATA_INVALID",
+            "当前 Case 的知识引用或资料正文完整性验证失败。"
+          );
+        }
+      }
+
+      let receiptIndex: ResearchJournalAuxiliaryIndex<EventTimeMigrationReceipt>;
+      if (captured.receiptCapture.status === "error") {
+        receiptIndex = captured.receiptCapture;
+      } else {
+        try {
+          signal?.throwIfAborted();
+          const verifiedReceipts = await verifyEventTimeMigrationReceiptRelationships(
+            captured.receiptCapture.receipts,
+            captured.receiptCapture.relatedEvents
+          );
+          signal?.throwIfAborted();
+          verifiedReceipts.sort((left, right) => (
+            right.createdAt.localeCompare(left.createdAt) || left.id.localeCompare(right.id)
+          ));
+          receiptIndex = Object.freeze({ status: "loaded" as const, records: verifiedReceipts });
+        } catch (cause) {
+          signal?.throwIfAborted();
+          if (!(cause instanceof EventTimeMigrationError)) throw cause;
+          receiptIndex = researchJournalAuxiliaryError(
+            "RECEIPT_DATA_INVALID",
+            "当前 Case 的事件时间迁移凭证关系验证失败。"
+          );
+        }
+      }
+
+      signal?.throwIfAborted();
+      return deepFreezeResearchJournalValue({
+        caseId,
+        profile: RESEARCH_JOURNAL_SNAPSHOT_PROFILE,
+        notes: captured.notes,
+        events: captured.events,
+        citationIndex,
+        receiptIndex,
+        boundary: {
+          atomicStorageSnapshotVerified: true as const,
+          caseIdBound: true as const,
+          transactionMode: "readonly" as const,
+          mutationEpochRead: false as const,
+          mutationEpochRevalidationPerformed: false as const,
+          storageMutationPerformed: false as const,
+          schemaOrReleaseIdentityMutationPerformed: false as const,
+          expertTruthClaimed: false as const,
+          publicReleaseAuthorized: false as const,
+          formalActivationAllowed: false as const
+        }
+      });
+    } catch (reason) {
+      signal?.throwIfAborted();
+      throw reason;
+    } finally {
+      signal?.removeEventListener("abort", abortTransaction);
+    }
+  }
 
   private async requireCase(
     caseId: string,
@@ -5001,10 +6997,9 @@ export class ResearchRepository {
         this.database.citations,
         (target) => target.kind === "research_note" && target.noteId === noteId
       );
-      await deleteAttachmentsMatching(
-        this.database.attachments,
-        (link) => link?.kind === "research_note" && link.noteId === noteId
-      );
+      await deleteAttachmentsByLinkIndexes(this.database.attachments, {
+        researchNoteIds: [noteId]
+      });
       await this.database.researchNotes.delete(noteId);
       }
     );
@@ -5027,7 +7022,7 @@ export class ResearchRepository {
         endDisambiguation: input.endDisambiguation
       })
     });
-    const record = parseVerifiedEventRecord({
+    const record = parseCurrentEventRecord({
       schemaVersion: SCHEMA_VERSION,
       recordVersion: EVENT_RECORD_VERSION,
       id: crypto.randomUUID(),
@@ -5059,7 +7054,7 @@ export class ResearchRepository {
 
   async getEvent(eventId: string): Promise<EventRecord | null> {
     const record = await this.database.events.get(eventId);
-    return record ? parseVerifiedEventRecord(record) : null;
+    return record ? parseStoredEventRecord(record) : null;
   }
 
   async listEventsByCase(caseId: string, options: { includeDeleted?: boolean } = {}): Promise<EventRecord[]> {
@@ -5073,12 +7068,12 @@ export class ResearchRepository {
         .reverse()
         .toArray();
       return records
-        .map((record) => parseVerifiedEventRecord(record))
+        .map((record) => parseStoredEventRecord(record))
         .filter((record) => options.includeDeleted || record.deletedAt === null);
     }
     const records = await this.database.events.where("caseId").equals(caseId).sortBy("updatedAt");
     return records
-      .map((record) => parseVerifiedEventRecord(record))
+      .map((record) => parseStoredEventRecord(record))
       .filter((record) => options.includeDeleted || record.deletedAt === null)
       .reverse();
   }
@@ -5105,7 +7100,7 @@ export class ResearchRepository {
         if (!sourceRaw) {
           throw new EventTimeMigrationError("SOURCE_NOT_FOUND", `Legacy Event does not exist: ${input.sourceEventId}`);
         }
-        const source = parseVerifiedEventRecord(sourceRaw);
+        const source = parseStoredEventRecord(sourceRaw);
         const sourceRecordDigest = await Dexie.waitFor(computeEventRecordDigest(source));
         if (sourceRecordDigest !== input.expectedSourceRecordDigest) {
           throw new EventTimeMigrationError(
@@ -5144,7 +7139,7 @@ export class ResearchRepository {
           throw new EventTimeMigrationError("TARGET_KIND_MISMATCH", "Derived Event time cannot remain legacy_floating.");
         }
         const timestamp = this.now();
-        const target = parseVerifiedEventRecord({
+        const target = parseCurrentEventRecord({
           ...source,
           id: crypto.randomUUID(),
           timeContext: targetTimeContext,
@@ -5162,7 +7157,7 @@ export class ResearchRepository {
           .equals(source.id)
           .toArray();
         if (existingReceipts.some((rawReceipt) =>
-          eventTimeMigrationReceiptSchema.parse(rawReceipt).target.snapshotDigest === targetSnapshotDigest
+          storedEventTimeMigrationReceiptSchema.parse(rawReceipt).target.snapshotDigest === targetSnapshotDigest
         )) {
           throw new EventTimeMigrationError(
             "TARGET_INTERPRETATION_ALREADY_DERIVED",
@@ -5215,7 +7210,7 @@ export class ResearchRepository {
             `Event time migration receipt references missing Event ${eventIds[index]}.`
           );
         }
-        return parseVerifiedEventRecord(record);
+        return parseStoredEventRecord(record);
       });
       const verified = await Dexie.waitFor(verifyEventTimeMigrationReceiptRelationships(receipts, events));
       return verified.sort((left, right) =>
@@ -5228,7 +7223,7 @@ export class ResearchRepository {
     return this.database.transaction("rw", this.database.cases, this.database.revisions, this.database.candidateSets, this.database.events, this.database.eventTimeMigrationReceipts, async () => {
       const currentRaw = await this.database.events.get(eventId);
       if (!currentRaw) throw new ResearchRepositoryError("EVENT_NOT_FOUND", `事件不存在：${eventId}`);
-      const current = parseVerifiedEventRecord(currentRaw);
+      const current = parseStoredEventRecord(currentRaw);
       const nextTransitNodeRef = patch.transitNodeRef === undefined
         ? current.transitNodeRef
         : transitNodeRefSchema.nullable().parse(patch.transitNodeRef);
@@ -5258,8 +7253,20 @@ export class ResearchRepository {
             "Event time and Revision/transit lineage are immutable after an append-only derivation receipt exists."
           );
         }
+        const historicalLineage = current.timeContext.kind === "legacy_floating" || (
+          current.timeContext.kind === "zoned_minute" &&
+          classifyStoredTimeZoneDatabase(current.timeContext) !== "current_exact"
+        );
+        if (historicalLineage) {
+          throw new ResearchRepositoryError(
+            current.timeContext.kind === "legacy_floating"
+              ? "LEGACY_EVENT_TIME_MIGRATION_REQUIRED"
+              : "HISTORICAL_EVENT_TIME_DERIVATION_REQUIRED",
+            "Historical Event time and Revision/transit lineage cannot be rewritten under the same record ID."
+          );
+        }
       }
-      const next = parseVerifiedEventRecord({
+      const next = parseStoredEventRecord({
         ...current,
         revisionId: nextRevisionId,
         transitNodeRef: nextTransitNodeRef,
@@ -5284,10 +7291,10 @@ export class ResearchRepository {
     return this.database.transaction("rw", this.database.cases, this.database.candidateSets, this.database.events, async () => {
       const currentRaw = await this.database.events.get(eventId);
       if (!currentRaw) throw new ResearchRepositoryError("EVENT_NOT_FOUND", `事件不存在：${eventId}`);
-      const current = parseVerifiedEventRecord(currentRaw);
+      const current = parseStoredEventRecord(currentRaw);
       await this.requireCase(current.caseId);
       const timestamp = this.now();
-      const next = parseVerifiedEventRecord({
+      const next = parseStoredEventRecord({
         ...current,
         deletedAt: deleted ? timestamp : null,
         updatedAt: timestamp
@@ -5615,6 +7622,269 @@ export type CreateCitationInput = {
   targets: CitationTarget[];
 };
 
+const CREATE_CITATION_INPUT_CAPTURE_LIMITS = Object.freeze({
+  maxDepth: 16,
+  maxTextCharacters: 256_000,
+  maxValueNodes: 2_000
+});
+
+function captureCreateCitationInput(input: unknown): CreateCitationInput {
+  const captured = captureDeclarativeOwnData(
+    input,
+    "Citation creation input",
+    CREATE_CITATION_INPUT_CAPTURE_LIMITS
+  ) as Record<string, unknown>;
+  const expectedKeys = ["annotation", "documentId", "locator", "targets"];
+  const actualKeys = Object.keys(captured).sort(compareCanonicalCodeUnits);
+  if (
+    actualKeys.length !== expectedKeys.length
+    || actualKeys.some((key, index) => key !== expectedKeys[index])
+  ) {
+    throw new TypeError(
+      "Citation creation input must contain exactly documentId, locator, annotation and targets."
+    );
+  }
+  return captured as CreateCitationInput;
+}
+
+function countJsonValueNodes(value: unknown): number {
+  const pending: unknown[] = [value];
+  let count = 0;
+  while (pending.length > 0) {
+    const current = pending.pop();
+    count += 1;
+    if (Array.isArray(current)) {
+      pending.push(...current);
+    } else if (current !== null && typeof current === "object") {
+      pending.push(...Object.values(current as Record<string, unknown>));
+    }
+  }
+  return count;
+}
+
+function compareCanonicalCodeUnits(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function sameOrderedStrings(left: readonly string[], right: readonly string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+export const LOCAL_KNOWLEDGE_INTEGRITY_SNAPSHOT_PROFILE = Object.freeze({
+  snapshotVersion: "hakimi.storage.local_knowledge_integrity_snapshot/0.1.0",
+  scope: "all_local_knowledge_documents_rights_and_citations" as const,
+  transactionMode: "readonly" as const,
+  documentTraversal: "primary_key_order" as const,
+  citationTraversal: "document_id_index" as const,
+  documentContentDigestPolicy: "one_recomputation_per_unique_document_sequential" as const,
+  storeNames: Object.freeze([
+    "knowledgeDocuments",
+    "sourceRights",
+    "citations"
+  ] as const)
+});
+
+export type LocalKnowledgeIntegritySnapshot = Readonly<{
+  profile: typeof LOCAL_KNOWLEDGE_INTEGRITY_SNAPSHOT_PROFILE;
+  counts: Readonly<{
+    knowledgeDocuments: number;
+    sourceRights: number;
+    citations: number;
+  }>;
+  boundary: Readonly<{
+    atomicStorageSnapshotVerified: true;
+    completeCoverageVerified: true;
+    maximumDocumentContentDigestConcurrency: 1;
+    uniqueDocumentContentHashesVerified: true;
+    sourceRightsOneToOneVerified: true;
+    citationDocumentBindingVerified: true;
+    citationQuoteVerified: true;
+    citationTargetKeysVerified: true;
+    storageMutationPerformed: false;
+    authenticityClaimed: false;
+    expertTruthClaimed: false;
+    publicReleaseAuthorized: false;
+  }>;
+}>;
+
+export const LOCAL_KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_SNAPSHOT_PROFILE = Object.freeze({
+  snapshotVersion: "hakimi.storage.local_knowledge_source_aware_retrieval_snapshot/0.1.0",
+  useMode: "local_review" as const,
+  targetScope: "one_registered_evidence_subject" as const,
+  citationDiscovery: "bounded_full_table_schema_audit_then_canonical_target_filter" as const,
+  maxAuditedCitationRecords: KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_LIMITS.maxInputCitations,
+  citationAuditBatchSize: 64,
+  maxAuditedCitationJsonCharacters: KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_LIMITS.maxInputTextCharacters,
+  maxMatchingCitationRecords: KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_LIMITS.maxMatchingCitations,
+  maxVerifiedCitationRecords: KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_LIMITS.maxVerifiedItems,
+  maxCapturedPacketInputJsonCharacters: KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_LIMITS.maxInputTextCharacters,
+  maxCapturedPacketInputValueNodes: KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_LIMITS.maxInputValueNodes,
+  digestDomain: "hakimi.storage.local_knowledge_source_aware_retrieval_snapshot.sha256/1" as const,
+  transactionMode: "readonly" as const,
+  storeNames: Object.freeze([
+    "citations",
+    "knowledgeDocuments",
+    "sourceRights"
+  ])
+});
+
+export type LocalKnowledgeSourceAwareRetrievalStorageSnapshot = Readonly<{
+  profile: typeof LOCAL_KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_SNAPSHOT_PROFILE;
+  target: Readonly<{
+    evidenceSubjectId: string;
+    targetKey: string;
+    registryVersion: string;
+  }>;
+  database: Readonly<{
+    targetSchemaVersion: number;
+  }>;
+  bindings: Readonly<{
+    matchingCitationIds: readonly string[];
+    candidateCitationIds: readonly string[];
+    verifiedCitationIds: readonly string[];
+    rejectedCitationIds: readonly string[];
+    documentIds: readonly string[];
+    sourceRightsDocumentIds: readonly string[];
+    packetProjectionVersion: string;
+    packetPayloadSha256: string;
+    matchingSourceSetSha256: string;
+  }>;
+  boundary: Readonly<{
+    atomicStorageSnapshotVerified: true;
+    nestedPacketAtomicStorageSnapshotVerified: false;
+    mutationEpochRevalidationPerformed: false;
+    nestedPacketMutationEpochRevalidationPerformed: false;
+    externalProviderUseAuthorized: false;
+    externalPurposeRightsReviewed: false;
+    privacyReviewPerformed: false;
+    sourceTextInstructionAuthority: false;
+    promptInjectionScreeningPerformed: false;
+    citationSetConflictReviewPerformed: false;
+    citationSetConflictStatus: "unassessed";
+    networkTransmissionPerformed: false;
+    networkTransmissionAuthorized: false;
+    publicExportAuthorized: false;
+    expertTruthClaimed: false;
+    scientificValidityClaimed: false;
+    formalActivationAllowed: false;
+    authenticityClaimed: false;
+    snapshotCallStorageMutationPerformed: false;
+    snapshotCallSchemaOrReleaseIdentityMutationPerformed: false;
+  }>;
+  snapshotSha256: string;
+}>;
+
+export type LocalKnowledgeSourceAwareRetrievalSnapshot = Readonly<{
+  packet: KnowledgeSourceAwareRetrievalPacket;
+  storageSnapshot: LocalKnowledgeSourceAwareRetrievalStorageSnapshot;
+}>;
+
+export type ReadLocalKnowledgeSourceAwareRetrievalSnapshotOptions = Readonly<{
+  expectedSnapshotSha256?: string;
+}>;
+
+export const LOCAL_KNOWLEDGE_CITATION_REVIEW_WORKSET_SNAPSHOT_PROFILE = Object.freeze({
+  snapshotVersion: "hakimi.storage.local_knowledge_citation_review_workset_snapshot/0.1.0",
+  contentVersion: "0.1.0",
+  scope: "one_registered_evidence_subject_local_source_set" as const,
+  derivationPolicy: "packet_and_inventory_from_one_readonly_transaction_source_capture" as const,
+  transactionMode: "readonly" as const,
+  requiredTargetSchemaVersion: 13 as const,
+  rawSourceRecordExposure: "none" as const,
+  digestDomain: "hakimi.storage.local_knowledge_citation_review_workset_snapshot.sha256/1" as const
+});
+
+export type LocalKnowledgeCitationReviewWorksetStorageSnapshot = Readonly<{
+  profile: typeof LOCAL_KNOWLEDGE_CITATION_REVIEW_WORKSET_SNAPSHOT_PROFILE;
+  target: Readonly<{
+    evidenceSubjectId: string;
+    targetKey: string;
+    registryVersion: string;
+  }>;
+  database: Readonly<{
+    targetSchemaVersion: 13;
+    matchesRequiredTargetSchema: true;
+    dbGenerationVerified: false;
+    migrationIdentityVerified: false;
+  }>;
+  storageBinding: Readonly<{
+    snapshotVersion: string;
+    snapshotSha256: string;
+  }>;
+  packetBinding: Readonly<{
+    projectionVersion: string;
+    payloadSha256: string;
+    matchingSourceSetSha256: string;
+  }>;
+  inventoryBinding: Readonly<{
+    projectionVersion: string;
+    payloadSha256: string;
+    pairCount: number;
+  }>;
+  citationLedger: Readonly<{
+    matchingCitationIds: readonly string[];
+    candidateCitationIds: readonly string[];
+    verifiedCitationIds: readonly string[];
+    rejectedCitationIds: readonly string[];
+  }>;
+  reviewGate: Readonly<{
+    status: KnowledgeCitationSetConflictInventory["reviewGate"]["status"];
+    pairwiseComparisonRequired: boolean;
+    humanReviewRequired: boolean;
+    candidateResolutionRequired: boolean;
+    rejectedCitationAcknowledgementRequired: boolean;
+    downstreamExternalUseGate: "blocked";
+  }>;
+  boundary: Readonly<{
+    sourceInputsCapturedInOneReadonlyTransaction: true;
+    packetDerivedOnlyFromCapturedSourceInputs: true;
+    inventoryDerivedOnlyFromCapturedSourceInputs: true;
+    nestedPacketAtomicStorageSnapshotVerified: false;
+    nestedInventoryAtomicStorageSnapshotVerified: false;
+    mutationEpochRevalidationPerformed: false;
+    nestedPacketMutationEpochRevalidationPerformed: false;
+    nestedInventoryMutationEpochRevalidationPerformed: false;
+    worksetSnapshotRawSourceRecordsCopied: false;
+    bindingSidecarContainsSourceText: false;
+    returnedPacketMayContainLocalSourceText: true;
+    sourceTextInstructionAuthority: false;
+    promptInjectionScreeningPerformed: false;
+    mechanicalPairInventoryBuilt: true;
+    citationSetConflictReviewPerformed: false;
+    citationSetConflictStatus: "unassessed";
+    chartApplicabilityAssessed: false;
+    externalProviderUseAuthorized: false;
+    externalPurposeRightsReviewed: false;
+    privacyReviewPerformed: false;
+    networkTransmissionPerformed: false;
+    networkTransmissionAuthorized: false;
+    publicExportAuthorized: false;
+    expertTruthClaimed: false;
+    scientificValidityClaimed: false;
+    formalActivationAllowed: false;
+    authenticityClaimed: false;
+    snapshotCallStorageMutationPerformed: false;
+    snapshotCallSchemaOrReleaseIdentityMutationPerformed: false;
+  }>;
+  snapshotSha256: string;
+}>;
+
+export type LocalKnowledgeCitationReviewWorksetSnapshot = Readonly<{
+  packet: KnowledgeSourceAwareRetrievalPacket;
+  inventory: KnowledgeCitationSetConflictInventory;
+  storageSnapshot: LocalKnowledgeSourceAwareRetrievalStorageSnapshot;
+  worksetSnapshot: LocalKnowledgeCitationReviewWorksetStorageSnapshot;
+}>;
+
+export type ReadLocalKnowledgeCitationReviewWorksetSnapshotOptions = Readonly<{
+  expectedWorksetSnapshotSha256?: string;
+}>;
+
+type LocalKnowledgeSourceAwareRetrievalSnapshotBuildContext = Readonly<{
+  snapshot: LocalKnowledgeSourceAwareRetrievalSnapshot;
+  packetInput: BuildKnowledgeSourceAwareRetrievalPacketInput;
+}>;
+
 export class KnowledgeRepository {
   constructor(
     readonly database = new ResearchDatabase(),
@@ -5663,7 +7933,7 @@ export class KnowledgeRepository {
       if (target.kind === "event") {
         const event = await this.database.events.get(target.eventId);
         if (!event) throw new KnowledgeRepositoryError("TARGET_NOT_FOUND", `事件不存在：${target.eventId}`);
-        parseVerifiedEventRecord(event);
+        parseStoredEventRecord(event);
         continue;
       }
       if (target.kind === "evidence_subject") {
@@ -5695,21 +7965,699 @@ export class KnowledgeRepository {
     }
   }
 
-  private async verifyCitations(records: CitationRecord[]): Promise<CitationRecord[]> {
+  private async verifyCitations(
+    records: CitationRecord[],
+    requiredDocumentIds: readonly string[] = []
+  ): Promise<CitationRecord[]> {
     const parsed = records.map((record) => citationRecordSchema.parse(record));
-    const documentIds = [...new Set(parsed.map((record) => record.documentId))];
+    const requiredDocumentIdSet = new Set(requiredDocumentIds);
+    const documentIds = [...new Set([
+      ...requiredDocumentIds,
+      ...parsed.map((record) => record.documentId)
+    ])].sort(compareCanonicalCodeUnits);
     const documents = await this.database.knowledgeDocuments.bulkGet(documentIds);
-    const documentById = new Map<string, KnowledgeDocumentRecord>();
-    await Dexie.waitFor(Promise.all(documents.map(async (raw, index) => {
+    const verifierByDocumentId = new Map<
+      string,
+      Awaited<ReturnType<typeof createKnowledgeDocumentCitationIntegrityVerifier>>
+    >();
+    for (let index = 0; index < documents.length; index += 1) {
+      const raw = documents[index];
+      const documentId = documentIds[index]!;
       if (!raw) {
-        throw new KnowledgeRepositoryError("DOCUMENT_NOT_FOUND", `引用资料不存在：${documentIds[index]}`);
+        throw new KnowledgeRepositoryError(
+          "DOCUMENT_NOT_FOUND",
+          requiredDocumentIdSet.has(documentId)
+            ? `研究资料不存在：${documentId}`
+            : `引用资料不存在：${documentId}`
+        );
       }
-      const knowledgeDocument = await verifyKnowledgeDocumentIntegrity(raw);
-      documentById.set(knowledgeDocument.id, knowledgeDocument);
-    })));
-    return Dexie.waitFor(Promise.all(parsed.map((citation) =>
-      verifyCitationIntegrity(citation, documentById.get(citation.documentId)!)
-    )));
+      const verifier = await Dexie.waitFor(
+        createKnowledgeDocumentCitationIntegrityVerifier(raw)
+      );
+      verifierByDocumentId.set(documentId, verifier);
+    }
+    return parsed.map((citation) => citationRecordSchema.parse(
+      verifierByDocumentId.get(citation.documentId)!.verifyCitation(citation)
+    ));
+  }
+
+  /**
+   * Verifies every local knowledge document, rights row and citation against one
+   * readonly IndexedDB snapshot. Only bounded counts and explicit boundary facts
+   * escape the transaction; document bodies and citation collections do not.
+   */
+  async verifyLocalKnowledgeIntegritySnapshot(): Promise<LocalKnowledgeIntegritySnapshot> {
+    if (!this.database.isOpen()) {
+      throw new KnowledgeRepositoryError(
+        "KNOWLEDGE_INTEGRITY_DATABASE_NOT_OPEN",
+        "本地知识完整性快照要求数据库已由启动流程显式打开；本方法不会隐式建库或升级。"
+      );
+    }
+
+    return this.database.transaction(
+      "r",
+      [
+        this.database.knowledgeDocuments,
+        this.database.sourceRights,
+        this.database.citations
+      ],
+      async () => {
+        const [knowledgeDocumentCount, sourceRightsCount, citationCount, rawDocumentIds] = await Promise.all([
+          this.database.knowledgeDocuments.count(),
+          this.database.sourceRights.count(),
+          this.database.citations.count(),
+          this.database.knowledgeDocuments.toCollection().primaryKeys()
+        ]);
+        const documentIds = rawDocumentIds.map((documentId) => {
+          if (typeof documentId !== "string") {
+            throw new KnowledgeRepositoryError(
+              "KNOWLEDGE_INTEGRITY_COVERAGE_CONFLICT",
+              "本地知识资料表包含非字符串主键，无法完成全量完整性覆盖。"
+            );
+          }
+          return documentId;
+        }).sort(compareCanonicalCodeUnits);
+        if (
+          documentIds.length !== knowledgeDocumentCount
+          || new Set(documentIds).size !== knowledgeDocumentCount
+        ) {
+          throw new KnowledgeRepositoryError(
+            "KNOWLEDGE_INTEGRITY_COVERAGE_CONFLICT",
+            "本地知识资料主键枚举与表计数不一致。"
+          );
+        }
+        if (sourceRightsCount !== knowledgeDocumentCount) {
+          throw new KnowledgeRepositoryError(
+            "SOURCE_RIGHTS_CONFLICT",
+            "Every knowledge document must have exactly one non-orphan source-rights record."
+          );
+        }
+
+        const verifiedContentHashes = new Set<string>();
+        let processedCitationCount = 0;
+        for (const documentId of documentIds) {
+          const rawDocument = await this.database.knowledgeDocuments.get(documentId);
+          if (!rawDocument) {
+            throw new KnowledgeRepositoryError(
+              "KNOWLEDGE_INTEGRITY_COVERAGE_CONFLICT",
+              `本地知识资料主键 ${documentId} 无法在同一只读事务中复现。`
+            );
+          }
+          const citationVerifier = await Dexie.waitFor(
+            createKnowledgeDocumentCitationIntegrityVerifier(rawDocument)
+          );
+          const knowledgeDocument = citationVerifier.document;
+          if (knowledgeDocument.id !== documentId) {
+            throw new KnowledgeRepositoryError(
+              "KNOWLEDGE_INTEGRITY_COVERAGE_CONFLICT",
+              `本地知识资料主键与记录身份不一致：${documentId}。`
+            );
+          }
+          if (verifiedContentHashes.has(knowledgeDocument.contentHash)) {
+            throw new KnowledgeRepositoryError(
+              "KNOWLEDGE_INTEGRITY_COVERAGE_CONFLICT",
+              `本地知识资料正文摘要重复：${knowledgeDocument.contentHash}。`
+            );
+          }
+          verifiedContentHashes.add(knowledgeDocument.contentHash);
+
+          const rawRights = await this.database.sourceRights.get(documentId);
+          if (!rawRights) {
+            throw new KnowledgeRepositoryError(
+              "SOURCE_RIGHTS_CONFLICT",
+              `Source-rights record does not exist for document ${documentId}.`
+            );
+          }
+          const rights = sourceRightsRecordSchema.parse(rawRights);
+          if (
+            rights.documentId !== knowledgeDocument.id
+            || rights.documentContentHash !== knowledgeDocument.contentHash
+            || (rights.origin === "user_import") !== (knowledgeDocument.recordType === "user_knowledge_document")
+          ) {
+            throw new KnowledgeRepositoryError(
+              "SOURCE_RIGHTS_CONFLICT",
+              `Source rights do not match document ${documentId}.`
+            );
+          }
+
+          let citationIntegrityFailure: unknown;
+          await this.database.citations.where("documentId").equals(documentId).each((rawCitation) => {
+            processedCitationCount += 1;
+            if (citationIntegrityFailure !== undefined) return;
+            try {
+              citationVerifier.verifyCitation(rawCitation);
+            } catch (cause) {
+              // Dexie cursor callbacks are deliberately synchronous here. Capture
+              // the first failure explicitly so no adapter can turn a callback
+              // exception into a shortened iteration followed by a coverage error.
+              citationIntegrityFailure = cause;
+            }
+          });
+          if (citationIntegrityFailure !== undefined) throw citationIntegrityFailure;
+        }
+
+        if (processedCitationCount !== citationCount) {
+          throw new KnowledgeRepositoryError(
+            "KNOWLEDGE_INTEGRITY_COVERAGE_CONFLICT",
+            "本地引用表包含孤儿记录、无索引记录，或无法按资料关联完整覆盖的记录。"
+          );
+        }
+
+        return Object.freeze({
+          profile: LOCAL_KNOWLEDGE_INTEGRITY_SNAPSHOT_PROFILE,
+          counts: Object.freeze({
+            knowledgeDocuments: knowledgeDocumentCount,
+            sourceRights: sourceRightsCount,
+            citations: citationCount
+          }),
+          boundary: Object.freeze({
+            atomicStorageSnapshotVerified: true as const,
+            completeCoverageVerified: true as const,
+            maximumDocumentContentDigestConcurrency: 1 as const,
+            uniqueDocumentContentHashesVerified: true as const,
+            sourceRightsOneToOneVerified: true as const,
+            citationDocumentBindingVerified: true as const,
+            citationQuoteVerified: true as const,
+            citationTargetKeysVerified: true as const,
+            storageMutationPerformed: false as const,
+            authenticityClaimed: false as const,
+            expertTruthClaimed: false as const,
+            publicReleaseAuthorized: false as const
+          })
+        });
+      }
+    );
+  }
+
+  /**
+   * Reads one registered evidence subject and all of its citation/document/rights
+   * inputs from a single readonly IndexedDB transaction. The nested packet stays
+   * storage-agnostic and therefore keeps its atomic/mutation flags false; this
+   * sidecar is the only layer that attests to the transaction-scoped snapshot.
+   */
+  async readLocalKnowledgeSourceAwareRetrievalSnapshot(
+    evidenceSubjectId: string,
+    options: ReadLocalKnowledgeSourceAwareRetrievalSnapshotOptions = {}
+  ): Promise<LocalKnowledgeSourceAwareRetrievalSnapshot> {
+    return (await this.readLocalKnowledgeSourceAwareRetrievalSnapshotBuildContext(
+      evidenceSubjectId,
+      options
+    )).snapshot;
+  }
+
+  private async readLocalKnowledgeSourceAwareRetrievalSnapshotBuildContext(
+    evidenceSubjectId: string,
+    options: ReadLocalKnowledgeSourceAwareRetrievalSnapshotOptions
+  ): Promise<LocalKnowledgeSourceAwareRetrievalSnapshotBuildContext> {
+    const subject = requireEvidenceSubject(evidenceSubjectId);
+    const targetKey = citationTargetKey({ kind: "evidence_subject", subjectId: subject.subjectId });
+    if (
+      options === null
+      || typeof options !== "object"
+      || Array.isArray(options)
+      || ![Object.prototype, null].includes(Object.getPrototypeOf(options))
+      || Reflect.ownKeys(options).some((key) => key !== "expectedSnapshotSha256")
+    ) {
+      throw new TypeError("Source-aware retrieval snapshot options must be a plain exact object.");
+    }
+    const expectedDigestDescriptor = Object.getOwnPropertyDescriptor(options, "expectedSnapshotSha256");
+    if (
+      expectedDigestDescriptor
+      && (!Object.hasOwn(expectedDigestDescriptor, "value") || expectedDigestDescriptor.get || expectedDigestDescriptor.set)
+    ) {
+      throw new TypeError("Source-aware retrieval snapshot options cannot contain accessors.");
+    }
+    const expectedSnapshotSha256 = expectedDigestDescriptor?.value as unknown;
+    if (
+      expectedSnapshotSha256 !== undefined
+      && (typeof expectedSnapshotSha256 !== "string" || !LOWERCASE_SHA256.test(expectedSnapshotSha256))
+    ) {
+      throw new TypeError("Expected source-aware retrieval snapshot digest must be a lowercase SHA-256 digest.");
+    }
+
+    try {
+      if (!this.database.isOpen()) {
+        throw new KnowledgeRepositoryError(
+          "SOURCE_AWARE_RETRIEVAL_DATABASE_NOT_OPEN",
+          "来源感知检索快照要求数据库已由启动流程显式打开；本方法不会隐式建库或升级。"
+        );
+      }
+      const captured = await this.database.transaction(
+        "r",
+        [
+          this.database.citations,
+          this.database.knowledgeDocuments,
+          this.database.sourceRights
+        ],
+        async () => {
+          let auditedCitationJsonCharacters = 0;
+          let matchingCitationJsonCharacters = 0;
+          let matchingCitationValueNodes = 0;
+          let verifiedCitationCount = 0;
+          const citations: CitationRecord[] = [];
+          const citationIds = await this.database.citations
+            .toCollection()
+            .limit(LOCAL_KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_SNAPSHOT_PROFILE.maxAuditedCitationRecords + 1)
+            .primaryKeys();
+          if (
+            citationIds.length
+            > LOCAL_KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_SNAPSHOT_PROFILE.maxAuditedCitationRecords
+          ) {
+            throw new KnowledgeRepositoryError(
+              "SOURCE_AWARE_RETRIEVAL_RESOURCE_LIMIT_EXCEEDED",
+              `来源感知检索拒绝审计超过 ${LOCAL_KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_SNAPSHOT_PROFILE.maxAuditedCitationRecords} 条引用记录。`
+            );
+          }
+          for (
+            let offset = 0;
+            offset < citationIds.length;
+            offset += LOCAL_KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_SNAPSHOT_PROFILE.citationAuditBatchSize
+          ) {
+            const batchIds = citationIds.slice(
+              offset,
+              offset + LOCAL_KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_SNAPSHOT_PROFILE.citationAuditBatchSize
+            );
+            const records = await this.database.citations.bulkGet(batchIds);
+            for (let index = 0; index < records.length; index += 1) {
+              const record = records[index];
+              if (!record) {
+                throw new KnowledgeRepositoryError(
+                  "SOURCE_AWARE_RETRIEVAL_BOUNDARY_MISMATCH",
+                  `来源感知检索引用主键 ${String(batchIds[index])} 在同一只读事务内无法复现。`
+                );
+              }
+              const citation = citationRecordSchema.parse(record);
+              const citationJsonCharacters = JSON.stringify(citation).length;
+              auditedCitationJsonCharacters += citationJsonCharacters;
+              if (
+                auditedCitationJsonCharacters
+                > LOCAL_KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_SNAPSHOT_PROFILE.maxAuditedCitationJsonCharacters
+              ) {
+                throw new KnowledgeRepositoryError(
+                  "SOURCE_AWARE_RETRIEVAL_RESOURCE_LIMIT_EXCEEDED",
+                  "来源感知检索引用全表审计超过有界文本预算。"
+                );
+              }
+              if (!citation.targetKeys.includes(targetKey)) continue;
+              matchingCitationJsonCharacters += citationJsonCharacters;
+              matchingCitationValueNodes += countJsonValueNodes(citation);
+              citations.push(citation);
+              if (citation.status === "verified") verifiedCitationCount += 1;
+              if (
+                citations.length
+                > LOCAL_KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_SNAPSHOT_PROFILE.maxMatchingCitationRecords
+                || verifiedCitationCount
+                > LOCAL_KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_SNAPSHOT_PROFILE.maxVerifiedCitationRecords
+              ) {
+                throw new KnowledgeRepositoryError(
+                  "SOURCE_AWARE_RETRIEVAL_RESOURCE_LIMIT_EXCEEDED",
+                  "来源感知检索主题绑定的引用超过有界读取上限；不得在载入资料正文后再静默截断。"
+                );
+              }
+            }
+          }
+          citations.sort((left, right) => compareCanonicalCodeUnits(left.id, right.id));
+
+          const documentIds = [...new Set(citations.map((citation) => citation.documentId))]
+            .sort(compareCanonicalCodeUnits);
+          const documents: KnowledgeDocumentRecord[] = [];
+          const sourceRights: SourceRightsRecord[] = [];
+          let loadedJsonCharacters = 0;
+          let loadedValueNodes = 0;
+          for (const documentId of documentIds) {
+            const [rawDocument, rawRights] = await Promise.all([
+              this.database.knowledgeDocuments.get(documentId),
+              this.database.sourceRights.get(documentId)
+            ]);
+            if (!rawDocument) {
+              throw new KnowledgeRepositoryError(
+                "DOCUMENT_NOT_FOUND",
+                `来源感知检索引用资料不存在：${documentId}`
+              );
+            }
+            if (!rawRights) {
+              throw new KnowledgeRepositoryError(
+                "SOURCE_RIGHTS_NOT_FOUND",
+                `来源感知检索资料缺少权利记录：${documentId}`
+              );
+            }
+            const document = knowledgeDocumentRecordSchema.parse(rawDocument);
+            const rights = sourceRightsRecordSchema.parse(rawRights);
+            loadedJsonCharacters += JSON.stringify(document).length + JSON.stringify(rights).length;
+            loadedValueNodes += countJsonValueNodes(document) + countJsonValueNodes(rights);
+            if (
+              matchingCitationJsonCharacters + loadedJsonCharacters
+              > LOCAL_KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_SNAPSHOT_PROFILE.maxCapturedPacketInputJsonCharacters
+              || matchingCitationValueNodes + loadedValueNodes + 16
+              > LOCAL_KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_SNAPSHOT_PROFILE.maxCapturedPacketInputValueNodes
+            ) {
+              throw new KnowledgeRepositoryError(
+                "SOURCE_AWARE_RETRIEVAL_RESOURCE_LIMIT_EXCEEDED",
+                "来源感知检索资料与权利记录超过有界文本或节点预算。"
+              );
+            }
+            documents.push(document);
+            sourceRights.push(rights);
+          }
+          return Object.freeze({
+            citations: Object.freeze(citations),
+            documentIds: Object.freeze(documentIds),
+            documents: Object.freeze(documents),
+            sourceRights: Object.freeze(sourceRights)
+          });
+        }
+      );
+
+      const packetInput: BuildKnowledgeSourceAwareRetrievalPacketInput = Object.freeze({
+        evidenceSubjectId: subject.subjectId,
+        useMode: "local_review" as const,
+        documents: captured.documents,
+        citations: captured.citations,
+        sourceRights: captured.sourceRights
+      });
+      const packet = await buildKnowledgeSourceAwareRetrievalPacket(packetInput);
+      if (
+        packet.request.useMode !== "local_review"
+        || packet.request.targetKey !== targetKey
+        || packet.request.evidenceSubject.subjectId !== subject.subjectId
+        || packet.request.evidenceSubject.registryVersion !== subject.registryVersion
+        || packet.boundary.atomicStorageSnapshotVerified !== false
+        || packet.boundary.mutationEpochRevalidationPerformed !== false
+        || packet.boundary.semanticRankingPerformed !== false
+        || packet.boundary.semanticConflictResolutionPerformed !== false
+        || packet.boundary.citationSetConflictReviewPerformed !== false
+        || packet.boundary.citationSetConflictStatus !== "unassessed"
+        || packet.boundary.citationReviewEstablishesSemanticTruth !== false
+        || packet.boundary.rightsReviewEstablishesSemanticTruth !== false
+        || packet.boundary.sourceTextInstructionAuthority !== false
+        || packet.boundary.promptInjectionScreeningPerformed !== false
+        || packet.boundary.externalPurposeRightsReviewed !== false
+        || packet.boundary.privacyReviewPerformed !== false
+        || packet.boundary.externalProviderUseAuthorized !== false
+        || packet.boundary.networkTransmissionPerformed !== false
+        || packet.boundary.networkTransmissionAuthorized !== false
+        || packet.boundary.publicExportAuthorized !== false
+        || packet.boundary.expertTruthClaimed !== false
+        || packet.boundary.scientificValidityClaimed !== false
+        || packet.boundary.formalActivationAllowed !== false
+        || packet.boundary.chartOrStorageMutationPerformed !== false
+        || packet.boundary.downstreamExternalUseGate !== "blocked"
+        || packet.integrity.authenticityClaimed !== false
+        || packet.boundary.result !== null
+      ) {
+        throw new KnowledgeRepositoryError(
+          "SOURCE_AWARE_RETRIEVAL_BOUNDARY_MISMATCH",
+          "来源感知检索 packet 的本机只读或外部失败关闭边界不匹配。"
+        );
+      }
+
+      const snapshotPayload = Object.freeze({
+        profile: LOCAL_KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_SNAPSHOT_PROFILE,
+        target: Object.freeze({
+          evidenceSubjectId: subject.subjectId,
+          targetKey,
+          registryVersion: subject.registryVersion
+        }),
+        database: Object.freeze({
+          targetSchemaVersion: this.database.targetSchemaVersion
+        }),
+        bindings: Object.freeze({
+          matchingCitationIds: Object.freeze(captured.citations.map((citation) => citation.id)),
+          candidateCitationIds: Object.freeze([...packet.candidateCitationIds]),
+          verifiedCitationIds: Object.freeze([...packet.verifiedCitationIds]),
+          rejectedCitationIds: Object.freeze([...packet.rejectedCitationIds]),
+          documentIds: Object.freeze([...captured.documentIds]),
+          sourceRightsDocumentIds: Object.freeze(captured.sourceRights.map((rights) => rights.documentId)),
+          packetProjectionVersion: packet.profile.projectionVersion,
+          packetPayloadSha256: packet.integrity.payloadSha256,
+          matchingSourceSetSha256: packet.sourceSet.matchingSourceSetSha256
+        }),
+        boundary: Object.freeze({
+          atomicStorageSnapshotVerified: true as const,
+          nestedPacketAtomicStorageSnapshotVerified: false as const,
+          mutationEpochRevalidationPerformed: false as const,
+          nestedPacketMutationEpochRevalidationPerformed: false as const,
+          externalProviderUseAuthorized: false as const,
+          externalPurposeRightsReviewed: false as const,
+          privacyReviewPerformed: false as const,
+          sourceTextInstructionAuthority: false as const,
+          promptInjectionScreeningPerformed: false as const,
+          citationSetConflictReviewPerformed: false as const,
+          citationSetConflictStatus: "unassessed" as const,
+          networkTransmissionPerformed: false as const,
+          networkTransmissionAuthorized: false as const,
+          publicExportAuthorized: false as const,
+          expertTruthClaimed: false as const,
+          scientificValidityClaimed: false as const,
+          formalActivationAllowed: false as const,
+          authenticityClaimed: false as const,
+          snapshotCallStorageMutationPerformed: false as const,
+          snapshotCallSchemaOrReleaseIdentityMutationPerformed: false as const
+        })
+      });
+      const snapshotSha256 = await sha256Hex({
+        domain: LOCAL_KNOWLEDGE_SOURCE_AWARE_RETRIEVAL_SNAPSHOT_PROFILE.digestDomain,
+        payload: snapshotPayload
+      });
+      if (expectedSnapshotSha256 !== undefined && expectedSnapshotSha256 !== snapshotSha256) {
+        throw new KnowledgeRepositoryError(
+          "SOURCE_AWARE_RETRIEVAL_SNAPSHOT_STALE",
+          "来源感知检索 target snapshot 已变化；旧摘要不能继续使用。"
+        );
+      }
+      const storageSnapshot = Object.freeze({
+        ...snapshotPayload,
+        snapshotSha256
+      });
+      return Object.freeze({
+        snapshot: Object.freeze({ packet, storageSnapshot }),
+        packetInput
+      });
+    } catch (cause) {
+      if (
+        expectedSnapshotSha256 !== undefined
+        && !(
+          cause instanceof KnowledgeRepositoryError
+          && cause.code === "SOURCE_AWARE_RETRIEVAL_SNAPSHOT_STALE"
+        )
+      ) {
+        const error = new KnowledgeRepositoryError(
+          "SOURCE_AWARE_RETRIEVAL_SNAPSHOT_REVALIDATION_FAILED",
+          "来源感知检索旧摘要无法在新的原子只读事务中完整复现。"
+        );
+        Object.defineProperty(error, "cause", { value: cause, enumerable: false });
+        throw error;
+      }
+      throw cause;
+    }
+  }
+
+  /**
+   * Derives the source-aware packet and the exhaustive mechanical conflict
+   * inventory from the same private three-store capture. Raw database records
+   * remain internal; the returned packet may still contain local quote text for
+   * review, while the workset sidecar contains only identifiers and digests.
+   */
+  async readLocalKnowledgeCitationReviewWorksetSnapshot(
+    evidenceSubjectId: string,
+    options: ReadLocalKnowledgeCitationReviewWorksetSnapshotOptions = {}
+  ): Promise<LocalKnowledgeCitationReviewWorksetSnapshot> {
+    if (
+      options === null
+      || typeof options !== "object"
+      || Array.isArray(options)
+      || ![Object.prototype, null].includes(Object.getPrototypeOf(options))
+      || Reflect.ownKeys(options).some((key) => key !== "expectedWorksetSnapshotSha256")
+    ) {
+      throw new TypeError("Citation review workset snapshot options must be a plain exact object.");
+    }
+    const expectedDigestDescriptor = Object.getOwnPropertyDescriptor(
+      options,
+      "expectedWorksetSnapshotSha256"
+    );
+    if (
+      expectedDigestDescriptor
+      && (!Object.hasOwn(expectedDigestDescriptor, "value") || expectedDigestDescriptor.get || expectedDigestDescriptor.set)
+    ) {
+      throw new TypeError("Citation review workset snapshot options cannot contain accessors.");
+    }
+    const expectedWorksetSnapshotSha256 = expectedDigestDescriptor?.value as unknown;
+    if (
+      expectedWorksetSnapshotSha256 !== undefined
+      && (
+        typeof expectedWorksetSnapshotSha256 !== "string"
+        || !LOWERCASE_SHA256.test(expectedWorksetSnapshotSha256)
+      )
+    ) {
+      throw new TypeError("Expected citation review workset snapshot digest must be a lowercase SHA-256 digest.");
+    }
+
+    try {
+      if (
+        this.database.targetSchemaVersion
+        !== LOCAL_KNOWLEDGE_CITATION_REVIEW_WORKSET_SNAPSHOT_PROFILE.requiredTargetSchemaVersion
+      ) {
+        throw new KnowledgeRepositoryError(
+          "CITATION_REVIEW_WORKSET_TARGET_SCHEMA_MISMATCH",
+          "引用复核工作集仅绑定当前 legacy-v13 路线的 targetSchema 13；不得跨代际复用。"
+        );
+      }
+      const { snapshot, packetInput } = await this.readLocalKnowledgeSourceAwareRetrievalSnapshotBuildContext(
+        evidenceSubjectId,
+        {}
+      );
+      const { packet, storageSnapshot } = snapshot;
+      const inventory = await buildKnowledgeCitationSetConflictInventory(packet, packetInput);
+
+      if (
+        storageSnapshot.database.targetSchemaVersion
+        !== LOCAL_KNOWLEDGE_CITATION_REVIEW_WORKSET_SNAPSHOT_PROFILE.requiredTargetSchemaVersion
+        || storageSnapshot.target.evidenceSubjectId !== inventory.binding.evidenceSubjectId
+        || storageSnapshot.target.targetKey !== inventory.binding.targetKey
+        || storageSnapshot.target.registryVersion !== inventory.binding.registryVersion
+        || inventory.binding.retrievalUseMode !== "local_review"
+        || storageSnapshot.bindings.packetProjectionVersion !== inventory.binding.retrievalProjectionVersion
+        || storageSnapshot.bindings.packetPayloadSha256 !== inventory.binding.retrievalPayloadSha256
+        || storageSnapshot.bindings.matchingSourceSetSha256 !== inventory.binding.matchingSourceSetSha256
+        || !sameOrderedStrings(
+          storageSnapshot.bindings.candidateCitationIds,
+          inventory.binding.candidateCitationIds
+        )
+        || !sameOrderedStrings(
+          storageSnapshot.bindings.verifiedCitationIds,
+          inventory.binding.verifiedCitationIds
+        )
+        || !sameOrderedStrings(
+          storageSnapshot.bindings.rejectedCitationIds,
+          inventory.binding.rejectedCitationIds
+        )
+        || storageSnapshot.boundary.atomicStorageSnapshotVerified !== true
+        || storageSnapshot.boundary.nestedPacketAtomicStorageSnapshotVerified !== false
+        || packet.boundary.atomicStorageSnapshotVerified !== false
+        || packet.boundary.mutationEpochRevalidationPerformed !== false
+        || inventory.boundary.atomicStorageSnapshotVerified !== false
+        || inventory.boundary.mutationEpochRevalidationPerformed !== false
+        || inventory.boundary.rawSourceRecordsCopied !== false
+        || inventory.boundary.containsSourceText !== false
+        || inventory.reviewGate.citationSetConflictReviewPerformed !== false
+        || inventory.reviewGate.citationSetConflictStatus !== "unassessed"
+        || inventory.reviewGate.downstreamExternalUseGate !== "blocked"
+        || inventory.counts.pairs !== inventory.pairs.length
+      ) {
+        throw new KnowledgeRepositoryError(
+          "CITATION_REVIEW_WORKSET_BOUNDARY_MISMATCH",
+          "引用复核工作集的原子来源、检索包、机械清单或失败关闭边界不一致。"
+        );
+      }
+
+      const worksetPayload = Object.freeze({
+        profile: LOCAL_KNOWLEDGE_CITATION_REVIEW_WORKSET_SNAPSHOT_PROFILE,
+        target: Object.freeze({
+          evidenceSubjectId: storageSnapshot.target.evidenceSubjectId,
+          targetKey: storageSnapshot.target.targetKey,
+          registryVersion: storageSnapshot.target.registryVersion
+        }),
+        database: Object.freeze({
+          targetSchemaVersion: 13 as const,
+          matchesRequiredTargetSchema: true as const,
+          dbGenerationVerified: false as const,
+          migrationIdentityVerified: false as const
+        }),
+        storageBinding: Object.freeze({
+          snapshotVersion: storageSnapshot.profile.snapshotVersion,
+          snapshotSha256: storageSnapshot.snapshotSha256
+        }),
+        packetBinding: Object.freeze({
+          projectionVersion: packet.profile.projectionVersion,
+          payloadSha256: packet.integrity.payloadSha256,
+          matchingSourceSetSha256: packet.sourceSet.matchingSourceSetSha256
+        }),
+        inventoryBinding: Object.freeze({
+          projectionVersion: inventory.profile.projectionVersion,
+          payloadSha256: inventory.integrity.payloadSha256,
+          pairCount: inventory.counts.pairs
+        }),
+        citationLedger: Object.freeze({
+          matchingCitationIds: Object.freeze([...storageSnapshot.bindings.matchingCitationIds]),
+          candidateCitationIds: Object.freeze([...inventory.binding.candidateCitationIds]),
+          verifiedCitationIds: Object.freeze([...inventory.binding.verifiedCitationIds]),
+          rejectedCitationIds: Object.freeze([...inventory.binding.rejectedCitationIds])
+        }),
+        reviewGate: Object.freeze({
+          status: inventory.reviewGate.status,
+          pairwiseComparisonRequired: inventory.reviewGate.pairwiseComparisonRequired,
+          humanReviewRequired: inventory.reviewGate.humanReviewRequired,
+          candidateResolutionRequired: inventory.reviewGate.candidateResolutionRequired,
+          rejectedCitationAcknowledgementRequired: inventory.reviewGate.rejectedCitationAcknowledgementRequired,
+          downstreamExternalUseGate: "blocked" as const
+        }),
+        boundary: Object.freeze({
+          sourceInputsCapturedInOneReadonlyTransaction: true as const,
+          packetDerivedOnlyFromCapturedSourceInputs: true as const,
+          inventoryDerivedOnlyFromCapturedSourceInputs: true as const,
+          nestedPacketAtomicStorageSnapshotVerified: false as const,
+          nestedInventoryAtomicStorageSnapshotVerified: false as const,
+          mutationEpochRevalidationPerformed: false as const,
+          nestedPacketMutationEpochRevalidationPerformed: false as const,
+          nestedInventoryMutationEpochRevalidationPerformed: false as const,
+          worksetSnapshotRawSourceRecordsCopied: false as const,
+          bindingSidecarContainsSourceText: false as const,
+          returnedPacketMayContainLocalSourceText: true as const,
+          sourceTextInstructionAuthority: false as const,
+          promptInjectionScreeningPerformed: false as const,
+          mechanicalPairInventoryBuilt: true as const,
+          citationSetConflictReviewPerformed: false as const,
+          citationSetConflictStatus: "unassessed" as const,
+          chartApplicabilityAssessed: false as const,
+          externalProviderUseAuthorized: false as const,
+          externalPurposeRightsReviewed: false as const,
+          privacyReviewPerformed: false as const,
+          networkTransmissionPerformed: false as const,
+          networkTransmissionAuthorized: false as const,
+          publicExportAuthorized: false as const,
+          expertTruthClaimed: false as const,
+          scientificValidityClaimed: false as const,
+          formalActivationAllowed: false as const,
+          authenticityClaimed: false as const,
+          snapshotCallStorageMutationPerformed: false as const,
+          snapshotCallSchemaOrReleaseIdentityMutationPerformed: false as const
+        })
+      });
+      const snapshotSha256 = await sha256Hex({
+        domain: LOCAL_KNOWLEDGE_CITATION_REVIEW_WORKSET_SNAPSHOT_PROFILE.digestDomain,
+        payload: worksetPayload
+      });
+      if (
+        expectedWorksetSnapshotSha256 !== undefined
+        && expectedWorksetSnapshotSha256 !== snapshotSha256
+      ) {
+        throw new KnowledgeRepositoryError(
+          "CITATION_REVIEW_WORKSET_SNAPSHOT_STALE",
+          "引用复核工作集已变化；旧摘要不能继续用于人工观察或后续上下文绑定。"
+        );
+      }
+      const worksetSnapshot = Object.freeze({
+        ...worksetPayload,
+        snapshotSha256
+      });
+      return Object.freeze({ packet, inventory, storageSnapshot, worksetSnapshot });
+    } catch (cause) {
+      if (
+        expectedWorksetSnapshotSha256 !== undefined
+        && !(
+          cause instanceof KnowledgeRepositoryError
+          && cause.code === "CITATION_REVIEW_WORKSET_SNAPSHOT_STALE"
+        )
+      ) {
+        const error = new KnowledgeRepositoryError(
+          "CITATION_REVIEW_WORKSET_SNAPSHOT_REVALIDATION_FAILED",
+          "引用复核工作集旧摘要无法从新的原子只读捕获中完整复现。"
+        );
+        Object.defineProperty(error, "cause", { value: cause, enumerable: false });
+        throw error;
+      }
+      throw cause;
+    }
   }
 
   async listDocuments(): Promise<KnowledgeDocumentRecord[]> {
@@ -5872,10 +8820,9 @@ export class KnowledgeRepository {
           throw new KnowledgeRepositoryError("DOCUMENT_NOT_FOUND", `研究资料不存在：${documentId}`);
         }
         await this.database.citations.where("documentId").equals(documentId).delete();
-        await deleteAttachmentsMatching(
-          this.database.attachments,
-          (link) => link?.kind === "knowledge_document" && link.documentId === documentId
-        );
+        await deleteAttachmentsByLinkIndexes(this.database.attachments, {
+          knowledgeDocumentIds: [documentId]
+        });
         await this.database.sourceRights.delete(documentId);
         await this.database.knowledgeDocuments.delete(documentId);
       }
@@ -5883,22 +8830,39 @@ export class KnowledgeRepository {
   }
 
   async listCitations(): Promise<CitationRecord[]> {
-    const records = await this.database.citations.orderBy("updatedAt").reverse().toArray();
-    return this.verifyCitations(records);
+    return this.database.transaction(
+      "r",
+      [this.database.citations, this.database.knowledgeDocuments],
+      async () => {
+        const records = await this.database.citations.orderBy("updatedAt").reverse().toArray();
+        return this.verifyCitations(records);
+      }
+    );
   }
 
   async listCitationsByDocument(documentId: string): Promise<CitationRecord[]> {
-    await this.requireDocument(documentId);
-    const records = await this.database.citations.where("documentId").equals(documentId).sortBy("updatedAt");
-    return (await this.verifyCitations(records)).reverse();
+    return this.database.transaction(
+      "r",
+      [this.database.citations, this.database.knowledgeDocuments],
+      async () => {
+        const records = await this.database.citations.where("documentId").equals(documentId).sortBy("updatedAt");
+        return (await this.verifyCitations(records, [documentId])).reverse();
+      }
+    );
   }
 
   async listCitationsByTargetKey(targetKey: string): Promise<CitationRecord[]> {
     if (targetKey.trim() !== targetKey || targetKey.length === 0 || targetKey.length > 500) {
       throw new TypeError("Citation target key must be a non-empty canonical string.");
     }
-    const records = await this.database.citations.where("targetKeys").equals(targetKey).sortBy("updatedAt");
-    return (await this.verifyCitations(records)).reverse();
+    return this.database.transaction(
+      "r",
+      [this.database.citations, this.database.knowledgeDocuments],
+      async () => {
+        const records = await this.database.citations.where("targetKeys").equals(targetKey).sortBy("updatedAt");
+        return (await this.verifyCitations(records)).reverse();
+      }
+    );
   }
 
   async listCitationsByTarget(target: CitationTarget): Promise<CitationRecord[]> {
@@ -5906,6 +8870,7 @@ export class KnowledgeRepository {
   }
 
   async createCitation(input: CreateCitationInput): Promise<CitationRecord> {
+    const capturedInput = captureCreateCitationInput(input);
     return this.database.transaction(
       "rw",
       [
@@ -5917,18 +8882,32 @@ export class KnowledgeRepository {
         this.database.events
       ],
       async () => {
-        const knowledgeDocument = await this.requireDocument(input.documentId);
+        const rawDocument = await this.database.knowledgeDocuments.get(capturedInput.documentId);
+        if (!rawDocument) {
+          throw new KnowledgeRepositoryError(
+            "DOCUMENT_NOT_FOUND",
+            `研究资料不存在：${capturedInput.documentId}`
+          );
+        }
+        const citationVerifier = await Dexie.waitFor(
+          createKnowledgeDocumentCitationIntegrityVerifier(rawDocument)
+        );
+        const knowledgeDocument = citationVerifier.document;
         const timestamp = this.now();
         const record = citationRecordSchema.parse({
           schemaVersion: SCHEMA_VERSION,
           id: crypto.randomUUID(),
           documentId: knowledgeDocument.id,
           documentContentHash: knowledgeDocument.contentHash,
-          locator: input.locator,
-          quote: extractKnowledgeQuote(knowledgeDocument.content, input.locator.startLine, input.locator.endLine),
-          annotation: input.annotation,
-          targets: input.targets,
-          targetKeys: citationTargetKeys(input.targets),
+          locator: capturedInput.locator,
+          quote: extractKnowledgeQuote(
+            knowledgeDocument.content,
+            capturedInput.locator.startLine,
+            capturedInput.locator.endLine
+          ),
+          annotation: capturedInput.annotation,
+          targets: capturedInput.targets,
+          targetKeys: citationTargetKeys(capturedInput.targets),
           status: "user_candidate",
           reviewAttestations: [],
           decisionNote: "",
@@ -5937,9 +8916,9 @@ export class KnowledgeRepository {
           updatedAt: timestamp
         });
         await this.verifyTargets(record.targets);
-        await Dexie.waitFor(verifyCitationIntegrity(record, knowledgeDocument));
-        await this.database.citations.add(record);
-        return record;
+        const verifiedRecord = citationRecordSchema.parse(citationVerifier.verifyCitation(record));
+        await this.database.citations.add(verifiedRecord);
+        return verifiedRecord;
       }
     );
   }
@@ -5954,7 +8933,54 @@ export class KnowledgeRepository {
   }
 }
 
-export const caseRepository = new CaseRepository();
-export const researchRepository = new ResearchRepository(caseRepository.database);
-export const knowledgeRepository = new KnowledgeRepository(caseRepository.database);
-export const ruleRegistryRepository = new RuleRegistryRepository(caseRepository.database);
+function lazyRuntimeSingleton<T extends object>(factory: () => T): T {
+  let instance: T | undefined;
+  const proxyTarget = Object.create(null) as T;
+  const resolve = (): T => {
+    instance ??= factory();
+    return instance;
+  };
+  return new Proxy(proxyTarget, {
+    get(target, property, receiver) {
+      if (Object.prototype.hasOwnProperty.call(target, property)) {
+        return Reflect.get(target, property, receiver) as unknown;
+      }
+      const resolved = resolve();
+      const value = Reflect.get(resolved, property, resolved) as unknown;
+      return typeof value === "function" ? value.bind(resolved) : value;
+    },
+    set(target, property, value, receiver) {
+      if (Object.prototype.hasOwnProperty.call(target, property)) {
+        return Reflect.set(target, property, value, receiver);
+      }
+      const resolved = resolve();
+      return Reflect.set(resolved, property, value, resolved);
+    },
+    has(target, property) {
+      return Reflect.has(target, property) || Reflect.has(resolve(), property);
+    },
+    ownKeys(target) {
+      return [...new Set([...Reflect.ownKeys(target), ...Reflect.ownKeys(resolve())])];
+    },
+    getOwnPropertyDescriptor(target, property) {
+      const targetDescriptor = Reflect.getOwnPropertyDescriptor(target, property);
+      if (targetDescriptor) return targetDescriptor;
+      const descriptor = Reflect.getOwnPropertyDescriptor(resolve(), property);
+      return descriptor ? { ...descriptor, configurable: true } : undefined;
+    },
+    getPrototypeOf() {
+      return Reflect.getPrototypeOf(resolve());
+    }
+  });
+}
+
+export const caseRepository = lazyRuntimeSingleton(() => new CaseRepository());
+export const researchRepository = lazyRuntimeSingleton(
+  () => new ResearchRepository(caseRepository.database)
+);
+export const knowledgeRepository = lazyRuntimeSingleton(
+  () => new KnowledgeRepository(caseRepository.database)
+);
+export const ruleRegistryRepository = lazyRuntimeSingleton(
+  () => new RuleRegistryRepository(caseRepository.database)
+);

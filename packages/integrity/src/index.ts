@@ -4,6 +4,7 @@ const BASE64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012
 const BASE64_DECODE_TABLE = new Int16Array(128).fill(-1);
 const BASE64_ENCODE_CHUNK_LENGTH = 16_384;
 const BINARY_STRING_CHUNK_LENGTH = 32_768;
+const MAX_CANONICAL_JSON_DEPTH = 256;
 const CANONICAL_BASE64_PATTERN = /^[A-Za-z0-9+/]*={0,2}$/;
 
 for (let index = 0; index < BASE64_ALPHABET.length; index += 1) {
@@ -44,7 +45,15 @@ function encodeBase64WithPlatform(bytes: Uint8Array): string | null {
     );
     chunkIndex += 1;
   }
-  return platformBtoa.call(globalThis, chunks.join(""));
+  try {
+    const encoded = platformBtoa.call(globalThis, chunks.join(""));
+    return encoded.length === Math.ceil(bytes.byteLength / 3) * 4 &&
+      CANONICAL_BASE64_PATTERN.test(encoded)
+      ? encoded
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 function decodeBase64WithPlatform(value: string): Uint8Array | null {
@@ -55,7 +64,7 @@ function decodeBase64WithPlatform(value: string): Uint8Array | null {
   try {
     binary = platformAtob.call(globalThis, value);
   } catch {
-    invalidCanonicalBase64();
+    return null;
   }
   const output = new Uint8Array(binary.length);
   for (let index = 0; index < binary.length; index += 1) {
@@ -64,21 +73,82 @@ function decodeBase64WithPlatform(value: string): Uint8Array | null {
   return output;
 }
 
-function normalizeCanonicalValue(input: unknown): CanonicalValue {
+function normalizeCanonicalValue(
+  input: unknown,
+  ancestors: WeakSet<object> = new WeakSet<object>(),
+  depth = 0
+): CanonicalValue {
+  if (depth > MAX_CANONICAL_JSON_DEPTH) {
+    throw new TypeError(`规范化 JSON 嵌套不能超过 ${MAX_CANONICAL_JSON_DEPTH} 层`);
+  }
   if (input === null || typeof input === "boolean" || typeof input === "string") return input;
   if (typeof input === "number") {
     if (!Number.isFinite(input)) throw new TypeError("规范化 JSON 不接受非有限数字");
     return input;
   }
-  if (Array.isArray(input)) return input.map(normalizeCanonicalValue);
+  if (Array.isArray(input)) {
+    if (ancestors.has(input)) throw new TypeError("规范化 JSON 不接受循环数组");
+    if (Object.getOwnPropertySymbols(input).length > 0) {
+      throw new TypeError("规范化 JSON 数组不接受 Symbol 属性");
+    }
+    ancestors.add(input);
+    try {
+      const output = new Array<CanonicalValue>(input.length);
+      for (let index = 0; index < input.length; index += 1) {
+        const descriptor = Object.getOwnPropertyDescriptor(input, String(index));
+        if (!descriptor) throw new TypeError("规范化 JSON 不接受稀疏数组");
+        if (!("value" in descriptor)) throw new TypeError("规范化 JSON 不接受数组访问器");
+        output[index] = normalizeCanonicalValue(descriptor.value, ancestors, depth + 1);
+      }
+      if (Object.keys(input).length !== input.length) {
+        throw new TypeError("规范化 JSON 数组不接受额外命名属性");
+      }
+      return output;
+    } finally {
+      ancestors.delete(input);
+    }
+  }
   if (typeof input === "object") {
-    const record = input as Record<string, unknown>;
-    return Object.keys(record)
-      .sort()
-      .reduce<Record<string, CanonicalValue>>((output, key) => {
-        if (record[key] !== undefined) output[key] = normalizeCanonicalValue(record[key]);
-        return output;
-      }, {});
+    const prototype = Object.getPrototypeOf(input);
+    const constructorDescriptor = prototype === null
+      ? null
+      : Object.getOwnPropertyDescriptor(prototype, "constructor");
+    if (
+      Object.prototype.toString.call(input) !== "[object Object]" ||
+      (prototype !== null && (
+        !constructorDescriptor ||
+        !("value" in constructorDescriptor) ||
+        typeof constructorDescriptor.value !== "function" ||
+        constructorDescriptor.value.name !== "Object"
+      ))
+    ) {
+      throw new TypeError("规范化 JSON 只接受普通对象");
+    }
+    if (Object.getOwnPropertySymbols(input).length > 0) {
+      throw new TypeError("规范化 JSON 对象不接受 Symbol 属性");
+    }
+    if (ancestors.has(input)) throw new TypeError("规范化 JSON 不接受循环对象");
+    ancestors.add(input);
+    try {
+      const record = input as Record<string, unknown>;
+      const output = Object.create(null) as Record<string, CanonicalValue>;
+      for (const key of Object.keys(record).sort()) {
+        const descriptor = Object.getOwnPropertyDescriptor(record, key);
+        if (!descriptor || !("value" in descriptor)) {
+          throw new TypeError("规范化 JSON 不接受对象访问器");
+        }
+        if (descriptor.value === undefined) continue;
+        Object.defineProperty(output, key, {
+          value: normalizeCanonicalValue(descriptor.value, ancestors, depth + 1),
+          enumerable: true,
+          configurable: true,
+          writable: true
+        });
+      }
+      return output;
+    } finally {
+      ancestors.delete(input);
+    }
   }
   throw new TypeError(`规范化 JSON 不接受 ${typeof input}`);
 }
@@ -93,8 +163,19 @@ export async function sha256Bytes(bytes: Uint8Array): Promise<Uint8Array> {
 
   // 固化当前视图的精确字节范围，也避免调用方在异步摘要期间修改输入。
   const snapshot = Uint8Array.from(bytes);
-  const digest = await globalThis.crypto.subtle.digest("SHA-256", snapshot);
-  return new Uint8Array(digest);
+  const subtle = globalThis.crypto?.subtle;
+  if (!subtle || typeof subtle.digest !== "function") {
+    throw new Error("当前运行环境不支持 Web Crypto SHA-256。");
+  }
+  let digest: ArrayBuffer;
+  try {
+    digest = await subtle.digest("SHA-256", snapshot);
+  } catch (cause) {
+    throw new Error("Web Crypto SHA-256 计算失败。", { cause });
+  }
+  const output = new Uint8Array(digest);
+  if (output.byteLength !== 32) throw new Error("Web Crypto 返回了无效的 SHA-256 长度。");
+  return output;
 }
 
 /** 计算原始字节的 SHA-256，返回 64 位小写十六进制摘要。 */
@@ -108,7 +189,7 @@ export async function sha256Hex(value: unknown): Promise<string> {
 }
 
 export async function verifySha256(value: unknown, expectedDigest: string): Promise<boolean> {
-  if (!/^[a-f0-9]{64}$/.test(expectedDigest)) return false;
+  if (typeof expectedDigest !== "string" || !/^[a-f0-9]{64}$/u.test(expectedDigest)) return false;
   return (await sha256Hex(value)) === expectedDigest;
 }
 

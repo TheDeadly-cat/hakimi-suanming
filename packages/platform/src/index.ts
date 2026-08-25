@@ -19,7 +19,9 @@ function supportsWebSavePicker(): boolean {
 function supportsWebFileShare(): boolean {
   return typeof navigator !== "undefined"
     && typeof navigator.share === "function"
-    && typeof navigator.canShare === "function";
+    && typeof navigator.canShare === "function"
+    && (typeof globalThis.isSecureContext === "undefined" || globalThis.isSecureContext)
+    && (typeof window === "undefined" || window.top === window);
 }
 
 export const webPlatformCapabilities: PlatformCapabilities = {
@@ -113,12 +115,17 @@ type SaveFilePickerWindow = Window & {
 };
 
 export function validateTransferFilename(filename: string): string {
+  const baseName = typeof filename === "string" ? filename.split(".", 1)[0]!.toUpperCase() : "";
   if (
-    !filename
+    typeof filename !== "string"
+    || !filename
+    || filename.trim() !== filename
     || filename === "."
     || filename === ".."
-    || filename.length > 255
-    || /[\\/\u0000-\u001f\u007f]/.test(filename)
+    || filename.endsWith(".")
+    || Array.from(filename).length > 255
+    || /[\\/\p{Cc}\p{Cf}]/u.test(filename)
+    || /^(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/u.test(baseName)
   ) {
     throw new Error("文件名必须是 1～255 个字符的普通文件名，不能包含路径或控制字符。");
   }
@@ -126,24 +133,40 @@ export function validateTransferFilename(filename: string): string {
 }
 
 function errorMessage(reason: unknown, fallback: string): string {
-  if (reason instanceof Error && reason.message) return reason.message;
-  if (
-    typeof reason === "object"
-    && reason !== null
-    && "message" in reason
-    && typeof (reason as { message?: unknown }).message === "string"
-    && (reason as { message: string }).message
-  ) {
-    return (reason as { message: string }).message;
+  try {
+    const raw = reason instanceof Error
+      ? reason.message
+      : typeof reason === "object" && reason !== null && "message" in reason
+        ? (reason as { message?: unknown }).message
+        : null;
+    if (typeof raw === "string") {
+      const normalized = raw
+        .normalize("NFC")
+        .replace(/[\p{Cc}\p{Cf}]+/gu, " ")
+        .replace(/\s+/gu, " ")
+        .trim();
+      if (normalized) {
+        const characters = Array.from(normalized);
+        return characters.length <= 500
+          ? normalized
+          : `${characters.slice(0, 500).join("")}…`;
+      }
+    }
+  } catch {
+    // Hostile error-like values must remain ordinary bounded failures.
   }
   return fallback;
 }
 
 function isAbortError(reason: unknown): boolean {
-  return typeof reason === "object"
-    && reason !== null
-    && "name" in reason
-    && (reason as { name?: unknown }).name === "AbortError";
+  try {
+    return typeof reason === "object"
+      && reason !== null
+      && "name" in reason
+      && (reason as { name?: unknown }).name === "AbortError";
+  } catch {
+    return false;
+  }
 }
 
 function pickerOptions({ filename, blob }: FilePayload): SaveFilePickerOptions {
@@ -182,19 +205,50 @@ function pickWebFile(options: PickFileOptions = {}): Promise<FilePickResult> {
     return Promise.resolve({ status: "unsupported", reason: "当前平台没有可用的文件选择器。" });
   }
 
+  if (
+    options.maxBytes !== undefined &&
+    (!Number.isSafeInteger(options.maxBytes) || options.maxBytes <= 0)
+  ) {
+    return Promise.reject(new Error("文件大小上限必须是正安全整数。"));
+  }
+  if (
+    options.accept !== undefined &&
+    (typeof options.accept !== "string" || options.accept.length > 1_024 || /[\p{Cc}\p{Cf}]/u.test(options.accept))
+  ) {
+    return Promise.reject(new Error("文件选择类型约束无效。"));
+  }
+
   return new Promise((resolve, reject) => {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = options.accept ?? ".json,application/json,text/plain";
     input.hidden = true;
-    document.body.append(input);
+    const container = document.body ?? document.documentElement;
+    if (!container) {
+      resolve({ status: "unsupported", reason: "当前页面尚未准备好文件选择器。" });
+      return;
+    }
+    container.append(input);
     let settled = false;
+    let focusFallback: ReturnType<typeof globalThis.setTimeout> | null = null;
+
+    const cleanup = () => {
+      if (focusFallback !== null) globalThis.clearTimeout(focusFallback);
+      if (typeof window !== "undefined") window.removeEventListener("focus", handleWindowFocus);
+      input.remove();
+    };
 
     const finish = (value: FilePickResult) => {
       if (settled) return;
       settled = true;
-      input.remove();
+      cleanup();
       resolve(value);
+    };
+
+    const handleWindowFocus = () => {
+      focusFallback = globalThis.setTimeout(() => {
+        if (!settled && !input.files?.length) finish({ status: "cancelled" });
+      }, 0);
     };
 
     input.addEventListener("change", () => {
@@ -205,7 +259,7 @@ function pickWebFile(options: PickFileOptions = {}): Promise<FilePickResult> {
       }
       if (options.maxBytes !== undefined && file.size > options.maxBytes) {
         settled = true;
-        input.remove();
+        cleanup();
         reject(new Error(`文件超过 ${Math.round(options.maxBytes / 1024 / 1024)} MB 安全上限。`));
         return;
       }
@@ -215,7 +269,14 @@ function pickWebFile(options: PickFileOptions = {}): Promise<FilePickResult> {
       });
     }, { once: true });
     input.addEventListener("cancel", () => finish({ status: "cancelled" }), { once: true });
-    input.click();
+    if (typeof window !== "undefined") window.addEventListener("focus", handleWindowFocus, { once: true });
+    try {
+      input.click();
+    } catch (reason) {
+      settled = true;
+      cleanup();
+      reject(new Error("浏览器未能打开文件选择器。", { cause: reason }));
+    }
   });
 }
 
@@ -286,9 +347,12 @@ async function saveWebFileToChosenLocation(payload: FilePayload): Promise<FileSa
     return saveFailure(filename, "pick", reason, "浏览器未能打开保存位置选择器。");
   }
 
-  const selectedFilename = handle.name && !/[\\/\u0000-\u001f\u007f]/.test(handle.name)
-    ? handle.name
-    : filename;
+  let selectedFilename = filename;
+  try {
+    if (handle.name) selectedFilename = validateTransferFilename(handle.name);
+  } catch {
+    // Preserve the already validated suggested name when the browser returns an unsafe display name.
+  }
   let writable: FileSystemWritableFileStream;
   try {
     writable = await handle.createWritable();
@@ -310,6 +374,11 @@ async function saveWebFileToChosenLocation(payload: FilePayload): Promise<FileSa
   try {
     await writable.close();
   } catch (reason) {
+    try {
+      await writable.abort(reason);
+    } catch {
+      // Preserve the close failure as the actionable result.
+    }
     return saveFailure(selectedFilename, "close", reason, "浏览器未能完成文件提交。");
   }
 
@@ -341,8 +410,23 @@ async function shareWebFile({ filename, blob, title }: FilePayload): Promise<Fil
     type: blob.type || "application/octet-stream",
     lastModified: Date.now()
   });
-  const shareData: ShareData = { files: [file], title: title ?? filename };
-  if (!navigator.canShare(shareData)) {
+  const shareData: ShareData = {
+    files: [file],
+    title: errorMessage({ message: title ?? filename }, filename)
+  };
+  let accepted: boolean;
+  try {
+    accepted = navigator.canShare(shareData);
+  } catch (reason) {
+    return {
+      status: "failed",
+      filename,
+      operation: "share",
+      stage: "share",
+      reason: errorMessage(reason, "当前平台无法确认是否支持此文件分享。")
+    };
+  }
+  if (!accepted) {
     return {
       status: "unsupported",
       filename,
@@ -388,7 +472,13 @@ export const webFileTransferPort: FileTransferPort = {
   shareFile: shareWebFile
 };
 
-let installedFileTransferPort: FileTransferPort | null = null;
+type FileTransferPortInstallation = {
+  port: FileTransferPort;
+  previous: FileTransferPortInstallation | null;
+  active: boolean;
+};
+
+let installedFileTransferPort: FileTransferPortInstallation | null = null;
 
 /**
  * Installs a runtime adapter before rendering the app. The Android shell can
@@ -396,15 +486,34 @@ let installedFileTransferPort: FileTransferPort | null = null;
  * The returned disposer keeps tests and nested runtime scopes deterministic.
  */
 export function installFileTransferPort(port: FileTransferPort): () => void {
-  const previous = installedFileTransferPort;
-  installedFileTransferPort = port;
+  if (
+    !port ||
+    typeof port !== "object" ||
+    typeof port.getCapabilities !== "function" ||
+    typeof port.pickFile !== "function" ||
+    typeof port.saveFile !== "function" ||
+    typeof port.shareFile !== "function"
+  ) {
+    throw new TypeError("文件传输适配器未实现完整端口契约。");
+  }
+  const installation: FileTransferPortInstallation = {
+    port,
+    previous: installedFileTransferPort,
+    active: true
+  };
+  installedFileTransferPort = installation;
   return () => {
-    if (installedFileTransferPort === port) installedFileTransferPort = previous;
+    if (!installation.active) return;
+    installation.active = false;
+    if (installedFileTransferPort !== installation) return;
+    let previous = installation.previous;
+    while (previous && !previous.active) previous = previous.previous;
+    installedFileTransferPort = previous;
   };
 }
 
 export function getFileTransferPort(): FileTransferPort {
-  return installedFileTransferPort ?? webFileTransferPort;
+  return installedFileTransferPort?.port ?? webFileTransferPort;
 }
 
 export function getFileTransferCapabilities(): FileTransferCapabilities {

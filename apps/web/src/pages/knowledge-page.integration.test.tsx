@@ -76,6 +76,9 @@ describe("KnowledgePage + IndexedDB", () => {
   });
 
   it("把同一原文绑定为全局 evidence_subject，而不是复制到每个案例字段", async () => {
+    const calculated = await calculateChart(input, WORKING_DEFAULT_RULE_PROFILE);
+    const bundle = await caseRepository.createCase({ alias: "主题来源 locator 样本", calculated });
+    const revision = bundle.revisions[0];
     const subject = EVIDENCE_SUBJECTS.find((item) => item.fieldPaths.includes("pillars.day.hiddenStems"))!;
     const content = "# 藏干\n巳中藏丙戊庚。";
     const document = await knowledgeRepository.createDocument({
@@ -92,9 +95,25 @@ describe("KnowledgePage + IndexedDB", () => {
       byteSize: new Blob([content]).size
     });
     const target = { kind: "evidence_subject" as const, subjectId: subject.subjectId };
-    window.history.replaceState({}, "", `/knowledge${buildKnowledgeSearch({ documentId: document.id, target })}`);
+    const reviewContextLocator = {
+      caseId: bundle.caseRecord.id,
+      revisionId: revision.id,
+      evidenceSubjectId: subject.subjectId,
+      fieldPath: "pillars.day.hiddenStems"
+    };
+    window.history.replaceState({}, "", `/knowledge${buildKnowledgeSearch({
+      documentId: document.id,
+      target,
+      reviewContextLocator
+    })}`);
 
     render(<KnowledgePage />);
+    expect((await screen.findByRole("link", { name: "返回该 Revision" })).getAttribute("href"))
+      .toBe(`/cases/${bundle.caseRecord.id}/revisions/${revision.id}`);
+    expect(screen.getByText(/locator 只用于本次字段级只读复核/)).toBeTruthy();
+    expect(await screen.findByRole("button", { name: "读取来源并复核 Revision 上下文" }))
+      .toBeTruthy();
+    expect(window.document.querySelector("[data-review-context-requested='true']")).toBeTruthy();
     fireEvent.click(await screen.findByRole("button", { name: "引用第 2 行" }));
     fireEvent.click(screen.getByRole("button", { name: "建立候选引用" }));
 

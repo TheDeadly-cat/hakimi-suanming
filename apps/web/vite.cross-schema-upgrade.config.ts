@@ -28,7 +28,7 @@ if (descriptor.targetSchema === 13 && fault !== "none") {
 
 const PRODUCTION_SCHEMA_MARKERS: Record<ProductionMigrationSchema, readonly string[]> = {
   14: [
-    "export const RESEARCH_DATABASE_SCHEMA_VERSION = 14 as const;",
+    "storage has no implicit default Schema.",
     "// v14 only adds case-scoped recency indexes.",
     "this.version(14).stores({",
     'researchNotes: "id, caseId, [caseId+lifecycle], [caseId+updatedAt], anchor.kind, anchor.revisionId, updatedAt, *tags"',

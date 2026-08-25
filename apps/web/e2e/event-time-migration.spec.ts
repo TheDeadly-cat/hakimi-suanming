@@ -677,6 +677,7 @@ test("合法合成 native Dexie v7 Event v1 在真实 Edge 显式派生新 ID，
     expect(markdownSemanticText).toContain("2025-11-02T05:30:00Z");
     expect(markdownSemanticText).toContain("calendar_date");
 
+    await deliveryDialog.getByRole("button", { name: "已核对，允许再次下载", exact: true }).click();
     await deliveryDialog.getByRole("button", { name: "关闭文件交付", exact: true }).click();
     await expect(deliveryDialog).toBeHidden();
 

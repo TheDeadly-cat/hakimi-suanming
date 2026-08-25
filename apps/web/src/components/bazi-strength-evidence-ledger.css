@@ -1,0 +1,1353 @@
+/* Source-bound strength evidence, displayed as a research ledger. */
+
+.bazi-strength-evidence-ledger {
+  --ledger-ink: #253238;
+  --ledger-muted: #58676c;
+  --ledger-line: rgba(37, 50, 56, 0.16);
+  --ledger-paper: #f1f2ec;
+  --ledger-jade: #47776b;
+  --ledger-blue: #4a6b88;
+  --ledger-ochre: #875f31;
+  --ledger-red: #a34f42;
+  position: relative;
+  overflow: hidden;
+  padding: clamp(18px, 2.5vw, 28px);
+  border: 1px solid var(--ledger-line);
+  border-radius: 7px 24px 7px 7px;
+  background:
+    linear-gradient(110deg, rgba(74, 107, 136, 0.055), transparent 34%),
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(37, 50, 56, 0.024) 31px 32px),
+    var(--ledger-paper);
+  box-shadow:
+    0 20px 46px rgba(37, 50, 56, 0.075),
+    inset 0 1px rgba(255, 255, 255, 0.76);
+}
+
+.bazi-strength-evidence-ledger::before {
+  position: absolute;
+  top: 0;
+  right: clamp(18px, 3vw, 38px);
+  width: 78px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--ledger-blue), var(--ledger-jade));
+  content: "";
+}
+
+.bazi-strength-evidence-ledger[data-binding-state="error"]::before {
+  background: var(--ledger-red);
+}
+
+.bazi-strength-evidence-ledger[data-binding-state="loading"]::before {
+  background: linear-gradient(90deg, var(--ledger-blue), color-mix(in srgb, var(--ledger-blue) 25%, transparent));
+}
+
+.bazi-strength-evidence-ledger > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--ledger-line);
+}
+
+.bazi-strength-evidence-ledger > header small:first-child {
+  color: var(--ledger-blue);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.bazi-strength-evidence-ledger > header h3 {
+  margin: 6px 0 7px;
+  color: var(--ledger-ink);
+  font-family: var(--font-editorial);
+  font-size: clamp(22px, 2.2vw, 29px);
+  letter-spacing: 0.03em;
+}
+
+.bazi-strength-evidence-ledger > header p {
+  max-width: 70rem;
+  margin: 0;
+  color: var(--ledger-muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-scope {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px 14px;
+  align-items: center;
+  margin: 16px 0;
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--ledger-ochre) 28%, var(--ledger-line));
+  border-left: 3px solid var(--ledger-ochre);
+  border-radius: 4px 14px 4px 4px;
+  background: rgba(160, 120, 67, 0.065);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-scope strong {
+  color: var(--ledger-ochre);
+  font-family: var(--font-editorial);
+  font-size: 14px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-scope p {
+  margin: 0;
+  color: var(--ledger-muted);
+  font-size: 0.76rem;
+  line-height: 1.6;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-scope > span {
+  color: var(--ledger-ochre);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-loading,
+.bazi-strength-evidence-ledger .bazi-strength-evidence-error,
+.bazi-strength-evidence-ledger .bazi-strength-evidence-integrity {
+  min-height: 76px;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--ledger-line);
+  border-radius: 5px 16px 5px 5px;
+  background: rgba(255, 253, 248, 0.56);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-loading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-loading > span {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: 2px;
+  background: var(--ledger-blue);
+  animation: strength-ledger-pulse 720ms ease-in-out infinite alternate;
+  transform: rotate(45deg);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-loading p,
+.bazi-strength-evidence-ledger .bazi-strength-evidence-error p,
+.bazi-strength-evidence-ledger .bazi-strength-evidence-integrity p {
+  margin: 0;
+  color: var(--ledger-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-error {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  border-left: 4px solid var(--ledger-red);
+  background: rgba(163, 79, 66, 0.07);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-integrity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 13px;
+  border-left: 4px solid var(--ledger-red);
+  background: rgba(163, 79, 66, 0.07);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-integrity > div {
+  min-width: 0;
+  flex: 1 1 240px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-integrity > .secondary-action {
+  flex: 0 0 auto;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-integrity > svg {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  color: var(--ledger-red);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-integrity strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--ledger-red);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-error strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--ledger-red);
+}
+
+.bazi-strength-evidence-ledger :is(.bazi-strength-evidence-error, .bazi-strength-evidence-integrity) .secondary-action {
+  white-space: nowrap;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin: 0 0 14px;
+  border: 1px solid var(--ledger-line);
+  border-radius: 5px 16px 5px 5px;
+  background: var(--ledger-line);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-summary > div {
+  --metric-accent: var(--ledger-blue);
+  position: relative;
+  min-width: 0;
+  padding: 12px 13px 12px 16px;
+  background: color-mix(in srgb, var(--ledger-paper) 93%, white);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-summary > div[data-metric="band"] { --metric-accent: var(--ledger-blue); }
+.bazi-strength-evidence-ledger .bazi-strength-evidence-summary > div[data-metric="weights"] { --metric-accent: var(--ledger-blue); }
+.bazi-strength-evidence-ledger .bazi-strength-evidence-summary > div[data-metric="evidence"] { --metric-accent: var(--ledger-ochre); }
+.bazi-strength-evidence-ledger .bazi-strength-evidence-summary > div[data-metric="scenarios"] { --metric-accent: var(--ledger-red); }
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-summary > div::before {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 7px;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--metric-accent);
+  content: "";
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-summary dt {
+  color: var(--ledger-muted);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-summary dd {
+  margin: 5px 0 4px;
+  color: var(--ledger-ink);
+  font-family: var(--font-editorial);
+  font-size: clamp(20px, 2vw, 27px);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-summary small {
+  color: var(--ledger-muted);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-input-binding {
+  overflow: hidden;
+  margin: 0 0 14px;
+  border: 1px solid var(--ledger-line);
+  border-radius: 5px 17px 5px 5px;
+  background: rgba(255, 253, 248, 0.58);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-input-binding > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 13px;
+  border-bottom: 1px solid var(--ledger-line);
+  background: linear-gradient(90deg, rgba(74, 107, 136, 0.075), transparent 62%);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-input-binding > header small,
+.bazi-strength-evidence-ledger .bazi-strength-input-binding > header h4 {
+  display: block;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-input-binding > header small {
+  color: var(--ledger-blue);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-input-binding > header h4 {
+  margin: 3px 0 0;
+  color: var(--ledger-ink);
+  font-family: var(--font-editorial);
+  font-size: 15px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-input-binding > ol {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  background: var(--ledger-line);
+  list-style: none;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-input-binding li {
+  --binding-accent: var(--ledger-blue);
+  position: relative;
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  padding: 12px 11px 11px 15px;
+  background: color-mix(in srgb, var(--ledger-paper) 94%, white);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-input-binding li[data-binding-kind="policy"] { --binding-accent: var(--ledger-blue); }
+.bazi-strength-evidence-ledger .bazi-strength-input-binding li[data-binding-kind="assessment"] { --binding-accent: var(--ledger-ochre); }
+.bazi-strength-evidence-ledger .bazi-strength-input-binding li[data-binding-kind="sensitivity"] { --binding-accent: var(--ledger-ochre); }
+.bazi-strength-evidence-ledger .bazi-strength-input-binding li[data-binding-kind="claims"] { --binding-accent: var(--ledger-blue); }
+
+.bazi-strength-evidence-ledger .bazi-strength-input-binding li::before {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 7px;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--binding-accent);
+  content: "";
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-input-binding li > span {
+  color: var(--binding-accent);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-input-binding li > strong {
+  color: var(--ledger-ink);
+  font-size: 0.76rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-input-binding li > code {
+  color: var(--ledger-muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-input-binding > p {
+  margin: 0;
+  padding: 9px 13px;
+  border-top: 1px solid var(--ledger-line);
+  color: var(--ledger-muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-binding-digests {
+  border-top: 1px solid var(--ledger-line);
+  background: rgba(37, 50, 56, 0.025);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-binding-digests > summary {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 46px;
+  padding: 9px 13px 9px 45px;
+  color: var(--ledger-ink);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 760;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-binding-digests > summary::-webkit-details-marker {
+  display: none;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-binding-digests > summary::before {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  display: grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+  border: 1px solid var(--ledger-line);
+  border-radius: 3px 8px 3px 3px;
+  background: rgba(74, 107, 136, 0.07);
+  color: var(--ledger-blue);
+  content: "+";
+  font-family: var(--font-mono);
+  font-size: 15px;
+  transform: translateY(-50%);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-binding-digests[open] > summary::before {
+  content: "-";
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-binding-digests > summary small {
+  color: var(--ledger-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-binding-digests[open] > summary {
+  border-bottom: 1px solid var(--ledger-line);
+  background: rgba(74, 107, 136, 0.055);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-binding-digests > dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  background: var(--ledger-line);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-binding-digests > dl > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--ledger-paper) 94%, white);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-binding-digests dt {
+  color: var(--ledger-blue);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 760;
+  letter-spacing: 0.04em;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-binding-digests dd {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  margin: 0;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-binding-digests dd > span {
+  color: var(--ledger-muted);
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-binding-digests code {
+  display: block;
+  color: var(--ledger-ink);
+  font-size: 0.7rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  user-select: all;
+  word-break: break-all;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-weight-balance {
+  display: block;
+  height: 7px;
+  overflow: hidden;
+  margin: 7px 0 6px;
+  border: 1px solid color-mix(in srgb, var(--ledger-ochre) 34%, var(--ledger-line));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ledger-ochre) 72%, var(--ledger-paper));
+  box-shadow: inset 0 1px 2px rgba(37, 50, 56, 0.12);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-weight-balance > span {
+  display: block;
+  height: 100%;
+  border-right: 1px solid rgba(255, 255, 255, 0.78);
+  background: var(--ledger-blue);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-direction-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  margin: -3px 0 14px;
+  padding: 9px 12px;
+  border: 1px solid var(--ledger-line);
+  border-radius: 4px 12px 4px 4px;
+  background: rgba(255, 253, 248, 0.5);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-direction-key > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ledger-ink);
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-direction-key i {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--ledger-blue);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ledger-blue) 36%, transparent);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-direction-key [data-direction="demand"] i {
+  background: var(--ledger-ochre);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ledger-ochre) 40%, transparent);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-direction-key > small {
+  flex: 1 1 320px;
+  color: var(--ledger-muted);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-weight-balance[data-empty="true"] {
+  border-color: var(--ledger-line);
+  background: repeating-linear-gradient(135deg, rgba(100, 114, 119, 0.12) 0 5px, transparent 5px 10px);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-weight-balance[data-empty="true"] > span {
+  display: none;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-classification-direct {
+  display: grid;
+  gap: 5px;
+  margin: 0 0 10px;
+  padding: 13px 15px;
+  border-left: 4px solid var(--ledger-blue);
+  border-radius: 4px 14px 4px 4px;
+  background: rgba(74, 107, 136, 0.07);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-classification-direct > small {
+  color: var(--ledger-blue);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-classification-direct > p {
+  margin: 0;
+  color: var(--ledger-ink);
+  font-family: var(--font-editorial);
+  font-size: 15px;
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-month-duplicate {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px 14px;
+  align-items: center;
+  margin-bottom: 17px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--ledger-ochre) 28%, var(--ledger-line));
+  border-radius: 4px 13px 4px 4px;
+  background: rgba(160, 120, 67, 0.055);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-month-duplicate strong {
+  color: var(--ledger-ochre);
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-month-duplicate span {
+  color: var(--ledger-muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 2px 0 2px 28px;
+  list-style: none;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items::before {
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  left: 7px;
+  width: 2px;
+  background: linear-gradient(var(--ledger-blue), rgba(74, 107, 136, 0.12));
+  content: "";
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items > li {
+  --evidence-accent: var(--ledger-blue);
+  position: relative;
+  min-width: 0;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items > li[data-strength-direction="support"] { --evidence-accent: var(--ledger-blue); }
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items > li[data-strength-direction="demand"] { --evidence-accent: var(--ledger-ochre); }
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items > li[data-status="excluded_day_master"] { --evidence-accent: var(--ledger-ochre); }
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items > li[data-status="withheld_unreliable_hour"] { --evidence-accent: var(--ledger-muted); }
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items > li::before {
+  position: absolute;
+  z-index: 2;
+  top: 19px;
+  left: -26px;
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--ledger-paper);
+  border-radius: 2px;
+  background: var(--evidence-accent);
+  box-shadow: 0 0 0 1px var(--evidence-accent);
+  content: "";
+  transform: rotate(45deg);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items > li > article {
+  overflow: hidden;
+  border: 1px solid var(--ledger-line);
+  border-left: 3px solid var(--evidence-accent);
+  border-radius: 5px 16px 5px 5px;
+  background: rgba(255, 253, 248, 0.66);
+  box-shadow: 0 9px 22px rgba(37, 50, 56, 0.045);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items article > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: 11px 13px;
+  border-bottom: 1px solid var(--ledger-line);
+  background: color-mix(in srgb, var(--evidence-accent) 5%, transparent);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items article > header small {
+  color: var(--evidence-accent);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items article h4 {
+  margin: 3px 0 0;
+  color: var(--ledger-ink);
+  font-family: var(--font-editorial);
+  font-size: 16px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items article > p {
+  margin: 0;
+  padding: 11px 13px 5px;
+  color: var(--ledger-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  padding: 5px 13px;
+  color: var(--ledger-muted);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 7px 13px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items nav a {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  padding: 4px 7px;
+  border: 1px solid color-mix(in srgb, var(--evidence-accent) 28%, var(--ledger-line));
+  border-radius: 3px 9px 3px 3px;
+  background: color-mix(in srgb, var(--evidence-accent) 7%, transparent);
+  color: var(--evidence-accent);
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items article > small:last-child {
+  display: block;
+  padding: 8px 13px 11px;
+  color: var(--ledger-muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-scenario-comparisons,
+.bazi-strength-evidence-ledger .bazi-strength-claim-ledger {
+  overflow: hidden;
+  margin-top: 11px;
+  border: 1px solid var(--ledger-line);
+  border-radius: 5px 17px 5px 5px;
+  background: rgba(255, 253, 248, 0.55);
+}
+
+.bazi-strength-evidence-ledger :is(.bazi-strength-scenario-comparisons, .bazi-strength-claim-ledger) > summary {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  min-height: 58px;
+  padding: 12px 14px 12px 48px;
+  cursor: pointer;
+}
+
+.bazi-strength-evidence-ledger :is(.bazi-strength-scenario-comparisons, .bazi-strength-claim-ledger) > summary::-webkit-details-marker {
+  display: none;
+}
+
+.bazi-strength-evidence-ledger :is(.bazi-strength-scenario-comparisons, .bazi-strength-claim-ledger) > summary::before {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 1px solid var(--ledger-line);
+  border-radius: 3px 8px 3px 3px;
+  background: rgba(74, 107, 136, 0.07);
+  color: var(--ledger-blue);
+  content: "+";
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 800;
+  transform: translateY(-50%);
+}
+
+.bazi-strength-evidence-ledger :is(.bazi-strength-scenario-comparisons, .bazi-strength-claim-ledger)[open] > summary::before {
+  content: "-";
+}
+
+.bazi-strength-evidence-ledger :is(.bazi-strength-scenario-comparisons, .bazi-strength-claim-ledger) > summary:focus-visible {
+  outline: 3px solid var(--ledger-blue);
+  outline-offset: -4px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-binding-digests > summary:focus-visible {
+  outline: 3px solid var(--ledger-blue);
+  outline-offset: -4px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-items nav a:focus-visible,
+.bazi-strength-evidence-ledger .bazi-strength-external-source:focus-visible,
+.bazi-strength-evidence-ledger :is(.bazi-strength-evidence-error, .bazi-strength-evidence-integrity) .secondary-action:focus-visible {
+  outline: 3px solid var(--ledger-blue);
+  outline-offset: 3px;
+}
+
+.bazi-strength-evidence-ledger :is(.bazi-strength-scenario-comparisons, .bazi-strength-claim-ledger) > summary strong,
+.bazi-strength-evidence-ledger :is(.bazi-strength-scenario-comparisons, .bazi-strength-claim-ledger) > summary small {
+  display: block;
+}
+
+.bazi-strength-evidence-ledger :is(.bazi-strength-scenario-comparisons, .bazi-strength-claim-ledger) > summary strong {
+  color: var(--ledger-ink);
+  font-family: var(--font-editorial);
+  font-size: 15px;
+}
+
+.bazi-strength-evidence-ledger :is(.bazi-strength-scenario-comparisons, .bazi-strength-claim-ledger) > summary small {
+  margin-top: 4px;
+  color: var(--ledger-muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+@media (hover: hover) {
+  .bazi-strength-evidence-ledger :is(.bazi-strength-scenario-comparisons, .bazi-strength-claim-ledger) > summary:hover {
+    background: rgba(74, 107, 136, 0.045);
+  }
+}
+
+.bazi-strength-evidence-ledger :is(.bazi-strength-scenario-comparisons, .bazi-strength-claim-ledger)[open] > summary {
+  border-bottom: 1px solid var(--ledger-line);
+  background: rgba(74, 107, 136, 0.055);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-scenario-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-scenario-body {
+  display: grid;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-scenario-comparisons article {
+  --scenario-accent: var(--ledger-blue);
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--ledger-line);
+  border-top: 3px solid var(--scenario-accent);
+  border-radius: 4px 12px 4px 4px;
+  background: rgba(255, 253, 248, 0.64);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-scenario-comparisons article[data-crosses-band="true"] {
+  --scenario-accent: var(--ledger-ochre);
+  background: rgba(135, 95, 49, 0.07);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-scenario-comparisons article > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-scenario-comparisons article header strong {
+  color: var(--ledger-ink);
+  font-size: 13px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-scenario-comparisons article header span {
+  color: var(--scenario-accent);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-scenario-comparisons article p {
+  margin: 8px 0;
+  color: var(--ledger-muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-scenario-comparisons article > small {
+  color: var(--ledger-muted);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-list {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-card {
+  overflow: hidden;
+  scroll-margin-top: 92px;
+  border: 1px solid var(--ledger-line);
+  border-left: 3px solid var(--ledger-blue);
+  border-radius: 5px 16px 5px 5px;
+  background: rgba(255, 253, 248, 0.66);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-card:target {
+  border-color: var(--ledger-blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ledger-blue) 18%, transparent);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-card:focus-visible {
+  outline: 3px solid var(--ledger-blue);
+  outline-offset: 3px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-card[data-display-status^="withheld"] {
+  border-left-color: var(--ledger-ochre);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-card > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: 12px 13px;
+  border-bottom: 1px solid var(--ledger-line);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-card > header small {
+  color: var(--ledger-blue);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-card > header h4 {
+  margin: 4px 0 0;
+  color: var(--ledger-ink);
+  font-family: var(--font-editorial);
+  font-size: 15px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-card > code {
+  display: block;
+  padding: 8px 13px;
+  border-bottom: 1px solid var(--ledger-line);
+  color: var(--ledger-muted);
+  font-size: 0.76rem;
+  overflow-wrap: anywhere;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-context {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--ledger-line);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-context > section {
+  --context-accent: var(--ledger-blue);
+  min-width: 0;
+  padding: 12px 13px;
+  background: color-mix(in srgb, var(--ledger-paper) 93%, white);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-context > section[data-context="counterexamples"] {
+  --context-accent: var(--ledger-ochre);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-context > section > strong {
+  color: var(--context-accent);
+  font-size: 0.76rem;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-context ul,
+.bazi-strength-evidence-ledger .bazi-strength-source-bindings {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-context li {
+  position: relative;
+  padding: 3px 0 3px 11px;
+  color: var(--ledger-muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-context li::before {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  width: 5px;
+  height: 1px;
+  background: var(--context-accent);
+  content: "";
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-source-bindings {
+  display: grid;
+  gap: 8px;
+  padding: 12px 13px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-source-bindings > li {
+  padding: 10px 11px;
+  border: 1px solid var(--ledger-line);
+  border-left: 3px solid var(--ledger-ochre);
+  border-radius: 4px 12px 4px 4px;
+  background: rgba(255, 253, 248, 0.6);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-source-bindings > li[data-locator-verification="verified"] {
+  border-left-color: var(--ledger-blue);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-source-bindings > li > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-source-bindings > li > div > span {
+  color: var(--ledger-blue);
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-source-bindings p {
+  margin: 7px 0 0;
+  color: var(--ledger-muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-source-bindings > li > small {
+  display: block;
+  margin-top: 8px;
+  color: var(--ledger-muted);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  overflow-wrap: anywhere;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-external-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--ledger-blue);
+  font-weight: 750;
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.2em;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-external-source svg {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-external-source__host {
+  max-width: 22rem;
+  padding: 2px 5px;
+  border: 1px solid color-mix(in srgb, var(--ledger-blue) 24%, var(--ledger-line));
+  border-radius: 3px 8px 3px 3px;
+  background: rgba(74, 107, 136, 0.06);
+  color: var(--ledger-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-progress {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px dashed color-mix(in srgb, var(--ledger-blue) 34%, var(--ledger-line));
+  border-radius: 4px 12px 4px 4px;
+  background: rgba(74, 107, 136, 0.045);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-progress[data-progress-kind="scenarios"],
+.bazi-strength-evidence-ledger .bazi-strength-progress[data-progress-kind="claims"] {
+  margin: 0 12px 12px;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-progress > span {
+  color: var(--ledger-muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-progress > .secondary-action {
+  flex: 0 0 auto;
+  min-height: 36px;
+  white-space: nowrap;
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-boundary,
+.bazi-strength-evidence-ledger .bazi-strength-evidence-boundary {
+  display: block;
+  color: var(--ledger-muted);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+@media screen {
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-items > li > article,
+  .bazi-strength-evidence-ledger .bazi-strength-scenario-comparisons article {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 210px;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-claim-card {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 360px;
+  }
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-boundary {
+  padding: 9px 13px 11px;
+  border-top: 1px solid var(--ledger-line);
+  background: rgba(74, 107, 136, 0.04);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-boundary {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px dashed var(--ledger-line);
+  border-radius: 4px 12px 4px 4px;
+  background: rgba(255, 253, 248, 0.42);
+}
+
+@media (max-width: 900px) {
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-summary,
+  .bazi-strength-evidence-ledger .bazi-strength-scenario-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-input-binding > ol {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .bazi-strength-evidence-ledger {
+    padding: 16px 13px;
+    border-radius: 6px 17px 6px 6px;
+  }
+
+  .bazi-strength-evidence-ledger > header,
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-error,
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-integrity,
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-scope,
+  .bazi-strength-evidence-ledger .bazi-strength-input-binding > header,
+  .bazi-strength-evidence-ledger .bazi-strength-input-binding > ol,
+  .bazi-strength-evidence-ledger .bazi-strength-binding-digests > dl,
+  .bazi-strength-evidence-ledger .bazi-strength-month-duplicate,
+  .bazi-strength-evidence-ledger :is(.bazi-strength-scenario-comparisons, .bazi-strength-claim-ledger) > summary,
+  .bazi-strength-evidence-ledger .bazi-strength-scenario-list,
+  .bazi-strength-evidence-ledger .bazi-strength-claim-card > header,
+  .bazi-strength-evidence-ledger .bazi-strength-claim-context {
+    grid-template-columns: 1fr;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-scope > span {
+    white-space: normal;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-binding-digests > summary {
+    display: grid;
+    gap: 4px;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-integrity > .secondary-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-items {
+    padding-left: 20px;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-items::before {
+    left: 5px;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-items > li::before {
+    left: -19px;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-items article > header {
+    grid-template-columns: 1fr;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-error .secondary-action {
+    width: 100%;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-items nav a,
+  .bazi-strength-evidence-ledger .bazi-strength-external-source {
+    min-height: 44px;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-direction-key {
+    align-items: flex-start;
+    margin-top: 0;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-direction-key > small {
+    flex-basis: 100%;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-progress {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-progress > .secondary-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-scope p,
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-items article > p,
+  .bazi-strength-evidence-ledger .bazi-strength-scenario-comparisons article p,
+  .bazi-strength-evidence-ledger .bazi-strength-claim-context li,
+  .bazi-strength-evidence-ledger .bazi-strength-source-bindings p {
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (pointer: coarse) {
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-items nav a,
+  .bazi-strength-evidence-ledger .bazi-strength-external-source {
+    min-height: 44px;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-progress > .secondary-action {
+    min-height: 44px;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-binding-digests > summary {
+    min-height: 46px;
+  }
+}
+
+@media (forced-colors: active) {
+  .bazi-strength-evidence-ledger,
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-scope,
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-loading,
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-error,
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-integrity,
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-summary,
+  .bazi-strength-evidence-ledger .bazi-strength-input-binding,
+  .bazi-strength-evidence-ledger .bazi-strength-input-binding li,
+  .bazi-strength-evidence-ledger .bazi-strength-binding-digests,
+  .bazi-strength-evidence-ledger .bazi-strength-binding-digests > dl > div,
+  .bazi-strength-evidence-ledger .bazi-strength-classification-direct,
+  .bazi-strength-evidence-ledger .bazi-strength-month-duplicate,
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-items > li > article,
+  .bazi-strength-evidence-ledger .bazi-strength-scenario-comparisons,
+  .bazi-strength-evidence-ledger .bazi-strength-scenario-comparisons article,
+  .bazi-strength-evidence-ledger .bazi-strength-claim-ledger,
+  .bazi-strength-evidence-ledger .bazi-strength-claim-card,
+  .bazi-strength-evidence-ledger .bazi-strength-source-bindings > li,
+  .bazi-strength-evidence-ledger .bazi-strength-weight-balance,
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-boundary {
+    border-color: CanvasText;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-progress,
+  .bazi-strength-evidence-ledger .bazi-strength-external-source__host {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-items > li::before,
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-items::before,
+  .bazi-strength-evidence-ledger .bazi-strength-input-binding li::before {
+    background: CanvasText;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-weight-balance {
+    background: CanvasText;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-weight-balance > span {
+    background: Highlight;
+  }
+
+  .bazi-strength-evidence-ledger :is(.bazi-strength-scenario-comparisons, .bazi-strength-claim-ledger) > summary::before {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+
+  .bazi-strength-evidence-ledger .bazi-strength-claim-card:target {
+    border-color: Highlight;
+    box-shadow: 0 0 0 3px Highlight;
+  }
+
+  .bazi-strength-evidence-ledger :is(.bazi-strength-scenario-comparisons, .bazi-strength-claim-ledger) > summary:focus-visible,
+  .bazi-strength-evidence-ledger .bazi-strength-binding-digests > summary:focus-visible,
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-items nav a:focus-visible,
+  .bazi-strength-evidence-ledger .bazi-strength-external-source:focus-visible,
+  .bazi-strength-evidence-ledger .bazi-strength-claim-card:focus-visible,
+  .bazi-strength-evidence-ledger :is(.bazi-strength-evidence-error, .bazi-strength-evidence-integrity) .secondary-action:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bazi-strength-evidence-ledger .bazi-strength-evidence-loading > span {
+    animation: none;
+  }
+}
+
+@keyframes strength-ledger-pulse {
+  to {
+    opacity: 0.36;
+    transform: rotate(45deg) scale(0.72);
+  }
+}
+/* Support and demand are analytical poles, not good/bad outcomes. */
+.bazi-strength-evidence-ledger .bazi-strength-weight-bar {
+  background: color-mix(in srgb, var(--ledger-ochre) 28%, transparent);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-weight-fill {
+  background: var(--ledger-blue);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-item--support,
+.bazi-strength-evidence-ledger .bazi-strength-evidence-item[data-direction="support"] {
+  border-inline-start-color: var(--ledger-blue);
+  background: color-mix(in srgb, var(--ledger-blue) 7%, transparent);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-evidence-item--demand,
+.bazi-strength-evidence-ledger .bazi-strength-evidence-item[data-direction="demand"] {
+  border-inline-start-color: var(--ledger-ochre);
+  background: color-mix(in srgb, var(--ledger-ochre) 8%, transparent);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-scenario--crossing {
+  border-inline-start-color: var(--ledger-ochre);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-condition {
+  border-color: color-mix(in srgb, var(--ledger-blue) 36%, transparent);
+}
+
+.bazi-strength-evidence-ledger .bazi-strength-claim-counterexample {
+  border-color: color-mix(in srgb, var(--ledger-ochre) 42%, transparent);
+}

@@ -1,0 +1,1173 @@
+{
+  "schemaVersion": "1.0.0",
+  "formatVersion": "1.6.0",
+  "kind": "single_chart_research_report",
+  "title": "八字单盘研究报告",
+  "revisionLabel": "第 1 版 · 历史修订",
+  "interpretationEvidenceSha256": "164bf3fd11cc6a6256e40373c8ee9bba7e43cb6aa71417e237deb24e66918940",
+  "pillars": [
+    {
+      "key": "year",
+      "label": "年柱",
+      "ganZhi": "乙亥",
+      "xun": "甲戌",
+      "voidBranches": "申酉"
+    },
+    {
+      "key": "month",
+      "label": "月柱",
+      "ganZhi": "甲申",
+      "xun": "甲申",
+      "voidBranches": "午未"
+    },
+    {
+      "key": "day",
+      "label": "日柱",
+      "ganZhi": "辛巳",
+      "xun": "甲戌",
+      "voidBranches": "申酉"
+    },
+    {
+      "key": "hour",
+      "label": "时柱",
+      "ganZhi": "壬辰",
+      "xun": "甲申",
+      "voidBranches": "午未"
+    }
+  ],
+  "rowLabels": {
+    "case": [
+      "案例",
+      "案例标识",
+      "修订",
+      "标签",
+      "案例备注"
+    ],
+    "birth": [
+      "输入历法",
+      "原始日期",
+      "出生时间",
+      "时区",
+      "性别",
+      "地点",
+      "坐标",
+      "来源备注"
+    ],
+    "calibration": [
+      "民用公历日期",
+      "历法算法",
+      "原始民用时间",
+      "排盘墙上时间",
+      "UTC 瞬时点",
+      "UTC 偏移",
+      "DST 状态",
+      "时区解析",
+      "真太阳时预览",
+      "太阳时模型",
+      "时间校准警告",
+      "计算警告"
+    ],
+    "rules": [
+      "规则方案",
+      "规则状态",
+      "规则说明",
+      "界年 / 换月",
+      "换日 / 子时日干",
+      "时柱时间基准",
+      "DST 歧义",
+      "太阳时",
+      "起运",
+      "启用层",
+      "规则来源",
+      "规则包绑定",
+      "规则包 packId",
+      "规则包 packDigest",
+      "规则配置 profileId",
+      "规则配置 profileVersion",
+      "规则配置 profileDigest",
+      "规则包 useMode"
+    ],
+    "integrity": [
+      "引擎",
+      "上游",
+      "时区库",
+      "tzdb 数据摘要",
+      "时区解析器",
+      "规则摘要",
+      "运限规则摘要",
+      "结果哈希",
+      "支持范围",
+      "验证状态",
+      "计算时间"
+    ]
+  },
+  "calculationSource": {
+    "natalSource": "verified_stored_revision",
+    "downstreamSource": "explicit_projection",
+    "receiptLedgerStatus": "schema_unavailable",
+    "storedHistoricalOutputCompared": false,
+    "comparisonStatus": "not_applicable",
+    "profileId": "hakimi-explicit-derived-replay:relations-0.1.0_luck-0.1.0_transit-1.2.0",
+    "expertEvidenceStatus": "not_verified",
+    "components": [
+      {
+        "key": "relations",
+        "label": "四柱关系",
+        "status": "projected",
+        "executorId": "hakimi-relations-core:pillar-relations-executor:0.1.0"
+      },
+      {
+        "key": "luckCycle",
+        "label": "起运",
+        "status": "projected",
+        "executorId": "hakimi-luck-core:luck-cycle-executor:0.1.0"
+      },
+      {
+        "key": "transit",
+        "label": "Transit",
+        "status": "not_requested",
+        "executorId": null
+      }
+    ]
+  },
+  "interpretationEvidence": {
+    "status": "available",
+    "reason": null,
+    "scope": "strength_engineering_candidate_only",
+    "includeHour": true,
+    "envelopeProfileVersion": "hakimi.bazi.interpretation_evidence_envelope/0.1.0",
+    "envelopeContentVersion": "0.19.0",
+    "sourceRegistry": {
+      "profileVersion": "hakimi.bazi.strength_claim_registry/0.1.0",
+      "contentVersion": "0.18.0",
+      "registrySha256": null
+    },
+    "statementSequence": [
+      "1|strength-statement:scope|scope|supported|visible_with_evidence|verified|2|true",
+      "2|strength-statement:factor:strength-evidence:month_command:month|factor_ledger|supported|visible_with_evidence|verified|8|true",
+      "3|strength-statement:factor:strength-evidence:visible_stem:year|factor_ledger|supported|visible_with_evidence|verified|5|true",
+      "4|strength-statement:factor:strength-evidence:visible_stem:month|factor_ledger|supported|visible_with_evidence|verified|5|true",
+      "5|strength-statement:factor:strength-evidence:visible_stem:day|factor_ledger|supported|visible_with_evidence|verified|2|true",
+      "6|strength-statement:factor:strength-evidence:visible_stem:hour|factor_ledger|supported|visible_with_evidence|verified|5|true",
+      "7|strength-statement:factor:strength-evidence:first_hidden_stem:year:0|factor_ledger|blocked|withheld|incomplete|5|true",
+      "8|strength-statement:factor:strength-evidence:first_hidden_stem:month:0|factor_ledger|blocked|withheld|incomplete|6|true",
+      "9|strength-statement:factor:strength-evidence:first_hidden_stem:day:0|factor_ledger|blocked|withheld|incomplete|5|true",
+      "10|strength-statement:factor:strength-evidence:first_hidden_stem:hour:0|factor_ledger|blocked|withheld|incomplete|5|true",
+      "11|strength-statement:factor:strength-evidence:other_hidden_stem:year:1|factor_ledger|blocked|withheld|incomplete|5|true",
+      "12|strength-statement:factor:strength-evidence:other_hidden_stem:month:1|factor_ledger|blocked|withheld|incomplete|5|true",
+      "13|strength-statement:factor:strength-evidence:other_hidden_stem:month:2|factor_ledger|blocked|withheld|incomplete|5|true",
+      "14|strength-statement:factor:strength-evidence:other_hidden_stem:day:1|factor_ledger|blocked|withheld|incomplete|5|true",
+      "15|strength-statement:factor:strength-evidence:other_hidden_stem:day:2|factor_ledger|blocked|withheld|incomplete|5|true",
+      "16|strength-statement:factor:strength-evidence:other_hidden_stem:hour:1|factor_ledger|blocked|withheld|incomplete|5|true",
+      "17|strength-statement:factor:strength-evidence:other_hidden_stem:hour:2|factor_ledger|blocked|withheld|incomplete|5|true",
+      "18|strength-statement:month-main-duplication|month_main_duplication|supported|visible_with_evidence|verified|2|true",
+      "19|strength-statement:subtotal|subtotal|supported|visible_with_evidence|verified|5|true",
+      "20|strength-statement:classification|classification|supported|visible_with_evidence|verified|4|true",
+      "21|strength-statement:sensitivity:baseline_current_candidate|sensitivity|supported|visible_with_evidence|verified|1|true",
+      "22|strength-statement:sensitivity:deduplicate_month_main|sensitivity|supported|visible_with_evidence|verified|1|true",
+      "23|strength-statement:sensitivity:equal_presence_deduplicated|sensitivity|supported|visible_with_evidence|verified|1|true",
+      "24|strength-statement:sensitivity:without_month_command_bonus|sensitivity|supported|visible_with_evidence|verified|1|true",
+      "25|strength-statement:sensitivity:without_visible_stems|sensitivity|supported|visible_with_evidence|verified|1|true",
+      "26|strength-statement:sensitivity:without_hidden_stems|sensitivity|supported|visible_with_evidence|verified|1|true",
+      "27|strength-statement:boundary|boundary|advisory|visible_with_caveat|incomplete|2|true"
+    ],
+    "statementEvidence": [
+      {
+        "order": 1,
+        "statementId": "strength-statement:scope",
+        "text": "本证据账使用当前四柱事实；所有因素与当前政策逐项重算。",
+        "rationale": "事实、工程规则与精确来源定位均可解析；supported 仅表示当前工程投影引用闭合，不证明术数或科学真值。",
+        "factIds": [
+          "strength-evidence:month_command:month",
+          "strength-evidence:visible_stem:year",
+          "strength-evidence:visible_stem:month",
+          "strength-evidence:visible_stem:day",
+          "strength-evidence:visible_stem:hour",
+          "strength-evidence:first_hidden_stem:year:0",
+          "strength-evidence:first_hidden_stem:month:0",
+          "strength-evidence:first_hidden_stem:day:0",
+          "strength-evidence:first_hidden_stem:hour:0",
+          "strength-evidence:other_hidden_stem:year:1",
+          "strength-evidence:other_hidden_stem:month:1",
+          "strength-evidence:other_hidden_stem:month:2",
+          "strength-evidence:other_hidden_stem:day:1",
+          "strength-evidence:other_hidden_stem:day:2",
+          "strength-evidence:other_hidden_stem:hour:1",
+          "strength-evidence:other_hidden_stem:hour:2"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.engineering.strength.factor_inclusion.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion"
+        ]
+      },
+      {
+        "order": 2,
+        "statementId": "strength-statement:factor:strength-evidence:month_command:month",
+        "text": "月令 申 主气 庚，十神为劫财；五行关系为“与日主同类”，当前工程候选归入支持侧并计权 4。",
+        "rationale": "事实、工程规则与精确来源定位均可解析；supported 仅表示当前工程投影引用闭合，不证明术数或科学真值。",
+        "factIds": [
+          "strength-evidence:month_command:month"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.tradition.strength.month_command_whole_chart.v1",
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1",
+          "bazi.engineering.strength.month_main_counted_separately.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:policy:month-duplication",
+          "binding:dtt:month-command",
+          "binding:smt-v5:relative-relations",
+          "binding:smt-v10:whole-chart"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:policy:month-duplication",
+          "binding:dtt:month-command",
+          "binding:smt-v5:relative-relations",
+          "binding:smt-v10:whole-chart"
+        ]
+      },
+      {
+        "order": 3,
+        "statementId": "strength-statement:factor:strength-evidence:visible_stem:year",
+        "text": "年柱乙亥透干 乙，十神为偏财；五行关系为“受日主所克”，当前工程候选归入需求侧并计权 2。",
+        "rationale": "事实、工程规则与精确来源定位均可解析；supported 仅表示当前工程投影引用闭合，不证明术数或科学真值。",
+        "factIds": [
+          "strength-evidence:visible_stem:year"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.tradition.ten_god.relative_relations.v1",
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 4,
+        "statementId": "strength-statement:factor:strength-evidence:visible_stem:month",
+        "text": "月柱甲申透干 甲，十神为正财；五行关系为“受日主所克”，当前工程候选归入需求侧并计权 2。",
+        "rationale": "事实、工程规则与精确来源定位均可解析；supported 仅表示当前工程投影引用闭合，不证明术数或科学真值。",
+        "factIds": [
+          "strength-evidence:visible_stem:month"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.tradition.ten_god.relative_relations.v1",
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 5,
+        "statementId": "strength-statement:factor:strength-evidence:visible_stem:day",
+        "text": "日柱透干 辛 是日主事实锚点；当前政策不把日主自身再次作为透干因素计权。",
+        "rationale": "事实、工程规则与精确来源定位均可解析；supported 仅表示当前工程投影引用闭合，不证明术数或科学真值。",
+        "factIds": [
+          "strength-evidence:visible_stem:day"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.engineering.strength.factor_inclusion.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion"
+        ]
+      },
+      {
+        "order": 6,
+        "statementId": "strength-statement:factor:strength-evidence:visible_stem:hour",
+        "text": "时柱壬辰透干 壬，十神为伤官；五行关系为“由日主所生”，当前工程候选归入需求侧并计权 2。",
+        "rationale": "事实、工程规则与精确来源定位均可解析；supported 仅表示当前工程投影引用闭合，不证明术数或科学真值。",
+        "factIds": [
+          "strength-evidence:visible_stem:hour"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.tradition.ten_god.relative_relations.v1",
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 7,
+        "statementId": "strength-statement:factor:strength-evidence:first_hidden_stem:year:0",
+        "text": null,
+        "rationale": "规则或精确来源定位尚未通过当前工程门，禁止把这条叙事交给模型当作可用结论。",
+        "factIds": [
+          "strength-evidence:first_hidden_stem:year:0"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.tradition.ten_god.relative_relations.v1",
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1",
+          "bazi.tradition.hidden_stem.listing_candidate.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations",
+          "binding:yhzp:hidden-listing"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 8,
+        "statementId": "strength-statement:factor:strength-evidence:first_hidden_stem:month:0",
+        "text": null,
+        "rationale": "规则或精确来源定位尚未通过当前工程门，禁止把这条叙事交给模型当作可用结论。",
+        "factIds": [
+          "strength-evidence:first_hidden_stem:month:0"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.tradition.ten_god.relative_relations.v1",
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1",
+          "bazi.tradition.hidden_stem.listing_candidate.v1",
+          "bazi.engineering.strength.month_main_counted_separately.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:policy:month-duplication",
+          "binding:smt-v5:relative-relations",
+          "binding:yhzp:hidden-listing"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:policy:month-duplication",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 9,
+        "statementId": "strength-statement:factor:strength-evidence:first_hidden_stem:day:0",
+        "text": null,
+        "rationale": "规则或精确来源定位尚未通过当前工程门，禁止把这条叙事交给模型当作可用结论。",
+        "factIds": [
+          "strength-evidence:first_hidden_stem:day:0"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.tradition.ten_god.relative_relations.v1",
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1",
+          "bazi.tradition.hidden_stem.listing_candidate.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations",
+          "binding:yhzp:hidden-listing"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 10,
+        "statementId": "strength-statement:factor:strength-evidence:first_hidden_stem:hour:0",
+        "text": null,
+        "rationale": "规则或精确来源定位尚未通过当前工程门，禁止把这条叙事交给模型当作可用结论。",
+        "factIds": [
+          "strength-evidence:first_hidden_stem:hour:0"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.tradition.ten_god.relative_relations.v1",
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1",
+          "bazi.tradition.hidden_stem.listing_candidate.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations",
+          "binding:yhzp:hidden-listing"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 11,
+        "statementId": "strength-statement:factor:strength-evidence:other_hidden_stem:year:1",
+        "text": null,
+        "rationale": "规则或精确来源定位尚未通过当前工程门，禁止把这条叙事交给模型当作可用结论。",
+        "factIds": [
+          "strength-evidence:other_hidden_stem:year:1"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.tradition.ten_god.relative_relations.v1",
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1",
+          "bazi.tradition.hidden_stem.listing_candidate.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations",
+          "binding:yhzp:hidden-listing"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 12,
+        "statementId": "strength-statement:factor:strength-evidence:other_hidden_stem:month:1",
+        "text": null,
+        "rationale": "规则或精确来源定位尚未通过当前工程门，禁止把这条叙事交给模型当作可用结论。",
+        "factIds": [
+          "strength-evidence:other_hidden_stem:month:1"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.tradition.ten_god.relative_relations.v1",
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1",
+          "bazi.tradition.hidden_stem.listing_candidate.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations",
+          "binding:yhzp:hidden-listing"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 13,
+        "statementId": "strength-statement:factor:strength-evidence:other_hidden_stem:month:2",
+        "text": null,
+        "rationale": "规则或精确来源定位尚未通过当前工程门，禁止把这条叙事交给模型当作可用结论。",
+        "factIds": [
+          "strength-evidence:other_hidden_stem:month:2"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.tradition.ten_god.relative_relations.v1",
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1",
+          "bazi.tradition.hidden_stem.listing_candidate.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations",
+          "binding:yhzp:hidden-listing"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 14,
+        "statementId": "strength-statement:factor:strength-evidence:other_hidden_stem:day:1",
+        "text": null,
+        "rationale": "规则或精确来源定位尚未通过当前工程门，禁止把这条叙事交给模型当作可用结论。",
+        "factIds": [
+          "strength-evidence:other_hidden_stem:day:1"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.tradition.ten_god.relative_relations.v1",
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1",
+          "bazi.tradition.hidden_stem.listing_candidate.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations",
+          "binding:yhzp:hidden-listing"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 15,
+        "statementId": "strength-statement:factor:strength-evidence:other_hidden_stem:day:2",
+        "text": null,
+        "rationale": "规则或精确来源定位尚未通过当前工程门，禁止把这条叙事交给模型当作可用结论。",
+        "factIds": [
+          "strength-evidence:other_hidden_stem:day:2"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.tradition.ten_god.relative_relations.v1",
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1",
+          "bazi.tradition.hidden_stem.listing_candidate.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations",
+          "binding:yhzp:hidden-listing"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 16,
+        "statementId": "strength-statement:factor:strength-evidence:other_hidden_stem:hour:1",
+        "text": null,
+        "rationale": "规则或精确来源定位尚未通过当前工程门，禁止把这条叙事交给模型当作可用结论。",
+        "factIds": [
+          "strength-evidence:other_hidden_stem:hour:1"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.tradition.ten_god.relative_relations.v1",
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1",
+          "bazi.tradition.hidden_stem.listing_candidate.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations",
+          "binding:yhzp:hidden-listing"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 17,
+        "statementId": "strength-statement:factor:strength-evidence:other_hidden_stem:hour:2",
+        "text": null,
+        "rationale": "规则或精确来源定位尚未通过当前工程门，禁止把这条叙事交给模型当作可用结论。",
+        "factIds": [
+          "strength-evidence:other_hidden_stem:hour:2"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.day_master_fact_anchor.v1",
+          "bazi.tradition.ten_god.relative_relations.v1",
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1",
+          "bazi.tradition.hidden_stem.listing_candidate.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations",
+          "binding:yhzp:hidden-listing"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 18,
+        "statementId": "strength-statement:month-main-duplication",
+        "text": "同一月支主气 庚 在当前基线以“月令 4 + 首位藏干 2”分别计入，合计 6；这是公开待审的工程选择。",
+        "rationale": "事实、工程规则与精确来源定位均可解析；supported 仅表示当前工程投影引用闭合，不证明术数或科学真值。",
+        "factIds": [
+          "strength-evidence:month_command:month",
+          "strength-evidence:first_hidden_stem:month:0"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.month_main_counted_separately.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:policy:weights",
+          "binding:policy:month-duplication"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:policy:weights",
+          "binding:policy:month-duplication"
+        ]
+      },
+      {
+        "order": 19,
+        "statementId": "strength-statement:subtotal",
+        "text": "纳入因素逐项相加为支持侧 11、需求侧 14；排除项和 withheld 项不计权。",
+        "rationale": "事实、工程规则与精确来源定位均可解析；supported 仅表示当前工程投影引用闭合，不证明术数或科学真值。",
+        "factIds": [
+          "strength-evidence:month_command:month",
+          "strength-evidence:visible_stem:year",
+          "strength-evidence:visible_stem:month",
+          "strength-evidence:visible_stem:hour",
+          "strength-evidence:first_hidden_stem:year:0",
+          "strength-evidence:first_hidden_stem:month:0",
+          "strength-evidence:first_hidden_stem:day:0",
+          "strength-evidence:first_hidden_stem:hour:0",
+          "strength-evidence:other_hidden_stem:year:1",
+          "strength-evidence:other_hidden_stem:month:1",
+          "strength-evidence:other_hidden_stem:month:2",
+          "strength-evidence:other_hidden_stem:day:1",
+          "strength-evidence:other_hidden_stem:day:2",
+          "strength-evidence:other_hidden_stem:hour:1",
+          "strength-evidence:other_hidden_stem:hour:2"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.factor_inclusion.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:core:derive-assessment",
+          "binding:policy:factor-inclusion",
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 20,
+        "statementId": "strength-statement:classification",
+        "text": "逐项汇总得到支持侧 11、需求侧 14，支持比例 44.0%；当前工程阈值把它映射为“相对中和”候选，区间 [0.43, 0.57]。",
+        "rationale": "事实、工程规则与精确来源定位均可解析；supported 仅表示当前工程投影引用闭合，不证明术数或科学真值。",
+        "factIds": [
+          "strength-evidence:month_command:month",
+          "strength-evidence:visible_stem:year",
+          "strength-evidence:visible_stem:month",
+          "strength-evidence:visible_stem:hour",
+          "strength-evidence:first_hidden_stem:year:0",
+          "strength-evidence:first_hidden_stem:month:0",
+          "strength-evidence:first_hidden_stem:day:0",
+          "strength-evidence:first_hidden_stem:hour:0",
+          "strength-evidence:other_hidden_stem:year:1",
+          "strength-evidence:other_hidden_stem:month:1",
+          "strength-evidence:other_hidden_stem:month:2",
+          "strength-evidence:other_hidden_stem:day:1",
+          "strength-evidence:other_hidden_stem:day:2",
+          "strength-evidence:other_hidden_stem:hour:1",
+          "strength-evidence:other_hidden_stem:hour:2"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.factor_weights_4_2_2_1.v1",
+          "bazi.engineering.ten_god.support_demand_grouping.v1",
+          "bazi.engineering.strength.threshold_bands.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:policy:thresholds",
+          "binding:smt-v5:relative-relations"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:policy:direction-map",
+          "binding:policy:weights",
+          "binding:policy:thresholds",
+          "binding:smt-v5:relative-relations"
+        ]
+      },
+      {
+        "order": 21,
+        "statementId": "strength-statement:sensitivity:baseline_current_candidate",
+        "text": "当前 0.1.0 候选得到“相对中和”与 demand_leading；相对当前基线未跨越分档，支持／需求方向未变。这是工程假设扰动，不是出生输入变化或正式流派裁决。",
+        "rationale": "事实、工程规则与精确来源定位均可解析；supported 仅表示当前工程投影引用闭合，不证明术数或科学真值。",
+        "factIds": [
+          "strength-evidence:month_command:month",
+          "strength-evidence:visible_stem:year",
+          "strength-evidence:visible_stem:month",
+          "strength-evidence:visible_stem:hour",
+          "strength-evidence:first_hidden_stem:year:0",
+          "strength-evidence:first_hidden_stem:month:0",
+          "strength-evidence:first_hidden_stem:day:0",
+          "strength-evidence:first_hidden_stem:hour:0",
+          "strength-evidence:other_hidden_stem:year:1",
+          "strength-evidence:other_hidden_stem:month:1",
+          "strength-evidence:other_hidden_stem:month:2",
+          "strength-evidence:other_hidden_stem:day:1",
+          "strength-evidence:other_hidden_stem:day:2",
+          "strength-evidence:other_hidden_stem:hour:1",
+          "strength-evidence:other_hidden_stem:hour:2"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.scenario_sensitivity.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:sensitivity:six-scenarios"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:sensitivity:six-scenarios"
+        ]
+      },
+      {
+        "order": 22,
+        "statementId": "strength-statement:sensitivity:deduplicate_month_main",
+        "text": "月支主气去重得到“偏弱”与 demand_leading；相对当前基线跨越分档，支持／需求方向未变。这是工程假设扰动，不是出生输入变化或正式流派裁决。",
+        "rationale": "事实、工程规则与精确来源定位均可解析；supported 仅表示当前工程投影引用闭合，不证明术数或科学真值。",
+        "factIds": [
+          "strength-evidence:first_hidden_stem:month:0"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.scenario_sensitivity.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:sensitivity:six-scenarios"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:sensitivity:six-scenarios"
+        ]
+      },
+      {
+        "order": 23,
+        "statementId": "strength-statement:sensitivity:equal_presence_deduplicated",
+        "text": "去重后等权出现得到“偏弱”与 demand_leading；相对当前基线跨越分档，支持／需求方向未变。这是工程假设扰动，不是出生输入变化或正式流派裁决。",
+        "rationale": "事实、工程规则与精确来源定位均可解析；supported 仅表示当前工程投影引用闭合，不证明术数或科学真值。",
+        "factIds": [
+          "strength-evidence:first_hidden_stem:month:0",
+          "strength-evidence:month_command:month",
+          "strength-evidence:visible_stem:year",
+          "strength-evidence:first_hidden_stem:year:0",
+          "strength-evidence:visible_stem:month",
+          "strength-evidence:first_hidden_stem:day:0",
+          "strength-evidence:visible_stem:hour",
+          "strength-evidence:first_hidden_stem:hour:0"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.scenario_sensitivity.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:sensitivity:six-scenarios"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:sensitivity:six-scenarios"
+        ]
+      },
+      {
+        "order": 24,
+        "statementId": "strength-statement:sensitivity:without_month_command_bonus",
+        "text": "不计月令加权项得到“偏弱”与 demand_leading；相对当前基线跨越分档，支持／需求方向未变。这是工程假设扰动，不是出生输入变化或正式流派裁决。",
+        "rationale": "事实、工程规则与精确来源定位均可解析；supported 仅表示当前工程投影引用闭合，不证明术数或科学真值。",
+        "factIds": [
+          "strength-evidence:month_command:month"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.scenario_sensitivity.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:sensitivity:six-scenarios"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:sensitivity:six-scenarios"
+        ]
+      },
+      {
+        "order": 25,
+        "statementId": "strength-statement:sensitivity:without_visible_stems",
+        "text": "省略透干得到“偏强”与 support_leading；相对当前基线跨越分档，支持／需求方向发生变化。这是工程假设扰动，不是出生输入变化或正式流派裁决。",
+        "rationale": "事实、工程规则与精确来源定位均可解析；supported 仅表示当前工程投影引用闭合，不证明术数或科学真值。",
+        "factIds": [
+          "strength-evidence:visible_stem:year",
+          "strength-evidence:visible_stem:month",
+          "strength-evidence:visible_stem:hour"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.scenario_sensitivity.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:sensitivity:six-scenarios"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:sensitivity:six-scenarios"
+        ]
+      },
+      {
+        "order": 26,
+        "statementId": "strength-statement:sensitivity:without_hidden_stems",
+        "text": "省略一般藏干得到“偏弱”与 demand_leading；相对当前基线跨越分档，支持／需求方向未变。这是工程假设扰动，不是出生输入变化或正式流派裁决。",
+        "rationale": "事实、工程规则与精确来源定位均可解析；supported 仅表示当前工程投影引用闭合，不证明术数或科学真值。",
+        "factIds": [
+          "strength-evidence:first_hidden_stem:year:0",
+          "strength-evidence:other_hidden_stem:year:1",
+          "strength-evidence:first_hidden_stem:month:0",
+          "strength-evidence:other_hidden_stem:month:1",
+          "strength-evidence:other_hidden_stem:month:2",
+          "strength-evidence:first_hidden_stem:day:0",
+          "strength-evidence:other_hidden_stem:day:1",
+          "strength-evidence:other_hidden_stem:day:2",
+          "strength-evidence:first_hidden_stem:hour:0",
+          "strength-evidence:other_hidden_stem:hour:1",
+          "strength-evidence:other_hidden_stem:hour:2"
+        ],
+        "ruleIds": [
+          "bazi.engineering.strength.scenario_sensitivity.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:sensitivity:six-scenarios"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:sensitivity:six-scenarios"
+        ]
+      },
+      {
+        "order": 27,
+        "statementId": "strength-statement:boundary",
+        "text": "从格、专旺、化气、合化、刑冲、调候与运限仍未裁决；本层不输出用神、喜忌、个人吉凶或事件结果。",
+        "rationale": "这是显式的留白与复核边界，不是命盘事实或确定结论。",
+        "factIds": [],
+        "ruleIds": [
+          "bazi.tradition.strength.month_command_whole_chart.v1",
+          "bazi.review_gate.structure_rescue_climate.v1"
+        ],
+        "sourceBindingIds": [
+          "binding:dtt:month-command",
+          "binding:smt-v10:whole-chart",
+          "binding:zpzz:review-gates"
+        ],
+        "registryLocatorVerifiedBindingIds": [
+          "binding:dtt:month-command",
+          "binding:smt-v10:whole-chart"
+        ]
+      }
+    ],
+    "assertionFamilies": [
+      {
+        "kind": "scope",
+        "total": 1,
+        "displayable": 1,
+        "withheld": 0
+      },
+      {
+        "kind": "factor_ledger",
+        "total": 16,
+        "displayable": 5,
+        "withheld": 11
+      },
+      {
+        "kind": "month_main_duplication",
+        "total": 1,
+        "displayable": 1,
+        "withheld": 0
+      },
+      {
+        "kind": "subtotal",
+        "total": 1,
+        "displayable": 1,
+        "withheld": 0
+      },
+      {
+        "kind": "classification",
+        "total": 1,
+        "displayable": 1,
+        "withheld": 0
+      },
+      {
+        "kind": "sensitivity",
+        "total": 6,
+        "displayable": 6,
+        "withheld": 0
+      },
+      {
+        "kind": "boundary",
+        "total": 1,
+        "displayable": 1,
+        "withheld": 0
+      }
+    ],
+    "coverage": {
+      "statementsTotal": 27,
+      "displayable": 16,
+      "withheld": 11,
+      "assertionFamilies": 7,
+      "referencedSourceBindings": 12,
+      "registryLocatorVerifiedBindings": 10,
+      "referencedSources": 8,
+      "pinnedRevisionSources": 7,
+      "structuredCitationRecordsBound": 0,
+      "sourceRightsRecordsBound": 0,
+      "sourceTextsIncluded": 0,
+      "structuredCitationCoverage": "not_assessed",
+      "distributionRights": "not_assessed"
+    },
+    "sourceSequence": [
+      "1|hakimi-strength-core-0.1.0|engineering_contract|哈基米旺衰因素共享派生核|本仓源码；当前工程定义|/packages/bazi-interpretation/src/strength-assessment-core.ts|hakimi-bazi-strength-ten-god-candidate/0.1.0|repository_policy_verified|internal_project_source|local_repository_only|not_bound|false|false|只证明当前工程如何从命盘事实派生因素、五行关系与汇总，不证明命理或科学正确。",
+      "2|hakimi-strength-policy-0.1.0|engineering_contract|哈基米旺衰候选政策|本仓源码；单一政策事实源|/packages/bazi-interpretation/src/strength-policy.ts|hakimi.bazi.strength_policy/0.1.0|repository_policy_verified|internal_project_source|local_repository_only|not_bound|false|false|只认证 4/2/2/1、阈值、方向分组和关闭范围是本项目当前工程候选。",
+      "3|hakimi-strength-sensitivity-0.1.0|engineering_contract|哈基米旺衰工程敏感性投影|本仓源码；六个工程扰动场景|/packages/bazi-interpretation/src/strength-sensitivity-review.ts|hakimi.bazi.strength_sensitivity_review/0.1.0|repository_policy_verified|internal_project_source|local_repository_only|not_bound|false|false|六场景只检查模型假设敏感度，不代表六个流派、专家共识或预测验证。",
+      "4|dtt-chanwei-wikisource-r2600158|public_domain_classic_transcription|《滴天髓阐微》|Wikisource 社区转录，任铁樵阐微本|https://zh.wikisource.org/w/index.php?title=%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE&oldid=2600158|2600158|locator_verified_in_pinned_revision|historical_work_public_domain_candidate|community_transcription_reuse_requires_site_license_audit|not_bound|false|false|用于月令与全局合看、不可执一的传统语境；未与指定影印本逐字校勘。",
+      "5|smt-v5-wikisource-r2706483|public_domain_classic_transcription|《三命通会》卷五|Wikisource 社区转录|https://zh.wikisource.org/w/index.php?title=%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83/%E5%8D%B7%E4%BA%94&oldid=2706483|2706483|locator_verified_in_pinned_revision|historical_work_public_domain_candidate|community_transcription_reuse_requires_site_license_audit|not_bound|false|false|用于十神相对生克关系的传统语境；不认证现代支持／需求分组或吉凶。",
+      "6|smt-siku-v10-wikisource-r761703|public_domain_classic_transcription|《三命通会》（四库全书本）卷十|Wikisource 社区转录的四库文本|https://zh.wikisource.org/w/index.php?title=%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83_(%E5%9B%9B%E5%BA%AB%E5%85%A8%E6%9B%B8%E6%9C%AC)/%E5%8D%B710&oldid=761703|761703|locator_verified_in_pinned_revision|historical_work_public_domain_candidate|community_transcription_reuse_requires_site_license_audit|not_bound|false|false|用于月令、透藏、其余柱和配置须合看的传统语境；未与四库影印逐字校勘。",
+      "7|yhzp-wikisource-r2593607|public_domain_classic_transcription|《渊海子平》|Wikisource 不完整、来源未核定的社区转录|https://zh.wikisource.org/w/index.php?title=%E6%B7%B5%E6%B5%B7%E5%AD%90%E5%B9%B3&oldid=2593607|2593607|source_warning_unresolved|historical_work_public_domain_candidate|incomplete_transcription_source_warning|not_bound|false|false|只登记藏干成员与次序候选；不得宣称首位必为主气或已完成影印校勘。",
+      "8|zpzz-ctext-ch974137-unfrozen|review_gate_locator|《子平真诠评注》|Chinese Text Project 页面；原文与评注身份尚未冻结|https://ctext.org/wiki.pl?chapter=974137&if=gb&remap=gb|null|locator_only_unfrozen|historical_and_commentary_layers_require_separate_audit|link_and_locator_only_no_redistribution_clearance|not_bound|false|false|仅挂起格局成败救应与气候专家复核问题；不支撑当前算法或个案结论。"
+    ],
+    "sourceBindingSequence": [
+      "1|binding:core:derive-assessment|hakimi-strength-core-0.1.0|engineering_contract|defines_engineering_candidate|stable_symbol|deriveBaziStrengthAssessment + collectBaziStrengthFactors|verified|repository_symbol_registration_only|null|exact_engineering_definition|当前工程从日主、透干、藏干与时柱可靠性派生完整因素账。|命理真值；科学有效性；用户吉凶",
+      "2|binding:policy:factor-inclusion|hakimi-strength-policy-0.1.0|engineering_contract|defines_engineering_candidate|stable_symbol|BAZI_STRENGTH_POLICY.factorInclusion|verified|repository_symbol_registration_only|null|exact_engineering_definition|日主透干排除、月令与首藏分别保留、时辰不可靠时关闭时柱。|传统唯一规则；所有流派一致",
+      "3|binding:policy:direction-map|hakimi-strength-policy-0.1.0|engineering_contract|defines_engineering_candidate|stable_symbol|BAZI_STRENGTH_TEN_GOD_GROUPS + strengthFactorDirectionForTenGod|verified|repository_symbol_registration_only|null|exact_engineering_definition|比劫与印归支持侧，食伤、财与官杀归需求侧。|支持即吉；需求即凶；用神喜忌",
+      "4|binding:policy:weights|hakimi-strength-policy-0.1.0|engineering_contract|defines_engineering_candidate|stable_symbol|BAZI_STRENGTH_FACTOR_WEIGHTS|verified|repository_symbol_registration_only|null|exact_engineering_definition|月令 4、透干 2、首位藏干 2、其余藏干 1 的当前工程候选。|古籍规定该权重；专家批准；统计校准",
+      "5|binding:policy:month-duplication|hakimi-strength-policy-0.1.0|engineering_contract|defines_engineering_candidate|stable_symbol|BAZI_STRENGTH_POLICY.monthMainDuplication|verified|repository_symbol_registration_only|null|exact_engineering_definition|月令主气与月支首位藏干在当前基线分别计入。|古籍规定合计权重 6；去重场景必然正确",
+      "6|binding:policy:thresholds|hakimi-strength-policy-0.1.0|engineering_contract|defines_engineering_candidate|stable_symbol|BAZI_STRENGTH_BAND_THRESHOLDS + classifyStrengthBand|verified|repository_symbol_registration_only|null|exact_engineering_definition|支持比例按 0.25、0.43、0.57、0.75 映射五档。|传统分界；人口统计阈值；预测准确率",
+      "7|binding:sensitivity:six-scenarios|hakimi-strength-sensitivity-0.1.0|engineering_contract|defines_engineering_candidate|stable_symbol|BAZI_STRENGTH_SENSITIVITY_SCENARIOS + buildStrengthSensitivityReview|verified|repository_symbol_registration_only|null|exact_engineering_definition|六个工程扰动场景的权重、排除项、分档与稳定性比较。|六大流派；专家共识；预测稳健性",
+      "8|binding:dtt:month-command|dtt-chanwei-wikisource-r2600158|public_domain_classic_transcription|traditional_context_only|chapter_heading|通神论 > 十五、月令；十七、衰旺|verified|pinned_carrier_heading_only|null|context_only|月令重要而仍须结合其余柱与全局、不可只凭得令失令执一。|4/2/2/1；当前阈值；科学有效性",
+      "9|binding:smt-v5:relative-relations|smt-v5-wikisource-r2706483|public_domain_classic_transcription|traditional_context_only|chapter_heading|卷五 > 论古人立印食官财名义|verified|pinned_carrier_heading_only|null|context_only|十神名称建立在日主与其他五行的生克关系上。|十神固定吉凶；当前支持／需求权重；个人事件",
+      "10|binding:smt-v10:whole-chart|smt-siku-v10-wikisource-r761703|public_domain_classic_transcription|traditional_context_only|chapter_heading|卷十 > 看命口诀；玉井奥诀 > 物须提豁方明轻重|verified|pinned_carrier_heading_only|null|context_only|察月支同时仍须察其余柱、时令深浅、显露暗藏与配置。|固定藏干顺序等于主气；当前数字权重",
+      "11|binding:yhzp:hidden-listing|yhzp-wikisource-r2593607|public_domain_classic_transcription|traditional_context_only|chapter_heading|论天干地支暗藏总诀；又地支藏遁歌|pending_manual_textual_verification|pending_manual_textual_verification|null|context_only|某一未核定转录版本列出了地支藏干成员与次序。|首位必为主气；权重 2；所有流派一致",
+      "12|binding:zpzz:review-gates|zpzz-ctext-ch974137-unfrozen|review_gate_locator|review_question_only|chapter_heading|九、十三、十四、十八、十九：成败救应、气候、破格与成格|pending_manual_textual_verification|pending_manual_textual_verification|null|boundary_only|挂起格局成败救应与气候是否推翻基线的专家复核问题。|当前算法；喜忌；用户结论"
+    ],
+    "boundary": {
+      "referenceResolutionEstablishesSemanticTruth": false,
+      "expertTruthClaimed": false,
+      "scientificValidityClaimed": false,
+      "formalActivationAllowed": false,
+      "publicReleaseAuthorized": false,
+      "authenticityClaimed": false,
+      "sourceTextIncluded": false,
+      "locatorReviewEstablishesExactQuote": false,
+      "locatorVerificationEstablishesContentIdentity": false,
+      "sourceRegistrationEstablishesDistributionRights": false,
+      "structuredCitationRecordBound": false,
+      "sourceRightsRecordBound": false,
+      "citationReviewEstablishesSemanticTruth": false,
+      "rightsReviewEstablishesSemanticTruth": false,
+      "reviewerIdentityVerified": false,
+      "reviewerIndependenceVerified": false,
+      "overallGoodBad": null,
+      "result": null
+    }
+  },
+  "counts": {
+    "provenance": 36,
+    "researchNotes": 1,
+    "events": 2,
+    "eventTimeDerivations": 0,
+    "citations": 1
+  },
+  "events": [
+    {
+      "reference": "66666666-6666-4666-8666-666666666666",
+      "timeRows": [
+        {
+          "label": "时间上下文",
+          "value": "zoned_minute"
+        },
+        {
+          "label": "IANA 时区",
+          "value": "America/New_York"
+        },
+        {
+          "label": "TZDB",
+          "value": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3"
+        },
+        {
+          "label": "起始 DST 解析",
+          "value": "overlap / resolved_overlap_earlier / policy=earlier / selected=earlier"
+        },
+        {
+          "label": "起始 UTC 偏移",
+          "value": "-04:00"
+        },
+        {
+          "label": "起始规范 UTC",
+          "value": "2024-11-03T05:30:00Z"
+        }
+      ]
+    },
+    {
+      "reference": "77777777-7777-4777-8777-777777777777",
+      "timeRows": [
+        {
+          "label": "时间上下文",
+          "value": "legacy_floating"
+        },
+        {
+          "label": "时间说明",
+          "value": "历史浮动时间：未记录 IANA 时区，无法换算规范 UTC。"
+        }
+      ]
+    }
+  ],
+  "citation": [
+    {
+      "status": "user_candidate",
+      "targets": [
+        "命盘字段 pillars.day.ganZhi",
+        "证据主题 bazi.pillar.day.ganzhi.v1"
+      ],
+      "locator": "section-1 · 第 3-3 行",
+      "distributionPolicy": "local_private_only",
+      "reviewStatus": "unreviewed"
+    }
+  ],
+  "markdown": {
+    "suggestedFileName": "hakimi-chart-r1-full.md",
+    "mimeType": "text/markdown;charset=utf-8",
+    "frontMatter": [
+      "---",
+      "schemaVersion: \"1.0.0\"",
+      "formatVersion: \"1.6.0\"",
+      "kind: \"single_chart_research_report\"",
+      "format: \"markdown\"",
+      "anonymized: false",
+      "---"
+    ],
+    "headings": [
+      "## 案例与出生输入",
+      "## 四柱事实",
+      "## 时间校准",
+      "## 规则与完整性",
+      "## 下游计算来源",
+      "## 旺衰工程候选解读证据",
+      "## 字段来源与验证状态",
+      "## 研究笔记",
+      "## 真实事件",
+      "## 事件时间迁移血缘",
+      "## 结构化引用与反证"
+    ]
+  }
+}

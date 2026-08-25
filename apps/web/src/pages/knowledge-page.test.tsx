@@ -5,6 +5,9 @@ import { KnowledgePage } from "./knowledge-page";
 const documentId = "11111111-1111-4111-8111-111111111111";
 const noteId = "22222222-2222-4222-8222-222222222222";
 const citationId = "33333333-3333-4333-8333-333333333333";
+const caseId = "44444444-4444-4444-8444-444444444444";
+const revisionId = "55555555-5555-4555-8555-555555555555";
+const evidenceSubjectId = "bazi.pillar.day.hidden-stems.v1";
 
 const documentRecord = {
   schemaVersion: "1.0.0",
@@ -41,9 +44,44 @@ const citationRecord = {
   editVersion: 1
 };
 
+const sourceRightsRecord = {
+  schemaVersion: "1.0.0",
+  recordType: "knowledge_source_rights",
+  documentId,
+  documentContentHash: "a".repeat(64),
+  origin: "user_import",
+  source: {
+    sourceUrl: "https://example.test/source",
+    publisher: "示例书局",
+    publicationYear: 1936,
+    acquiredAt: "2026-08-01T00:00:00.000Z"
+  },
+  rights: {
+    status: "user_unverified",
+    workStatus: "unknown",
+    editionStatus: "unknown",
+    basis: "user_declaration",
+    jurisdiction: null,
+    licenseId: null,
+    copyrightNotice: "",
+    evidenceRefs: [],
+    distributionPolicy: "local_private_only"
+  },
+  review: { status: "unreviewed", attestations: [], note: "" },
+  editVersion: 1,
+  createdAt: "2026-08-01T00:00:00.000Z",
+  updatedAt: "2026-08-01T00:00:00.000Z"
+};
+
+const { printReportMock, localSourceReviewModuleLoadMock } = vi.hoisted(() => ({
+  printReportMock: vi.fn(),
+  localSourceReviewModuleLoadMock: vi.fn()
+}));
+
 const repositoryMocks = vi.hoisted(() => ({
   listDocuments: vi.fn(),
   getDocument: vi.fn(),
+  getSourceRights: vi.fn(),
   searchDocuments: vi.fn(),
   createDocument: vi.fn(),
   deleteDocument: vi.fn(),
@@ -54,21 +92,66 @@ const repositoryMocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@hakimi/storage", () => ({ knowledgeRepository: repositoryMocks }));
+vi.mock("@hakimi/platform", () => ({
+  webReportExportPort: { printReport: printReportMock }
+}));
+vi.mock("../components/local-source-aware-review-panel", () => {
+  localSourceReviewModuleLoadMock();
+  return {
+    LocalSourceAwareReviewPanel: ({ subjectId, reviewContextLocator }: {
+      subjectId: string;
+      reviewContextLocator?: {
+        caseId: string;
+        revisionId: string;
+        evidenceSubjectId: string;
+        fieldPath: string;
+      } | null;
+    }) => (
+      <section
+        role="region"
+        aria-label="主题来源审阅测试替身"
+        data-subject-id={subjectId}
+        data-review-context-locator={reviewContextLocator ? JSON.stringify(reviewContextLocator) : "none"}
+      >
+        <button type="button">读取并复核本机来源</button>
+      </section>
+    )
+  };
+});
 
 beforeEach(() => {
   window.history.replaceState({}, "", "/knowledge");
   Object.values(repositoryMocks).forEach((mock) => mock.mockReset());
   repositoryMocks.listDocuments.mockResolvedValue([documentRecord]);
   repositoryMocks.getDocument.mockResolvedValue(documentRecord);
+  repositoryMocks.getSourceRights.mockResolvedValue(sourceRightsRecord);
   repositoryMocks.searchDocuments.mockResolvedValue([]);
   repositoryMocks.listCitations.mockResolvedValue([]);
   repositoryMocks.listCitationsByDocument.mockResolvedValue([]);
   repositoryMocks.createCitation.mockResolvedValue(citationRecord);
   repositoryMocks.deleteDocument.mockResolvedValue(undefined);
   repositoryMocks.deleteCitation.mockResolvedValue(undefined);
+  printReportMock.mockReset().mockResolvedValue(undefined);
+  localSourceReviewModuleLoadMock.mockClear();
 });
 
 describe("KnowledgePage", () => {
+  it("只通过平台端口打印当前阅读页，并在适配器拒绝时显示可重试错误", async () => {
+    printReportMock.mockRejectedValueOnce(new Error("当前阅读页打印不可用。"));
+    window.history.replaceState({}, "", `/knowledge?document=${documentId}`);
+    render(<KnowledgePage />);
+
+    const printButton = await screen.findByRole("button", { name: "打印当前阅读页" });
+    fireEvent.click(printButton);
+
+    expect((await screen.findByText("当前阅读页打印不可用。")).closest("[role='alert']")).toBeTruthy();
+    expect(printReportMock).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(printButton);
+    await waitFor(() => expect(screen.queryByText("当前阅读页打印不可用。")).toBeNull());
+    expect(printReportMock).toHaveBeenCalledTimes(2);
+  });
+
   it("普通入口只提供检索和阅读，不创建游离引用", async () => {
     window.history.replaceState({}, "", `/knowledge?document=${documentId}`);
     render(<KnowledgePage />);
@@ -78,18 +161,85 @@ describe("KnowledgePage", () => {
     expect(screen.getByRole("heading", { name: "藏干", level: 3 })).toBeTruthy();
     expect(document.querySelector(".knowledge-layout")?.classList.contains("is-reader-view")).toBe(true);
     expect(document.querySelector(".knowledge-reader")?.hasAttribute("aria-live")).toBe(false);
-    expect(screen.getByText(/《藏干研究摘录》 · 藏干 · 第 1–2 行/).getAttribute("role")).toBe("status");
+    expect(screen.getByText(/《藏干研究摘录》 · 藏干 · 第 1–2 行/).closest("[role='status']"))
+      .toBeTruthy();
     expect(screen.getByRole("link", { name: /藏干研究摘录/ }).getAttribute("aria-current")).toBe("page");
     expect(screen.getByRole("link", { name: "藏干" }).getAttribute("aria-current")).toBe("location");
     expect(screen.getByText("巳中藏丙戊庚。")).toBeTruthy();
+    expect(screen.getByText("示例书局")).toBeTruthy();
+    expect(screen.getByText("1936")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "打开登记来源（在新窗口打开）" }).getAttribute("href"))
+      .toBe("https://example.test/source");
     expect(screen.queryByRole("button", { name: "引用第 2 行" })).toBeNull();
     expect(screen.queryByRole("button", { name: "建立候选引用" })).toBeNull();
     expect(screen.getByText(/当前为只读入口/)).toBeTruthy();
   });
 
+  it("只在 evidence_subject 路由懒加载主题来源审阅面板", async () => {
+    const ordinaryView = render(<KnowledgePage />);
+    await screen.findByRole("link", { name: /藏干研究摘录/ });
+    expect(screen.queryByRole("region", { name: "主题来源审阅测试替身" })).toBeNull();
+    expect(localSourceReviewModuleLoadMock).not.toHaveBeenCalled();
+    ordinaryView.unmount();
+
+    window.history.replaceState({}, "", `/knowledge?target=chart_field&case=${caseId}&revision=${revisionId}&field=pillars.day.hiddenStems`);
+    const fieldView = render(<KnowledgePage />);
+    expect(await screen.findByText(/正在为命盘字段 pillars\.day\.hiddenStems选择来源/)).toBeTruthy();
+    expect(screen.queryByRole("region", { name: "主题来源审阅测试替身" })).toBeNull();
+    expect(localSourceReviewModuleLoadMock).not.toHaveBeenCalled();
+    fieldView.unmount();
+
+    window.history.replaceState({}, "", `/knowledge?target=evidence_subject&subject=${evidenceSubjectId}`);
+    render(<KnowledgePage />);
+    const reviewPanel = await screen.findByRole("region", { name: "主题来源审阅测试替身" });
+    expect(reviewPanel.getAttribute("data-subject-id")).toBe(evidenceSubjectId);
+    expect(screen.getByRole("button", { name: "读取并复核本机来源" })).toBeTruthy();
+    expect(localSourceReviewModuleLoadMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("在搜索和资料链接中保留字段复核 locator，并在审计视图链接中主动丢弃", async () => {
+    const fieldPath = "pillars.day.hiddenStems";
+    const review = `revision_field:${caseId}:${revisionId}:${fieldPath}`;
+    window.history.replaceState(
+      {},
+      "",
+      `/knowledge?target=evidence_subject&subject=${evidenceSubjectId}&review=${review}`
+    );
+    render(<KnowledgePage />);
+
+    const reviewPanel = await screen.findByRole("region", { name: "主题来源审阅测试替身" });
+    expect(JSON.parse(reviewPanel.getAttribute("data-review-context-locator")!)).toEqual({
+      caseId,
+      revisionId,
+      evidenceSubjectId,
+      fieldPath
+    });
+    expect(screen.getByRole("link", { name: "返回该 Revision" }).getAttribute("href"))
+      .toBe(`/cases/${caseId}/revisions/${revisionId}`);
+
+    const documentLink = await screen.findByRole("link", { name: /藏干研究摘录/ });
+    expect(new URL(documentLink.getAttribute("href")!, "https://hakimi.test").searchParams.get("review"))
+      .toBe(review);
+
+    fireEvent.change(screen.getByRole("searchbox", { name: "检索资料" }), {
+      target: { value: "不存在的检索词" }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "检索" }));
+    await waitFor(() => expect(new URLSearchParams(window.location.search).get("review")).toBe(review));
+    expect(new URLSearchParams(window.location.search).get("subject")).toBe(evidenceSubjectId);
+
+    const clearLink = await screen.findByRole("link", { name: "清除检索" });
+    expect(new URL(clearLink.getAttribute("href")!, "https://hakimi.test").searchParams.get("review"))
+      .toBe(review);
+    const rightsLink = screen.getByRole("link", { name: /来源台账/ });
+    const rightsUrl = new URL(rightsLink.getAttribute("href")!, "https://hakimi.test");
+    expect(rightsUrl.searchParams.get("review")).toBeNull();
+    expect(rightsUrl.searchParams.get("target")).toBeNull();
+  });
+
   it("导入开关公开展开状态并关联导入面板", async () => {
     render(<KnowledgePage />);
-    const toggle = screen.getByRole("button", { name: "导入资料" });
+    const toggle = await screen.findByRole("button", { name: "导入资料" });
 
     expect(toggle.getAttribute("aria-expanded")).toBe("false");
     expect(toggle.getAttribute("aria-controls")).toBe("knowledge-importer-panel");
@@ -131,6 +281,7 @@ describe("KnowledgePage", () => {
     render(<KnowledgePage />);
 
     await screen.findByRole("heading", { name: "藏干研究摘录", level: 2 });
+    repositoryMocks.getDocument.mockResolvedValueOnce(null);
     const deleteTrigger = screen.getByRole("button", { name: "删除此资料" });
     deleteTrigger.focus();
     fireEvent.click(deleteTrigger);
@@ -147,7 +298,7 @@ describe("KnowledgePage", () => {
     fireEvent.click(confirmDelete);
 
     await waitFor(() => expect(repositoryMocks.deleteDocument).toHaveBeenCalledWith(documentId));
-    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("textbox", { name: "检索资料" })));
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("searchbox", { name: "检索资料" })));
   });
 
   it("搜索时使用仓储命中提供的 sectionId、行号与摘要", async () => {
@@ -161,13 +312,15 @@ describe("KnowledgePage", () => {
     expect(repositoryMocks.searchDocuments).toHaveBeenCalledWith("藏干", { limit: 100 });
   });
 
-  it("搜索无命中时仍保留全部资料入口", async () => {
+  it("搜索无命中时明确区分零结果并提供清除检索入口", async () => {
     render(<KnowledgePage />);
     fireEvent.change(screen.getByPlaceholderText("检索书名、作者或全文"), { target: { value: "不存在" } });
     fireEvent.click(screen.getByRole("button", { name: "检索" }));
 
-    expect(await screen.findByText("“不存在” · 0 条结果；显示全部 1 份资料")).toBeTruthy();
-    expect(screen.getByRole("link", { name: /藏干研究摘录/ })).toBeTruthy();
+    expect((await screen.findByText(/“不存在” · 0 条定位结果/)).closest("[role='status']"))
+      .toBeTruthy();
+    expect(screen.getByRole("link", { name: "清除检索" }).getAttribute("href")).toBe("/knowledge");
+    expect(screen.queryByRole("link", { name: /藏干研究摘录/ })).toBeNull();
   });
 
   it("长文只渲染 route.line 所在的固定 400 行窗口", async () => {

@@ -2,8 +2,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import Dexie from "dexie";
 import {
   RESEARCH_DATABASE_MAX_SCHEMA_VERSION,
-  RESEARCH_DATABASE_SCHEMA_VERSION,
-  ResearchDatabase
+  ResearchDatabase,
+  ResearchDatabaseRuntimeConfigurationError
 } from "./index";
 
 const V14_STORES = {
@@ -70,14 +70,19 @@ afterEach(async () => {
 });
 
 describe("ResearchDatabase schema v15", () => {
-  it("keeps the unconfigured runtime on schema 14 and registers v15 only by explicit opt-in", async () => {
-    expect(RESEARCH_DATABASE_SCHEMA_VERSION).toBe(14);
+  it("rejects an unconfigured production database and allows an explicit v14 fixture", async () => {
     expect(RESEARCH_DATABASE_MAX_SCHEMA_VERSION).toBe(16);
 
     const previous = globalThis.__HAKIMI_RESEARCH_DATABASE_RUNTIME__;
     globalThis.__HAKIMI_RESEARCH_DATABASE_RUNTIME__ = undefined;
     try {
-      const database = new ResearchDatabase(`hakimi-default-v14-${crypto.randomUUID()}`);
+      expect(() => new ResearchDatabase()).toThrow(ResearchDatabaseRuntimeConfigurationError);
+      expect(() => new ResearchDatabase(`hakimi-unconfigured-${crypto.randomUUID()}`))
+        .toThrow(ResearchDatabaseRuntimeConfigurationError);
+
+      const database = new ResearchDatabase(`hakimi-explicit-v14-${crypto.randomUUID()}`, {
+        targetSchema: 14
+      });
       openDatabases.push(database);
       await database.open();
 

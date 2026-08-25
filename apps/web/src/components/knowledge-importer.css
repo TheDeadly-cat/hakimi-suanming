@@ -1,0 +1,1243 @@
+.knowledge-importer {
+  --import-ink: #222c28;
+  --import-muted: #6d7570;
+  --import-line: rgba(54, 67, 61, 0.15);
+  --import-paper: rgba(255, 251, 241, 0.95);
+  --import-cinnabar: #a54335;
+  --import-info: #4b7181;
+  --import-state-color: #887556;
+  --import-state-trail: #b79a68;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--import-line);
+  border-radius: 10px 30px 10px 30px;
+  background:
+    linear-gradient(120deg, rgba(255, 252, 244, 0.98), rgba(240, 233, 216, 0.94)),
+    var(--import-paper);
+  box-shadow: 0 22px 56px rgba(54, 47, 35, 0.1);
+}
+
+.knowledge-importer[data-state="reading"] {
+  --import-state-color: #a54335;
+  --import-state-trail: #d19a45;
+}
+
+.knowledge-importer[data-state="prepared"] {
+  --import-state-color: var(--import-info);
+  --import-state-trail: #82a3af;
+}
+
+.knowledge-importer[data-state="saving"] {
+  --import-state-color: #326c82;
+  --import-state-trail: #83a8b5;
+}
+
+.knowledge-importer[data-state="saved"] {
+  --import-state-color: #3f7658;
+  --import-state-trail: #87a98d;
+}
+
+.knowledge-importer[data-state="refresh-warning"] {
+  --import-state-color: #a06a23;
+  --import-state-trail: #d0a35d;
+}
+
+.knowledge-importer[data-state="error"] {
+  --import-state-color: #a13d34;
+  --import-state-trail: #d17c68;
+}
+
+.knowledge-importer::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, var(--import-state-color), var(--import-state-trail) 48%, transparent 90%);
+  content: "";
+}
+
+.knowledge-importer > .section-heading-row {
+  padding: clamp(24px, 4vw, 36px) clamp(22px, 4vw, 40px) 21px;
+  border-bottom: 1px solid var(--import-line);
+}
+
+.knowledge-importer > .section-heading-row h2 {
+  margin: 0;
+  color: var(--import-ink);
+  font-family: var(--font-display, "Noto Serif SC", serif);
+  font-size: clamp(1.45rem, 3vw, 2.15rem);
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+
+.knowledge-importer > .section-heading-row .eyebrow {
+  margin-bottom: 7px;
+  color: var(--import-cinnabar);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  letter-spacing: 0.13em;
+}
+
+.knowledge-rights-notice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  margin: 20px clamp(22px, 4vw, 40px) 0;
+  padding: 15px 17px;
+  border: 1px solid rgba(174, 111, 35, 0.22);
+  border-radius: 16px 7px 16px 7px;
+  background: rgba(245, 226, 187, 0.48);
+}
+
+.knowledge-rights-notice p {
+  margin: 0;
+  color: #715328;
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+.knowledge-rights-notice > div {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.knowledge-import-boundary {
+  color: #826e4d;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.knowledge-import-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 18px clamp(22px, 4vw, 40px) 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--import-line);
+  border-radius: 8px 18px 8px 18px;
+  background: rgba(255, 253, 247, 0.6);
+  list-style: none;
+}
+
+.knowledge-import-steps li {
+  --step-color: #8a918d;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 11px;
+  align-items: center;
+  min-width: 0;
+  padding: 14px 16px;
+  border-right: 1px solid var(--import-line);
+}
+
+.knowledge-import-steps li:last-child {
+  border-right: 0;
+}
+
+.knowledge-import-steps li[data-state="current"],
+.knowledge-import-steps li[data-state="active"] {
+  --step-color: #a54335;
+  background: rgba(165, 67, 53, 0.045);
+}
+
+.knowledge-import-steps li[data-state="complete"] {
+  --step-color: #3f7658;
+}
+
+.knowledge-import-steps li[data-state="warning"] {
+  --step-color: #a06a23;
+  background: rgba(160, 106, 35, 0.06);
+}
+
+.knowledge-import-steps li > span {
+  color: var(--step-color);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.knowledge-import-steps li div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.knowledge-import-steps strong {
+  color: #37413c;
+  font-size: 0.8rem;
+}
+
+.knowledge-import-steps small {
+  color: #818783;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.knowledge-importer > .inline-error {
+  margin: 16px clamp(22px, 4vw, 40px) 0;
+  border-radius: 8px 16px 8px 16px;
+}
+
+.knowledge-import-operation-status {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  margin: 16px clamp(22px, 4vw, 40px) 0;
+  padding: 13px 16px;
+  border: 1px solid color-mix(in srgb, var(--import-state-color) 28%, transparent);
+  border-radius: 7px 15px 7px 15px;
+  background: color-mix(in srgb, var(--import-state-color) 7%, rgba(255, 253, 247, 0.82));
+}
+
+.knowledge-import-operation-status__indicator {
+  width: 11px;
+  height: 11px;
+  margin-top: 4px;
+  border: 2px solid color-mix(in srgb, var(--import-state-color) 25%, transparent);
+  border-top-color: var(--import-state-color);
+  border-radius: 50%;
+}
+
+.knowledge-import-operation-status strong,
+.knowledge-import-operation-status small {
+  display: block;
+}
+
+.knowledge-import-operation-status strong {
+  color: #3b4741;
+  font-size: 0.8rem;
+}
+
+.knowledge-import-operation-status small {
+  margin-top: 3px;
+  color: var(--import-muted);
+  font-size: 0.77rem;
+  line-height: 1.55;
+}
+
+.knowledge-import-commit-receipt {
+  display: grid;
+  gap: 14px;
+  margin: 16px clamp(22px, 4vw, 40px) 0;
+  padding: clamp(18px, 3vw, 24px);
+  border: 1px solid rgba(63, 118, 88, 0.26);
+  border-left: 4px solid #3f7658;
+  border-radius: 9px 20px 9px 20px;
+  background: linear-gradient(125deg, rgba(63, 118, 88, 0.1), rgba(255, 253, 247, 0.82));
+}
+
+.knowledge-import-commit-receipt[data-receipt-state="refresh_failed"] {
+  border-color: rgba(160, 106, 35, 0.3);
+  border-left-color: #a06a23;
+  background: linear-gradient(125deg, rgba(160, 106, 35, 0.1), rgba(255, 253, 247, 0.82));
+}
+
+.knowledge-import-commit-receipt[data-receipt-state="call_unknown"] {
+  border-color: rgba(160, 106, 35, 0.42);
+  border-left-color: #a06a23;
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 14px, rgba(160, 106, 35, 0.045) 14px 28px),
+    linear-gradient(125deg, rgba(160, 106, 35, 0.12), rgba(255, 253, 247, 0.88));
+}
+
+.knowledge-import-commit-receipt[data-receipt-state="binding_unknown"],
+.knowledge-import-commit-receipt[data-receipt-state="coordination_failed"] {
+  border-color: rgba(161, 61, 52, 0.3);
+  border-left-color: #a13d34;
+  background: linear-gradient(125deg, rgba(161, 61, 52, 0.09), rgba(255, 253, 247, 0.82));
+}
+
+.knowledge-import-commit-receipt > header {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.knowledge-import-commit-receipt .eyebrow {
+  margin: 0 0 5px;
+  color: var(--import-state-color);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+}
+
+.knowledge-import-commit-receipt h3 {
+  margin: 0;
+  color: var(--import-ink);
+  font-family: var(--font-display, "Noto Serif SC", serif);
+  font-size: 1.04rem;
+}
+
+.knowledge-import-commit-receipt > p {
+  margin: 0;
+  color: #5f6c65;
+  font-size: 0.8rem;
+  line-height: 1.62;
+}
+
+.knowledge-import-commit-receipt > dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--import-line);
+  border-radius: 6px 14px 6px 14px;
+  background: var(--import-line);
+}
+
+.knowledge-import-commit-receipt > dl > div {
+  min-width: 0;
+  padding: 10px 11px;
+  background: rgba(255, 253, 247, 0.88);
+}
+
+.knowledge-import-commit-receipt dt {
+  color: var(--import-muted);
+  font-size: 0.72rem;
+}
+
+.knowledge-import-commit-receipt dd {
+  margin: 4px 0 0;
+  color: var(--import-ink);
+  font-size: 0.76rem;
+  font-weight: 680;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.knowledge-import-commit-receipt code {
+  font: inherit;
+}
+
+.knowledge-import-commit-receipt__actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 13px;
+  border-top: 1px solid var(--import-line);
+}
+
+.knowledge-import-commit-receipt__actions p {
+  margin: 0;
+  color: #715e42;
+  font-size: 0.76rem;
+  line-height: 1.6;
+}
+
+.knowledge-import-commit-receipt:focus,
+.knowledge-import-preflight h3:focus {
+  outline: 2px solid var(--import-cinnabar);
+  outline-offset: 3px;
+}
+
+.knowledge-content-preview summary:focus-visible {
+  outline: 2px solid var(--import-cinnabar);
+  outline-offset: 3px;
+}
+
+.knowledge-file-intake {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.34fr) minmax(0, 1fr);
+  gap: clamp(22px, 4vw, 38px);
+  align-items: center;
+  margin: 18px clamp(22px, 4vw, 40px) clamp(26px, 4vw, 40px);
+  padding: clamp(24px, 4vw, 38px);
+  border: 1px dashed rgba(57, 70, 63, 0.25);
+  border-radius: 22px 8px 22px 8px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 35px, rgba(52, 65, 58, 0.035) 35px 36px),
+    rgba(255, 253, 247, 0.62);
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.knowledge-file-intake[data-drag-active="true"] {
+  border-color: rgba(165, 67, 53, 0.72);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 35px, rgba(165, 67, 53, 0.055) 35px 36px),
+    rgba(255, 248, 236, 0.92);
+  box-shadow: inset 0 0 0 4px rgba(165, 67, 53, 0.08), 0 14px 34px rgba(80, 56, 32, 0.09);
+  transform: translateY(-2px);
+}
+
+.knowledge-file-intake[data-drag-active="true"] .knowledge-file-intake__mark {
+  color: #8f3328;
+  border-color: rgba(165, 67, 53, 0.55);
+  background: rgba(165, 67, 53, 0.06);
+}
+
+.knowledge-file-intake__mark {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: min(100%, 150px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  border: 1px solid rgba(165, 67, 53, 0.27);
+  border-radius: 50%;
+  color: var(--import-cinnabar);
+  box-shadow: inset 0 0 0 7px rgba(165, 67, 53, 0.045);
+}
+
+.knowledge-file-intake__mark svg {
+  width: 34px;
+  height: 34px;
+}
+
+.knowledge-file-intake__mark span {
+  margin-top: 8px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.knowledge-file-intake__copy .eyebrow {
+  margin: 0 0 7px;
+  color: #9b6b31;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.13em;
+}
+
+.knowledge-file-intake__state {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  margin: 0 0 12px;
+  padding: 6px 10px;
+  border: 1px solid rgba(63, 118, 88, 0.22);
+  border-radius: 999px;
+  background: rgba(63, 118, 88, 0.07);
+  color: #42634f;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.66rem;
+  font-weight: 760;
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+
+.knowledge-file-intake__state[data-state="drag"] {
+  border-color: rgba(165, 67, 53, 0.38);
+  background: rgba(165, 67, 53, 0.09);
+  color: #8f3328;
+}
+
+.knowledge-file-intake__state[data-state="waiting"] {
+  border-color: rgba(160, 106, 35, 0.3);
+  background: rgba(160, 106, 35, 0.08);
+  color: #7c551f;
+}
+
+.knowledge-file-intake__copy h3 {
+  margin: 0;
+  color: var(--import-ink);
+  font-family: var(--font-display, "Noto Serif SC", serif);
+  font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+}
+
+.knowledge-file-intake__copy > p:not(.eyebrow) {
+  max-width: 62ch;
+  margin: 10px 0 0;
+  color: var(--import-muted);
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+
+.knowledge-file-intake__copy dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.knowledge-file-intake__copy dl > div {
+  min-width: 0;
+  padding-left: 11px;
+  border-left: 2px solid rgba(165, 67, 53, 0.16);
+}
+
+.knowledge-file-intake__copy dt {
+  color: #898f8b;
+  font-size: 0.7rem;
+}
+
+.knowledge-file-intake__copy dd {
+  margin: 4px 0 0;
+  color: #414c46;
+  font-size: 0.77rem;
+  font-weight: 650;
+}
+
+.knowledge-file-intake__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: center;
+}
+
+.knowledge-file-picker {
+  min-height: 44px;
+}
+
+.knowledge-import-form {
+  display: grid;
+  gap: 18px;
+  margin: 18px clamp(22px, 4vw, 40px) clamp(26px, 4vw, 40px);
+}
+
+.knowledge-file-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 15px;
+  align-items: center;
+  padding: 17px 19px;
+  border: 1px solid color-mix(in srgb, var(--import-info) 24%, transparent);
+  border-radius: 8px 18px 8px 18px;
+  background: color-mix(in srgb, var(--import-info) 8%, var(--import-paper));
+}
+
+.knowledge-file-summary__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid color-mix(in srgb, var(--import-info) 30%, transparent);
+  border-radius: 50%;
+  color: var(--import-info);
+}
+
+.knowledge-file-summary__icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.knowledge-file-summary .eyebrow {
+  margin: 0 0 3px;
+  color: var(--import-info);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.11em;
+}
+
+.knowledge-file-summary strong,
+.knowledge-file-summary small {
+  display: block;
+}
+
+.knowledge-file-summary strong {
+  overflow: visible;
+  color: #314239;
+  font-size: 0.86rem;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.knowledge-file-summary small {
+  margin-top: 4px;
+  color: color-mix(in srgb, var(--import-info) 78%, var(--import-ink));
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.knowledge-metadata-error {
+  margin: 0;
+  padding: 11px 14px;
+  border: 1px solid rgba(161, 61, 52, 0.24);
+  border-left: 3px solid #a13d34;
+  border-radius: 6px 13px 6px 13px;
+  color: #8d3931;
+  background: rgba(161, 61, 52, 0.055);
+  font-size: 0.79rem;
+  font-weight: 650;
+  line-height: 1.6;
+}
+
+.knowledge-import-preflight {
+  display: grid;
+  gap: 16px;
+  padding: clamp(20px, 3vw, 28px);
+  border: 1px solid rgba(57, 70, 63, 0.17);
+  border-radius: 22px 8px 22px 8px;
+  background:
+    linear-gradient(135deg, rgba(239, 233, 216, 0.52), rgba(255, 253, 247, 0.78)),
+    rgba(255, 253, 247, 0.72);
+}
+
+.knowledge-import-preflight > header {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.knowledge-import-preflight header .eyebrow {
+  margin: 0 0 5px;
+  color: #9b6b31;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+}
+
+.knowledge-import-preflight h3 {
+  margin: 0;
+  color: var(--import-ink);
+  font-family: var(--font-display, "Noto Serif SC", serif);
+  font-size: 1.05rem;
+}
+
+.knowledge-preflight-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.knowledge-preflight-grid article {
+  --gate-accent: #858b87;
+  position: relative;
+  min-width: 0;
+  padding: 15px 14px 14px;
+  overflow: hidden;
+  border: 1px solid rgba(57, 70, 63, 0.13);
+  border-radius: 7px 15px 7px 15px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.knowledge-preflight-grid article::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--gate-accent);
+  content: "";
+}
+
+.knowledge-preflight-grid article[data-tone="pass"] {
+  --gate-accent: #3f7658;
+}
+
+.knowledge-preflight-grid article[data-tone="info"] {
+  --gate-accent: #4b7181;
+}
+
+.knowledge-preflight-grid article[data-tone="warning"] {
+  --gate-accent: #a06a23;
+}
+
+.knowledge-preflight-grid article > span,
+.knowledge-preflight-grid article strong,
+.knowledge-preflight-grid article small {
+  display: block;
+}
+
+.knowledge-preflight-grid article > span {
+  color: var(--gate-accent);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.knowledge-preflight-grid article strong {
+  margin-top: 8px;
+  color: #37413c;
+  font-size: 0.79rem;
+  line-height: 1.45;
+}
+
+.knowledge-preflight-grid article small {
+  margin-top: 5px;
+  color: #777f7a;
+  font-size: 0.71rem;
+  line-height: 1.55;
+}
+
+.knowledge-import-identity {
+  display: grid;
+  gap: 9px;
+  padding: 14px 16px;
+  border: 1px solid rgba(75, 113, 129, 0.2);
+  border-left: 3px solid #4b7181;
+  border-radius: 7px 15px 7px 15px;
+  background: rgba(75, 113, 129, 0.055);
+}
+
+.knowledge-import-identity[data-state="unavailable"] {
+  border-color: rgba(160, 106, 35, 0.24);
+  border-left-color: #a06a23;
+  background: rgba(160, 106, 35, 0.055);
+}
+
+.knowledge-import-identity__heading {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.knowledge-import-identity__heading > div > span,
+.knowledge-import-identity__heading > div > strong {
+  display: block;
+}
+
+.knowledge-import-identity__heading > div > span {
+  color: #4b7181;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.knowledge-import-identity__heading > div > strong {
+  margin-top: 4px;
+  color: #37413c;
+  font-size: 0.79rem;
+}
+
+.knowledge-import-identity code {
+  display: block;
+  padding: 8px 10px;
+  overflow-wrap: anywhere;
+  border: 1px solid rgba(57, 70, 63, 0.1);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.58);
+  color: #52625a;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+.knowledge-import-identity p {
+  margin: 0;
+  color: #68736d;
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+.knowledge-content-preview {
+  border-top: 1px solid rgba(57, 70, 63, 0.13);
+}
+
+.knowledge-content-preview summary {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 14px 2px 0;
+  color: #48544e;
+  cursor: pointer;
+}
+
+.knowledge-content-preview summary span {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.knowledge-content-preview summary small {
+  color: #7b837e;
+  font-size: 0.7rem;
+  text-align: right;
+}
+
+.knowledge-content-preview p {
+  margin: 13px 0 0;
+  padding: 15px 17px;
+  border-left: 3px solid color-mix(in srgb, var(--import-info) 42%, transparent);
+  background: rgba(255, 255, 255, 0.58);
+  color: #58625d;
+  font-family: var(--font-display, "Noto Serif SC", serif);
+  font-size: 0.8rem;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.knowledge-import-form__section {
+  display: grid;
+  gap: 15px;
+  padding: clamp(20px, 3vw, 28px);
+  border: 1px solid var(--import-line);
+  border-radius: 8px 22px 8px 22px;
+  background: rgba(255, 253, 247, 0.65);
+}
+
+.knowledge-import-form__section > header {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--import-line);
+}
+
+.knowledge-import-form__section header .eyebrow {
+  margin: 0 0 5px;
+  color: #9b6b31;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+}
+
+.knowledge-import-form__section h3 {
+  margin: 0;
+  color: var(--import-ink);
+  font-family: var(--font-display, "Noto Serif SC", serif);
+  font-size: 1.05rem;
+}
+
+.knowledge-provenance-meter {
+  display: grid;
+  gap: 9px;
+  padding: 14px 16px;
+  border: 1px solid rgba(75, 113, 129, 0.2);
+  border-radius: 7px 15px 7px 15px;
+  background:
+    linear-gradient(135deg, rgba(75, 113, 129, 0.075), transparent 58%),
+    rgba(255, 255, 255, 0.5);
+}
+
+.knowledge-provenance-meter > div:first-child {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.knowledge-provenance-meter > div:first-child > span {
+  color: #4b7181;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.knowledge-provenance-meter > div:first-child > strong {
+  color: #3b4942;
+  font-size: 0.8rem;
+}
+
+.knowledge-provenance-meter > div:first-child > b {
+  color: #365f70;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.76rem;
+}
+
+.knowledge-provenance-meter__segments {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.knowledge-provenance-meter__segments > span {
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(75, 113, 129, 0.13);
+}
+
+.knowledge-provenance-meter__segments > span[data-filled="true"] {
+  background: linear-gradient(90deg, #4b7181, #7196a4);
+  box-shadow: 0 0 0 1px rgba(75, 113, 129, 0.08);
+}
+
+.knowledge-provenance-meter > p {
+  margin: 0;
+  color: #6c7771;
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.knowledge-import-form .field-grid {
+  gap: 14px;
+}
+
+.knowledge-import-form input {
+  border-color: rgba(56, 68, 62, 0.17);
+  background: rgba(255, 255, 255, 0.74);
+  unicode-bidi: plaintext;
+}
+
+.knowledge-import-form input:focus {
+  border-color: rgba(165, 67, 53, 0.46);
+  box-shadow: 0 0 0 3px rgba(165, 67, 53, 0.08);
+}
+
+.knowledge-importer :is(button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--import-cinnabar);
+  outline-offset: 3px;
+}
+
+.knowledge-import-form input[aria-invalid="true"] {
+  border-color: rgba(161, 61, 52, 0.66);
+  background: rgba(255, 247, 244, 0.88);
+}
+
+.knowledge-field-hint,
+.knowledge-field-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.71rem;
+  line-height: 1.5;
+}
+
+.knowledge-field-hint {
+  color: #7a827d;
+}
+
+.knowledge-field-error {
+  color: #963f36;
+  font-weight: 650;
+}
+
+.knowledge-local-only-note {
+  margin: 0;
+  padding: 12px 14px;
+  border-left: 3px solid rgba(165, 67, 53, 0.46);
+  background: rgba(165, 67, 53, 0.045);
+  color: #79645b;
+  font-size: 0.76rem;
+  line-height: 1.65;
+}
+
+.knowledge-import-confirmation {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 13px;
+  align-items: start;
+  padding: 16px 18px;
+  border: 1px solid rgba(160, 106, 35, 0.24);
+  border-radius: 16px 7px 16px 7px;
+  background: rgba(245, 226, 187, 0.34);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.knowledge-import-confirmation[data-state="confirmed"] {
+  border-color: rgba(63, 118, 88, 0.3);
+  background: rgba(216, 234, 218, 0.42);
+}
+
+.knowledge-import-confirmation input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: #3f7658;
+}
+
+.knowledge-import-confirmation span,
+.knowledge-import-confirmation strong,
+.knowledge-import-confirmation small {
+  display: block;
+}
+
+.knowledge-import-confirmation strong {
+  color: #493e2d;
+  font-size: 0.78rem;
+}
+
+.knowledge-import-confirmation[data-state="confirmed"] strong {
+  color: #365c45;
+}
+
+.knowledge-import-confirmation small {
+  margin-top: 5px;
+  color: #756950;
+  font-size: 0.73rem;
+  line-height: 1.65;
+}
+
+.knowledge-import-form > .journal-actions {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .knowledge-file-intake,
+  .knowledge-import-form {
+    animation: knowledge-intake-in 360ms both cubic-bezier(0.2, 0.75, 0.25, 1);
+  }
+
+  .knowledge-import-operation-status__indicator {
+    animation: knowledge-operation-spin 850ms linear infinite;
+  }
+
+  .knowledge-importer[data-state="reading"]::before,
+  .knowledge-importer[data-state="saving"]::before {
+    background-size: 190% 100%;
+    animation: knowledge-state-scan 1.4s linear infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knowledge-file-intake {
+    transition: none;
+  }
+}
+
+@keyframes knowledge-intake-in {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes knowledge-state-scan {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes knowledge-operation-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (pointer: coarse) {
+  .knowledge-importer button,
+  .knowledge-content-preview summary {
+    min-height: 44px;
+  }
+
+  .knowledge-import-confirmation {
+    min-height: 48px;
+  }
+
+  .knowledge-import-confirmation input {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+@media (max-width: 980px) {
+  .knowledge-preflight-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .knowledge-import-steps,
+  .knowledge-file-intake,
+  .knowledge-file-intake__copy dl {
+    grid-template-columns: 1fr;
+  }
+
+  .knowledge-import-steps li {
+    border-right: 0;
+    border-bottom: 1px solid var(--import-line);
+  }
+
+  .knowledge-import-steps li:last-child {
+    border-bottom: 0;
+  }
+
+  .knowledge-file-intake__mark {
+    width: 110px;
+  }
+
+  .knowledge-file-intake__copy dl {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 520px) {
+  .knowledge-importer {
+    border-radius: 8px 20px 8px 20px;
+  }
+
+  .knowledge-importer > .section-heading-row {
+    padding: 22px 16px 17px;
+  }
+
+  .knowledge-rights-notice,
+  .knowledge-import-steps,
+  .knowledge-importer > .inline-error,
+  .knowledge-import-operation-status,
+  .knowledge-import-commit-receipt,
+  .knowledge-file-intake,
+  .knowledge-import-form {
+    margin-inline: 14px;
+  }
+
+  .knowledge-rights-notice,
+  .knowledge-file-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .knowledge-file-summary strong {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .knowledge-import-preflight > header,
+  .knowledge-import-commit-receipt > header,
+  .knowledge-import-form__section > header,
+  .knowledge-import-form > .journal-actions {
+    align-items: flex-start;
+  }
+
+  .knowledge-import-preflight > header {
+    display: grid;
+  }
+
+  .knowledge-preflight-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .knowledge-content-preview summary {
+    display: grid;
+    gap: 5px;
+  }
+
+  .knowledge-content-preview summary small {
+    text-align: left;
+  }
+
+  .knowledge-import-identity__heading {
+    display: grid;
+  }
+
+  .knowledge-import-commit-receipt > dl {
+    grid-template-columns: 1fr;
+  }
+
+  .knowledge-import-commit-receipt__actions {
+    display: grid;
+  }
+
+  .knowledge-import-confirmation {
+    padding: 14px;
+  }
+
+  .knowledge-provenance-meter > div:first-child {
+    grid-template-columns: 1fr auto;
+  }
+
+  .knowledge-provenance-meter > div:first-child > span {
+    grid-column: 1 / -1;
+  }
+
+  .knowledge-import-form > .journal-actions {
+    display: grid;
+  }
+
+  .knowledge-file-intake__actions {
+    display: grid;
+  }
+
+  .knowledge-file-intake__state {
+    width: fit-content;
+    border-radius: 6px 12px 6px 12px;
+  }
+
+  .knowledge-file-intake__actions button,
+  .knowledge-import-form > .journal-actions button {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+@media (forced-colors: active) {
+  .knowledge-importer,
+  .knowledge-rights-notice,
+  .knowledge-import-steps,
+  .knowledge-import-operation-status,
+  .knowledge-import-commit-receipt,
+  .knowledge-import-commit-receipt > dl,
+  .knowledge-import-commit-receipt > dl > div,
+  .knowledge-file-intake,
+  .knowledge-file-summary,
+  .knowledge-import-preflight,
+  .knowledge-preflight-grid article,
+  .knowledge-import-identity,
+  .knowledge-import-form__section,
+  .knowledge-import-confirmation {
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+    color: CanvasText;
+  }
+
+  .knowledge-import-boundary {
+    color: CanvasText;
+  }
+
+  .knowledge-file-intake[data-drag-active="true"],
+  .knowledge-provenance-meter,
+  .knowledge-metadata-error {
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  .knowledge-importer :is(button, input, select, textarea, summary):focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* Final intake-readability pass for file identities, preflight and commit receipts. */
+.knowledge-importer :is(
+  .knowledge-rights-notice p,
+  .knowledge-import-boundary,
+  .knowledge-import-steps small,
+  .knowledge-import-operation-status small,
+  .inline-error p,
+  .knowledge-import-commit-receipt > p,
+  .knowledge-import-commit-receipt dd,
+  .knowledge-import-commit-receipt code,
+  .knowledge-file-summary strong,
+  .knowledge-import-identity code,
+  .knowledge-import-identity p,
+  .knowledge-content-preview p,
+  .knowledge-local-only-note,
+  .knowledge-import-confirmation small
+) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  unicode-bidi: plaintext;
+}
+
+.knowledge-importer :is(
+  .knowledge-rights-notice p,
+  .knowledge-import-steps small,
+  .knowledge-import-operation-status small,
+  .knowledge-import-commit-receipt > p,
+  .knowledge-import-commit-receipt__actions p,
+  .knowledge-file-intake__copy > p:not(.eyebrow),
+  .knowledge-import-identity p,
+  .knowledge-local-only-note,
+  .knowledge-import-confirmation small
+) {
+  text-wrap: pretty;
+}
+
+.knowledge-importer .knowledge-import-steps li > span,
+.knowledge-importer .knowledge-import-steps strong,
+.knowledge-importer .knowledge-import-steps small,
+.knowledge-importer .knowledge-import-operation-status strong,
+.knowledge-importer .knowledge-import-operation-status small,
+.knowledge-importer .knowledge-import-commit-receipt dt,
+.knowledge-importer .knowledge-field-hint,
+.knowledge-importer .knowledge-field-error,
+.knowledge-importer .knowledge-import-confirmation strong,
+.knowledge-importer .knowledge-import-confirmation small {
+  font-size: 0.8rem;
+}
+
+.knowledge-importer .knowledge-content-preview summary {
+  min-height: 44px;
+}

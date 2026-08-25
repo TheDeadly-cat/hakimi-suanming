@@ -16,6 +16,7 @@ import {
   type FullBackupWorkerResponse,
   type FullBackupWorkerSerializedError
 } from "../lib/full-backup-worker-protocol";
+import { safeVisibleText } from "../lib/visible-text";
 
 type WorkerScope = {
   onmessage: ((event: MessageEvent<FullBackupWorkerRequest>) => void) | null;
@@ -34,6 +35,14 @@ class FullBackupWorkerCancelledError extends Error {
 const workerScope = globalThis as unknown as WorkerScope;
 let activeJobId: string | null = null;
 let cancelledJobId: string | null = null;
+const MAX_WORKER_DIAGNOSTIC_CODE_POINTS = 512;
+const WORKER_OPERATION_TYPES = new Set<string>([
+  "create_from_snapshot",
+  "archive_envelope",
+  "inspect_snapshot",
+  "prepare_import",
+  "verify_prepared"
+]);
 
 function responseBase(jobId: string) {
   return {
@@ -48,44 +57,87 @@ function operationOf(request: FullBackupWorkerRequest): FullBackupWorkerOperatio
 }
 
 function serializeError(reason: unknown): FullBackupWorkerSerializedError {
-  if (reason instanceof FullBackupArchiveError) {
-    return {
-      name: reason.name,
-      message: reason.message,
-      code: reason.code,
-      category: "archive"
-    };
-  }
-  if (reason instanceof FullBackupError) {
-    return {
-      name: reason.name,
-      message: reason.message,
-      code: reason.code,
-      category: "backup"
-    };
-  }
-  if (reason instanceof FullBackupWorkerCancelledError) {
-    return {
-      name: reason.name,
-      message: reason.message,
-      code: reason.code,
-      category: "cancelled"
-    };
-  }
-  if (reason instanceof Error) {
-    const code = "code" in reason && typeof reason.code === "string" ? reason.code : undefined;
-    return {
-      name: reason.name,
-      message: reason.message,
-      ...(code ? { code } : {}),
-      category: reason.name === "FullBackupWorkerProtocolError" ? "protocol" : "runtime"
-    };
+  try {
+    if (reason instanceof FullBackupArchiveError) {
+      return {
+        name: safeVisibleText(reason.name, "FullBackupArchiveError", 128),
+        message: safeVisibleText(reason.message, "备份归档失败。", MAX_WORKER_DIAGNOSTIC_CODE_POINTS),
+        code: safeVisibleText(reason.code, "ARCHIVE_ERROR", 128),
+        category: "archive"
+      };
+    }
+    if (reason instanceof FullBackupError) {
+      return {
+        name: safeVisibleText(reason.name, "FullBackupError", 128),
+        message: safeVisibleText(reason.message, "备份处理失败。", MAX_WORKER_DIAGNOSTIC_CODE_POINTS),
+        code: safeVisibleText(reason.code, "BACKUP_ERROR", 128),
+        category: "backup"
+      };
+    }
+    if (reason instanceof FullBackupWorkerCancelledError) {
+      return {
+        name: reason.name,
+        message: reason.message,
+        code: reason.code,
+        category: "cancelled"
+      };
+    }
+    if (reason instanceof Error) {
+      const code = "code" in reason && typeof reason.code === "string"
+        ? safeVisibleText(reason.code, "", 128)
+        : "";
+      const name = safeVisibleText(reason.name, "Error", 128) || "Error";
+      return {
+        name,
+        message: safeVisibleText(
+          reason.message,
+          "备份 Worker 处理失败。",
+          MAX_WORKER_DIAGNOSTIC_CODE_POINTS
+        ),
+        ...(code ? { code } : {}),
+        category: name === "FullBackupWorkerProtocolError" ? "protocol" : "runtime"
+      };
+    }
+  } catch {
+    // Hostile or malformed error objects degrade to a stable runtime error.
   }
   return {
     name: "Error",
     message: "备份 Worker 处理失败。",
     category: "runtime"
   };
+}
+
+function postErrorResponse(
+  jobId: string,
+  operation: FullBackupWorkerOperation | "protocol",
+  reason: unknown
+): void {
+  try {
+    workerScope.postMessage({
+      ...responseBase(jobId),
+      type: "error",
+      operation,
+      error: serializeError(reason)
+    });
+  } catch {
+    // No secondary error can be reported if the worker channel itself is broken.
+  }
+}
+
+function isValidJobId(value: unknown): value is string {
+  return typeof value === "string"
+    && value.length > 0
+    && value.length <= 128
+    && value === safeVisibleText(value, "", 128);
+}
+
+function isOperationRequest(
+  value: unknown
+): value is Exclude<FullBackupWorkerRequest, { type: "cancel" }> {
+  return value !== null
+    && typeof value === "object"
+    && WORKER_OPERATION_TYPES.has((value as { type?: unknown }).type as string);
 }
 
 function protocolError(message: string, code: string): Error {
@@ -102,7 +154,12 @@ function assertNotCancelled(jobId: string): void {
 async function runJob(request: Exclude<FullBackupWorkerRequest, { type: "cancel" }>): Promise<void> {
   const { jobId } = request;
   if (activeJobId !== null) {
-    throw protocolError("备份 Worker 一次只能处理一个任务。", "BACKUP_WORKER_JOB_ACTIVE");
+    postErrorResponse(
+      jobId,
+      operationOf(request),
+      protocolError("备份 Worker 一次只能处理一个任务。", "BACKUP_WORKER_JOB_ACTIVE")
+    );
+    return;
   }
   activeJobId = jobId;
   cancelledJobId = null;
@@ -205,12 +262,7 @@ async function runJob(request: Exclude<FullBackupWorkerRequest, { type: "cancel"
       verified
     });
   } catch (reason) {
-    workerScope.postMessage({
-      ...responseBase(jobId),
-      type: "error",
-      operation: operationOf(request),
-      error: serializeError(reason)
-    });
+    postErrorResponse(jobId, operationOf(request), reason);
   } finally {
     if (activeJobId === jobId) activeJobId = null;
     if (cancelledJobId === jobId) cancelledJobId = null;
@@ -218,30 +270,37 @@ async function runJob(request: Exclude<FullBackupWorkerRequest, { type: "cancel"
 }
 
 workerScope.onmessage = (event) => {
-  const request = event.data;
-  const jobId = typeof request?.jobId === "string" ? request.jobId : "invalid-job";
-  if (
-    request?.protocol !== FULL_BACKUP_WORKER_PROTOCOL ||
-    request?.version !== FULL_BACKUP_WORKER_PROTOCOL_VERSION ||
-    typeof request?.jobId !== "string" ||
-    request.jobId.length === 0
-  ) {
-    workerScope.postMessage({
-      ...responseBase(jobId),
-      type: "error",
-      operation: "protocol",
-      error: serializeError(protocolError(
+  try {
+    const request = event.data;
+    const jobId = safeVisibleText(request?.jobId, "invalid-job", 128) || "invalid-job";
+    if (
+      request?.protocol !== FULL_BACKUP_WORKER_PROTOCOL ||
+      request?.version !== FULL_BACKUP_WORKER_PROTOCOL_VERSION ||
+      !isValidJobId(request?.jobId)
+    ) {
+      postErrorResponse(jobId, "protocol", protocolError(
         "备份 Worker 协议或版本不匹配。",
         "BACKUP_WORKER_PROTOCOL_VERSION_INVALID"
-      ))
+      ));
+      return;
+    }
+    if (request.type === "cancel") {
+      if (activeJobId === request.jobId) cancelledJobId = request.jobId;
+      return;
+    }
+    if (!isOperationRequest(request)) {
+      postErrorResponse(jobId, "protocol", protocolError(
+        "备份 Worker 收到了未知任务类型。",
+        "BACKUP_WORKER_OPERATION_INVALID"
+      ));
+      return;
+    }
+    void runJob(request).catch((reason: unknown) => {
+      postErrorResponse(jobId, operationOf(request), reason);
     });
-    return;
+  } catch (reason) {
+    postErrorResponse("invalid-job", "protocol", reason);
   }
-  if (request.type === "cancel") {
-    if (activeJobId === request.jobId) cancelledJobId = request.jobId;
-    return;
-  }
-  void runJob(request);
 };
 
 export {};

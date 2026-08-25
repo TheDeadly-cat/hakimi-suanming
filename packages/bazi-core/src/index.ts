@@ -8,10 +8,14 @@ import {
   calculationEngineSchema,
   calculatedChartSchema,
   chartFactsSchema,
-  unknownHourCandidateResultSchema,
-  unknownHourBirthInputSchema,
+  createBirthInputSchemaForTimeZoneName,
+  createCalculatedChartSchemaForTimeZoneName,
+  createUnknownHourBirthInputSchemaForTimeZoneName,
+  createUnknownHourCandidateResultSchemaForTimeZoneName,
   rulePackBindingSchema,
   ruleProfileSchema,
+  storedBirthInputSchema,
+  timeZoneDatabaseSnapshotSchema,
   type BirthInput,
   type CalculatedChart,
   type ChartFacts,
@@ -25,7 +29,8 @@ import {
   type PillarFact,
   type RulePackBinding,
   type RuleProfile,
-  type TimeZoneDatabaseSnapshot
+  type TimeZoneDatabaseSnapshot,
+  type TimeZoneNamePredicate
 } from "@hakimi/contracts";
 import { canonicalStringify, sha256Hex } from "@hakimi/integrity";
 import { bindLuckCycleRuleProfile } from "@hakimi/luck-core";
@@ -39,6 +44,13 @@ import {
   type BundledTimeZoneCalculationContext
 } from "@hakimi/time-core";
 import { LunarUtil, Solar } from "lunar-typescript";
+import {
+  HISTORICAL_NATAL_ENGINE_0_4_0,
+  calculateHistoricalNatalChart040
+} from "./historical-natal-chart-executor-0.4.0";
+import { UnsupportedCalculationError } from "./unsupported-calculation-error";
+
+export { UnsupportedCalculationError } from "./unsupported-calculation-error";
 
 export { canonicalStringify, sha256Hex } from "@hakimi/integrity";
 export type {
@@ -62,13 +74,6 @@ const HYBRID_ALGORITHM_ID = "hakimi-bazi-core:fixed-plus08-year-month-local-civi
 const TABLE_ALGORITHM_PREFIX = "lunar-typescript:1.8.6:LunarUtil";
 export const UNKNOWN_HOUR_PROBE_ALGORITHM_ID = "hakimi-bazi-core:unknown-hour-representative-probes:v1" as const;
 export const UNKNOWN_HOUR_PROBE_DEFINITION_VERSION = "1.0.0" as const;
-
-export class UnsupportedCalculationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "UnsupportedCalculationError";
-  }
-}
 
 export type RuleProfileCompatibilityReason = {
   code: "INVALID_RULE_PROFILE" | "UNSUPPORTED_SEMANTIC_VALUE";
@@ -335,6 +340,7 @@ type CalculationContext = {
   timeZoneDatabase: TimeZoneDatabaseSnapshot;
   supportedRange: SupportedRangeAssessment;
   warnings: string[];
+  isTimeZoneName?: TimeZoneNamePredicate;
 };
 
 function disambiguationPolicy(
@@ -725,7 +731,10 @@ async function buildCalculatedChart(
     manifest: { ...manifestWithoutResultHash, resultHash: "0".repeat(64) }
   }));
 
-  return calculatedChartSchema.parse({
+  const outputSchema = context.isTimeZoneName
+    ? createCalculatedChartSchemaForTimeZoneName(context.isTimeZoneName)
+    : calculatedChartSchema;
+  return outputSchema.parse({
     input,
     timeCalibration,
     ruleProfile,
@@ -770,7 +779,9 @@ async function calculateChartWithBundledContext(
   options: CalculateChartOptions,
   timeZoneContext: BundledTimeZoneCalculationContext
 ): Promise<CalculatedChart> {
-  const input = birthInputSchema.parse(rawInput);
+  const input = createBirthInputSchemaForTimeZoneName(
+    timeZoneContext.resolver.isTimeZoneName
+  ).parse(rawInput);
   const ruleProfile = ruleProfileSchema.parse(rawRuleProfile);
   assertS0Support(input, ruleProfile);
   const policy = disambiguationPolicy(ruleProfile, options.dstResolutionOverride);
@@ -793,7 +804,8 @@ async function calculateChartWithBundledContext(
     ...binding,
     timeZoneDatabase: timeZoneContext.timeZoneDatabase,
     supportedRange,
-    warnings
+    warnings,
+    isTimeZoneName: timeZoneContext.resolver.isTimeZoneName
   });
 }
 
@@ -808,20 +820,31 @@ export async function calculateChartForBundledSnapshot(
   snapshotId: string,
   options: CalculateChartForBundledSnapshotOptions = {}
 ): Promise<CalculatedChart> {
-  const { expectedTimeZoneDatabase, ...calculationOptions } = options;
+  const input = storedBirthInputSchema.parse(rawInput);
+  const ruleProfile = ruleProfileSchema.parse(rawRuleProfile);
+  const dstResolutionOverride = options.dstResolutionOverride;
+  disambiguationPolicy(ruleProfile, dstResolutionOverride);
+  const rulePackBinding = options.rulePackBinding === undefined
+    ? undefined
+    : rulePackBindingSchema.parse(options.rulePackBinding);
+  const expectedTimeZoneDatabase = options.expectedTimeZoneDatabase === undefined
+    ? undefined
+    : timeZoneDatabaseSnapshotSchema.parse(options.expectedTimeZoneDatabase);
+  const calculationOptions: CalculateChartOptions = {
+    ...(rulePackBinding === undefined ? {} : { rulePackBinding }),
+    ...(dstResolutionOverride === undefined ? {} : { dstResolutionOverride })
+  };
   const timeZoneContext = await loadBundledTimeZoneCalculationContext(
     snapshotId,
     expectedTimeZoneDatabase
   );
   return calculateChartWithBundledContext(
-    rawInput,
-    rawRuleProfile,
+    input,
+    ruleProfile,
     calculationOptions,
     timeZoneContext
   );
 }
-
-const HISTORICAL_NATAL_ENGINE_0_4_0 = Object.freeze({ ...ENGINE });
 
 /**
  * Append-only executor registry for read-only natal-chart replay. Existing
@@ -832,7 +855,7 @@ export const HISTORICAL_NATAL_EXECUTOR_REGISTRY: readonly HistoricalNatalChartEx
   Object.freeze({
     executorId: "hakimi-bazi-core:natal-chart-executor:0.4.0",
     engine: HISTORICAL_NATAL_ENGINE_0_4_0,
-    calculateChart: calculateChartForBundledSnapshot
+    calculateChart: calculateHistoricalNatalChart040
   })
 ]);
 
@@ -914,13 +937,22 @@ async function calculateUnknownHourCandidatesWithBundledContext(
   options: CalculateUnknownHourCandidatesOptions,
   timeZoneContext: BundledTimeZoneCalculationContext
 ): Promise<UnknownHourCandidateResult> {
-  const parsedInput = birthInputSchema.parse(rawInput);
+  const resolverBirthInputSchema = createBirthInputSchemaForTimeZoneName(
+    timeZoneContext.resolver.isTimeZoneName
+  );
+  const resolverUnknownHourInputSchema = createUnknownHourBirthInputSchemaForTimeZoneName(
+    timeZoneContext.resolver.isTimeZoneName
+  );
+  const resolverCandidateResultSchema = createUnknownHourCandidateResultSchemaForTimeZoneName(
+    timeZoneContext.resolver.isTimeZoneName
+  );
+  const parsedInput = resolverBirthInputSchema.parse(rawInput);
   const ruleProfile = ruleProfileSchema.parse(rawRuleProfile);
   assertUnknownHourSupport(parsedInput, ruleProfile);
-  const input = unknownHourBirthInputSchema.parse(parsedInput);
+  const input = resolverUnknownHourInputSchema.parse(parsedInput);
   const rangeProbe = UNKNOWN_HOUR_PROBE_DEFINITIONS[0];
   if (!rangeProbe) throw new UnsupportedCalculationError("未知时辰探针定义为空，无法执行支持范围检查。");
-  const rangeProbeInput = birthInputSchema.parse({
+  const rangeProbeInput = resolverBirthInputSchema.parse({
     ...input,
     time: rangeProbe.representativeTime,
     timePrecision: "exact_minute"
@@ -938,11 +970,12 @@ async function calculateUnknownHourCandidatesWithBundledContext(
     ...binding,
     timeZoneDatabase: timeZoneContext.timeZoneDatabase,
     supportedRange: assessSupportedRange(ruleProfile, rangeCalibration),
-    warnings: parallelReplayWarnings
+    warnings: parallelReplayWarnings,
+    isTimeZoneName: timeZoneContext.resolver.isTimeZoneName
   };
 
   const candidates = await Promise.all(UNKNOWN_HOUR_PROBE_DEFINITIONS.map(async (definition, probeIndex): Promise<UnknownHourProbeCandidate> => {
-    const probeInput = birthInputSchema.parse({
+    const probeInput = resolverBirthInputSchema.parse({
       ...input,
       time: definition.representativeTime,
       timePrecision: "exact_minute"
@@ -1053,7 +1086,7 @@ async function calculateUnknownHourCandidatesWithBundledContext(
     candidates
   }));
 
-  return unknownHourCandidateResultSchema.parse({
+  return resolverCandidateResultSchema.parse({
     schemaVersion: SCHEMA_VERSION,
     hashSchemaVersion: HASH_SCHEMA_VERSION,
     kind: "unknown_hour_candidate_probes",
@@ -1089,14 +1122,19 @@ export async function calculateUnknownHourCandidates(
   rawRuleProfile: RuleProfile,
   options: CalculateUnknownHourCandidatesOptions = {}
 ): Promise<UnknownHourCandidateResult> {
+  const input = birthInputSchema.parse(rawInput);
+  const ruleProfile = ruleProfileSchema.parse(rawRuleProfile);
+  const rulePackBinding = options.rulePackBinding === undefined
+    ? undefined
+    : rulePackBindingSchema.parse(options.rulePackBinding);
   const timeZoneContext = await loadBundledTimeZoneCalculationContext(
     RUNTIME_TZDB_VERSION,
     RUNTIME_TIME_ZONE_DATABASE
   );
   return calculateUnknownHourCandidatesWithBundledContext(
-    rawInput,
-    rawRuleProfile,
-    options,
+    input,
+    ruleProfile,
+    rulePackBinding === undefined ? {} : { rulePackBinding },
     timeZoneContext
   );
 }
@@ -1112,15 +1150,22 @@ export async function calculateUnknownHourCandidatesForBundledSnapshot(
   snapshotId: string,
   options: CalculateUnknownHourCandidatesForBundledSnapshotOptions = {}
 ): Promise<UnknownHourCandidateResult> {
-  const { expectedTimeZoneDatabase, ...calculationOptions } = options;
+  const input = storedBirthInputSchema.parse(rawInput);
+  const ruleProfile = ruleProfileSchema.parse(rawRuleProfile);
+  const rulePackBinding = options.rulePackBinding === undefined
+    ? undefined
+    : rulePackBindingSchema.parse(options.rulePackBinding);
+  const expectedTimeZoneDatabase = options.expectedTimeZoneDatabase === undefined
+    ? undefined
+    : timeZoneDatabaseSnapshotSchema.parse(options.expectedTimeZoneDatabase);
   const timeZoneContext = await loadBundledTimeZoneCalculationContext(
     snapshotId,
     expectedTimeZoneDatabase
   );
   return calculateUnknownHourCandidatesWithBundledContext(
-    rawInput,
-    rawRuleProfile,
-    calculationOptions,
+    input,
+    ruleProfile,
+    rulePackBinding === undefined ? {} : { rulePackBinding },
     timeZoneContext
   );
 }

@@ -1,0 +1,824 @@
+.prepared-delivery-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding:
+    max(clamp(16px, 4vw, 48px), env(safe-area-inset-top))
+    max(clamp(16px, 4vw, 48px), env(safe-area-inset-right))
+    max(clamp(16px, 4vw, 48px), env(safe-area-inset-bottom))
+    max(clamp(16px, 4vw, 48px), env(safe-area-inset-left));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  background:
+    radial-gradient(circle at 76% 14%, rgba(194, 145, 78, 0.16), transparent 28rem),
+    rgba(22, 29, 27, 0.76);
+  backdrop-filter: blur(12px) saturate(0.82);
+}
+
+.prepared-delivery-modal .prepared-delivery-dialog {
+  --delivery-ink: #202925;
+  --delivery-muted: #6c736f;
+  --delivery-line: rgba(54, 66, 60, 0.15);
+  --delivery-paper: #fffaf0;
+  --delivery-cinnabar: #a54335;
+  display: grid;
+  width: min(100%, 760px);
+  max-height: min(88vh, 820px);
+  max-height: min(88dvh, 820px);
+  gap: 0;
+  padding: 0;
+  overscroll-behavior: contain;
+  overflow: auto;
+  scrollbar-gutter: stable;
+  border: 1px solid rgba(255, 248, 232, 0.22);
+  border-radius: 10px 30px 10px 30px;
+  background:
+    linear-gradient(112deg, rgba(255, 252, 243, 0.98), rgba(246, 238, 220, 0.98)),
+    var(--delivery-paper);
+  box-shadow: 0 36px 90px rgba(12, 18, 16, 0.36);
+  color: var(--delivery-ink);
+}
+
+.prepared-delivery-modal .prepared-delivery-dialog:focus-visible {
+  outline: 3px solid rgba(213, 165, 98, 0.72);
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 3px rgba(213, 165, 98, 0.45),
+    0 36px 90px rgba(12, 18, 16, 0.36);
+}
+
+.prepared-delivery-header {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: clamp(24px, 4vw, 36px) clamp(24px, 5vw, 44px) 22px;
+  border-bottom: 1px solid var(--delivery-line);
+}
+
+.prepared-delivery-header .eyebrow {
+  margin-bottom: 8px;
+  color: var(--delivery-cinnabar);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  letter-spacing: 0.14em;
+}
+
+.prepared-delivery-header h2 {
+  margin: 0;
+  color: var(--delivery-ink);
+  font-family: var(--font-display, "Noto Serif SC", serif);
+  font-size: clamp(1.55rem, 3vw, 2.25rem);
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+
+.prepared-delivery-stage {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 10px;
+  padding: 4px 8px;
+  border: 1px solid rgba(111, 101, 80, 0.24);
+  border-radius: 999px;
+  background: rgba(111, 101, 80, 0.07);
+  color: #706754;
+  font-size: 0.7rem;
+  font-weight: 760;
+  letter-spacing: 0.04em;
+}
+
+.prepared-delivery-dialog[data-delivery-stage="busy"] .prepared-delivery-stage,
+.prepared-delivery-dialog[data-delivery-stage="requested"] .prepared-delivery-stage {
+  border-color: rgba(154, 106, 49, 0.3);
+  background: rgba(154, 106, 49, 0.09);
+  color: #805722;
+}
+
+.prepared-delivery-dialog[data-delivery-stage="completed"] .prepared-delivery-stage {
+  border-color: rgba(61, 112, 78, 0.3);
+  background: rgba(61, 112, 78, 0.09);
+  color: #365c42;
+}
+
+.prepared-delivery-dialog[data-delivery-stage="blocked"] .prepared-delivery-stage,
+.prepared-delivery-dialog[data-delivery-stage="failed"] .prepared-delivery-stage {
+  border-color: rgba(165, 67, 53, 0.32);
+  background: rgba(165, 67, 53, 0.08);
+  color: var(--delivery-cinnabar);
+}
+
+.prepared-delivery-header .icon-button {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  border-color: rgba(58, 68, 63, 0.16);
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.prepared-delivery-artifact {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr);
+  gap: clamp(18px, 4vw, 30px);
+  margin: clamp(22px, 4vw, 34px) clamp(24px, 5vw, 44px) 0;
+  padding: clamp(20px, 3.5vw, 28px);
+  border: 1px solid var(--delivery-line);
+  border-radius: 8px 22px 8px 22px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 31px, rgba(48, 61, 54, 0.035) 31px 32px),
+    rgba(255, 253, 247, 0.72);
+}
+
+.prepared-delivery-seal {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  align-self: start;
+  width: 82px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(165, 67, 53, 0.34);
+  border-radius: 50%;
+  color: var(--delivery-cinnabar);
+  box-shadow: inset 0 0 0 5px rgba(165, 67, 53, 0.055);
+}
+
+.prepared-delivery-seal svg {
+  width: 24px;
+  height: 24px;
+}
+
+.prepared-delivery-seal span {
+  margin-top: 6px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.prepared-delivery-label {
+  margin: 0 0 5px;
+  color: #9a6a31;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.7rem;
+  font-weight: 760;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.prepared-delivery-artifact-copy > strong {
+  display: block;
+  color: var(--delivery-ink);
+  font-family: var(--font-display, "Noto Serif SC", serif);
+  font-size: 1.15rem;
+  font-weight: 680;
+  overflow-wrap: anywhere;
+}
+
+.prepared-delivery-artifact-copy > p:not(.prepared-delivery-label) {
+  margin: 8px 0 0;
+  color: var(--delivery-muted);
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+.prepared-delivery-artifact-copy > .prepared-delivery-boundary {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--delivery-line);
+  color: #737b76;
+  font-size: 0.76rem;
+}
+
+.prepared-delivery-ledger {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) 0.55fr 0.85fr minmax(0, 1fr);
+  gap: 14px;
+  margin: 20px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--delivery-line);
+}
+
+.prepared-delivery-ledger > div {
+  min-width: 0;
+}
+
+.prepared-delivery-ledger dt {
+  color: #8b918d;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.prepared-delivery-ledger dd {
+  margin: 5px 0 0;
+  color: #37423d;
+  font-size: 0.82rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.prepared-delivery-ledger code {
+  font-size: 0.8rem;
+}
+
+.prepared-delivery-policy {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin: 14px clamp(24px, 5vw, 44px) 0;
+  padding: 13px 14px;
+  border: 1px solid rgba(82, 114, 141, 0.24);
+  border-left: 4px solid #52728d;
+  border-radius: 5px 14px 5px 14px;
+  background: rgba(82, 114, 141, 0.065);
+}
+
+.prepared-delivery-policy[data-policy="blocked_sensitive"] {
+  border-color: rgba(165, 67, 53, 0.26);
+  border-left-color: var(--delivery-cinnabar);
+  background: rgba(165, 67, 53, 0.055);
+}
+
+.prepared-delivery-policy > svg {
+  width: 19px;
+  height: 19px;
+  color: #52728d;
+}
+
+.prepared-delivery-policy[data-policy="blocked_sensitive"] > svg {
+  color: var(--delivery-cinnabar);
+}
+
+.prepared-delivery-policy strong {
+  color: var(--delivery-ink);
+  font-family: var(--font-display, "Noto Serif SC", serif);
+  font-size: 0.88rem;
+}
+
+.prepared-delivery-policy > div {
+  min-width: 0;
+}
+
+.prepared-delivery-policy p {
+  margin: 3px 0 0;
+  color: var(--delivery-muted);
+  font-size: 0.75rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.prepared-delivery-policy > span {
+  padding: 4px 7px;
+  border: 1px solid currentColor;
+  color: #52728d;
+  font-size: 0.68rem;
+  font-weight: 760;
+  white-space: nowrap;
+}
+
+.prepared-delivery-policy[data-policy="blocked_sensitive"] > span {
+  color: var(--delivery-cinnabar);
+}
+
+.prepared-delivery-dialog > .prepared-delivery-warning,
+.prepared-delivery-dialog > .muted-copy,
+.prepared-delivery-dialog > .prepared-delivery-feedback,
+.prepared-delivery-dialog > .inline-error,
+.prepared-delivery-dialog > .success-message {
+  margin: 14px clamp(24px, 5vw, 44px) 0;
+  padding: 12px 14px;
+  border-radius: 7px 14px 7px 14px;
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+.prepared-delivery-dialog > .prepared-delivery-warning {
+  border: 1px solid rgba(174, 113, 37, 0.24);
+  background: rgba(246, 226, 188, 0.52);
+  color: #78501f;
+}
+
+.prepared-delivery-dialog > .muted-copy {
+  border: 1px solid var(--delivery-line);
+  background: rgba(255, 255, 255, 0.4);
+  color: var(--delivery-muted);
+}
+
+.prepared-delivery-dialog > .prepared-delivery-feedback {
+  border: 1px solid var(--delivery-line);
+  border-left: 3px solid #52728d;
+  background: rgba(82, 114, 141, 0.07);
+  color: var(--delivery-muted);
+}
+
+.prepared-delivery-dialog > .prepared-delivery-feedback[data-kind="cancelled"] {
+  border-left-color: #9a6a31;
+  background: rgba(154, 106, 49, 0.065);
+}
+
+.prepared-delivery-dialog > .success-message {
+  border: 1px solid rgba(61, 112, 78, 0.22);
+  background: rgba(207, 228, 209, 0.54);
+  color: #365c42;
+}
+
+.prepared-delivery-dialog .prepared-delivery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: clamp(22px, 4vw, 34px);
+  padding: 20px clamp(24px, 5vw, 44px) clamp(24px, 4vw, 34px);
+  border-top: 1px solid var(--delivery-line);
+  background: rgba(255, 252, 244, 0.62);
+}
+
+.prepared-delivery-actions .text-action {
+  margin-left: auto;
+}
+
+.prepared-delivery-dialog[data-active-intent]:not([data-active-intent="idle"]) .prepared-delivery-artifact,
+.prepared-delivery-dialog[data-active-intent]:not([data-active-intent="idle"]) .prepared-delivery-actions {
+  cursor: progress;
+}
+
+@media (forced-colors: active) {
+  .prepared-delivery-modal {
+    background: CanvasText;
+    backdrop-filter: none;
+  }
+
+  .prepared-delivery-modal .prepared-delivery-dialog,
+  .prepared-delivery-artifact,
+  .prepared-delivery-policy,
+  .prepared-delivery-dialog > .prepared-delivery-warning,
+  .prepared-delivery-dialog > .muted-copy,
+  .prepared-delivery-dialog > .prepared-delivery-feedback,
+  .prepared-delivery-dialog > .inline-error,
+  .prepared-delivery-dialog > .success-message {
+    border-color: CanvasText;
+  }
+
+  .prepared-delivery-modal .prepared-delivery-dialog {
+    background: Canvas;
+    box-shadow: none;
+    color: CanvasText;
+  }
+
+  .prepared-delivery-modal .prepared-delivery-dialog:focus-visible {
+    outline-color: Highlight;
+    box-shadow: none;
+  }
+
+  .prepared-delivery-seal {
+    border-color: CanvasText;
+    color: CanvasText;
+  }
+
+  .prepared-delivery-policy > svg,
+  .prepared-delivery-policy > span {
+    border-color: CanvasText;
+    color: CanvasText;
+  }
+
+  .prepared-delivery-stage,
+  .prepared-delivery-artifact-copy > .prepared-delivery-boundary {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+}
+
+.pwa-install-banner {
+  --pwa-accent: #a54335;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 18px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--pwa-accent) 24%, transparent);
+  border-left: 4px solid var(--pwa-accent);
+  border-radius: 8px 18px 8px 18px;
+  background:
+    linear-gradient(105deg, rgba(255, 252, 244, 0.97), rgba(241, 233, 215, 0.95));
+  box-shadow: 0 14px 36px rgba(55, 48, 36, 0.1);
+}
+
+.pwa-install-banner[data-status="installed"] {
+  --pwa-accent: #47715a;
+}
+
+.pwa-install-banner[data-status="accepted"] {
+  --pwa-accent: #8a6835;
+}
+
+.pwa-install-banner[data-status="prompting"] {
+  --pwa-accent: #9a6a31;
+}
+
+.pwa-install-banner[data-status="dismissed"] {
+  --pwa-accent: #81735f;
+}
+
+.pwa-install-banner[data-status="failed"] {
+  --pwa-accent: #a33d32;
+}
+
+.pwa-install-icon-frame {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid color-mix(in srgb, var(--pwa-accent) 30%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--pwa-accent) 8%, white);
+  color: var(--pwa-accent);
+}
+
+.pwa-install-icon-frame svg {
+  width: 21px;
+  height: 21px;
+}
+
+.pwa-install-copy {
+  min-width: 0;
+}
+
+.pwa-install-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 11px;
+  align-items: center;
+  margin: 0 0 5px;
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.68rem;
+  font-weight: 760;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pwa-install-meta span {
+  color: #8c724d;
+}
+
+.pwa-install-meta em {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pwa-accent) 9%, transparent);
+  color: var(--pwa-accent);
+  font-style: normal;
+  letter-spacing: 0.05em;
+}
+
+.pwa-install-copy > strong {
+  display: block;
+  color: #25302b;
+  font-family: var(--font-display, "Noto Serif SC", serif);
+  font-size: 0.96rem;
+  font-weight: 680;
+}
+
+.pwa-install-description {
+  max-width: 76ch;
+  margin: 4px 0 0;
+  color: #69716c;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.pwa-install-description:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid color-mix(in srgb, var(--pwa-accent) 55%, transparent);
+  outline-offset: 3px;
+}
+
+.pwa-install-capabilities {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin: 9px 0 0;
+  border: 1px solid color-mix(in srgb, var(--pwa-accent) 14%, transparent);
+  border-radius: 3px 10px 3px 3px;
+  background: color-mix(in srgb, var(--pwa-accent) 12%, transparent);
+}
+
+.pwa-install-capabilities > div {
+  min-width: 0;
+  padding: 7px 8px;
+  background: rgba(255, 252, 245, 0.84);
+}
+
+.pwa-install-capabilities dt {
+  color: var(--pwa-accent);
+  font-family: var(--font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.pwa-install-capabilities dd {
+  margin: 3px 0 0;
+  color: #626b66;
+  font-size: 0.7rem;
+  font-weight: 650;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.pwa-install-capabilities > div[data-capability="offline"],
+.pwa-install-capabilities > div[data-capability="sync"] {
+  background:
+    repeating-linear-gradient(135deg, rgba(91, 101, 96, 0.035) 0 5px, transparent 5px 10px),
+    rgba(255, 252, 245, 0.84);
+}
+
+.pwa-install-boundary {
+  display: block;
+  max-width: 82ch;
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px solid color-mix(in srgb, var(--pwa-accent) 14%, transparent);
+  color: #747b76;
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.pwa-install-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pwa-install-actions .primary-action {
+  min-height: 44px;
+  padding-inline: 15px;
+  white-space: nowrap;
+}
+
+.pwa-install-actions .icon-button {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  border-color: rgba(52, 63, 57, 0.14);
+  background: rgba(255, 255, 255, 0.44);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .prepared-delivery-modal {
+    animation: system-surface-fade 180ms both ease-out;
+  }
+
+  .prepared-delivery-dialog {
+    animation: system-dialog-rise 320ms both cubic-bezier(0.2, 0.75, 0.25, 1);
+  }
+
+  .pwa-install-banner {
+    animation: system-banner-arrive 360ms both cubic-bezier(0.2, 0.75, 0.25, 1);
+  }
+}
+
+@keyframes system-surface-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes system-dialog-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes system-banner-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 720px) {
+  .prepared-delivery-modal {
+    place-items: end center;
+    padding:
+      max(12px, env(safe-area-inset-top))
+      max(12px, env(safe-area-inset-right))
+      max(12px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+  }
+
+  .prepared-delivery-modal .prepared-delivery-dialog {
+    max-height: calc(100dvh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+    border-radius: 22px 22px 8px 8px;
+  }
+
+  .prepared-delivery-artifact {
+    grid-template-columns: 1fr;
+  }
+
+  .prepared-delivery-policy {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .prepared-delivery-policy > span {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .prepared-delivery-seal {
+    width: 62px;
+  }
+
+  .prepared-delivery-ledger {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .prepared-delivery-dialog .prepared-delivery-actions {
+    display: grid;
+  }
+
+  .prepared-delivery-actions button {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .prepared-delivery-actions .text-action {
+    margin-left: 0;
+  }
+
+  .pwa-install-banner {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .pwa-install-capabilities {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pwa-install-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 460px) {
+  .prepared-delivery-header,
+  .prepared-delivery-dialog .prepared-delivery-actions {
+    padding-inline: 20px;
+  }
+
+  .prepared-delivery-artifact,
+  .prepared-delivery-policy,
+  .prepared-delivery-dialog > .prepared-delivery-warning,
+  .prepared-delivery-dialog > .muted-copy,
+  .prepared-delivery-dialog > .prepared-delivery-feedback,
+  .prepared-delivery-dialog > .inline-error,
+  .prepared-delivery-dialog > .success-message {
+    margin-inline: 20px;
+  }
+
+  .prepared-delivery-ledger {
+    grid-template-columns: 1fr;
+  }
+
+  .pwa-install-banner {
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .pwa-install-icon-frame {
+    width: 40px;
+    height: 40px;
+  }
+
+  .pwa-install-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    width: 100%;
+  }
+
+  .pwa-install-actions .primary-action {
+    justify-content: center;
+  }
+}
+
+@media (forced-colors: active) {
+  .pwa-install-banner {
+    --pwa-accent: CanvasText;
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+
+  .pwa-install-icon-frame,
+  .pwa-install-actions .icon-button,
+  .pwa-install-meta em,
+  .pwa-install-capabilities,
+  .pwa-install-capabilities > div {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+
+  .pwa-install-copy > strong,
+  .pwa-install-description,
+  .pwa-install-boundary,
+  .pwa-install-capabilities dt,
+  .pwa-install-capabilities dd,
+  .pwa-install-meta span,
+  .pwa-install-meta em {
+    color: CanvasText;
+  }
+
+  .pwa-install-description:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* Delivery and install surfaces receive untrusted filenames and translated copy. */
+.prepared-delivery-header > div,
+.prepared-delivery-artifact-copy,
+.prepared-delivery-policy > div,
+.pwa-install-copy,
+.pwa-install-actions {
+  min-width: 0;
+}
+
+.prepared-delivery-header h2,
+.prepared-delivery-artifact-copy > strong,
+.prepared-delivery-artifact-copy > p,
+.prepared-delivery-ledger dd,
+.prepared-delivery-policy :where(strong, p, span),
+.pwa-install-copy > strong,
+.pwa-install-description,
+.pwa-install-boundary,
+.pwa-install-capabilities dd {
+  overflow-wrap: anywhere;
+}
+
+.prepared-delivery-header h2,
+.pwa-install-copy > strong {
+  text-wrap: balance;
+}
+
+.prepared-delivery-artifact-copy > p,
+.pwa-install-description,
+.pwa-install-boundary {
+  text-wrap: pretty;
+}
+
+@media (max-width: 460px) {
+  .pwa-install-actions .primary-action {
+    min-width: 0;
+    white-space: normal;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-height: 620px) and (min-width: 721px) {
+  .prepared-delivery-modal {
+    place-items: start center;
+    padding-block: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-bottom));
+  }
+
+  .prepared-delivery-modal .prepared-delivery-dialog {
+    max-height: calc(100dvh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .prepared-delivery-modal {
+    background: rgba(22, 29, 27, 0.94);
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-contrast: more) and (forced-colors: none) {
+  .prepared-delivery-modal .prepared-delivery-dialog {
+    --delivery-muted: #4d5651;
+    --delivery-line: rgba(54, 66, 60, 0.38);
+  }
+
+  .prepared-delivery-artifact,
+  .prepared-delivery-policy,
+  .pwa-install-banner,
+  .pwa-install-capabilities {
+    border-width: 2px;
+  }
+}

@@ -31,7 +31,7 @@ export type ResearchQueryFormState = {
   relationTypes: string[];
   ruleProfileDigests: string[];
   transitEnabled: boolean;
-  transitUtcMinute: string;
+  transitUtcDateTime: string;
   manualDirection: "" | "forward" | "backward";
   transitMatches: Record<TransitNodeType, TransitMatchDraft>;
   caseEventsEnabled: boolean;
@@ -55,6 +55,10 @@ export const HEAVENLY_STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", 
 export const EARTHLY_BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"] as const;
 export const RELATION_TYPES = [...PILLAR_RELATION_TYPES];
 
+const MAX_CANONICAL_LIST_ITEMS = 1_024;
+const MAX_CANONICAL_LIST_ITEM_LENGTH = 2_048;
+const MAX_TEXT_LIST_DRAFT_LENGTH = 4_096;
+
 function emptyTransitMatches(): Record<TransitNodeType, TransitMatchDraft> {
   return Object.fromEntries(TRANSIT_NODE_TYPES.map((nodeType) => [nodeType, {
     enabled: false,
@@ -70,6 +74,7 @@ export function defaultResearchQuery(scope: ResearchQueryScope = "cases"): Resea
     case "events": return createDefaultResearchQuery("events");
     case "knowledge": return createDefaultResearchQuery("knowledge");
   }
+  throw new TypeError("Unsupported research query scope.");
 }
 
 function queryTags(query: ResearchQuery): string[] {
@@ -79,9 +84,19 @@ function queryTags(query: ResearchQuery): string[] {
 }
 
 export function researchQueryToFormState(query: ResearchQuery): ResearchQueryFormState {
+  const validatedQuery = researchQuerySchema.safeParse(query);
+  if (!validatedQuery.success) {
+    throw new TypeError("Cannot restore a research query that does not satisfy the current schema.");
+  }
+  query = validatedQuery.data;
   const transitMatches = emptyTransitMatches();
   if (query.scope === "cases" && query.transit) {
+    const seenNodeTypes = new Set<TransitNodeType>();
     for (const match of query.transit.matches) {
+      if (seenNodeTypes.has(match.nodeType)) {
+        throw new TypeError("Cannot restore a research query containing duplicate transit node types.");
+      }
+      seenNodeTypes.add(match.nodeType);
       transitMatches[match.nodeType] = {
         enabled: true,
         ganZhi: match.ganZhi ?? "",
@@ -103,7 +118,7 @@ export function researchQueryToFormState(query: ResearchQuery): ResearchQueryFor
     relationTypes: query.scope === "cases" ? [...query.relationTypes] : [],
     ruleProfileDigests: query.scope === "cases" ? [...query.ruleProfileDigests] : [],
     transitEnabled: query.scope === "cases" && query.transit !== null,
-    transitUtcMinute: query.scope === "cases" && query.transit ? query.transit.atInstant.slice(0, 16) : "",
+    transitUtcDateTime: query.scope === "cases" && query.transit ? query.transit.atInstant.slice(0, -1) : "",
     manualDirection: query.scope === "cases" && query.transit ? query.transit.manualDirection ?? "" : "",
     transitMatches,
     caseEventsEnabled: caseEvents !== null,
@@ -124,104 +139,149 @@ export function researchQueryToFormState(query: ResearchQuery): ResearchQueryFor
 }
 
 function canonicalList(values: readonly string[]): string[] {
-  return [...new Set(values.map((value) => value.trim()).filter(Boolean))].sort();
+  if (!Array.isArray(values) || values.length > MAX_CANONICAL_LIST_ITEMS) {
+    throw new TypeError("Query list exceeds the normalization boundary.");
+  }
+  const normalized = values.map((value) => {
+    if (typeof value !== "string" || value.length > MAX_CANONICAL_LIST_ITEM_LENGTH) {
+      throw new TypeError("Query list contains a non-string or oversized value.");
+    }
+    return value.trim();
+  });
+  return [...new Set(normalized.filter(Boolean))].sort();
 }
 
 function textList(value: string): string[] {
+  if (typeof value !== "string" || value.length > MAX_TEXT_LIST_DRAFT_LENGTH) {
+    throw new TypeError("Query text list exceeds the normalization boundary.");
+  }
   return canonicalList(value.split(/[，,\n]/));
+}
+
+function canonicalUuidDraft(value: string): string {
+  if (typeof value !== "string") throw new TypeError("Query UUID draft is not a string.");
+  return value.trim().toLowerCase();
+}
+
+function canonicalUtcInstantFromDateTimeInput(value: string): string {
+  if (!value) return "";
+  const match = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/.exec(value);
+  if (!match) return value;
+  const seconds = match[2] ?? "00";
+  const milliseconds = (match[3] ?? "").padEnd(3, "0");
+  return `${match[1]}:${seconds}.${milliseconds}Z`;
 }
 
 export function researchQueryFromFormState(state: ResearchQueryFormState):
   | { query: ResearchQuery; issue: null }
   | { query: null; issue: string } {
-  const sort = { field: state.sortField, direction: state.sortDirection };
-  let candidate: unknown;
-  if (state.scope === "cases") {
-    const transit = state.transitEnabled ? {
-      atInstant: state.transitUtcMinute ? `${state.transitUtcMinute}:00.000Z` : "",
-      manualDirection: state.manualDirection || null,
-      matches: TRANSIT_NODE_TYPES.flatMap((nodeType) => {
-        const match = state.transitMatches[nodeType];
-        return match.enabled ? [{
-          nodeType,
-          ganZhi: match.ganZhi.trim() || null,
-          stemTenGod: match.stemTenGod.trim() || null,
-        }] : [];
-      }),
-    } : null;
-    candidate = {
-      version: 1,
-      scope: state.scope,
-      text: normalizeResearchQueryText(state.text),
-      lifecycle: state.lifecycle,
-      favorites: state.favorites,
-      revisionScope: state.revisionScope,
-      caseTags: textList(state.tagsText),
-      dayMasters: canonicalList(state.dayMasters),
-      monthBranches: canonicalList(state.monthBranches),
-      relationTypes: canonicalList(state.relationTypes),
-      ruleProfileDigests: canonicalList(state.ruleProfileDigests),
-      transit,
-      events: state.caseEventsEnabled ? {
-        text: normalizeResearchQueryText(state.eventText),
-        tags: textList(state.eventTagsText),
+  try {
+    const sort = { field: state.sortField, direction: state.sortDirection };
+    let candidate: unknown;
+    if (state.scope === "cases") {
+      const transit = state.transitEnabled ? {
+        atInstant: canonicalUtcInstantFromDateTimeInput(state.transitUtcDateTime),
+        manualDirection: state.manualDirection || null,
+        matches: TRANSIT_NODE_TYPES.flatMap((nodeType) => {
+          const match = state.transitMatches[nodeType];
+          return match.enabled ? [{
+            nodeType,
+            ganZhi: match.ganZhi.trim() || null,
+            stemTenGod: match.stemTenGod.trim() || null,
+          }] : [];
+        }),
+      } : null;
+      candidate = {
+        version: 1,
+        scope: state.scope,
+        text: normalizeResearchQueryText(state.text),
+        lifecycle: state.lifecycle,
+        favorites: state.favorites,
+        revisionScope: state.revisionScope,
+        caseTags: textList(state.tagsText),
+        dayMasters: canonicalList(state.dayMasters),
+        monthBranches: canonicalList(state.monthBranches),
+        relationTypes: canonicalList(state.relationTypes),
+        ruleProfileDigests: canonicalList(state.ruleProfileDigests),
+        transit,
+        events: state.caseEventsEnabled ? {
+          text: normalizeResearchQueryText(state.eventText),
+          tags: textList(state.eventTagsText),
+          feedbacks: canonicalList(state.feedbacks),
+          lifecycle: state.eventLifecycle,
+          binding: state.caseEventBinding,
+        } : null,
+        sort,
+      };
+    } else if (state.scope === "candidate_sets") {
+      candidate = {
+        version: 1,
+        scope: state.scope,
+        text: normalizeResearchQueryText(state.text),
+        lifecycle: state.lifecycle,
+        favorites: state.favorites,
+        tags: textList(state.tagsText),
+        sort,
+      };
+    } else if (state.scope === "events") {
+      const binding = state.eventBindingKind === "context_case"
+        ? { kind: state.eventBindingKind, caseId: canonicalUuidDraft(state.contextCaseId) }
+        : state.eventBindingKind === "context_revision"
+        ? { kind: state.eventBindingKind, caseId: canonicalUuidDraft(state.contextCaseId), revisionId: canonicalUuidDraft(state.contextRevisionId) }
+        : state.eventBindingKind === "context_node"
+          ? {
+              kind: state.eventBindingKind,
+              caseId: canonicalUuidDraft(state.contextCaseId),
+              revisionId: canonicalUuidDraft(state.contextRevisionId),
+              nodeType: state.contextNodeType,
+              nodeId: state.contextNodeId.trim(),
+            }
+          : { kind: state.eventBindingKind };
+      candidate = {
+        version: 1,
+        scope: state.scope,
+        text: normalizeResearchQueryText(state.text),
+        tags: textList(state.tagsText),
         feedbacks: canonicalList(state.feedbacks),
-        lifecycle: state.eventLifecycle,
-        binding: state.caseEventBinding,
-      } : null,
-      sort,
-    };
-  } else if (state.scope === "candidate_sets") {
-    candidate = {
-      version: 1,
-      scope: state.scope,
-      text: normalizeResearchQueryText(state.text),
-      lifecycle: state.lifecycle,
-      favorites: state.favorites,
-      tags: textList(state.tagsText),
-      sort,
-    };
-  } else if (state.scope === "events") {
-    const binding = state.eventBindingKind === "context_case"
-      ? { kind: state.eventBindingKind, caseId: state.contextCaseId.trim() }
-      : state.eventBindingKind === "context_revision"
-      ? { kind: state.eventBindingKind, caseId: state.contextCaseId.trim(), revisionId: state.contextRevisionId.trim() }
-      : state.eventBindingKind === "context_node"
-        ? {
-            kind: state.eventBindingKind,
-            caseId: state.contextCaseId.trim(),
-            revisionId: state.contextRevisionId.trim(),
-            nodeType: state.contextNodeType,
-            nodeId: state.contextNodeId.trim(),
-          }
-        : { kind: state.eventBindingKind };
-    candidate = {
-      version: 1,
-      scope: state.scope,
-      text: normalizeResearchQueryText(state.text),
-      tags: textList(state.tagsText),
-      feedbacks: canonicalList(state.feedbacks),
-      lifecycle: state.lifecycle,
-      binding,
-      sort,
-    };
-  } else {
-    candidate = {
-      version: 1,
-      scope: state.scope,
-      text: normalizeResearchQueryText(state.text),
-      recordTypes: canonicalList(state.knowledgeRecordTypes),
-      sort,
-    };
+        lifecycle: state.lifecycle,
+        binding,
+        sort,
+      };
+    } else {
+      candidate = {
+        version: 1,
+        scope: state.scope,
+        text: normalizeResearchQueryText(state.text),
+        recordTypes: canonicalList(state.knowledgeRecordTypes),
+        sort,
+      };
+    }
+    const parsed = researchQuerySchema.safeParse(candidate);
+    if (!parsed.success) {
+      const first = parsed.error.issues[0];
+      return { query: null, issue: `${first?.path.join(".") || "query"}：${first?.message ?? "查询条件无效"}` };
+    }
+    return { query: parsed.data, issue: null };
+  } catch {
+    return { query: null, issue: "query：查询草稿结构不完整、超出规范化上限或包含不可处理的值" };
   }
-  const parsed = researchQuerySchema.safeParse(candidate);
-  if (!parsed.success) {
-    const first = parsed.error.issues[0];
-    return { query: null, issue: `${first?.path.join(".") || "query"}：${first?.message ?? "查询条件无效"}` };
-  }
-  return { query: parsed.data, issue: null };
+}
+
+function stableSerialize(value: unknown): string {
+  const normalize = (current: unknown): unknown => {
+    if (Array.isArray(current)) return current.map(normalize);
+    if (!current || typeof current !== "object") return current;
+    return Object.fromEntries(
+      Object.entries(current as Record<string, unknown>)
+        .sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)
+        .map(([key, nested]) => [key, normalize(nested)]),
+    );
+  };
+  return JSON.stringify(normalize(value)) ?? "undefined";
 }
 
 export function isDefaultResearchQuery(query: ResearchQuery): boolean {
-  return JSON.stringify(query) === JSON.stringify(defaultResearchQuery(query.scope));
+  const parsed = researchQuerySchema.safeParse(query);
+  if (!parsed.success) return false;
+  return stableSerialize(parsed.data) === stableSerialize(defaultResearchQuery(parsed.data.scope));
 }
