@@ -1,0 +1,402 @@
+{
+  "admissionProjection": {
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "highRiskPolicyCandidatePresent": true,
+    "highRiskPolicyEstablished": false,
+    "highRiskPolicyGateSatisfied": false,
+    "parentLedgerUpdated": false,
+    "projectedRequirementState": "requirements_only_candidate_present_zero_enforcement_not_admitted",
+    "registryUpdated": false,
+    "requirementsMaterialDefined": true
+  },
+  "authorityBoundary": {
+    "baziAuthorityInherited": false,
+    "contentTruthEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "highRiskClaimsAuthorized": false,
+    "policyAdmitted": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false
+  },
+  "createdAt": "2026-08-30T00:00:00.000Z",
+  "decisionContract": {
+    "allowedDispositions": [
+      "block",
+      "abstain",
+      "defer",
+      "diagnostic_only",
+      "conservative_expression",
+      "no_release"
+    ],
+    "defaultDisposition": "block",
+    "disagreementTypes": [
+      {
+        "disposition": "split_versioned_school_profiles_or_defer",
+        "type": "school"
+      },
+      {
+        "disposition": "split_input_policies_and_recompute_or_defer",
+        "type": "input_semantics"
+      },
+      {
+        "disposition": "keep_binding_unverified",
+        "type": "source_edition_or_carrier"
+      },
+      {
+        "disposition": "preserve_side_by_side_and_defer",
+        "type": "rule_interpretation"
+      },
+      {
+        "disposition": "repair_and_require_two_new_independent_reviews",
+        "type": "engineering_error"
+      },
+      {
+        "disposition": "more_conservative_expression_or_no_release",
+        "type": "high_risk_expression"
+      },
+      {
+        "disposition": "defer",
+        "type": "cannot_decide"
+      }
+    ],
+    "evaluationOrder": [
+      "validate_system_and_input_prerequisites",
+      "validate_fact_rule_source_rights_and_expert_scope",
+      "detect_prohibited_or_sensitive_claim_class",
+      "preserve_unresolved_disagreement_without_winner_selection",
+      "emit_only_structured_block_abstention_defer_or_diagnostic_disposition"
+    ],
+    "forbiddenResolutionMethods": [
+      "majority_vote",
+      "opinion_average",
+      "weighted_cross_system_score",
+      "generative_model_winner_selection",
+      "silent_default_or_fallback",
+      "merge_disagreements_into_middle_claim"
+    ],
+    "missingAmbiguousOrUnverifiedPrerequisite": "block_or_abstain_without_content_claim",
+    "unresolvedHighRiskDisagreement": "more_conservative_expression_or_no_release"
+  },
+  "doesNotEstablish": [
+    "admitted_or_runtime_enforced_high_risk_policy",
+    "vedic_input_fact_rule_or_report_contract_admission",
+    "vedic_rule_definition_evaluator_ruleset_or_receipt",
+    "source_body_quote_locator_or_frozen_binding",
+    "work_version_carrier_rights_or_legal_conclusion",
+    "expert_identity_credentials_independence_opinion_or_truth",
+    "scientific_validity_prediction_accuracy_or_domain_truth",
+    "health_legal_financial_or_other_high_stakes_authority",
+    "cross_system_authority_inheritance_or_concept_equivalence",
+    "browser_runtime_storage_backup_recovery_or_release_evidence",
+    "mutation_epoch_cross_file_atomic_snapshot_interval_mutation_or_aba_exclusion",
+    "formal_admission_release_readiness_public_deployment_or_public_release_authorization"
+  ],
+  "enforcementBoundary": {
+    "browserValidated": false,
+    "classifierInstances": 0,
+    "enforcementImplemented": false,
+    "enforcementReceipts": 0,
+    "outputGeneratorInstances": 0,
+    "policyEvaluatorInstances": 0,
+    "productReportsObserved": 0,
+    "receiptIssued": false,
+    "runtimeExecutionsObserved": 0,
+    "runtimeIntegrated": false,
+    "successReceipts": 0,
+    "userInputsOrPersonDataIncluded": false
+  },
+  "evidenceLedger": {
+    "browserRuntimeEvidence": "not_assessed",
+    "contentTruth": "not_established",
+    "engineeringIdentity": "project_authored_requirements_only_policy_material_with_three_current_upstream_identities",
+    "expertTruth": "not_established",
+    "policyMaterialCoverage": "complete_for_v0_1_draft",
+    "policyRuntimeEnforcement": "absent",
+    "publicReleaseAuthorization": "not_authorized",
+    "releaseReadiness": "not_ready",
+    "rightsLegalConclusion": "not_established"
+  },
+  "expertBoundary": {
+    "expertReviewBundleComplete": false,
+    "expertReviewStarted": false,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "modelMayFormatOrIndexOpinionsOnly": true,
+    "modelMaySelectWinner": false,
+    "opinionsVerified": 0,
+    "policyExpertReviewed": false,
+    "reviewerSeatsFilled": 0
+  },
+  "integrityBoundary": {
+    "authenticityEstablished": false,
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi.vedic.high-risk-expression-policy-draft.v0.1",
+    "digestIsDigitalSignature": false,
+    "digitalSignature": null,
+    "signerIdentity": null
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "boundArtifactHashAndInspectionUseSameReadBuffer": true,
+    "crossFileAtomicSnapshot": false,
+    "heldFileHandleReads": true,
+    "intervalMutationExcluded": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "pathEndpointRevalidated": true,
+    "plainDirectoryChainRequired": true,
+    "policyHashAndParseUseSameReadBuffer": true,
+    "policyUpstreamsAtomicSnapshot": false
+  },
+  "policyDigest": "bc1996b042e84214f86d35416c4589e3309a5654250e43c30688568a28ee9fb9",
+  "policyId": "hakimi.vedic.high-risk-expression-policy-draft/0.1.0",
+  "policyMaterial": {
+    "additionalConservativeClasses": [
+      {
+        "classId": "pregnancy_fertility_or_reproductive_outcome",
+        "disposition": "block_or_abstain",
+        "rationale": "health_adjacent_sensitive_outcome_requires_separate_clinical_and_policy_authority"
+      },
+      {
+        "classId": "caste_varna_jati_or_protected_characteristic_inference",
+        "disposition": "block",
+        "rationale": "protected_or_status_inference_must_not_be_derived_from_chart_material"
+      },
+      {
+        "classId": "criminality_moral_worth_or_spiritual_worth_judgment",
+        "disposition": "block",
+        "rationale": "identity_and_moral_determinism_is_out_of_scope"
+      },
+      {
+        "classId": "relationship_marriage_or_compatibility_inevitability",
+        "disposition": "block_or_abstain",
+        "rationale": "relationship_outcomes_must_not_be_presented_as_inevitable"
+      },
+      {
+        "classId": "remedy_ritual_mantra_gemstone_substitution_or_spend_pressure",
+        "disposition": "block",
+        "rationale": "remedies_must_not_replace_professional_care_or_create_coercive_spend_pressure"
+      },
+      {
+        "classId": "minor_targeted_deterministic_or_high_stakes_claim",
+        "disposition": "block",
+        "rationale": "minors_require_the_most_conservative_non_deterministic_boundary"
+      },
+      {
+        "classId": "self_harm_crisis_or_violence",
+        "disposition": "block_and_direct_to_immediate_human_or_emergency_support_when_applicable",
+        "rationale": "chart_material_must_not_predict_normalize_or_direct_self_harm_crisis_or_violence"
+      },
+      {
+        "classId": "privacy_sensitive_personal_or_third_party_inference",
+        "disposition": "block",
+        "rationale": "sensitive_personal_or_third_party_attributes_must_not_be_inferred_from_chart_material"
+      },
+      {
+        "classId": "employment_education_or_irreversible_life_decision_determinism",
+        "disposition": "block_or_abstain",
+        "rationale": "high_impact_life_decisions_must_not_be_directed_as_deterministic_chart_outcomes"
+      }
+    ],
+    "allowedNonClaimOutputClasses": [
+      "structured_block_notice",
+      "structured_abstention_notice",
+      "engineering_diagnostic_without_person_interpretation",
+      "provenance_or_missing_prerequisite_inventory",
+      "uncertainty_and_non_comparability_notice",
+      "human_review_referral_without_authority_claim"
+    ],
+    "anchoredRequiredProhibitedClasses": [
+      "health",
+      "legal",
+      "financial",
+      "death_or_lifespan",
+      "disaster_or_calamity",
+      "scientific_validity_claim",
+      "prediction_accuracy_claim"
+    ],
+    "containsInterpretationTemplates": false,
+    "containsRuleBodies": false,
+    "policyMaterialCoverageComplete": true,
+    "prohibitedOutputPatterns": [
+      "deterministic_or_guaranteed_outcome",
+      "date_or_probability_for_death_disaster_disease_crime_profit_or_legal_result",
+      "diagnosis_treatment_or_professional_advice_substitution",
+      "scientific_validation_or_accuracy_rate_without_separate_admissible_evidence",
+      "fear_pressure_urgency_or_paid_remedy_coercion",
+      "protected_characteristic_status_or_moral_worth_inference",
+      "cross_system_vote_average_weight_or_composite_destiny_score",
+      "unresolved_expert_disagreement_hidden_or_auto_resolved"
+    ],
+    "requiredBlockers": [
+      "vedic_product_not_integrated",
+      "formal_input_contract_not_admitted",
+      "deterministic_fact_producer_and_fact_receipts_absent",
+      "versioned_ruleset_evaluator_and_rule_receipts_absent",
+      "ayanamsa_ephemeris_time_scale_node_and_bhava_choices_not_frozen",
+      "birth_time_timezone_dst_or_location_semantics_missing_or_ambiguous",
+      "birth_time_uncertainty_or_school_conflict_unresolved",
+      "source_binding_body_quote_or_locator_missing",
+      "work_version_or_carrier_rights_evidence_missing",
+      "rights_legal_conclusion_missing",
+      "two_real_independent_expert_reviews_missing_or_disputed",
+      "high_risk_policy_enforcement_and_runtime_receipts_absent",
+      "release_evidence_or_public_deployment_authorization_absent",
+      "cross_system_authority_or_concept_equivalence_borrowed",
+      "requested_output_exceeds_frozen_fact_rule_source_rights_expert_scope"
+    ],
+    "riskUniverseClosed": false,
+    "scenarios": [
+      {
+        "expectedDisposition": "block",
+        "scenarioId": "synthetic-health-diagnosis",
+        "triggerClass": "health"
+      },
+      {
+        "expectedDisposition": "block",
+        "scenarioId": "synthetic-legal-guilt",
+        "triggerClass": "legal"
+      },
+      {
+        "expectedDisposition": "block",
+        "scenarioId": "synthetic-investment-guarantee",
+        "triggerClass": "financial"
+      },
+      {
+        "expectedDisposition": "block",
+        "scenarioId": "synthetic-lifespan-date",
+        "triggerClass": "death_or_lifespan"
+      },
+      {
+        "expectedDisposition": "block",
+        "scenarioId": "synthetic-disaster-certainty",
+        "triggerClass": "disaster_or_calamity"
+      },
+      {
+        "expectedDisposition": "block",
+        "scenarioId": "synthetic-scientific-proof",
+        "triggerClass": "scientific_validity_claim"
+      },
+      {
+        "expectedDisposition": "block",
+        "scenarioId": "synthetic-accuracy-rate",
+        "triggerClass": "prediction_accuracy_claim"
+      },
+      {
+        "expectedDisposition": "block",
+        "scenarioId": "synthetic-caste-inference",
+        "triggerClass": "caste_varna_jati_or_protected_characteristic_inference"
+      },
+      {
+        "expectedDisposition": "block",
+        "scenarioId": "synthetic-remedy-spend-pressure",
+        "triggerClass": "remedy_ritual_mantra_gemstone_substitution_or_spend_pressure"
+      },
+      {
+        "expectedDisposition": "block",
+        "scenarioId": "synthetic-self-harm-certainty",
+        "triggerClass": "self_harm_crisis_or_violence"
+      },
+      {
+        "expectedDisposition": "block",
+        "scenarioId": "synthetic-third-party-sensitive-inference",
+        "triggerClass": "privacy_sensitive_personal_or_third_party_inference"
+      },
+      {
+        "expectedDisposition": "abstain",
+        "scenarioId": "synthetic-missing-ayanamsa",
+        "triggerClass": "missing_prerequisite"
+      },
+      {
+        "expectedDisposition": "defer_or_no_release",
+        "scenarioId": "synthetic-unresolved-expert-disagreement",
+        "triggerClass": "expert_disagreement"
+      },
+      {
+        "expectedDisposition": "diagnostic_only",
+        "scenarioId": "synthetic-structural-precheck",
+        "triggerClass": "engineering_diagnostic"
+      }
+    ]
+  },
+  "productBoundary": {
+    "activeAdmissionEffect": "none",
+    "centralRegistryIntegration": "absent",
+    "domainManifest": "absent",
+    "integrationStatus": "not-integrated",
+    "legacyV13Inherited": false,
+    "migrationId": null,
+    "productStatus": "research-only",
+    "productSurface": "absent",
+    "releaseIdentity": null,
+    "schema13Inherited": false,
+    "targetSchema": null
+  },
+  "recordType": "vedic_high_risk_expression_policy_draft_v0_1",
+  "sourceRightsBoundary": {
+    "bindingFrozenVerified": 0,
+    "bindingRequiredCurrentScoped": 38,
+    "requirementsUniverseClosed": false,
+    "rightsEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "sourceBindingEstablished": false,
+    "sourceBodiesBound": 0,
+    "threeLayerRightsRecordsVerified": 0
+  },
+  "status": "requirements_only_engineering_candidate_not_admitted",
+  "systemIdentity": {
+    "comparisonIncluded": false,
+    "systemId": "vedic",
+    "systemName": "Vedic astrology independent research boundary"
+  },
+  "upstreamClosure": {
+    "bindingDirection": "adr_rule_requirements_and_expert_plan_to_policy_draft_only",
+    "childBindsOrRewritesUpstreams": false,
+    "productBoundaryAdr": {
+      "bytes": 4531,
+      "path": "docs/吠陀占星独立产品化ADR-0001-2026-08-26.md",
+      "rawHashAndSemanticInspectionUseSameBuffer": true,
+      "semanticIdentity": {
+        "authorityStatus": "not-authoritative",
+        "boundaryId": "hakimi.vedic.independent-product-boundary/1.0.0",
+        "decisionStatus": "accepted-research-boundary",
+        "integrationStatus": "not-integrated",
+        "productStatus": "research-only",
+        "publicReleaseAuthorized": false,
+        "rereviewRequirementIds": [
+          "own_input_fact_and_rule_drafts",
+          "runtime_and_bundle_size_proposal",
+          "three_layer_source_rights_ledger",
+          "two_independent_real_expert_review_plan",
+          "independent_storage_backup_recovery_and_rollback_design",
+          "independent_browser_gate_and_release_evidence_design",
+          "owner_scope_license_and_deployment_decision"
+        ],
+        "semanticDigest": "1a71b363132b0d61298f53f7e14eb77d58a3eb3f7d649d8d3c8f42fd1acd1a89"
+      },
+      "sha256": "0e9b81505abb963b4d64426338b8071cd8a211eed8d02fe76065fada335dce63"
+    },
+    "realIndependentExpertReviewPlan": {
+      "bytes": 37131,
+      "path": "content/system-admission/vedic-real-independent-expert-review-plan.v1.json",
+      "planDigest": "2eb4dc9c037403e47f332cc105755bfb86aa8ad6dc0b95dbaf29e80d7bdfd1af",
+      "rawHashAndSemanticInspectionUseSameBuffer": true,
+      "sha256": "9bcbff519dd38d40f26dfba1ccabe1c2987700200cf3a7f6eb7bf68254d7cf89",
+      "status": "complete_verifiable_material_contract_for_two_vacant_real_independent_expert_seats_zero_expert_instances_review_not_started"
+    },
+    "ruleContractRequirements": {
+      "bytes": 30734,
+      "ledgerDigest": "fbaad8625fc10d112ccf47f7c5aae358a49305fe2d560a08d02f506194c4156f",
+      "path": "content/system-admission/vedic-rule-contract-requirements.v1.json",
+      "rawHashAndSemanticInspectionUseSameBuffer": true,
+      "sha256": "ee34106b3dccdfd5d08d89d3871161ba2a12f7bcc983aff8b4850aa6ee42bc94",
+      "status": "rule_contract_draft_present_zero_rule_instances_evaluator_and_versioned_ruleset_absent_not_admitted"
+    }
+  }
+}

@@ -1,0 +1,1091 @@
+{
+  "activeAdmissionEffect": "none",
+  "artifactBindings": [
+    {
+      "manifestDigest": "96c1f8c4062a5d398b7b546ee68fd6bbd51f5a5200f4bdb4b76b994ab25d8685",
+      "manifestId": "hakimi.vedic-astrology.isolated-engineering-current-machine-identity-manifest/1.0.0",
+      "path": "content/domain-release/vedic-astrology.engineering-draft.v0.1.0.manifest.v1.json",
+      "privateBrandVerified": true,
+      "rawBytes": 19557,
+      "rawSha256": "a21c5bcafe84fcbb6289af6d3dfdd052acb72c6987ea924a882abd76768bc0d5",
+      "role": "predecessor_manifest_v1"
+    },
+    {
+      "childId": "hakimi.vedic.civil-time.same-artifact-edge-chrome-observation/1.0.0",
+      "observationDigest": "795638cbe93459ad598c2a138f627c2ba4a9db28b4bebd528e78d934083f3f6e",
+      "path": "content/system-admission/vedic-civil-time-same-artifact-browser-observation-child.v1.0.0.json",
+      "privateBrandVerified": true,
+      "rawBytes": 41077,
+      "rawSha256": "fef063bb880ca0f65aa9fa10ac65cd5d6733216c1aa83faaa05fc536e7431710",
+      "role": "civil_time_same_artifact_browser_observation_child"
+    }
+  ],
+  "authorityBoundary": {
+    "baziAuthorityInherited": false,
+    "contentTruthEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertIdentityQualificationIndependenceEstablished": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "highRiskClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "redistributionAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "safeToPublish": false
+  },
+  "browserEvidenceBoundary": {
+    "allTwelveOutputPathsWereScenarioRequestedOrEvidenceProbed": false,
+    "browserRuntimeEvidenceEstablishedByThisManifest": false,
+    "childEvidenceScope": "historical_isolated_loopback_civil_time_fact_only_same_artifact_observation",
+    "chromeScenarioOutcomesAtChildIssuance": 5,
+    "currentWorkspaceOutputInventoryEstablished": false,
+    "edgeScenarioOutcomesAtChildIssuance": 5,
+    "evidenceToolFileCountAtChildIssuance": 20,
+    "evidenceToolGraphDigestAtChildIssuance": "ff1a8bc71fc70c4f6b375b5dc0b97b87f67f49d266e49a7f9f12cebf971031e3",
+    "evidenceToolSnapshotIsSelectedComponentInventory": false,
+    "formalChromeBrowserReceiptIssued": false,
+    "formalEdgeBrowserReceiptIssued": false,
+    "historicalIssuanceEvidenceOnlyProbePathCount": 1,
+    "historicalIssuanceEvidenceOnlyProbePaths": [
+      "assets/iana-2025b-BLy5AmWt.js"
+    ],
+    "historicalIssuanceNeitherScenarioRequestedNorEvidenceProbedPathCount": 7,
+    "historicalIssuanceNeitherScenarioRequestedNorEvidenceProbedPaths": [
+      "assets/civil-worker-DltlCpqw.js.map",
+      "assets/iana-2025b-BLy5AmWt.js.map",
+      "assets/index-BxE6jOMI.js.map",
+      "hakimi-vedic-fact-only-build-manifest.v1.json",
+      "licenses/moment-2.30.1-LICENSE.txt",
+      "licenses/moment-timezone-0.5.48-retained-LICENSE.txt",
+      "licenses/moment-timezone-0.6.3-LICENSE.txt"
+    ],
+    "historicalIssuanceOutputFileCount": 12,
+    "historicalIssuanceOutputTreeDigest": "cceaaa8766293f4fe778ccc9af0723953556c328c6631acf503e009c1efa424e",
+    "historicalIssuanceOutputTreeOnly": true,
+    "historicalIssuancePathClassificationExhaustsOutputTree": true,
+    "historicalIssuanceScenarioRuntimePathCount": 4,
+    "historicalIssuanceScenarioRuntimePaths": [
+      "assets/civil-worker-DltlCpqw.js",
+      "assets/index-BxE6jOMI.js",
+      "assets/index-OpA1Rqqk.css",
+      "index.html"
+    ],
+    "lockedBuildInputCountAtChildIssuance": 17,
+    "lockedBuildInputGraphDigestAtChildIssuance": "ded4e291d462d842ac53b453b6bd3bec1888afbb4aa174639fc9f49657b54b80",
+    "lockedBuildInputsAreSelectedComponentInventory": false,
+    "manifestRerunsBrowserMatrix": false,
+    "productionBrowserRuntimeEvidenceEstablished": false,
+    "publicHostValidated": false,
+    "pwaOrServiceWorkerValidated": false,
+    "retained2025bChunkScenarioRuntimeRequested": false,
+    "retainedIanaChunkBodyObservedByEvidenceOnlyNavigation": true,
+    "retainedIanaChunkExecutedByCivilResolverEstablished": false,
+    "sameOutputTreeIdentityUsedForBothBrowsersAtChildIssuance": true,
+    "singleOutputTreeServedWithoutRebuildAtChildIssuance": true,
+    "totalPassedScenarioOutcomesAtChildIssuance": 10
+  },
+  "componentAccounting": {
+    "componentCount": 9,
+    "componentFileReferences": 35,
+    "engineeringAttachmentPaths": 31,
+    "mappedUniquePhysicalPaths": 26,
+    "selectedUniquePhysicalPaths": 57
+  },
+  "componentClassificationBoundary": {
+    "classificationIsDomainOrExpertJudgment": false,
+    "classificationIsSemanticCompletenessProof": false,
+    "classificationMethod": "path_name_and_file_role_heuristic_only",
+    "componentIds": [
+      "execution_rules",
+      "interpretation_rules",
+      "input_policy",
+      "fact_contract",
+      "source_bundle",
+      "rights_bundle",
+      "expert_review_bundle",
+      "high_risk_policy",
+      "report_contract"
+    ],
+    "semanticMembershipEstablished": false
+  },
+  "components": [
+    {
+      "boundary": {
+        "componentComplete": false,
+        "retainedIana2025bCivilResolverExecutionEstablished": false,
+        "retainedIana2025bScenarioRuntimeRequested": false,
+        "semanticMembershipEstablished": false,
+        "vedicRulesetEstablished": false
+      },
+      "classificationBasis": "path_name_and_file_role_heuristic_only",
+      "componentDigest": "2821b489d69cfb12269d9cda4ca2a1658a3ea81c2ae7e705677b9926d8f6733e",
+      "componentId": "execution_rules",
+      "fileReferenceCount": 8,
+      "files": [
+        {
+          "bytes": 50123,
+          "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/src/index.ts",
+          "sha256": "3125651e57f177b849ce6141782e13c7726ff1e7835680c19a5785ddb5fc25c2"
+        },
+        {
+          "bytes": 8764,
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-client.ts",
+          "sha256": "3abcfea96d8a3e1023f73a777aded11f9d26c3c2793fdb5a4123680c79ae977c"
+        },
+        {
+          "bytes": 22095,
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-time.ts",
+          "sha256": "c69be8dd8fc39d40f8c1b77263ad41598a54698c252f55e32acecda3f2a96668"
+        },
+        {
+          "bytes": 3468,
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-worker.ts",
+          "sha256": "bb01b0f1577a485a63eff8e38b521fabcaf32becd5a2806f1f4c4ca0949d91bc"
+        },
+        {
+          "bytes": 3317,
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/worker-fact-projection.ts",
+          "sha256": "dc0370cfb82f14b009b8469a0e4990df6526a71191fcb6c60073b926aeabfe3f"
+        },
+        {
+          "bytes": 7819,
+          "path": "packages/tzdb-core/src/index.ts",
+          "sha256": "7c144f6446b3fdba55f7b7b947fe242348ba5010025af36868c39436bfea638e"
+        },
+        {
+          "bytes": 8495,
+          "path": "packages/tzdb-core/src/packed-resolver.ts",
+          "sha256": "bc13da5d2d9b8309aaad972662f8a31761a40afffbd9226bdf80159d43e5081f"
+        },
+        {
+          "bytes": 396,
+          "path": "packages/tzdb-core/src/artifacts/iana-2025b.ts",
+          "sha256": "b1236071105653538a259d929a57e7cd2bb97928429cefaef2ead9dd5019e613"
+        }
+      ],
+      "status": "incomplete_civil_time_tzdb_implementation_slice_not_executed_or_vedic_ruleset"
+    },
+    {
+      "boundary": {
+        "componentComplete": false,
+        "interpretationRulesEstablished": false,
+        "semanticMembershipEstablished": false
+      },
+      "classificationBasis": "path_name_and_file_role_heuristic_only",
+      "componentDigest": "22d5cb98920192303c9265fae152ca36a4ab4fc6994ce7a51482c1156df5a7bd",
+      "componentId": "interpretation_rules",
+      "fileReferenceCount": 0,
+      "files": [],
+      "status": "absent_no_interpretation_rules_selected"
+    },
+    {
+      "boundary": {
+        "componentComplete": false,
+        "formalInputPolicyEstablished": false,
+        "semanticMembershipEstablished": false
+      },
+      "classificationBasis": "path_name_and_file_role_heuristic_only",
+      "componentDigest": "d7984dd99510f9519e15b9f2f610726b0dac31f50d211c45f257af69d10cc35b",
+      "componentId": "input_policy",
+      "fileReferenceCount": 9,
+      "files": [
+        {
+          "bytes": 26585,
+          "path": "content/system-admission/vedic-input-structural-rejection-execution-evidence.v1.json",
+          "sha256": "da953b36a3bef662833ae5763e3cdde7dd84b129089e96a8445ddbc582d1a67f"
+        },
+        {
+          "bytes": 35325,
+          "path": "content/system-admission/vedic-input-admission-readiness-candidate.v0.1.0.json",
+          "sha256": "7f42750a2d11a64bc9ad2cdbef5838aa7081d60fd314c44647079eae426f19dd"
+        },
+        {
+          "bytes": 57125,
+          "path": "content/system-admission/vedic-input-admission-transition-and-receipt-requirements.v0.1.0.json",
+          "sha256": "e394f26f581b517666fec4b8361cba85c6c2761d0dfd06ba5cab23710bafde4d"
+        },
+        {
+          "bytes": 33697,
+          "path": "packages/vedic-input-admission-kernel-draft/src/evaluator.test.ts",
+          "sha256": "05f67634afa59e2a05f8432ae111babcd53f87c80802878fde3379e2082327e6"
+        },
+        {
+          "bytes": 27542,
+          "path": "packages/vedic-input-admission-kernel-draft/src/evaluator.ts",
+          "sha256": "7d0660f4c6823bea25e18c343aa86c610b76dfc0e83de33081dc79cc1381bd98"
+        },
+        {
+          "bytes": 22122,
+          "path": "packages/vedic-input-admission-kernel-draft/src/frozen-packet-schema.ts",
+          "sha256": "8d1c75a1ba54689653d6b13f25bf7badae7ce8cadbbf7d5336de25b6a38390b3"
+        },
+        {
+          "bytes": 17437,
+          "path": "packages/vedic-input-admission-kernel-draft/src/protocol.ts",
+          "sha256": "ba7a9d79ccffd89b580dc9535f347d6febee3625c9007bb7bd2c7a391a6df6c3"
+        },
+        {
+          "bytes": 10168,
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/input-contract.ts",
+          "sha256": "e713dfbd579de404671f8190f1e4b89c95c4ad894498fcefa85313e94c7982ca"
+        },
+        {
+          "bytes": 12295,
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/protocol.ts",
+          "sha256": "fccd81865e6e41834624acfb4b551522edf526277b66950eda59830e37a6257f"
+        }
+      ],
+      "status": "incomplete_draft_input_policy_and_kernel_implementation_only"
+    },
+    {
+      "boundary": {
+        "componentComplete": false,
+        "domainFactTruthEstablished": false,
+        "factContractEstablished": false,
+        "semanticMembershipEstablished": false,
+        "testEvidenceIsDomainTruth": false
+      },
+      "classificationBasis": "path_name_and_file_role_heuristic_only",
+      "componentDigest": "405a8387a0c142158999ba630ca9d231c42bd2d31ab65a2fda294cfed266147f",
+      "componentId": "fact_contract",
+      "fileReferenceCount": 8,
+      "files": [
+        {
+          "bytes": 32543,
+          "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/src/index.test.ts",
+          "sha256": "836a20db6dc171b308d01fc63b102506eddc5068011b9336ee44ffab27f54ceb"
+        },
+        {
+          "bytes": 50123,
+          "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/src/index.ts",
+          "sha256": "3125651e57f177b849ce6141782e13c7726ff1e7835680c19a5785ddb5fc25c2"
+        },
+        {
+          "bytes": 21038,
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/browser-fact-projection.ts",
+          "sha256": "5b8d3b25d2505854ef1edf21ad51ef2b8dd04401e1168cc90632af26e4b0e515"
+        },
+        {
+          "bytes": 8764,
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-client.ts",
+          "sha256": "3abcfea96d8a3e1023f73a777aded11f9d26c3c2793fdb5a4123680c79ae977c"
+        },
+        {
+          "bytes": 22095,
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-time.ts",
+          "sha256": "c69be8dd8fc39d40f8c1b77263ad41598a54698c252f55e32acecda3f2a96668"
+        },
+        {
+          "bytes": 3468,
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-worker.ts",
+          "sha256": "bb01b0f1577a485a63eff8e38b521fabcaf32becd5a2806f1f4c4ca0949d91bc"
+        },
+        {
+          "bytes": 4879,
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/constants.ts",
+          "sha256": "afe7b76fda96edd53f15d2f0dd4834e060f409924e1e9a41c58b5a462f569aa2"
+        },
+        {
+          "bytes": 3317,
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/worker-fact-projection.ts",
+          "sha256": "dc0370cfb82f14b009b8469a0e4990df6526a71191fcb6c60073b926aeabfe3f"
+        }
+      ],
+      "status": "incomplete_draft_fact_implementation_and_test_evidence_only"
+    },
+    {
+      "boundary": {
+        "componentComplete": false,
+        "packageMetadataIsSourceProvenance": false,
+        "semanticMembershipEstablished": false,
+        "sourceBodyOrProvenanceEstablished": false
+      },
+      "classificationBasis": "path_name_and_file_role_heuristic_only",
+      "componentDigest": "47f1842607a95b5ab8185a7150eecf6ab376a0ae594d430a35168ce6a25b346e",
+      "componentId": "source_bundle",
+      "fileReferenceCount": 4,
+      "files": [
+        {
+          "bytes": 85752,
+          "path": "content/system-admission/vedic-source-binding-and-three-layer-rights-requirements.v1.json",
+          "sha256": "2eed084660dbfa9de5c655e40d96c9bb848743f8f14091e8fb3564f2d60385b9"
+        },
+        {
+          "bytes": 94582,
+          "path": "content/system-admission/vedic-source-binding-and-three-layer-rights-requirements.v1.1.0.json",
+          "sha256": "9356740cfd960a3137493928978d43d25be432f1bae719dde7ea95c66338c2bd"
+        },
+        {
+          "bytes": 241,
+          "path": "packages/tzdb-core/package.json",
+          "sha256": "fb12b19a6f6c971185bd2f2c9226fe50ad816595e3acec4f0a0b373593136236"
+        },
+        {
+          "bytes": 396,
+          "path": "packages/tzdb-core/src/artifacts/iana-2025b.ts",
+          "sha256": "b1236071105653538a259d929a57e7cd2bb97928429cefaef2ead9dd5019e613"
+        }
+      ],
+      "status": "incomplete_requirements_and_private_package_metadata_not_source_provenance"
+    },
+    {
+      "boundary": {
+        "componentComplete": false,
+        "rightsBindingEstablished": false,
+        "rightsEvidenceEstablished": false,
+        "rightsLegalConclusionEstablished": false,
+        "semanticMembershipEstablished": false
+      },
+      "classificationBasis": "path_name_and_file_role_heuristic_only",
+      "componentDigest": "69538669e79a587b5a61ad2d13076174dbc7e6b57bc42552cbc3e88114a152bf",
+      "componentId": "rights_bundle",
+      "fileReferenceCount": 2,
+      "files": [
+        {
+          "bytes": 85752,
+          "path": "content/system-admission/vedic-source-binding-and-three-layer-rights-requirements.v1.json",
+          "sha256": "2eed084660dbfa9de5c655e40d96c9bb848743f8f14091e8fb3564f2d60385b9"
+        },
+        {
+          "bytes": 94582,
+          "path": "content/system-admission/vedic-source-binding-and-three-layer-rights-requirements.v1.1.0.json",
+          "sha256": "9356740cfd960a3137493928978d43d25be432f1bae719dde7ea95c66338c2bd"
+        }
+      ],
+      "status": "requirements_only_no_rights_evidence_or_legal_conclusion"
+    },
+    {
+      "boundary": {
+        "componentComplete": false,
+        "expertIdentityQualificationIndependenceEstablished": false,
+        "expertReviewInstanceEstablished": false,
+        "semanticMembershipEstablished": false
+      },
+      "classificationBasis": "path_name_and_file_role_heuristic_only",
+      "componentDigest": "41cfea7a7c1afb4a8f3e1d5e404bc853a03b7c92bfc016d68dfc0dd76c1fc36f",
+      "componentId": "expert_review_bundle",
+      "fileReferenceCount": 0,
+      "files": [],
+      "status": "absent_no_expert_review_instance_selected_plan_is_attachment_only"
+    },
+    {
+      "boundary": {
+        "componentComplete": false,
+        "highRiskPolicyBound": false,
+        "semanticMembershipEstablished": false
+      },
+      "classificationBasis": "path_name_and_file_role_heuristic_only",
+      "componentDigest": "07bdf7f40e0d96a2568a3034671dbc17ebed033163f8117a1ad628a94c20a497",
+      "componentId": "high_risk_policy",
+      "fileReferenceCount": 1,
+      "files": [
+        {
+          "bytes": 15788,
+          "path": "content/system-admission/vedic-high-risk-expression-policy-draft.v0.1.0.json",
+          "sha256": "8a1295c4f68da87a50ac2d6f8689765c271e007a68d63dfe2afa88377d94f5fa"
+        }
+      ],
+      "status": "incomplete_draft_policy_only_not_bound"
+    },
+    {
+      "boundary": {
+        "componentComplete": false,
+        "formalReportEstablished": false,
+        "reportContractEstablished": false,
+        "semanticMembershipEstablished": false
+      },
+      "classificationBasis": "path_name_and_file_role_heuristic_only",
+      "componentDigest": "dbdfdff09fbdda1088cfb458a9a4e58419935e8055452d03f3003e81c7db61fa",
+      "componentId": "report_contract",
+      "fileReferenceCount": 3,
+      "files": [
+        {
+          "bytes": 21038,
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/browser-fact-projection.ts",
+          "sha256": "5b8d3b25d2505854ef1edf21ad51ef2b8dd04401e1168cc90632af26e4b0e515"
+        },
+        {
+          "bytes": 7307,
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/main.ts",
+          "sha256": "4f88710d65a8f108b47ef307b72f4984f75ad69fed06d24de9a949ea71acb4c8"
+        },
+        {
+          "bytes": 975,
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/ui-format.ts",
+          "sha256": "44739e5fa14d1070459eb251bb3211d9fb82e7b19b88f6bacbe170f280ad17fc"
+        }
+      ],
+      "status": "preview_projection_implementation_only_no_report_contract"
+    }
+  ],
+  "createdAt": "2026-09-01T00:00:00.000Z",
+  "doesNotEstablish": [
+    "recursive_directory_or_extra_file_absence_closure",
+    "entire_fact_browser_draft_tzdb_core_or_vedic_engineering_closure",
+    "current_full_domain_manifest_or_formal_admission",
+    "vedic_interpretation_ruleset_fact_truth_or_report_contract",
+    "source_body_provenance_exact_quote_frozen_binding_or_three_layer_rights",
+    "real_expert_identity_qualification_independence_opinion_or_truth",
+    "semantic_complete_high_risk_policy_or_high_risk_claims_authority",
+    "current_browser_rerun_product_pwa_service_worker_public_host_or_production_receipt",
+    "product_release_schema_migration_runtime_storage_or_central_registry_identity",
+    "cross_file_atomicity_mutation_epoch_interval_integrity_or_aba_exclusion",
+    "release_evidence_release_readiness_deployment_rollback_or_public_release_authorization",
+    "legacy_v13_or_bazi_authority_inheritance"
+  ],
+  "engineeringAttachments": [
+    {
+      "bytes": 25578,
+      "path": "content/system-admission/vedic-independent-productization-requirements.v1.json",
+      "sha256": "c9f0fbb3b25c3ad582dc4c3f5534e7e27cb44e47721dbf806b8085cefb6b26f8"
+    },
+    {
+      "bytes": 14110,
+      "path": "content/system-admission/vedic-independent-productization-version-aware-observation-candidate.v1.1.0.json",
+      "sha256": "d87a9340c4afd280e1aeb004f4322d2088868b79f31b7c2fd3191e8d14e1343a"
+    },
+    {
+      "bytes": 25978,
+      "path": "content/system-admission/vedic-independent-storage-backup-recovery-and-rollback-design-candidate.v0.1.0.json",
+      "sha256": "1eeaf1419ce4b3ae01f277f6389fc3bbdf5a59605f89d4c7ae7eccfc1a8d1bbf"
+    },
+    {
+      "bytes": 37131,
+      "path": "content/system-admission/vedic-real-independent-expert-review-plan.v1.json",
+      "sha256": "9bcbff519dd38d40f26dfba1ccabe1c2987700200cf3a7f6eb7bf68254d7cf89"
+    },
+    {
+      "bytes": 5319,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/browser-app/index.html",
+      "sha256": "12701b0dba0102ea9da20793d1fa58f7de787e8dcfa72067d178116dc31fec34"
+    },
+    {
+      "bytes": 399,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/package.json",
+      "sha256": "a0e8cc8534860cb4e7c9bfea7b2487955ad6433c7f65927f5d0946f9a8827f91"
+    },
+    {
+      "bytes": 4006,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/styles.css",
+      "sha256": "c8e0e6b98c63a67f206c6400bacf3aa61b01f6814a360b320edb101efcbf5da9"
+    },
+    {
+      "bytes": 233,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/tsconfig.json",
+      "sha256": "9eeb488130dcf8c4c637b6ba8fb136c4c2d1f845424290bc652db5fa35ee53f6"
+    },
+    {
+      "bytes": 16136,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/vite.config.mjs",
+      "sha256": "99771905c50721404267d2af70ce4cbaf4a0aa7b749785369b769d48a7ae9024"
+    },
+    {
+      "bytes": 2525,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/vite.same-artifact-evidence.config.mjs",
+      "sha256": "960a2355565032bf20bb75b04b7657a9261c6884b74c08f48c4192fda8b8938f"
+    },
+    {
+      "bytes": 2782,
+      "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/README.md",
+      "sha256": "782a13b3db1939843b99cdfa1857e51fc8aff4a7ea2ba91496be01eacc8773f6"
+    },
+    {
+      "bytes": 549,
+      "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/package.json",
+      "sha256": "26b1139fc0a5de1f2435e26f87130d044a01f9b085ecf6d373b884b2cbe1197b"
+    },
+    {
+      "bytes": 182,
+      "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/tsconfig.json",
+      "sha256": "63607b49052422c9e0bbb58b8f9074215a442bc2b65c39de60be162a4d5b04ef"
+    },
+    {
+      "bytes": 175812,
+      "path": "package-lock.json",
+      "sha256": "40a02c7c3166f0c9bc03afa9c1d1f342fb7f54efe1abbf7cb3f5cf6ecb482a4d"
+    },
+    {
+      "bytes": 28879,
+      "path": "package.json",
+      "sha256": "c601b1e560d988a82cfc8d9c374a06597bf8dd867e941a2f4e8cc57f3d59e076"
+    },
+    {
+      "bytes": 5307,
+      "path": "packages/vedic-input-admission-kernel-draft/README.md",
+      "sha256": "590467f1c0de277476dbad5cb15b1b59fc4cab277ed93b13e9349b88fb7c61f0"
+    },
+    {
+      "bytes": 358,
+      "path": "packages/vedic-input-admission-kernel-draft/package.json",
+      "sha256": "161ef453575192dcc89e7ad095a67001653628dbfad49e4b0706247afee313f2"
+    },
+    {
+      "bytes": 209,
+      "path": "packages/vedic-input-admission-kernel-draft/tsconfig.json",
+      "sha256": "a6e1cd9ecab965e460aa18d009723c8b961c6768af50f169dc663cd80ebe998a"
+    },
+    {
+      "bytes": 314,
+      "path": "packages/vedic-input-admission-kernel-draft/vitest.config.ts",
+      "sha256": "ea0654c3137fa6ff32f2d6808948a37102ddf48c9dc60227bad0962e071f2397"
+    },
+    {
+      "bytes": 3933,
+      "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/README.md",
+      "sha256": "4995fa82b7b2f94fae75fcf5391d9e0ad76d6e01d8b034ca2b34055812937c75"
+    },
+    {
+      "bytes": 2519,
+      "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/browser-app/index.html",
+      "sha256": "a1f543502754758c52af821100d9be4d259419dad5ded1e5ca1d7aa540a5060b"
+    },
+    {
+      "bytes": 523,
+      "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/package.json",
+      "sha256": "7eecd92eaa54f5e734ccc4838c9430663e2d19e0bcf79e4918f61b323ee452b3"
+    },
+    {
+      "bytes": 8820,
+      "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/browser-app/main.ts",
+      "sha256": "a71e362f53b157a92de054ed9d8304ac2a3965f2970438df76cd2c44c90238f5"
+    },
+    {
+      "bytes": 3489,
+      "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/browser-app/styles.css",
+      "sha256": "ffba533522b4d19af2a9b394f404ce41921da78cf38f888baabc98554e0a07c7"
+    },
+    {
+      "bytes": 14290,
+      "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/runtime.test.ts",
+      "sha256": "5cf6cb4eb3be0d9c544512c46052aba835e652a30364b6a7dec73814c8ad435f"
+    },
+    {
+      "bytes": 44063,
+      "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/runtime.ts",
+      "sha256": "7454618b8fe1263d864b90a6dfdd826444d2290e72b26f2cb8a638cd93750bea"
+    },
+    {
+      "bytes": 240,
+      "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/tsconfig.json",
+      "sha256": "af6c7b422c96358b50849512ee48911cb344ebd5329cf71f14cba7120efb4eb2"
+    },
+    {
+      "bytes": 603,
+      "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/vite.browser-experiment.config.mjs",
+      "sha256": "4e6b60630be078453ccba532f37eae2193ddec2e6e0bd58684cfc9acd5f81844"
+    },
+    {
+      "bytes": 314,
+      "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/vitest.config.ts",
+      "sha256": "ea0654c3137fa6ff32f2d6808948a37102ddf48c9dc60227bad0962e071f2397"
+    },
+    {
+      "bytes": 3124,
+      "path": "tsconfig.base.json",
+      "sha256": "181e40ee1a2565d45cd35d250085bc3395a07035bfba0a4f4e6fcc31e093164c"
+    },
+    {
+      "bytes": 479,
+      "path": "tsconfig.json",
+      "sha256": "bbed523406f38d3fe9757ef12accf9a02c98a75b3f9812d64fa302975c856cf3"
+    }
+  ],
+  "evidenceLedgerSeparation": {
+    "accountsMustNotBeCollapsed": true,
+    "browserRuntimeEvidence": "historical_child_only_not_reverified_by_this_manifest",
+    "contentTruthEstablished": false,
+    "engineeringIdentityEvidence": "selected_parent_declared_57_path_projection_mechanically_current",
+    "expertTruthEstablished": false,
+    "publicReleaseAuthorizationEstablished": false,
+    "releaseReadinessEstablished": false,
+    "rightsLegalJudgmentEstablished": false
+  },
+  "gateState": {
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 38,
+    "expertReviewBundleComplete": false,
+    "highRiskPolicyBound": false,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "releaseEvidenceComplete": false,
+    "rightsBundleComplete": false,
+    "sourceBundleComplete": false
+  },
+  "integrationBoundary": {
+    "centralFormalRegistryConsumesThisManifest": false,
+    "crossSystemSuccessorBacklinkPresent": false,
+    "mainApplicationIntegrated": false,
+    "ownerAcceptanceForFormalAdmissionEstablished": false
+  },
+  "manifestDigest": "7d4fcf50e4fdfa513611ace4331abf2079b1faf433f0a1c58e60603a9584a347",
+  "manifestId": "hakimi.vedic-astrology.parent-declared-selected-path-machine-identity-manifest/2.0.0",
+  "observationBoundary": {
+    "abaExcluded": false,
+    "crossFileAtomicSnapshot": false,
+    "digestIsDigitalSignature": false,
+    "endpointSnapshotOnly": true,
+    "exactPersistedRawIdentitiesVerified": true,
+    "intervalMutationExcludedAcrossFiles": false,
+    "mutationEpochAvailableForProduct": false,
+    "mutationEpochReceipt": null,
+    "signerIdentityEstablished": false,
+    "upstreamPrivateBrandsVerified": 2
+  },
+  "productBoundary": {
+    "formalProductSurface": "absent",
+    "migrationId": null,
+    "productIdentity": null,
+    "releaseIdentity": null,
+    "runtimeOption": "unselected",
+    "storageBackend": "unselected",
+    "targetSchema": null
+  },
+  "projectDefaultReleaseGovernance": {
+    "activeLine": "legacy-v13",
+    "inheritedByThisSystem": false,
+    "migrationId": null,
+    "targetSchema": 13
+  },
+  "recordType": "vedic_parent_declared_selected_path_machine_identity_manifest_v2",
+  "releaseStatus": "draft",
+  "runtimeTrustBoundary": {
+    "completeSourceToBuildAttestationEstablished": false,
+    "hiddenPreEvaluationCodeExcluded": false,
+    "repositoryIntervalIntegrityEstablished": false,
+    "toolAttestationEstablished": false,
+    "visibleCliLoaderInjectionRejected": true
+  },
+  "schemaVersion": "2.0.0",
+  "scopeOmissions": {
+    "factBrowserDraftRoot": {
+      "authoredSelectedPaths": 16,
+      "entireRootClosureEstablished": false,
+      "evidenceToolOnlyPaths": [
+        "isolated-drafts/vedic-civil-time-fact-browser-draft/playwright.same-artifact-evidence.config.ts",
+        "isolated-drafts/vedic-civil-time-fact-browser-draft/tsconfig.same-artifact-evidence.json",
+        "isolated-drafts/vedic-civil-time-fact-browser-draft/e2e/civil-time-browser-gate.spec.ts",
+        "isolated-drafts/vedic-civil-time-fact-browser-draft/e2e/same-artifact-summary-reporter.ts"
+      ],
+      "evidenceToolOnlyPathsCount": 4,
+      "knownOrdinaryFilesAtAuthoring": 27,
+      "loaderRecursivelyEnumeratesThisRoot": false,
+      "omittedNonEvidencePaths": [
+        "isolated-drafts/vedic-civil-time-fact-browser-draft/README.md",
+        "isolated-drafts/vedic-civil-time-fact-browser-draft/src/browser-fact-projection.test.ts",
+        "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-client.test.ts",
+        "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-time.test.ts",
+        "isolated-drafts/vedic-civil-time-fact-browser-draft/src/input-contract.test.ts",
+        "isolated-drafts/vedic-civil-time-fact-browser-draft/src/ui-format.test.ts",
+        "isolated-drafts/vedic-civil-time-fact-browser-draft/vitest.config.ts"
+      ],
+      "omittedNonEvidencePathsCount": 7
+    },
+    "omissionListsMechanicallyReverifiedByThisLoader": false,
+    "omissionListsPurpose": "authoring_time_counterexamples_against_directory_or_domain_closure_claims",
+    "tzdbCorePackage": {
+      "authoredSelectedPaths": 4,
+      "entirePackageClosureEstablished": false,
+      "knownOrdinaryFilesAtAuthoring": 8,
+      "loaderRecursivelyEnumeratesThisRoot": false,
+      "omittedPaths": [
+        "packages/tzdb-core/scripts/run-release-gate.mjs",
+        "packages/tzdb-core/scripts/verify-artifact.mjs",
+        "packages/tzdb-core/scripts/verify-artifact.test.mjs",
+        "packages/tzdb-core/src/index.test.ts"
+      ],
+      "omittedPathsCount": 4
+    }
+  },
+  "selectedClosure": {
+    "canonicalPathSortApplied": true,
+    "childDeclaredAuthoredBuildPaths": 24,
+    "entireFactBrowserDraftRootClosureEstablished": false,
+    "entireTzdbCorePackageClosureEstablished": false,
+    "entireVedicEngineeringClosureEstablished": false,
+    "extraFileAbsenceEstablished": false,
+    "files": [
+      {
+        "bytes": 15788,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "content/system-admission/vedic-high-risk-expression-policy-draft.v0.1.0.json",
+        "sha256": "8a1295c4f68da87a50ac2d6f8689765c271e007a68d63dfe2afa88377d94f5fa"
+      },
+      {
+        "bytes": 25578,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "content/system-admission/vedic-independent-productization-requirements.v1.json",
+        "sha256": "c9f0fbb3b25c3ad582dc4c3f5534e7e27cb44e47721dbf806b8085cefb6b26f8"
+      },
+      {
+        "bytes": 14110,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "content/system-admission/vedic-independent-productization-version-aware-observation-candidate.v1.1.0.json",
+        "sha256": "d87a9340c4afd280e1aeb004f4322d2088868b79f31b7c2fd3191e8d14e1343a"
+      },
+      {
+        "bytes": 25978,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "content/system-admission/vedic-independent-storage-backup-recovery-and-rollback-design-candidate.v0.1.0.json",
+        "sha256": "1eeaf1419ce4b3ae01f277f6389fc3bbdf5a59605f89d4c7ae7eccfc1a8d1bbf"
+      },
+      {
+        "bytes": 35325,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "content/system-admission/vedic-input-admission-readiness-candidate.v0.1.0.json",
+        "sha256": "7f42750a2d11a64bc9ad2cdbef5838aa7081d60fd314c44647079eae426f19dd"
+      },
+      {
+        "bytes": 57125,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "content/system-admission/vedic-input-admission-transition-and-receipt-requirements.v0.1.0.json",
+        "sha256": "e394f26f581b517666fec4b8361cba85c6c2761d0dfd06ba5cab23710bafde4d"
+      },
+      {
+        "bytes": 26585,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "content/system-admission/vedic-input-structural-rejection-execution-evidence.v1.json",
+        "sha256": "da953b36a3bef662833ae5763e3cdde7dd84b129089e96a8445ddbc582d1a67f"
+      },
+      {
+        "bytes": 37131,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "content/system-admission/vedic-real-independent-expert-review-plan.v1.json",
+        "sha256": "9bcbff519dd38d40f26dfba1ccabe1c2987700200cf3a7f6eb7bf68254d7cf89"
+      },
+      {
+        "bytes": 94582,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "content/system-admission/vedic-source-binding-and-three-layer-rights-requirements.v1.1.0.json",
+        "sha256": "9356740cfd960a3137493928978d43d25be432f1bae719dde7ea95c66338c2bd"
+      },
+      {
+        "bytes": 85752,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "content/system-admission/vedic-source-binding-and-three-layer-rights-requirements.v1.json",
+        "sha256": "2eed084660dbfa9de5c655e40d96c9bb848743f8f14091e8fb3564f2d60385b9"
+      },
+      {
+        "bytes": 5319,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/browser-app/index.html",
+        "sha256": "12701b0dba0102ea9da20793d1fa58f7de787e8dcfa72067d178116dc31fec34"
+      },
+      {
+        "bytes": 399,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/package.json",
+        "sha256": "a0e8cc8534860cb4e7c9bfea7b2487955ad6433c7f65927f5d0946f9a8827f91"
+      },
+      {
+        "bytes": 21038,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/browser-fact-projection.ts",
+        "sha256": "5b8d3b25d2505854ef1edf21ad51ef2b8dd04401e1168cc90632af26e4b0e515"
+      },
+      {
+        "bytes": 8764,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-client.ts",
+        "sha256": "3abcfea96d8a3e1023f73a777aded11f9d26c3c2793fdb5a4123680c79ae977c"
+      },
+      {
+        "bytes": 22095,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-time.ts",
+        "sha256": "c69be8dd8fc39d40f8c1b77263ad41598a54698c252f55e32acecda3f2a96668"
+      },
+      {
+        "bytes": 3468,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-worker.ts",
+        "sha256": "bb01b0f1577a485a63eff8e38b521fabcaf32becd5a2806f1f4c4ca0949d91bc"
+      },
+      {
+        "bytes": 4879,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/constants.ts",
+        "sha256": "afe7b76fda96edd53f15d2f0dd4834e060f409924e1e9a41c58b5a462f569aa2"
+      },
+      {
+        "bytes": 10168,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/input-contract.ts",
+        "sha256": "e713dfbd579de404671f8190f1e4b89c95c4ad894498fcefa85313e94c7982ca"
+      },
+      {
+        "bytes": 7307,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/main.ts",
+        "sha256": "4f88710d65a8f108b47ef307b72f4984f75ad69fed06d24de9a949ea71acb4c8"
+      },
+      {
+        "bytes": 12295,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/protocol.ts",
+        "sha256": "fccd81865e6e41834624acfb4b551522edf526277b66950eda59830e37a6257f"
+      },
+      {
+        "bytes": 4006,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/styles.css",
+        "sha256": "c8e0e6b98c63a67f206c6400bacf3aa61b01f6814a360b320edb101efcbf5da9"
+      },
+      {
+        "bytes": 975,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/ui-format.ts",
+        "sha256": "44739e5fa14d1070459eb251bb3211d9fb82e7b19b88f6bacbe170f280ad17fc"
+      },
+      {
+        "bytes": 3317,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/worker-fact-projection.ts",
+        "sha256": "dc0370cfb82f14b009b8469a0e4990df6526a71191fcb6c60073b926aeabfe3f"
+      },
+      {
+        "bytes": 233,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/tsconfig.json",
+        "sha256": "9eeb488130dcf8c4c637b6ba8fb136c4c2d1f845424290bc652db5fa35ee53f6"
+      },
+      {
+        "bytes": 16136,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/vite.config.mjs",
+        "sha256": "99771905c50721404267d2af70ce4cbaf4a0aa7b749785369b769d48a7ae9024"
+      },
+      {
+        "bytes": 2525,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/vite.same-artifact-evidence.config.mjs",
+        "sha256": "960a2355565032bf20bb75b04b7657a9261c6884b74c08f48c4192fda8b8938f"
+      },
+      {
+        "bytes": 2782,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/README.md",
+        "sha256": "782a13b3db1939843b99cdfa1857e51fc8aff4a7ea2ba91496be01eacc8773f6"
+      },
+      {
+        "bytes": 549,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/package.json",
+        "sha256": "26b1139fc0a5de1f2435e26f87130d044a01f9b085ecf6d373b884b2cbe1197b"
+      },
+      {
+        "bytes": 32543,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/src/index.test.ts",
+        "sha256": "836a20db6dc171b308d01fc63b102506eddc5068011b9336ee44ffab27f54ceb"
+      },
+      {
+        "bytes": 50123,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/src/index.ts",
+        "sha256": "3125651e57f177b849ce6141782e13c7726ff1e7835680c19a5785ddb5fc25c2"
+      },
+      {
+        "bytes": 182,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/tsconfig.json",
+        "sha256": "63607b49052422c9e0bbb58b8f9074215a442bc2b65c39de60be162a4d5b04ef"
+      },
+      {
+        "bytes": 175812,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "package-lock.json",
+        "sha256": "40a02c7c3166f0c9bc03afa9c1d1f342fb7f54efe1abbf7cb3f5cf6ecb482a4d"
+      },
+      {
+        "bytes": 28879,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "package.json",
+        "sha256": "c601b1e560d988a82cfc8d9c374a06597bf8dd867e941a2f4e8cc57f3d59e076"
+      },
+      {
+        "bytes": 241,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "packages/tzdb-core/package.json",
+        "sha256": "fb12b19a6f6c971185bd2f2c9226fe50ad816595e3acec4f0a0b373593136236"
+      },
+      {
+        "bytes": 396,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "packages/tzdb-core/src/artifacts/iana-2025b.ts",
+        "sha256": "b1236071105653538a259d929a57e7cd2bb97928429cefaef2ead9dd5019e613"
+      },
+      {
+        "bytes": 7819,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "packages/tzdb-core/src/index.ts",
+        "sha256": "7c144f6446b3fdba55f7b7b947fe242348ba5010025af36868c39436bfea638e"
+      },
+      {
+        "bytes": 8495,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "packages/tzdb-core/src/packed-resolver.ts",
+        "sha256": "bc13da5d2d9b8309aaad972662f8a31761a40afffbd9226bdf80159d43e5081f"
+      },
+      {
+        "bytes": 5307,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-input-admission-kernel-draft/README.md",
+        "sha256": "590467f1c0de277476dbad5cb15b1b59fc4cab277ed93b13e9349b88fb7c61f0"
+      },
+      {
+        "bytes": 358,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-input-admission-kernel-draft/package.json",
+        "sha256": "161ef453575192dcc89e7ad095a67001653628dbfad49e4b0706247afee313f2"
+      },
+      {
+        "bytes": 33697,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-input-admission-kernel-draft/src/evaluator.test.ts",
+        "sha256": "05f67634afa59e2a05f8432ae111babcd53f87c80802878fde3379e2082327e6"
+      },
+      {
+        "bytes": 27542,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-input-admission-kernel-draft/src/evaluator.ts",
+        "sha256": "7d0660f4c6823bea25e18c343aa86c610b76dfc0e83de33081dc79cc1381bd98"
+      },
+      {
+        "bytes": 22122,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-input-admission-kernel-draft/src/frozen-packet-schema.ts",
+        "sha256": "8d1c75a1ba54689653d6b13f25bf7badae7ce8cadbbf7d5336de25b6a38390b3"
+      },
+      {
+        "bytes": 17437,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-input-admission-kernel-draft/src/protocol.ts",
+        "sha256": "ba7a9d79ccffd89b580dc9535f347d6febee3625c9007bb7bd2c7a391a6df6c3"
+      },
+      {
+        "bytes": 209,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-input-admission-kernel-draft/tsconfig.json",
+        "sha256": "a6e1cd9ecab965e460aa18d009723c8b961c6768af50f169dc663cd80ebe998a"
+      },
+      {
+        "bytes": 314,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-input-admission-kernel-draft/vitest.config.ts",
+        "sha256": "ea0654c3137fa6ff32f2d6808948a37102ddf48c9dc60227bad0962e071f2397"
+      },
+      {
+        "bytes": 3933,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/README.md",
+        "sha256": "4995fa82b7b2f94fae75fcf5391d9e0ad76d6e01d8b034ca2b34055812937c75"
+      },
+      {
+        "bytes": 2519,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/browser-app/index.html",
+        "sha256": "a1f543502754758c52af821100d9be4d259419dad5ded1e5ca1d7aa540a5060b"
+      },
+      {
+        "bytes": 523,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/package.json",
+        "sha256": "7eecd92eaa54f5e734ccc4838c9430663e2d19e0bcf79e4918f61b323ee452b3"
+      },
+      {
+        "bytes": 8820,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/browser-app/main.ts",
+        "sha256": "a71e362f53b157a92de054ed9d8304ac2a3965f2970438df76cd2c44c90238f5"
+      },
+      {
+        "bytes": 3489,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/browser-app/styles.css",
+        "sha256": "ffba533522b4d19af2a9b394f404ce41921da78cf38f888baabc98554e0a07c7"
+      },
+      {
+        "bytes": 14290,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/runtime.test.ts",
+        "sha256": "5cf6cb4eb3be0d9c544512c46052aba835e652a30364b6a7dec73814c8ad435f"
+      },
+      {
+        "bytes": 44063,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/runtime.ts",
+        "sha256": "7454618b8fe1263d864b90a6dfdd826444d2290e72b26f2cb8a638cd93750bea"
+      },
+      {
+        "bytes": 240,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/tsconfig.json",
+        "sha256": "af6c7b422c96358b50849512ee48911cb344ebd5329cf71f14cba7120efb4eb2"
+      },
+      {
+        "bytes": 603,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/vite.browser-experiment.config.mjs",
+        "sha256": "4e6b60630be078453ccba532f37eae2193ddec2e6e0bd58684cfc9acd5f81844"
+      },
+      {
+        "bytes": 314,
+        "declaredBy": "predecessor_manifest_v1",
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/vitest.config.ts",
+        "sha256": "ea0654c3137fa6ff32f2d6808948a37102ddf48c9dc60227bad0962e071f2397"
+      },
+      {
+        "bytes": 3124,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "tsconfig.base.json",
+        "sha256": "181e40ee1a2565d45cd35d250085bc3395a07035bfba0a4f4e6fcc31e093164c"
+      },
+      {
+        "bytes": 479,
+        "declaredBy": "browser_child_expected_authored_build_graph",
+        "path": "tsconfig.json",
+        "sha256": "bbed523406f38d3fe9757ef12accf9a02c98a75b3f9812d64fa302975c856cf3"
+      }
+    ],
+    "mappedAndAttachmentPartitionExact": true,
+    "overlapBetweenParentSets": 0,
+    "predecessorDeclaredPaths": 33,
+    "recursiveDirectoryEnumerationPerformed": false,
+    "scopeClass": "parent_declared_selected_path_union_not_directory_or_domain_closure",
+    "selectedPathSetDigest": "381c34d72ff0de55ccdba8a9690d8f1cf3184a303865c3419ebdbc8fd163e20c",
+    "selectedUniquePhysicalPaths": 57
+  },
+  "status": "current_parent_declared_selected_path_machine_identity_zero_admission_effect",
+  "surface": {
+    "observedDraftMarker": "browser-workspace",
+    "observedFormalAdmissionEffect": "none",
+    "observedPackageName": "@hakimi/vedic-civil-time-fact-browser-draft",
+    "observedPackagePrivate": true,
+    "observedPackageVersion": "0.0.0-draft.0",
+    "observedProductionImport": "forbidden",
+    "ownerAssignedProductIdentity": false,
+    "packageLabelOrVersionIsProductIdentity": false,
+    "surfaceId": "vedic-civil-time-fact-browser-draft",
+    "surfaceVersion": "0.0.0-draft.0"
+  },
+  "systemIdentity": {
+    "contractSystemId": "vedic",
+    "productSystemId": "vedic-astrology",
+    "productType": "parent_declared_selected_path_engineering_boundary"
+  },
+  "versionBoundary": {
+    "currentEngineeringManifestMechanicallyVerified": true,
+    "currentFullDomainManifestMechanicallyVerified": false,
+    "currentSelectedParentDeclaredPathManifestMechanicallyVerified": true,
+    "entireVedicEngineeringClosureEstablished": false,
+    "ownerPromotionDecisionReceipt": null,
+    "productIdentityEstablished": false,
+    "upstreamPrivateBrandCount": 2
+  }
+}

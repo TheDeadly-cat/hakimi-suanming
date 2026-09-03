@@ -1,0 +1,424 @@
+{
+  "authorityBoundary": {
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "factReceiptIssued": false,
+    "formalAdmissionAuthorized": false,
+    "inputContractAccepted": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false
+  },
+  "boundaryBindings": {
+    "bindingDirection": "requirements_to_draft_and_adr_only",
+    "inputContractDraft": {
+      "artifactRole": "project_authored_isolated_input_contract_draft",
+      "bytes": 16529,
+      "path": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json",
+      "rawHashAndSemanticInspectionUseSameBuffer": true,
+      "schemaSemanticDigest": "ad9a1d568d63296d3ed19f30d91cb8f8e52f543afcec03f238178da4af70ee08",
+      "schemaStatus": "isolated_contract_draft",
+      "sha256": "4899e8fdf267a44e401295f23e11e2504e45f8e2f731c6be9b8ad1435e8dbf69"
+    },
+    "productBoundaryAdr": {
+      "bytes": 4531,
+      "path": "docs/吠陀占星独立产品化ADR-0001-2026-08-26.md",
+      "rawHashAndSemanticInspectionUseSameBuffer": true,
+      "semanticIdentity": {
+        "authorityStatus": "not-authoritative",
+        "boundaryId": "hakimi.vedic.independent-product-boundary/1.0.0",
+        "decisionStatus": "accepted-research-boundary",
+        "integrationStatus": "not-integrated",
+        "productStatus": "research-only",
+        "publicReleaseAuthorized": false,
+        "rereviewRequirementIds": [
+          "own_input_fact_and_rule_drafts",
+          "runtime_and_bundle_size_proposal",
+          "three_layer_source_rights_ledger",
+          "two_independent_real_expert_review_plan",
+          "independent_storage_backup_recovery_and_rollback_design",
+          "independent_browser_gate_and_release_evidence_design",
+          "owner_scope_license_and_deployment_decision"
+        ],
+        "semanticDigest": "1a71b363132b0d61298f53f7e14eb77d58a3eb3f7d649d8d3c8f42fd1acd1a89"
+      },
+      "sha256": "0e9b81505abb963b4d64426338b8071cd8a211eed8d02fe76065fada335dce63"
+    }
+  },
+  "createdAt": "2026-08-29T00:00:00.000Z",
+  "currentInstances": {
+    "counts": {
+      "acceptedInputs": 0,
+      "factReceipts": 0,
+      "inputAcceptanceReceipts": 0,
+      "inputCandidates": 0,
+      "inputContractArtifacts": 1,
+      "inputRejectionReceipts": 0,
+      "normalizationReceipts": 0,
+      "realPersonInputs": 0,
+      "sampleInputs": 0,
+      "syntheticPersonInputs": 0,
+      "timeResolutionReceipts": 0
+    },
+    "factReceipts": [],
+    "inputAcceptanceReceipts": [],
+    "inputCandidates": [],
+    "inputContractArtifacts": [
+      {
+        "artifactRole": "project_authored_isolated_input_contract_draft",
+        "bytes": 16529,
+        "path": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json",
+        "rawHashAndSemanticInspectionUseSameBuffer": true,
+        "schemaSemanticDigest": "ad9a1d568d63296d3ed19f30d91cb8f8e52f543afcec03f238178da4af70ee08",
+        "schemaStatus": "isolated_contract_draft",
+        "sha256": "4899e8fdf267a44e401295f23e11e2504e45f8e2f731c6be9b8ad1435e8dbf69"
+      }
+    ],
+    "inputRejectionReceipts": [],
+    "normalizationReceipts": [],
+    "timeResolutionReceipts": []
+  },
+  "doesNotEstablish": [
+    "formally_admitted_or_semantically_selected_vedic_input_contract",
+    "input_normalization_or_acceptance_capability",
+    "utc_dst_time_scale_or_ephemeris_correctness",
+    "ayanamsa_node_house_or_perturbation_policy_selection",
+    "sample_real_or_synthetic_person_input",
+    "fact_producer_projector_deterministic_facts_or_fact_receipt",
+    "versioned_ruleset_or_domain_manifest",
+    "source_candidate_body_quote_locator_or_binding_inventory",
+    "license_rights_or_legal_conclusion",
+    "expert_identity_credentials_independence_opinion_or_truth",
+    "artifact_authenticity_digital_signature_or_signer_identity",
+    "cross_system_authority_inheritance_or_concept_equivalence",
+    "browser_runtime_storage_backup_recovery_or_deployment_evidence",
+    "mutation_epoch_cross_file_atomic_snapshot_interval_mutation_or_aba_exclusion",
+    "formal_admission_release_readiness_or_public_release_authorization"
+  ],
+  "evidenceLedger": {
+    "browserRuntimeEvidence": "not_assessed",
+    "contentTruth": "not_established",
+    "engineeringIdentity": "isolated_input_contract_draft_shape_and_zero_instance_boundary_only",
+    "expertTruth": "not_established",
+    "publicReleaseAuthorization": "not_authorized",
+    "releaseReadiness": "not_ready",
+    "rightsLegalConclusion": "not_established"
+  },
+  "expertBoundary": {
+    "credentialsVerified": 0,
+    "expertOpinionIds": [],
+    "expertReviewBundle": "absent",
+    "expertTruthEstablished": false,
+    "identitiesVerified": 0,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "opinionsVerified": 0,
+    "reviewerIds": []
+  },
+  "failClosedInvariants": {
+    "crossSystemFallbackAccepted": false,
+    "defaultInference": "forbidden",
+    "generativeModelInference": "forbidden",
+    "missingOrAmbiguousInput": "reject_without_contract_or_fact_receipt",
+    "partialFactsPersisted": false
+  },
+  "integrityBoundary": {
+    "authenticityEstablished": false,
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi.vedic.input-contract-requirements.v1",
+    "digestIsDigitalSignature": false,
+    "digitalSignature": null,
+    "signerIdentity": null
+  },
+  "ledgerDigest": "e545c254d29902df58e29ca90f965333daca70f06bce03cca62ad9e2f4fc7ac0",
+  "ledgerId": "hakimi.vedic.input-contract-requirements/1.0.0",
+  "observationBoundary": {
+    "abaExcluded": false,
+    "boundArtifactHashAndInspectionUseSameReadBuffer": true,
+    "crossFileAtomicSnapshot": false,
+    "draftAndRequirementsAtomicSnapshot": false,
+    "endpointSnapshotOnly": true,
+    "heldFileHandleReads": true,
+    "intervalMutationExcluded": false,
+    "ledgerHashAndParseUseSameReadBuffer": true,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "pathEndpointRevalidated": true,
+    "plainDirectoryChainRequired": true
+  },
+  "productBoundary": {
+    "domainManifest": "absent",
+    "factContract": "absent",
+    "factProducer": "absent",
+    "inputContract": "isolated_contract_draft",
+    "migrationId": null,
+    "mutationEpochCapability": "absent_no_admitted_product_schema",
+    "productSurface": "absent",
+    "projector": "absent",
+    "releaseIdentity": null,
+    "targetSchema": null,
+    "versionedRuleset": "absent"
+  },
+  "recordType": "vedic_input_contract_requirements_v1",
+  "requirementInventory": {
+    "inputContractArtifactPresent": true,
+    "inputContractGateSatisfied": false,
+    "requirements": [
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/civil_calendar_and_date"
+        ],
+        "defaultValue": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "instanceValues": [],
+        "order": 1,
+        "requirementClass": "input_declaration",
+        "requirementId": "civil_calendar_and_date",
+        "requirementState": "draft_shape_defined_value_unselected",
+        "rightsRefs": [],
+        "selectedValue": null,
+        "sourceRefs": []
+      },
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/local_wall_time_and_precision"
+        ],
+        "defaultValue": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "instanceValues": [],
+        "order": 2,
+        "requirementClass": "input_declaration",
+        "requirementId": "local_wall_time_and_precision",
+        "requirementState": "draft_shape_defined_value_unselected",
+        "rightsRefs": [],
+        "selectedValue": null,
+        "sourceRefs": []
+      },
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/birth_time_uncertainty_interval_or_candidates"
+        ],
+        "defaultValue": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "instanceValues": [],
+        "order": 3,
+        "requirementClass": "input_declaration",
+        "requirementId": "birth_time_uncertainty_interval_or_candidates",
+        "requirementState": "draft_shape_defined_value_unselected",
+        "rightsRefs": [],
+        "selectedValue": null,
+        "sourceRefs": []
+      },
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/place_coordinates_and_precision"
+        ],
+        "defaultValue": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "instanceValues": [],
+        "order": 4,
+        "requirementClass": "input_declaration",
+        "requirementId": "place_coordinates_and_precision",
+        "requirementState": "draft_shape_defined_value_unselected",
+        "rightsRefs": [],
+        "selectedValue": null,
+        "sourceRefs": []
+      },
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/iana_time_zone_and_tzdb_identity"
+        ],
+        "defaultValue": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "instanceValues": [],
+        "order": 5,
+        "requirementClass": "input_declaration",
+        "requirementId": "iana_time_zone_and_tzdb_identity",
+        "requirementState": "draft_shape_defined_value_unselected",
+        "rightsRefs": [],
+        "selectedValue": null,
+        "sourceRefs": []
+      },
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/dst_gap_overlap_resolution"
+        ],
+        "defaultValue": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "instanceValues": [],
+        "order": 6,
+        "requirementClass": "input_declaration",
+        "requirementId": "dst_gap_overlap_resolution",
+        "requirementState": "draft_shape_defined_value_unselected",
+        "rightsRefs": [],
+        "selectedValue": null,
+        "sourceRefs": []
+      },
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/utc_conversion_and_time_scale"
+        ],
+        "defaultValue": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "instanceValues": [],
+        "order": 7,
+        "requirementClass": "calculation_policy_declaration",
+        "requirementId": "utc_conversion_and_time_scale",
+        "requirementState": "draft_shape_defined_value_unselected",
+        "rightsRefs": [],
+        "selectedValue": null,
+        "sourceRefs": []
+      },
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/ephemeris_identity_version_and_coverage"
+        ],
+        "defaultValue": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "instanceValues": [],
+        "order": 8,
+        "requirementClass": "calculation_policy_declaration",
+        "requirementId": "ephemeris_identity_version_and_coverage",
+        "requirementState": "draft_shape_defined_value_unselected",
+        "rightsRefs": [],
+        "selectedValue": null,
+        "sourceRefs": []
+      },
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/sidereal_zodiac_declaration"
+        ],
+        "defaultValue": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "instanceValues": [],
+        "order": 9,
+        "requirementClass": "calculation_policy_declaration",
+        "requirementId": "sidereal_zodiac_declaration",
+        "requirementState": "draft_shape_defined_value_unselected",
+        "rightsRefs": [],
+        "selectedValue": null,
+        "sourceRefs": []
+      },
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/ayanamsa_identity_and_version"
+        ],
+        "defaultValue": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "instanceValues": [],
+        "order": 10,
+        "requirementClass": "calculation_policy_declaration",
+        "requirementId": "ayanamsa_identity_and_version",
+        "requirementState": "draft_shape_defined_value_unselected",
+        "rightsRefs": [],
+        "selectedValue": null,
+        "sourceRefs": []
+      },
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/rahu_ketu_mode"
+        ],
+        "defaultValue": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "instanceValues": [],
+        "order": 11,
+        "requirementClass": "calculation_policy_declaration",
+        "requirementId": "rahu_ketu_mode",
+        "requirementState": "draft_shape_defined_value_unselected",
+        "rightsRefs": [],
+        "selectedValue": null,
+        "sourceRefs": []
+      },
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/bhava_house_definition"
+        ],
+        "defaultValue": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "instanceValues": [],
+        "order": 12,
+        "requirementClass": "calculation_policy_declaration",
+        "requirementId": "bhava_house_definition",
+        "requirementState": "draft_shape_defined_value_unselected",
+        "rightsRefs": [],
+        "selectedValue": null,
+        "sourceRefs": []
+      },
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/birth_time_perturbation_candidates_and_transition_points"
+        ],
+        "defaultValue": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "instanceValues": [],
+        "order": 13,
+        "requirementClass": "calculation_policy_declaration",
+        "requirementId": "birth_time_perturbation_candidates_and_transition_points",
+        "requirementState": "draft_shape_defined_value_unselected",
+        "rightsRefs": [],
+        "selectedValue": null,
+        "sourceRefs": []
+      }
+    ],
+    "requirementsDefined": 13,
+    "requirementsDraftCovered": 13,
+    "requirementsInventoryDefined": true,
+    "requirementsResolved": 0
+  },
+  "schemaVersion": "1.0.0",
+  "sourceRightsBoundary": {
+    "bindingFrozenVerified": 0,
+    "bindingRequired": null,
+    "bindingRequirementsInventoryDefined": false,
+    "exactLocatorRefs": [],
+    "exactQuoteRefs": [],
+    "licenseEstablished": false,
+    "licenseEvidenceRefs": [],
+    "rightsEstablished": false,
+    "rightsEvidenceRefs": [],
+    "sourceBindingEstablished": false,
+    "sourceBodyRefs": [],
+    "sourceCandidateIds": []
+  },
+  "status": "input_contract_draft_present_zero_instances_not_admitted",
+  "systemIdentity": {
+    "artifactRole": "non_product_governance_requirements_inventory",
+    "contractSystemId": "vedic",
+    "productSystemId": "vedic-astrology"
+  },
+  "zeroInstanceRequirementsReceipt": {
+    "acceptedInputs": 0,
+    "countsTowardAdmission": false,
+    "factReceiptIssued": false,
+    "factReceipts": 0,
+    "inputAcceptanceReceiptIssued": false,
+    "inputContractArtifacts": 1,
+    "inputContractGateSatisfied": false,
+    "inputInstancesObserved": 0,
+    "normalizationReceipts": 0,
+    "receiptClass": "input_contract_draft_present_zero_instance_observation",
+    "receiptIsFactReceipt": false,
+    "receiptIsProductReceipt": false,
+    "receiptStatus": "input_contract_draft_present_zero_instances_not_admitted",
+    "rejectedInputs": 0,
+    "requirementsDefined": 13,
+    "requirementsDraftCovered": 13,
+    "requirementsResolved": 0,
+    "successReceiptIssued": false,
+    "timeResolutionReceipts": 0,
+    "zeroRejectedInputsMeansNoExecutionObserved": true
+  }
+}

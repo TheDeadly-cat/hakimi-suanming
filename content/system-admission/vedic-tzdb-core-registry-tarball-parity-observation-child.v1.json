@@ -1,0 +1,476 @@
+{
+  "authorityBoundary": {
+    "authenticityEstablished": false,
+    "contentTruthEstablished": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "traditionalAuthorityEstablished": false
+  },
+  "childDigest": "51c4c7ec945050d3bf40b0051d9a3b3237b310a22892f2a57c9399d8d331c86c",
+  "childId": "hakimi.vedic.tzdb-core-registry-tarball-parity-observation-child/1.0.0",
+  "createdAt": "2026-09-01T14:43:00.000Z",
+  "doesNotEstablish": [
+    "npm_publisher_account_identity_package_signature_first_seen_or_authenticity",
+    "license_authenticity_applicability_or_notice_obligation_satisfaction",
+    "work_version_or_carrier_rights_legal_conclusion_or_redistribution",
+    "source_body_exact_quote_exact_locator_new_candidate_or_subject_satisfaction",
+    "vedic_content_truth_traditional_authority_or_expert_truth",
+    "browser_pwa_service_worker_product_runtime_or_release_evidence",
+    "formal_current_replacement_registry_manifest_owner_or_active_effect",
+    "trusted_time_mutation_epoch_cross_file_atomicity_interval_integrity_or_aba_exclusion"
+  ],
+  "evidenceLedgerSeparation": {
+    "browserRuntimeEvidence": "not_assessed_by_this_child",
+    "contentTruth": "not_established",
+    "engineeringEvidence": "point_in_time_public_registry_tarball_lock_and_current_local_carrier_byte_parity_only",
+    "expertTruth": "not_established",
+    "publicReleaseAuthorization": "not_authorized",
+    "releaseReadiness": "not_established",
+    "rightsLegalJudgment": "not_established"
+  },
+  "gateSummary": {
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 38,
+    "carrierRightsEstablished": 0,
+    "exactLocatorsEstablished": 0,
+    "exactQuotesBound": 0,
+    "expertReviewsVerified": 0,
+    "inheritedPartialCandidates": 2,
+    "legalReviewsVerified": 0,
+    "licenseCarrierByteParitiesObserved": 3,
+    "metadataEndpointsObserved": 3,
+    "newCandidateIdsAdded": 0,
+    "packageManifestByteParitiesObserved": 3,
+    "packedCarrierByteParitiesObserved": 2,
+    "redistributionAuthorizations": 0,
+    "selectedEntryByteParitiesObserved": 8,
+    "sourceBodiesBound": 0,
+    "subjectFullySatisfied": 0,
+    "tarballEndpointsObserved": 3,
+    "versionRightsEstablished": 0,
+    "workRightsEstablished": 0
+  },
+  "integrityBoundary": {
+    "authenticityEstablished": false,
+    "canonicalPrettyJsonWithLfRequired": true,
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi.vedic.tzdb-core-registry-tarball-parity-observation-child.v1\u0000",
+    "digestExcludesOwnField": true,
+    "digestIsDigitalSignature": false,
+    "exclusiveCreateWriterRequired": true
+  },
+  "lineage": {
+    "localCarrierChild": {
+      "childDigest": "37800051745eeff337134962eb2518c9149eab14cf8369d559419ea76cdca4d0",
+      "childId": "hakimi.vedic.tzdb-core-dependency-license-carrier-observation-child/1.0.0",
+      "path": "content/system-admission/vedic-tzdb-core-dependency-license-carrier-observation-child.v1.json",
+      "rawBytes": 12983,
+      "rawSha256": "3320d773aaf6687af773d8d8a98cbc01cee1f0b83831120069e002caef766884",
+      "relationship": "append_only_external_carrier_parity_observation"
+    },
+    "predecessorBacklinkAdded": false,
+    "predecessorModified": false
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "currentLocalEndpointsRevalidatedByPredecessorFullLoader": true,
+    "intervalMutationExcludedAcrossNetworkAndLocalFiles": false,
+    "localPerFileHeldHandleStableReadsUsed": true,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "remoteAndLocalCrossFileAtomicSnapshotEstablished": false,
+    "strictDuplicateKeyRejectingJsonUsedForMetadataAndSelectedJsonEntries": true
+  },
+  "packageParityObservations": [
+    {
+      "declaredDependencyName": "moment-timezone",
+      "distProjection": {
+        "integrity": "sha512-pVEPA/HCFHHbwJ130ywnzYuZpkEGcP6Daa/OwNebpA18MybeFHmQilAGGovXgWijQ8vQtmud9jZrziUBgsykfg==",
+        "shasum": "e386bad3116567a44477653ad6543b071bc153b7",
+        "tarball": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.6.3.tgz"
+      },
+      "metadataObservation": {
+        "endpoint": "https://registry.npmjs.org/moment-timezone/0.6.3",
+        "etagObserved": null,
+        "finalUrlExact": true,
+        "httpStatus": 200,
+        "lastModifiedObserved": null,
+        "rawIdentity": {
+          "rawBytes": 2169,
+          "rawSha256": "a07e166a0c52c2ab80472140349d6569c318df013e3c3d27fec50291ff8ef6d0"
+        },
+        "rawIdentityStableAcrossTimeEstablished": false,
+        "strictDuplicateKeyRejectingJsonUsed": true
+      },
+      "observationKey": "moment_timezone_0_6_3",
+      "ordinal": 1,
+      "packageAuthenticityEstablished": false,
+      "packageManifestSemantics": {
+        "declaredLicense": "MIT",
+        "name": "moment-timezone",
+        "version": "0.6.3"
+      },
+      "packageName": "moment-timezone",
+      "packagePath": "node_modules/moment-timezone",
+      "packageSignatureVerified": false,
+      "packedSemantics": {
+        "countryCount": 247,
+        "ianaVersion": "2026c",
+        "linkCount": 257,
+        "zoneCount": 340
+      },
+      "publicRegistryTarballToCurrentLocalCarrierByteParityObserved": true,
+      "publisherIdentityVerified": false,
+      "registryFirstSeenEstablished": false,
+      "relationship": "tzdb_core_direct_current_dependency",
+      "selectedEntries": [
+        {
+          "exactByteEqualityObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 1076,
+            "rawSha256": "131fc5c4b7ad0c5ebcc00b5670c49ef54c2cf0cd26f68670bee10bfd66276a2b"
+          },
+          "localPath": "node_modules/moment-timezone/package.json",
+          "role": "package_manifest",
+          "tarEntryIdentity": {
+            "rawBytes": 1076,
+            "rawSha256": "131fc5c4b7ad0c5ebcc00b5670c49ef54c2cf0cd26f68670bee10bfd66276a2b"
+          },
+          "tarPath": "package/package.json"
+        },
+        {
+          "exactByteEqualityObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 1097,
+            "rawSha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+          },
+          "localPath": "node_modules/moment-timezone/LICENSE",
+          "role": "license_carrier",
+          "tarEntryIdentity": {
+            "rawBytes": 1097,
+            "rawSha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+          },
+          "tarPath": "package/LICENSE"
+        },
+        {
+          "exactByteEqualityObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 715527,
+            "rawSha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81"
+          },
+          "localPath": "node_modules/moment-timezone/data/packed/latest.json",
+          "role": "packed_tzdb_carrier",
+          "tarEntryIdentity": {
+            "rawBytes": 715527,
+            "rawSha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81"
+          },
+          "tarPath": "package/data/packed/latest.json"
+        }
+      ],
+      "tarballObservation": {
+        "distIntegrityMatchesObservedSha512": true,
+        "distShasumMatchesObservedSha1": true,
+        "endpoint": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.6.3.tgz",
+        "finalUrlExact": true,
+        "httpStatus": 200,
+        "packageLockIntegrityMatchesDistIntegrity": true,
+        "packageLockResolvedMatchesDistTarball": true,
+        "rawIdentity": {
+          "rawBytes": 238621,
+          "rawSha1": "e386bad3116567a44477653ad6543b071bc153b7",
+          "rawSha256": "09cc398dae4d95db31016e6e3e35eafff09244a72e0511a292702738e7c724ac",
+          "rawSha512": "a5510f03f1c21471dbc09d77d32c27cd8b99a6410670fe8369afcec0d79ba40d7c3326de1479908a50061a8bd78168a343cbd0b66b9df6366bce250182cca47e",
+          "sriSha512": "sha512-pVEPA/HCFHHbwJ130ywnzYuZpkEGcP6Daa/OwNebpA18MybeFHmQilAGGovXgWijQ8vQtmud9jZrziUBgsykfg=="
+        }
+      },
+      "version": "0.6.3"
+    },
+    {
+      "declaredDependencyName": "moment-timezone-2025b",
+      "distProjection": {
+        "integrity": "sha512-f22b8LV1gbTO2ms2j2z13MuPogNoh5UzxL3nzNAYKGraILnbGc9NEE6dyiiiLv46DGRb8A4kg8UKWLjPthxBHw==",
+        "shasum": "111727bb274734a518ae154b5ca589283f058967",
+        "tarball": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.5.48.tgz"
+      },
+      "metadataObservation": {
+        "endpoint": "https://registry.npmjs.org/moment-timezone/0.5.48",
+        "etagObserved": null,
+        "finalUrlExact": true,
+        "httpStatus": 200,
+        "lastModifiedObserved": null,
+        "rawIdentity": {
+          "rawBytes": 2170,
+          "rawSha256": "4eaf51fb08eb703ff0c513831e2c9dd8100d70121bd020d12cd5c31f6a5c94b6"
+        },
+        "rawIdentityStableAcrossTimeEstablished": false,
+        "strictDuplicateKeyRejectingJsonUsed": true
+      },
+      "observationKey": "moment_timezone_alias_0_5_48",
+      "ordinal": 2,
+      "packageAuthenticityEstablished": false,
+      "packageManifestSemantics": {
+        "declaredLicense": "MIT",
+        "name": "moment-timezone",
+        "version": "0.5.48"
+      },
+      "packageName": "moment-timezone",
+      "packagePath": "node_modules/moment-timezone-2025b",
+      "packageSignatureVerified": false,
+      "packedSemantics": {
+        "countryCount": 247,
+        "ianaVersion": "2025b",
+        "linkCount": 257,
+        "zoneCount": 340
+      },
+      "publicRegistryTarballToCurrentLocalCarrierByteParityObserved": true,
+      "publisherIdentityVerified": false,
+      "registryFirstSeenEstablished": false,
+      "relationship": "tzdb_core_direct_retained_alias_dependency",
+      "selectedEntries": [
+        {
+          "exactByteEqualityObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 1077,
+            "rawSha256": "4b5a6218fe37ea04bbe19f463fc2477e141bfb8ee18506bd99e871a0d25c3dad"
+          },
+          "localPath": "node_modules/moment-timezone-2025b/package.json",
+          "role": "package_manifest",
+          "tarEntryIdentity": {
+            "rawBytes": 1077,
+            "rawSha256": "4b5a6218fe37ea04bbe19f463fc2477e141bfb8ee18506bd99e871a0d25c3dad"
+          },
+          "tarPath": "package/package.json"
+        },
+        {
+          "exactByteEqualityObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 1097,
+            "rawSha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+          },
+          "localPath": "node_modules/moment-timezone-2025b/LICENSE",
+          "role": "license_carrier",
+          "tarEntryIdentity": {
+            "rawBytes": 1097,
+            "rawSha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+          },
+          "tarPath": "package/LICENSE"
+        },
+        {
+          "exactByteEqualityObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 727104,
+            "rawSha256": "b1ad1446fbc94459f86c8e3f4ffadfc4170ad2af9cbd2a9b85c75d5436ce6425"
+          },
+          "localPath": "node_modules/moment-timezone-2025b/data/packed/latest.json",
+          "role": "packed_tzdb_carrier",
+          "tarEntryIdentity": {
+            "rawBytes": 727104,
+            "rawSha256": "b1ad1446fbc94459f86c8e3f4ffadfc4170ad2af9cbd2a9b85c75d5436ce6425"
+          },
+          "tarPath": "package/data/packed/latest.json"
+        }
+      ],
+      "tarballObservation": {
+        "distIntegrityMatchesObservedSha512": true,
+        "distShasumMatchesObservedSha1": true,
+        "endpoint": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.5.48.tgz",
+        "finalUrlExact": true,
+        "httpStatus": 200,
+        "packageLockIntegrityMatchesDistIntegrity": true,
+        "packageLockResolvedMatchesDistTarball": true,
+        "rawIdentity": {
+          "rawBytes": 238671,
+          "rawSha1": "111727bb274734a518ae154b5ca589283f058967",
+          "rawSha256": "2c95a267b09e2d3d0fe1511901f05f7d62c806f8e34a35323382c6d3956df826",
+          "rawSha512": "7f6d9bf0b57581b4ceda6b368f6cf5dccb8fa20368879533c4bde7ccd018286ada20b9db19cf4d104e9dca28a22efe3a0c645bf00e2483c50a58b8cfb61c411f",
+          "sriSha512": "sha512-f22b8LV1gbTO2ms2j2z13MuPogNoh5UzxL3nzNAYKGraILnbGc9NEE6dyiiiLv46DGRb8A4kg8UKWLjPthxBHw=="
+        }
+      },
+      "version": "0.5.48"
+    },
+    {
+      "declaredDependencyName": "moment",
+      "distProjection": {
+        "integrity": "sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==",
+        "shasum": "f8c91c07b7a786e30c59926df530b4eac96974ae",
+        "tarball": "https://registry.npmjs.org/moment/-/moment-2.30.1.tgz"
+      },
+      "metadataObservation": {
+        "endpoint": "https://registry.npmjs.org/moment/2.30.1",
+        "etagObserved": null,
+        "finalUrlExact": true,
+        "httpStatus": 200,
+        "lastModifiedObserved": null,
+        "rawIdentity": {
+          "rawBytes": 3669,
+          "rawSha256": "98e09e47dde58be32311ad46b8dcb072c6468f37cefd4249e2eda3a211ae9525"
+        },
+        "rawIdentityStableAcrossTimeEstablished": false,
+        "strictDuplicateKeyRejectingJsonUsed": true
+      },
+      "observationKey": "moment_2_30_1",
+      "ordinal": 3,
+      "packageAuthenticityEstablished": false,
+      "packageManifestSemantics": {
+        "declaredLicense": "MIT",
+        "name": "moment",
+        "version": "2.30.1"
+      },
+      "packageName": "moment",
+      "packagePath": "node_modules/moment",
+      "packageSignatureVerified": false,
+      "packedSemantics": null,
+      "publicRegistryTarballToCurrentLocalCarrierByteParityObserved": true,
+      "publisherIdentityVerified": false,
+      "registryFirstSeenEstablished": false,
+      "relationship": "shared_transitive_dependency_of_both_moment_timezone_nodes",
+      "selectedEntries": [
+        {
+          "exactByteEqualityObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 3556,
+            "rawSha256": "5e2f0870f4d1bbef11e8bf90babd72a4399b86b19da81de796a58457a37b8e13"
+          },
+          "localPath": "node_modules/moment/package.json",
+          "role": "package_manifest",
+          "tarEntryIdentity": {
+            "rawBytes": 3556,
+            "rawSha256": "5e2f0870f4d1bbef11e8bf90babd72a4399b86b19da81de796a58457a37b8e13"
+          },
+          "tarPath": "package/package.json"
+        },
+        {
+          "exactByteEqualityObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 1075,
+            "rawSha256": "8f38f320bbf5eb84c08e08676f7ee1d2204ebe5797f6a090d077329cf212fca3"
+          },
+          "localPath": "node_modules/moment/LICENSE",
+          "role": "license_carrier",
+          "tarEntryIdentity": {
+            "rawBytes": 1075,
+            "rawSha256": "8f38f320bbf5eb84c08e08676f7ee1d2204ebe5797f6a090d077329cf212fca3"
+          },
+          "tarPath": "package/LICENSE"
+        }
+      ],
+      "tarballObservation": {
+        "distIntegrityMatchesObservedSha512": true,
+        "distShasumMatchesObservedSha1": true,
+        "endpoint": "https://registry.npmjs.org/moment/-/moment-2.30.1.tgz",
+        "finalUrlExact": true,
+        "httpStatus": 200,
+        "packageLockIntegrityMatchesDistIntegrity": true,
+        "packageLockResolvedMatchesDistTarball": true,
+        "rawIdentity": {
+          "rawBytes": 715526,
+          "rawSha1": "f8c91c07b7a786e30c59926df530b4eac96974ae",
+          "rawSha256": "52219a9fee5e1faade4c72536c173c54cedd5e2619272dd0c251a30aeafcde8c",
+          "rawSha512": "b849ad3616c33ab58f152fa176314205fcbd7f6628cb3469c1c97e0eaa42ead697db5173b132d055b315fd6ecfccd497eb1fdb842d73037736510e4dcc7ea1a3",
+          "sriSha512": "sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how=="
+        }
+      },
+      "version": "2.30.1"
+    }
+  ],
+  "projectReleaseGovernanceContext": {
+    "activeLine": "legacy-v13",
+    "expertClaimsAuthorized": false,
+    "inheritedByVedicProductIdentity": false,
+    "migrationId": null,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "projectContextOnly": true,
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "recordType": "vedic_tzdb_core_public_registry_tarball_local_carrier_parity_observation_child_v1",
+  "registryObservationBoundary": {
+    "authenticatedSessionUsed": false,
+    "credentialsAccessed": false,
+    "exactTarballEndpointsObserved": 3,
+    "exactVersionMetadataEndpointsObserved": 3,
+    "firstSeenOrPublicationTimeEstablished": false,
+    "metadataRawBodiesPersistedInWorkspace": false,
+    "observedWindow": {
+      "endedAt": "2026-09-01T14:42:54.173Z",
+      "startedAt": "2026-09-01T14:42:32.615Z"
+    },
+    "packageSignatureVerified": false,
+    "pointInTimeObservationOnly": true,
+    "publicHttpsRegistryHost": "registry.npmjs.org",
+    "publisherAccountIdentityVerified": false,
+    "redirectsAccepted": false,
+    "tarballBodiesPersistedInWorkspace": false,
+    "thirdPartyPrivateBackendAccessed": false,
+    "tlsEstablishesPublisherIdentity": false
+  },
+  "rightsBoundary": {
+    "carrierRightsEstablished": false,
+    "licenseApplicabilityEstablished": false,
+    "licenseAuthenticityEstablished": false,
+    "noticeObligationSatisfied": false,
+    "publicRegistryTarballToLocalCarrierByteParityObserved": true,
+    "publisherAuthenticatedTarballParityEstablished": false,
+    "redistributionAuthorized": false,
+    "rightsLegalConclusionEstablished": false,
+    "versionRightsEstablished": false,
+    "workRightsEstablished": false
+  },
+  "runtimeTrustBoundary": {
+    "assumesNoArbitraryPreEvaluationCodeExecution": true,
+    "cliOutputTrustedAttestation": false,
+    "hiddenPreEvaluationCodeExecutionExcluded": false,
+    "launcherIdentityEstablished": false,
+    "loaderIdentityEstablished": false,
+    "nodeRuntimeIdentityEstablished": false,
+    "selectedChildIdentityBindsCliImplementation": false,
+    "visibleGuardIsSecurityBoundary": false
+  },
+  "schemaVersion": "1.0.0",
+  "sourceRequirementsProjectionBoundary": {
+    "countsTowardFrozenBindingGate": false,
+    "formalExactLocatorEstablished": false,
+    "formalExactQuoteBound": false,
+    "inheritedPartialCandidateCount": 2,
+    "newCandidateIdAdded": false,
+    "sourceBodyBound": false,
+    "subjectFullySatisfied": false,
+    "supplementsExistingPartialCandidatesOnly": true,
+    "targetSubjectIds": [
+      "vedic.input.iana_time_zone_and_tzdb_identity",
+      "vedic.rule.rights_license_and_redistribution_review"
+    ]
+  },
+  "status": "three_exact_registry_metadata_and_tarball_endpoints_eight_local_carrier_byte_parities_observed_point_in_time_unbound",
+  "systemIdentity": {
+    "baziWesternZiweiAuthorityInherited": false,
+    "contractSystemId": "vedic",
+    "independentSystemBoundaryPreserved": true,
+    "productSystemId": "vedic-astrology"
+  },
+  "temporaryExecutionBoundary": {
+    "archiveEntriesParsedInMemory": true,
+    "cleanupVerifiedAfterObservation": true,
+    "lifecycleScriptsExecuted": false,
+    "npmInstallExecuted": false,
+    "npmPackExecuted": false,
+    "randomChildDirectoryUsed": true,
+    "systemTemporaryDirectoryParentVerified": true,
+    "targetRevalidatedBeforeRecursiveCleanup": true,
+    "temporaryDirectoryPathPersisted": false
+  },
+  "timeBoundary": {
+    "clockRollbackExcluded": false,
+    "createdAtIsUntrustedLocalClockLabel": true,
+    "createdAtUpperBoundObservedOnSameUntrustedLocalClock": "2026-09-01T14:43:30.000Z",
+    "externalTimeAuthorityUsed": false,
+    "remoteHttpDateUsedAsTimeAuthority": false,
+    "trustedTimestampEstablished": false
+  }
+}

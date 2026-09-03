@@ -1,0 +1,1489 @@
+{
+  "schemaVersion": "vedic-input-admission-transition-and-receipt-requirements/v0.1.0",
+  "recordType": "vedic-input-admission-transition-and-receipt-requirements",
+  "contractId": "vedic-input-admission-transition-and-receipt-requirements-v0.1.0",
+  "status": "transition_and_receipt_requirements_defined_zero_instances_no_evaluator_no_authority",
+  "createdAt": "2026-08-30T00:00:00.000Z",
+  "activeAdmissionEffect": "none",
+  "systemIdentity": {
+    "systemId": "vedic",
+    "independentFromBaziZiweiWestern": true,
+    "crossSystemAuthorityInheritanceAllowed": false,
+    "independentProductIdentity": null,
+    "independentStorageNamespaceId": null,
+    "targetSchema": null,
+    "migrationId": null,
+    "releaseIdentity": null,
+    "projectReleaseGovernanceContext": {
+      "activeRulePackId": "legacy-v13",
+      "targetSchema": 13,
+      "migrationId": null,
+      "contextOnlyNotInheritedByVedic": true
+    }
+  },
+  "upstreamBindings": {
+    "bindingDirection": "exact_current_upstream_snapshots_to_requirements_contract_only",
+    "directBindingCount": 2,
+    "readinessCandidate": {
+      "path": "content/system-admission/vedic-input-admission-readiness-candidate.v0.1.0.json",
+      "bytes": 35325,
+      "sha256": "7f42750a2d11a64bc9ad2cdbef5838aa7081d60fd314c44647079eae426f19dd",
+      "semanticDigestField": "candidateDigest",
+      "semanticDigest": "688a786525d8d8c988be2d517d31cca23113d788cadc3168cae5bbd71a6a1efb",
+      "role": "thirteen_requirement_twenty_six_invariant_eight_condition_zero_readiness_parent"
+    },
+    "storageDesignCandidate": {
+      "path": "content/system-admission/vedic-independent-storage-backup-recovery-and-rollback-design-candidate.v0.1.0.json",
+      "bytes": 25978,
+      "sha256": "1eeaf1419ce4b3ae01f277f6389fc3bbdf5a59605f89d4c7ae7eccfc1a8d1bbf",
+      "semanticDigestField": "designDigest",
+      "semanticDigest": "5a96993f7750722a984eb6f5845ce1e49e6c5f49e5b49735629698a47eb11958",
+      "role": "mutation_epoch_backup_recovery_rollback_requirements_only_zero_implementation_parent"
+    },
+    "readinessTransitiveEndpointListCopied": false,
+    "browserAndFixedProbeContextOnlyViaReadiness": true,
+    "upstreamsBacklinkThisContract": false,
+    "contractRewritesUpstreams": false
+  },
+  "stateModel": {
+    "modelType": "future_fail_closed_transition_requirements_only_no_runtime_state_machine",
+    "currentProjection": "requirements_only_not_instantiated",
+    "stateMachineImplemented": false,
+    "stateInstances": [],
+    "futureStateDefinitions": [
+      {
+        "stateId": "uninstantiated",
+        "authorityEffect": "none",
+        "terminal": false
+      },
+      {
+        "stateId": "packet_frozen_receipts_incomplete",
+        "authorityEffect": "none",
+        "terminal": false
+      },
+      {
+        "stateId": "pre_snapshot_evidence_manifest_complete_unverified",
+        "authorityEffect": "none",
+        "terminal": false
+      },
+      {
+        "stateId": "conditions_1_to_7_verified_supersession_pending",
+        "authorityEffect": "none",
+        "terminal": false
+      },
+      {
+        "stateId": "all_eight_conditions_mechanically_verified_input_gate_candidate",
+        "authorityEffect": "none",
+        "terminal": false
+      },
+      {
+        "stateId": "invalidated_new_packet_and_epoch_required",
+        "authorityEffect": "none",
+        "terminal": true
+      }
+    ],
+    "positiveStateNamesMayUseAdmittedAuthorizedReady": false,
+    "conditionsAreNecessaryNotSufficient": true,
+    "formalAdmissionRequiresSeparateVersionedTransition": true
+  },
+  "transitionRequirements": {
+    "transitionEvaluatorImplemented": false,
+    "transitionInstances": [],
+    "evidenceCollectionIsOverwriteTransition": false,
+    "evidenceCollectionMode": "append_only_until_pre_snapshot_evidence_manifest_sealed",
+    "futureTransitionDefinitions": [
+      {
+        "transitionId": "freeze_packet",
+        "fromStateIds": [
+          "uninstantiated"
+        ],
+        "toStateId": "packet_frozen_receipts_incomplete",
+        "requiredGuardIds": [
+          "packet_exact_identity",
+          "packet_review_content_exact_identity",
+          "no_person_input_instance_in_governance_packet",
+          "unknown_missing_ambiguous_means_false"
+        ],
+        "authorityEffect": "none"
+      },
+      {
+        "transitionId": "seal_pre_snapshot_evidence_manifest",
+        "fromStateIds": [
+          "packet_frozen_receipts_incomplete"
+        ],
+        "toStateId": "pre_snapshot_evidence_manifest_complete_unverified",
+        "requiredGuardIds": [
+          "same_cycle_and_packet_for_every_receipt",
+          "pre_snapshot_evidence_manifest_closed",
+          "manifest_layer_exact_set_coverage",
+          "no_active_correction_withdrawal_or_revocation"
+        ],
+        "authorityEffect": "none"
+      },
+      {
+        "transitionId": "verify_conditions_1_to_7",
+        "fromStateIds": [
+          "pre_snapshot_evidence_manifest_complete_unverified"
+        ],
+        "toStateId": "conditions_1_to_7_verified_supersession_pending",
+        "requiredGuardIds": [
+          "evaluation_snapshot_exact_identity",
+          "actor_role_eligible_authenticated_and_scope_allowed",
+          "required_distinct_actors_verified",
+          "disagreements_preserved_and_non_automatic",
+          "private_lifecycle_public_attestation_valid",
+          "acyclic_manifest_layering",
+          "epoch_atomicity_interval_and_aba_receipt_valid"
+        ],
+        "authorityEffect": "none"
+      },
+      {
+        "transitionId": "verify_supersession_projection",
+        "fromStateIds": [
+          "conditions_1_to_7_verified_supersession_pending"
+        ],
+        "toStateId": "all_eight_conditions_mechanically_verified_input_gate_candidate",
+        "requiredGuardIds": [
+          "supersession_parent_registry_transaction_valid",
+          "all_eight_conditions_necessary_not_sufficient"
+        ],
+        "authorityEffect": "none"
+      },
+      {
+        "transitionId": "invalidate",
+        "fromStateIds": [
+          "packet_frozen_receipts_incomplete",
+          "pre_snapshot_evidence_manifest_complete_unverified",
+          "conditions_1_to_7_verified_supersession_pending",
+          "all_eight_conditions_mechanically_verified_input_gate_candidate"
+        ],
+        "toStateId": "invalidated_new_packet_and_epoch_required",
+        "requiredGuardIds": [
+          "append_only_invalidation_forward_epoch"
+        ],
+        "authorityEffect": "none"
+      }
+    ],
+    "invalidationTriggers": [
+      "packet_value_or_manifest_drift",
+      "new_evidence_after_pre_snapshot_evidence_manifest_seal",
+      "evidence_correction",
+      "evidence_withdrawal",
+      "evidence_revocation",
+      "receipt_replacement",
+      "actor_eligibility_or_authenticity_change",
+      "trust_anchor_or_key_revocation_change",
+      "ledger_generation_or_evaluation_snapshot_drift"
+    ],
+    "invalidatedStateMayReturnInPlace": false,
+    "recoveryRequiresNewCyclePacketEpochAndEvaluation": true
+  },
+  "guardDefinitions": {
+    "allGuardsRequired": true,
+    "guardEvaluatorImplemented": false,
+    "guardInstances": [],
+    "failureDisposition": "not_ready_no_product_receipt",
+    "orderedGuards": [
+      {
+        "order": 1,
+        "guardId": "strict_bytes_parser_and_canonical_materialization",
+        "requirement": "size_cap_strict_utf8_no_bom_no_duplicate_or_unknown_keys_plain_json_and_canonical_digest",
+        "currentSatisfied": false
+      },
+      {
+        "order": 2,
+        "guardId": "vedic_identity_no_cross_system_fallback",
+        "requirement": "exact_vedic_product_namespace_ledger_identity_and_no_legacy_v13_schema13_inheritance",
+        "currentSatisfied": false
+      },
+      {
+        "order": 3,
+        "guardId": "packet_exact_identity",
+        "requirement": "immutable_admission_cycle_packet_and_exact_requirement_invariant_condition_sets",
+        "currentSatisfied": false
+      },
+      {
+        "order": 4,
+        "guardId": "same_cycle_and_packet_for_every_receipt",
+        "requirement": "all_binding_receipts_reference_same_admission_cycle_packet_and_digest_domains",
+        "currentSatisfied": false
+      },
+      {
+        "order": 5,
+        "guardId": "pre_snapshot_evidence_manifest_closed",
+        "requirement": "closed_pre_snapshot_evidence_manifest_with_unique_nonempty_ids_and_no_output_receipt_or_unknown_kind",
+        "currentSatisfied": false
+      },
+      {
+        "order": 6,
+        "guardId": "manifest_layer_exact_set_coverage",
+        "requirement": "each_declared_manifest_layer_exactly_matches_its_input_kinds_or_component_ids_without_duplicate_alias_extra_or_own_output_receipt",
+        "currentSatisfied": false
+      },
+      {
+        "order": 7,
+        "guardId": "actor_role_eligible_authenticated_and_scope_allowed",
+        "requirement": "protected_identity_eligibility_capacity_scope_conflict_and_signature_state_current_at_evaluation_snapshot",
+        "currentSatisfied": false
+      },
+      {
+        "order": 8,
+        "guardId": "required_distinct_actors_verified",
+        "requirement": "two_distinct_domain_experts_two_independent_source_rights_reviewers_and_separate_legal_authority",
+        "currentSatisfied": false
+      },
+      {
+        "order": 9,
+        "guardId": "disagreements_preserved_and_non_automatic",
+        "requirement": "originals_and_disagreements_parallel_no_majority_averaging_or_generative_model_winner",
+        "currentSatisfied": false
+      },
+      {
+        "order": 10,
+        "guardId": "no_active_correction_withdrawal_or_revocation",
+        "requirement": "current_revocation_head_rechecked_and_no_stale_superseded_withdrawn_or_revoked_success_evidence",
+        "currentSatisfied": false
+      },
+      {
+        "order": 11,
+        "guardId": "evaluation_snapshot_exact_identity",
+        "requirement": "single_atomic_read_snapshot_binds_generation_epoch_state_chain_head_acyclic_evaluation_input_manifests_and_revocation_head",
+        "currentSatisfied": false
+      },
+      {
+        "order": 12,
+        "guardId": "epoch_atomicity_interval_and_aba_receipt_valid",
+        "requirement": "cas_precondition_after_epoch_plus_one_atomic_receipt_nonce_heads_and_a_to_b_to_a_chain_distinction",
+        "currentSatisfied": false
+      },
+      {
+        "order": 13,
+        "guardId": "replay_idempotency_restore_and_fork_safe",
+        "requirement": "old_generation_epoch_predecessor_nonce_receipt_replay_rejected_and_restore_is_forward_mutation_with_fencing",
+        "currentSatisfied": false
+      },
+      {
+        "order": 14,
+        "guardId": "no_person_input_instance_in_governance_packet",
+        "requirement": "exact_schema_governance_allowlist_excludes_person_fields_person_refs_free_text_and_person_derived_digests",
+        "currentSatisfied": false
+      },
+      {
+        "order": 15,
+        "guardId": "append_only_invalidation_forward_epoch",
+        "requirement": "correction_withdrawal_revocation_and_restore_advance_epoch_and_never_delete_overwrite_or_unrevoke",
+        "currentSatisfied": false
+      },
+      {
+        "order": 16,
+        "guardId": "supersession_parent_registry_transaction_valid",
+        "requirement": "explicit_owner_and_formal_governance_bind_parent_registry_pre_post_images_transaction_and_rollback_refs",
+        "currentSatisfied": false
+      },
+      {
+        "order": 17,
+        "guardId": "all_eight_conditions_necessary_not_sufficient",
+        "requirement": "eight_condition_mechanical_candidate_never_confers_formal_admission_or_release_authority",
+        "currentSatisfied": false
+      },
+      {
+        "order": 18,
+        "guardId": "unknown_missing_ambiguous_means_false",
+        "requirement": "unknown_missing_empty_ambiguous_partial_or_extra_input_fails_closed_without_product_receipt",
+        "currentSatisfied": false
+      },
+      {
+        "order": 19,
+        "guardId": "packet_review_content_exact_identity",
+        "requirement": "every_receipt_matches_packet_selected_values_use_question_source_rights_validator_lifecycle_operation_and_jurisdiction_digests",
+        "currentSatisfied": false
+      },
+      {
+        "order": 20,
+        "guardId": "acyclic_manifest_layering",
+        "requirement": "pre_snapshot_evidence_condition_one_to_seven_and_final_evaluation_manifests_have_distinct_domains_and_exclude_their_own_output_receipts",
+        "currentSatisfied": false
+      },
+      {
+        "order": 21,
+        "guardId": "private_lifecycle_public_attestation_valid",
+        "requirement": "evaluator_consumes_only_current_non_person_public_lifecycle_attestation_bound_to_policy_runtime_evidence_and_revocation_head",
+        "currentSatisfied": false
+      }
+    ]
+  },
+  "actorRoleRequirements": {
+    "roleInstances": [],
+    "seatInstances": [],
+    "identityVerificationInstances": [],
+    "eligibilityVerificationInstances": [],
+    "signatureVerificationInstances": [],
+    "roles": [
+      {
+        "roleId": "product_owner",
+        "minimumSeatCount": 1,
+        "allowedScopes": [
+          "freeze_use_channel_audience_commerciality_and_target_jurisdictions",
+          "select_thirteen_values_and_scope",
+          "adopt_private_or_link_only_restrictions",
+          "request_supersession"
+        ],
+        "forbiddenScopes": [
+          "self_supply_domain_opinion",
+          "self_supply_source_rights_review",
+          "rights_legal_conclusion",
+          "override_deferred_negative_or_revoked_disposition",
+          "public_release_authorization_by_this_contract"
+        ],
+        "currentSeatCount": 0
+      },
+      {
+        "roleId": "vedic_domain_expert",
+        "minimumSeatCount": 2,
+        "allowedScopes": [
+          "vedic_input_fact_and_rule_semantics",
+          "school_and_version_scope",
+          "source_content_relevance",
+          "counterexamples",
+          "high_risk_expression_opinion"
+        ],
+        "forbiddenScopes": [
+          "rights_legal_conclusion",
+          "license_compatibility_conclusion",
+          "engineering_reproducibility_attestation",
+          "product_adoption",
+          "public_release_authorization"
+        ],
+        "currentSeatCount": 0
+      },
+      {
+        "roleId": "source_rights_reviewer",
+        "minimumSeatCount": 2,
+        "sourceProvenanceEvidenceReviewIncluded": true,
+        "allowedScopes": [
+          "source_chain_and_provenance_evidence",
+          "work_version_carrier_identity_and_evidence",
+          "notice_and_license_facts",
+          "distribution_operation_matrix_recommendation"
+        ],
+        "forbiddenScopes": [
+          "final_rights_legal_conclusion",
+          "vedic_domain_truth",
+          "engineering_reproducibility_attestation",
+          "product_or_public_release_authorization"
+        ],
+        "currentSeatCount": 0
+      },
+      {
+        "roleId": "engineering_reproducibility_reviewer",
+        "minimumSeatCount": 1,
+        "allowedScopes": [
+          "schema_digest_and_exact_set_verification",
+          "validator_and_runtime_identity_observation",
+          "signature_cryptographic_status_observation",
+          "mutation_epoch_atomicity_aba_and_private_lifecycle_mechanical_evidence"
+        ],
+        "forbiddenScopes": [
+          "real_identity_truth",
+          "expert_qualification_truth",
+          "vedic_domain_truth",
+          "rights_legal_conclusion",
+          "product_or_public_release_authorization"
+        ],
+        "currentSeatCount": 0
+      },
+      {
+        "roleId": "independent_legal_authority",
+        "minimumSeatCount": "required_undefined",
+        "allowedScopes": [
+          "jurisdiction_use_material_operation_scoped_legal_disposition"
+        ],
+        "forbiddenScopes": [
+          "self_review_source_evidence",
+          "vedic_domain_truth",
+          "engineering_reproducibility_attestation",
+          "product_owner_decision",
+          "public_release_authorization"
+        ],
+        "currentSeatCount": 0,
+        "roleDefinitionStatus": "required_undefined",
+        "eligibilityPolicyRef": null,
+        "jurisdictionPolicyRef": null,
+        "capacityPolicyRef": null,
+        "signatureProfileRef": null
+      },
+      {
+        "roleId": "formal_admission_governance",
+        "minimumSeatCount": 1,
+        "allowedScopes": [
+          "verify_parent_registry_preimage_postimage_transaction_and_rollback_refs"
+        ],
+        "forbiddenScopes": [
+          "content_truth",
+          "expert_truth",
+          "rights_legal_conclusion",
+          "product_owner_decision",
+          "public_release_authorization_by_this_contract"
+        ],
+        "currentSeatCount": 0
+      }
+    ],
+    "requiredActorBindingFields": [
+      "actorBindingId",
+      "roleId",
+      "seatId",
+      "principalType",
+      "accountableNaturalPersonBindingId",
+      "privateIdentityContextId",
+      "publicOpaqueIdentityBindingId",
+      "identityVerificationMethod",
+      "identityVerificationStatus",
+      "identityVerifiedAt",
+      "identityVerifiedByBindingId",
+      "credentialOrCapacityEvidenceRefs",
+      "verifiedScopeIds",
+      "eligibilityDecision",
+      "effectiveFrom",
+      "effectiveUntil",
+      "conflictDisclosureRefs",
+      "rawEvidenceCustodyRef"
+    ],
+    "signerMayVerifyOwnEligibility": false,
+    "rawIdentityCredentialsOrContactDataMayEnterPublicRepository": false,
+    "generativeModelMayOccupyAnyRoleOrSeat": false
+  },
+  "frozenPacketRequirements": {
+    "currentAdmissionCycleId": null,
+    "currentPacketId": null,
+    "currentPacketDigest": null,
+    "currentPacketInstances": [],
+    "packetScope": "system_governance_policy_only_no_person_input_instances",
+    "requiredFields": [
+      "admissionCycleId",
+      "packetSchemaVersion",
+      "packetId",
+      "packetManifestDigest",
+      "packetDigestDomain",
+      "packetDigest",
+      "requirementSetDigest",
+      "invariantSetDigest",
+      "conditionSetDigest",
+      "receiptTypeRequirementSetDigest",
+      "privacyProjectionDigest",
+      "selectedValueSetDigest",
+      "targetUseProfileDigest",
+      "questionSetDigest",
+      "sourceBindingManifestDigest",
+      "threeLayerRightsEvidenceManifestDigest",
+      "validatorProfileSetDigest",
+      "privateLifecyclePolicyDigest",
+      "distributionOperationSetDigest",
+      "targetJurisdictionSetDigest",
+      "reviewInstructionAndDisagreementPolicyDigest",
+      "frozenAt",
+      "custodyRef"
+    ],
+    "reviewContentBindingFields": [
+      "selectedValueSetDigest",
+      "targetUseProfileDigest",
+      "questionSetDigest",
+      "sourceBindingManifestDigest",
+      "threeLayerRightsEvidenceManifestDigest",
+      "validatorProfileSetDigest",
+      "privateLifecyclePolicyDigest",
+      "distributionOperationSetDigest",
+      "targetJurisdictionSetDigest",
+      "reviewInstructionAndDisagreementPolicyDigest"
+    ],
+    "requirementCount": 13,
+    "requirementIds": [
+      "civil_calendar_and_date",
+      "local_wall_time_and_precision",
+      "birth_time_uncertainty_interval_or_candidates",
+      "place_coordinates_and_precision",
+      "iana_time_zone_and_tzdb_identity",
+      "dst_gap_overlap_resolution",
+      "utc_conversion_and_time_scale",
+      "ephemeris_identity_version_and_coverage",
+      "sidereal_zodiac_declaration",
+      "ayanamsa_identity_and_version",
+      "rahu_ketu_mode",
+      "bhava_house_definition",
+      "birth_time_perturbation_candidates_and_transition_points"
+    ],
+    "invariantCount": 26,
+    "invariantIds": [
+      "civil_date_validity",
+      "calendar_identity_version",
+      "canonical_wall_time",
+      "precision_vocabulary",
+      "uncertainty_representation",
+      "interval_ordering",
+      "candidate_semantics",
+      "coordinate_reference_system",
+      "coordinate_precision_semantics",
+      "location_privacy_boundary",
+      "iana_zone_identity",
+      "tzdb_version_identity",
+      "coverage_update_policy",
+      "dst_gap_overlap_classification",
+      "dst_resolution_policy",
+      "utc_conversion_consistency",
+      "time_scale_identity",
+      "ephemeris_identity_version_digest",
+      "ephemeris_coverage",
+      "sidereal_zodiac_identity_version",
+      "ayanamsa_identity_version",
+      "node_mode_definition_version",
+      "bhava_definition_version",
+      "perturbation_candidate_semantics",
+      "transition_ordering",
+      "perturbation_policy_identity"
+    ],
+    "conditionCount": 8,
+    "conditionIds": [
+      "all_thirteen_owner_selections_and_scope_decisions_accepted",
+      "all_thirteen_source_or_first_party_provenance_bindings_frozen_verified",
+      "all_thirteen_work_version_carrier_rights_and_distribution_dispositions_complete",
+      "two_independent_domain_opinions_cover_same_frozen_thirteen_requirement_packet",
+      "two_independent_source_rights_reviews_and_legal_authority_disposition_complete",
+      "schema_specific_structural_and_semantic_validator_receipts_complete",
+      "mutation_epoch_atomic_snapshot_aba_and_private_input_lifecycle_receipts_complete",
+      "owner_supersession_formal_parent_and_central_registry_projection_complete"
+    ],
+    "exactSetEqualityRequired": true,
+    "countsAloneSufficient": false,
+    "packetChangeRequiresNewAdmissionCycle": true,
+    "oldOpinionsAutomaticallyCarryForward": false,
+    "candidateInputInstancesAllowed": 0
+  },
+  "admissionEpochRequirements": {
+    "identityPlanesMustRemainSeparate": true,
+    "identityPlanes": [
+      {
+        "planeId": "admission_cycle_and_packet",
+        "requiredIdentityFields": [
+          "admissionCycleId",
+          "packetId",
+          "packetDigest"
+        ],
+        "purpose": "immutable_governance_packet_identity"
+      },
+      {
+        "planeId": "ledger_mutation_clock",
+        "requiredIdentityFields": [
+          "ledgerGenerationId",
+          "mutationEpoch",
+          "stateDigest",
+          "chainHeadDigest"
+        ],
+        "purpose": "cas_replay_and_aba_boundary"
+      },
+      {
+        "planeId": "evaluation_snapshot",
+        "requiredIdentityFields": [
+          "evaluationSnapshotEpoch",
+          "snapshotDigest",
+          "evaluationInputManifestDigest",
+          "revocationLedgerHeadDigest"
+        ],
+        "purpose": "atomic_read_reverification_boundary"
+      }
+    ],
+    "currentLedgerGenerationId": null,
+    "currentMutationEpoch": null,
+    "currentEvaluationSnapshotEpoch": null,
+    "currentConsumedNonceSetHeadDigest": null,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "mutationEpochReceiptsIssued": 0,
+    "operationNoncesConsumed": 0,
+    "crossFileAtomicSnapshot": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false,
+    "singleWriterFencingEstablished": false,
+    "externalMonotonicAnchorEstablished": false,
+    "offlineCloneOrOldBackupRollbackResistanceEstablished": false,
+    "runtimeImplementationInstances": 0,
+    "futureCasPreconditionFields": [
+      "storageNamespaceId",
+      "ledgerId",
+      "ledgerGenerationId",
+      "beforeEpoch",
+      "previousStateDigest",
+      "previousChainHeadDigest",
+      "previousRevocationHeadDigest",
+      "generationScopedOperationNonce",
+      "previousConsumedNonceSetHeadDigest",
+      "operationId",
+      "idempotencyKey"
+    ],
+    "futureAtomicCommitFields": [
+      "nextState",
+      "afterEpoch",
+      "usedOperationId",
+      "usedIdempotencyKey",
+      "usedGenerationScopedOperationNonce",
+      "nextConsumedNonceSetHeadDigest",
+      "receipt",
+      "nextChainHeadDigest",
+      "nextRevocationHeadDigest",
+      "nextSupersessionHeadDigest"
+    ],
+    "successfulMutationAdvancesEpochByExactlyOne": true,
+    "failedMutationChangesNoAtomicCommitField": true,
+    "sameStateDigestAfterAbaStillRequiresDifferentEpochAndChainHead": true,
+    "generationScopedNonceRequired": true,
+    "consumedNonceHeadCommittedAtomically": true,
+    "restoreAndRollbackAreForwardMutations": true,
+    "evidenceIssuedAtMutationEpochMayPrecedeEvaluationSnapshot": true,
+    "allEvidenceMustHaveSameIssuanceMutationEpoch": false,
+    "allEvidenceMustBeReverifiedAtSameEvaluationSnapshotEpoch": true
+  },
+  "receiptEnvelopeRequirements": {
+    "draftReceiptEnvelopeRequirementsDefined": true,
+    "executableReceiptSchema": false,
+    "executableReceiptSchemaIds": [],
+    "acceptedOrGateSatisfiedMayBeIssuerSupplied": false,
+    "authenticMayBeIssuerSupplied": false,
+    "commonRequiredFields": [
+      "receiptSchemaVersion",
+      "receiptKind",
+      "receiptId",
+      "operationId",
+      "idempotencyKey",
+      "generationScopedOperationNonce",
+      "systemId",
+      "independentProductId",
+      "storageNamespaceId",
+      "ledgerId",
+      "ledgerGenerationId",
+      "admissionCycleId",
+      "packetSchemaVersion",
+      "packetId",
+      "packetDigestDomain",
+      "packetDigest",
+      "packetManifestDigest",
+      "selectedValueSetDigest",
+      "targetUseProfileDigest",
+      "questionSetDigest",
+      "sourceBindingManifestDigest",
+      "threeLayerRightsEvidenceManifestDigest",
+      "validatorProfileSetDigest",
+      "privateLifecyclePolicyDigest",
+      "distributionOperationSetDigest",
+      "targetJurisdictionSetDigest",
+      "reviewInstructionAndDisagreementPolicyDigest",
+      "requirementIds",
+      "requirementSetDigest",
+      "invariantIds",
+      "invariantSetDigest",
+      "conditionIds",
+      "conditionSetDigest",
+      "evidenceSetDigest",
+      "issuerRoleId",
+      "protectedIssuerContextRef",
+      "authorityEvidenceContextRef",
+      "payloadContextRef",
+      "payloadDigestDomain",
+      "payloadDigest",
+      "issuedAtMutationEpoch",
+      "custodyRef",
+      "validityPolicyId",
+      "canonicalizationProfile",
+      "digestAlgorithm",
+      "receiptDigestDomain",
+      "receiptDigest",
+      "signatureProfile",
+      "signatureContextRef",
+      "signingKeyContextRef",
+      "trustAnchorSnapshotDigest"
+    ],
+    "aggregateAndTransitionAdditionalFieldsUseOnlyTypeSpecificReceiptRequirements": true,
+    "lifecycleFieldsAreReceiptKindSpecific": true,
+    "opaqueProtectedContextRefsRequired": true,
+    "rawIdentityOpinionSourceBodyOrLegalTextMayBeCopiedIntoPublicEnvelope": false,
+    "receiptDigestIsDigitalSignature": false,
+    "digitalSignatureAloneEstablishesRealIdentityEligibilityAuthorityOrTruth": false,
+    "receiptIdMinimumRandomBits": 128,
+    "receiptIdMayDeriveFromPersonalData": false,
+    "operationNonceMayDeriveFromPersonalData": false
+  },
+  "receiptTypeRequirements": {
+    "requirementsOnlyNoExecutableSchemas": true,
+    "receiptInstances": [],
+    "acceptedReceipts": 0,
+    "successFamiliesFormOneFlatManifest": false,
+    "successFamilyCardinalitiesApplyWithinDeclaredManifestLayerOrTransitionOutput": true,
+    "typeSpecificRequiredPayloadFields": {
+      "frozen_packet_receipt": [
+        "admissionCycleId",
+        "packetId",
+        "packetManifestDigest",
+        "requirementSetDigest",
+        "invariantSetDigest",
+        "conditionSetDigest",
+        "privacyProjectionDigest"
+      ],
+      "owner_selection_receipt": [
+        "requirementId",
+        "selectedValueDigest",
+        "scopeDigest",
+        "targetUseProfileDigest",
+        "decision"
+      ],
+      "source_or_first_party_binding_receipt": [
+        "requirementId",
+        "sourceOrProvenanceMode",
+        "sourceBodyDigest",
+        "locatorSetDigest",
+        "minimalQuoteOrFirstPartyRationaleDigest",
+        "bindingDigest"
+      ],
+      "three_layer_rights_evidence_receipt": [
+        "requirementId",
+        "workIdentityDigest",
+        "workRightsEvidenceDigest",
+        "versionIdentityDigest",
+        "versionRightsEvidenceDigest",
+        "carrierIdentityDigest",
+        "carrierRightsEvidenceDigest",
+        "distributionDispositionPolicyRef",
+        "evidenceOnlyNotLegalConclusion"
+      ],
+      "vedic_domain_expert_opinion_binding_receipt": [
+        "expertSeatId",
+        "identityEligibilityScopeVerificationRefs",
+        "pairwiseIndependenceAssessmentRef",
+        "samePacketAndQuestionSetDigest",
+        "sealedOriginalOpinionDigest",
+        "thirteenRequirementCoverageDigest",
+        "priorExposureDeclaration"
+      ],
+      "domain_disagreement_inventory_receipt": [
+        "opinionReceiptIds",
+        "parallelAgreementAndDisagreementDigest",
+        "unresolvedItemIds",
+        "disposition",
+        "winnerSelected"
+      ],
+      "source_rights_review_receipt": [
+        "reviewerSeatId",
+        "identityEligibilityScopeVerificationRefs",
+        "pairwiseIndependenceAssessmentRef",
+        "samePacketDigest",
+        "threeLayerEvidenceCoverageDigest",
+        "sealedReviewOpinionDigest"
+      ],
+      "legal_authority_disposition_receipt": [
+        "legalAuthoritySeatId",
+        "identityEligibilityCapacityVerificationRefs",
+        "professionalStatusContextRef",
+        "engagementOrMandateContextRef",
+        "sourceRightsReviewReceiptIds",
+        "targetUseProfileDigest",
+        "targetJurisdictionSetDigest",
+        "applicableLawCandidateSetDigest",
+        "lawVersionAndEffectiveDateDigest",
+        "conflictOfLawsAnalysisContextRef",
+        "uncoveredJurisdictionIds",
+        "materialOperationJurisdictionDispositionMatrixDigest",
+        "assumptionsLimitationsAndUnresolvedIssuesDigest",
+        "requiredProductRestrictionsDigest",
+        "conflictDisclosureAndMitigationDigest",
+        "signedPayloadSha256",
+        "signatureOrAttestationMethod",
+        "signatureEvidenceContextRef",
+        "keyOrCertificateBindingRef",
+        "signatureVerificationStatus",
+        "certificateOrAuthorityRevocationStatusRef"
+      ],
+      "structural_validator_receipt": [
+        "validatorId",
+        "validatorVersion",
+        "validatorByteDigest",
+        "schemaDigest",
+        "exactSetCoverageDigest",
+        "failureCorpusDigest",
+        "runnerIdentityDigest",
+        "result"
+      ],
+      "semantic_validator_receipt": [
+        "validatorId",
+        "validatorVersion",
+        "validatorByteDigest",
+        "invariantSetDigest",
+        "counterexampleCorpusDigest",
+        "coverageDigest",
+        "runnerIdentityDigest",
+        "result"
+      ],
+      "private_lifecycle_public_non_person_attestation_receipt": [
+        "payloadClass",
+        "privateLifecycleSchemaDigest",
+        "privateNamespaceClassId",
+        "retentionDeletionPolicyDigest",
+        "runtimeCanaryTestCorpusDigest",
+        "protectedRuntimeEvidenceContextRef",
+        "evidenceFreshnessPolicyId",
+        "revocationLedgerHeadDigest",
+        "publicGovernanceProjectionDigest",
+        "candidateInstanceCount",
+        "personalDataFieldCount",
+        "personDerivedDigestCount",
+        "candidateInstanceRefs",
+        "personalDataRefs",
+        "freeTextFieldsPresent",
+        "result"
+      ],
+      "admission_epoch_snapshot_receipt": [
+        "transitionType",
+        "fromState",
+        "toState",
+        "ledgerGenerationId",
+        "beforeEpoch",
+        "afterEpoch",
+        "generationScopedOperationNonce",
+        "previousStateDigest",
+        "nextStateDigest",
+        "previousChainHeadDigest",
+        "nextChainHeadDigest",
+        "previousConsumedNonceSetHeadDigest",
+        "nextConsumedNonceSetHeadDigest",
+        "preSnapshotEvidenceManifestDigest",
+        "readSetDigest",
+        "writeSetDigest",
+        "revocationLedgerHeadDigest",
+        "atomicityMechanismRef",
+        "abaDefenseEvidenceRef",
+        "privateLifecyclePolicyRef",
+        "privateLifecyclePublicAttestationReceiptId",
+        "evaluationSnapshotEpoch"
+      ],
+      "supersession_intent_receipt": [
+        "predecessorPacketDigest",
+        "successorPacketDigest",
+        "ownerDecisionDigest",
+        "adoptedRestrictionSetDigest",
+        "preSupersessionReadinessEvaluationReceiptId"
+      ],
+      "supersession_commit_receipt": [
+        "transitionType",
+        "fromState",
+        "toState",
+        "beforeEpoch",
+        "afterEpoch",
+        "previousStateDigest",
+        "nextStateDigest",
+        "previousChainHeadDigest",
+        "nextChainHeadDigest",
+        "previousConsumedNonceSetHeadDigest",
+        "nextConsumedNonceSetHeadDigest",
+        "revocationLedgerHeadDigest",
+        "formalParentPreimageDigest",
+        "formalParentPostimageDigest",
+        "registrySlotId",
+        "registryPreimageDigest",
+        "registryPostimageDigest",
+        "oldLedgerGenerationId",
+        "newLedgerGenerationId",
+        "transactionContextRef",
+        "rollbackContextRef"
+      ],
+      "conditions_one_to_seven_evaluation_receipt": [
+        "transitionType",
+        "fromState",
+        "toState",
+        "beforeEpoch",
+        "afterEpoch",
+        "previousStateDigest",
+        "nextStateDigest",
+        "previousChainHeadDigest",
+        "nextChainHeadDigest",
+        "previousConsumedNonceSetHeadDigest",
+        "nextConsumedNonceSetHeadDigest",
+        "revocationLedgerHeadDigest",
+        "preSnapshotEvidenceManifestDigest",
+        "admissionEpochSnapshotReceiptId",
+        "privateLifecyclePublicAttestationReceiptId",
+        "conditionOneToSevenEvaluationInputManifestDigest",
+        "evaluationSnapshotEpoch",
+        "orderedGuardResultDigest",
+        "conditionResultDigest",
+        "resultingState",
+        "evaluatorIdentityDigest",
+        "authorityEffect"
+      ],
+      "final_readiness_evaluation_receipt": [
+        "transitionType",
+        "fromState",
+        "toState",
+        "beforeEpoch",
+        "afterEpoch",
+        "previousStateDigest",
+        "nextStateDigest",
+        "previousChainHeadDigest",
+        "nextChainHeadDigest",
+        "previousConsumedNonceSetHeadDigest",
+        "nextConsumedNonceSetHeadDigest",
+        "revocationLedgerHeadDigest",
+        "conditionsOneToSevenEvaluationReceiptId",
+        "supersessionIntentReceiptId",
+        "supersessionCommitReceiptId",
+        "finalEvaluationInputManifestDigest",
+        "evaluationSnapshotEpoch",
+        "orderedGuardResultDigest",
+        "conditionResultDigest",
+        "resultingState",
+        "evaluatorIdentityDigest",
+        "authorityEffect"
+      ]
+    },
+    "families": [
+      {
+        "receiptKind": "frozen_packet_receipt",
+        "minimumCount": 1,
+        "maximumCount": 1,
+        "issuerRoleId": "product_owner",
+        "coverage": "exact_frozen_governance_packet"
+      },
+      {
+        "receiptKind": "owner_selection_receipt",
+        "minimumCount": 13,
+        "maximumCount": 13,
+        "issuerRoleId": "product_owner",
+        "coverage": "exactly_one_per_requirement"
+      },
+      {
+        "receiptKind": "source_or_first_party_binding_receipt",
+        "minimumCount": 13,
+        "maximumCount": 13,
+        "issuerRoleId": "source_rights_reviewer",
+        "coverage": "exactly_one_per_requirement_provenance_evidence_only"
+      },
+      {
+        "receiptKind": "three_layer_rights_evidence_receipt",
+        "minimumCount": 13,
+        "maximumCount": 13,
+        "issuerRoleId": "source_rights_reviewer",
+        "coverage": "work_version_carrier_evidence_per_requirement_not_legal_conclusion"
+      },
+      {
+        "receiptKind": "vedic_domain_expert_opinion_binding_receipt",
+        "minimumCount": 2,
+        "maximumCount": 2,
+        "issuerRoleId": "vedic_domain_expert",
+        "coverage": "each_distinct_expert_covers_same_exact_thirteen_requirement_packet"
+      },
+      {
+        "receiptKind": "domain_disagreement_inventory_receipt",
+        "minimumCount": 1,
+        "maximumCount": 1,
+        "issuerRoleId": "engineering_reproducibility_reviewer",
+        "coverage": "parallel_original_opinion_inventory_no_winner"
+      },
+      {
+        "receiptKind": "source_rights_review_receipt",
+        "minimumCount": 2,
+        "maximumCount": 2,
+        "issuerRoleId": "source_rights_reviewer",
+        "coverage": "two_independent_reviews_of_same_packet"
+      },
+      {
+        "receiptKind": "legal_authority_disposition_receipt",
+        "minimumCount": "required_undefined",
+        "maximumCount": "required_undefined",
+        "issuerRoleId": "independent_legal_authority",
+        "coverage": "all_target_jurisdictions_material_layers_and_requested_operations"
+      },
+      {
+        "receiptKind": "structural_validator_receipt",
+        "minimumCount": 1,
+        "maximumCount": 1,
+        "issuerRoleId": "engineering_reproducibility_reviewer",
+        "coverage": "schema_specific_structural_exact_set_and_failure_channel"
+      },
+      {
+        "receiptKind": "semantic_validator_receipt",
+        "minimumCount": 1,
+        "maximumCount": 1,
+        "issuerRoleId": "engineering_reproducibility_reviewer",
+        "coverage": "exact_twenty_six_invariants_and_counterexample_corpus"
+      },
+      {
+        "receiptKind": "private_lifecycle_public_non_person_attestation_receipt",
+        "minimumCount": 1,
+        "maximumCount": 1,
+        "issuerRoleId": "engineering_reproducibility_reviewer",
+        "coverage": "current_revocation_checked_public_projection_of_private_lifecycle_runtime_evidence_without_person_data_or_person_derived_digest"
+      },
+      {
+        "receiptKind": "admission_epoch_snapshot_receipt",
+        "minimumCount": 1,
+        "maximumCount": 1,
+        "issuerRoleId": "engineering_reproducibility_reviewer",
+        "coverage": "atomic_evaluation_snapshot_epoch_revocation_and_aba_boundary"
+      },
+      {
+        "receiptKind": "supersession_intent_receipt",
+        "minimumCount": 1,
+        "maximumCount": 1,
+        "issuerRoleId": "product_owner",
+        "coverage": "explicit_owner_predecessor_successor_and_restriction_intent"
+      },
+      {
+        "receiptKind": "supersession_commit_receipt",
+        "minimumCount": 1,
+        "maximumCount": 1,
+        "issuerRoleId": "formal_admission_governance",
+        "coverage": "formal_parent_registry_transaction_and_rollback_refs"
+      },
+      {
+        "receiptKind": "conditions_one_to_seven_evaluation_receipt",
+        "minimumCount": 1,
+        "maximumCount": 1,
+        "issuerRoleId": "engineering_reproducibility_reviewer",
+        "coverage": "acyclic_pre_snapshot_evidence_plus_epoch_snapshot_condition_one_to_seven_result_authority_none"
+      },
+      {
+        "receiptKind": "final_readiness_evaluation_receipt",
+        "minimumCount": 1,
+        "maximumCount": 1,
+        "issuerRoleId": "engineering_reproducibility_reviewer",
+        "coverage": "acyclic_prior_evaluation_plus_supersession_outputs_all_eight_candidate_state_authority_none"
+      }
+    ],
+    "nonSuccessLifecycleReceiptRequirements": {
+      "currentInstances": [],
+      "mayEnterSuccessExactSet": false,
+      "receiptKinds": [
+        "evidence_correction_receipt",
+        "evidence_withdrawal_receipt",
+        "evidence_revocation_receipt",
+        "transition_rejection_receipt"
+      ],
+      "forwardInvalidationReceiptKinds": [
+        "evidence_correction_receipt",
+        "evidence_withdrawal_receipt",
+        "evidence_revocation_receipt"
+      ],
+      "noMutationReceiptKinds": [
+        "transition_rejection_receipt"
+      ],
+      "typeSpecificRequirements": {
+        "evidence_correction_receipt": {
+          "mutationSemantics": "append_only_forward_invalidation_and_replacement",
+          "afterEpochRule": "before_epoch_plus_one",
+          "revocationHeadRule": "advance_atomically",
+          "revocationCasIdentityRule": {
+            "receiptPreviousField": "previousRevocationLedgerHeadDigest",
+            "casPreviousField": "previousRevocationHeadDigest",
+            "receiptNextField": "nextRevocationLedgerHeadDigest",
+            "atomicCommitNextField": "nextRevocationHeadDigest",
+            "correspondingValuesMustBeExactlyEqual": true
+          },
+          "consumedNonceHeadRule": "next_must_differ_from_previous_and_advance_atomically_by_adding_only_this_generation_scoped_operation_nonce",
+          "operationNonceRule": "consume_atomically",
+          "requiredPayloadFields": [
+            "targetReceiptId",
+            "targetReceiptDigest",
+            "replacementReceiptId",
+            "replacementReceiptDigest",
+            "reasonCode",
+            "protectedReasonContextRef",
+            "previousRevocationLedgerHeadDigest",
+            "nextRevocationLedgerHeadDigest",
+            "previousConsumedNonceSetHeadDigest",
+            "nextConsumedNonceSetHeadDigest",
+            "generationScopedOperationNonce",
+            "beforeEpoch",
+            "afterEpoch"
+          ]
+        },
+        "evidence_withdrawal_receipt": {
+          "mutationSemantics": "append_only_forward_invalidation",
+          "afterEpochRule": "before_epoch_plus_one",
+          "revocationHeadRule": "advance_atomically",
+          "revocationCasIdentityRule": {
+            "receiptPreviousField": "previousRevocationLedgerHeadDigest",
+            "casPreviousField": "previousRevocationHeadDigest",
+            "receiptNextField": "nextRevocationLedgerHeadDigest",
+            "atomicCommitNextField": "nextRevocationHeadDigest",
+            "correspondingValuesMustBeExactlyEqual": true
+          },
+          "consumedNonceHeadRule": "next_must_differ_from_previous_and_advance_atomically_by_adding_only_this_generation_scoped_operation_nonce",
+          "operationNonceRule": "consume_atomically",
+          "requiredPayloadFields": [
+            "targetReceiptId",
+            "targetReceiptDigest",
+            "reasonCode",
+            "protectedReasonContextRef",
+            "previousRevocationLedgerHeadDigest",
+            "nextRevocationLedgerHeadDigest",
+            "previousConsumedNonceSetHeadDigest",
+            "nextConsumedNonceSetHeadDigest",
+            "generationScopedOperationNonce",
+            "beforeEpoch",
+            "afterEpoch"
+          ]
+        },
+        "evidence_revocation_receipt": {
+          "mutationSemantics": "append_only_forward_invalidation",
+          "afterEpochRule": "before_epoch_plus_one",
+          "revocationHeadRule": "advance_atomically",
+          "revocationCasIdentityRule": {
+            "receiptPreviousField": "previousRevocationLedgerHeadDigest",
+            "casPreviousField": "previousRevocationHeadDigest",
+            "receiptNextField": "nextRevocationLedgerHeadDigest",
+            "atomicCommitNextField": "nextRevocationHeadDigest",
+            "correspondingValuesMustBeExactlyEqual": true
+          },
+          "consumedNonceHeadRule": "next_must_differ_from_previous_and_advance_atomically_by_adding_only_this_generation_scoped_operation_nonce",
+          "operationNonceRule": "consume_atomically",
+          "requiredPayloadFields": [
+            "targetReceiptId",
+            "targetReceiptDigest",
+            "reasonCode",
+            "protectedReasonContextRef",
+            "previousRevocationLedgerHeadDigest",
+            "nextRevocationLedgerHeadDigest",
+            "previousConsumedNonceSetHeadDigest",
+            "nextConsumedNonceSetHeadDigest",
+            "generationScopedOperationNonce",
+            "beforeEpoch",
+            "afterEpoch"
+          ]
+        },
+        "transition_rejection_receipt": {
+          "mutationSemantics": "deterministic_no_ledger_mutation_failure_response",
+          "afterEpochRule": "equals_before_epoch",
+          "stateDigestRule": "next_equals_previous",
+          "chainHeadRule": "next_equals_previous",
+          "revocationHeadRule": "next_equals_previous",
+          "revocationCasIdentityRule": {
+            "receiptPreviousField": "previousRevocationLedgerHeadDigest",
+            "casPreviousField": "previousRevocationHeadDigest",
+            "receiptNextField": "nextRevocationLedgerHeadDigest",
+            "atomicCommitNextField": "nextRevocationHeadDigest",
+            "correspondingValuesMustBeExactlyEqual": true
+          },
+          "consumedNonceHeadRule": "next_equals_previous",
+          "operationNonceRule": "not_consumed",
+          "requiredPayloadFields": [
+            "attemptedTransitionId",
+            "rejectionCode",
+            "failedGuardIds",
+            "protectedReasonContextRef",
+            "generationScopedOperationNonce",
+            "beforeEpoch",
+            "afterEpoch",
+            "previousStateDigest",
+            "nextStateDigest",
+            "previousChainHeadDigest",
+            "nextChainHeadDigest",
+            "previousRevocationLedgerHeadDigest",
+            "nextRevocationLedgerHeadDigest",
+            "previousConsumedNonceSetHeadDigest",
+            "nextConsumedNonceSetHeadDigest"
+          ]
+        }
+      },
+      "unrevokeAllowed": false,
+      "deletionOrOverwriteOfTargetAllowed": false,
+      "failedTransitionChangesAnyAtomicCommitField": false
+    },
+    "rejectionReceiptMayEnterSuccessExactSet": false,
+    "legalDispositionReceiptStructurallyVerified": false,
+    "rightsLegalConclusionRecorded": false,
+    "structuralVerificationAloneMaySetRightsLegalConclusionRecorded": false
+  },
+  "evaluationRequirements": {
+    "evaluatorImplemented": false,
+    "evaluatorIdentity": null,
+    "evaluatorByteDigest": null,
+    "evaluationInstances": [],
+    "evaluationReceipts": 0,
+    "exactRequirementSetRequired": 13,
+    "exactInvariantSetRequired": 26,
+    "exactConditionSetRequired": 8,
+    "manifestLayeringAcyclicRequired": true,
+    "manifestCoverageUnit": "receipt_kind_plus_receipt_id_plus_receipt_digest",
+    "manifestLayerCount": 3,
+    "manifestLayers": [
+      {
+        "manifestId": "pre_snapshot_evidence_manifest",
+        "digestDomain": "hakimi/vedic-input-admission/pre-snapshot-evidence-manifest/v0.1.0",
+        "includedReceiptKinds": [
+          "frozen_packet_receipt",
+          "owner_selection_receipt",
+          "source_or_first_party_binding_receipt",
+          "three_layer_rights_evidence_receipt",
+          "vedic_domain_expert_opinion_binding_receipt",
+          "domain_disagreement_inventory_receipt",
+          "source_rights_review_receipt",
+          "legal_authority_disposition_receipt",
+          "structural_validator_receipt",
+          "semantic_validator_receipt",
+          "private_lifecycle_public_non_person_attestation_receipt"
+        ],
+        "excludedOutputReceiptKinds": [
+          "admission_epoch_snapshot_receipt",
+          "conditions_one_to_seven_evaluation_receipt",
+          "supersession_intent_receipt",
+          "supersession_commit_receipt",
+          "final_readiness_evaluation_receipt"
+        ],
+        "currentInstances": 0
+      },
+      {
+        "manifestId": "conditions_one_to_seven_evaluation_input_manifest",
+        "digestDomain": "hakimi/vedic-input-admission/conditions-one-to-seven-evaluation-input-manifest/v0.1.0",
+        "includedComponentIds": [
+          "pre_snapshot_evidence_manifest_digest",
+          "admission_epoch_snapshot_receipt_digest"
+        ],
+        "excludedOutputReceiptKinds": [
+          "conditions_one_to_seven_evaluation_receipt"
+        ],
+        "currentInstances": 0
+      },
+      {
+        "manifestId": "final_readiness_evaluation_input_manifest",
+        "digestDomain": "hakimi/vedic-input-admission/final-readiness-evaluation-input-manifest/v0.1.0",
+        "includedComponentIds": [
+          "conditions_one_to_seven_evaluation_receipt_digest",
+          "supersession_intent_receipt_digest",
+          "supersession_commit_receipt_digest"
+        ],
+        "excludedOutputReceiptKinds": [
+          "final_readiness_evaluation_receipt"
+        ],
+        "currentInstances": 0
+      }
+    ],
+    "outputReceiptMayBeIncludedInOwnInputManifest": false,
+    "manifestDigestDomainsMustBeDistinct": true,
+    "partialCompletionMaySetGateTrue": false,
+    "conditionSkippingAllowed": false,
+    "majorityVoteAllowed": false,
+    "opinionAveragingAllowed": false,
+    "generativeModelWinnerSelectionAllowed": false,
+    "unresolvedDisagreementDisposition": "defer_or_reject_no_product_receipt",
+    "unknownMissingAmbiguousExtraDisposition": "not_ready_no_product_receipt",
+    "allEightConditionsAloneConferFormalAdmission": false,
+    "successfulMechanicalCandidateAuthorityEffect": "none",
+    "futureFormalAdmissionTransitionRequired": true
+  },
+  "privacyBoundary": {
+    "allowedPayloadClass": "governance_policy_packet_only",
+    "exactSchemaRequired": true,
+    "governanceDigestAllowlistRequired": true,
+    "booleanPrivacySelfDeclarationSufficient": false,
+    "keyBlacklistAloneSufficient": false,
+    "candidateInstanceCount": 0,
+    "personalDataFieldCount": 0,
+    "personDerivedDigestCount": 0,
+    "candidateInstanceRefs": [],
+    "personalDataRefs": [],
+    "freeTextFieldsPresent": false,
+    "prohibitedPersonalFieldClasses": [
+      "civil_birth_date_year_month_day",
+      "local_birth_wall_time_or_precision",
+      "birth_time_uncertainty_interval_or_candidates",
+      "person_linked_iana_time_zone",
+      "place_name_latitude_longitude_or_precision",
+      "utc_or_candidate_instant",
+      "perturbation_candidate_or_transition_point",
+      "name_alias_note_or_other_free_text",
+      "person_input_or_candidate_reference"
+    ],
+    "prohibitedStableDerivedIdentifiers": [
+      "candidate_input_digest",
+      "personal_payload_digest",
+      "birth_data_fingerprint",
+      "deterministic_person_linkable_identifier"
+    ],
+    "futurePersonalInputLifecycleUsesSeparatePrivateSchemaAndNamespace": true,
+    "futurePrivateLifecycleReceiptConsumableByAdmissionEvaluator": false,
+    "publicNonPersonLifecycleAttestationRequired": true,
+    "publicNonPersonLifecycleAttestationConsumableByAdmissionEvaluator": true,
+    "publicNonPersonLifecycleAttestationCurrentInstances": 0,
+    "publicNonPersonLifecycleAttestationMustBindPolicyRuntimeEvidenceFreshnessAndRevocationHead": true,
+    "publicNonPersonLifecycleAttestationMayContainPersonalDataOrPersonDerivedDigest": false,
+    "publicNonPersonLifecycleAttestationAloneEstablishesRuntimeNoLeakage": false,
+    "publicProjectionMayClaimAnonymous": false,
+    "runtimeNoLeakageEstablished": false,
+    "browserDomUrlHistoryConsoleNetworkStorageServiceWorkerNoLeakageEstablished": false,
+    "stableDigestMechanicallyBlockedForArbitraryCandidate": false
+  },
+  "supersessionRequirements": {
+    "supersedesReadinessCandidate": false,
+    "candidateIsFormalParent": false,
+    "formalParentUpdated": false,
+    "centralRegistryUpdated": false,
+    "supersessionTransactionImplemented": false,
+    "supersessionReceiptInstances": [],
+    "ownerIntentRequired": true,
+    "formalGovernanceCommitRequired": true,
+    "requiredBindings": [
+      "predecessorPacketDigest",
+      "successorPacketDigest",
+      "oldLedgerGenerationId",
+      "newLedgerGenerationId",
+      "formalParentPreimageDigest",
+      "formalParentPostimageDigest",
+      "centralRegistrySlotId",
+      "registryPreimageDigest",
+      "registryPostimageDigest",
+      "ownerIntentReceiptId",
+      "preSupersessionReadinessEvaluationReceiptId",
+      "admissionEpochSnapshotReceiptId",
+      "unresolvedRevokedAndDisagreementDispositionDigest",
+      "transactionContextRef",
+      "rollbackContextRef"
+    ],
+    "higherSemverNewerCreatedAtOrFileOverwriteConfersSupersession": false,
+    "supersededPacketAcceptsNewEvidence": false,
+    "digestCycleBetweenParentPostimageAndReceiptForbidden": true
+  },
+  "requiredUndefined": {
+    "items": [
+      "independentProductIdentity",
+      "independentStorageNamespaceId",
+      "ledgerId",
+      "ledgerGenerationId",
+      "trustedMutationCoordinator",
+      "externalMonotonicAnchorOrFencingMechanism",
+      "frozenPacketIdAndDigest",
+      "selectedRequirementValues",
+      "sourceBodiesQuotesLocatorsAndBindings",
+      "workVersionCarrierIdentitiesAndRightsEvidence",
+      "vedicDistributionDispositionVocabulary",
+      "realProductOwnerIdentityCapacityAndSignature",
+      "realDomainExpertIdentitiesQualificationsOpinionsAndIndependence",
+      "realSourceRightsReviewerIdentitiesQualificationsOpinionsAndIndependence",
+      "independentLegalAuthorityRoleEligibilityMinimumSeatsJurisdictionCapacityAndSignatureProfiles",
+      "executableReceiptSchemaIds",
+      "transitionEvaluatorIdentityAndDigest",
+      "formalParentTargetIdentityVersionAndDigest",
+      "centralRegistryTargetSlotAndSchema",
+      "supersessionTransactionMechanism",
+      "vedicTargetSchema",
+      "vedicMigrationId",
+      "vedicReleaseIdentity"
+    ],
+    "undefinedValuesMayBeInferredFromBaziOrOtherSystems": false,
+    "verifiedPrivateOrVerifiedRedistributableVocabularyInheritedFromBazi": false
+  },
+  "zeroInstanceState": {
+    "stateInstances": [],
+    "transitionInstances": [],
+    "frozenPacketInstances": [],
+    "admissionCycleInstances": [],
+    "ledgerGenerationInstances": [],
+    "admissionEpochInstances": [],
+    "evaluationSnapshotInstances": [],
+    "preSnapshotEvidenceManifestInstances": [],
+    "conditionsOneToSevenEvaluationInputManifestInstances": [],
+    "finalReadinessEvaluationInputManifestInstances": [],
+    "receiptInstances": [],
+    "actorInstances": [],
+    "seatInstances": [],
+    "acceptedReceipts": 0,
+    "operationNoncesConsumed": 0,
+    "privateLifecyclePublicAttestationReceipts": 0,
+    "evaluationReceipts": 0,
+    "supersessionReceipts": 0,
+    "transitionEvaluatorImplemented": false,
+    "executableReceiptSchemasImplemented": false,
+    "runtimeReceiptEvidenceEstablished": false,
+    "mutationEpochAvailable": false,
+    "crossFileAtomicSnapshot": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false,
+    "inputContractGateSatisfied": false,
+    "formalAdmissionAuthorized": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "highRiskClaimsAuthorized": false,
+    "rightsLegalConclusionEstablished": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false
+  },
+  "observationBoundary": {
+    "requirementsArtifactPersisted": true,
+    "currentContractEndpointMechanicallyObserved": false,
+    "currentUpstreamEndpointsMechanicallyObserved": false,
+    "heldFileHandleReads": false,
+    "pathEndpointRevalidated": false,
+    "contractHashAndParseUseSameReadBuffer": false,
+    "upstreamHashAndParseUseSameReadBuffer": false,
+    "crossFileAtomicSnapshot": false,
+    "simultaneousCurrentRawClosureVerified": false,
+    "mutationEpochAvailable": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false,
+    "erasedPreloadExcluded": false,
+    "loadedModuleByteIdentityVerified": false,
+    "nodeLoaderIntegrityVerified": false,
+    "runtimeLauncherIdentityVerified": false,
+    "runtimeIntrinsicIntegrityVerified": false,
+    "runtimeReceiptExecutionObserved": false,
+    "browserRuntimeObserved": false,
+    "staticRequirementsDoNotProveRuntimeProperties": true
+  },
+  "integrityBoundary": {
+    "canonicalizationProfile": "sorted_object_keys_compact_json_finite_numbers_aliases_expanded_active_cycles_rejected_v1",
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi/vedic-input-admission-transition-and-receipt-requirements/v0.1.0",
+    "contractDigestExcludesOwnField": true,
+    "contractDigestIsDigitalSignature": false,
+    "digitalSignature": null,
+    "signerIdentity": null,
+    "artifactAuthenticityEstablished": false
+  },
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "inputContractGateSatisfied": false,
+    "formalAdmissionAuthorized": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "highRiskClaimsAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false
+  },
+  "evidenceLedgerSeparation": {
+    "engineeringEvidence": "requirements_contract_structure_and_fixed_endpoint_verifier_only",
+    "browserOrRuntimeEvidence": "not_established",
+    "contentTruth": "not_established",
+    "expertTruth": "not_established",
+    "rightsLegalConclusion": "not_established",
+    "releaseReadiness": "not_ready",
+    "publicReleaseAuthorization": "not_authorized"
+  },
+  "doesNotEstablish": [
+    "executable_receipt_schema",
+    "positive_transition_evaluator",
+    "runtime_receipt_or_transition_instance",
+    "frozen_selected_vedic_input_policy_packet",
+    "personal_input_processing_or_stable_person_digest_authority",
+    "mutation_epoch_cross_file_atomicity_interval_mutation_or_aba_exclusion",
+    "offline_clone_or_old_backup_rollback_resistance",
+    "source_body_exact_quote_locator_or_binding_truth",
+    "work_version_carrier_rights_license_or_legal_conclusion",
+    "real_owner_expert_reviewer_or_legal_authority_identity_eligibility_independence_or_opinion",
+    "content_truth_expert_truth_or_vedic_domain_authority",
+    "formal_parent_supersession_or_central_registry_update",
+    "vedic_target_schema_migration_or_release_identity",
+    "formal_system_admission_product_integration_or_release_readiness",
+    "expert_claims_high_risk_claims_public_deployment_or_public_release_authorization",
+    "legacy_v13_target_schema_13_or_bazi_v1_7_authority_inheritance"
+  ],
+  "contractDigest": "548a0ab95dbe030dda2c158a7a4583c4591d98be75bc9f9a604ff98cff3d52ac"
+}

@@ -1,0 +1,628 @@
+{
+  "$id": "urn:hakimi:vedic:input-contract-draft:0.1.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "ayanamsa_identity_and_version": {
+      "additionalProperties": false,
+      "properties": {
+        "ayanamsa_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "ayanamsa_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "ayanamsa_id",
+        "ayanamsa_version"
+      ],
+      "type": "object"
+    },
+    "bhava_house_definition": {
+      "additionalProperties": false,
+      "properties": {
+        "definition_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "definition_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "definition_id",
+        "definition_version"
+      ],
+      "type": "object"
+    },
+    "birth_time_perturbation_candidates_and_transition_points": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_instants": {
+          "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "policy_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "policy_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "transition_points": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "instant": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "transition_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "transition_id",
+              "instant"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "policy_id",
+        "policy_version",
+        "candidate_instants",
+        "transition_points"
+      ],
+      "type": "object"
+    },
+    "birth_time_uncertainty_interval_or_candidates": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "model_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "model_version": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "representation": {
+              "const": "exact"
+            }
+          },
+          "required": [
+            "model_id",
+            "model_version",
+            "representation"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "interval_end_local": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "interval_start_local": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "model_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "model_version": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "representation": {
+              "const": "closed_interval"
+            }
+          },
+          "required": [
+            "model_id",
+            "model_version",
+            "representation",
+            "interval_start_local",
+            "interval_end_local"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "candidate_local_wall_times": {
+              "items": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "model_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "model_version": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "representation": {
+              "const": "candidate_set"
+            }
+          },
+          "required": [
+            "model_id",
+            "model_version",
+            "representation",
+            "candidate_local_wall_times"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "civil_calendar_and_date": {
+      "additionalProperties": false,
+      "properties": {
+        "calendar_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "calendar_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "day": {
+          "type": "integer"
+        },
+        "month": {
+          "type": "integer"
+        },
+        "year": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "calendar_id",
+        "calendar_version",
+        "year",
+        "month",
+        "day"
+      ],
+      "type": "object"
+    },
+    "contractVersion": {
+      "const": "hakimi.vedic.input/0.1-draft"
+    },
+    "dst_gap_overlap_resolution": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "classification": {
+              "const": "unambiguous"
+            },
+            "resolution_policy_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "resolution_policy_version": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "utc_offset_seconds": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "resolution_policy_id",
+            "resolution_policy_version",
+            "classification",
+            "utc_offset_seconds"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "candidate_offsets": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "candidate_id": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "utc_offset_seconds": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "candidate_id",
+                  "utc_offset_seconds"
+                ],
+                "type": "object"
+              },
+              "minItems": 2,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "classification": {
+              "const": "overlap"
+            },
+            "resolution_policy_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "resolution_policy_version": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "selected_candidate_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "resolution_policy_id",
+            "resolution_policy_version",
+            "classification",
+            "candidate_offsets",
+            "selected_candidate_id"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "classification": {
+              "const": "gap"
+            },
+            "rejection_code": {
+              "const": "nonexistent_local_wall_time"
+            },
+            "resolution_policy_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "resolution_policy_version": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "resolution_policy_id",
+            "resolution_policy_version",
+            "classification",
+            "rejection_code"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "ephemeris_identity_version_and_coverage": {
+      "additionalProperties": false,
+      "properties": {
+        "coverage_end": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "coverage_start": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "data_digest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "ephemeris_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "ephemeris_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "ephemeris_id",
+        "ephemeris_version",
+        "coverage_start",
+        "coverage_end",
+        "data_digest_sha256"
+      ],
+      "type": "object"
+    },
+    "iana_time_zone_and_tzdb_identity": {
+      "additionalProperties": false,
+      "properties": {
+        "iana_time_zone_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "tzdb_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "iana_time_zone_id",
+        "tzdb_version"
+      ],
+      "type": "object"
+    },
+    "local_wall_time_and_precision": {
+      "additionalProperties": false,
+      "properties": {
+        "precision_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "precision_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "wall_time_text": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "wall_time_text",
+        "precision_id",
+        "precision_version"
+      ],
+      "type": "object"
+    },
+    "place_coordinates_and_precision": {
+      "additionalProperties": false,
+      "properties": {
+        "coordinate_reference_system_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "coordinate_reference_system_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "latitude_degrees": {
+          "maximum": 90,
+          "minimum": -90,
+          "type": "number"
+        },
+        "longitude_degrees": {
+          "maximum": 180,
+          "minimum": -180,
+          "type": "number"
+        },
+        "precision_meters": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "coordinate_reference_system_id",
+        "coordinate_reference_system_version",
+        "latitude_degrees",
+        "longitude_degrees",
+        "precision_meters"
+      ],
+      "type": "object"
+    },
+    "rahu_ketu_mode": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "mean",
+            "true"
+          ],
+          "type": "string"
+        },
+        "mode_definition_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "mode_definition_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode",
+        "mode_definition_id",
+        "mode_definition_version"
+      ],
+      "type": "object"
+    },
+    "sidereal_zodiac_declaration": {
+      "additionalProperties": false,
+      "properties": {
+        "zodiac_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "zodiac_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "zodiac_id",
+        "zodiac_version"
+      ],
+      "type": "object"
+    },
+    "utc_conversion_and_time_scale": {
+      "additionalProperties": false,
+      "properties": {
+        "conversion_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "conversion_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "input_time_scale_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "input_time_scale_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "output_time_scale_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "output_time_scale_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "conversion_id",
+        "conversion_version",
+        "input_time_scale_id",
+        "input_time_scale_version",
+        "output_time_scale_id",
+        "output_time_scale_version"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "contractVersion",
+    "civil_calendar_and_date",
+    "local_wall_time_and_precision",
+    "birth_time_uncertainty_interval_or_candidates",
+    "place_coordinates_and_precision",
+    "iana_time_zone_and_tzdb_identity",
+    "dst_gap_overlap_resolution",
+    "utc_conversion_and_time_scale",
+    "ephemeris_identity_version_and_coverage",
+    "sidereal_zodiac_declaration",
+    "ayanamsa_identity_and_version",
+    "rahu_ketu_mode",
+    "bhava_house_definition",
+    "birth_time_perturbation_candidates_and_transition_points"
+  ],
+  "title": "Hakimi Vedic input contract draft 0.1.0",
+  "type": "object",
+  "x-hakimiBoundary": {
+    "acceptanceCapability": false,
+    "acceptedInputsIncluded": 0,
+    "artifactRole": "project_authored_isolated_input_contract_draft",
+    "authenticityEstablished": false,
+    "authorityStatus": "not-authoritative",
+    "authorshipAuthenticityEstablished": false,
+    "authorshipClaim": "project_authored_clean_room_draft",
+    "baziArtifactRefs": [],
+    "baziAuthorityInherited": false,
+    "countsTowardAdmission": false,
+    "defaultInference": "forbidden",
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "externalSourceRefs": [],
+    "factReceiptCapability": false,
+    "factReceiptIssued": false,
+    "formalAdmissionAuthorized": false,
+    "generativeModelInference": "forbidden",
+    "inputAcceptanceReceiptIssued": false,
+    "inputAccepted": false,
+    "inputContractGateSatisfied": false,
+    "inputInstancesIncluded": 0,
+    "integrationStatus": "not-integrated",
+    "missingOrAmbiguousInput": "reject",
+    "normalizationCapability": false,
+    "productBoundaryAdr": {
+      "bytes": 4531,
+      "path": "docs/吠陀占星独立产品化ADR-0001-2026-08-26.md",
+      "rawHashAndSemanticInspectionUseSameBuffer": true,
+      "sha256": "0e9b81505abb963b4d64426338b8071cd8a211eed8d02fe76065fada335dce63"
+    },
+    "productStatus": "research-only",
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "realPersonInputsIncluded": 0,
+    "releaseReady": false,
+    "requirementSelectionsIncluded": 0,
+    "requirementsResolved": 0,
+    "rightsEstablished": false,
+    "sampleInputsIncluded": 0,
+    "schemaStatus": "isolated_contract_draft",
+    "structuralPrecheckCountsAsAcceptance": false,
+    "structuralPrecheckOnly": true,
+    "successReceiptCapability": false,
+    "successReceiptIssued": false,
+    "syntheticPersonInputsIncluded": 0
+  }
+}

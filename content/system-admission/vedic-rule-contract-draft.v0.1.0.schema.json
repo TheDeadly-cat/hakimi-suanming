@@ -1,0 +1,330 @@
+{
+  "$defs": {
+    "nonEmptyOpaqueIdentityRefList": {
+      "items": {
+        "$ref": "#/$defs/opaqueIdentityRef"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "opaqueIdentityRef": {
+      "maxLength": 300,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/#-]{0,299}$",
+      "type": "string"
+    },
+    "opaqueIdentityRefList": {
+      "items": {
+        "$ref": "#/$defs/opaqueIdentityRef"
+      },
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "$id": "urn:hakimi:vedic:rule-contract-draft:0.1.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": {
+      "const": "hakimi.vedic.rule-contract/0.1-draft",
+      "type": "string"
+    },
+    "ruleDefinitionEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability_definition_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "conflict_definition_refs": {
+          "$ref": "#/$defs/opaqueIdentityRefList"
+        },
+        "counterexample_definition_refs": {
+          "$ref": "#/$defs/opaqueIdentityRefList"
+        },
+        "expert_review_policy_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "fact_dependency_contract_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "failure_channel_contract_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "high_risk_policy_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "implementation_artifact_set_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "rights_policy_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "rule_digest_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "rule_id_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "rule_version_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "school_definition_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "source_binding_refs": {
+          "$ref": "#/$defs/nonEmptyOpaqueIdentityRefList"
+        },
+        "summary_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        }
+      },
+      "required": [
+        "rule_id_ref",
+        "rule_version_ref",
+        "rule_digest_ref",
+        "summary_ref",
+        "school_definition_ref",
+        "applicability_definition_ref",
+        "conflict_definition_refs",
+        "counterexample_definition_refs",
+        "source_binding_refs",
+        "fact_dependency_contract_ref",
+        "rights_policy_ref",
+        "expert_review_policy_ref",
+        "high_risk_policy_ref",
+        "implementation_artifact_set_ref",
+        "failure_channel_contract_ref"
+      ],
+      "type": "object"
+    },
+    "rulesetEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "expert_review_policy_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "fact_contract_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "failure_channel_contract_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "high_risk_policy_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "implementation_artifact_set_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "rights_policy_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "rule_definition_refs": {
+          "$ref": "#/$defs/nonEmptyOpaqueIdentityRefList"
+        },
+        "ruleset_digest_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "ruleset_id_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "ruleset_version_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "school_scope_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "source_binding_policy_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        },
+        "summary_ref": {
+          "$ref": "#/$defs/opaqueIdentityRef"
+        }
+      },
+      "required": [
+        "ruleset_id_ref",
+        "ruleset_version_ref",
+        "ruleset_digest_ref",
+        "summary_ref",
+        "school_scope_ref",
+        "rule_definition_refs",
+        "fact_contract_ref",
+        "source_binding_policy_ref",
+        "rights_policy_ref",
+        "expert_review_policy_ref",
+        "high_risk_policy_ref",
+        "implementation_artifact_set_ref",
+        "failure_channel_contract_ref"
+      ],
+      "type": "object"
+    },
+    "systemId": {
+      "const": "vedic",
+      "type": "string"
+    }
+  },
+  "required": [
+    "contractVersion",
+    "systemId",
+    "ruleDefinitionEnvelope",
+    "rulesetEnvelope"
+  ],
+  "title": "Hakimi Vedic rule contract draft 0.1.0",
+  "type": "object",
+  "x-hakimiBoundary": {
+    "artifactRole": "project_authored_isolated_rule_contract_draft",
+    "authenticityEstablished": false,
+    "authorityStatus": "not-authoritative",
+    "authorshipAuthenticityEstablished": false,
+    "authorshipClaim": "project_authored_clean_room_draft",
+    "baziArtifactRefs": [],
+    "baziAuthorityInherited": false,
+    "blockedPrerequisiteIds": [
+      "admitted_fact_contract_and_deterministic_fact_instances",
+      "rule_school_identity_scope_and_lineage_semantics",
+      "rule_applicability_condition_semantics",
+      "rule_conflict_declaration_and_resolution_semantics",
+      "rule_counterexample_model_and_retention_semantics",
+      "source_body_quote_locator_and_binding",
+      "rule_and_ruleset_version_digest_and_summary_semantics",
+      "fact_dependency_contract_and_invariants",
+      "rule_completeness_uniqueness_and_cross_rule_invariants",
+      "rights_license_and_redistribution_review",
+      "independent_expert_review_and_disagreement_retention",
+      "high_risk_output_policy_abstention_and_failure_semantics",
+      "executable_ruleset_implementation_identity_and_failure_channel"
+    ],
+    "blockedPrerequisitesDefined": 13,
+    "blockedPrerequisitesResolved": 0,
+    "blockedPrerequisitesUniverseClosed": false,
+    "boundaryBindings": {
+      "bindingDirection": "rule_draft_to_adr_input_and_fact_closures_only",
+      "chainOrder": [
+        "docs/吠陀占星独立产品化ADR-0001-2026-08-26.md",
+        "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json",
+        "content/system-admission/vedic-input-contract-requirements.v1.json",
+        "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json",
+        "content/system-admission/vedic-fact-contract-requirements.v1.json"
+      ],
+      "factContractDraft": {
+        "artifactRole": "project_authored_isolated_fact_contract_draft",
+        "bytes": 14240,
+        "path": "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json",
+        "rawHashAndSemanticInspectionUseSameBuffer": true,
+        "schemaSemanticDigest": "0eb3aa460403e42ca5542d1bafb3325d543a0e11429f40b8041f2c1bdf0bc5b1",
+        "schemaStatus": "isolated_contract_draft",
+        "sha256": "6fe875bcb156ae9c7756302e96d902b8c03668e58a8894b33bc0d5fab374a1fe"
+      },
+      "factContractRequirements": {
+        "artifactRole": "non_product_governance_fact_requirements_inventory",
+        "bytes": 42634,
+        "ledgerDigest": "a33eeee2652559faa0f83c404980ec78acc6dc94be3f6476f25b0e8fdd5eb6b8",
+        "path": "content/system-admission/vedic-fact-contract-requirements.v1.json",
+        "rawHashAndSemanticInspectionUseSameBuffer": true,
+        "requirementsResolved": 0,
+        "requirementsUniverseClosed": false,
+        "sha256": "a20a1033ce063702548a79b6a651d21421e9f59a9a2ecd4da251cde42ae36b38",
+        "status": "fact_contract_draft_present_zero_instances_values_producer_projector_absent_not_admitted"
+      },
+      "inputContractDraft": {
+        "artifactRole": "project_authored_isolated_input_contract_draft",
+        "bytes": 16529,
+        "path": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json",
+        "rawHashAndSemanticInspectionUseSameBuffer": true,
+        "schemaSemanticDigest": "ad9a1d568d63296d3ed19f30d91cb8f8e52f543afcec03f238178da4af70ee08",
+        "schemaStatus": "isolated_contract_draft",
+        "sha256": "4899e8fdf267a44e401295f23e11e2504e45f8e2f731c6be9b8ad1435e8dbf69"
+      },
+      "inputContractRequirements": {
+        "artifactRole": "non_product_governance_requirements_inventory",
+        "bytes": 15859,
+        "ledgerDigest": "e545c254d29902df58e29ca90f965333daca70f06bce03cca62ad9e2f4fc7ac0",
+        "path": "content/system-admission/vedic-input-contract-requirements.v1.json",
+        "rawHashAndSemanticInspectionUseSameBuffer": true,
+        "requirementsResolved": 0,
+        "sha256": "85409d7f4ed7ef6bddc4d34102ecff479fd8dbe4210a78416f90ee705a0f2e59",
+        "status": "input_contract_draft_present_zero_instances_not_admitted"
+      },
+      "productBoundaryAdr": {
+        "bytes": 4531,
+        "path": "docs/吠陀占星独立产品化ADR-0001-2026-08-26.md",
+        "rawHashAndSemanticInspectionUseSameBuffer": true,
+        "semanticDigest": "1a71b363132b0d61298f53f7e14eb77d58a3eb3f7d649d8d3c8f42fd1acd1a89",
+        "sha256": "0e9b81505abb963b4d64426338b8071cd8a211eed8d02fe76065fada335dce63"
+      }
+    },
+    "countsTowardAdmission": false,
+    "doesNotEstablish": [
+      "admitted_fact_contract_or_deterministic_fact_instances",
+      "rule_school_applicability_conflict_counterexample_or_method_truth",
+      "rule_source_body_quote_locator_or_binding",
+      "rule_rights_license_or_legal_conclusion",
+      "expert_identity_opinion_or_truth",
+      "executable_rule_evaluator_or_versioned_ruleset",
+      "rule_fact_or_success_receipt",
+      "mutation_epoch_cross_file_atomic_snapshot_interval_mutation_or_aba_exclusion",
+      "formal_admission_release_readiness_or_public_release_authorization"
+    ],
+    "domainAuthorityAuthorized": false,
+    "excludedUnreviewedCandidateMethodIds": [
+      "d1_divisional_chart",
+      "d9_divisional_chart",
+      "d10_divisional_chart",
+      "vimshottari_dasha",
+      "chara_karaka",
+      "shadbala",
+      "ashtakavarga"
+    ],
+    "expertClaimsAuthorized": false,
+    "externalSourceRefs": [],
+    "factContractGateSatisfied": false,
+    "factInstancesIncluded": 0,
+    "factReceiptIssued": false,
+    "formalAdmissionAuthorized": false,
+    "highRiskClaimsAuthorized": false,
+    "implementationArtifactRefs": [],
+    "inputAcceptanceReceiptIssued": false,
+    "inputContractGateSatisfied": false,
+    "integrationStatus": "not-integrated",
+    "methodSelectionsIncluded": 0,
+    "observationBoundary": {
+      "abaExcluded": false,
+      "crossFileAtomicSnapshot": false,
+      "heldFileHandleReads": true,
+      "intervalMutationExcluded": false,
+      "mutationEpochAvailable": false,
+      "mutationEpochReceipt": null,
+      "pathEndpointRevalidated": true,
+      "plainDirectoryChainRequired": true,
+      "ruleDraftAndUpstreamsAtomicSnapshot": false,
+      "schemaHashAndParseUseSameReadBuffer": true,
+      "upstreamArtifactHashAndInspectionUseSameReadBuffer": true
+    },
+    "productStatus": "research-only",
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "requirementSelectionsIncluded": 0,
+    "requirementsResolved": 0,
+    "requirementsUniverseClosed": false,
+    "rightsEstablished": false,
+    "ruleBodiesIncluded": 0,
+    "ruleContractGateSatisfied": false,
+    "ruleDefinitionsIncluded": 0,
+    "ruleEvaluationCapability": false,
+    "ruleInstancesIncluded": 0,
+    "ruleReceiptCapability": false,
+    "ruleReceiptIssued": false,
+    "rulesetExecutionCapability": false,
+    "rulesetInstancesIncluded": 0,
+    "schemaStatus": "isolated_contract_draft",
+    "schoolSelectionsIncluded": 0,
+    "sourceBindingEstablished": false,
+    "sourceBodiesIncluded": 0,
+    "structuralPrecheckCountsAsRuleValidation": false,
+    "structuralPrecheckOnly": true,
+    "successReceiptCapability": false,
+    "successReceiptIssued": false,
+    "versionedRulesetGateSatisfied": false
+  }
+}

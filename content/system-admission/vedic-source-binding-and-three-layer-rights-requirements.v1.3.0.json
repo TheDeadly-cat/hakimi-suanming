@@ -1,0 +1,277 @@
+{
+  "artifactRole": "append_only_nonformal_registry_tarball_parity_delta_successor_candidate",
+  "authorityBoundary": {
+    "authenticityEstablished": false,
+    "contentTruthEstablished": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "traditionalAuthorityEstablished": false
+  },
+  "createdAt": "2026-09-01T14:44:00.000Z",
+  "crossSystemIsolationBoundary": {
+    "baziAuthorityInherited": false,
+    "sharedCarrierIdentityIsAuthorityInheritance": false,
+    "westernAuthorityInherited": false,
+    "ziweiAuthorityInherited": false
+  },
+  "doesNotEstablish": [
+    "formal_v1_replacement_or_v1_1_v1_2_promotion",
+    "new_source_candidate_frozen_binding_or_subject_satisfaction",
+    "source_body_exact_quote_or_exact_locator",
+    "npm_publisher_identity_package_signature_first_seen_or_authenticity",
+    "license_authenticity_applicability_or_notice_obligation_satisfaction",
+    "work_version_carrier_rights_legal_conclusion_or_redistribution",
+    "vedic_content_truth_traditional_authority_or_expert_truth",
+    "browser_pwa_service_worker_product_runtime_or_release_evidence",
+    "formal_parent_registry_manifest_owner_or_public_admission",
+    "trusted_time_mutation_epoch_cross_file_atomicity_interval_integrity_or_aba_exclusion"
+  ],
+  "evidenceLedgerSeparation": {
+    "browserRuntimeEvidence": "not_assessed_by_this_successor",
+    "contentTruth": "not_established",
+    "engineeringEvidence": "v1_2_plus_point_in_time_public_registry_tarball_local_carrier_byte_parity_child",
+    "expertTruth": "not_established",
+    "publicReleaseAuthorization": "not_authorized",
+    "releaseReadiness": "not_established",
+    "rightsLegalJudgment": "not_established"
+  },
+  "formalStateBoundary": {
+    "formalManifestIntegrated": false,
+    "formalParentConsumptionEstablished": false,
+    "formalRegistryIntegrated": false,
+    "formalV1RemainsCurrent": true,
+    "ownerAdmissionAccepted": false,
+    "predecessorV11RemainsNonformal": true,
+    "predecessorV12RemainsNonformal": true,
+    "publicReleaseAuthorized": false,
+    "successorActiveEffect": "none",
+    "successorIsFormalCurrent": false
+  },
+  "gateSummary": {
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 38,
+    "carrierEvidenceChildrenTotal": 2,
+    "carrierRightsEstablished": 0,
+    "exactLocatorsEstablished": 0,
+    "exactQuotesBound": 0,
+    "independentDomainExpertReviewsVerified": 0,
+    "independentEngineeringReviewsVerified": 0,
+    "independentRightsReviewsVerified": 0,
+    "inheritedPartialCandidates": 2,
+    "metadataEndpointsObserved": 3,
+    "newCandidateIdsAdded": 0,
+    "publicReleaseAuthorized": false,
+    "registryTarballParityChildrenAttached": 1,
+    "registryTarballParityEvidenceBindingsAttached": 2,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "selectedEntryByteParitiesObserved": 8,
+    "sourceBodiesBound": 0,
+    "subjectFullySatisfied": 0,
+    "tarballEndpointsObserved": 3,
+    "versionRightsEstablished": 0,
+    "workRightsEstablished": 0
+  },
+  "integrityBoundary": {
+    "authenticityEstablished": false,
+    "canonicalPrettyJsonWithLfRequired": true,
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi.vedic.source-binding-and-three-layer-rights-requirements.successor.v1.3\u0000",
+    "digestExcludesOwnField": true,
+    "digestIsDigitalSignature": false,
+    "exclusiveCreateWriterRequired": true,
+    "perFileHeldHandleStableReadsUsed": true,
+    "strictDuplicateKeyRejectingJsonUsed": true
+  },
+  "ledgerDigest": "a019f2a78e7631486f56cc75a1de0fe28b8f0d8651ed0b71ec7a5910767326bb",
+  "ledgerId": "hakimi.vedic.source-binding-and-three-layer-rights-requirements/1.3.0",
+  "lineage": {
+    "formalV1": {
+      "ledgerDigest": "b98699c70e9783ef670c6acfbb0410e0ff89eca51db54dd4b36b44e60d33194e",
+      "ledgerId": "hakimi.vedic.source-binding-and-three-layer-rights-requirements/1.0.0",
+      "path": "content/system-admission/vedic-source-binding-and-three-layer-rights-requirements.v1.json",
+      "rawBytes": 85752,
+      "rawSha256": "2eed084660dbfa9de5c655e40d96c9bb848743f8f14091e8fb3564f2d60385b9",
+      "remainsFormalCurrent": true
+    },
+    "formalV1Modified": false,
+    "predecessorBacklinkAdded": false,
+    "predecessorV11": {
+      "activeEffect": "none",
+      "ledgerDigest": "afd65de96a850c1632e8c00b03b6be2ff05a2f8b1dd0a19fbe27d4376ac2bb6b",
+      "ledgerId": "hakimi.vedic.source-binding-and-three-layer-rights-requirements/1.1.0",
+      "path": "content/system-admission/vedic-source-binding-and-three-layer-rights-requirements.v1.1.0.json",
+      "rawBytes": 94582,
+      "rawSha256": "9356740cfd960a3137493928978d43d25be432f1bae719dde7ea95c66338c2bd",
+      "remainsNonformal": true
+    },
+    "predecessorV11Modified": false,
+    "predecessorV12": {
+      "activeEffect": "none",
+      "ledgerDigest": "0decafbdc8c94dd9ae206fb453a8a64e8132eb02e5b4f50a1eb12797804b8ef2",
+      "ledgerId": "hakimi.vedic.source-binding-and-three-layer-rights-requirements/1.2.0",
+      "path": "content/system-admission/vedic-source-binding-and-three-layer-rights-requirements.v1.2.0.json",
+      "rawBytes": 15738,
+      "rawSha256": "6d3a36f041801e7120a3d270695f94b34242a97fc1559000f8d4d2c0002a3239",
+      "remainsNonformal": true
+    },
+    "predecessorV12Modified": false,
+    "registryTarballParityChild": {
+      "childDigest": "51c4c7ec945050d3bf40b0051d9a3b3237b310a22892f2a57c9399d8d331c86c",
+      "childId": "hakimi.vedic.tzdb-core-registry-tarball-parity-observation-child/1.0.0",
+      "path": "content/system-admission/vedic-tzdb-core-registry-tarball-parity-observation-child.v1.json",
+      "rawBytes": 19758,
+      "rawSha256": "8c6cbafa49a2ff4b5c453a7c43fd9474aff338b05b1c0a5b32f303bd0cf5d074",
+      "relationship": "one_way_point_in_time_carrier_parity_supplement_to_two_existing_candidates"
+    }
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "crossFileAtomicSnapshotEstablished": false,
+    "intervalMutationExcludedAcrossFilesAndNetwork": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "perFileHeldHandleStableReadsUsed": true,
+    "predecessorAndParityChildVerifiedThroughIndependentFullLoaders": true,
+    "publicRegistryObservationWasPointInTimeOnly": true,
+    "strictDuplicateKeyRejectingJsonUsed": true
+  },
+  "predecessorStateBoundary": {
+    "frozenBindings": 0,
+    "inheritedPartialCandidates": 2,
+    "newCandidateIdsAdded": 0,
+    "predecessorCandidateBindingsReplaced": false,
+    "predecessorSubjectBodiesCopiedIntoThisDeltaSuccessor": false,
+    "requiredUnbound": 36,
+    "subjectFullySatisfied": 0,
+    "verifiedThroughV12FullLoaderPrivateBrand": true
+  },
+  "projectReleaseGovernanceContext": {
+    "activeLine": "legacy-v13",
+    "expertClaimsAuthorized": false,
+    "inheritedByVedicProductIdentity": false,
+    "migrationId": null,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "projectContextOnly": true,
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "recordType": "vedic_source_binding_and_three_layer_rights_requirements_registry_tarball_parity_delta_successor_candidate_v1_3",
+  "registryTarballParityEvidenceBindings": [
+    {
+      "bindingState": "candidate_only_unbound",
+      "contentTruthEstablished": false,
+      "countsTowardFrozenBindingGate": false,
+      "evidenceArtifact": {
+        "childDigest": "51c4c7ec945050d3bf40b0051d9a3b3237b310a22892f2a57c9399d8d331c86c",
+        "childId": "hakimi.vedic.tzdb-core-registry-tarball-parity-observation-child/1.0.0",
+        "path": "content/system-admission/vedic-tzdb-core-registry-tarball-parity-observation-child.v1.json",
+        "rawBytes": 19758,
+        "rawSha256": "8c6cbafa49a2ff4b5c453a7c43fd9474aff338b05b1c0a5b32f303bd0cf5d074"
+      },
+      "evidenceScope": "public_registry_tarball_package_manifest_and_2026c_2025b_packed_local_byte_parity_only",
+      "existingCandidateId": "vedic-iana-tzdb-2026c-input-source-candidate-v1",
+      "formalExactLocatorEstablished": false,
+      "formalExactQuoteBound": false,
+      "observedPackageKeys": [
+        "moment_timezone_0_6_3",
+        "moment_timezone_alias_0_5_48",
+        "moment_2_30_1"
+      ],
+      "replacesPredecessorEvidence": false,
+      "sourceBodyBound": false,
+      "subjectFullySatisfied": false,
+      "subjectId": "vedic.input.iana_time_zone_and_tzdb_identity",
+      "supplementsExistingCandidate": true
+    },
+    {
+      "bindingState": "candidate_only_unbound",
+      "carrierRightsEstablished": false,
+      "countsTowardFrozenBindingGate": false,
+      "evidenceArtifact": {
+        "childDigest": "51c4c7ec945050d3bf40b0051d9a3b3237b310a22892f2a57c9399d8d331c86c",
+        "childId": "hakimi.vedic.tzdb-core-registry-tarball-parity-observation-child/1.0.0",
+        "path": "content/system-admission/vedic-tzdb-core-registry-tarball-parity-observation-child.v1.json",
+        "rawBytes": 19758,
+        "rawSha256": "8c6cbafa49a2ff4b5c453a7c43fd9474aff338b05b1c0a5b32f303bd0cf5d074"
+      },
+      "evidenceScope": "public_registry_tarball_package_manifest_license_and_packed_local_byte_parity_only",
+      "existingCandidateId": "vedic-iana-tzdb-2026c-moment-timezone-rights-candidate-v1",
+      "licenseApplicabilityEstablished": false,
+      "licenseAuthenticityEstablished": false,
+      "observedPackageKeys": [
+        "moment_timezone_0_6_3",
+        "moment_timezone_alias_0_5_48",
+        "moment_2_30_1"
+      ],
+      "packageAuthenticityEstablished": false,
+      "packageSignatureVerified": false,
+      "publisherIdentityVerified": false,
+      "redistributionAuthorized": false,
+      "replacesPredecessorEvidence": false,
+      "rightsLegalConclusionEstablished": false,
+      "subjectFullySatisfied": false,
+      "subjectId": "vedic.rule.rights_license_and_redistribution_review",
+      "supplementsExistingCandidate": true,
+      "versionRightsEstablished": false,
+      "workRightsEstablished": false
+    }
+  ],
+  "requirementsUniverse": {
+    "bindingRequired": 38,
+    "countsByLayer": {
+      "fact": 12,
+      "input": 13,
+      "rule": 13
+    },
+    "exhaustiveVedicSourceRightsUniverseClaimed": false,
+    "requirementsUniverseClosed": false
+  },
+  "runtimeTrustBoundary": {
+    "assumesNoArbitraryPreEvaluationCodeExecution": true,
+    "cliOutputTrustedAttestation": false,
+    "hiddenPreEvaluationCodeExecutionExcluded": false,
+    "launcherIdentityEstablished": false,
+    "loaderIdentityEstablished": false,
+    "nodeRuntimeIdentityEstablished": false,
+    "selectedLedgerIdentityBindsCliImplementation": false,
+    "visibleGuardIsSecurityBoundary": false
+  },
+  "schemaVersion": "1.3.0",
+  "sourceRightsBoundary": {
+    "bindingFrozenVerified": 0,
+    "carrierRightsEstablished": 0,
+    "exactLocatorsEstablished": 0,
+    "exactQuotesBound": 0,
+    "inheritedCandidateCount": 2,
+    "newCandidateIdsAdded": 0,
+    "packageAuthenticityEstablished": false,
+    "packageSignatureVerified": false,
+    "predecessorCarrierEvidenceChildrenAttached": 1,
+    "publicRegistryTarballToLocalCarrierByteParityObserved": true,
+    "publisherIdentityVerified": false,
+    "redistributionAuthorized": false,
+    "registryTarballParityChildrenAttached": 1,
+    "rightsBundleComplete": false,
+    "rightsLegalConclusionEstablished": false,
+    "sourceBodiesBound": 0,
+    "sourceBundleComplete": false,
+    "totalCarrierEvidenceChildrenAttached": 2,
+    "versionRightsEstablished": 0,
+    "workRightsEstablished": 0
+  },
+  "status": "v1_2_two_partial_candidates_plus_public_registry_tarball_local_carrier_parity_nonformal_zero_active_effect_zero_of_38_frozen",
+  "timeBoundary": {
+    "clockRollbackExcluded": false,
+    "createdAtIsUntrustedLocalClockLabel": true,
+    "createdAtUpperBoundObservedOnSameUntrustedLocalClock": "2026-09-01T14:44:30.000Z",
+    "externalTimeAuthorityUsed": false,
+    "trustedTimestampEstablished": false
+  }
+}

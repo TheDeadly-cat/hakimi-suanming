@@ -1,0 +1,20 @@
+{
+  "name": "@hakimi/vedic-mutation-epoch-runtime-experiment-draft",
+  "version": "0.0.0-draft.0",
+  "private": true,
+  "type": "module",
+  "exports": {},
+  "x-hakimi-isolated-draft": {
+    "schemaVersion": 1,
+    "kind": "workspace",
+    "systemId": "vedic-astrology",
+    "productIdentity": null,
+    "targetSchema": null,
+    "migrationId": null,
+    "runtimeOptionSelected": false,
+    "storageBackendSelected": false,
+    "productionImport": "forbidden",
+    "allowedDraftDependencies": []
+  },
+  "dependencies": {}
+}

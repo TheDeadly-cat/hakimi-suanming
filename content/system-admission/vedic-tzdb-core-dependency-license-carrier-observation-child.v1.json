@@ -1,0 +1,335 @@
+{
+  "authorityBoundary": {
+    "authenticityEstablished": false,
+    "contentTruthEstablished": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "traditionalAuthorityEstablished": false
+  },
+  "basisArtifacts": [
+    {
+      "path": "package-lock.json",
+      "rawBytes": 175812,
+      "rawSha256": "40a02c7c3166f0c9bc03afa9c1d1f342fb7f54efe1abbf7cb3f5cf6ecb482a4d",
+      "role": "workspace_dependency_lock"
+    },
+    {
+      "path": "packages/tzdb-core/package.json",
+      "rawBytes": 241,
+      "rawSha256": "fb12b19a6f6c971185bd2f2c9226fe50ad816595e3acec4f0a0b373593136236",
+      "role": "tzdb_core_package_manifest"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "rawBytes": 7030,
+      "rawSha256": "d05d5d8a944cde7a739f3a64a1077fbedf706185a20e3e15c7ad423d7f0e8248",
+      "role": "project_third_party_notice_inventory"
+    }
+  ],
+  "childDigest": "37800051745eeff337134962eb2518c9149eab14cf8369d559419ea76cdca4d0",
+  "childId": "hakimi.vedic.tzdb-core-dependency-license-carrier-observation-child/1.0.0",
+  "createdAt": "2026-09-01T13:08:00.000Z",
+  "dependencyCarriers": [
+    {
+      "declaredDependencyName": "moment-timezone",
+      "declaredDependencySpec": "0.6.3",
+      "licenseCarrier": {
+        "applicabilityEstablished": false,
+        "authenticityEstablished": false,
+        "bodyCopiedIntoChild": false,
+        "exactQuoteStoredInChild": false,
+        "path": "node_modules/moment-timezone/LICENSE",
+        "rawBytes": 1097,
+        "rawSha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+      },
+      "lockEntry": {
+        "declaredLicense": "MIT",
+        "dependencyEdges": {
+          "moment": "^2.29.4"
+        },
+        "integrity": "sha512-pVEPA/HCFHHbwJ130ywnzYuZpkEGcP6Daa/OwNebpA18MybeFHmQilAGGovXgWijQ8vQtmud9jZrziUBgsykfg==",
+        "packageNameFieldForAlias": "moment-timezone",
+        "resolved": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.6.3.tgz"
+      },
+      "noticeObservation": {
+        "entryObserved": true,
+        "legalReviewComplete": false,
+        "noticeInventory": {
+          "path": "THIRD_PARTY_NOTICES.md",
+          "rawBytes": 7030,
+          "rawSha256": "d05d5d8a944cde7a739f3a64a1077fbedf706185a20e3e15c7ad423d7f0e8248"
+        },
+        "noticeObligationSatisfied": false
+      },
+      "ordinal": 1,
+      "packageManifest": {
+        "declaredLicense": "MIT",
+        "declaredName": "moment-timezone",
+        "declaredVersion": "0.6.3",
+        "path": "node_modules/moment-timezone/package.json",
+        "rawBytes": 1076,
+        "rawSha256": "131fc5c4b7ad0c5ebcc00b5670c49ef54c2cf0cd26f68670bee10bfd66276a2b"
+      },
+      "packageName": "moment-timezone",
+      "packagePath": "node_modules/moment-timezone",
+      "packedCarrier": {
+        "countryCount": 247,
+        "dataTransformationProvenanceEstablished": false,
+        "ianaVersion": "2026c",
+        "linkCount": 257,
+        "path": "node_modules/moment-timezone/data/packed/latest.json",
+        "publisherTarballByteEqualityEstablished": false,
+        "rawBytes": 715527,
+        "rawSha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81",
+        "zoneCount": 340
+      },
+      "relationship": "tzdb_core_direct_current_dependency",
+      "version": "0.6.3"
+    },
+    {
+      "declaredDependencyName": "moment-timezone-2025b",
+      "declaredDependencySpec": "npm:moment-timezone@0.5.48",
+      "licenseCarrier": {
+        "applicabilityEstablished": false,
+        "authenticityEstablished": false,
+        "bodyCopiedIntoChild": false,
+        "exactQuoteStoredInChild": false,
+        "path": "node_modules/moment-timezone-2025b/LICENSE",
+        "rawBytes": 1097,
+        "rawSha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+      },
+      "lockEntry": {
+        "declaredLicense": "MIT",
+        "dependencyEdges": {
+          "moment": "^2.29.4"
+        },
+        "integrity": "sha512-f22b8LV1gbTO2ms2j2z13MuPogNoh5UzxL3nzNAYKGraILnbGc9NEE6dyiiiLv46DGRb8A4kg8UKWLjPthxBHw==",
+        "packageNameFieldForAlias": "moment-timezone",
+        "resolved": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.5.48.tgz"
+      },
+      "noticeObservation": {
+        "entryObserved": true,
+        "legalReviewComplete": false,
+        "noticeInventory": {
+          "path": "THIRD_PARTY_NOTICES.md",
+          "rawBytes": 7030,
+          "rawSha256": "d05d5d8a944cde7a739f3a64a1077fbedf706185a20e3e15c7ad423d7f0e8248"
+        },
+        "noticeObligationSatisfied": false
+      },
+      "ordinal": 2,
+      "packageManifest": {
+        "declaredLicense": "MIT",
+        "declaredName": "moment-timezone",
+        "declaredVersion": "0.5.48",
+        "path": "node_modules/moment-timezone-2025b/package.json",
+        "rawBytes": 1077,
+        "rawSha256": "4b5a6218fe37ea04bbe19f463fc2477e141bfb8ee18506bd99e871a0d25c3dad"
+      },
+      "packageName": "moment-timezone",
+      "packagePath": "node_modules/moment-timezone-2025b",
+      "packedCarrier": {
+        "countryCount": 247,
+        "dataTransformationProvenanceEstablished": false,
+        "ianaVersion": "2025b",
+        "linkCount": 257,
+        "path": "node_modules/moment-timezone-2025b/data/packed/latest.json",
+        "publisherTarballByteEqualityEstablished": false,
+        "rawBytes": 727104,
+        "rawSha256": "b1ad1446fbc94459f86c8e3f4ffadfc4170ad2af9cbd2a9b85c75d5436ce6425",
+        "zoneCount": 340
+      },
+      "relationship": "tzdb_core_direct_retained_alias_dependency",
+      "version": "0.5.48"
+    },
+    {
+      "declaredDependencyName": "moment",
+      "declaredDependencySpec": "^2.29.4",
+      "licenseCarrier": {
+        "applicabilityEstablished": false,
+        "authenticityEstablished": false,
+        "bodyCopiedIntoChild": false,
+        "exactQuoteStoredInChild": false,
+        "path": "node_modules/moment/LICENSE",
+        "rawBytes": 1075,
+        "rawSha256": "8f38f320bbf5eb84c08e08676f7ee1d2204ebe5797f6a090d077329cf212fca3"
+      },
+      "lockEntry": {
+        "declaredLicense": "MIT",
+        "dependencyEdges": {},
+        "integrity": "sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==",
+        "packageNameFieldForAlias": "moment",
+        "resolved": "https://registry.npmjs.org/moment/-/moment-2.30.1.tgz"
+      },
+      "noticeObservation": {
+        "entryObserved": true,
+        "legalReviewComplete": false,
+        "noticeInventory": {
+          "path": "THIRD_PARTY_NOTICES.md",
+          "rawBytes": 7030,
+          "rawSha256": "d05d5d8a944cde7a739f3a64a1077fbedf706185a20e3e15c7ad423d7f0e8248"
+        },
+        "noticeObligationSatisfied": false
+      },
+      "ordinal": 3,
+      "packageManifest": {
+        "declaredLicense": "MIT",
+        "declaredName": "moment",
+        "declaredVersion": "2.30.1",
+        "path": "node_modules/moment/package.json",
+        "rawBytes": 3556,
+        "rawSha256": "5e2f0870f4d1bbef11e8bf90babd72a4399b86b19da81de796a58457a37b8e13"
+      },
+      "packageName": "moment",
+      "packagePath": "node_modules/moment",
+      "packedCarrier": null,
+      "relationship": "shared_transitive_dependency_of_both_moment_timezone_nodes",
+      "version": "2.30.1"
+    }
+  ],
+  "dependencyClosure": {
+    "aliasTargetExact": true,
+    "buildAndTestToolingClosureObserved": false,
+    "completeCurrentTzdbCoreThirdPartyLockClosureObserved": true,
+    "completeVedicProductRuntimeClosureObserved": false,
+    "currentSelectedPackageLockSubgraphExact": true,
+    "expectedThirdPartyNodeCount": 3,
+    "observedThirdPartyNodeCount": 3,
+    "rootDeclaredDependencyEdgesExact": true,
+    "rootManifestPath": "packages/tzdb-core/package.json",
+    "rootPackage": "@hakimi/tzdb-core@0.1.0",
+    "thirdPartyNodePaths": [
+      "node_modules/moment-timezone",
+      "node_modules/moment-timezone-2025b",
+      "node_modules/moment"
+    ],
+    "transitiveDependencyEdgesExact": true
+  },
+  "doesNotEstablish": [
+    "npm_publisher_tarball_equality_or_package_authenticity",
+    "license_applicability_or_notice_obligation_satisfaction",
+    "work_version_or_carrier_rights",
+    "legal_review_redistribution_or_publication_authorization",
+    "source_binding_exact_quote_exact_locator_or_subject_satisfaction",
+    "vedic_content_truth_traditional_authority_or_expert_truth",
+    "browser_pwa_service_worker_product_runtime_or_release_evidence",
+    "formal_current_replacement_registry_manifest_or_active_effect",
+    "trusted_time_mutation_epoch_cross_file_atomicity_interval_integrity_or_aba_exclusion"
+  ],
+  "evidenceLedgerSeparation": {
+    "browserRuntimeEvidence": "not_assessed_by_this_child",
+    "contentTruth": "not_established",
+    "engineeringEvidence": "local_lock_manifest_license_notice_and_packed_carrier_identity_only",
+    "expertTruth": "not_established",
+    "publicReleaseAuthorization": "not_authorized",
+    "releaseReadiness": "not_established",
+    "rightsLegalJudgment": "not_established"
+  },
+  "gateSummary": {
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 38,
+    "carrierRightsEstablished": 0,
+    "dependenciesExpected": 3,
+    "dependenciesObserved": 3,
+    "exactQuotesStored": 0,
+    "expertReviewsVerified": 0,
+    "legalReviewsVerified": 0,
+    "licenseCarrierEndpointsVerified": 3,
+    "noticeEntriesObserved": 3,
+    "packageManifestsVerified": 3,
+    "packedCarrierEndpointsVerified": 2,
+    "redistributionAuthorizations": 0,
+    "sourceBodiesCopied": 0,
+    "subjectFullySatisfied": 0,
+    "versionRightsEstablished": 0,
+    "workRightsEstablished": 0
+  },
+  "integrityBoundary": {
+    "authenticityEstablished": false,
+    "canonicalPrettyJsonWithLfRequired": true,
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi.vedic.tzdb-core-dependency-license-carrier-observation-child.v1\u0000",
+    "digestExcludesOwnField": true,
+    "digestIsDigitalSignature": false,
+    "exclusiveCreateWriterRequired": true
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "crossFileAtomicSnapshotEstablished": false,
+    "currentEndpointRevalidated": true,
+    "intervalMutationExcluded": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "perFileHeldHandleStableReadsUsed": true,
+    "strictDuplicateKeyRejectingJsonUsed": true
+  },
+  "projectReleaseGovernanceContext": {
+    "activeLine": "legacy-v13",
+    "expertClaimsAuthorized": false,
+    "inheritedByVedicProductIdentity": false,
+    "migrationId": null,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "projectContextOnly": true,
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "recordType": "vedic_tzdb_core_dependency_license_carrier_observation_child_v1",
+  "rightsBoundary": {
+    "carrierRightsEstablished": false,
+    "declaredLicenseFieldsObserved": true,
+    "licenseApplicabilityEstablished": false,
+    "licenseAuthenticityEstablished": false,
+    "localLicenseCarrierIdentitiesObserved": true,
+    "noticeObligationSatisfied": false,
+    "publisherTarballByteEqualityEstablished": false,
+    "redistributionAuthorized": false,
+    "rightsLegalConclusionEstablished": false,
+    "versionRightsEstablished": false,
+    "workRightsEstablished": false
+  },
+  "runtimeTrustBoundary": {
+    "assumesNoArbitraryPreEvaluationCodeExecution": true,
+    "cliOutputTrustedAttestation": false,
+    "hiddenPreEvaluationCodeExecutionExcluded": false,
+    "launcherIdentityEstablished": false,
+    "loaderIdentityEstablished": false,
+    "nodeRuntimeIdentityEstablished": false,
+    "selectedChildIdentityBindsCliImplementation": false,
+    "visibleGuardIsSecurityBoundary": false
+  },
+  "schemaVersion": "1.0.0",
+  "sourceRequirementsProjectionBoundary": {
+    "bindsFormalV1": false,
+    "bindsNonformalV11": false,
+    "carrierScopeOnly": true,
+    "countsTowardFrozenBindingGate": false,
+    "formalExactLocatorEstablished": false,
+    "formalExactQuoteBound": false,
+    "sourceBodyBound": false,
+    "subjectFullySatisfied": false,
+    "targetSubjectIds": [
+      "vedic.input.iana_time_zone_and_tzdb_identity",
+      "vedic.rule.rights_license_and_redistribution_review"
+    ]
+  },
+  "status": "three_node_local_manifest_license_and_two_packed_carriers_observed_unbound_no_legal_conclusion",
+  "systemIdentity": {
+    "baziWesternZiweiAuthorityInherited": false,
+    "contractSystemId": "vedic",
+    "independentSystemBoundaryPreserved": true,
+    "productSystemId": "vedic-astrology"
+  },
+  "timeBoundary": {
+    "clockRollbackExcluded": false,
+    "createdAtIsUntrustedLocalClockLabel": true,
+    "createdAtUpperBoundObservedOnSameUntrustedLocalClock": "2026-09-01T13:08:07.824Z",
+    "externalTimeAuthorityUsed": false,
+    "trustedTimestampEstablished": false
+  }
+}

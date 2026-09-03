@@ -1,0 +1,595 @@
+{
+  "activeAdmissionEffect": "none",
+  "artifactBindingCount": 25,
+  "artifactBindings": [
+    {
+      "bytes": 14240,
+      "path": "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "6fe875bcb156ae9c7756302e96d902b8c03668e58a8894b33bc0d5fab374a1fe"
+    },
+    {
+      "bytes": 42634,
+      "path": "content/system-admission/vedic-fact-contract-requirements.v1.json",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "a20a1033ce063702548a79b6a651d21421e9f59a9a2ecd4da251cde42ae36b38"
+    },
+    {
+      "bytes": 25578,
+      "path": "content/system-admission/vedic-independent-productization-requirements.v1.json",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "c9f0fbb3b25c3ad582dc4c3f5534e7e27cb44e47721dbf806b8085cefb6b26f8"
+    },
+    {
+      "bytes": 16529,
+      "path": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "4899e8fdf267a44e401295f23e11e2504e45f8e2f731c6be9b8ad1435e8dbf69"
+    },
+    {
+      "bytes": 15859,
+      "path": "content/system-admission/vedic-input-contract-requirements.v1.json",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "85409d7f4ed7ef6bddc4d34102ecff479fd8dbe4210a78416f90ee705a0f2e59"
+    },
+    {
+      "bytes": 12140,
+      "path": "content/system-admission/vedic-rule-contract-draft.v0.1.0.schema.json",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "1b0f118d5014aa8de0ab85bd756b710252565d643a5164ee88a7418d4a002f0d"
+    },
+    {
+      "bytes": 30734,
+      "path": "content/system-admission/vedic-rule-contract-requirements.v1.json",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "ee34106b3dccdfd5d08d89d3871161ba2a12f7bcc983aff8b4850aa6ee42bc94"
+    },
+    {
+      "bytes": 5229,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/browser-app/index.html",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "f13f5ca45965551e194fb6277fdc07d1040ec144d124c641e1f0e0eaa34edeb7"
+    },
+    {
+      "bytes": 21038,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/browser-fact-projection.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "5b8d3b25d2505854ef1edf21ad51ef2b8dd04401e1168cc90632af26e4b0e515"
+    },
+    {
+      "bytes": 8764,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-client.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "3abcfea96d8a3e1023f73a777aded11f9d26c3c2793fdb5a4123680c79ae977c"
+    },
+    {
+      "bytes": 22095,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-time.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "c69be8dd8fc39d40f8c1b77263ad41598a54698c252f55e32acecda3f2a96668"
+    },
+    {
+      "bytes": 3468,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-worker.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "bb01b0f1577a485a63eff8e38b521fabcaf32becd5a2806f1f4c4ca0949d91bc"
+    },
+    {
+      "bytes": 4879,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/constants.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "afe7b76fda96edd53f15d2f0dd4834e060f409924e1e9a41c58b5a462f569aa2"
+    },
+    {
+      "bytes": 10168,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/input-contract.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "e713dfbd579de404671f8190f1e4b89c95c4ad894498fcefa85313e94c7982ca"
+    },
+    {
+      "bytes": 7307,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/main.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "4f88710d65a8f108b47ef307b72f4984f75ad69fed06d24de9a949ea71acb4c8"
+    },
+    {
+      "bytes": 12295,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/protocol.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "fccd81865e6e41834624acfb4b551522edf526277b66950eda59830e37a6257f"
+    },
+    {
+      "bytes": 975,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/ui-format.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "44739e5fa14d1070459eb251bb3211d9fb82e7b19b88f6bacbe170f280ad17fc"
+    },
+    {
+      "bytes": 3317,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/worker-fact-projection.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "dc0370cfb82f14b009b8469a0e4990df6526a71191fcb6c60073b926aeabfe3f"
+    },
+    {
+      "bytes": 16136,
+      "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/vite.config.mjs",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "99771905c50721404267d2af70ce4cbaf4a0aa7b749785369b769d48a7ae9024"
+    },
+    {
+      "bytes": 396,
+      "path": "packages/tzdb-core/src/artifacts/iana-2025b.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "b1236071105653538a259d929a57e7cd2bb97928429cefaef2ead9dd5019e613"
+    },
+    {
+      "bytes": 7819,
+      "path": "packages/tzdb-core/src/index.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "7c144f6446b3fdba55f7b7b947fe242348ba5010025af36868c39436bfea638e"
+    },
+    {
+      "bytes": 8495,
+      "path": "packages/tzdb-core/src/packed-resolver.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "bc13da5d2d9b8309aaad972662f8a31761a40afffbd9226bdf80159d43e5081f"
+    },
+    {
+      "bytes": 96766,
+      "path": "scripts/vedic-civil-time-fact-browser-observation-lib.mjs",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "61612c877f81ee918fd462f5d1bb14304d38540a720719a53d779d1a86223dfd"
+    },
+    {
+      "bytes": 1735,
+      "path": "scripts/verify-vedic-civil-time-fact-browser-observation.mjs",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "8c2be04c8de46b0aea1e4e2e3ddca96ca4b02129b97c2b0a35d4bc6c2a69e2ae"
+    },
+    {
+      "bytes": 17450,
+      "path": "scripts/verify-vedic-civil-time-fact-browser-observation.test.mjs",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "sha256": "cd9bad19e300ff650ed1ddffa2dc5e553425839525431a69024047e1d9ecf693"
+    }
+  ],
+  "authorityBoundary": {
+    "astronomicalFactsEstablished": false,
+    "civilTimeDomainTruthCertified": false,
+    "contentTruthEstablished": false,
+    "crossSystemAuthorityInherited": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertIdentityCredentialsIndependenceEstablished": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "formalInputContractAdmitted": false,
+    "highRiskClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "sourceFreezeEstablished": false
+  },
+  "browserObservation": {
+    "actualPersonDataEntered": false,
+    "allButtonsTypeButtonBrowserObserved": true,
+    "astronomyOrInterpretationFieldsBrowserObserved": false,
+    "browserProduct": "Codex In-app Browser",
+    "browserVersion": null,
+    "chromeValidated": false,
+    "connectSrcNoneResponseHeaderObserved": true,
+    "consoleProbePerformed": true,
+    "consoleWarningOrErrorCountObserved": 0,
+    "controlsDisabledDuringRunBrowserObserved": false,
+    "cookieInspectionProhibited": true,
+    "cookieMutationObserved": null,
+    "cookieProbePerformed": false,
+    "crossBrowserValidated": false,
+    "edgeValidated": false,
+    "factOnlyFieldsBrowserObserved": true,
+    "failureAllowlistBrowserObserved": false,
+    "formActionNoneResponseHeaderObserved": true,
+    "formSubmissionBehaviorBrowserObserved": false,
+    "historicalSecondPrecisionOffsetBrowserObserved": "UTC+08:05:43",
+    "inputClearedOnChangeBrowserObserved": true,
+    "namedControlsBrowserObserved": 0,
+    "networkProbePerformed": false,
+    "networkRequestCountObserved": null,
+    "observedAt": "2026-08-31T21:02:10.254Z",
+    "origin": "http://127.0.0.1:4226",
+    "productionBrowserRuntimeEvidenceEstablished": false,
+    "productionHostValidated": false,
+    "requestDigestBindingBrowserObserved": false,
+    "responseDescriptorCaptureBrowserObserved": false,
+    "scenarios": [
+      {
+        "code": null,
+        "decision": "unique",
+        "outcome": "resolved",
+        "partialFactsReturned": false,
+        "scenarioId": "unique"
+      },
+      {
+        "code": "LOCAL_WALL_TIME_GAP_REJECTED",
+        "decision": null,
+        "outcome": "failed_closed",
+        "partialFactsReturned": false,
+        "scenarioId": "gap"
+      },
+      {
+        "code": "LOCAL_WALL_TIME_OVERLAP_REJECTED",
+        "decision": null,
+        "outcome": "failed_closed",
+        "partialFactsReturned": false,
+        "scenarioId": "overlap_reject"
+      },
+      {
+        "code": null,
+        "decision": "vedic_adapter_draft_earlier",
+        "outcome": "resolved",
+        "partialFactsReturned": false,
+        "scenarioId": "overlap_earlier"
+      },
+      {
+        "code": null,
+        "decision": "vedic_adapter_draft_later",
+        "outcome": "resolved",
+        "partialFactsReturned": false,
+        "scenarioId": "overlap_later"
+      }
+    ],
+    "serviceWorkerProbePerformed": false,
+    "serviceWorkerRegistrationObserved": null,
+    "sourceBuildOutputIdentityDigest": "2037ddbf4a4ccea5b80e597751dd30c51f9e4a99a5fef353531570c8b5f78ccd",
+    "sourceBuildRunId": "build-2026-09-01-a",
+    "storageInspectionProhibited": true,
+    "storageMutationObserved": null,
+    "storageProbePerformed": false,
+    "syntheticDataOnly": true,
+    "utcOffsetIncludesSecondsBrowserObserved": true
+  },
+  "buildOutputIdentities": [
+    {
+      "artifacts": [
+        {
+          "bytes": 812865,
+          "path": "assets/civil-worker-DltlCpqw.js",
+          "sha256": "2bcbf77a1e53bfb11dd1f22dbdc25018a8cc2b1e40ac0a2ca8d1231bb4efc8de"
+        },
+        {
+          "bytes": 423292,
+          "path": "assets/civil-worker-DltlCpqw.js.map",
+          "sha256": "8787c266557a574f8f0ced16b38fe9ed204db2da7a6f18540d05bb93b0836bed"
+        },
+        {
+          "bytes": 714805,
+          "path": "assets/iana-2025b-BLy5AmWt.js",
+          "sha256": "4c6ed210fe3c4589fa71235119b55c9c829291ad0a67201e7366159922cdcae3"
+        },
+        {
+          "bytes": 103,
+          "path": "assets/iana-2025b-BLy5AmWt.js.map",
+          "sha256": "53de463e0f11bb1f395fb120fca2f26855a939296b145fc972e70e92683d8e0b"
+        },
+        {
+          "bytes": 30565,
+          "path": "assets/index-BxE6jOMI.js",
+          "sha256": "03e12be459f99168a079c44c5c402fb72099179e6cbe62fd8106438b0848a2c4"
+        },
+        {
+          "bytes": 98588,
+          "path": "assets/index-BxE6jOMI.js.map",
+          "sha256": "a06f1166dc9eb4bc9084c2cee0716c6157c8d778a2a6376a78e62ab5152d506b"
+        },
+        {
+          "bytes": 3290,
+          "path": "assets/index-OpA1Rqqk.css",
+          "sha256": "c8f53bed798236445f56b08ef0bb8838ddbf09c4467f8308708a6e2cace34016"
+        },
+        {
+          "bytes": 2283,
+          "path": "hakimi-vedic-fact-only-build-manifest.v1.json",
+          "sha256": "ffb76ba5663578f49526928f7b5557911e22ff9b1df3ec4ee142b9d6d9828f7c"
+        },
+        {
+          "bytes": 5328,
+          "path": "index.html",
+          "sha256": "193aa09c18fba1809662721062199930cab4dc321664e9aec895cfd2aea76b15"
+        },
+        {
+          "bytes": 1075,
+          "path": "licenses/moment-2.30.1-LICENSE.txt",
+          "sha256": "8f38f320bbf5eb84c08e08676f7ee1d2204ebe5797f6a090d077329cf212fca3"
+        },
+        {
+          "bytes": 1097,
+          "path": "licenses/moment-timezone-0.5.48-retained-LICENSE.txt",
+          "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+        },
+        {
+          "bytes": 1097,
+          "path": "licenses/moment-timezone-0.6.3-LICENSE.txt",
+          "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+        }
+      ],
+      "exitCode": 0,
+      "outDirLeaf": "hakimi-vedic-facts-abfcc7be6182426a92ceaf45b0077419",
+      "outputIdentityDigest": "2037ddbf4a4ccea5b80e597751dd30c51f9e4a99a5fef353531570c8b5f78ccd",
+      "runId": "build-2026-09-01-a",
+      "transformedModuleCount": 10,
+      "viteVersion": "7.3.6"
+    },
+    {
+      "artifacts": [
+        {
+          "bytes": 812865,
+          "path": "assets/civil-worker-DltlCpqw.js",
+          "sha256": "2bcbf77a1e53bfb11dd1f22dbdc25018a8cc2b1e40ac0a2ca8d1231bb4efc8de"
+        },
+        {
+          "bytes": 423292,
+          "path": "assets/civil-worker-DltlCpqw.js.map",
+          "sha256": "8787c266557a574f8f0ced16b38fe9ed204db2da7a6f18540d05bb93b0836bed"
+        },
+        {
+          "bytes": 714805,
+          "path": "assets/iana-2025b-BLy5AmWt.js",
+          "sha256": "4c6ed210fe3c4589fa71235119b55c9c829291ad0a67201e7366159922cdcae3"
+        },
+        {
+          "bytes": 103,
+          "path": "assets/iana-2025b-BLy5AmWt.js.map",
+          "sha256": "53de463e0f11bb1f395fb120fca2f26855a939296b145fc972e70e92683d8e0b"
+        },
+        {
+          "bytes": 30565,
+          "path": "assets/index-BxE6jOMI.js",
+          "sha256": "03e12be459f99168a079c44c5c402fb72099179e6cbe62fd8106438b0848a2c4"
+        },
+        {
+          "bytes": 98588,
+          "path": "assets/index-BxE6jOMI.js.map",
+          "sha256": "a06f1166dc9eb4bc9084c2cee0716c6157c8d778a2a6376a78e62ab5152d506b"
+        },
+        {
+          "bytes": 3290,
+          "path": "assets/index-OpA1Rqqk.css",
+          "sha256": "c8f53bed798236445f56b08ef0bb8838ddbf09c4467f8308708a6e2cace34016"
+        },
+        {
+          "bytes": 2283,
+          "path": "hakimi-vedic-fact-only-build-manifest.v1.json",
+          "sha256": "ffb76ba5663578f49526928f7b5557911e22ff9b1df3ec4ee142b9d6d9828f7c"
+        },
+        {
+          "bytes": 5328,
+          "path": "index.html",
+          "sha256": "193aa09c18fba1809662721062199930cab4dc321664e9aec895cfd2aea76b15"
+        },
+        {
+          "bytes": 1075,
+          "path": "licenses/moment-2.30.1-LICENSE.txt",
+          "sha256": "8f38f320bbf5eb84c08e08676f7ee1d2204ebe5797f6a090d077329cf212fca3"
+        },
+        {
+          "bytes": 1097,
+          "path": "licenses/moment-timezone-0.5.48-retained-LICENSE.txt",
+          "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+        },
+        {
+          "bytes": 1097,
+          "path": "licenses/moment-timezone-0.6.3-LICENSE.txt",
+          "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+        }
+      ],
+      "exitCode": 0,
+      "outDirLeaf": "hakimi-vedic-facts-8e29cacf489640b8a9a5bcf57739cf01",
+      "outputIdentityDigest": "2037ddbf4a4ccea5b80e597751dd30c51f9e4a99a5fef353531570c8b5f78ccd",
+      "runId": "build-2026-09-01-b",
+      "transformedModuleCount": 10,
+      "viteVersion": "7.3.6"
+    }
+  ],
+  "createdAt": "2026-08-31T21:06:18.619Z",
+  "dataHandling": {
+    "candidateDigestIsAnonymous": false,
+    "loggingAuthorized": false,
+    "networkTransmissionAuthorized": false,
+    "noLogNoPersistNoPublishBoundary": true,
+    "persistenceAuthorized": false,
+    "personDerivedData": true,
+    "publicationAuthorized": false,
+    "realPersonDataUsedInRecordedObservation": false
+  },
+  "doesNotEstablish": [
+    "astronomy_ephemeris_chart_houses_aspects_or_interpretation",
+    "content_truth_or_expert_truth",
+    "source_freeze_rights_or_legal_clearance",
+    "production_browser_cross_browser_pwa_or_service_worker_validation",
+    "formal_admission_release_readiness_or_public_release_authorization",
+    "mutation_epoch_cross_file_atomicity_interval_integrity_or_aba_exclusion"
+  ],
+  "evidenceAccounts": [
+    {
+      "accountId": "engineering_evidence",
+      "admitted": false,
+      "authorityGranted": false,
+      "observationPresent": true
+    },
+    {
+      "accountId": "browser_runtime_evidence",
+      "authorityGranted": false,
+      "observationPresent": true,
+      "productionValidated": false
+    },
+    {
+      "accountId": "content_truth",
+      "authorityGranted": false,
+      "established": false
+    },
+    {
+      "accountId": "expert_truth",
+      "authorityGranted": false,
+      "established": false
+    },
+    {
+      "accountId": "rights_legal_judgment",
+      "authorityGranted": false,
+      "established": false
+    },
+    {
+      "accountId": "release_readiness",
+      "authorityGranted": false,
+      "established": false
+    },
+    {
+      "accountId": "public_release_authorization",
+      "authorityGranted": false,
+      "established": false
+    }
+  ],
+  "formalContext": {
+    "authorityBoundaryAllFalseVerified": true,
+    "bindings": [
+      {
+        "bytes": 14240,
+        "path": "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json",
+        "rawHashAndUtf8DecodeUseSameBuffer": true,
+        "sha256": "6fe875bcb156ae9c7756302e96d902b8c03668e58a8894b33bc0d5fab374a1fe"
+      },
+      {
+        "bytes": 42634,
+        "path": "content/system-admission/vedic-fact-contract-requirements.v1.json",
+        "rawHashAndUtf8DecodeUseSameBuffer": true,
+        "sha256": "a20a1033ce063702548a79b6a651d21421e9f59a9a2ecd4da251cde42ae36b38"
+      },
+      {
+        "bytes": 25578,
+        "path": "content/system-admission/vedic-independent-productization-requirements.v1.json",
+        "rawHashAndUtf8DecodeUseSameBuffer": true,
+        "sha256": "c9f0fbb3b25c3ad582dc4c3f5534e7e27cb44e47721dbf806b8085cefb6b26f8"
+      },
+      {
+        "bytes": 16529,
+        "path": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json",
+        "rawHashAndUtf8DecodeUseSameBuffer": true,
+        "sha256": "4899e8fdf267a44e401295f23e11e2504e45f8e2f731c6be9b8ad1435e8dbf69"
+      },
+      {
+        "bytes": 15859,
+        "path": "content/system-admission/vedic-input-contract-requirements.v1.json",
+        "rawHashAndUtf8DecodeUseSameBuffer": true,
+        "sha256": "85409d7f4ed7ef6bddc4d34102ecff479fd8dbe4210a78416f90ee705a0f2e59"
+      },
+      {
+        "bytes": 12140,
+        "path": "content/system-admission/vedic-rule-contract-draft.v0.1.0.schema.json",
+        "rawHashAndUtf8DecodeUseSameBuffer": true,
+        "sha256": "1b0f118d5014aa8de0ab85bd756b710252565d643a5164ee88a7418d4a002f0d"
+      },
+      {
+        "bytes": 30734,
+        "path": "content/system-admission/vedic-rule-contract-requirements.v1.json",
+        "rawHashAndUtf8DecodeUseSameBuffer": true,
+        "sha256": "ee34106b3dccdfd5d08d89d3871161ba2a12f7bcc983aff8b4850aa6ee42bc94"
+      }
+    ],
+    "boundLedgerCount": 7,
+    "productizationGateSummaryVerified": true
+  },
+  "gateSummary": {
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 38,
+    "contentTruthEstablished": false,
+    "evidenceAccountCount": 7,
+    "expertTruthEstablished": false,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "requirementsUniverseClosed": false,
+    "rereviewRequirementsComplete": 3,
+    "rereviewRequirementsRequired": 7,
+    "rightsLegalConclusionEstablished": false,
+    "sourceBindingEstablished": false
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "crossFileAtomicSnapshot": false,
+    "intervalMutationExcluded": false,
+    "mutationEpochClaimed": false,
+    "mutationEpochReceipt": null,
+    "oneSyntheticBrowserObservationRecorded": true,
+    "operatorSuppliedEvidence": true,
+    "osLevelAdversarialReplacementExcluded": false,
+    "toolAttestationEstablished": false,
+    "twoBuildOutputsByteIdenticalObserved": true
+  },
+  "observationDigest": "019ee27933a5a63eb2636a3b3618df25b9a365fed0101f88e1e8ddc1bcb68f6d",
+  "observationId": "hakimi.vedic.civil-time-fact-only-browser-observation/1.0.0",
+  "projectReleaseGovernanceContext": {
+    "activeLine": "legacy-v13",
+    "contextOnlyNotInheritedProductIdentity": true,
+    "migrationId": null,
+    "targetSchema": 13
+  },
+  "recordType": "vedic_civil_time_fact_only_browser_observation_candidate_v1",
+  "schemaVersion": "1.0.0",
+  "scopeBoundary": {
+    "aspectsIncluded": false,
+    "chartIncluded": false,
+    "civilTimeEngineeringFactsOnly": true,
+    "daylightSavingClassificationEstablished": false,
+    "eopIncluded": false,
+    "ephemerisIncluded": false,
+    "housesIncluded": false,
+    "interpretationIncluded": false,
+    "localWallTimeOverlapGapHandlingIncluded": true,
+    "ramcIncluded": false,
+    "rulesIncluded": false,
+    "tdbIncluded": false,
+    "ttIncluded": false,
+    "tzdbBindingIncluded": true,
+    "ut1Included": false,
+    "utcInstantIncluded": true,
+    "utcOffsetSecondsIncluded": true
+  },
+  "staticBoundaryObservation": {
+    "authoredSourceForbiddenCapabilityReferenceCount": 0,
+    "buildManifestFileName": "hakimi-vedic-fact-only-build-manifest.v1.json",
+    "concurrentSameAccountConfigReplacementDuringLoaderWindowExcluded": true,
+    "concurrentSameAccountPathReplacementExcluded": true,
+    "emittedNoticeCount": 3,
+    "finalBuildEnvelopeFileCount": 12,
+    "kind": "vedic_civil_time_fact_browser_static_boundary_observation",
+    "lockedBuildInputCount": 17,
+    "manifestEnumeratedOutputFileCount": 11,
+    "osLevelAdversarialReplacementExcluded": false,
+    "previewRevalidatesManifestAndExactEnvelope": true,
+    "productionReachabilityAudit": {
+      "appsWebReadableSourceFilesScanned": 372,
+      "appsWebReverseReferenceCount": 0,
+      "incompleteProductionReachabilityAudit": true,
+      "restrictedPathIntentionallySkipped": "apps/web/src/lib/local-user-data-cleanup.ts",
+      "wholeRepositoryProductionUnreachableEstablished": false
+    },
+    "runtimeImportEdgeCount": 31,
+    "runtimeModuleCount": 13,
+    "runtimeSourceIdentityCount": 15,
+    "sameBufferByteLengthSha256AndStrictUtf8Verified": true,
+    "staticObservationDigest": "05e01af8d2065af1755e7ecf12956e141156846cb4f60efabded35602af84d8e",
+    "workerOnlyTzdbReachabilityEstablished": true
+  },
+  "status": "operator_supplied_two_build_identity_and_one_browser_observation_candidate_only",
+  "systemIdentity": {
+    "contractSystemId": "vedic",
+    "migrationId": null,
+    "productSystemId": null,
+    "releaseIdentity": null,
+    "targetSchema": null
+  }
+}

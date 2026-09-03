@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>吠陀临时 Mutation Epoch 工程实验</title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">VEDIC · EPHEMERAL ENGINEERING EXPERIMENT</p>
+        <h1>Mutation epoch 边界观察</h1>
+        <p class="lede">
+          仅在随机临时 IndexedDB 中重放零个人数据的 CAS、ABA、事务中止、quota-like 合成中止和 generation 重建。
+          它不是产品存储、备份恢复能力或体系准入。
+        </p>
+      </header>
+
+      <section class="boundary" aria-label="权限边界">
+        <div><span>产品 identity</span><strong>null</strong></div>
+        <div><span>targetSchema</span><strong>null</strong></div>
+        <div><span>migrationId</span><strong>null</strong></div>
+        <div><span>公开授权</span><strong>false</strong></div>
+      </section>
+
+      <section class="runner" aria-labelledby="runner-title">
+        <div class="runner-heading">
+          <div>
+            <p class="eyebrow">ONE-SHOT PROBE</p>
+            <h2 id="runner-title">浏览器机械重放</h2>
+          </div>
+          <button id="run-experiment" type="button">运行六项固定探针</button>
+        </div>
+
+        <p id="run-status" data-state="idle" aria-live="polite">尚未运行；所有 authority 维持 false。</p>
+
+        <div class="metrics" aria-label="运行摘要">
+          <div><span>机械探针</span><strong id="probe-count">6</strong></div>
+          <div><span>通过</span><strong id="passed-count">0</strong></div>
+          <div><span>个人数据字段</span><strong id="person-field-count">0</strong></div>
+          <div><span>产品回执</span><strong id="product-receipt-count">0</strong></div>
+        </div>
+
+        <ol id="probe-results">
+          <li class="placeholder">点击运行后会尝试删除临时数据库；blocked 或崩溃时不保证清理完成。</li>
+        </ol>
+        <p id="run-error" class="error" hidden></p>
+      </section>
+
+      <footer>
+        <strong>证据边界：</strong>
+        通过只表示当前浏览器观察到临时事务机械行为；不建立内容真值、专家真值、来源权利、正式存储后端、发布就绪或公开发布授权。
+      </footer>
+    </main>
+    <script type="module" src="../src/browser-app/main.ts"></script>
+  </body>
+</html>

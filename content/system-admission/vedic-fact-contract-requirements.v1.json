@@ -1,0 +1,769 @@
+{
+  "authorityBoundary": {
+    "deterministicFactsGateSatisfied": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "factContractAccepted": false,
+    "factReceiptIssued": false,
+    "formalAdmissionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "successReceiptIssued": false
+  },
+  "boundaryBindings": {
+    "bindingDirection": "requirements_to_adr_input_draft_input_requirements_and_fact_draft_only",
+    "chainOrder": [
+      "docs/吠陀占星独立产品化ADR-0001-2026-08-26.md",
+      "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json",
+      "content/system-admission/vedic-input-contract-requirements.v1.json",
+      "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json"
+    ],
+    "factContractDraft": {
+      "artifactRole": "project_authored_isolated_fact_contract_draft",
+      "bytes": 14240,
+      "path": "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json",
+      "rawHashAndSemanticInspectionUseSameBuffer": true,
+      "schemaSemanticDigest": "0eb3aa460403e42ca5542d1bafb3325d543a0e11429f40b8041f2c1bdf0bc5b1",
+      "schemaStatus": "isolated_contract_draft",
+      "sha256": "6fe875bcb156ae9c7756302e96d902b8c03668e58a8894b33bc0d5fab374a1fe"
+    },
+    "inputContractDraft": {
+      "artifactRole": "project_authored_isolated_input_contract_draft",
+      "bytes": 16529,
+      "path": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json",
+      "rawHashAndSemanticInspectionUseSameBuffer": true,
+      "schemaSemanticDigest": "ad9a1d568d63296d3ed19f30d91cb8f8e52f543afcec03f238178da4af70ee08",
+      "schemaStatus": "isolated_contract_draft",
+      "sha256": "4899e8fdf267a44e401295f23e11e2504e45f8e2f731c6be9b8ad1435e8dbf69"
+    },
+    "inputContractRequirements": {
+      "artifactRole": "non_product_governance_requirements_inventory",
+      "bytes": 15859,
+      "inputContractArtifacts": 1,
+      "inputContractGateSatisfied": false,
+      "inputInstancesObserved": 0,
+      "ledgerDigest": "e545c254d29902df58e29ca90f965333daca70f06bce03cca62ad9e2f4fc7ac0",
+      "path": "content/system-admission/vedic-input-contract-requirements.v1.json",
+      "rawHashAndSemanticInspectionUseSameBuffer": true,
+      "requirementsDraftCovered": 13,
+      "requirementsResolved": 0,
+      "semanticDigest": "fab8dc4882288af8bb14217680afdec6d17ab52b16d29e73cefcd2f0f99f4a66",
+      "sha256": "85409d7f4ed7ef6bddc4d34102ecff479fd8dbe4210a78416f90ee705a0f2e59",
+      "status": "input_contract_draft_present_zero_instances_not_admitted"
+    },
+    "productBoundaryAdr": {
+      "bytes": 4531,
+      "path": "docs/吠陀占星独立产品化ADR-0001-2026-08-26.md",
+      "rawHashAndSemanticInspectionUseSameBuffer": true,
+      "semanticIdentity": {
+        "authorityStatus": "not-authoritative",
+        "boundaryId": "hakimi.vedic.independent-product-boundary/1.0.0",
+        "decisionStatus": "accepted-research-boundary",
+        "integrationStatus": "not-integrated",
+        "productStatus": "research-only",
+        "publicReleaseAuthorized": false,
+        "rereviewRequirementIds": [
+          "own_input_fact_and_rule_drafts",
+          "runtime_and_bundle_size_proposal",
+          "three_layer_source_rights_ledger",
+          "two_independent_real_expert_review_plan",
+          "independent_storage_backup_recovery_and_rollback_design",
+          "independent_browser_gate_and_release_evidence_design",
+          "owner_scope_license_and_deployment_decision"
+        ],
+        "semanticDigest": "1a71b363132b0d61298f53f7e14eb77d58a3eb3f7d649d8d3c8f42fd1acd1a89"
+      },
+      "sha256": "0e9b81505abb963b4d64426338b8071cd8a211eed8d02fe76065fada335dce63"
+    }
+  },
+  "createdAt": "2026-08-29T00:00:00.000Z",
+  "currentInstances": {
+    "counts": {
+      "factCandidates": 0,
+      "factContractArtifacts": 1,
+      "factFailureReceipts": 0,
+      "factInstances": 0,
+      "factProducerInstances": 0,
+      "factProjectorInstances": 0,
+      "factReceipts": 0,
+      "factValueInstances": 0,
+      "realPersonFactInstances": 0,
+      "sampleFactInstances": 0,
+      "successReceipts": 0,
+      "syntheticPersonFactInstances": 0
+    },
+    "factCandidates": [],
+    "factContractArtifacts": [
+      {
+        "artifactRole": "project_authored_isolated_fact_contract_draft",
+        "bytes": 14240,
+        "path": "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json",
+        "rawHashAndSemanticInspectionUseSameBuffer": true,
+        "schemaSemanticDigest": "0eb3aa460403e42ca5542d1bafb3325d543a0e11429f40b8041f2c1bdf0bc5b1",
+        "schemaStatus": "isolated_contract_draft",
+        "sha256": "6fe875bcb156ae9c7756302e96d902b8c03668e58a8894b33bc0d5fab374a1fe"
+      }
+    ],
+    "factFailureReceipts": [],
+    "factInstances": [],
+    "factProducerInstances": [],
+    "factProjectorInstances": [],
+    "factReceipts": [],
+    "factValueInstances": [],
+    "successReceipts": []
+  },
+  "doesNotEstablish": [
+    "closed_or_exhaustive_vedic_fact_requirements_universe",
+    "formally_admitted_or_semantically_selected_vedic_fact_contract",
+    "fact_values_deterministic_facts_or_computation_capability",
+    "fact_producer_projector_or_engine_profile_binding",
+    "fact_failure_acceptance_or_success_receipt_instance",
+    "utc_dst_time_scale_ephemeris_or_sidereal_correctness",
+    "ayanamsa_node_bhava_perturbation_or_rule_policy_selection",
+    "sample_real_or_synthetic_person_fact_instance",
+    "versioned_ruleset_or_domain_manifest",
+    "source_candidate_body_quote_locator_or_binding_inventory",
+    "license_rights_or_legal_conclusion",
+    "expert_identity_credentials_independence_opinion_or_truth",
+    "artifact_authenticity_digital_signature_or_signer_identity",
+    "cross_system_authority_inheritance_or_concept_equivalence",
+    "browser_runtime_storage_backup_recovery_or_deployment_evidence",
+    "mutation_epoch_cross_file_atomic_snapshot_interval_mutation_or_aba_exclusion",
+    "formal_admission_release_readiness_or_public_release_authorization"
+  ],
+  "evidenceLedger": {
+    "browserRuntimeEvidence": "not_assessed",
+    "contentTruth": "not_established",
+    "engineeringIdentity": "isolated_fact_contract_v0_1_shape_twelve_named_open_prerequisites_and_zero_instances_only",
+    "expertTruth": "not_established",
+    "publicReleaseAuthorization": "not_authorized",
+    "releaseReadiness": "not_ready",
+    "rightsLegalConclusion": "not_established"
+  },
+  "expertBoundary": {
+    "credentialsVerified": 0,
+    "expertOpinionIds": [],
+    "expertReviewBundle": "absent",
+    "expertTruthEstablished": false,
+    "identitiesVerified": 0,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "opinionsVerified": 0,
+    "reviewerIds": []
+  },
+  "factFamilyCoverageSummary": {
+    "artifactRole": "non_requirement_fact_family_coverage_summary",
+    "factFamiliesDefined": 4,
+    "factFamiliesDraftCovered": 4,
+    "families": [
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/observationInstantFact",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyIds/0",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/observation_instant_fact"
+        ],
+        "blockedPrerequisiteIds": [
+          "accepted_input_and_evaluated_candidate_identity",
+          "fact_generation_implementation_identity",
+          "observation_instant_and_time_scale_semantics",
+          "candidate_transition_provenance_semantics",
+          "fact_completeness_uniqueness_and_cross_field_invariants",
+          "rejection_channel_and_no_partial_fact_artifact"
+        ],
+        "factFamilyId": "observation_instant_fact",
+        "familyState": "draft_shape_covered_prerequisites_semantically_unresolved",
+        "order": 1,
+        "schemaPropertyPointer": "#/properties/observationInstantFact"
+      },
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/grahaPositionFacts",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyIds/1",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts"
+        ],
+        "blockedPrerequisiteIds": [
+          "accepted_input_and_evaluated_candidate_identity",
+          "fact_generation_implementation_identity",
+          "coordinate_frame_and_numeric_representation_semantics",
+          "graha_catalog_and_position_semantics",
+          "rahu_ketu_node_mode_and_position_invariant",
+          "rashi_catalog_segmentation_and_boundary_semantics",
+          "candidate_transition_provenance_semantics",
+          "fact_completeness_uniqueness_and_cross_field_invariants",
+          "rejection_channel_and_no_partial_fact_artifact"
+        ],
+        "factFamilyId": "graha_position_facts",
+        "familyState": "draft_shape_covered_prerequisites_semantically_unresolved",
+        "order": 2,
+        "schemaPropertyPointer": "#/properties/grahaPositionFacts"
+      },
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/lagnaFact",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyIds/2",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact"
+        ],
+        "blockedPrerequisiteIds": [
+          "accepted_input_and_evaluated_candidate_identity",
+          "fact_generation_implementation_identity",
+          "coordinate_frame_and_numeric_representation_semantics",
+          "lagna_definition_and_position_semantics",
+          "rashi_catalog_segmentation_and_boundary_semantics",
+          "candidate_transition_provenance_semantics",
+          "fact_completeness_uniqueness_and_cross_field_invariants",
+          "rejection_channel_and_no_partial_fact_artifact"
+        ],
+        "factFamilyId": "lagna_fact",
+        "familyState": "draft_shape_covered_prerequisites_semantically_unresolved",
+        "order": 3,
+        "schemaPropertyPointer": "#/properties/lagnaFact"
+      },
+      {
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/bhavaFacts",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyIds/3",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/bhava_facts"
+        ],
+        "blockedPrerequisiteIds": [
+          "accepted_input_and_evaluated_candidate_identity",
+          "fact_generation_implementation_identity",
+          "coordinate_frame_and_numeric_representation_semantics",
+          "bhava_definition_geometry_and_assignment_semantics",
+          "candidate_transition_provenance_semantics",
+          "fact_completeness_uniqueness_and_cross_field_invariants",
+          "rejection_channel_and_no_partial_fact_artifact"
+        ],
+        "factFamilyId": "bhava_facts",
+        "familyState": "draft_shape_covered_prerequisites_semantically_unresolved",
+        "order": 4,
+        "schemaPropertyPointer": "#/properties/bhavaFacts"
+      }
+    ],
+    "requirementsUniverseClosed": false
+  },
+  "failClosedInvariants": {
+    "crossSystemFallbackAccepted": false,
+    "defaultInference": "forbidden",
+    "generativeModelInference": "forbidden",
+    "missingOrAmbiguousPrerequisite": "block_without_fact_failure_acceptance_or_success_receipt",
+    "partialFactsPersisted": false,
+    "placeholderFactsMaterialized": false
+  },
+  "integrityBoundary": {
+    "authenticityEstablished": false,
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi.vedic.fact-contract-requirements.v1",
+    "digestIsDigitalSignature": false,
+    "digitalSignature": null,
+    "signerIdentity": null
+  },
+  "ledgerDigest": "a33eeee2652559faa0f83c404980ec78acc6dc94be3f6476f25b0e8fdd5eb6b8",
+  "ledgerId": "hakimi.vedic.fact-contract-requirements/1.0.0",
+  "observationBoundary": {
+    "abaExcluded": false,
+    "boundArtifactHashAndInspectionUseSameReadBuffer": true,
+    "crossFileAtomicSnapshot": false,
+    "endpointSnapshotOnly": true,
+    "factDraftAndRequirementsAtomicSnapshot": false,
+    "heldFileHandleReads": true,
+    "intervalMutationExcluded": false,
+    "ledgerHashAndParseUseSameReadBuffer": true,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "pathEndpointRevalidated": true,
+    "plainDirectoryChainRequired": true
+  },
+  "productBoundary": {
+    "domainManifest": "absent",
+    "factContract": "isolated_contract_draft",
+    "factProducer": "absent",
+    "inputContract": "isolated_contract_draft",
+    "migrationId": null,
+    "mutationEpochCapability": "absent_no_admitted_product_schema",
+    "productSurface": "absent",
+    "projector": "absent",
+    "releaseIdentity": null,
+    "targetSchema": null,
+    "versionedRuleset": "absent"
+  },
+  "recordType": "vedic_fact_contract_requirements_v1",
+  "requirementInventory": {
+    "bindingRequired": null,
+    "bindingRequirementsInventoryDefined": false,
+    "factContractArtifactPresent": true,
+    "factContractGateSatisfied": false,
+    "inventoryScope": "v0.1_scoped",
+    "requirements": [
+      {
+        "algorithmBindingRefs": [],
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/blockedPrerequisiteIds/0",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/input_contract_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/accepted_input_artifact_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/input_acceptance_receipt_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/evaluated_candidate_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/observation_instant_fact/0",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/0",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/0",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/bhava_facts/0"
+        ],
+        "basisArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/input_contract_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/accepted_input_artifact_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/input_acceptance_receipt_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/evaluated_candidate_ref"
+        ],
+        "coveredFactFamilyIds": [
+          "observation_instant_fact",
+          "graha_position_facts",
+          "lagna_fact",
+          "bhava_facts"
+        ],
+        "defaultDefinition": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "factFamilyMapArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/observation_instant_fact/0",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/0",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/0",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/bhava_facts/0"
+        ],
+        "factValueInstances": [],
+        "order": 1,
+        "requirementClass": "v0_1_scoped_fact_prerequisite",
+        "requirementId": "accepted_input_and_evaluated_candidate_identity",
+        "requirementState": "named_and_structurally_covered_semantics_unresolved",
+        "rightsRefs": [],
+        "selectedDefinition": null,
+        "sourceRefs": []
+      },
+      {
+        "algorithmBindingRefs": [],
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/blockedPrerequisiteIds/1",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/fact_generation_implementation_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/runtime_artifact_set_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/observation_instant_fact/1",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/1",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/1",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/bhava_facts/1"
+        ],
+        "basisArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/fact_generation_implementation_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/runtime_artifact_set_ref"
+        ],
+        "coveredFactFamilyIds": [
+          "observation_instant_fact",
+          "graha_position_facts",
+          "lagna_fact",
+          "bhava_facts"
+        ],
+        "defaultDefinition": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "factFamilyMapArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/observation_instant_fact/1",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/1",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/1",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/bhava_facts/1"
+        ],
+        "factValueInstances": [],
+        "order": 2,
+        "requirementClass": "v0_1_scoped_fact_prerequisite",
+        "requirementId": "fact_generation_implementation_identity",
+        "requirementState": "named_and_structurally_covered_semantics_unresolved",
+        "rightsRefs": [],
+        "selectedDefinition": null,
+        "sourceRefs": []
+      },
+      {
+        "algorithmBindingRefs": [],
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/blockedPrerequisiteIds/2",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/utc_conversion_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/time_scale_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/observation_instant_fact/2"
+        ],
+        "basisArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/utc_conversion_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/time_scale_definition_ref"
+        ],
+        "coveredFactFamilyIds": [
+          "observation_instant_fact"
+        ],
+        "defaultDefinition": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "factFamilyMapArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/observation_instant_fact/2"
+        ],
+        "factValueInstances": [],
+        "order": 3,
+        "requirementClass": "v0_1_scoped_fact_prerequisite",
+        "requirementId": "observation_instant_and_time_scale_semantics",
+        "requirementState": "named_and_structurally_covered_semantics_unresolved",
+        "rightsRefs": [],
+        "selectedDefinition": null,
+        "sourceRefs": []
+      },
+      {
+        "algorithmBindingRefs": [],
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/blockedPrerequisiteIds/3",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/coordinate_frame_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/numeric_representation_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/2",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/2",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/bhava_facts/2"
+        ],
+        "basisArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/coordinate_frame_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/numeric_representation_definition_ref"
+        ],
+        "coveredFactFamilyIds": [
+          "graha_position_facts",
+          "lagna_fact",
+          "bhava_facts"
+        ],
+        "defaultDefinition": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "factFamilyMapArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/2",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/2",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/bhava_facts/2"
+        ],
+        "factValueInstances": [],
+        "order": 4,
+        "requirementClass": "v0_1_scoped_fact_prerequisite",
+        "requirementId": "coordinate_frame_and_numeric_representation_semantics",
+        "requirementState": "named_and_structurally_covered_semantics_unresolved",
+        "rightsRefs": [],
+        "selectedDefinition": null,
+        "sourceRefs": []
+      },
+      {
+        "algorithmBindingRefs": [],
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/blockedPrerequisiteIds/4",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/ephemeris_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/sidereal_zodiac_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/ayanamsa_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/graha_catalog_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/3"
+        ],
+        "basisArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/ephemeris_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/sidereal_zodiac_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/ayanamsa_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/graha_catalog_definition_ref"
+        ],
+        "coveredFactFamilyIds": [
+          "graha_position_facts"
+        ],
+        "defaultDefinition": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "factFamilyMapArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/3"
+        ],
+        "factValueInstances": [],
+        "order": 5,
+        "requirementClass": "v0_1_scoped_fact_prerequisite",
+        "requirementId": "graha_catalog_and_position_semantics",
+        "requirementState": "named_and_structurally_covered_semantics_unresolved",
+        "rightsRefs": [],
+        "selectedDefinition": null,
+        "sourceRefs": []
+      },
+      {
+        "algorithmBindingRefs": [],
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/blockedPrerequisiteIds/5",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/node_mode_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/4"
+        ],
+        "basisArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/node_mode_definition_ref"
+        ],
+        "coveredFactFamilyIds": [
+          "graha_position_facts"
+        ],
+        "defaultDefinition": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "factFamilyMapArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/4"
+        ],
+        "factValueInstances": [],
+        "order": 6,
+        "requirementClass": "v0_1_scoped_fact_prerequisite",
+        "requirementId": "rahu_ketu_node_mode_and_position_invariant",
+        "requirementState": "named_and_structurally_covered_semantics_unresolved",
+        "rightsRefs": [],
+        "selectedDefinition": null,
+        "sourceRefs": []
+      },
+      {
+        "algorithmBindingRefs": [],
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/blockedPrerequisiteIds/6",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/ephemeris_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/sidereal_zodiac_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/ayanamsa_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/3"
+        ],
+        "basisArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/ephemeris_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/sidereal_zodiac_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/ayanamsa_definition_ref"
+        ],
+        "coveredFactFamilyIds": [
+          "lagna_fact"
+        ],
+        "defaultDefinition": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "factFamilyMapArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/3"
+        ],
+        "factValueInstances": [],
+        "order": 7,
+        "requirementClass": "v0_1_scoped_fact_prerequisite",
+        "requirementId": "lagna_definition_and_position_semantics",
+        "requirementState": "named_and_structurally_covered_semantics_unresolved",
+        "rightsRefs": [],
+        "selectedDefinition": null,
+        "sourceRefs": []
+      },
+      {
+        "algorithmBindingRefs": [],
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/blockedPrerequisiteIds/7",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/sidereal_zodiac_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/ayanamsa_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/rashi_catalog_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/5",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/4"
+        ],
+        "basisArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/sidereal_zodiac_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/ayanamsa_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/rashi_catalog_definition_ref"
+        ],
+        "coveredFactFamilyIds": [
+          "graha_position_facts",
+          "lagna_fact"
+        ],
+        "defaultDefinition": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "factFamilyMapArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/5",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/4"
+        ],
+        "factValueInstances": [],
+        "order": 8,
+        "requirementClass": "v0_1_scoped_fact_prerequisite",
+        "requirementId": "rashi_catalog_segmentation_and_boundary_semantics",
+        "requirementState": "named_and_structurally_covered_semantics_unresolved",
+        "rightsRefs": [],
+        "selectedDefinition": null,
+        "sourceRefs": []
+      },
+      {
+        "algorithmBindingRefs": [],
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/blockedPrerequisiteIds/8",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/bhava_definition_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/bhava_facts/3"
+        ],
+        "basisArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/bhava_definition_ref"
+        ],
+        "coveredFactFamilyIds": [
+          "bhava_facts"
+        ],
+        "defaultDefinition": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "factFamilyMapArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/bhava_facts/3"
+        ],
+        "factValueInstances": [],
+        "order": 9,
+        "requirementClass": "v0_1_scoped_fact_prerequisite",
+        "requirementId": "bhava_definition_geometry_and_assignment_semantics",
+        "requirementState": "named_and_structurally_covered_semantics_unresolved",
+        "rightsRefs": [],
+        "selectedDefinition": null,
+        "sourceRefs": []
+      },
+      {
+        "algorithmBindingRefs": [],
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/blockedPrerequisiteIds/9",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/evaluated_candidate_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/observation_instant_fact/3",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/6",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/5",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/bhava_facts/4"
+        ],
+        "basisArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/evaluated_candidate_ref"
+        ],
+        "coveredFactFamilyIds": [
+          "observation_instant_fact",
+          "graha_position_facts",
+          "lagna_fact",
+          "bhava_facts"
+        ],
+        "defaultDefinition": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "factFamilyMapArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/observation_instant_fact/3",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/6",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/5",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/bhava_facts/4"
+        ],
+        "factValueInstances": [],
+        "order": 10,
+        "requirementClass": "v0_1_scoped_fact_prerequisite",
+        "requirementId": "candidate_transition_provenance_semantics",
+        "requirementState": "named_and_structurally_covered_semantics_unresolved",
+        "rightsRefs": [],
+        "selectedDefinition": null,
+        "sourceRefs": []
+      },
+      {
+        "algorithmBindingRefs": [],
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/blockedPrerequisiteIds/10",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/fact_generation_implementation_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/runtime_artifact_set_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/observation_instant_fact/4",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/7",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/6",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/bhava_facts/5"
+        ],
+        "basisArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/fact_generation_implementation_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/runtime_artifact_set_ref"
+        ],
+        "coveredFactFamilyIds": [
+          "observation_instant_fact",
+          "graha_position_facts",
+          "lagna_fact",
+          "bhava_facts"
+        ],
+        "defaultDefinition": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "factFamilyMapArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/observation_instant_fact/4",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/7",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/6",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/bhava_facts/5"
+        ],
+        "factValueInstances": [],
+        "order": 11,
+        "requirementClass": "v0_1_scoped_fact_prerequisite",
+        "requirementId": "fact_completeness_uniqueness_and_cross_field_invariants",
+        "requirementState": "named_and_structurally_covered_semantics_unresolved",
+        "rightsRefs": [],
+        "selectedDefinition": null,
+        "sourceRefs": []
+      },
+      {
+        "algorithmBindingRefs": [],
+        "artifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/blockedPrerequisiteIds/11",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/input_acceptance_receipt_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/fact_generation_implementation_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/observation_instant_fact/5",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/8",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/7",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/bhava_facts/6"
+        ],
+        "basisArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/input_acceptance_receipt_ref",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/properties/basis/properties/fact_generation_implementation_ref"
+        ],
+        "coveredFactFamilyIds": [
+          "observation_instant_fact",
+          "graha_position_facts",
+          "lagna_fact",
+          "bhava_facts"
+        ],
+        "defaultDefinition": null,
+        "evidenceRefs": [],
+        "expertRefs": [],
+        "factFamilyMapArtifactRefs": [
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/observation_instant_fact/5",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/graha_position_facts/8",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/lagna_fact/7",
+          "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json#/x-hakimiBoundary/factFamilyBlockedPrerequisiteMap/bhava_facts/6"
+        ],
+        "factValueInstances": [],
+        "order": 12,
+        "requirementClass": "v0_1_scoped_fact_prerequisite",
+        "requirementId": "rejection_channel_and_no_partial_fact_artifact",
+        "requirementState": "named_and_structurally_covered_semantics_unresolved",
+        "rightsRefs": [],
+        "selectedDefinition": null,
+        "sourceRefs": []
+      }
+    ],
+    "requirementsDefined": 12,
+    "requirementsDraftCovered": 12,
+    "requirementsInventoryDefined": true,
+    "requirementsResolved": 0,
+    "requirementsUniverseClosed": false
+  },
+  "schemaVersion": "1.0.0",
+  "sourceRightsBoundary": {
+    "bindingFrozenVerified": 0,
+    "bindingRequired": null,
+    "bindingRequirementsInventoryDefined": false,
+    "exactLocatorRefs": [],
+    "exactQuoteRefs": [],
+    "licenseEstablished": false,
+    "licenseEvidenceRefs": [],
+    "rightsEstablished": false,
+    "rightsEvidenceRefs": [],
+    "sourceBindingEstablished": false,
+    "sourceBodyRefs": [],
+    "sourceCandidateIds": []
+  },
+  "status": "fact_contract_draft_present_zero_instances_values_producer_projector_absent_not_admitted",
+  "systemIdentity": {
+    "artifactRole": "non_product_governance_fact_requirements_inventory",
+    "contractSystemId": "vedic",
+    "productSystemId": "vedic-astrology"
+  },
+  "zeroInstanceRequirementsReceipt": {
+    "countsTowardAdmission": false,
+    "factCandidatesObserved": 0,
+    "factContractArtifacts": 1,
+    "factContractGateSatisfied": false,
+    "factFailureReceipts": 0,
+    "factInstancesObserved": 0,
+    "factProducerInstances": 0,
+    "factProjectorInstances": 0,
+    "factReceiptIssued": false,
+    "factReceipts": 0,
+    "factValueInstances": 0,
+    "receiptClass": "fact_contract_draft_present_zero_instance_observation",
+    "receiptIsFactReceipt": false,
+    "receiptIsProductReceipt": false,
+    "receiptStatus": "fact_contract_draft_present_zero_instances_values_producer_projector_absent_not_admitted",
+    "requirementsDraftCovered": 12,
+    "requirementsResolved": 0,
+    "requirementsUniverseClosed": false,
+    "successReceiptIssued": false,
+    "successReceipts": 0,
+    "zeroFailureReceiptsMeansNoExecutionObserved": true
+  }
+}

@@ -1,0 +1,596 @@
+{
+  "artifactId": "hakimi.vedic.input-structural-rejection-execution-evidence/1.0.0",
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false
+  },
+  "bindingDirection": "one_way_child_to_existing_input_draft_requirements_and_local_execution_closure_only",
+  "createdAt": "2026-08-30T00:00:00.000Z",
+  "doesNotEstablish": [
+    "admitted_vedic_input_contract_or_product_input_instance",
+    "general_structural_validator_completeness_or_all_malformed_input_rejection",
+    "product_input_rejection_acceptance_normalization_or_time_resolution_receipt",
+    "calendar_utc_dst_tzdb_time_scale_ephemeris_or_astronomical_correctness",
+    "fact_rule_interpretation_prediction_or_domain_truth",
+    "source_body_quote_locator_license_rights_or_legal_conclusion",
+    "expert_identity_credential_independence_opinion_or_expert_truth",
+    "runtime_selection_product_integration_browser_storage_pwa_or_host_evidence",
+    "loaded_module_node_loader_launcher_or_historical_execution_identity",
+    "artifact_authenticity_digital_signature_or_signer_identity",
+    "mutation_epoch_cross_file_atomic_snapshot_interval_mutation_or_aba_exclusion",
+    "release_readiness_public_deployment_or_public_release_authorization"
+  ],
+  "evidenceDigest": "b068269d809d49e6ff2f8a80ee2c3ee2bcb649f9fbfc0cb1fa3240b3722422a2",
+  "evidenceLedgers": {
+    "browserRuntimeEvidence": "not_assessed",
+    "contentTruth": "not_established",
+    "engineeringEvidence": "four_fixed_no_person_diagnostic_rejection_probes_replayed",
+    "expertTruth": "not_established",
+    "publicReleaseAuthorization": "not_authorized",
+    "releaseReadiness": "not_ready",
+    "rightsLegalConclusion": "not_established"
+  },
+  "executionBoundary": {
+    "acceptedInputs": 0,
+    "candidateRawInputsPersisted": 0,
+    "diagnosticProbeExecutions": 4,
+    "factArtifactsIssued": 0,
+    "inputInstances": 0,
+    "normalizationReceipts": 0,
+    "partialOutputsIssued": 0,
+    "probeClass": "project_controlled_fixed_no_person_shape_only",
+    "productInputCandidates": 0,
+    "productInputRejectionReceipts": 0,
+    "structuralPrecheckCountsAsAcceptance": false,
+    "successReceipts": 0,
+    "timeResolutionReceipts": 0
+  },
+  "integrityBoundary": {
+    "authenticityEstablished": false,
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi.vedic.input-structural-rejection-execution-evidence.v1",
+    "digestIsDigitalSignature": false,
+    "digitalSignature": null,
+    "signerIdentity": null
+  },
+  "localExecutionClosureBindings": [
+    {
+      "bytes": 23349,
+      "path": "scripts/vedic-input-structural-rejection-execution-lib.mjs",
+      "sha256": "a49e065a98b30512a6486998650e66009568503eab20a379663e3d8d178cb88a"
+    },
+    {
+      "bytes": 30839,
+      "path": "scripts/vedic-input-contract-draft-lib.mjs",
+      "sha256": "a20cf2b30c848bda5d813db9b2b431185f1ffb1123c39fc1436b9309e0c84db0"
+    },
+    {
+      "bytes": 48822,
+      "path": "scripts/vedic-input-contract-requirements-lib.mjs",
+      "sha256": "b188481682fa0923e502c73064cae24f44bb7d2f2934814d4a8de1d20cc8e0dc"
+    }
+  ],
+  "observationBoundary": {
+    "abaExcluded": false,
+    "crossFileAtomicSnapshot": false,
+    "endpointSnapshotOnly": true,
+    "heldFileHandleReads": true,
+    "historicalExecutionAttested": false,
+    "intervalMutationExcluded": false,
+    "loadedModuleByteIdentityVerified": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "nodeLoaderIntegrityVerified": false,
+    "pathEndpointRevalidated": true,
+    "plainDirectoryChainRequired": true,
+    "rawHashAndParseUseSameBufferPerJsonFile": true,
+    "runtimeLauncherIdentityVerified": false
+  },
+  "probeCoverageBoundary": {
+    "allMalformedInputsRejectedEstablished": false,
+    "fixedProbeSetVerified": true,
+    "inputRejectionCapabilityEstablished": false,
+    "probeCoverageComplete": false,
+    "structuralValidatorComplete": false
+  },
+  "probeExecution": {
+    "diagnosticCodes": [
+      "SCHEMA_REQUIRED_PROPERTY_MISSING",
+      "SCHEMA_PATTERN_MISMATCH",
+      "DECLARED_DST_GAP_REJECTED",
+      "INPUT_CONTRACT_NOT_ADMITTED"
+    ],
+    "fixedProbeCount": 4,
+    "probeIds": [
+      "missing_required_root_field",
+      "invalid_ephemeris_digest_shape",
+      "declared_dst_gap",
+      "structurally_complete_contract_not_admitted"
+    ],
+    "probeResults": [
+      {
+        "candidateIdentity": {
+          "canonicalByteLength": 1985,
+          "canonicalDigest": "fac71e3e0c036e0143d550adc42144f016783fb03a4ec61ab91174010be079b9",
+          "canonicalizationProfile": "sorted_object_keys_compact_json_finite_numbers_no_alias_v1",
+          "digestAlgorithm": "SHA-256",
+          "digestDomain": "hakimi.vedic.input-structural-precheck-candidate.v1",
+          "digestIsAnonymous": false,
+          "digestIsSafeToPublish": false,
+          "personalDataPresenceAssessed": false,
+          "rawInputPersisted": false
+        },
+        "candidateRawInputPersisted": false,
+        "containsPersonIdentity": false,
+        "diagnostic": {
+          "candidateDeclarationVerifiedAsWorldFact": false,
+          "code": "SCHEMA_REQUIRED_PROPERTY_MISSING",
+          "draftSchemaShapeConforming": false,
+          "dstClassificationVerified": false,
+          "ianaTimeZoneResolved": false,
+          "jsonPointer": "/civil_calendar_and_date",
+          "keyword": "required",
+          "messageId": "draft_schema_structural_rejection",
+          "nonexistentWallTimeEstablished": false,
+          "stage": "draft_schema_structure",
+          "timeResolutionPerformed": false,
+          "timezoneDatabaseConsulted": false
+        },
+        "externalOrRealPersonInputUsed": false,
+        "probeId": "missing_required_root_field",
+        "projectControlledNoPersonProbe": true,
+        "runtimeReceiptProjection": {
+          "artifactOutputs": {
+            "acceptanceReceiptIssued": false,
+            "factArtifactIssued": false,
+            "factReceiptIssued": false,
+            "normalizedInputIssued": false,
+            "ruleReceiptIssued": false,
+            "successArtifactIssued": false,
+            "successReceiptIssued": false,
+            "timeResolutionReceiptIssued": false
+          },
+          "authorityBoundary": {
+            "domainAuthorityAuthorized": false,
+            "expertClaimsAuthorized": false,
+            "formalAdmissionAuthorized": false,
+            "publicDeploymentAuthorized": false,
+            "publicReleaseAuthorized": false,
+            "releaseReady": false
+          },
+          "candidateIdentity": {
+            "canonicalByteLength": 1985,
+            "canonicalDigest": "fac71e3e0c036e0143d550adc42144f016783fb03a4ec61ab91174010be079b9",
+            "canonicalizationProfile": "sorted_object_keys_compact_json_finite_numbers_no_alias_v1",
+            "digestAlgorithm": "SHA-256",
+            "digestDomain": "hakimi.vedic.input-structural-precheck-candidate.v1",
+            "digestIsAnonymous": false,
+            "digestIsSafeToPublish": false,
+            "personalDataPresenceAssessed": false,
+            "rawInputPersisted": false
+          },
+          "countsAsInputInstance": false,
+          "countsAsProductInputRejectionReceipt": false,
+          "countsTowardAdmission": false,
+          "diagnostic": {
+            "candidateDeclarationVerifiedAsWorldFact": false,
+            "code": "SCHEMA_REQUIRED_PROPERTY_MISSING",
+            "draftSchemaShapeConforming": false,
+            "dstClassificationVerified": false,
+            "ianaTimeZoneResolved": false,
+            "jsonPointer": "/civil_calendar_and_date",
+            "keyword": "required",
+            "messageId": "draft_schema_structural_rejection",
+            "nonexistentWallTimeEstablished": false,
+            "stage": "draft_schema_structure",
+            "timeResolutionPerformed": false,
+            "timezoneDatabaseConsulted": false
+          },
+          "inputAccepted": false,
+          "inputContractGateSatisfied": false,
+          "inputRejectionCapabilityEstablished": false,
+          "receiptClass": "structural_precheck_diagnostic_rejection_receipt",
+          "receiptId": "hakimi.vedic.structural-precheck-diagnostic/178b527a30396579060f4d3978c55a3e1c1e6a99d386db202d03963460124264",
+          "receiptIdentity": {
+            "bindsCandidateSchemaAndDiagnostic": true,
+            "digest": "178b527a30396579060f4d3978c55a3e1c1e6a99d386db202d03963460124264",
+            "digestAlgorithm": "SHA-256",
+            "digestDomain": "hakimi.vedic.input-structural-precheck-diagnostic-receipt-identity.v1"
+          },
+          "receiptIsFactReceipt": false,
+          "receiptIsProductReceipt": false,
+          "receiptStatus": "diagnostic_rejected_not_product_admitted",
+          "requirementsResolved": 0,
+          "schemaIdentity": {
+            "canonicalBytes": 9766,
+            "canonicalSha256": "03afcae3e276ce7d84b1be321185431ea4e8d95fcba02063ecb29a42e10d6a1f",
+            "schemaSemanticDigest": "ad9a1d568d63296d3ed19f30d91cb8f8e52f543afcec03f238178da4af70ee08"
+          }
+        },
+        "savedEvidenceReceiptIsRuntimeReceipt": false
+      },
+      {
+        "candidateIdentity": {
+          "canonicalByteLength": 2113,
+          "canonicalDigest": "58d94a46f209ca712bcaabcf3cc7df74f8f71be4940669b6b882ef43547e6aa3",
+          "canonicalizationProfile": "sorted_object_keys_compact_json_finite_numbers_no_alias_v1",
+          "digestAlgorithm": "SHA-256",
+          "digestDomain": "hakimi.vedic.input-structural-precheck-candidate.v1",
+          "digestIsAnonymous": false,
+          "digestIsSafeToPublish": false,
+          "personalDataPresenceAssessed": false,
+          "rawInputPersisted": false
+        },
+        "candidateRawInputPersisted": false,
+        "containsPersonIdentity": false,
+        "diagnostic": {
+          "candidateDeclarationVerifiedAsWorldFact": false,
+          "code": "SCHEMA_PATTERN_MISMATCH",
+          "draftSchemaShapeConforming": false,
+          "dstClassificationVerified": false,
+          "ianaTimeZoneResolved": false,
+          "jsonPointer": "/ephemeris_identity_version_and_coverage/data_digest_sha256",
+          "keyword": "pattern",
+          "messageId": "draft_schema_structural_rejection",
+          "nonexistentWallTimeEstablished": false,
+          "stage": "draft_schema_structure",
+          "timeResolutionPerformed": false,
+          "timezoneDatabaseConsulted": false
+        },
+        "externalOrRealPersonInputUsed": false,
+        "probeId": "invalid_ephemeris_digest_shape",
+        "projectControlledNoPersonProbe": true,
+        "runtimeReceiptProjection": {
+          "artifactOutputs": {
+            "acceptanceReceiptIssued": false,
+            "factArtifactIssued": false,
+            "factReceiptIssued": false,
+            "normalizedInputIssued": false,
+            "ruleReceiptIssued": false,
+            "successArtifactIssued": false,
+            "successReceiptIssued": false,
+            "timeResolutionReceiptIssued": false
+          },
+          "authorityBoundary": {
+            "domainAuthorityAuthorized": false,
+            "expertClaimsAuthorized": false,
+            "formalAdmissionAuthorized": false,
+            "publicDeploymentAuthorized": false,
+            "publicReleaseAuthorized": false,
+            "releaseReady": false
+          },
+          "candidateIdentity": {
+            "canonicalByteLength": 2113,
+            "canonicalDigest": "58d94a46f209ca712bcaabcf3cc7df74f8f71be4940669b6b882ef43547e6aa3",
+            "canonicalizationProfile": "sorted_object_keys_compact_json_finite_numbers_no_alias_v1",
+            "digestAlgorithm": "SHA-256",
+            "digestDomain": "hakimi.vedic.input-structural-precheck-candidate.v1",
+            "digestIsAnonymous": false,
+            "digestIsSafeToPublish": false,
+            "personalDataPresenceAssessed": false,
+            "rawInputPersisted": false
+          },
+          "countsAsInputInstance": false,
+          "countsAsProductInputRejectionReceipt": false,
+          "countsTowardAdmission": false,
+          "diagnostic": {
+            "candidateDeclarationVerifiedAsWorldFact": false,
+            "code": "SCHEMA_PATTERN_MISMATCH",
+            "draftSchemaShapeConforming": false,
+            "dstClassificationVerified": false,
+            "ianaTimeZoneResolved": false,
+            "jsonPointer": "/ephemeris_identity_version_and_coverage/data_digest_sha256",
+            "keyword": "pattern",
+            "messageId": "draft_schema_structural_rejection",
+            "nonexistentWallTimeEstablished": false,
+            "stage": "draft_schema_structure",
+            "timeResolutionPerformed": false,
+            "timezoneDatabaseConsulted": false
+          },
+          "inputAccepted": false,
+          "inputContractGateSatisfied": false,
+          "inputRejectionCapabilityEstablished": false,
+          "receiptClass": "structural_precheck_diagnostic_rejection_receipt",
+          "receiptId": "hakimi.vedic.structural-precheck-diagnostic/e50cfc73e274c7e5c6c2cf0795a7a7ad4fc20fb5e01f9625a82daa993b3fc174",
+          "receiptIdentity": {
+            "bindsCandidateSchemaAndDiagnostic": true,
+            "digest": "e50cfc73e274c7e5c6c2cf0795a7a7ad4fc20fb5e01f9625a82daa993b3fc174",
+            "digestAlgorithm": "SHA-256",
+            "digestDomain": "hakimi.vedic.input-structural-precheck-diagnostic-receipt-identity.v1"
+          },
+          "receiptIsFactReceipt": false,
+          "receiptIsProductReceipt": false,
+          "receiptStatus": "diagnostic_rejected_not_product_admitted",
+          "requirementsResolved": 0,
+          "schemaIdentity": {
+            "canonicalBytes": 9766,
+            "canonicalSha256": "03afcae3e276ce7d84b1be321185431ea4e8d95fcba02063ecb29a42e10d6a1f",
+            "schemaSemanticDigest": "ad9a1d568d63296d3ed19f30d91cb8f8e52f543afcec03f238178da4af70ee08"
+          }
+        },
+        "savedEvidenceReceiptIsRuntimeReceipt": false
+      },
+      {
+        "candidateIdentity": {
+          "canonicalByteLength": 2130,
+          "canonicalDigest": "4de7de4ad33f9c74e5044fc7978456a00aa32220856a8db581a83a4109bbd8e8",
+          "canonicalizationProfile": "sorted_object_keys_compact_json_finite_numbers_no_alias_v1",
+          "digestAlgorithm": "SHA-256",
+          "digestDomain": "hakimi.vedic.input-structural-precheck-candidate.v1",
+          "digestIsAnonymous": false,
+          "digestIsSafeToPublish": false,
+          "personalDataPresenceAssessed": false,
+          "rawInputPersisted": false
+        },
+        "candidateRawInputPersisted": false,
+        "containsPersonIdentity": false,
+        "diagnostic": {
+          "candidateDeclarationVerifiedAsWorldFact": false,
+          "code": "DECLARED_DST_GAP_REJECTED",
+          "draftSchemaShapeConforming": true,
+          "dstClassificationVerified": false,
+          "ianaTimeZoneResolved": false,
+          "jsonPointer": "/dst_gap_overlap_resolution",
+          "keyword": "declared_gap_branch",
+          "messageId": "candidate_declares_nonexistent_local_wall_time",
+          "nonexistentWallTimeEstablished": false,
+          "stage": "candidate_declared_gap_boundary",
+          "timeResolutionPerformed": false,
+          "timezoneDatabaseConsulted": false
+        },
+        "externalOrRealPersonInputUsed": false,
+        "probeId": "declared_dst_gap",
+        "projectControlledNoPersonProbe": true,
+        "runtimeReceiptProjection": {
+          "artifactOutputs": {
+            "acceptanceReceiptIssued": false,
+            "factArtifactIssued": false,
+            "factReceiptIssued": false,
+            "normalizedInputIssued": false,
+            "ruleReceiptIssued": false,
+            "successArtifactIssued": false,
+            "successReceiptIssued": false,
+            "timeResolutionReceiptIssued": false
+          },
+          "authorityBoundary": {
+            "domainAuthorityAuthorized": false,
+            "expertClaimsAuthorized": false,
+            "formalAdmissionAuthorized": false,
+            "publicDeploymentAuthorized": false,
+            "publicReleaseAuthorized": false,
+            "releaseReady": false
+          },
+          "candidateIdentity": {
+            "canonicalByteLength": 2130,
+            "canonicalDigest": "4de7de4ad33f9c74e5044fc7978456a00aa32220856a8db581a83a4109bbd8e8",
+            "canonicalizationProfile": "sorted_object_keys_compact_json_finite_numbers_no_alias_v1",
+            "digestAlgorithm": "SHA-256",
+            "digestDomain": "hakimi.vedic.input-structural-precheck-candidate.v1",
+            "digestIsAnonymous": false,
+            "digestIsSafeToPublish": false,
+            "personalDataPresenceAssessed": false,
+            "rawInputPersisted": false
+          },
+          "countsAsInputInstance": false,
+          "countsAsProductInputRejectionReceipt": false,
+          "countsTowardAdmission": false,
+          "diagnostic": {
+            "candidateDeclarationVerifiedAsWorldFact": false,
+            "code": "DECLARED_DST_GAP_REJECTED",
+            "draftSchemaShapeConforming": true,
+            "dstClassificationVerified": false,
+            "ianaTimeZoneResolved": false,
+            "jsonPointer": "/dst_gap_overlap_resolution",
+            "keyword": "declared_gap_branch",
+            "messageId": "candidate_declares_nonexistent_local_wall_time",
+            "nonexistentWallTimeEstablished": false,
+            "stage": "candidate_declared_gap_boundary",
+            "timeResolutionPerformed": false,
+            "timezoneDatabaseConsulted": false
+          },
+          "inputAccepted": false,
+          "inputContractGateSatisfied": false,
+          "inputRejectionCapabilityEstablished": false,
+          "receiptClass": "structural_precheck_diagnostic_rejection_receipt",
+          "receiptId": "hakimi.vedic.structural-precheck-diagnostic/023ab8cd7779b2d7c43e5314761cab9c4fdc8c7a093bcf2399c97276a968b112",
+          "receiptIdentity": {
+            "bindsCandidateSchemaAndDiagnostic": true,
+            "digest": "023ab8cd7779b2d7c43e5314761cab9c4fdc8c7a093bcf2399c97276a968b112",
+            "digestAlgorithm": "SHA-256",
+            "digestDomain": "hakimi.vedic.input-structural-precheck-diagnostic-receipt-identity.v1"
+          },
+          "receiptIsFactReceipt": false,
+          "receiptIsProductReceipt": false,
+          "receiptStatus": "diagnostic_rejected_not_product_admitted",
+          "requirementsResolved": 0,
+          "schemaIdentity": {
+            "canonicalBytes": 9766,
+            "canonicalSha256": "03afcae3e276ce7d84b1be321185431ea4e8d95fcba02063ecb29a42e10d6a1f",
+            "schemaSemanticDigest": "ad9a1d568d63296d3ed19f30d91cb8f8e52f543afcec03f238178da4af70ee08"
+          }
+        },
+        "savedEvidenceReceiptIsRuntimeReceipt": false
+      },
+      {
+        "candidateIdentity": {
+          "canonicalByteLength": 2114,
+          "canonicalDigest": "0e46426ad4ceb05ed797633746c19abfe2ed3ae929f4cfa16dba8a577bd53a9c",
+          "canonicalizationProfile": "sorted_object_keys_compact_json_finite_numbers_no_alias_v1",
+          "digestAlgorithm": "SHA-256",
+          "digestDomain": "hakimi.vedic.input-structural-precheck-candidate.v1",
+          "digestIsAnonymous": false,
+          "digestIsSafeToPublish": false,
+          "personalDataPresenceAssessed": false,
+          "rawInputPersisted": false
+        },
+        "candidateRawInputPersisted": false,
+        "containsPersonIdentity": false,
+        "diagnostic": {
+          "candidateDeclarationVerifiedAsWorldFact": false,
+          "code": "INPUT_CONTRACT_NOT_ADMITTED",
+          "draftSchemaShapeConforming": true,
+          "dstClassificationVerified": false,
+          "ianaTimeZoneResolved": false,
+          "jsonPointer": "",
+          "keyword": "admission_boundary",
+          "messageId": "isolated_draft_cannot_accept_input",
+          "nonexistentWallTimeEstablished": false,
+          "stage": "admission_boundary",
+          "timeResolutionPerformed": false,
+          "timezoneDatabaseConsulted": false
+        },
+        "externalOrRealPersonInputUsed": false,
+        "probeId": "structurally_complete_contract_not_admitted",
+        "projectControlledNoPersonProbe": true,
+        "runtimeReceiptProjection": {
+          "artifactOutputs": {
+            "acceptanceReceiptIssued": false,
+            "factArtifactIssued": false,
+            "factReceiptIssued": false,
+            "normalizedInputIssued": false,
+            "ruleReceiptIssued": false,
+            "successArtifactIssued": false,
+            "successReceiptIssued": false,
+            "timeResolutionReceiptIssued": false
+          },
+          "authorityBoundary": {
+            "domainAuthorityAuthorized": false,
+            "expertClaimsAuthorized": false,
+            "formalAdmissionAuthorized": false,
+            "publicDeploymentAuthorized": false,
+            "publicReleaseAuthorized": false,
+            "releaseReady": false
+          },
+          "candidateIdentity": {
+            "canonicalByteLength": 2114,
+            "canonicalDigest": "0e46426ad4ceb05ed797633746c19abfe2ed3ae929f4cfa16dba8a577bd53a9c",
+            "canonicalizationProfile": "sorted_object_keys_compact_json_finite_numbers_no_alias_v1",
+            "digestAlgorithm": "SHA-256",
+            "digestDomain": "hakimi.vedic.input-structural-precheck-candidate.v1",
+            "digestIsAnonymous": false,
+            "digestIsSafeToPublish": false,
+            "personalDataPresenceAssessed": false,
+            "rawInputPersisted": false
+          },
+          "countsAsInputInstance": false,
+          "countsAsProductInputRejectionReceipt": false,
+          "countsTowardAdmission": false,
+          "diagnostic": {
+            "candidateDeclarationVerifiedAsWorldFact": false,
+            "code": "INPUT_CONTRACT_NOT_ADMITTED",
+            "draftSchemaShapeConforming": true,
+            "dstClassificationVerified": false,
+            "ianaTimeZoneResolved": false,
+            "jsonPointer": "",
+            "keyword": "admission_boundary",
+            "messageId": "isolated_draft_cannot_accept_input",
+            "nonexistentWallTimeEstablished": false,
+            "stage": "admission_boundary",
+            "timeResolutionPerformed": false,
+            "timezoneDatabaseConsulted": false
+          },
+          "inputAccepted": false,
+          "inputContractGateSatisfied": false,
+          "inputRejectionCapabilityEstablished": false,
+          "receiptClass": "structural_precheck_diagnostic_rejection_receipt",
+          "receiptId": "hakimi.vedic.structural-precheck-diagnostic/d7c048b5ba968ea7ae795f9116d7bedd5af5c1693acac3cc3769b86ff55c5dc0",
+          "receiptIdentity": {
+            "bindsCandidateSchemaAndDiagnostic": true,
+            "digest": "d7c048b5ba968ea7ae795f9116d7bedd5af5c1693acac3cc3769b86ff55c5dc0",
+            "digestAlgorithm": "SHA-256",
+            "digestDomain": "hakimi.vedic.input-structural-precheck-diagnostic-receipt-identity.v1"
+          },
+          "receiptIsFactReceipt": false,
+          "receiptIsProductReceipt": false,
+          "receiptStatus": "diagnostic_rejected_not_product_admitted",
+          "requirementsResolved": 0,
+          "schemaIdentity": {
+            "canonicalBytes": 9766,
+            "canonicalSha256": "03afcae3e276ce7d84b1be321185431ea4e8d95fcba02063ecb29a42e10d6a1f",
+            "schemaSemanticDigest": "ad9a1d568d63296d3ed19f30d91cb8f8e52f543afcec03f238178da4af70ee08"
+          }
+        },
+        "savedEvidenceReceiptIsRuntimeReceipt": false
+      }
+    ],
+    "probeSetDigest": "28b898fc131c5c2fa89d389c7a05c8d07321539574f054a7d5630abf581c4c7f"
+  },
+  "productBoundary": {
+    "domainManifest": "absent",
+    "factContract": "standalone_draft_not_executed",
+    "factProducer": "absent",
+    "inputContract": "isolated_contract_draft_not_admitted",
+    "migrationId": null,
+    "productRuntime": "not_selected_not_implemented_not_executed",
+    "productSurface": "absent",
+    "projector": "absent",
+    "releaseIdentity": null,
+    "targetSchema": null,
+    "versionedRuleset": "standalone_draft_not_executed"
+  },
+  "projectReleaseGovernance": {
+    "activeRulePack": "legacy-v13",
+    "migrationId": null,
+    "targetSchema": 13
+  },
+  "receiptBoundary": {
+    "acceptanceReceiptIssued": false,
+    "diagnosticReceiptClass": "structural_precheck_diagnostic_rejection_receipt",
+    "factReceiptIssued": false,
+    "inputAccepted": false,
+    "inputContractGateSatisfied": false,
+    "receiptIsFactReceipt": false,
+    "receiptIsProductReceipt": false,
+    "requirementsResolved": 0,
+    "requirementsUniverseClosed": false,
+    "runtimeReceiptRegistrationNotSerializable": true,
+    "successReceiptIssued": false
+  },
+  "recordType": "vedic_input_structural_rejection_execution_evidence_v1",
+  "schemaVersion": "1.0.0",
+  "semanticValidationBoundary": {
+    "calendarValidityEstablished": false,
+    "candidateConsistencyEstablished": false,
+    "ephemerisCoverageEstablished": false,
+    "ianaTimeZoneIdentityEstablished": false,
+    "intervalOrderingEstablished": false,
+    "semanticValidationPerformed": false,
+    "transitionConsistencyEstablished": false
+  },
+  "sourceExpertRightsBoundary": {
+    "exactLocatorVerified": false,
+    "exactQuoteVerified": false,
+    "expertCredentialVerified": false,
+    "expertIdentityVerified": false,
+    "expertIndependenceVerified": false,
+    "expertOpinionVerified": false,
+    "licenseEstablished": false,
+    "rightsEstablished": false,
+    "sourceBindingEstablished": false,
+    "sourceBodyVerified": false
+  },
+  "status": "four_fixed_diagnostic_rejection_probes_verified_not_product_admitted",
+  "upstreamBindings": {
+    "inputContractDraft": {
+      "bytes": 16529,
+      "path": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json",
+      "semanticDigest": "ad9a1d568d63296d3ed19f30d91cb8f8e52f543afcec03f238178da4af70ee08",
+      "sha256": "4899e8fdf267a44e401295f23e11e2504e45f8e2f731c6be9b8ad1435e8dbf69"
+    },
+    "inputContractRequirements": {
+      "bytes": 15859,
+      "ledgerDigest": "e545c254d29902df58e29ca90f965333daca70f06bce03cca62ad9e2f4fc7ac0",
+      "path": "content/system-admission/vedic-input-contract-requirements.v1.json",
+      "sha256": "85409d7f4ed7ef6bddc4d34102ecff479fd8dbe4210a78416f90ee705a0f2e59"
+    },
+    "parentBacklinkRequired": false,
+    "parentOrRegistryModifiedByThisChild": false
+  }
+}

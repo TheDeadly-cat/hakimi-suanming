@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'"
+    />
+    <meta
+      name="description"
+      content="隔离的吠陀输入结构预检草案：只重放四个固定无人物 probe，拒绝全部输入，不保存、不联网、不产生事实或规则。"
+    />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='26' height='26' rx='8' fill='%232c3a34'/%3E%3Cpath d='M10 16h12M16 10v12' stroke='%23e8d9af' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='%23e8d9af' stroke-width='1.5'/%3E%3C/svg%3E" />
+    <title>吠陀输入结构预检 · 隔离草案</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#preflight-control">跳到预检控制</a>
+    <main class="shell">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">哈基米 · 跨体系独立产品化</p>
+          <h1>吠陀输入结构预检</h1>
+          <p class="lead">
+            这里只重放四个仓内固定、无人物身份的 shape-only probe。每次运行创建新的 Worker；所有结果都必须拒绝。
+          </p>
+        </div>
+        <div class="boundary-stamp" aria-label="隔离工程草案，零准入">
+          <strong>隔离草案</strong>
+          <span>0 个输入获准 · 0 个产品回执</span>
+        </div>
+      </header>
+
+      <section id="preflight-control" class="control-card" aria-labelledby="control-title">
+        <div>
+          <p class="section-kicker">01 · 固定执行</p>
+          <h2 id="control-title">运行四个确定性拒绝探针</h2>
+          <p>不接收姓名、出生信息、地点、时间或上传文件；页面没有任意输入入口。</p>
+        </div>
+        <button id="run-preflight" type="button">
+          <span>运行固定预检</span>
+          <small>fresh Worker · no persistence</small>
+        </button>
+      </section>
+
+      <p id="run-status" class="run-status" role="status" aria-live="polite" data-state="idle">
+        尚未运行。当前仅显示固定红门。
+      </p>
+
+      <section class="summary-grid" aria-label="预检红门摘要">
+        <article>
+          <span>固定探针</span>
+          <strong id="probe-count">4</strong>
+        </article>
+        <article>
+          <span>获准输入</span>
+          <strong id="accepted-count">0</strong>
+        </article>
+        <article>
+          <span>产品回执</span>
+          <strong id="product-receipt-count">0</strong>
+        </article>
+        <article>
+          <span>正式准入</span>
+          <strong id="admission-state">false</strong>
+        </article>
+      </section>
+
+      <section class="results-card" aria-labelledby="results-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">02 · Worker 结果</p>
+            <h2 id="results-title">四项必须逐条失败关闭</h2>
+          </div>
+          <span id="worker-state" class="worker-state" data-state="idle">未运行</span>
+        </div>
+        <ol id="probe-results" class="probe-results">
+          <li class="probe-placeholder">等待固定 Worker 回执。</li>
+        </ol>
+        <p id="run-error" class="run-error" role="alert" hidden></p>
+      </section>
+
+      <section class="boundary-card" aria-labelledby="boundary-title">
+        <p class="section-kicker">03 · 不建立什么</p>
+        <h2 id="boundary-title">这不是吠陀排盘，也不是完整输入验证器</h2>
+        <ul>
+          <li>不验证真实日期、IANA 时区、DST gap/overlap、UTC 或 tzdb。</li>
+          <li>不选择星历、恒星黄道、岁差、Rahu/Ketu、宫制或分盘规则。</li>
+          <li>不产生 normalized input、事实、规则、命盘、解释或成功回执。</li>
+          <li>不建立来源许可、专家真值、法律判断、发布就绪或公开部署授权。</li>
+          <li>不读取八字 v1.7，也不进入四体系正式 registry 或主应用。</li>
+        </ul>
+      </section>
+
+      <footer>
+        <p>
+          固定项目治理仍为 <code>legacy-v13 / targetSchema 13 / migrationId null</code>；该治理只约束项目边界，不成为吠陀产品身份。
+        </p>
+      </footer>
+    </main>
+    <noscript>此隔离预检需要启用 JavaScript 才能创建一次性 Worker。</noscript>
+    <script type="module" src="../src/browser-app/main.ts"></script>
+  </body>
+</html>

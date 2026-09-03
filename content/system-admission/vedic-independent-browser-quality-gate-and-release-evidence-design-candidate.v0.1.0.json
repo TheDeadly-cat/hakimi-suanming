@@ -1,0 +1,1069 @@
+{
+  "activeAdmissionEffect": "none",
+  "actorRoleRequirements": [
+    {
+      "authority": "records_exact_source_toolchain_and_output_identity_only",
+      "roleId": "engineering_artifact_identity_recorder",
+      "roleInstances": 0
+    },
+    {
+      "authority": "executes_clean_reproducible_builds_only",
+      "roleId": "independent_build_executor",
+      "roleInstances": 0
+    },
+    {
+      "authority": "observes_fixed_browser_device_and_viewport_runs_only",
+      "roleId": "independent_browser_matrix_observer",
+      "roleInstances": 0
+    },
+    {
+      "authority": "records_runtime_probes_without_domain_or_release_authority",
+      "roleId": "runtime_security_privacy_observer",
+      "roleInstances": 0
+    },
+    {
+      "authority": "records_https_provider_and_deployment_operation_only",
+      "roleId": "deployment_provider_operator",
+      "roleInstances": 0
+    },
+    {
+      "authority": "records_backup_recovery_and_forward_rollback_operation_only",
+      "roleId": "rollback_recovery_operator",
+      "roleInstances": 0
+    },
+    {
+      "authority": "retains_authorized_non_person_evidence_without_admission_authority",
+      "roleId": "evidence_retention_custodian",
+      "roleInstances": 0
+    },
+    {
+      "authority": "future_explicit_scope_license_deployment_and_public_release_decisions",
+      "roleId": "vedic_product_owner_authorizer",
+      "roleInstances": 0
+    }
+  ],
+  "artifactRole": "non_product_requirements_only_independent_browser_quality_gate_and_release_evidence_design_candidate",
+  "authorityBoundary": {
+    "artifactAuthenticityEstablished": false,
+    "contentTruthEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "highRiskClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "scientificTruthEstablished": false,
+    "sourceFreezeEstablished": false
+  },
+  "baselineEngineeringObservation": {
+    "activeAdmissionEffect": "none",
+    "actualPersonDataEntered": false,
+    "artifactBindingCount": 25,
+    "browserObservationCount": 1,
+    "browserObservationFieldCount": 40,
+    "browserProduct": "Codex In-app Browser",
+    "browserVersion": null,
+    "buildArtifactFileCountPerRun": 12,
+    "buildManifestPayloadEntryCount": 11,
+    "buildOutputIdentityCount": 2,
+    "buildOutputIdentityDigest": "2037ddbf4a4ccea5b80e597751dd30c51f9e4a99a5fef353531570c8b5f78ccd",
+    "chromeAcceptedReceipts": 0,
+    "chromeValidated": false,
+    "connectSrcNoneResponseHeaderObserved": true,
+    "consoleProbePerformed": true,
+    "consoleWarningOrErrorCountObserved": 0,
+    "cookieInspectionProhibited": true,
+    "cookieMutationObserved": null,
+    "cookieProbePerformed": false,
+    "currentObservationIsFormalReleaseEvidence": false,
+    "edgeAcceptedReceipts": 0,
+    "edgeValidated": false,
+    "emittedNoticeCount": 3,
+    "evidenceAccountCount": 7,
+    "formActionNoneResponseHeaderObserved": true,
+    "formalContextBindingCount": 7,
+    "headerObservationProvenance": "separate_http_response_read_not_iab_dom_observation",
+    "historicalSecondPrecisionOffsetBrowserObserved": "UTC+08:05:43",
+    "iabObservationCount": 1,
+    "lockedBuildInputCount": 17,
+    "namedControlsBrowserObserved": 0,
+    "networkProbePerformed": false,
+    "networkRequestCountObserved": null,
+    "observationDigest": "019ee27933a5a63eb2636a3b3618df25b9a365fed0101f88e1e8ddc1bcb68f6d",
+    "operatorSuppliedEvidence": true,
+    "origin": "http://127.0.0.1:4226",
+    "productionBrowserObservationCount": 0,
+    "productionBrowserRuntimeEvidenceEstablished": false,
+    "productionHostValidated": false,
+    "runtimeImportEdgeCount": 31,
+    "runtimeModuleCount": 13,
+    "runtimeSourceIdentityCount": 15,
+    "scenarioCount": 5,
+    "scenarioIds": [
+      "unique",
+      "gap",
+      "overlap_reject",
+      "overlap_earlier",
+      "overlap_later"
+    ],
+    "serviceWorkerProbePerformed": false,
+    "serviceWorkerRegistrationObserved": null,
+    "storageInspectionProhibited": true,
+    "storageMutationObserved": null,
+    "storageProbePerformed": false,
+    "syntheticDataOnly": true,
+    "toolAttestationEstablished": false,
+    "topLevelFieldCount": 22
+  },
+  "boundaryBindings": {
+    "civilTimeFactBrowserObservation": {
+      "activeAdmissionEffect": "none",
+      "bytes": 22446,
+      "contextId": "civil_time_fact_browser_observation_candidate_v1",
+      "fullLoaderPrivateBrandRequired": true,
+      "path": "content/system-admission/vedic-civil-time-fact-browser-observation-candidate.v1.0.0.json",
+      "semanticDigest": "019ee27933a5a63eb2636a3b3618df25b9a365fed0101f88e1e8ddc1bcb68f6d",
+      "semanticDigestField": "observationDigest",
+      "sha256": "fdfb6da43215e87e103f428d59d104b43cb3be3b4468880b9417f0baf6167e0a"
+    },
+    "historicalParent": {
+      "bytes": 25578,
+      "contextId": "historical_parent_requirements_ledger_v1",
+      "path": "content/system-admission/vedic-independent-productization-requirements.v1.json",
+      "requiredRereviewRequirementId": "independent_browser_gate_and_release_evidence_design",
+      "requiredRereviewRequirementState": "required_absent",
+      "semanticDigest": "1017f04864428a84d5032aaef5593875e483e2e30ce479127682219ed269cdbb",
+      "semanticDigestField": "ledgerDigest",
+      "sha256": "c9f0fbb3b25c3ad582dc4c3f5534e7e27cb44e47721dbf806b8085cefb6b26f8"
+    },
+    "independentProductBoundaryAdr": {
+      "bytes": 4531,
+      "contextId": "vedic_independent_product_boundary_adr",
+      "path": "docs/吠陀占星独立产品化ADR-0001-2026-08-26.md",
+      "requiredMarker": "6. 独立浏览器质量门和 Release Evidence 设计；",
+      "sha256": "0e9b81505abb963b4d64426338b8071cd8a211eed8d02fe76065fada335dce63"
+    },
+    "runtimeAndBundleSizeProposal": {
+      "bytes": 27241,
+      "contextId": "runtime_and_bundle_size_proposal_v1",
+      "expectedDesignArtifactsObserved": 0,
+      "expectedRequirementState": "separate_rereview_requirement_plan_only_not_satisfied",
+      "path": "content/system-admission/vedic-runtime-and-bundle-size-proposal.v1.json",
+      "requiredDeferredDesignKey": "browserGateAndReleaseEvidence",
+      "semanticDigest": "ae9fb180d97e81a30a9157655d168bb4101d993f859f40990db31c2e12954f15",
+      "semanticDigestField": "proposalDigest",
+      "sha256": "e268aa78d6123c34481752cc8e0789e1a185f3f2e2ce9757c45d6227f5bea30e"
+    },
+    "storageDesignCandidate": {
+      "bytes": 25978,
+      "contextId": "independent_storage_backup_recovery_rollback_design_candidate_v0_1",
+      "formalRereviewRequirementSatisfied": false,
+      "fullLoaderPrivateBrandRequired": true,
+      "path": "content/system-admission/vedic-independent-storage-backup-recovery-and-rollback-design-candidate.v0.1.0.json",
+      "semanticDigest": "5a96993f7750722a984eb6f5845ce1e49e6c5f49e5b49735629698a47eb11958",
+      "semanticDigestField": "designDigest",
+      "sha256": "1eeaf1419ce4b3ae01f277f6389fc3bbdf5a59605f89d4c7ae7eccfc1a8d1bbf"
+    }
+  },
+  "browserRunMatrixRequirements": [
+    {
+      "browserId": "microsoft_edge",
+      "currentAcceptedReceipts": 0,
+      "currentExecutedRuns": 0,
+      "exactBrowserVersionRequired": true,
+      "exactRunRoleSetRequired": true,
+      "interfaceRequirementId": "microsoft_edge_browser_receipt_interface",
+      "plannedRuns": 3,
+      "runRoles": [
+        {
+          "cacheState": "cold_empty_before_exact_release_load",
+          "connectivitySequence": "online_only",
+          "currentExecutedInstances": 0,
+          "formalReceiptInstances": 0,
+          "profileState": "new_empty_browser_profile",
+          "requiredScenarioIds": [
+            "unique",
+            "gap",
+            "overlap_reject",
+            "overlap_earlier",
+            "overlap_later"
+          ],
+          "runRoleId": "fresh_profile_online_desktop",
+          "serviceWorkerLifecycle": "no_registration_before_run_then_record_actual_registration_state",
+          "updateLifecycle": "initial_exact_release_load_no_update",
+          "viewportProfile": "owner_selected_fixed_desktop_viewport"
+        },
+        {
+          "cacheState": "cold_empty_before_exact_release_load",
+          "connectivitySequence": "online_only",
+          "currentExecutedInstances": 0,
+          "formalReceiptInstances": 0,
+          "profileState": "second_new_empty_browser_profile",
+          "requiredScenarioIds": [
+            "unique",
+            "gap",
+            "overlap_reject",
+            "overlap_earlier",
+            "overlap_later"
+          ],
+          "runRoleId": "fresh_profile_online_390x844",
+          "serviceWorkerLifecycle": "no_registration_before_run_then_record_actual_registration_state",
+          "updateLifecycle": "initial_exact_release_load_no_update",
+          "viewportProfile": "desktop_browser_emulated_390x844_viewport"
+        },
+        {
+          "cacheState": "warm_release_n_cache_then_measured_release_n_plus_1_convergence",
+          "connectivitySequence": "online_release_n_then_offline_cold_start_then_online_update_then_offline_recheck",
+          "currentExecutedInstances": 0,
+          "formalReceiptInstances": 0,
+          "profileState": "retained_profile_from_accepted_release_n_install",
+          "requiredScenarioIds": [
+            "unique",
+            "gap",
+            "overlap_reject",
+            "overlap_earlier",
+            "overlap_later"
+          ],
+          "runRoleId": "retained_profile_offline_update_transition",
+          "serviceWorkerLifecycle": "record_release_n_controller_then_release_n_plus_1_controller_and_cache_convergence",
+          "updateLifecycle": "bind_subject_release_n_plus_1_and_predecessor_release_n_artifact_identities_or_fail_closed",
+          "viewportProfile": "owner_selected_fixed_desktop_viewport"
+        }
+      ],
+      "uniqueProfileDirectoriesRequired": true,
+      "uniqueRunIdsRequired": true
+    },
+    {
+      "browserId": "google_chrome",
+      "currentAcceptedReceipts": 0,
+      "currentExecutedRuns": 0,
+      "exactBrowserVersionRequired": true,
+      "exactRunRoleSetRequired": true,
+      "interfaceRequirementId": "google_chrome_browser_receipt_interface",
+      "plannedRuns": 3,
+      "runRoles": [
+        {
+          "cacheState": "cold_empty_before_exact_release_load",
+          "connectivitySequence": "online_only",
+          "currentExecutedInstances": 0,
+          "formalReceiptInstances": 0,
+          "profileState": "new_empty_browser_profile",
+          "requiredScenarioIds": [
+            "unique",
+            "gap",
+            "overlap_reject",
+            "overlap_earlier",
+            "overlap_later"
+          ],
+          "runRoleId": "fresh_profile_online_desktop",
+          "serviceWorkerLifecycle": "no_registration_before_run_then_record_actual_registration_state",
+          "updateLifecycle": "initial_exact_release_load_no_update",
+          "viewportProfile": "owner_selected_fixed_desktop_viewport"
+        },
+        {
+          "cacheState": "cold_empty_before_exact_release_load",
+          "connectivitySequence": "online_only",
+          "currentExecutedInstances": 0,
+          "formalReceiptInstances": 0,
+          "profileState": "second_new_empty_browser_profile",
+          "requiredScenarioIds": [
+            "unique",
+            "gap",
+            "overlap_reject",
+            "overlap_earlier",
+            "overlap_later"
+          ],
+          "runRoleId": "fresh_profile_online_390x844",
+          "serviceWorkerLifecycle": "no_registration_before_run_then_record_actual_registration_state",
+          "updateLifecycle": "initial_exact_release_load_no_update",
+          "viewportProfile": "desktop_browser_emulated_390x844_viewport"
+        },
+        {
+          "cacheState": "warm_release_n_cache_then_measured_release_n_plus_1_convergence",
+          "connectivitySequence": "online_release_n_then_offline_cold_start_then_online_update_then_offline_recheck",
+          "currentExecutedInstances": 0,
+          "formalReceiptInstances": 0,
+          "profileState": "retained_profile_from_accepted_release_n_install",
+          "requiredScenarioIds": [
+            "unique",
+            "gap",
+            "overlap_reject",
+            "overlap_earlier",
+            "overlap_later"
+          ],
+          "runRoleId": "retained_profile_offline_update_transition",
+          "serviceWorkerLifecycle": "record_release_n_controller_then_release_n_plus_1_controller_and_cache_convergence",
+          "updateLifecycle": "bind_subject_release_n_plus_1_and_predecessor_release_n_artifact_identities_or_fail_closed",
+          "viewportProfile": "owner_selected_fixed_desktop_viewport"
+        }
+      ],
+      "uniqueProfileDirectoriesRequired": true,
+      "uniqueRunIdsRequired": true
+    }
+  ],
+  "createdAt": "2026-09-01T00:00:00.000Z",
+  "designCoverage": {
+    "designExecutionStarted": false,
+    "designMaterialCandidateComplete": true,
+    "designMaterialCandidateCompleteMeans": "eight_requirements_texts_present_only",
+    "designReceiptsIssued": 0,
+    "interfaceRequirementIds": [
+      "microsoft_edge_browser_receipt_interface",
+      "google_chrome_browser_receipt_interface",
+      "artifact_identity_receipt_interface",
+      "build_receipt_interface",
+      "runtime_execution_receipt_interface",
+      "deployment_receipt_interface",
+      "rollback_receipt_interface",
+      "evidence_retention_receipt_interface"
+    ],
+    "interfaceRequirementsDefined": 8,
+    "interfaceRequirementsRequired": 8,
+    "quantitativePlanRefs": [
+      "#/measurementPlan/browserMatrix/0/plannedRuns",
+      "#/measurementPlan/browserMatrix/1/plannedRuns",
+      "#/runtimeOptions/0/candidateCeilings/8/proposedCeiling",
+      "#/runtimeOptions/1/candidateCeilings/8/proposedCeiling"
+    ]
+  },
+  "designDigest": "c66ebecac08cbfad109d7bf11b6d63d7e8468bd075c599f105d4d515cbda768c",
+  "designId": "hakimi.vedic.independent-browser-quality-gate-and-release-evidence.design-candidate/0.1.0",
+  "doesNotEstablish": [
+    "formal_parent_update_supersession_or_rereview_satisfaction",
+    "independent_vedic_product_release_schema_or_migration_identity",
+    "formal_input_fact_rule_or_system_admission",
+    "chrome_edge_browser_matrix_or_production_runtime_acceptance",
+    "pwa_service_worker_offline_update_public_host_or_https_provider_validation",
+    "network_storage_cookie_service_worker_or_console_zero_activity",
+    "selected_runtime_storage_backend_namespace_or_capacity_budget",
+    "mutation_epoch_cross_file_atomicity_interval_integrity_or_aba_exclusion",
+    "backup_recovery_deployment_rollback_or_evidence_retention_execution",
+    "source_binding_rights_legal_content_expert_or_scientific_truth",
+    "release_evidence_completeness_release_readiness_or_public_authorization",
+    "legacy_v13_schema_13_or_cross_system_authority_inheritance"
+  ],
+  "evidenceAccounts": [
+    {
+      "accountId": "engineering_evidence",
+      "authorityGranted": false,
+      "formalReceiptAccepted": false,
+      "observationPresent": true
+    },
+    {
+      "accountId": "browser_runtime_evidence",
+      "authorityGranted": false,
+      "formalReceiptAccepted": false,
+      "observationPresent": true,
+      "productionValidated": false
+    },
+    {
+      "accountId": "content_truth",
+      "authorityGranted": false,
+      "established": false
+    },
+    {
+      "accountId": "expert_truth",
+      "authorityGranted": false,
+      "established": false
+    },
+    {
+      "accountId": "rights_legal_judgment",
+      "authorityGranted": false,
+      "established": false
+    },
+    {
+      "accountId": "release_readiness",
+      "authorityGranted": false,
+      "established": false
+    },
+    {
+      "accountId": "public_release_authorization",
+      "authorityGranted": false,
+      "established": false
+    }
+  ],
+  "evidenceBoundary": {
+    "acceptedArtifactIdentityReceipts": 0,
+    "acceptedBuildReceipts": 0,
+    "acceptedChromeBrowserReceipts": 0,
+    "acceptedDeploymentReceipts": 0,
+    "acceptedEdgeBrowserReceipts": 0,
+    "acceptedEvidenceRetentionReceipts": 0,
+    "acceptedRollbackReceipts": 0,
+    "acceptedRuntimeExecutionReceipts": 0,
+    "releaseEvidenceComplete": false,
+    "releaseEvidenceSetInstances": 0
+  },
+  "gateSummary": {
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 38,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "requirementsUniverseClosed": false,
+    "rereviewRequirementsComplete": 3,
+    "rereviewRequirementsRequired": 7,
+    "rereviewTriggered": false
+  },
+  "integrityBoundary": {
+    "adrSnapshotHashAndMarkerUseSameBuffer": true,
+    "artifactAuthenticityEstablished": false,
+    "browserSnapshotHashAndFullLoaderSerializationUseSeparateReads": true,
+    "designDigestAlgorithm": "sha256",
+    "designDigestDomain": "hakimi.vedic.independent-browser-quality-gate-release-evidence.design-candidate.v0.1",
+    "designDigestIsDigitalSignature": false,
+    "directContextCount": 5,
+    "directJsonContextHashAndLocalParseSameBufferCount": 3,
+    "fixedPathCurrentVerificationRequired": true,
+    "fullLoaderPrivateBrandCountRequired": 2,
+    "sameBufferHashParsePerBoundFile": false,
+    "signerIdentityEstablished": false,
+    "transitiveClosureIndependentlyRawPinned": false,
+    "transitiveRawContextCountIndependentlyPinned": 0,
+    "upstreamCapabilityBrandCount": 2
+  },
+  "interfaceRequirements": [
+    {
+      "failClosedConditions": [
+        "browser_is_not_microsoft_edge_or_version_is_unpinned",
+        "fewer_than_three_independent_runs",
+        "artifact_or_evidence_set_identity_mismatch",
+        "required_desktop_or_390x844_viewport_missing",
+        "console_or_runtime_failure_or_partial_facts_observed",
+        "real_person_data_or_unapproved_profile_state_used"
+      ],
+      "interfaceRequirementId": "microsoft_edge_browser_receipt_interface",
+      "invariants": [
+        "each_run_binds_one_exact_subject_release_artifact_and_browser_version",
+        "three_runs_are_separate_and_retain_raw_observation_receipts",
+        "exact_three_run_roles_are_fresh_desktop_fresh_390x844_and_retained_offline_update_transition",
+        "desktop_and_390x844_layouts_must_not_overflow_or_hide_gate_state",
+        "synthetic_scenarios_preserve_unique_gap_overlap_and_failure_semantics"
+      ],
+      "nonClaims": [
+        "current_codex_in_app_browser_observation_is_not_an_edge_receipt",
+        "edge_quality_gate_not_executed_or_satisfied"
+      ],
+      "requiredEvidenceBeforeImplementation": [
+        "microsoft_edge_exact_version_and_device_profile",
+        "three_synthetic_runtime_execution_receipts",
+        "viewport_layout_and_console_observations",
+        "same_release_evidence_set_binding"
+      ],
+      "requiredInputs": [
+        "receipt_type_and_schema_version",
+        "independent_vedic_product_release_and_evidence_set_identity",
+        "subject_artifact_set_digest_and_source_closure_digest",
+        "run_or_operation_id_and_canonical_utc_times",
+        "actor_role_and_verifiable_authority_ref",
+        "status_failure_code_and_partial_evidence_disposition",
+        "edge_version_device_viewport_and_scenario_matrix"
+      ],
+      "requiredOutputs": [
+        "vedic_edge_browser_quality_receipt",
+        "fail_closed_edge_browser_gate_status"
+      ],
+      "requirementsDefined": true,
+      "runtimeImplementationInstances": 0,
+      "status": "requirements_only_zero_implementation"
+    },
+    {
+      "failClosedConditions": [
+        "browser_is_not_google_chrome_or_version_is_unpinned",
+        "fewer_than_three_independent_runs",
+        "artifact_or_evidence_set_identity_mismatch",
+        "required_desktop_or_390x844_viewport_missing",
+        "console_or_runtime_failure_or_partial_facts_observed",
+        "real_person_data_or_unapproved_profile_state_used"
+      ],
+      "interfaceRequirementId": "google_chrome_browser_receipt_interface",
+      "invariants": [
+        "each_run_binds_one_exact_subject_release_artifact_and_browser_version",
+        "three_runs_are_separate_and_retain_raw_observation_receipts",
+        "exact_three_run_roles_are_fresh_desktop_fresh_390x844_and_retained_offline_update_transition",
+        "desktop_and_390x844_layouts_must_not_overflow_or_hide_gate_state",
+        "synthetic_scenarios_preserve_unique_gap_overlap_and_failure_semantics"
+      ],
+      "nonClaims": [
+        "current_codex_in_app_browser_observation_is_not_a_chrome_receipt",
+        "chrome_quality_gate_not_executed_or_satisfied"
+      ],
+      "requiredEvidenceBeforeImplementation": [
+        "google_chrome_exact_version_and_device_profile",
+        "three_synthetic_runtime_execution_receipts",
+        "viewport_layout_and_console_observations",
+        "same_release_evidence_set_binding"
+      ],
+      "requiredInputs": [
+        "receipt_type_and_schema_version",
+        "independent_vedic_product_release_and_evidence_set_identity",
+        "subject_artifact_set_digest_and_source_closure_digest",
+        "run_or_operation_id_and_canonical_utc_times",
+        "actor_role_and_verifiable_authority_ref",
+        "status_failure_code_and_partial_evidence_disposition",
+        "chrome_version_device_viewport_and_scenario_matrix"
+      ],
+      "requiredOutputs": [
+        "vedic_chrome_browser_quality_receipt",
+        "fail_closed_chrome_browser_gate_status"
+      ],
+      "requirementsDefined": true,
+      "runtimeImplementationInstances": 0,
+      "status": "requirements_only_zero_implementation"
+    },
+    {
+      "failClosedConditions": [
+        "independent_vedic_product_or_release_identity_absent",
+        "legacy_v13_or_schema_13_inherited_as_vedic_identity",
+        "source_toolchain_or_output_file_identity_incomplete",
+        "artifact_authenticity_or_signature_claim_without_verifiable_signer",
+        "formal_admission_or_owner_scope_decision_absent"
+      ],
+      "interfaceRequirementId": "artifact_identity_receipt_interface",
+      "invariants": [
+        "artifact_identity_covers_exact_source_toolchain_configuration_and_output_envelope",
+        "every_file_has_path_byte_length_and_sha256",
+        "artifact_identity_and_authority_decisions_are_separate_accounts",
+        "no_observation_digest_is_a_signature_or_publisher_authentication"
+      ],
+      "nonClaims": [
+        "current_vedic_product_release_schema_and_migration_identity_remain_null",
+        "two_build_output_digest_is_not_a_formal_release_artifact_identity_receipt"
+      ],
+      "requiredEvidenceBeforeImplementation": [
+        "independent_non_null_vedic_product_release_schema_and_migration_identity",
+        "formal_admission_and_owner_scope_license_deployment_decision",
+        "complete_source_toolchain_and_runtime_dependency_closure",
+        "exact_release_output_envelope_and_authenticity_disposition"
+      ],
+      "requiredInputs": [
+        "receipt_type_and_schema_version",
+        "independent_vedic_product_release_and_evidence_set_identity",
+        "subject_artifact_set_digest_and_source_closure_digest",
+        "run_or_operation_id_and_canonical_utc_times",
+        "actor_role_and_verifiable_authority_ref",
+        "status_failure_code_and_partial_evidence_disposition",
+        "exact_file_inventory_toolchain_and_authenticity_disposition"
+      ],
+      "requiredOutputs": [
+        "vedic_release_artifact_identity_receipt",
+        "fail_closed_artifact_identity_gate_status"
+      ],
+      "requirementsDefined": true,
+      "runtimeImplementationInstances": 0,
+      "status": "requirements_only_zero_implementation"
+    },
+    {
+      "failClosedConditions": [
+        "fewer_than_two_clean_build_receipts",
+        "builds_share_output_directory_or_uncontrolled_cache",
+        "source_toolchain_config_or_lock_identity_differs",
+        "output_envelopes_are_not_byte_exact",
+        "build_mutates_source_workspace_or_uses_unrecorded_network_input"
+      ],
+      "interfaceRequirementId": "build_receipt_interface",
+      "invariants": [
+        "two_builds_use_distinct_real_os_temp_directories",
+        "both_builds_bind_the_same_source_toolchain_config_and_lock_identity",
+        "both_builds_emit_the_same_exact_allowlisted_file_envelope",
+        "build_and_release_authorization_are_separate_accounts"
+      ],
+      "nonClaims": [
+        "current_operator_supplied_two_build_observation_is_baseline_only",
+        "formal_build_receipts_not_issued"
+      ],
+      "requiredEvidenceBeforeImplementation": [
+        "two_independent_clean_build_receipts",
+        "toolchain_lock_configuration_and_environment_identity",
+        "exact_output_manifest_and_byte_comparison",
+        "source_workspace_before_after_integrity_observation"
+      ],
+      "requiredInputs": [
+        "receipt_type_and_schema_version",
+        "independent_vedic_product_release_and_evidence_set_identity",
+        "subject_artifact_set_digest_and_source_closure_digest",
+        "run_or_operation_id_and_canonical_utc_times",
+        "actor_role_and_verifiable_authority_ref",
+        "status_failure_code_and_partial_evidence_disposition",
+        "outdir_toolchain_modules_output_manifest_and_workspace_integrity"
+      ],
+      "requiredOutputs": [
+        "vedic_release_build_receipt",
+        "fail_closed_build_gate_status"
+      ],
+      "requirementsDefined": true,
+      "runtimeImplementationInstances": 0,
+      "status": "requirements_only_zero_implementation"
+    },
+    {
+      "failClosedConditions": [
+        "csp_form_action_or_connect_src_not_observed_fail_closed",
+        "network_storage_cookie_or_service_worker_probe_not_performed_or_inconclusive",
+        "console_warning_error_or_unhandled_failure_observed",
+        "stale_result_partial_fact_or_input_change_clear_failure",
+        "worker_request_response_digest_or_exact_shape_binding_failure",
+        "probe_null_coerced_to_zero_or_absence_claim"
+      ],
+      "interfaceRequirementId": "runtime_execution_receipt_interface",
+      "invariants": [
+        "performed_false_and_observed_null_remain_distinct_from_observed_zero",
+        "runtime_receipt_binds_exact_browser_build_origin_headers_and_synthetic_scenario",
+        "failure_returns_no_partial_facts_and_clears_previous_view",
+        "person_derived_fields_are_not_logged_persisted_transmitted_or_published"
+      ],
+      "nonClaims": [
+        "current_network_storage_cookie_and_service_worker_probes_are_not_complete",
+        "runtime_zero_activity_not_established",
+        "production_runtime_gate_not_satisfied"
+      ],
+      "requiredEvidenceBeforeImplementation": [
+        "response_header_csp_form_action_and_connect_src_observation",
+        "network_storage_cookie_service_worker_and_console_probe_receipts",
+        "worker_request_response_shape_digest_and_stale_generation_observation",
+        "synthetic_unique_gap_overlap_unknown_zone_and_input_change_scenarios"
+      ],
+      "requiredInputs": [
+        "receipt_type_and_schema_version",
+        "independent_vedic_product_release_and_evidence_set_identity",
+        "subject_artifact_set_digest_and_source_closure_digest",
+        "run_or_operation_id_and_canonical_utc_times",
+        "actor_role_and_verifiable_authority_ref",
+        "status_failure_code_and_partial_evidence_disposition",
+        "probe_performed_flags_observed_values_headers_console_and_scenarios"
+      ],
+      "requiredOutputs": [
+        "vedic_runtime_execution_receipt",
+        "fail_closed_runtime_execution_gate_status"
+      ],
+      "requirementsDefined": true,
+      "runtimeImplementationInstances": 0,
+      "status": "requirements_only_zero_implementation"
+    },
+    {
+      "failClosedConditions": [
+        "https_provider_host_or_tls_identity_absent",
+        "pwa_manifest_service_worker_offline_or_update_receipt_absent",
+        "deployed_artifact_differs_from_accepted_release_artifact",
+        "cache_update_or_old_client_convergence_unverified",
+        "deployment_operator_or_owner_authorization_absent",
+        "public_deployment_authorized_false"
+      ],
+      "interfaceRequirementId": "deployment_receipt_interface",
+      "invariants": [
+        "deployment_uses_the_exact_accepted_release_artifact",
+        "https_headers_pwa_offline_update_and_cache_behavior_are_separate_evidence",
+        "old_and_new_client_convergence_is_tested_without_schema_13_inheritance",
+        "deployment_success_does_not_authorize_public_release_or_expert_claims"
+      ],
+      "nonClaims": [
+        "current_loopback_origin_is_not_a_deployment_receipt",
+        "pwa_service_worker_public_host_and_deployment_not_validated"
+      ],
+      "requiredEvidenceBeforeImplementation": [
+        "provider_account_host_tls_and_https_header_identity",
+        "pwa_manifest_service_worker_offline_cold_start_and_update_receipts",
+        "cache_and_old_client_convergence_matrix",
+        "explicit_owner_deployment_authorization"
+      ],
+      "requiredInputs": [
+        "receipt_type_and_schema_version",
+        "independent_vedic_product_release_and_evidence_set_identity",
+        "subject_artifact_set_digest_and_source_closure_digest",
+        "run_or_operation_id_and_canonical_utc_times",
+        "actor_role_and_verifiable_authority_ref",
+        "status_failure_code_and_partial_evidence_disposition",
+        "provider_host_tls_pwa_offline_update_cache_and_owner_authorization"
+      ],
+      "requiredOutputs": [
+        "vedic_deployment_receipt",
+        "fail_closed_deployment_gate_status"
+      ],
+      "requirementsDefined": true,
+      "runtimeImplementationInstances": 0,
+      "status": "requirements_only_zero_implementation"
+    },
+    {
+      "failClosedConditions": [
+        "independent_storage_namespace_or_backend_absent",
+        "mutation_epoch_or_atomic_commit_receipt_absent",
+        "backup_or_recovery_receipt_absent",
+        "rollback_target_artifact_or_provider_sequence_unverified",
+        "rollback_rewinds_epoch_or_overwrites_without_forward_commit",
+        "interval_mutation_or_aba_exclusion_unproven"
+      ],
+      "interfaceRequirementId": "rollback_receipt_interface",
+      "invariants": [
+        "rollback_consumes_verified_backup_recovery_deployment_and_artifact_receipts",
+        "successful_rollback_is_a_forward_mutation_with_one_new_epoch",
+        "failed_rollback_changes_neither_active_state_nor_epoch",
+        "evidence_and_expert_disagreements_are_retained_across_rollback"
+      ],
+      "nonClaims": [
+        "storage_design_candidate_is_not_storage_or_rollback_implementation",
+        "mutation_epoch_atomicity_interval_integrity_and_aba_exclusion_not_established",
+        "rollback_not_executed"
+      ],
+      "requiredEvidenceBeforeImplementation": [
+        "independent_storage_namespace_and_backend_selection",
+        "mutation_epoch_atomicity_interval_and_aba_receipts",
+        "verified_backup_and_recovery_dry_runs",
+        "provider_rollback_sequence_and_owner_rollback_authority"
+      ],
+      "requiredInputs": [
+        "receipt_type_and_schema_version",
+        "independent_vedic_product_release_and_evidence_set_identity",
+        "subject_artifact_set_digest_and_source_closure_digest",
+        "run_or_operation_id_and_canonical_utc_times",
+        "actor_role_and_verifiable_authority_ref",
+        "status_failure_code_and_partial_evidence_disposition",
+        "before_after_release_epoch_backup_recovery_and_provider_sequence"
+      ],
+      "requiredOutputs": [
+        "vedic_rollback_receipt",
+        "fail_closed_release_rollback_gate_status"
+      ],
+      "requirementsDefined": true,
+      "runtimeImplementationInstances": 0,
+      "status": "requirements_only_zero_implementation"
+    },
+    {
+      "failClosedConditions": [
+        "release_evidence_set_missing_any_required_receipt_type_or_count",
+        "receipt_release_artifact_or_epoch_identity_mismatch",
+        "retention_duration_location_integrity_or_deletion_policy_undecided",
+        "person_derived_digest_or_unredistributable_material_in_public_evidence",
+        "actor_role_independence_or_owner_final_authorization_absent",
+        "partial_or_conflicting_receipts_collapsed_to_success"
+      ],
+      "interfaceRequirementId": "evidence_retention_receipt_interface",
+      "invariants": [
+        "all_eight_interfaces_are_conjunctive_and_partial_completion_never_sets_ready",
+        "every_receipt_binds_one_release_evidence_set_and_exact_artifact_identity",
+        "person_derived_private_and_link_only_material_remain_separated_by_disposition",
+        "conflicts_fail_closed_and_are_preserved_without_majority_average_or_model_selection",
+        "owner_public_release_authorization_is_separate_from_evidence_completeness"
+      ],
+      "nonClaims": [
+        "current_release_evidence_set_instances_zero",
+        "release_evidence_complete_false",
+        "release_ready_and_public_release_authorized_false"
+      ],
+      "requiredEvidenceBeforeImplementation": [
+        "complete_minimum_receipt_counts_for_all_eight_interfaces",
+        "content_addressed_evidence_inventory_and_retention_policy",
+        "privacy_rights_and_redistribution_disposition_per_artifact",
+        "actor_role_separation_and_explicit_owner_public_release_decision"
+      ],
+      "requiredInputs": [
+        "receipt_type_and_schema_version",
+        "independent_vedic_product_release_and_evidence_set_identity",
+        "subject_artifact_set_digest_and_source_closure_digest",
+        "run_or_operation_id_and_canonical_utc_times",
+        "actor_role_and_verifiable_authority_ref",
+        "status_failure_code_and_partial_evidence_disposition",
+        "retention_inventory_privacy_rights_conflicts_and_owner_final_decision"
+      ],
+      "requiredOutputs": [
+        "vedic_release_evidence_retention_receipt",
+        "fail_closed_release_evidence_set_status"
+      ],
+      "requirementsDefined": true,
+      "runtimeImplementationInstances": 0,
+      "status": "requirements_only_zero_implementation"
+    }
+  ],
+  "observationBoundary": {
+    "abaExcluded": false,
+    "boundFilesObservedSequentially": true,
+    "browserObservationOperatorSupplied": true,
+    "crossFileAtomicSnapshot": false,
+    "intervalMutationExcluded": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "simultaneousCurrentRawClosureVerified": false
+  },
+  "productBoundary": {
+    "centralFormalRegistryIntegration": "absent",
+    "databaseInstances": 0,
+    "databaseSchema": "absent",
+    "formalProductSurface": "absent",
+    "mainApplicationIntegration": false,
+    "migrationId": null,
+    "namespaceInstances": 0,
+    "productIdentity": null,
+    "releaseIdentity": null,
+    "runtimeOption": "unselected",
+    "storageBackend": "unselected",
+    "storageNamespace": null,
+    "targetSchema": null
+  },
+  "projectDefaultReleaseGovernanceContext": {
+    "activeLine": "legacy-v13",
+    "inheritedByVedicProductIdentity": false,
+    "migrationId": null,
+    "targetSchema": 13
+  },
+  "quantitativePlanObservations": {
+    "browserMatrixEntriesObserved": 2,
+    "candidateCeilingEntriesObserved": 18,
+    "candidateCeilingsApproved": 0,
+    "candidateCeilingsMeasured": 0,
+    "chromeExecutedRuns": 0,
+    "chromePlannedRuns": 3,
+    "edgeExecutedRuns": 0,
+    "edgePlannedRuns": 3,
+    "observedMeasurements": 0,
+    "plannedBrowserRunsTotal": 6,
+    "retentionCeilings": [
+      {
+        "approvalStatus": "unapproved_candidate",
+        "inheritedAsApprovedBudget": false,
+        "inheritedAsMeasurement": false,
+        "measurementStatus": "not_measured",
+        "observedValue": null,
+        "optionId": "browser_embedded",
+        "planRef": "#/runtimeOptions/0/candidateCeilings/8/proposedCeiling",
+        "proposedCeiling": 50000000,
+        "unit": "bytes"
+      },
+      {
+        "approvalStatus": "unapproved_candidate",
+        "inheritedAsApprovedBudget": false,
+        "inheritedAsMeasurement": false,
+        "measurementStatus": "not_measured",
+        "observedValue": null,
+        "optionId": "loopback_local_service",
+        "planRef": "#/runtimeOptions/1/candidateCeilings/8/proposedCeiling",
+        "proposedCeiling": 100000000,
+        "unit": "bytes"
+      }
+    ],
+    "runtimeOptionsObserved": 2
+  },
+  "receiptTypeDefinitions": [
+    {
+      "currentAcceptedReceipts": 0,
+      "interfaceRequirementId": "microsoft_edge_browser_receipt_interface",
+      "issuerRoleId": "independent_browser_matrix_observer",
+      "minimumAcceptedReceipts": 3,
+      "receiptType": "vedic_edge_browser_quality_receipt"
+    },
+    {
+      "currentAcceptedReceipts": 0,
+      "interfaceRequirementId": "google_chrome_browser_receipt_interface",
+      "issuerRoleId": "independent_browser_matrix_observer",
+      "minimumAcceptedReceipts": 3,
+      "receiptType": "vedic_chrome_browser_quality_receipt"
+    },
+    {
+      "currentAcceptedReceipts": 0,
+      "interfaceRequirementId": "artifact_identity_receipt_interface",
+      "issuerRoleId": "engineering_artifact_identity_recorder",
+      "minimumAcceptedReceipts": 1,
+      "receiptType": "vedic_release_artifact_identity_receipt"
+    },
+    {
+      "currentAcceptedReceipts": 0,
+      "interfaceRequirementId": "build_receipt_interface",
+      "issuerRoleId": "independent_build_executor",
+      "minimumAcceptedReceipts": 2,
+      "receiptType": "vedic_release_build_receipt"
+    },
+    {
+      "currentAcceptedReceipts": 0,
+      "interfaceRequirementId": "runtime_execution_receipt_interface",
+      "issuerRoleId": "runtime_security_privacy_observer",
+      "minimumAcceptedReceipts": 6,
+      "receiptType": "vedic_runtime_execution_receipt"
+    },
+    {
+      "currentAcceptedReceipts": 0,
+      "interfaceRequirementId": "deployment_receipt_interface",
+      "issuerRoleId": "deployment_provider_operator",
+      "minimumAcceptedReceipts": 1,
+      "receiptType": "vedic_deployment_receipt"
+    },
+    {
+      "currentAcceptedReceipts": 0,
+      "interfaceRequirementId": "rollback_receipt_interface",
+      "issuerRoleId": "rollback_recovery_operator",
+      "minimumAcceptedReceipts": 1,
+      "receiptType": "vedic_rollback_receipt"
+    },
+    {
+      "currentAcceptedReceipts": 0,
+      "interfaceRequirementId": "evidence_retention_receipt_interface",
+      "issuerRoleId": "evidence_retention_custodian",
+      "minimumAcceptedReceipts": 1,
+      "receiptType": "vedic_release_evidence_retention_receipt"
+    }
+  ],
+  "recordType": "vedic_independent_browser_quality_gate_and_release_evidence_design_candidate_v0_1",
+  "releaseEvidenceConjunctiveGate": {
+    "actorIdentityMaySatisfyMultipleRequiredRoles": false,
+    "allEightInterfacesRequired": true,
+    "allReceiptsMustBindSameSubjectArtifactReleaseAndEvidenceSet": true,
+    "automaticPromotionAllowed": false,
+    "conflictDisposition": "preserve_and_fail_closed_no_vote_average_or_model_winner",
+    "crossReceiptBindingFields": [
+      "independent_vedic_product_identity",
+      "release_identity",
+      "target_schema_identity",
+      "migration_identity",
+      "release_evidence_set_identity",
+      "source_lock_identity",
+      "subject_artifact_set_digest",
+      "runtime_option_identity",
+      "build_identity",
+      "storage_identity",
+      "deployment_host_identity",
+      "mutation_epoch_lineage",
+      "rollback_release_lineage"
+    ],
+    "currentGateSatisfied": false,
+    "currentReleaseEvidenceSetId": null,
+    "duplicateReceiptIdRejected": true,
+    "exactBrowserRunRoleMatricesRequired": true,
+    "exactChronologyFreshnessReplayAndRevocationRulesRequired": true,
+    "extraReceiptRoleRejected": true,
+    "legacyV13Schema13IdentitySubstitutionRejected": true,
+    "missingReceiptRoleRejected": true,
+    "mixedReleaseArtifactRuntimeOrHostBundleRejected": true,
+    "nonNullIndependentVedicIdentitiesRequired": true,
+    "ownerAuthorizationSeparatelyRequired": true,
+    "partialCompletionMaySetGateTrue": false,
+    "predecessorArtifactMayReplaceSubjectArtifact": false,
+    "receiptMaySatisfyMultipleRoles": false,
+    "receiptRoleExactSetRequired": true,
+    "requiredInterfaceIds": [
+      "microsoft_edge_browser_receipt_interface",
+      "google_chrome_browser_receipt_interface",
+      "artifact_identity_receipt_interface",
+      "build_receipt_interface",
+      "runtime_execution_receipt_interface",
+      "deployment_receipt_interface",
+      "rollback_receipt_interface",
+      "evidence_retention_receipt_interface"
+    ],
+    "requiredReceiptTypesAndMinimumCounts": [
+      {
+        "currentAcceptedReceipts": 0,
+        "interfaceRequirementId": "microsoft_edge_browser_receipt_interface",
+        "issuerRoleId": "independent_browser_matrix_observer",
+        "minimumAcceptedReceipts": 3,
+        "receiptType": "vedic_edge_browser_quality_receipt"
+      },
+      {
+        "currentAcceptedReceipts": 0,
+        "interfaceRequirementId": "google_chrome_browser_receipt_interface",
+        "issuerRoleId": "independent_browser_matrix_observer",
+        "minimumAcceptedReceipts": 3,
+        "receiptType": "vedic_chrome_browser_quality_receipt"
+      },
+      {
+        "currentAcceptedReceipts": 0,
+        "interfaceRequirementId": "artifact_identity_receipt_interface",
+        "issuerRoleId": "engineering_artifact_identity_recorder",
+        "minimumAcceptedReceipts": 1,
+        "receiptType": "vedic_release_artifact_identity_receipt"
+      },
+      {
+        "currentAcceptedReceipts": 0,
+        "interfaceRequirementId": "build_receipt_interface",
+        "issuerRoleId": "independent_build_executor",
+        "minimumAcceptedReceipts": 2,
+        "receiptType": "vedic_release_build_receipt"
+      },
+      {
+        "currentAcceptedReceipts": 0,
+        "interfaceRequirementId": "runtime_execution_receipt_interface",
+        "issuerRoleId": "runtime_security_privacy_observer",
+        "minimumAcceptedReceipts": 6,
+        "receiptType": "vedic_runtime_execution_receipt"
+      },
+      {
+        "currentAcceptedReceipts": 0,
+        "interfaceRequirementId": "deployment_receipt_interface",
+        "issuerRoleId": "deployment_provider_operator",
+        "minimumAcceptedReceipts": 1,
+        "receiptType": "vedic_deployment_receipt"
+      },
+      {
+        "currentAcceptedReceipts": 0,
+        "interfaceRequirementId": "rollback_receipt_interface",
+        "issuerRoleId": "rollback_recovery_operator",
+        "minimumAcceptedReceipts": 1,
+        "receiptType": "vedic_rollback_receipt"
+      },
+      {
+        "currentAcceptedReceipts": 0,
+        "interfaceRequirementId": "evidence_retention_receipt_interface",
+        "issuerRoleId": "evidence_retention_custodian",
+        "minimumAcceptedReceipts": 1,
+        "receiptType": "vedic_release_evidence_retention_receipt"
+      }
+    ],
+    "transitionRoleAdditionalBindingFields": [
+      "predecessor_release_identity",
+      "predecessor_artifact_set_digest",
+      "update_source_identity",
+      "before_after_cache_and_controller_lineage"
+    ],
+    "transitionRoleId": "retained_profile_offline_update_transition",
+    "transitionRolePredecessorBindingsAreAdditionalOnly": true
+  },
+  "rereviewBoundary": {
+    "currentDesignCandidateMaterialPresent": true,
+    "formalRereviewRequirementSatisfied": false,
+    "historicalParentRequirementState": "required_absent",
+    "historicalParentRereviewRequirementsComplete": 3,
+    "historicalParentRereviewRequirementsRequired": 7,
+    "ownerDecision": null,
+    "parentLedgerUpdated": false,
+    "registryUpdated": false
+  },
+  "schemaVersion": "0.1.0",
+  "status": "requirements_only_eight_interface_conjunctive_design_candidate_zero_release_evidence_instances_parent_still_required_absent_no_rereview_effect",
+  "storageDesignBaseline": {
+    "approvedCapacityBudgets": 0,
+    "backupDryRunsExecuted": 0,
+    "backupImplementations": 0,
+    "backupReceiptsIssued": 0,
+    "compareAndSwapImplementations": 0,
+    "designInterfaceRequirementsDefined": 6,
+    "designInterfaceRequirementsRequired": 6,
+    "directContextEndpointSnapshots": 4,
+    "measuredCapacityValues": 0,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "recoveryDryRunsExecuted": 0,
+    "recoveryImplementations": 0,
+    "recoveryReceiptsIssued": 0,
+    "releaseRollbackReceiptInterchangeableWithStorageDesignInterface": false,
+    "rollbackDryRunsExecuted": 0,
+    "rollbackImplementations": 0,
+    "rollbackReceiptsIssued": 0,
+    "totalContextEndpointSnapshots": 20,
+    "transitiveContextEndpointSnapshots": 16
+  },
+  "systemIdentity": {
+    "independentFromBaziZiweiWestern": true,
+    "migrationId": null,
+    "productIdentity": null,
+    "releaseIdentity": null,
+    "systemId": "vedic-astrology",
+    "targetSchema": null
+  },
+  "transitiveRawClosureBoundary": {
+    "completeCurrentRawClosureClaimed": false,
+    "directCurrentContextsPinned": 5,
+    "downgradeReason": "five_direct_contexts_and_two_full_loader_private_brands_only_no_independent_transitive_raw_repin",
+    "transitiveClosureIndependentlyRawPinned": false,
+    "transitiveCurrentRawContextsIndependentlyPinned": 0
+  }
+}

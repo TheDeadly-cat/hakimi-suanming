@@ -1,0 +1,369 @@
+{
+  "activeAdmissionEffect": "none",
+  "artifactBindings": [
+    {
+      "artifactId": "hakimi.vedic.independent-productization-requirements/1.0.0",
+      "bytes": 25578,
+      "path": "content/system-admission/vedic-independent-productization-requirements.v1.json",
+      "role": "parent",
+      "semanticDigest": "1017f04864428a84d5032aaef5593875e483e2e30ce479127682219ed269cdbb",
+      "semanticDigestField": "ledgerDigest",
+      "sha256": "c9f0fbb3b25c3ad582dc4c3f5534e7e27cb44e47721dbf806b8085cefb6b26f8",
+      "status": "input_fact_rule_contract_drafts_runtime_bundle_proposal_source_rights_requirements_only_inventory_and_two_vacant_seat_expert_review_plan_present_open_universe_zero_bindings_zero_expert_instances_research_only_not_admitted"
+    },
+    {
+      "artifactId": "hakimi.vedic.independent-productization.version-aware-observation-candidate/1.1.0",
+      "bytes": 14110,
+      "path": "content/system-admission/vedic-independent-productization-version-aware-observation-candidate.v1.1.0.json",
+      "role": "priorObservation",
+      "semanticDigest": "3eebcbcd60dfd1f4a96671ec2ab18bd6cceb20d14806acd44a00603e4848a8d1",
+      "semanticDigestField": "candidateDigest",
+      "sha256": "d87a9340c4afd280e1aeb004f4322d2088868b79f31b7c2fd3191e8d14e1343a",
+      "status": "current_three_direct_context_endpoints_mechanically_verified_non_atomic_observation_only_parent_and_registry_unchanged_zero_admission_effect"
+    },
+    {
+      "artifactId": "hakimi.vedic.source-binding-and-three-layer-rights-requirements/1.0.0",
+      "bytes": 85752,
+      "path": "content/system-admission/vedic-source-binding-and-three-layer-rights-requirements.v1.json",
+      "role": "sourceRights",
+      "semanticDigest": "b98699c70e9783ef670c6acfbb0410e0ff89eca51db54dd4b36b44e60d33194e",
+      "semanticDigestField": "ledgerDigest",
+      "sha256": "2eed084660dbfa9de5c655e40d96c9bb848743f8f14091e8fb3564f2d60385b9",
+      "status": "requirements_only_current_scoped_inventory_38_all_unbound_open_universe_no_sources_bodies_quotes_bindings_or_three_layer_rights_established"
+    },
+    {
+      "artifactId": "hakimi.vedic.real-independent-expert-review-plan/1.0.0",
+      "bytes": 37131,
+      "path": "content/system-admission/vedic-real-independent-expert-review-plan.v1.json",
+      "role": "expertPlan",
+      "semanticDigest": "2eb4dc9c037403e47f332cc105755bfb86aa8ad6dc0b95dbaf29e80d7bdfd1af",
+      "semanticDigestField": "planDigest",
+      "sha256": "9bcbff519dd38d40f26dfba1ccabe1c2987700200cf3a7f6eb7bf68254d7cf89",
+      "status": "complete_verifiable_material_contract_for_two_vacant_real_independent_expert_seats_zero_expert_instances_review_not_started"
+    },
+    {
+      "artifactId": "hakimi.vedic.high-risk-expression-policy-draft/0.1.0",
+      "bytes": 15788,
+      "path": "content/system-admission/vedic-high-risk-expression-policy-draft.v0.1.0.json",
+      "role": "highRisk",
+      "semanticDigest": "bc1996b042e84214f86d35416c4589e3309a5654250e43c30688568a28ee9fb9",
+      "semanticDigestField": "policyDigest",
+      "sha256": "8a1295c4f68da87a50ac2d6f8689765c271e007a68d63dfe2afa88377d94f5fa",
+      "status": "requirements_only_engineering_candidate_not_admitted"
+    },
+    {
+      "artifactId": "hakimi.vedic.input-structural-rejection-execution-evidence/1.0.0",
+      "bytes": 26585,
+      "path": "content/system-admission/vedic-input-structural-rejection-execution-evidence.v1.json",
+      "role": "inputStructural",
+      "semanticDigest": "b068269d809d49e6ff2f8a80ee2c3ee2bcb649f9fbfc0cb1fa3240b3722422a2",
+      "semanticDigestField": "evidenceDigest",
+      "sha256": "da953b36a3bef662833ae5763e3cdde7dd84b129089e96a8445ddbc582d1a67f",
+      "status": "four_fixed_diagnostic_rejection_probes_verified_not_product_admitted"
+    },
+    {
+      "artifactId": "vedic-input-admission-readiness-candidate-v0.1.0",
+      "bytes": 35325,
+      "path": "content/system-admission/vedic-input-admission-readiness-candidate.v0.1.0.json",
+      "role": "readiness",
+      "semanticDigest": "688a786525d8d8c988be2d517d31cca23113d788cadc3168cae5bbd71a6a1efb",
+      "semanticDigestField": "candidateDigest",
+      "sha256": "7f42750a2d11a64bc9ad2cdbef5838aa7081d60fd314c44647079eae426f19dd",
+      "status": "thirteen_requirement_conjunctive_readiness_conditions_defined_zero_resolved_zero_admission_effect"
+    },
+    {
+      "artifactId": "vedic-input-admission-transition-and-receipt-requirements-v0.1.0",
+      "bytes": 57125,
+      "path": "content/system-admission/vedic-input-admission-transition-and-receipt-requirements.v0.1.0.json",
+      "role": "transition",
+      "semanticDigest": "548a0ab95dbe030dda2c158a7a4583c4591d98be75bc9f9a604ff98cff3d52ac",
+      "semanticDigestField": "contractDigest",
+      "sha256": "e394f26f581b517666fec4b8361cba85c6c2761d0dfd06ba5cab23710bafde4d",
+      "status": "transition_and_receipt_requirements_defined_zero_instances_no_evaluator_no_authority"
+    },
+    {
+      "artifactId": "hakimi.vedic.independent-storage-backup-recovery-rollback.design-candidate/0.1.0",
+      "bytes": 25978,
+      "path": "content/system-admission/vedic-independent-storage-backup-recovery-and-rollback-design-candidate.v0.1.0.json",
+      "role": "storage",
+      "semanticDigest": "5a96993f7750722a984eb6f5845ce1e49e6c5f49e5b49735629698a47eb11958",
+      "semanticDigestField": "designDigest",
+      "sha256": "1eeaf1419ce4b3ae01f277f6389fc3bbdf5a59605f89d4c7ae7eccfc1a8d1bbf",
+      "status": "requirements_only_design_candidate_six_interfaces_defined_zero_implementation_parent_still_required_absent_no_rereview_effect"
+    }
+  ],
+  "authorityBoundary": {
+    "baziAuthorityInherited": false,
+    "contentTruthEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "highRiskClaimsAuthorized": false,
+    "inputContractGateSatisfied": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "ruleEvaluationAuthorized": false
+  },
+  "candidateDigest": "462498245b533db031ed25a1a8808e4e77dc2ea92f17154013a04d487ebdb171",
+  "candidateId": "hakimi.vedic.independent-productization.version-aware-observation-child/1.2.0",
+  "createdAt": "2026-08-31T00:00:00.000Z",
+  "doesNotEstablish": [
+    "browser_runtime_acceptance",
+    "content_truth",
+    "domain_authority",
+    "expert_claims_authority",
+    "expert_truth",
+    "formal_input_admission",
+    "high_risk_claims_authority",
+    "legal_or_rights_conclusion",
+    "product_mutation_epoch_capability",
+    "public_deployment_authority",
+    "public_release_authority",
+    "release_evidence_completeness",
+    "release_readiness",
+    "source_binding_or_redistribution_rights",
+    "vedic_product_identity",
+    "versioned_ruleset_authority"
+  ],
+  "evidenceLedgerSeparation": [
+    "engineering_evidence",
+    "browser_and_runtime_evidence",
+    "content_truth",
+    "expert_truth",
+    "rights_and_legal_judgment",
+    "release_readiness",
+    "public_release_authorization"
+  ],
+  "gateSummary": {
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 38,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "inputRequirementsDefined": 13,
+    "inputRequirementsResolved": 0,
+    "releaseEvidenceComplete": false,
+    "requirementsUniverseClosed": false,
+    "rereviewRequirementsComplete": 3,
+    "rereviewRequirementsRequired": 7
+  },
+  "inputKernelObservation": {
+    "authorityEffect": "none",
+    "crossFileAtomicSnapshot": false,
+    "executableSuccessReceiptSchemasAvailable": false,
+    "formalParentIntegrated": false,
+    "fourSystemRegistryIntegrated": false,
+    "kernelDraftMechanicallyObserved": true,
+    "packageBoundary": {
+      "exportsEmpty": true,
+      "packageName": "@hakimi/vedic-input-admission-kernel-draft",
+      "private": true,
+      "productionImport": "forbidden"
+    },
+    "persistenceEstablished": false,
+    "pointInTimeSourceObservation": true,
+    "productInputReceiptIssued": false,
+    "productionDependencyClosureEstablished": false,
+    "registryBinding": {
+      "bytes": 1808,
+      "path": "scripts/system-contract-downstream-draft-registry.json",
+      "sha256": "c17503797376c5800364f8976b8c11e5b42479a637206de8b09ae77374f1cc59"
+    },
+    "restrictedWebFileIntentionallyNotRead": true,
+    "runtimeEstablished": false,
+    "sourceClosure": {
+      "closureDigest": "9947da29ca876d9f77b60598f4a759d155be7ef3b24bd4e62f0b9f35c856478a",
+      "files": [
+        {
+          "bytes": 5307,
+          "path": "packages/vedic-input-admission-kernel-draft/README.md",
+          "sha256": "590467f1c0de277476dbad5cb15b1b59fc4cab277ed93b13e9349b88fb7c61f0"
+        },
+        {
+          "bytes": 358,
+          "path": "packages/vedic-input-admission-kernel-draft/package.json",
+          "sha256": "161ef453575192dcc89e7ad095a67001653628dbfad49e4b0706247afee313f2"
+        },
+        {
+          "bytes": 33697,
+          "path": "packages/vedic-input-admission-kernel-draft/src/evaluator.test.ts",
+          "sha256": "05f67634afa59e2a05f8432ae111babcd53f87c80802878fde3379e2082327e6"
+        },
+        {
+          "bytes": 27542,
+          "path": "packages/vedic-input-admission-kernel-draft/src/evaluator.ts",
+          "sha256": "7d0660f4c6823bea25e18c343aa86c610b76dfc0e83de33081dc79cc1381bd98"
+        },
+        {
+          "bytes": 22122,
+          "path": "packages/vedic-input-admission-kernel-draft/src/frozen-packet-schema.ts",
+          "sha256": "8d1c75a1ba54689653d6b13f25bf7badae7ce8cadbbf7d5336de25b6a38390b3"
+        },
+        {
+          "bytes": 17437,
+          "path": "packages/vedic-input-admission-kernel-draft/src/protocol.ts",
+          "sha256": "ba7a9d79ccffd89b580dc9535f347d6febee3625c9007bb7bd2c7a391a6df6c3"
+        },
+        {
+          "bytes": 209,
+          "path": "packages/vedic-input-admission-kernel-draft/tsconfig.json",
+          "sha256": "a6e1cd9ecab965e460aa18d009723c8b961c6768af50f169dc663cd80ebe998a"
+        },
+        {
+          "bytes": 314,
+          "path": "packages/vedic-input-admission-kernel-draft/vitest.config.ts",
+          "sha256": "ea0654c3137fa6ff32f2d6808948a37102ddf48c9dc60227bad0962e071f2397"
+        }
+      ]
+    },
+    "transitionPersisted": false,
+    "trustedRuntimeObserved": false,
+    "upstreamReadinessRegistryBacklinkObserved": false,
+    "verifierBinding": {
+      "bytes": 83155,
+      "path": "scripts/verify-vedic-input-admission-kernel-draft.mjs",
+      "sha256": "a82dd85499697dbf07b7a0311ac67c2c22c284a7f6120d04c5b97c4a3700cd83"
+    }
+  },
+  "integrityBoundary": {
+    "candidateDigestAlgorithm": "sha256",
+    "candidateDigestDomain": "hakimi.vedic.independent-productization.version-aware-observation-child.v1.2",
+    "candidateDigestExcludesOwnField": true,
+    "candidateDigestIsDigitalSignature": false,
+    "crossFileAtomicSnapshot": false,
+    "rawIdentitiesAreSignatures": false,
+    "semanticDigestsAreAuthorityReceipts": false
+  },
+  "mutationEpochExperimentObservation": {
+    "abaExcludedForFormalProduct": false,
+    "browserButtonFlowObserved": false,
+    "externalMonotonicAnchorAvailable": false,
+    "focusedEvidenceReportedByReadme": {
+      "isolatedViteBuildReported": true,
+      "nodeTestFiles": 1,
+      "nodeTests": 10,
+      "recordedAsExecutionByThisObservation": false,
+      "strictTypeScriptReported": true
+    },
+    "packageBoundary": {
+      "exportsEmpty": true,
+      "migrationId": null,
+      "packageName": "@hakimi/vedic-mutation-epoch-runtime-experiment-draft",
+      "private": true,
+      "productIdentity": null,
+      "productionImport": "forbidden",
+      "runtimeOptionSelected": false,
+      "storageBackendSelected": false,
+      "targetSchema": null
+    },
+    "productMutationGateSatisfied": false,
+    "productMutationReceiptIssued": false,
+    "sourceClosure": {
+      "closureDigest": "e6f550c548f63f0d1e3028c63008a727a568324d4ac91051792064bcc4d4d721",
+      "files": [
+        {
+          "bytes": 3933,
+          "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/README.md",
+          "sha256": "4995fa82b7b2f94fae75fcf5391d9e0ad76d6e01d8b034ca2b34055812937c75"
+        },
+        {
+          "bytes": 2519,
+          "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/browser-app/index.html",
+          "sha256": "a1f543502754758c52af821100d9be4d259419dad5ded1e5ca1d7aa540a5060b"
+        },
+        {
+          "bytes": 523,
+          "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/package.json",
+          "sha256": "7eecd92eaa54f5e734ccc4838c9430663e2d19e0bcf79e4918f61b323ee452b3"
+        },
+        {
+          "bytes": 8820,
+          "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/browser-app/main.ts",
+          "sha256": "a71e362f53b157a92de054ed9d8304ac2a3965f2970438df76cd2c44c90238f5"
+        },
+        {
+          "bytes": 3489,
+          "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/browser-app/styles.css",
+          "sha256": "ffba533522b4d19af2a9b394f404ce41921da78cf38f888baabc98554e0a07c7"
+        },
+        {
+          "bytes": 14290,
+          "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/runtime.test.ts",
+          "sha256": "5cf6cb4eb3be0d9c544512c46052aba835e652a30364b6a7dec73814c8ad435f"
+        },
+        {
+          "bytes": 44063,
+          "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/runtime.ts",
+          "sha256": "7454618b8fe1263d864b90a6dfdd826444d2290e72b26f2cb8a638cd93750bea"
+        },
+        {
+          "bytes": 240,
+          "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/tsconfig.json",
+          "sha256": "af6c7b422c96358b50849512ee48911cb344ebd5329cf71f14cba7120efb4eb2"
+        },
+        {
+          "bytes": 603,
+          "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/vite.browser-experiment.config.mjs",
+          "sha256": "4e6b60630be078453ccba532f37eae2193ddec2e6e0bd58684cfc9acd5f81844"
+        },
+        {
+          "bytes": 314,
+          "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/vitest.config.ts",
+          "sha256": "ea0654c3137fa6ff32f2d6808948a37102ddf48c9dc60227bad0962e071f2397"
+        }
+      ]
+    },
+    "testsExecutedByThisObservation": false
+  },
+  "observationBoundary": {
+    "abaExcludedForFormalProduct": false,
+    "crossFileAtomicSnapshot": false,
+    "intervalMutationExcluded": false,
+    "parentAndChildrenAtomicSnapshot": false,
+    "pointInTimeOnly": true,
+    "sameBufferHashAndParsePerBoundFile": true
+  },
+  "productBoundary": {
+    "formalProductSurface": "absent",
+    "migrationId": null,
+    "productIdentity": null,
+    "releaseIdentity": null,
+    "runtimeOption": "unselected",
+    "storageBackend": "unselected",
+    "targetSchema": null
+  },
+  "projectReleaseGovernanceContext": {
+    "activeLine": "legacy-v13",
+    "expertClaimsAuthorized": false,
+    "inheritedByVedicProductIdentity": false,
+    "migrationId": null,
+    "projectContextOnly": true,
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "recordType": "vedic_independent_productization_version_aware_observation_child_v1_2",
+  "schemaVersion": "1.2.0",
+  "status": "current_version_aware_non_atomic_engineering_observation_child_zero_admission_effect_all_authority_false",
+  "systemIdentity": {
+    "contractSystemId": "vedic",
+    "productSystemId": "vedic-astrology",
+    "productType": "research_boundary_only"
+  },
+  "versionBoundary": {
+    "centralRegistryModifiedByThisChild": false,
+    "downstreamRegistryModifiedByThisChild": false,
+    "formalParentModifiedByThisChild": false,
+    "kernelVerifierModifiedByThisChild": false,
+    "overwritesPriorArtifact": false,
+    "ownerPromotionDecisionReceipt": null,
+    "priorArtifactPath": "content/system-admission/vedic-independent-productization-version-aware-observation-candidate.v1.1.0.json",
+    "priorArtifactPreserved": true,
+    "priorCandidateDigest": "3eebcbcd60dfd1f4a96671ec2ab18bd6cceb20d14806acd44a00603e4848a8d1",
+    "supersedesPriorArtifact": false
+  }
+}

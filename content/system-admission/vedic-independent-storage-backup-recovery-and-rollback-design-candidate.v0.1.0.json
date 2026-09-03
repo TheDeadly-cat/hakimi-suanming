@@ -1,0 +1,637 @@
+{
+  "activeAdmissionEffect": "none",
+  "artifactRole": "non_product_requirements_only_independent_storage_backup_recovery_and_rollback_design_candidate",
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false
+  },
+  "backupRecoveryRollbackBoundary": {
+    "backupDryRunsExecuted": 0,
+    "backupImplementations": 0,
+    "backupReceiptsIssued": 0,
+    "backupSetsCreated": 0,
+    "recoveryDryRunsExecuted": 0,
+    "recoveryImplementations": 0,
+    "recoveryReceiptsIssued": 0,
+    "rollbackDryRunsExecuted": 0,
+    "rollbackImplementations": 0,
+    "rollbackReceiptsIssued": 0
+  },
+  "boundaryBindings": {
+    "historicalParent": {
+      "bytes": 25578,
+      "contextId": "historical_parent_requirements_ledger_v1",
+      "path": "content/system-admission/vedic-independent-productization-requirements.v1.json",
+      "requiredRereviewRequirementId": "independent_storage_backup_recovery_and_rollback_design",
+      "requiredRereviewRequirementState": "required_absent",
+      "schemaVersion": "1.0.0",
+      "semanticDigest": "1017f04864428a84d5032aaef5593875e483e2e30ce479127682219ed269cdbb",
+      "semanticDigestField": "ledgerDigest",
+      "sha256": "c9f0fbb3b25c3ad582dc4c3f5534e7e27cb44e47721dbf806b8085cefb6b26f8"
+    },
+    "independentProductBoundaryAdr": {
+      "bytes": 4531,
+      "contextId": "vedic_independent_product_boundary_adr",
+      "path": "docs/吠陀占星独立产品化ADR-0001-2026-08-26.md",
+      "requiredMarker": "5. 独立数据库、备份、恢复与回滚设计；",
+      "sha256": "0e9b81505abb963b4d64426338b8071cd8a211eed8d02fe76065fada335dce63"
+    },
+    "runtimeAndBundleSizeProposal": {
+      "bytes": 27241,
+      "contextId": "runtime_and_bundle_size_proposal_v1",
+      "expectedDesignArtifactsObserved": 0,
+      "expectedRequirementState": "separate_rereview_requirement_plan_only_not_satisfied",
+      "path": "content/system-admission/vedic-runtime-and-bundle-size-proposal.v1.json",
+      "requiredDeferredDesignKey": "storageBackupRecoveryMutationEpochCapacityRollback",
+      "semanticDigest": "ae9fb180d97e81a30a9157655d168bb4101d993f859f40990db31c2e12954f15",
+      "semanticDigestField": "proposalDigest",
+      "sha256": "e268aa78d6123c34481752cc8e0789e1a185f3f2e2ce9757c45d6227f5bea30e"
+    },
+    "versionAwareObservationCandidate": {
+      "bytes": 14110,
+      "contextId": "version_aware_parent_children_observation_candidate_v1_1",
+      "expectedActiveAdmissionEffect": "none",
+      "expectedParentLedgerUpdated": false,
+      "expectedRegistryUpdated": false,
+      "path": "content/system-admission/vedic-independent-productization-version-aware-observation-candidate.v1.1.0.json",
+      "semanticDigest": "3eebcbcd60dfd1f4a96671ec2ab18bd6cceb20d14806acd44a00603e4848a8d1",
+      "semanticDigestField": "candidateDigest",
+      "sha256": "d87a9340c4afd280e1aeb004f4322d2088868b79f31b7c2fd3191e8d14e1343a"
+    }
+  },
+  "candidateCeilingObservations": [
+    {
+      "approvalStatus": "unapproved_candidate",
+      "measurementStatus": "not_measured",
+      "metricId": "installed_offline_footprint_bytes",
+      "observedValue": null,
+      "optionId": "browser_embedded",
+      "planRef": "#/runtimeOptions/0/candidateCeilings/2/proposedCeiling",
+      "proposedCeiling": 100000000,
+      "unit": "bytes"
+    },
+    {
+      "approvalStatus": "unapproved_candidate",
+      "measurementStatus": "not_measured",
+      "metricId": "evidence_retention_bytes_per_release",
+      "observedValue": null,
+      "optionId": "browser_embedded",
+      "planRef": "#/runtimeOptions/0/candidateCeilings/8/proposedCeiling",
+      "proposedCeiling": 50000000,
+      "unit": "bytes"
+    },
+    {
+      "approvalStatus": "unapproved_candidate",
+      "measurementStatus": "not_measured",
+      "metricId": "installed_offline_footprint_bytes",
+      "observedValue": null,
+      "optionId": "loopback_local_service",
+      "planRef": "#/runtimeOptions/1/candidateCeilings/2/proposedCeiling",
+      "proposedCeiling": 750000000,
+      "unit": "bytes"
+    },
+    {
+      "approvalStatus": "unapproved_candidate",
+      "measurementStatus": "not_measured",
+      "metricId": "evidence_retention_bytes_per_release",
+      "observedValue": null,
+      "optionId": "loopback_local_service",
+      "planRef": "#/runtimeOptions/1/candidateCeilings/8/proposedCeiling",
+      "proposedCeiling": 100000000,
+      "unit": "bytes"
+    }
+  ],
+  "capacityBoundary": {
+    "approvedCapacityBudgets": 0,
+    "candidateCeilingsInheritedAsApproved": false,
+    "capacityBudgetApproved": false,
+    "measuredCapacityValues": 0,
+    "quantitativePlanRefs": [
+      "#/runtimeOptions/0/candidateCeilings/2/proposedCeiling",
+      "#/runtimeOptions/1/candidateCeilings/2/proposedCeiling",
+      "#/runtimeOptions/0/candidateCeilings/8/proposedCeiling",
+      "#/runtimeOptions/1/candidateCeilings/8/proposedCeiling"
+    ],
+    "runtimeOptionSelected": false
+  },
+  "createdAt": "2026-08-30T00:00:00.000Z",
+  "designCoverage": {
+    "designExecutionStarted": false,
+    "designMaterialCandidateComplete": true,
+    "designReceiptsIssued": 0,
+    "interfaceRequirementIds": [
+      "separate_vedic_storage_namespace_interface",
+      "storage_capacity_budget_interface",
+      "mutation_epoch_receipt_interface",
+      "backup_interface",
+      "recovery_interface",
+      "rollback_interface"
+    ],
+    "interfaceRequirementsDefined": 6,
+    "interfaceRequirementsRequired": 6
+  },
+  "designDigest": "5a96993f7750722a984eb6f5845ce1e49e6c5f49e5b49735629698a47eb11958",
+  "designId": "hakimi.vedic.independent-storage-backup-recovery-rollback.design-candidate/0.1.0",
+  "doesNotEstablish": [
+    "formal_parent_update_or_supersession",
+    "formal_rereview_requirement_satisfaction",
+    "owner_scope_license_or_deployment_decision",
+    "selected_runtime_or_storage_backend",
+    "vedic_storage_namespace_schema_database_or_migration",
+    "storage_capacity_measurement_or_approved_budget",
+    "mutation_epoch_capability_receipt_atomicity_or_aba_exclusion",
+    "backup_recovery_or_rollback_implementation_execution_or_receipt",
+    "browser_runtime_service_worker_host_or_release_evidence",
+    "loaded_module_node_loader_runtime_launcher_or_trusted_startup_identity",
+    "source_binding_source_body_exact_quote_locator_or_three_layer_rights",
+    "expert_identity_credentials_independence_opinion_or_expert_truth",
+    "content_truth_scientific_validity_or_prediction_accuracy",
+    "release_readiness_public_deployment_public_release_or_expert_claims_authorization",
+    "legacy_v13_schema_13_or_cross_system_authority_inheritance"
+  ],
+  "evidenceBoundary": {
+    "artifactAuthenticityEstablished": false,
+    "browserReceipts": 0,
+    "buildReceipts": 0,
+    "deploymentReceipts": 0,
+    "releaseEvidenceComplete": false,
+    "rollbackReceipts": 0,
+    "runtimeExecutionReceipts": 0,
+    "storageExecutionReceipts": 0
+  },
+  "gateSummary": {
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 38,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "productArtifactsPresent": 3,
+    "requirementsUniverseClosed": false,
+    "rereviewRequirementsComplete": 3,
+    "rereviewRequirementsRequired": 7,
+    "rereviewTriggered": false
+  },
+  "integrityBoundary": {
+    "artifactAuthenticityEstablished": false,
+    "designDigestAlgorithm": "sha256",
+    "designDigestIsSignature": false,
+    "directContextCount": 4,
+    "fixedPathCurrentVerificationRequired": true,
+    "signerIdentityEstablished": false,
+    "totalRawContextCount": 20,
+    "transitiveClosureIndependentlyRawPinned": true,
+    "transitiveRawContextCount": 16,
+    "upstreamCapabilityBrandCount": 1
+  },
+  "interfaceRequirements": [
+    {
+      "failClosedConditions": [
+        "vedic_product_identity_is_null",
+        "namespace_aliases_legacy_v13_or_schema_13",
+        "record_lacks_schema_identity_or_digest",
+        "cross_system_record_or_namespace_detected",
+        "expected_mutation_epoch_absent_or_stale"
+      ],
+      "interfaceRequirementId": "separate_vedic_storage_namespace_interface",
+      "invariants": [
+        "must_not_inherit_legacy_v13_or_schema_13",
+        "must_not_share_writable_table_index_keyspace_or_migration_with_other_systems",
+        "must_not_fallback_to_a_default_namespace",
+        "future_namespace_creation_requires_independent_authorized_mutation"
+      ],
+      "nonClaims": [
+        "storage_namespace_not_selected_or_created",
+        "storage_backend_not_selected",
+        "namespace_isolation_not_established",
+        "database_or_migration_not_created"
+      ],
+      "requiredEvidenceBeforeImplementation": [
+        "owner_product_scope_decision",
+        "selected_runtime_option",
+        "independent_vedic_storage_schema",
+        "mutation_epoch_capability_evidence",
+        "privacy_retention_and_deletion_decision"
+      ],
+      "requiredInputs": [
+        "independent_vedic_product_identity",
+        "independent_storage_namespace_id",
+        "storage_schema_identity",
+        "record_envelope_digest",
+        "expected_mutation_epoch"
+      ],
+      "requiredOutputs": [
+        "namespace_scoped_operation_candidate",
+        "cross_system_write_rejection_candidate"
+      ],
+      "requirementsDefined": true,
+      "runtimeImplementationInstances": 0,
+      "status": "requirements_only_zero_implementation"
+    },
+    {
+      "failClosedConditions": [
+        "runtime_option_unselected",
+        "candidate_ceiling_treated_as_measurement",
+        "unapproved_ceiling_treated_as_budget",
+        "quota_observation_or_measurement_receipt_absent",
+        "silent_eviction_or_evidence_retention_loss"
+      ],
+      "interfaceRequirementId": "storage_capacity_budget_interface",
+      "invariants": [
+        "proposed_observed_and_approved_capacity_values_are_separate_accounts",
+        "primary_backup_and_evidence_retention_capacity_are_separate_accounts",
+        "capacity_values_require_nonnegative_safe_integer_bytes",
+        "silent_data_deletion_cannot_satisfy_a_capacity_budget"
+      ],
+      "nonClaims": [
+        "candidate_ceilings_are_not_measurements",
+        "candidate_ceilings_are_not_approved_budgets",
+        "capacity_sla_not_established",
+        "storage_quota_acceptance_not_established"
+      ],
+      "requiredEvidenceBeforeImplementation": [
+        "selected_runtime_option",
+        "measured_storage_footprint_receipts",
+        "measured_evidence_retention_receipts",
+        "owner_approved_capacity_budget",
+        "retention_and_eviction_policy"
+      ],
+      "requiredInputs": [
+        "selected_runtime_option_id",
+        "measured_installed_footprint_bytes",
+        "measured_evidence_retention_bytes_per_release",
+        "quota_observation",
+        "measurement_receipt"
+      ],
+      "requiredOutputs": [
+        "capacity_budget_decision_candidate",
+        "quota_refusal_candidate",
+        "retention_pressure_observation_candidate"
+      ],
+      "requirementsDefined": true,
+      "runtimeImplementationInstances": 0,
+      "status": "requirements_only_zero_implementation"
+    },
+    {
+      "failClosedConditions": [
+        "mutation_epoch_unavailable",
+        "expected_and_current_epoch_mismatch",
+        "operation_digest_not_bound",
+        "epoch_reuse_or_aba_not_excluded",
+        "cross_file_atomicity_claim_without_receipt"
+      ],
+      "interfaceRequirementId": "mutation_epoch_receipt_interface",
+      "invariants": [
+        "future_successful_mutation_advances_epoch_by_exactly_one",
+        "future_failed_mutation_changes_neither_state_nor_epoch",
+        "future_recovery_and_rollback_are_forward_mutations_not_epoch_rewinds",
+        "future_state_epoch_and_receipt_commit_in_one_backend_boundary",
+        "future_reader_snapshot_binds_one_epoch"
+      ],
+      "nonClaims": [
+        "mutation_epoch_not_available",
+        "mutation_receipt_not_issued",
+        "atomic_commit_not_established",
+        "interval_mutation_and_aba_not_excluded"
+      ],
+      "requiredEvidenceBeforeImplementation": [
+        "selected_storage_backend",
+        "backend_atomicity_contract",
+        "compare_and_swap_implementation",
+        "concurrency_and_crash_recovery_tests",
+        "aba_and_epoch_reuse_tests"
+      ],
+      "requiredInputs": [
+        "independent_storage_namespace_id",
+        "expected_mutation_epoch",
+        "current_mutation_epoch",
+        "operation_digest",
+        "base_snapshot_digest"
+      ],
+      "requiredOutputs": [
+        "compare_and_swap_commit_receipt_candidate",
+        "stale_epoch_conflict_candidate",
+        "mutation_epoch_advance_receipt_candidate"
+      ],
+      "requirementsDefined": true,
+      "runtimeImplementationInstances": 0,
+      "status": "requirements_only_zero_implementation"
+    },
+    {
+      "failClosedConditions": [
+        "independent_product_or_namespace_identity_absent",
+        "bazi_or_other_system_records_mixed_into_backup",
+        "backup_set_partial_or_unhashed",
+        "source_mutation_epoch_absent",
+        "encryption_custody_consent_or_retention_decision_absent"
+      ],
+      "interfaceRequirementId": "backup_interface",
+      "invariants": [
+        "future_backup_is_read_only_and_does_not_advance_epoch",
+        "future_backup_manifest_describes_exactly_one_epoch",
+        "incomplete_backup_is_never_recovery_eligible",
+        "credentials_logs_and_unredistributable_material_are_excluded_without_authorization",
+        "future_entries_manifest_and_archive_each_require_digests"
+      ],
+      "nonClaims": [
+        "backup_artifact_not_created",
+        "backup_verification_not_established",
+        "backup_portability_and_restorability_not_established",
+        "content_redistribution_rights_not_established"
+      ],
+      "requiredEvidenceBeforeImplementation": [
+        "selected_storage_backend",
+        "backup_implementation",
+        "restore_verification_plan",
+        "privacy_and_consent_decision",
+        "encryption_key_custody_and_retention_decision"
+      ],
+      "requiredInputs": [
+        "independent_vedic_product_identity",
+        "namespace_manifest_digest",
+        "backup_set_manifest",
+        "source_mutation_epoch",
+        "encryption_custody_consent_and_retention_policy"
+      ],
+      "requiredOutputs": [
+        "backup_dry_run_report_candidate",
+        "backup_receipt_candidate"
+      ],
+      "requirementsDefined": true,
+      "runtimeImplementationInstances": 0,
+      "status": "requirements_only_zero_implementation"
+    },
+    {
+      "failClosedConditions": [
+        "backup_receipt_or_manifest_absent",
+        "product_namespace_schema_or_release_identity_mismatch",
+        "backup_authenticity_or_integrity_unverified",
+        "in_place_overwrite_without_recovery_plan",
+        "partial_recovery_or_mutation_epoch_unavailable"
+      ],
+      "interfaceRequirementId": "recovery_interface",
+      "invariants": [
+        "future_recovery_verifies_before_write",
+        "future_recovery_uses_isolated_staging_before_activation",
+        "future_failed_recovery_changes_neither_active_state_nor_epoch",
+        "future_successful_recovery_creates_a_new_forward_epoch",
+        "future_source_backup_remains_immutable"
+      ],
+      "nonClaims": [
+        "recovery_execution_not_observed",
+        "backup_restorability_not_proven",
+        "schema_compatibility_not_established",
+        "migration_capability_not_established"
+      ],
+      "requiredEvidenceBeforeImplementation": [
+        "recovery_implementation",
+        "isolated_recovery_sandbox",
+        "backup_authenticity_and_integrity_checks",
+        "post_recovery_validation_plan",
+        "recovery_failure_rollback_plan"
+      ],
+      "requiredInputs": [
+        "backup_receipt",
+        "backup_manifest_and_artifact_digests",
+        "target_namespace_identity",
+        "recovery_plan_identity",
+        "expected_target_mutation_epoch"
+      ],
+      "requiredOutputs": [
+        "recovery_dry_run_report_candidate",
+        "recovery_integrity_report_candidate",
+        "recovery_commit_receipt_candidate"
+      ],
+      "requirementsDefined": true,
+      "runtimeImplementationInstances": 0,
+      "status": "requirements_only_zero_implementation"
+    },
+    {
+      "failClosedConditions": [
+        "release_identity_or_rollback_target_absent",
+        "rollback_target_not_bound_to_retained_evidence",
+        "backup_recovery_or_deployment_receipt_absent",
+        "rollback_provider_sequence_unverified",
+        "mutation_epoch_absent_or_public_deployment_unauthorized"
+      ],
+      "interfaceRequirementId": "rollback_interface",
+      "invariants": [
+        "future_rollback_is_a_forward_mutation",
+        "future_successful_rollback_advances_epoch_by_exactly_one",
+        "future_rollback_preserves_evidence_source_and_expert_disagreements",
+        "future_failed_rollback_changes_neither_active_state_nor_epoch",
+        "future_current_state_is_preserved_before_rollback_activation"
+      ],
+      "nonClaims": [
+        "rollback_execution_not_observed",
+        "rollback_receipt_not_issued",
+        "rollback_target_not_verified",
+        "deployment_or_disaster_recovery_capability_not_established"
+      ],
+      "requiredEvidenceBeforeImplementation": [
+        "owner_rollback_authority_decision",
+        "independent_release_identity",
+        "tested_rollback_implementation",
+        "verified_provider_sequence",
+        "retained_backup_deployment_and_recovery_evidence"
+      ],
+      "requiredInputs": [
+        "before_and_after_release_identities",
+        "deployment_backup_and_recovery_receipts",
+        "rollback_target_identity",
+        "rollback_provider_sequence",
+        "expected_mutation_epoch"
+      ],
+      "requiredOutputs": [
+        "rollback_plan_candidate",
+        "rollback_dry_run_report_candidate",
+        "rollback_commit_receipt_candidate"
+      ],
+      "requirementsDefined": true,
+      "runtimeImplementationInstances": 0,
+      "status": "requirements_only_zero_implementation"
+    }
+  ],
+  "mutationBoundary": {
+    "abaExcluded": false,
+    "compareAndSwapImplementations": 0,
+    "crossFileAtomicSnapshot": false,
+    "intervalMutationExcluded": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "mutationEpochReceiptsIssued": 0
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "crossFileAtomicSnapshot": false,
+    "directContextEndpointSnapshots": 4,
+    "endpointSnapshotOnly": true,
+    "intervalMutationExcluded": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "parentRuntimeAndDesignAtomicSnapshot": false,
+    "totalContextEndpointSnapshots": 20,
+    "transitiveContextEndpointSnapshots": 16
+  },
+  "productBoundary": {
+    "centralRegistryIntegration": "absent",
+    "databaseInstances": 0,
+    "domainManifest": "absent",
+    "legacyV13Inherited": false,
+    "migrationId": null,
+    "namespaceInstances": 0,
+    "productSurface": "absent",
+    "releaseIdentity": null,
+    "runtimeImplementation": "absent",
+    "runtimeOption": "unselected",
+    "schema13Inherited": false,
+    "storageBackend": "unselected",
+    "storageSchema": "absent",
+    "targetSchema": null
+  },
+  "recordType": "vedic_independent_storage_backup_recovery_and_rollback_design_candidate_v0_1",
+  "rereviewBoundary": {
+    "currentDesignCandidateMaterialPresent": true,
+    "formalRereviewRequirementSatisfied": false,
+    "historicalParentRequirementState": "required_absent",
+    "historicalParentRereviewRequirementsComplete": 3,
+    "historicalParentRereviewRequirementsRequired": 7,
+    "ownerDecision": null,
+    "parentLedgerUpdated": false,
+    "registryUpdated": false
+  },
+  "schemaVersion": "0.1.0",
+  "status": "requirements_only_design_candidate_six_interfaces_defined_zero_implementation_parent_still_required_absent_no_rereview_effect",
+  "systemIdentity": {
+    "independentFromBaziZiweiWestern": true,
+    "migrationId": null,
+    "projectDefaultReleaseGovernanceContext": {
+      "activeLine": "legacy-v13",
+      "migrationId": null,
+      "targetSchema": 13
+    },
+    "projectDefaultReleaseGovernanceInherited": false,
+    "releaseIdentity": null,
+    "systemId": "vedic-astrology",
+    "targetSchema": null
+  },
+  "transitiveCurrentRawBindings": [
+    {
+      "bindingRole": "parent_input_contract_draft",
+      "bytes": 16529,
+      "contextId": "transitive_input_contract_draft_v0_1",
+      "path": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json",
+      "sha256": "4899e8fdf267a44e401295f23e11e2504e45f8e2f731c6be9b8ad1435e8dbf69"
+    },
+    {
+      "bindingRole": "parent_input_contract_requirements",
+      "bytes": 15859,
+      "contextId": "transitive_input_contract_requirements_v1",
+      "path": "content/system-admission/vedic-input-contract-requirements.v1.json",
+      "sha256": "85409d7f4ed7ef6bddc4d34102ecff479fd8dbe4210a78416f90ee705a0f2e59"
+    },
+    {
+      "bindingRole": "parent_fact_contract_draft",
+      "bytes": 14240,
+      "contextId": "transitive_fact_contract_draft_v0_1",
+      "path": "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json",
+      "sha256": "6fe875bcb156ae9c7756302e96d902b8c03668e58a8894b33bc0d5fab374a1fe"
+    },
+    {
+      "bindingRole": "parent_fact_contract_requirements",
+      "bytes": 42634,
+      "contextId": "transitive_fact_contract_requirements_v1",
+      "path": "content/system-admission/vedic-fact-contract-requirements.v1.json",
+      "sha256": "a20a1033ce063702548a79b6a651d21421e9f59a9a2ecd4da251cde42ae36b38"
+    },
+    {
+      "bindingRole": "parent_rule_contract_draft",
+      "bytes": 12140,
+      "contextId": "transitive_rule_contract_draft_v0_1",
+      "path": "content/system-admission/vedic-rule-contract-draft.v0.1.0.schema.json",
+      "sha256": "1b0f118d5014aa8de0ab85bd756b710252565d643a5164ee88a7418d4a002f0d"
+    },
+    {
+      "bindingRole": "parent_rule_contract_requirements",
+      "bytes": 30734,
+      "contextId": "transitive_rule_contract_requirements_v1",
+      "path": "content/system-admission/vedic-rule-contract-requirements.v1.json",
+      "sha256": "ee34106b3dccdfd5d08d89d3871161ba2a12f7bcc983aff8b4850aa6ee42bc94"
+    },
+    {
+      "bindingRole": "runtime_proposal_license_evidence_child",
+      "bytes": 23919,
+      "contextId": "transitive_runtime_dependency_license_evidence_v1",
+      "path": "content/system-admission/vedic-runtime-dependency-license-evidence.v1.json",
+      "sha256": "ed51e68438bc3b00613986e082d6064ceea41e9f75dc9992613e1b91449105e1"
+    },
+    {
+      "bindingRole": "parent_source_binding_and_rights_requirements_child",
+      "bytes": 85752,
+      "contextId": "transitive_source_binding_and_three_layer_rights_requirements_v1",
+      "path": "content/system-admission/vedic-source-binding-and-three-layer-rights-requirements.v1.json",
+      "sha256": "2eed084660dbfa9de5c655e40d96c9bb848743f8f14091e8fb3564f2d60385b9"
+    },
+    {
+      "bindingRole": "parent_real_independent_expert_review_plan_child",
+      "bytes": 37131,
+      "contextId": "transitive_real_independent_expert_review_plan_v1",
+      "path": "content/system-admission/vedic-real-independent-expert-review-plan.v1.json",
+      "sha256": "9bcbff519dd38d40f26dfba1ccabe1c2987700200cf3a7f6eb7bf68254d7cf89"
+    },
+    {
+      "bindingRole": "parent_external_observation_document",
+      "bytes": 97473,
+      "contextId": "transitive_github_external_reference_audit_2026_08_24",
+      "path": "docs/GitHub外部参考审计-2026-08-24.md",
+      "sha256": "ac3b4620de3d183f60511b1ec0dacb268281f43fee75018ae533efb5ddd957bc"
+    },
+    {
+      "bindingRole": "parent_external_observation_document",
+      "bytes": 19451,
+      "contextId": "transitive_public_sites_and_repositories_audit_2026_08_25",
+      "path": "docs/公开命理网站与五仓库吸收审计-2026-08-25.md",
+      "sha256": "082c1a852b129c3ca5e35c6e619603071dff59a9615702862af4316538db34c0"
+    },
+    {
+      "bindingRole": "observation_input_structural_rejection_evidence_child",
+      "bytes": 26585,
+      "contextId": "transitive_input_structural_rejection_execution_evidence_v1",
+      "path": "content/system-admission/vedic-input-structural-rejection-execution-evidence.v1.json",
+      "sha256": "da953b36a3bef662833ae5763e3cdde7dd84b129089e96a8445ddbc582d1a67f"
+    },
+    {
+      "bindingRole": "observation_high_risk_expression_policy_child",
+      "bytes": 15788,
+      "contextId": "transitive_high_risk_expression_policy_draft_v0_1",
+      "path": "content/system-admission/vedic-high-risk-expression-policy-draft.v0.1.0.json",
+      "sha256": "8a1295c4f68da87a50ac2d6f8689765c271e007a68d63dfe2afa88377d94f5fa"
+    },
+    {
+      "bindingRole": "input_evidence_disk_helper_identity_not_loaded_module_identity",
+      "bytes": 23349,
+      "contextId": "transitive_input_structural_rejection_execution_helper_source",
+      "path": "scripts/vedic-input-structural-rejection-execution-lib.mjs",
+      "sha256": "a49e065a98b30512a6486998650e66009568503eab20a379663e3d8d178cb88a"
+    },
+    {
+      "bindingRole": "input_evidence_disk_helper_identity_not_loaded_module_identity",
+      "bytes": 30839,
+      "contextId": "transitive_input_contract_draft_helper_source",
+      "path": "scripts/vedic-input-contract-draft-lib.mjs",
+      "sha256": "a20cf2b30c848bda5d813db9b2b431185f1ffb1123c39fc1436b9309e0c84db0"
+    },
+    {
+      "bindingRole": "input_evidence_disk_helper_identity_not_loaded_module_identity",
+      "bytes": 48822,
+      "contextId": "transitive_input_contract_requirements_helper_source",
+      "path": "scripts/vedic-input-contract-requirements-lib.mjs",
+      "sha256": "b188481682fa0923e502c73064cae24f44bb7d2f2934814d4a8de1d20cc8e0dc"
+    }
+  ]
+}

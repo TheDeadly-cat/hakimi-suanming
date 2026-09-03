@@ -1,0 +1,858 @@
+{
+  "activeAdmissionEffect": "none",
+  "authorityBoundary": {
+    "browserRuntimeEvidenceEstablished": false,
+    "contentTruthEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "highRiskClaimsAuthorized": false,
+    "inputContractGateSatisfied": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "sourceFreezeEstablished": false
+  },
+  "candidateDigest": "688a786525d8d8c988be2d517d31cca23113d788cadc3168cae5bbd71a6a1efb",
+  "candidateId": "vedic-input-admission-readiness-candidate-v0.1.0",
+  "createdAt": "2026-08-30T00:00:00.000Z",
+  "doesNotEstablish": [
+    "selected_or_owner_accepted_vedic_input_policy_value",
+    "admitted_vedic_input_contract_or_product_input_instance",
+    "complete_structural_validator_or_semantic_validator",
+    "calendar_time_zone_dst_utc_time_scale_or_ephemeris_correctness",
+    "sidereal_zodiac_ayanamsa_node_bhava_or_perturbation_policy_truth",
+    "source_body_exact_quote_locator_or_frozen_binding",
+    "work_version_carrier_rights_license_or_legal_conclusion",
+    "expert_identity_credentials_independence_opinion_or_expert_truth",
+    "browser_runtime_evidence_for_a_vedic_product_surface",
+    "mutation_epoch_cross_file_atomic_snapshot_interval_mutation_or_aba_exclusion",
+    "parent_supersession_central_registry_update_or_vedic_release_identity",
+    "formal_system_admission_release_readiness_public_deployment_or_public_release_authorization",
+    "legacy_v13_schema13_or_bazi_authority_inheritance"
+  ],
+  "engineeringPrerequisites": {
+    "browserWorkerDraft": {
+      "activeAdmissionEffect": "none",
+      "browserRuntimeEvidenceEstablished": false,
+      "buildEndpointCount": 6,
+      "countsTowardAdmission": 0,
+      "currentEndpointSnapshotObserved": true,
+      "fixedProbeCount": 4,
+      "historicalBrowserExecutionAttestedByThisCandidate": false,
+      "inputContractGateSatisfied": false,
+      "packagePrivate": true,
+      "productInputInstances": 0,
+      "productInputRejectionReceipts": 0,
+      "productionExports": 0,
+      "role": "isolated_non_product_engineering_prerequisite",
+      "sourceEndpointCount": 18
+    },
+    "nodeFixedProbeChild": {
+      "acceptedInputs": 0,
+      "activeAdmissionEffect": "none",
+      "countsTowardAdmission": 0,
+      "diagnosticProbeExecutions": 4,
+      "fixedProbeSetVerified": true,
+      "inputContractGateSatisfied": false,
+      "inputInstances": 0,
+      "inputRejectionCapabilityEstablished": false,
+      "probeCoverageComplete": false,
+      "productInputRejectionReceipts": 0,
+      "role": "fixed_no_person_diagnostic_engineering_prerequisite",
+      "structuralValidatorComplete": false
+    }
+  },
+  "evidenceLedgerSeparation": {
+    "browserOrRuntimeEvidence": "isolated_browser_worker_draft_endpoint_and_document_observation_only_not_product_runtime_evidence",
+    "contentTruth": "not_established",
+    "engineeringEvidence": "thirteen_row_readiness_contract_plus_fixed_node_probe_and_isolated_browser_worker_endpoint_prerequisites",
+    "expertTruth": "not_established",
+    "publicReleaseAuthorization": "not_authorized",
+    "releaseReadiness": "not_ready",
+    "rightsLegalConclusion": "not_established"
+  },
+  "gateSummary": {
+    "acceptedInputs": 0,
+    "admissionEligibleRequirements": 0,
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "browserWorkerEngineeringPrerequisitesObserved": 1,
+    "engineeringValidatedRequirements": 0,
+    "epochProtectedRequirements": 0,
+    "expertReviewedRequirements": 0,
+    "inputContractGateSatisfied": false,
+    "nodeFixedProbeExecutions": 4,
+    "ownerAcceptedRequirements": 0,
+    "necessaryConditionsRequired": 8,
+    "necessaryConditionsSatisfied": 0,
+    "productInputInstances": 0,
+    "productInputRejectionReceipts": 0,
+    "requirementsDefined": 13,
+    "requirementsDraftCovered": 13,
+    "requirementsResolved": 0,
+    "requirementsSelected": 0,
+    "requirementsWithSemanticInvariantAllowlist": 13,
+    "rightsClosuresComplete": 0,
+    "semanticInvariantIdsRequired": 26,
+    "sourceBindingsFrozenVerified": 0
+  },
+  "integrityBoundary": {
+    "authenticityEstablished": false,
+    "candidateDigestExcludesOwnField": true,
+    "canonicalizationProfile": "sorted_object_keys_compact_json_finite_numbers_aliases_expanded_active_cycles_rejected_v1",
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi/vedic-input-admission-readiness-candidate/v0.1.0",
+    "digestIsDigitalSignature": false,
+    "digitalSignature": null,
+    "signerIdentity": null
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "candidateHashAndParseUseSameReadBuffer": false,
+    "crossFileAtomicSnapshot": false,
+    "endpointSnapshotOnly": true,
+    "heldFileHandleReads": false,
+    "intervalMutationExcluded": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "parentAndChildrenAtomicSnapshot": false,
+    "pathEndpointRevalidated": false,
+    "plainDirectoryChainRequired": true,
+    "upstreamHashAndSemanticInspectionUseSameReadBuffer": false
+  },
+  "conjunctiveReadinessConditions": {
+    "additionalVersionedTransitionAndReceiptContractRequired": true,
+    "allConditionsAloneConferEligibility": false,
+    "allConditionsRequiredForFutureEligibility": true,
+    "allEvidenceMustBindSameAdmissionEpoch": true,
+    "allEvidenceMustBindSameFrozenPacket": true,
+    "allRequirementsMustSatisfyAllRowPrerequisites": true,
+    "automaticPromotionAllowed": false,
+    "conditionSkippingAllowed": false,
+    "conditions": [
+      {
+        "authorityOwner": "product_owner",
+        "conditionId": "all_thirteen_owner_selections_and_scope_decisions_accepted",
+        "currentState": false,
+        "order": 1,
+        "requiredState": true,
+        "satisfied": false
+      },
+      {
+        "authorityOwner": "source_provenance_review",
+        "conditionId": "all_thirteen_source_or_first_party_provenance_bindings_frozen_verified",
+        "currentState": false,
+        "order": 2,
+        "requiredState": true,
+        "satisfied": false
+      },
+      {
+        "authorityOwner": "source_rights_and_legal_review",
+        "conditionId": "all_thirteen_work_version_carrier_rights_and_distribution_dispositions_complete",
+        "currentState": false,
+        "order": 3,
+        "requiredState": true,
+        "satisfied": false
+      },
+      {
+        "authorityOwner": "two_independent_vedic_domain_experts",
+        "conditionId": "two_independent_domain_opinions_cover_same_frozen_thirteen_requirement_packet",
+        "currentState": false,
+        "order": 4,
+        "requiredState": true,
+        "satisfied": false
+      },
+      {
+        "authorityOwner": "independent_source_rights_review_and_legal_authority",
+        "conditionId": "two_independent_source_rights_reviews_and_legal_authority_disposition_complete",
+        "currentState": false,
+        "order": 5,
+        "requiredState": true,
+        "satisfied": false
+      },
+      {
+        "authorityOwner": "engineering_reproducibility_review",
+        "conditionId": "schema_specific_structural_and_semantic_validator_receipts_complete",
+        "currentState": false,
+        "order": 6,
+        "requiredState": true,
+        "satisfied": false
+      },
+      {
+        "authorityOwner": "engineering_data_lifecycle_review",
+        "conditionId": "mutation_epoch_atomic_snapshot_aba_and_private_input_lifecycle_receipts_complete",
+        "currentState": false,
+        "order": 7,
+        "requiredState": true,
+        "satisfied": false
+      },
+      {
+        "authorityOwner": "product_owner_and_formal_admission_governance",
+        "conditionId": "owner_supersession_formal_parent_and_central_registry_projection_complete",
+        "currentState": false,
+        "order": 8,
+        "requiredState": true,
+        "satisfied": false
+      }
+    ],
+    "conditionsAreNecessaryNotSufficient": true,
+    "currentAdmissionEpochReceipt": null,
+    "currentFrozenPacketDigest": null,
+    "currentReadinessState": "requirements_only_not_admitted",
+    "formalSystemAdmissionConferred": false,
+    "formalSystemAdmissionRequiresOtherProductizationGates": true,
+    "futurePositiveTransitionsMechanicallyAccepted": false,
+    "generativeModelMaySelectValuesOrWinners": false,
+    "inputContractGateSatisfied": false,
+    "majorityVoteAllowed": false,
+    "partialCompletionMaySetGateTrue": false,
+    "positiveReceiptSchemasDefined": false,
+    "positiveTransitionEvaluatorImplemented": false,
+    "positiveTransitionReceiptsAccepted": 0,
+    "publicReleaseAuthorizationConferred": false,
+    "readinessModelType": "conjunctive_fail_closed_necessary_conditions_only",
+    "unresolvedOrAmbiguousEvidenceDisposition": "not_ready_no_product_receipt"
+  },
+  "privacyBoundary": {
+    "arbitraryCandidateInputAuthorized": false,
+    "candidateDigestIsAnonymous": false,
+    "candidateDigestSafeToPublish": false,
+    "candidateInstancesIncluded": 0,
+    "fixedProbeReceiptsSafeOnlyBecauseNoPersonData": true,
+    "personalDataProcessedByThisCandidate": false,
+    "stableDigestForArbitraryCandidateForbiddenByGovernance": true,
+    "stableDigestMechanicallyBlockedForArbitraryCandidate": false
+  },
+  "productBoundary": {
+    "centralRegistryIntegration": "absent",
+    "domainManifest": "absent",
+    "inputContract": "isolated_contract_draft_not_admitted",
+    "migrationId": null,
+    "parentLedgerUpdated": false,
+    "productInputSurface": "absent",
+    "registryUpdated": false,
+    "releaseIdentity": null,
+    "runtimeImplementation": "absent",
+    "targetSchema": null
+  },
+  "projectReleaseGovernanceContext": {
+    "activeLine": "legacy-v13",
+    "expertClaimsAuthorized": false,
+    "inheritedByVedicProductIdentity": false,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "projectContextOnly": true,
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "recordType": "vedic-input-admission-readiness-candidate",
+  "requirementRows": [
+    {
+      "currentEvidenceCounts": {
+        "engineeringValidatorReceipts": 0,
+        "expertOpinionRefs": 0,
+        "ownerDecisionRefs": 0,
+        "rightsEvidenceRefs": 0,
+        "sourceBindingRefs": 0
+      },
+      "currentGateProjection": {
+        "admissionEligible": false,
+        "engineeringValidationComplete": false,
+        "expertReviewComplete": false,
+        "mutationEpochProtected": false,
+        "ownerSelectionAccepted": false,
+        "rightsClosureComplete": false,
+        "sourceBindingFrozenVerified": false
+      },
+      "currentState": "draft_shape_defined_value_unselected_required_unbound",
+      "draftRequirementPointer": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/civil_calendar_and_date",
+      "order": 1,
+      "requirementClass": "input_declaration",
+      "requirementId": "civil_calendar_and_date",
+      "requiredSemanticInvariantIds": [
+        "civil_date_validity",
+        "calendar_identity_version"
+      ],
+      "subjectId": "vedic.input.civil_calendar_and_date"
+    },
+    {
+      "currentEvidenceCounts": {
+        "engineeringValidatorReceipts": 0,
+        "expertOpinionRefs": 0,
+        "ownerDecisionRefs": 0,
+        "rightsEvidenceRefs": 0,
+        "sourceBindingRefs": 0
+      },
+      "currentGateProjection": {
+        "admissionEligible": false,
+        "engineeringValidationComplete": false,
+        "expertReviewComplete": false,
+        "mutationEpochProtected": false,
+        "ownerSelectionAccepted": false,
+        "rightsClosureComplete": false,
+        "sourceBindingFrozenVerified": false
+      },
+      "currentState": "draft_shape_defined_value_unselected_required_unbound",
+      "draftRequirementPointer": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/local_wall_time_and_precision",
+      "order": 2,
+      "requirementClass": "input_declaration",
+      "requirementId": "local_wall_time_and_precision",
+      "requiredSemanticInvariantIds": [
+        "canonical_wall_time",
+        "precision_vocabulary"
+      ],
+      "subjectId": "vedic.input.local_wall_time_and_precision"
+    },
+    {
+      "currentEvidenceCounts": {
+        "engineeringValidatorReceipts": 0,
+        "expertOpinionRefs": 0,
+        "ownerDecisionRefs": 0,
+        "rightsEvidenceRefs": 0,
+        "sourceBindingRefs": 0
+      },
+      "currentGateProjection": {
+        "admissionEligible": false,
+        "engineeringValidationComplete": false,
+        "expertReviewComplete": false,
+        "mutationEpochProtected": false,
+        "ownerSelectionAccepted": false,
+        "rightsClosureComplete": false,
+        "sourceBindingFrozenVerified": false
+      },
+      "currentState": "draft_shape_defined_value_unselected_required_unbound",
+      "draftRequirementPointer": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/birth_time_uncertainty_interval_or_candidates",
+      "order": 3,
+      "requirementClass": "input_declaration",
+      "requirementId": "birth_time_uncertainty_interval_or_candidates",
+      "requiredSemanticInvariantIds": [
+        "uncertainty_representation",
+        "interval_ordering",
+        "candidate_semantics"
+      ],
+      "subjectId": "vedic.input.birth_time_uncertainty_interval_or_candidates"
+    },
+    {
+      "currentEvidenceCounts": {
+        "engineeringValidatorReceipts": 0,
+        "expertOpinionRefs": 0,
+        "ownerDecisionRefs": 0,
+        "rightsEvidenceRefs": 0,
+        "sourceBindingRefs": 0
+      },
+      "currentGateProjection": {
+        "admissionEligible": false,
+        "engineeringValidationComplete": false,
+        "expertReviewComplete": false,
+        "mutationEpochProtected": false,
+        "ownerSelectionAccepted": false,
+        "rightsClosureComplete": false,
+        "sourceBindingFrozenVerified": false
+      },
+      "currentState": "draft_shape_defined_value_unselected_required_unbound",
+      "draftRequirementPointer": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/place_coordinates_and_precision",
+      "order": 4,
+      "requirementClass": "input_declaration",
+      "requirementId": "place_coordinates_and_precision",
+      "requiredSemanticInvariantIds": [
+        "coordinate_reference_system",
+        "coordinate_precision_semantics",
+        "location_privacy_boundary"
+      ],
+      "subjectId": "vedic.input.place_coordinates_and_precision"
+    },
+    {
+      "currentEvidenceCounts": {
+        "engineeringValidatorReceipts": 0,
+        "expertOpinionRefs": 0,
+        "ownerDecisionRefs": 0,
+        "rightsEvidenceRefs": 0,
+        "sourceBindingRefs": 0
+      },
+      "currentGateProjection": {
+        "admissionEligible": false,
+        "engineeringValidationComplete": false,
+        "expertReviewComplete": false,
+        "mutationEpochProtected": false,
+        "ownerSelectionAccepted": false,
+        "rightsClosureComplete": false,
+        "sourceBindingFrozenVerified": false
+      },
+      "currentState": "draft_shape_defined_value_unselected_required_unbound",
+      "draftRequirementPointer": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/iana_time_zone_and_tzdb_identity",
+      "order": 5,
+      "requirementClass": "input_declaration",
+      "requirementId": "iana_time_zone_and_tzdb_identity",
+      "requiredSemanticInvariantIds": [
+        "iana_zone_identity",
+        "tzdb_version_identity",
+        "coverage_update_policy"
+      ],
+      "subjectId": "vedic.input.iana_time_zone_and_tzdb_identity"
+    },
+    {
+      "currentEvidenceCounts": {
+        "engineeringValidatorReceipts": 0,
+        "expertOpinionRefs": 0,
+        "ownerDecisionRefs": 0,
+        "rightsEvidenceRefs": 0,
+        "sourceBindingRefs": 0
+      },
+      "currentGateProjection": {
+        "admissionEligible": false,
+        "engineeringValidationComplete": false,
+        "expertReviewComplete": false,
+        "mutationEpochProtected": false,
+        "ownerSelectionAccepted": false,
+        "rightsClosureComplete": false,
+        "sourceBindingFrozenVerified": false
+      },
+      "currentState": "draft_shape_defined_value_unselected_required_unbound",
+      "draftRequirementPointer": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/dst_gap_overlap_resolution",
+      "order": 6,
+      "requirementClass": "input_declaration",
+      "requirementId": "dst_gap_overlap_resolution",
+      "requiredSemanticInvariantIds": [
+        "dst_gap_overlap_classification",
+        "dst_resolution_policy"
+      ],
+      "subjectId": "vedic.input.dst_gap_overlap_resolution"
+    },
+    {
+      "currentEvidenceCounts": {
+        "engineeringValidatorReceipts": 0,
+        "expertOpinionRefs": 0,
+        "ownerDecisionRefs": 0,
+        "rightsEvidenceRefs": 0,
+        "sourceBindingRefs": 0
+      },
+      "currentGateProjection": {
+        "admissionEligible": false,
+        "engineeringValidationComplete": false,
+        "expertReviewComplete": false,
+        "mutationEpochProtected": false,
+        "ownerSelectionAccepted": false,
+        "rightsClosureComplete": false,
+        "sourceBindingFrozenVerified": false
+      },
+      "currentState": "draft_shape_defined_value_unselected_required_unbound",
+      "draftRequirementPointer": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/utc_conversion_and_time_scale",
+      "order": 7,
+      "requirementClass": "calculation_policy_declaration",
+      "requirementId": "utc_conversion_and_time_scale",
+      "requiredSemanticInvariantIds": [
+        "utc_conversion_consistency",
+        "time_scale_identity"
+      ],
+      "subjectId": "vedic.input.utc_conversion_and_time_scale"
+    },
+    {
+      "currentEvidenceCounts": {
+        "engineeringValidatorReceipts": 0,
+        "expertOpinionRefs": 0,
+        "ownerDecisionRefs": 0,
+        "rightsEvidenceRefs": 0,
+        "sourceBindingRefs": 0
+      },
+      "currentGateProjection": {
+        "admissionEligible": false,
+        "engineeringValidationComplete": false,
+        "expertReviewComplete": false,
+        "mutationEpochProtected": false,
+        "ownerSelectionAccepted": false,
+        "rightsClosureComplete": false,
+        "sourceBindingFrozenVerified": false
+      },
+      "currentState": "draft_shape_defined_value_unselected_required_unbound",
+      "draftRequirementPointer": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/ephemeris_identity_version_and_coverage",
+      "order": 8,
+      "requirementClass": "calculation_policy_declaration",
+      "requirementId": "ephemeris_identity_version_and_coverage",
+      "requiredSemanticInvariantIds": [
+        "ephemeris_identity_version_digest",
+        "ephemeris_coverage"
+      ],
+      "subjectId": "vedic.input.ephemeris_identity_version_and_coverage"
+    },
+    {
+      "currentEvidenceCounts": {
+        "engineeringValidatorReceipts": 0,
+        "expertOpinionRefs": 0,
+        "ownerDecisionRefs": 0,
+        "rightsEvidenceRefs": 0,
+        "sourceBindingRefs": 0
+      },
+      "currentGateProjection": {
+        "admissionEligible": false,
+        "engineeringValidationComplete": false,
+        "expertReviewComplete": false,
+        "mutationEpochProtected": false,
+        "ownerSelectionAccepted": false,
+        "rightsClosureComplete": false,
+        "sourceBindingFrozenVerified": false
+      },
+      "currentState": "draft_shape_defined_value_unselected_required_unbound",
+      "draftRequirementPointer": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/sidereal_zodiac_declaration",
+      "order": 9,
+      "requirementClass": "calculation_policy_declaration",
+      "requirementId": "sidereal_zodiac_declaration",
+      "requiredSemanticInvariantIds": [
+        "sidereal_zodiac_identity_version"
+      ],
+      "subjectId": "vedic.input.sidereal_zodiac_declaration"
+    },
+    {
+      "currentEvidenceCounts": {
+        "engineeringValidatorReceipts": 0,
+        "expertOpinionRefs": 0,
+        "ownerDecisionRefs": 0,
+        "rightsEvidenceRefs": 0,
+        "sourceBindingRefs": 0
+      },
+      "currentGateProjection": {
+        "admissionEligible": false,
+        "engineeringValidationComplete": false,
+        "expertReviewComplete": false,
+        "mutationEpochProtected": false,
+        "ownerSelectionAccepted": false,
+        "rightsClosureComplete": false,
+        "sourceBindingFrozenVerified": false
+      },
+      "currentState": "draft_shape_defined_value_unselected_required_unbound",
+      "draftRequirementPointer": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/ayanamsa_identity_and_version",
+      "order": 10,
+      "requirementClass": "calculation_policy_declaration",
+      "requirementId": "ayanamsa_identity_and_version",
+      "requiredSemanticInvariantIds": [
+        "ayanamsa_identity_version"
+      ],
+      "subjectId": "vedic.input.ayanamsa_identity_and_version"
+    },
+    {
+      "currentEvidenceCounts": {
+        "engineeringValidatorReceipts": 0,
+        "expertOpinionRefs": 0,
+        "ownerDecisionRefs": 0,
+        "rightsEvidenceRefs": 0,
+        "sourceBindingRefs": 0
+      },
+      "currentGateProjection": {
+        "admissionEligible": false,
+        "engineeringValidationComplete": false,
+        "expertReviewComplete": false,
+        "mutationEpochProtected": false,
+        "ownerSelectionAccepted": false,
+        "rightsClosureComplete": false,
+        "sourceBindingFrozenVerified": false
+      },
+      "currentState": "draft_shape_defined_value_unselected_required_unbound",
+      "draftRequirementPointer": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/rahu_ketu_mode",
+      "order": 11,
+      "requirementClass": "calculation_policy_declaration",
+      "requirementId": "rahu_ketu_mode",
+      "requiredSemanticInvariantIds": [
+        "node_mode_definition_version"
+      ],
+      "subjectId": "vedic.input.rahu_ketu_mode"
+    },
+    {
+      "currentEvidenceCounts": {
+        "engineeringValidatorReceipts": 0,
+        "expertOpinionRefs": 0,
+        "ownerDecisionRefs": 0,
+        "rightsEvidenceRefs": 0,
+        "sourceBindingRefs": 0
+      },
+      "currentGateProjection": {
+        "admissionEligible": false,
+        "engineeringValidationComplete": false,
+        "expertReviewComplete": false,
+        "mutationEpochProtected": false,
+        "ownerSelectionAccepted": false,
+        "rightsClosureComplete": false,
+        "sourceBindingFrozenVerified": false
+      },
+      "currentState": "draft_shape_defined_value_unselected_required_unbound",
+      "draftRequirementPointer": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/bhava_house_definition",
+      "order": 12,
+      "requirementClass": "calculation_policy_declaration",
+      "requirementId": "bhava_house_definition",
+      "requiredSemanticInvariantIds": [
+        "bhava_definition_version"
+      ],
+      "subjectId": "vedic.input.bhava_house_definition"
+    },
+    {
+      "currentEvidenceCounts": {
+        "engineeringValidatorReceipts": 0,
+        "expertOpinionRefs": 0,
+        "ownerDecisionRefs": 0,
+        "rightsEvidenceRefs": 0,
+        "sourceBindingRefs": 0
+      },
+      "currentGateProjection": {
+        "admissionEligible": false,
+        "engineeringValidationComplete": false,
+        "expertReviewComplete": false,
+        "mutationEpochProtected": false,
+        "ownerSelectionAccepted": false,
+        "rightsClosureComplete": false,
+        "sourceBindingFrozenVerified": false
+      },
+      "currentState": "draft_shape_defined_value_unselected_required_unbound",
+      "draftRequirementPointer": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json#/properties/birth_time_perturbation_candidates_and_transition_points",
+      "order": 13,
+      "requirementClass": "calculation_policy_declaration",
+      "requirementId": "birth_time_perturbation_candidates_and_transition_points",
+      "requiredSemanticInvariantIds": [
+        "perturbation_candidate_semantics",
+        "transition_ordering",
+        "perturbation_policy_identity"
+      ],
+      "subjectId": "vedic.input.birth_time_perturbation_candidates_and_transition_points"
+    }
+  ],
+  "roleSeparationBoundary": {
+    "conditionFiveBlocked": true,
+    "conditionFiveBlockedReason": "independent_legal_authority_role_seat_eligibility_signing_and_authenticity_schemas_absent",
+    "conditionFiveId": "two_independent_source_rights_reviews_and_legal_authority_disposition_complete",
+    "domainExpertMaySignRightsLegalConclusion": false,
+    "independentLegalAuthority": {
+      "authenticitySchemaDefined": false,
+      "eligibilitySchemaDefined": false,
+      "roleDefinition": "absent",
+      "seatCount": 0,
+      "signingSchemaDefined": false
+    },
+    "rightsLegalConclusionEstablished": false,
+    "sourceRightsReviewerMaySignRightsLegalConclusion": false
+  },
+  "schemaVersion": "vedic-input-admission-readiness-candidate/v0.1.0",
+  "status": "thirteen_requirement_conjunctive_readiness_conditions_defined_zero_resolved_zero_admission_effect",
+  "systemIdentity": {
+    "authorityStatus": "not-authoritative",
+    "contractSystemId": "vedic",
+    "integrationStatus": "not-integrated",
+    "productStatus": "research-only",
+    "productSystemId": "vedic-astrology"
+  },
+  "upstreamBindings": {
+    "bindingDirection": "exact_current_endpoint_snapshots_to_candidate_only",
+    "browserWorkerEngineeringClosure": {
+      "buildEndpoints": [
+        {
+          "bytes": 4910,
+          "path": "packages/vedic-input-preflight-draft/dist/browser-app/index.html",
+          "sha256": "db25a47af05de8853b4af1984cce8b3b03a3a4199a662756a734bc7b00e48935"
+        },
+        {
+          "bytes": 28286,
+          "path": "packages/vedic-input-preflight-draft/dist/browser-app/assets/browser-worker-D9nX9PvL.js",
+          "sha256": "1c6723ab0d78606858dfa80a66c043a7e0605bf4fd5c2d4be6e4e1cc51bc4fd8"
+        },
+        {
+          "bytes": 57271,
+          "path": "packages/vedic-input-preflight-draft/dist/browser-app/assets/browser-worker-D9nX9PvL.js.map",
+          "sha256": "90459e206ae4898bc9ef81ae35ebd0fc3bee702b61a6ca606e29071fbe3a3260"
+        },
+        {
+          "bytes": 12331,
+          "path": "packages/vedic-input-preflight-draft/dist/browser-app/assets/index-yQhygIFy.js",
+          "sha256": "f28d1494e99ea5c2a1f9a94d8957f1f7651e7c008e4c0add8d3f40f1f861f3da"
+        },
+        {
+          "bytes": 35905,
+          "path": "packages/vedic-input-preflight-draft/dist/browser-app/assets/index-yQhygIFy.js.map",
+          "sha256": "44d87d986d7c812de496b40594ce945e775f3ac027e6934b188eb8eb15d2c0f6"
+        },
+        {
+          "bytes": 4617,
+          "path": "packages/vedic-input-preflight-draft/dist/browser-app/assets/index-CRHLBWku.css",
+          "sha256": "82bc8b2fee36f1c4d11d9c4eec77ef2536ff27b552abb15029fcc0a9a517b1a0"
+        }
+      ],
+      "documentationEndpoint": {
+        "bytes": 9840,
+        "path": "docs/吠陀独立输入结构预检浏览器Worker草案-v0.1-2026-08-30.md",
+        "sha256": "e8264034a01e45e4e713af7b57ad4f2586671f7e42ba243a9f0d06ab325bf6b0"
+      },
+      "engineeringRegistryEndpoint": {
+        "bytes": 13698,
+        "path": "scripts/system-contract-draft-registry.json",
+        "sha256": "9892ee572e967cff4c6a8a509560691cb2f34fe6049f8257cf4b6feda6f6c8d7"
+      },
+      "sourceEndpoints": [
+        {
+          "bytes": 352,
+          "path": "packages/vedic-input-preflight-draft/package.json",
+          "sha256": "35e64ff6974a425f243aaa7a645db18148b071dc3d0040aea3851de4e6fc61e8"
+        },
+        {
+          "bytes": 312,
+          "path": "packages/vedic-input-preflight-draft/tsconfig.json",
+          "sha256": "919c604b60f6af90c9b2e0b63401c7caffe4b98e5535c163cf57d77ed7373603"
+        },
+        {
+          "bytes": 955,
+          "path": "packages/vedic-input-preflight-draft/vitest.config.ts",
+          "sha256": "08db172fab46ffa3216918e060801f17abec46b87eab7c27f68d2bacc13c4ac5"
+        },
+        {
+          "bytes": 3390,
+          "path": "packages/vedic-input-preflight-draft/vite.browser-preflight.config.mjs",
+          "sha256": "f75b0385f8d2c4d9d8af2e024dff810860744d085247dcb36bd0f382eef1bb02"
+        },
+        {
+          "bytes": 1103,
+          "path": "packages/vedic-input-preflight-draft/playwright.browser-preflight.config.ts",
+          "sha256": "3f4b73004a14990ab1384d1643481c981b58d3867e3d2a439e6069c6a598f7b1"
+        },
+        {
+          "bytes": 1885,
+          "path": "packages/vedic-input-preflight-draft/README.md",
+          "sha256": "e857ab81c7f05bffb0c504c1e8f9ff4b54bf915b9c70ebc232c42a24fa4238f2"
+        },
+        {
+          "bytes": 4823,
+          "path": "packages/vedic-input-preflight-draft/browser-app/index.html",
+          "sha256": "a1307fcefd47f769536afdaa1ad5b1be656f44f836c6ec9851194d5df46a4a21"
+        },
+        {
+          "bytes": 7680,
+          "path": "packages/vedic-input-preflight-draft/e2e/browser-preflight.spec.ts",
+          "sha256": "f3544b7f0090df66fcd2c5e46e9fefb0dcb25a728939600ee30f8f03b80eab07"
+        },
+        {
+          "bytes": 448,
+          "path": "packages/vedic-input-preflight-draft/scripts/serve-fresh-browser-preflight.mjs",
+          "sha256": "c4f5da58c88518ac4bc2b1116e73f83adf90cb5e10d75d1dafa0f16658d2fd14"
+        },
+        {
+          "bytes": 289,
+          "path": "packages/vedic-input-preflight-draft/src/virtual-schema.d.ts",
+          "sha256": "68dcaf0c0f637d59821b5a6c67d6a05463abcdeca4ba0333fb9a8eff82daa538"
+        },
+        {
+          "bytes": 16393,
+          "path": "packages/vedic-input-preflight-draft/src/protocol.ts",
+          "sha256": "5ee2de32419019495cc8ec1ea8502860ed93a197c29c3cc48c6ff7ed1da4a5af"
+        },
+        {
+          "bytes": 22675,
+          "path": "packages/vedic-input-preflight-draft/src/preflight.ts",
+          "sha256": "25cf02a65713d2ddd4c69d020417f22aa1fa3206bd4717b7528047281cd72ccb"
+        },
+        {
+          "bytes": 3836,
+          "path": "packages/vedic-input-preflight-draft/src/preflight.test.ts",
+          "sha256": "45040f0b2010a7bc67436a568436b6ae4b205f801d7bf9eb1dbb2b7822f9806d"
+        },
+        {
+          "bytes": 1358,
+          "path": "packages/vedic-input-preflight-draft/src/browser-worker.ts",
+          "sha256": "391d89d148df2bcb0a4ae3c27ead675a551ab56d277cfcc1b0264b812c816b31"
+        },
+        {
+          "bytes": 4953,
+          "path": "packages/vedic-input-preflight-draft/src/browser-client.ts",
+          "sha256": "91512d859d128c1aa05a526e1c40d1a070fe01f86b36d5870ddc87a0b9ffd1b6"
+        },
+        {
+          "bytes": 7000,
+          "path": "packages/vedic-input-preflight-draft/src/browser-client.test.ts",
+          "sha256": "c0470f24ad1d9b3447419b7a482353aebb6be9158a70e211cd0dfdd15a2a5749"
+        },
+        {
+          "bytes": 4538,
+          "path": "packages/vedic-input-preflight-draft/src/browser-app/main.ts",
+          "sha256": "17c5340dd14c8cf34dc61a196290effa229f4d3604f6aa1d93152b4007b339d5"
+        },
+        {
+          "bytes": 5661,
+          "path": "packages/vedic-input-preflight-draft/src/browser-app/styles.css",
+          "sha256": "17e1c4dbcfd3890e56b2198f0599cdfc3c7ac15768acec44776a80ff65444745"
+        }
+      ]
+    },
+    "candidateBacklinkedByUpstreams": false,
+    "childBindsOrRewritesUpstreams": false,
+    "exactEndpointCount": 34,
+    "governanceAndAdmissionContext": [
+      {
+        "bytes": 4531,
+        "path": "docs/吠陀占星独立产品化ADR-0001-2026-08-26.md",
+        "role": "independent_product_boundary_adr",
+        "sha256": "0e9b81505abb963b4d64426338b8071cd8a211eed8d02fe76065fada335dce63"
+      },
+      {
+        "bytes": 16529,
+        "path": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json",
+        "role": "isolated_input_contract_draft",
+        "semanticDigest": "ad9a1d568d63296d3ed19f30d91cb8f8e52f543afcec03f238178da4af70ee08",
+        "semanticDigestField": "schemaSemanticDigest",
+        "sha256": "4899e8fdf267a44e401295f23e11e2504e45f8e2f731c6be9b8ad1435e8dbf69"
+      },
+      {
+        "bytes": 15859,
+        "path": "content/system-admission/vedic-input-contract-requirements.v1.json",
+        "role": "zero_instance_input_requirements_baseline",
+        "semanticDigest": "e545c254d29902df58e29ca90f965333daca70f06bce03cca62ad9e2f4fc7ac0",
+        "semanticDigestField": "ledgerDigest",
+        "sha256": "85409d7f4ed7ef6bddc4d34102ecff479fd8dbe4210a78416f90ee705a0f2e59"
+      },
+      {
+        "bytes": 85752,
+        "path": "content/system-admission/vedic-source-binding-and-three-layer-rights-requirements.v1.json",
+        "role": "source_binding_and_three_layer_rights_requirements",
+        "semanticDigest": "b98699c70e9783ef670c6acfbb0410e0ff89eca51db54dd4b36b44e60d33194e",
+        "semanticDigestField": "ledgerDigest",
+        "sha256": "2eed084660dbfa9de5c655e40d96c9bb848743f8f14091e8fb3564f2d60385b9"
+      },
+      {
+        "bytes": 37131,
+        "path": "content/system-admission/vedic-real-independent-expert-review-plan.v1.json",
+        "role": "two_vacant_seat_real_independent_expert_review_plan",
+        "semanticDigest": "2eb4dc9c037403e47f332cc105755bfb86aa8ad6dc0b95dbaf29e80d7bdfd1af",
+        "semanticDigestField": "planDigest",
+        "sha256": "9bcbff519dd38d40f26dfba1ccabe1c2987700200cf3a7f6eb7bf68254d7cf89"
+      },
+      {
+        "bytes": 25578,
+        "path": "content/system-admission/vedic-independent-productization-requirements.v1.json",
+        "role": "historical_productization_parent_requirements",
+        "semanticDigest": "1017f04864428a84d5032aaef5593875e483e2e30ce479127682219ed269cdbb",
+        "semanticDigestField": "ledgerDigest",
+        "sha256": "c9f0fbb3b25c3ad582dc4c3f5534e7e27cb44e47721dbf806b8085cefb6b26f8"
+      },
+      {
+        "bytes": 14110,
+        "path": "content/system-admission/vedic-independent-productization-version-aware-observation-candidate.v1.1.0.json",
+        "role": "non_authoritative_version_aware_productization_observation",
+        "semanticDigest": "3eebcbcd60dfd1f4a96671ec2ab18bd6cceb20d14806acd44a00603e4848a8d1",
+        "semanticDigestField": "candidateDigest",
+        "sha256": "d87a9340c4afd280e1aeb004f4322d2088868b79f31b7c2fd3191e8d14e1343a"
+      }
+    ],
+    "nodeFixedProbeEngineeringChild": {
+      "bytes": 26585,
+      "path": "content/system-admission/vedic-input-structural-rejection-execution-evidence.v1.json",
+      "role": "fixed_four_probe_non_admission_engineering_child",
+      "semanticDigest": "b068269d809d49e6ff2f8a80ee2c3ee2bcb649f9fbfc0cb1fa3240b3722422a2",
+      "semanticDigestField": "evidenceDigest",
+      "sha256": "da953b36a3bef662833ae5763e3cdde7dd84b129089e96a8445ddbc582d1a67f"
+    }
+  },
+  "versionBoundary": {
+    "candidateIsFormalParent": false,
+    "centralRegistryUpdated": false,
+    "formalParentUpdated": false,
+    "ownerAcceptanceVerified": false,
+    "ownerDecision": null,
+    "supersedesBaseline": false,
+    "supersessionReceipt": null
+  }
+}

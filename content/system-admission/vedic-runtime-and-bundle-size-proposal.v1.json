@@ -1,0 +1,664 @@
+{
+  "artifactRole": "non_product_governance_runtime_and_bundle_size_proposal",
+  "authorityBoundary": {
+    "browserEvidenceEstablished": false,
+    "budgetApproved": false,
+    "buildEvidenceEstablished": false,
+    "centralAdmissionAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "formalAdmissionAuthorized": false,
+    "implementationAuthorized": false,
+    "productRuntimeAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "runtimeOptionSelected": false
+  },
+  "boundaryBindings": {
+    "bindingDirection": "proposal_to_adr_input_fact_and_rule_drafts_and_requirements_only",
+    "chainOrder": [
+      "docs/吠陀占星独立产品化ADR-0001-2026-08-26.md",
+      "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json",
+      "content/system-admission/vedic-input-contract-requirements.v1.json",
+      "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json",
+      "content/system-admission/vedic-fact-contract-requirements.v1.json",
+      "content/system-admission/vedic-rule-contract-draft.v0.1.0.schema.json",
+      "content/system-admission/vedic-rule-contract-requirements.v1.json"
+    ],
+    "proposalBindsCentralRegistry": false,
+    "proposalBindsParent": false,
+    "upstreamArtifacts": [
+      {
+        "artifactRole": "independent_product_boundary_adr",
+        "bytes": 4531,
+        "decisionStatus": "accepted_research_boundary",
+        "path": "docs/吠陀占星独立产品化ADR-0001-2026-08-26.md",
+        "rawHashAndInspectionUseSameReadBuffer": true,
+        "semanticDigest": "1a71b363132b0d61298f53f7e14eb77d58a3eb3f7d649d8d3c8f42fd1acd1a89",
+        "sha256": "0e9b81505abb963b4d64426338b8071cd8a211eed8d02fe76065fada335dce63"
+      },
+      {
+        "artifactRole": "project_authored_isolated_input_contract_draft",
+        "bytes": 16529,
+        "path": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json",
+        "rawHashAndInspectionUseSameReadBuffer": true,
+        "semanticDigest": "ad9a1d568d63296d3ed19f30d91cb8f8e52f543afcec03f238178da4af70ee08",
+        "sha256": "4899e8fdf267a44e401295f23e11e2504e45f8e2f731c6be9b8ad1435e8dbf69",
+        "status": "isolated_contract_draft"
+      },
+      {
+        "artifactRole": "non_product_governance_requirements_inventory",
+        "bytes": 15859,
+        "ledgerDigest": "e545c254d29902df58e29ca90f965333daca70f06bce03cca62ad9e2f4fc7ac0",
+        "path": "content/system-admission/vedic-input-contract-requirements.v1.json",
+        "rawHashAndInspectionUseSameReadBuffer": true,
+        "sha256": "85409d7f4ed7ef6bddc4d34102ecff479fd8dbe4210a78416f90ee705a0f2e59",
+        "status": "input_contract_draft_present_zero_instances_not_admitted"
+      },
+      {
+        "artifactRole": "project_authored_isolated_fact_contract_draft",
+        "bytes": 14240,
+        "path": "content/system-admission/vedic-fact-contract-draft.v0.1.0.schema.json",
+        "rawHashAndInspectionUseSameReadBuffer": true,
+        "semanticDigest": "0eb3aa460403e42ca5542d1bafb3325d543a0e11429f40b8041f2c1bdf0bc5b1",
+        "sha256": "6fe875bcb156ae9c7756302e96d902b8c03668e58a8894b33bc0d5fab374a1fe",
+        "status": "isolated_contract_draft"
+      },
+      {
+        "artifactRole": "non_product_governance_fact_requirements_inventory",
+        "bytes": 42634,
+        "ledgerDigest": "a33eeee2652559faa0f83c404980ec78acc6dc94be3f6476f25b0e8fdd5eb6b8",
+        "path": "content/system-admission/vedic-fact-contract-requirements.v1.json",
+        "rawHashAndInspectionUseSameReadBuffer": true,
+        "sha256": "a20a1033ce063702548a79b6a651d21421e9f59a9a2ecd4da251cde42ae36b38",
+        "status": "fact_contract_draft_present_zero_instances_values_producer_projector_absent_not_admitted"
+      },
+      {
+        "artifactRole": "project_authored_isolated_rule_contract_draft",
+        "bytes": 12140,
+        "path": "content/system-admission/vedic-rule-contract-draft.v0.1.0.schema.json",
+        "rawHashAndInspectionUseSameReadBuffer": true,
+        "semanticDigest": "3491132c1c5081eac5bb76f6fe1d67400da954ace73546589f34322dd11ae3f3",
+        "sha256": "1b0f118d5014aa8de0ab85bd756b710252565d643a5164ee88a7418d4a002f0d",
+        "status": "isolated_contract_draft"
+      },
+      {
+        "artifactRole": "non_product_governance_rule_requirements_inventory",
+        "bytes": 30734,
+        "ledgerDigest": "fbaad8625fc10d112ccf47f7c5aae358a49305fe2d560a08d02f506194c4156f",
+        "path": "content/system-admission/vedic-rule-contract-requirements.v1.json",
+        "rawHashAndInspectionUseSameReadBuffer": true,
+        "sha256": "ee34106b3dccdfd5d08d89d3871161ba2a12f7bcc983aff8b4850aa6ee42bc94",
+        "status": "rule_contract_draft_present_zero_rule_instances_evaluator_and_versioned_ruleset_absent_not_admitted"
+      }
+    ]
+  },
+  "createdAt": "2026-08-29T00:00:00.000Z",
+  "deferredIndependentDesignRequirements": {
+    "browserGateAndReleaseEvidence": {
+      "artifactRefs": [],
+      "designArtifactsObserved": 0,
+      "interfaceRequirementIds": [
+        "microsoft_edge_browser_receipt_interface",
+        "google_chrome_browser_receipt_interface",
+        "artifact_identity_receipt_interface",
+        "build_receipt_interface",
+        "runtime_execution_receipt_interface",
+        "deployment_receipt_interface",
+        "rollback_receipt_interface",
+        "evidence_retention_receipt_interface"
+      ],
+      "quantitativePlanRefs": [
+        "#/measurementPlan/browserMatrix/0/plannedRuns",
+        "#/measurementPlan/browserMatrix/1/plannedRuns",
+        "#/runtimeOptions/0/candidateCeilings/8/proposedCeiling",
+        "#/runtimeOptions/1/candidateCeilings/8/proposedCeiling"
+      ],
+      "requirementState": "separate_rereview_requirement_plan_only_not_satisfied"
+    },
+    "storageBackupRecoveryMutationEpochCapacityRollback": {
+      "artifactRefs": [],
+      "designArtifactsObserved": 0,
+      "interfaceRequirementIds": [
+        "separate_vedic_storage_namespace_interface",
+        "storage_capacity_budget_interface",
+        "mutation_epoch_receipt_interface",
+        "backup_interface",
+        "recovery_interface",
+        "rollback_interface"
+      ],
+      "quantitativePlanRefs": [
+        "#/runtimeOptions/0/candidateCeilings/2/proposedCeiling",
+        "#/runtimeOptions/1/candidateCeilings/2/proposedCeiling",
+        "#/runtimeOptions/0/candidateCeilings/8/proposedCeiling",
+        "#/runtimeOptions/1/candidateCeilings/8/proposedCeiling"
+      ],
+      "requirementState": "separate_rereview_requirement_plan_only_not_satisfied"
+    }
+  },
+  "dependencyDecisionBoundary": {
+    "dedicatedWorker": "undecided_not_selected",
+    "ephemerisDataFiles": "undecided_not_selected",
+    "loopbackLocalService": "undecided_not_selected",
+    "pythonRuntime": "undecided_not_selected",
+    "swissEphemeris": "undecided_not_selected"
+  },
+  "dependencyLicenseQuestionMatrix": [
+    {
+      "dependencyId": "python_runtime",
+      "evidenceRefs": [
+        "hakimi.vedic.runtime-license-evidence/python-psf-legal-public-read/2026-08-29"
+      ],
+      "legalConclusionEstablished": false,
+      "redistributionAuthorized": false,
+      "reviewComplete": false,
+      "reviewQuestionIds": [
+        "python_runtime_exact_version_and_license_identity_question",
+        "python_runtime_packaging_and_redistribution_terms_question",
+        "python_runtime_security_update_and_support_window_question"
+      ],
+      "selection": "undecided_not_selected"
+    },
+    {
+      "dependencyId": "swiss_ephemeris_code",
+      "evidenceRefs": [
+        "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-commit-license-public-read/2026-08-29",
+        "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-dynamic-overview-public-read/2026-08-29",
+        "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-professional-contract-template-public-read/2026-08-29"
+      ],
+      "legalConclusionEstablished": false,
+      "redistributionAuthorized": false,
+      "reviewComplete": false,
+      "reviewQuestionIds": [
+        "swiss_ephemeris_code_exact_version_and_license_identity_question",
+        "swiss_ephemeris_binding_and_distribution_terms_question",
+        "swiss_ephemeris_code_update_and_provenance_question"
+      ],
+      "selection": "undecided_not_selected"
+    },
+    {
+      "dependencyId": "ephemeris_data_files",
+      "evidenceRefs": [
+        "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-commit-license-public-read/2026-08-29",
+        "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-dynamic-overview-public-read/2026-08-29",
+        "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-professional-contract-template-public-read/2026-08-29"
+      ],
+      "legalConclusionEstablished": false,
+      "redistributionAuthorized": false,
+      "reviewComplete": false,
+      "reviewQuestionIds": [
+        "ephemeris_data_file_set_version_and_provenance_question",
+        "ephemeris_data_file_use_and_redistribution_rights_question",
+        "ephemeris_data_file_update_integrity_question"
+      ],
+      "selection": "undecided_not_selected"
+    },
+    {
+      "dependencyId": "dedicated_worker",
+      "evidenceRefs": [
+        "hakimi.vedic.runtime-license-evidence/whatwg-workers-living-standard-public-read/2026-08-29"
+      ],
+      "legalConclusionEstablished": false,
+      "redistributionAuthorized": false,
+      "reviewComplete": false,
+      "reviewQuestionIds": [
+        "dedicated_worker_platform_support_question",
+        "dedicated_worker_isolation_and_message_boundary_question",
+        "dedicated_worker_packaging_dependency_license_question"
+      ],
+      "selection": "undecided_not_selected"
+    },
+    {
+      "dependencyId": "loopback_local_service",
+      "evidenceRefs": [],
+      "legalConclusionEstablished": false,
+      "redistributionAuthorized": false,
+      "reviewComplete": false,
+      "reviewQuestionIds": [
+        "loopback_service_process_distribution_question",
+        "loopback_service_port_origin_and_authentication_review_question",
+        "loopback_service_runtime_dependency_license_question"
+      ],
+      "selection": "undecided_not_selected"
+    }
+  ],
+  "doesNotEstablish": [
+    "approved_budget_or_service_level_objective",
+    "selected_runtime_option_or_architecture_decision",
+    "runtime_implementation_or_build_artifact",
+    "measured_bundle_download_install_update_or_evidence_retention_bytes",
+    "measured_startup_calculation_or_memory_performance",
+    "browser_runtime_offline_or_update_validation",
+    "python_swiss_ephemeris_data_worker_or_service_selection",
+    "code_or_ephemeris_data_license_rights_or_redistribution_conclusion",
+    "public_endpoint_retrieval_receipt_as_authenticity_version_selection_complete_legal_review_or_license_grant",
+    "dynamic_webpage_digest_as_frozen_source_body_or_stable_version",
+    "unsigned_professional_contract_template_as_executed_contract_or_license_authorization",
+    "whatwg_platform_spec_as_packaged_worker_implementation_or_dependency_license",
+    "python_license_family_page_as_exact_runtime_version_or_packaging_rights",
+    "storage_backup_recovery_mutation_epoch_capacity_or_rollback_design_completion",
+    "browser_gate_or_release_evidence_design_completion",
+    "proposal_material_coverage_as_review_implementation_measurement_or_evidence_completion",
+    "legacy_v13_schema13_or_bazi_authority_inheritance",
+    "central_registry_integration_or_formal_admission",
+    "product_surface_release_readiness_or_public_release_authorization",
+    "mutation_epoch_cross_file_atomic_snapshot_interval_mutation_or_aba_exclusion"
+  ],
+  "evidenceBoundary": {
+    "browserReceipts": 0,
+    "browserRunsExecuted": 0,
+    "buildArtifactsObserved": 0,
+    "buildReceipts": 0,
+    "candidateCeilingsAreMeasurements": false,
+    "implementationArtifactsObserved": 0,
+    "implementationReceipts": 0,
+    "measurementReceipts": 0,
+    "performanceMeasurementsObserved": 0,
+    "proposalTargetsApproved": false,
+    "proposalTargetsQuantified": true,
+    "runtimeExecutionsObserved": 0,
+    "runtimeReceipts": 0,
+    "successReceipts": 0
+  },
+  "licenseRightsBoundary": {
+    "codeLicenseEvidenceRefs": [
+      "hakimi.vedic.runtime-license-evidence/python-psf-legal-public-read/2026-08-29",
+      "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-commit-license-public-read/2026-08-29",
+      "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-dynamic-overview-public-read/2026-08-29",
+      "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-professional-contract-template-public-read/2026-08-29"
+    ],
+    "codeLicenseReviewed": false,
+    "ephemerisDataLicenseEvidenceRefs": [
+      "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-commit-license-public-read/2026-08-29",
+      "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-dynamic-overview-public-read/2026-08-29",
+      "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-professional-contract-template-public-read/2026-08-29"
+    ],
+    "ephemerisDataLicenseReviewed": false,
+    "legalReviewComplete": false,
+    "observedEvidenceIsLegalConclusion": false,
+    "redistributionAuthorized": false,
+    "redistributionConditionRefs": [],
+    "rightsLegalConclusionEstablished": false
+  },
+  "measurementPlan": {
+    "browserMatrix": [
+      {
+        "browserId": "microsoft_edge",
+        "evidenceRefs": [],
+        "executedRuns": 0,
+        "executionStatus": "planned_not_executed",
+        "plannedRuns": 3,
+        "targetDeviceClass": "fixed_desktop_candidate_unselected"
+      },
+      {
+        "browserId": "google_chrome",
+        "evidenceRefs": [],
+        "executedRuns": 0,
+        "executionStatus": "planned_not_executed",
+        "plannedRuns": 3,
+        "targetDeviceClass": "fixed_desktop_candidate_unselected"
+      }
+    ],
+    "measurementScenarioIds": [
+      "first_load_online",
+      "offline_cold_start",
+      "incremental_update",
+      "single_chart_calculation",
+      "peak_runtime_memory",
+      "release_evidence_retention"
+    ],
+    "measurementStatus": "not_measured",
+    "observedMeasurementCount": 0,
+    "targetDeviceSelectionStatus": "unselected"
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "boundArtifactHashAndInspectionUseSameReadBuffer": true,
+    "crossFileAtomicSnapshot": false,
+    "heldFileHandleReads": true,
+    "intervalMutationExcluded": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "nestedVerifierSameBufferTransitivityClaimed": false,
+    "parentAndChildrenAtomicSnapshot": false,
+    "pathEndpointRevalidated": true,
+    "plainDirectoryChainRequired": true,
+    "proposalHashAndParseUseSameReadBuffer": true
+  },
+  "productBoundary": {
+    "buildArtifact": "absent",
+    "centralRegistryIntegration": "absent",
+    "implementation": "absent",
+    "legacyV13Inherited": false,
+    "migrationId": null,
+    "productSurface": "absent",
+    "releaseIdentity": null,
+    "runtimeProfile": "proposal_only_unselected",
+    "schema13Inherited": false,
+    "targetSchema": null
+  },
+  "proposalCoverageComplete": true,
+  "proposalDigest": "ae9fb180d97e81a30a9157655d168bb4101d993f859f40990db31c2e12954f15",
+  "proposalId": "hakimi.vedic.runtime-and-bundle-size-proposal/1.0.0",
+  "recordType": "vedic_runtime_and_bundle_size_proposal_v1",
+  "reviewsComplete": false,
+  "runtimeDependencyLicenseEvidenceClosure": {
+    "bindingDirection": "runtime_dependency_license_evidence_to_runtime_proposal_aggregator_only",
+    "childBindsCentralRegistry": false,
+    "childBindsParent": false,
+    "childBindsProposal": false,
+    "runtimeDependencyLicenseEvidence": {
+      "artifactRole": "authoritative_project_record_of_public_runtime_dependency_license_observations",
+      "bytes": 23919,
+      "dependenciesWithObservedRefs": 4,
+      "dependenciesWithoutObservedRefs": 1,
+      "evidenceDigest": "cbd459847bd4f57450f8389f127aa76c424298511786811b17c3cb88a856c926",
+      "legalReviewsComplete": 0,
+      "loopbackEvidenceRefs": 0,
+      "path": "content/system-admission/vedic-runtime-dependency-license-evidence.v1.json",
+      "publicHttpReadsObserved": 10,
+      "publicObjectApiVerified": true,
+      "publicReadApiVerified": true,
+      "publicReleaseAuthorized": false,
+      "rawHashAndSemanticInspectionUseSameBuffer": true,
+      "redistributionAuthorizations": 0,
+      "releaseReady": false,
+      "sha256": "ed51e68438bc3b00613986e082d6064ceea41e9f75dc9992613e1b91449105e1",
+      "sourceObservationCount": 5,
+      "stableImmediateReadPairs": 4,
+      "status": "five_claimed_publisher_or_maintainer_public_endpoints_ten_read_receipts_observed_four_of_five_dependencies_have_refs_loopback_zero_link_only_unreviewed_unsigned_no_legal_conclusion_redistribution_or_selection",
+      "unstableImmediateReadPairs": 1
+    }
+  },
+  "runtimeOptions": [
+    {
+      "candidateCeilings": [
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "application_code_uncompressed_bytes",
+          "observedValue": null,
+          "proposedCeiling": 6000000,
+          "unit": "bytes"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "initial_network_download_bytes",
+          "observedValue": null,
+          "proposedCeiling": 20000000,
+          "unit": "bytes"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "installed_offline_footprint_bytes",
+          "observedValue": null,
+          "proposedCeiling": 100000000,
+          "unit": "bytes"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "first_load_interactive_ms",
+          "observedValue": null,
+          "proposedCeiling": 8000,
+          "unit": "milliseconds"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "offline_cold_start_interactive_ms",
+          "observedValue": null,
+          "proposedCeiling": 5000,
+          "unit": "milliseconds"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "incremental_update_download_bytes",
+          "observedValue": null,
+          "proposedCeiling": 20000000,
+          "unit": "bytes"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "single_calculation_p95_ms",
+          "observedValue": null,
+          "proposedCeiling": 2000,
+          "unit": "milliseconds"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "peak_runtime_memory_bytes",
+          "observedValue": null,
+          "proposedCeiling": 268435456,
+          "unit": "bytes"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "evidence_retention_bytes_per_release",
+          "observedValue": null,
+          "proposedCeiling": 50000000,
+          "unit": "bytes"
+        }
+      ],
+      "decisionStatus": "candidate_unselected_unimplemented",
+      "optionId": "browser_embedded",
+      "preferenceRank": null,
+      "privacyReviewStatus": "required_not_performed",
+      "reproducibilityReviewStatus": "required_not_performed",
+      "securityReviewStatus": "required_not_performed"
+    },
+    {
+      "candidateCeilings": [
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "client_and_service_uncompressed_bytes",
+          "observedValue": null,
+          "proposedCeiling": 250000000,
+          "unit": "bytes"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "initial_network_download_bytes",
+          "observedValue": null,
+          "proposedCeiling": 150000000,
+          "unit": "bytes"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "installed_offline_footprint_bytes",
+          "observedValue": null,
+          "proposedCeiling": 750000000,
+          "unit": "bytes"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "first_load_interactive_ms",
+          "observedValue": null,
+          "proposedCeiling": 15000,
+          "unit": "milliseconds"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "offline_local_service_start_ms",
+          "observedValue": null,
+          "proposedCeiling": 10000,
+          "unit": "milliseconds"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "incremental_update_download_bytes",
+          "observedValue": null,
+          "proposedCeiling": 150000000,
+          "unit": "bytes"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "single_calculation_p95_ms",
+          "observedValue": null,
+          "proposedCeiling": 1500,
+          "unit": "milliseconds"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "peak_runtime_memory_bytes",
+          "observedValue": null,
+          "proposedCeiling": 536870912,
+          "unit": "bytes"
+        },
+        {
+          "approvalStatus": "unapproved_candidate",
+          "comparator": "less_than_or_equal",
+          "evidenceRefs": [],
+          "measurementStatus": "not_measured",
+          "metricId": "evidence_retention_bytes_per_release",
+          "observedValue": null,
+          "proposedCeiling": 100000000,
+          "unit": "bytes"
+        }
+      ],
+      "decisionStatus": "candidate_unselected_unimplemented",
+      "optionId": "loopback_local_service",
+      "preferenceRank": null,
+      "privacyReviewStatus": "required_not_performed",
+      "reproducibilityReviewStatus": "required_not_performed",
+      "securityReviewStatus": "required_not_performed"
+    }
+  ],
+  "schemaVersion": "1.0.0",
+  "securityPrivacyReproducibilityTradeoffMatrix": [
+    {
+      "optionId": "browser_embedded",
+      "preferenceClaimed": false,
+      "privacy": {
+        "identifiedRiskIds": [
+          "browser_storage_extension_and_profile_exposure_unvalidated",
+          "browser_network_egress_behavior_unvalidated"
+        ],
+        "requiredControlIds": [
+          "offline_no_egress_browser_test_plan",
+          "separate_vedic_browser_storage_namespace_plan",
+          "sensitive_field_retention_and_export_policy_plan"
+        ],
+        "validationStatus": "required_not_performed"
+      },
+      "reproducibility": {
+        "identifiedRiskIds": [
+          "browser_engine_device_and_cache_variance_unvalidated",
+          "browser_ephemeris_data_version_drift_unvalidated"
+        ],
+        "requiredControlIds": [
+          "edge_chrome_fixed_device_matrix_plan",
+          "browser_runtime_data_and_rule_digest_capture_plan"
+        ],
+        "validationStatus": "required_not_performed"
+      },
+      "security": {
+        "identifiedRiskIds": [
+          "browser_supply_chain_and_cached_asset_integrity_unvalidated",
+          "browser_main_thread_and_worker_isolation_unvalidated"
+        ],
+        "requiredControlIds": [
+          "browser_content_security_and_asset_integrity_plan",
+          "worker_boundary_and_message_schema_plan",
+          "browser_release_artifact_identity_plan"
+        ],
+        "validationStatus": "required_not_performed"
+      }
+    },
+    {
+      "optionId": "loopback_local_service",
+      "preferenceClaimed": false,
+      "privacy": {
+        "identifiedRiskIds": [
+          "loopback_payload_and_local_log_exposure_unvalidated",
+          "local_service_network_egress_behavior_unvalidated"
+        ],
+        "requiredControlIds": [
+          "loopback_payload_minimization_and_log_redaction_plan",
+          "offline_no_egress_service_test_plan",
+          "separate_vedic_service_storage_namespace_plan"
+        ],
+        "validationStatus": "required_not_performed"
+      },
+      "reproducibility": {
+        "identifiedRiskIds": [
+          "python_native_library_and_platform_variance_unvalidated",
+          "service_data_file_and_environment_drift_unvalidated"
+        ],
+        "requiredControlIds": [
+          "runtime_native_dependency_and_data_digest_capture_plan",
+          "fixed_service_environment_replay_matrix_plan"
+        ],
+        "validationStatus": "required_not_performed"
+      },
+      "security": {
+        "identifiedRiskIds": [
+          "loopback_origin_authentication_and_port_exposure_unvalidated",
+          "local_service_process_and_update_integrity_unvalidated"
+        ],
+        "requiredControlIds": [
+          "loopback_bind_scope_authentication_and_request_origin_plan",
+          "service_binary_and_update_digest_plan",
+          "least_privilege_service_process_boundary_plan"
+        ],
+        "validationStatus": "required_not_performed"
+      }
+    }
+  ],
+  "selectedRuntimeOptionId": null,
+  "status": "complete_quantified_decision_neutral_proposal_runtime_unselected_unimplemented_unvalidated",
+  "systemIdentity": {
+    "contractSystemId": "vedic",
+    "integrationStatus": "not_integrated",
+    "productStatus": "research_only",
+    "productSystemId": "vedic-astrology"
+  }
+}

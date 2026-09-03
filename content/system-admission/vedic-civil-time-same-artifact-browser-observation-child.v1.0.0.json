@@ -1,0 +1,1055 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "vedic_civil_time_same_artifact_edge_chrome_browser_observation_child",
+  "childId": "hakimi.vedic.civil-time.same-artifact-edge-chrome-observation/1.0.0",
+  "status": "isolated_fact_only_single_build_dual_browser_observation_not_admitted",
+  "createdAt": "2026-09-01T03:56:17.909Z",
+  "activeAdmissionEffect": "none",
+  "systemIdentity": {
+    "contractSystemId": "vedic",
+    "productIdentity": null,
+    "releaseIdentity": null,
+    "targetSchema": null,
+    "migrationId": null,
+    "projectDefaultReleaseGovernanceContext": {
+      "releaseIdentity": "legacy-v13",
+      "targetSchema": 13,
+      "migrationId": null
+    },
+    "projectDefaultReleaseGovernanceInherited": false
+  },
+  "expectedAuthoredBuildInputClosure": {
+    "graphId": "hakimi.vedic.civil-time.authored-build-source-graph/1",
+    "digestAlgorithm": "sha256-authored-build-source-graph-v1",
+    "fileCount": 24,
+    "files": [
+      {
+        "path": "package.json",
+        "bytes": 28879,
+        "sha256": "c601b1e560d988a82cfc8d9c374a06597bf8dd867e941a2f4e8cc57f3d59e076"
+      },
+      {
+        "path": "package-lock.json",
+        "bytes": 175812,
+        "sha256": "40a02c7c3166f0c9bc03afa9c1d1f342fb7f54efe1abbf7cb3f5cf6ecb482a4d"
+      },
+      {
+        "path": "tsconfig.json",
+        "bytes": 479,
+        "sha256": "bbed523406f38d3fe9757ef12accf9a02c98a75b3f9812d64fa302975c856cf3"
+      },
+      {
+        "path": "tsconfig.base.json",
+        "bytes": 3124,
+        "sha256": "181e40ee1a2565d45cd35d250085bc3395a07035bfba0a4f4e6fcc31e093164c"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/package.json",
+        "bytes": 399,
+        "sha256": "a0e8cc8534860cb4e7c9bfea7b2487955ad6433c7f65927f5d0946f9a8827f91"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/tsconfig.json",
+        "bytes": 233,
+        "sha256": "9eeb488130dcf8c4c637b6ba8fb136c4c2d1f845424290bc652db5fa35ee53f6"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/browser-app/index.html",
+        "bytes": 5319,
+        "sha256": "12701b0dba0102ea9da20793d1fa58f7de787e8dcfa72067d178116dc31fec34"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/vite.config.mjs",
+        "bytes": 16136,
+        "sha256": "99771905c50721404267d2af70ce4cbaf4a0aa7b749785369b769d48a7ae9024"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/vite.same-artifact-evidence.config.mjs",
+        "bytes": 2525,
+        "sha256": "960a2355565032bf20bb75b04b7657a9261c6884b74c08f48c4192fda8b8938f"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/styles.css",
+        "bytes": 4006,
+        "sha256": "c8e0e6b98c63a67f206c6400bacf3aa61b01f6814a360b320edb101efcbf5da9"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/browser-fact-projection.ts",
+        "bytes": 21038,
+        "sha256": "5b8d3b25d2505854ef1edf21ad51ef2b8dd04401e1168cc90632af26e4b0e515"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-client.ts",
+        "bytes": 8764,
+        "sha256": "3abcfea96d8a3e1023f73a777aded11f9d26c3c2793fdb5a4123680c79ae977c"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-time.ts",
+        "bytes": 22095,
+        "sha256": "c69be8dd8fc39d40f8c1b77263ad41598a54698c252f55e32acecda3f2a96668"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-worker.ts",
+        "bytes": 3468,
+        "sha256": "bb01b0f1577a485a63eff8e38b521fabcaf32becd5a2806f1f4c4ca0949d91bc"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/constants.ts",
+        "bytes": 4879,
+        "sha256": "afe7b76fda96edd53f15d2f0dd4834e060f409924e1e9a41c58b5a462f569aa2"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/input-contract.ts",
+        "bytes": 10168,
+        "sha256": "e713dfbd579de404671f8190f1e4b89c95c4ad894498fcefa85313e94c7982ca"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/main.ts",
+        "bytes": 7307,
+        "sha256": "4f88710d65a8f108b47ef307b72f4984f75ad69fed06d24de9a949ea71acb4c8"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/protocol.ts",
+        "bytes": 12295,
+        "sha256": "fccd81865e6e41834624acfb4b551522edf526277b66950eda59830e37a6257f"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/ui-format.ts",
+        "bytes": 975,
+        "sha256": "44739e5fa14d1070459eb251bb3211d9fb82e7b19b88f6bacbe170f280ad17fc"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/worker-fact-projection.ts",
+        "bytes": 3317,
+        "sha256": "dc0370cfb82f14b009b8469a0e4990df6526a71191fcb6c60073b926aeabfe3f"
+      },
+      {
+        "path": "packages/tzdb-core/package.json",
+        "bytes": 241,
+        "sha256": "fb12b19a6f6c971185bd2f2c9226fe50ad816595e3acec4f0a0b373593136236"
+      },
+      {
+        "path": "packages/tzdb-core/src/index.ts",
+        "bytes": 7819,
+        "sha256": "7c144f6446b3fdba55f7b7b947fe242348ba5010025af36868c39436bfea638e"
+      },
+      {
+        "path": "packages/tzdb-core/src/packed-resolver.ts",
+        "bytes": 8495,
+        "sha256": "bc13da5d2d9b8309aaad972662f8a31761a40afffbd9226bdf80159d43e5081f"
+      },
+      {
+        "path": "packages/tzdb-core/src/artifacts/iana-2025b.ts",
+        "bytes": 396,
+        "sha256": "b1236071105653538a259d929a57e7cd2bb97928429cefaef2ead9dd5019e613"
+      }
+    ],
+    "graphDigest": "c6132f9397dfceadbb5e29764e061eee6694ab705d27e224a2762502d05bec6f",
+    "closureKind": "static_audited_expected_pre_post_current_not_vite_module_load_telemetry",
+    "prePostEndpointDigestEqual": true,
+    "viteMainAndWorkerModuleLoadTelemetryEstablished": false,
+    "completeInstalledDependencyRuntimeClosureBound": false,
+    "crossFileAtomicSnapshot": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false
+  },
+  "lockedBuildInputSnapshot": {
+    "graphId": "hakimi.vedic.civil-time.base-config-locked-build-inputs/1",
+    "digestAlgorithm": "sha256-role-file-graph-v1",
+    "inputCount": 17,
+    "inputs": [
+      {
+        "role": "tzdbCorePath",
+        "path": "packages/tzdb-core/src/index.ts",
+        "bytes": 7819,
+        "sha256": "7c144f6446b3fdba55f7b7b947fe242348ba5010025af36868c39436bfea638e"
+      },
+      {
+        "role": "tzdbResolverPath",
+        "path": "packages/tzdb-core/src/packed-resolver.ts",
+        "bytes": 8495,
+        "sha256": "bc13da5d2d9b8309aaad972662f8a31761a40afffbd9226bdf80159d43e5081f"
+      },
+      {
+        "role": "momentEntryPath",
+        "path": "node_modules/moment-timezone/index.js",
+        "bytes": 114,
+        "sha256": "b93bc1a0ab15d56e12f0e281bf005d39166952d9208b828e8d056563f3ff1fd1"
+      },
+      {
+        "role": "momentImplementationPath",
+        "path": "node_modules/moment-timezone/moment-timezone.js",
+        "bytes": 17137,
+        "sha256": "c6ea311984ec62f79570fe9d440295978ec21518d4b8e3ac88117e729e85bc7b"
+      },
+      {
+        "role": "momentPackageJsonPath",
+        "path": "node_modules/moment-timezone/package.json",
+        "bytes": 1076,
+        "sha256": "131fc5c4b7ad0c5ebcc00b5670c49ef54c2cf0cd26f68670bee10bfd66276a2b"
+      },
+      {
+        "role": "momentDataPath",
+        "path": "node_modules/moment-timezone/data/packed/latest.json",
+        "bytes": 715527,
+        "sha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81"
+      },
+      {
+        "role": "momentLicensePath",
+        "path": "node_modules/moment-timezone/LICENSE",
+        "bytes": 1097,
+        "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+      },
+      {
+        "role": "retainedTzdbAdapterPath",
+        "path": "packages/tzdb-core/src/artifacts/iana-2025b.ts",
+        "bytes": 396,
+        "sha256": "b1236071105653538a259d929a57e7cd2bb97928429cefaef2ead9dd5019e613"
+      },
+      {
+        "role": "retainedMomentEntryPath",
+        "path": "node_modules/moment-timezone-2025b/index.js",
+        "bytes": 114,
+        "sha256": "b93bc1a0ab15d56e12f0e281bf005d39166952d9208b828e8d056563f3ff1fd1"
+      },
+      {
+        "role": "retainedMomentImplementationPath",
+        "path": "node_modules/moment-timezone-2025b/moment-timezone.js",
+        "bytes": 17139,
+        "sha256": "11de898e2d5abf498f56633f7f425512bb90bdfa0c1ad527eb4e88bb86e6c443"
+      },
+      {
+        "role": "retainedMomentPackageJsonPath",
+        "path": "node_modules/moment-timezone-2025b/package.json",
+        "bytes": 1077,
+        "sha256": "4b5a6218fe37ea04bbe19f463fc2477e141bfb8ee18506bd99e871a0d25c3dad"
+      },
+      {
+        "role": "retainedMomentDataPath",
+        "path": "node_modules/moment-timezone-2025b/data/packed/latest.json",
+        "bytes": 727104,
+        "sha256": "b1ad1446fbc94459f86c8e3f4ffadfc4170ad2af9cbd2a9b85c75d5436ce6425"
+      },
+      {
+        "role": "retainedMomentLicensePath",
+        "path": "node_modules/moment-timezone-2025b/LICENSE",
+        "bytes": 1097,
+        "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+      },
+      {
+        "role": "sharedMomentImplementationPath",
+        "path": "node_modules/moment/moment.js",
+        "bytes": 176435,
+        "sha256": "7dc0a51c32dae143f2eade235145dfd6a7756388c0f0bf409fa373dd6c233629"
+      },
+      {
+        "role": "sharedMomentBrowserImplementationPath",
+        "path": "node_modules/moment/dist/moment.js",
+        "bytes": 156326,
+        "sha256": "1e949937d4266c65affeb189ff0f4c0dafed235d8d314e32d6746f0334c95852"
+      },
+      {
+        "role": "sharedMomentPackageJsonPath",
+        "path": "node_modules/moment/package.json",
+        "bytes": 3556,
+        "sha256": "5e2f0870f4d1bbef11e8bf90babd72a4399b86b19da81de796a58457a37b8e13"
+      },
+      {
+        "role": "sharedMomentLicensePath",
+        "path": "node_modules/moment/LICENSE",
+        "bytes": 1075,
+        "sha256": "8f38f320bbf5eb84c08e08676f7ee1d2204ebe5797f6a090d077329cf212fca3"
+      }
+    ],
+    "graphDigest": "ded4e291d462d842ac53b453b6bd3bec1888afbb4aa174639fc9f49657b54b80",
+    "prePostEndpointDigestEqual": true,
+    "exactBaseConfigRolePathBytesAndSha256Verified": true,
+    "baseMainBuildStartExactPreflightConfigured": true,
+    "workerSameBufferVerificationEstablished": false,
+    "intervalLockEstablished": false,
+    "crossFileAtomicSnapshot": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false
+  },
+  "evidenceToolingSnapshot": {
+    "graphId": "hakimi.vedic.civil-time.same-artifact-evidence-tooling/1",
+    "digestAlgorithm": "sha256-file-graph-v1",
+    "fileCount": 20,
+    "files": [
+      {
+        "path": "scripts/vedic-civil-time-same-artifact-browser-observation-lib.mjs",
+        "bytes": 67685,
+        "sha256": "839f5089e17c0404c6187aefb76ebfeb4b3565cb2ce976ef531124da7e25ad1d"
+      },
+      {
+        "path": "scripts/run-vedic-civil-time-same-artifact-browser-observation.mjs",
+        "bytes": 46306,
+        "sha256": "171caf1327173f782e1fc8e1fd1d37846fb0541b4bca7264f4f49eb5ee5c5157"
+      },
+      {
+        "path": "scripts/render-vedic-civil-time-same-artifact-browser-observation-candidate.mjs",
+        "bytes": 5015,
+        "sha256": "7fa961f06e5d3edc1bb5ebf795d3e117ec091c7b365e7221e525e8a3cc19f2f6"
+      },
+      {
+        "path": "scripts/verify-vedic-civil-time-same-artifact-browser-observation.mjs",
+        "bytes": 2767,
+        "sha256": "1b93a81d62f9761cf6b0607f0184d15d4cdf3fb4c7db0cc41faf4dbcd02af9f2"
+      },
+      {
+        "path": "scripts/verify-vedic-civil-time-same-artifact-browser-observation.test.mjs",
+        "bytes": 16665,
+        "sha256": "8dfae68f2009001d1211284c6d45a0f945ad8bb42e9f16aa2792d80fe194ad0a"
+      },
+      {
+        "path": "scripts/verify-vedic-civil-time-same-artifact-config-cwd.test.mjs",
+        "bytes": 3769,
+        "sha256": "a487262b751582f6ac68e223c4b9557511f5fd5aa37a9361b93c95dd4259fb63"
+      },
+      {
+        "path": "scripts/vedic-civil-time-fact-browser-observation-lib.mjs",
+        "bytes": 96766,
+        "sha256": "61612c877f81ee918fd462f5d1bb14304d38540a720719a53d779d1a86223dfd"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/playwright.same-artifact-evidence.config.ts",
+        "bytes": 5059,
+        "sha256": "6ff2a3b401b160176b4315417b5af0c621117d2d81c42243eb5e151abacc07e6"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/tsconfig.same-artifact-evidence.json",
+        "bytes": 174,
+        "sha256": "4c4b319ea32a9dbab022dae289b49b4628b0514487bc4ab5fffacd810b4fe53b"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/e2e/civil-time-browser-gate.spec.ts",
+        "bytes": 9478,
+        "sha256": "c1e904bfc30e1229d78fee5bc58fe456c7f807e7ce423e5b122505bb57dff0d6"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/e2e/same-artifact-summary-reporter.ts",
+        "bytes": 9756,
+        "sha256": "7e86a026dd58ff23b9f8ba568470118c9720ca80099a0c584e0e6e8836a2c22a"
+      },
+      {
+        "path": "apps/web/node_modules/vite/package.json",
+        "bytes": 5158,
+        "sha256": "e5ed0f85215f871fe22a48987dcd77fcfbe14064a53c0c9f7f48186a6b7e2cf0"
+      },
+      {
+        "path": "apps/web/node_modules/vite/bin/vite.js",
+        "bytes": 2574,
+        "sha256": "fa03478846d229651a3c6aa64833ba2c6cbf580a798b92bd8f47c7480bafb5d8"
+      },
+      {
+        "path": "node_modules/@playwright/test/package.json",
+        "bytes": 754,
+        "sha256": "be51f784a5742a1aa075e0173f5f04f189a791cc30c40e3bb18be584f696764e"
+      },
+      {
+        "path": "node_modules/@playwright/test/cli.js",
+        "bytes": 707,
+        "sha256": "79e23e6a249176295b8490567daa7717448a75866d6ea6f6b296ff3d23305c69"
+      },
+      {
+        "path": "node_modules/playwright-core/package.json",
+        "bytes": 876,
+        "sha256": "07c47543631fef9508760365dee9fbe958c562093ec8d122543949ed231f233f"
+      },
+      {
+        "path": "node_modules/esbuild/package.json",
+        "bytes": 3980,
+        "sha256": "d55d1d19fcc5b6079e4a71dd4111340c79c682bc36835ac7058a0c364c7db58a"
+      },
+      {
+        "path": "node_modules/esbuild/lib/main.js",
+        "bytes": 97214,
+        "sha256": "8331fe1d8b3a07381f33cc425fcfaa94776e263113653f80ec3ba433e9657e73"
+      },
+      {
+        "path": "node_modules/rollup/package.json",
+        "bytes": 12426,
+        "sha256": "c923db71dffef7c6c8bde4a658cb70aea7cbcee3123d9f1f382ffe0ff9423e5d"
+      },
+      {
+        "path": "node_modules/rollup/dist/rollup.js",
+        "bytes": 4701,
+        "sha256": "14a30f6c663b4311ab01518491f395d87ade2668b098d4b022c50109c661b72b"
+      }
+    ],
+    "graphDigest": "ff1a8bc71fc70c4f6b375b5dc0b97b87f67f49d266e49a7f9f12cebf971031e3",
+    "prePostEndpointDigestEqual": true,
+    "viteEsbuildAndRollupStableResolutionIdentifiersObserved": true,
+    "completeNodePlaywrightViteRuntimeClosureBound": false,
+    "crossFileAtomicSnapshot": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false
+  },
+  "e2eAssertionContract": {
+    "contractId": "hakimi.vedic.civil-time.same-artifact-five-scenarios/1",
+    "scenarioCountPerBrowser": 5,
+    "expectedOutcomeCount": 10,
+    "scenarios": [
+      {
+        "scenarioId": "unique",
+        "assertionClass": "resolved_fact_only_then_all_ten_fact_value_slots_empty_after_input_change"
+      },
+      {
+        "scenarioId": "gap",
+        "assertionClass": "synthetic_dom_setup_without_input_events_then_completed_gap_failure_leaves_all_ten_previously_populated_fact_value_slots_empty"
+      },
+      {
+        "scenarioId": "overlap_reject",
+        "assertionClass": "synthetic_dom_setup_without_input_events_then_completed_overlap_failure_leaves_all_ten_previously_populated_fact_value_slots_empty"
+      },
+      {
+        "scenarioId": "overlap_earlier",
+        "assertionClass": "explicit_earlier_overlap_selection_resolved_fact_only"
+      },
+      {
+        "scenarioId": "overlap_later",
+        "assertionClass": "explicit_later_overlap_selection_resolved_fact_only"
+      }
+    ],
+    "exactFileInspection": {
+      "inspectionId": "hakimi.vedic.civil-time.same-artifact-exact-e2e-files/1",
+      "bindingCount": 3,
+      "bindings": [
+        {
+          "role": "playwrightConfig",
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/playwright.same-artifact-evidence.config.ts",
+          "bytes": 5059,
+          "sha256": "6ff2a3b401b160176b4315417b5af0c621117d2d81c42243eb5e151abacc07e6"
+        },
+        {
+          "role": "fiveScenarioSpec",
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/e2e/civil-time-browser-gate.spec.ts",
+          "bytes": 9478,
+          "sha256": "c1e904bfc30e1229d78fee5bc58fe456c7f807e7ce423e5b122505bb57dff0d6"
+        },
+        {
+          "role": "sanitizedReporter",
+          "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/e2e/same-artifact-summary-reporter.ts",
+          "bytes": 9756,
+          "sha256": "7e86a026dd58ff23b9f8ba568470118c9720ca80099a0c584e0e6e8836a2c22a"
+        }
+      ],
+      "exactFiveScenarioSpecReporterAndConfigBytesVerified": true
+    },
+    "exactSecondHistoricalOffsetRangeGuardUnknownZoneOrResponsiveRunReceiptEstablished": false,
+    "generalControlFlowEquivalenceEstablished": false
+  },
+  "formalContext": {
+    "bindingCount": 5,
+    "bindings": [
+      {
+        "path": "content/system-admission/vedic-civil-time-fact-browser-observation-candidate.v1.0.0.json",
+        "bytes": 22446,
+        "sha256": "fdfb6da43215e87e103f428d59d104b43cb3be3b4468880b9417f0baf6167e0a"
+      },
+      {
+        "path": "content/system-admission/vedic-independent-storage-backup-recovery-and-rollback-design-candidate.v0.1.0.json",
+        "bytes": 25978,
+        "sha256": "1eeaf1419ce4b3ae01f277f6389fc3bbdf5a59605f89d4c7ae7eccfc1a8d1bbf"
+      },
+      {
+        "path": "content/system-admission/vedic-independent-browser-quality-gate-and-release-evidence-design-candidate.v0.1.0.json",
+        "bytes": 45131,
+        "sha256": "4f2ecea6cb8d639c23fa3b06528b217319e93d171a7db57f0a5331172a5ae673"
+      },
+      {
+        "path": "content/system-admission/vedic-independent-productization-version-aware-observation-child.v1.2.0.json",
+        "bytes": 16272,
+        "sha256": "78b4f27c24182a73ab9da86065829990e053834f49785d394878ca7ad79e2845"
+      },
+      {
+        "path": "content/domain-release/vedic-astrology.engineering-draft.v0.1.0.manifest.v1.json",
+        "bytes": 19557,
+        "sha256": "a21c5bcafe84fcbb6289af6d3dfdd052acb72c6987ea924a882abd76768bc0d5"
+      }
+    ],
+    "baselineCivilObservationDigest": "019ee27933a5a63eb2636a3b3618df25b9a365fed0101f88e1e8ddc1bcb68f6d",
+    "storageDesignDigest": "5a96993f7750722a984eb6f5845ce1e49e6c5f49e5b49735629698a47eb11958",
+    "browserQualityDesignDigest": "c66ebecac08cbfad109d7bf11b6d63d7e8468bd075c599f105d4d515cbda768c",
+    "parentCandidateDigest": "462498245b533db031ed25a1a8808e4e77dc2ea92f17154013a04d487ebdb171",
+    "currentEngineeringManifestDigest": "96c1f8c4062a5d398b7b546ee68fd6bbd51f5a5200f4bdb4b76b994ab25d8685",
+    "currentEngineeringManifestConsumesThisChild": false,
+    "currentEngineeringManifestConsumesFactBrowserDraft": false
+  },
+  "runtimeObservation": {
+    "observedAt": "2026-09-01T03:56:17.909Z",
+    "nodeVersion": "24.16.0",
+    "viteVersion": "7.3.6",
+    "playwrightVersion": "1.62.1",
+    "buildExecutionCount": 1,
+    "buildExitCode": 0,
+    "transformedModuleCount": 10,
+    "sourceGraphDigestBefore": "c6132f9397dfceadbb5e29764e061eee6694ab705d27e224a2762502d05bec6f",
+    "sourceGraphDigestAfter": "c6132f9397dfceadbb5e29764e061eee6694ab705d27e224a2762502d05bec6f",
+    "lockedBuildInputGraphDigestBefore": "ded4e291d462d842ac53b453b6bd3bec1888afbb4aa174639fc9f49657b54b80",
+    "lockedBuildInputGraphDigestAfter": "ded4e291d462d842ac53b453b6bd3bec1888afbb4aa174639fc9f49657b54b80",
+    "evidenceToolGraphDigestBefore": "ff1a8bc71fc70c4f6b375b5dc0b97b87f67f49d266e49a7f9f12cebf971031e3",
+    "evidenceToolGraphDigestAfter": "ff1a8bc71fc70c4f6b375b5dc0b97b87f67f49d266e49a7f9f12cebf971031e3",
+    "outputTreeBefore": {
+      "digestAlgorithm": "sha256-file-tree-v1",
+      "fileCount": 12,
+      "files": [
+        {
+          "path": "assets/civil-worker-DltlCpqw.js",
+          "bytes": 812865,
+          "sha256": "2bcbf77a1e53bfb11dd1f22dbdc25018a8cc2b1e40ac0a2ca8d1231bb4efc8de"
+        },
+        {
+          "path": "assets/civil-worker-DltlCpqw.js.map",
+          "bytes": 423292,
+          "sha256": "8787c266557a574f8f0ced16b38fe9ed204db2da7a6f18540d05bb93b0836bed"
+        },
+        {
+          "path": "assets/iana-2025b-BLy5AmWt.js",
+          "bytes": 714805,
+          "sha256": "4c6ed210fe3c4589fa71235119b55c9c829291ad0a67201e7366159922cdcae3"
+        },
+        {
+          "path": "assets/iana-2025b-BLy5AmWt.js.map",
+          "bytes": 103,
+          "sha256": "53de463e0f11bb1f395fb120fca2f26855a939296b145fc972e70e92683d8e0b"
+        },
+        {
+          "path": "assets/index-BxE6jOMI.js",
+          "bytes": 30565,
+          "sha256": "03e12be459f99168a079c44c5c402fb72099179e6cbe62fd8106438b0848a2c4"
+        },
+        {
+          "path": "assets/index-BxE6jOMI.js.map",
+          "bytes": 98609,
+          "sha256": "4a65a9851a9644742cf6c4e08dbea656c4663381b99862e4733ee16f3925e911"
+        },
+        {
+          "path": "assets/index-OpA1Rqqk.css",
+          "bytes": 3290,
+          "sha256": "c8f53bed798236445f56b08ef0bb8838ddbf09c4467f8308708a6e2cace34016"
+        },
+        {
+          "path": "hakimi-vedic-fact-only-build-manifest.v1.json",
+          "bytes": 2283,
+          "sha256": "2e6ca903fda50ab7f2878b69fa2cdd50f7e93c20b1d883dcc48927f20e11a998"
+        },
+        {
+          "path": "index.html",
+          "bytes": 5418,
+          "sha256": "9bda6345cf91f30abe1070eb7a356ed038c0e8b212c38a6b6b52669c81cc08b3"
+        },
+        {
+          "path": "licenses/moment-2.30.1-LICENSE.txt",
+          "bytes": 1075,
+          "sha256": "8f38f320bbf5eb84c08e08676f7ee1d2204ebe5797f6a090d077329cf212fca3"
+        },
+        {
+          "path": "licenses/moment-timezone-0.5.48-retained-LICENSE.txt",
+          "bytes": 1097,
+          "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+        },
+        {
+          "path": "licenses/moment-timezone-0.6.3-LICENSE.txt",
+          "bytes": 1097,
+          "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+        }
+      ],
+      "treeDigest": "cceaaa8766293f4fe778ccc9af0723953556c328c6631acf503e009c1efa424e"
+    },
+    "outputTreeAfter": {
+      "digestAlgorithm": "sha256-file-tree-v1",
+      "fileCount": 12,
+      "files": [
+        {
+          "path": "assets/civil-worker-DltlCpqw.js",
+          "bytes": 812865,
+          "sha256": "2bcbf77a1e53bfb11dd1f22dbdc25018a8cc2b1e40ac0a2ca8d1231bb4efc8de"
+        },
+        {
+          "path": "assets/civil-worker-DltlCpqw.js.map",
+          "bytes": 423292,
+          "sha256": "8787c266557a574f8f0ced16b38fe9ed204db2da7a6f18540d05bb93b0836bed"
+        },
+        {
+          "path": "assets/iana-2025b-BLy5AmWt.js",
+          "bytes": 714805,
+          "sha256": "4c6ed210fe3c4589fa71235119b55c9c829291ad0a67201e7366159922cdcae3"
+        },
+        {
+          "path": "assets/iana-2025b-BLy5AmWt.js.map",
+          "bytes": 103,
+          "sha256": "53de463e0f11bb1f395fb120fca2f26855a939296b145fc972e70e92683d8e0b"
+        },
+        {
+          "path": "assets/index-BxE6jOMI.js",
+          "bytes": 30565,
+          "sha256": "03e12be459f99168a079c44c5c402fb72099179e6cbe62fd8106438b0848a2c4"
+        },
+        {
+          "path": "assets/index-BxE6jOMI.js.map",
+          "bytes": 98609,
+          "sha256": "4a65a9851a9644742cf6c4e08dbea656c4663381b99862e4733ee16f3925e911"
+        },
+        {
+          "path": "assets/index-OpA1Rqqk.css",
+          "bytes": 3290,
+          "sha256": "c8f53bed798236445f56b08ef0bb8838ddbf09c4467f8308708a6e2cace34016"
+        },
+        {
+          "path": "hakimi-vedic-fact-only-build-manifest.v1.json",
+          "bytes": 2283,
+          "sha256": "2e6ca903fda50ab7f2878b69fa2cdd50f7e93c20b1d883dcc48927f20e11a998"
+        },
+        {
+          "path": "index.html",
+          "bytes": 5418,
+          "sha256": "9bda6345cf91f30abe1070eb7a356ed038c0e8b212c38a6b6b52669c81cc08b3"
+        },
+        {
+          "path": "licenses/moment-2.30.1-LICENSE.txt",
+          "bytes": 1075,
+          "sha256": "8f38f320bbf5eb84c08e08676f7ee1d2204ebe5797f6a090d077329cf212fca3"
+        },
+        {
+          "path": "licenses/moment-timezone-0.5.48-retained-LICENSE.txt",
+          "bytes": 1097,
+          "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+        },
+        {
+          "path": "licenses/moment-timezone-0.6.3-LICENSE.txt",
+          "bytes": 1097,
+          "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+        }
+      ],
+      "treeDigest": "cceaaa8766293f4fe778ccc9af0723953556c328c6631acf503e009c1efa424e"
+    },
+    "server": {
+      "origin": "http://127.0.0.1:61956",
+      "host": "127.0.0.1",
+      "scheme": "http",
+      "projectHeaderName": "x-hakimi-vedic-evidence-project",
+      "responseHeaderName": "x-hakimi-vedic-output-tree-sha256",
+      "responseHeaderValue": "cceaaa8766293f4fe778ccc9af0723953556c328c6631acf503e009c1efa424e",
+      "requiredRuntimePaths": [
+        "assets/civil-worker-DltlCpqw.js",
+        "assets/index-BxE6jOMI.js",
+        "assets/index-OpA1Rqqk.css",
+        "index.html"
+      ],
+      "requiredRuntimePathsServedByBothBrowsers": true,
+      "scenarioRuntimePaths": [
+        "assets/civil-worker-DltlCpqw.js",
+        "assets/index-BxE6jOMI.js",
+        "assets/index-OpA1Rqqk.css",
+        "index.html"
+      ],
+      "scenarioRuntimePathsServedByBothBrowsers": true,
+      "evidenceOnlyOutputBodyProbePaths": [
+        "assets/iana-2025b-BLy5AmWt.js"
+      ],
+      "evidenceOnlyOutputBodyProbePathsServedByBothBrowsers": true,
+      "retained2025bChunkScenarioRuntimeRequested": false,
+      "retained2025bChunkEvidenceOnlyBodyProbeObserved": true,
+      "browserDefaultFaviconControl": {
+        "requestMethod": "GET",
+        "canonicalPath": "/favicon.ico",
+        "query": "",
+        "responseStatus": 204,
+        "noBody": true,
+        "cacheControl": "no-store",
+        "contentSecurityPolicy": "default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'",
+        "xContentTypeOptions": "nosniff",
+        "outputTreeResponseHeaderIncluded": false,
+        "excludedFromOutputTree": true,
+        "excludedFromServedBodyLedger": true,
+        "responsesByProject": [
+          {
+            "projectName": "chrome",
+            "responseCount": 1
+          },
+          {
+            "projectName": "msedge",
+            "responseCount": 1
+          }
+        ],
+        "aggregateResponseCount": 2
+      },
+      "servedResponseCount": 46,
+      "totalControlledHttpResponseCount": 48,
+      "unattributedResponseCount": 0,
+      "unexpectedResponseCount": 0,
+      "bodyMismatchResponseCount": 0,
+      "unmarkedRetainedChunkResponseCount": 0,
+      "servedArtifactsByProject": [
+        {
+          "projectName": "chrome",
+          "servedResponseCount": 23,
+          "scenarioRuntimeArtifactCount": 4,
+          "scenarioRuntimeArtifacts": [
+            {
+              "path": "assets/civil-worker-DltlCpqw.js",
+              "bytes": 812865,
+              "sha256": "2bcbf77a1e53bfb11dd1f22dbdc25018a8cc2b1e40ac0a2ca8d1231bb4efc8de",
+              "responseCount": 7
+            },
+            {
+              "path": "assets/index-BxE6jOMI.js",
+              "bytes": 30565,
+              "sha256": "03e12be459f99168a079c44c5c402fb72099179e6cbe62fd8106438b0848a2c4",
+              "responseCount": 5
+            },
+            {
+              "path": "assets/index-OpA1Rqqk.css",
+              "bytes": 3290,
+              "sha256": "c8f53bed798236445f56b08ef0bb8838ddbf09c4467f8308708a6e2cace34016",
+              "responseCount": 5
+            },
+            {
+              "path": "index.html",
+              "bytes": 5418,
+              "sha256": "9bda6345cf91f30abe1070eb7a356ed038c0e8b212c38a6b6b52669c81cc08b3",
+              "responseCount": 5
+            }
+          ],
+          "scenarioRuntimeBodyManifestDigest": "674d0d2bea3c546323ce85b91e3cab2ab3f2a1bc87d7c0387dfe9e611d124e06",
+          "scenarioRuntimeResponseLedgerDigest": "40eb4de7ba7f05b140620b87b4fc4718e10981a5854b5ad885647106da128556",
+          "evidenceOnlyProbeArtifactCount": 1,
+          "evidenceOnlyProbeArtifacts": [
+            {
+              "path": "assets/iana-2025b-BLy5AmWt.js",
+              "bytes": 714805,
+              "sha256": "4c6ed210fe3c4589fa71235119b55c9c829291ad0a67201e7366159922cdcae3",
+              "responseCount": 1
+            }
+          ],
+          "evidenceOnlyProbeBodyManifestDigest": "65733d7f24825d79601595a04bdbdc0e51addb488b870b6154796392785b400f",
+          "evidenceOnlyProbeResponseLedgerDigest": "5644e3dc5fe720d643d642062e8106f688e784680178dd06b1a99fa61ed6c88b",
+          "combinedServedBodyManifestDigest": "fa2ccff9b6859d7abf22b91607a8929ad8af519e75f4f8ce1ddfd76a666b307f",
+          "combinedServedResponseLedgerDigest": "0ad375c3fbf87f04a7ccd8e72c1a278c8937425b9841158827c144cdbbea04a3"
+        },
+        {
+          "projectName": "msedge",
+          "servedResponseCount": 23,
+          "scenarioRuntimeArtifactCount": 4,
+          "scenarioRuntimeArtifacts": [
+            {
+              "path": "assets/civil-worker-DltlCpqw.js",
+              "bytes": 812865,
+              "sha256": "2bcbf77a1e53bfb11dd1f22dbdc25018a8cc2b1e40ac0a2ca8d1231bb4efc8de",
+              "responseCount": 7
+            },
+            {
+              "path": "assets/index-BxE6jOMI.js",
+              "bytes": 30565,
+              "sha256": "03e12be459f99168a079c44c5c402fb72099179e6cbe62fd8106438b0848a2c4",
+              "responseCount": 5
+            },
+            {
+              "path": "assets/index-OpA1Rqqk.css",
+              "bytes": 3290,
+              "sha256": "c8f53bed798236445f56b08ef0bb8838ddbf09c4467f8308708a6e2cace34016",
+              "responseCount": 5
+            },
+            {
+              "path": "index.html",
+              "bytes": 5418,
+              "sha256": "9bda6345cf91f30abe1070eb7a356ed038c0e8b212c38a6b6b52669c81cc08b3",
+              "responseCount": 5
+            }
+          ],
+          "scenarioRuntimeBodyManifestDigest": "674d0d2bea3c546323ce85b91e3cab2ab3f2a1bc87d7c0387dfe9e611d124e06",
+          "scenarioRuntimeResponseLedgerDigest": "40eb4de7ba7f05b140620b87b4fc4718e10981a5854b5ad885647106da128556",
+          "evidenceOnlyProbeArtifactCount": 1,
+          "evidenceOnlyProbeArtifacts": [
+            {
+              "path": "assets/iana-2025b-BLy5AmWt.js",
+              "bytes": 714805,
+              "sha256": "4c6ed210fe3c4589fa71235119b55c9c829291ad0a67201e7366159922cdcae3",
+              "responseCount": 1
+            }
+          ],
+          "evidenceOnlyProbeBodyManifestDigest": "65733d7f24825d79601595a04bdbdc0e51addb488b870b6154796392785b400f",
+          "evidenceOnlyProbeResponseLedgerDigest": "5644e3dc5fe720d643d642062e8106f688e784680178dd06b1a99fa61ed6c88b",
+          "combinedServedBodyManifestDigest": "fa2ccff9b6859d7abf22b91607a8929ad8af519e75f4f8ce1ddfd76a666b307f",
+          "combinedServedResponseLedgerDigest": "0ad375c3fbf87f04a7ccd8e72c1a278c8937425b9841158827c144cdbbea04a3"
+        }
+      ],
+      "perBrowserServedBodyManifestsEqual": true,
+      "perBrowserScenarioRuntimeBodyManifestsEqual": true,
+      "perBrowserEvidenceOnlyProbeBodyManifestsEqual": true,
+      "allServedBodiesMatchedOutputTree": true,
+      "singleOutputTreeServedWithoutRebuild": true
+    },
+    "browserProbes": [
+      {
+        "projectName": "chrome",
+        "channel": "chrome",
+        "browserProduct": "Google Chrome",
+        "versionBefore": "151.0.7922.174",
+        "versionAfter": "151.0.7922.174",
+        "prePostVersionEqual": true
+      },
+      {
+        "projectName": "msedge",
+        "channel": "msedge",
+        "browserProduct": "Microsoft Edge",
+        "versionBefore": "152.0.4191.53",
+        "versionAfter": "152.0.4191.53",
+        "prePostVersionEqual": true
+      }
+    ],
+    "runtimeToolResolution": {
+      "resolutionAnchorIdentifier": "apps/web/node_modules/vite/package.json",
+      "viteCliIdentifier": "apps/web/node_modules/vite/bin/vite.js",
+      "viteConfigLoader": "runner",
+      "tools": [
+        {
+          "role": "esbuild",
+          "resolutionMode": "resolved_from_vite_package_anchor",
+          "packageIdentifier": "node_modules/esbuild/package.json",
+          "entryIdentifier": "node_modules/esbuild/lib/main.js",
+          "version": "0.28.1"
+        },
+        {
+          "role": "rollup",
+          "resolutionMode": "resolved_from_vite_package_anchor",
+          "packageIdentifier": "node_modules/rollup/package.json",
+          "entryIdentifier": "node_modules/rollup/dist/rollup.js",
+          "version": "4.62.3"
+        },
+        {
+          "role": "vite",
+          "resolutionMode": "explicit_workspace_relative_cli",
+          "packageIdentifier": "apps/web/node_modules/vite/package.json",
+          "entryIdentifier": "apps/web/node_modules/vite/bin/vite.js",
+          "version": "7.3.6"
+        }
+      ],
+      "completeInstalledRuntimeDependencyClosureBound": false
+    },
+    "playwrightSummary": {
+      "schemaVersion": "hakimi.vedic.same-artifact-playwright-summary/1",
+      "overallStatus": "passed",
+      "configuredProjectNames": [
+        "chrome",
+        "msedge"
+      ],
+      "outcomeCount": 10,
+      "outcomes": [
+        {
+          "projectName": "chrome",
+          "scenarioId": "unique",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "chrome",
+          "scenarioId": "gap",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "chrome",
+          "scenarioId": "overlap_reject",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "chrome",
+          "scenarioId": "overlap_earlier",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "chrome",
+          "scenarioId": "overlap_later",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "msedge",
+          "scenarioId": "unique",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "msedge",
+          "scenarioId": "gap",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "msedge",
+          "scenarioId": "overlap_reject",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "msedge",
+          "scenarioId": "overlap_earlier",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "msedge",
+          "scenarioId": "overlap_later",
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    "cleanup": {
+      "viteCliExited": true,
+      "playwrightCliExited": true,
+      "browserVersionProbeHandlesClosed": true,
+      "runnerControlledChildProcessesStopped": true,
+      "serverStopped": true,
+      "portReleased": true,
+      "temporaryRootRemoved": true
+    }
+  },
+  "browserEvidenceBoundary": {
+    "exactSingleBuildExecuted": true,
+    "sameOutputTreeServedToBothBrowsers": true,
+    "perBrowserActualServedBodyIdentitiesObserved": true,
+    "retainedIanaChunkBodyObservedByEvidenceOnlyNavigation": true,
+    "retained2025bChunkScenarioRuntimeRequested": false,
+    "retainedIanaChunkExecutedByCivilResolverEstablished": false,
+    "exactBrowserVersionsObservedBeforeAndAfterMatrix": true,
+    "chromeScenarioOutcomes": 5,
+    "edgeScenarioOutcomes": 5,
+    "totalPassedScenarioOutcomes": 10,
+    "isolatedLoopbackBrowserRuntimeObservationEstablished": true,
+    "formalChromeBrowserReceiptIssued": false,
+    "formalEdgeBrowserReceiptIssued": false,
+    "productionBrowserRuntimeEvidenceEstablished": false,
+    "publicHostValidated": false,
+    "pwaOrServiceWorkerValidated": false
+  },
+  "storageBackupRecoveryBoundary": {
+    "storageProbePerformed": false,
+    "storageMutationObserved": null,
+    "independentStorageBackendSelected": false,
+    "independentStorageNamespaceSelected": false,
+    "backupExecutionCount": 0,
+    "recoveryExecutionCount": 0,
+    "rollbackExecutionCount": 0,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "uiViewGenerationIsProductMutationEpoch": false,
+    "productionBackupRecoveryCertified": false
+  },
+  "dataHandling": {
+    "syntheticInputsOnly": true,
+    "actualPersonDataEntered": false,
+    "candidateAnonymous": false,
+    "rawCivilTimeInputIncluded": false,
+    "utcInstantOrOffsetIncluded": false,
+    "requestOrProjectionDigestIncluded": false,
+    "rawPlaywrightReportIncluded": false,
+    "rawStdoutOrStderrIncluded": false,
+    "errorOrAttachmentIncluded": false,
+    "screenshotTraceVideoOrDownloadIncluded": false,
+    "temporaryOrAbsolutePathIncluded": false,
+    "safeToLog": false,
+    "safeToPersist": false,
+    "safeToPublish": false
+  },
+  "gateSummary": {
+    "bindingRequired": 38,
+    "bindingFrozenVerified": 0,
+    "independentExpertsRequired": 2,
+    "independentExpertReviewsVerified": 0,
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "requirementsUniverseClosed": false
+  },
+  "formalReceiptCounts": {
+    "releaseEvidenceReceipts": 0,
+    "productionBrowserReceipts": 0,
+    "artifactIdentityReceipts": 0,
+    "buildReceipts": 0,
+    "runtimeExecutionReceipts": 0,
+    "deploymentReceipts": 0,
+    "rollbackReceipts": 0,
+    "expertReviewReceipts": 0,
+    "rightsLegalDecisionReceipts": 0
+  },
+  "evidenceAccounts": [
+    {
+      "accountId": "engineering_evidence",
+      "state": "current_single_build_dual_browser_matrix_mechanically_observed"
+    },
+    {
+      "accountId": "browser_runtime_evidence",
+      "state": "isolated_loopback_current_output_tree_only"
+    },
+    {
+      "accountId": "content_truth",
+      "state": "not_established"
+    },
+    {
+      "accountId": "expert_truth",
+      "state": "not_established"
+    },
+    {
+      "accountId": "rights_legal_judgment",
+      "state": "not_established"
+    },
+    {
+      "accountId": "release_readiness",
+      "state": "not_ready"
+    },
+    {
+      "accountId": "public_release_authorization",
+      "state": "not_authorized"
+    }
+  ],
+  "authorityBoundary": {
+    "astronomicalFactsEstablished": false,
+    "civilTimeDomainTruthCertified": false,
+    "crossSystemAuthorityInherited": false,
+    "formalAdmissionAuthorized": false,
+    "formalInputContractAdmitted": false,
+    "domainAuthorityAuthorized": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "expertIdentityCredentialsIndependenceEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "sourceFreezeEstablished": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "highRiskClaimsAuthorized": false
+  },
+  "observationBoundary": {
+    "automatedSameRunLineageMechanicallyObserved": true,
+    "toolAttestationEstablished": false,
+    "completeSourceToBuildAttestationEstablished": false,
+    "viteMainAndWorkerModuleLoadTelemetryEstablished": false,
+    "outputTreePrePostDigestEqual": true,
+    "sourceAndToolGraphsPrePostDigestEqual": true,
+    "repositoryCrossFileAtomicSnapshot": false,
+    "repositoryIntervalMutationExcluded": false,
+    "repositoryAbaExcluded": false,
+    "mutationEpochClaimed": false,
+    "mutationEpochReceipt": null,
+    "digestIsDigitalSignature": false,
+    "signerIdentityEstablished": false,
+    "historicalRuntimeCanBeReverifiedFromCandidateAlone": false,
+    "cleanupObservedAtIssuanceOnly": true
+  },
+  "doesNotEstablish": [
+    "formal_product_manifest_parent_or_registry_integration",
+    "formal_release_evidence_or_production_browser_receipts",
+    "pwa_service_worker_public_host_deployment_or_rollback",
+    "storage_backend_namespace_backup_recovery_or_product_mutation_epoch",
+    "content_truth_expert_truth_source_freeze_or_rights_legal_judgment",
+    "release_readiness_public_deployment_or_public_release_authorization",
+    "cross_file_atomicity_interval_integrity_aba_exclusion_or_trusted_tool_attestation"
+  ],
+  "observationDigest": "795638cbe93459ad598c2a138f627c2ba4a9db28b4bebd528e78d934083f3f6e"
+}

@@ -1,0 +1,750 @@
+{
+  "schemaVersion": "3.0.0",
+  "recordType": "vedic_five_allowlisted_authored_root_recursive_machine_identity_manifest_v3",
+  "manifestId": "hakimi.vedic-astrology.five-allowlisted-authored-root-recursive-machine-identity-manifest/3.0.0",
+  "status": "current_five_allowlisted_authored_root_recursive_machine_identity_zero_admission_effect",
+  "createdAt": "2026-09-03T06:30:00.000Z",
+  "activeAdmissionEffect": "none",
+  "systemIdentity": {
+    "contractSystemId": "vedic",
+    "productSystemId": "vedic-astrology",
+    "productType": "five_allowlisted_authored_root_recursive_machine_identity_boundary"
+  },
+  "parentBinding": {
+    "role": "current_vedic_parent_declared_selected_path_machine_identity_manifest_v2",
+    "path": "content/domain-release/vedic-astrology.engineering-draft.v0.1.0.manifest.v2.json",
+    "rawBytes": 47107,
+    "rawSha256": "ad69843f8e9ec9f1f3f5a446c2107389753100fe371fdbcef7202cbdb39639c4",
+    "manifestId": "hakimi.vedic-astrology.parent-declared-selected-path-machine-identity-manifest/2.0.0",
+    "semanticDigest": "7d4fcf50e4fdfa513611ace4331abf2079b1faf433f0a1c58e60603a9584a347",
+    "semanticDigestField": "manifestDigest",
+    "privateBrandConsumed": true,
+    "currentFullLoaderVerified": true
+  },
+  "recursiveAuthoredRootClosure": {
+    "scopeClass": "five_allowlisted_authored_roots_excluding_exact_runtime_subtrees_not_full_vedic_engineering_or_domain_closure",
+    "allowlistedRootCount": 5,
+    "allowlistedRoots": [
+      "isolated-drafts/vedic-civil-time-fact-browser-draft",
+      "isolated-drafts/vedic-civil-time-input-resolution-draft",
+      "packages/tzdb-core",
+      "packages/vedic-input-admission-kernel-draft",
+      "packages/vedic-mutation-epoch-runtime-experiment-draft"
+    ],
+    "expectedAuthoredOrdinaryFileCount": 58,
+    "observedAuthoredOrdinaryFileCount": 58,
+    "files": [
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/README.md",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 4922,
+        "sha256": "4265637b267ba8df3554199c236d1aa39d9b52ff2c89e4f0df91d6cf8050f2db",
+        "selectedByParentV2": false
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/browser-app/index.html",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 5319,
+        "sha256": "12701b0dba0102ea9da20793d1fa58f7de787e8dcfa72067d178116dc31fec34",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/e2e/civil-time-browser-gate.spec.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 9478,
+        "sha256": "c1e904bfc30e1229d78fee5bc58fe456c7f807e7ce423e5b122505bb57dff0d6",
+        "selectedByParentV2": false
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/e2e/same-artifact-summary-reporter.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 9756,
+        "sha256": "7e86a026dd58ff23b9f8ba568470118c9720ca80099a0c584e0e6e8836a2c22a",
+        "selectedByParentV2": false
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/package.json",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 399,
+        "sha256": "a0e8cc8534860cb4e7c9bfea7b2487955ad6433c7f65927f5d0946f9a8827f91",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/playwright.same-artifact-evidence.config.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 5059,
+        "sha256": "6ff2a3b401b160176b4315417b5af0c621117d2d81c42243eb5e151abacc07e6",
+        "selectedByParentV2": false
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/browser-fact-projection.test.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 6768,
+        "sha256": "8810a9b3466704b8ea5251ef75358ff777c9bdd7a3d53b83db4d13261c159118",
+        "selectedByParentV2": false
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/browser-fact-projection.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 21038,
+        "sha256": "5b8d3b25d2505854ef1edf21ad51ef2b8dd04401e1168cc90632af26e4b0e515",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-client.test.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 7142,
+        "sha256": "5cb6f5146d59f4786f328845d6d200564a9f64cbbe552da9d932dce107ec5ea6",
+        "selectedByParentV2": false
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-client.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 8764,
+        "sha256": "3abcfea96d8a3e1023f73a777aded11f9d26c3c2793fdb5a4123680c79ae977c",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-time.test.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 13864,
+        "sha256": "217e84830c66ce86f12f66299a00a42441392759fa2f78fa302a2e07ff443f36",
+        "selectedByParentV2": false
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-time.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 22095,
+        "sha256": "c69be8dd8fc39d40f8c1b77263ad41598a54698c252f55e32acecda3f2a96668",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-worker.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 3468,
+        "sha256": "bb01b0f1577a485a63eff8e38b521fabcaf32becd5a2806f1f4c4ca0949d91bc",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/constants.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 4879,
+        "sha256": "afe7b76fda96edd53f15d2f0dd4834e060f409924e1e9a41c58b5a462f569aa2",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/input-contract.test.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 8969,
+        "sha256": "0efd1cea8189eef4cbaaf9f48c459de8da214ca48a47474138f4ac66da97a7f1",
+        "selectedByParentV2": false
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/input-contract.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 10168,
+        "sha256": "e713dfbd579de404671f8190f1e4b89c95c4ad894498fcefa85313e94c7982ca",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/main.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 7307,
+        "sha256": "4f88710d65a8f108b47ef307b72f4984f75ad69fed06d24de9a949ea71acb4c8",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/protocol.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 12295,
+        "sha256": "fccd81865e6e41834624acfb4b551522edf526277b66950eda59830e37a6257f",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/styles.css",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 4006,
+        "sha256": "c8e0e6b98c63a67f206c6400bacf3aa61b01f6814a360b320edb101efcbf5da9",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/ui-format.test.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 1371,
+        "sha256": "d1fa47272a09bde8930d04d6292fab498431c2ddfb28a9a30e7fe60d242043fc",
+        "selectedByParentV2": false
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/ui-format.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 975,
+        "sha256": "44739e5fa14d1070459eb251bb3211d9fb82e7b19b88f6bacbe170f280ad17fc",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/worker-fact-projection.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 3317,
+        "sha256": "dc0370cfb82f14b009b8469a0e4990df6526a71191fcb6c60073b926aeabfe3f",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/tsconfig.json",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 233,
+        "sha256": "9eeb488130dcf8c4c637b6ba8fb136c4c2d1f845424290bc652db5fa35ee53f6",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/tsconfig.same-artifact-evidence.json",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 174,
+        "sha256": "4c4b319ea32a9dbab022dae289b49b4628b0514487bc4ab5fffacd810b4fe53b",
+        "selectedByParentV2": false
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/vite.config.mjs",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 16136,
+        "sha256": "99771905c50721404267d2af70ce4cbaf4a0aa7b749785369b769d48a7ae9024",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/vite.same-artifact-evidence.config.mjs",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 2525,
+        "sha256": "960a2355565032bf20bb75b04b7657a9261c6884b74c08f48c4192fda8b8938f",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/vitest.config.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 314,
+        "sha256": "ea0654c3137fa6ff32f2d6808948a37102ddf48c9dc60227bad0962e071f2397",
+        "selectedByParentV2": false
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/README.md",
+        "root": "isolated-drafts/vedic-civil-time-input-resolution-draft",
+        "bytes": 2782,
+        "sha256": "782a13b3db1939843b99cdfa1857e51fc8aff4a7ea2ba91496be01eacc8773f6",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/package.json",
+        "root": "isolated-drafts/vedic-civil-time-input-resolution-draft",
+        "bytes": 549,
+        "sha256": "26b1139fc0a5de1f2435e26f87130d044a01f9b085ecf6d373b884b2cbe1197b",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/src/index.test.ts",
+        "root": "isolated-drafts/vedic-civil-time-input-resolution-draft",
+        "bytes": 32543,
+        "sha256": "836a20db6dc171b308d01fc63b102506eddc5068011b9336ee44ffab27f54ceb",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/src/index.ts",
+        "root": "isolated-drafts/vedic-civil-time-input-resolution-draft",
+        "bytes": 50123,
+        "sha256": "3125651e57f177b849ce6141782e13c7726ff1e7835680c19a5785ddb5fc25c2",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-input-resolution-draft/tsconfig.json",
+        "root": "isolated-drafts/vedic-civil-time-input-resolution-draft",
+        "bytes": 182,
+        "sha256": "63607b49052422c9e0bbb58b8f9074215a442bc2b65c39de60be162a4d5b04ef",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/tzdb-core/package.json",
+        "root": "packages/tzdb-core",
+        "bytes": 241,
+        "sha256": "fb12b19a6f6c971185bd2f2c9226fe50ad816595e3acec4f0a0b373593136236",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/tzdb-core/scripts/run-release-gate.mjs",
+        "root": "packages/tzdb-core",
+        "bytes": 770,
+        "sha256": "8e96e0769944af1c6ad078ec5f3b33c0b56e1fad7c1771c44fa5899073307dcc",
+        "selectedByParentV2": false
+      },
+      {
+        "path": "packages/tzdb-core/scripts/verify-artifact.mjs",
+        "root": "packages/tzdb-core",
+        "bytes": 9473,
+        "sha256": "a0b643073f5ca99e6668c476c4382b9bdadf93d19422fe7f8558e98f9bb96164",
+        "selectedByParentV2": false
+      },
+      {
+        "path": "packages/tzdb-core/scripts/verify-artifact.test.mjs",
+        "root": "packages/tzdb-core",
+        "bytes": 2759,
+        "sha256": "686dc986a0e6c522d16b6b00733774f46b86ed8f3687678405119515345041fd",
+        "selectedByParentV2": false
+      },
+      {
+        "path": "packages/tzdb-core/src/artifacts/iana-2025b.ts",
+        "root": "packages/tzdb-core",
+        "bytes": 396,
+        "sha256": "b1236071105653538a259d929a57e7cd2bb97928429cefaef2ead9dd5019e613",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/tzdb-core/src/index.test.ts",
+        "root": "packages/tzdb-core",
+        "bytes": 7551,
+        "sha256": "2d36c441795c918ad97df0e48931898df26c84f3614f024bccef88655478d7e2",
+        "selectedByParentV2": false
+      },
+      {
+        "path": "packages/tzdb-core/src/index.ts",
+        "root": "packages/tzdb-core",
+        "bytes": 7819,
+        "sha256": "7c144f6446b3fdba55f7b7b947fe242348ba5010025af36868c39436bfea638e",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/tzdb-core/src/packed-resolver.ts",
+        "root": "packages/tzdb-core",
+        "bytes": 8495,
+        "sha256": "bc13da5d2d9b8309aaad972662f8a31761a40afffbd9226bdf80159d43e5081f",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-input-admission-kernel-draft/README.md",
+        "root": "packages/vedic-input-admission-kernel-draft",
+        "bytes": 5307,
+        "sha256": "590467f1c0de277476dbad5cb15b1b59fc4cab277ed93b13e9349b88fb7c61f0",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-input-admission-kernel-draft/package.json",
+        "root": "packages/vedic-input-admission-kernel-draft",
+        "bytes": 358,
+        "sha256": "161ef453575192dcc89e7ad095a67001653628dbfad49e4b0706247afee313f2",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-input-admission-kernel-draft/src/evaluator.test.ts",
+        "root": "packages/vedic-input-admission-kernel-draft",
+        "bytes": 33697,
+        "sha256": "05f67634afa59e2a05f8432ae111babcd53f87c80802878fde3379e2082327e6",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-input-admission-kernel-draft/src/evaluator.ts",
+        "root": "packages/vedic-input-admission-kernel-draft",
+        "bytes": 27542,
+        "sha256": "7d0660f4c6823bea25e18c343aa86c610b76dfc0e83de33081dc79cc1381bd98",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-input-admission-kernel-draft/src/frozen-packet-schema.ts",
+        "root": "packages/vedic-input-admission-kernel-draft",
+        "bytes": 22122,
+        "sha256": "8d1c75a1ba54689653d6b13f25bf7badae7ce8cadbbf7d5336de25b6a38390b3",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-input-admission-kernel-draft/src/protocol.ts",
+        "root": "packages/vedic-input-admission-kernel-draft",
+        "bytes": 17437,
+        "sha256": "ba7a9d79ccffd89b580dc9535f347d6febee3625c9007bb7bd2c7a391a6df6c3",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-input-admission-kernel-draft/tsconfig.json",
+        "root": "packages/vedic-input-admission-kernel-draft",
+        "bytes": 209,
+        "sha256": "a6e1cd9ecab965e460aa18d009723c8b961c6768af50f169dc663cd80ebe998a",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-input-admission-kernel-draft/vitest.config.ts",
+        "root": "packages/vedic-input-admission-kernel-draft",
+        "bytes": 314,
+        "sha256": "ea0654c3137fa6ff32f2d6808948a37102ddf48c9dc60227bad0962e071f2397",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/README.md",
+        "root": "packages/vedic-mutation-epoch-runtime-experiment-draft",
+        "bytes": 3933,
+        "sha256": "4995fa82b7b2f94fae75fcf5391d9e0ad76d6e01d8b034ca2b34055812937c75",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/browser-app/index.html",
+        "root": "packages/vedic-mutation-epoch-runtime-experiment-draft",
+        "bytes": 2519,
+        "sha256": "a1f543502754758c52af821100d9be4d259419dad5ded1e5ca1d7aa540a5060b",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/package.json",
+        "root": "packages/vedic-mutation-epoch-runtime-experiment-draft",
+        "bytes": 523,
+        "sha256": "7eecd92eaa54f5e734ccc4838c9430663e2d19e0bcf79e4918f61b323ee452b3",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/browser-app/main.ts",
+        "root": "packages/vedic-mutation-epoch-runtime-experiment-draft",
+        "bytes": 8820,
+        "sha256": "a71e362f53b157a92de054ed9d8304ac2a3965f2970438df76cd2c44c90238f5",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/browser-app/styles.css",
+        "root": "packages/vedic-mutation-epoch-runtime-experiment-draft",
+        "bytes": 3489,
+        "sha256": "ffba533522b4d19af2a9b394f404ce41921da78cf38f888baabc98554e0a07c7",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/runtime.test.ts",
+        "root": "packages/vedic-mutation-epoch-runtime-experiment-draft",
+        "bytes": 14290,
+        "sha256": "5cf6cb4eb3be0d9c544512c46052aba835e652a30364b6a7dec73814c8ad435f",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/src/runtime.ts",
+        "root": "packages/vedic-mutation-epoch-runtime-experiment-draft",
+        "bytes": 44063,
+        "sha256": "7454618b8fe1263d864b90a6dfdd826444d2290e72b26f2cb8a638cd93750bea",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/tsconfig.json",
+        "root": "packages/vedic-mutation-epoch-runtime-experiment-draft",
+        "bytes": 240,
+        "sha256": "af6c7b422c96358b50849512ee48911cb344ebd5329cf71f14cba7120efb4eb2",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/vite.browser-experiment.config.mjs",
+        "root": "packages/vedic-mutation-epoch-runtime-experiment-draft",
+        "bytes": 603,
+        "sha256": "4e6b60630be078453ccba532f37eae2193ddec2e6e0bd58684cfc9acd5f81844",
+        "selectedByParentV2": true
+      },
+      {
+        "path": "packages/vedic-mutation-epoch-runtime-experiment-draft/vitest.config.ts",
+        "root": "packages/vedic-mutation-epoch-runtime-experiment-draft",
+        "bytes": 314,
+        "sha256": "ea0654c3137fa6ff32f2d6808948a37102ddf48c9dc60227bad0962e071f2397",
+        "selectedByParentV2": true
+      }
+    ],
+    "rootFileCounts": {
+      "isolated-drafts/vedic-civil-time-fact-browser-draft": 27,
+      "isolated-drafts/vedic-civil-time-input-resolution-draft": 5,
+      "packages/tzdb-core": 8,
+      "packages/vedic-input-admission-kernel-draft": 8,
+      "packages/vedic-mutation-epoch-runtime-experiment-draft": 10
+    },
+    "rootTreeDigests": {
+      "isolated-drafts/vedic-civil-time-fact-browser-draft": "98be924aad81904c3000aaee2a07ddebc5ca8405716ad79e80c38981f66175e0",
+      "isolated-drafts/vedic-civil-time-input-resolution-draft": "823656e46ba2de3fdf7d331c533ec678a4d8db8316565dd915fe03b072fea351",
+      "packages/tzdb-core": "e80da691b7e539365e2a47a20d26621bff8e8da194c67fcdf4e64db1d48d72aa",
+      "packages/vedic-input-admission-kernel-draft": "4de078ebb5b1dcb55a3ec31ff475449ebdc20d8897dccd8dc2f00f8d51ca78dd",
+      "packages/vedic-mutation-epoch-runtime-experiment-draft": "8e04a45e17034a071748db7e96f5850ecca4189f144400027d266aafb168e5e6"
+    },
+    "recursiveEnumerationWithinVisitedAuthoredTreePerformed": true,
+    "exactRelativePathBytesAndSha256Recorded": true,
+    "ordinaryFilesOnly": true,
+    "hardlinksRejected": true,
+    "duplicatePhysicalMembershipRejected": true,
+    "unexpectedFileOrDirectoryRequiresNewSuccessor": true,
+    "symlinkJunctionOrReparseRejectedWithinVisitedTree": true,
+    "realpathEscapeOrAliasRejectedAtObservedEndpoints": true,
+    "directoryAndFileEndpointsReobservedAfterFileReads": true,
+    "toctouDetectableEndpointDriftRejected": true,
+    "allOrdinaryFilesUnderPhysicalRootsEnumerated": false,
+    "excludedRuntimeSubtreeCount": 25,
+    "excludedRuntimeSubtrees": [
+      "isolated-drafts/vedic-civil-time-fact-browser-draft/.tmp",
+      "isolated-drafts/vedic-civil-time-fact-browser-draft/dist",
+      "isolated-drafts/vedic-civil-time-fact-browser-draft/node_modules",
+      "isolated-drafts/vedic-civil-time-fact-browser-draft/temp",
+      "isolated-drafts/vedic-civil-time-fact-browser-draft/tmp",
+      "isolated-drafts/vedic-civil-time-input-resolution-draft/.tmp",
+      "isolated-drafts/vedic-civil-time-input-resolution-draft/dist",
+      "isolated-drafts/vedic-civil-time-input-resolution-draft/node_modules",
+      "isolated-drafts/vedic-civil-time-input-resolution-draft/temp",
+      "isolated-drafts/vedic-civil-time-input-resolution-draft/tmp",
+      "packages/tzdb-core/.tmp",
+      "packages/tzdb-core/dist",
+      "packages/tzdb-core/node_modules",
+      "packages/tzdb-core/temp",
+      "packages/tzdb-core/tmp",
+      "packages/vedic-input-admission-kernel-draft/.tmp",
+      "packages/vedic-input-admission-kernel-draft/dist",
+      "packages/vedic-input-admission-kernel-draft/node_modules",
+      "packages/vedic-input-admission-kernel-draft/temp",
+      "packages/vedic-input-admission-kernel-draft/tmp",
+      "packages/vedic-mutation-epoch-runtime-experiment-draft/.tmp",
+      "packages/vedic-mutation-epoch-runtime-experiment-draft/dist",
+      "packages/vedic-mutation-epoch-runtime-experiment-draft/node_modules",
+      "packages/vedic-mutation-epoch-runtime-experiment-draft/temp",
+      "packages/vedic-mutation-epoch-runtime-experiment-draft/tmp"
+    ],
+    "excludedRuntimeSubtreeContentsEnumerated": false,
+    "excludedRuntimeSubtreeContentsAuthoritative": false,
+    "excludedRuntimeSubtreeEndpointsTypeCheckedWhenPresent": true,
+    "excludedRuntimeSubtreeEndpointsReobservedAfterFileReadsWhenPresent": true,
+    "entireFivePhysicalRootsClosureEstablished": false,
+    "entireVedicEngineeringClosureEstablished": false,
+    "fullDomainManifestEstablished": false
+  },
+  "parentV2Partition": {
+    "parentSelectedPathsTotal": 57,
+    "parentSelectedPathsInsideAllowlistedRoots": 43,
+    "parentSelectedPathsOutsideAllowlistedRoots": 14,
+    "additionalDiscoveredFileCount": 15,
+    "additionalDiscoveredFiles": [
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/README.md",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 4922,
+        "sha256": "4265637b267ba8df3554199c236d1aa39d9b52ff2c89e4f0df91d6cf8050f2db",
+        "disposition": "observed_inside_allowlisted_authored_root_not_selected_by_parent_v2_zero_authority_effect"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/e2e/civil-time-browser-gate.spec.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 9478,
+        "sha256": "c1e904bfc30e1229d78fee5bc58fe456c7f807e7ce423e5b122505bb57dff0d6",
+        "disposition": "observed_inside_allowlisted_authored_root_not_selected_by_parent_v2_zero_authority_effect"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/e2e/same-artifact-summary-reporter.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 9756,
+        "sha256": "7e86a026dd58ff23b9f8ba568470118c9720ca80099a0c584e0e6e8836a2c22a",
+        "disposition": "observed_inside_allowlisted_authored_root_not_selected_by_parent_v2_zero_authority_effect"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/playwright.same-artifact-evidence.config.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 5059,
+        "sha256": "6ff2a3b401b160176b4315417b5af0c621117d2d81c42243eb5e151abacc07e6",
+        "disposition": "observed_inside_allowlisted_authored_root_not_selected_by_parent_v2_zero_authority_effect"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/browser-fact-projection.test.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 6768,
+        "sha256": "8810a9b3466704b8ea5251ef75358ff777c9bdd7a3d53b83db4d13261c159118",
+        "disposition": "observed_inside_allowlisted_authored_root_not_selected_by_parent_v2_zero_authority_effect"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-client.test.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 7142,
+        "sha256": "5cb6f5146d59f4786f328845d6d200564a9f64cbbe552da9d932dce107ec5ea6",
+        "disposition": "observed_inside_allowlisted_authored_root_not_selected_by_parent_v2_zero_authority_effect"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/civil-time.test.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 13864,
+        "sha256": "217e84830c66ce86f12f66299a00a42441392759fa2f78fa302a2e07ff443f36",
+        "disposition": "observed_inside_allowlisted_authored_root_not_selected_by_parent_v2_zero_authority_effect"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/input-contract.test.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 8969,
+        "sha256": "0efd1cea8189eef4cbaaf9f48c459de8da214ca48a47474138f4ac66da97a7f1",
+        "disposition": "observed_inside_allowlisted_authored_root_not_selected_by_parent_v2_zero_authority_effect"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/src/ui-format.test.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 1371,
+        "sha256": "d1fa47272a09bde8930d04d6292fab498431c2ddfb28a9a30e7fe60d242043fc",
+        "disposition": "observed_inside_allowlisted_authored_root_not_selected_by_parent_v2_zero_authority_effect"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/tsconfig.same-artifact-evidence.json",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 174,
+        "sha256": "4c4b319ea32a9dbab022dae289b49b4628b0514487bc4ab5fffacd810b4fe53b",
+        "disposition": "observed_inside_allowlisted_authored_root_not_selected_by_parent_v2_zero_authority_effect"
+      },
+      {
+        "path": "isolated-drafts/vedic-civil-time-fact-browser-draft/vitest.config.ts",
+        "root": "isolated-drafts/vedic-civil-time-fact-browser-draft",
+        "bytes": 314,
+        "sha256": "ea0654c3137fa6ff32f2d6808948a37102ddf48c9dc60227bad0962e071f2397",
+        "disposition": "observed_inside_allowlisted_authored_root_not_selected_by_parent_v2_zero_authority_effect"
+      },
+      {
+        "path": "packages/tzdb-core/scripts/run-release-gate.mjs",
+        "root": "packages/tzdb-core",
+        "bytes": 770,
+        "sha256": "8e96e0769944af1c6ad078ec5f3b33c0b56e1fad7c1771c44fa5899073307dcc",
+        "disposition": "observed_inside_allowlisted_authored_root_not_selected_by_parent_v2_zero_authority_effect"
+      },
+      {
+        "path": "packages/tzdb-core/scripts/verify-artifact.mjs",
+        "root": "packages/tzdb-core",
+        "bytes": 9473,
+        "sha256": "a0b643073f5ca99e6668c476c4382b9bdadf93d19422fe7f8558e98f9bb96164",
+        "disposition": "observed_inside_allowlisted_authored_root_not_selected_by_parent_v2_zero_authority_effect"
+      },
+      {
+        "path": "packages/tzdb-core/scripts/verify-artifact.test.mjs",
+        "root": "packages/tzdb-core",
+        "bytes": 2759,
+        "sha256": "686dc986a0e6c522d16b6b00733774f46b86ed8f3687678405119515345041fd",
+        "disposition": "observed_inside_allowlisted_authored_root_not_selected_by_parent_v2_zero_authority_effect"
+      },
+      {
+        "path": "packages/tzdb-core/src/index.test.ts",
+        "root": "packages/tzdb-core",
+        "bytes": 7551,
+        "sha256": "2d36c441795c918ad97df0e48931898df26c84f3614f024bccef88655478d7e2",
+        "disposition": "observed_inside_allowlisted_authored_root_not_selected_by_parent_v2_zero_authority_effect"
+      }
+    ],
+    "additionalFileSetDigest": "8234d47d9ba5d247e13a1e933a5b31950daef03f62387757c358a9e47dd580f1",
+    "additionalMeansNotSelectedByV2NotUnauthorized": true,
+    "allAdditionalFilesIncludedInCurrentRootIdentity": true,
+    "additionalFilesAuthorizedAsDomainContent": false,
+    "additionalFilesPromotedToFormalComponents": false,
+    "unauthorizedFileDeterminationMade": false
+  },
+  "sharedDependencyBoundary": {
+    "sharedRoot": "packages/tzdb-core",
+    "includedAsMachineIdentityDependencyRoot": true,
+    "exclusivelyOwnedByVedicEstablished": false,
+    "sourceProvenanceComplete": false,
+    "rightsOrRedistributionCleared": false,
+    "establishesVedicRuleset": false,
+    "establishesFullVedicEngineeringClosure": false
+  },
+  "componentAndCapabilityBoundary": {
+    "parentV2ComponentProjectionReverifiedThroughPrivateBrand": true,
+    "additionalFilesSemanticallyClassifiedByThisSuccessor": false,
+    "semanticDependencyOrCallgraphEstablished": false,
+    "inputContractFormallyEstablished": false,
+    "factContractFormallyEstablished": false,
+    "executionRulesetEstablished": false,
+    "interpretationRulesetEstablished": false,
+    "reportContractEstablished": false,
+    "highRiskPolicyBound": false,
+    "sourceBundleComplete": false,
+    "rightsBundleComplete": false,
+    "expertReviewBundleComplete": false
+  },
+  "productBoundary": {
+    "productIdentity": null,
+    "releaseIdentity": null,
+    "targetSchema": null,
+    "migrationId": null,
+    "runtimeOption": "unselected",
+    "storageBackend": "unselected",
+    "mainApplicationIntegrated": false,
+    "formalProductSurface": "absent",
+    "centralRegistryIntegration": "absent"
+  },
+  "projectReleaseGovernanceContext": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "projectContextOnly": true,
+    "inheritedByVedicProductIdentity": false,
+    "mutationEpochBoundaryRequired": true,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "expertClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false
+  },
+  "currentnessBoundary": {
+    "parentV2PrivateBrandVerified": true,
+    "currentFiveAllowlistedAuthoredRootMachineIdentityMechanicallyVerified": true,
+    "currentEngineeringManifestMechanicallyVerified": true,
+    "currentFullDomainManifestMechanicallyVerified": false,
+    "entireVedicEngineeringClosureEstablished": false,
+    "productIdentityEstablished": false,
+    "ownerPromotionDecisionReceipt": null
+  },
+  "gateState": {
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "bindingRequired": 38,
+    "bindingFrozenVerified": 0,
+    "independentExpertsRequired": 2,
+    "independentExpertReviewsVerified": 0,
+    "sourceBundleComplete": false,
+    "rightsBundleComplete": false,
+    "expertReviewBundleComplete": false,
+    "highRiskPolicyBound": false,
+    "releaseEvidenceComplete": false
+  },
+  "observationBoundary": {
+    "heldHandlePerFileSnapshots": true,
+    "directoryAndFileEndpointCheckpointComparison": true,
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "intervalMutationExcludedAcrossFiles": false,
+    "abaExcluded": false,
+    "manifestDigestIsDigitalSignature": false,
+    "rawIdentitiesAreDigitalSignatures": false
+  },
+  "runtimeTrustBoundary": {
+    "hiddenPreloadExcluded": false,
+    "nodeRuntimeIdentityEstablished": false,
+    "loaderIdentityEstablished": false,
+    "runtimeLauncherIdentityEstablished": false,
+    "cliOutputTrustedAttestation": false,
+    "mechanicalResultAssumesNoArbitraryPreEvaluationCodeExecution": true
+  },
+  "evidenceLedger": {
+    "engineeringEvidence": "current_exact_five_allowlisted_authored_root_recursive_machine_identity",
+    "browserAndRuntimeEvidence": "not_reverified_by_this_manifest",
+    "contentTruth": "not_established",
+    "expertTruth": "not_established",
+    "rightsAndLegalJudgment": "not_established",
+    "releaseReadiness": "not_ready",
+    "publicReleaseAuthorization": "not_authorized"
+  },
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertIdentityQualificationIndependenceEstablished": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "highRiskClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "redistributionAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "safeToPublish": false
+  },
+  "doesNotEstablish": [
+    "all_files_inside_excluded_runtime_subtrees_or_entire_physical_root_closure",
+    "entire_vedic_engineering_or_product_file_closure",
+    "current_full_domain_manifest_or_formal_admission",
+    "formal_input_fact_execution_interpretation_or_report_contract",
+    "source_body_exact_quote_frozen_binding_or_three_layer_rights",
+    "content_truth_real_expert_truth_or_domain_authority",
+    "runtime_storage_product_release_schema_migration_or_central_registry_identity",
+    "browser_pwa_service_worker_public_host_or_product_runtime_evidence",
+    "cross_file_atomicity_mutation_epoch_interval_integrity_or_aba_exclusion",
+    "release_evidence_release_readiness_deployment_rollback_or_public_release_authorization",
+    "legacy_v13_or_bazi_authority_inheritance"
+  ],
+  "manifestDigest": "b466a83ada3c9f39721cfc4a54628eb1a9afa03ff4794f51461fb6b4100041b2"
+}

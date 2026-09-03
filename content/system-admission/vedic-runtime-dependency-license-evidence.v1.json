@@ -1,0 +1,556 @@
+{
+  "artifactRole": "authoritative_project_record_of_public_runtime_dependency_license_observations",
+  "authorityBoundary": {
+    "artifactAuthenticityEstablished": false,
+    "centralAdmissionAuthorized": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "formalAdmissionAuthorized": false,
+    "licenseReviewComplete": false,
+    "productRuntimeAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "redistributionAuthorized": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "runtimeOptionSelected": false
+  },
+  "boundaryBindings": {
+    "bindingDirection": "runtime_dependency_license_evidence_to_adr_only",
+    "childBindsCentralRegistry": false,
+    "childBindsParent": false,
+    "childBindsRuntimeProposal": false,
+    "upstreamArtifacts": [
+      {
+        "artifactRole": "independent_product_boundary_adr",
+        "bytes": 4531,
+        "decisionStatus": "accepted_research_boundary",
+        "path": "docs/吠陀占星独立产品化ADR-0001-2026-08-26.md",
+        "rawHashAndInspectionUseSameReadBuffer": true,
+        "sha256": "0e9b81505abb963b4d64426338b8071cd8a211eed8d02fe76065fada335dce63"
+      }
+    ]
+  },
+  "createdAt": "2026-08-29T06:08:01.354Z",
+  "dependencyEvidenceMatrix": [
+    {
+      "dependencyId": "python_runtime",
+      "evidenceRefs": [
+        "hakimi.vedic.runtime-license-evidence/python-psf-legal-public-read/2026-08-29"
+      ],
+      "legalConclusionEstablished": false,
+      "redistributionAuthorized": false,
+      "reviewComplete": false,
+      "reviewQuestionIds": [
+        "python_runtime_exact_version_and_license_identity_question",
+        "python_runtime_packaging_and_redistribution_terms_question",
+        "python_runtime_security_update_and_support_window_question"
+      ],
+      "selection": "undecided_not_selected"
+    },
+    {
+      "dependencyId": "swiss_ephemeris_code",
+      "evidenceRefs": [
+        "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-commit-license-public-read/2026-08-29",
+        "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-dynamic-overview-public-read/2026-08-29",
+        "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-professional-contract-template-public-read/2026-08-29"
+      ],
+      "legalConclusionEstablished": false,
+      "redistributionAuthorized": false,
+      "reviewComplete": false,
+      "reviewQuestionIds": [
+        "swiss_ephemeris_code_exact_version_and_license_identity_question",
+        "swiss_ephemeris_binding_and_distribution_terms_question",
+        "swiss_ephemeris_code_update_and_provenance_question"
+      ],
+      "selection": "undecided_not_selected"
+    },
+    {
+      "dependencyId": "ephemeris_data_files",
+      "evidenceRefs": [
+        "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-commit-license-public-read/2026-08-29",
+        "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-dynamic-overview-public-read/2026-08-29",
+        "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-professional-contract-template-public-read/2026-08-29"
+      ],
+      "legalConclusionEstablished": false,
+      "redistributionAuthorized": false,
+      "reviewComplete": false,
+      "reviewQuestionIds": [
+        "ephemeris_data_file_set_version_and_provenance_question",
+        "ephemeris_data_file_use_and_redistribution_rights_question",
+        "ephemeris_data_file_update_integrity_question"
+      ],
+      "selection": "undecided_not_selected"
+    },
+    {
+      "dependencyId": "dedicated_worker",
+      "evidenceRefs": [
+        "hakimi.vedic.runtime-license-evidence/whatwg-workers-living-standard-public-read/2026-08-29"
+      ],
+      "legalConclusionEstablished": false,
+      "redistributionAuthorized": false,
+      "reviewComplete": false,
+      "reviewQuestionIds": [
+        "dedicated_worker_platform_support_question",
+        "dedicated_worker_isolation_and_message_boundary_question",
+        "dedicated_worker_packaging_dependency_license_question"
+      ],
+      "selection": "undecided_not_selected"
+    },
+    {
+      "dependencyId": "loopback_local_service",
+      "evidenceRefs": [],
+      "legalConclusionEstablished": false,
+      "redistributionAuthorized": false,
+      "reviewComplete": false,
+      "reviewQuestionIds": [
+        "loopback_service_process_distribution_question",
+        "loopback_service_port_origin_and_authentication_review_question",
+        "loopback_service_runtime_dependency_license_question"
+      ],
+      "selection": "undecided_not_selected"
+    }
+  ],
+  "doesNotEstablish": [
+    "publisher_maintainer_or_carrier_authenticity_or_digital_signature",
+    "exact_python_runtime_version_packaging_or_transitive_dependency_identity",
+    "swiss_ephemeris_or_ephemeris_data_selection",
+    "dedicated_worker_bundle_or_packaged_dependency_identity",
+    "loopback_local_service_dependency_evidence",
+    "five_public_endpoints_as_five_of_five_dependency_coverage",
+    "dynamic_astrodienst_page_as_stable_or_frozen_source_body",
+    "unsigned_professional_contract_template_as_executed_contract_or_license_grant",
+    "whatwg_living_standard_as_worker_bundle_license_or_browser_validation",
+    "source_body_storage_exact_quote_or_offline_carrier_materialization",
+    "body_digest_or_project_summary_as_legal_review_or_legal_conclusion",
+    "license_model_selection_redistribution_authorization_or_owner_decision",
+    "runtime_option_selection_implementation_execution_or_build_artifact",
+    "central_registry_parent_productization_or_source_rights_binding",
+    "formal_admission_release_readiness_or_public_release_authorization",
+    "mutation_epoch_cross_file_atomic_snapshot_interval_mutation_or_aba_exclusion"
+  ],
+  "evidenceDigest": "cbd459847bd4f57450f8389f127aa76c424298511786811b17c3cb88a856c926",
+  "evidenceLedgerId": "hakimi.vedic.runtime-dependency-license-evidence/1.0.0",
+  "evidenceSummary": {
+    "dependenciesRequired": 5,
+    "dependenciesWithObservedRefs": 4,
+    "dependenciesWithoutObservedRefs": 1,
+    "dependencyIdsWithoutObservedRefs": [
+      "loopback_local_service"
+    ],
+    "immediateReadPairsObserved": 5,
+    "immediateReadPairsStable": 4,
+    "legalReviewsComplete": 0,
+    "licenseSelectionsMade": 0,
+    "matrixEvidenceRefLinks": 8,
+    "publicHttpReadsObserved": 10,
+    "redistributionAuthorizations": 0,
+    "sourceBodiesStored": 0,
+    "uniqueEvidenceRefs": 5,
+    "unstableImmediateReadPairs": 1
+  },
+  "integrityBoundary": {
+    "authenticityEstablished": false,
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi-vedic-runtime-dependency-license-evidence-v1",
+    "digestIsDigitalSignature": false,
+    "digitalSignature": null,
+    "signerIdentity": null
+  },
+  "legalDecisionBoundary": {
+    "decisionArtifactRefs": [],
+    "decisionStatus": "not_established",
+    "executedContractRefs": [],
+    "legalReviewAttestationIds": [],
+    "legalReviewComplete": false,
+    "ownerDecisionRefs": [],
+    "redistributionAuthorized": false,
+    "reviewComplete": false,
+    "selectedLicenseModel": null,
+    "signedProfessionalContractObserved": false
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "adrAndEvidenceAtomicSnapshot": false,
+    "artifactAuthenticityEstablished": false,
+    "claimedPublisherOrMaintainerEndpointsObserved": 5,
+    "crossFileAtomicSnapshot": false,
+    "digitalSignaturesVerified": 0,
+    "evidenceHashAndParseUseSameReadBuffer": true,
+    "heldFileHandleReads": true,
+    "immediateReadPairsObserved": 5,
+    "immediateReadPairsStable": 4,
+    "intervalMutationExcluded": false,
+    "legalReviewsComplete": 0,
+    "licenseSelectionsMade": 0,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "observationCompletedAt": "2026-08-29T06:08:01.354Z",
+    "observationStartedAt": "2026-08-29T06:07:50.954Z",
+    "pathEndpointRevalidated": true,
+    "perReadCapturedAtAvailable": false,
+    "plainDirectoryChainRequired": true,
+    "publicHttpReadsObserved": 10,
+    "publisherIdentitiesIndependentlyVerified": 0,
+    "redistributionAuthorizations": 0,
+    "sourceBodiesStored": 0,
+    "sourceObservationCount": 5,
+    "storagePolicy": "link_only_no_source_body_copied",
+    "unstableImmediateReadPairs": 1
+  },
+  "observations": [
+    {
+      "authenticityEstablished": false,
+      "bodyObservation": {
+        "assertionCodes": [
+          "psf_page_identifies_python_and_standard_library_license_family",
+          "other_python_implementations_may_have_different_rights"
+        ],
+        "bodySummary": "The public Python legal overview identifies a Python and standard-library license family and warns that other implementations may carry different rights; no exact runtime version or packaging set is selected.",
+        "bodySummarySha256": "6b32374f9ae6866a00e8c3d86ebebce0073eeada3436897415c59110f527b145",
+        "bodySummaryStatus": "project_authored_paraphrase_unreviewed",
+        "exactQuoteStored": false,
+        "locatorRefs": [],
+        "sourceBodyStored": false
+      },
+      "carrierIdentity": {
+        "bodyStored": false,
+        "carrierId": "python-org-about-legal-public-page",
+        "carrierIdentityEstablished": false,
+        "finalUrl": "https://www.python.org/about/legal/",
+        "firstRead": {
+          "bytes": 33368,
+          "contentType": "text/html",
+          "etag": null,
+          "httpStatus": 200,
+          "lastModified": null,
+          "sha256": "579c76490d8f53a260c5aaa436f8287d770063168220b5bc9f1bf41cc2da0957"
+        },
+        "materializationPolicy": "link_only_no_source_body_stored",
+        "requestedUrl": "https://www.python.org/about/legal/",
+        "secondRead": {
+          "bytes": 33368,
+          "contentType": "text/html",
+          "etag": null,
+          "httpStatus": 200,
+          "lastModified": null,
+          "sha256": "579c76490d8f53a260c5aaa436f8287d770063168220b5bc9f1bf41cc2da0957"
+        },
+        "stableAcrossTwoImmediateReads": true
+      },
+      "dependencyIds": [
+        "python_runtime"
+      ],
+      "editionIdentity": {
+        "editionId": null,
+        "identityEstablished": false,
+        "sourceVersionPin": null
+      },
+      "evidenceRef": "hakimi.vedic.runtime-license-evidence/python-psf-legal-public-read/2026-08-29",
+      "evidenceScope": "license_family_overview_only_exact_runtime_version_and_packaging_unselected",
+      "legalDecision": {
+        "executedContractObserved": false,
+        "legalConclusionEstablished": false,
+        "legalReviewAttestationIds": [],
+        "legalReviewComplete": false,
+        "ownerDecisionRefs": [],
+        "redistributionAuthorized": false,
+        "reviewComplete": false,
+        "selectedLicenseModel": null
+      },
+      "publisherIdentityIndependentlyVerified": false,
+      "workIdentity": {
+        "claimedPublisherOrMaintainer": "Python Software Foundation",
+        "identityEstablished": false,
+        "title": "Python",
+        "workId": "python-runtime-license-family",
+        "workType": "software_runtime_license_family"
+      }
+    },
+    {
+      "authenticityEstablished": false,
+      "bodyObservation": {
+        "assertionCodes": [
+          "swiss_ephemeris_license_file_describes_dual_license_models",
+          "license_choice_described_before_distribution_or_public_service"
+        ],
+        "bodySummary": "The commit-pinned Swiss Ephemeris LICENSE describes AGPL and Professional license routes and says a route is chosen before software distribution or activation of a public service; no route is selected here.",
+        "bodySummarySha256": "f849ac9c49d5cb1e5055e3cd3a49acb059eb63e41618c4a7ee645e8d899af14b",
+        "bodySummaryStatus": "project_authored_paraphrase_unreviewed",
+        "exactQuoteStored": false,
+        "locatorRefs": [],
+        "sourceBodyStored": false
+      },
+      "carrierIdentity": {
+        "bodyStored": false,
+        "carrierId": "github-raw-swisseph-3fd0-license",
+        "carrierIdentityEstablished": false,
+        "finalUrl": "https://raw.githubusercontent.com/aloistr/swisseph/3fd0f956d73898b91cc4f67cf18b21af656d1342/LICENSE",
+        "firstRead": {
+          "bytes": 2371,
+          "contentType": "text/plain; charset=utf-8",
+          "etag": "W/\"1f0f24a33b0eb12f550f9cf5bddd632280134f0d4175dbc8dd2886904b1dbbb5\"",
+          "httpStatus": 200,
+          "lastModified": null,
+          "sha256": "b6345743292c516d07799dfad46f1a641e5270da2160cc4d6bd54594d6faa991"
+        },
+        "materializationPolicy": "link_only_no_source_body_stored",
+        "requestedUrl": "https://raw.githubusercontent.com/aloistr/swisseph/3fd0f956d73898b91cc4f67cf18b21af656d1342/LICENSE",
+        "secondRead": {
+          "bytes": 2371,
+          "contentType": "text/plain; charset=utf-8",
+          "etag": "W/\"1f0f24a33b0eb12f550f9cf5bddd632280134f0d4175dbc8dd2886904b1dbbb5\"",
+          "httpStatus": 200,
+          "lastModified": null,
+          "sha256": "b6345743292c516d07799dfad46f1a641e5270da2160cc4d6bd54594d6faa991"
+        },
+        "stableAcrossTwoImmediateReads": true
+      },
+      "dependencyIds": [
+        "swiss_ephemeris_code",
+        "ephemeris_data_files"
+      ],
+      "editionIdentity": {
+        "editionId": "git-commit-3fd0f956d73898b91cc4f67cf18b21af656d1342",
+        "identityEstablished": false,
+        "sourceVersionPin": "git_commit_3fd0f956d73898b91cc4f67cf18b21af656d1342"
+      },
+      "evidenceRef": "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-commit-license-public-read/2026-08-29",
+      "evidenceScope": "commit_pinned_license_text_retrieval_only_no_license_path_selected",
+      "legalDecision": {
+        "executedContractObserved": false,
+        "legalConclusionEstablished": false,
+        "legalReviewAttestationIds": [],
+        "legalReviewComplete": false,
+        "ownerDecisionRefs": [],
+        "redistributionAuthorized": false,
+        "reviewComplete": false,
+        "selectedLicenseModel": null
+      },
+      "publisherIdentityIndependentlyVerified": false,
+      "workIdentity": {
+        "claimedPublisherOrMaintainer": "Astrodienst AG via aloistr/swisseph",
+        "identityEstablished": false,
+        "title": "Swiss Ephemeris",
+        "workId": "swiss-ephemeris-code-and-data-license-notice",
+        "workType": "software_and_ephemeris_data_license_notice"
+      }
+    },
+    {
+      "authenticityEstablished": false,
+      "bodyObservation": {
+        "assertionCodes": [
+          "astrodienst_page_describes_dual_license_models",
+          "astrodienst_page_describes_compressed_ephemeris_data",
+          "immediate_retrieval_pair_has_different_body_digest"
+        ],
+        "bodySummary": "The Astrodienst overview describes Swiss Ephemeris licensing and compressed ephemeris data, but the two immediate public reads had different body digests, so this dynamic page is not a frozen source body.",
+        "bodySummarySha256": "3f2b2cf36820761a66479049036428f21c881e63c1a0d4ed795b4888fbfc9e61",
+        "bodySummaryStatus": "project_authored_paraphrase_unreviewed",
+        "exactQuoteStored": false,
+        "locatorRefs": [],
+        "sourceBodyStored": false
+      },
+      "carrierIdentity": {
+        "bodyStored": false,
+        "carrierId": "astro-com-swisseph-dynamic-overview-page",
+        "carrierIdentityEstablished": false,
+        "finalUrl": "https://www.astro.com/swisseph/swephinfo_e.htm",
+        "firstRead": {
+          "bytes": 62524,
+          "contentType": "text/html; charset=UTF-8",
+          "etag": null,
+          "httpStatus": 200,
+          "lastModified": null,
+          "sha256": "0d08e91fe7c975d0156b38d56add580f8bcd662433fef589e82dcdb1cd4eb9c0"
+        },
+        "materializationPolicy": "link_only_no_source_body_stored",
+        "requestedUrl": "https://www.astro.com/swisseph/swephinfo_e.htm",
+        "secondRead": {
+          "bytes": 62524,
+          "contentType": "text/html; charset=UTF-8",
+          "etag": null,
+          "httpStatus": 200,
+          "lastModified": null,
+          "sha256": "a5766678581fa5fd263fe217bcd11695d3b74144a7be216c0668a7ef545a2efe"
+        },
+        "stableAcrossTwoImmediateReads": false
+      },
+      "dependencyIds": [
+        "swiss_ephemeris_code",
+        "ephemeris_data_files"
+      ],
+      "editionIdentity": {
+        "editionId": null,
+        "identityEstablished": false,
+        "sourceVersionPin": null
+      },
+      "evidenceRef": "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-dynamic-overview-public-read/2026-08-29",
+      "evidenceScope": "dynamic_publisher_page_variance_observation_not_frozen_source_body",
+      "legalDecision": {
+        "executedContractObserved": false,
+        "legalConclusionEstablished": false,
+        "legalReviewAttestationIds": [],
+        "legalReviewComplete": false,
+        "ownerDecisionRefs": [],
+        "redistributionAuthorized": false,
+        "reviewComplete": false,
+        "selectedLicenseModel": null
+      },
+      "publisherIdentityIndependentlyVerified": false,
+      "workIdentity": {
+        "claimedPublisherOrMaintainer": "Astrodienst AG",
+        "identityEstablished": false,
+        "title": "Swiss Ephemeris public overview",
+        "workId": "swiss-ephemeris-public-overview",
+        "workType": "dynamic_publisher_webpage"
+      }
+    },
+    {
+      "authenticityEstablished": false,
+      "bodyObservation": {
+        "assertionCodes": [
+          "professional_contract_template_lists_code_and_ephemeris_data_files",
+          "professional_license_template_requires_execution_and_payment_before_validity"
+        ],
+        "bodySummary": "The public Professional License contract template lists Swiss Ephemeris code and data files and states that validity depends on execution and payment; the template is unsigned and is not a project license.",
+        "bodySummarySha256": "95e88a0abd98a4bb65815619b0b074ad9427550ffe326d85afa0924f11095363",
+        "bodySummaryStatus": "project_authored_paraphrase_unreviewed",
+        "exactQuoteStored": false,
+        "locatorRefs": [],
+        "sourceBodyStored": false
+      },
+      "carrierIdentity": {
+        "bodyStored": false,
+        "carrierId": "astro-com-swisseph-professional-contract-template-pdf",
+        "carrierIdentityEstablished": false,
+        "finalUrl": "https://www.astro.com/swisseph/secont_e.pdf",
+        "firstRead": {
+          "bytes": 105150,
+          "contentType": "application/pdf",
+          "etag": null,
+          "httpStatus": 200,
+          "lastModified": "Fri, 19 Jun 2026 14:10:31 GMT",
+          "sha256": "0e0a80ab3efcc239ce5a0d8d0be05635281b2a6f298935229ebdfe5392ca043a"
+        },
+        "materializationPolicy": "link_only_no_source_body_stored",
+        "requestedUrl": "https://www.astro.com/swisseph/secont_e.pdf",
+        "secondRead": {
+          "bytes": 105150,
+          "contentType": "application/pdf",
+          "etag": null,
+          "httpStatus": 200,
+          "lastModified": "Fri, 19 Jun 2026 14:10:31 GMT",
+          "sha256": "0e0a80ab3efcc239ce5a0d8d0be05635281b2a6f298935229ebdfe5392ca043a"
+        },
+        "stableAcrossTwoImmediateReads": true
+      },
+      "dependencyIds": [
+        "swiss_ephemeris_code",
+        "ephemeris_data_files"
+      ],
+      "editionIdentity": {
+        "editionId": "last-modified-2026-06-19T14-10-31Z",
+        "identityEstablished": false,
+        "sourceVersionPin": "last_modified_2026_06_19T14_10_31Z"
+      },
+      "evidenceRef": "hakimi.vedic.runtime-license-evidence/swiss-ephemeris-professional-contract-template-public-read/2026-08-29",
+      "evidenceScope": "unsigned_contract_template_observation_not_executed_license_or_authorization",
+      "legalDecision": {
+        "executedContractObserved": false,
+        "legalConclusionEstablished": false,
+        "legalReviewAttestationIds": [],
+        "legalReviewComplete": false,
+        "ownerDecisionRefs": [],
+        "redistributionAuthorized": false,
+        "reviewComplete": false,
+        "selectedLicenseModel": null
+      },
+      "publisherIdentityIndependentlyVerified": false,
+      "workIdentity": {
+        "claimedPublisherOrMaintainer": "Astrodienst AG",
+        "identityEstablished": false,
+        "title": "Swiss Ephemeris Professional License contract template",
+        "workId": "swiss-ephemeris-professional-license-contract-template",
+        "workType": "unsigned_contract_template"
+      }
+    },
+    {
+      "authenticityEstablished": false,
+      "bodyObservation": {
+        "assertionCodes": [
+          "whatwg_standard_defines_dedicated_worker_platform_api",
+          "whatwg_standard_describes_worker_message_boundary"
+        ],
+        "bodySummary": "The WHATWG living standard defines the Dedicated Worker platform API and its message boundary; it is not evidence for a packaged Worker bundle, a browser run, or any third-party dependency license.",
+        "bodySummarySha256": "76444728220f241af7aaf345f82d38d9c098a4f1bc2cf10f7b2ab2de4e490b5a",
+        "bodySummaryStatus": "project_authored_paraphrase_unreviewed",
+        "exactQuoteStored": false,
+        "locatorRefs": [],
+        "sourceBodyStored": false
+      },
+      "carrierIdentity": {
+        "bodyStored": false,
+        "carrierId": "whatwg-html-workers-living-standard-page",
+        "carrierIdentityEstablished": false,
+        "finalUrl": "https://html.spec.whatwg.org/multipage/workers.html",
+        "firstRead": {
+          "bytes": 305340,
+          "contentType": "text/html; charset=utf-8",
+          "etag": "W/\"6a912e21-4a8bc\"",
+          "httpStatus": 200,
+          "lastModified": "Fri, 28 Aug 2026 06:43:45 GMT",
+          "sha256": "f768875a62c65ef50b08c7e1126084148b3f1b9e74037165601b22399aaee429"
+        },
+        "materializationPolicy": "link_only_no_source_body_stored",
+        "requestedUrl": "https://html.spec.whatwg.org/multipage/workers.html",
+        "secondRead": {
+          "bytes": 305340,
+          "contentType": "text/html; charset=utf-8",
+          "etag": "W/\"6a912e21-4a8bc\"",
+          "httpStatus": 200,
+          "lastModified": "Fri, 28 Aug 2026 06:43:45 GMT",
+          "sha256": "f768875a62c65ef50b08c7e1126084148b3f1b9e74037165601b22399aaee429"
+        },
+        "stableAcrossTwoImmediateReads": true
+      },
+      "dependencyIds": [
+        "dedicated_worker"
+      ],
+      "editionIdentity": {
+        "editionId": "last-modified-2026-08-28T06-43-45Z",
+        "identityEstablished": false,
+        "sourceVersionPin": "living_standard_last_modified_2026_08_28T06_43_45Z"
+      },
+      "evidenceRef": "hakimi.vedic.runtime-license-evidence/whatwg-workers-living-standard-public-read/2026-08-29",
+      "evidenceScope": "living_platform_specification_observation_not_browser_or_packaged_dependency_license",
+      "legalDecision": {
+        "executedContractObserved": false,
+        "legalConclusionEstablished": false,
+        "legalReviewAttestationIds": [],
+        "legalReviewComplete": false,
+        "ownerDecisionRefs": [],
+        "redistributionAuthorized": false,
+        "reviewComplete": false,
+        "selectedLicenseModel": null
+      },
+      "publisherIdentityIndependentlyVerified": false,
+      "workIdentity": {
+        "claimedPublisherOrMaintainer": "WHATWG",
+        "identityEstablished": false,
+        "title": "HTML Living Standard: Web workers",
+        "workId": "whatwg-html-workers-living-standard",
+        "workType": "living_platform_standard"
+      }
+    }
+  ],
+  "recordType": "vedic_runtime_dependency_license_evidence_v1",
+  "schemaVersion": "1.0.0",
+  "status": "five_claimed_publisher_or_maintainer_public_endpoints_ten_read_receipts_observed_four_of_five_dependencies_have_refs_loopback_zero_link_only_unreviewed_unsigned_no_legal_conclusion_redistribution_or_selection",
+  "systemIdentity": {
+    "contractSystemId": "vedic",
+    "integrationStatus": "not_integrated",
+    "productStatus": "research_only",
+    "productSystemId": "vedic-astrology"
+  }
+}

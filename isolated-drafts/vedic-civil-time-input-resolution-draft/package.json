@@ -1,0 +1,21 @@
+{
+  "name": "@hakimi/vedic-civil-time-input-resolution-draft",
+  "version": "0.0.0-draft.0",
+  "private": true,
+  "type": "module",
+  "exports": {},
+  "x-hakimi-isolated-draft": {
+    "schemaVersion": 1,
+    "kind": "adapter",
+    "systemId": "vedic-astrology",
+    "runtime": "node-test-only",
+    "productionImport": "forbidden",
+    "allowedDraftDependencies": [],
+    "baziAuthorityInherited": false,
+    "westernAuthorityInherited": false,
+    "legacyV13IdentityInherited": false
+  },
+  "dependencies": {
+    "@hakimi/tzdb-core": "0.1.0"
+  }
+}

@@ -1,0 +1,630 @@
+{
+  "$id": "urn:hakimi:vedic:input-admission:transition-rejection-receipt:0.1-draft.2",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hakimi Vedic input-admission zero-mutation transition rejection 0.1-draft.2",
+  "description": "Strict structural schema for the isolated evaluator's deterministic failure response. A conforming value is a rejected, non-accepted, non-committed response and never a target success receipt or authority grant.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "acceptedReceipt",
+    "admissionCycleId",
+    "afterEpoch",
+    "attemptedTransitionId",
+    "authorityBoundary",
+    "authorityEffect",
+    "beforeEpoch",
+    "commitObserved",
+    "failedGuardIds",
+    "generationScopedOperationNonce",
+    "idempotencyKey",
+    "ledgerGenerationId",
+    "mutationEpochRuntimeEstablished",
+    "nextChainHeadDigest",
+    "nextConsumedNonceSetHeadDigest",
+    "nextRevocationLedgerHeadDigest",
+    "nextStateDigest",
+    "nonceConsumed",
+    "operationId",
+    "outcome",
+    "packetDigest",
+    "packetDigestDomain",
+    "packetId",
+    "packetManifestDigest",
+    "packetSchemaVersion",
+    "previousChainHeadDigest",
+    "previousConsumedNonceSetHeadDigest",
+    "previousRevocationLedgerHeadDigest",
+    "previousStateDigest",
+    "receiptDigest",
+    "receiptKind",
+    "receiptSchemaVersion",
+    "receiptStatus",
+    "rejectionCode",
+    "stateAfter",
+    "stateBefore"
+  ],
+  "properties": {
+    "acceptedReceipt": {
+      "const": false
+    },
+    "admissionCycleId": {
+      "type": "string",
+      "pattern": "^vedic-admission-cycle/[0-9a-f]{64}$"
+    },
+    "afterEpoch": {
+      "$ref": "#/$defs/mutationEpoch"
+    },
+    "attemptedTransitionId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,95}$"
+    },
+    "authorityBoundary": {
+      "$ref": "#/$defs/authorityBoundary"
+    },
+    "authorityEffect": {
+      "const": "none"
+    },
+    "beforeEpoch": {
+      "$ref": "#/$defs/mutationEpoch"
+    },
+    "commitObserved": {
+      "const": false
+    },
+    "failedGuardIds": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "after_epoch_must_equal_before_plus_one",
+          "from_state_packet_frozen_receipts_incomplete",
+          "from_state_uninstantiated",
+          "idempotency_key_not_previously_observed",
+          "manifest_layer_exact_set_coverage",
+          "no_active_correction_withdrawal_or_revocation",
+          "operation_id_not_previously_observed",
+          "operation_nonce_not_previously_consumed",
+          "pre_snapshot_evidence_manifest_closed",
+          "same_cycle_and_packet_for_every_receipt",
+          "transition_not_implemented",
+          "unknown_transition"
+        ]
+      }
+    },
+    "generationScopedOperationNonce": {
+      "type": "string",
+      "pattern": "^vedic-operation-nonce/[0-9a-f]{64}$"
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "pattern": "^vedic-idempotency/[0-9a-f]{64}$"
+    },
+    "ledgerGenerationId": {
+      "type": "string",
+      "pattern": "^vedic-ledger-generation/[0-9a-f]{64}$"
+    },
+    "mutationEpochRuntimeEstablished": {
+      "const": false
+    },
+    "nextChainHeadDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "nextConsumedNonceSetHeadDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "nextRevocationLedgerHeadDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "nextStateDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "nonceConsumed": {
+      "const": false
+    },
+    "operationId": {
+      "type": "string",
+      "pattern": "^vedic-operation/[0-9a-f]{64}$"
+    },
+    "outcome": {
+      "const": "transition_rejection_receipt"
+    },
+    "packetDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "packetDigestDomain": {
+      "const": "hakimi/vedic-input-admission-kernel-draft/governance-packet/v0.1"
+    },
+    "packetId": {
+      "type": "string",
+      "pattern": "^vedic-governance-packet/[0-9a-f]{64}$"
+    },
+    "packetManifestDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "packetSchemaVersion": {
+      "const": "hakimi.vedic-input-governance-packet/0.1-draft"
+    },
+    "previousChainHeadDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "previousConsumedNonceSetHeadDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "previousRevocationLedgerHeadDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "previousStateDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "receiptDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "receiptKind": {
+      "const": "transition_rejection_receipt"
+    },
+    "receiptSchemaVersion": {
+      "const": "hakimi.vedic-transition-rejection-receipt/0.1-draft.2"
+    },
+    "receiptStatus": {
+      "const": "deterministic_failure_response_not_accepted_receipt"
+    },
+    "rejectionCode": {
+      "enum": [
+        "EPOCH_OVERFLOW",
+        "FROM_STATE_MISMATCH",
+        "PRE_SNAPSHOT_MANIFEST_SEAL_BLOCKED",
+        "REPLAY_OR_IDEMPOTENCY_CONFLICT",
+        "TRANSITION_NOT_IMPLEMENTED",
+        "UNKNOWN_TRANSITION"
+      ]
+    },
+    "stateAfter": {
+      "$ref": "#/$defs/stateId"
+    },
+    "stateBefore": {
+      "$ref": "#/$defs/stateId"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "rejectionCode": {
+            "const": "UNKNOWN_TRANSITION"
+          }
+        },
+        "required": [
+          "rejectionCode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "attemptedTransitionId": {
+            "not": {
+              "enum": [
+                "freeze_packet",
+                "seal_pre_snapshot_evidence_manifest",
+                "verify_conditions_1_to_7",
+                "verify_supersession_projection",
+                "invalidate"
+              ]
+            }
+          },
+          "failedGuardIds": {
+            "const": [
+              "unknown_transition"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rejectionCode": {
+            "const": "TRANSITION_NOT_IMPLEMENTED"
+          }
+        },
+        "required": [
+          "rejectionCode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "attemptedTransitionId": {
+            "enum": [
+              "verify_conditions_1_to_7",
+              "verify_supersession_projection",
+              "invalidate"
+            ]
+          },
+          "failedGuardIds": {
+            "const": [
+              "transition_not_implemented"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rejectionCode": {
+            "const": "FROM_STATE_MISMATCH"
+          }
+        },
+        "required": [
+          "rejectionCode"
+        ]
+      },
+      "then": {
+        "oneOf": [
+          {
+            "properties": {
+              "attemptedTransitionId": {
+                "const": "freeze_packet"
+              },
+              "failedGuardIds": {
+                "const": [
+                  "from_state_uninstantiated"
+                ]
+              },
+              "stateBefore": {
+                "not": {
+                  "const": "uninstantiated"
+                }
+              }
+            }
+          },
+          {
+            "properties": {
+              "attemptedTransitionId": {
+                "const": "seal_pre_snapshot_evidence_manifest"
+              },
+              "failedGuardIds": {
+                "const": [
+                  "from_state_packet_frozen_receipts_incomplete"
+                ]
+              },
+              "stateBefore": {
+                "not": {
+                  "const": "packet_frozen_receipts_incomplete"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rejectionCode": {
+            "const": "PRE_SNAPSHOT_MANIFEST_SEAL_BLOCKED"
+          }
+        },
+        "required": [
+          "rejectionCode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "attemptedTransitionId": {
+            "const": "seal_pre_snapshot_evidence_manifest"
+          },
+          "failedGuardIds": {
+            "const": [
+              "same_cycle_and_packet_for_every_receipt",
+              "pre_snapshot_evidence_manifest_closed",
+              "manifest_layer_exact_set_coverage",
+              "no_active_correction_withdrawal_or_revocation"
+            ]
+          },
+          "stateBefore": {
+            "const": "packet_frozen_receipts_incomplete"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rejectionCode": {
+            "const": "REPLAY_OR_IDEMPOTENCY_CONFLICT"
+          }
+        },
+        "required": [
+          "rejectionCode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "attemptedTransitionId": {
+            "enum": [
+              "freeze_packet",
+              "seal_pre_snapshot_evidence_manifest"
+            ]
+          },
+          "failedGuardIds": {
+            "oneOf": [
+              {
+                "const": [
+                  "operation_id_not_previously_observed"
+                ]
+              },
+              {
+                "const": [
+                  "idempotency_key_not_previously_observed"
+                ]
+              },
+              {
+                "const": [
+                  "operation_nonce_not_previously_consumed"
+                ]
+              },
+              {
+                "const": [
+                  "operation_id_not_previously_observed",
+                  "idempotency_key_not_previously_observed"
+                ]
+              },
+              {
+                "const": [
+                  "operation_id_not_previously_observed",
+                  "operation_nonce_not_previously_consumed"
+                ]
+              },
+              {
+                "const": [
+                  "idempotency_key_not_previously_observed",
+                  "operation_nonce_not_previously_consumed"
+                ]
+              },
+              {
+                "const": [
+                  "operation_id_not_previously_observed",
+                  "idempotency_key_not_previously_observed",
+                  "operation_nonce_not_previously_consumed"
+                ]
+              }
+            ]
+          },
+          "stateBefore": {
+            "enum": [
+              "uninstantiated",
+              "packet_frozen_receipts_incomplete"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "attemptedTransitionId": {
+                  "const": "freeze_packet"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "stateBefore": {
+                  "const": "uninstantiated"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "attemptedTransitionId": {
+                  "const": "seal_pre_snapshot_evidence_manifest"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "stateBefore": {
+                  "const": "packet_frozen_receipts_incomplete"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rejectionCode": {
+            "const": "EPOCH_OVERFLOW"
+          }
+        },
+        "required": [
+          "rejectionCode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "afterEpoch": {
+            "const": 9007199254740991
+          },
+          "attemptedTransitionId": {
+            "enum": [
+              "freeze_packet",
+              "seal_pre_snapshot_evidence_manifest"
+            ]
+          },
+          "beforeEpoch": {
+            "const": 9007199254740991
+          },
+          "failedGuardIds": {
+            "const": [
+              "after_epoch_must_equal_before_plus_one"
+            ]
+          },
+          "stateBefore": {
+            "enum": [
+              "uninstantiated",
+              "packet_frozen_receipts_incomplete"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "attemptedTransitionId": {
+                  "const": "freeze_packet"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "stateBefore": {
+                  "const": "uninstantiated"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "attemptedTransitionId": {
+                  "const": "seal_pre_snapshot_evidence_manifest"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "stateBefore": {
+                  "const": "packet_frozen_receipts_incomplete"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "mutationEpoch": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "stateId": {
+      "enum": [
+        "uninstantiated",
+        "packet_frozen_receipts_incomplete",
+        "pre_snapshot_evidence_manifest_complete_unverified",
+        "conditions_1_to_7_verified_supersession_pending",
+        "all_eight_conditions_mechanically_verified_input_gate_candidate",
+        "invalidated_new_packet_and_epoch_required"
+      ]
+    },
+    "authorityBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contentTruthEstablished",
+        "domainAuthorityAuthorized",
+        "expertClaimsAuthorized",
+        "expertTruthEstablished",
+        "formalAdmissionAuthorized",
+        "highRiskClaimsAuthorized",
+        "inputContractGateSatisfied",
+        "publicDeploymentAuthorized",
+        "publicReleaseAuthorized",
+        "releaseEvidenceComplete",
+        "releaseReady",
+        "rightsLegalConclusionEstablished"
+      ],
+      "properties": {
+        "contentTruthEstablished": {
+          "const": false
+        },
+        "domainAuthorityAuthorized": {
+          "const": false
+        },
+        "expertClaimsAuthorized": {
+          "const": false
+        },
+        "expertTruthEstablished": {
+          "const": false
+        },
+        "formalAdmissionAuthorized": {
+          "const": false
+        },
+        "highRiskClaimsAuthorized": {
+          "const": false
+        },
+        "inputContractGateSatisfied": {
+          "const": false
+        },
+        "publicDeploymentAuthorized": {
+          "const": false
+        },
+        "publicReleaseAuthorized": {
+          "const": false
+        },
+        "releaseEvidenceComplete": {
+          "const": false
+        },
+        "releaseReady": {
+          "const": false
+        },
+        "rightsLegalConclusionEstablished": {
+          "const": false
+        }
+      }
+    }
+  },
+  "x-hakimiSchemaRevision": 2,
+  "x-hakimiBoundary": {
+    "acceptedReceipt": false,
+    "artifactRole": "isolated_vedic_zero_mutation_rejection_schema",
+    "authorityEffect": "none",
+    "commitObserved": false,
+    "countsTowardFormalAdmission": false,
+    "expertClaimsAuthorized": false,
+    "formalAdmissionAuthorized": false,
+    "mutationEpochRuntimeEstablished": false,
+    "nonceConsumed": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "targetReceiptIssued": false
+  },
+  "x-hakimiOperationBinding": {
+    "digestBound": true,
+    "evaluatorEnforced": true,
+    "fieldsCopiedFromValidatedOperationContext": [
+      "ledgerGenerationId",
+      "operationId",
+      "idempotencyKey",
+      "generationScopedOperationNonce"
+    ],
+    "jsonSchemaAloneProvesRequestOutputEquality": false
+  },
+  "x-hakimiEvaluatorInvariants": {
+    "enforcedBy": "evaluateVedicInputAdmissionTransition/createRejection",
+    "forbiddenFields": [
+      "targetReceiptId"
+    ],
+    "jsonSchemaAloneProvesCrossFieldEquality": false,
+    "rules": [
+      "afterEpoch equals beforeEpoch",
+      "stateAfter equals stateBefore",
+      "nextChainHeadDigest equals previousChainHeadDigest",
+      "nextConsumedNonceSetHeadDigest equals previousConsumedNonceSetHeadDigest",
+      "nextRevocationLedgerHeadDigest equals previousRevocationLedgerHeadDigest",
+      "nextStateDigest equals previousStateDigest",
+      "nonceConsumed remains false and no targetReceiptId is emitted"
+    ]
+  }
+}

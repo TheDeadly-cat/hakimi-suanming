@@ -1,0 +1,573 @@
+{
+  "$id": "urn:hakimi:vedic:input-admission:frozen-packet-transition-candidate:0.1.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hakimi Vedic frozen packet draft transition candidate 0.1.0",
+  "description": "Strict structural schema for the isolated Vedic freeze_packet evaluator output. Despite the filename retaining receipt for traceability, a conforming value is only a draft_transition_candidate: it is not an issued, accepted, committed, persisted, or authoritative receipt.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "acceptedReceipt",
+    "afterEpoch",
+    "authorityBoundary",
+    "authorityEffect",
+    "beforeEpoch",
+    "candidateReceipt",
+    "commitObserved",
+    "fromState",
+    "generationScopedOperationNonce",
+    "idempotencyKey",
+    "ledgerGenerationId",
+    "mutationEpochRuntimeEstablished",
+    "nextChainHeadDigest",
+    "nextConsumedNonceSetHeadDigest",
+    "nextRevocationLedgerHeadDigest",
+    "nextStateDigest",
+    "operationId",
+    "outcome",
+    "packet",
+    "previousChainHeadDigest",
+    "previousConsumedNonceSetHeadDigest",
+    "previousRevocationLedgerHeadDigest",
+    "previousStateDigest",
+    "toState",
+    "transitionId"
+  ],
+  "properties": {
+    "acceptedReceipt": {
+      "const": false
+    },
+    "afterEpoch": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "authorityBoundary": {
+      "$ref": "#/$defs/authorityBoundary"
+    },
+    "authorityEffect": {
+      "const": "none"
+    },
+    "beforeEpoch": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740990
+    },
+    "candidateReceipt": {
+      "$ref": "#/$defs/candidateReceipt"
+    },
+    "commitObserved": {
+      "const": false
+    },
+    "fromState": {
+      "const": "uninstantiated"
+    },
+    "generationScopedOperationNonce": {
+      "type": "string",
+      "pattern": "^vedic-operation-nonce/[0-9a-f]{64}$"
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "pattern": "^vedic-idempotency/[0-9a-f]{64}$"
+    },
+    "ledgerGenerationId": {
+      "type": "string",
+      "pattern": "^vedic-ledger-generation/[0-9a-f]{64}$"
+    },
+    "mutationEpochRuntimeEstablished": {
+      "const": false
+    },
+    "nextChainHeadDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "nextConsumedNonceSetHeadDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "nextRevocationLedgerHeadDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "nextStateDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "operationId": {
+      "type": "string",
+      "pattern": "^vedic-operation/[0-9a-f]{64}$"
+    },
+    "outcome": {
+      "const": "draft_transition_candidate"
+    },
+    "packet": {
+      "$ref": "#/$defs/governancePacket"
+    },
+    "previousChainHeadDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "previousConsumedNonceSetHeadDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "previousRevocationLedgerHeadDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "previousStateDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "toState": {
+      "const": "packet_frozen_receipts_incomplete"
+    },
+    "transitionId": {
+      "const": "freeze_packet"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "authorityBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contentTruthEstablished",
+        "domainAuthorityAuthorized",
+        "expertClaimsAuthorized",
+        "expertTruthEstablished",
+        "formalAdmissionAuthorized",
+        "highRiskClaimsAuthorized",
+        "inputContractGateSatisfied",
+        "publicDeploymentAuthorized",
+        "publicReleaseAuthorized",
+        "releaseEvidenceComplete",
+        "releaseReady",
+        "rightsLegalConclusionEstablished"
+      ],
+      "properties": {
+        "contentTruthEstablished": {
+          "const": false
+        },
+        "domainAuthorityAuthorized": {
+          "const": false
+        },
+        "expertClaimsAuthorized": {
+          "const": false
+        },
+        "expertTruthEstablished": {
+          "const": false
+        },
+        "formalAdmissionAuthorized": {
+          "const": false
+        },
+        "highRiskClaimsAuthorized": {
+          "const": false
+        },
+        "inputContractGateSatisfied": {
+          "const": false
+        },
+        "publicDeploymentAuthorized": {
+          "const": false
+        },
+        "publicReleaseAuthorized": {
+          "const": false
+        },
+        "releaseEvidenceComplete": {
+          "const": false
+        },
+        "releaseReady": {
+          "const": false
+        },
+        "rightsLegalConclusionEstablished": {
+          "const": false
+        }
+      }
+    },
+    "packetAuthorityBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authorityEffect",
+        "candidateInstanceCount",
+        "digestSemanticOriginVerified",
+        "freeTextFieldCount",
+        "governancePolicyOnly",
+        "personalDataFieldCount",
+        "personDerivedDigestFieldCount",
+        "privacySourceProvenanceEstablished"
+      ],
+      "properties": {
+        "authorityEffect": {
+          "const": "none"
+        },
+        "candidateInstanceCount": {
+          "const": 0
+        },
+        "digestSemanticOriginVerified": {
+          "const": false
+        },
+        "freeTextFieldCount": {
+          "const": 0
+        },
+        "governancePolicyOnly": {
+          "const": true
+        },
+        "personalDataFieldCount": {
+          "const": 0
+        },
+        "personDerivedDigestFieldCount": {
+          "const": 0
+        },
+        "privacySourceProvenanceEstablished": {
+          "const": false
+        }
+      }
+    },
+    "systemIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baziIdentityInherited",
+        "contractSystemId",
+        "independentProductId",
+        "legacyV13IdentityInherited",
+        "migrationId",
+        "migrationIdentityInherited",
+        "productSystemId",
+        "releaseIdentity",
+        "releaseIdentityInherited",
+        "storageNamespaceClass",
+        "targetSchema",
+        "targetSchemaInherited"
+      ],
+      "properties": {
+        "baziIdentityInherited": {
+          "const": false
+        },
+        "contractSystemId": {
+          "const": "vedic"
+        },
+        "independentProductId": {
+          "const": null
+        },
+        "legacyV13IdentityInherited": {
+          "const": false
+        },
+        "migrationId": {
+          "const": null
+        },
+        "migrationIdentityInherited": {
+          "const": false
+        },
+        "productSystemId": {
+          "const": "vedic-astrology"
+        },
+        "releaseIdentity": {
+          "const": null
+        },
+        "releaseIdentityInherited": {
+          "const": false
+        },
+        "storageNamespaceClass": {
+          "const": "vedic-input-admission-kernel-draft"
+        },
+        "targetSchema": {
+          "const": null
+        },
+        "targetSchemaInherited": {
+          "const": false
+        }
+      }
+    },
+    "candidateReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "acceptedReceipt",
+        "authorityEffect",
+        "candidateOnly",
+        "commitObserved",
+        "mutationEpochRuntimeEstablished",
+        "packetDigest",
+        "packetId",
+        "packetManifestDigest",
+        "receiptDigest",
+        "receiptId",
+        "receiptKind",
+        "receiptSchemaVersion",
+        "receiptStatus"
+      ],
+      "properties": {
+        "acceptedReceipt": {
+          "const": false
+        },
+        "authorityEffect": {
+          "const": "none"
+        },
+        "candidateOnly": {
+          "const": true
+        },
+        "commitObserved": {
+          "const": false
+        },
+        "mutationEpochRuntimeEstablished": {
+          "const": false
+        },
+        "packetDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "packetId": {
+          "type": "string",
+          "pattern": "^vedic-governance-packet/[0-9a-f]{64}$"
+        },
+        "packetManifestDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "receiptDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "receiptId": {
+          "type": "string",
+          "pattern": "^vedic-frozen-packet-candidate/[0-9a-f]{64}$"
+        },
+        "receiptKind": {
+          "const": "frozen_packet_receipt"
+        },
+        "receiptSchemaVersion": {
+          "const": "hakimi.vedic-frozen-packet-transition-candidate/0.1-draft"
+        },
+        "receiptStatus": {
+          "const": "draft_candidate_not_issued_not_accepted"
+        }
+      }
+    },
+    "governancePacket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "admissionCycleId",
+        "authorityBoundary",
+        "canonicalizationProfile",
+        "conditionIds",
+        "conditionSetDigest",
+        "digestAlgorithm",
+        "distributionOperationSetDigest",
+        "invariantIds",
+        "invariantSetDigest",
+        "packetDigest",
+        "packetDigestDomain",
+        "packetId",
+        "packetManifestDigest",
+        "packetSchemaVersion",
+        "packetScope",
+        "privacyProjectionDigest",
+        "privateLifecyclePolicyDigest",
+        "questionSetDigest",
+        "requirementIds",
+        "requirementSetDigest",
+        "reviewContentManifestDigest",
+        "reviewInstructionAndDisagreementPolicyDigest",
+        "selectedValueSetDigest",
+        "sourceBindingManifestDigest",
+        "systemIdentity",
+        "targetJurisdictionSetDigest",
+        "targetUseProfileDigest",
+        "threeLayerRightsEvidenceManifestDigest",
+        "transitionContractDigest",
+        "upstreamReadinessCandidateDigest",
+        "validatorProfileSetDigest"
+      ],
+      "properties": {
+        "admissionCycleId": {
+          "type": "string",
+          "pattern": "^vedic-admission-cycle/[0-9a-f]{64}$"
+        },
+        "authorityBoundary": {
+          "$ref": "#/$defs/packetAuthorityBoundary"
+        },
+        "canonicalizationProfile": {
+          "const": "sorted-object-keys-compact-json-fatal-utf8-no-bom-no-duplicates-v1"
+        },
+        "conditionIds": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "const": [
+            "all_thirteen_owner_selections_and_scope_decisions_accepted",
+            "all_thirteen_source_or_first_party_provenance_bindings_frozen_verified",
+            "all_thirteen_work_version_carrier_rights_and_distribution_dispositions_complete",
+            "two_independent_domain_opinions_cover_same_frozen_thirteen_requirement_packet",
+            "two_independent_source_rights_reviews_and_legal_authority_disposition_complete",
+            "schema_specific_structural_and_semantic_validator_receipts_complete",
+            "mutation_epoch_atomic_snapshot_aba_and_private_input_lifecycle_receipts_complete",
+            "owner_supersession_formal_parent_and_central_registry_projection_complete"
+          ]
+        },
+        "conditionSetDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "digestAlgorithm": {
+          "const": "SHA-256"
+        },
+        "distributionOperationSetDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "invariantIds": {
+          "type": "array",
+          "minItems": 26,
+          "maxItems": 26,
+          "const": [
+            "civil_date_validity",
+            "calendar_identity_version",
+            "canonical_wall_time",
+            "precision_vocabulary",
+            "uncertainty_representation",
+            "interval_ordering",
+            "candidate_semantics",
+            "coordinate_reference_system",
+            "coordinate_precision_semantics",
+            "location_privacy_boundary",
+            "iana_zone_identity",
+            "tzdb_version_identity",
+            "coverage_update_policy",
+            "dst_gap_overlap_classification",
+            "dst_resolution_policy",
+            "utc_conversion_consistency",
+            "time_scale_identity",
+            "ephemeris_identity_version_digest",
+            "ephemeris_coverage",
+            "sidereal_zodiac_identity_version",
+            "ayanamsa_identity_version",
+            "node_mode_definition_version",
+            "bhava_definition_version",
+            "perturbation_candidate_semantics",
+            "transition_ordering",
+            "perturbation_policy_identity"
+          ]
+        },
+        "invariantSetDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "packetDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "packetDigestDomain": {
+          "const": "hakimi/vedic-input-admission-kernel-draft/governance-packet/v0.1"
+        },
+        "packetId": {
+          "type": "string",
+          "pattern": "^vedic-governance-packet/[0-9a-f]{64}$"
+        },
+        "packetManifestDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "packetSchemaVersion": {
+          "const": "hakimi.vedic-input-governance-packet/0.1-draft"
+        },
+        "packetScope": {
+          "const": "system_governance_policy_only_no_person_input_instances"
+        },
+        "privacyProjectionDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "privateLifecyclePolicyDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "questionSetDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "requirementIds": {
+          "type": "array",
+          "minItems": 13,
+          "maxItems": 13,
+          "const": [
+            "civil_calendar_and_date",
+            "local_wall_time_and_precision",
+            "birth_time_uncertainty_interval_or_candidates",
+            "place_coordinates_and_precision",
+            "iana_time_zone_and_tzdb_identity",
+            "dst_gap_overlap_resolution",
+            "utc_conversion_and_time_scale",
+            "ephemeris_identity_version_and_coverage",
+            "sidereal_zodiac_declaration",
+            "ayanamsa_identity_and_version",
+            "rahu_ketu_mode",
+            "bhava_house_definition",
+            "birth_time_perturbation_candidates_and_transition_points"
+          ]
+        },
+        "requirementSetDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "reviewContentManifestDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "reviewInstructionAndDisagreementPolicyDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "selectedValueSetDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "sourceBindingManifestDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "systemIdentity": {
+          "$ref": "#/$defs/systemIdentity"
+        },
+        "targetJurisdictionSetDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "targetUseProfileDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "threeLayerRightsEvidenceManifestDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "transitionContractDigest": {
+          "const": "548a0ab95dbe030dda2c158a7a4583c4591d98be75bc9f9a604ff98cff3d52ac"
+        },
+        "upstreamReadinessCandidateDigest": {
+          "const": "688a786525d8d8c988be2d517d31cca23113d788cadc3168cae5bbd71a6a1efb"
+        },
+        "validatorProfileSetDigest": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    }
+  },
+  "x-hakimiBoundary": {
+    "acceptedReceipt": false,
+    "artifactRole": "isolated_vedic_draft_transition_candidate_schema",
+    "authorityEffect": "none",
+    "candidateOnly": true,
+    "commitObserved": false,
+    "countsTowardFormalAdmission": false,
+    "expertClaimsAuthorized": false,
+    "formalAdmissionAuthorized": false,
+    "issuedReceipt": false,
+    "independentProductIdentityEstablished": false,
+    "mutationEpochRuntimeEstablished": false,
+    "persistedReceipt": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false
+  },
+  "x-hakimiReviewContentDigestFields": [
+    "selectedValueSetDigest",
+    "targetUseProfileDigest",
+    "questionSetDigest",
+    "sourceBindingManifestDigest",
+    "threeLayerRightsEvidenceManifestDigest",
+    "validatorProfileSetDigest",
+    "privateLifecyclePolicyDigest",
+    "distributionOperationSetDigest",
+    "targetJurisdictionSetDigest",
+    "reviewInstructionAndDisagreementPolicyDigest"
+  ],
+  "x-hakimiEvaluatorInvariants": {
+    "enforcedBy": "evaluateVedicInputAdmissionTransition and parseCanonicalVedicGovernancePacket",
+    "jsonSchemaAloneProvesCrossFieldEquality": false,
+    "rules": [
+      "afterEpoch equals beforeEpoch plus one only in the returned draft candidate calculation; mutationEpochRuntimeEstablished remains false and no commit is observed",
+      "packet admissionCycleId and packetId suffixes equal packetManifestDigest",
+      "candidateReceipt packetDigest, packetId, and packetManifestDigest equal the corresponding packet fields",
+      "nextRevocationLedgerHeadDigest equals previousRevocationLedgerHeadDigest",
+      "all packet set, manifest, privacy, receipt, state, nonce-head, and chain-head digests are domain-separated evaluator recomputations"
+    ]
+  }
+}

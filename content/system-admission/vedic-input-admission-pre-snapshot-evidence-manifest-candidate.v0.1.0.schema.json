@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hakimi:vedic:input-admission:pre-snapshot-evidence-manifest-candidate:0.1.0",
+  "title": "Vedic pre-snapshot evidence manifest candidate projection",
+  "description": "Closed schema for a local diagnostic projection only. It is not a receipt, a sealed manifest, an accepted instance, or evidence that any upstream transition guard is satisfied.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "admissionCycleId",
+    "declaredManifestDigestDomain",
+    "manifestId",
+    "packetDigest",
+    "packetDigestDomain",
+    "packetId",
+    "packetManifestDigest",
+    "receiptReferences",
+    "revocationObservation",
+    "schemaVersion"
+  ],
+  "properties": {
+    "admissionCycleId": {
+      "type": "string",
+      "pattern": "^vedic-admission-cycle/[0-9a-f]{64}$"
+    },
+    "declaredManifestDigestDomain": {
+      "const": "hakimi/vedic-input-admission/pre-snapshot-evidence-manifest/v0.1.0"
+    },
+    "manifestId": {
+      "const": "pre_snapshot_evidence_manifest"
+    },
+    "packetDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "packetDigestDomain": {
+      "const": "hakimi/vedic-input-admission-kernel-draft/governance-packet/v0.1"
+    },
+    "packetId": {
+      "type": "string",
+      "pattern": "^vedic-governance-packet/[0-9a-f]{64}$"
+    },
+    "packetManifestDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "receiptReferences": {
+      "type": "array",
+      "maxItems": 512,
+      "items": {
+        "$ref": "#/$defs/receiptReference"
+      }
+    },
+    "revocationObservation": {
+      "$ref": "#/$defs/revocationObservation"
+    },
+    "schemaVersion": {
+      "const": "hakimi.vedic-pre-snapshot-evidence-manifest-candidate/0.1-draft"
+    }
+  },
+  "$defs": {
+    "receiptId": {
+      "type": "string",
+      "pattern": "^vedic-receipt/[0-9a-f]{32,128}$"
+    },
+    "receiptReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "admissionCycleId",
+        "packetDigest",
+        "packetDigestDomain",
+        "packetId",
+        "packetManifestDigest",
+        "receiptDigest",
+        "receiptId",
+        "receiptKind"
+      ],
+      "properties": {
+        "admissionCycleId": {
+          "type": "string",
+          "pattern": "^vedic-admission-cycle/[0-9a-f]{64}$"
+        },
+        "packetDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "packetDigestDomain": {
+          "const": "hakimi/vedic-input-admission-kernel-draft/governance-packet/v0.1"
+        },
+        "packetId": {
+          "type": "string",
+          "pattern": "^vedic-governance-packet/[0-9a-f]{64}$"
+        },
+        "packetManifestDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "receiptDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "receiptId": {
+          "$ref": "#/$defs/receiptId"
+        },
+        "receiptKind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,95}$"
+        }
+      }
+    },
+    "revocationObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "activeCorrectionReceiptIds",
+        "activeRevocationReceiptIds",
+        "activeWithdrawalReceiptIds",
+        "revocationLedgerHeadDigest"
+      ],
+      "properties": {
+        "activeCorrectionReceiptIds": {
+          "type": "array",
+          "maxItems": 512,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/receiptId"
+          }
+        },
+        "activeRevocationReceiptIds": {
+          "type": "array",
+          "maxItems": 512,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/receiptId"
+          }
+        },
+        "activeWithdrawalReceiptIds": {
+          "type": "array",
+          "maxItems": 512,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/receiptId"
+          }
+        },
+        "revocationLedgerHeadDigest": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "x-hakimiManifestContractProjection": {
+    "includedReceiptKinds": [
+      "frozen_packet_receipt",
+      "owner_selection_receipt",
+      "source_or_first_party_binding_receipt",
+      "three_layer_rights_evidence_receipt",
+      "vedic_domain_expert_opinion_binding_receipt",
+      "domain_disagreement_inventory_receipt",
+      "source_rights_review_receipt",
+      "legal_authority_disposition_receipt",
+      "structural_validator_receipt",
+      "semantic_validator_receipt",
+      "private_lifecycle_public_non_person_attestation_receipt"
+    ],
+    "excludedOutputReceiptKinds": [
+      "admission_epoch_snapshot_receipt",
+      "conditions_one_to_seven_evaluation_receipt",
+      "supersession_intent_receipt",
+      "supersession_commit_receipt",
+      "final_readiness_evaluation_receipt"
+    ],
+    "definedReceiptCardinalities": {
+      "domain_disagreement_inventory_receipt": 1,
+      "frozen_packet_receipt": 1,
+      "owner_selection_receipt": 13,
+      "private_lifecycle_public_non_person_attestation_receipt": 1,
+      "semantic_validator_receipt": 1,
+      "source_or_first_party_binding_receipt": 13,
+      "source_rights_review_receipt": 2,
+      "structural_validator_receipt": 1,
+      "three_layer_rights_evidence_receipt": 13,
+      "vedic_domain_expert_opinion_binding_receipt": 2
+    },
+    "undefinedReceiptCardinalityKinds": [
+      "legal_authority_disposition_receipt"
+    ],
+    "candidateRootAndEntryShapesAreUpstreamNormative": false,
+    "candidateDigestMayBeUsedAsFormalManifestOrIdempotencyIdentity": false,
+    "entryOrderingIsUpstreamNormative": false,
+    "localDiagnosticReceiptIdPatternIsUpstreamNormative": false,
+    "localDiagnosticReceiptReferenceLimitIsUpstreamNormative": false,
+    "receiptIdUniquenessEstablishedBySchemaAlone": false,
+    "receiptKindExactSetEstablishedBySchemaAlone": false,
+    "revocationObservationShapeIsUpstreamNormative": false
+  },
+  "x-hakimiBoundary": {
+    "acceptedReceipt": false,
+    "artifactRole": "isolated_vedic_manifest_candidate_projection_schema",
+    "authorityEffect": "none",
+    "candidateOnly": true,
+    "countsTowardFormalAdmission": false,
+    "executableReceiptSchemasAvailable": false,
+    "expertClaimsAuthorized": false,
+    "formalAdmissionAuthorized": false,
+    "formalManifestInstanceCreated": false,
+    "legalAuthorityDispositionCardinalityDefined": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "runtimeRevocationRecheckEstablished": false,
+    "sealedManifestEstablished": false
+  }
+}

@@ -1,0 +1,441 @@
+{
+  "$defs": {
+    "canonicalQuantity": {
+      "additionalProperties": false,
+      "properties": {
+        "quantity_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "quantization_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "value_text": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value_text",
+        "quantity_definition_ref",
+        "quantization_definition_ref"
+      ],
+      "type": "object"
+    },
+    "identityReference": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "sha256"
+      ],
+      "type": "object"
+    },
+    "positionFact": {
+      "additionalProperties": false,
+      "properties": {
+        "fact_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "rashi_segment_ref": {
+          "$ref": "#/$defs/rashiSegmentReference"
+        },
+        "sidereal_longitude": {
+          "$ref": "#/$defs/canonicalQuantity"
+        },
+        "subject_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        }
+      },
+      "required": [
+        "fact_id",
+        "subject_definition_ref",
+        "sidereal_longitude",
+        "rashi_segment_ref"
+      ],
+      "type": "object"
+    },
+    "rashiSegmentReference": {
+      "additionalProperties": false,
+      "properties": {
+        "catalog_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "segment_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "catalog_ref",
+        "segment_id"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "urn:hakimi:vedic:fact-contract-draft:0.1.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "basis": {
+      "additionalProperties": false,
+      "properties": {
+        "accepted_input_artifact_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "ayanamsa_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "bhava_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "coordinate_frame_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "ephemeris_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "evaluated_candidate_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "fact_generation_implementation_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "graha_catalog_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "input_acceptance_receipt_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "input_contract_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "node_mode_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "numeric_representation_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "rashi_catalog_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "runtime_artifact_set_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "sidereal_zodiac_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "time_scale_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "utc_conversion_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        }
+      },
+      "required": [
+        "input_contract_ref",
+        "accepted_input_artifact_ref",
+        "input_acceptance_receipt_ref",
+        "evaluated_candidate_ref",
+        "fact_generation_implementation_ref",
+        "runtime_artifact_set_ref",
+        "utc_conversion_definition_ref",
+        "time_scale_definition_ref",
+        "ephemeris_definition_ref",
+        "sidereal_zodiac_definition_ref",
+        "ayanamsa_definition_ref",
+        "node_mode_definition_ref",
+        "bhava_definition_ref",
+        "coordinate_frame_definition_ref",
+        "numeric_representation_definition_ref",
+        "graha_catalog_definition_ref",
+        "rashi_catalog_definition_ref"
+      ],
+      "type": "object"
+    },
+    "bhavaFacts": {
+      "additionalProperties": false,
+      "properties": {
+        "boundaries": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "bhava_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "sidereal_longitude": {
+                "$ref": "#/$defs/canonicalQuantity"
+              }
+            },
+            "required": [
+              "bhava_id",
+              "sidereal_longitude"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "subject_assignments": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "bhava_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "subject_fact_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "subject_fact_id",
+              "bhava_id"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "definition_ref",
+        "boundaries",
+        "subject_assignments"
+      ],
+      "type": "object"
+    },
+    "contractVersion": {
+      "const": "hakimi.vedic.facts/0.1-draft"
+    },
+    "factSetId": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+    },
+    "grahaPositionFacts": {
+      "items": {
+        "$ref": "#/$defs/positionFact"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "lagnaFact": {
+      "$ref": "#/$defs/positionFact"
+    },
+    "observationInstantFact": {
+      "additionalProperties": false,
+      "properties": {
+        "canonical_instant_text": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "representation_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        },
+        "time_scale_definition_ref": {
+          "$ref": "#/$defs/identityReference"
+        }
+      },
+      "required": [
+        "canonical_instant_text",
+        "representation_definition_ref",
+        "time_scale_definition_ref"
+      ],
+      "type": "object"
+    },
+    "systemId": {
+      "const": "vedic"
+    }
+  },
+  "required": [
+    "contractVersion",
+    "systemId",
+    "factSetId",
+    "basis",
+    "observationInstantFact",
+    "grahaPositionFacts",
+    "lagnaFact",
+    "bhavaFacts"
+  ],
+  "title": "Hakimi Vedic fact contract draft 0.1.0",
+  "type": "object",
+  "x-hakimiBoundary": {
+    "angleRangeOrCoordinateSemanticsEstablished": false,
+    "artifactRole": "project_authored_isolated_fact_contract_draft",
+    "authenticityEstablished": false,
+    "authorityStatus": "not-authoritative",
+    "authorshipAuthenticityEstablished": false,
+    "authorshipClaim": "project_authored_clean_room_draft",
+    "baziArtifactRefs": [],
+    "baziAuthorityInherited": false,
+    "blockedPrerequisiteIds": [
+      "accepted_input_and_evaluated_candidate_identity",
+      "fact_generation_implementation_identity",
+      "observation_instant_and_time_scale_semantics",
+      "coordinate_frame_and_numeric_representation_semantics",
+      "graha_catalog_and_position_semantics",
+      "rahu_ketu_node_mode_and_position_invariant",
+      "lagna_definition_and_position_semantics",
+      "rashi_catalog_segmentation_and_boundary_semantics",
+      "bhava_definition_geometry_and_assignment_semantics",
+      "candidate_transition_provenance_semantics",
+      "fact_completeness_uniqueness_and_cross_field_invariants",
+      "rejection_channel_and_no_partial_fact_artifact"
+    ],
+    "boundaryBindings": {
+      "bindingDirection": "fact_draft_to_adr_input_draft_and_input_requirements_only",
+      "inputContractDraft": {
+        "artifactRole": "project_authored_isolated_input_contract_draft",
+        "bytes": 16529,
+        "path": "content/system-admission/vedic-input-contract-draft.v0.1.0.schema.json",
+        "rawHashAndSemanticInspectionUseSameBuffer": true,
+        "schemaSemanticDigest": "ad9a1d568d63296d3ed19f30d91cb8f8e52f543afcec03f238178da4af70ee08",
+        "schemaStatus": "isolated_contract_draft",
+        "sha256": "4899e8fdf267a44e401295f23e11e2504e45f8e2f731c6be9b8ad1435e8dbf69"
+      },
+      "inputContractRequirements": {
+        "artifactRole": "non_product_governance_requirements_inventory",
+        "bytes": 15859,
+        "inputContractGateSatisfied": false,
+        "ledgerDigest": "e545c254d29902df58e29ca90f965333daca70f06bce03cca62ad9e2f4fc7ac0",
+        "path": "content/system-admission/vedic-input-contract-requirements.v1.json",
+        "rawHashAndSemanticInspectionUseSameBuffer": true,
+        "requirementsResolved": 0,
+        "sha256": "85409d7f4ed7ef6bddc4d34102ecff479fd8dbe4210a78416f90ee705a0f2e59",
+        "status": "input_contract_draft_present_zero_instances_not_admitted"
+      },
+      "productBoundaryAdr": {
+        "bytes": 4531,
+        "path": "docs/吠陀占星独立产品化ADR-0001-2026-08-26.md",
+        "rawHashAndSemanticInspectionUseSameBuffer": true,
+        "semanticDigest": "1a71b363132b0d61298f53f7e14eb77d58a3eb3f7d649d8d3c8f42fd1acd1a89",
+        "sha256": "0e9b81505abb963b4d64426338b8071cd8a211eed8d02fe76065fada335dce63"
+      }
+    },
+    "canonicalQuantityEncodingScope": "v0.1_nonnegative_decimal_text_shape_only",
+    "comparisonIncluded": false,
+    "countsTowardAdmission": false,
+    "deterministicFactsGateSatisfied": false,
+    "domainAuthorityAuthorized": false,
+    "excludedUnreviewedCandidateMethods": [
+      "d9_divisional_chart",
+      "d10_divisional_chart",
+      "other_divisional_charts",
+      "vimshottari_dasha",
+      "chara_karaka",
+      "shadbala",
+      "ashtakavarga"
+    ],
+    "expertClaimsAuthorized": false,
+    "externalSourceRefs": [],
+    "factContractGateSatisfied": false,
+    "factFamilyBlockedPrerequisiteMap": {
+      "bhava_facts": [
+        "accepted_input_and_evaluated_candidate_identity",
+        "fact_generation_implementation_identity",
+        "coordinate_frame_and_numeric_representation_semantics",
+        "bhava_definition_geometry_and_assignment_semantics",
+        "candidate_transition_provenance_semantics",
+        "fact_completeness_uniqueness_and_cross_field_invariants",
+        "rejection_channel_and_no_partial_fact_artifact"
+      ],
+      "graha_position_facts": [
+        "accepted_input_and_evaluated_candidate_identity",
+        "fact_generation_implementation_identity",
+        "coordinate_frame_and_numeric_representation_semantics",
+        "graha_catalog_and_position_semantics",
+        "rahu_ketu_node_mode_and_position_invariant",
+        "rashi_catalog_segmentation_and_boundary_semantics",
+        "candidate_transition_provenance_semantics",
+        "fact_completeness_uniqueness_and_cross_field_invariants",
+        "rejection_channel_and_no_partial_fact_artifact"
+      ],
+      "lagna_fact": [
+        "accepted_input_and_evaluated_candidate_identity",
+        "fact_generation_implementation_identity",
+        "coordinate_frame_and_numeric_representation_semantics",
+        "lagna_definition_and_position_semantics",
+        "rashi_catalog_segmentation_and_boundary_semantics",
+        "candidate_transition_provenance_semantics",
+        "fact_completeness_uniqueness_and_cross_field_invariants",
+        "rejection_channel_and_no_partial_fact_artifact"
+      ],
+      "observation_instant_fact": [
+        "accepted_input_and_evaluated_candidate_identity",
+        "fact_generation_implementation_identity",
+        "observation_instant_and_time_scale_semantics",
+        "candidate_transition_provenance_semantics",
+        "fact_completeness_uniqueness_and_cross_field_invariants",
+        "rejection_channel_and_no_partial_fact_artifact"
+      ]
+    },
+    "factFamilyIds": [
+      "observation_instant_fact",
+      "graha_position_facts",
+      "lagna_fact",
+      "bhava_facts"
+    ],
+    "factGenerationCapability": false,
+    "factInstancesIncluded": 0,
+    "factReceiptCapability": false,
+    "factReceiptIssued": false,
+    "formalAdmissionAuthorized": false,
+    "inputAcceptanceReceiptIssued": false,
+    "inputContractGateSatisfied": false,
+    "integrationStatus": "not-integrated",
+    "methodSelectionsIncluded": 0,
+    "observationBoundary": {
+      "abaExcluded": false,
+      "crossFileAtomicSnapshot": false,
+      "heldFileHandleReads": true,
+      "intervalMutationExcluded": false,
+      "mutationEpochAvailable": false,
+      "mutationEpochReceipt": null,
+      "pathEndpointRevalidated": true,
+      "plainDirectoryChainRequired": true,
+      "schemaHashAndParseUseSameReadBuffer": true,
+      "upstreamArtifactHashAndInspectionUseSameReadBuffer": true
+    },
+    "productStatus": "research-only",
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "requirementSelectionsIncluded": 0,
+    "requirementsResolved": 0,
+    "rightsEstablished": false,
+    "schemaStatus": "isolated_contract_draft",
+    "sourceBindingEstablished": false,
+    "structuralPrecheckCountsAsFactValidation": false,
+    "structuralPrecheckOnly": true
+  }
+}
