@@ -43,7 +43,7 @@ import {
   RUNTIME_TZDB_VERSION,
   type BundledTimeZoneCalculationContext
 } from "@hakimi/time-core";
-import { LunarUtil, Solar } from "lunar-typescript";
+import { LunarUtil, Solar, type Lunar } from "lunar-typescript";
 import {
   HISTORICAL_NATAL_ENGINE_0_4_0,
   calculateHistoricalNatalChart040
@@ -480,11 +480,10 @@ function buildPillar(seed: PillarSeed, dayStem: string, dayStemIndex: number): P
 }
 
 function buildHybridPillars(
-  fixedEightSolar: Solar,
+  fixedEightLunar: Lunar,
   localCivilSolar: Solar,
   dayBoundary: RuleProfile["calendar"]["dayBoundary"]
 ): ChartFacts["pillars"] {
-  const fixedEightLunar = fixedEightSolar.getLunar();
   const localCivilLunar = localCivilSolar.getLunar();
   const useZiStart = dayBoundary === "zi_start_23";
   const dayStemIndex = useZiStart
@@ -567,7 +566,7 @@ export function calculateTransitPillarsAtInstant(
     fixedPlusEightWallDateTime,
     dayBoundary: ruleProfile.calendar.dayBoundary,
     pillars: buildHybridPillars(
-      solarFromWallTime(fixedPlusEightWallDateTime),
+      solarFromWallTime(fixedPlusEightWallDateTime).getLunar(),
       solarFromWallTime(local.wallDateTime),
       ruleProfile.calendar.dayBoundary
     )
@@ -676,7 +675,7 @@ async function buildCalculatedChart(
   const localCivilSolar = solarFromWallTime(localCivilWallTime);
   const fixedEightSolar = solarFromWallTime(fixedEightWallTime);
   const fixedEightLunar = fixedEightSolar.getLunar();
-  const pillars = buildHybridPillars(fixedEightSolar, localCivilSolar, ruleProfile.calendar.dayBoundary);
+  const pillars = buildHybridPillars(fixedEightLunar, localCivilSolar, ruleProfile.calendar.dayBoundary);
 
   const previousJie = fixedEightLunar.getPrevJie(false);
   const nextJie = fixedEightLunar.getNextJie(false);
@@ -756,14 +755,22 @@ export async function calculateChart(
   const input = birthInputSchema.parse(rawInput);
   const ruleProfile = ruleProfileSchema.parse(rawRuleProfile);
   assertS0Support(input, ruleProfile);
-  const policy = disambiguationPolicy(ruleProfile, options.dstResolutionOverride);
+  const dstResolutionOverride = options.dstResolutionOverride;
+  const parsedRulePackBinding = options.rulePackBinding === undefined
+    ? null
+    : rulePackBindingSchema.safeParse(options.rulePackBinding);
+  if (parsedRulePackBinding && !parsedRulePackBinding.success) {
+    throw new UnsupportedCalculationError("规则包绑定结构无效，已拒绝计算。");
+  }
+  const rulePackBinding = parsedRulePackBinding?.data;
+  const policy = disambiguationPolicy(ruleProfile, dstResolutionOverride);
   const [binding, timeCalibration] = await Promise.all([
-    bindCalculationRulePack(ruleProfile, options.rulePackBinding),
+    bindCalculationRulePack(ruleProfile, rulePackBinding),
     Promise.resolve(normalizeBirthTime(input, policy))
   ]);
   const supportedRange = assessSupportedRange(ruleProfile, timeCalibration);
-  const warnings = options.dstResolutionOverride !== undefined && ruleProfile.calendar.dstAmbiguity === "require_user"
-    ? [`本次 DST 歧义按显式 override=${options.dstResolutionOverride} 解析；RuleProfile 仍保留 require_user，未被临时改写。`]
+  const warnings = dstResolutionOverride !== undefined && ruleProfile.calendar.dstAmbiguity === "require_user"
+    ? [`本次 DST 歧义按显式 override=${dstResolutionOverride} 解析；RuleProfile 仍保留 require_user，未被临时改写。`]
     : [];
   return buildCalculatedChart(input, ruleProfile, timeCalibration, {
     ...binding,

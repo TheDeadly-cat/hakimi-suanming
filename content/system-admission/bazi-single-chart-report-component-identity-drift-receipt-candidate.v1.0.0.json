@@ -1,0 +1,136 @@
+{
+  "authorityBoundary": {
+    "browserRuntimeEvidenceEstablished": false,
+    "contentTruthEstablished": false,
+    "crossSystemAuthorityInheritanceAllowed": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "publicDeploymentAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "safeToPublish": false
+  },
+  "blockingRelationship": {
+    "blocksCallingFormalV22Current": true,
+    "blocksCurrentReportComponentIdentityClosure": true,
+    "code": "COMPONENT_FILE_IDENTITY_DRIFT",
+    "otherFormalComponentIdentitiesAssessedByThisReceipt": false,
+    "path": "packages/research-export/src/single-chart-report.ts",
+    "uniqueBlockerClaimed": false
+  },
+  "candidateId": "hakimi.bazi.single-chart-report.component-identity-drift-receipt-candidate/1.0.0",
+  "candidateStatus": "candidate_only_component_drift_observation_no_manifest_authority",
+  "createdAt": "2026-09-01T04:31:00.000Z",
+  "doesNotEstablish": [
+    "current-full-domain-manifest",
+    "manifest-rebind-or-resign-authorization",
+    "binding-freeze",
+    "source-or-rights-completeness",
+    "expert-review-completeness",
+    "content-truth",
+    "expert-truth",
+    "rights-legal-conclusion",
+    "browser-or-runtime-evidence",
+    "release-readiness",
+    "public-deployment-authorization",
+    "cross-system-authority"
+  ],
+  "gateSummary": {
+    "basis": "formal-v2.2-historical-baseline-not-current-admission-replay",
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 12,
+    "currentAdmissionReplayPerformedByThisReceipt": false,
+    "expertReviewBundleComplete": false,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "releaseEvidenceComplete": false,
+    "rightsBundleComplete": false,
+    "sourceBundleComplete": false
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "activeAdmissionEffect": "none",
+    "crossFileAtomicSnapshot": false,
+    "currentFullComponentSetObserved": false,
+    "currentFullDomainManifestEstablished": false,
+    "currentReportSourceBytesVerified": true,
+    "endpointObservationOnly": true,
+    "engineeringObservationEstablished": true,
+    "formalHistoricalManifestBytesVerified": true,
+    "frozenGoldenBytesVerified": true,
+    "intervalMutationExcludedAcrossFiles": false,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "persistedAsDomainManifest": false,
+    "sameHeldBufferPerFile": true
+  },
+  "ownerDecisionBoundary": {
+    "manifestRebindAuthorized": false,
+    "manifestResignAuthorized": false,
+    "ownerAcceptanceVerified": false,
+    "ownerAttributionVerified": false,
+    "ownerDecisionsRecorded": 0,
+    "releaseCandidateFreezeAuthorized": false
+  },
+  "receiptDigest": "95e5a1b99d0a021a0fabf6c42e1cc8de432b9565459a091e577d57abbcea5fc8",
+  "recordType": "bazi_single_chart_report_component_identity_drift_receipt_candidate",
+  "releaseGovernance": {
+    "migrationId": null,
+    "releaseIdentity": "legacy-v13",
+    "targetSchema": 13
+  },
+  "runtimeTrustBoundary": {
+    "cliOutputTrustedAttestation": false,
+    "hiddenPreloadExcluded": false,
+    "loaderIdentityEstablished": false,
+    "mechanicalResultAssumesNoArbitraryPreEvaluationCodeExecution": true,
+    "nodeRuntimeIdentityEstablished": false,
+    "runtimeLauncherIdentityEstablished": false,
+    "visiblePreloadGuardIsSecurityBoundary": false
+  },
+  "schemaVersion": "1.0.0",
+  "scope": {
+    "formalManifest": {
+      "currentAfterComponentChange": false,
+      "fullLoaderReplayPerformed": false,
+      "manifestDigest": "a95e722674c0b09a2d564b4090396fbfc25fdfc2f5f2fff9aedc92aa2468f68e",
+      "manifestId": "hakimi.bazi.single-chart-report.domain-release-manifest/2.2.0",
+      "manifestRevision": "2.2.0",
+      "path": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.2.0.json",
+      "privateBrandCurrent": false,
+      "rawBytes": 23399,
+      "rawSha256": "6481d5edfa9f9819af035ad9d208ea526fa7b29f12ccd6e072ad31f625e7f86d"
+    },
+    "frozenGolden": {
+      "currentRawBytes": 60900,
+      "currentSha256": "aba357d98a99271cc9a9b2727ad1c7c516424c94b7cf34f765cb38b0e9a74b29",
+      "expectedRawBytes": 60900,
+      "expectedSha256": "aba357d98a99271cc9a9b2727ad1c7c516424c94b7cf34f765cb38b0e9a74b29",
+      "path": "packages/research-export/src/golden/single-chart-report.contract.v1.7.json",
+      "unchanged": true
+    },
+    "productVersion": "1.7",
+    "reportComponent": {
+      "componentId": "report_contract",
+      "currentObservedDigest": "6dd730cabb3035567694599692439a1b27f48e89ea0ee0970bbb33f5f7ee95f2",
+      "digestChanged": true,
+      "driftEntries": [
+        {
+          "currentRawBytes": 164210,
+          "currentSha256": "43da8ce98eb0b09c061e6997dd140ffd3ad3dd597cb30720413fd67cf724d2dc",
+          "failureCode": "COMPONENT_FILE_IDENTITY_DRIFT",
+          "path": "packages/research-export/src/single-chart-report.ts",
+          "persistedRawBytes": 161365,
+          "persistedSha256": "215a470e79ea6eb844b41a5aad18867279d1a7ae60fd2b9cf6a364cc2c1b5082"
+        }
+      ],
+      "persistedDigest": "621cb0422729a3e5e12434f5c1c9ff5bf0f06e2d7bd2493deb5b5387f4957268",
+      "status": "bound_frozen_golden_engineering_contract",
+      "version": "single-chart-report@1.7.0"
+    },
+    "surfaceId": "single-chart-report",
+    "surfaceVersion": "1.7.0",
+    "systemId": "bazi"
+  }
+}

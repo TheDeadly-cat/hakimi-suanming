@@ -1,0 +1,461 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "bazi_prc_copyright_law_public_evidence_observation_v1",
+  "observationId": "hakimi.bazi.source-rights.prc-copyright-law-public-evidence/1.0.0",
+  "status": "link_only_operator_recorded_ncac_page_claims_non_adjudicative_not_formal_rights_record",
+  "observedDate": "2026-08-29",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "parentSourceRightsLedger": {
+    "path": "content/bazi-strength-source-rights-candidates.v1.json",
+    "rawBytes": 20806,
+    "rawSha256": "433116caf1a2b9c233739093b0a2436f13c7f268dfa8af6c1ce481964b48b179",
+    "ledgerId": "hakimi.bazi.strength.source-rights-candidates/1.1.0",
+    "ledgerDigest": "3776e4b8799ca5221c1765a735c3e34c637b4f4952c9243836fedfbf1ee30a36",
+    "rightsCandidateIds": [
+      "smt-siku-v10-wikisource-r761703-rights-candidate-v1",
+      "dtt-chanwei-wikisource-r2600158-rights-candidate-v1",
+      "smt-v5-wikisource-r2706483-rights-candidate-v1",
+      "yhzp-wikisource-r2593607-rights-candidate-v1"
+    ]
+  },
+  "parentSourceBindingLedger": {
+    "path": "content/bazi-strength-source-binding-candidates.v1.json",
+    "rawBytes": 47753,
+    "rawSha256": "e2ac6a7a0ea1209dd92a38dfae82c494df4792da1a102c11d2fdb2caa80e41f7",
+    "ledgerId": "hakimi.bazi.strength.source-binding-candidates/1.5.0",
+    "ledgerDigest": "44ed9e23490c11c625602b77574efbf7331305bd1bf87634c5b91f568e8b85af",
+    "candidateCount": 4
+  },
+  "basisArtifact": {
+    "path": "docs/阶段C中国现行著作权法公开证据观察-child-v1-2026-08-29.md",
+    "role": "non_authoritative_link_only_public_law_observation_narrative_basis",
+    "rawBytes": 7867,
+    "rawSha256": "737b271ebf526b34e10ad3462657fe3baa1eec4ef2ccf417bdeb098fc2d296c4"
+  },
+  "operatorRecordedPublisherPageGroupPolicy": {
+    "deduplicationKey": "sourceUpstreamGroupId",
+    "samePublisherPageGroupCountsOnce": true,
+    "operatorRecordedPublicationCount": 2,
+    "deduplicatedPublisherPageGroupCount": 1
+  },
+  "operatorRecordedPublisherPageGroups": [
+    {
+      "sourceUpstreamGroupId": "PRC_NCAC_COPYRIGHT_LAW_2020_PUBLICATION_FAMILY",
+      "operatorRecordedPublisherLabel": "中华人民共和国国家版权局",
+      "publicationIds": [
+        "NCAC-CONSOLIDATED-COPYRIGHT-LAW-2020",
+        "NCAC-2020-AMENDMENT-DECISION"
+      ]
+    }
+  ],
+  "operatorRecordedPublications": [
+    {
+      "publicationId": "NCAC-CONSOLIDATED-COPYRIGHT-LAW-2020",
+      "sourceUpstreamGroupId": "PRC_NCAC_COPYRIGHT_LAW_2020_PUBLICATION_FAMILY",
+      "requestedUrl": "https://www.ncac.gov.cn/xxfb/flfg/flfg_532/202103/t20210309_50530.html",
+      "publicationRole": "operator_observed_page_labeled_consolidated_2020_amended_law_text",
+      "operatorRecordedPublisherLabel": "中华人民共和国国家版权局",
+      "immediateTransportReads": [
+        {
+          "ordinal": 1,
+          "startedAt": "2026-08-29T14:30:34.399Z",
+          "completedAt": "2026-08-29T14:30:35.046Z",
+          "httpStatus": 200,
+          "finalUrl": "https://www.ncac.gov.cn/xxfb/flfg/flfg_532/202103/t20210309_50530.html",
+          "redirected": false,
+          "contentType": "text/html",
+          "contentEncoding": null,
+          "deliveredDecodedBodyBytes": 122716,
+          "deliveredDecodedBodySha256": "e27fccf5c3a0f29439d7e165f09e4e3d148ac301c16f71d0210339c175cca4f3"
+        },
+        {
+          "ordinal": 2,
+          "startedAt": "2026-08-29T14:30:35.047Z",
+          "completedAt": "2026-08-29T14:30:35.269Z",
+          "httpStatus": 200,
+          "finalUrl": "https://www.ncac.gov.cn/xxfb/flfg/flfg_532/202103/t20210309_50530.html",
+          "redirected": false,
+          "contentType": "text/html",
+          "contentEncoding": null,
+          "deliveredDecodedBodyBytes": 122716,
+          "deliveredDecodedBodySha256": "e27fccf5c3a0f29439d7e165f09e4e3d148ac301c16f71d0210339c175cca4f3"
+        }
+      ],
+      "immediatePairStableOperatorRecorded": true,
+      "semanticCapture": {
+        "startedAt": "2026-08-29T14:32:02.975Z",
+        "completedAt": "2026-08-29T14:32:03.232Z",
+        "httpStatus": 200,
+        "finalUrl": "https://www.ncac.gov.cn/xxfb/flfg/flfg_532/202103/t20210309_50530.html",
+        "redirected": false,
+        "contentType": "text/html",
+        "contentEncoding": null,
+        "deliveredDecodedBodyBytes": 122716,
+        "deliveredDecodedBodySha256": "e27fccf5c3a0f29439d7e165f09e4e3d148ac301c16f71d0210339c175cca4f3"
+      },
+      "operatorRecordedSummary": "国家版权局公开页面呈现经 2020 年第三次修正后的《中华人民共和国著作权法》全文；本 child 只记录版本与条款定位证据。",
+      "requestedUrlNcacHostnameObserved": true,
+      "publisherAuthenticityEstablished": false
+    },
+    {
+      "publicationId": "NCAC-2020-AMENDMENT-DECISION",
+      "sourceUpstreamGroupId": "PRC_NCAC_COPYRIGHT_LAW_2020_PUBLICATION_FAMILY",
+      "requestedUrl": "https://www.ncac.gov.cn/xxfb/ywxx/202011/t20201112_47358.html",
+      "publicationRole": "operator_observed_page_labeled_2020_amendment_decision_and_effective_date",
+      "operatorRecordedPublisherLabel": "中华人民共和国国家版权局",
+      "immediateTransportReads": [
+        {
+          "ordinal": 1,
+          "startedAt": "2026-08-29T14:30:35.269Z",
+          "completedAt": "2026-08-29T14:30:35.385Z",
+          "httpStatus": 200,
+          "finalUrl": "https://www.ncac.gov.cn/xxfb/ywxx/202011/t20201112_47358.html",
+          "redirected": false,
+          "contentType": "text/html",
+          "contentEncoding": null,
+          "deliveredDecodedBodyBytes": 68007,
+          "deliveredDecodedBodySha256": "46491a9386aa385e1b471e0021fe51bfe2972da57732ef3f0d2c0bb605d3c2a2"
+        },
+        {
+          "ordinal": 2,
+          "startedAt": "2026-08-29T14:30:35.385Z",
+          "completedAt": "2026-08-29T14:30:35.479Z",
+          "httpStatus": 200,
+          "finalUrl": "https://www.ncac.gov.cn/xxfb/ywxx/202011/t20201112_47358.html",
+          "redirected": false,
+          "contentType": "text/html",
+          "contentEncoding": null,
+          "deliveredDecodedBodyBytes": 68007,
+          "deliveredDecodedBodySha256": "46491a9386aa385e1b471e0021fe51bfe2972da57732ef3f0d2c0bb605d3c2a2"
+        }
+      ],
+      "immediatePairStableOperatorRecorded": true,
+      "semanticCapture": {
+        "startedAt": "2026-08-29T14:32:03.367Z",
+        "completedAt": "2026-08-29T14:32:03.902Z",
+        "httpStatus": 200,
+        "finalUrl": "https://www.ncac.gov.cn/xxfb/ywxx/202011/t20201112_47358.html",
+        "redirected": false,
+        "contentType": "text/html",
+        "contentEncoding": null,
+        "deliveredDecodedBodyBytes": 68007,
+        "deliveredDecodedBodySha256": "46491a9386aa385e1b471e0021fe51bfe2972da57732ef3f0d2c0bb605d3c2a2"
+      },
+      "operatorRecordedSummary": "国家版权局公开页面呈现 2020 年修改决定及 2021-06-01 施行日期；本 child 不据此完成候选作品适用判断。",
+      "requestedUrlNcacHostnameObserved": true,
+      "publisherAuthenticityEstablished": false
+    }
+  ],
+  "semanticEvidence": {
+    "normalization": "jsdom_body_text_nbsp_to_ascii_space_ecmascript_whitespace_collapse_trim_v1",
+    "lawProvisionFragments": [
+      {
+        "provisionEvidenceId": "PRC-CRL-2020-ARTICLE-5",
+        "publicationId": "NCAC-CONSOLIDATED-COPYRIGHT-LAW-2020",
+        "provisionLabel": "第五条",
+        "selectionRule": "unique_start_then_first_end_marker",
+        "sectionAnchor": null,
+        "startMarker": "第五条",
+        "endMarker": "第六条",
+        "startOccurrencesInNormalizedBody": 1,
+        "normalizedCharacters": 93,
+        "utf8Bytes": 271,
+        "normalizedTextSha256": "5e761fabbbf73db8697eec063954b4548064bbc0937e66231908c0b7932c96ab",
+        "operatorRecordedSummary": "法律、法规及具有立法、行政、司法性质的官方文件属于法定排除客体；不外推网页 HTML 或载体权利。",
+        "exactTextStored": false,
+        "humanLegalInterpretationVerified": false
+      },
+      {
+        "provisionEvidenceId": "PRC-CRL-2020-ARTICLE-15",
+        "publicationId": "NCAC-CONSOLIDATED-COPYRIGHT-LAW-2020",
+        "provisionLabel": "第十五条",
+        "selectionRule": "unique_start_then_first_end_marker",
+        "sectionAnchor": null,
+        "startMarker": "第十五条",
+        "endMarker": "第十六条",
+        "startOccurrencesInNormalizedBody": 1,
+        "normalizedCharacters": 91,
+        "utf8Bytes": 271,
+        "normalizedTextSha256": "e3270ef19a9b93de8f445ac879c3fc1218b2354f918cee9a0aaa31f1cb0de8de",
+        "operatorRecordedSummary": "汇编的选择或编排可能形成独立权利，行使时仍不得侵犯原作品。",
+        "exactTextStored": false,
+        "humanLegalInterpretationVerified": false
+      },
+      {
+        "provisionEvidenceId": "PRC-CRL-2020-ARTICLE-16",
+        "publicationId": "NCAC-CONSOLIDATED-COPYRIGHT-LAW-2020",
+        "provisionLabel": "第十六条",
+        "selectionRule": "unique_start_then_first_end_marker",
+        "sectionAnchor": null,
+        "startMarker": "第十六条",
+        "endMarker": "第十七条",
+        "startOccurrencesInNormalizedBody": 1,
+        "normalizedCharacters": 78,
+        "utf8Bytes": 232,
+        "normalizedTextSha256": "505b5dce829d409dbbd3fac4122afc6331ebb997247bb099d7a57613b2f81986",
+        "operatorRecordedSummary": "改编、翻译、注释、整理或汇编层与原作品层必须分账。",
+        "exactTextStored": false,
+        "humanLegalInterpretationVerified": false
+      },
+      {
+        "provisionEvidenceId": "PRC-CRL-2020-ARTICLE-22",
+        "publicationId": "NCAC-CONSOLIDATED-COPYRIGHT-LAW-2020",
+        "provisionLabel": "第二十二条",
+        "selectionRule": "unique_start_then_first_end_marker",
+        "sectionAnchor": null,
+        "startMarker": "第二十二条",
+        "endMarker": "第二十三条",
+        "startOccurrencesInNormalizedBody": 1,
+        "normalizedCharacters": 33,
+        "utf8Bytes": 97,
+        "normalizedTextSha256": "09cfb29f66b05e05a2a1d4bb92f28e3c9f03dc8c2980ae7478d709b7166540bc",
+        "operatorRecordedSummary": "署名、修改和保护作品完整等人身权期限不能由财产权期限届满替代。",
+        "exactTextStored": false,
+        "humanLegalInterpretationVerified": false
+      },
+      {
+        "provisionEvidenceId": "PRC-CRL-2020-ARTICLE-23",
+        "publicationId": "NCAC-CONSOLIDATED-COPYRIGHT-LAW-2020",
+        "provisionLabel": "第二十三条",
+        "selectionRule": "first_start_after_section_anchor_then_first_end_marker",
+        "sectionAnchor": "第三节 权利的保护期",
+        "startMarker": "第二十三条",
+        "endMarker": "第四节",
+        "startOccurrencesInNormalizedBody": 2,
+        "normalizedCharacters": 382,
+        "utf8Bytes": 1092,
+        "normalizedTextSha256": "d9e57d2c9b8a9de204b93f37c6db7163e6d916c3df115876bcb7b8610c86ce33",
+        "operatorRecordedSummary": "自然人作品相关财产权通常以作者终生及死亡后五十年为计算规则；本 child 不核验具体适用事实。",
+        "exactTextStored": false,
+        "humanLegalInterpretationVerified": false
+      },
+      {
+        "provisionEvidenceId": "PRC-CRL-2020-ARTICLE-59",
+        "publicationId": "NCAC-CONSOLIDATED-COPYRIGHT-LAW-2020",
+        "provisionLabel": "第五十九条",
+        "selectionRule": "first_start_after_section_anchor_then_first_end_marker",
+        "sectionAnchor": "第五章",
+        "startMarker": "第五十九条",
+        "endMarker": "第六十条",
+        "startOccurrencesInNormalizedBody": 1,
+        "normalizedCharacters": 167,
+        "utf8Bytes": 497,
+        "normalizedTextSha256": "9cd94af4f7bb3fba82ab593352baaf601b22a7c31bf8d27aed5a1c1a7c0968f8",
+        "operatorRecordedSummary": "合法授权、合法来源或无需许可例外需要证据，平台标签和无密钥 hash 不能替代证明。",
+        "exactTextStored": false,
+        "humanLegalInterpretationVerified": false
+      }
+    ],
+    "amendmentEffectiveDateEvidence": {
+      "provisionEvidenceId": "PRC-CRL-2020-AMENDMENT-EFFECTIVE-DATE",
+      "publicationId": "NCAC-2020-AMENDMENT-DECISION",
+      "selectionRule": "exact_literal_unique_in_normalized_body",
+      "occurrenceCount": 1,
+      "effectiveDateOperatorRecorded": "2021-06-01",
+      "normalizedCharacters": 17,
+      "utf8Bytes": 39,
+      "normalizedTextSha256": "85aa3aa30011c60915cf46ee0dba5b38172d690c70c1bddff7a0cdfc4ab64cd4",
+      "exactTextStored": false,
+      "humanLegalInterpretationVerified": false
+    },
+    "operatorRecordedFragmentDigests": true,
+    "fragmentDigestExecutionReceiptStored": false,
+    "semanticSummaryMechanicallyVerified": false
+  },
+  "candidateRuleLinks": [
+    {
+      "rightsCandidateId": "smt-siku-v10-wikisource-r761703-rights-candidate-v1",
+      "bindingId": "binding:smt-v10:whole-chart",
+      "sourceId": "smt-siku-v10-wikisource-r761703",
+      "ruleEvidenceIds": [
+        "PRC-CRL-2020-ARTICLE-15",
+        "PRC-CRL-2020-ARTICLE-16",
+        "PRC-CRL-2020-ARTICLE-22",
+        "PRC-CRL-2020-ARTICLE-23",
+        "PRC-CRL-2020-ARTICLE-59"
+      ],
+      "ruleObservationOnlyNotApplied": true,
+      "candidateAuthorIdentityAndDeathFactsVerified": false,
+      "candidateWorkJurisdictionAssessmentCompleted": false,
+      "modernEditionContributionRightsResolved": false,
+      "workLayerCleared": false,
+      "editionLayerCleared": false,
+      "carrierLayerCleared": false
+    },
+    {
+      "rightsCandidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v1",
+      "bindingId": "binding:dtt:month-command",
+      "sourceId": "dtt-chanwei-wikisource-r2600158",
+      "ruleEvidenceIds": [
+        "PRC-CRL-2020-ARTICLE-15",
+        "PRC-CRL-2020-ARTICLE-16",
+        "PRC-CRL-2020-ARTICLE-22",
+        "PRC-CRL-2020-ARTICLE-23",
+        "PRC-CRL-2020-ARTICLE-59"
+      ],
+      "ruleObservationOnlyNotApplied": true,
+      "candidateAuthorIdentityAndDeathFactsVerified": false,
+      "candidateWorkJurisdictionAssessmentCompleted": false,
+      "modernEditionContributionRightsResolved": false,
+      "workLayerCleared": false,
+      "editionLayerCleared": false,
+      "carrierLayerCleared": false
+    },
+    {
+      "rightsCandidateId": "smt-v5-wikisource-r2706483-rights-candidate-v1",
+      "bindingId": "binding:smt-v5:relative-relations",
+      "sourceId": "smt-v5-wikisource-r2706483",
+      "ruleEvidenceIds": [
+        "PRC-CRL-2020-ARTICLE-15",
+        "PRC-CRL-2020-ARTICLE-16",
+        "PRC-CRL-2020-ARTICLE-22",
+        "PRC-CRL-2020-ARTICLE-23",
+        "PRC-CRL-2020-ARTICLE-59"
+      ],
+      "ruleObservationOnlyNotApplied": true,
+      "candidateAuthorIdentityAndDeathFactsVerified": false,
+      "candidateWorkJurisdictionAssessmentCompleted": false,
+      "modernEditionContributionRightsResolved": false,
+      "workLayerCleared": false,
+      "editionLayerCleared": false,
+      "carrierLayerCleared": false
+    },
+    {
+      "rightsCandidateId": "yhzp-wikisource-r2593607-rights-candidate-v1",
+      "bindingId": "binding:yhzp:hidden-listing",
+      "sourceId": "yhzp-wikisource-r2593607",
+      "ruleEvidenceIds": [
+        "PRC-CRL-2020-ARTICLE-15",
+        "PRC-CRL-2020-ARTICLE-16",
+        "PRC-CRL-2020-ARTICLE-22",
+        "PRC-CRL-2020-ARTICLE-23",
+        "PRC-CRL-2020-ARTICLE-59"
+      ],
+      "ruleObservationOnlyNotApplied": true,
+      "candidateAuthorIdentityAndDeathFactsVerified": false,
+      "candidateWorkJurisdictionAssessmentCompleted": false,
+      "modernEditionContributionRightsResolved": false,
+      "workLayerCleared": false,
+      "editionLayerCleared": false,
+      "carrierLayerCleared": false
+    }
+  ],
+  "bindingBoundary": {
+    "childToParentsOnly": true,
+    "parentRightsLedgerMutated": false,
+    "parentSourceLedgerMutated": false,
+    "parentBacklinkAdded": false,
+    "bindingReadinessMutated": false,
+    "formalManifestMutated": false,
+    "registryMutated": false,
+    "crossSystemReceiptsMutated": false
+  },
+  "storageBoundary": {
+    "remoteResponseBodiesStored": 0,
+    "lawTextStored": 0,
+    "exactQuotesStored": 0,
+    "domSnapshotsStored": 0,
+    "screenshotsStored": 0,
+    "carrierFilesStored": 0,
+    "sourceUrlsStored": 2,
+    "fragmentDigestsStored": 7,
+    "credentialsUsed": false,
+    "loginOrProtectedBackendUsed": false,
+    "distributionPolicy": "link_only"
+  },
+  "networkObservationBoundary": {
+    "operatorRecordedNetworkFacts": true,
+    "immediateStablePairEndpoints": 2,
+    "semanticCaptureEndpoints": 2,
+    "remoteCaptureMechanicallyVerified": false,
+    "captureExecutionReceiptStored": false,
+    "operatorRecordedFragmentDigestsMechanicallyVerified": false,
+    "automaticDecompressionMechanicallyVerified": false,
+    "requestedToFinalUrlBindingEstablished": false,
+    "redirectChainCaptured": false,
+    "wireBytesCaptured": false,
+    "tlsPeerCertificateCaptured": false,
+    "futureFreshnessRevalidated": false,
+    "ncacHostnameObservationCountsAsPublisherAuthentication": false,
+    "publisherAuthenticityEstablished": false,
+    "remoteNetworkProvenanceEstablished": false
+  },
+  "rightsBoundary": {
+    "operatorRecordedPrcStatutoryRulePageClaim": true,
+    "operatorRecordedLawVersionAndEffectiveDatePageClaim": true,
+    "article5AppliedToNcacHtmlCarrier": false,
+    "statuteApplicabilityToCandidateWorksEstablished": false,
+    "candidateAuthorIdentityVerified": false,
+    "candidateAuthorDeathDatesVerified": false,
+    "jointAuthorshipResolved": false,
+    "modernAnnotationArrangementRightsResolved": false,
+    "targetDistributionJurisdictionsSelected": false,
+    "conflictOfLawsAnalyzed": false,
+    "humanLegalReviewVerified": false,
+    "formalSourceRightsRecordsCreated": 0,
+    "formalSourceCarrierRecordsCreated": 0,
+    "workLayersCleared": 0,
+    "editionLayersCleared": 0,
+    "carrierLayersCleared": 0,
+    "redistributableSources": 0,
+    "legalConclusion": "not_established",
+    "publicRepositoryInclusionAuthorized": false,
+    "buildInclusionAuthorized": false
+  },
+  "integrityBoundary": {
+    "heldHandleRead": true,
+    "sameBufferHashAndParse": true,
+    "basisSameBufferHashAndInspection": true,
+    "parentsLoadedFromHeldBuffersAndStrictlyVerified": true,
+    "rawIdentityPinned": true,
+    "semanticDigestPinned": true,
+    "finalFileSymlinkRejected": true,
+    "directorySymlinkRejected": true,
+    "hardlinkRejected": true,
+    "unknownFieldsRejected": true,
+    "callerMatchesPersistedSnapshotRequired": true,
+    "fullLoadResultWeakSetBranded": true,
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailable": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false
+  },
+  "authorityBoundary": {
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 12,
+    "realIndependentExpertsVerified": 0,
+    "expertSeatsRequired": 2,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "releaseReady": false,
+    "expertClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false
+  },
+  "doesNotEstablish": [
+    "remote_publisher_authenticity",
+    "candidate_author_identity_or_death_date",
+    "candidate_work_jurisdiction_or_conflict_of_laws",
+    "statute_application_to_any_candidate",
+    "work_edition_or_carrier_clearance",
+    "wikisource_or_commons_provenance_clearance",
+    "legal_opinion_or_legal_conclusion",
+    "formal_source_rights_or_carrier_record",
+    "source_body_or_exact_quote",
+    "binding_freeze",
+    "content_truth",
+    "expert_truth",
+    "release_readiness",
+    "public_release_authorization",
+    "cross_file_atomic_snapshot",
+    "mutation_epoch_or_interval_mutation_or_aba_exclusion"
+  ],
+  "observationDigest": "f2cbbbf2d34b6f6ee69272805799def74f582f0058de8cfbab3321a84a44146c"
+}

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta name="referrer" content="no-referrer">
+    <title>八字两席试填差异并列</title>
+    <link rel="stylesheet" href="./pair-compare.css">
+  </head>
+  <body>
+    <noscript>此本机并列工具需要启用浏览器 JavaScript；它不会连接网络。</noscript>
+    <main class="compare-shell">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">协调人本机工具 · 只读候选</p>
+          <h1>两席试填差异并列</h1>
+          <p>把 A、B 两份原始意见逐字段并排显示，不投票、不平均、不自动选择赢家。</p>
+        </div>
+        <div class="local-mark" aria-label="候选代码没有上传或持久化接口">无上传／持久化接口</div>
+      </header>
+
+      <aside class="warning" role="note">
+        这不是正式专家审定，也不评价 AI 或命理预测准确度。当前页面只允许合成测试回件：浏览器资料夹、既有 Service Worker 与扩展隔离尚未建立，不得载入真实专家回件。
+      </aside>
+
+      <section class="input-card" aria-labelledby="input-title">
+        <div class="section-heading">
+          <div>
+            <h2 id="input-title">载入同一轮 A、B 回件</h2>
+            <p>交接号和两个 pin 应来自协调人在包外独立保存的记录，不能从回件自身复制后当作信任根。</p>
+          </div>
+          <span>合成测试专用</span>
+        </div>
+        <div class="binding-grid">
+          <label>
+            <span>本轮交接号</span>
+            <input id="review-cycle" autocomplete="off" spellcheck="false" placeholder="pilot-review-cycle. 后接 64 位小写字符">
+          </label>
+          <label>
+            <span>A 席 manifest pin</span>
+            <input id="pin-a" autocomplete="off" spellcheck="false" placeholder="64 位小写 SHA-256">
+          </label>
+          <label>
+            <span>B 席 manifest pin</span>
+            <input id="pin-b" autocomplete="off" spellcheck="false" placeholder="64 位小写 SHA-256">
+          </label>
+        </div>
+        <div class="file-grid">
+          <label class="file-field">
+            <strong>A 席完整回件</strong>
+            <span>选择 complete-submission.json</span>
+            <input id="file-a" type="file" accept="application/json,.json">
+          </label>
+          <label class="file-field">
+            <strong>B 席完整回件</strong>
+            <span>选择 complete-submission.json</span>
+            <input id="file-b" type="file" accept="application/json,.json">
+          </label>
+        </div>
+        <div class="actions">
+          <button id="compare" class="primary" type="button">校验并逐项并列</button>
+          <button id="clear" class="secondary" type="button">清除本页内容</button>
+        </div>
+        <div id="status" class="status" aria-live="polite"></div>
+      </section>
+
+      <section id="error" class="error" role="alert" tabindex="-1" hidden></section>
+      <section id="result" tabindex="-1" hidden></section>
+
+      <footer>
+        当前代码没有保存或上传接口；但浏览器运行环境信任尚未建立。工具不生成 reconciliation、不改变 Schema 13 数据，也不增加现实专家计数。
+      </footer>
+    </main>
+    <script type="module" src="./pair-compare.js"></script>
+  </body>
+</html>

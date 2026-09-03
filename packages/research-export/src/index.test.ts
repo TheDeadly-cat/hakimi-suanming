@@ -34,6 +34,7 @@ import {
   type KnowledgeDocumentRecord,
   type ResearchNoteRecord,
   type RevisionRecord,
+  type SourceCarrierRecord,
   type SourceRightsRecord,
   type StoredEventTimeMigrationReceipt
 } from "@hakimi/contracts";
@@ -854,6 +855,44 @@ function makeFixtureSourceRedistributable(input: SingleChartReportInput): void {
     ],
     note: "合成夹具双人复核，仅验证机械权利投影"
   };
+  const sourceCarrier: SourceCarrierRecord = {
+    schemaVersion: "1.0.0",
+    recordType: "knowledge_source_carrier",
+    carrierId: "66666666-6666-4666-8666-666666666666",
+    documentId: document.id,
+    documentContentHash: document.contentHash,
+    carrierType: "private_transcription",
+    provider: "Hakimi synthetic test fixture",
+    sourceUrl: null,
+    acquiredAt: rights.createdAt,
+    accessMethod: "synthetic project-original fixture",
+    contentDigest: document.contentHash,
+    imageDigest: null,
+    ocrDigest: null,
+    rights: {
+      status: "project_original_verified",
+      jurisdiction: "CN",
+      licenseId: null,
+      copyrightNotice: "Synthetic Hakimi test fixture",
+      reproductionAllowed: true,
+      quotationAllowed: true,
+      redistributionAllowed: true,
+      evidenceRefs: ["https://example.test/synthetic-carrier-evidence"]
+    },
+    storagePolicy: "public_repo",
+    review: {
+      status: "double_reviewed",
+      attestations: [
+        { reviewerId: "synthetic-carrier-review-a", reviewedAt: rights.createdAt, note: "测试载体身份复核" },
+        { reviewerId: "synthetic-carrier-review-b", reviewedAt: rights.createdAt, note: "测试载体权利复核" }
+      ],
+      note: "合成夹具双人复核，仅验证机械载体门"
+    },
+    editVersion: 1,
+    createdAt: rights.createdAt,
+    updatedAt: rights.updatedAt
+  };
+  input.sourceCarriers = [sourceCarrier];
 }
 
 async function resignRevision(revision: RevisionRecord): Promise<void> {
@@ -1323,6 +1362,338 @@ describe("single-chart report projection", () => {
       sourceRightsRecordsBound: 1,
       distributionRightsState: "all_matching_source_text_redistributable"
     });
+  });
+
+  it("binding 机械准入要求同一 Citation 同时命中当前 Revision chart_field 与 binding subject", async () => {
+    const subjectId = STRENGTH_EVIDENCE_SUBJECT_IDS[0];
+    if (!subjectId) throw new Error("测试夹具缺少旺衰证据主题");
+    const admissionFor = (
+      report: Awaited<ReturnType<typeof buildSingleChartResearchReport>>
+    ) => {
+      const binding = report.interpretationEvidence.sourceBindings.find(
+        (candidate) => candidate.evidenceSubjectId === subjectId
+      );
+      if (!binding) throw new Error("测试报告缺少目标旺衰 binding");
+      return binding.mechanicalAdmission;
+    };
+
+    const subjectOnlyInput = singleChartFixture();
+    targetFixtureCitationAtStrengthSubjects(subjectOnlyInput, [subjectId]);
+    const subjectOnlyCitation = subjectOnlyInput.citations[0];
+    if (!subjectOnlyCitation) throw new Error("测试夹具缺少 Citation");
+    subjectOnlyCitation.targets = subjectOnlyCitation.targets.filter(
+      (target) => target.kind !== "chart_field"
+    );
+    subjectOnlyCitation.targetKeys = citationTargetKeys(subjectOnlyCitation.targets);
+    const subjectOnly = await buildSingleChartResearchReport(subjectOnlyInput, { anonymized: false });
+
+    const otherRevisionInput = singleChartFixture();
+    targetFixtureCitationAtStrengthSubjects(otherRevisionInput, [subjectId]);
+    const otherRevisionCitation = otherRevisionInput.citations[0];
+    if (!otherRevisionCitation) throw new Error("测试夹具缺少 Citation");
+    otherRevisionCitation.targets = otherRevisionCitation.targets.map((target) => (
+      target.kind === "chart_field" ? { ...target, revisionId: REVISION_2_ID } : target
+    ));
+    otherRevisionCitation.targetKeys = citationTargetKeys(otherRevisionCitation.targets);
+    const otherRevision = await buildSingleChartResearchReport(otherRevisionInput, { anonymized: false });
+
+    const otherCaseInput = singleChartFixture();
+    targetFixtureCitationAtStrengthSubjects(otherCaseInput, [subjectId]);
+    const otherCaseCitation = otherCaseInput.citations[0];
+    if (!otherCaseCitation) throw new Error("测试夹具缺少 Citation");
+    otherCaseCitation.targets = otherCaseCitation.targets.map((target) => (
+      target.kind === "chart_field"
+        ? { ...target, caseId: "44444444-4444-4444-8444-444444444444" }
+        : target
+    ));
+    otherCaseCitation.targetKeys = citationTargetKeys(otherCaseCitation.targets);
+    const otherCase = await buildSingleChartResearchReport(otherCaseInput, { anonymized: false });
+
+    const splitTargetsInput = singleChartFixture();
+    targetFixtureCitationAtStrengthSubjects(splitTargetsInput, [subjectId]);
+    const chartCitation = splitTargetsInput.citations[0];
+    if (!chartCitation) throw new Error("测试夹具缺少 Citation");
+    const subjectCitation = structuredClone(chartCitation);
+    subjectCitation.id = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    chartCitation.targets = chartCitation.targets.filter((target) => target.kind === "chart_field");
+    chartCitation.targetKeys = citationTargetKeys(chartCitation.targets);
+    subjectCitation.targets = subjectCitation.targets.filter((target) => target.kind === "evidence_subject");
+    subjectCitation.targetKeys = citationTargetKeys(subjectCitation.targets);
+    splitTargetsInput.citations.push(subjectCitation);
+    const splitTargets = await buildSingleChartResearchReport(splitTargetsInput, { anonymized: false });
+
+    for (const report of [subjectOnly, otherRevision, otherCase, splitTargets]) {
+      expect(admissionFor(report)).toEqual({
+        sourceIdentityStatus: "not_assessed",
+        citationReviewState: "no_citation",
+        redistributionState: "not_applicable_no_verified",
+        candidateCitationReferences: [],
+        verifiedCitationReferences: [],
+        rejectedCitationReferences: [],
+        redistributableVerifiedCitationReferences: []
+      });
+      expect(report.interpretationEvidence.admissionSummary).toMatchObject({
+        bindingsWithNonRejectedCitation: 0,
+        bindingsWithVerifiedCitation: 0,
+        bindingsWithRedistributableVerifiedCitation: 0,
+        citationRecords: { matching: 0, structured: 0, candidate: 0, verified: 0, rejected: 0 },
+        knowledgeDocumentsBound: 0,
+        sourceRightsRecordsBound: 0,
+        structuredCitationCoverage: "none",
+        distributionRightsState: "no_matching_source_text"
+      });
+    }
+
+    const admittedInput = singleChartFixture();
+    targetFixtureCitationAtStrengthSubjects(admittedInput, [subjectId]);
+    const admitted = await buildSingleChartResearchReport(admittedInput, { anonymized: false });
+    const forgedVisibleTargets = structuredClone(admitted);
+    forgedVisibleTargets.citations[0]!.targets = [`证据主题 ${subjectId}`];
+    expect(singleChartResearchReportSchema.safeParse(forgedVisibleTargets).success).toBe(false);
+
+    const standaloneProjectionForgery = structuredClone(subjectOnly);
+    standaloneProjectionForgery.citations[0]!.targets = [
+      "命盘字段 forged.path.without.case.or.revision.identity",
+      `证据主题 ${subjectId}`
+    ];
+    standaloneProjectionForgery.interpretationEvidence = structuredClone(admitted.interpretationEvidence);
+    expect(singleChartResearchReportSchema.safeParse(standaloneProjectionForgery).success).toBe(true);
+    await expect(validateSingleChartResearchReport(
+      standaloneProjectionForgery,
+      subjectOnlyInput,
+      { anonymized: false }
+    )).rejects.toThrow(/规范重建结果不一致/u);
+  });
+
+  it("redistributable SourceRights 必须通过 exact SourceCarrier material gate", async () => {
+    const subjectId = STRENGTH_EVIDENCE_SUBJECT_IDS[0];
+    if (!subjectId) throw new Error("测试夹具缺少旺衰证据主题");
+    const admittedInput = singleChartFixture();
+    targetFixtureCitationAtStrengthSubjects(admittedInput, [subjectId]);
+    setFixtureCitationReviewStatus(admittedInput, "verified");
+    makeFixtureSourceRedistributable(admittedInput);
+    const sourceCarrier = admittedInput.sourceCarriers?.[0];
+    if (!sourceCarrier) throw new Error("测试夹具缺少 SourceCarrier");
+    sourceCarrier.provider = "carrier-only-provider-canary";
+    sourceCarrier.sourceUrl = "https://carrier-only.example.test/private-canary";
+    sourceCarrier.accessMethod = "carrier-only-access-method-canary";
+    sourceCarrier.imageDigest = "c".repeat(64);
+    sourceCarrier.ocrDigest = "d".repeat(64);
+    sourceCarrier.rights.jurisdiction = "carrier-only-jurisdiction-canary";
+    sourceCarrier.rights.licenseId = "carrier-only-license-canary";
+    sourceCarrier.rights.copyrightNotice = "carrier-only-copyright-canary";
+    sourceCarrier.rights.evidenceRefs = ["https://carrier-only.example.test/rights-evidence-canary"];
+    sourceCarrier.review.attestations[0]!.note = "carrier-only-attestation-a-canary";
+    sourceCarrier.review.attestations[1]!.note = "carrier-only-attestation-b-canary";
+    sourceCarrier.review.note = "carrier-only-review-note-canary";
+
+    const admitted = await buildSingleChartResearchReport(admittedInput, { anonymized: false });
+    expect(admitted.citations[0]!.source.redistributableSourceRights).toBe(true);
+    expect(singleChartResearchReportSchema.safeParse(admitted).success).toBe(true);
+    const anonymous = await buildSingleChartResearchReport(admittedInput);
+    const validatedAnonymous = await validateSingleChartResearchReport(anonymous, admittedInput);
+    const carrierOnlyValues = [
+      sourceCarrier.carrierId,
+      sourceCarrier.documentId,
+      sourceCarrier.documentContentHash,
+      sourceCarrier.provider,
+      sourceCarrier.sourceUrl,
+      sourceCarrier.accessMethod,
+      sourceCarrier.imageDigest,
+      sourceCarrier.ocrDigest,
+      sourceCarrier.rights.jurisdiction,
+      sourceCarrier.rights.licenseId,
+      sourceCarrier.rights.copyrightNotice,
+      sourceCarrier.rights.evidenceRefs[0]!,
+      sourceCarrier.review.attestations[0]!.reviewerId,
+      sourceCarrier.review.attestations[0]!.note,
+      sourceCarrier.review.attestations[1]!.reviewerId,
+      sourceCarrier.review.attestations[1]!.note,
+      sourceCarrier.review.note
+    ];
+    for (const anonymousOutput of [anonymous, validatedAnonymous]) {
+      const anonymousJson = JSON.stringify(anonymousOutput);
+      for (const carrierOnlyValue of carrierOnlyValues) {
+        expect(anonymousJson).not.toContain(carrierOnlyValue);
+      }
+    }
+
+    const expectAnonymousCarrierFailure = async (
+      operation: Promise<unknown>,
+      expectedMessage: RegExp,
+      forbiddenValues: readonly string[]
+    ): Promise<void> => {
+      let rejection: unknown;
+      try {
+        await operation;
+      } catch (error) {
+        rejection = error;
+      }
+      expect(rejection).toBeInstanceOf(Error);
+      const message = rejection instanceof Error ? rejection.message : String(rejection);
+      expect(message).toMatch(expectedMessage);
+      expect(message).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/iu);
+      for (const value of forbiddenValues) expect(message).not.toContain(value);
+    };
+
+    const missingCarrier = structuredClone(admittedInput);
+    missingCarrier.sourceCarriers = [];
+    await expect(buildSingleChartResearchReport(missingCarrier, { anonymized: false }))
+      .rejects.toThrow(/可再分发 SourceRights 缺少 SourceCarrier/u);
+    await expect(validateSingleChartResearchReport(admitted, missingCarrier, { anonymized: false }))
+      .rejects.toThrow(/可再分发 SourceRights 缺少 SourceCarrier/u);
+    await expectAnonymousCarrierFailure(
+      buildSingleChartResearchReport(missingCarrier),
+      /可再分发 SourceRights 缺少 SourceCarrier/u,
+      [sourceCarrier.carrierId, sourceCarrier.documentId]
+    );
+    await expectAnonymousCarrierFailure(
+      validateSingleChartResearchReport(anonymous, missingCarrier),
+      /可再分发 SourceRights 缺少 SourceCarrier/u,
+      [sourceCarrier.carrierId, sourceCarrier.documentId]
+    );
+
+    const mismatchedDocument = structuredClone(admittedInput);
+    const mismatchedDocumentCarrier = mismatchedDocument.sourceCarriers?.[0];
+    if (!mismatchedDocumentCarrier) throw new Error("测试夹具缺少 SourceCarrier");
+    mismatchedDocumentCarrier.documentId = "77777777-7777-4777-8777-777777777777";
+    await expect(buildSingleChartResearchReport(mismatchedDocument, { anonymized: false }))
+      .rejects.toThrow(/可再分发 SourceRights 缺少 SourceCarrier/u);
+    await expectAnonymousCarrierFailure(
+      buildSingleChartResearchReport(mismatchedDocument),
+      /可再分发 SourceRights 缺少 SourceCarrier/u,
+      [sourceCarrier.carrierId, sourceCarrier.documentId, mismatchedDocumentCarrier.documentId]
+    );
+    await expectAnonymousCarrierFailure(
+      validateSingleChartResearchReport(anonymous, mismatchedDocument),
+      /可再分发 SourceRights 缺少 SourceCarrier/u,
+      [sourceCarrier.carrierId, sourceCarrier.documentId, mismatchedDocumentCarrier.documentId]
+    );
+
+    const mismatchedHash = structuredClone(admittedInput);
+    const mismatchedHashCarrier = mismatchedHash.sourceCarriers?.[0];
+    if (!mismatchedHashCarrier) throw new Error("测试夹具缺少 SourceCarrier");
+    mismatchedHashCarrier.documentContentHash = "b".repeat(64);
+    mismatchedHashCarrier.contentDigest = mismatchedHashCarrier.documentContentHash;
+    await expect(buildSingleChartResearchReport(mismatchedHash, { anonymized: false }))
+      .rejects.toThrow(/作品层、版本层与载体层再分发门/u);
+    await expectAnonymousCarrierFailure(
+      buildSingleChartResearchReport(mismatchedHash),
+      /作品层、版本层与载体层再分发门/u,
+      [sourceCarrier.carrierId, sourceCarrier.documentId]
+    );
+    await expectAnonymousCarrierFailure(
+      validateSingleChartResearchReport(anonymous, mismatchedHash),
+      /作品层、版本层与载体层再分发门/u,
+      [sourceCarrier.carrierId, sourceCarrier.documentId]
+    );
+
+    const materialGateMutations: Array<(carrier: SourceCarrierRecord) => void> = [
+      (carrier) => { carrier.storagePolicy = "private_vault"; },
+      (carrier) => {
+        carrier.storagePolicy = "private_vault";
+        carrier.review.status = "single_reviewed";
+        carrier.review.attestations = carrier.review.attestations.slice(0, 1);
+        carrier.rights.redistributionAllowed = false;
+      },
+      (carrier) => {
+        carrier.storagePolicy = "private_vault";
+        carrier.rights.status = "unknown";
+        carrier.rights.reproductionAllowed = false;
+        carrier.rights.quotationAllowed = false;
+        carrier.rights.redistributionAllowed = false;
+        carrier.rights.evidenceRefs = [];
+      }
+    ];
+    for (const mutate of materialGateMutations) {
+      const candidate = structuredClone(admittedInput);
+      const carrier = candidate.sourceCarriers?.[0];
+      if (!carrier) throw new Error("测试夹具缺少 SourceCarrier");
+      mutate(carrier);
+      await expect(buildSingleChartResearchReport(candidate, { anonymized: false }))
+        .rejects.toThrow(/作品层、版本层与载体层再分发门/u);
+    }
+    const anonymousMaterialFailure = structuredClone(admittedInput);
+    const anonymousMaterialCarrier = anonymousMaterialFailure.sourceCarriers?.[0];
+    if (!anonymousMaterialCarrier) throw new Error("测试夹具缺少 SourceCarrier");
+    anonymousMaterialCarrier.storagePolicy = "private_vault";
+    await expectAnonymousCarrierFailure(
+      buildSingleChartResearchReport(anonymousMaterialFailure),
+      /作品层、版本层与载体层再分发门/u,
+      [sourceCarrier.carrierId, sourceCarrier.documentId]
+    );
+    await expectAnonymousCarrierFailure(
+      validateSingleChartResearchReport(anonymous, anonymousMaterialFailure),
+      /作品层、版本层与载体层再分发门/u,
+      [sourceCarrier.carrierId, sourceCarrier.documentId]
+    );
+
+    const schemaGateMutations: Array<(carrier: SourceCarrierRecord) => void> = [
+      (carrier) => { carrier.rights.reproductionAllowed = false; },
+      (carrier) => { carrier.rights.quotationAllowed = false; },
+      (carrier) => { carrier.rights.redistributionAllowed = false; },
+      (carrier) => { carrier.rights.evidenceRefs = []; }
+    ];
+    for (const mutate of schemaGateMutations) {
+      const candidate = structuredClone(admittedInput);
+      const carrier = candidate.sourceCarriers?.[0];
+      if (!carrier) throw new Error("测试夹具缺少 SourceCarrier");
+      mutate(carrier);
+      await expect(buildSingleChartResearchReport(candidate, { anonymized: false }))
+        .rejects.toThrow(/公开仓库存储必须绑定实际正文摘要、逐项允许复制、引用和再分发并完成双人复核/u);
+    }
+
+    const duplicateDocumentCarrier = structuredClone(admittedInput);
+    duplicateDocumentCarrier.sourceCarriers!.push({
+      ...structuredClone(sourceCarrier),
+      carrierId: "88888888-8888-4888-8888-888888888888"
+    });
+    await expect(buildSingleChartResearchReport(duplicateDocumentCarrier, { anonymized: false }))
+      .rejects.toThrow(/SourceCarrier documentId 重复/u);
+    await expectAnonymousCarrierFailure(
+      buildSingleChartResearchReport(duplicateDocumentCarrier),
+      /SourceCarrier documentId 重复/u,
+      [sourceCarrier.documentId, "88888888-8888-4888-8888-888888888888"]
+    );
+    await expectAnonymousCarrierFailure(
+      validateSingleChartResearchReport(anonymous, duplicateDocumentCarrier),
+      /SourceCarrier documentId 重复/u,
+      [sourceCarrier.documentId, "88888888-8888-4888-8888-888888888888"]
+    );
+
+    const duplicateCarrierId = structuredClone(admittedInput);
+    duplicateCarrierId.sourceCarriers!.push({
+      ...structuredClone(sourceCarrier),
+      documentId: "77777777-7777-4777-8777-777777777777"
+    });
+    await expect(buildSingleChartResearchReport(duplicateCarrierId, { anonymized: false }))
+      .rejects.toThrow(/SourceCarrier carrierId 重复/u);
+    await expectAnonymousCarrierFailure(
+      buildSingleChartResearchReport(duplicateCarrierId),
+      /SourceCarrier carrierId 重复/u,
+      [sourceCarrier.carrierId, "77777777-7777-4777-8777-777777777777"]
+    );
+    await expectAnonymousCarrierFailure(
+      validateSingleChartResearchReport(anonymous, duplicateCarrierId),
+      /SourceCarrier carrierId 重复/u,
+      [sourceCarrier.carrierId, "77777777-7777-4777-8777-777777777777"]
+    );
+
+    const privateWithUnconsumedCarrier = singleChartFixture();
+    privateWithUnconsumedCarrier.sourceCarriers = [structuredClone(sourceCarrier)];
+    await expect(buildSingleChartResearchReport(privateWithUnconsumedCarrier, { anonymized: false }))
+      .rejects.toThrow(/SourceCarrier 集合只能包含当前报告可再分发资料所需记录/u);
+
+    const sharedCarrierInput = structuredClone(admittedInput);
+    const secondCitation = structuredClone(sharedCarrierInput.citations[0]!);
+    secondCitation.id = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    sharedCarrierInput.citations.push(secondCitation);
+    const sharedCarrier = await buildSingleChartResearchReport(sharedCarrierInput, { anonymized: false });
+    const targetBinding = sharedCarrier.interpretationEvidence.sourceBindings.find(
+      (binding) => binding.evidenceSubjectId === subjectId
+    );
+    expect(targetBinding?.mechanicalAdmission.redistributableVerifiedCitationReferences).toEqual(["C1", "C2"]);
+    expect(sharedCarrierInput.sourceCarriers).toHaveLength(1);
   });
 
   it("multi-target Citation 按唯一 Citation、资料与权利计数，同时分别命中两个 binding", async () => {
@@ -2449,6 +2820,9 @@ describe("single-chart report projection", () => {
         citations: 512,
         redactions: 512,
         components: 3
+      },
+      builderInputCollections: {
+        sourceCarriers: 512
       }
     });
   });
@@ -2779,6 +3153,17 @@ describe("single-chart report projection", () => {
     );
     await expect(buildSingleChartResearchReport(overRawProvenance, { anonymized: false }))
       .rejects.toThrow(/字段 provenance 集合超过当前单盘报告展示容量/);
+
+    const overRawSourceCarriers = singleChartFixture();
+    makeFixtureSourceRedistributable(overRawSourceCarriers);
+    const rawSourceCarrier = overRawSourceCarriers.sourceCarriers?.[0];
+    if (!rawSourceCarrier) throw new Error("测试夹具缺少 SourceCarrier");
+    overRawSourceCarriers.sourceCarriers = Array.from(
+      { length: limits.builderInputCollections.sourceCarriers + 1 },
+      () => structuredClone(rawSourceCarrier)
+    );
+    await expect(buildSingleChartResearchReport(overRawSourceCarriers, { anonymized: false }))
+      .rejects.toThrow(/来源载体记录集合超过当前单盘报告展示容量/);
   });
 
   it("在 whole-report aggregate 边界按 Unicode code point 精确计数，并在完整性校验前拒绝聚合输入且不回显 canary", async () => {

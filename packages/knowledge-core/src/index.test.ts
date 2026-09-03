@@ -8,6 +8,7 @@ import {
   buildEvidenceCoverageReport,
   buildKnowledgeContentSnapshot,
   buildKnowledgeSections,
+  compareBundledKnowledgePaths,
   createKnowledgeDocumentCitationIntegrityVerifier,
   extractKnowledgeQuote,
   inferKnowledgeFormat,
@@ -16,6 +17,7 @@ import {
   normalizeKnowledgeContent,
   requireEvidenceSubject,
   searchKnowledgeDocuments,
+  validateBundledKnowledgeManifestRelease,
   validateBundledKnowledgeRelease,
   verifyCitationIntegrity,
   verifyKnowledgeDocumentIntegrity
@@ -25,10 +27,55 @@ import {
   citationTargetKeys,
   type CitationRecord,
   type KnowledgeDocumentRecord,
+  type SourceCarrierRecord,
   type SourceRightsRecord
 } from "@hakimi/contracts";
 
 const timestamp = "2026-08-01T00:00:00.000Z";
+
+describe("bundled knowledge manifest path contract", () => {
+  const incompleteEntry = {
+    documentId: "11111111-1111-4111-8111-111111111111",
+    contentHash: "a".repeat(64),
+    sourceRights: {},
+    sourceCarrier: {}
+  } as unknown as Parameters<typeof validateBundledKnowledgeManifestRelease>[0][number];
+
+  it("rejects safe relative paths that the Web manifest consumer cannot load", () => {
+    expect(() => validateBundledKnowledgeManifestRelease([{
+      ...incompleteEntry,
+      path: "knowledge/source.md"
+    }])).toThrow(/documents/);
+    expect(() => validateBundledKnowledgeManifestRelease([{
+      ...incompleteEntry,
+      path: "documents/source.pdf"
+    }])).toThrow(/Markdown\/TXT/);
+    expect(() => validateBundledKnowledgeManifestRelease([{
+      ...incompleteEntry,
+      path: "documents//source.md"
+    }])).toThrow(/规范化/);
+    expect(() => validateBundledKnowledgeManifestRelease([{
+      ...incompleteEntry,
+      path: "documents/./source.md"
+    }])).toThrow(/规范化/);
+  });
+
+  it("uses one deterministic path order and one format inference for Web consumers", () => {
+    expect([
+      "documents/a/source.md",
+      "documents/A/source.md",
+      "documents/_source.md",
+      "documents/-source.md"
+    ].sort(compareBundledKnowledgePaths)).toEqual([
+      "documents/-source.md",
+      "documents/A/source.md",
+      "documents/_source.md",
+      "documents/a/source.md"
+    ]);
+    expect(inferKnowledgeFormat("documents/.txt")).toBe("text");
+    expect(inferKnowledgeFormat("documents/.MD")).toBe("markdown");
+  });
+});
 
 async function documentFixture(): Promise<KnowledgeDocumentRecord> {
   const snapshot = await buildKnowledgeContentSnapshot("序言\n# 第一章\n藏干正文\n```md\n# 不是标题\n```\n## 小节\n十神正文", "markdown");
@@ -550,11 +597,49 @@ describe("knowledge-core", () => {
       createdAt: timestamp,
       updatedAt: timestamp
     };
+    const carrier: SourceCarrierRecord = {
+      schemaVersion: "1.0.0",
+      recordType: "knowledge_source_carrier",
+      carrierId: "22222222-2222-4222-8222-222222222222",
+      documentId: rights.documentId,
+      documentContentHash: rights.documentContentHash,
+      carrierType: "private_transcription",
+      provider: "项目",
+      sourceUrl: null,
+      acquiredAt: timestamp,
+      accessMethod: "项目原创正文直接导出",
+      contentDigest: rights.documentContentHash,
+      imageDigest: null,
+      ocrDigest: null,
+      rights: {
+        status: "project_original_verified",
+        jurisdiction: "CN",
+        licenseId: null,
+        copyrightNotice: "项目原创",
+        reproductionAllowed: true,
+        quotationAllowed: true,
+        redistributionAllowed: true,
+        evidenceRefs: ["https://example.com/carrier-evidence"]
+      },
+      storagePolicy: "public_repo",
+      review: {
+        status: "double_reviewed",
+        attestations: [
+          { reviewerId: "carrier-reviewer-a", reviewedAt: timestamp, note: "载体正文" },
+          { reviewerId: "carrier-reviewer-b", reviewedAt: timestamp, note: "载体权利" }
+        ],
+        note: ""
+      },
+      editVersion: 1,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
     expect(() => validateBundledKnowledgeRelease([{
       path: "documents/source.md",
       documentId: rights.documentId,
       contentHash: rights.documentContentHash,
-      sourceRights: rights
+      sourceRights: rights,
+      sourceCarrier: carrier
     }])).toThrow(/现代版本层|随包资料/);
   });
 });

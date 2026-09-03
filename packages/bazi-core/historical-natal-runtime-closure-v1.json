@@ -124,8 +124,8 @@
     {
       "path": "packages/contracts/src/index.ts",
       "packageManifestPath": "packages/contracts/package.json",
-      "lfUtf8Sha256": "a7c9add04188f2fb9f9da46d2fce39c70a709d5a28872f1c7cb866c1e8e6756f",
-      "byteLength": 225571,
+      "lfUtf8Sha256": "674a3fe1e2b3cd4fc99e481a758966a320ddc3c1113a9471eba190851d15e041",
+      "byteLength": 244747,
       "edges": [
         {
           "kind": "static-import",
@@ -498,13 +498,13 @@
     "scriptManifests": [
       {
         "path": "apps/web/package.json",
-        "lfUtf8Sha256": "6d9512150dffd2dce33fbd9c431f86f1f559fd32c848fcff2b0ce1fab032cdab",
-        "byteLength": 3201
+        "lfUtf8Sha256": "8451d463a5a009a62df8821ad4a881940996db2f55ed2a858e1a7a31ad4b2784",
+        "byteLength": 3439
       },
       {
         "path": "package.json",
-        "lfUtf8Sha256": "09bd62a4b505f86a8a17dac6b9eb8932635479d03cce3c1ed38dbd5f9514b3f5",
-        "byteLength": 16354
+        "lfUtf8Sha256": "b8d8a31c3c4ae3669e196f0398288bf44284fdc1093ccbf6e510f8fcde0ca62c",
+        "byteLength": 20716
       }
     ],
     "rootBundleScripts": [
@@ -650,5 +650,5 @@
       }
     }
   ],
-  "overallSha256": "2788ee8934a417f32e78c827ce31eb441e9238214f96be2e3b7a2330a3b7dbe0"
+  "overallSha256": "06cb9615e1934d51d397507107879335a5595ad6180a1c91a95d2324f0bb920f"
 }

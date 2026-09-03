@@ -1,0 +1,360 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "bazi_strength_expert_review_packet_candidate",
+  "packetId": "hakimi.bazi.strength.expert-review-packet/1.5.0",
+  "status": "mechanically_bound_vacant_review_packet",
+  "createdAt": "2026-08-25T20:17:10.106Z",
+  "releaseGovernance": {
+    "releaseIdentity": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "mutationEpochBoundary": "preserved",
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "artifactLocks": [
+    {
+      "artifactId": "bazi-core-fact-engine",
+      "path": "packages/bazi-core/src/index.ts",
+      "sha256": "73e0be8dbb2f40132158ee5dba26e493e18b686f9c888552c3e596c713301b2f",
+      "evidenceLayer": "engineering_input_fact_contract"
+    },
+    {
+      "artifactId": "bazi-current-chart-fact-projection",
+      "path": "packages/bazi-interpretation/src/current-chart-review-snapshot.ts",
+      "sha256": "f280a47fe9d2c6a7c0980e45b190a653ca86f0720d564ef28a1663314ab0e565",
+      "evidenceLayer": "engineering_input_fact_contract"
+    },
+    {
+      "artifactId": "bazi-strength-assessment-core",
+      "path": "packages/bazi-interpretation/src/strength-assessment-core.ts",
+      "sha256": "bbe6510c5cc0500efc8bb3af45efc1c344a5159f35c8fe5fca3aae3dab156e3b",
+      "evidenceLayer": "engineering_rule_candidate"
+    },
+    {
+      "artifactId": "bazi-strength-claim-registry",
+      "path": "packages/bazi-interpretation/src/strength-claim-registry.ts",
+      "sha256": "b08d4e6b0fb5c830b251e0c03ac49b7620729f223805b145b839a89245aa3888",
+      "evidenceLayer": "content_claim_candidate"
+    },
+    {
+      "artifactId": "bazi-strength-policy",
+      "path": "packages/bazi-interpretation/src/strength-policy.ts",
+      "sha256": "795709298542773459a73cd8a63a6824d3076bbdedf6a157c0652d25446486f1",
+      "evidenceLayer": "engineering_rule_candidate"
+    },
+    {
+      "artifactId": "bazi-strength-sensitivity-review",
+      "path": "packages/bazi-interpretation/src/strength-sensitivity-review.ts",
+      "sha256": "ef6772513009cb4e4174cd9f6d12318c69995629a37ab5e5be59ea7bcbace4d8",
+      "evidenceLayer": "engineering_sensitivity_evidence"
+    },
+    {
+      "artifactId": "contracts",
+      "path": "packages/contracts/src/index.ts",
+      "sha256": "674a3fe1e2b3cd4fc99e481a758966a320ddc3c1113a9471eba190851d15e041",
+      "evidenceLayer": "engineering_input_contract"
+    },
+    {
+      "artifactId": "rule-profiles",
+      "path": "packages/rule-profiles/src/index.ts",
+      "sha256": "f11f06b73f48efbca8a9fe4184b254b29ba6a3180b7b5e2e99be326cd80e485f",
+      "evidenceLayer": "engineering_input_policy"
+    },
+    {
+      "artifactId": "engineering-binding-candidate-ledger",
+      "path": "content/bazi-strength-engineering-binding-candidates.v1.json",
+      "sha256": "95154d55d9e368351f5a69a1fa2ff63a51ba946d33a800dbd1f2460d9ac97b2f",
+      "evidenceLayer": "engineering_candidate_not_frozen_rationale"
+    },
+    {
+      "artifactId": "source-binding-candidate-ledger",
+      "path": "content/bazi-strength-source-binding-candidates.v1.json",
+      "sha256": "e2ac6a7a0ea1209dd92a38dfae82c494df4792da1a102c11d2fdb2caa80e41f7",
+      "evidenceLayer": "source_candidate_not_content_truth"
+    },
+    {
+      "artifactId": "source-rights-candidate-ledger",
+      "path": "content/bazi-strength-source-rights-candidates.v1.json",
+      "sha256": "433116caf1a2b9c233739093b0a2436f13c7f268dfa8af6c1ce481964b48b179",
+      "evidenceLayer": "rights_observation_not_legal_conclusion"
+    },
+    {
+      "artifactId": "single-chart-report-v1.7-frozen-golden",
+      "path": "packages/research-export/src/golden/single-chart-report.contract.v1.7.json",
+      "sha256": "aba357d98a99271cc9a9b2727ad1c7c516424c94b7cf34f765cb38b0e9a74b29",
+      "evidenceLayer": "engineering_report_contract"
+    }
+  ],
+  "sourceLedgerBindings": {
+    "engineeringBindingLedgerId": "hakimi.bazi.strength.engineering-binding-candidates/1.0.0",
+    "engineeringBindingLedgerDigest": "05ce9c6d9c03822cf246b0406d15616e8c4a6938650296135142827a00a5a28e",
+    "sourceBindingLedgerId": "hakimi.bazi.strength.source-binding-candidates/1.5.0",
+    "sourceBindingLedgerDigest": "44ed9e23490c11c625602b77574efbf7331305bd1bf87634c5b91f568e8b85af",
+    "sourceRightsLedgerId": "hakimi.bazi.strength.source-rights-candidates/1.1.0",
+    "sourceRightsLedgerDigest": "3776e4b8799ca5221c1765a735c3e34c637b4f4952c9243836fedfbf1ee30a36"
+  },
+  "reviewScope": {
+    "systemId": "bazi",
+    "surfaceId": "single-chart-report",
+    "surfaceVersion": "1.7.0",
+    "bindingIds": [
+      "binding:core:derive-assessment",
+      "binding:policy:factor-inclusion",
+      "binding:policy:direction-map",
+      "binding:policy:weights",
+      "binding:policy:month-duplication",
+      "binding:policy:thresholds",
+      "binding:sensitivity:six-scenarios",
+      "binding:dtt:month-command",
+      "binding:smt-v5:relative-relations",
+      "binding:smt-v10:whole-chart",
+      "binding:yhzp:hidden-listing",
+      "binding:zpzz:review-gates"
+    ],
+    "unresolvedStructures": [
+      "从格",
+      "专旺",
+      "化气",
+      "合化",
+      "刑冲",
+      "调候",
+      "大运流年"
+    ],
+    "excludedScopes": [
+      "ziwei_domain_truth",
+      "western_astrology_domain_truth",
+      "vedic_astrology_domain_truth",
+      "rights_or_legal_adjudication",
+      "engineering_release_readiness",
+      "individual_fortune_prediction",
+      "public_deployment_authorization"
+    ]
+  },
+  "reviewQuestions": [
+    {
+      "questionId": "month-command-hidden-stem-duplication",
+      "title": "月令主气与首位藏干重复计权",
+      "question": "月令主气与同一月支首位藏干是否应同时计权；若同时计权，边界依据是什么？"
+    },
+    {
+      "questionId": "relative-factor-weighting",
+      "title": "月令、透干与藏干相对权重",
+      "question": "透干、首位藏干、其余藏干与月令之间应采用怎样的相对权重，哪些反例会推翻当前‘月令 4、透干 2、首位藏干 2、其余藏干 1’候选？"
+    },
+    {
+      "questionId": "strength-band-thresholds",
+      "title": "旺衰五档阈值",
+      "question": "0.25、0.43、0.57、0.75 分档阈值是否有可复核案例集支持？"
+    },
+    {
+      "questionId": "strength-invalidation-structures",
+      "title": "基础旺衰结论失效或改写条件",
+      "question": "从格、专旺、化气、合化、刑冲、调候等结构应在何时使基础旺衰结论失效或改写？"
+    }
+  ],
+  "roleSeparation": [
+    {
+      "roleId": "domain_expert",
+      "allowedScope": [
+        "bazi_rule_interpretation",
+        "school_profile",
+        "counterexample_cases",
+        "high_risk_expression_boundary"
+      ],
+      "forbiddenScope": [
+        "rights_legal_conclusion",
+        "engineering_reproducibility_attestation",
+        "public_release_authorization"
+      ]
+    },
+    {
+      "roleId": "source_rights_reviewer",
+      "allowedScope": [
+        "work_identity",
+        "edition_identity",
+        "carrier_identity",
+        "license_evidence"
+      ],
+      "forbiddenScope": [
+        "bazi_domain_truth",
+        "engineering_reproducibility_attestation",
+        "public_release_authorization"
+      ]
+    },
+    {
+      "roleId": "engineering_reproducibility_reviewer",
+      "allowedScope": [
+        "input_lock",
+        "algorithm_lock",
+        "digest_reproduction",
+        "test_evidence"
+      ],
+      "forbiddenScope": [
+        "bazi_school_truth",
+        "rights_legal_conclusion",
+        "public_release_authorization"
+      ]
+    }
+  ],
+  "identityPrivacyPolicy": {
+    "privateDossier": {
+      "repositoryStorageAllowed": false,
+      "encryptedOfflineStorageRequired": true,
+      "fields": [
+        "legal_name",
+        "contact_details",
+        "credential_raw_evidence",
+        "institution_raw_evidence",
+        "review_history",
+        "verification_process_raw_evidence"
+      ]
+    },
+    "publicIdentityBindingFields": [
+      "reviewerId",
+      "displayNameOrControlledPseudonym",
+      "verificationMethod",
+      "credentialDigest",
+      "verificationDate",
+      "reviewScope",
+      "evidenceType",
+      "verifiedBy"
+    ],
+    "publicPacketProhibitedFields": [
+      "legalName",
+      "email",
+      "phone",
+      "address",
+      "governmentId",
+      "rawCredentialDocument",
+      "privateContactHandle"
+    ]
+  },
+  "independenceChecklist": [
+    "same_institution_or_organization",
+    "teacher_student_or_lineage_relationship",
+    "family_or_household_relationship",
+    "shared_commercial_interest",
+    "rule_or_case_set_coauthorship",
+    "shared_professional_service",
+    "reporting_or_supervision_relationship",
+    "prior_exposure_to_other_reviewer_conclusion",
+    "shared_unpublished_source_or_case_material",
+    "same_upstream_algorithm_or_textbook_dependency"
+  ],
+  "reviewerSlots": [
+    {
+      "slotId": "domain-expert-a",
+      "reviewerBinding": null,
+      "identityVerificationState": "absent",
+      "credentialVerificationState": "absent",
+      "scopeVerificationState": "absent",
+      "independenceVerificationState": "absent",
+      "originalOpinionDigest": null,
+      "originalOpinionStored": false,
+      "submittedAt": null,
+      "priorExposureToOtherOpinion": null,
+      "status": "vacant"
+    },
+    {
+      "slotId": "domain-expert-b",
+      "reviewerBinding": null,
+      "identityVerificationState": "absent",
+      "credentialVerificationState": "absent",
+      "scopeVerificationState": "absent",
+      "independenceVerificationState": "absent",
+      "originalOpinionDigest": null,
+      "originalOpinionStored": false,
+      "submittedAt": null,
+      "priorExposureToOtherOpinion": null,
+      "status": "vacant"
+    }
+  ],
+  "reviewProcess": {
+    "steps": [
+      "freeze_input_rules_sources_rights_and_golden",
+      "verify_reviewer_identity_credentials_scope_and_independence",
+      "collect_expert_a_opinion_without_expert_b_opinion_access",
+      "collect_expert_b_opinion_without_expert_a_opinion_access",
+      "seal_and_preserve_both_original_opinions",
+      "publish_parallel_agreement_and_disagreement_inventory",
+      "collect_independent_supplements_if_needed",
+      "issue_reconciliation_note_without_overwriting_originals"
+    ],
+    "sameQuestionSetRequired": true,
+    "mutualDisclosureBeforeBothOpinionsSealedAllowed": false,
+    "immutableOriginalOpinionsRequired": true,
+    "supplementsMustBeSeparateRecords": true,
+    "reconciliationMayOverwriteOriginals": false
+  },
+  "disagreementPolicy": [
+    {
+      "disagreementType": "school_divergence",
+      "requiredDisposition": "split_versioned_school_profiles"
+    },
+    {
+      "disagreementType": "input_semantics",
+      "requiredDisposition": "split_versioned_input_policies"
+    },
+    {
+      "disagreementType": "base_edition_or_source_identity",
+      "requiredDisposition": "keep_affected_bindings_unverified"
+    },
+    {
+      "disagreementType": "rule_interpretation",
+      "requiredDisposition": "preserve_parallel_interpretations_no_winner"
+    },
+    {
+      "disagreementType": "engineering_error",
+      "requiredDisposition": "correct_artifact_and_repeat_both_reviews"
+    },
+    {
+      "disagreementType": "high_risk_expression",
+      "requiredDisposition": "apply_conservative_expression_or_no_release"
+    },
+    {
+      "disagreementType": "cannot_decide",
+      "requiredDisposition": "defer"
+    }
+  ],
+  "automatedResolutionPolicy": {
+    "majorityVoteAllowed": false,
+    "opinionAveragingAllowed": false,
+    "generatedModelWinnerSelectionAllowed": false,
+    "unresolvedDisagreementMayBeAdopted": false,
+    "allowedUnresolvedDisposition": [
+      "defer",
+      "reject"
+    ]
+  },
+  "gateSummary": {
+    "packetArtifactLocksVerified": 12,
+    "domainExpertsRequired": 2,
+    "reviewerSlotsOccupied": 0,
+    "identitiesVerified": 0,
+    "credentialsVerified": 0,
+    "scopesVerified": 0,
+    "independentExpertReviewsVerified": 0,
+    "sealedOriginalOpinions": 0,
+    "expertReviewBundleComplete": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "doesNotEstablish": [
+    "real_reviewer_identity",
+    "reviewer_credentials",
+    "reviewer_independence",
+    "expert_opinion",
+    "content_truth",
+    "expert_truth",
+    "rights_legal_conclusion",
+    "cross_system_authority",
+    "release_readiness",
+    "public_release_authorization"
+  ],
+  "packetDigest": "cfe554b60b4698e0acd0a42e14484f4683eb7663d4f6862b767cf70404d2cd5f"
+}

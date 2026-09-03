@@ -1,0 +1,546 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "bazi_expert_public_candidate_prescreen_v1",
+  "ledgerId": "hakimi.bazi.expert-public-candidate-prescreen/1.0.0",
+  "status": "public_candidate_discovery_only_non_authoritative",
+  "createdAt": "2026-08-29T00:00:00.000Z",
+  "basisArtifacts": [
+    {
+      "path": "docs/阶段D八字现实专家公开候选预筛-2026-08-29.md",
+      "role": "non_authoritative_public_prescreen_narrative_basis",
+      "rawBytes": 17149,
+      "rawSha256": "4c4c1d3371825cdd68bb2d20fb21c1be53a097d7f1e7259ba93bf221e0329988"
+    }
+  ],
+  "sourceGroupPolicy": {
+    "deduplicationKey": "sourceUpstreamGroupId",
+    "sameGroupObservationsCountOnce": true,
+    "sourceObservationCount": 11,
+    "deduplicatedSourceGroupCount": 6
+  },
+  "sourceGroups": [
+    {
+      "sourceUpstreamGroupId": "NYCU",
+      "publicOwnerLabel": "国立阳明交通大学",
+      "observationIds": [
+        "LIN-NYCU-TEACHER",
+        "LIN-NYCU-ALUMNI",
+        "LIN-NYCU-PAPER"
+      ]
+    },
+    {
+      "sourceUpstreamGroupId": "JAPAN_DIVINATION_ASSOCIATION",
+      "publicOwnerLabel": "日本占術協会",
+      "observationIds": [
+        "OYAMA-ASSOC-RESEARCH",
+        "OYAMA-ASSOC-OVERVIEW",
+        "OYAMA-ASSOC-MEMBER"
+      ]
+    },
+    {
+      "sourceUpstreamGroupId": "SETSUWA_PUBLISHER",
+      "publicOwnerLabel": "説話社",
+      "observationIds": [
+        "OYAMA-PUBLISHER"
+      ]
+    },
+    {
+      "sourceUpstreamGroupId": "NDL",
+      "publicOwnerLabel": "日本国立国会图书馆",
+      "observationIds": [
+        "OYAMA-NDL"
+      ]
+    },
+    {
+      "sourceUpstreamGroupId": "NCCU",
+      "publicOwnerLabel": "国立政治大学",
+      "observationIds": [
+        "ZHANG-NCCU-THESIS",
+        "ZHANG-NCCU-HUB"
+      ]
+    },
+    {
+      "sourceUpstreamGroupId": "FJU_EXTENSION",
+      "publicOwnerLabel": "辅仁大学推广教育",
+      "observationIds": [
+        "CHEN-FJU-COURSE"
+      ]
+    }
+  ],
+  "sourceObservations": [
+    {
+      "sourceObservationId": "LIN-NYCU-TEACHER",
+      "candidateLeadId": "bazi-public-lead-001",
+      "sourceUrl": "https://stat.nycu.edu.tw/zh_tw/members/teacher/%E6%9E%97%E8%81%96%E8%BB%92-86259034",
+      "sourceUpstreamGroupId": "NYCU",
+      "sourceType": "current_faculty_public_page",
+      "observationSummary": "公开教师页列出两项与八字量化研究相关的项目题名。",
+      "observedAt": "2026-08-29",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "LIN-NYCU-ALUMNI",
+      "candidateLeadId": "bazi-public-lead-001",
+      "sourceUrl": "https://nctu-alumni-voice.sec.nycu.edu.tw/?p=4495",
+      "sourceUpstreamGroupId": "NYCU",
+      "sourceType": "public_alumni_interview",
+      "observationSummary": "公开校友访谈提供同一候选的机构背景线索。",
+      "observedAt": "2026-08-29",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "LIN-NYCU-PAPER",
+      "candidateLeadId": "bazi-public-lead-001",
+      "sourceUrl": "https://shenghsuanlin.web.nycu.edu.tw/2021/04/22/%E5%85%AB%E5%AD%97%E8%AB%96%E5%91%BD%E9%87%8F%E5%8C%96%E7%A0%94%E7%A9%B6%E4%B9%8B%E5%95%8F%E5%8D%B7%E7%99%BC%E5%B1%95/",
+      "sourceUpstreamGroupId": "NYCU",
+      "sourceType": "public_research_page",
+      "observationSummary": "NYCU 托管公开页展示八字量化问卷研究题名。",
+      "observedAt": "2026-08-29",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "OYAMA-ASSOC-RESEARCH",
+      "candidateLeadId": "bazi-public-lead-002",
+      "sourceUrl": "https://uranai-japan.or.jp/rp_archive/",
+      "sourceUpstreamGroupId": "JAPAN_DIVINATION_ASSOCIATION",
+      "sourceType": "public_association_research_archive",
+      "observationSummary": "协会公开研究档案提供候选与四柱推命领域的发现线索。",
+      "observedAt": "2026-08-29",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "OYAMA-ASSOC-OVERVIEW",
+      "candidateLeadId": "bazi-public-lead-002",
+      "sourceUrl": "https://uranai-japan.or.jp/overview/",
+      "sourceUpstreamGroupId": "JAPAN_DIVINATION_ASSOCIATION",
+      "sourceType": "public_association_overview",
+      "observationSummary": "协会概况页提供候选与组织关系的待核线索。",
+      "observedAt": "2026-08-29",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "OYAMA-ASSOC-MEMBER",
+      "candidateLeadId": "bazi-public-lead-002",
+      "sourceUrl": "https://uranai-japan.or.jp/membership-list/",
+      "sourceUpstreamGroupId": "JAPAN_DIVINATION_ASSOCIATION",
+      "sourceType": "public_association_membership_list",
+      "observationSummary": "协会公开名单提供候选关联线索。",
+      "observedAt": "2026-08-29",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "OYAMA-PUBLISHER",
+      "candidateLeadId": "bazi-public-lead-002",
+      "sourceUrl": "https://www.setsuwa.co.jp/publishingDetail.php?pKey=150",
+      "sourceUpstreamGroupId": "SETSUWA_PUBLISHER",
+      "sourceType": "public_publisher_catalog",
+      "observationSummary": "出版社公开书目提供候选著作线索。",
+      "observedAt": "2026-08-29",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "OYAMA-NDL",
+      "candidateLeadId": "bazi-public-lead-002",
+      "sourceUrl": "https://ndlsearch.ndl.go.jp/books/R100000002-I000010973545",
+      "sourceUpstreamGroupId": "NDL",
+      "sourceType": "public_national_library_catalog",
+      "observationSummary": "国家图书馆公开书目提供对应著作的存在性线索。",
+      "observedAt": "2026-08-29",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "ZHANG-NCCU-THESIS",
+      "candidateLeadId": "bazi-public-lead-003",
+      "sourceUrl": "https://thesis.lib.nccu.edu.tw/thesis/detail/f55bc057bbdefe8bf032062c9dc542ec/",
+      "sourceUpstreamGroupId": "NCCU",
+      "sourceType": "public_thesis_detail",
+      "observationSummary": "论文详情页列出 2002 年《子平學之理論研究》。",
+      "observedAt": "2026-08-29",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "ZHANG-NCCU-HUB",
+      "candidateLeadId": "bazi-public-lead-003",
+      "sourceUrl": "https://ah.lib.nccu.edu.tw/item?item_id=107759&locale=en",
+      "sourceUpstreamGroupId": "NCCU",
+      "sourceType": "public_institutional_repository_record",
+      "observationSummary": "机构典藏页提供同一论文的馆藏记录。",
+      "observedAt": "2026-08-29",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "CHEN-FJU-COURSE",
+      "candidateLeadId": "bazi-public-lead-004",
+      "sourceUrl": "https://www.ext.fju.edu.tw/course.php?id=71124",
+      "sourceUpstreamGroupId": "FJU_EXTENSION",
+      "sourceType": "public_extension_course_page",
+      "observationSummary": "推广教育公开课程页列出 2026 年四柱八字进阶研究班。",
+      "observedAt": "2026-08-29",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    }
+  ],
+  "reviewQuestionIds": [
+    "month-command-hidden-stem-duplication",
+    "relative-factor-weighting",
+    "strength-band-thresholds",
+    "strength-invalidation-structures"
+  ],
+  "candidates": [
+    {
+      "candidateLeadId": "bazi-public-lead-001",
+      "publicDisplayName": "林聖軒",
+      "candidateState": "uncontacted_public_candidate_lead",
+      "proposedReviewDirection": "methodology_and_engineering_reproducibility_candidate",
+      "sourceObservationIds": [
+        "LIN-NYCU-TEACHER",
+        "LIN-NYCU-ALUMNI",
+        "LIN-NYCU-PAPER"
+      ],
+      "sourceUpstreamGroupIds": [
+        "NYCU"
+      ],
+      "deduplicatedSourceGroupCount": 1,
+      "multiplePublicUpstreamGroupsObserved": false,
+      "scopeMatrix": [
+        {
+          "questionId": "month-command-hidden-stem-duplication",
+          "state": "unknown"
+        },
+        {
+          "questionId": "relative-factor-weighting",
+          "state": "methodology_only"
+        },
+        {
+          "questionId": "strength-band-thresholds",
+          "state": "methodology_only"
+        },
+        {
+          "questionId": "strength-invalidation-structures",
+          "state": "unknown"
+        }
+      ],
+      "slotAssignment": null,
+      "identityVerified": false,
+      "credentialVerified": false,
+      "scopeVerified": false,
+      "independenceVerified": false,
+      "expertStatusVerified": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "candidateLeadId": "bazi-public-lead-002",
+      "publicDisplayName": "小山眞樹代",
+      "candidateState": "uncontacted_public_candidate_lead",
+      "proposedReviewDirection": "four_pillars_domain_rule_interpretation_candidate",
+      "sourceObservationIds": [
+        "OYAMA-ASSOC-RESEARCH",
+        "OYAMA-ASSOC-OVERVIEW",
+        "OYAMA-ASSOC-MEMBER",
+        "OYAMA-PUBLISHER",
+        "OYAMA-NDL"
+      ],
+      "sourceUpstreamGroupIds": [
+        "JAPAN_DIVINATION_ASSOCIATION",
+        "NDL",
+        "SETSUWA_PUBLISHER"
+      ],
+      "deduplicatedSourceGroupCount": 3,
+      "multiplePublicUpstreamGroupsObserved": true,
+      "scopeMatrix": [
+        {
+          "questionId": "month-command-hidden-stem-duplication",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "relative-factor-weighting",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "strength-band-thresholds",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "strength-invalidation-structures",
+          "state": "potentially_related_scope_confirmation_required"
+        }
+      ],
+      "slotAssignment": null,
+      "identityVerified": false,
+      "credentialVerified": false,
+      "scopeVerified": false,
+      "independenceVerified": false,
+      "expertStatusVerified": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "candidateLeadId": "bazi-public-lead-003",
+      "publicDisplayName": "張新智",
+      "candidateState": "uncontacted_public_candidate_lead",
+      "proposedReviewDirection": "ziping_theory_and_version_interpretation_candidate",
+      "sourceObservationIds": [
+        "ZHANG-NCCU-THESIS",
+        "ZHANG-NCCU-HUB"
+      ],
+      "sourceUpstreamGroupIds": [
+        "NCCU"
+      ],
+      "deduplicatedSourceGroupCount": 1,
+      "multiplePublicUpstreamGroupsObserved": false,
+      "scopeMatrix": [
+        {
+          "questionId": "month-command-hidden-stem-duplication",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "relative-factor-weighting",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "strength-band-thresholds",
+          "state": "unknown"
+        },
+        {
+          "questionId": "strength-invalidation-structures",
+          "state": "potentially_related_scope_confirmation_required"
+        }
+      ],
+      "slotAssignment": null,
+      "identityVerified": false,
+      "credentialVerified": false,
+      "scopeVerified": false,
+      "independenceVerified": false,
+      "expertStatusVerified": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "candidateLeadId": "bazi-public-lead-004",
+      "publicDisplayName": "陳怡廷",
+      "candidateState": "uncontacted_public_candidate_lead",
+      "proposedReviewDirection": "teaching_practice_and_high_risk_expression_candidate",
+      "sourceObservationIds": [
+        "CHEN-FJU-COURSE"
+      ],
+      "sourceUpstreamGroupIds": [
+        "FJU_EXTENSION"
+      ],
+      "deduplicatedSourceGroupCount": 1,
+      "multiplePublicUpstreamGroupsObserved": false,
+      "scopeMatrix": [
+        {
+          "questionId": "month-command-hidden-stem-duplication",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "relative-factor-weighting",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "strength-band-thresholds",
+          "state": "unknown"
+        },
+        {
+          "questionId": "strength-invalidation-structures",
+          "state": "potentially_related_scope_confirmation_required"
+        }
+      ],
+      "slotAssignment": null,
+      "identityVerified": false,
+      "credentialVerified": false,
+      "scopeVerified": false,
+      "independenceVerified": false,
+      "expertStatusVerified": false,
+      "countsTowardExpertGate": false
+    }
+  ],
+  "independenceFactorIds": [
+    "same_institution_or_organization",
+    "teacher_student_or_lineage_relationship",
+    "family_or_household_relationship",
+    "shared_commercial_interest",
+    "rule_or_case_set_coauthorship",
+    "shared_professional_service",
+    "reporting_or_supervision_relationship",
+    "prior_exposure_to_other_reviewer_conclusion",
+    "shared_unpublished_source_or_case_material",
+    "same_upstream_algorithm_or_textbook_dependency"
+  ],
+  "pairwiseIndependenceAssessments": [
+    {
+      "pairId": "bazi-public-lead-001--bazi-public-lead-002",
+      "candidateLeadIds": [
+        "bazi-public-lead-001",
+        "bazi-public-lead-002"
+      ],
+      "factorStates": [
+        { "factorId": "same_institution_or_organization", "state": "unknown" },
+        { "factorId": "teacher_student_or_lineage_relationship", "state": "unknown" },
+        { "factorId": "family_or_household_relationship", "state": "unknown" },
+        { "factorId": "shared_commercial_interest", "state": "unknown" },
+        { "factorId": "rule_or_case_set_coauthorship", "state": "unknown" },
+        { "factorId": "shared_professional_service", "state": "unknown" },
+        { "factorId": "reporting_or_supervision_relationship", "state": "unknown" },
+        { "factorId": "prior_exposure_to_other_reviewer_conclusion", "state": "not_applicable_before_review" },
+        { "factorId": "shared_unpublished_source_or_case_material", "state": "unknown" },
+        { "factorId": "same_upstream_algorithm_or_textbook_dependency", "state": "unknown" }
+      ],
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "pairId": "bazi-public-lead-001--bazi-public-lead-003",
+      "candidateLeadIds": [
+        "bazi-public-lead-001",
+        "bazi-public-lead-003"
+      ],
+      "factorStates": [
+        { "factorId": "same_institution_or_organization", "state": "unknown" },
+        { "factorId": "teacher_student_or_lineage_relationship", "state": "unknown" },
+        { "factorId": "family_or_household_relationship", "state": "unknown" },
+        { "factorId": "shared_commercial_interest", "state": "unknown" },
+        { "factorId": "rule_or_case_set_coauthorship", "state": "unknown" },
+        { "factorId": "shared_professional_service", "state": "unknown" },
+        { "factorId": "reporting_or_supervision_relationship", "state": "unknown" },
+        { "factorId": "prior_exposure_to_other_reviewer_conclusion", "state": "not_applicable_before_review" },
+        { "factorId": "shared_unpublished_source_or_case_material", "state": "unknown" },
+        { "factorId": "same_upstream_algorithm_or_textbook_dependency", "state": "unknown" }
+      ],
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "pairId": "bazi-public-lead-001--bazi-public-lead-004",
+      "candidateLeadIds": [
+        "bazi-public-lead-001",
+        "bazi-public-lead-004"
+      ],
+      "factorStates": [
+        { "factorId": "same_institution_or_organization", "state": "unknown" },
+        { "factorId": "teacher_student_or_lineage_relationship", "state": "unknown" },
+        { "factorId": "family_or_household_relationship", "state": "unknown" },
+        { "factorId": "shared_commercial_interest", "state": "unknown" },
+        { "factorId": "rule_or_case_set_coauthorship", "state": "unknown" },
+        { "factorId": "shared_professional_service", "state": "unknown" },
+        { "factorId": "reporting_or_supervision_relationship", "state": "unknown" },
+        { "factorId": "prior_exposure_to_other_reviewer_conclusion", "state": "not_applicable_before_review" },
+        { "factorId": "shared_unpublished_source_or_case_material", "state": "unknown" },
+        { "factorId": "same_upstream_algorithm_or_textbook_dependency", "state": "unknown" }
+      ],
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "pairId": "bazi-public-lead-002--bazi-public-lead-003",
+      "candidateLeadIds": [
+        "bazi-public-lead-002",
+        "bazi-public-lead-003"
+      ],
+      "factorStates": [
+        { "factorId": "same_institution_or_organization", "state": "unknown" },
+        { "factorId": "teacher_student_or_lineage_relationship", "state": "unknown" },
+        { "factorId": "family_or_household_relationship", "state": "unknown" },
+        { "factorId": "shared_commercial_interest", "state": "unknown" },
+        { "factorId": "rule_or_case_set_coauthorship", "state": "unknown" },
+        { "factorId": "shared_professional_service", "state": "unknown" },
+        { "factorId": "reporting_or_supervision_relationship", "state": "unknown" },
+        { "factorId": "prior_exposure_to_other_reviewer_conclusion", "state": "not_applicable_before_review" },
+        { "factorId": "shared_unpublished_source_or_case_material", "state": "unknown" },
+        { "factorId": "same_upstream_algorithm_or_textbook_dependency", "state": "unknown" }
+      ],
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "pairId": "bazi-public-lead-002--bazi-public-lead-004",
+      "candidateLeadIds": [
+        "bazi-public-lead-002",
+        "bazi-public-lead-004"
+      ],
+      "factorStates": [
+        { "factorId": "same_institution_or_organization", "state": "unknown" },
+        { "factorId": "teacher_student_or_lineage_relationship", "state": "unknown" },
+        { "factorId": "family_or_household_relationship", "state": "unknown" },
+        { "factorId": "shared_commercial_interest", "state": "unknown" },
+        { "factorId": "rule_or_case_set_coauthorship", "state": "unknown" },
+        { "factorId": "shared_professional_service", "state": "unknown" },
+        { "factorId": "reporting_or_supervision_relationship", "state": "unknown" },
+        { "factorId": "prior_exposure_to_other_reviewer_conclusion", "state": "not_applicable_before_review" },
+        { "factorId": "shared_unpublished_source_or_case_material", "state": "unknown" },
+        { "factorId": "same_upstream_algorithm_or_textbook_dependency", "state": "unknown" }
+      ],
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "pairId": "bazi-public-lead-003--bazi-public-lead-004",
+      "candidateLeadIds": [
+        "bazi-public-lead-003",
+        "bazi-public-lead-004"
+      ],
+      "factorStates": [
+        { "factorId": "same_institution_or_organization", "state": "unknown" },
+        { "factorId": "teacher_student_or_lineage_relationship", "state": "unknown" },
+        { "factorId": "family_or_household_relationship", "state": "unknown" },
+        { "factorId": "shared_commercial_interest", "state": "unknown" },
+        { "factorId": "rule_or_case_set_coauthorship", "state": "unknown" },
+        { "factorId": "shared_professional_service", "state": "unknown" },
+        { "factorId": "reporting_or_supervision_relationship", "state": "unknown" },
+        { "factorId": "prior_exposure_to_other_reviewer_conclusion", "state": "not_applicable_before_review" },
+        { "factorId": "shared_unpublished_source_or_case_material", "state": "unknown" },
+        { "factorId": "same_upstream_algorithm_or_textbook_dependency", "state": "unknown" }
+      ],
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    }
+  ],
+  "authorityBoundary": {
+    "identityVerified": false,
+    "credentialVerified": false,
+    "scopeVerified": false,
+    "independenceVerified": false,
+    "expertStatusVerified": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "releaseReady": false,
+    "expertClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false
+  },
+  "observationBoundary": {
+    "heldHandleRead": true,
+    "sameBufferHashAndParse": true,
+    "basisSameBufferHashAndInspection": true,
+    "finalFileSymlinkRejected": true,
+    "directorySymlinkRejected": true,
+    "unknownFieldsRejected": true,
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailable": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false
+  },
+  "doesNotEstablish": [
+    "real_person_identity",
+    "current_credentials",
+    "four_question_scope",
+    "pairwise_independence",
+    "expert_status",
+    "content_truth",
+    "expert_truth",
+    "rights_or_legal_conclusion",
+    "formal_review_gate",
+    "release_readiness",
+    "public_release_authorization",
+    "cross_file_atomic_snapshot",
+    "interval_mutation_or_aba_exclusion"
+  ],
+  "ledgerDigest": "ba9878bfcf266d5f34c46cf0808b3bbc382ddaa8464b36bf1a63d8c77bdf6d21"
+}

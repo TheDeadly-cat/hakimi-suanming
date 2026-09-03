@@ -1,0 +1,894 @@
+{
+  "schemaVersion": "1.1.0",
+  "recordType": "bazi_pr10bc_version_aware_candidate_scope_reconciliation_v1_1",
+  "ledgerId": "hakimi.bazi.pr10bc.version-aware-candidate-scope-reconciliation/1.1.0",
+  "status": "candidate_scope_reconciliation_versioned_parent_rebound_no_binding_created",
+  "createdAt": "2026-08-30T00:00:00.000Z",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "historicalLineage": {
+    "path": "content/system-admission/bazi-pr10bc-scope-reconciliation.v1.json",
+    "rawBytes": 31668,
+    "rawSha256": "0aa6dda66b5d3b47a69d1decb73220ae5811af7d779516858aeb32ef18a1abd6",
+    "ledgerId": "hakimi.bazi.pr10bc.scope-reconciliation/1.0.0",
+    "ledgerDigest": "5e742a8a92a8ca4ebf2337f5eb0866be6c962e53801e3d259de4571b0cd65116",
+    "schemaVersion": "1.0.0",
+    "status": "scope_reconciliation_only_no_binding_created",
+    "createdAt": "2026-08-29T00:00:00.000Z",
+    "role": "fixed_projection_template_only_not_current_capability"
+  },
+  "versionedCandidateParentRebind": {
+    "activeAdmissionEffect": "none",
+    "supersessionWeakSetBrandVerified": true,
+    "candidateReadinessWeakSetBrandVerified": true,
+    "candidateReadiness": {
+      "path": "content/system-admission/bazi-binding-freeze-requirements.v1.7.0.json",
+      "rawBytes": 32629,
+      "rawSha256": "7565a1c1ae51c09c78cf8f906e544bd8ee822020f76587237bc909ef1e6408a2",
+      "ledgerId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.7.0",
+      "ledgerDigest": "afdebfa1fb7a797f02d136373eb9aef1afa26b38b755926f8930ea5de97316b8"
+    },
+    "sourceBindingCandidateParent": {
+      "path": "content/bazi-strength-source-binding-candidates.v1.6.0.json",
+      "rawBytes": 50427,
+      "rawSha256": "62f6a68b99246a802bcf2055aa09a8ac8113df37a7ede1c55d8a2ea64deaea98",
+      "ledgerId": "hakimi.bazi.strength.source-binding-candidates/1.6.0",
+      "ledgerDigest": "6f008058b282613fd131344206b27fccb1d80596bb49789f0554acdd69c1e44c",
+      "candidateId": "dtt-chanwei-wikisource-r2600158-candidate-v2",
+      "candidateDigest": "2c59ee25081c6e0a88ee7f9da18395be2ea615bb289c28798e324e23befeeb59"
+    },
+    "sourceRightsCandidateParent": {
+      "path": "content/bazi-strength-source-rights-candidates.v1.2.0.json",
+      "rawBytes": 23947,
+      "rawSha256": "678632a8875672f58bb5c9f1ec4a299a4f0c6e750b8ff4a02bfe4df889e1243a",
+      "ledgerId": "hakimi.bazi.strength.source-rights-candidates/1.2.0",
+      "ledgerDigest": "300e092c4913885cff626221b8734786128639c7d6cfd7c2be7bea2acc6bbefc",
+      "candidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v2",
+      "candidateDigest": "674a0b64179f5fbb0dff331fdad6b6ac93e3093de4a8459abf6ff9bdd6cd418c"
+    },
+    "dttNoticeCandidateProjection": {
+      "path": "content/system-admission/bazi-dtt-notice-reconciliation.v2.json",
+      "rawBytes": 8881,
+      "rawSha256": "e2656a19955db0ce908df88aa696cd40847e7536af58c79548ac1fbce9a7464b",
+      "reconciliationId": "hakimi.bazi.dtt-notice-reconciliation/2.0.0",
+      "reconciliationDigest": "2a47fc6fe281a4362c36dfc67c2a6dee195b5b069065ffc0e86ac1afcd7aa8a0"
+    },
+    "supersessionReceipt": {
+      "path": "content/system-admission/bazi-dtt-versioned-parent-supersession.v1.json",
+      "rawBytes": 9229,
+      "rawSha256": "aa9e62089990d8ba699c441114914173141e8228f027605b47f5c5e238fac0e3",
+      "supersessionId": "hakimi.bazi.dtt-versioned-parent-supersession/1.0.0",
+      "supersessionDigest": "601b4e07b94e62b73812a7a26f1108a094272dca660a188bb660fa860f031264"
+    },
+    "dttAdjacentCandidateReferenceRebinds": 3,
+    "uniqueSupersedingSourceCandidateParents": 1,
+    "semanticMappingAuthorityChanged": false,
+    "formalAdmissionPromotionBlocked": true
+  },
+  "scopeInput": {
+    "sourceClass": "user_supplied_second_deep_review_concepts_4_to_12",
+    "topicsReconciled": 9,
+    "interpretationBoundary": "old_audit_topic_ids_are_not_current_binding_ids",
+    "orderingBoundary": "deep_review_contains_conflicting_original_and_recommended_orders_reconciliation_uses_recommended_batch_order"
+  },
+  "mappingAuthorityBoundary": {
+    "mappingProjectionClass": "repository_authored_scope_judgment_not_domain_truth",
+    "mappingProjectionMechanicallyReproduced": true,
+    "semanticEquivalenceMechanicallyEstablished": false,
+    "userSuppliedReviewAttachmentBytesBound": false,
+    "domainExpertMappingApproved": false,
+    "candidateParentIdentityRebindOnly": true,
+    "activeAdmissionEffect": "none"
+  },
+  "observationBoundary": {
+    "directHistoricalPr10bcRawAndSemanticIdentityVerified": true,
+    "historicalScopedInspectionProjectionReusedAfterRawIdentityMatch": true,
+    "scopedArtifactPointInTimeRawIdentitiesVerified": 6,
+    "upstreamBrandedDependenciesVerified": true,
+    "nestedVerifierSameBufferTransitivityClaimed": false,
+    "endpointSnapshotOnly": true,
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false
+  },
+  "currentBindingInventory": {
+    "bindingIds": [
+      "binding:core:derive-assessment",
+      "binding:policy:factor-inclusion",
+      "binding:policy:direction-map",
+      "binding:policy:weights",
+      "binding:policy:month-duplication",
+      "binding:policy:thresholds",
+      "binding:sensitivity:six-scenarios",
+      "binding:dtt:month-command",
+      "binding:smt-v5:relative-relations",
+      "binding:smt-v10:whole-chart",
+      "binding:yhzp:hidden-listing",
+      "binding:zpzz:review-gates"
+    ],
+    "enumerationSource": "packages/bazi-interpretation/src/strength-claim-registry.ts#sourceBindings",
+    "exactRegisteredSourceBindings": 12,
+    "projectEngineeringBindings": 7,
+    "historicalTextBindings": 4,
+    "reviewGateBindings": 1,
+    "bindingsFrozenVerified": 0
+  },
+  "basisArtifacts": [
+    {
+      "path": "content/system-admission/bazi-binding-freeze-requirements.v1.7.0.json",
+      "role": "version_aware_candidate_readiness_parent",
+      "bytes": 32629,
+      "sha256": "7565a1c1ae51c09c78cf8f906e544bd8ee822020f76587237bc909ef1e6408a2"
+    },
+    {
+      "path": "content/bazi-strength-engineering-binding-candidates.v1.json",
+      "role": "engineering_binding_candidate_parent",
+      "bytes": 21712,
+      "sha256": "95154d55d9e368351f5a69a1fa2ff63a51ba946d33a800dbd1f2460d9ac97b2f"
+    },
+    {
+      "path": "content/bazi-strength-source-binding-candidates.v1.6.0.json",
+      "role": "versioned_source_binding_candidate_parent",
+      "bytes": 50427,
+      "sha256": "62f6a68b99246a802bcf2055aa09a8ac8113df37a7ede1c55d8a2ea64deaea98"
+    },
+    {
+      "path": "content/bazi-strength-source-rights-candidates.v1.2.0.json",
+      "role": "versioned_source_rights_candidate_parent",
+      "bytes": 23947,
+      "sha256": "678632a8875672f58bb5c9f1ec4a299a4f0c6e750b8ff4a02bfe4df889e1243a"
+    },
+    {
+      "path": "content/system-admission/bazi-dtt-notice-reconciliation.v2.json",
+      "role": "dtt_candidate_notice_projection_parent",
+      "bytes": 8881,
+      "sha256": "e2656a19955db0ce908df88aa696cd40847e7536af58c79548ac1fbce9a7464b"
+    },
+    {
+      "path": "content/system-admission/bazi-dtt-versioned-parent-supersession.v1.json",
+      "role": "paired_versioned_parent_supersession_receipt",
+      "bytes": 9229,
+      "sha256": "aa9e62089990d8ba699c441114914173141e8228f027605b47f5c5e238fac0e3"
+    }
+  ],
+  "artifactObservations": [
+    {
+      "path": "packages/bazi-interpretation/src/strength-assessment-core.ts",
+      "role": "scoped_engineering_producer",
+      "bytes": 8559,
+      "sha256": "bbe6510c5cc0500efc8bb3af45efc1c344a5159f35c8fe5fca3aae3dab156e3b",
+      "stableSymbols": [
+        "const GENERATED_ELEMENT",
+        "const CONTROLLED_ELEMENT",
+        "export function strengthElementRelation(",
+        "export function collectBaziStrengthFactors(",
+        "export function deriveBaziStrengthAssessment(",
+        "group: \"visible_stem\"",
+        "strengthFactorWeight(\"visible_stem\")",
+        "const month = facts.pillars.month",
+        "const monthMainTenGod = month.branchTenGods[0]",
+        "const monthMainStem = month.hiddenStems[0]",
+        "group: \"month_command\"",
+        "position: \"month\"",
+        "strengthFactorWeight(\"month_command\")",
+        "pillar.hiddenStems.forEach",
+        "strengthFactorWeight(\"hidden_stem\", index)",
+        "const supportWeight = factors",
+        "const demandWeight = factors",
+        "const supportRatio = total === 0 ? null : supportWeight / total"
+      ],
+      "admissionEffect": "none"
+    },
+    {
+      "path": "packages/bazi-interpretation/src/strength-policy.ts",
+      "role": "scoped_engineering_policy",
+      "bytes": 10905,
+      "sha256": "795709298542773459a73cd8a63a6824d3076bbdedf6a157c0652d25446486f1",
+      "stableSymbols": [
+        "export const BAZI_STRENGTH_FACTOR_WEIGHTS",
+        "export const BAZI_STRENGTH_BAND_THRESHOLDS",
+        "export function strengthFactorWeight(",
+        "hiddenStemIndex: number | null = null",
+        "export function classifyStrengthBand("
+      ],
+      "admissionEffect": "none"
+    },
+    {
+      "path": "packages/bazi-interpretation/src/strength-sensitivity-review.ts",
+      "role": "scoped_engineering_sensitivity_producer",
+      "bytes": 13979,
+      "sha256": "ef6772513009cb4e4174cd9f6d12318c69995629a37ab5e5be59ea7bcbace4d8",
+      "stableSymbols": [
+        "export const BAZI_STRENGTH_SENSITIVITY_REVIEW_PROFILE",
+        "export function validateStrengthSensitivityReview(",
+        "export function buildStrengthSensitivityReview("
+      ],
+      "admissionEffect": "none"
+    },
+    {
+      "path": "packages/bazi-core/src/index.ts",
+      "role": "scoped_runtime_fact_producer_not_admission",
+      "bytes": 46847,
+      "sha256": "4c9b7fc5a16cbd3e3f5ca0bed90cd950b8ef3750f204427a332a6c1a1b4e7e7f",
+      "stableSymbols": [
+        "function buildPillar(",
+        "LunarUtil.ZHI_HIDE_GAN",
+        "field: `${prefix}.hiddenStems`",
+        "verificationStatus: \"experimental\" as const"
+      ],
+      "admissionEffect": "none"
+    },
+    {
+      "path": "apps/web/src/components/bazi-strength-evidence-ledger.tsx",
+      "role": "scoped_score_projection_consumer",
+      "bytes": 52960,
+      "sha256": "75ffdcf4596f8e4088441782baca0a0d3e655ac3854e06ad2273351ab33b4fc7",
+      "stableSymbols": [
+        "const recomputedSupportWeight",
+        "const recomputedDemandWeight",
+        "const recomputedSupportRatio",
+        "分类小计无法由逐项证据贡献独立复算。"
+      ],
+      "admissionEffect": "none"
+    },
+    {
+      "path": "packages/bazi-interpretation/src/strength-claim-registry.ts",
+      "role": "current_binding_registry_inventory_source",
+      "bytes": 44959,
+      "sha256": "b08d4e6b0fb5c830b251e0c03ac49b7620729f223805b145b839a89245aa3888",
+      "stableSymbols": [
+        "const sourceBindings: readonly BaziStrengthClaimSourceBinding[] = Object.freeze([",
+        "export const BAZI_STRENGTH_CLAIM_REGISTRY: BaziStrengthClaimRegistry = Object.freeze({"
+      ],
+      "admissionEffect": "none"
+    }
+  ],
+  "concepts": [
+    {
+      "topicId": "support.season_production",
+      "originalTopicOrder": 6,
+      "recommendedBatchOrder": 4,
+      "recommendedBatch": "PR10B_rule_tables_and_season_relations",
+      "mappingState": "underdefined_generic_relation_and_month_command_pipeline_observed_not_season_table",
+      "currentBindingIds": [],
+      "nearestNonEquivalentBindingIds": [
+        "binding:core:derive-assessment",
+        "binding:policy:factor-inclusion",
+        "binding:policy:direction-map",
+        "binding:policy:weights",
+        "binding:policy:month-duplication"
+      ],
+      "observedProducerRefs": [
+        {
+          "path": "packages/bazi-interpretation/src/strength-assessment-core.ts",
+          "stableSymbols": [
+            "GENERATED_ELEMENT",
+            "strengthElementRelation"
+          ],
+          "observationBoundary": "generic_five_element_relation_function_has_no_season_dimension"
+        },
+        {
+          "path": "packages/bazi-interpretation/src/strength-assessment-core.ts",
+          "stableSymbols": [
+            "const month = facts.pillars.month",
+            "group: \"month_command\"",
+            "position: \"month\"",
+            "strengthFactorWeight(\"month_command\")"
+          ],
+          "observationBoundary": "non_equivalent_month_command_engineering_pipeline_exists_but_is_not_season_production_table"
+        }
+      ],
+      "observedConsumerRefs": [],
+      "originClassification": "underdefined_audit_concept_with_generic_relation_and_month_command_engineering_pipeline",
+      "scoreMeaning": null,
+      "authorityBoundary": "no_season_specific_production_table_or_dedicated_binding_observed_in_scoped_artifacts",
+      "externalEvidenceRequired": [
+        "explicit_rule_model_and_scope",
+        "per_value_source_or_first_party_derivation_provenance",
+        "work_edition_and_carrier_identity",
+        "work_edition_and_carrier_rights_evidence",
+        "two_independent_domain_opinions"
+      ],
+      "dedicatedCurrentBindingExists": false,
+      "dedicatedRuleTableOrScoreMeaningFieldObservedInScopedArtifacts": false,
+      "formalScoringAllowed": false,
+      "parallelBindingCreated": false,
+      "contentTruthEstablished": false,
+      "expertTruthEstablished": false,
+      "rightsLegalConclusionEstablished": false,
+      "bindingFreezeEffect": "none",
+      "adjacentCandidateContexts": [
+        {
+          "candidateId": "smt-v5-wikisource-r2706483-candidate-v1",
+          "bindingId": "binding:smt-v5:relative-relations",
+          "quoteCandidateIds": [
+            "smt-v5-relative-relations-minimal-v1"
+          ],
+          "relationBoundary": "adjacent_relative_relations_text_candidate_not_season_table",
+          "supersedesCandidateId": null,
+          "candidateIdentityRebound": false,
+          "candidateParentRole": "unchanged_historical_text_candidate_context"
+        },
+        {
+          "candidateId": "dtt-chanwei-wikisource-r2600158-candidate-v2",
+          "bindingId": "binding:dtt:month-command",
+          "quoteCandidateIds": [
+            "dtt-yueling-minimal-v1"
+          ],
+          "relationBoundary": "adjacent_month_command_text_candidate_not_season_relation_table",
+          "supersedesCandidateId": "dtt-chanwei-wikisource-r2600158-candidate-v1",
+          "candidateIdentityRebound": true,
+          "candidateParentRole": "superseding_candidate_input_only_not_active_formal_parent"
+        },
+        {
+          "candidateId": "smt-siku-v10-wikisource-r761703-candidate-v1",
+          "bindingId": "binding:smt-v10:whole-chart",
+          "quoteCandidateIds": [
+            "smt-v10-yueling-minimal-v1"
+          ],
+          "relationBoundary": "adjacent_whole_chart_text_candidate_not_season_relation_table",
+          "supersedesCandidateId": null,
+          "candidateIdentityRebound": false,
+          "candidateParentRole": "unchanged_historical_text_candidate_context"
+        }
+      ]
+    },
+    {
+      "topicId": "support.season_control",
+      "originalTopicOrder": 7,
+      "recommendedBatchOrder": 5,
+      "recommendedBatch": "PR10B_rule_tables_and_season_relations",
+      "mappingState": "underdefined_generic_relation_and_month_command_pipeline_observed_not_season_table",
+      "currentBindingIds": [],
+      "nearestNonEquivalentBindingIds": [
+        "binding:core:derive-assessment",
+        "binding:policy:factor-inclusion",
+        "binding:policy:direction-map",
+        "binding:policy:weights",
+        "binding:policy:month-duplication"
+      ],
+      "observedProducerRefs": [
+        {
+          "path": "packages/bazi-interpretation/src/strength-assessment-core.ts",
+          "stableSymbols": [
+            "CONTROLLED_ELEMENT",
+            "strengthElementRelation"
+          ],
+          "observationBoundary": "generic_five_element_relation_function_has_no_season_dimension"
+        },
+        {
+          "path": "packages/bazi-interpretation/src/strength-assessment-core.ts",
+          "stableSymbols": [
+            "const month = facts.pillars.month",
+            "group: \"month_command\"",
+            "position: \"month\"",
+            "strengthFactorWeight(\"month_command\")"
+          ],
+          "observationBoundary": "non_equivalent_month_command_engineering_pipeline_exists_but_is_not_season_control_table"
+        }
+      ],
+      "observedConsumerRefs": [],
+      "originClassification": "underdefined_audit_concept_with_generic_relation_and_month_command_engineering_pipeline",
+      "scoreMeaning": null,
+      "authorityBoundary": "no_season_specific_control_table_or_dedicated_binding_observed_in_scoped_artifacts",
+      "externalEvidenceRequired": [
+        "explicit_rule_model_and_scope",
+        "per_value_source_or_first_party_derivation_provenance",
+        "work_edition_and_carrier_identity",
+        "work_edition_and_carrier_rights_evidence",
+        "two_independent_domain_opinions"
+      ],
+      "dedicatedCurrentBindingExists": false,
+      "dedicatedRuleTableOrScoreMeaningFieldObservedInScopedArtifacts": false,
+      "formalScoringAllowed": false,
+      "parallelBindingCreated": false,
+      "contentTruthEstablished": false,
+      "expertTruthEstablished": false,
+      "rightsLegalConclusionEstablished": false,
+      "bindingFreezeEffect": "none",
+      "adjacentCandidateContexts": [
+        {
+          "candidateId": "smt-v5-wikisource-r2706483-candidate-v1",
+          "bindingId": "binding:smt-v5:relative-relations",
+          "quoteCandidateIds": [
+            "smt-v5-relative-relations-minimal-v1"
+          ],
+          "relationBoundary": "adjacent_relative_relations_text_candidate_not_season_table",
+          "supersedesCandidateId": null,
+          "candidateIdentityRebound": false,
+          "candidateParentRole": "unchanged_historical_text_candidate_context"
+        },
+        {
+          "candidateId": "dtt-chanwei-wikisource-r2600158-candidate-v2",
+          "bindingId": "binding:dtt:month-command",
+          "quoteCandidateIds": [
+            "dtt-yueling-minimal-v1"
+          ],
+          "relationBoundary": "adjacent_month_command_text_candidate_not_season_relation_table",
+          "supersedesCandidateId": "dtt-chanwei-wikisource-r2600158-candidate-v1",
+          "candidateIdentityRebound": true,
+          "candidateParentRole": "superseding_candidate_input_only_not_active_formal_parent"
+        },
+        {
+          "candidateId": "smt-siku-v10-wikisource-r761703-candidate-v1",
+          "bindingId": "binding:smt-v10:whole-chart",
+          "quoteCandidateIds": [
+            "smt-v10-yueling-minimal-v1"
+          ],
+          "relationBoundary": "adjacent_whole_chart_text_candidate_not_season_relation_table",
+          "supersedesCandidateId": null,
+          "candidateIdentityRebound": false,
+          "candidateParentRole": "unchanged_historical_text_candidate_context"
+        }
+      ]
+    },
+    {
+      "topicId": "support.season_storage",
+      "originalTopicOrder": 8,
+      "recommendedBatchOrder": 6,
+      "recommendedBatch": "PR10B_rule_tables_and_season_relations",
+      "mappingState": "not_registered_no_scoped_producer_observed",
+      "currentBindingIds": [],
+      "nearestNonEquivalentBindingIds": [],
+      "observedProducerRefs": [],
+      "observedConsumerRefs": [],
+      "originClassification": "unregistered_audit_concept",
+      "scoreMeaning": null,
+      "authorityBoundary": "no_storage_rule_table_binding_or_scoped_producer_observed",
+      "externalEvidenceRequired": [
+        "explicit_rule_model_and_scope",
+        "per_value_source_or_first_party_derivation_provenance",
+        "work_edition_and_carrier_identity",
+        "work_edition_and_carrier_rights_evidence",
+        "two_independent_domain_opinions"
+      ],
+      "dedicatedCurrentBindingExists": false,
+      "dedicatedRuleTableOrScoreMeaningFieldObservedInScopedArtifacts": false,
+      "formalScoringAllowed": false,
+      "parallelBindingCreated": false,
+      "contentTruthEstablished": false,
+      "expertTruthEstablished": false,
+      "rightsLegalConclusionEstablished": false,
+      "bindingFreezeEffect": "none",
+      "adjacentCandidateContexts": []
+    },
+    {
+      "topicId": "support.rooting_tables",
+      "originalTopicOrder": 9,
+      "recommendedBatchOrder": 7,
+      "recommendedBatch": "PR10B_rule_tables_and_season_relations",
+      "mappingState": "runtime_hidden_stem_fact_and_adjacent_text_only_not_rooting_table",
+      "currentBindingIds": [],
+      "nearestNonEquivalentBindingIds": [
+        "binding:policy:weights"
+      ],
+      "observedProducerRefs": [
+        {
+          "path": "packages/bazi-core/src/index.ts",
+          "stableSymbols": [
+            "buildPillar",
+            "LunarUtil.ZHI_HIDE_GAN",
+            "field: `${prefix}.hiddenStems`"
+          ],
+          "observationBoundary": "experimental_hidden_stem_fact_derivation_not_rooting_strength_table"
+        },
+        {
+          "path": "packages/bazi-interpretation/src/strength-assessment-core.ts",
+          "stableSymbols": [
+            "pillar.hiddenStems.forEach",
+            "strengthFactorWeight(\"hidden_stem\", index)"
+          ],
+          "observationBoundary": "hidden_stem_index_weight_consumption_not_rooting_rule_table"
+        }
+      ],
+      "observedConsumerRefs": [],
+      "originClassification": "unregistered_audit_concept_with_non_equivalent_runtime_fact",
+      "scoreMeaning": null,
+      "authorityBoundary": "hidden_stem_listing_and_index_weight_do_not_establish_rooting_strength",
+      "externalEvidenceRequired": [
+        "explicit_rule_model_and_scope",
+        "per_value_source_or_first_party_derivation_provenance",
+        "work_edition_and_carrier_identity",
+        "work_edition_and_carrier_rights_evidence",
+        "two_independent_domain_opinions"
+      ],
+      "dedicatedCurrentBindingExists": false,
+      "dedicatedRuleTableOrScoreMeaningFieldObservedInScopedArtifacts": false,
+      "formalScoringAllowed": false,
+      "parallelBindingCreated": false,
+      "contentTruthEstablished": false,
+      "expertTruthEstablished": false,
+      "rightsLegalConclusionEstablished": false,
+      "bindingFreezeEffect": "none",
+      "adjacentCandidateContexts": [
+        {
+          "candidateId": "dtt-chanwei-wikisource-r2600158-candidate-v2",
+          "bindingId": "binding:dtt:month-command",
+          "quoteCandidateIds": [
+            "dtt-rooting-minimal-v1"
+          ],
+          "relationBoundary": "adjacent_rooting_passage_candidate_not_rooting_rule_table",
+          "supersedesCandidateId": "dtt-chanwei-wikisource-r2600158-candidate-v1",
+          "candidateIdentityRebound": true,
+          "candidateParentRole": "superseding_candidate_input_only_not_active_formal_parent"
+        },
+        {
+          "candidateId": "yhzp-wikisource-r2593607-candidate-v1",
+          "bindingId": "binding:yhzp:hidden-listing",
+          "quoteCandidateIds": [
+            "yhzp-hidden-stem-listing-minimal-v1"
+          ],
+          "relationBoundary": "adjacent_hidden_stem_listing_candidate_not_rooting_strength_table",
+          "supersedesCandidateId": null,
+          "candidateIdentityRebound": false,
+          "candidateParentRole": "unchanged_historical_text_candidate_context"
+        }
+      ]
+    },
+    {
+      "topicId": "support.tougan_tables",
+      "originalTopicOrder": 10,
+      "recommendedBatchOrder": 8,
+      "recommendedBatch": "PR10B_rule_tables_and_season_relations",
+      "mappingState": "visible_stem_presence_and_adjacent_text_only_not_tougan_table",
+      "currentBindingIds": [],
+      "nearestNonEquivalentBindingIds": [
+        "binding:policy:factor-inclusion"
+      ],
+      "observedProducerRefs": [
+        {
+          "path": "packages/bazi-interpretation/src/strength-assessment-core.ts",
+          "stableSymbols": [
+            "group: \"visible_stem\"",
+            "strengthFactorWeight(\"visible_stem\")"
+          ],
+          "observationBoundary": "visible_stem_presence_weighting_not_tougan_rule_or_grade_table"
+        }
+      ],
+      "observedConsumerRefs": [],
+      "originClassification": "unregistered_audit_concept_with_non_equivalent_visible_fact",
+      "scoreMeaning": null,
+      "authorityBoundary": "visible_stem_presence_does_not_establish_tougan_rule_table",
+      "externalEvidenceRequired": [
+        "explicit_rule_model_and_scope",
+        "per_value_source_or_first_party_derivation_provenance",
+        "work_edition_and_carrier_identity",
+        "work_edition_and_carrier_rights_evidence",
+        "two_independent_domain_opinions"
+      ],
+      "dedicatedCurrentBindingExists": false,
+      "dedicatedRuleTableOrScoreMeaningFieldObservedInScopedArtifacts": false,
+      "formalScoringAllowed": false,
+      "parallelBindingCreated": false,
+      "contentTruthEstablished": false,
+      "expertTruthEstablished": false,
+      "rightsLegalConclusionEstablished": false,
+      "bindingFreezeEffect": "none",
+      "adjacentCandidateContexts": [
+        {
+          "candidateId": "smt-siku-v10-wikisource-r761703-candidate-v1",
+          "bindingId": "binding:smt-v10:whole-chart",
+          "quoteCandidateIds": [
+            "smt-v10-tougan-minimal-v1"
+          ],
+          "relationBoundary": "adjacent_stem_exposure_passage_candidate_not_tougan_rule_table",
+          "supersedesCandidateId": null,
+          "candidateIdentityRebound": false,
+          "candidateParentRole": "unchanged_historical_text_candidate_context"
+        }
+      ]
+    },
+    {
+      "topicId": "strength.zhushou_position_decay",
+      "originalTopicOrder": 4,
+      "recommendedBatchOrder": 9,
+      "recommendedBatch": "PR10C_engineering_heuristics_and_score_semantics",
+      "mappingState": "ambiguous_hidden_stem_index_weight_is_not_pillar_position_decay",
+      "currentBindingIds": [],
+      "nearestNonEquivalentBindingIds": [
+        "binding:policy:weights"
+      ],
+      "observedProducerRefs": [
+        {
+          "path": "packages/bazi-interpretation/src/strength-policy.ts",
+          "stableSymbols": [
+            "strengthFactorWeight",
+            "hiddenStemIndex"
+          ],
+          "observationBoundary": "hidden_stem_list_index_changes_weight_but_no_pillar_position_argument_exists"
+        }
+      ],
+      "observedConsumerRefs": [],
+      "originClassification": "undefined_audit_concept_not_current_engineering_binding",
+      "scoreMeaning": null,
+      "authorityBoundary": "position_dimension_and_decay_semantics_must_be_defined_before_mapping",
+      "externalEvidenceRequired": [
+        "human_definition_of_position_dimension",
+        "explicit_decay_rule_and_coefficients",
+        "first_class_score_semantics_contract",
+        "engineering_review",
+        "two_independent_domain_opinions",
+        "supersession_chain",
+        "applicable_rights_evidence"
+      ],
+      "dedicatedCurrentBindingExists": false,
+      "dedicatedRuleTableOrScoreMeaningFieldObservedInScopedArtifacts": false,
+      "formalScoringAllowed": false,
+      "parallelBindingCreated": false,
+      "contentTruthEstablished": false,
+      "expertTruthEstablished": false,
+      "rightsLegalConclusionEstablished": false,
+      "bindingFreezeEffect": "none",
+      "adjacentCandidateContexts": []
+    },
+    {
+      "topicId": "strength.score_observation_only",
+      "originalTopicOrder": 5,
+      "recommendedBatchOrder": 10,
+      "recommendedBatch": "PR10C_engineering_heuristics_and_score_semantics",
+      "mappingState": "mapped_to_existing_engineering_candidates_no_dedicated_score_meaning_field",
+      "currentBindingIds": [
+        "binding:core:derive-assessment",
+        "binding:policy:factor-inclusion",
+        "binding:policy:direction-map",
+        "binding:policy:weights",
+        "binding:policy:month-duplication",
+        "binding:policy:thresholds",
+        "binding:sensitivity:six-scenarios"
+      ],
+      "nearestNonEquivalentBindingIds": [],
+      "observedProducerRefs": [
+        {
+          "path": "packages/bazi-interpretation/src/strength-assessment-core.ts",
+          "stableSymbols": [
+            "collectBaziStrengthFactors",
+            "deriveBaziStrengthAssessment",
+            "supportWeight",
+            "demandWeight",
+            "supportRatio"
+          ],
+          "observationBoundary": "current_support_demand_ratio_and_band_engineering_projection"
+        },
+        {
+          "path": "packages/bazi-interpretation/src/strength-policy.ts",
+          "stableSymbols": [
+            "BAZI_STRENGTH_FACTOR_WEIGHTS",
+            "BAZI_STRENGTH_BAND_THRESHOLDS",
+            "strengthFactorWeight",
+            "classifyStrengthBand"
+          ],
+          "observationBoundary": "current_engineering_candidate_weights_thresholds_and_classification"
+        },
+        {
+          "path": "packages/bazi-interpretation/src/strength-sensitivity-review.ts",
+          "stableSymbols": [
+            "BAZI_STRENGTH_SENSITIVITY_REVIEW_PROFILE",
+            "buildStrengthSensitivityReview"
+          ],
+          "observationBoundary": "six_scenario_engineering_sensitivity_projection"
+        }
+      ],
+      "observedConsumerRefs": [
+        {
+          "path": "apps/web/src/components/bazi-strength-evidence-ledger.tsx",
+          "stableSymbols": [
+            "recomputedSupportWeight",
+            "recomputedDemandWeight",
+            "recomputedSupportRatio"
+          ],
+          "observationBoundary": "web_source_recomputes_engineering_projection_not_browser_runtime_evidence"
+        }
+      ],
+      "originClassification": "project_engineering_heuristic_candidate_projection",
+      "scoreMeaning": "observational_engineering_candidate_only",
+      "authorityBoundary": "engineering_observation_only_no_classical_expert_scientific_or_predictive_authority",
+      "externalEvidenceRequired": [
+        "first_class_score_semantics_contract",
+        "engineering_review",
+        "two_independent_domain_opinions",
+        "supersession_chain",
+        "applicable_rights_evidence"
+      ],
+      "dedicatedCurrentBindingExists": false,
+      "dedicatedRuleTableOrScoreMeaningFieldObservedInScopedArtifacts": false,
+      "formalScoringAllowed": false,
+      "parallelBindingCreated": false,
+      "contentTruthEstablished": false,
+      "expertTruthEstablished": false,
+      "rightsLegalConclusionEstablished": false,
+      "bindingFreezeEffect": "none",
+      "adjacentCandidateContexts": []
+    },
+    {
+      "topicId": "support.position_decay",
+      "originalTopicOrder": 11,
+      "recommendedBatchOrder": 11,
+      "recommendedBatch": "PR10C_engineering_heuristics_and_score_semantics",
+      "mappingState": "ambiguous_hidden_stem_index_weight_is_not_pillar_position_decay",
+      "currentBindingIds": [],
+      "nearestNonEquivalentBindingIds": [
+        "binding:policy:weights"
+      ],
+      "observedProducerRefs": [
+        {
+          "path": "packages/bazi-interpretation/src/strength-policy.ts",
+          "stableSymbols": [
+            "strengthFactorWeight",
+            "hiddenStemIndex"
+          ],
+          "observationBoundary": "hidden_stem_list_index_changes_weight_but_no_pillar_position_argument_exists"
+        }
+      ],
+      "observedConsumerRefs": [],
+      "originClassification": "undefined_audit_concept_not_current_engineering_binding",
+      "scoreMeaning": null,
+      "authorityBoundary": "position_dimension_and_decay_semantics_must_be_defined_before_mapping",
+      "externalEvidenceRequired": [
+        "human_definition_of_position_dimension",
+        "explicit_decay_rule_and_coefficients",
+        "first_class_score_semantics_contract",
+        "engineering_review",
+        "two_independent_domain_opinions",
+        "supersession_chain",
+        "applicable_rights_evidence"
+      ],
+      "dedicatedCurrentBindingExists": false,
+      "dedicatedRuleTableOrScoreMeaningFieldObservedInScopedArtifacts": false,
+      "formalScoringAllowed": false,
+      "parallelBindingCreated": false,
+      "contentTruthEstablished": false,
+      "expertTruthEstablished": false,
+      "rightsLegalConclusionEstablished": false,
+      "bindingFreezeEffect": "none",
+      "adjacentCandidateContexts": []
+    },
+    {
+      "topicId": "support.score_semantics",
+      "originalTopicOrder": 12,
+      "recommendedBatchOrder": 12,
+      "recommendedBatch": "PR10C_engineering_heuristics_and_score_semantics",
+      "mappingState": "mapped_to_existing_engineering_candidates_no_dedicated_score_meaning_field",
+      "currentBindingIds": [
+        "binding:core:derive-assessment",
+        "binding:policy:factor-inclusion",
+        "binding:policy:direction-map",
+        "binding:policy:weights",
+        "binding:policy:month-duplication",
+        "binding:policy:thresholds",
+        "binding:sensitivity:six-scenarios"
+      ],
+      "nearestNonEquivalentBindingIds": [],
+      "observedProducerRefs": [
+        {
+          "path": "packages/bazi-interpretation/src/strength-assessment-core.ts",
+          "stableSymbols": [
+            "collectBaziStrengthFactors",
+            "deriveBaziStrengthAssessment",
+            "supportWeight",
+            "demandWeight",
+            "supportRatio"
+          ],
+          "observationBoundary": "current_support_demand_ratio_and_band_engineering_projection"
+        },
+        {
+          "path": "packages/bazi-interpretation/src/strength-policy.ts",
+          "stableSymbols": [
+            "BAZI_STRENGTH_FACTOR_WEIGHTS",
+            "BAZI_STRENGTH_BAND_THRESHOLDS",
+            "strengthFactorWeight",
+            "classifyStrengthBand"
+          ],
+          "observationBoundary": "current_engineering_candidate_weights_thresholds_and_classification"
+        },
+        {
+          "path": "packages/bazi-interpretation/src/strength-sensitivity-review.ts",
+          "stableSymbols": [
+            "BAZI_STRENGTH_SENSITIVITY_REVIEW_PROFILE",
+            "buildStrengthSensitivityReview"
+          ],
+          "observationBoundary": "six_scenario_engineering_sensitivity_projection"
+        }
+      ],
+      "observedConsumerRefs": [
+        {
+          "path": "apps/web/src/components/bazi-strength-evidence-ledger.tsx",
+          "stableSymbols": [
+            "recomputedSupportWeight",
+            "recomputedDemandWeight",
+            "recomputedSupportRatio"
+          ],
+          "observationBoundary": "web_source_recomputes_engineering_projection_not_browser_runtime_evidence"
+        }
+      ],
+      "originClassification": "project_engineering_heuristic_candidate_projection",
+      "scoreMeaning": "observational_engineering_candidate_only",
+      "authorityBoundary": "engineering_observation_only_no_classical_expert_scientific_or_predictive_authority",
+      "externalEvidenceRequired": [
+        "first_class_score_semantics_contract",
+        "engineering_review",
+        "two_independent_domain_opinions",
+        "supersession_chain",
+        "applicable_rights_evidence"
+      ],
+      "dedicatedCurrentBindingExists": false,
+      "dedicatedRuleTableOrScoreMeaningFieldObservedInScopedArtifacts": false,
+      "formalScoringAllowed": false,
+      "parallelBindingCreated": false,
+      "contentTruthEstablished": false,
+      "expertTruthEstablished": false,
+      "rightsLegalConclusionEstablished": false,
+      "bindingFreezeEffect": "none",
+      "adjacentCandidateContexts": []
+    }
+  ],
+  "gateSummary": {
+    "scopeProjectionsReproduced": 9,
+    "exactCurrentBindingIdMatches": 0,
+    "pr10bRuleTableConcepts": 5,
+    "dedicatedRuleTablesObservedInScopedArtifacts": 0,
+    "repositoryWideRuleTableAbsenceEstablished": false,
+    "tableValueSourceBundlesComplete": 0,
+    "pr10cEngineeringSemanticConcepts": 4,
+    "conceptsMappedToExistingEngineeringBindings": 2,
+    "ambiguousPositionDecayConcepts": 2,
+    "firstClassScoreMeaningFieldsObservedInScopedArtifacts": 0,
+    "repositoryWideScoreMeaningAbsenceEstablished": false,
+    "semanticMappingsMechanicallyEstablished": 0,
+    "domainExpertMappingsApproved": 0,
+    "engineeringCandidateBindingsReferenced": 7,
+    "parallelBindingsCreated": 0,
+    "bindingFrozenVerified": 0,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "browserRuntimeEvidenceEstablished": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "conceptsWithAdjacentCandidateContexts": 4,
+    "candidateBindingsReferencedAsAdjacentContext": 4,
+    "dttAdjacentCandidateReferenceRebinds": 3,
+    "uniqueSupersedingSourceCandidateParents": 1,
+    "activeAdmissionEffect": "none",
+    "formalAdmissionPromotionBlocked": true
+  },
+  "evidenceLedger": {
+    "engineeringEvidence": "historical_pr10bc_scope_projection_current_scoped_artifact_raw_identities_and_versioned_candidate_parent_rebind_mechanically_verified",
+    "browserRuntimeEvidence": "not_assessed_source_consumer_observation_only",
+    "contentTruth": "not_established",
+    "expertTruth": "not_established",
+    "rightsLegalConclusion": "not_established",
+    "releaseReadiness": "not_ready",
+    "publicReleaseAuthorization": "not_authorized"
+  },
+  "doesNotEstablish": [
+    "active_readiness_or_formal_admission",
+    "new_binding_or_parallel_binding_identity",
+    "rule_table_value_provenance",
+    "position_decay_definition_or_implementation",
+    "formal_score_semantics",
+    "semantic_equivalence_between_audit_topics_and_current_bindings",
+    "repository_wide_rule_table_or_alternate_identifier_absence",
+    "source_body_or_exact_quote_text",
+    "binding_frozen_verification",
+    "classical_or_traditional_authority",
+    "content_truth",
+    "expert_truth",
+    "rights_or_legal_conclusion",
+    "browser_or_runtime_validation",
+    "cross_file_atomic_snapshot",
+    "mutation_epoch_interval_or_aba_exclusion",
+    "central_release_manifest_closure",
+    "release_readiness",
+    "public_release_authorization"
+  ],
+  "ledgerDigest": "24851de28a762c426e2630c9a52666786274c3c5477b9fc0463f9129e43d20d1"
+}

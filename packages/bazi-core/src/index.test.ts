@@ -542,6 +542,26 @@ describe("calculateChart", () => {
     expect(earlier.manifest.warnings.join(" ")).toContain("RuleProfile 仍保留 require_user");
   });
 
+  it("snapshots current chart options before asynchronous digest work", async () => {
+    const overlapInput = birthAt("2024-11-03", "01:30", "America/New_York");
+    const mutableBinding = await rulePackBindingFor(WORKING_DEFAULT_RULE_PROFILE);
+    const mutableOptions: Parameters<typeof calculateChart>[2] = {
+      dstResolutionOverride: "earlier",
+      rulePackBinding: mutableBinding
+    };
+    const pending = calculateChart(overlapInput, WORKING_DEFAULT_RULE_PROFILE, mutableOptions);
+
+    mutableOptions.dstResolutionOverride = "later";
+    mutableBinding.packId = "mutated-after-call";
+
+    const result = await pending;
+    expect(result.timeCalibration.utcInstant).toBe("2024-11-03T05:30:00Z");
+    expect(result.timeCalibration.timeZoneResolution?.status).toBe("resolved_overlap_earlier");
+    expect(result.rulePackBinding?.packId).toBe("test-installed-pack");
+    expect(result.manifest.warnings.join(" ")).toContain("override=earlier");
+    expect(result.manifest.warnings.join(" ")).not.toContain("override=later");
+  });
+
   it("allows an identical override for a fixed DST policy and rejects a conflicting one", async () => {
     const overlapInput = birthAt("2024-11-03", "01:30", "America/New_York");
     const fixedEarlier = withTimeRules({ dayBoundary: "zi_start_23", dstAmbiguity: "earlier" });

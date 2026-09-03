@@ -1,0 +1,189 @@
+{
+  "authorityBoundary": {
+    "baziRuleTruthEstablished": false,
+    "browserOrPwaAcceptancePassed": false,
+    "contentTruthEstablished": false,
+    "defaultWebBuildPassed": false,
+    "deploymentAndRollbackConfirmed": false,
+    "expertClaimsAuthorized": false,
+    "expertReviewBundleComplete": false,
+    "expertTruthEstablished": false,
+    "fullRepositoryTypecheckPassed": false,
+    "publicDeploymentAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsBundleComplete": false,
+    "rightsLegalConclusionEstablished": false,
+    "sourceBundleComplete": false
+  },
+  "createdAt": "2026-08-30T00:00:00.000Z",
+  "currentParents": {
+    "sourceBinding": {
+      "candidateDigest": "26182f43d801dedb7433e53d8e390efc32195ef08555199d933e36a1ed65ca61",
+      "candidateId": "dtt-chanwei-wikisource-r2600158-candidate-v1",
+      "ledgerDigest": "44ed9e23490c11c625602b77574efbf7331305bd1bf87634c5b91f568e8b85af",
+      "ledgerId": "hakimi.bazi.strength.source-binding-candidates/1.5.0",
+      "path": "content/bazi-strength-source-binding-candidates.v1.json",
+      "rawBytes": 47753,
+      "rawSha256": "e2ac6a7a0ea1209dd92a38dfae82c494df4792da1a102c11d2fdb2caa80e41f7",
+      "supersession": {
+        "inPlaceHistoricalParentMutationAccepted": false,
+        "state": "not_started_current_parent_is_historical_parent",
+        "supersedes": null,
+        "supersedesHistoricalParent": false
+      }
+    },
+    "sourceRights": {
+      "candidateDigest": "631f530ded6a17652c8a419246805b278d0f6f5511b96a1fd6274f386fce633d",
+      "candidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v1",
+      "ledgerDigest": "3776e4b8799ca5221c1765a735c3e34c637b4f4952c9243836fedfbf1ee30a36",
+      "ledgerId": "hakimi.bazi.strength.source-rights-candidates/1.1.0",
+      "path": "content/bazi-strength-source-rights-candidates.v1.json",
+      "rawBytes": 20806,
+      "rawSha256": "433116caf1a2b9c233739093b0a2436f13c7f268dfa8af6c1ce481964b48b179",
+      "supersession": {
+        "inPlaceHistoricalParentMutationAccepted": false,
+        "state": "not_started_current_parent_is_historical_parent",
+        "supersedes": null,
+        "supersedesHistoricalParent": false
+      }
+    }
+  },
+  "doesNotEstablish": [
+    "historical_parent_mutation_or_backlink",
+    "notice_discrepancy_resolution",
+    "source_body_or_exact_quote_text",
+    "work_edition_transcription_or_carrier_rights_clearance",
+    "formal_source_rights_or_carrier_record",
+    "binding_frozen_verification",
+    "content_truth",
+    "expert_truth",
+    "rights_or_legal_conclusion",
+    "cross_file_atomic_snapshot",
+    "mutation_epoch_interval_or_aba_exclusion",
+    "release_readiness",
+    "public_release_authorization"
+  ],
+  "formalAdmissionBoundary": {
+    "bindingFrozen": false,
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 12,
+    "exactQuoteTextStored": false,
+    "formalSourceCarrierRecordCount": 0,
+    "formalSourceRightsRecordCount": 0,
+    "independentDomainReviewsVerified": 0,
+    "independentSourceRightsReviewsVerified": 0,
+    "knowledgeDocumentCount": 0,
+    "legalConclusion": "not_established",
+    "redistributableSourceCount": 0,
+    "redistributionAuthorized": false,
+    "sourceBodyStored": false
+  },
+  "futureResolutionRequirements": {
+    "cL2RewriteAllowed": false,
+    "correctedCarrierNoticeProjectionMustBeStructuredPerAnchor": true,
+    "correctedCurrentParentsMustUseNewVersionedPaths": true,
+    "currentParentsMustExplicitlySupersedeHistoricalSemanticIdentities": true,
+    "formalSourceRightsAndCarrierRecordsRemainSeparatePrerequisites": true,
+    "historicalEvidenceMustRemainUnchanged": true,
+    "historicalParentInPlaceRewriteAllowed": false,
+    "historicalParentIdentitiesMustRemainRecorded": true,
+    "oldidLiteralAndRenderedDependencyMustRemainSeparate": true,
+    "publicDomainMarkCannotBecomeLicense": true,
+    "sourceAndRightsSupersessionMustBePaired": true
+  },
+  "historicalEvidence": {
+    "findingState": "unresolved_parent_not_mutated_reconciliation_required",
+    "observationDigest": "01e61e4f77526270ef83a0d95fbcb165bf307d5efa09c5a0360ff49bf1735993",
+    "observationId": "hakimi.bazi.dtt-month-command-public-evidence/2026-08-29T15:17:27.103Z",
+    "path": "content/system-admission/bazi-dtt-month-command-public-evidence.v1.json",
+    "rawBytes": 31062,
+    "rawSha256": "85788506067b50453545ec786c7a47b0e51a4cf004419cbe8c547f9384c01ae6"
+  },
+  "historicalParents": {
+    "sourceBinding": {
+      "candidateDigest": "26182f43d801dedb7433e53d8e390efc32195ef08555199d933e36a1ed65ca61",
+      "candidateId": "dtt-chanwei-wikisource-r2600158-candidate-v1",
+      "ledgerDigest": "44ed9e23490c11c625602b77574efbf7331305bd1bf87634c5b91f568e8b85af",
+      "ledgerId": "hakimi.bazi.strength.source-binding-candidates/1.5.0",
+      "path": "content/bazi-strength-source-binding-candidates.v1.json",
+      "rawBytes": 47753,
+      "rawSha256": "e2ac6a7a0ea1209dd92a38dfae82c494df4792da1a102c11d2fdb2caa80e41f7"
+    },
+    "sourceRights": {
+      "candidateDigest": "631f530ded6a17652c8a419246805b278d0f6f5511b96a1fd6274f386fce633d",
+      "candidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v1",
+      "ledgerDigest": "3776e4b8799ca5221c1765a735c3e34c637b4f4952c9243836fedfbf1ee30a36",
+      "ledgerId": "hakimi.bazi.strength.source-rights-candidates/1.1.0",
+      "path": "content/bazi-strength-source-rights-candidates.v1.json",
+      "rawBytes": 20806,
+      "rawSha256": "433116caf1a2b9c233739093b0a2436f13c7f268dfa8af6c1ce481964b48b179"
+    }
+  },
+  "integrityBoundary": {
+    "abaExcluded": false,
+    "cL2Mutated": false,
+    "crossFileAtomicSnapshot": false,
+    "currentParentsIndependentlyReadAndVerified": true,
+    "currentParentsSameAsHistoricalRawAndSemanticIdentities": true,
+    "explicitSupersessionStateRecorded": true,
+    "historicalEvidenceVerifiedByPureCL2ArtifactVerifier": true,
+    "historicalParentBacklinksAdded": false,
+    "historicalParentIdentitiesMatchCL2": true,
+    "historicalParentsMutated": false,
+    "intervalMutationExcluded": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "reconciliationDigestIsDigitalSignature": false
+  },
+  "noticeProjection": {
+    "cadalFixedFilePageNotice": "pd_old_top_level_observed_without_pd_scan_template",
+    "currentRightsParentWorkNotice": "pd_old_template_observed",
+    "currentSourceParentCadalNotice": "commons_public_domain_and_pd_scan_notice_observed_not_adjudicated",
+    "currentSourceParentSsidNotice": "commons_public_domain_and_pd_scan_notice_observed_not_adjudicated",
+    "dependencyRevisionsPinnedAtCapture": true,
+    "historicalParentCompositeNotice": "commons_public_domain_and_pd_scan_notice_observed_not_adjudicated",
+    "markerAuthorityAndAccuracyVerified": false,
+    "oldidAlonePinsRenderedNotice": false,
+    "oldidMainSlotPdOldLiteralObserved": false,
+    "parentNoticeProjectionReestablishedForAllCarriers": false,
+    "publicDomainMarkCountsAsLicense": false,
+    "renderedPagePdOldDependencyObserved": true,
+    "ssidFixedFilePageNotice": "pd_scan_top_level_observed"
+  },
+  "reconciliationDecision": {
+    "cL2MutationRequired": false,
+    "currentParentProjectionCorrected": false,
+    "currentParentsVersionedSupersessionComplete": false,
+    "distributionPolicy": "link_only",
+    "historicalFindingAcknowledged": true,
+    "inPlaceHistoricalParentMutationAllowed": false,
+    "noticeDiscrepancyResolved": false,
+    "promotionBlocked": true,
+    "promotionGateEffect": "deny_only_no_rights_or_binding_authority",
+    "rightsParentSupersessionRequired": true,
+    "sourceParentSupersessionRequired": true,
+    "state": "unresolved_current_parents_are_historical_discrepant_parents"
+  },
+  "reconciliationDigest": "fabf96fddf7f3710b86f22b0d3f7aa7844087351f30c53fbb823780f3d81ba2f",
+  "reconciliationId": "hakimi.bazi.dtt-notice-reconciliation/1.0.0",
+  "recordType": "bazi_dtt_notice_reconciliation_overlay_v1",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "expertClaimsAuthorized": false,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "schemaVersion": "1.0.0",
+  "status": "unresolved_versioned_parent_supersession_required_promotion_blocked",
+  "subjectLock": {
+    "affectedAnchorId": "dtt-chanwei-cadal-07005210-pages-178-184-facsimile-v1",
+    "bindingId": "binding:dtt:month-command",
+    "evidenceSubjectId": "bazi.strength.binding.dtt.month-command.v1",
+    "rightsCandidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v1",
+    "sourceCandidateId": "dtt-chanwei-wikisource-r2600158-candidate-v1",
+    "sourceId": "dtt-chanwei-wikisource-r2600158"
+  }
+}

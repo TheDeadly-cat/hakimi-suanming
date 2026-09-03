@@ -1,0 +1,189 @@
+{
+  "schemaVersion": "2.0.0",
+  "recordType": "bazi_dtt_notice_reconciliation_overlay_v2",
+  "reconciliationId": "hakimi.bazi.dtt-notice-reconciliation/2.0.0",
+  "status": "candidate_notice_projection_reconciled_formal_admission_blocked",
+  "createdAt": "2026-08-30T00:00:00.000Z",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "supersedes": {
+    "path": "content/system-admission/bazi-dtt-notice-reconciliation.v1.json",
+    "rawBytes": 8709,
+    "rawSha256": "e3f014e8f87457b09ae866b79fe2581f87553658829515db61f597c345f6ff68",
+    "reconciliationId": "hakimi.bazi.dtt-notice-reconciliation/1.0.0",
+    "reconciliationDigest": "fabf96fddf7f3710b86f22b0d3f7aa7844087351f30c53fbb823780f3d81ba2f"
+  },
+  "subjectLock": {
+    "bindingId": "binding:dtt:month-command",
+    "evidenceSubjectId": "bazi.strength.binding.dtt.month-command.v1",
+    "sourceId": "dtt-chanwei-wikisource-r2600158",
+    "sourceCandidateId": "dtt-chanwei-wikisource-r2600158-candidate-v2",
+    "rightsCandidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v2",
+    "affectedAnchorIds": [
+      "dtt-chanwei-ssid-11335994-pages-170-176-facsimile-v1",
+      "dtt-chanwei-cadal-07005210-pages-178-184-facsimile-v1"
+    ]
+  },
+  "historicalEvidence": {
+    "path": "content/system-admission/bazi-dtt-month-command-public-evidence.v1.json",
+    "rawBytes": 31062,
+    "rawSha256": "85788506067b50453545ec786c7a47b0e51a4cf004419cbe8c547f9384c01ae6",
+    "observationId": "hakimi.bazi.dtt-month-command-public-evidence/2026-08-29T15:17:27.103Z",
+    "observationDigest": "01e61e4f77526270ef83a0d95fbcb165bf307d5efa09c5a0360ff49bf1735993"
+  },
+  "historicalParents": {
+    "sourceBinding": {
+      "path": "content/bazi-strength-source-binding-candidates.v1.json",
+      "rawBytes": 47753,
+      "rawSha256": "e2ac6a7a0ea1209dd92a38dfae82c494df4792da1a102c11d2fdb2caa80e41f7",
+      "ledgerId": "hakimi.bazi.strength.source-binding-candidates/1.5.0",
+      "ledgerDigest": "44ed9e23490c11c625602b77574efbf7331305bd1bf87634c5b91f568e8b85af",
+      "candidateId": "dtt-chanwei-wikisource-r2600158-candidate-v1",
+      "candidateDigest": "26182f43d801dedb7433e53d8e390efc32195ef08555199d933e36a1ed65ca61"
+    },
+    "sourceRights": {
+      "path": "content/bazi-strength-source-rights-candidates.v1.json",
+      "rawBytes": 20806,
+      "rawSha256": "433116caf1a2b9c233739093b0a2436f13c7f268dfa8af6c1ce481964b48b179",
+      "ledgerId": "hakimi.bazi.strength.source-rights-candidates/1.1.0",
+      "ledgerDigest": "3776e4b8799ca5221c1765a735c3e34c637b4f4952c9243836fedfbf1ee30a36",
+      "candidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v1",
+      "candidateDigest": "631f530ded6a17652c8a419246805b278d0f6f5511b96a1fd6274f386fce633d"
+    }
+  },
+  "currentCandidateParents": {
+    "sourceBinding": {
+      "path": "content/bazi-strength-source-binding-candidates.v1.6.0.json",
+      "rawBytes": 50427,
+      "rawSha256": "62f6a68b99246a802bcf2055aa09a8ac8113df37a7ede1c55d8a2ea64deaea98",
+      "ledgerId": "hakimi.bazi.strength.source-binding-candidates/1.6.0",
+      "ledgerDigest": "6f008058b282613fd131344206b27fccb1d80596bb49789f0554acdd69c1e44c",
+      "candidateId": "dtt-chanwei-wikisource-r2600158-candidate-v2",
+      "candidateDigest": "2c59ee25081c6e0a88ee7f9da18395be2ea615bb289c28798e324e23befeeb59",
+      "adoptionRole": "superseding_candidate_input_only_not_active_formal_parent",
+      "supersedesCandidateId": "dtt-chanwei-wikisource-r2600158-candidate-v1",
+      "inPlaceHistoricalParentMutationAccepted": false
+    },
+    "sourceRights": {
+      "path": "content/bazi-strength-source-rights-candidates.v1.2.0.json",
+      "rawBytes": 23947,
+      "rawSha256": "678632a8875672f58bb5c9f1ec4a299a4f0c6e750b8ff4a02bfe4df889e1243a",
+      "ledgerId": "hakimi.bazi.strength.source-rights-candidates/1.2.0",
+      "ledgerDigest": "300e092c4913885cff626221b8734786128639c7d6cfd7c2be7bea2acc6bbefc",
+      "candidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v2",
+      "candidateDigest": "674a0b64179f5fbb0dff331fdad6b6ac93e3093de4a8459abf6ff9bdd6cd418c",
+      "adoptionRole": "superseding_candidate_input_only_not_active_formal_parent",
+      "supersedesCandidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v1",
+      "inPlaceHistoricalParentMutationAccepted": false
+    }
+  },
+  "supersessionReceipt": {
+    "path": "content/system-admission/bazi-dtt-versioned-parent-supersession.v1.json",
+    "rawBytes": 9229,
+    "rawSha256": "aa9e62089990d8ba699c441114914173141e8228f027605b47f5c5e238fac0e3",
+    "supersessionId": "hakimi.bazi.dtt-versioned-parent-supersession/1.0.0",
+    "supersessionDigest": "601b4e07b94e62b73812a7a26f1108a094272dca660a188bb660fa860f031264",
+    "relationship": "paired_candidate_parent_supersession_basis"
+  },
+  "noticeProjection": {
+    "oldidMainSlotPdOldLiteralObserved": false,
+    "renderedPagePdOldDependencyObserved": true,
+    "dependencyRevisionsPinnedAtCapture": true,
+    "oldidAlonePinsRenderedNotice": false,
+    "sourceSsidNotice": "commons_pd_scan_top_level_notice_observed_not_adjudicated",
+    "sourceCadalNotice": "commons_pd_old_top_level_notice_observed_without_pd_scan_template_not_adjudicated",
+    "rightsWorkNotice": "rendered_pd_old_dependency_observed_not_oldid_main_slot_literal",
+    "rightsSsidNotice": "pd_scan_top_level_observed_not_adjudicated",
+    "rightsCadalNotice": "pd_old_top_level_observed_without_pd_scan_template_not_adjudicated",
+    "parentNoticeProjectionReestablishedForAllCarriers": true,
+    "publicDomainMarkCountsAsLicense": false,
+    "markerAuthorityAndAccuracyVerified": false,
+    "noticeApplicabilityEstablished": false,
+    "legalConclusion": "not_established"
+  },
+  "reconciliationDecision": {
+    "candidateProjectionResolved": true,
+    "candidateParentPairVersionedSupersessionReceiptComplete": true,
+    "candidateNoticeProjectionCorrected": true,
+    "candidateNoticeProjectionReconciliationPassed": true,
+    "candidateNoticeProjectionDiscrepancyResolved": true,
+    "noticeApplicabilityEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "candidateNoticeDiscrepancyPromotionBlocked": false,
+    "formalAdmissionPromotionBlocked": true,
+    "promotionBlocked": true,
+    "activeAdmissionEffect": "none",
+    "distributionPolicy": "link_only",
+    "state": "candidate_projection_reconciled_formal_admission_prerequisites_open"
+  },
+  "formalAdmissionBoundary": {
+    "bindingRequired": 12,
+    "bindingFrozenVerified": 0,
+    "formalSourceRightsRecordCount": 0,
+    "formalSourceCarrierRecordCount": 0,
+    "knowledgeDocumentCount": 0,
+    "workLayersCleared": 0,
+    "editionLayersCleared": 0,
+    "transcriptionLayersCleared": 0,
+    "carrierLayersCleared": 0,
+    "independentSourceRightsReviewsVerified": 0,
+    "independentDomainReviewsVerified": 0,
+    "legalConclusion": "not_established",
+    "redistributionAuthorized": false,
+    "formalAdmissionPromotionBlocked": true
+  },
+  "integrityBoundary": {
+    "historicalParentsMutated": false,
+    "historicalParentBacklinksAdded": false,
+    "supersessionWeakSetBrandVerified": true,
+    "persistedArtifactsUseFixedPaths": true,
+    "stableSingleFileReadsUsed": true,
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "intervalMutationExcludedAcrossFiles": false,
+    "abaExcluded": false,
+    "reconciliationDigestIsDigitalSignature": false
+  },
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "baziRuleTruthEstablished": false,
+    "sourceBundleComplete": false,
+    "rightsBundleComplete": false,
+    "expertReviewBundleComplete": false,
+    "expertTruthEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "fullRepositoryTypecheckPassed": false,
+    "defaultWebBuildPassed": false,
+    "browserOrPwaAcceptancePassed": false,
+    "releaseEvidenceComplete": false,
+    "deploymentAndRollbackConfirmed": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "doesNotEstablish": [
+    "active_formal_parent_or_active_admission",
+    "notice_applicability_or_legal_conclusion",
+    "source_body_or_exact_quote_text",
+    "work_edition_transcription_or_carrier_identity",
+    "work_edition_transcription_or_carrier_rights_clearance",
+    "formal_source_rights_or_source_carrier_record",
+    "knowledge_document",
+    "binding_freeze",
+    "content_truth",
+    "bazi_rule_truth",
+    "expert_truth",
+    "cross_file_atomic_snapshot",
+    "mutation_epoch_interval_or_aba_exclusion",
+    "release_readiness",
+    "public_release_authorization"
+  ],
+  "reconciliationDigest": "2a47fc6fe281a4362c36dfc67c2a6dee195b5b069065ffc0e86ac1afcd7aa8a0"
+}

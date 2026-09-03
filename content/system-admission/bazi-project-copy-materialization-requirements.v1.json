@@ -1,0 +1,163 @@
+{
+  "authorityBoundary": {
+    "bindingFreezeEffect": "none",
+    "contentTruthEstablished": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "legalConclusion": "not_established",
+    "publicDeploymentAuthorized": false,
+    "releaseReady": false,
+    "rightsEffect": "none"
+  },
+  "basisArtifacts": [
+    {
+      "bytes": 48,
+      "hashAndInspectionUseSameBuffer": true,
+      "path": "content/knowledge/manifest.v2.json",
+      "role": "current_empty_bundled_knowledge_manifest",
+      "sha256": "92e4d2c92aeb7f1e7898014be429f0fab92885dd52c36aee8eb1523941c55122"
+    },
+    {
+      "bytes": 244747,
+      "hashAndInspectionUseSameBuffer": true,
+      "path": "packages/contracts/src/index.ts",
+      "role": "formal_source_carrier_schema_basis",
+      "sha256": "674a3fe1e2b3cd4fc99e481a758966a320ddc3c1113a9471eba190851d15e041"
+    },
+    {
+      "bytes": 39595,
+      "hashAndInspectionUseSameBuffer": true,
+      "path": "packages/knowledge-core/src/index.ts",
+      "role": "knowledge_text_normalization_and_materialization_basis",
+      "sha256": "9e6420e8c6c5b3aafd892fdb3c5363af81ea9d9e24ebff6e11897300053524b0"
+    },
+    {
+      "bytes": 47753,
+      "hashAndInspectionUseSameBuffer": true,
+      "path": "content/bazi-strength-source-binding-candidates.v1.json",
+      "role": "phase_c_source_candidate_parent_ledger",
+      "sha256": "e2ac6a7a0ea1209dd92a38dfae82c494df4792da1a102c11d2fdb2caa80e41f7"
+    },
+    {
+      "bytes": 20806,
+      "hashAndInspectionUseSameBuffer": true,
+      "path": "content/bazi-strength-source-rights-candidates.v1.json",
+      "role": "phase_c_rights_candidate_parent_ledger",
+      "sha256": "433116caf1a2b9c233739093b0a2436f13c7f268dfa8af6c1ce481964b48b179"
+    },
+    {
+      "bytes": 26038,
+      "hashAndInspectionUseSameBuffer": true,
+      "path": "content/system-admission/bazi-binding-freeze-requirements.v1.json",
+      "role": "phase_c_binding_freeze_parent_ledger",
+      "sha256": "662c91e6269d5e860a0d207185680ea7c7b752f24e313859c0d987cb5b446201"
+    }
+  ],
+  "contractBoundary": {
+    "allowedTransformationClass": "utf8_bom_and_line_ending_normalization_only",
+    "carrierCanonicalRecordDigestRequired": true,
+    "carrierIdAndEditVersionRequired": true,
+    "carrierRole": "upstream_source_carrier_not_project_copy",
+    "collationCanBePromotedByReceipt": false,
+    "fixedNormalizationProfileRequired": true,
+    "ocrCanBePromotedByReceipt": false,
+    "projectCopyRawBytesAndSha256Required": true,
+    "projectCopyRole": "technical_materialization_provenance_only",
+    "sourceCarrierContentDigestMustEqualNormalizedContentSha256": true,
+    "transcriptionCanBePromotedByReceipt": false
+  },
+  "createdAt": "2026-08-29T00:00:00.000Z",
+  "currentInventory": {
+    "bundledManifestEntries": 0,
+    "formalSourceCarrierRecords": 0,
+    "formalSourceRightsRecords": 0,
+    "materializationsVerified": 0,
+    "projectCopyMaterializationRecords": 0,
+    "redistributableSources": 0,
+    "sourceBindingsFrozen": 0,
+    "sourceBindingsRequired": 12
+  },
+  "doesNotEstablish": [
+    "lawful_material_access",
+    "source_carrier_record_authenticity_or_custody",
+    "work_edition_or_carrier_rights_legal_conclusion",
+    "ocr_transcription_or_collation_accuracy",
+    "source_to_text_semantic_equivalence_beyond_fixed_normalization",
+    "content_truth",
+    "expert_identity_credentials_independence_opinion_or_truth",
+    "binding_freeze",
+    "cross_file_atomic_snapshot",
+    "mutation_epoch",
+    "interval_mutation_or_aba_exclusion",
+    "release_readiness",
+    "public_release_authorization"
+  ],
+  "gateSummary": {
+    "bindingFrozenVerified": 0,
+    "formalSourceCarrierRecords": 0,
+    "formalSourceRightsRecords": 0,
+    "ledgerRequirementsDefined": true,
+    "materializationsVerified": 0,
+    "projectCopyMaterializationRecords": 0,
+    "publicDeploymentAuthorized": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false
+  },
+  "integrityBoundary": {
+    "authenticityEstablished": false,
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi.bazi.project-copy-materialization-requirements.v1",
+    "digestIsDigitalSignature": false,
+    "digitalSignature": null,
+    "signerIdentity": null
+  },
+  "ledgerDigest": "690320c5d9778bf61da5ca3e112aedc6f9e2760e27f628f4c992cb5b9a8af1cb",
+  "ledgerId": "hakimi.bazi.project-copy-materialization-requirements/1.0.0",
+  "normalizationProfile": {
+    "implementationPath": "packages/knowledge-core/src/index.ts",
+    "implementationSha256": "9e6420e8c6c5b3aafd892fdb3c5363af81ea9d9e24ebff6e11897300053524b0",
+    "operations": [
+      "strict_utf8_decode",
+      "single_leading_bom_removal",
+      "crlf_and_cr_to_lf",
+      "nul_rejection",
+      "nonempty_content_requirement"
+    ],
+    "profileId": "hakimi.knowledge.utf8-text-normalization/1.0.0"
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "basisArtifactHashAndParseUseSameBuffer": true,
+    "crossFileAtomicSnapshot": false,
+    "endpointSnapshotOnly": true,
+    "heldFileHandleReads": true,
+    "intervalMutationExcluded": false,
+    "ledgerHashAndParseUseSameBuffer": true,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "nestedVerifierReadsReuseDirectBuffers": false,
+    "pathAndDirectoryChainRevalidated": true
+  },
+  "receiptRequirements": {
+    "candidateSchemaVersion": "1.0.0",
+    "currentPersistedReceiptIds": [],
+    "projectPathPrefix": "content/knowledge/documents/",
+    "rawIdentityRequired": true,
+    "receiptSchemaVersion": "1.0.0",
+    "resultStoresAbsolutePath": false,
+    "resultStoresContentOrBytes": false,
+    "sourceCarrierCanonicalDigestDomain": "hakimi.knowledge.source-carrier-record.canonical.v1",
+    "sourceCarrierSchemaVersion": "1.0.0"
+  },
+  "recordType": "bazi_project_copy_materialization_requirements_v1",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "expertClaimsAuthorized": false,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "schemaVersion": "1.0.0",
+  "status": "zero_instance_materialization_requirements_defined"
+}

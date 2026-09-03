@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta name="referrer" content="no-referrer">
+    <title>DTT 月令候选 · 三角色四视图模板预览</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#view-content">跳到当前审查内容</a>
+    <header class="page-header">
+      <div class="page-header__inner">
+        <div>
+          <h1 id="page-title">DTT 月令候选 · 三角色四视图模板预览</h1>
+          <p>面向专家的无代码只读模板。同一人可以浏览全部四个模板；导航不代表权限或人员隔开。</p>
+        </div>
+        <div class="read-only-mark" aria-label="只读预览，不收集任何内容">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22">
+            <path d="M5 5.5h11l3 3V19H5zM8 5.5v5h7v-5M8 19v-5h8v5" />
+          </svg>
+          <span>只读预览<br><small>不收集 · 不保存 · 不上传</small></span>
+        </div>
+      </div>
+    </header>
+
+    <section class="boundary-banner" aria-labelledby="boundary-title">
+      <div class="boundary-banner__inner">
+        <strong id="boundary-title">这是模板预览，不是访问控制。</strong>
+        <span>当前没有任何意见，因此没有跨席意见可泄露；未来正式 A／B 必须使用独立物理包或独立会话。本页不比较真人与 AI 的准确度，也不采集身份、联系方式或真人命盘。</span>
+      </div>
+    </section>
+
+    <section id="machine-status" class="status-strip" aria-label="协调员区：机器候选状态">
+      <dl class="status-strip__inner">
+        <div><dt>生命周期</dt><dd id="status-lifecycle">—</dd></div>
+        <div><dt>准入状态</dt><dd id="status-admission">—</dd></div>
+        <div><dt>Binding</dt><dd id="status-binding">—</dd></div>
+        <div><dt>独立专家</dt><dd id="status-experts">—</dd></div>
+        <div><dt>授权</dt><dd id="status-authorization">—</dd></div>
+      </dl>
+    </section>
+
+    <div class="workspace">
+      <aside class="role-rail" aria-labelledby="role-nav-title">
+        <h2 id="role-nav-title">选择模板视图</h2>
+        <p>四路同页导航只用于查看模板，不是登录、授权、人员隔开或物理席位隔开。</p>
+        <nav id="role-nav" aria-label="三角色四视图模板导航"></nav>
+        <div class="rail-note">
+          <strong>当前规则</strong>
+          <p>同一人可浏览全部模板。缺材料就停在“缺失”，不要补写或推断。</p>
+        </div>
+      </aside>
+
+      <main id="view-content" class="review-surface" tabindex="-1">
+        <noscript>
+          <section class="notice notice--danger">
+            <h2>需要启用 JavaScript</h2>
+            <p>本页只用本地 JavaScript 从固定角色清单渲染内容，不会联网或上传。</p>
+          </section>
+        </noscript>
+      </main>
+    </div>
+
+    <footer class="page-footer">
+      <p id="machine-footer" class="page-footer__machine">synthetic · candidate-only · binding 0/12 · experts 0/2 · authorization false</p>
+      <p>本预览没有意见输入、存储、提交或上传能力。</p>
+    </footer>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

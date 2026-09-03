@@ -1,0 +1,21 @@
+{
+  "name": "@hakimi/bazi-stage-c-material-admission-candidate",
+  "version": "0.0.0-candidate.0",
+  "private": true,
+  "type": "module",
+  "exports": {},
+  "x-hakimi-isolated-candidate": {
+    "schemaVersion": 1,
+    "kind": "material-admission",
+    "systemId": "bazi",
+    "productionImport": "forbidden",
+    "authorityEffect": "none",
+    "snapshotCapabilityIssuerProvided": false
+  },
+  "dependencies": {
+    "@hakimi/bazi-interpretation": "*",
+    "@hakimi/contracts": "*",
+    "@hakimi/integrity": "*",
+    "@hakimi/knowledge-core": "*"
+  }
+}

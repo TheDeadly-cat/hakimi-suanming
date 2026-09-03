@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta name="referrer" content="no-referrer">
+    <title>八字两席合成并列自检</title>
+    <link rel="icon" href="./pair-compare-synthetic-icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./pair-compare-synthetic.css">
+  </head>
+  <body>
+    <main class="synthetic-shell">
+      <header>
+        <p class="eyebrow">协调人隔离启动候选</p>
+        <h1>两席合成并列自检</h1>
+        <p>本页面只生成程序内置的 A、B 合成回件，不接受任何文件、路径、粘贴内容或真人资料。</p>
+      </header>
+      <aside class="boundary" role="note">
+        它只检查随机端口、新浏览器资料夹和并列逻辑能否共同运行；不证明真实专家身份、独立性、意见真实性、AI 来源排除、内容真值或预测准确度。
+      </aside>
+      <section class="status-card" aria-labelledby="status-title">
+        <div>
+          <h2 id="status-title">合成运行状态</h2>
+          <p id="status" aria-live="polite">尚未运行。</p>
+        </div>
+        <button id="run" type="button">运行合成 A/B 自检</button>
+      </section>
+      <section id="error" class="error" role="alert" tabindex="-1" hidden></section>
+      <section id="result" class="result-card" tabindex="-1" hidden>
+        <h2>机械并列候选已生成</h2>
+        <dl>
+          <div><dt>比较字段</dt><dd id="total-fields">—</dd></div>
+          <div><dt>规范字段值相同</dt><dd id="matching-fields">—</dd></div>
+          <div><dt>未解决差异</dt><dd id="difference-fields">—</dd></div>
+          <div><dt>正式专家计数变化</dt><dd id="formal-count">—</dd></div>
+        </dl>
+        <p id="difference-summary"></p>
+        <p class="stop-line">没有赢家、评分、投票、平均、自动合并或正式 reconciliation。</p>
+      </section>
+      <footer>syntheticFixtureOnly=true · realReturnLoadingAuthorized=false · publicDeploymentAuthorized=false</footer>
+    </main>
+    <script type="module" src="./pair-compare-synthetic.js"></script>
+  </body>
+</html>

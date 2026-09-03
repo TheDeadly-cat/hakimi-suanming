@@ -1,0 +1,953 @@
+{
+  "schemaVersion": "1.6.0",
+  "recordType": "bazi_strength_source_binding_candidate_ledger",
+  "ledgerId": "hakimi.bazi.strength.source-binding-candidates/1.6.0",
+  "status": "research_candidates_only_versioned_notice_projection_corrected",
+  "acquiredAt": "2026-08-25T14:37:30.867Z",
+  "accessBoundary": {
+    "provider": "Chinese Wikisource public MediaWiki API",
+    "apiEndpoint": "https://zh.wikisource.org/w/api.php",
+    "publicReadOnly": true,
+    "authenticatedAccessUsed": false,
+    "accessControlBypassed": false,
+    "sourceBodiesStored": false,
+    "quoteTextsStored": false
+  },
+  "facsimileInspectedAt": "2026-08-25T15:11:04.567Z",
+  "facsimileCollationInspectedAt": "2026-08-25T19:19:23.981Z",
+  "facsimileAccessBoundary": {
+    "provider": "Wikimedia Commons and Chinese Wikisource public APIs",
+    "apiEndpoints": [
+      "https://commons.wikimedia.org/w/api.php",
+      "https://zh.wikisource.org/w/api.php"
+    ],
+    "publicReadOnly": true,
+    "authenticatedAccessUsed": false,
+    "accessControlBypassed": false,
+    "repositoryCarrierFilesStored": false,
+    "repositoryPageImagesStored": false,
+    "repositoryInspectionDerivativesStored": false,
+    "storagePolicy": "link_only"
+  },
+  "conceptualTopicMapping": [
+    {
+      "topicId": "strength.yueling_exact_quote",
+      "currentBindingIds": [
+        "binding:dtt:month-command",
+        "binding:smt-v10:whole-chart"
+      ],
+      "mappingState": "mapped_to_existing_bindings_as_research_candidates",
+      "note": "The audit topic is not a current binding ID. It maps to the existing month-command and whole-chart bindings without creating a parallel identifier."
+    },
+    {
+      "topicId": "strength.rooting_exact_quote",
+      "currentBindingIds": [
+        "binding:dtt:month-command"
+      ],
+      "mappingState": "candidate_quote_located_no_dedicated_current_binding",
+      "note": "A rooting passage was located inside the pinned DTT revision, but the current registry has no dedicated rooting binding. Model review is required before any binding split."
+    },
+    {
+      "topicId": "strength.tougan_exact_quote",
+      "currentBindingIds": [
+        "binding:smt-v10:whole-chart"
+      ],
+      "mappingState": "candidate_quote_located_no_dedicated_current_binding",
+      "note": "A stem-exposure passage was located inside the pinned SMT volume 10 revision, but the current registry has no dedicated tougan binding."
+    }
+  ],
+  "candidates": [
+    {
+      "candidateId": "smt-siku-v10-wikisource-r761703-candidate-v1",
+      "bindingId": "binding:smt-v10:whole-chart",
+      "evidenceSubjectId": "bazi.strength.binding.smt-v10.whole-chart.v1",
+      "sourceId": "smt-siku-v10-wikisource-r761703",
+      "workIdentity": {
+        "title": "三命通會",
+        "attributedAuthor": "萬民英",
+        "workRightsObservation": "public_domain_notice_observed_not_adjudicated"
+      },
+      "editionIdentity": {
+        "title": "三命通會 (四庫全書本)/卷10",
+        "editionStatus": "not_independently_collated",
+        "facsimileComparisonStatus": "visual_correspondence_only_not_collated"
+      },
+      "carrierIdentity": {
+        "provider": "Chinese Wikisource",
+        "carrierType": "link_only",
+        "pageId": 260849,
+        "pageTitle": "三命通會 (四庫全書本)/卷10",
+        "permanentUrl": "https://zh.wikisource.org/w/index.php?title=%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83_(%E5%9B%9B%E5%BA%AB%E5%85%A8%E6%9B%B8%E6%9C%AC)/%E5%8D%B710&oldid=761703",
+        "revisionId": 761703,
+        "parentRevisionId": 657383,
+        "revisionTimestamp": "2016-10-24T13:15:01Z",
+        "mediaWikiSha1": "43ac68d5e4a84bdfa98524557a8b3e9b3f1f8426",
+        "contentModel": "wikitext",
+        "contentFormat": "text/x-wiki",
+        "rawWikitextCharacters": 38959,
+        "rawWikitextUtf8Bytes": 106555,
+        "rawWikitextSha256": "0a20dc53a4156211b5c8ba89dbb6a8f07f056fde573e37699e28b021b6d026b6",
+        "sourceBodyStored": false,
+        "storagePolicy": "link_only"
+      },
+      "quoteCandidates": [
+        {
+          "quoteCandidateId": "smt-v10-yueling-minimal-v1",
+          "conceptualTopics": [
+            "strength.yueling_exact_quote"
+          ],
+          "heading": "㸔命口訣",
+          "rawRevisionLineStart": 10,
+          "rawRevisionLineEnd": 10,
+          "rawCharacterStartZeroBased": 236,
+          "rawCharacterEndExclusive": 252,
+          "quoteCharacters": 16,
+          "quoteUtf8Bytes": 48,
+          "quoteSha256": "b7f2c66c97d311fe3e1b3d1048dddbbcdafd5e71cfd4454f0b40ae89c3d4a53f",
+          "quoteOccurrenceInRawRevision": "unique",
+          "quoteTextStored": false,
+          "supportCandidate": "month branch is inspected before other factors"
+        },
+        {
+          "quoteCandidateId": "smt-v10-tougan-minimal-v1",
+          "conceptualTopics": [
+            "strength.tougan_exact_quote"
+          ],
+          "heading": "㸔命口訣",
+          "rawRevisionLineStart": 10,
+          "rawRevisionLineEnd": 10,
+          "rawCharacterStartZeroBased": 365,
+          "rawCharacterEndExclusive": 384,
+          "quoteCharacters": 19,
+          "quoteUtf8Bytes": 57,
+          "quoteSha256": "b652a600ae2db57b8035fb95c38c4fc67f45bd6cbf03e5b62ffbd5a6bbbcccee",
+          "quoteOccurrenceInRawRevision": "unique",
+          "quoteTextStored": false,
+          "supportCandidate": "branch use and stem exposure are discussed together"
+        }
+      ],
+      "facsimileCollationCandidates": [
+        {
+          "collationCandidateId": "smt-v10-yueling-gujin-v472-page-28-normalized-collation-v1",
+          "anchorId": "smt-v10-gujin-volume-472-page-28-facsimile-v1",
+          "pageRefId": "smt-v10-gujin-v472-page-28",
+          "quoteCandidateId": "smt-v10-yueling-minimal-v1",
+          "observedAt": "2026-08-25T19:19:23.981Z",
+          "method": "manual_visual_character_comparison_of_rendered_public_scan_pages",
+          "observerClass": "automated_agent_nonexpert_visual_inspection",
+          "carrierSha256": "be4df89c53764fb0acf26224a47ddc445b403569dde104d283e1fb85768940f7",
+          "transcriptionQuoteSha256": "b7f2c66c97d311fe3e1b3d1048dddbbcdafd5e71cfd4454f0b40ae89c3d4a53f",
+          "carrierGlyphSequenceSha256": "a2dcb5a44deae965e6eec1926651a73a43b7bb5532385b03184efbd38507d029",
+          "transcriptionGlyphSequenceSha256": "b7f2c66c97d311fe3e1b3d1048dddbbcdafd5e71cfd4454f0b40ae89c3d4a53f",
+          "comparisonNormalization": "remove_punctuation_and_map_observed_glyph_variants_to_pinned_transcription_for_comparison_only",
+          "normalizedSequenceCharacters": 16,
+          "normalizedSequenceSha256": "b7f2c66c97d311fe3e1b3d1048dddbbcdafd5e71cfd4454f0b40ae89c3d4a53f",
+          "scriptVariantPairCount": 3,
+          "punctuationDifferenceObserved": false,
+          "exactGlyphSequenceEqual": false,
+          "result": "normalized_correspondence_observed_not_exact_transcription",
+          "humanCollatorAttestations": [],
+          "domainExpertReviewIds": [],
+          "rightsEffect": "none",
+          "bindingFreezeEffect": "none",
+          "carrierTextStored": false,
+          "repositoryInspectionDerivativeStored": false,
+          "collationDigest": "8fd17b89c8c51ad1777c13d16936c70c9c0b1c237883d46d6518172dfee3d10c"
+        },
+        {
+          "collationCandidateId": "smt-v10-tougan-gujin-v472-page-28-exact-glyph-candidate-v1",
+          "anchorId": "smt-v10-gujin-volume-472-page-28-facsimile-v1",
+          "pageRefId": "smt-v10-gujin-v472-page-28",
+          "quoteCandidateId": "smt-v10-tougan-minimal-v1",
+          "observedAt": "2026-08-25T19:19:23.981Z",
+          "method": "manual_visual_character_comparison_of_rendered_public_scan_pages",
+          "observerClass": "automated_agent_nonexpert_visual_inspection",
+          "carrierSha256": "be4df89c53764fb0acf26224a47ddc445b403569dde104d283e1fb85768940f7",
+          "transcriptionQuoteSha256": "b652a600ae2db57b8035fb95c38c4fc67f45bd6cbf03e5b62ffbd5a6bbbcccee",
+          "carrierGlyphSequenceSha256": "b652a600ae2db57b8035fb95c38c4fc67f45bd6cbf03e5b62ffbd5a6bbbcccee",
+          "transcriptionGlyphSequenceSha256": "b652a600ae2db57b8035fb95c38c4fc67f45bd6cbf03e5b62ffbd5a6bbbcccee",
+          "comparisonNormalization": "none_direct_exact_glyph_sequence_observation",
+          "normalizedSequenceCharacters": 19,
+          "normalizedSequenceSha256": "b652a600ae2db57b8035fb95c38c4fc67f45bd6cbf03e5b62ffbd5a6bbbcccee",
+          "scriptVariantPairCount": 0,
+          "punctuationDifferenceObserved": false,
+          "exactGlyphSequenceEqual": true,
+          "result": "exact_glyph_correspondence_observed_nonexpert_not_verified_collation",
+          "humanCollatorAttestations": [],
+          "domainExpertReviewIds": [],
+          "rightsEffect": "none",
+          "bindingFreezeEffect": "none",
+          "carrierTextStored": false,
+          "repositoryInspectionDerivativeStored": false,
+          "collationDigest": "8043c3dfbc9aabd1d1a387a0ee3150c5dbd3d7660851c82026473be0fc1b1d64"
+        }
+      ],
+      "facsimileAnchors": [
+        {
+          "anchorId": "smt-v10-gujin-volume-472-page-28-facsimile-v1",
+          "anchorRole": "corroborating_historical_excerpt_not_edition_identity_proof",
+          "provider": "Wikimedia Commons and Chinese Wikisource",
+          "carrierFilePageId": 52325762,
+          "carrierFileTitle": "File:Gujin Tushu Jicheng, Volume 472 (1700-1725).djvu",
+          "carrierDescriptionUrl": "https://commons.wikimedia.org/wiki/File:Gujin_Tushu_Jicheng,_Volume_472_(1700-1725).djvu",
+          "carrierFileTimestamp": "2016-10-17T12:20:36Z",
+          "carrierMediaWikiSha1": "52d4c0998f472e704d85a71f9458d206e43f6128",
+          "carrierSha256": "be4df89c53764fb0acf26224a47ddc445b403569dde104d283e1fb85768940f7",
+          "carrierBytes": 21705448,
+          "carrierPageCount": 125,
+          "carrierMime": "image/vnd.djvu",
+          "licenseOrNoticeObserved": "commons_public_domain_and_pd_scan_notice_observed_not_adjudicated",
+          "sourceProvenanceObservation": "commons_credit_links_baidu_pan_original_source_not_independently_verified",
+          "editionRelation": "Gujin Tushu Jicheng excerpt; not the pinned Siku edition",
+          "comparisonScope": "visual_heading_and_passage_correspondence_only",
+          "exactCollationStatus": "not_performed",
+          "repositoryCarrierFileStored": false,
+          "repositoryPageImagesStored": false,
+          "storagePolicy": "link_only",
+          "pageRefs": [
+            {
+              "pageRefId": "smt-v10-gujin-v472-page-28",
+              "quoteCandidateIds": [
+                "smt-v10-yueling-minimal-v1",
+                "smt-v10-tougan-minimal-v1"
+              ],
+              "scanPageNumber": 28,
+              "printedPageLabel": null,
+              "visibleHeading": "三命通會二十八／看命口訣",
+              "pageUrl": "https://zh.wikisource.org/w/index.php?title=Page%3AGujin_Tushu_Jicheng%2C_Volume_472_%281700-1725%29.djvu%2F28&oldid=1898854",
+              "pageId": 959158,
+              "pageRevisionId": 1898854,
+              "pageRevisionTimestamp": "2020-06-09T11:26:55Z",
+              "pageMediaWikiSha1": "c6baac2e33385a3f2c77abcdd117a11ad588f21b",
+              "pageTranscriptionQualityLevel": 1,
+              "pageTranscriptionQualityState": "not_proofread",
+              "correspondenceState": "visual_passage_correspondence_observed_not_collated"
+            }
+          ]
+        }
+      ],
+      "rightsObservation": {
+        "workLayer": "candidate_only",
+        "editionLayer": "unknown",
+        "carrierLayer": "terms_observed_human_review_required",
+        "licenseOrNoticeObserved": "page_public_domain_notice_and_wikimedia_terms",
+        "evidenceRefs": [
+          "https://zh.wikisource.org/w/index.php?title=%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83_(%E5%9B%9B%E5%BA%AB%E5%85%A8%E6%9B%B8%E6%9C%AC)/%E5%8D%B710&oldid=761703",
+          "https://commons.wikimedia.org/wiki/File:Gujin_Tushu_Jicheng,_Volume_472_(1700-1725).djvu",
+          "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use/en#7._Licensing_of_Content",
+          "https://creativecommons.org/licenses/by-sa/4.0/legalcode"
+        ],
+        "rightsReviewAttestations": [],
+        "distributionDecision": "link_only",
+        "legalConclusion": "not_established"
+      },
+      "reviewState": {
+        "bindingCandidateState": "revision_locator_quote_hash_and_facsimile_anchor_verified_candidate",
+        "sourceIdentityBeyondRevisionMetadata": "facsimile_anchor_observed_identity_not_established",
+        "contentTruth": "not_established",
+        "expertReviewIds": [],
+        "frozenAt": null,
+        "supersedes": null,
+        "supersededBy": null
+      },
+      "candidateDigest": "e726f93c6b8001a75c1ae58e17506976f970b483728f7f8ef21e37313981f92a"
+    },
+    {
+      "candidateId": "dtt-chanwei-wikisource-r2600158-candidate-v2",
+      "bindingId": "binding:dtt:month-command",
+      "evidenceSubjectId": "bazi.strength.binding.dtt.month-command.v1",
+      "sourceId": "dtt-chanwei-wikisource-r2600158",
+      "workIdentity": {
+        "title": "滴天髓闡微",
+        "attributedAuthor": "任鐵樵",
+        "workRightsObservation": "rendered_pd_old_dependency_observed_not_oldid_main_slot_literal_not_adjudicated"
+      },
+      "editionIdentity": {
+        "title": "滴天髓闡微",
+        "editionStatus": "not_independently_collated",
+        "facsimileComparisonStatus": "visual_correspondence_only_not_collated"
+      },
+      "carrierIdentity": {
+        "provider": "Chinese Wikisource",
+        "carrierType": "link_only",
+        "pageId": 340255,
+        "pageTitle": "滴天髓闡微",
+        "permanentUrl": "https://zh.wikisource.org/w/index.php?title=%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE&oldid=2600158",
+        "revisionId": 2600158,
+        "parentRevisionId": 1163183,
+        "revisionTimestamp": "2025-09-25T13:22:02Z",
+        "mediaWikiSha1": "6ac3dc412881525c2c0544b75e51512cc0daa573",
+        "contentModel": "wikitext",
+        "contentFormat": "text/x-wiki",
+        "rawWikitextCharacters": 143701,
+        "rawWikitextUtf8Bytes": 401801,
+        "rawWikitextSha256": "1d1a3d61c1b9a26618b41b8ead857a6b966992fdf2adabdc607a0c6cb4c8f04d",
+        "sourceBodyStored": false,
+        "storagePolicy": "link_only"
+      },
+      "quoteCandidates": [
+        {
+          "quoteCandidateId": "dtt-yueling-minimal-v1",
+          "conceptualTopics": [
+            "strength.yueling_exact_quote"
+          ],
+          "heading": "十五、月令",
+          "rawRevisionLineStart": 2391,
+          "rawRevisionLineEnd": 2391,
+          "rawCharacterStartZeroBased": 38616,
+          "rawCharacterEndExclusive": 38628,
+          "quoteCharacters": 12,
+          "quoteUtf8Bytes": 36,
+          "quoteSha256": "03df5322e1504e142e673e7d11c2d0ad4e08fa84ddbdea3d5c75532d520cc3b9",
+          "quoteOccurrenceInRawRevision": "unique",
+          "quoteTextStored": false,
+          "supportCandidate": "month command is treated as the chart outline"
+        },
+        {
+          "quoteCandidateId": "dtt-rooting-minimal-v1",
+          "conceptualTopics": [
+            "strength.rooting_exact_quote"
+          ],
+          "heading": "十七、衰旺",
+          "rawRevisionLineStart": 2451,
+          "rawRevisionLineEnd": 2451,
+          "rawCharacterStartZeroBased": 40658,
+          "rawCharacterEndExclusive": 40675,
+          "quoteCharacters": 17,
+          "quoteUtf8Bytes": 51,
+          "quoteSha256": "201ce34c97841b890910cc311d14290d9cb71228f4fe64d1b0f4a419aff6818b",
+          "quoteOccurrenceInRawRevision": "unique",
+          "quoteTextStored": false,
+          "supportCandidate": "rooting is considered when assessing strength beyond month command"
+        }
+      ],
+      "facsimileCollationCandidates": [
+        {
+          "collationCandidateId": "dtt-yueling-ssid-11335994-page-170-normalized-collation-v1",
+          "anchorId": "dtt-chanwei-ssid-11335994-pages-170-176-facsimile-v1",
+          "pageRefId": "dtt-ssid-11335994-pdf-page-170",
+          "quoteCandidateId": "dtt-yueling-minimal-v1",
+          "observedAt": "2026-08-25T18:48:11.944Z",
+          "method": "manual_visual_character_comparison_of_rendered_public_scan_pages",
+          "observerClass": "automated_agent_nonexpert_visual_inspection",
+          "carrierSha256": "d6a7d1daf6513ce9fb9940ff8331b96804c10cdafbeac00d4d3d0a37229e1803",
+          "transcriptionQuoteSha256": "03df5322e1504e142e673e7d11c2d0ad4e08fa84ddbdea3d5c75532d520cc3b9",
+          "carrierGlyphSequenceSha256": "23440d78a05ca6d7c97d3c45261f8f4970a5a4fae6b5b90fa46e7c3204b3fe28",
+          "transcriptionGlyphSequenceSha256": "53d755230c068c883d93a77eae1f216e050a56cd57ac1021710a65df12c5e159",
+          "comparisonNormalization": "remove_punctuation_and_map_observed_glyph_variants_to_pinned_transcription_for_comparison_only",
+          "normalizedSequenceCharacters": 11,
+          "normalizedSequenceSha256": "53d755230c068c883d93a77eae1f216e050a56cd57ac1021710a65df12c5e159",
+          "scriptVariantPairCount": 1,
+          "punctuationDifferenceObserved": true,
+          "exactGlyphSequenceEqual": false,
+          "result": "normalized_correspondence_observed_not_exact_transcription",
+          "humanCollatorAttestations": [],
+          "domainExpertReviewIds": [],
+          "rightsEffect": "none",
+          "bindingFreezeEffect": "none",
+          "carrierTextStored": false,
+          "repositoryInspectionDerivativeStored": false,
+          "collationDigest": "154645461e0b47de7a04c660f7f56a89493e8ce8722fc6041f5baabaff936bc9"
+        },
+        {
+          "collationCandidateId": "dtt-rooting-ssid-11335994-page-176-normalized-collation-v1",
+          "anchorId": "dtt-chanwei-ssid-11335994-pages-170-176-facsimile-v1",
+          "pageRefId": "dtt-ssid-11335994-pdf-page-176",
+          "quoteCandidateId": "dtt-rooting-minimal-v1",
+          "observedAt": "2026-08-25T18:48:11.944Z",
+          "method": "manual_visual_character_comparison_of_rendered_public_scan_pages",
+          "observerClass": "automated_agent_nonexpert_visual_inspection",
+          "carrierSha256": "d6a7d1daf6513ce9fb9940ff8331b96804c10cdafbeac00d4d3d0a37229e1803",
+          "transcriptionQuoteSha256": "201ce34c97841b890910cc311d14290d9cb71228f4fe64d1b0f4a419aff6818b",
+          "carrierGlyphSequenceSha256": "f06ee5afc2fcb42bb12261901aff988ff034c77569bc109231cf0079616b8bfe",
+          "transcriptionGlyphSequenceSha256": "cdd8f8affa52fc66395e6959eab441b3620fb0c1f1b4a53c728658c934cf5f9d",
+          "comparisonNormalization": "remove_punctuation_and_map_observed_glyph_variants_to_pinned_transcription_for_comparison_only",
+          "normalizedSequenceCharacters": 16,
+          "normalizedSequenceSha256": "cdd8f8affa52fc66395e6959eab441b3620fb0c1f1b4a53c728658c934cf5f9d",
+          "scriptVariantPairCount": 1,
+          "punctuationDifferenceObserved": true,
+          "exactGlyphSequenceEqual": false,
+          "result": "normalized_correspondence_observed_not_exact_transcription",
+          "humanCollatorAttestations": [],
+          "domainExpertReviewIds": [],
+          "rightsEffect": "none",
+          "bindingFreezeEffect": "none",
+          "carrierTextStored": false,
+          "repositoryInspectionDerivativeStored": false,
+          "collationDigest": "b161d2829d5a2dd9e978e9b58ec975aa2747f4ba9dd7c343080524406a1fced9"
+        },
+        {
+          "collationCandidateId": "dtt-yueling-cadal-07005210-page-178-normalized-collation-v1",
+          "anchorId": "dtt-chanwei-cadal-07005210-pages-178-184-facsimile-v1",
+          "pageRefId": "dtt-cadal-07005210-djvu-page-178",
+          "quoteCandidateId": "dtt-yueling-minimal-v1",
+          "observedAt": "2026-08-25T20:17:10.106Z",
+          "method": "manual_visual_character_comparison_of_rendered_public_scan_pages",
+          "observerClass": "automated_agent_nonexpert_visual_inspection",
+          "carrierSha256": "1d0a16f528ed3074cdefad33b2d2f9233a47199cf88a8b02001c897e16996e60",
+          "transcriptionQuoteSha256": "03df5322e1504e142e673e7d11c2d0ad4e08fa84ddbdea3d5c75532d520cc3b9",
+          "carrierGlyphSequenceSha256": "23440d78a05ca6d7c97d3c45261f8f4970a5a4fae6b5b90fa46e7c3204b3fe28",
+          "transcriptionGlyphSequenceSha256": "53d755230c068c883d93a77eae1f216e050a56cd57ac1021710a65df12c5e159",
+          "comparisonNormalization": "remove_punctuation_and_map_observed_glyph_variants_to_pinned_transcription_for_comparison_only",
+          "normalizedSequenceCharacters": 11,
+          "normalizedSequenceSha256": "53d755230c068c883d93a77eae1f216e050a56cd57ac1021710a65df12c5e159",
+          "scriptVariantPairCount": 1,
+          "punctuationDifferenceObserved": true,
+          "exactGlyphSequenceEqual": false,
+          "result": "normalized_correspondence_observed_not_exact_transcription",
+          "humanCollatorAttestations": [],
+          "domainExpertReviewIds": [],
+          "rightsEffect": "none",
+          "bindingFreezeEffect": "none",
+          "carrierTextStored": false,
+          "repositoryInspectionDerivativeStored": false,
+          "collationDigest": "b4ef49ed4c0369c12c97137370481059860068d068444a00f8b552a54adbc5d0"
+        },
+        {
+          "collationCandidateId": "dtt-rooting-cadal-07005210-page-184-normalized-collation-v1",
+          "anchorId": "dtt-chanwei-cadal-07005210-pages-178-184-facsimile-v1",
+          "pageRefId": "dtt-cadal-07005210-djvu-page-184",
+          "quoteCandidateId": "dtt-rooting-minimal-v1",
+          "observedAt": "2026-08-25T20:17:10.106Z",
+          "method": "manual_visual_character_comparison_of_rendered_public_scan_pages",
+          "observerClass": "automated_agent_nonexpert_visual_inspection",
+          "carrierSha256": "1d0a16f528ed3074cdefad33b2d2f9233a47199cf88a8b02001c897e16996e60",
+          "transcriptionQuoteSha256": "201ce34c97841b890910cc311d14290d9cb71228f4fe64d1b0f4a419aff6818b",
+          "carrierGlyphSequenceSha256": "f06ee5afc2fcb42bb12261901aff988ff034c77569bc109231cf0079616b8bfe",
+          "transcriptionGlyphSequenceSha256": "cdd8f8affa52fc66395e6959eab441b3620fb0c1f1b4a53c728658c934cf5f9d",
+          "comparisonNormalization": "remove_punctuation_and_map_observed_glyph_variants_to_pinned_transcription_for_comparison_only",
+          "normalizedSequenceCharacters": 16,
+          "normalizedSequenceSha256": "cdd8f8affa52fc66395e6959eab441b3620fb0c1f1b4a53c728658c934cf5f9d",
+          "scriptVariantPairCount": 1,
+          "punctuationDifferenceObserved": true,
+          "exactGlyphSequenceEqual": false,
+          "result": "normalized_correspondence_observed_not_exact_transcription",
+          "humanCollatorAttestations": [],
+          "domainExpertReviewIds": [],
+          "rightsEffect": "none",
+          "bindingFreezeEffect": "none",
+          "carrierTextStored": false,
+          "repositoryInspectionDerivativeStored": false,
+          "collationDigest": "7328ee9c72e648cc2638582a493eb7cbc6fb8b760244091c9aee1f6c82950113"
+        }
+      ],
+      "facsimileAnchors": [
+        {
+          "anchorId": "dtt-chanwei-ssid-11335994-pages-170-176-facsimile-v1",
+          "anchorRole": "commons_described_1947_shanghai_dadong_scan_candidate_not_work_or_edition_identity_proof",
+          "provider": "Wikimedia Commons",
+          "carrierFilePageId": 125728441,
+          "carrierFileTitle": "File:SSID-11335994 滴天髓闡微.pdf",
+          "carrierDescriptionUrl": "https://commons.wikimedia.org/wiki/File:SSID-11335994_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.pdf",
+          "carrierFileTimestamp": "2022-11-20T09:29:18Z",
+          "carrierMediaWikiSha1": "2d2e1502325c5f026be0f5618d54d8e9c254c232",
+          "carrierSha256": "d6a7d1daf6513ce9fb9940ff8331b96804c10cdafbeac00d4d3d0a37229e1803",
+          "carrierBytes": 14751242,
+          "carrierPageCount": 516,
+          "carrierMime": "application/pdf",
+          "licenseOrNoticeObserved": "commons_pd_scan_top_level_notice_observed_not_adjudicated",
+          "sourceProvenanceObservation": "commons_file_page_has_no_machine_readable_source_or_author",
+          "editionRelation": "1947 Shanghai Dadong Bookstore scan; pinned transcription edition identity not established",
+          "comparisonScope": "visual_heading_and_passage_correspondence_only",
+          "exactCollationStatus": "not_performed",
+          "repositoryCarrierFileStored": false,
+          "repositoryPageImagesStored": false,
+          "storagePolicy": "link_only",
+          "pageRefs": [
+            {
+              "pageRefId": "dtt-ssid-11335994-pdf-page-170",
+              "quoteCandidateIds": [
+                "dtt-yueling-minimal-v1"
+              ],
+              "scanPageNumber": 170,
+              "printedPageLabel": "二八",
+              "visibleHeading": "月令",
+              "pageUrl": "https://commons.wikimedia.org/wiki/File:SSID-11335994_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.pdf?page=170",
+              "pageId": null,
+              "pageRevisionId": null,
+              "pageRevisionTimestamp": null,
+              "pageMediaWikiSha1": null,
+              "pageTranscriptionQualityLevel": null,
+              "pageTranscriptionQualityState": "not_applicable_no_page_namespace_revision",
+              "correspondenceState": "visual_passage_correspondence_observed_not_collated"
+            },
+            {
+              "pageRefId": "dtt-ssid-11335994-pdf-page-176",
+              "quoteCandidateIds": [
+                "dtt-rooting-minimal-v1"
+              ],
+              "scanPageNumber": 176,
+              "printedPageLabel": "三四",
+              "visibleHeading": "衰旺",
+              "pageUrl": "https://commons.wikimedia.org/wiki/File:SSID-11335994_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.pdf?page=176",
+              "pageId": null,
+              "pageRevisionId": null,
+              "pageRevisionTimestamp": null,
+              "pageMediaWikiSha1": null,
+              "pageTranscriptionQualityLevel": null,
+              "pageTranscriptionQualityState": "not_applicable_no_page_namespace_revision",
+              "correspondenceState": "visual_passage_correspondence_observed_not_collated"
+            }
+          ]
+        },
+        {
+          "anchorId": "dtt-chanwei-cadal-07005210-pages-178-184-facsimile-v1",
+          "anchorRole": "commons_described_1947_first_edition_facsimile_candidate_not_same_edition_or_transcription_identity_proof",
+          "provider": "Wikimedia Commons",
+          "carrierFilePageId": 126125545,
+          "carrierFileTitle": "File:CADAL07005210 滴天髓闡微.djvu",
+          "carrierDescriptionUrl": "https://commons.wikimedia.org/wiki/File:CADAL07005210_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.djvu",
+          "carrierFileTimestamp": "2022-11-30T06:30:20Z",
+          "carrierMediaWikiSha1": "e73a24aee3cfc28f22d39e795b13fe76a5a995ad",
+          "carrierSha256": "1d0a16f528ed3074cdefad33b2d2f9233a47199cf88a8b02001c897e16996e60",
+          "carrierBytes": 17912324,
+          "carrierPageCount": 521,
+          "carrierMime": "image/vnd.djvu",
+          "licenseOrNoticeObserved": "commons_pd_old_top_level_notice_observed_without_pd_scan_template_not_adjudicated",
+          "sourceProvenanceObservation": "commons_description_identifies_cadal_07005210_and_fudan_source_not_independently_verified",
+          "editionRelation": "Commons describes a 1947-04 Shanghai Dadong first-edition facsimile and the observed page layout matches the other 1947 carrier; pinned transcription edition identity remains unestablished",
+          "comparisonScope": "visual_heading_and_passage_correspondence_only",
+          "exactCollationStatus": "not_performed",
+          "repositoryCarrierFileStored": false,
+          "repositoryPageImagesStored": false,
+          "storagePolicy": "link_only",
+          "pageRefs": [
+            {
+              "pageRefId": "dtt-cadal-07005210-djvu-page-178",
+              "quoteCandidateIds": [
+                "dtt-yueling-minimal-v1"
+              ],
+              "scanPageNumber": 178,
+              "printedPageLabel": "二八",
+              "visibleHeading": "月令",
+              "pageUrl": "https://commons.wikimedia.org/wiki/File:CADAL07005210_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.djvu?page=178",
+              "pageId": null,
+              "pageRevisionId": null,
+              "pageRevisionTimestamp": null,
+              "pageMediaWikiSha1": null,
+              "pageTranscriptionQualityLevel": null,
+              "pageTranscriptionQualityState": "not_applicable_no_page_namespace_revision",
+              "correspondenceState": "visual_passage_correspondence_observed_not_collated"
+            },
+            {
+              "pageRefId": "dtt-cadal-07005210-djvu-page-184",
+              "quoteCandidateIds": [
+                "dtt-rooting-minimal-v1"
+              ],
+              "scanPageNumber": 184,
+              "printedPageLabel": "三四",
+              "visibleHeading": "衰旺",
+              "pageUrl": "https://commons.wikimedia.org/wiki/File:CADAL07005210_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.djvu?page=184",
+              "pageId": null,
+              "pageRevisionId": null,
+              "pageRevisionTimestamp": null,
+              "pageMediaWikiSha1": null,
+              "pageTranscriptionQualityLevel": null,
+              "pageTranscriptionQualityState": "not_applicable_no_page_namespace_revision",
+              "correspondenceState": "visual_passage_correspondence_observed_not_collated"
+            }
+          ]
+        }
+      ],
+      "rightsObservation": {
+        "workLayer": "candidate_only",
+        "editionLayer": "unknown",
+        "carrierLayer": "terms_observed_human_review_required",
+        "licenseOrNoticeObserved": "wikisource_rendered_dependency_and_distinct_carrier_notices_observed_not_adjudicated",
+        "evidenceRefs": [
+          "https://zh.wikisource.org/w/index.php?title=%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE&oldid=2600158",
+          "https://commons.wikimedia.org/wiki/File:SSID-11335994_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.pdf",
+          "https://commons.wikimedia.org/wiki/File:CADAL07005210_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.djvu",
+          "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use/en#7._Licensing_of_Content",
+          "https://creativecommons.org/licenses/by-sa/4.0/legalcode"
+        ],
+        "rightsReviewAttestations": [],
+        "distributionDecision": "link_only",
+        "legalConclusion": "not_established",
+        "noticeProjectionEvidence": {
+          "publicEvidenceObservationId": "hakimi.bazi.dtt-month-command-public-evidence/2026-08-29T15:17:27.103Z",
+          "reconciliationId": "hakimi.bazi.dtt-notice-reconciliation/1.0.0",
+          "oldidMainSlotPdOldLiteralObserved": false,
+          "renderedPagePdOldDependencyObserved": true,
+          "oldidAlonePinsRenderedNotice": false,
+          "ssidTopLevelNotice": "pd_scan_top_level_observed",
+          "cadalTopLevelNotice": "pd_old_top_level_observed_without_pd_scan_template",
+          "publicDomainMarkCountsAsLicense": false,
+          "markerAuthorityAndAccuracyVerified": false,
+          "sameEditionRelationshipIndependentlyEstablished": false,
+          "workIdentityEstablished": false,
+          "editionIdentityEstablished": false,
+          "carrierIdentityEstablished": false
+        }
+      },
+      "reviewState": {
+        "bindingCandidateState": "revision_locator_quote_hash_and_facsimile_anchor_verified_candidate",
+        "sourceIdentityBeyondRevisionMetadata": "facsimile_anchor_observed_identity_not_established",
+        "contentTruth": "not_established",
+        "expertReviewIds": [],
+        "frozenAt": null,
+        "supersedes": "dtt-chanwei-wikisource-r2600158-candidate-v1",
+        "supersededBy": null
+      },
+      "candidateDigest": "2c59ee25081c6e0a88ee7f9da18395be2ea615bb289c28798e324e23befeeb59"
+    },
+    {
+      "candidateId": "smt-v5-wikisource-r2706483-candidate-v1",
+      "bindingId": "binding:smt-v5:relative-relations",
+      "evidenceSubjectId": "bazi.strength.binding.smt-v5.relative-relations.v1",
+      "sourceId": "smt-v5-wikisource-r2706483",
+      "workIdentity": {
+        "title": "三命通會",
+        "attributedAuthor": "萬民英",
+        "workRightsObservation": "historical_authorship_recorded_no_page_pd_notice"
+      },
+      "editionIdentity": {
+        "title": "三命通會/卷五",
+        "editionStatus": "not_independently_collated",
+        "facsimileComparisonStatus": "visual_correspondence_only_not_collated"
+      },
+      "carrierIdentity": {
+        "provider": "Chinese Wikisource",
+        "carrierType": "link_only",
+        "pageId": 335940,
+        "pageTitle": "三命通會/卷五",
+        "permanentUrl": "https://zh.wikisource.org/w/index.php?title=%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83/%E5%8D%B7%E4%BA%94&oldid=2706483",
+        "revisionId": 2706483,
+        "parentRevisionId": 845351,
+        "revisionTimestamp": "2026-04-23T06:45:01Z",
+        "mediaWikiSha1": "cd03b24ebd1c63acc3a5b9c9b5f71cda3da9749f",
+        "contentModel": "wikitext",
+        "contentFormat": "text/x-wiki",
+        "rawWikitextCharacters": 10612,
+        "rawWikitextUtf8Bytes": 30616,
+        "rawWikitextSha256": "df0446bc9ff7651a91fc866de1eb4f86dec4b045b95cbbd777b1fec70e51f139",
+        "sourceBodyStored": false,
+        "storagePolicy": "link_only"
+      },
+      "quoteCandidates": [
+        {
+          "quoteCandidateId": "smt-v5-relative-relations-minimal-v1",
+          "conceptualTopics": [],
+          "heading": "论古人立印食官财名义",
+          "rawRevisionLineStart": 7,
+          "rawRevisionLineEnd": 8,
+          "rawCharacterStartZeroBased": 108,
+          "rawCharacterEndExclusive": 128,
+          "quoteCharacters": 20,
+          "quoteUtf8Bytes": 58,
+          "quoteSha256": "04b00701992b5a8c8e259ff0172de817420f3022dc37bdfe96efe47a1f84d444",
+          "quoteOccurrenceInRawRevision": "unique",
+          "quoteTextStored": false,
+          "supportCandidate": "relative five-phase relations are the stated basis of the named relations"
+        }
+      ],
+      "facsimileCollationCandidates": [
+        {
+          "collationCandidateId": "smt-v5-relative-relations-gujin-v470-page-115-normalized-collation-v1",
+          "anchorId": "smt-v5-gujin-volume-470-page-115-facsimile-v1",
+          "pageRefId": "smt-v5-gujin-v470-page-115",
+          "quoteCandidateId": "smt-v5-relative-relations-minimal-v1",
+          "observedAt": "2026-08-25T19:19:23.981Z",
+          "method": "manual_visual_character_comparison_of_rendered_public_scan_pages",
+          "observerClass": "automated_agent_nonexpert_visual_inspection",
+          "carrierSha256": "64491cdc159a480686ddc568d6f08c5976e5ea5abc8b27816a5d71e19941c037",
+          "transcriptionQuoteSha256": "04b00701992b5a8c8e259ff0172de817420f3022dc37bdfe96efe47a1f84d444",
+          "carrierGlyphSequenceSha256": "118abf2b412bb6a6e03869161ca421022a318630ad2042ebb24fb129831a569b",
+          "transcriptionGlyphSequenceSha256": "03ac497b4067b4e7e69b48b853d3c123794eb9e3b9bca02cc00a121a6a9d193d",
+          "comparisonNormalization": "remove_punctuation_and_map_observed_glyph_variants_to_pinned_transcription_for_comparison_only",
+          "normalizedSequenceCharacters": 16,
+          "normalizedSequenceSha256": "03ac497b4067b4e7e69b48b853d3c123794eb9e3b9bca02cc00a121a6a9d193d",
+          "scriptVariantPairCount": 5,
+          "punctuationDifferenceObserved": true,
+          "exactGlyphSequenceEqual": false,
+          "result": "normalized_correspondence_observed_not_exact_transcription",
+          "humanCollatorAttestations": [],
+          "domainExpertReviewIds": [],
+          "rightsEffect": "none",
+          "bindingFreezeEffect": "none",
+          "carrierTextStored": false,
+          "repositoryInspectionDerivativeStored": false,
+          "collationDigest": "c274cba618d40796edb57b5f055dca8e61574a78da8cb984fe4ab523177c39a7"
+        }
+      ],
+      "facsimileAnchors": [
+        {
+          "anchorId": "smt-v5-gujin-volume-470-page-115-facsimile-v1",
+          "anchorRole": "corroborating_historical_excerpt_not_edition_identity_proof",
+          "provider": "Wikimedia Commons and Chinese Wikisource",
+          "carrierFilePageId": 52325594,
+          "carrierFileTitle": "File:Gujin Tushu Jicheng, Volume 470 (1700-1725).djvu",
+          "carrierDescriptionUrl": "https://commons.wikimedia.org/wiki/File:Gujin_Tushu_Jicheng,_Volume_470_(1700-1725).djvu",
+          "carrierFileTimestamp": "2016-10-17T12:08:45Z",
+          "carrierMediaWikiSha1": "81460135a18a531bf1ca51ac49616e23fb7a5182",
+          "carrierSha256": "64491cdc159a480686ddc568d6f08c5976e5ea5abc8b27816a5d71e19941c037",
+          "carrierBytes": 22564579,
+          "carrierPageCount": 123,
+          "carrierMime": "image/vnd.djvu",
+          "licenseOrNoticeObserved": "commons_public_domain_and_pd_scan_notice_observed_not_adjudicated",
+          "sourceProvenanceObservation": "commons_credit_links_baidu_pan_original_source_not_independently_verified",
+          "editionRelation": "Gujin Tushu Jicheng excerpt; not the pinned Wikisource volume edition",
+          "comparisonScope": "visual_heading_and_passage_correspondence_only",
+          "exactCollationStatus": "not_performed",
+          "repositoryCarrierFileStored": false,
+          "repositoryPageImagesStored": false,
+          "storagePolicy": "link_only",
+          "pageRefs": [
+            {
+              "pageRefId": "smt-v5-gujin-v470-page-115",
+              "quoteCandidateIds": [
+                "smt-v5-relative-relations-minimal-v1"
+              ],
+              "scanPageNumber": 115,
+              "printedPageLabel": null,
+              "visibleHeading": "三命通會十二／論古人立印食官財名義",
+              "pageUrl": "https://zh.wikisource.org/w/index.php?title=Page%3AGujin_Tushu_Jicheng%2C_Volume_470_%281700-1725%29.djvu%2F115&oldid=1898698",
+              "pageId": 959331,
+              "pageRevisionId": 1898698,
+              "pageRevisionTimestamp": "2020-06-09T11:00:37Z",
+              "pageMediaWikiSha1": "6773ade6c3941557462cf1c8ddf64dd629011463",
+              "pageTranscriptionQualityLevel": 1,
+              "pageTranscriptionQualityState": "not_proofread",
+              "correspondenceState": "visual_passage_correspondence_observed_not_collated"
+            }
+          ]
+        }
+      ],
+      "rightsObservation": {
+        "workLayer": "candidate_only",
+        "editionLayer": "unknown",
+        "carrierLayer": "terms_observed_human_review_required",
+        "licenseOrNoticeObserved": "cc_by_sa_footer_without_page_specific_public_domain_notice",
+        "evidenceRefs": [
+          "https://zh.wikisource.org/w/index.php?title=%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83/%E5%8D%B7%E4%BA%94&oldid=2706483",
+          "https://commons.wikimedia.org/wiki/File:Gujin_Tushu_Jicheng,_Volume_470_(1700-1725).djvu",
+          "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use/en#7._Licensing_of_Content",
+          "https://creativecommons.org/licenses/by-sa/4.0/legalcode"
+        ],
+        "rightsReviewAttestations": [],
+        "distributionDecision": "link_only",
+        "legalConclusion": "not_established"
+      },
+      "reviewState": {
+        "bindingCandidateState": "revision_locator_quote_hash_and_facsimile_anchor_verified_candidate",
+        "sourceIdentityBeyondRevisionMetadata": "facsimile_anchor_observed_identity_not_established",
+        "contentTruth": "not_established",
+        "expertReviewIds": [],
+        "frozenAt": null,
+        "supersedes": null,
+        "supersededBy": null
+      },
+      "candidateDigest": "c9dead89c020772224db8e0802373797d939839b184a32ab0d6db05c7a2c2b62"
+    },
+    {
+      "candidateId": "yhzp-wikisource-r2593607-candidate-v1",
+      "bindingId": "binding:yhzp:hidden-listing",
+      "evidenceSubjectId": "bazi.strength.binding.yhzp.hidden-listing.v1",
+      "sourceId": "yhzp-wikisource-r2593607",
+      "workIdentity": {
+        "title": "淵海子平",
+        "attributedAuthor": "徐升",
+        "workRightsObservation": "public_domain_notice_observed_not_adjudicated"
+      },
+      "editionIdentity": {
+        "title": "淵海子平",
+        "editionStatus": "not_independently_collated",
+        "facsimileComparisonStatus": "visual_correspondence_only_not_collated"
+      },
+      "carrierIdentity": {
+        "provider": "Chinese Wikisource",
+        "carrierType": "link_only",
+        "pageId": 343323,
+        "pageTitle": "淵海子平",
+        "permanentUrl": "https://zh.wikisource.org/w/index.php?title=%E6%B7%B5%E6%B5%B7%E5%AD%90%E5%B9%B3&oldid=2593607",
+        "revisionId": 2593607,
+        "parentRevisionId": 2589932,
+        "revisionTimestamp": "2025-08-24T18:41:12Z",
+        "mediaWikiSha1": "9b1ba96079eb641d8663b48f698dbd1b7fbada70",
+        "contentModel": "wikitext",
+        "contentFormat": "text/x-wiki",
+        "rawWikitextCharacters": 61325,
+        "rawWikitextUtf8Bytes": 173237,
+        "rawWikitextSha256": "a4447be5d95eb073857cb8cba8f0e58a500de1c283016c76cfdedb0d1b2bb133",
+        "sourceBodyStored": false,
+        "storagePolicy": "link_only"
+      },
+      "quoteCandidates": [
+        {
+          "quoteCandidateId": "yhzp-hidden-stem-listing-minimal-v1",
+          "conceptualTopics": [],
+          "heading": "又地支藏遁歌",
+          "rawRevisionLineStart": 80,
+          "rawRevisionLineEnd": 80,
+          "rawCharacterStartZeroBased": 831,
+          "rawCharacterEndExclusive": 927,
+          "quoteCharacters": 96,
+          "quoteUtf8Bytes": 288,
+          "quoteSha256": "a6f2f818d80148318a769754ff5bb0f74f5b68be96764bfb35843abbaa8fabc2",
+          "quoteOccurrenceInRawRevision": "unique",
+          "quoteTextStored": false,
+          "supportCandidate": "one pinned transcription lists hidden stems for all twelve branches"
+        }
+      ],
+      "facsimileCollationCandidates": [
+        {
+          "collationCandidateId": "yhzp-hidden-stem-listing-nlc-page-54-normalized-collation-v1",
+          "anchorId": "yhzp-nlc416-15jh007754-99036-page-54-facsimile-v1",
+          "pageRefId": "yhzp-nlc416-15jh007754-99036-pdf-page-54",
+          "quoteCandidateId": "yhzp-hidden-stem-listing-minimal-v1",
+          "observedAt": "2026-08-25T19:50:36.415Z",
+          "method": "manual_visual_character_comparison_of_rendered_public_scan_pages",
+          "observerClass": "automated_agent_nonexpert_visual_inspection",
+          "carrierSha256": "fca66e109aae987a5a04dc623e5168680d227542e13b56cdd7c39b62e55b605f",
+          "transcriptionQuoteSha256": "a6f2f818d80148318a769754ff5bb0f74f5b68be96764bfb35843abbaa8fabc2",
+          "carrierGlyphSequenceSha256": "bb3b88084c0bee2b2d5f820c6132ab0d59c6319b6fe2376f6245f00542ce07fd",
+          "transcriptionGlyphSequenceSha256": "d66a494cde4d315d9962cb016f40e24b4a4ce3b7a1cdd786b76ad6f5dbdd7ea0",
+          "comparisonNormalization": "remove_punctuation_and_map_observed_glyph_variants_to_pinned_transcription_for_comparison_only",
+          "normalizedSequenceCharacters": 84,
+          "normalizedSequenceSha256": "d66a494cde4d315d9962cb016f40e24b4a4ce3b7a1cdd786b76ad6f5dbdd7ea0",
+          "scriptVariantPairCount": 11,
+          "punctuationDifferenceObserved": true,
+          "exactGlyphSequenceEqual": false,
+          "result": "normalized_correspondence_observed_not_exact_transcription",
+          "humanCollatorAttestations": [],
+          "domainExpertReviewIds": [],
+          "rightsEffect": "none",
+          "bindingFreezeEffect": "none",
+          "carrierTextStored": false,
+          "repositoryInspectionDerivativeStored": false,
+          "collationDigest": "d796c3105332f5d8dd6365b39ca9ae9c0d7bdc89082b889d6d3d0eb935240fb0"
+        }
+      ],
+      "facsimileAnchors": [
+        {
+          "anchorId": "yhzp-nlc416-15jh007754-99036-page-54-facsimile-v1",
+          "anchorRole": "same_work_later_print_not_version_identity_proof",
+          "provider": "Wikimedia Commons",
+          "carrierFilePageId": 130948304,
+          "carrierFileTitle": "File:NLC416-15jh007754-99036 淵海子平 子平真詮.pdf",
+          "carrierDescriptionUrl": "https://commons.wikimedia.org/wiki/File:NLC416-15jh007754-99036_%E6%B7%B5%E6%B5%B7%E5%AD%90%E5%B9%B3_%E5%AD%90%E5%B9%B3%E7%9C%9F%E8%A9%AE.pdf",
+          "carrierFileTimestamp": "2023-04-21T13:52:10Z",
+          "carrierMediaWikiSha1": "ba319cfa1afb636a20eeed3d0beb90e41b8ce10e",
+          "carrierSha256": "fca66e109aae987a5a04dc623e5168680d227542e13b56cdd7c39b62e55b605f",
+          "carrierBytes": 6429274,
+          "carrierPageCount": 209,
+          "carrierMime": "application/pdf",
+          "licenseOrNoticeObserved": "commons_public_domain_and_pd_scan_notice_observed_not_adjudicated",
+          "sourceProvenanceObservation": "commons_description_identifies_national_library_of_china_source_not_independently_verified",
+          "editionRelation": "Republican-era Wenming Bookstore scan of the same work; pinned transcription edition identity not established",
+          "comparisonScope": "visual_heading_and_passage_correspondence_only",
+          "exactCollationStatus": "not_performed",
+          "repositoryCarrierFileStored": false,
+          "repositoryPageImagesStored": false,
+          "storagePolicy": "link_only",
+          "pageRefs": [
+            {
+              "pageRefId": "yhzp-nlc416-15jh007754-99036-pdf-page-54",
+              "quoteCandidateIds": [
+                "yhzp-hidden-stem-listing-minimal-v1"
+              ],
+              "scanPageNumber": 54,
+              "printedPageLabel": "三六",
+              "visibleHeading": "又地支藏遁歌",
+              "pageUrl": "https://commons.wikimedia.org/wiki/File:NLC416-15jh007754-99036_%E6%B7%B5%E6%B5%B7%E5%AD%90%E5%B9%B3_%E5%AD%90%E5%B9%B3%E7%9C%9F%E8%A9%AE.pdf?page=54",
+              "pageId": null,
+              "pageRevisionId": null,
+              "pageRevisionTimestamp": null,
+              "pageMediaWikiSha1": null,
+              "pageTranscriptionQualityLevel": null,
+              "pageTranscriptionQualityState": "not_applicable_no_page_namespace_revision",
+              "correspondenceState": "visual_passage_correspondence_observed_not_collated"
+            }
+          ]
+        }
+      ],
+      "rightsObservation": {
+        "workLayer": "candidate_only",
+        "editionLayer": "unknown",
+        "carrierLayer": "terms_observed_human_review_required",
+        "licenseOrNoticeObserved": "page_public_domain_notice_and_wikimedia_terms",
+        "evidenceRefs": [
+          "https://zh.wikisource.org/w/index.php?title=%E6%B7%B5%E6%B5%B7%E5%AD%90%E5%B9%B3&oldid=2593607",
+          "https://commons.wikimedia.org/wiki/File:NLC416-15jh007754-99036_%E6%B7%B5%E6%B5%B7%E5%AD%90%E5%B9%B3_%E5%AD%90%E5%B9%B3%E7%9C%9F%E8%A9%AE.pdf",
+          "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use/en#7._Licensing_of_Content",
+          "https://creativecommons.org/licenses/by-sa/4.0/legalcode"
+        ],
+        "rightsReviewAttestations": [],
+        "distributionDecision": "link_only",
+        "legalConclusion": "not_established"
+      },
+      "reviewState": {
+        "bindingCandidateState": "revision_locator_quote_hash_and_facsimile_anchor_verified_candidate",
+        "sourceIdentityBeyondRevisionMetadata": "facsimile_anchor_observed_identity_not_established",
+        "contentTruth": "not_established",
+        "expertReviewIds": [],
+        "frozenAt": null,
+        "supersedes": null,
+        "supersededBy": null
+      },
+      "candidateDigest": "8a2d7aa5705cd8735af2b9563bb094f09b0d9bcd9881bb6d711dc108f9fc0257"
+    }
+  ],
+  "gateSummary": {
+    "bindingRequired": 12,
+    "bindingFrozenVerified": 0,
+    "candidateBindingCount": 4,
+    "corroboratingFacsimileAnchors": 5,
+    "visualPageCorrespondencesObserved": 7,
+    "normalizedFacsimileCollationCandidatesObserved": 7,
+    "exactGlyphFacsimileCorrespondenceCandidatesObserved": 1,
+    "exactFacsimileCollationsVerified": 0,
+    "independentHumanFacsimileCollationsVerified": 0,
+    "sourceBodiesStored": 0,
+    "quoteTextsStored": 0,
+    "rightsReviewsVerified": 0,
+    "expertReviewsVerified": 0,
+    "sourceBundleComplete": false,
+    "rightsBundleComplete": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "doesNotEstablish": [
+    "source_identity_beyond_public_revision_metadata",
+    "edition_fidelity_to_facsimile",
+    "exact_transcription_identity",
+    "independent_human_facsimile_collation",
+    "quote_redistribution_permission",
+    "content_truth",
+    "expert_truth",
+    "rights_legal_conclusion",
+    "release_readiness",
+    "public_release_authorization",
+    "notice_projection_correction_is_not_rights_clearance"
+  ],
+  "ledgerDigest": "6f008058b282613fd131344206b27fccb1d80596bb49789f0554acdd69c1e44c",
+  "supersession": {
+    "supersedes": {
+      "path": "content/bazi-strength-source-binding-candidates.v1.json",
+      "ledgerId": "hakimi.bazi.strength.source-binding-candidates/1.5.0",
+      "ledgerDigest": "44ed9e23490c11c625602b77574efbf7331305bd1bf87634c5b91f568e8b85af",
+      "rawBytes": 47753,
+      "rawSha256": "e2ac6a7a0ea1209dd92a38dfae82c494df4792da1a102c11d2fdb2caa80e41f7",
+      "dttCandidateId": "dtt-chanwei-wikisource-r2600158-candidate-v1",
+      "dttCandidateDigest": "26182f43d801dedb7433e53d8e390efc32195ef08555199d933e36a1ed65ca61"
+    },
+    "pairedRightsLedger": {
+      "path": "content/bazi-strength-source-rights-candidates.v1.2.0.json",
+      "ledgerId": "hakimi.bazi.strength.source-rights-candidates/1.2.0"
+    },
+    "evidence": {
+      "publicEvidenceObservationId": "hakimi.bazi.dtt-month-command-public-evidence/2026-08-29T15:17:27.103Z",
+      "publicEvidenceObservationDigest": "01e61e4f77526270ef83a0d95fbcb165bf307d5efa09c5a0360ff49bf1735993",
+      "reconciliationId": "hakimi.bazi.dtt-notice-reconciliation/1.0.0",
+      "reconciliationDigest": "fabf96fddf7f3710b86f22b0d3f7aa7844087351f30c53fbb823780f3d81ba2f"
+    },
+    "historicalLedgerAcquiredAt": "2026-08-25T14:37:30.867Z",
+    "noticeProjectionObservedAt": "2026-08-29T15:17:27.103Z",
+    "supersessionCreatedAt": "2026-08-30T00:00:00.000Z",
+    "changeScope": "dtt_notice_projection_only_no_admission_state_promotion",
+    "historicalParentMutated": false,
+    "historicalParentBacklinkAdded": false,
+    "formalAdmissionEffect": "none"
+  }
+}

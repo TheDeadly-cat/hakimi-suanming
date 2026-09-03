@@ -123,8 +123,8 @@ describe("Bazi current-chart hit review v0.18", () => {
       digestAlgorithm: "sha256-canonical-json-v1",
       catalogVersion: "0.17.0",
       strengthPolicyVersion: "hakimi.bazi.strength_policy/0.1.0",
-      strengthEvidenceNarrativeProjectionVersion: "hakimi.bazi.strength_evidence_narrative/0.1.0",
-      strengthClaimRegistryVersion: "hakimi.bazi.strength_claim_registry/0.1.0"
+      strengthEvidenceNarrativeProjectionVersion: "hakimi.bazi.strength_evidence_narrative/0.2.0",
+      strengthClaimRegistryVersion: "hakimi.bazi.strength_claim_registry/0.2.0"
     });
     expect(first.packet.strengthSnapshot.evidenceNarrative.bindings).toMatchObject({
       factsProjectionSha256: first.packet.bindings.factsProjectionSha256,

@@ -1,0 +1,682 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "bazi_dtt_month_command_three_role_review_packet_candidate_v1",
+  "packetId": "hakimi.bazi.dtt-month-command-three-role-review-packet/1.0.0",
+  "status": "append_only_candidate_packet_vacant_no_authority",
+  "createdAt": "2026-09-04T00:00:00.000Z",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "appendOnlyBoundary": {
+    "candidateOnly": true,
+    "existingArtifactMutationAllowed": false,
+    "supersedes": null,
+    "supersededBy": null,
+    "futureResponsesAndAttestationsMustBeSeparateAppendOnlyRecords": true,
+    "packetPresencePromotesAdmissionOrAuthority": false
+  },
+  "basisArtifacts": [
+    {
+      "role": "current_source_binding_candidate_ledger",
+      "path": "content/bazi-strength-source-binding-candidates.v1.7.0.json",
+      "bytes": 58579,
+      "sha256": "03bc334a507e224d8658cd2af5fe5d5a11e1db0553fa7e54bf1287010147ccd2",
+      "semanticIdField": "ledgerId",
+      "semanticId": "hakimi.bazi.strength.source-binding-candidates/1.7.0",
+      "semanticDigestField": "ledgerDigest",
+      "semanticDigest": "e705ef32eb2dc0d6651f314a6020b71c18070ba5b6702c6965b628d01f1ef5d9",
+      "privateBrandConsumed": false,
+      "verificationMode": "exact_raw_digest_and_structural_reextraction_no_stale_private_brand"
+    },
+    {
+      "role": "current_source_rights_candidate_ledger",
+      "path": "content/bazi-strength-source-rights-candidates.v1.3.0.json",
+      "bytes": 25852,
+      "sha256": "8b26eea65e9ee3e7876298c3f720c46c43d5ec7d444ad4a4252116fc1dc21f17",
+      "semanticIdField": "ledgerId",
+      "semanticId": "hakimi.bazi.strength.source-rights-candidates/1.3.0",
+      "semanticDigestField": "ledgerDigest",
+      "semanticDigest": "4b1183a85f1d2aeee537544a6b3711510406d98856a921730879c8a9ca782db1",
+      "privateBrandConsumed": false,
+      "verificationMode": "exact_raw_digest_and_structural_reextraction_no_stale_private_brand"
+    },
+    {
+      "role": "dtt_notice_reconciliation_v2",
+      "path": "content/system-admission/bazi-dtt-notice-reconciliation.v2.json",
+      "bytes": 8881,
+      "sha256": "e2656a19955db0ce908df88aa696cd40847e7536af58c79548ac1fbce9a7464b",
+      "semanticIdField": "reconciliationId",
+      "semanticId": "hakimi.bazi.dtt-notice-reconciliation/2.0.0",
+      "semanticDigestField": "reconciliationDigest",
+      "semanticDigest": "2a47fc6fe281a4362c36dfc67c2a6dee195b5b069065ffc0e86ac1afcd7aa8a0",
+      "privateBrandConsumed": false,
+      "verificationMode": "exact_raw_digest_and_structural_reextraction_no_stale_private_brand"
+    },
+    {
+      "role": "current_binding_readiness_v1_9",
+      "path": "content/system-admission/bazi-binding-freeze-requirements.v1.9.0.json",
+      "bytes": 45551,
+      "sha256": "e20145b5f34b5dc04464e482cda5da990f82e520236679efbf568b322637f797",
+      "semanticIdField": "ledgerId",
+      "semanticId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.9.0",
+      "semanticDigestField": "ledgerDigest",
+      "semanticDigest": "42930e63cb0960df969f5fe059617eb96a8ec9bd857c486cd4b33a28d37a8ae1",
+      "privateBrandConsumed": true,
+      "verificationMode": "exact_raw_semantic_and_current_full_loader_private_brand"
+    },
+    {
+      "role": "current_dtt_month_command_public_evidence_observation",
+      "path": "content/system-admission/bazi-dtt-month-command-public-evidence.v1.json",
+      "bytes": 31062,
+      "sha256": "85788506067b50453545ec786c7a47b0e51a4cf004419cbe8c547f9384c01ae6",
+      "semanticIdField": "observationId",
+      "semanticId": "hakimi.bazi.dtt-month-command-public-evidence/2026-08-29T15:17:27.103Z",
+      "semanticDigestField": "observationDigest",
+      "semanticDigest": "01e61e4f77526270ef83a0d95fbcb165bf307d5efa09c5a0360ff49bf1735993",
+      "privateBrandConsumed": true,
+      "verificationMode": "exact_raw_semantic_and_current_full_loader_private_brand"
+    }
+  ],
+  "subjectLock": {
+    "bindingId": "binding:dtt:month-command",
+    "evidenceSubjectId": "bazi.strength.binding.dtt.month-command.v1",
+    "quoteCandidateId": "dtt-yueling-minimal-v1",
+    "rightsCandidateDigest": "674a0b64179f5fbb0dff331fdad6b6ac93e3093de4a8459abf6ff9bdd6cd418c",
+    "rightsCandidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v2",
+    "sourceCandidateDigest": "2c59ee25081c6e0a88ee7f9da18395be2ea615bb289c28798e324e23befeeb59",
+    "sourceCandidateId": "dtt-chanwei-wikisource-r2600158-candidate-v2",
+    "sourceId": "dtt-chanwei-wikisource-r2600158"
+  },
+  "lineageBoundary": {
+    "reconciliationV2CandidateParents": {
+      "sourceBinding": {
+        "adoptionRole": "superseding_candidate_input_only_not_active_formal_parent",
+        "candidateDigest": "2c59ee25081c6e0a88ee7f9da18395be2ea615bb289c28798e324e23befeeb59",
+        "candidateId": "dtt-chanwei-wikisource-r2600158-candidate-v2",
+        "inPlaceHistoricalParentMutationAccepted": false,
+        "ledgerDigest": "6f008058b282613fd131344206b27fccb1d80596bb49789f0554acdd69c1e44c",
+        "ledgerId": "hakimi.bazi.strength.source-binding-candidates/1.6.0",
+        "path": "content/bazi-strength-source-binding-candidates.v1.6.0.json",
+        "rawBytes": 50427,
+        "rawSha256": "62f6a68b99246a802bcf2055aa09a8ac8113df37a7ede1c55d8a2ea64deaea98",
+        "supersedesCandidateId": "dtt-chanwei-wikisource-r2600158-candidate-v1"
+      },
+      "sourceRights": {
+        "adoptionRole": "superseding_candidate_input_only_not_active_formal_parent",
+        "candidateDigest": "674a0b64179f5fbb0dff331fdad6b6ac93e3093de4a8459abf6ff9bdd6cd418c",
+        "candidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v2",
+        "inPlaceHistoricalParentMutationAccepted": false,
+        "ledgerDigest": "300e092c4913885cff626221b8734786128639c7d6cfd7c2be7bea2acc6bbefc",
+        "ledgerId": "hakimi.bazi.strength.source-rights-candidates/1.2.0",
+        "path": "content/bazi-strength-source-rights-candidates.v1.2.0.json",
+        "rawBytes": 23947,
+        "rawSha256": "678632a8875672f58bb5c9f1ec4a299a4f0c6e750b8ff4a02bfe4df889e1243a",
+        "supersedesCandidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v1"
+      }
+    },
+    "reconciliationV2ParentsRewrittenToV17OrV13": false,
+    "dttSourceCandidateCarriedForwardUnchangedInV17": true,
+    "dttRightsCandidateCarriedForwardUnchangedInV13": true,
+    "currentLedgerIdentities": {
+      "sourceBindingLedgerId": "hakimi.bazi.strength.source-binding-candidates/1.7.0",
+      "sourceBindingLedgerDigest": "e705ef32eb2dc0d6651f314a6020b71c18070ba5b6702c6965b628d01f1ef5d9",
+      "sourceRightsLedgerId": "hakimi.bazi.strength.source-rights-candidates/1.3.0",
+      "sourceRightsLedgerDigest": "4b1183a85f1d2aeee537544a6b3711510406d98856a921730879c8a9ca782db1"
+    }
+  },
+  "publicEvidenceProjection": {
+    "observationId": "hakimi.bazi.dtt-month-command-public-evidence/2026-08-29T15:17:27.103Z",
+    "observationDigest": "01e61e4f77526270ef83a0d95fbcb165bf307d5efa09c5a0360ff49bf1735993",
+    "observationArtifact": {
+      "path": "content/system-admission/bazi-dtt-month-command-public-evidence.v1.json",
+      "bytes": 31062,
+      "sha256": "85788506067b50453545ec786c7a47b0e51a4cf004419cbe8c547f9384c01ae6"
+    },
+    "dynamicDescriptionUrlsAreDiscoveryOnly": true,
+    "dynamicDescriptionUrlsCountAsFixedRightsEvidence": false,
+    "fixedRevisionUrlsStoredByPublicEvidence": false,
+    "fixedRevisionUrlsDerivedFromPublicEvidenceFields": true,
+    "fixedCarrierPageRevisions": [
+      {
+        "anchorId": "dtt-chanwei-ssid-11335994-pages-170-176-facsimile-v1",
+        "carrierFileTitle": "File:SSID-11335994 滴天髓闡微.pdf",
+        "dynamicDescriptionUrl": "https://commons.wikimedia.org/wiki/File:SSID-11335994_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.pdf",
+        "dynamicDescriptionUrlCountsAsFixedRightsEvidence": false,
+        "dynamicDescriptionUrlRole": "discovery_only_not_fixed_rights_evidence",
+        "fixedFilePageMainSlotSha256": "55d405f7cc909c4ee2f356e3bacd7da2903bc759596e6ab1cae13b58014fbc05",
+        "fixedFilePageRevisionId": 708090379,
+        "fixedFilePageRevisionTimestamp": "2022-11-20T09:29:18Z",
+        "fixedFilePageRevisionUrl": "https://commons.wikimedia.org/w/index.php?title=File%3ASSID-11335994%20%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.pdf&oldid=708090379",
+        "fixedFilePageRevisionUrlDerivation": "derived_from_public_evidence_carrier_file_title_and_fixed_revision_id",
+        "fixedFilePageRevisionUrlOldidMatchesRevisionId": true,
+        "fixedRevisionEvidenceRole": "revision_specific_observation_locator_not_rights_or_legal_clearance"
+      },
+      {
+        "anchorId": "dtt-chanwei-cadal-07005210-pages-178-184-facsimile-v1",
+        "carrierFileTitle": "File:CADAL07005210 滴天髓闡微.djvu",
+        "dynamicDescriptionUrl": "https://commons.wikimedia.org/wiki/File:CADAL07005210_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.djvu",
+        "dynamicDescriptionUrlCountsAsFixedRightsEvidence": false,
+        "dynamicDescriptionUrlRole": "discovery_only_not_fixed_rights_evidence",
+        "fixedFilePageMainSlotSha256": "30194bbd8c92409dc8efb02f536b0909a6b29fa793528bc6ac81063bb04bc001",
+        "fixedFilePageRevisionId": 1104458375,
+        "fixedFilePageRevisionTimestamp": "2025-10-24T20:27:06Z",
+        "fixedFilePageRevisionUrl": "https://commons.wikimedia.org/w/index.php?title=File%3ACADAL07005210%20%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.djvu&oldid=1104458375",
+        "fixedFilePageRevisionUrlDerivation": "derived_from_public_evidence_carrier_file_title_and_fixed_revision_id",
+        "fixedFilePageRevisionUrlOldidMatchesRevisionId": true,
+        "fixedRevisionEvidenceRole": "revision_specific_observation_locator_not_rights_or_legal_clearance"
+      }
+    ]
+  },
+  "sourceMaterialProjection": {
+    "storagePolicy": "existing_url_locator_digest_and_metadata_only",
+    "sourceBodiesStored": false,
+    "quoteTextsStored": false,
+    "carrierFilesStored": false,
+    "pageImagesStored": false,
+    "transcriptionCarrier": {
+      "provider": "Chinese Wikisource",
+      "pageId": 340255,
+      "pageTitle": "滴天髓闡微",
+      "permanentUrl": "https://zh.wikisource.org/w/index.php?title=%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE&oldid=2600158",
+      "revisionId": 2600158,
+      "parentRevisionId": 1163183,
+      "revisionTimestamp": "2025-09-25T13:22:02Z",
+      "mediaWikiSha1": "6ac3dc412881525c2c0544b75e51512cc0daa573",
+      "contentModel": "wikitext",
+      "contentFormat": "text/x-wiki",
+      "storagePolicy": "link_only"
+    },
+    "quoteLocator": {
+      "quoteCandidateId": "dtt-yueling-minimal-v1",
+      "conceptualTopics": [
+        "strength.yueling_exact_quote"
+      ],
+      "heading": "十五、月令",
+      "rawRevisionLineStart": 2391,
+      "rawRevisionLineEnd": 2391,
+      "rawCharacterStartZeroBased": 38616,
+      "rawCharacterEndExclusive": 38628,
+      "quoteCharacters": 12,
+      "quoteUtf8Bytes": 36,
+      "quoteSha256": "03df5322e1504e142e673e7d11c2d0ad4e08fa84ddbdea3d5c75532d520cc3b9",
+      "quoteOccurrenceInRawRevision": "unique",
+      "quoteTextStored": false
+    },
+    "carrierLocators": [
+      {
+        "anchorId": "dtt-chanwei-ssid-11335994-pages-170-176-facsimile-v1",
+        "provider": "Wikimedia Commons",
+        "carrierFilePageId": 125728441,
+        "carrierFileTitle": "File:SSID-11335994 滴天髓闡微.pdf",
+        "carrierDescriptionUrl": "https://commons.wikimedia.org/wiki/File:SSID-11335994_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.pdf",
+        "carrierMediaWikiSha1": "2d2e1502325c5f026be0f5618d54d8e9c254c232",
+        "carrierSha256": "d6a7d1daf6513ce9fb9940ff8331b96804c10cdafbeac00d4d3d0a37229e1803",
+        "carrierBytes": 14751242,
+        "carrierPageCount": 516,
+        "carrierMime": "application/pdf",
+        "storagePolicy": "link_only",
+        "pageLocator": {
+          "pageRefId": "dtt-ssid-11335994-pdf-page-170",
+          "scanPageNumber": 170,
+          "printedPageLabel": "二八",
+          "visibleHeading": "月令",
+          "pageUrl": "https://commons.wikimedia.org/wiki/File:SSID-11335994_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.pdf?page=170"
+        },
+        "collationCandidate": {
+          "collationCandidateId": "dtt-yueling-ssid-11335994-page-170-normalized-collation-v1",
+          "collationDigest": "154645461e0b47de7a04c660f7f56a89493e8ce8722fc6041f5baabaff936bc9",
+          "transcriptionQuoteSha256": "03df5322e1504e142e673e7d11c2d0ad4e08fa84ddbdea3d5c75532d520cc3b9",
+          "carrierGlyphSequenceSha256": "23440d78a05ca6d7c97d3c45261f8f4970a5a4fae6b5b90fa46e7c3204b3fe28",
+          "transcriptionGlyphSequenceSha256": "53d755230c068c883d93a77eae1f216e050a56cd57ac1021710a65df12c5e159",
+          "normalizedSequenceSha256": "53d755230c068c883d93a77eae1f216e050a56cd57ac1021710a65df12c5e159",
+          "normalizedSequenceCharacters": 11,
+          "exactGlyphSequenceEqual": false,
+          "humanCollatorAttestations": [],
+          "domainExpertReviewIds": [],
+          "rightsEffect": "none",
+          "bindingFreezeEffect": "none"
+        }
+      },
+      {
+        "anchorId": "dtt-chanwei-cadal-07005210-pages-178-184-facsimile-v1",
+        "provider": "Wikimedia Commons",
+        "carrierFilePageId": 126125545,
+        "carrierFileTitle": "File:CADAL07005210 滴天髓闡微.djvu",
+        "carrierDescriptionUrl": "https://commons.wikimedia.org/wiki/File:CADAL07005210_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.djvu",
+        "carrierMediaWikiSha1": "e73a24aee3cfc28f22d39e795b13fe76a5a995ad",
+        "carrierSha256": "1d0a16f528ed3074cdefad33b2d2f9233a47199cf88a8b02001c897e16996e60",
+        "carrierBytes": 17912324,
+        "carrierPageCount": 521,
+        "carrierMime": "image/vnd.djvu",
+        "storagePolicy": "link_only",
+        "pageLocator": {
+          "pageRefId": "dtt-cadal-07005210-djvu-page-178",
+          "scanPageNumber": 178,
+          "printedPageLabel": "二八",
+          "visibleHeading": "月令",
+          "pageUrl": "https://commons.wikimedia.org/wiki/File:CADAL07005210_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.djvu?page=178"
+        },
+        "collationCandidate": {
+          "collationCandidateId": "dtt-yueling-cadal-07005210-page-178-normalized-collation-v1",
+          "collationDigest": "b4ef49ed4c0369c12c97137370481059860068d068444a00f8b552a54adbc5d0",
+          "transcriptionQuoteSha256": "03df5322e1504e142e673e7d11c2d0ad4e08fa84ddbdea3d5c75532d520cc3b9",
+          "carrierGlyphSequenceSha256": "23440d78a05ca6d7c97d3c45261f8f4970a5a4fae6b5b90fa46e7c3204b3fe28",
+          "transcriptionGlyphSequenceSha256": "53d755230c068c883d93a77eae1f216e050a56cd57ac1021710a65df12c5e159",
+          "normalizedSequenceSha256": "53d755230c068c883d93a77eae1f216e050a56cd57ac1021710a65df12c5e159",
+          "normalizedSequenceCharacters": 11,
+          "exactGlyphSequenceEqual": false,
+          "humanCollatorAttestations": [],
+          "domainExpertReviewIds": [],
+          "rightsEffect": "none",
+          "bindingFreezeEffect": "none"
+        }
+      }
+    ]
+  },
+  "rightsEvidenceProjection": {
+    "workLayer": {
+      "sourceUrl": "https://zh.wikisource.org/w/index.php?title=%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE&oldid=2600158",
+      "pageSpecificNoticeObservation": "rendered_pd_old_dependency_observed_not_oldid_main_slot_literal",
+      "status": "candidate_only_not_adjudicated",
+      "jurisdictionAssessment": null,
+      "evidenceRefs": [
+        "https://zh.wikisource.org/w/index.php?title=%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE&oldid=2600158"
+      ]
+    },
+    "transcriptionLayer": {
+      "provider": "Chinese Wikisource",
+      "pageId": 340255,
+      "revisionId": 2600158,
+      "termsPolicyIds": [
+        "wmf-terms-r554823",
+        "cc-by-sa-4.0-legal-code"
+      ],
+      "status": "terms_observed_not_cleared",
+      "evidenceRefs": [
+        "https://zh.wikisource.org/w/index.php?title=%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE&oldid=2600158",
+        "https://foundation.wikimedia.org/w/index.php?title=Policy%3ATerms_of_Use&oldid=554823#7._Licensing_of_Content",
+        "https://creativecommons.org/licenses/by-sa/4.0/legalcode"
+      ]
+    },
+    "carrierLayers": [
+      {
+        "anchorId": "dtt-chanwei-ssid-11335994-pages-170-176-facsimile-v1",
+        "carrierFilePageId": 125728441,
+        "dynamicCarrierDescriptionUrl": "https://commons.wikimedia.org/wiki/File:SSID-11335994_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.pdf",
+        "dynamicCarrierDescriptionUrlRole": "discovery_only_not_fixed_rights_evidence",
+        "dynamicCarrierDescriptionUrlCountsAsFixedRightsEvidence": false,
+        "dynamicEvidenceRefs": [
+          "https://commons.wikimedia.org/wiki/File:SSID-11335994_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.pdf",
+          "https://commons.wikimedia.org/w/index.php?title=Commons%3AReusing_content_outside_Wikimedia&oldid=1259943424"
+        ],
+        "dynamicEvidenceRefsRole": "discovery_and_policy_context_only_not_fixed_carrier_rights_evidence",
+        "dynamicEvidenceRefsCountAsFixedRightsEvidence": false,
+        "carrierMediaWikiSha1": "2d2e1502325c5f026be0f5618d54d8e9c254c232",
+        "carrierSha256": "d6a7d1daf6513ce9fb9940ff8331b96804c10cdafbeac00d4d3d0a37229e1803",
+        "fixedFilePageRevisionId": 708090379,
+        "fixedFilePageRevisionUrl": "https://commons.wikimedia.org/w/index.php?title=File%3ASSID-11335994%20%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.pdf&oldid=708090379",
+        "fixedFilePageRevisionTimestamp": "2022-11-20T09:29:18Z",
+        "fixedFilePageMainSlotSha256": "55d405f7cc909c4ee2f356e3bacd7da2903bc759596e6ab1cae13b58014fbc05",
+        "fixedRevisionEvidenceRole": "fixed_revision_locator_for_rights_review_not_rights_or_legal_clearance",
+        "fixedRevisionCountsAsRightsClearance": false,
+        "noticeState": "pd_scan_top_level_observed_not_adjudicated",
+        "status": "notice_observed_not_cleared"
+      },
+      {
+        "anchorId": "dtt-chanwei-cadal-07005210-pages-178-184-facsimile-v1",
+        "carrierFilePageId": 126125545,
+        "dynamicCarrierDescriptionUrl": "https://commons.wikimedia.org/wiki/File:CADAL07005210_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.djvu",
+        "dynamicCarrierDescriptionUrlRole": "discovery_only_not_fixed_rights_evidence",
+        "dynamicCarrierDescriptionUrlCountsAsFixedRightsEvidence": false,
+        "dynamicEvidenceRefs": [
+          "https://commons.wikimedia.org/wiki/File:CADAL07005210_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.djvu",
+          "https://commons.wikimedia.org/w/index.php?title=Commons%3AReusing_content_outside_Wikimedia&oldid=1259943424"
+        ],
+        "dynamicEvidenceRefsRole": "discovery_and_policy_context_only_not_fixed_carrier_rights_evidence",
+        "dynamicEvidenceRefsCountAsFixedRightsEvidence": false,
+        "carrierMediaWikiSha1": "e73a24aee3cfc28f22d39e795b13fe76a5a995ad",
+        "carrierSha256": "1d0a16f528ed3074cdefad33b2d2f9233a47199cf88a8b02001c897e16996e60",
+        "fixedFilePageRevisionId": 1104458375,
+        "fixedFilePageRevisionUrl": "https://commons.wikimedia.org/w/index.php?title=File%3ACADAL07005210%20%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.djvu&oldid=1104458375",
+        "fixedFilePageRevisionTimestamp": "2025-10-24T20:27:06Z",
+        "fixedFilePageMainSlotSha256": "30194bbd8c92409dc8efb02f536b0909a6b29fa793528bc6ac81063bb04bc001",
+        "fixedRevisionEvidenceRole": "fixed_revision_locator_for_rights_review_not_rights_or_legal_clearance",
+        "fixedRevisionCountsAsRightsClearance": false,
+        "noticeState": "pd_old_top_level_observed_without_pd_scan_template_not_adjudicated",
+        "status": "notice_observed_not_cleared"
+      }
+    ],
+    "distributionPolicy": "link_only",
+    "legalConclusion": "not_established"
+  },
+  "reconciliationProjection": {
+    "reconciliationId": "hakimi.bazi.dtt-notice-reconciliation/2.0.0",
+    "reconciliationDigest": "2a47fc6fe281a4362c36dfc67c2a6dee195b5b069065ffc0e86ac1afcd7aa8a0",
+    "candidateProjectionResolved": true,
+    "candidateNoticeProjectionReconciliationPassed": true,
+    "formalAdmissionPromotionBlocked": true,
+    "promotionBlocked": true,
+    "activeAdmissionEffect": "none",
+    "distributionPolicy": "link_only",
+    "noticeApplicabilityEstablished": false,
+    "rightsLegalConclusionEstablished": false
+  },
+  "readinessProjection": {
+    "ledgerId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.9.0",
+    "ledgerDigest": "42930e63cb0960df969f5fe059617eb96a8ec9bd857c486cd4b33a28d37a8ae1",
+    "bindingId": "binding:dtt:month-command",
+    "evidenceSubjectId": "bazi.strength.binding.dtt.month-command.v1",
+    "bindingRequired": 12,
+    "bindingFrozenVerified": 0,
+    "independentDomainReviewsRequired": 2,
+    "independentDomainReviewsVerified": 0,
+    "rightsLegalReviewsVerified": 0,
+    "formalKnowledgeDocumentCount": 0,
+    "formalSourceRightsRecordCount": 0,
+    "formalSourceCarrierRecordCount": 0,
+    "sourceBundleComplete": false,
+    "rightsBundleComplete": false,
+    "expertReviewBundleComplete": false,
+    "releaseReady": false
+  },
+  "reviewProtocol": {
+    "roles": [
+      {
+        "allowedScope": [
+          "work_edition_and_carrier_identity",
+          "revision_and_page_locator",
+          "facsimile_correspondence_and_collation"
+        ],
+        "forbiddenScope": [
+          "rights_legal_conclusion",
+          "dtt_domain_truth",
+          "formal_admission_or_release_authorization"
+        ],
+        "roleId": "bibliographic_collation",
+        "seatsRequired": 1
+      },
+      {
+        "allowedScope": [
+          "work_transcription_and_carrier_notice_applicability",
+          "license_and_attribution_obligations",
+          "redistribution_and_legal_disposition"
+        ],
+        "forbiddenScope": [
+          "bibliographic_or_collation_identity_by_assertion",
+          "dtt_domain_truth",
+          "formal_admission_or_release_authorization"
+        ],
+        "roleId": "rights_legal",
+        "seatsRequired": 1
+      },
+      {
+        "allowedScope": [
+          "month_command_source_relevance",
+          "traditional_context_and_school_scope",
+          "counterexamples_disagreement_and_uncertainty"
+        ],
+        "forbiddenScope": [
+          "bibliographic_or_collation_identity",
+          "rights_legal_conclusion",
+          "formal_admission_or_release_authorization"
+        ],
+        "roleId": "dtt_domain_expert",
+        "seatsRequired": 2
+      }
+    ],
+    "seats": [
+      {
+        "attestations": [],
+        "responses": [],
+        "reviewerIds": [],
+        "roleId": "bibliographic_collation",
+        "seatId": "bibliographic-collation-1",
+        "status": "vacant_not_started"
+      },
+      {
+        "attestations": [],
+        "responses": [],
+        "reviewerIds": [],
+        "roleId": "rights_legal",
+        "seatId": "rights-legal-1",
+        "status": "vacant_not_started"
+      },
+      {
+        "attestations": [],
+        "responses": [],
+        "reviewerIds": [],
+        "roleId": "dtt_domain_expert",
+        "seatId": "domain-expert-a",
+        "status": "vacant_not_started"
+      },
+      {
+        "attestations": [],
+        "responses": [],
+        "reviewerIds": [],
+        "roleId": "dtt_domain_expert",
+        "seatId": "domain-expert-b",
+        "status": "vacant_not_started"
+      }
+    ],
+    "reviewItems": [
+      {
+        "attestationRefs": [],
+        "itemId": "bib-01-work-identity",
+        "responseRefs": [],
+        "roleId": "bibliographic_collation",
+        "status": "open_unreviewed",
+        "subject": "work_identity"
+      },
+      {
+        "attestationRefs": [],
+        "itemId": "bib-02-edition-identity",
+        "responseRefs": [],
+        "roleId": "bibliographic_collation",
+        "status": "open_unreviewed",
+        "subject": "edition_identity"
+      },
+      {
+        "attestationRefs": [],
+        "itemId": "bib-03-transcription-revision",
+        "responseRefs": [],
+        "roleId": "bibliographic_collation",
+        "status": "open_unreviewed",
+        "subject": "transcription_revision_locator"
+      },
+      {
+        "attestationRefs": [],
+        "itemId": "bib-04-ssid-carrier",
+        "responseRefs": [],
+        "roleId": "bibliographic_collation",
+        "status": "open_unreviewed",
+        "subject": "ssid_carrier_identity"
+      },
+      {
+        "attestationRefs": [],
+        "itemId": "bib-05-cadal-carrier",
+        "responseRefs": [],
+        "roleId": "bibliographic_collation",
+        "status": "open_unreviewed",
+        "subject": "cadal_carrier_identity"
+      },
+      {
+        "attestationRefs": [],
+        "itemId": "bib-06-two-collations",
+        "responseRefs": [],
+        "roleId": "bibliographic_collation",
+        "status": "open_unreviewed",
+        "subject": "two_normalized_collation_candidates"
+      },
+      {
+        "attestationRefs": [],
+        "itemId": "rights-01-work-notice",
+        "responseRefs": [],
+        "roleId": "rights_legal",
+        "status": "open_unreviewed",
+        "subject": "work_notice_applicability"
+      },
+      {
+        "attestationRefs": [],
+        "itemId": "rights-02-transcription-terms",
+        "responseRefs": [],
+        "roleId": "rights_legal",
+        "status": "open_unreviewed",
+        "subject": "transcription_terms_and_attribution"
+      },
+      {
+        "attestationRefs": [],
+        "itemId": "rights-03-carrier-notices",
+        "responseRefs": [],
+        "roleId": "rights_legal",
+        "status": "open_unreviewed",
+        "subject": "carrier_notice_applicability"
+      },
+      {
+        "attestationRefs": [],
+        "itemId": "rights-04-redistribution",
+        "responseRefs": [],
+        "roleId": "rights_legal",
+        "status": "open_unreviewed",
+        "subject": "redistribution_and_legal_disposition"
+      },
+      {
+        "attestationRefs": [],
+        "itemId": "domain-01-month-command",
+        "responseRefs": [],
+        "roleId": "dtt_domain_expert",
+        "status": "open_unreviewed",
+        "subject": "month_command_relevance_and_scope"
+      },
+      {
+        "attestationRefs": [],
+        "itemId": "domain-02-independent-disposition",
+        "responseRefs": [],
+        "roleId": "dtt_domain_expert",
+        "status": "open_unreviewed",
+        "subject": "independent_opinions_and_disagreement"
+      }
+    ],
+    "domainSeatItemResponseRequirements": [
+      {
+        "attestationRefs": [],
+        "itemId": "domain-01-month-command",
+        "principalId": null,
+        "responseRefs": [],
+        "seatId": "domain-expert-a",
+        "status": "required_unassigned_unanswered"
+      },
+      {
+        "attestationRefs": [],
+        "itemId": "domain-02-independent-disposition",
+        "principalId": null,
+        "responseRefs": [],
+        "seatId": "domain-expert-a",
+        "status": "required_unassigned_unanswered"
+      },
+      {
+        "attestationRefs": [],
+        "itemId": "domain-01-month-command",
+        "principalId": null,
+        "responseRefs": [],
+        "seatId": "domain-expert-b",
+        "status": "required_unassigned_unanswered"
+      },
+      {
+        "attestationRefs": [],
+        "itemId": "domain-02-independent-disposition",
+        "principalId": null,
+        "responseRefs": [],
+        "seatId": "domain-expert-b",
+        "status": "required_unassigned_unanswered"
+      }
+    ],
+    "domainPrincipalSeparation": {
+      "seatIds": [
+        "domain-expert-a",
+        "domain-expert-b"
+      ],
+      "requiredItemIdsPerSeat": [
+        "domain-01-month-command",
+        "domain-02-independent-disposition"
+      ],
+      "eachSeatMustAnswerSameTwoItems": true,
+      "principalsMustBeDistinct": true,
+      "samePrincipalMayOccupyBothSeats": false,
+      "principalIds": [],
+      "principalAssignmentsOccupied": 0,
+      "principalDistinctnessVerified": false
+    },
+    "samePacketAndQuestionSetRequired": true,
+    "domainOpinionsMustBeIndependent": true,
+    "originalsMustRemainImmutable": true,
+    "supplementsAndReconciliationMustBeSeparateRecords": true,
+    "automatedWinnerSelectionAllowed": false,
+    "unresolvedDisagreementDisposition": "defer_or_reject"
+  },
+  "gateSummary": {
+    "reviewRolesDefined": 3,
+    "reviewerSeatsRequired": 4,
+    "reviewerSeatsOccupied": 0,
+    "reviewItemsRequired": 12,
+    "reviewItemsCompleted": 0,
+    "domainSeatItemRequirementsDefined": 4,
+    "domainSeatItemAssignmentsOccupied": 0,
+    "domainSeatItemCompletions": 0,
+    "bindingRequired": 12,
+    "bindingFrozenVerified": 0,
+    "independentDomainReviewsRequired": 2,
+    "independentDomainReviewsVerified": 0,
+    "bibliographicCollationReviewsVerified": 0,
+    "rightsLegalReviewsVerified": 0,
+    "formalAdmissionComplete": false,
+    "rightsCleared": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "releaseReady": false
+  },
+  "authorityBoundary": {
+    "formalAdmissionAuthorized": false,
+    "rightsLegalConclusionEstablished": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "integrityBoundary": {
+    "stableSingleFileReadsUsed": true,
+    "sourceV17ExactRawDigestAndStructureReextracted": true,
+    "rightsV13ExactRawDigestAndStructureReextracted": true,
+    "reconciliationV2ExactRawDigestAndStructureReextracted": true,
+    "reconciliationV2StaleHistoricalPrivateBrandConsumed": false,
+    "readinessV19CurrentPrivateBrandConsumed": true,
+    "publicEvidenceV1CurrentPrivateBrandConsumed": true,
+    "callerSuppliedParentObjectsAcceptedAsAuthority": false,
+    "persistedPacketReloadRequiredForCapability": true,
+    "cloneOrSelfSignedObjectConfersCapability": false,
+    "packetDigestIsDigitalSignature": false,
+    "signerIdentityEstablished": false,
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "intervalMutationExcludedAcrossFiles": false,
+    "abaExcluded": false
+  },
+  "doesNotEstablish": [
+    "source_body_or_quote_text",
+    "exact_facsimile_collation_or_bibliographic_identity",
+    "work_edition_transcription_or_carrier_rights",
+    "notice_applicability_or_legal_conclusion",
+    "formal_source_rights_source_carrier_or_knowledge_document",
+    "binding_freeze_or_content_truth",
+    "reviewer_identity_credential_scope_or_independence",
+    "expert_opinion_expert_truth_or_dtt_authority",
+    "cross_file_atomic_snapshot_interval_integrity_or_aba_exclusion",
+    "release_readiness_public_deployment_or_expert_claims_authority"
+  ],
+  "packetDigest": "c1f92bbb836875b50458e1a3c81bf1f2c1aa4a654fa8a9a9f66a7198f71a7d8e"
+}

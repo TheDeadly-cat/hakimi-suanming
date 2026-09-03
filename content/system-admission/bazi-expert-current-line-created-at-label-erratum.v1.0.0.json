@@ -1,0 +1,191 @@
+{
+  "additionalIssueEvidence": [
+    {
+      "digest": "ea16c7ae69271c2a4ea5902e4ec8b9ff6df224c5d58433b07a56004a2c46e2de",
+      "digestField": "childDigest",
+      "fullLoaderImportedByErratum": false,
+      "fullLoaderInvokedByErratum": false,
+      "id": "hakimi.system-admission/four-system-current-status-observation-child/2.3.0",
+      "idField": "childId",
+      "observedCreatedAt": "2026-09-01T11:00:00.000Z",
+      "path": "content/system-admission/four-system-current-status-observation-child.v2.3.0.json",
+      "rawBytes": 17398,
+      "rawSha256": "7f6a12f52cf035c2138c17c6f58855db03ba686c7c71ebf2221021461387f1b7",
+      "role": "additional_inversion_parent_four_system_v2_3"
+    },
+    {
+      "digest": "bc685bb8da2f4a285eda645ab883da002c526cc80d800f2406fe9e0386a04840",
+      "digestField": "childDigest",
+      "fullLoaderImportedByErratum": false,
+      "fullLoaderInvokedByErratum": false,
+      "id": "hakimi.system-admission/four-system-current-status-observation-child/2.4.0",
+      "idField": "childId",
+      "observedCreatedAt": "2026-09-01T08:17:44.862Z",
+      "path": "content/system-admission/four-system-current-status-observation-child.v2.4.0.json",
+      "rawBytes": 16791,
+      "rawSha256": "fa70f8dbe13cacb0a4af282cfed4055a088d9c29d3d76fbb85a4bf52aa737e58",
+      "role": "additional_inversion_consumer_four_system_v2_4"
+    }
+  ],
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertIdentityCredentialsIndependenceEstablished": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsBundleComplete": false,
+    "rightsLegalConclusionEstablished": false
+  },
+  "boundArtifacts": [
+    {
+      "digest": "f7e7a4a6b3580e451e06de8af29cf8c3b834b05234f9f97ec343a5b8ab1641db",
+      "digestField": "childDigest",
+      "fullLoaderImportedByErratum": false,
+      "fullLoaderInvokedByErratum": false,
+      "id": "hakimi.bazi.expert-current-line-zero-instance-observation-child/1.0.0",
+      "idField": "childId",
+      "observedCreatedAt": "2026-09-01T14:00:00.000Z",
+      "path": "content/system-admission/bazi-expert-current-line-zero-instance-observation-child.v1.0.0.json",
+      "rawBytes": 9122,
+      "rawSha256": "c21d07363701fa15ad57ccabf333f2dfcb5200b816c3772fbc3ae830c5c5e3ce",
+      "role": "affected_old_expert_zero_instance_child"
+    },
+    {
+      "digest": "f7ae6009bea62156a82de86ee0be3c353b022035194881001a913066ed8c4b05",
+      "digestField": "receiptDigest",
+      "fullLoaderImportedByErratum": false,
+      "fullLoaderInvokedByErratum": false,
+      "id": "hakimi.bazi.current-machine-identity-successor/1.0.0",
+      "idField": "successorId",
+      "observedCreatedAt": "2026-09-01T08:10:46.766Z",
+      "path": "content/system-admission/bazi-current-machine-identity-successor.v1.0.0.json",
+      "rawBytes": 30801,
+      "rawSha256": "9360655d17b23ea8c7c68e44af3177f8ccc72b350046d4f7dca5f8a8c83b717d",
+      "role": "direct_consumer_bazi_machine_identity_successor_v1"
+    },
+    {
+      "digest": "a3057d564024e6e5c52a01ab82b4bcc74cc863aea127b6556849b5dd7a2ee792",
+      "digestField": "childDigest",
+      "fullLoaderImportedByErratum": false,
+      "fullLoaderInvokedByErratum": false,
+      "id": "hakimi.system-admission/four-system-current-status-observation-child/2.8.0",
+      "idField": "childId",
+      "observedCreatedAt": "2026-09-01T11:54:00.000Z",
+      "path": "content/system-admission/four-system-current-status-observation-child.v2.8.0.json",
+      "rawBytes": 19327,
+      "rawSha256": "3e5181c53fbc8eddc6e57fce7c7c6bfb94a05ae5498c408b52198851f7580dea",
+      "role": "then_current_four_system_status_aggregate_exposing_affected_bazi_endpoint_at_erratum_observation"
+    }
+  ],
+  "correctedCreatedAt": null,
+  "createdAt": "2026-09-01T13:09:00.000Z",
+  "currentEndpointBoundary": {
+    "activeAdmissionEffect": "none",
+    "centralRegistryModified": false,
+    "defaultOrRuntimeIntegration": "absent",
+    "formalManifestModified": false,
+    "oldFrozenArtifactsModified": false,
+    "parentBacklinksAdded": false,
+    "replacesBaziMachineIdentitySuccessorAsCurrentEndpoint": false,
+    "replacesFourSystemStatusAggregateAsCurrentEndpoint": false,
+    "replacesOldExpertChildAsCurrentEndpoint": false
+  },
+  "doesNotEstablish": [
+    "a_correct_historical_created_at_or_actual_creation_order",
+    "trusted_time_external_timestamp_authority_signature_or_notary_receipt",
+    "a_repaired_or_replaced_current_expert_bazi_or_four_system_endpoint",
+    "real_expert_identity_credentials_scope_independence_opinion_or_truth",
+    "content_truth_source_or_rights_legal_closure",
+    "manifest_currentness_registry_currentness_or_formal_admission",
+    "browser_runtime_release_evidence_deployment_or_rollback_confirmation",
+    "release_readiness_public_release_public_deployment_or_expert_claims_authorization",
+    "cross_file_atomic_snapshot_mutation_epoch_interval_mutation_aba_or_replay_exclusion"
+  ],
+  "erratumDigest": "f16e24eb71145203d15eec73e1ddcd7ef5a375e349284597744a249dd47cc8cf",
+  "erratumId": "hakimi.bazi.expert-current-line-created-at-label-erratum/1.0.0",
+  "expertBoundary": {
+    "countsTowardExpertGate": false,
+    "credentialsVerified": 0,
+    "expertReviewBundleComplete": false,
+    "identitiesVerified": 0,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "originalOpinionsVerified": 0,
+    "pairwiseIndependenceAssessments": 0,
+    "realReviewerInstancesVerified": 0,
+    "scopesVerified": 0
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "cliOutputTrustedAttestation": false,
+    "crossFileAtomicSnapshot": false,
+    "endpointSnapshotOnly": true,
+    "hiddenPreloadExcluded": false,
+    "intervalMutationExcludedAcrossFiles": false,
+    "loaderIdentityEstablished": false,
+    "nodeRuntimeIdentityEstablished": false,
+    "replayExcluded": false,
+    "runtimeLauncherIdentityEstablished": false,
+    "sameHeldHandlePerArtifact": true,
+    "visibleCliGuardIsSecurityBoundary": false
+  },
+  "recordType": "bazi_expert_current_line_created_at_label_erratum_v1",
+  "releaseGovernance": {
+    "expertClaimsAuthorized": false,
+    "migrationId": null,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochBoundaryRequired": true,
+    "mutationEpochReceipt": null,
+    "publicDeploymentAuthorized": false,
+    "releaseIdentity": "legacy-v13",
+    "targetSchema": 13
+  },
+  "schemaVersion": "1.0.0",
+  "status": "append_only_time_label_erratum_no_endpoint_or_admission_effect",
+  "temporalLabelIssues": [
+    {
+      "actualCreationOrderEstablished": false,
+      "causeEstablished": false,
+      "chronologyMeaningWithdrawn": true,
+      "consumerCreatedAtLabel": "2026-09-01T08:10:46.766Z",
+      "consumerPath": "content/system-admission/bazi-current-machine-identity-successor.v1.0.0.json",
+      "correctedParentCreatedAt": null,
+      "issueId": "expert-child-v1-label-after-direct-consumer-v1-label",
+      "parentCreatedAtLabel": "2026-09-01T14:00:00.000Z",
+      "parentLabelLaterThanConsumerLabel": true,
+      "parentLabelLaterThanErratumUpperBoundOnSameUntrustedClock": true,
+      "parentPath": "content/system-admission/bazi-expert-current-line-zero-instance-observation-child.v1.0.0.json",
+      "relationship": "old_expert_child_is_direct_current_overlay_parent_of_bazi_successor_v1"
+    },
+    {
+      "actualCreationOrderEstablished": false,
+      "causeEstablished": false,
+      "chronologyMeaningWithdrawn": true,
+      "consumerCreatedAtLabel": "2026-09-01T08:17:44.862Z",
+      "consumerPath": "content/system-admission/four-system-current-status-observation-child.v2.4.0.json",
+      "correctedParentCreatedAt": null,
+      "issueId": "four-system-v2-3-label-after-direct-consumer-v2-4-label",
+      "parentCreatedAtLabel": "2026-09-01T11:00:00.000Z",
+      "parentLabelLaterThanConsumerLabel": true,
+      "parentLabelLaterThanErratumUpperBoundOnSameUntrustedClock": false,
+      "parentPath": "content/system-admission/four-system-current-status-observation-child.v2.3.0.json",
+      "relationship": "four_system_v2_3_is_direct_parent_of_four_system_v2_4"
+    }
+  ],
+  "timeBoundary": {
+    "correctedHistoricalInstantEstablished": false,
+    "createdAtClock": "untrusted_local_clock_label",
+    "createdAtUpperBoundObservedOnSameUntrustedLocalClock": "2026-09-01T13:09:44.233Z",
+    "crossArtifactTemporalOrderEstablished": false,
+    "externalTimeAuthorityEstablished": false,
+    "filesystemTimestampsUsedAsAuthority": false,
+    "monotonicClockEstablished": false,
+    "notaryReceiptEstablished": false,
+    "trustedTimestampEstablished": false
+  }
+}

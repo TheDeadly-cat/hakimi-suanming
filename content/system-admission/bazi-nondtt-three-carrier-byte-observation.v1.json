@@ -1,0 +1,387 @@
+{
+  "schemaVersion": 1,
+  "recordType": "bazi_nondtt_three_carrier_byte_observation_v1",
+  "observationId": "hakimi.bazi.nondtt-three-carrier-byte-observation/2026-08-31.1",
+  "status": "operator_recorded_public_read_only_point_in_time_three_carrier_bytes_verified_no_rights_adjudication",
+  "captureStartedAt": "2026-08-30T22:12:02.331Z",
+  "captureCompletedAt": "2026-08-30T22:13:09.886Z",
+  "access": "public_read_only_unauthenticated",
+  "producer": {
+    "path": "scripts/audit-bazi-nondtt-source-carrier-evidence-live.ps1",
+    "bytes": 38948,
+    "sha256": "bbd414d57e966332a93717879ebf375e261b9905fe3fbf0c36ecd4f721d28b93",
+    "requestedMode": "required",
+    "requestedModeCompleted": true
+  },
+  "parentArtifacts": {
+    "source": {
+      "path": "content/bazi-strength-source-binding-candidates.v1.6.0.json",
+      "bytes": 50427,
+      "sha256": "62f6a68b99246a802bcf2055aa09a8ac8113df37a7ede1c55d8a2ea64deaea98",
+      "ledgerId": "hakimi.bazi.strength.source-binding-candidates/1.6.0",
+      "ledgerDigest": "6f008058b282613fd131344206b27fccb1d80596bb49789f0554acdd69c1e44c"
+    },
+    "rights": {
+      "path": "content/bazi-strength-source-rights-candidates.v1.2.0.json",
+      "bytes": 23947,
+      "sha256": "678632a8875672f58bb5c9f1ec4a299a4f0c6e750b8ff4a02bfe4df889e1243a",
+      "ledgerId": "hakimi.bazi.strength.source-rights-candidates/1.2.0",
+      "ledgerDigest": "300e092c4913885cff626221b8734786128639c7d6cfd7c2be7bea2acc6bbefc"
+    },
+    "carrierReadiness": {
+      "path": "content/system-admission/bazi-source-carrier-record-readiness.v1.json",
+      "bytes": 27322,
+      "sha256": "d5624c796f715b3e4a9846714a036621a8ccc66d8e3433a91e7bf69beba291e9",
+      "ledgerId": "hakimi.bazi.source-carrier-record-readiness/1.0.0",
+      "ledgerDigest": "7b34f976c58b541895747177a2326af82241d76432acba3dbbd8fac2b68ad3c5"
+    }
+  },
+  "requestReceipts": {
+    "sourceRevisionBatch": {
+      "host": "zh.wikisource.org",
+      "httpStatus": 200,
+      "contentType": "application/json; charset=utf-8",
+      "requestStartedAt": "2026-08-30T22:12:02.393Z",
+      "requestCompletedAt": "2026-08-30T22:12:04.412Z",
+      "deliveredBodyBytes": 317062,
+      "deliveredBodySha256": "3f32067fade2175b0ce8f51904d6166af0d3950212f27bdeb3b705d074211785"
+    },
+    "carrierMetadataBatch": {
+      "host": "commons.wikimedia.org",
+      "httpStatus": 200,
+      "contentType": "application/json; charset=utf-8",
+      "requestStartedAt": "2026-08-30T22:12:06.226Z",
+      "requestCompletedAt": "2026-08-30T22:12:07.213Z",
+      "deliveredBodyBytes": 11831,
+      "deliveredBodySha256": "e7ed89e09b1103fd9f46b17176057610b4589eccd9526a2233397a7ba524a070"
+    }
+  },
+  "results": [
+    {
+      "candidateId": "smt-siku-v10-wikisource-r761703-candidate-v1",
+      "bindingId": "binding:smt-v10:whole-chart",
+      "evidenceSubjectId": "bazi.strength.binding.smt-v10.whole-chart.v1",
+      "sourceRevision": {
+        "pageId": 260849,
+        "revisionId": 761703,
+        "mediaWikiSha1": "43ac68d5e4a84bdfa98524557a8b3e9b3f1f8426",
+        "rawWikitextCharacters": 38959,
+        "rawWikitextUtf8Bytes": 106555,
+        "rawWikitextSha256": "0a20dc53a4156211b5c8ba89dbb6a8f07f056fde573e37699e28b021b6d026b6",
+        "quoteLocators": [
+          {
+            "quoteCandidateId": "smt-v10-yueling-minimal-v1",
+            "rawCharacterStartZeroBased": 236,
+            "rawCharacterEndExclusive": 252,
+            "quoteCharacters": 16,
+            "quoteUtf8Bytes": 48,
+            "quoteSha256": "b7f2c66c97d311fe3e1b3d1048dddbbcdafd5e71cfd4454f0b40ae89c3d4a53f",
+            "occurrenceCount": 1,
+            "quoteTextStored": false
+          },
+          {
+            "quoteCandidateId": "smt-v10-tougan-minimal-v1",
+            "rawCharacterStartZeroBased": 365,
+            "rawCharacterEndExclusive": 384,
+            "quoteCharacters": 19,
+            "quoteUtf8Bytes": 57,
+            "quoteSha256": "b652a600ae2db57b8035fb95c38c4fc67f45bd6cbf03e5b62ffbd5a6bbbcccee",
+            "occurrenceCount": 1,
+            "quoteTextStored": false
+          }
+        ],
+        "sourceBodyStored": false,
+        "quoteTextsStored": false
+      },
+      "workNotice": {
+        "observedTemplateNames": [
+          "Template:PD-old"
+        ],
+        "pageBodyStored": false,
+        "legalConclusion": "not_established"
+      },
+      "carrier": {
+        "anchorId": "smt-v10-gujin-volume-472-page-28-facsimile-v1",
+        "carrierFilePageId": 52325762,
+        "carrierFileTitle": "File:Gujin Tushu Jicheng, Volume 472 (1700-1725).djvu",
+        "currentFilePageRevisionId": 1262623897,
+        "currentFilePageParentRevisionId": 900367608,
+        "currentFilePageRevisionTimestamp": "2026-08-17T09:48:05Z",
+        "currentFilePageMediaWikiSha1": "726afc70706060ae0a71dff74e87c4feefa64599",
+        "currentFilePageWikitextUtf8Bytes": 969,
+        "currentFilePageWikitextSha256": "ec141bcf40151eb167d19c5a6ece4749651411a547aa693105af0755016b2644",
+        "pdScanTemplateObserved": true,
+        "watermarkTemplateObserved": false,
+        "licenseShortNameObserved": "Public domain",
+        "usageTermsObserved": "Public domain",
+        "attributionRequiredObserved": "false",
+        "copyrightedObserved": "False",
+        "noticeState": "commons_public_domain_metadata_observed_not_adjudicated",
+        "rawByte": {
+          "contentType": "image/vnd.djvu",
+          "contentLength": 21705448,
+          "etag": "78811ad9e8265e5db3c766bb479f5fc6",
+          "lastModified": "Sat, 13 Jan 2018 12:17:37 GMT",
+          "expectedBytes": 21705448,
+          "expectedSha256": "be4df89c53764fb0acf26224a47ddc445b403569dde104d283e1fb85768940f7",
+          "downloadedBytes": 21705448,
+          "downloadedSha256": "be4df89c53764fb0acf26224a47ddc445b403569dde104d283e1fb85768940f7",
+          "requestStartedAt": "2026-08-30T22:12:32.106Z",
+          "requestCompletedAt": "2026-08-30T22:12:46.446Z",
+          "httpStatus": 200,
+          "expectedIdentityMatched": true,
+          "rawByteVerificationStatus": "verified",
+          "temporaryFileDeletedAfterVerification": true
+        },
+        "workParseBodySha256": "7c0fe99a752dae48da8bf588c2cdadae5c4a5d27b1ea85abf412d59509f56ba5",
+        "carrierParseBodySha256": "e454cbb16258e1699cba67a4e9e656d04d761794db080bea7ca8cdeba63f0fcd",
+        "carrierFileStored": false,
+        "distributionPolicy": "link_only",
+        "workLayerCleared": false,
+        "editionOrTranscriptionLayerCleared": false,
+        "carrierLayerCleared": false,
+        "reproductionAllowed": false,
+        "quotationAllowed": false,
+        "redistributionAllowed": false,
+        "legalConclusion": "not_established"
+      }
+    },
+    {
+      "candidateId": "smt-v5-wikisource-r2706483-candidate-v1",
+      "bindingId": "binding:smt-v5:relative-relations",
+      "evidenceSubjectId": "bazi.strength.binding.smt-v5.relative-relations.v1",
+      "sourceRevision": {
+        "pageId": 335940,
+        "revisionId": 2706483,
+        "mediaWikiSha1": "cd03b24ebd1c63acc3a5b9c9b5f71cda3da9749f",
+        "rawWikitextCharacters": 10612,
+        "rawWikitextUtf8Bytes": 30616,
+        "rawWikitextSha256": "df0446bc9ff7651a91fc866de1eb4f86dec4b045b95cbbd777b1fec70e51f139",
+        "quoteLocators": [
+          {
+            "quoteCandidateId": "smt-v5-relative-relations-minimal-v1",
+            "rawCharacterStartZeroBased": 108,
+            "rawCharacterEndExclusive": 128,
+            "quoteCharacters": 20,
+            "quoteUtf8Bytes": 58,
+            "quoteSha256": "04b00701992b5a8c8e259ff0172de817420f3022dc37bdfe96efe47a1f84d444",
+            "occurrenceCount": 1,
+            "quoteTextStored": false
+          }
+        ],
+        "sourceBodyStored": false,
+        "quoteTextsStored": false
+      },
+      "workNotice": {
+        "observedTemplateNames": [],
+        "pageBodyStored": false,
+        "legalConclusion": "not_established"
+      },
+      "carrier": {
+        "anchorId": "smt-v5-gujin-volume-470-page-115-facsimile-v1",
+        "carrierFilePageId": 52325594,
+        "carrierFileTitle": "File:Gujin Tushu Jicheng, Volume 470 (1700-1725).djvu",
+        "currentFilePageRevisionId": 1108509159,
+        "currentFilePageParentRevisionId": 900367605,
+        "currentFilePageRevisionTimestamp": "2025-11-03T15:58:31Z",
+        "currentFilePageMediaWikiSha1": "acacd74ca6e8442878ff7a6abcb397316a988534",
+        "currentFilePageWikitextUtf8Bytes": 968,
+        "currentFilePageWikitextSha256": "bb65d5550c43002ff42a63054565ffeea9fb930e0344473b62c3263dc5bb127e",
+        "pdScanTemplateObserved": true,
+        "watermarkTemplateObserved": false,
+        "licenseShortNameObserved": "Public domain",
+        "usageTermsObserved": "Public domain",
+        "attributionRequiredObserved": "false",
+        "copyrightedObserved": "False",
+        "noticeState": "commons_public_domain_metadata_observed_not_adjudicated",
+        "rawByte": {
+          "contentType": "image/vnd.djvu",
+          "contentLength": 22564579,
+          "etag": "74c647cbe504bb6ff5c1a22bf9670f9f",
+          "lastModified": "Sat, 13 Jan 2018 12:17:37 GMT",
+          "expectedBytes": 22564579,
+          "expectedSha256": "64491cdc159a480686ddc568d6f08c5976e5ea5abc8b27816a5d71e19941c037",
+          "downloadedBytes": 22564579,
+          "downloadedSha256": "64491cdc159a480686ddc568d6f08c5976e5ea5abc8b27816a5d71e19941c037",
+          "requestStartedAt": "2026-08-30T22:12:54.451Z",
+          "requestCompletedAt": "2026-08-30T22:12:59.639Z",
+          "httpStatus": 200,
+          "expectedIdentityMatched": true,
+          "rawByteVerificationStatus": "verified",
+          "temporaryFileDeletedAfterVerification": true
+        },
+        "workParseBodySha256": "4b1f046644ae7843c6a03f6e1f6923bc8fefc56f0a6e2b148a2f3a3edb7a50ae",
+        "carrierParseBodySha256": "d05b65203ac7cc79d283f02329326e261048c7040c0ffccd64aa35462769d71d",
+        "carrierFileStored": false,
+        "distributionPolicy": "link_only",
+        "workLayerCleared": false,
+        "editionOrTranscriptionLayerCleared": false,
+        "carrierLayerCleared": false,
+        "reproductionAllowed": false,
+        "quotationAllowed": false,
+        "redistributionAllowed": false,
+        "legalConclusion": "not_established"
+      }
+    },
+    {
+      "candidateId": "yhzp-wikisource-r2593607-candidate-v1",
+      "bindingId": "binding:yhzp:hidden-listing",
+      "evidenceSubjectId": "bazi.strength.binding.yhzp.hidden-listing.v1",
+      "sourceRevision": {
+        "pageId": 343323,
+        "revisionId": 2593607,
+        "mediaWikiSha1": "9b1ba96079eb641d8663b48f698dbd1b7fbada70",
+        "rawWikitextCharacters": 61325,
+        "rawWikitextUtf8Bytes": 173237,
+        "rawWikitextSha256": "a4447be5d95eb073857cb8cba8f0e58a500de1c283016c76cfdedb0d1b2bb133",
+        "quoteLocators": [
+          {
+            "quoteCandidateId": "yhzp-hidden-stem-listing-minimal-v1",
+            "rawCharacterStartZeroBased": 831,
+            "rawCharacterEndExclusive": 927,
+            "quoteCharacters": 96,
+            "quoteUtf8Bytes": 288,
+            "quoteSha256": "a6f2f818d80148318a769754ff5bb0f74f5b68be96764bfb35843abbaa8fabc2",
+            "occurrenceCount": 1,
+            "quoteTextStored": false
+          }
+        ],
+        "sourceBodyStored": false,
+        "quoteTextsStored": false
+      },
+      "workNotice": {
+        "observedTemplateNames": [
+          "Template:PD-old"
+        ],
+        "pageBodyStored": false,
+        "legalConclusion": "not_established"
+      },
+      "carrier": {
+        "anchorId": "yhzp-nlc416-15jh007754-99036-page-54-facsimile-v1",
+        "carrierFilePageId": 130948304,
+        "carrierFileTitle": "File:NLC416-15jh007754-99036 淵海子平 子平真詮.pdf",
+        "currentFilePageRevisionId": 876206946,
+        "currentFilePageParentRevisionId": 752906729,
+        "currentFilePageRevisionTimestamp": "2024-05-13T14:50:26Z",
+        "currentFilePageMediaWikiSha1": "e8196298daf14b248309b7c069e3e58e9170c12f",
+        "currentFilePageWikitextUtf8Bytes": 578,
+        "currentFilePageWikitextSha256": "94f241befd841d13ed90b373e7a09265e27e9ee7db185a1ca9858b712de26495",
+        "pdScanTemplateObserved": true,
+        "watermarkTemplateObserved": true,
+        "licenseShortNameObserved": "Public domain",
+        "usageTermsObserved": "Public domain",
+        "attributionRequiredObserved": "false",
+        "copyrightedObserved": "False",
+        "noticeState": "commons_public_domain_metadata_observed_not_adjudicated",
+        "rawByte": {
+          "contentType": "application/pdf",
+          "contentLength": 6429274,
+          "etag": "c8d1268fc8dd425ab2d2618d23facd37",
+          "lastModified": "Fri, 21 Apr 2023 13:52:11 GMT",
+          "expectedBytes": 6429274,
+          "expectedSha256": "fca66e109aae987a5a04dc623e5168680d227542e13b56cdd7c39b62e55b605f",
+          "downloadedBytes": 6429274,
+          "downloadedSha256": "fca66e109aae987a5a04dc623e5168680d227542e13b56cdd7c39b62e55b605f",
+          "requestStartedAt": "2026-08-30T22:13:07.645Z",
+          "requestCompletedAt": "2026-08-30T22:13:09.867Z",
+          "httpStatus": 200,
+          "expectedIdentityMatched": true,
+          "rawByteVerificationStatus": "verified",
+          "temporaryFileDeletedAfterVerification": true
+        },
+        "workParseBodySha256": "1d1e77a645c4fcb6a27e61a44eb84be0e370ccc5ad70da06f5c01fb45bf1f16a",
+        "carrierParseBodySha256": "22479929b28a3a0a9aa7a7fd66d1a3a56e73c7497ecb91619711d0c6413077ba",
+        "carrierFileStored": false,
+        "distributionPolicy": "link_only",
+        "workLayerCleared": false,
+        "editionOrTranscriptionLayerCleared": false,
+        "carrierLayerCleared": false,
+        "reproductionAllowed": false,
+        "quotationAllowed": false,
+        "redistributionAllowed": false,
+        "legalConclusion": "not_established"
+      }
+    }
+  ],
+  "counts": {
+    "nonDttSourceCandidates": 3,
+    "sourceRevisionBodiesRevalidatedWithoutStorage": 3,
+    "quoteLocatorsRevalidatedWithoutTextStorage": 4,
+    "carrierFilePageRevisionsObserved": 3,
+    "carrierRawByteIdentitiesRevalidated": 3,
+    "downloadedCarrierBytes": 50699301,
+    "formalKnowledgeDocuments": 0,
+    "formalSourceRightsRecords": 0,
+    "formalSourceCarrierRecords": 0,
+    "materializationsVerified": 0,
+    "rightsAdjudicationReceipts": 0,
+    "verifiedNaturalPersonRightsReviewers": 0,
+    "bindingFrozenVerified": 0
+  },
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "storageBoundary": {
+    "sourceBodyStored": false,
+    "quoteTextsStored": false,
+    "carrierFilePageBodiesStored": false,
+    "carrierFilesStored": false,
+    "temporaryCarrierFilesDeletedAfterVerification": 3,
+    "distributionPolicy": "link_only"
+  },
+  "integrityBoundary": {
+    "operatorRecordedLivePublicResponses": true,
+    "responseBodyDigestsMechanicallyComputedAtRuntime": true,
+    "originalCarrierByteDigestsMechanicallyComputedAtRuntime": true,
+    "remotePublisherAuthenticityEstablished": false,
+    "tlsPeerIdentityAttestedIntoReceipt": false,
+    "wireBytesCaptured": false,
+    "signedTimestampEstablished": false,
+    "futureFreshnessEstablished": false,
+    "crossFileAtomicSnapshot": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false,
+    "observationDigestIsDigitalSignature": false
+  },
+  "rightsBoundary": {
+    "platformNoticeAccuracyVerified": false,
+    "jurisdictionalApplicabilityEstablished": false,
+    "workRightsEstablished": false,
+    "editionOrTranscriptionRightsEstablished": false,
+    "carrierRightsEstablished": false,
+    "reproductionAllowed": false,
+    "quotationAllowed": false,
+    "redistributionAllowed": false,
+    "rightsLegalConclusionEstablished": false
+  },
+  "authorityBoundary": {
+    "activeAdmissionEffect": "none",
+    "sourceIdentityBeyondObservedBytesEstablished": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "sourceBundleComplete": false,
+    "rightsBundleComplete": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "doesNotEstablish": [
+    "publisher_authenticity_or_network_provenance",
+    "work_edition_transcription_or_carrier_legal_clearance",
+    "platform_notice_accuracy_or_jurisdictional_applicability",
+    "reproduction_quotation_or_redistribution_permission",
+    "formal_source_rights_or_carrier_record",
+    "source_body_quote_text_or_carrier_storage",
+    "content_truth_or_expert_truth",
+    "binding_freeze",
+    "cross_file_atomic_snapshot_mutation_epoch_interval_mutation_or_aba_exclusion",
+    "release_readiness_or_public_release_authorization"
+  ],
+  "observationDigest": "b2d4d98e94c6bc1c5446d03905f0f24884b55c966c4dd90ed7701ce52f8573dd"
+}

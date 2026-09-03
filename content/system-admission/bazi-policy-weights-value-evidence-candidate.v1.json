@@ -1,0 +1,257 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "bazi_policy_weights_value_evidence_candidate_v1",
+  "candidateId": "hakimi.bazi/policy-weights-value-evidence-candidate/1.0.0",
+  "status": "candidate_only_current_repository_values_observed_not_freeze_eligible",
+  "createdAt": "2026-08-29T00:00:00.000Z",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "mutationEpochRequiredBeforeAnyFutureFreeze": true,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "scopeBoundary": {
+    "phase": "C_source_rights_and_binding_governance",
+    "childScope": "binding_policy_weights_three_value_subjects_only",
+    "candidateOnly": true,
+    "newBindingIdentityCreated": false,
+    "formalEvidenceSubjectRegistrationPerformed": false,
+    "domainManifestIntegrated": false,
+    "centralRegistryIntegrated": false,
+    "parentLedgerResigned": false,
+    "formalLifecycleIntegrationAssessed": false
+  },
+  "observationBoundary": {
+    "heldFileHandleReads": true,
+    "pathAndDirectoryChainRevalidated": true,
+    "perFileHashParseAndAstInspectionUseSameBuffer": true,
+    "candidateJsonParseUsesHeldHandleBuffer": true,
+    "endpointSnapshotOnly": true,
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false,
+    "stableExecutableSyntaxProjectionObserved": true,
+    "generalControlFlowEquivalenceMechanicallyEstablished": false,
+    "generalDataFlowEquivalenceMechanicallyEstablished": false,
+    "runtimeExecutionObserved": false
+  },
+  "policyBinding": {
+    "bindingId": "binding:policy:weights",
+    "evidenceSubjectId": "bazi.strength.binding.policy.weights.v1",
+    "engineeringCandidateId": "hakimi-strength-weights-0.1.0-engineering-candidate-v1",
+    "sourceId": "hakimi-strength-policy-0.1.0",
+    "policyVersion": "hakimi.bazi.strength_policy/0.1.0",
+    "order": 4,
+    "originType": "project_engineering_heuristic",
+    "authorityBoundary": "engineering_definition_only_no_classical_or_expert_authority",
+    "valueSubjectIds": [
+      "bazi.engineering.weights.values.v1",
+      "bazi.engineering.weights.dispatch.v1",
+      "bazi.engineering.weights.guard-and-consumers.v1"
+    ]
+  },
+  "basisArtifacts": [
+    {
+      "path": "content/bazi-strength-engineering-binding-candidates.v1.json",
+      "role": "engineering_binding_candidate_parent",
+      "bytes": 21712,
+      "sha256": "95154d55d9e368351f5a69a1fa2ff63a51ba946d33a800dbd1f2460d9ac97b2f",
+      "heldFileHandleRead": true,
+      "hashAndInspectionUseSameBuffer": true
+    },
+    {
+      "path": "content/system-admission/bazi-engineering-binding-value-subject-gaps.v1.json",
+      "role": "engineering_value_subject_gap_parent",
+      "bytes": 52073,
+      "sha256": "5c7a999738200b55f5e3e79a3ff7b2c73f59d8af61846046d26ea1e31987c4c0",
+      "heldFileHandleRead": true,
+      "hashAndInspectionUseSameBuffer": true
+    },
+    {
+      "path": "content/system-admission/bazi-binding-freeze-requirements.v1.json",
+      "role": "binding_freeze_state_parent",
+      "bytes": 26038,
+      "sha256": "662c91e6269d5e860a0d207185680ea7c7b752f24e313859c0d987cb5b446201",
+      "heldFileHandleRead": true,
+      "hashAndInspectionUseSameBuffer": true
+    },
+    {
+      "path": "packages/bazi-interpretation/src/strength-policy.ts",
+      "role": "policy_weight_value_and_dispatch_source",
+      "bytes": 10905,
+      "sha256": "795709298542773459a73cd8a63a6824d3076bbdedf6a157c0652d25446486f1",
+      "heldFileHandleRead": true,
+      "hashAndInspectionUseSameBuffer": true
+    },
+    {
+      "path": "packages/bazi-interpretation/src/strength-assessment-core.ts",
+      "role": "policy_weight_direct_consumer_source",
+      "bytes": 8559,
+      "sha256": "bbe6510c5cc0500efc8bb3af45efc1c344a5159f35c8fe5fca3aae3dab156e3b",
+      "heldFileHandleRead": true,
+      "hashAndInspectionUseSameBuffer": true
+    }
+  ],
+  "parentLedgerRefs": {
+    "engineeringCandidateLedgerId": "hakimi.bazi.strength.engineering-binding-candidates/1.0.0",
+    "engineeringCandidateLedgerDigest": "05ce9c6d9c03822cf246b0406d15616e8c4a6938650296135142827a00a5a28e",
+    "valueSubjectGapLedgerId": "hakimi.bazi.engineering_binding_value_subject_gaps/1.0.0",
+    "valueSubjectGapLedgerDigest": "7a03874b6009928367bf8c5aa60a1312d519d0f8c4ee339c83bc7a40f0b8e81d",
+    "freezeRequirementsLedgerId": "hakimi.bazi.strength.binding-freeze-readiness/1.5.0",
+    "freezeRequirementsLedgerDigest": "feea402079cab44a5d3e0855f867114684da96e4005343a1b1a7cdc75fbee9ad",
+    "parentLedgersResigned": false
+  },
+  "valueEvidenceRecords": [
+    {
+      "valueSubjectId": "bazi.engineering.weights.values.v1",
+      "kind": "declared_policy_values",
+      "repositoryProjection": {
+        "monthCommand": 4,
+        "visibleStem": 2,
+        "firstHiddenStem": 2,
+        "otherHiddenStem": 1
+      },
+      "projectionDigest": "7321a50bd8d46a0c4d5dce816544c6999c1e7e356bf4a33262b38f7408f02fd4",
+      "observationState": "repository_values_observed_engineering_rationale_unfrozen",
+      "producerRefs": [
+        "packages/bazi-interpretation/src/strength-policy.ts#BAZI_STRENGTH_FACTOR_WEIGHTS"
+      ],
+      "consumerRefs": [],
+      "sourceOrRationaleRefs": [],
+      "syntaxProjectionMechanicallyObserved": true,
+      "generalControlFlowEquivalenceMechanicallyEstablished": false,
+      "generalDataFlowEquivalenceMechanicallyEstablished": false,
+      "runtimeExecutionObserved": false,
+      "valueProvenanceFrozen": false,
+      "independentDomainReviewed": false,
+      "freezeEffect": "none"
+    },
+    {
+      "valueSubjectId": "bazi.engineering.weights.dispatch.v1",
+      "kind": "algorithm_surface",
+      "repositoryProjection": {
+        "monthCommand": "monthCommand",
+        "visibleStem": "visibleStem",
+        "hiddenIndexZero": "firstHiddenStem",
+        "hiddenOtherIndex": "otherHiddenStem"
+      },
+      "projectionDigest": "29f672fd738d2ace9fb6def48c8ff061f63f94d4fccf9e817d6d82dcb6290d8d",
+      "observationState": "stable_executable_syntax_indicates_policy_dispatch_general_control_flow_unproven",
+      "producerRefs": [
+        "packages/bazi-interpretation/src/strength-policy.ts#strengthFactorWeight"
+      ],
+      "consumerRefs": [],
+      "sourceOrRationaleRefs": [],
+      "syntaxProjectionMechanicallyObserved": true,
+      "generalControlFlowEquivalenceMechanicallyEstablished": false,
+      "generalDataFlowEquivalenceMechanicallyEstablished": false,
+      "runtimeExecutionObserved": false,
+      "valueProvenanceFrozen": false,
+      "independentDomainReviewed": false,
+      "freezeEffect": "none"
+    },
+    {
+      "valueSubjectId": "bazi.engineering.weights.guard-and-consumers.v1",
+      "kind": "fail_closed_consumer_surface",
+      "repositoryProjection": {
+        "invalidHiddenIndexRejected": true,
+        "consumerCalls": [
+          "month_command",
+          "visible_stem",
+          "hidden_stem_with_index"
+        ]
+      },
+      "projectionDigest": "bbd5aee0c69926cd582bfc15782db3876c2d8d145d7796c469c001f8f0b25716",
+      "observationState": "stable_executable_syntax_of_guard_and_consumers_observed_value_provenance_unfrozen",
+      "producerRefs": [
+        "packages/bazi-interpretation/src/strength-policy.ts#strengthFactorWeight"
+      ],
+      "consumerRefs": [
+        "packages/bazi-interpretation/src/strength-assessment-core.ts#collectBaziStrengthFactors"
+      ],
+      "sourceOrRationaleRefs": [],
+      "syntaxProjectionMechanicallyObserved": true,
+      "generalControlFlowEquivalenceMechanicallyEstablished": false,
+      "generalDataFlowEquivalenceMechanicallyEstablished": false,
+      "runtimeExecutionObserved": false,
+      "valueProvenanceFrozen": false,
+      "independentDomainReviewed": false,
+      "freezeEffect": "none"
+    }
+  ],
+  "externalEvidence": {
+    "sourceEvidenceRefs": [],
+    "sourceRightsRecordId": null,
+    "sourceCarrierRecordId": null,
+    "engineeringRationaleRecordId": null,
+    "engineeringReviewIds": [],
+    "expertReviewIds": [],
+    "independentDomainReviewIds": []
+  },
+  "authorityBoundary": {
+    "bindingFreezeEligible": false,
+    "bindingFrozenVerified": false,
+    "engineeringRationaleFrozen": false,
+    "firstPartyAuthorshipLegallyEstablished": false,
+    "traditionalAuthorityClaimed": false,
+    "parameterAuthorityClaimed": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false
+  },
+  "gateSummary": {
+    "currentPolicyWeightValuesObserved": 4,
+    "scopedValueSubjectsObserved": 3,
+    "stablePolicyDispatchSyntaxObserved": true,
+    "directConsumerCallShapesObserved": 3,
+    "sourceEvidenceRefsBound": 0,
+    "formalSourceRightsRecords": 0,
+    "formalSourceCarrierRecords": 0,
+    "engineeringRationalesFrozen": 0,
+    "engineeringReviewsVerified": 0,
+    "expertReviewsVerified": 0,
+    "independentDomainReviewsVerified": 0,
+    "bindingFreezeEligible": false,
+    "bindingFrozenVerified": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "formalActivationAllowed": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false
+  },
+  "digestBoundary": {
+    "algorithm": "SHA-256",
+    "domain": "hakimi.bazi.policy-weights-value-evidence-candidate.v1",
+    "digestIsDigitalSignature": false,
+    "digitalSignature": null,
+    "signerIdentity": null
+  },
+  "doesNotEstablish": [
+    "new_or_parallel_binding_identity",
+    "formal_evidence_subject_registration",
+    "engineering_rationale_freeze",
+    "source_or_exact_quote_evidence",
+    "source_rights_or_carrier_record",
+    "work_edition_or_carrier_rights_clearance",
+    "expert_review_or_domain_truth",
+    "general_control_flow_or_data_flow_equivalence",
+    "runtime_execution",
+    "binding_freeze_eligibility_or_verification",
+    "cross_file_atomic_snapshot",
+    "mutation_epoch",
+    "interval_mutation_or_aba_exclusion",
+    "domain_manifest_or_central_registry_integration",
+    "release_readiness",
+    "public_release_authorization"
+  ],
+  "candidateDigest": "208ae39797d048b2fc869392528a3cf7d1858de232a8691bc0296366d6363088"
+}

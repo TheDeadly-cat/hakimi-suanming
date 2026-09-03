@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>八字规则单题审阅演练</title>
+    <link rel="stylesheet" href="./single-binding-rehearsal.css">
+  </head>
+  <body data-seat-id="B" data-rehearsal-state="initial">
+    <a class="skip-link" href="#main">跳到审阅题面</a>
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">独立席位 B · 合成题面演练</p>
+        <h1>八字规则单题审阅演练</h1>
+        <p>专家只需要读中文题面并说明专业判断，不需要懂代码、JSON、hash 或 AI 原理。</p>
+      </div>
+      <span class="status-badge">不计入正式审定</span>
+    </header>
+    <main id="main" tabindex="-1">
+      <p class="loading-state">正在准备纯合成题面……</p>
+    </main>
+    <div id="announcer" class="visually-hidden" role="status" aria-live="polite"></div>
+    <script type="module" src="./single-binding-rehearsal.js"></script>
+  </body>
+</html>

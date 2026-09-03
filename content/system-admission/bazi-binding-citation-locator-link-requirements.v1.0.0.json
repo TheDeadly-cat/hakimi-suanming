@@ -1,0 +1,708 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "bazi_binding_citation_locator_link_requirements_v1",
+  "ledgerId": "hakimi.bazi.binding-citation-locator-link-requirements/1.0.0",
+  "status": "zero_instance_deny_only_current_binding_locator_material_link_requirements",
+  "createdAt": "2026-09-01T00:00:00.000Z",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "currentReadinessParent": {
+    "artifact": {
+      "path": "content/system-admission/bazi-binding-freeze-requirements.v1.9.0.json",
+      "bytes": 45551,
+      "sha256": "e20145b5f34b5dc04464e482cda5da990f82e520236679efbf568b322637f797"
+    },
+    "ledgerId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.9.0",
+    "ledgerDigest": "42930e63cb0960df969f5fe059617eb96a8ec9bd857c486cd4b33a28d37a8ae1",
+    "bindingRowsCanonicalSha256": "2cd5d5c44b777cc71fa9c022e77b89598341a6aeab8f24c46eb8ccbb5d2b1794",
+    "fullLoaderPrivateBrandRequired": true,
+    "fullLoaderPrivateBrandConsumedByBuilder": true,
+    "parentPrivateBrandTransferredToBuilderOutput": false,
+    "bindingRequired": 12,
+    "bindingFrozenVerified": 0
+  },
+  "basisArtifacts": [
+    {
+      "path": "packages/bazi-interpretation/src/strength-claim-registry.ts",
+      "bytes": 44959,
+      "sha256": "b08d4e6b0fb5c830b251e0c03ac49b7620729f223805b145b839a89245aa3888"
+    },
+    {
+      "path": "packages/contracts/src/index.ts",
+      "bytes": 244747,
+      "sha256": "674a3fe1e2b3cd4fc99e481a758966a320ddc3c1113a9471eba190851d15e041"
+    },
+    {
+      "path": "packages/knowledge-core/src/index.ts",
+      "bytes": 41040,
+      "sha256": "85e86d6e28fbaee112a21daa4288be0c613b93d22138a5448a8f78bd33b20837"
+    },
+    {
+      "path": "packages/bazi-stage-c-material-admission-candidate/src/index.ts",
+      "bytes": 28529,
+      "sha256": "2c2d3635530d8ec57ba7e6af838c868c7d0cc7cf9ed4c8fbd12436b76648c229"
+    },
+    {
+      "path": "content/system-admission/bazi-project-copy-materialization-requirements.v1.1.0.json",
+      "bytes": 10887,
+      "sha256": "7e98e6042cd1ccb00a2cff749f0000a989baacd683271edffc3158a80ee02b83"
+    }
+  ],
+  "registryProjection": {
+    "projectionVersion": "hakimi.bazi.strength_claim_registry/0.2.0",
+    "contentVersion": "0.18.0",
+    "bindingInventoryCount": 12,
+    "inventoryOrdering": "exact_registry_source_binding_order",
+    "inventoryCanonicalSha256": "20f8b230946a0f36e52921cc57c7c7afe066eade1492ba716950809f5aed21ae",
+    "parentBindingRowsCanonicalSha256": "2cd5d5c44b777cc71fa9c022e77b89598341a6aeab8f24c46eb8ccbb5d2b1794"
+  },
+  "singleChartReportBoundary": {
+    "browserEvidenceEstablishedByThisChild": false,
+    "frozenGoldenReverifiedByThisChild": false,
+    "knowledgeCoreMapping": {
+      "artifactPath": "packages/knowledge-core/src/index.ts",
+      "currentBindingEvidenceSubjectCount": 12,
+      "currentBindingEvidenceSubjectsIncluded": true,
+      "exportName": "SINGLE_CHART_REPORT_EVIDENCE_SUBJECTS"
+    },
+    "mappingAloneEstablishesReportAdmission": false,
+    "mappingObservationScope": "current_binding_evidence_subject_registry_membership_only",
+    "reportCitationAdmissionReplayedByThisChild": false,
+    "reportConsumerClosureAssessedByThisChild": false,
+    "singleChartReportAdmissionEffect": "none"
+  },
+  "bindingInventory": [
+    {
+      "order": 1,
+      "bindingId": "binding:core:derive-assessment",
+      "evidenceSubjectId": "bazi.strength.binding.core.derive-assessment.v1",
+      "source": {
+        "sourceId": "hakimi-strength-core-0.1.0",
+        "sourceType": "engineering_contract",
+        "stableRevision": "hakimi-bazi-strength-ten-god-candidate/0.1.0",
+        "url": "/packages/bazi-interpretation/src/strength-assessment-core.ts",
+        "verificationStatus": "repository_policy_verified"
+      },
+      "registryLocator": {
+        "contentSha256": null,
+        "kind": "stable_symbol",
+        "value": "deriveBaziStrengthAssessment + collectBaziStrengthFactors",
+        "verificationStatus": "verified"
+      },
+      "readiness": {
+        "freezeState": "candidate_only_unbound",
+        "candidateState": "project_engineering_candidate_envelope",
+        "currentDistributionBoundary": "local_repository_only_no_distribution_clearance",
+        "sourceBodyStored": false,
+        "sourceBodyDigest": null,
+        "exactQuoteTextStored": false,
+        "exactQuoteDigest": null,
+        "exactLocatorEstablishedForFreeze": false,
+        "workIdentityFrozen": false,
+        "editionIdentityFrozen": false,
+        "carrierIdentityFrozen": false,
+        "workRightsEvidenceBound": false,
+        "editionRightsEvidenceBound": false,
+        "carrierRightsEvidenceBound": false,
+        "sourceRightsRecordId": null,
+        "sourceCarrierRecordId": null,
+        "bindingDigest": null,
+        "frozenAt": null
+      },
+      "parentReadinessRowCanonicalSha256": "f2bfccd81e059ef2a31093564fe983bcb65e48609f351561e2d34474e35bbe0f"
+    },
+    {
+      "order": 2,
+      "bindingId": "binding:policy:factor-inclusion",
+      "evidenceSubjectId": "bazi.strength.binding.policy.factor-inclusion.v1",
+      "source": {
+        "sourceId": "hakimi-strength-policy-0.1.0",
+        "sourceType": "engineering_contract",
+        "stableRevision": "hakimi.bazi.strength_policy/0.1.0",
+        "url": "/packages/bazi-interpretation/src/strength-policy.ts",
+        "verificationStatus": "repository_policy_verified"
+      },
+      "registryLocator": {
+        "contentSha256": null,
+        "kind": "stable_symbol",
+        "value": "BAZI_STRENGTH_POLICY.factorInclusion",
+        "verificationStatus": "verified"
+      },
+      "readiness": {
+        "freezeState": "candidate_only_unbound",
+        "candidateState": "project_engineering_candidate_envelope",
+        "currentDistributionBoundary": "local_repository_only_no_distribution_clearance",
+        "sourceBodyStored": false,
+        "sourceBodyDigest": null,
+        "exactQuoteTextStored": false,
+        "exactQuoteDigest": null,
+        "exactLocatorEstablishedForFreeze": false,
+        "workIdentityFrozen": false,
+        "editionIdentityFrozen": false,
+        "carrierIdentityFrozen": false,
+        "workRightsEvidenceBound": false,
+        "editionRightsEvidenceBound": false,
+        "carrierRightsEvidenceBound": false,
+        "sourceRightsRecordId": null,
+        "sourceCarrierRecordId": null,
+        "bindingDigest": null,
+        "frozenAt": null
+      },
+      "parentReadinessRowCanonicalSha256": "9d818965a979a7bee5e808b448dde7b0420d7486bff039923920b31bdbb0e1cb"
+    },
+    {
+      "order": 3,
+      "bindingId": "binding:policy:direction-map",
+      "evidenceSubjectId": "bazi.strength.binding.policy.direction-map.v1",
+      "source": {
+        "sourceId": "hakimi-strength-policy-0.1.0",
+        "sourceType": "engineering_contract",
+        "stableRevision": "hakimi.bazi.strength_policy/0.1.0",
+        "url": "/packages/bazi-interpretation/src/strength-policy.ts",
+        "verificationStatus": "repository_policy_verified"
+      },
+      "registryLocator": {
+        "contentSha256": null,
+        "kind": "stable_symbol",
+        "value": "BAZI_STRENGTH_TEN_GOD_GROUPS + strengthFactorDirectionForTenGod",
+        "verificationStatus": "verified"
+      },
+      "readiness": {
+        "freezeState": "candidate_only_unbound",
+        "candidateState": "project_engineering_candidate_envelope",
+        "currentDistributionBoundary": "local_repository_only_no_distribution_clearance",
+        "sourceBodyStored": false,
+        "sourceBodyDigest": null,
+        "exactQuoteTextStored": false,
+        "exactQuoteDigest": null,
+        "exactLocatorEstablishedForFreeze": false,
+        "workIdentityFrozen": false,
+        "editionIdentityFrozen": false,
+        "carrierIdentityFrozen": false,
+        "workRightsEvidenceBound": false,
+        "editionRightsEvidenceBound": false,
+        "carrierRightsEvidenceBound": false,
+        "sourceRightsRecordId": null,
+        "sourceCarrierRecordId": null,
+        "bindingDigest": null,
+        "frozenAt": null
+      },
+      "parentReadinessRowCanonicalSha256": "248f2a9e1a31a45f62b2dabb662d9690c19a16348065c53a4719fc25f00d4733"
+    },
+    {
+      "order": 4,
+      "bindingId": "binding:policy:weights",
+      "evidenceSubjectId": "bazi.strength.binding.policy.weights.v1",
+      "source": {
+        "sourceId": "hakimi-strength-policy-0.1.0",
+        "sourceType": "engineering_contract",
+        "stableRevision": "hakimi.bazi.strength_policy/0.1.0",
+        "url": "/packages/bazi-interpretation/src/strength-policy.ts",
+        "verificationStatus": "repository_policy_verified"
+      },
+      "registryLocator": {
+        "contentSha256": null,
+        "kind": "stable_symbol",
+        "value": "BAZI_STRENGTH_FACTOR_WEIGHTS",
+        "verificationStatus": "verified"
+      },
+      "readiness": {
+        "freezeState": "candidate_only_unbound",
+        "candidateState": "project_engineering_candidate_envelope",
+        "currentDistributionBoundary": "local_repository_only_no_distribution_clearance",
+        "sourceBodyStored": false,
+        "sourceBodyDigest": null,
+        "exactQuoteTextStored": false,
+        "exactQuoteDigest": null,
+        "exactLocatorEstablishedForFreeze": false,
+        "workIdentityFrozen": false,
+        "editionIdentityFrozen": false,
+        "carrierIdentityFrozen": false,
+        "workRightsEvidenceBound": false,
+        "editionRightsEvidenceBound": false,
+        "carrierRightsEvidenceBound": false,
+        "sourceRightsRecordId": null,
+        "sourceCarrierRecordId": null,
+        "bindingDigest": null,
+        "frozenAt": null
+      },
+      "parentReadinessRowCanonicalSha256": "491e6d5b7f1416ed1cc887f0984af01a742e39fde125a53b9facc3b5657ab22c"
+    },
+    {
+      "order": 5,
+      "bindingId": "binding:policy:month-duplication",
+      "evidenceSubjectId": "bazi.strength.binding.policy.month-duplication.v1",
+      "source": {
+        "sourceId": "hakimi-strength-policy-0.1.0",
+        "sourceType": "engineering_contract",
+        "stableRevision": "hakimi.bazi.strength_policy/0.1.0",
+        "url": "/packages/bazi-interpretation/src/strength-policy.ts",
+        "verificationStatus": "repository_policy_verified"
+      },
+      "registryLocator": {
+        "contentSha256": null,
+        "kind": "stable_symbol",
+        "value": "BAZI_STRENGTH_POLICY.monthMainDuplication",
+        "verificationStatus": "verified"
+      },
+      "readiness": {
+        "freezeState": "candidate_only_unbound",
+        "candidateState": "project_engineering_candidate_envelope",
+        "currentDistributionBoundary": "local_repository_only_no_distribution_clearance",
+        "sourceBodyStored": false,
+        "sourceBodyDigest": null,
+        "exactQuoteTextStored": false,
+        "exactQuoteDigest": null,
+        "exactLocatorEstablishedForFreeze": false,
+        "workIdentityFrozen": false,
+        "editionIdentityFrozen": false,
+        "carrierIdentityFrozen": false,
+        "workRightsEvidenceBound": false,
+        "editionRightsEvidenceBound": false,
+        "carrierRightsEvidenceBound": false,
+        "sourceRightsRecordId": null,
+        "sourceCarrierRecordId": null,
+        "bindingDigest": null,
+        "frozenAt": null
+      },
+      "parentReadinessRowCanonicalSha256": "59a11e0894f1b9b38e1a0225fb7e9f343103b82bac83794f32828e217c45606c"
+    },
+    {
+      "order": 6,
+      "bindingId": "binding:policy:thresholds",
+      "evidenceSubjectId": "bazi.strength.binding.policy.thresholds.v1",
+      "source": {
+        "sourceId": "hakimi-strength-policy-0.1.0",
+        "sourceType": "engineering_contract",
+        "stableRevision": "hakimi.bazi.strength_policy/0.1.0",
+        "url": "/packages/bazi-interpretation/src/strength-policy.ts",
+        "verificationStatus": "repository_policy_verified"
+      },
+      "registryLocator": {
+        "contentSha256": null,
+        "kind": "stable_symbol",
+        "value": "BAZI_STRENGTH_BAND_THRESHOLDS + classifyStrengthBand",
+        "verificationStatus": "verified"
+      },
+      "readiness": {
+        "freezeState": "candidate_only_unbound",
+        "candidateState": "project_engineering_candidate_envelope",
+        "currentDistributionBoundary": "local_repository_only_no_distribution_clearance",
+        "sourceBodyStored": false,
+        "sourceBodyDigest": null,
+        "exactQuoteTextStored": false,
+        "exactQuoteDigest": null,
+        "exactLocatorEstablishedForFreeze": false,
+        "workIdentityFrozen": false,
+        "editionIdentityFrozen": false,
+        "carrierIdentityFrozen": false,
+        "workRightsEvidenceBound": false,
+        "editionRightsEvidenceBound": false,
+        "carrierRightsEvidenceBound": false,
+        "sourceRightsRecordId": null,
+        "sourceCarrierRecordId": null,
+        "bindingDigest": null,
+        "frozenAt": null
+      },
+      "parentReadinessRowCanonicalSha256": "61a52261d4623868e1cfc5f6cc897f6b89a306616bfa8362cf8ef5c54c2f4aa9"
+    },
+    {
+      "order": 7,
+      "bindingId": "binding:sensitivity:six-scenarios",
+      "evidenceSubjectId": "bazi.strength.binding.sensitivity.six-scenarios.v1",
+      "source": {
+        "sourceId": "hakimi-strength-sensitivity-0.1.0",
+        "sourceType": "engineering_contract",
+        "stableRevision": "hakimi.bazi.strength_sensitivity_review/0.1.0",
+        "url": "/packages/bazi-interpretation/src/strength-sensitivity-review.ts",
+        "verificationStatus": "repository_policy_verified"
+      },
+      "registryLocator": {
+        "contentSha256": null,
+        "kind": "stable_symbol",
+        "value": "BAZI_STRENGTH_SENSITIVITY_SCENARIOS + buildStrengthSensitivityReview",
+        "verificationStatus": "verified"
+      },
+      "readiness": {
+        "freezeState": "candidate_only_unbound",
+        "candidateState": "project_engineering_candidate_envelope",
+        "currentDistributionBoundary": "local_repository_only_no_distribution_clearance",
+        "sourceBodyStored": false,
+        "sourceBodyDigest": null,
+        "exactQuoteTextStored": false,
+        "exactQuoteDigest": null,
+        "exactLocatorEstablishedForFreeze": false,
+        "workIdentityFrozen": false,
+        "editionIdentityFrozen": false,
+        "carrierIdentityFrozen": false,
+        "workRightsEvidenceBound": false,
+        "editionRightsEvidenceBound": false,
+        "carrierRightsEvidenceBound": false,
+        "sourceRightsRecordId": null,
+        "sourceCarrierRecordId": null,
+        "bindingDigest": null,
+        "frozenAt": null
+      },
+      "parentReadinessRowCanonicalSha256": "80cb04abd5d13f6d8fc940a2a038a62093af013c968f4bc2693584e95cfb5a36"
+    },
+    {
+      "order": 8,
+      "bindingId": "binding:dtt:month-command",
+      "evidenceSubjectId": "bazi.strength.binding.dtt.month-command.v1",
+      "source": {
+        "sourceId": "dtt-chanwei-wikisource-r2600158",
+        "sourceType": "public_domain_classic_transcription",
+        "stableRevision": "2600158",
+        "url": "https://zh.wikisource.org/w/index.php?title=%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE&oldid=2600158",
+        "verificationStatus": "locator_verified_in_pinned_revision"
+      },
+      "registryLocator": {
+        "contentSha256": null,
+        "kind": "chapter_heading",
+        "value": "通神论 > 十五、月令；十七、衰旺",
+        "verificationStatus": "verified"
+      },
+      "readiness": {
+        "freezeState": "candidate_only_unbound",
+        "candidateState": "public_revision_and_facsimile_candidate",
+        "currentDistributionBoundary": "link_only_no_redistribution_clearance",
+        "sourceBodyStored": false,
+        "sourceBodyDigest": null,
+        "exactQuoteTextStored": false,
+        "exactQuoteDigest": null,
+        "exactLocatorEstablishedForFreeze": false,
+        "workIdentityFrozen": false,
+        "editionIdentityFrozen": false,
+        "carrierIdentityFrozen": false,
+        "workRightsEvidenceBound": false,
+        "editionRightsEvidenceBound": false,
+        "carrierRightsEvidenceBound": false,
+        "sourceRightsRecordId": null,
+        "sourceCarrierRecordId": null,
+        "bindingDigest": null,
+        "frozenAt": null
+      },
+      "parentReadinessRowCanonicalSha256": "cf6f3c72d7e27474a098b39a1ca2e12764f2b3ebd71c55dad1b5cb6f86130d1d"
+    },
+    {
+      "order": 9,
+      "bindingId": "binding:smt-v5:relative-relations",
+      "evidenceSubjectId": "bazi.strength.binding.smt-v5.relative-relations.v1",
+      "source": {
+        "sourceId": "smt-v5-wikisource-r2706483",
+        "sourceType": "public_domain_classic_transcription",
+        "stableRevision": "2706483",
+        "url": "https://zh.wikisource.org/w/index.php?title=%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83/%E5%8D%B7%E4%BA%94&oldid=2706483",
+        "verificationStatus": "locator_verified_in_pinned_revision"
+      },
+      "registryLocator": {
+        "contentSha256": null,
+        "kind": "chapter_heading",
+        "value": "卷五 > 论古人立印食官财名义",
+        "verificationStatus": "verified"
+      },
+      "readiness": {
+        "freezeState": "candidate_only_unbound",
+        "candidateState": "public_revision_and_facsimile_candidate",
+        "currentDistributionBoundary": "link_only_no_redistribution_clearance",
+        "sourceBodyStored": false,
+        "sourceBodyDigest": null,
+        "exactQuoteTextStored": false,
+        "exactQuoteDigest": null,
+        "exactLocatorEstablishedForFreeze": false,
+        "workIdentityFrozen": false,
+        "editionIdentityFrozen": false,
+        "carrierIdentityFrozen": false,
+        "workRightsEvidenceBound": false,
+        "editionRightsEvidenceBound": false,
+        "carrierRightsEvidenceBound": false,
+        "sourceRightsRecordId": null,
+        "sourceCarrierRecordId": null,
+        "bindingDigest": null,
+        "frozenAt": null
+      },
+      "parentReadinessRowCanonicalSha256": "3216329bb4b3334be9fdbf6476e9f2e61d5f269b00edc42bd0a71cd5c224d7b1"
+    },
+    {
+      "order": 10,
+      "bindingId": "binding:smt-v10:whole-chart",
+      "evidenceSubjectId": "bazi.strength.binding.smt-v10.whole-chart.v1",
+      "source": {
+        "sourceId": "smt-siku-v10-wikisource-r761703",
+        "sourceType": "public_domain_classic_transcription",
+        "stableRevision": "761703",
+        "url": "https://zh.wikisource.org/w/index.php?title=%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83_(%E5%9B%9B%E5%BA%AB%E5%85%A8%E6%9B%B8%E6%9C%AC)/%E5%8D%B710&oldid=761703",
+        "verificationStatus": "locator_verified_in_pinned_revision"
+      },
+      "registryLocator": {
+        "contentSha256": null,
+        "kind": "chapter_heading",
+        "value": "卷十 > 看命口诀；玉井奥诀 > 物须提豁方明轻重",
+        "verificationStatus": "verified"
+      },
+      "readiness": {
+        "freezeState": "candidate_only_unbound",
+        "candidateState": "public_revision_and_facsimile_candidate",
+        "currentDistributionBoundary": "link_only_no_redistribution_clearance",
+        "sourceBodyStored": false,
+        "sourceBodyDigest": null,
+        "exactQuoteTextStored": false,
+        "exactQuoteDigest": null,
+        "exactLocatorEstablishedForFreeze": false,
+        "workIdentityFrozen": false,
+        "editionIdentityFrozen": false,
+        "carrierIdentityFrozen": false,
+        "workRightsEvidenceBound": false,
+        "editionRightsEvidenceBound": false,
+        "carrierRightsEvidenceBound": false,
+        "sourceRightsRecordId": null,
+        "sourceCarrierRecordId": null,
+        "bindingDigest": null,
+        "frozenAt": null
+      },
+      "parentReadinessRowCanonicalSha256": "8f035e1e5f94281a4c9eee15669c3e9215744eecebfa118e2b01253e5533b682"
+    },
+    {
+      "order": 11,
+      "bindingId": "binding:yhzp:hidden-listing",
+      "evidenceSubjectId": "bazi.strength.binding.yhzp.hidden-listing.v1",
+      "source": {
+        "sourceId": "yhzp-wikisource-r2593607",
+        "sourceType": "public_domain_classic_transcription",
+        "stableRevision": "2593607",
+        "url": "https://zh.wikisource.org/w/index.php?title=%E6%B7%B5%E6%B5%B7%E5%AD%90%E5%B9%B3&oldid=2593607",
+        "verificationStatus": "source_warning_unresolved"
+      },
+      "registryLocator": {
+        "contentSha256": null,
+        "kind": "chapter_heading",
+        "value": "论天干地支暗藏总诀；又地支藏遁歌",
+        "verificationStatus": "pending_manual_textual_verification"
+      },
+      "readiness": {
+        "freezeState": "candidate_only_unbound",
+        "candidateState": "public_revision_and_facsimile_candidate",
+        "currentDistributionBoundary": "link_only_no_redistribution_clearance",
+        "sourceBodyStored": false,
+        "sourceBodyDigest": null,
+        "exactQuoteTextStored": false,
+        "exactQuoteDigest": null,
+        "exactLocatorEstablishedForFreeze": false,
+        "workIdentityFrozen": false,
+        "editionIdentityFrozen": false,
+        "carrierIdentityFrozen": false,
+        "workRightsEvidenceBound": false,
+        "editionRightsEvidenceBound": false,
+        "carrierRightsEvidenceBound": false,
+        "sourceRightsRecordId": null,
+        "sourceCarrierRecordId": null,
+        "bindingDigest": null,
+        "frozenAt": null
+      },
+      "parentReadinessRowCanonicalSha256": "3b5f3eabf37da82c19a490cee69180f0240719cb421e2f1767b63fb1048788c6"
+    },
+    {
+      "order": 12,
+      "bindingId": "binding:zpzz:review-gates",
+      "evidenceSubjectId": "bazi.strength.binding.zpzz.review-gates.v1",
+      "source": {
+        "sourceId": "zpzz-ctext-ch974137-unfrozen",
+        "sourceType": "review_gate_locator",
+        "stableRevision": null,
+        "url": "https://ctext.org/wiki.pl?chapter=974137&if=gb&remap=gb",
+        "verificationStatus": "locator_only_unfrozen"
+      },
+      "registryLocator": {
+        "contentSha256": null,
+        "kind": "chapter_heading",
+        "value": "九、十三、十四、十八、十九：成败救应、气候、破格与成格",
+        "verificationStatus": "pending_manual_textual_verification"
+      },
+      "readiness": {
+        "freezeState": "blocked_unbound",
+        "candidateState": "blocked_no_reliable_edition",
+        "currentDistributionBoundary": "link_only_no_redistribution_clearance",
+        "sourceBodyStored": false,
+        "sourceBodyDigest": null,
+        "exactQuoteTextStored": false,
+        "exactQuoteDigest": null,
+        "exactLocatorEstablishedForFreeze": false,
+        "workIdentityFrozen": false,
+        "editionIdentityFrozen": false,
+        "carrierIdentityFrozen": false,
+        "workRightsEvidenceBound": false,
+        "editionRightsEvidenceBound": false,
+        "carrierRightsEvidenceBound": false,
+        "sourceRightsRecordId": null,
+        "sourceCarrierRecordId": null,
+        "bindingDigest": null,
+        "frozenAt": null
+      },
+      "parentReadinessRowCanonicalSha256": "bdfe42dde665825d7ade7eba54e6ec1b3893dadfe0e2211e5e3e1ff8e1048081"
+    }
+  ],
+  "futureReceiptContract": {
+    "authorityEffect": "none",
+    "identityRules": {
+      "bindingSubjectSourceMustMatchOneInventoryRow": true,
+      "candidateLocatorVerificationCannotBePromotedByReceiptShape": true,
+      "citationMustTargetExactlyOneMatchingEvidenceSubject": true,
+      "knowledgeDocumentCitationRightsCarrierContentIdentityMustMatch": true,
+      "materializationMustTerminateAtSameKnowledgeDocumentContentHash": true,
+      "nullRegistryLocatorContentSha256CannotBeTreatedAsLinked": true,
+      "registryLocatorMustMatchSameInventoryRow": true
+    },
+    "issuerBoundary": {
+      "callerAuthoredReceiptAccepted": false,
+      "digestOnlyReceiptAccepted": false,
+      "oneReceiptMustConjoinAllIdentityLayers": true,
+      "partialReceiptMergeAllowed": false,
+      "separateOwnerAuthorizedCapabilityIssuerRequired": true,
+      "thisLedgerMayIssueReceipt": false
+    },
+    "quoteBoundary": {
+      "automaticMinimalSufficiencyInferenceAllowed": false,
+      "exactQuoteTextStoredByThisLedger": false,
+      "independentHumanMinimalSufficiencyReviewRequired": true,
+      "minimalQuoteSufficiency": "not_established",
+      "quoteDigestRequiredForFutureReceipt": true,
+      "quoteLengthOrUniquenessEstablishesSufficiency": false,
+      "quoteMustBeVerifiedAgainstSameKnowledgeDocumentBytes": true
+    },
+    "recordType": "bazi_binding_citation_locator_link_receipt_v1",
+    "requiredConjunction": {
+      "citation": [
+        "citationId",
+        "editVersion",
+        "documentId",
+        "documentContentHash",
+        "sectionId",
+        "startLine",
+        "endLine",
+        "quoteSha256",
+        "targetKeysDigest",
+        "status"
+      ],
+      "knowledgeDocument": [
+        "documentId",
+        "documentContentHash",
+        "editVersion",
+        "canonicalRecordDigest"
+      ],
+      "projectCopyMaterialization": [
+        "materializationReceiptId",
+        "sourceCarrierRecordId",
+        "projectRawSha256",
+        "normalizedUtf8Sha256",
+        "knowledgeDocumentContentHash",
+        "verifiedAt"
+      ],
+      "registryBinding": [
+        "order",
+        "bindingId",
+        "evidenceSubjectId"
+      ],
+      "registryLocator": [
+        "kind",
+        "value",
+        "verificationStatus",
+        "contentSha256"
+      ],
+      "registrySource": [
+        "sourceId",
+        "sourceType",
+        "url",
+        "stableRevision",
+        "verificationStatus"
+      ],
+      "sourceCarrier": [
+        "carrierId",
+        "documentId",
+        "documentContentHash",
+        "contentDigest",
+        "editVersion",
+        "canonicalRecordDigest"
+      ],
+      "sourceRights": [
+        "documentId",
+        "documentContentHash",
+        "editVersion",
+        "canonicalRecordDigest"
+      ]
+    },
+    "schemaVersion": "1.0.0"
+  },
+  "currentReceipts": [],
+  "counts": {
+    "bindingsRequired": 12,
+    "inventoryRows": 12,
+    "locatorLinkReceipts": 0,
+    "bindingsLocatorLinked": 0,
+    "minimalQuoteSufficiencyEstablished": 0,
+    "formalKnowledgeDocuments": 0,
+    "formalSourceRightsRecords": 0,
+    "formalSourceCarrierRecords": 0,
+    "projectCopyMaterializationRecords": 0,
+    "materializationsVerified": 0,
+    "bindingsFrozen": 0,
+    "verifiedNaturalPersonRightsReviewers": 0,
+    "domainExpertReviews": 0,
+    "rightsLegalReviews": 0
+  },
+  "integrityBoundary": {
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi.bazi.binding-citation-locator-link-requirements.v1",
+    "parentFullLoaderPrivateBrandConsumed": true,
+    "parentRawIdentityPinned": true,
+    "parentSelfDigestRecomputed": true,
+    "registryAndSchemaBasisRawIdentitiesPinned": true,
+    "builderOutputPrivatelyBranded": false,
+    "exactPersistedLoaderPrivateBrandRequired": true,
+    "persistedRawIdentityPinned": true,
+    "persistedSelfDigestPinned": true,
+    "stableSingleFileReadsUsed": true,
+    "endpointSnapshotOnly": true,
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "intervalMutationExcludedAcrossFiles": false,
+    "abaExcluded": false,
+    "digestIsDigitalSignature": false,
+    "digitalSignature": null,
+    "signerIdentity": null
+  },
+  "authorityBoundary": {
+    "sourceIdentityAdjudicated": false,
+    "minimalQuoteSufficiencyEstablished": false,
+    "realReviewerIdentityAndIndependenceVerified": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "bindingFreezeEffect": "none",
+    "activeAdmissionEffect": "none",
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "publicReleaseAuthorized": false
+  },
+  "doesNotEstablish": [
+    "registry_locator_to_citation_material_link",
+    "knowledge_document_source_rights_source_carrier_or_materialization_instance",
+    "minimal_quote_sufficiency",
+    "lawful_material_access_or_storage_authority",
+    "work_edition_carrier_rights_or_legal_conclusion",
+    "reviewer_real_identity_credentials_scope_or_independence",
+    "content_or_expert_truth",
+    "binding_freeze",
+    "single_chart_report_consumer_closure_citation_admission_frozen_golden_or_browser_evidence",
+    "cross_file_atomic_snapshot_mutation_epoch_interval_or_aba_exclusion",
+    "release_readiness_or_public_release_authorization"
+  ],
+  "ledgerDigest": "2fdc1fcafcb28795823b3cac92db707e88df6325c197f08cb6a59a96fa3f9dc4"
+}

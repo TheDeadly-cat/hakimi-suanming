@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="hakimi-single-binding-seat-a-session" content="__HAKIMI_SINGLE_BINDING_SEAT_A_SESSION_BINDING_JSON__">
+    <meta name="hakimi-single-binding-seat-b-session" content="__HAKIMI_SINGLE_BINDING_SEAT_B_SESSION_BINDING_JSON__">
+    <title>单条规则 A/B 回件校验与差异并列</title>
+    <link rel="stylesheet" href="./single-binding-integrated-pair.css">
+  </head>
+  <body data-pair-state="initial">
+    <a class="skip-link" href="#main">跳到回件校验</a>
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">协调人端 · 固定合成题面</p>
+        <h1>单条规则 A/B 回件校验与差异并列</h1>
+        <p>选择两席各自的完整回件和包外校验值文件；系统只做机械核对与逐字段并列。</p>
+      </div>
+      <span class="status-badge">不选赢家 · 不计入正式审定</span>
+    </header>
+    <main id="main" tabindex="-1">
+      <p class="loading-state">正在核对本轮合成会话边界……</p>
+    </main>
+    <div id="announcer" class="visually-hidden" role="status" aria-live="polite"></div>
+    <script type="module" src="./single-binding-integrated-pair.js"></script>
+  </body>
+</html>

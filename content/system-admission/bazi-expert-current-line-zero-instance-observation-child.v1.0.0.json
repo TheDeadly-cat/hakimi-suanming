@@ -1,0 +1,230 @@
+{
+  "authorityBoundary": {
+    "collectionAuthorized": false,
+    "contentTruthEstablished": false,
+    "credentialAuthorityEstablished": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "formalActivationAllowed": false,
+    "identityAuthorityEstablished": false,
+    "originalOpinionAuthenticityEstablished": false,
+    "persistedRealPersonInstancesAllowed": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "reviewerIndependenceEstablished": false,
+    "rightsLegalConclusionEstablished": false
+  },
+  "childDigest": "f7e7a4a6b3580e451e06de8af29cf8c3b834b05234f9f97ec343a5b8ab1641db",
+  "childId": "hakimi.bazi.expert-current-line-zero-instance-observation-child/1.0.0",
+  "createdAt": "2026-09-01T14:00:00.000Z",
+  "currentMechanicalGate": {
+    "activeAdmissionEffect": "none",
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 12,
+    "countsTowardExpertGate": false,
+    "domainExpertReviewsVerified": 0,
+    "domainExpertsRequired": 2,
+    "expertReviewBundleComplete": false,
+    "realReviewerInstancesVerified": 0,
+    "sourceBindingClosureComplete": false,
+    "sourceRightsClosureComplete": false,
+    "verifierAuthorityGrantInstancesVerified": 0
+  },
+  "currentParentBrands": {
+    "authorityPrecheckV1": {
+      "fullLoaderPrivateBrandVerified": true,
+      "ledgerDigest": "0c68a77a135a6ad6205a9c0da3e37162a820ee2f273cb899783fe9a990526a80",
+      "ledgerId": "hakimi.bazi.expert-authority-material-precheck/1.0.0",
+      "path": "content/system-admission/bazi-expert-authority-material-precheck.v1.json",
+      "rawBytes": 12974,
+      "rawSha256": "ccfe28e4dfb8c1bd7a6764d6253cf818c37a712ea24225bd100092362cc1f2af",
+      "role": "current_zero_instance_authority_contract_parent"
+    },
+    "readinessV19": {
+      "fullLoaderPrivateBrandVerified": true,
+      "ledgerDigest": "42930e63cb0960df969f5fe059617eb96a8ec9bd857c486cd4b33a28d37a8ae1",
+      "ledgerId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.9.0",
+      "path": "content/system-admission/bazi-binding-freeze-requirements.v1.9.0.json",
+      "rawBytes": 45551,
+      "rawSha256": "e20145b5f34b5dc04464e482cda5da990f82e520236679efbf568b322637f797",
+      "role": "current_binding_readiness_zero_authority_parent"
+    },
+    "verifiedCurrentPrivateBrandCount": 2
+  },
+  "doesNotEstablish": [
+    "real_reviewer_identity_credentials_scope_or_pairwise_independence",
+    "private_material_absence_authenticity_first_seen_custody_or_consent",
+    "original_opinion_authenticity_or_expert_truth",
+    "content_truth_source_or_rights_legal_closure",
+    "formal_expert_intake_currentness_or_expert_gate_closure",
+    "browser_runtime_release_evidence_or_deployment_rollback_confirmation",
+    "manifest_currentness_release_readiness_or_public_authorization",
+    "cross_file_atomic_snapshot_mutation_epoch_interval_aba_or_replay_exclusion"
+  ],
+  "historicalObservations": {
+    "historicalObservationCount": 2,
+    "historicalPrivateBrandsConsumed": 0,
+    "intakeV11": {
+      "artifact": {
+        "path": "content/system-admission/bazi-expert-review-intake-gap.v1.1.0.json",
+        "rawBytes": 32579,
+        "rawSha256": "7a7088a3fdc660ccca3ef0d9765e36421563c7feee1c3dfa6bc4d7169d0f91df"
+      },
+      "brandCurrent": false,
+      "fullLoaderImportedByThisChild": false,
+      "fullLoaderInvokedByThisChild": false,
+      "ledgerDigest": "5318b9543bad20c52e5129901e94aa2ca3d2dd68f342ba11ab9611f4f767d582",
+      "ledgerId": "hakimi.bazi.expert-review-intake-gap.version-aware-candidate/1.1.0",
+      "rawAndSelfDigestVerified": true,
+      "role": "historical_zero_instance_intake_observation_not_current_parent_authority"
+    },
+    "privacyV1": {
+      "artifact": {
+        "path": "content/system-admission/bazi-expert-privacy-formal-intake-reconciliation.v1.json",
+        "rawBytes": 10260,
+        "rawSha256": "f99612bd68adbe42145b0cc92030f44d54ee91eed574617690de8a4f109c9a17"
+      },
+      "brandCurrent": false,
+      "fullLoaderImportedByThisChild": false,
+      "fullLoaderInvokedByThisChild": false,
+      "ledgerDigest": "cdf1a4d73a07b99a915e19f24672adbf6a4b42fb98754a0d679b32ec91eca3a2",
+      "ledgerId": "hakimi.bazi.expert-privacy-formal-intake-reconciliation/1.0.0",
+      "rawAndSelfDigestVerified": true,
+      "role": "historical_opaque_privacy_red_semantics_not_current_parent_authority"
+    }
+  },
+  "historicalPersistedZeroInstanceProjection": {
+    "credentialsVerified": 0,
+    "currentFormalIntakeRecordInstances": 0,
+    "disagreementInventories": 0,
+    "expertReviewBundles": 0,
+    "identitiesVerified": 0,
+    "independentExpertReviewsVerified": 0,
+    "originalOpinions": 0,
+    "pairwiseIndependenceAssessments": 0,
+    "privateOpinionSealReceipts": 0,
+    "projectionIsCurrentRealityAttestation": false,
+    "publicIdentityBindings": 0,
+    "reconciliationNotes": 0,
+    "reviewerSlotsOccupied": 0,
+    "scopesVerified": 0,
+    "sealedOriginalOpinions": 0
+  },
+  "knowledgeCoreDriftAttribution": {
+    "codeAttributionMode": "deterministic_old_new_identity_attribution_not_loader_execution",
+    "currentIdentity": {
+      "path": "packages/knowledge-core/src/index.ts",
+      "rawBytes": 41040,
+      "rawSha256": "85e86d6e28fbaee112a21daa4288be0c613b93d22138a5448a8f78bd33b20837"
+    },
+    "driftDoesNotChangeExpertOrAuthorityCounts": true,
+    "knownFailClosedCode": "BOUND_READINESS_BASIS_DRIFT",
+    "previousIdentity": {
+      "path": "packages/knowledge-core/src/index.ts",
+      "rawBytes": 39595,
+      "rawSha256": "9e6420e8c6c5b3aafd892fdb3c5363af81ea9d9e24ebff6e11897300053524b0"
+    },
+    "readinessV19CurrentBrandIsEvidenceBasis": true,
+    "staleIntakeOrPrivacyLoaderExecutedByThisChild": false
+  },
+  "lineage": {
+    "centralManifestModified": false,
+    "centralRegistryModified": false,
+    "defaultOrRuntimeIntegration": "absent",
+    "parentArtifactsModified": false,
+    "parentBacklinksAdded": false
+  },
+  "manifestBoundary": {
+    "currentFullDomainManifestEstablished": false,
+    "formalManifestLoadedByThisChild": false,
+    "manifestCurrentness": "not_assessed_by_this_child",
+    "manifestRebindOrResignAuthorized": false,
+    "reportContractDriftReceiptConsumedByThisChild": false
+  },
+  "materialAccessBoundary": {
+    "absenceOfPrivateMaterialInRealityClaimed": false,
+    "personDataPresenceAssessed": false,
+    "personDerivedDigestExcluded": false,
+    "privateDossierArtifactsReadByThisChild": 0,
+    "privateOpinionFilesReadByThisChild": 0,
+    "privateRuntimeEndpointInvokedByThisChild": false,
+    "realPersonMaterialCollectedByThisChild": 0,
+    "realWorldPrivateMaterialExistenceAssessed": false,
+    "safeToPublish": false
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "crossFileAtomicSnapshot": false,
+    "endpointSnapshotOnly": true,
+    "intervalMutationExcludedAcrossFiles": false,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "replayExcluded": false,
+    "sameHeldHandlePerHistoricalArtifact": true
+  },
+  "recordType": "bazi_expert_current_line_zero_instance_observation_child_v1",
+  "releaseGovernance": {
+    "expertClaimsAuthorized": false,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "publicDeploymentAuthorized": false,
+    "releaseIdentity": "legacy-v13",
+    "targetSchema": 13
+  },
+  "reviewContract": {
+    "independenceFactorIds": [
+      "same_institution_or_organization",
+      "teacher_student_or_lineage_relationship",
+      "family_or_household_relationship",
+      "shared_commercial_interest",
+      "rule_or_case_set_coauthorship",
+      "shared_professional_service",
+      "reporting_or_supervision_relationship",
+      "prior_exposure_to_other_reviewer_conclusion",
+      "shared_unpublished_source_or_case_material",
+      "same_upstream_algorithm_or_textbook_dependency"
+    ],
+    "noWinnerPolicy": {
+      "allowedUnresolvedDisposition": [
+        "defer",
+        "reject"
+      ],
+      "generatedModelWinnerSelectionAllowed": false,
+      "majorityVoteAllowed": false,
+      "opinionAveragingAllowed": false,
+      "unresolvedDisagreementMayBeAdopted": false
+    },
+    "reviewQuestionIds": [
+      "month-command-hidden-stem-duplication",
+      "relative-factor-weighting",
+      "strength-band-thresholds",
+      "strength-invalidation-structures"
+    ],
+    "reviewerSeatIds": [
+      "domain-expert-a",
+      "domain-expert-b"
+    ],
+    "reviewerSeats": [
+      {
+        "slotId": "domain-expert-a",
+        "status": "vacant"
+      },
+      {
+        "slotId": "domain-expert-b",
+        "status": "vacant"
+      }
+    ]
+  },
+  "runtimeTrustBoundary": {
+    "cliOutputTrustedAttestation": false,
+    "hiddenPreloadExcluded": false,
+    "loaderIdentityEstablished": false,
+    "mechanicalResultAssumesNoArbitraryPreEvaluationCodeExecution": true,
+    "nodeRuntimeIdentityEstablished": false,
+    "runtimeLauncherIdentityEstablished": false,
+    "visibleLoaderGuardIsSecurityBoundary": false
+  },
+  "schemaVersion": "1.0.0",
+  "status": "current_line_mechanical_zero_instance_observation_no_admission_effect"
+}

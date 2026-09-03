@@ -1,0 +1,245 @@
+{
+  "authorityBoundary": {
+    "bindingFreezeEffect": "none",
+    "contentTruthEstablished": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "legalConclusion": "not_established",
+    "publicDeploymentAuthorized": false,
+    "releaseReady": false,
+    "rightsEffect": "none"
+  },
+  "basisArtifacts": [
+    {
+      "bytes": 48,
+      "currentProjectionInspectionReexecutedByThisLayer": false,
+      "path": "content/knowledge/manifest.v2.json",
+      "pointInTimeRawIdentityVerified": true,
+      "role": "current_empty_bundled_knowledge_manifest",
+      "sha256": "92e4d2c92aeb7f1e7898014be429f0fab92885dd52c36aee8eb1523941c55122"
+    },
+    {
+      "bytes": 244747,
+      "currentProjectionInspectionReexecutedByThisLayer": false,
+      "path": "packages/contracts/src/index.ts",
+      "pointInTimeRawIdentityVerified": true,
+      "role": "formal_source_carrier_schema_basis",
+      "sha256": "674a3fe1e2b3cd4fc99e481a758966a320ddc3c1113a9471eba190851d15e041"
+    },
+    {
+      "bytes": 39595,
+      "currentProjectionInspectionReexecutedByThisLayer": false,
+      "path": "packages/knowledge-core/src/index.ts",
+      "pointInTimeRawIdentityVerified": true,
+      "role": "knowledge_text_normalization_and_materialization_basis",
+      "sha256": "9e6420e8c6c5b3aafd892fdb3c5363af81ea9d9e24ebff6e11897300053524b0"
+    },
+    {
+      "bytes": 50427,
+      "currentProjectionInspectionReexecutedByThisLayer": false,
+      "path": "content/bazi-strength-source-binding-candidates.v1.6.0.json",
+      "pointInTimeRawIdentityVerified": true,
+      "role": "versioned_phase_c_source_candidate_parent_ledger",
+      "sha256": "62f6a68b99246a802bcf2055aa09a8ac8113df37a7ede1c55d8a2ea64deaea98"
+    },
+    {
+      "bytes": 23947,
+      "currentProjectionInspectionReexecutedByThisLayer": false,
+      "path": "content/bazi-strength-source-rights-candidates.v1.2.0.json",
+      "pointInTimeRawIdentityVerified": true,
+      "role": "versioned_phase_c_rights_candidate_parent_ledger",
+      "sha256": "678632a8875672f58bb5c9f1ec4a299a4f0c6e750b8ff4a02bfe4df889e1243a"
+    },
+    {
+      "bytes": 32629,
+      "currentProjectionInspectionReexecutedByThisLayer": false,
+      "path": "content/system-admission/bazi-binding-freeze-requirements.v1.7.0.json",
+      "pointInTimeRawIdentityVerified": true,
+      "role": "version_aware_phase_c_binding_freeze_candidate_readiness_parent",
+      "sha256": "7565a1c1ae51c09c78cf8f906e544bd8ee822020f76587237bc909ef1e6408a2"
+    }
+  ],
+  "contractBoundary": {
+    "allowedTransformationClass": "utf8_bom_and_line_ending_normalization_only",
+    "carrierCanonicalRecordDigestRequired": true,
+    "carrierIdAndEditVersionRequired": true,
+    "carrierRole": "upstream_source_carrier_not_project_copy",
+    "collationCanBePromotedByReceipt": false,
+    "fixedNormalizationProfileRequired": true,
+    "ocrCanBePromotedByReceipt": false,
+    "projectCopyRawBytesAndSha256Required": true,
+    "projectCopyRole": "technical_materialization_provenance_only",
+    "sourceCarrierContentDigestMustEqualNormalizedContentSha256": true,
+    "transcriptionCanBePromotedByReceipt": false
+  },
+  "createdAt": "2026-08-30T00:00:00.000Z",
+  "currentInventory": {
+    "bundledManifestEntries": 0,
+    "formalSourceCarrierRecords": 0,
+    "formalSourceRightsRecords": 0,
+    "materializationsVerified": 0,
+    "projectCopyMaterializationRecords": 0,
+    "redistributableSources": 0,
+    "sourceBindingsFrozen": 0,
+    "sourceBindingsRequired": 12
+  },
+  "doesNotEstablish": [
+    "lawful_material_access",
+    "source_carrier_record_authenticity_or_custody",
+    "work_edition_or_carrier_rights_legal_conclusion",
+    "ocr_transcription_or_collation_accuracy",
+    "source_to_text_semantic_equivalence_beyond_fixed_normalization",
+    "content_truth",
+    "expert_identity_credentials_independence_opinion_or_truth",
+    "binding_freeze",
+    "cross_file_atomic_snapshot",
+    "mutation_epoch",
+    "interval_mutation_or_aba_exclusion",
+    "release_readiness",
+    "public_release_authorization",
+    "active_readiness_or_formal_admission",
+    "formal_parent_identity",
+    "fresh_materialization_contract_or_runtime_reexecution_by_this_layer"
+  ],
+  "gateSummary": {
+    "activeAdmissionEffect": "none",
+    "bindingFrozenVerified": 0,
+    "browserRuntimeEvidenceEstablished": false,
+    "candidateReadinessWeakSetBrandVerified": true,
+    "contentTruthEstablished": false,
+    "currentInventoryChanged": false,
+    "expertClaimsAuthorized": false,
+    "expertReviewBundleComplete": false,
+    "expertTruthEstablished": false,
+    "formalActivationAllowed": false,
+    "formalAdmissionPromotionBlocked": true,
+    "formalSourceCarrierRecords": 0,
+    "formalSourceRightsRecords": 0,
+    "historicalDirectParentSlotsRebound": 3,
+    "historicalMaterializationContractProjectionReusedAfterUnchangedNonParentBasisRawIdentityMatchAndBrandedParentRebind": true,
+    "ledgerRequirementsDefined": true,
+    "materializationApiIntegratedByThisCandidate": false,
+    "materializationContractProjectionChanged": false,
+    "materializationsVerified": 0,
+    "projectCopyMaterializationRecords": 0,
+    "publicDeploymentAuthorized": false,
+    "releaseReady": false,
+    "rightsBundleComplete": false,
+    "rightsLegalConclusionEstablished": false,
+    "sourceBundleComplete": false,
+    "sourceRightsSupersessionWeakSetBrandVerified": true,
+    "verifiedUpstreamCapabilityCount": 2
+  },
+  "historicalLineage": {
+    "createdAt": "2026-08-29T00:00:00.000Z",
+    "ledgerDigest": "690320c5d9778bf61da5ca3e112aedc6f9e2760e27f628f4c992cb5b9a8af1cb",
+    "ledgerId": "hakimi.bazi.project-copy-materialization-requirements/1.0.0",
+    "path": "content/system-admission/bazi-project-copy-materialization-requirements.v1.json",
+    "rawBytes": 6168,
+    "rawSha256": "c63a95514063fb64752d449f6ccb1c844544110e5ed9f1192de2ef7723efd13b",
+    "recordType": "bazi_project_copy_materialization_requirements_v1",
+    "role": "fixed_zero_instance_materialization_contract_projection_template_only_not_current_capability",
+    "schemaVersion": "1.0.0",
+    "status": "zero_instance_materialization_requirements_defined"
+  },
+  "integrityBoundary": {
+    "authenticityEstablished": false,
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi.bazi.project-copy-materialization-requirements.version-aware-candidate.v1.1",
+    "digestIsDigitalSignature": false,
+    "digitalSignature": null,
+    "signerIdentity": null
+  },
+  "ledgerDigest": "d877ac00042d9e9635b0bf2cfe7b5f387f3aad82faa96c8a7214548299045d3f",
+  "ledgerId": "hakimi.bazi.project-copy-materialization-requirements.version-aware-candidate/1.1.0",
+  "normalizationProfile": {
+    "implementationPath": "packages/knowledge-core/src/index.ts",
+    "implementationSha256": "9e6420e8c6c5b3aafd892fdb3c5363af81ea9d9e24ebff6e11897300053524b0",
+    "operations": [
+      "strict_utf8_decode",
+      "single_leading_bom_removal",
+      "crlf_and_cr_to_lf",
+      "nul_rejection",
+      "nonempty_content_requirement"
+    ],
+    "profileId": "hakimi.knowledge.utf8-text-normalization/1.0.0"
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "crossFileAtomicSnapshot": false,
+    "currentProjectionInspectionReexecutedByThisLayer": false,
+    "directHistoricalRequirementsRawAndSemanticIdentityVerified": true,
+    "endpointSnapshotOnly": true,
+    "historicalMaterializationContractProjectionReusedAfterUnchangedNonParentBasisRawIdentityMatchAndBrandedParentRebind": true,
+    "intervalMutationExcluded": false,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "nestedVerifierSameBufferTransitivityClaimed": false,
+    "runtimeExecutionObservedByThisLayer": false,
+    "unchangedDirectNonParentBasisPointInTimeRawIdentitiesVerified": 3,
+    "upstreamBrandedCapabilitiesVerified": 2
+  },
+  "receiptRequirements": {
+    "candidateSchemaVersion": "1.0.0",
+    "currentPersistedReceiptIds": [],
+    "projectPathPrefix": "content/knowledge/documents/",
+    "rawIdentityRequired": true,
+    "receiptSchemaVersion": "1.0.0",
+    "resultStoresAbsolutePath": false,
+    "resultStoresContentOrBytes": false,
+    "sourceCarrierCanonicalDigestDomain": "hakimi.knowledge.source-carrier-record.canonical.v1",
+    "sourceCarrierSchemaVersion": "1.0.0"
+  },
+  "recordType": "bazi_project_copy_materialization_requirements_version_aware_candidate_v1_1",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "expertClaimsAuthorized": false,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "schemaVersion": "1.1.0",
+  "status": "candidate_only_version_aware_zero_instance_materialization_requirements_no_admission_effect",
+  "versionedCandidateParentRebind": {
+    "activeAdmissionEffect": "none",
+    "candidateReadinessParent": {
+      "ledgerDigest": "afdebfa1fb7a797f02d136373eb9aef1afa26b38b755926f8930ea5de97316b8",
+      "ledgerId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.7.0",
+      "path": "content/system-admission/bazi-binding-freeze-requirements.v1.7.0.json",
+      "rawBytes": 32629,
+      "rawSha256": "7565a1c1ae51c09c78cf8f906e544bd8ee822020f76587237bc909ef1e6408a2"
+    },
+    "candidateReadinessWeakSetBrandVerified": true,
+    "currentInventoryChanged": false,
+    "formalActivationAllowed": false,
+    "historicalDirectParentSlotsRebound": 3,
+    "historicalParentArtifactsMutated": false,
+    "materializationApiIntegratedByThisCandidate": false,
+    "materializationContractProjectionChanged": false,
+    "sourceBindingParent": {
+      "ledgerDigest": "6f008058b282613fd131344206b27fccb1d80596bb49789f0554acdd69c1e44c",
+      "ledgerId": "hakimi.bazi.strength.source-binding-candidates/1.6.0",
+      "path": "content/bazi-strength-source-binding-candidates.v1.6.0.json",
+      "rawBytes": 50427,
+      "rawSha256": "62f6a68b99246a802bcf2055aa09a8ac8113df37a7ede1c55d8a2ea64deaea98"
+    },
+    "sourceRightsParent": {
+      "ledgerDigest": "300e092c4913885cff626221b8734786128639c7d6cfd7c2be7bea2acc6bbefc",
+      "ledgerId": "hakimi.bazi.strength.source-rights-candidates/1.2.0",
+      "path": "content/bazi-strength-source-rights-candidates.v1.2.0.json",
+      "rawBytes": 23947,
+      "rawSha256": "678632a8875672f58bb5c9f1ec4a299a4f0c6e750b8ff4a02bfe4df889e1243a"
+    },
+    "sourceRightsSupersessionWeakSetBrandVerified": true,
+    "supportingReceiptArtifacts": 1,
+    "supportingSupersessionReceipt": {
+      "path": "content/system-admission/bazi-dtt-versioned-parent-supersession.v1.json",
+      "rawBytes": 9229,
+      "rawSha256": "aa9e62089990d8ba699c441114914173141e8228f027605b47f5c5e238fac0e3",
+      "supersessionDigest": "601b4e07b94e62b73812a7a26f1108a094272dca660a188bb660fa860f031264",
+      "supersessionId": "hakimi.bazi.dtt-versioned-parent-supersession/1.0.0"
+    },
+    "verifiedUpstreamCapabilityCount": 2
+  }
+}

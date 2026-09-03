@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "bazi_expert_review_intake_gap_v1",
+  "ledgerId": "hakimi.bazi.expert-review-intake-gap/1.0.0",
+  "status": "zero_instance_intake_contract_not_collection_ready",
+  "createdAt": "2026-08-29T00:00:00.000Z",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "mutationEpochBoundary": "preserved",
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "approvedPacketBinding": {
+    "path": "content/bazi-strength-expert-review-packet.v1.json",
+    "packetId": "hakimi.bazi.strength.expert-review-packet/1.5.0",
+    "packetDigest": "cfe554b60b4698e0acd0a42e14484f4683eb7663d4f6862b767cf70404d2cd5f",
+    "rawBytes": 12684,
+    "rawSha256": "ba28de1b95d57de4320913e7a0b00fe780630d15408c5b22b84311977ea29163"
+  },
+  "readinessLedgerBinding": {
+    "path": "content/system-admission/bazi-binding-freeze-requirements.v1.json",
+    "ledgerId": "hakimi.bazi.strength.binding-freeze-readiness/1.5.0",
+    "ledgerDigest": "feea402079cab44a5d3e0855f867114684da96e4005343a1b1a7cdc75fbee9ad",
+    "rawBytes": 26038,
+    "rawSha256": "662c91e6269d5e860a0d207185680ea7c7b752f24e313859c0d987cb5b446201"
+  },
+  "reviewQuestionIds": [
+    "month-command-hidden-stem-duplication",
+    "relative-factor-weighting",
+    "strength-band-thresholds",
+    "strength-invalidation-structures"
+  ],
+  "independenceFactorIds": [
+    "same_institution_or_organization",
+    "teacher_student_or_lineage_relationship",
+    "family_or_household_relationship",
+    "shared_commercial_interest",
+    "rule_or_case_set_coauthorship",
+    "shared_professional_service",
+    "reporting_or_supervision_relationship",
+    "prior_exposure_to_other_reviewer_conclusion",
+    "shared_unpublished_source_or_case_material",
+    "same_upstream_algorithm_or_textbook_dependency"
+  ],
+  "candidateRecordFormats": [
+    "bazi_expert_public_identity_binding_v1",
+    "bazi_expert_original_opinion_v1",
+    "bazi_expert_private_opinion_seal_receipt_v1",
+    "bazi_expert_pairwise_independence_assessment_v1",
+    "bazi_expert_disagreement_inventory_v1",
+    "bazi_expert_reconciliation_note_v1",
+    "bazi_expert_review_bundle_v1"
+  ],
+  "currentInstances": {
+    "publicIdentityBindings": [],
+    "originalOpinions": [],
+    "privateOpinionSealReceipts": [],
+    "pairwiseIndependenceAssessments": [],
+    "disagreementInventories": [],
+    "reconciliationNotes": [],
+    "overallBundles": [],
+    "counts": {
+      "publicIdentityBindings": 0,
+      "originalOpinions": 0,
+      "privateOpinionSealReceipts": 0,
+      "pairwiseIndependenceAssessments": 0,
+      "disagreementInventories": 0,
+      "reconciliationNotes": 0,
+      "overallBundles": 0,
+      "sealedOriginalOpinions": 0,
+      "independentExpertReviewsVerified": 0
+    }
+  },
+  "currentReadiness": {
+    "packetArtifactLocksCurrent": false,
+    "bindingFrozenVerified": 0,
+    "bindingFrozenRequired": 12,
+    "sourceBindingClosureComplete": false,
+    "sourceRightsClosureComplete": false,
+    "candidateFeedbackCollectionReady": false,
+    "releaseClosureReviewReady": false
+  },
+  "expertReviewBundle": {
+    "state": "absent",
+    "count": 0,
+    "countsTowardExpertGate": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "releaseReady": false
+  },
+  "gapSummary": {
+    "candidateRecordFormatsDefined": 7,
+    "reviewQuestionsBound": 4,
+    "independenceFactorsBound": 10,
+    "currentRecordInstances": 0,
+    "currentSealedOriginalOpinions": 0,
+    "currentIndependentExpertReviewsVerified": 0,
+    "expertReviewBundleComplete": false,
+    "candidateFeedbackCollectionReady": false,
+    "releaseClosureReviewReady": false,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "doesNotEstablish": [
+    "real_reviewer_identity",
+    "reviewer_credentials",
+    "reviewer_independence",
+    "expert_opinion_authenticity",
+    "immutable_first_seen_chronology",
+    "content_truth",
+    "expert_truth",
+    "rights_legal_conclusion",
+    "cross_file_atomic_snapshot",
+    "interval_mutation_or_aba_exclusion",
+    "expert_gate_closure",
+    "release_readiness",
+    "public_release_authorization"
+  ],
+  "ledgerDigest": "6cf349fda4c4fd2b8ddada22417e12741c37abc6fc884338dbf5c741e0fc1766"
+}

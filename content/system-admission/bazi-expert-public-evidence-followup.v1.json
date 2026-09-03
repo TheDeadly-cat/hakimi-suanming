@@ -1,0 +1,308 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "bazi_expert_public_evidence_followup_v1",
+  "followupId": "hakimi.bazi.expert-public-evidence-followup/1.0.0",
+  "status": "link_only_operator_recorded_public_followup_non_authoritative_not_formal_expert_intake",
+  "createdAt": "2026-08-29T00:00:00.000Z",
+  "parentPrescreenArtifact": {
+    "path": "content/system-admission/bazi-expert-public-candidate-prescreen.v1.json",
+    "rawBytes": 21691,
+    "rawSha256": "88e5dabca1f3bb10cc8c8dfc2d2bfbdcf6b65a9a577b4747374e4e986c6988d9",
+    "ledgerId": "hakimi.bazi.expert-public-candidate-prescreen/1.0.0",
+    "ledgerDigest": "ba9878bfcf266d5f34c46cf0808b3bbc382ddaa8464b36bf1a63d8c77bdf6d21",
+    "candidateLeadIds": [
+      "bazi-public-lead-002",
+      "bazi-public-lead-003"
+    ]
+  },
+  "basisArtifact": {
+    "path": "docs/阶段D八字现实专家公开证据跟进-child-v1-2026-08-29.md",
+    "role": "non_authoritative_link_only_public_followup_narrative_basis",
+    "rawBytes": 5517,
+    "rawSha256": "8ac95f9ea52cdf3aef7db2cc96f12a7fd780b00ea06d3b139d5deb8b8a0a982e"
+  },
+  "reviewQuestionIds": [
+    "month-command-hidden-stem-duplication",
+    "relative-factor-weighting",
+    "strength-band-thresholds",
+    "strength-invalidation-structures"
+  ],
+  "sourceGroupPolicy": {
+    "deduplicationKey": "sourceUpstreamGroupId",
+    "sameGroupObservationsCountOnce": true,
+    "sourceObservationCount": 3,
+    "deduplicatedSourceGroupCount": 2
+  },
+  "sourceGroups": [
+    {
+      "sourceUpstreamGroupId": "JAPAN_DIVINATION_ASSOCIATION",
+      "publicOwnerLabel": "日本占術協会",
+      "observationIds": [
+        "OYAMA-ASSOC-PAPER-TOPIC-20260829"
+      ]
+    },
+    {
+      "sourceUpstreamGroupId": "HUNG_KUANG_PUBLIC_RECORD_FAMILY",
+      "publicOwnerLabel": "弘光科技大学公开角色与出版元数据发布族",
+      "observationIds": [
+        "ZHANG-HK-ROLE-LABEL-OBSERVED-20260829",
+        "ZHANG-DOI-METADATA-201105"
+      ]
+    }
+  ],
+  "sourceObservations": [
+    {
+      "sourceObservationId": "OYAMA-ASSOC-PAPER-TOPIC-20260829",
+      "candidateLeadId": "bazi-public-lead-002",
+      "requestedUrl": "https://uranai-japan.or.jp/rp_archive/",
+      "sourceUpstreamGroupId": "JAPAN_DIVINATION_ASSOCIATION",
+      "sourceType": "public_association_research_archive_topic_record",
+      "observedAt": "2026-08-29",
+      "httpStatusOperatorRecorded": 200,
+      "contentTypeOperatorRecorded": "text/html; charset=UTF-8",
+      "deliveredBodyBytesOperatorRecorded": 223916,
+      "deliveredBodySha256OperatorRecorded": "646effc26cf6bc6873a5eec908f0fb62bd38d1fd51f0e9e2e2ab1ee6834601e0",
+      "deliveredBodyHashBindsSemanticSummary": false,
+      "redirectObserved": false,
+      "doiLiteral": null,
+      "operatorRecordedSummary": "协会公开研究档案把《子平推命とは何か》与小山眞樹代关联，并显示月令／藏干、数值化强弱及内外格／从格主题；项目规则答案仍未建立。",
+      "supportsFollowupDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "ZHANG-HK-ROLE-LABEL-OBSERVED-20260829",
+      "candidateLeadId": "bazi-public-lead-003",
+      "requestedUrl": "https://www.hk.edu.tw/remote/HK_PO37600939/",
+      "sourceUpstreamGroupId": "HUNG_KUANG_PUBLIC_RECORD_FAMILY",
+      "sourceType": "public_institution_role_label_record",
+      "observedAt": "2026-08-29",
+      "httpStatusOperatorRecorded": 200,
+      "contentTypeOperatorRecorded": "text/html; charset=UTF-8",
+      "deliveredBodyBytesOperatorRecorded": 70483,
+      "deliveredBodySha256OperatorRecorded": "328e66f7f7bc0592b9121ce6463859e73755fae7d68310efa709aebe36548adb",
+      "deliveredBodyHashBindsSemanticSummary": false,
+      "redirectObserved": false,
+      "doiLiteral": null,
+      "operatorRecordedSummary": "弘光科技大学人事室公开委员会名册列出同显示名人员及通识教育中心副教授角色标签；只作机构角色线索。",
+      "supportsFollowupDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "ZHANG-DOI-METADATA-201105",
+      "candidateLeadId": "bazi-public-lead-003",
+      "requestedUrl": "https://doi.org/10.29933/SHSS.201105.0005",
+      "sourceUpstreamGroupId": "HUNG_KUANG_PUBLIC_RECORD_FAMILY",
+      "sourceType": "public_doi_resolver_and_publication_metadata_record",
+      "observedAt": "2026-08-29",
+      "httpStatusOperatorRecorded": 302,
+      "contentTypeOperatorRecorded": "text/html;charset=utf-8",
+      "deliveredBodyBytesOperatorRecorded": 305,
+      "deliveredBodySha256OperatorRecorded": "985a94e85830b9845d8a4addf0bb849413b2a4744494499137de9d5ca55e1bd5",
+      "deliveredBodyHashBindsSemanticSummary": false,
+      "redirectObserved": true,
+      "doiLiteral": "10.29933/SHSS.201105.0005",
+      "operatorRecordedSummary": "公开 DOI 入口及出版元数据把《子平命學溯源－唐宋命學要籍考辨》、显示名張新智和该 DOI 关联；只支持子平研究主题相关性。",
+      "supportsFollowupDiscoveryOnly": true,
+      "authoritative": false
+    }
+  ],
+  "candidateFollowups": [
+    {
+      "candidateLeadId": "bazi-public-lead-002",
+      "parentCandidateState": "uncontacted_public_candidate_lead",
+      "followupState": "public_topic_relevance_observed_project_scope_unverified",
+      "observationIds": [
+        "OYAMA-ASSOC-PAPER-TOPIC-20260829"
+      ],
+      "sourceUpstreamGroupIds": [
+        "JAPAN_DIVINATION_ASSOCIATION"
+      ],
+      "deduplicatedSourceGroupCount": 1,
+      "scopeSignalMatrix": [
+        {
+          "questionId": "month-command-hidden-stem-duplication",
+          "state": "adjacent_public_topic_signal_observed_exact_project_question_unassessed"
+        },
+        {
+          "questionId": "relative-factor-weighting",
+          "state": "adjacent_public_topic_signal_observed_exact_project_question_unassessed"
+        },
+        {
+          "questionId": "strength-band-thresholds",
+          "state": "no_direct_public_evidence_observed"
+        },
+        {
+          "questionId": "strength-invalidation-structures",
+          "state": "adjacent_public_topic_signal_observed_exact_project_question_unassessed"
+        }
+      ],
+      "publicTopicRelevanceObserved": true,
+      "institutionRoleLabelObserved": false,
+      "doiLiteralObserved": false,
+      "projectQuestionAnswered": false,
+      "crossRecordPersonIdentityBindingVerified": false,
+      "currentRoleVerified": false,
+      "identityVerified": false,
+      "credentialVerified": false,
+      "scopeVerified": false,
+      "independenceVerified": false,
+      "expertStatusVerified": false,
+      "countsTowardExpertGate": false,
+      "slotAssignment": null
+    },
+    {
+      "candidateLeadId": "bazi-public-lead-003",
+      "parentCandidateState": "uncontacted_public_candidate_lead",
+      "followupState": "public_role_label_and_doi_metadata_observed_person_binding_unverified",
+      "observationIds": [
+        "ZHANG-HK-ROLE-LABEL-OBSERVED-20260829",
+        "ZHANG-DOI-METADATA-201105"
+      ],
+      "sourceUpstreamGroupIds": [
+        "HUNG_KUANG_PUBLIC_RECORD_FAMILY"
+      ],
+      "deduplicatedSourceGroupCount": 1,
+      "scopeSignalMatrix": [
+        {
+          "questionId": "month-command-hidden-stem-duplication",
+          "state": "not_assessed_in_this_followup"
+        },
+        {
+          "questionId": "relative-factor-weighting",
+          "state": "not_assessed_in_this_followup"
+        },
+        {
+          "questionId": "strength-band-thresholds",
+          "state": "not_assessed_in_this_followup"
+        },
+        {
+          "questionId": "strength-invalidation-structures",
+          "state": "not_assessed_in_this_followup"
+        }
+      ],
+      "publicTopicRelevanceObserved": true,
+      "institutionRoleLabelObserved": true,
+      "doiLiteralObserved": true,
+      "projectQuestionAnswered": false,
+      "crossRecordPersonIdentityBindingVerified": false,
+      "currentRoleVerified": false,
+      "identityVerified": false,
+      "credentialVerified": false,
+      "scopeVerified": false,
+      "independenceVerified": false,
+      "expertStatusVerified": false,
+      "countsTowardExpertGate": false,
+      "slotAssignment": null
+    }
+  ],
+  "bindingBoundary": {
+    "childToParentOnly": true,
+    "parentMutated": false,
+    "parentBacklinkAdded": false,
+    "formalPacketMutated": false,
+    "manifestMutated": false,
+    "registryMutated": false,
+    "crossSystemReceiptMutated": false,
+    "countsTowardFormalExpertIntake": false
+  },
+  "storageBoundary": {
+    "remoteResponseBodiesStored": 0,
+    "pageBodiesStored": 0,
+    "carrierFilesStored": 0,
+    "exactQuotesStored": 0,
+    "abstractsStored": 0,
+    "keywordsStored": 0,
+    "screenshotsStored": 0,
+    "personalContactDetailsStored": 0,
+    "privateIdentifiersStored": 0,
+    "credentialsUsed": false,
+    "loginOrProtectedBackendUsed": false,
+    "sourceUrlsStored": 3
+  },
+  "rightsBoundary": {
+    "distributionPolicy": "link_only",
+    "rightsLegalConclusion": "not_established",
+    "workRightsEstablished": false,
+    "editionRightsEstablished": false,
+    "carrierRightsEstablished": false,
+    "storageRightsEstablished": false,
+    "redistributionRightsEstablished": false,
+    "legalReviewVerified": false,
+    "publicRepositoryInclusionAuthorized": false,
+    "buildInclusionAuthorized": false
+  },
+  "networkObservationBoundary": {
+    "operatorRecordedNetworkFacts": true,
+    "operatorRecordedSummariesMechanicallyVerified": false,
+    "automaticDecompressionClaimedByOperator": true,
+    "automaticDecompressionMechanicallyVerified": false,
+    "captureExecutionReceiptStored": false,
+    "remoteCaptureMechanicallyVerified": false,
+    "requestedToFinalUrlBindingEstablished": false,
+    "redirectChainCaptured": false,
+    "wireBytesCaptured": false,
+    "tlsPeerCertificateCaptured": false,
+    "futureFreshnessRevalidated": false,
+    "doiResolverCountsAsIndependentFactUpstream": false,
+    "publisherAuthenticityEstablished": false,
+    "remoteNetworkProvenanceEstablished": false
+  },
+  "integrityBoundary": {
+    "heldHandleRead": true,
+    "sameBufferHashAndParse": true,
+    "basisSameBufferHashAndInspection": true,
+    "parentLoadedViaStrictVerifier": true,
+    "rawIdentityPinned": true,
+    "semanticDigestPinned": true,
+    "finalFileSymlinkRejected": true,
+    "directorySymlinkRejected": true,
+    "hardlinkRejected": true,
+    "unknownFieldsRejected": true,
+    "callerMatchesPersistedSnapshotRequired": true,
+    "fullLoadResultWeakSetBranded": true,
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailable": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false
+  },
+  "authorityBoundary": {
+    "candidateLeadsObserved": 2,
+    "formalExpertSeatsOccupied": 0,
+    "expertGateCount": 0,
+    "identityVerified": false,
+    "credentialVerified": false,
+    "scopeVerified": false,
+    "independenceVerified": false,
+    "expertStatusVerified": false,
+    "expertParticipationOrConsentVerified": false,
+    "expertOpinionStored": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "releaseReady": false,
+    "expertClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false
+  },
+  "doesNotEstablish": [
+    "real_person_identity",
+    "current_role",
+    "credential_validity",
+    "candidate_to_record_person_identity_binding",
+    "project_question_answer",
+    "project_scope_verification",
+    "pairwise_expert_independence",
+    "expert_participation_or_consent",
+    "expert_opinion",
+    "content_truth",
+    "expert_truth",
+    "work_edition_carrier_rights",
+    "legal_conclusion",
+    "release_readiness",
+    "expert_claim_authorization",
+    "public_deployment_authorization",
+    "remote_network_provenance",
+    "publisher_authenticity",
+    "cross_file_atomic_snapshot",
+    "mutation_epoch_or_interval_mutation_or_aba_exclusion"
+  ],
+  "followupDigest": "3cbe882b03294119b75a3ba8e13bfcf60202529029aff0ea3821bf232f7619f9"
+}

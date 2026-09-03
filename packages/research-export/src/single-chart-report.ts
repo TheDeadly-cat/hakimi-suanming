@@ -5,6 +5,7 @@ import {
   knowledgeDocumentRecordSchema,
   researchNoteRecordSchema,
   revisionCalculationReceiptRecordSchema,
+  sourceCarrierRecordSchema,
   storedEventRecordSchema,
   storedEventTimeMigrationReceiptSchema,
   storedRevisionRecordSchema,
@@ -13,6 +14,7 @@ import {
   type CitationTarget,
   type ResearchNoteRecord,
   type RulePackBinding,
+  type SourceCarrierRecord,
   type SourceRightsRecord,
   type StoredEventRecord,
   type StoredEventTimeMigrationReceipt
@@ -33,6 +35,7 @@ import {
 import { sha256Hex } from "@hakimi/integrity";
 import {
   createKnowledgeDocumentCitationIntegrityVerifier,
+  isRedistributableSourceMaterial,
   isRedistributableSourceRights,
   isReservedSingleChartReportEvidenceSubjectId,
   isSingleChartReportEvidenceSubjectId
@@ -245,6 +248,7 @@ export const SINGLE_CHART_REPORT_PRESENTATION_LIMITS = Object.freeze({
     citations: 512,
     knowledgeDocuments: 512,
     sourceRights: 512,
+    sourceCarriers: 512,
     provenance: 512
   })
 } as const);
@@ -486,7 +490,10 @@ export const singleChartReportInputSchema = z.strictObject({
   knowledgeDocuments: z.array(exactRecord(knowledgeDocumentRecordSchema, "KnowledgeDocument"))
     .max(SINGLE_CHART_REPORT_PRESENTATION_LIMITS.builderInputCollections.knowledgeDocuments),
   sourceRights: z.array(exactRecord(sourceRightsRecordSchema, "SourceRights"))
-    .max(SINGLE_CHART_REPORT_PRESENTATION_LIMITS.builderInputCollections.sourceRights)
+    .max(SINGLE_CHART_REPORT_PRESENTATION_LIMITS.builderInputCollections.sourceRights),
+  sourceCarriers: z.array(exactRecord(sourceCarrierRecordSchema, "SourceCarrier"))
+    .max(SINGLE_CHART_REPORT_PRESENTATION_LIMITS.builderInputCollections.sourceCarriers)
+    .default([])
 }).superRefine((input, context) => {
   if (
     input.researchNotes.length + input.events.length
@@ -1610,7 +1617,8 @@ export const singleChartResearchReportSchema = z.strictObject({
     const sourceBindings = report.interpretationEvidence.sourceBindings;
     for (const [bindingIndex, binding] of sourceBindings.entries()) {
       const matching = report.citations.filter((citation) => (
-        citation.evidenceSubjectIds.includes(binding.evidenceSubjectId)
+        citation.targets.some((target) => target.startsWith("命盘字段 "))
+        && citation.evidenceSubjectIds.includes(binding.evidenceSubjectId)
       ));
       const referencesForStatus = (status: typeof matching[number]["status"]) => matching
         .filter((citation) => citation.status === status)
@@ -1653,7 +1661,8 @@ export const singleChartResearchReportSchema = z.strictObject({
     const summary = report.interpretationEvidence.admissionSummary;
     const subjectIds = new Set(sourceBindings.map((binding) => binding.evidenceSubjectId));
     const matchingCitations = report.citations.filter((citation) => (
-      citation.evidenceSubjectIds.some((subjectId) => subjectIds.has(subjectId))
+      citation.targets.some((target) => target.startsWith("命盘字段 "))
+      && citation.evidenceSubjectIds.some((subjectId) => subjectIds.has(subjectId))
     ));
     const bindingsWithNonRejectedCitation = sourceBindings.filter((binding) => (
       binding.mechanicalAdmission.candidateCitationReferences.length > 0
@@ -1833,10 +1842,10 @@ export const singleChartMarkdownDocumentSchema = z.strictObject({
 type ParsedSingleChartReportInput = z.infer<typeof singleChartReportInputSchema>;
 export type SingleChartReportInput = Omit<
   ParsedSingleChartReportInput,
-  "revisionCalculationReceiptLedgerStatus" | "revisionCalculationReceipts"
+  "revisionCalculationReceiptLedgerStatus" | "revisionCalculationReceipts" | "sourceCarriers"
 > & Partial<Pick<
   ParsedSingleChartReportInput,
-  "revisionCalculationReceiptLedgerStatus" | "revisionCalculationReceipts"
+  "revisionCalculationReceiptLedgerStatus" | "revisionCalculationReceipts" | "sourceCarriers"
 >>;
 export type SingleChartReportOptions = z.input<typeof singleChartReportOptionsSchema>;
 export type SingleChartResearchReport = z.infer<typeof singleChartResearchReportSchema>;
@@ -2028,7 +2037,8 @@ function assertRawInputCollectionCapacity(rawInput: unknown): void {
     ["eventTimeMigrationReceipts", limits.eventTimeMigrationReceipts, "事件时间迁移凭证"],
     ["citations", limits.citations, "引用"],
     ["knowledgeDocuments", limits.knowledgeDocuments, "资料"],
-    ["sourceRights", limits.sourceRights, "来源权利记录"]
+    ["sourceRights", limits.sourceRights, "来源权利记录"],
+    ["sourceCarriers", limits.sourceCarriers, "来源载体记录"]
   ] as const;
   for (const [field, maximum, label] of collections) {
     const candidate = rawInput[field];
@@ -2232,7 +2242,8 @@ function assertParsedBuilderAggregateCapacity(input: ParsedSingleChartReportInpu
     input.eventTimeMigrationReceipts,
     input.citations,
     displayedDocumentMetadata,
-    input.sourceRights
+    input.sourceRights,
+    input.sourceCarriers
   ];
   if (!hasSingleChartReportAggregateTextCapacity(presentationSources)) {
     throw new Error(
@@ -2307,6 +2318,14 @@ async function validateAndSort(rawInput: SingleChartReportInput) {
     if (rights.has(record.documentId)) throw new Error(`SourceRights 重复：${record.documentId}`);
     rights.set(record.documentId, record);
   }
+  const carriers = new Map<string, SourceCarrierRecord>();
+  const carrierIds = new Set<string>();
+  for (const record of input.sourceCarriers) {
+    if (carrierIds.has(record.carrierId)) throw new Error("SourceCarrier carrierId 重复");
+    if (carriers.has(record.documentId)) throw new Error("SourceCarrier documentId 重复");
+    carrierIds.add(record.carrierId);
+    carriers.set(record.documentId, record);
+  }
 
   const verifiedCitations = input.citations.map((citation) => {
     const verifier = documentVerifiers.get(citation.documentId);
@@ -2329,6 +2348,7 @@ async function validateAndSort(rawInput: SingleChartReportInput) {
   if (documents.size !== requiredDocumentIds.size || rights.size !== requiredDocumentIds.size) {
     throw new Error("引用、资料与来源权利集合必须一一对应且不夹带无关记录");
   }
+  const redistributableDocumentIds = new Set<string>();
   for (const documentId of requiredDocumentIds) {
     const knowledgeDocument = documents.get(documentId);
     const sourceRights = rights.get(documentId);
@@ -2337,6 +2357,19 @@ async function validateAndSort(rawInput: SingleChartReportInput) {
     if ((sourceRights.origin === "user_import") !== (knowledgeDocument.recordType === "user_knowledge_document")) {
       throw new Error(`来源权利 origin 与资料类型不一致：${documentId}`);
     }
+    if (isRedistributableSourceRights(sourceRights)) {
+      const sourceCarrier = carriers.get(documentId);
+      if (!sourceCarrier) throw new Error("可再分发 SourceRights 缺少 SourceCarrier");
+      if (sourceCarrier.documentContentHash !== knowledgeDocument.contentHash
+        || !isRedistributableSourceMaterial(sourceRights, sourceCarrier)) {
+        throw new Error("来源载体未通过作品层、版本层与载体层再分发门");
+      }
+      redistributableDocumentIds.add(documentId);
+    }
+  }
+  if (carriers.size !== redistributableDocumentIds.size
+    || [...carriers.keys()].some((documentId) => !redistributableDocumentIds.has(documentId))) {
+    throw new Error("SourceCarrier 集合只能包含当前报告可再分发资料所需记录");
   }
   const citations = [...verifiedCitations].sort((left, right) => {
     const rank = { verified: 0, user_candidate: 1, rejected: 2 } as const;
@@ -2616,14 +2649,43 @@ function citationTargetsEvidenceSubject(
   ));
 }
 
+function citationTargetsCurrentChartField(
+  citation: Pick<CitationRecord, "targets">,
+  caseId: string,
+  revisionId: string
+): boolean {
+  return citation.targets.some((target) => (
+    target.kind === "chart_field"
+    && target.caseId === caseId
+    && target.revisionId === revisionId
+  ));
+}
+
+function citationTargetsBindingForCurrentRevision(
+  citation: Pick<CitationRecord, "targets">,
+  evidenceSubjectId: string,
+  caseId: string,
+  revisionId: string
+): boolean {
+  return citationTargetsEvidenceSubject(citation, evidenceSubjectId)
+    && citationTargetsCurrentChartField(citation, caseId, revisionId);
+}
+
 function reportInterpretationMechanicalAdmission(
   binding: BaziStrengthClaimSourceBinding,
   citations: readonly Readonly<CitationRecord>[],
   rights: ReadonlyMap<string, SourceRightsRecord>,
-  citationReferenceById: ReadonlyMap<string, string>
+  citationReferenceById: ReadonlyMap<string, string>,
+  caseId: string,
+  revisionId: string
 ): ReportInterpretationMechanicalAdmission {
   const matching = citations.filter((citation) => (
-    citationTargetsEvidenceSubject(citation, binding.evidenceSubjectId)
+    citationTargetsBindingForCurrentRevision(
+      citation,
+      binding.evidenceSubjectId,
+      caseId,
+      revisionId
+    )
   ));
   const referencesForStatus = (status: CitationRecord["status"]): string[] => matching
     .filter((citation) => citation.status === status)
@@ -2685,7 +2747,9 @@ function reportInterpretationAdmissionSummary(
   sourceBindings: readonly ReportInterpretationEvidence["sourceBindings"][number][],
   citations: readonly Readonly<CitationRecord>[],
   rights: ReadonlyMap<string, SourceRightsRecord>,
-  anonymized: boolean
+  anonymized: boolean,
+  caseId: string,
+  revisionId: string
 ): ReportInterpretationAdmissionSummary {
   if (anonymized) {
     return {
@@ -2694,9 +2758,12 @@ function reportInterpretationAdmissionSummary(
     };
   }
   const subjectIds = new Set(sourceBindings.map((binding) => binding.evidenceSubjectId));
-  const matchingCitations = citations.filter((citation) => citation.targets.some((target) => (
-    target.kind === "evidence_subject" && subjectIds.has(target.subjectId)
-  )));
+  const matchingCitations = citations.filter((citation) => (
+    citationTargetsCurrentChartField(citation, caseId, revisionId)
+    && citation.targets.some((target) => (
+      target.kind === "evidence_subject" && subjectIds.has(target.subjectId)
+    ))
+  ));
   const structuredCitations = matchingCitations.filter((citation) => citation.status !== "rejected");
   const matchingDocumentIds = new Set(matchingCitations.map((citation) => citation.documentId));
   const matchingRightsDocumentIds = new Set(matchingCitations.flatMap((citation) => (
@@ -2774,6 +2841,7 @@ function reportInterpretationCoverage(
 }
 
 async function buildReportInterpretationEvidence(
+  caseId: string,
   revision: ParsedSingleChartReportInput["revision"],
   citations: readonly Readonly<CitationRecord>[],
   rights: ReadonlyMap<string, SourceRightsRecord>,
@@ -2862,11 +2930,25 @@ async function buildReportInterpretationEvidence(
   const sources = envelope.sources.map(reportInterpretationSource);
   const sourceBindings = envelope.sourceBindings.map((binding) => reportInterpretationSourceBinding(
     binding,
-    reportInterpretationMechanicalAdmission(binding, citations, rights, citationReferenceById)
+    reportInterpretationMechanicalAdmission(
+      binding,
+      citations,
+      rights,
+      citationReferenceById,
+      caseId,
+      revision.id
+    )
   ));
   const assertionFamilies = reportInterpretationAssertionFamilies(statements);
   const coverage = reportInterpretationCoverage(statements, assertionFamilies, sourceBindings, sources);
-  const admissionSummary = reportInterpretationAdmissionSummary(sourceBindings, citations, rights, anonymized);
+  const admissionSummary = reportInterpretationAdmissionSummary(
+    sourceBindings,
+    citations,
+    rights,
+    anonymized,
+    caseId,
+    revision.id
+  );
   return {
     status: "available",
     reason: null,
@@ -3023,6 +3105,7 @@ export async function buildSingleChartResearchReport(
     }
   }
   const interpretationEvidence = await buildReportInterpretationEvidence(
+    input.caseRecord.id,
     revision,
     citations,
     rights,

@@ -1,0 +1,781 @@
+{
+  "authorityBoundary": {
+    "bindingFreezeEffect": "none",
+    "contentTruthEstablished": false,
+    "expertClaimsAuthorized": false,
+    "expertGateClosureAuthorized": false,
+    "expertTruthEstablished": false,
+    "feedbackCollectionAuthorized": false,
+    "formalActivationAllowed": false,
+    "legalConclusion": "not_established",
+    "publicDeploymentAuthorized": false,
+    "releaseReady": false,
+    "rightsEffect": "none"
+  },
+  "createdAt": "2026-08-30T00:00:00.000Z",
+  "dependencyBoundary": {
+    "activeAdmissionEffect": "none",
+    "candidateReadinessWeakSetBrandVerified": true,
+    "crossBrandActualSourceRightsReceiptTupleExact": true,
+    "currentCandidateReadinessParent": {
+      "ledgerDigest": "afdebfa1fb7a797f02d136373eb9aef1afa26b38b755926f8930ea5de97316b8",
+      "ledgerId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.7.0",
+      "path": "content/system-admission/bazi-binding-freeze-requirements.v1.7.0.json",
+      "rawBytes": 32629,
+      "rawSha256": "7565a1c1ae51c09c78cf8f906e544bd8ee822020f76587237bc909ef1e6408a2"
+    },
+    "currentSourceBindingParent": {
+      "candidateDigest": "2c59ee25081c6e0a88ee7f9da18395be2ea615bb289c28798e324e23befeeb59",
+      "candidateId": "dtt-chanwei-wikisource-r2600158-candidate-v2",
+      "ledgerDigest": "6f008058b282613fd131344206b27fccb1d80596bb49789f0554acdd69c1e44c",
+      "ledgerId": "hakimi.bazi.strength.source-binding-candidates/1.6.0",
+      "path": "content/bazi-strength-source-binding-candidates.v1.6.0.json",
+      "rawBytes": 50427,
+      "rawSha256": "62f6a68b99246a802bcf2055aa09a8ac8113df37a7ede1c55d8a2ea64deaea98"
+    },
+    "currentSourceRightsParent": {
+      "candidateDigest": "674a0b64179f5fbb0dff331fdad6b6ac93e3093de4a8459abf6ff9bdd6cd418c",
+      "candidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v2",
+      "ledgerDigest": "300e092c4913885cff626221b8734786128639c7d6cfd7c2be7bea2acc6bbefc",
+      "ledgerId": "hakimi.bazi.strength.source-rights-candidates/1.2.0",
+      "path": "content/bazi-strength-source-rights-candidates.v1.2.0.json",
+      "rawBytes": 23947,
+      "rawSha256": "678632a8875672f58bb5c9f1ec4a299a4f0c6e750b8ff4a02bfe4df889e1243a"
+    },
+    "engineeringValueSubjectGapCandidateDependency": false,
+    "historicalDirectParentSlotsRebound": 3,
+    "policyWeightsCandidateDependency": false,
+    "pr10bcCandidateDependency": false,
+    "projectCopyMaterializationCandidateDependency": false,
+    "readinessHistoricalPacketBasisRawIdentityExact": true,
+    "readinessLedgerBindingSlotsRebound": 1,
+    "sourceRightsSupersessionWeakSetBrandVerified": true,
+    "supportingSupersessionReceipt": {
+      "path": "content/system-admission/bazi-dtt-versioned-parent-supersession.v1.json",
+      "rawBytes": 9229,
+      "rawSha256": "aa9e62089990d8ba699c441114914173141e8228f027605b47f5c5e238fac0e3",
+      "supersessionDigest": "601b4e07b94e62b73812a7a26f1108a094272dca660a188bb660fa860f031264",
+      "supersessionId": "hakimi.bazi.dtt-versioned-parent-supersession/1.0.0"
+    },
+    "supportingSupersessionReceiptArtifactCount": 1,
+    "verifiedUpstreamPrivateBrandCount": 2
+  },
+  "doesNotEstablish": [
+    "approved_or_active_expert_review_packet",
+    "collection_ready_expert_intake",
+    "real_reviewer_identity",
+    "reviewer_credentials",
+    "reviewer_independence",
+    "expert_opinion_authenticity",
+    "immutable_first_seen_chronology",
+    "content_truth",
+    "expert_truth",
+    "rights_or_legal_conclusion",
+    "cross_file_atomic_snapshot",
+    "mutation_epoch_interval_or_aba_exclusion",
+    "binding_freeze_or_expert_gate_closure",
+    "release_readiness",
+    "public_release_authorization"
+  ],
+  "gateSummary": {
+    "activeAdmissionEffect": "none",
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 12,
+    "candidateFeedbackCollectionReady": false,
+    "candidateProjectedArtifactLockDrifts": 1,
+    "candidateProjectedArtifactLockExactMatches": 11,
+    "candidateRecordFormatsDefined": 7,
+    "contentTruthEstablished": false,
+    "countsTowardExpertGate": false,
+    "credentialsVerified": 0,
+    "currentRecordInstances": 0,
+    "domainExpertsRequired": 2,
+    "expertClaimsAuthorized": false,
+    "expertReviewBundleComplete": false,
+    "expertTruthEstablished": false,
+    "formalActivationAllowed": false,
+    "formalAdmissionPromotionBlocked": true,
+    "historicalDirectParentSlotsRebound": 3,
+    "historicalPacketArtifactLockSlots": 12,
+    "historicalTemplateArtifactCount": 2,
+    "identitiesVerified": 0,
+    "independentExpertReviewsVerified": 0,
+    "packetArtifactLocksCurrent": false,
+    "publicDeploymentAuthorized": false,
+    "releaseReady": false,
+    "reviewerSlotsOccupied": 0,
+    "rightsBundleComplete": false,
+    "rightsLegalConclusionEstablished": false,
+    "scopesVerified": 0,
+    "sealedOriginalOpinions": 0,
+    "sourceBundleComplete": false,
+    "sourceRightsArtifactLockSlotsRebound": 2,
+    "supportingSupersessionReceiptArtifactCount": 1,
+    "unchangedPacketArtifactLockSlotsChecked": 10,
+    "verifiedUpstreamPrivateBrandCount": 2
+  },
+  "historicalTemplateLineage": {
+    "historicalArtifactsMutated": false,
+    "historicalFormalFailureResolvedByThisCandidate": false,
+    "historicalFormalVerifierInvokedByThisCandidate": false,
+    "historicalTemplateArtifactCount": 2,
+    "intakeGap": {
+      "ledgerDigest": "6cf349fda4c4fd2b8ddada22417e12741c37abc6fc884338dbf5c741e0fc1766",
+      "ledgerId": "hakimi.bazi.expert-review-intake-gap/1.0.0",
+      "path": "content/system-admission/bazi-expert-review-intake-gap.v1.json",
+      "rawBytes": 4309,
+      "rawSha256": "7d01f000358f6938675c34fbebf6379e55c3f56dadee12fab6a3d801b33ef6ac",
+      "recordType": "bazi_expert_review_intake_gap_v1",
+      "role": "fixed_raw_and_semantic_zero_instance_intake_template_only",
+      "schemaVersion": "1.0.0",
+      "status": "zero_instance_intake_contract_not_collection_ready"
+    },
+    "packet": {
+      "packetDigest": "cfe554b60b4698e0acd0a42e14484f4683eb7663d4f6862b767cf70404d2cd5f",
+      "packetId": "hakimi.bazi.strength.expert-review-packet/1.5.0",
+      "path": "content/bazi-strength-expert-review-packet.v1.json",
+      "rawBytes": 12684,
+      "rawSha256": "ba28de1b95d57de4320913e7a0b00fe780630d15408c5b22b84311977ea29163",
+      "recordType": "bazi_strength_expert_review_packet_candidate",
+      "role": "fixed_raw_and_semantic_review_contract_template_only",
+      "schemaVersion": "1.0.0",
+      "status": "mechanically_bound_vacant_review_packet"
+    }
+  },
+  "intakeContractProjection": {
+    "approvedHistoricalPacketTemplateBinding": {
+      "packetDigest": "cfe554b60b4698e0acd0a42e14484f4683eb7663d4f6862b767cf70404d2cd5f",
+      "packetId": "hakimi.bazi.strength.expert-review-packet/1.5.0",
+      "path": "content/bazi-strength-expert-review-packet.v1.json",
+      "rawBytes": 12684,
+      "rawSha256": "ba28de1b95d57de4320913e7a0b00fe780630d15408c5b22b84311977ea29163"
+    },
+    "candidatePacketProjectionBinding": {
+      "countsAsApprovedPacket": false,
+      "persistedAsStandalonePacket": false,
+      "projectionDigest": "4613fce5226972912576c9cce74e1f10fdcb0db9664ffedfbbd0508ce8f49428",
+      "projectionId": "hakimi.bazi.strength.expert-review-packet.version-aware-template-projection/1.1.0"
+    },
+    "candidateRecordFormats": [
+      "bazi_expert_public_identity_binding_v1",
+      "bazi_expert_original_opinion_v1",
+      "bazi_expert_private_opinion_seal_receipt_v1",
+      "bazi_expert_pairwise_independence_assessment_v1",
+      "bazi_expert_disagreement_inventory_v1",
+      "bazi_expert_reconciliation_note_v1",
+      "bazi_expert_review_bundle_v1"
+    ],
+    "currentInstances": {
+      "counts": {
+        "disagreementInventories": 0,
+        "independentExpertReviewsVerified": 0,
+        "originalOpinions": 0,
+        "overallBundles": 0,
+        "pairwiseIndependenceAssessments": 0,
+        "privateOpinionSealReceipts": 0,
+        "publicIdentityBindings": 0,
+        "reconciliationNotes": 0,
+        "sealedOriginalOpinions": 0
+      },
+      "disagreementInventories": [],
+      "originalOpinions": [],
+      "overallBundles": [],
+      "pairwiseIndependenceAssessments": [],
+      "privateOpinionSealReceipts": [],
+      "publicIdentityBindings": [],
+      "reconciliationNotes": []
+    },
+    "currentReadiness": {
+      "bindingFrozenRequired": 12,
+      "bindingFrozenVerified": 0,
+      "candidateFeedbackCollectionReady": false,
+      "packetArtifactLocksCurrent": false,
+      "releaseClosureReviewReady": false,
+      "sourceBindingClosureComplete": false,
+      "sourceRightsClosureComplete": false
+    },
+    "expertReviewBundle": {
+      "contentTruthEstablished": false,
+      "count": 0,
+      "countsTowardExpertGate": false,
+      "expertTruthEstablished": false,
+      "releaseReady": false,
+      "state": "absent"
+    },
+    "gapSummary": {
+      "candidateFeedbackCollectionReady": false,
+      "candidateRecordFormatsDefined": 7,
+      "currentIndependentExpertReviewsVerified": 0,
+      "currentRecordInstances": 0,
+      "currentSealedOriginalOpinions": 0,
+      "expertClaimsAuthorized": false,
+      "expertReviewBundleComplete": false,
+      "independenceFactorsBound": 10,
+      "publicDeploymentAuthorized": false,
+      "releaseClosureReviewReady": false,
+      "reviewQuestionsBound": 4
+    },
+    "historicalGapDoesNotEstablish": [
+      "real_reviewer_identity",
+      "reviewer_credentials",
+      "reviewer_independence",
+      "expert_opinion_authenticity",
+      "immutable_first_seen_chronology",
+      "content_truth",
+      "expert_truth",
+      "rights_legal_conclusion",
+      "cross_file_atomic_snapshot",
+      "interval_mutation_or_aba_exclusion",
+      "expert_gate_closure",
+      "release_readiness",
+      "public_release_authorization"
+    ],
+    "historicalReadinessLedgerBindingTemplate": {
+      "ledgerDigest": "feea402079cab44a5d3e0855f867114684da96e4005343a1b1a7cdc75fbee9ad",
+      "ledgerId": "hakimi.bazi.strength.binding-freeze-readiness/1.5.0",
+      "path": "content/system-admission/bazi-binding-freeze-requirements.v1.json",
+      "rawBytes": 26038,
+      "rawSha256": "662c91e6269d5e860a0d207185680ea7c7b752f24e313859c0d987cb5b446201"
+    },
+    "independenceFactorIds": [
+      "same_institution_or_organization",
+      "teacher_student_or_lineage_relationship",
+      "family_or_household_relationship",
+      "shared_commercial_interest",
+      "rule_or_case_set_coauthorship",
+      "shared_professional_service",
+      "reporting_or_supervision_relationship",
+      "prior_exposure_to_other_reviewer_conclusion",
+      "shared_unpublished_source_or_case_material",
+      "same_upstream_algorithm_or_textbook_dependency"
+    ],
+    "projectionRole": "candidate_only_zero_instance_intake_contract_projection_not_collection_ready",
+    "readinessLedgerBinding": {
+      "ledgerDigest": "afdebfa1fb7a797f02d136373eb9aef1afa26b38b755926f8930ea5de97316b8",
+      "ledgerId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.7.0",
+      "path": "content/system-admission/bazi-binding-freeze-requirements.v1.7.0.json",
+      "rawBytes": 32629,
+      "rawSha256": "7565a1c1ae51c09c78cf8f906e544bd8ee822020f76587237bc909ef1e6408a2"
+    },
+    "readinessLedgerBindingSlotsRebound": 1,
+    "reviewQuestionIds": [
+      "month-command-hidden-stem-duplication",
+      "relative-factor-weighting",
+      "strength-band-thresholds",
+      "strength-invalidation-structures"
+    ]
+  },
+  "integrityBoundary": {
+    "abaExcluded": false,
+    "candidateArtifactHeldHandleRawAndStrictSemanticIdentityRequiredByLoader": true,
+    "crossFileAtomicSnapshot": false,
+    "digestDomain": "hakimi.bazi.expert-review-intake-gap.version-aware-candidate.v1.1",
+    "duplicateJsonKeysRejected": true,
+    "endpointSnapshotOnly": true,
+    "historicalGapHeldHandleRawAndStrictSemanticIdentityVerified": true,
+    "historicalPacketHeldHandleRawAndStrictSemanticIdentityVerified": true,
+    "intervalMutationExcludedAcrossFiles": false,
+    "ledgerDigestIsDigitalSignature": false,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "nestedVerifierSameBufferTransitivityClaimed": false,
+    "strictUtf8Required": true
+  },
+  "ledgerDigest": "5318b9543bad20c52e5129901e94aa2ca3d2dd68f342ba11ab9611f4f767d582",
+  "ledgerId": "hakimi.bazi.expert-review-intake-gap.version-aware-candidate/1.1.0",
+  "packetTemplateProjection": {
+    "artifactLockInspection": [
+      {
+        "artifactId": "bazi-core-fact-engine",
+        "evidenceLayer": "engineering_input_fact_contract",
+        "lockCurrent": false,
+        "lockedSha256": "73e0be8dbb2f40132158ee5dba26e493e18b686f9c888552c3e596c713301b2f",
+        "observedBytes": 46847,
+        "observedSha256": "4c9b7fc5a16cbd3e3f5ca0bed90cd950b8ef3750f204427a332a6c1a1b4e7e7f",
+        "path": "packages/bazi-core/src/index.ts"
+      },
+      {
+        "artifactId": "bazi-current-chart-fact-projection",
+        "evidenceLayer": "engineering_input_fact_contract",
+        "lockCurrent": true,
+        "lockedSha256": "f280a47fe9d2c6a7c0980e45b190a653ca86f0720d564ef28a1663314ab0e565",
+        "observedBytes": 7459,
+        "observedSha256": "f280a47fe9d2c6a7c0980e45b190a653ca86f0720d564ef28a1663314ab0e565",
+        "path": "packages/bazi-interpretation/src/current-chart-review-snapshot.ts"
+      },
+      {
+        "artifactId": "bazi-strength-assessment-core",
+        "evidenceLayer": "engineering_rule_candidate",
+        "lockCurrent": true,
+        "lockedSha256": "bbe6510c5cc0500efc8bb3af45efc1c344a5159f35c8fe5fca3aae3dab156e3b",
+        "observedBytes": 8559,
+        "observedSha256": "bbe6510c5cc0500efc8bb3af45efc1c344a5159f35c8fe5fca3aae3dab156e3b",
+        "path": "packages/bazi-interpretation/src/strength-assessment-core.ts"
+      },
+      {
+        "artifactId": "bazi-strength-claim-registry",
+        "evidenceLayer": "content_claim_candidate",
+        "lockCurrent": true,
+        "lockedSha256": "b08d4e6b0fb5c830b251e0c03ac49b7620729f223805b145b839a89245aa3888",
+        "observedBytes": 44959,
+        "observedSha256": "b08d4e6b0fb5c830b251e0c03ac49b7620729f223805b145b839a89245aa3888",
+        "path": "packages/bazi-interpretation/src/strength-claim-registry.ts"
+      },
+      {
+        "artifactId": "bazi-strength-policy",
+        "evidenceLayer": "engineering_rule_candidate",
+        "lockCurrent": true,
+        "lockedSha256": "795709298542773459a73cd8a63a6824d3076bbdedf6a157c0652d25446486f1",
+        "observedBytes": 10905,
+        "observedSha256": "795709298542773459a73cd8a63a6824d3076bbdedf6a157c0652d25446486f1",
+        "path": "packages/bazi-interpretation/src/strength-policy.ts"
+      },
+      {
+        "artifactId": "bazi-strength-sensitivity-review",
+        "evidenceLayer": "engineering_sensitivity_evidence",
+        "lockCurrent": true,
+        "lockedSha256": "ef6772513009cb4e4174cd9f6d12318c69995629a37ab5e5be59ea7bcbace4d8",
+        "observedBytes": 13979,
+        "observedSha256": "ef6772513009cb4e4174cd9f6d12318c69995629a37ab5e5be59ea7bcbace4d8",
+        "path": "packages/bazi-interpretation/src/strength-sensitivity-review.ts"
+      },
+      {
+        "artifactId": "contracts",
+        "evidenceLayer": "engineering_input_contract",
+        "lockCurrent": true,
+        "lockedSha256": "674a3fe1e2b3cd4fc99e481a758966a320ddc3c1113a9471eba190851d15e041",
+        "observedBytes": 244747,
+        "observedSha256": "674a3fe1e2b3cd4fc99e481a758966a320ddc3c1113a9471eba190851d15e041",
+        "path": "packages/contracts/src/index.ts"
+      },
+      {
+        "artifactId": "rule-profiles",
+        "evidenceLayer": "engineering_input_policy",
+        "lockCurrent": true,
+        "lockedSha256": "f11f06b73f48efbca8a9fe4184b254b29ba6a3180b7b5e2e99be326cd80e485f",
+        "observedBytes": 4916,
+        "observedSha256": "f11f06b73f48efbca8a9fe4184b254b29ba6a3180b7b5e2e99be326cd80e485f",
+        "path": "packages/rule-profiles/src/index.ts"
+      },
+      {
+        "artifactId": "engineering-binding-candidate-ledger",
+        "evidenceLayer": "engineering_candidate_not_frozen_rationale",
+        "lockCurrent": true,
+        "lockedSha256": "95154d55d9e368351f5a69a1fa2ff63a51ba946d33a800dbd1f2460d9ac97b2f",
+        "observedBytes": 21712,
+        "observedSha256": "95154d55d9e368351f5a69a1fa2ff63a51ba946d33a800dbd1f2460d9ac97b2f",
+        "path": "content/bazi-strength-engineering-binding-candidates.v1.json"
+      },
+      {
+        "artifactId": "source-binding-candidate-ledger",
+        "evidenceLayer": "source_candidate_not_content_truth",
+        "lockCurrent": true,
+        "lockedSha256": "62f6a68b99246a802bcf2055aa09a8ac8113df37a7ede1c55d8a2ea64deaea98",
+        "observedBytes": 50427,
+        "observedSha256": "62f6a68b99246a802bcf2055aa09a8ac8113df37a7ede1c55d8a2ea64deaea98",
+        "path": "content/bazi-strength-source-binding-candidates.v1.6.0.json"
+      },
+      {
+        "artifactId": "source-rights-candidate-ledger",
+        "evidenceLayer": "rights_observation_not_legal_conclusion",
+        "lockCurrent": true,
+        "lockedSha256": "678632a8875672f58bb5c9f1ec4a299a4f0c6e750b8ff4a02bfe4df889e1243a",
+        "observedBytes": 23947,
+        "observedSha256": "678632a8875672f58bb5c9f1ec4a299a4f0c6e750b8ff4a02bfe4df889e1243a",
+        "path": "content/bazi-strength-source-rights-candidates.v1.2.0.json"
+      },
+      {
+        "artifactId": "single-chart-report-v1.7-frozen-golden",
+        "evidenceLayer": "engineering_report_contract",
+        "lockCurrent": true,
+        "lockedSha256": "aba357d98a99271cc9a9b2727ad1c7c516424c94b7cf34f765cb38b0e9a74b29",
+        "observedBytes": 60900,
+        "observedSha256": "aba357d98a99271cc9a9b2727ad1c7c516424c94b7cf34f765cb38b0e9a74b29",
+        "path": "packages/research-export/src/golden/single-chart-report.contract.v1.7.json"
+      }
+    ],
+    "artifactLockSummary": {
+      "candidateProjectedArtifactLockDrifts": 1,
+      "candidateProjectedArtifactLockExactMatches": 11,
+      "historicalDeclaredCountInterpretedAsCurrentClaim": false,
+      "historicalPacketArtifactLockSlots": 12,
+      "historicalPacketDeclaredArtifactLocksVerified": 12,
+      "packetArtifactLocksCurrent": false,
+      "sourceRightsArtifactLockSlotsRebound": 2,
+      "unchangedPacketArtifactLockSlotsChecked": 10
+    },
+    "artifactLocks": [
+      {
+        "artifactId": "bazi-core-fact-engine",
+        "evidenceLayer": "engineering_input_fact_contract",
+        "path": "packages/bazi-core/src/index.ts",
+        "sha256": "73e0be8dbb2f40132158ee5dba26e493e18b686f9c888552c3e596c713301b2f"
+      },
+      {
+        "artifactId": "bazi-current-chart-fact-projection",
+        "evidenceLayer": "engineering_input_fact_contract",
+        "path": "packages/bazi-interpretation/src/current-chart-review-snapshot.ts",
+        "sha256": "f280a47fe9d2c6a7c0980e45b190a653ca86f0720d564ef28a1663314ab0e565"
+      },
+      {
+        "artifactId": "bazi-strength-assessment-core",
+        "evidenceLayer": "engineering_rule_candidate",
+        "path": "packages/bazi-interpretation/src/strength-assessment-core.ts",
+        "sha256": "bbe6510c5cc0500efc8bb3af45efc1c344a5159f35c8fe5fca3aae3dab156e3b"
+      },
+      {
+        "artifactId": "bazi-strength-claim-registry",
+        "evidenceLayer": "content_claim_candidate",
+        "path": "packages/bazi-interpretation/src/strength-claim-registry.ts",
+        "sha256": "b08d4e6b0fb5c830b251e0c03ac49b7620729f223805b145b839a89245aa3888"
+      },
+      {
+        "artifactId": "bazi-strength-policy",
+        "evidenceLayer": "engineering_rule_candidate",
+        "path": "packages/bazi-interpretation/src/strength-policy.ts",
+        "sha256": "795709298542773459a73cd8a63a6824d3076bbdedf6a157c0652d25446486f1"
+      },
+      {
+        "artifactId": "bazi-strength-sensitivity-review",
+        "evidenceLayer": "engineering_sensitivity_evidence",
+        "path": "packages/bazi-interpretation/src/strength-sensitivity-review.ts",
+        "sha256": "ef6772513009cb4e4174cd9f6d12318c69995629a37ab5e5be59ea7bcbace4d8"
+      },
+      {
+        "artifactId": "contracts",
+        "evidenceLayer": "engineering_input_contract",
+        "path": "packages/contracts/src/index.ts",
+        "sha256": "674a3fe1e2b3cd4fc99e481a758966a320ddc3c1113a9471eba190851d15e041"
+      },
+      {
+        "artifactId": "rule-profiles",
+        "evidenceLayer": "engineering_input_policy",
+        "path": "packages/rule-profiles/src/index.ts",
+        "sha256": "f11f06b73f48efbca8a9fe4184b254b29ba6a3180b7b5e2e99be326cd80e485f"
+      },
+      {
+        "artifactId": "engineering-binding-candidate-ledger",
+        "evidenceLayer": "engineering_candidate_not_frozen_rationale",
+        "path": "content/bazi-strength-engineering-binding-candidates.v1.json",
+        "sha256": "95154d55d9e368351f5a69a1fa2ff63a51ba946d33a800dbd1f2460d9ac97b2f"
+      },
+      {
+        "artifactId": "source-binding-candidate-ledger",
+        "evidenceLayer": "source_candidate_not_content_truth",
+        "path": "content/bazi-strength-source-binding-candidates.v1.6.0.json",
+        "sha256": "62f6a68b99246a802bcf2055aa09a8ac8113df37a7ede1c55d8a2ea64deaea98"
+      },
+      {
+        "artifactId": "source-rights-candidate-ledger",
+        "evidenceLayer": "rights_observation_not_legal_conclusion",
+        "path": "content/bazi-strength-source-rights-candidates.v1.2.0.json",
+        "sha256": "678632a8875672f58bb5c9f1ec4a299a4f0c6e750b8ff4a02bfe4df889e1243a"
+      },
+      {
+        "artifactId": "single-chart-report-v1.7-frozen-golden",
+        "evidenceLayer": "engineering_report_contract",
+        "path": "packages/research-export/src/golden/single-chart-report.contract.v1.7.json",
+        "sha256": "aba357d98a99271cc9a9b2727ad1c7c516424c94b7cf34f765cb38b0e9a74b29"
+      }
+    ],
+    "automatedResolutionPolicy": {
+      "allowedUnresolvedDisposition": [
+        "defer",
+        "reject"
+      ],
+      "generatedModelWinnerSelectionAllowed": false,
+      "majorityVoteAllowed": false,
+      "opinionAveragingAllowed": false,
+      "unresolvedDisagreementMayBeAdopted": false
+    },
+    "countsAsApprovedPacket": false,
+    "disagreementPolicy": [
+      {
+        "disagreementType": "school_divergence",
+        "requiredDisposition": "split_versioned_school_profiles"
+      },
+      {
+        "disagreementType": "input_semantics",
+        "requiredDisposition": "split_versioned_input_policies"
+      },
+      {
+        "disagreementType": "base_edition_or_source_identity",
+        "requiredDisposition": "keep_affected_bindings_unverified"
+      },
+      {
+        "disagreementType": "rule_interpretation",
+        "requiredDisposition": "preserve_parallel_interpretations_no_winner"
+      },
+      {
+        "disagreementType": "engineering_error",
+        "requiredDisposition": "correct_artifact_and_repeat_both_reviews"
+      },
+      {
+        "disagreementType": "high_risk_expression",
+        "requiredDisposition": "apply_conservative_expression_or_no_release"
+      },
+      {
+        "disagreementType": "cannot_decide",
+        "requiredDisposition": "defer"
+      }
+    ],
+    "historicalPacketBinding": {
+      "packetDigest": "cfe554b60b4698e0acd0a42e14484f4683eb7663d4f6862b767cf70404d2cd5f",
+      "packetId": "hakimi.bazi.strength.expert-review-packet/1.5.0",
+      "path": "content/bazi-strength-expert-review-packet.v1.json",
+      "rawBytes": 12684,
+      "rawSha256": "ba28de1b95d57de4320913e7a0b00fe780630d15408c5b22b84311977ea29163",
+      "recordType": "bazi_strength_expert_review_packet_candidate",
+      "schemaVersion": "1.0.0",
+      "status": "mechanically_bound_vacant_review_packet"
+    },
+    "historicalPacketDoesNotEstablish": [
+      "real_reviewer_identity",
+      "reviewer_credentials",
+      "reviewer_independence",
+      "expert_opinion",
+      "content_truth",
+      "expert_truth",
+      "rights_legal_conclusion",
+      "cross_system_authority",
+      "release_readiness",
+      "public_release_authorization"
+    ],
+    "historicalPacketGateSummaryTemplate": {
+      "contentTruthEstablished": false,
+      "credentialsVerified": 0,
+      "domainExpertsRequired": 2,
+      "expertClaimsAuthorized": false,
+      "expertReviewBundleComplete": false,
+      "expertTruthEstablished": false,
+      "identitiesVerified": 0,
+      "independentExpertReviewsVerified": 0,
+      "packetArtifactLocksVerified": 12,
+      "publicDeploymentAuthorized": false,
+      "releaseReady": false,
+      "reviewerSlotsOccupied": 0,
+      "rightsLegalConclusionEstablished": false,
+      "scopesVerified": 0,
+      "sealedOriginalOpinions": 0
+    },
+    "historicalPacketMutated": false,
+    "identityPrivacyPolicy": {
+      "privateDossier": {
+        "encryptedOfflineStorageRequired": true,
+        "fields": [
+          "legal_name",
+          "contact_details",
+          "credential_raw_evidence",
+          "institution_raw_evidence",
+          "review_history",
+          "verification_process_raw_evidence"
+        ],
+        "repositoryStorageAllowed": false
+      },
+      "publicIdentityBindingFields": [
+        "reviewerId",
+        "displayNameOrControlledPseudonym",
+        "verificationMethod",
+        "credentialDigest",
+        "verificationDate",
+        "reviewScope",
+        "evidenceType",
+        "verifiedBy"
+      ],
+      "publicPacketProhibitedFields": [
+        "legalName",
+        "email",
+        "phone",
+        "address",
+        "governmentId",
+        "rawCredentialDocument",
+        "privateContactHandle"
+      ]
+    },
+    "independenceChecklist": [
+      "same_institution_or_organization",
+      "teacher_student_or_lineage_relationship",
+      "family_or_household_relationship",
+      "shared_commercial_interest",
+      "rule_or_case_set_coauthorship",
+      "shared_professional_service",
+      "reporting_or_supervision_relationship",
+      "prior_exposure_to_other_reviewer_conclusion",
+      "shared_unpublished_source_or_case_material",
+      "same_upstream_algorithm_or_textbook_dependency"
+    ],
+    "persistedAsStandalonePacket": false,
+    "projectionDigest": "4613fce5226972912576c9cce74e1f10fdcb0db9664ffedfbbd0508ce8f49428",
+    "projectionId": "hakimi.bazi.strength.expert-review-packet.version-aware-template-projection/1.1.0",
+    "projectionRole": "candidate_only_in_memory_template_projection_not_approved_or_standalone_packet",
+    "reviewProcess": {
+      "immutableOriginalOpinionsRequired": true,
+      "mutualDisclosureBeforeBothOpinionsSealedAllowed": false,
+      "reconciliationMayOverwriteOriginals": false,
+      "sameQuestionSetRequired": true,
+      "steps": [
+        "freeze_input_rules_sources_rights_and_golden",
+        "verify_reviewer_identity_credentials_scope_and_independence",
+        "collect_expert_a_opinion_without_expert_b_opinion_access",
+        "collect_expert_b_opinion_without_expert_a_opinion_access",
+        "seal_and_preserve_both_original_opinions",
+        "publish_parallel_agreement_and_disagreement_inventory",
+        "collect_independent_supplements_if_needed",
+        "issue_reconciliation_note_without_overwriting_originals"
+      ],
+      "supplementsMustBeSeparateRecords": true
+    },
+    "reviewQuestions": [
+      {
+        "question": "月令主气与同一月支首位藏干是否应同时计权；若同时计权，边界依据是什么？",
+        "questionId": "month-command-hidden-stem-duplication",
+        "title": "月令主气与首位藏干重复计权"
+      },
+      {
+        "question": "透干、首位藏干、其余藏干与月令之间应采用怎样的相对权重，哪些反例会推翻当前‘月令 4、透干 2、首位藏干 2、其余藏干 1’候选？",
+        "questionId": "relative-factor-weighting",
+        "title": "月令、透干与藏干相对权重"
+      },
+      {
+        "question": "0.25、0.43、0.57、0.75 分档阈值是否有可复核案例集支持？",
+        "questionId": "strength-band-thresholds",
+        "title": "旺衰五档阈值"
+      },
+      {
+        "question": "从格、专旺、化气、合化、刑冲、调候等结构应在何时使基础旺衰结论失效或改写？",
+        "questionId": "strength-invalidation-structures",
+        "title": "基础旺衰结论失效或改写条件"
+      }
+    ],
+    "reviewScope": {
+      "bindingIds": [
+        "binding:core:derive-assessment",
+        "binding:policy:factor-inclusion",
+        "binding:policy:direction-map",
+        "binding:policy:weights",
+        "binding:policy:month-duplication",
+        "binding:policy:thresholds",
+        "binding:sensitivity:six-scenarios",
+        "binding:dtt:month-command",
+        "binding:smt-v5:relative-relations",
+        "binding:smt-v10:whole-chart",
+        "binding:yhzp:hidden-listing",
+        "binding:zpzz:review-gates"
+      ],
+      "excludedScopes": [
+        "ziwei_domain_truth",
+        "western_astrology_domain_truth",
+        "vedic_astrology_domain_truth",
+        "rights_or_legal_adjudication",
+        "engineering_release_readiness",
+        "individual_fortune_prediction",
+        "public_deployment_authorization"
+      ],
+      "surfaceId": "single-chart-report",
+      "surfaceVersion": "1.7.0",
+      "systemId": "bazi",
+      "unresolvedStructures": [
+        "从格",
+        "专旺",
+        "化气",
+        "合化",
+        "刑冲",
+        "调候",
+        "大运流年"
+      ]
+    },
+    "reviewerSlots": [
+      {
+        "credentialVerificationState": "absent",
+        "identityVerificationState": "absent",
+        "independenceVerificationState": "absent",
+        "originalOpinionDigest": null,
+        "originalOpinionStored": false,
+        "priorExposureToOtherOpinion": null,
+        "reviewerBinding": null,
+        "scopeVerificationState": "absent",
+        "slotId": "domain-expert-a",
+        "status": "vacant",
+        "submittedAt": null
+      },
+      {
+        "credentialVerificationState": "absent",
+        "identityVerificationState": "absent",
+        "independenceVerificationState": "absent",
+        "originalOpinionDigest": null,
+        "originalOpinionStored": false,
+        "priorExposureToOtherOpinion": null,
+        "reviewerBinding": null,
+        "scopeVerificationState": "absent",
+        "slotId": "domain-expert-b",
+        "status": "vacant",
+        "submittedAt": null
+      }
+    ],
+    "roleSeparation": [
+      {
+        "allowedScope": [
+          "bazi_rule_interpretation",
+          "school_profile",
+          "counterexample_cases",
+          "high_risk_expression_boundary"
+        ],
+        "forbiddenScope": [
+          "rights_legal_conclusion",
+          "engineering_reproducibility_attestation",
+          "public_release_authorization"
+        ],
+        "roleId": "domain_expert"
+      },
+      {
+        "allowedScope": [
+          "work_identity",
+          "edition_identity",
+          "carrier_identity",
+          "license_evidence"
+        ],
+        "forbiddenScope": [
+          "bazi_domain_truth",
+          "engineering_reproducibility_attestation",
+          "public_release_authorization"
+        ],
+        "roleId": "source_rights_reviewer"
+      },
+      {
+        "allowedScope": [
+          "input_lock",
+          "algorithm_lock",
+          "digest_reproduction",
+          "test_evidence"
+        ],
+        "forbiddenScope": [
+          "bazi_school_truth",
+          "rights_legal_conclusion",
+          "public_release_authorization"
+        ],
+        "roleId": "engineering_reproducibility_reviewer"
+      }
+    ],
+    "sourceLedgerBindings": {
+      "engineeringBindingLedgerDigest": "05ce9c6d9c03822cf246b0406d15616e8c4a6938650296135142827a00a5a28e",
+      "engineeringBindingLedgerId": "hakimi.bazi.strength.engineering-binding-candidates/1.0.0",
+      "sourceBindingLedgerDigest": "6f008058b282613fd131344206b27fccb1d80596bb49789f0554acdd69c1e44c",
+      "sourceBindingLedgerId": "hakimi.bazi.strength.source-binding-candidates/1.6.0",
+      "sourceRightsLedgerDigest": "300e092c4913885cff626221b8734786128639c7d6cfd7c2be7bea2acc6bbefc",
+      "sourceRightsLedgerId": "hakimi.bazi.strength.source-rights-candidates/1.2.0"
+    },
+    "sourceRightsArtifactLockSlotsRebound": 2,
+    "sourceRightsLedgerBindingSlotsRebound": 2
+  },
+  "recordType": "bazi_expert_review_intake_gap_version_aware_candidate_v1_1",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "expertClaimsAuthorized": false,
+    "migrationId": null,
+    "mutationEpochBoundary": "preserved",
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "schemaVersion": "1.1.0",
+  "status": "candidate_only_version_aware_vacant_intake_not_collection_ready_artifact_drift"
+}

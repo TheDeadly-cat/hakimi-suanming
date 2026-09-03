@@ -1,0 +1,450 @@
+{
+  "authorityBoundary": {
+    "browserRuntimeEvidenceEstablished": false,
+    "contentTruthEstablished": false,
+    "crossSystemAuthorityInheritanceAllowed": false,
+    "deploymentAndRollbackConfirmed": false,
+    "engineeringObservationOnly": true,
+    "expertClaimsAuthorized": false,
+    "expertIdentityCredentialsIndependenceEstablished": false,
+    "expertTruthEstablished": false,
+    "publicDeploymentAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "sourceFreezeEstablished": false
+  },
+  "candidateDigest": "be41925d72904e8eb90eea2b77f7de553f7c743d87fd975ae33fa99040571dc2",
+  "candidateId": "hakimi.bazi.domain-release-manifest.version-aware-observation-candidate/1.1.0",
+  "candidateObservationOverlays": [
+    {
+      "contextCapabilityIds": [
+        "hakimi.bazi/policy-weights-value-evidence.version-aware-candidate/1.1.0"
+      ],
+      "overlayId": "interpretation_and_high_risk_policy_context",
+      "overlaysAppliedToProductionManifest": false
+    },
+    {
+      "contextCapabilityIds": [
+        "hakimi.bazi.dtt-versioned-parent-supersession/1.0.0",
+        "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.7.0"
+      ],
+      "overlayId": "source_versioned_parent_and_readiness_context",
+      "overlaysAppliedToProductionManifest": false
+    },
+    {
+      "contextCapabilityIds": [
+        "hakimi.bazi.dtt-versioned-parent-supersession/1.0.0",
+        "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.7.0",
+        "hakimi.bazi.project-copy-materialization-requirements.version-aware-candidate/1.1.0"
+      ],
+      "overlayId": "rights_and_materialization_context",
+      "overlaysAppliedToProductionManifest": false
+    },
+    {
+      "contextCapabilityIds": [
+        "hakimi.bazi.expert-review-intake-gap.version-aware-candidate/1.1.0"
+      ],
+      "overlayId": "expert_intake_zero_instance_gap_context",
+      "overlaysAppliedToProductionManifest": false
+    }
+  ],
+  "contextBrandBoundary": {
+    "activeAdmissionEffect": "none",
+    "authorityInherited": false,
+    "capabilities": [
+      {
+        "activeAdmissionEffect": "none",
+        "artifacts": [
+          {
+            "bytes": 50427,
+            "digest": "6f008058b282613fd131344206b27fccb1d80596bb49789f0554acdd69c1e44c",
+            "id": "hakimi.bazi.strength.source-binding-candidates/1.6.0",
+            "path": "content/bazi-strength-source-binding-candidates.v1.6.0.json",
+            "sha256": "62f6a68b99246a802bcf2055aa09a8ac8113df37a7ede1c55d8a2ea64deaea98"
+          },
+          {
+            "bytes": 23947,
+            "digest": "300e092c4913885cff626221b8734786128639c7d6cfd7c2be7bea2acc6bbefc",
+            "id": "hakimi.bazi.strength.source-rights-candidates/1.2.0",
+            "path": "content/bazi-strength-source-rights-candidates.v1.2.0.json",
+            "sha256": "678632a8875672f58bb5c9f1ec4a299a4f0c6e750b8ff4a02bfe4df889e1243a"
+          },
+          {
+            "bytes": 9229,
+            "digest": "601b4e07b94e62b73812a7a26f1108a094272dca660a188bb660fa860f031264",
+            "id": "hakimi.bazi.dtt-versioned-parent-supersession/1.0.0",
+            "path": "content/system-admission/bazi-dtt-versioned-parent-supersession.v1.json",
+            "sha256": "aa9e62089990d8ba699c441114914173141e8228f027605b47f5c5e238fac0e3"
+          }
+        ],
+        "capabilityDigest": "601b4e07b94e62b73812a7a26f1108a094272dca660a188bb660fa860f031264",
+        "capabilityId": "hakimi.bazi.dtt-versioned-parent-supersession/1.0.0",
+        "role": "source_rights_versioned_parent_supersession_context"
+      },
+      {
+        "activeAdmissionEffect": "none",
+        "artifact": {
+          "bytes": 32629,
+          "digest": "afdebfa1fb7a797f02d136373eb9aef1afa26b38b755926f8930ea5de97316b8",
+          "id": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.7.0",
+          "path": "content/system-admission/bazi-binding-freeze-requirements.v1.7.0.json",
+          "sha256": "7565a1c1ae51c09c78cf8f906e544bd8ee822020f76587237bc909ef1e6408a2"
+        },
+        "capabilityDigest": "afdebfa1fb7a797f02d136373eb9aef1afa26b38b755926f8930ea5de97316b8",
+        "capabilityId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.7.0",
+        "role": "bazi_v17_candidate_readiness_context"
+      },
+      {
+        "activeAdmissionEffect": "none",
+        "artifact": {
+          "bytes": 13295,
+          "digest": "95a1edb8d0228231229b561c97fd4960385e581cef87c3e1f2aa57e979c12c5b",
+          "id": "hakimi.bazi/policy-weights-value-evidence.version-aware-candidate/1.1.0",
+          "path": "content/system-admission/bazi-policy-weights-value-evidence-candidate.v1.1.0.json",
+          "sha256": "0b221bfc2669310298d9082711ad111b205c5881e419a90f92776229102f53c1"
+        },
+        "capabilityDigest": "95a1edb8d0228231229b561c97fd4960385e581cef87c3e1f2aa57e979c12c5b",
+        "capabilityId": "hakimi.bazi/policy-weights-value-evidence.version-aware-candidate/1.1.0",
+        "role": "interpretation_and_high_risk_policy_observation_context"
+      },
+      {
+        "activeAdmissionEffect": "none",
+        "artifact": {
+          "bytes": 10887,
+          "digest": "d877ac00042d9e9635b0bf2cfe7b5f387f3aad82faa96c8a7214548299045d3f",
+          "id": "hakimi.bazi.project-copy-materialization-requirements.version-aware-candidate/1.1.0",
+          "path": "content/system-admission/bazi-project-copy-materialization-requirements.v1.1.0.json",
+          "sha256": "7e98e6042cd1ccb00a2cff749f0000a989baacd683271edffc3158a80ee02b83"
+        },
+        "capabilityDigest": "d877ac00042d9e9635b0bf2cfe7b5f387f3aad82faa96c8a7214548299045d3f",
+        "capabilityId": "hakimi.bazi.project-copy-materialization-requirements.version-aware-candidate/1.1.0",
+        "role": "rights_and_project_copy_materialization_zero_instance_context"
+      },
+      {
+        "activeAdmissionEffect": "none",
+        "artifact": {
+          "bytes": 32579,
+          "digest": "5318b9543bad20c52e5129901e94aa2ca3d2dd68f342ba11ab9611f4f767d582",
+          "id": "hakimi.bazi.expert-review-intake-gap.version-aware-candidate/1.1.0",
+          "path": "content/system-admission/bazi-expert-review-intake-gap.v1.1.0.json",
+          "sha256": "7a7088a3fdc660ccca3ef0d9765e36421563c7feee1c3dfa6bc4d7169d0f91df"
+        },
+        "capabilityDigest": "5318b9543bad20c52e5129901e94aa2ca3d2dd68f342ba11ab9611f4f767d582",
+        "capabilityId": "hakimi.bazi.expert-review-intake-gap.version-aware-candidate/1.1.0",
+        "role": "expert_intake_zero_instance_gap_context"
+      }
+    ],
+    "directLogicalParentArtifactCount": 6,
+    "supportingReceiptArtifactCount": 1,
+    "transitivePolicyArtifacts": [
+      {
+        "bytes": 71168,
+        "digest": "d578b6e76c325bf79593b728b78035d3481ec60fa7fb99c815748d9f806a8330",
+        "id": "hakimi.bazi.engineering_binding_value_subject_gaps.version-aware-candidate/1.1.0",
+        "path": "content/system-admission/bazi-engineering-binding-value-subject-gaps.v1.1.0.json",
+        "sha256": "f8ed780ce8e3fbaca59b295faff2f12b939a8b0c193bc0c20ce1198690528d4e"
+      },
+      {
+        "bytes": 38161,
+        "digest": "24851de28a762c426e2630c9a52666786274c3c5477b9fc0463f9129e43d20d1",
+        "id": "hakimi.bazi.pr10bc.version-aware-candidate-scope-reconciliation/1.1.0",
+        "path": "content/system-admission/bazi-pr10bc-scope-reconciliation.v1.1.0.json",
+        "sha256": "edb367448f857972e50c735e86acc5252605a0b4d27a2f85c996fcd67d0ed2cc"
+      }
+    ],
+    "transitivePolicyClosureArtifactCount": 2,
+    "verifiedMechanicalContextBrandCount": 5,
+    "verifiedReleaseParentBrandCount": 0
+  },
+  "createdAt": "2026-08-30T00:00:00.000Z",
+  "currentPreviewObservation": {
+    "authoritative": false,
+    "changedComponentsObserved": 4,
+    "componentDriftIds": [
+      "fact_contract",
+      "source_bundle",
+      "rights_bundle",
+      "high_risk_policy"
+    ],
+    "componentFileDriftEntryCount": 11,
+    "componentReceipts": [
+      {
+        "componentId": "execution_rules",
+        "currentComponentDigest": "c3984b1d539716f0dc00ca1022681d765a513408f359a8eec666ec1c3a59bca1",
+        "driftEntryCount": 0,
+        "fileCount": 2,
+        "savedComponentDigest": "c3984b1d539716f0dc00ca1022681d765a513408f359a8eec666ec1c3a59bca1",
+        "savedMatchesCurrent": true,
+        "status": "bound",
+        "version": "ziping-working-default@0.1.0"
+      },
+      {
+        "componentId": "interpretation_rules",
+        "currentComponentDigest": "a3f452a599082e9d9c4645a9f0fb4acfb9a5bb76815a9ee86cb1c5dd2582d81b",
+        "driftEntryCount": 0,
+        "fileCount": 5,
+        "savedComponentDigest": "a3f452a599082e9d9c4645a9f0fb4acfb9a5bb76815a9ee86cb1c5dd2582d81b",
+        "savedMatchesCurrent": true,
+        "status": "bound",
+        "version": "hakimi-bazi-strength-ten-god-candidate@0.1.0"
+      },
+      {
+        "componentId": "input_policy",
+        "currentComponentDigest": "9b0815fd4185a59ae7ed0aefed5404844f2fd379bbdab929540d6af6d016ebae",
+        "driftEntryCount": 0,
+        "fileCount": 2,
+        "savedComponentDigest": "9b0815fd4185a59ae7ed0aefed5404844f2fd379bbdab929540d6af6d016ebae",
+        "savedMatchesCurrent": true,
+        "status": "bound",
+        "version": "hakimi.bazi.input_policy/0.1.0"
+      },
+      {
+        "componentId": "fact_contract",
+        "currentComponentDigest": "bcd1ad4af3eb9532ac91b1a7f07e2dfbd28f745187dc9c16aded473643305e91",
+        "driftEntryCount": 1,
+        "fileCount": 3,
+        "savedComponentDigest": "1520a68a0974376afb61be2dc4b4d37392037659967085ebf6ed67ad4f8a09f9",
+        "savedMatchesCurrent": false,
+        "status": "bound",
+        "version": "hakimi.bazi.current_chart_review_facts/0.1.0"
+      },
+      {
+        "componentId": "source_bundle",
+        "currentComponentDigest": "091f9065d0cf37b5c4964a02917aab6e3c4778eb5248836ad4b15a254b872b51",
+        "driftEntryCount": 4,
+        "fileCount": 12,
+        "savedComponentDigest": "ebfceb4cf6f96ca88637ab6d06febc87489afd8ca4dfdb1f023a37ddaf7b948b",
+        "savedMatchesCurrent": false,
+        "status": "incomplete",
+        "version": "hakimi.bazi.strength_claim_registry/0.2.0+content.0.19.0-historical-candidates.4+engineering-candidates.7+freeze-readiness.6"
+      },
+      {
+        "componentId": "rights_bundle",
+        "currentComponentDigest": "c2e35cf80b8b754d9701f75af727983d442358ce60a1f7c46758d30a197aad8c",
+        "driftEntryCount": 5,
+        "fileCount": 14,
+        "savedComponentDigest": "495f6ab72764320847b852a847cd6a3db1cbcf33833cea723745f64406629546",
+        "savedMatchesCurrent": false,
+        "status": "incomplete",
+        "version": "source-rights@1.0.0+source-carrier@1.0.0+manifest@2.0.0+rights-candidates.2+source-collation.4+freeze-readiness.6"
+      },
+      {
+        "componentId": "expert_review_bundle",
+        "currentComponentDigest": "68fcfdc575995155f709c1491f5404dbc8e1ffa6214e726afc6128ccf9872380",
+        "driftEntryCount": 0,
+        "fileCount": 0,
+        "savedComponentDigest": "68fcfdc575995155f709c1491f5404dbc8e1ffa6214e726afc6128ccf9872380",
+        "savedMatchesCurrent": true,
+        "status": "absent",
+        "version": "absent/0"
+      },
+      {
+        "componentId": "high_risk_policy",
+        "currentComponentDigest": "666bffc377e59e220b4a7ca1930a7a519b046a89af7dbaaf186d2bec68b83c3c",
+        "driftEntryCount": 1,
+        "fileCount": 8,
+        "savedComponentDigest": "4d5b4e1f925c296b633d0002d3aabdfa43f87fe814d553a303d2ecb41134a3e4",
+        "savedMatchesCurrent": false,
+        "status": "bound",
+        "version": "hakimi.bazi.high_risk_policy/0.2.0+expert-review-packet.6+engineering-candidates.1"
+      },
+      {
+        "componentId": "report_contract",
+        "currentComponentDigest": "4537235d7ca51bcda836a83eda651df63c09844d6b3090180d8227bff304094e",
+        "driftEntryCount": 0,
+        "fileCount": 4,
+        "savedComponentDigest": "4537235d7ca51bcda836a83eda651df63c09844d6b3090180d8227bff304094e",
+        "savedMatchesCurrent": true,
+        "status": "bound",
+        "version": "single-chart-report@1.7.0"
+      }
+    ],
+    "componentsObserved": 9,
+    "currentVerifierFailureCode": "MANIFEST_MISMATCH",
+    "currentVerifierPassed": false,
+    "driftEntries": [
+      {
+        "componentId": "fact_contract",
+        "currentComponentDigest": "bcd1ad4af3eb9532ac91b1a7f07e2dfbd28f745187dc9c16aded473643305e91",
+        "currentSha256": "4c9b7fc5a16cbd3e3f5ca0bed90cd950b8ef3750f204427a332a6c1a1b4e7e7f",
+        "path": "packages/bazi-core/src/index.ts",
+        "savedComponentDigest": "1520a68a0974376afb61be2dc4b4d37392037659967085ebf6ed67ad4f8a09f9",
+        "savedSha256": "73e0be8dbb2f40132158ee5dba26e493e18b686f9c888552c3e596c713301b2f"
+      },
+      {
+        "componentId": "source_bundle",
+        "currentComponentDigest": "091f9065d0cf37b5c4964a02917aab6e3c4778eb5248836ad4b15a254b872b51",
+        "currentSha256": "1db59e2f7d3c5448f27b32d96bc8cf5a75968e8470dd0592d70594b44b3ec809",
+        "path": "content/system-admission/bazi-binding-freeze-requirements.v1.json",
+        "savedComponentDigest": "ebfceb4cf6f96ca88637ab6d06febc87489afd8ca4dfdb1f023a37ddaf7b948b",
+        "savedSha256": "662c91e6269d5e860a0d207185680ea7c7b752f24e313859c0d987cb5b446201"
+      },
+      {
+        "componentId": "source_bundle",
+        "currentComponentDigest": "091f9065d0cf37b5c4964a02917aab6e3c4778eb5248836ad4b15a254b872b51",
+        "currentSha256": "fe15feff99df887e5810fce508cec4158edd9b19278797ff1943dd9300f0dd3d",
+        "path": "scripts/audit-bazi-source-binding-candidates-live.ps1",
+        "savedComponentDigest": "ebfceb4cf6f96ca88637ab6d06febc87489afd8ca4dfdb1f023a37ddaf7b948b",
+        "savedSha256": "36d6bd96467c345782d9c4d5862f0f9ef908c90feafc12490595b59e945fa6ae"
+      },
+      {
+        "componentId": "source_bundle",
+        "currentComponentDigest": "091f9065d0cf37b5c4964a02917aab6e3c4778eb5248836ad4b15a254b872b51",
+        "currentSha256": "ae56d0015f944a67eae3adf56186625568a32d090d5cfd18ca6eea5615402b59",
+        "path": "scripts/bazi-binding-freeze-requirements-lib.mjs",
+        "savedComponentDigest": "ebfceb4cf6f96ca88637ab6d06febc87489afd8ca4dfdb1f023a37ddaf7b948b",
+        "savedSha256": "5c1292f18dd2ebdfe09dc2173f974cb38a6cbe888a783cd61c5e68d8dba9b4d5"
+      },
+      {
+        "componentId": "source_bundle",
+        "currentComponentDigest": "091f9065d0cf37b5c4964a02917aab6e3c4778eb5248836ad4b15a254b872b51",
+        "currentSha256": "e840e37febffae2f7e04b6d1722f1717b16e7410297410b459ceb308cf4eb681",
+        "path": "scripts/verify-bazi-binding-freeze-requirements.mjs",
+        "savedComponentDigest": "ebfceb4cf6f96ca88637ab6d06febc87489afd8ca4dfdb1f023a37ddaf7b948b",
+        "savedSha256": "ed95324d1c973b0cc04391de5d75b200939cc636c80a1c7bdb106d3bc4aeaca1"
+      },
+      {
+        "componentId": "rights_bundle",
+        "currentComponentDigest": "c2e35cf80b8b754d9701f75af727983d442358ce60a1f7c46758d30a197aad8c",
+        "currentSha256": "13eb497173611862276fce6c16a9ff207778fa70e3a3eadd60296ae09a0503cb",
+        "path": "apps/web/bundled-knowledge-audit.ts",
+        "savedComponentDigest": "495f6ab72764320847b852a847cd6a3db1cbcf33833cea723745f64406629546",
+        "savedSha256": "8d38e0cbaebe477d5b66784b2814ea845c910962e29fdf9c52354b1fd3e9cd8e"
+      },
+      {
+        "componentId": "rights_bundle",
+        "currentComponentDigest": "c2e35cf80b8b754d9701f75af727983d442358ce60a1f7c46758d30a197aad8c",
+        "currentSha256": "1db59e2f7d3c5448f27b32d96bc8cf5a75968e8470dd0592d70594b44b3ec809",
+        "path": "content/system-admission/bazi-binding-freeze-requirements.v1.json",
+        "savedComponentDigest": "495f6ab72764320847b852a847cd6a3db1cbcf33833cea723745f64406629546",
+        "savedSha256": "662c91e6269d5e860a0d207185680ea7c7b752f24e313859c0d987cb5b446201"
+      },
+      {
+        "componentId": "rights_bundle",
+        "currentComponentDigest": "c2e35cf80b8b754d9701f75af727983d442358ce60a1f7c46758d30a197aad8c",
+        "currentSha256": "cbce00529450c2c10086c2bac6749c0b7de79b69e2fcbe7bd14b940e030680ef",
+        "path": "package.json",
+        "savedComponentDigest": "495f6ab72764320847b852a847cd6a3db1cbcf33833cea723745f64406629546",
+        "savedSha256": "b8d8a31c3c4ae3669e196f0398288bf44284fdc1093ccbf6e510f8fcde0ca62c"
+      },
+      {
+        "componentId": "rights_bundle",
+        "currentComponentDigest": "c2e35cf80b8b754d9701f75af727983d442358ce60a1f7c46758d30a197aad8c",
+        "currentSha256": "ae56d0015f944a67eae3adf56186625568a32d090d5cfd18ca6eea5615402b59",
+        "path": "scripts/bazi-binding-freeze-requirements-lib.mjs",
+        "savedComponentDigest": "495f6ab72764320847b852a847cd6a3db1cbcf33833cea723745f64406629546",
+        "savedSha256": "5c1292f18dd2ebdfe09dc2173f974cb38a6cbe888a783cd61c5e68d8dba9b4d5"
+      },
+      {
+        "componentId": "rights_bundle",
+        "currentComponentDigest": "c2e35cf80b8b754d9701f75af727983d442358ce60a1f7c46758d30a197aad8c",
+        "currentSha256": "e840e37febffae2f7e04b6d1722f1717b16e7410297410b459ceb308cf4eb681",
+        "path": "scripts/verify-bazi-binding-freeze-requirements.mjs",
+        "savedComponentDigest": "495f6ab72764320847b852a847cd6a3db1cbcf33833cea723745f64406629546",
+        "savedSha256": "ed95324d1c973b0cc04391de5d75b200939cc636c80a1c7bdb106d3bc4aeaca1"
+      },
+      {
+        "componentId": "high_risk_policy",
+        "currentComponentDigest": "666bffc377e59e220b4a7ca1930a7a519b046a89af7dbaaf186d2bec68b83c3c",
+        "currentSha256": "76046086e4d4b49cd7166b548f4b6999fb208db020ed9b06e1cdefa90c2cd669",
+        "path": "scripts/bazi-expert-review-packet-lib.mjs",
+        "savedComponentDigest": "4d5b4e1f925c296b633d0002d3aabdfa43f87fe814d553a303d2ecb41134a3e4",
+        "savedSha256": "f8165c3b97e5a61bea333970c6f633a7b77418846458146442486b984af20812"
+      }
+    ],
+    "frozenGoldenMatchesCurrentBytes": true,
+    "frozenGoldenSha256": "aba357d98a99271cc9a9b2727ad1c7c516424c94b7cf34f765cb38b0e9a74b29",
+    "historicalManifestCurrentArtifactClosure": false,
+    "nonAuthoritativeCurrentExpectedPreviewDigest": "85e0a454c76bead4eac239a98a56b55fb662bcc77ff6f1e49e52ee2a6e65ea68",
+    "perFileComponentBytesObservedWithStableHeldHandle": true,
+    "persistedAsDomainManifest": false,
+    "totalUniqueComponentFilesObserved": 34,
+    "unchangedComponentsObserved": 5,
+    "uniqueDriftPathCount": 8
+  },
+  "doesNotEstablish": [
+    "historical_manifest_current_artifact_closure",
+    "owner_attribution_acceptance_rebind_or_resign",
+    "domain_or_content_truth",
+    "expert_identity_credentials_independence_opinion_or_truth",
+    "source_freeze_or_rights_legal_conclusion",
+    "browser_pwa_service_worker_or_runtime_validation",
+    "cross_file_atomic_snapshot_or_mutation_epoch",
+    "interval_mutation_or_aba_exclusion",
+    "release_candidate_freeze_or_release_readiness",
+    "public_release_deployment_or_expert_claims_authorization",
+    "cross_system_authority_inheritance"
+  ],
+  "gateSummary": {
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 12,
+    "expertReviewBundleComplete": false,
+    "formalActivationAllowed": false,
+    "formalAdmissionPromotionBlocked": true,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "releaseCandidateFreezeAllowed": false,
+    "releaseReady": false,
+    "reviewerSlotsOccupied": 0,
+    "rightsBundleComplete": false,
+    "sourceBundleComplete": false
+  },
+  "historicalLineage": {
+    "historicalBasisArtifactCount": 2,
+    "oldD0": {
+      "current": false,
+      "currentVerifierFailureCode": "CURRENT_EXPECTED_MANIFEST_CHANGED",
+      "currentVerifierPassed": false,
+      "ledgerDigest": "5b82b545a2c5b0cd5714342c1bdaca742f4de44e196cc32817e8310926850d0f",
+      "ledgerId": "hakimi.bazi.v17.manifest-drift-decisions/1.0.0",
+      "ownerDecisionsRecorded": 0,
+      "path": "content/system-admission/bazi-v17-manifest-drift-decisions.v1.json",
+      "rawBytes": 11291,
+      "rawSha256": "91e6cda96190b43f65018c913ffa31f5346500d82842f6ebbd4e8af543734486",
+      "storedDriftEntryCount": 7,
+      "storedPreviewDigest": "be637b1e37ae92a9fd047af28d0117334405a39408dc470c766b7ddb8ab96954"
+    },
+    "savedManifest": {
+      "createdAt": "2026-08-25T14:30:00.000Z",
+      "current": false,
+      "currentVerifierFailureCode": "MANIFEST_MISMATCH",
+      "currentVerifierPassed": false,
+      "manifestDigest": "60711da42ebc71e1f23ec300dffd5ed44f418c9bcc83ee394bf106f7354dc932",
+      "path": "content/domain-release/bazi.single-chart-report.v1.7.0.json",
+      "rawBytes": 12777,
+      "rawSha256": "d63d80502c6186a66f2eabc4bd2749687978a8cfb22d420842aa4a9d6e0eccd6"
+    },
+    "verifiedReleaseParentBrandCount": 0
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "componentFileHashUsesSameHeldHandleBuffer": true,
+    "crossFileAtomicSnapshot": false,
+    "endpointSnapshotOnly": true,
+    "intervalMutationExcludedAcrossFiles": false,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "oldD0HashAndParseUseSameHeldHandleBuffer": true,
+    "savedManifestHashAndParseUseSameHeldHandleBuffer": true
+  },
+  "ownerDecisionBoundary": {
+    "generatedModelMayChooseOrSign": false,
+    "manifestRebindAuthorized": false,
+    "manifestResignAuthorized": false,
+    "ownerAcceptanceVerified": false,
+    "ownerAttributionVerified": false,
+    "ownerDecisionsRecorded": 0
+  },
+  "recordType": "bazi_domain_release_manifest_version_aware_observation_candidate_v1_1",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "expertClaimsAuthorized": false,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "schemaVersion": "1.1.0",
+  "status": "candidate_only_current_component_observation_owner_acceptance_absent_no_release_authority"
+}

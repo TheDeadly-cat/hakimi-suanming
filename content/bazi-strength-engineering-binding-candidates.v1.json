@@ -1,0 +1,525 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "bazi_strength_engineering_binding_candidate_ledger",
+  "ledgerId": "hakimi.bazi.strength.engineering-binding-candidates/1.0.0",
+  "status": "mechanically_bound_unreviewed_unfrozen_engineering_candidates",
+  "createdAt": "2026-08-26T00:00:00.000Z",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "candidates": [
+    {
+      "candidateId": "hakimi-strength-core-0.1.0-engineering-candidate-v1",
+      "bindingId": "binding:core:derive-assessment",
+      "evidenceSubjectId": "bazi.strength.binding.core.derive-assessment.v1",
+      "order": 1,
+      "sourceId": "hakimi-strength-core-0.1.0",
+      "originType": "project_engineering_heuristic",
+      "evidenceRole": "defines_engineering_candidate",
+      "authorityBoundary": "engineering_definition_only_no_classical_or_expert_authority",
+      "registryLocator": {
+        "kind": "stable_symbol",
+        "value": "deriveBaziStrengthAssessment + collectBaziStrengthFactors",
+        "verificationStatus": "mechanically_observed_not_freeze_established"
+      },
+      "artifactLocks": [
+        {
+          "path": "packages/bazi-interpretation/src/strength-assessment-core.ts",
+          "bytes": 8559,
+          "sha256": "bbe6510c5cc0500efc8bb3af45efc1c344a5159f35c8fe5fca3aae3dab156e3b",
+          "stableSymbols": [
+            "collectBaziStrengthFactors",
+            "deriveBaziStrengthAssessment"
+          ]
+        }
+      ],
+      "consumerClaimIds": [
+        "bazi.engineering.strength.day_master_fact_anchor.v1",
+        "bazi.engineering.strength.factor_inclusion.v1"
+      ],
+      "definitionSummary": "当前工程从日主、透干、藏干与时柱可靠性派生完整因素账。",
+      "rationaleDraft": "先形成逐因素、方向与权重均可复演的账，再汇总支持侧与需求侧并派生候选分档，以减少分散实现造成的计算漂移。",
+      "forbiddenClaims": [
+        "命理真值",
+        "科学有效性",
+        "用户吉凶"
+      ],
+      "repositoryStorageObservation": {
+        "repositoryArtifactsAlreadyStored": true,
+        "separateSourceBodyCopied": false,
+        "exactQuoteTextStored": false
+      },
+      "rightsState": {
+        "repositoryProvenanceObserved": true,
+        "firstPartyAuthorshipLegallyEstablished": false,
+        "formalSourceRightsRecordId": null,
+        "legalReviewVerified": false,
+        "redistributionClearanceEstablished": false,
+        "distributionBoundary": "local_repository_only_no_distribution_clearance"
+      },
+      "reviewState": {
+        "engineeringReviewIds": [],
+        "independentDomainReviewIds": [],
+        "engineeringRationaleFrozen": false,
+        "bindingFreezeAuthorized": false,
+        "bindingFreezeEffect": "none"
+      },
+      "authorityClaims": {
+        "classicalAuthorityClaimed": false,
+        "expertAuthorityClaimed": false,
+        "scientificValidityClaimed": false,
+        "predictiveValidityClaimed": false
+      },
+      "candidateDigest": "79061be08a919ef707df42b50b86f177cd242cba28d66de8453f827692d9a504"
+    },
+    {
+      "candidateId": "hakimi-strength-factor-inclusion-0.1.0-engineering-candidate-v1",
+      "bindingId": "binding:policy:factor-inclusion",
+      "evidenceSubjectId": "bazi.strength.binding.policy.factor-inclusion.v1",
+      "order": 2,
+      "sourceId": "hakimi-strength-policy-0.1.0",
+      "originType": "project_engineering_heuristic",
+      "evidenceRole": "defines_engineering_candidate",
+      "authorityBoundary": "engineering_definition_only_no_classical_or_expert_authority",
+      "registryLocator": {
+        "kind": "stable_symbol",
+        "value": "BAZI_STRENGTH_POLICY.factorInclusion",
+        "verificationStatus": "mechanically_observed_not_freeze_established"
+      },
+      "artifactLocks": [
+        {
+          "path": "packages/bazi-interpretation/src/strength-policy.ts",
+          "bytes": 10905,
+          "sha256": "795709298542773459a73cd8a63a6824d3076bbdedf6a157c0652d25446486f1",
+          "stableSymbols": [
+            "BAZI_STRENGTH_POLICY",
+            "factorInclusion"
+          ]
+        },
+        {
+          "path": "packages/bazi-interpretation/src/strength-assessment-core.ts",
+          "bytes": 8559,
+          "sha256": "bbe6510c5cc0500efc8bb3af45efc1c344a5159f35c8fe5fca3aae3dab156e3b",
+          "stableSymbols": [
+            "collectBaziStrengthFactors"
+          ]
+        }
+      ],
+      "consumerClaimIds": [
+        "bazi.engineering.strength.factor_inclusion.v1",
+        "bazi.engineering.strength.unreliable_hour_withheld.v1"
+      ],
+      "definitionSummary": "日主透干排除、月令与首藏分别保留、时辰不可靠时关闭时柱。",
+      "rationaleDraft": "排除日主自身的重复透干贡献，并在时辰不可靠时关闭全部时柱因素；月令与首藏分别保留为可审计基线，等待后续反例与专家复核。",
+      "forbiddenClaims": [
+        "传统唯一规则",
+        "所有流派一致"
+      ],
+      "repositoryStorageObservation": {
+        "repositoryArtifactsAlreadyStored": true,
+        "separateSourceBodyCopied": false,
+        "exactQuoteTextStored": false
+      },
+      "rightsState": {
+        "repositoryProvenanceObserved": true,
+        "firstPartyAuthorshipLegallyEstablished": false,
+        "formalSourceRightsRecordId": null,
+        "legalReviewVerified": false,
+        "redistributionClearanceEstablished": false,
+        "distributionBoundary": "local_repository_only_no_distribution_clearance"
+      },
+      "reviewState": {
+        "engineeringReviewIds": [],
+        "independentDomainReviewIds": [],
+        "engineeringRationaleFrozen": false,
+        "bindingFreezeAuthorized": false,
+        "bindingFreezeEffect": "none"
+      },
+      "authorityClaims": {
+        "classicalAuthorityClaimed": false,
+        "expertAuthorityClaimed": false,
+        "scientificValidityClaimed": false,
+        "predictiveValidityClaimed": false
+      },
+      "candidateDigest": "231edd1370fc44fe67a40cea179b5d3bd721090f8db08e1bb37078fa6c49fce6"
+    },
+    {
+      "candidateId": "hakimi-strength-direction-map-0.1.0-engineering-candidate-v1",
+      "bindingId": "binding:policy:direction-map",
+      "evidenceSubjectId": "bazi.strength.binding.policy.direction-map.v1",
+      "order": 3,
+      "sourceId": "hakimi-strength-policy-0.1.0",
+      "originType": "project_engineering_heuristic",
+      "evidenceRole": "defines_engineering_candidate",
+      "authorityBoundary": "engineering_definition_only_no_classical_or_expert_authority",
+      "registryLocator": {
+        "kind": "stable_symbol",
+        "value": "BAZI_STRENGTH_TEN_GOD_GROUPS + strengthFactorDirectionForTenGod",
+        "verificationStatus": "mechanically_observed_not_freeze_established"
+      },
+      "artifactLocks": [
+        {
+          "path": "packages/bazi-interpretation/src/strength-policy.ts",
+          "bytes": 10905,
+          "sha256": "795709298542773459a73cd8a63a6824d3076bbdedf6a157c0652d25446486f1",
+          "stableSymbols": [
+            "BAZI_STRENGTH_TEN_GOD_GROUPS",
+            "strengthFactorDirectionForTenGod"
+          ]
+        }
+      ],
+      "consumerClaimIds": [
+        "bazi.engineering.ten_god.support_demand_grouping.v1"
+      ],
+      "definitionSummary": "比劫与印归支持侧，食伤、财与官杀归需求侧。",
+      "rationaleDraft": "先把十神压缩为五个工程组，再映射为支持与需求两侧，使同一加总过程可以逐项审计；该二分不承担喜忌或吉凶判断。",
+      "forbiddenClaims": [
+        "支持即吉",
+        "需求即凶",
+        "用神喜忌"
+      ],
+      "repositoryStorageObservation": {
+        "repositoryArtifactsAlreadyStored": true,
+        "separateSourceBodyCopied": false,
+        "exactQuoteTextStored": false
+      },
+      "rightsState": {
+        "repositoryProvenanceObserved": true,
+        "firstPartyAuthorshipLegallyEstablished": false,
+        "formalSourceRightsRecordId": null,
+        "legalReviewVerified": false,
+        "redistributionClearanceEstablished": false,
+        "distributionBoundary": "local_repository_only_no_distribution_clearance"
+      },
+      "reviewState": {
+        "engineeringReviewIds": [],
+        "independentDomainReviewIds": [],
+        "engineeringRationaleFrozen": false,
+        "bindingFreezeAuthorized": false,
+        "bindingFreezeEffect": "none"
+      },
+      "authorityClaims": {
+        "classicalAuthorityClaimed": false,
+        "expertAuthorityClaimed": false,
+        "scientificValidityClaimed": false,
+        "predictiveValidityClaimed": false
+      },
+      "candidateDigest": "d1ad960f644bfa898c72cb2ac38bcf4a8f0ece5b7e386ea5c2b8fc454e2af3d8"
+    },
+    {
+      "candidateId": "hakimi-strength-weights-0.1.0-engineering-candidate-v1",
+      "bindingId": "binding:policy:weights",
+      "evidenceSubjectId": "bazi.strength.binding.policy.weights.v1",
+      "order": 4,
+      "sourceId": "hakimi-strength-policy-0.1.0",
+      "originType": "project_engineering_heuristic",
+      "evidenceRole": "defines_engineering_candidate",
+      "authorityBoundary": "engineering_definition_only_no_classical_or_expert_authority",
+      "registryLocator": {
+        "kind": "stable_symbol",
+        "value": "BAZI_STRENGTH_FACTOR_WEIGHTS",
+        "verificationStatus": "mechanically_observed_not_freeze_established"
+      },
+      "artifactLocks": [
+        {
+          "path": "packages/bazi-interpretation/src/strength-policy.ts",
+          "bytes": 10905,
+          "sha256": "795709298542773459a73cd8a63a6824d3076bbdedf6a157c0652d25446486f1",
+          "stableSymbols": [
+            "BAZI_STRENGTH_FACTOR_WEIGHTS",
+            "strengthFactorWeight"
+          ]
+        }
+      ],
+      "consumerClaimIds": [
+        "bazi.engineering.strength.factor_weights_4_2_2_1.v1"
+      ],
+      "definitionSummary": "月令 4、透干 2、首位藏干 2、其余藏干 1 的当前工程候选。",
+      "rationaleDraft": "采用小整数权重，使月令、透干与藏干的相对差异可复演并可在敏感性场景中扰动；这些数字不表示古籍规定、专家批准或统计校准。",
+      "forbiddenClaims": [
+        "古籍规定该权重",
+        "专家批准",
+        "统计校准"
+      ],
+      "repositoryStorageObservation": {
+        "repositoryArtifactsAlreadyStored": true,
+        "separateSourceBodyCopied": false,
+        "exactQuoteTextStored": false
+      },
+      "rightsState": {
+        "repositoryProvenanceObserved": true,
+        "firstPartyAuthorshipLegallyEstablished": false,
+        "formalSourceRightsRecordId": null,
+        "legalReviewVerified": false,
+        "redistributionClearanceEstablished": false,
+        "distributionBoundary": "local_repository_only_no_distribution_clearance"
+      },
+      "reviewState": {
+        "engineeringReviewIds": [],
+        "independentDomainReviewIds": [],
+        "engineeringRationaleFrozen": false,
+        "bindingFreezeAuthorized": false,
+        "bindingFreezeEffect": "none"
+      },
+      "authorityClaims": {
+        "classicalAuthorityClaimed": false,
+        "expertAuthorityClaimed": false,
+        "scientificValidityClaimed": false,
+        "predictiveValidityClaimed": false
+      },
+      "candidateDigest": "aa5969beeb99bb0351af007e25854564a5240657249684327992ab791150a993"
+    },
+    {
+      "candidateId": "hakimi-strength-month-duplication-0.1.0-engineering-candidate-v1",
+      "bindingId": "binding:policy:month-duplication",
+      "evidenceSubjectId": "bazi.strength.binding.policy.month-duplication.v1",
+      "order": 5,
+      "sourceId": "hakimi-strength-policy-0.1.0",
+      "originType": "project_engineering_heuristic",
+      "evidenceRole": "defines_engineering_candidate",
+      "authorityBoundary": "engineering_definition_only_no_classical_or_expert_authority",
+      "registryLocator": {
+        "kind": "stable_symbol",
+        "value": "BAZI_STRENGTH_POLICY.monthMainDuplication",
+        "verificationStatus": "mechanically_observed_not_freeze_established"
+      },
+      "artifactLocks": [
+        {
+          "path": "packages/bazi-interpretation/src/strength-policy.ts",
+          "bytes": 10905,
+          "sha256": "795709298542773459a73cd8a63a6824d3076bbdedf6a157c0652d25446486f1",
+          "stableSymbols": [
+            "BAZI_STRENGTH_POLICY",
+            "monthMainDuplication"
+          ]
+        },
+        {
+          "path": "packages/bazi-interpretation/src/strength-assessment-core.ts",
+          "bytes": 8559,
+          "sha256": "bbe6510c5cc0500efc8bb3af45efc1c344a5159f35c8fe5fca3aae3dab156e3b",
+          "stableSymbols": [
+            "collectBaziStrengthFactors"
+          ]
+        }
+      ],
+      "consumerClaimIds": [
+        "bazi.engineering.strength.month_main_counted_separately.v1"
+      ],
+      "definitionSummary": "月令主气与月支首位藏干在当前基线分别计入。",
+      "rationaleDraft": "分别计入可把当前模型选择显式暴露，并由去重敏感性场景观察其影响；基线与去重场景都不因此成为命理真值。",
+      "forbiddenClaims": [
+        "古籍规定合计权重 6",
+        "去重场景必然正确"
+      ],
+      "repositoryStorageObservation": {
+        "repositoryArtifactsAlreadyStored": true,
+        "separateSourceBodyCopied": false,
+        "exactQuoteTextStored": false
+      },
+      "rightsState": {
+        "repositoryProvenanceObserved": true,
+        "firstPartyAuthorshipLegallyEstablished": false,
+        "formalSourceRightsRecordId": null,
+        "legalReviewVerified": false,
+        "redistributionClearanceEstablished": false,
+        "distributionBoundary": "local_repository_only_no_distribution_clearance"
+      },
+      "reviewState": {
+        "engineeringReviewIds": [],
+        "independentDomainReviewIds": [],
+        "engineeringRationaleFrozen": false,
+        "bindingFreezeAuthorized": false,
+        "bindingFreezeEffect": "none"
+      },
+      "authorityClaims": {
+        "classicalAuthorityClaimed": false,
+        "expertAuthorityClaimed": false,
+        "scientificValidityClaimed": false,
+        "predictiveValidityClaimed": false
+      },
+      "candidateDigest": "85589d3161742d87024a27f2be44d5a4cc1d97386fc747eab1b261b63d8039a6"
+    },
+    {
+      "candidateId": "hakimi-strength-thresholds-0.1.0-engineering-candidate-v1",
+      "bindingId": "binding:policy:thresholds",
+      "evidenceSubjectId": "bazi.strength.binding.policy.thresholds.v1",
+      "order": 6,
+      "sourceId": "hakimi-strength-policy-0.1.0",
+      "originType": "project_engineering_heuristic",
+      "evidenceRole": "defines_engineering_candidate",
+      "authorityBoundary": "engineering_definition_only_no_classical_or_expert_authority",
+      "registryLocator": {
+        "kind": "stable_symbol",
+        "value": "BAZI_STRENGTH_BAND_THRESHOLDS + classifyStrengthBand",
+        "verificationStatus": "mechanically_observed_not_freeze_established"
+      },
+      "artifactLocks": [
+        {
+          "path": "packages/bazi-interpretation/src/strength-policy.ts",
+          "bytes": 10905,
+          "sha256": "795709298542773459a73cd8a63a6824d3076bbdedf6a157c0652d25446486f1",
+          "stableSymbols": [
+            "BAZI_STRENGTH_BAND_THRESHOLDS",
+            "classifyStrengthBand"
+          ]
+        }
+      ],
+      "consumerClaimIds": [
+        "bazi.engineering.strength.threshold_bands.v1"
+      ],
+      "definitionSummary": "支持比例按 0.25、0.43、0.57、0.75 映射五档。",
+      "rationaleDraft": "固定阈值使连续支持比例可稳定复演为五个展示档位；当前数值只服务工程候选的一致分类，尚无案例集、专家或统计校准。",
+      "forbiddenClaims": [
+        "传统分界",
+        "人口统计阈值",
+        "预测准确率"
+      ],
+      "repositoryStorageObservation": {
+        "repositoryArtifactsAlreadyStored": true,
+        "separateSourceBodyCopied": false,
+        "exactQuoteTextStored": false
+      },
+      "rightsState": {
+        "repositoryProvenanceObserved": true,
+        "firstPartyAuthorshipLegallyEstablished": false,
+        "formalSourceRightsRecordId": null,
+        "legalReviewVerified": false,
+        "redistributionClearanceEstablished": false,
+        "distributionBoundary": "local_repository_only_no_distribution_clearance"
+      },
+      "reviewState": {
+        "engineeringReviewIds": [],
+        "independentDomainReviewIds": [],
+        "engineeringRationaleFrozen": false,
+        "bindingFreezeAuthorized": false,
+        "bindingFreezeEffect": "none"
+      },
+      "authorityClaims": {
+        "classicalAuthorityClaimed": false,
+        "expertAuthorityClaimed": false,
+        "scientificValidityClaimed": false,
+        "predictiveValidityClaimed": false
+      },
+      "candidateDigest": "f96ade163d93369966d67ccadd7a4a006f4ffa3f0902fc7a6ee97baa03801539"
+    },
+    {
+      "candidateId": "hakimi-strength-sensitivity-0.1.0-engineering-candidate-v1",
+      "bindingId": "binding:sensitivity:six-scenarios",
+      "evidenceSubjectId": "bazi.strength.binding.sensitivity.six-scenarios.v1",
+      "order": 7,
+      "sourceId": "hakimi-strength-sensitivity-0.1.0",
+      "originType": "project_engineering_heuristic",
+      "evidenceRole": "defines_engineering_candidate",
+      "authorityBoundary": "engineering_definition_only_no_classical_or_expert_authority",
+      "registryLocator": {
+        "kind": "stable_symbol",
+        "value": "BAZI_STRENGTH_SENSITIVITY_SCENARIOS + buildStrengthSensitivityReview",
+        "verificationStatus": "mechanically_observed_not_freeze_established"
+      },
+      "artifactLocks": [
+        {
+          "path": "packages/bazi-interpretation/src/strength-policy.ts",
+          "bytes": 10905,
+          "sha256": "795709298542773459a73cd8a63a6824d3076bbdedf6a157c0652d25446486f1",
+          "stableSymbols": [
+            "BAZI_STRENGTH_SENSITIVITY_SCENARIOS"
+          ]
+        },
+        {
+          "path": "packages/bazi-interpretation/src/strength-sensitivity-review.ts",
+          "bytes": 13979,
+          "sha256": "ef6772513009cb4e4174cd9f6d12318c69995629a37ab5e5be59ea7bcbace4d8",
+          "stableSymbols": [
+            "buildStrengthSensitivityReview"
+          ]
+        }
+      ],
+      "consumerClaimIds": [
+        "bazi.engineering.strength.scenario_sensitivity.v1"
+      ],
+      "definitionSummary": "六个工程扰动场景的权重、排除项、分档与稳定性比较。",
+      "rationaleDraft": "固定六个基线或扰动场景，用于暴露结论对计权与因素纳入假设的敏感程度；场景集合不代表流派穷尽、专家共识或预测稳健性。",
+      "forbiddenClaims": [
+        "六大流派",
+        "专家共识",
+        "预测稳健性"
+      ],
+      "repositoryStorageObservation": {
+        "repositoryArtifactsAlreadyStored": true,
+        "separateSourceBodyCopied": false,
+        "exactQuoteTextStored": false
+      },
+      "rightsState": {
+        "repositoryProvenanceObserved": true,
+        "firstPartyAuthorshipLegallyEstablished": false,
+        "formalSourceRightsRecordId": null,
+        "legalReviewVerified": false,
+        "redistributionClearanceEstablished": false,
+        "distributionBoundary": "local_repository_only_no_distribution_clearance"
+      },
+      "reviewState": {
+        "engineeringReviewIds": [],
+        "independentDomainReviewIds": [],
+        "engineeringRationaleFrozen": false,
+        "bindingFreezeAuthorized": false,
+        "bindingFreezeEffect": "none"
+      },
+      "authorityClaims": {
+        "classicalAuthorityClaimed": false,
+        "expertAuthorityClaimed": false,
+        "scientificValidityClaimed": false,
+        "predictiveValidityClaimed": false
+      },
+      "candidateDigest": "8608298ebf813d8dfd47a3a572cde15cbc2fc213a7eb69267f117ee730ca7f66"
+    }
+  ],
+  "gateSummary": {
+    "engineeringBindingsRequired": 7,
+    "candidateEnvelopesMechanicallyVerified": 7,
+    "candidatesWithArtifactIdentityLocks": 7,
+    "uniqueRepositoryArtifactsLocked": 3,
+    "consumerClaimBindingLinksMechanicallyVerified": 9,
+    "rationaleDraftsPresent": 7,
+    "engineeringRationalesFrozen": 0,
+    "engineeringReviewsVerified": 0,
+    "independentDomainReviewsVerified": 0,
+    "formalSourceRightsRecordsCreated": 0,
+    "redistributionClearancesEstablished": 0,
+    "bindingsFrozen": 0,
+    "classicalAuthorityClaims": 0,
+    "expertAuthorityClaims": 0,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "evidenceLedger": {
+    "engineeringEvidence": "current_repository_artifact_hashes_stable_symbols_and_existing_claim_consumers_mechanically_bound",
+    "browserRuntimeEvidence": "not_assessed_in_engineering_candidate_ledger",
+    "contentTruth": "not_established",
+    "expertTruth": "not_established",
+    "rightsLegalConclusion": "not_established",
+    "releaseReadiness": "not_ready",
+    "publicReleaseAuthorization": "not_authorized"
+  },
+  "doesNotEstablish": [
+    "engineering_rationale_frozen",
+    "binding_frozen_verification",
+    "classical_or_traditional_authority",
+    "content_truth",
+    "expert_truth",
+    "rights_or_legal_conclusion",
+    "redistribution_clearance",
+    "browser_or_runtime_validation",
+    "release_readiness",
+    "public_release_authorization"
+  ],
+  "ledgerDigest": "05ce9c6d9c03822cf246b0406d15616e8c4a6938650296135142827a00a5a28e"
+}

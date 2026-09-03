@@ -1,0 +1,496 @@
+{
+  "schemaVersion": "1.2.0",
+  "recordType": "bazi_strength_source_rights_candidate_ledger",
+  "ledgerId": "hakimi.bazi.strength.source-rights-candidates/1.2.0",
+  "status": "research_observations_only_versioned_notice_projection_corrected",
+  "observedAt": "2026-08-25T20:17:10.106Z",
+  "sourceBindingLedger": {
+    "path": "content/bazi-strength-source-binding-candidates.v1.6.0.json",
+    "ledgerId": "hakimi.bazi.strength.source-binding-candidates/1.6.0",
+    "ledgerDigest": "6f008058b282613fd131344206b27fccb1d80596bb49789f0554acdd69c1e44c",
+    "candidateCount": 4
+  },
+  "accessBoundary": {
+    "publicReadOnly": true,
+    "authenticatedAccessUsed": false,
+    "accessControlBypassed": false,
+    "sourceBodiesStored": false,
+    "quoteTextsStored": false,
+    "carrierFilesStored": false,
+    "pageImagesStored": false,
+    "storagePolicy": "link_only"
+  },
+  "policyEvidence": [
+    {
+      "policyId": "wmf-terms-r554823",
+      "provider": "Wikimedia Foundation Governance Wiki",
+      "title": "Policy:Terms of Use",
+      "permanentUrl": "https://foundation.wikimedia.org/w/index.php?title=Policy%3ATerms_of_Use&oldid=554823#7._Licensing_of_Content",
+      "pageId": 21261,
+      "revisionId": 554823,
+      "parentRevisionId": 554674,
+      "revisionTimestamp": "2026-02-21T02:54:13Z",
+      "mediaWikiSha1": "2ed02699a89770800d4297b97a3b61d07bce2588",
+      "observation": "default user-contributed text licensing and attribution paths observed; project exceptions and imported-content provenance remain source-specific",
+      "legalConclusion": "not_established"
+    },
+    {
+      "policyId": "cc-by-sa-4.0-legal-code",
+      "provider": "Creative Commons",
+      "title": "Attribution-ShareAlike 4.0 International Legal Code",
+      "permanentUrl": "https://creativecommons.org/licenses/by-sa/4.0/legalcode",
+      "pageId": null,
+      "revisionId": null,
+      "parentRevisionId": null,
+      "revisionTimestamp": null,
+      "mediaWikiSha1": null,
+      "observation": "attribution, modification marking, license linking, and share-alike conditions observed; applicability and compliance remain unadjudicated",
+      "legalConclusion": "not_established"
+    },
+    {
+      "policyId": "commons-reuse-r1259943424",
+      "provider": "Wikimedia Commons",
+      "title": "Commons:Reusing content outside Wikimedia",
+      "permanentUrl": "https://commons.wikimedia.org/w/index.php?title=Commons%3AReusing_content_outside_Wikimedia&oldid=1259943424",
+      "pageId": 1130401,
+      "revisionId": 1259943424,
+      "parentRevisionId": 1259943327,
+      "revisionTimestamp": "2026-08-11T22:45:52Z",
+      "mediaWikiSha1": "76bb7ffb1b9561c3a83b684d6f69d502ca050ef6",
+      "observation": "file-specific requirements, independent verification duty, and no copyright-status warranty observed",
+      "legalConclusion": "not_established"
+    }
+  ],
+  "candidates": [
+    {
+      "rightsCandidateId": "smt-siku-v10-wikisource-r761703-rights-candidate-v1",
+      "sourceCandidateId": "smt-siku-v10-wikisource-r761703-candidate-v1",
+      "bindingId": "binding:smt-v10:whole-chart",
+      "sourceId": "smt-siku-v10-wikisource-r761703",
+      "workLayer": {
+        "title": "三命通會",
+        "attributedAuthor": "萬民英",
+        "sourceUrl": "https://zh.wikisource.org/w/index.php?title=%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83_(%E5%9B%9B%E5%BA%AB%E5%85%A8%E6%9B%B8%E6%9C%AC)/%E5%8D%B710&oldid=761703",
+        "pageSpecificNoticeObservation": "pd_old_template_observed",
+        "observedTemplateNames": [
+          "Template:PD-old"
+        ],
+        "status": "candidate_only_not_adjudicated",
+        "jurisdictionAssessment": null,
+        "evidenceRefs": [
+          "https://zh.wikisource.org/w/index.php?title=%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83_(%E5%9B%9B%E5%BA%AB%E5%85%A8%E6%9B%B8%E6%9C%AC)/%E5%8D%B710&oldid=761703"
+        ],
+        "legalReviewerIds": []
+      },
+      "transcriptionLayer": {
+        "provider": "Chinese Wikisource",
+        "pageId": 260849,
+        "revisionId": 761703,
+        "rawWikitextSha256": "0a20dc53a4156211b5c8ba89dbb6a8f07f056fde573e37699e28b021b6d026b6",
+        "termsPolicyIds": [
+          "wmf-terms-r554823",
+          "cc-by-sa-4.0-legal-code"
+        ],
+        "contributionLicenseObservation": "wmf_default_cc_by_sa_4_or_gfdl_with_project_exceptions_observed",
+        "attributionPathObservation": "permalink_or_history_required_if_reused",
+        "provenanceState": "import_and_contribution_provenance_not_independently_verified",
+        "status": "terms_observed_not_cleared",
+        "evidenceRefs": [
+          "https://zh.wikisource.org/w/index.php?title=%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83_(%E5%9B%9B%E5%BA%AB%E5%85%A8%E6%9B%B8%E6%9C%AC)/%E5%8D%B710&oldid=761703",
+          "https://foundation.wikimedia.org/w/index.php?title=Policy%3ATerms_of_Use&oldid=554823#7._Licensing_of_Content",
+          "https://creativecommons.org/licenses/by-sa/4.0/legalcode"
+        ],
+        "rightsReviewerIds": []
+      },
+      "carrierLayers": [
+        {
+          "anchorId": "smt-v10-gujin-volume-472-page-28-facsimile-v1",
+          "carrierFilePageId": 52325762,
+          "carrierFileTitle": "File:Gujin Tushu Jicheng, Volume 472 (1700-1725).djvu",
+          "carrierDescriptionUrl": "https://commons.wikimedia.org/wiki/File:Gujin_Tushu_Jicheng,_Volume_472_(1700-1725).djvu",
+          "carrierMediaWikiSha1": "52d4c0998f472e704d85a71f9458d206e43f6128",
+          "carrierSha256": "be4df89c53764fb0acf26224a47ddc445b403569dde104d283e1fb85768940f7",
+          "metadataObservation": {
+            "licenseShortName": "Public domain",
+            "usageTerms": "Public domain",
+            "attributionRequired": "false",
+            "copyrighted": "False",
+            "licenseUrl": "",
+            "restrictions": ""
+          },
+          "noticeState": "commons_public_domain_metadata_observed_not_adjudicated",
+          "reusePolicyId": "commons-reuse-r1259943424",
+          "status": "notice_observed_not_cleared",
+          "evidenceRefs": [
+            "https://commons.wikimedia.org/wiki/File:Gujin_Tushu_Jicheng,_Volume_472_(1700-1725).djvu",
+            "https://commons.wikimedia.org/w/index.php?title=Commons%3AReusing_content_outside_Wikimedia&oldid=1259943424"
+          ],
+          "rightsReviewerIds": []
+        }
+      ],
+      "decision": {
+        "knowledgeDocumentCreated": false,
+        "formalSourceRightsRecordCreated": false,
+        "formalSourceCarrierRecordCreated": false,
+        "workLayerCleared": false,
+        "editionLayerCleared": false,
+        "carrierLayerCleared": false,
+        "reviewAttestations": [],
+        "distributionPolicy": "link_only",
+        "legalConclusion": "not_established",
+        "rightsCandidateState": "evidence_observed_human_legal_review_required",
+        "frozenAt": null
+      },
+      "candidateDigest": "5ac820401e53d6268c0250232bb2de3c813f2fbe5ed7a05ff46200c7f72fca16"
+    },
+    {
+      "rightsCandidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v2",
+      "sourceCandidateId": "dtt-chanwei-wikisource-r2600158-candidate-v2",
+      "bindingId": "binding:dtt:month-command",
+      "sourceId": "dtt-chanwei-wikisource-r2600158",
+      "workLayer": {
+        "title": "滴天髓闡微",
+        "attributedAuthor": "任鐵樵",
+        "sourceUrl": "https://zh.wikisource.org/w/index.php?title=%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE&oldid=2600158",
+        "pageSpecificNoticeObservation": "rendered_pd_old_dependency_observed_not_oldid_main_slot_literal",
+        "observedTemplateNames": [
+          "Template:清朝作品"
+        ],
+        "status": "candidate_only_not_adjudicated",
+        "jurisdictionAssessment": null,
+        "evidenceRefs": [
+          "https://zh.wikisource.org/w/index.php?title=%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE&oldid=2600158"
+        ],
+        "legalReviewerIds": [],
+        "renderedDependencyTemplateNamesObserved": [
+          "Template:License",
+          "Template:PD-old",
+          "Template:清朝作品"
+        ],
+        "noticeDependencyBoundary": {
+          "publicEvidenceObservationId": "hakimi.bazi.dtt-month-command-public-evidence/2026-08-29T15:17:27.103Z",
+          "oldidMainSlotPdOldLiteralObserved": false,
+          "renderedPagePdOldDependencyObserved": true,
+          "dependencyRevisionsPinnedAtCapture": true,
+          "oldidAlonePinsRenderedNotice": false,
+          "applicabilityEstablished": false,
+          "legalConclusion": "not_established"
+        }
+      },
+      "transcriptionLayer": {
+        "provider": "Chinese Wikisource",
+        "pageId": 340255,
+        "revisionId": 2600158,
+        "rawWikitextSha256": "1d1a3d61c1b9a26618b41b8ead857a6b966992fdf2adabdc607a0c6cb4c8f04d",
+        "termsPolicyIds": [
+          "wmf-terms-r554823",
+          "cc-by-sa-4.0-legal-code"
+        ],
+        "contributionLicenseObservation": "wmf_default_cc_by_sa_4_or_gfdl_with_project_exceptions_observed",
+        "attributionPathObservation": "permalink_or_history_required_if_reused",
+        "provenanceState": "import_and_contribution_provenance_not_independently_verified",
+        "status": "terms_observed_not_cleared",
+        "evidenceRefs": [
+          "https://zh.wikisource.org/w/index.php?title=%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE&oldid=2600158",
+          "https://foundation.wikimedia.org/w/index.php?title=Policy%3ATerms_of_Use&oldid=554823#7._Licensing_of_Content",
+          "https://creativecommons.org/licenses/by-sa/4.0/legalcode"
+        ],
+        "rightsReviewerIds": []
+      },
+      "carrierLayers": [
+        {
+          "anchorId": "dtt-chanwei-ssid-11335994-pages-170-176-facsimile-v1",
+          "carrierFilePageId": 125728441,
+          "carrierFileTitle": "File:SSID-11335994 滴天髓闡微.pdf",
+          "carrierDescriptionUrl": "https://commons.wikimedia.org/wiki/File:SSID-11335994_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.pdf",
+          "carrierMediaWikiSha1": "2d2e1502325c5f026be0f5618d54d8e9c254c232",
+          "carrierSha256": "d6a7d1daf6513ce9fb9940ff8331b96804c10cdafbeac00d4d3d0a37229e1803",
+          "metadataObservation": {
+            "licenseShortName": "Public domain",
+            "usageTerms": "Public domain",
+            "attributionRequired": "false",
+            "copyrighted": "False",
+            "licenseUrl": "",
+            "restrictions": ""
+          },
+          "noticeState": "pd_scan_top_level_observed_not_adjudicated",
+          "reusePolicyId": "commons-reuse-r1259943424",
+          "status": "notice_observed_not_cleared",
+          "evidenceRefs": [
+            "https://commons.wikimedia.org/wiki/File:SSID-11335994_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.pdf",
+            "https://commons.wikimedia.org/w/index.php?title=Commons%3AReusing_content_outside_Wikimedia&oldid=1259943424"
+          ],
+          "rightsReviewerIds": [],
+          "fixedFilePageRevisionId": 708090379,
+          "publicDomainMarkCountsAsLicense": false,
+          "markerAuthorityAndAccuracyVerified": false
+        },
+        {
+          "anchorId": "dtt-chanwei-cadal-07005210-pages-178-184-facsimile-v1",
+          "carrierFilePageId": 126125545,
+          "carrierFileTitle": "File:CADAL07005210 滴天髓闡微.djvu",
+          "carrierDescriptionUrl": "https://commons.wikimedia.org/wiki/File:CADAL07005210_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.djvu",
+          "carrierMediaWikiSha1": "e73a24aee3cfc28f22d39e795b13fe76a5a995ad",
+          "carrierSha256": "1d0a16f528ed3074cdefad33b2d2f9233a47199cf88a8b02001c897e16996e60",
+          "metadataObservation": {
+            "licenseShortName": "Public domain",
+            "usageTerms": "Public domain",
+            "attributionRequired": "false",
+            "copyrighted": "False",
+            "licenseUrl": "",
+            "restrictions": ""
+          },
+          "noticeState": "pd_old_top_level_observed_without_pd_scan_template_not_adjudicated",
+          "reusePolicyId": "commons-reuse-r1259943424",
+          "status": "notice_observed_not_cleared",
+          "evidenceRefs": [
+            "https://commons.wikimedia.org/wiki/File:CADAL07005210_%E6%BB%B4%E5%A4%A9%E9%AB%93%E9%97%A1%E5%BE%AE.djvu",
+            "https://commons.wikimedia.org/w/index.php?title=Commons%3AReusing_content_outside_Wikimedia&oldid=1259943424"
+          ],
+          "rightsReviewerIds": [],
+          "fixedFilePageRevisionId": 1104458375,
+          "publicDomainMarkCountsAsLicense": false,
+          "markerAuthorityAndAccuracyVerified": false
+        }
+      ],
+      "decision": {
+        "knowledgeDocumentCreated": false,
+        "formalSourceRightsRecordCreated": false,
+        "formalSourceCarrierRecordCreated": false,
+        "workLayerCleared": false,
+        "editionLayerCleared": false,
+        "carrierLayerCleared": false,
+        "reviewAttestations": [],
+        "distributionPolicy": "link_only",
+        "legalConclusion": "not_established",
+        "rightsCandidateState": "versioned_notice_projection_corrected_human_legal_review_required",
+        "frozenAt": null,
+        "supersedes": "dtt-chanwei-wikisource-r2600158-rights-candidate-v1"
+      },
+      "candidateDigest": "674a0b64179f5fbb0dff331fdad6b6ac93e3093de4a8459abf6ff9bdd6cd418c"
+    },
+    {
+      "rightsCandidateId": "smt-v5-wikisource-r2706483-rights-candidate-v1",
+      "sourceCandidateId": "smt-v5-wikisource-r2706483-candidate-v1",
+      "bindingId": "binding:smt-v5:relative-relations",
+      "sourceId": "smt-v5-wikisource-r2706483",
+      "workLayer": {
+        "title": "三命通會",
+        "attributedAuthor": "萬民英",
+        "sourceUrl": "https://zh.wikisource.org/w/index.php?title=%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83/%E5%8D%B7%E4%BA%94&oldid=2706483",
+        "pageSpecificNoticeObservation": "no_page_specific_pd_template_observed",
+        "observedTemplateNames": [],
+        "status": "candidate_only_not_adjudicated",
+        "jurisdictionAssessment": null,
+        "evidenceRefs": [
+          "https://zh.wikisource.org/w/index.php?title=%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83/%E5%8D%B7%E4%BA%94&oldid=2706483"
+        ],
+        "legalReviewerIds": []
+      },
+      "transcriptionLayer": {
+        "provider": "Chinese Wikisource",
+        "pageId": 335940,
+        "revisionId": 2706483,
+        "rawWikitextSha256": "df0446bc9ff7651a91fc866de1eb4f86dec4b045b95cbbd777b1fec70e51f139",
+        "termsPolicyIds": [
+          "wmf-terms-r554823",
+          "cc-by-sa-4.0-legal-code"
+        ],
+        "contributionLicenseObservation": "wmf_default_cc_by_sa_4_or_gfdl_with_project_exceptions_observed",
+        "attributionPathObservation": "permalink_or_history_required_if_reused",
+        "provenanceState": "import_and_contribution_provenance_not_independently_verified",
+        "status": "terms_observed_not_cleared",
+        "evidenceRefs": [
+          "https://zh.wikisource.org/w/index.php?title=%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83/%E5%8D%B7%E4%BA%94&oldid=2706483",
+          "https://foundation.wikimedia.org/w/index.php?title=Policy%3ATerms_of_Use&oldid=554823#7._Licensing_of_Content",
+          "https://creativecommons.org/licenses/by-sa/4.0/legalcode"
+        ],
+        "rightsReviewerIds": []
+      },
+      "carrierLayers": [
+        {
+          "anchorId": "smt-v5-gujin-volume-470-page-115-facsimile-v1",
+          "carrierFilePageId": 52325594,
+          "carrierFileTitle": "File:Gujin Tushu Jicheng, Volume 470 (1700-1725).djvu",
+          "carrierDescriptionUrl": "https://commons.wikimedia.org/wiki/File:Gujin_Tushu_Jicheng,_Volume_470_(1700-1725).djvu",
+          "carrierMediaWikiSha1": "81460135a18a531bf1ca51ac49616e23fb7a5182",
+          "carrierSha256": "64491cdc159a480686ddc568d6f08c5976e5ea5abc8b27816a5d71e19941c037",
+          "metadataObservation": {
+            "licenseShortName": "Public domain",
+            "usageTerms": "Public domain",
+            "attributionRequired": "false",
+            "copyrighted": "False",
+            "licenseUrl": "",
+            "restrictions": ""
+          },
+          "noticeState": "commons_public_domain_metadata_observed_not_adjudicated",
+          "reusePolicyId": "commons-reuse-r1259943424",
+          "status": "notice_observed_not_cleared",
+          "evidenceRefs": [
+            "https://commons.wikimedia.org/wiki/File:Gujin_Tushu_Jicheng,_Volume_470_(1700-1725).djvu",
+            "https://commons.wikimedia.org/w/index.php?title=Commons%3AReusing_content_outside_Wikimedia&oldid=1259943424"
+          ],
+          "rightsReviewerIds": []
+        }
+      ],
+      "decision": {
+        "knowledgeDocumentCreated": false,
+        "formalSourceRightsRecordCreated": false,
+        "formalSourceCarrierRecordCreated": false,
+        "workLayerCleared": false,
+        "editionLayerCleared": false,
+        "carrierLayerCleared": false,
+        "reviewAttestations": [],
+        "distributionPolicy": "link_only",
+        "legalConclusion": "not_established",
+        "rightsCandidateState": "evidence_observed_human_legal_review_required",
+        "frozenAt": null
+      },
+      "candidateDigest": "4b6b1187147e81ecee5e7f45b219a7c627b7da3d63a845f6faaf192ee9480d43"
+    },
+    {
+      "rightsCandidateId": "yhzp-wikisource-r2593607-rights-candidate-v1",
+      "sourceCandidateId": "yhzp-wikisource-r2593607-candidate-v1",
+      "bindingId": "binding:yhzp:hidden-listing",
+      "sourceId": "yhzp-wikisource-r2593607",
+      "workLayer": {
+        "title": "淵海子平",
+        "attributedAuthor": "徐升",
+        "sourceUrl": "https://zh.wikisource.org/w/index.php?title=%E6%B7%B5%E6%B5%B7%E5%AD%90%E5%B9%B3&oldid=2593607",
+        "pageSpecificNoticeObservation": "pd_old_template_observed",
+        "observedTemplateNames": [
+          "Template:PD-old"
+        ],
+        "status": "candidate_only_not_adjudicated",
+        "jurisdictionAssessment": null,
+        "evidenceRefs": [
+          "https://zh.wikisource.org/w/index.php?title=%E6%B7%B5%E6%B5%B7%E5%AD%90%E5%B9%B3&oldid=2593607"
+        ],
+        "legalReviewerIds": []
+      },
+      "transcriptionLayer": {
+        "provider": "Chinese Wikisource",
+        "pageId": 343323,
+        "revisionId": 2593607,
+        "rawWikitextSha256": "a4447be5d95eb073857cb8cba8f0e58a500de1c283016c76cfdedb0d1b2bb133",
+        "termsPolicyIds": [
+          "wmf-terms-r554823",
+          "cc-by-sa-4.0-legal-code"
+        ],
+        "contributionLicenseObservation": "wmf_default_cc_by_sa_4_or_gfdl_with_project_exceptions_observed",
+        "attributionPathObservation": "permalink_or_history_required_if_reused",
+        "provenanceState": "import_and_contribution_provenance_not_independently_verified",
+        "status": "terms_observed_not_cleared",
+        "evidenceRefs": [
+          "https://zh.wikisource.org/w/index.php?title=%E6%B7%B5%E6%B5%B7%E5%AD%90%E5%B9%B3&oldid=2593607",
+          "https://foundation.wikimedia.org/w/index.php?title=Policy%3ATerms_of_Use&oldid=554823#7._Licensing_of_Content",
+          "https://creativecommons.org/licenses/by-sa/4.0/legalcode"
+        ],
+        "rightsReviewerIds": []
+      },
+      "carrierLayers": [
+        {
+          "anchorId": "yhzp-nlc416-15jh007754-99036-page-54-facsimile-v1",
+          "carrierFilePageId": 130948304,
+          "carrierFileTitle": "File:NLC416-15jh007754-99036 淵海子平 子平真詮.pdf",
+          "carrierDescriptionUrl": "https://commons.wikimedia.org/wiki/File:NLC416-15jh007754-99036_%E6%B7%B5%E6%B5%B7%E5%AD%90%E5%B9%B3_%E5%AD%90%E5%B9%B3%E7%9C%9F%E8%A9%AE.pdf",
+          "carrierMediaWikiSha1": "ba319cfa1afb636a20eeed3d0beb90e41b8ce10e",
+          "carrierSha256": "fca66e109aae987a5a04dc623e5168680d227542e13b56cdd7c39b62e55b605f",
+          "metadataObservation": {
+            "licenseShortName": "Public domain",
+            "usageTerms": "Public domain",
+            "attributionRequired": "false",
+            "copyrighted": "False",
+            "licenseUrl": "",
+            "restrictions": ""
+          },
+          "noticeState": "commons_public_domain_metadata_observed_not_adjudicated",
+          "reusePolicyId": "commons-reuse-r1259943424",
+          "status": "notice_observed_not_cleared",
+          "evidenceRefs": [
+            "https://commons.wikimedia.org/wiki/File:NLC416-15jh007754-99036_%E6%B7%B5%E6%B5%B7%E5%AD%90%E5%B9%B3_%E5%AD%90%E5%B9%B3%E7%9C%9F%E8%A9%AE.pdf",
+            "https://commons.wikimedia.org/w/index.php?title=Commons%3AReusing_content_outside_Wikimedia&oldid=1259943424"
+          ],
+          "rightsReviewerIds": []
+        }
+      ],
+      "decision": {
+        "knowledgeDocumentCreated": false,
+        "formalSourceRightsRecordCreated": false,
+        "formalSourceCarrierRecordCreated": false,
+        "workLayerCleared": false,
+        "editionLayerCleared": false,
+        "carrierLayerCleared": false,
+        "reviewAttestations": [],
+        "distributionPolicy": "link_only",
+        "legalConclusion": "not_established",
+        "rightsCandidateState": "evidence_observed_human_legal_review_required",
+        "frozenAt": null
+      },
+      "candidateDigest": "2a4ed5ce56564eac5813bdd75378fff0d3288b92d3f9d4bb46cd2429c9c0ad43"
+    }
+  ],
+  "gateSummary": {
+    "rightsCandidateCount": 4,
+    "pageSpecificPdNoticeObserved": 3,
+    "pageSpecificPdNoticeAbsent": 1,
+    "commonsPublicDomainMetadataObserved": 5,
+    "formalSourceRightsRecordsCreated": 0,
+    "formalSourceCarrierRecordsCreated": 0,
+    "legalReviewsVerified": 0,
+    "workLayersCleared": 0,
+    "editionLayersCleared": 0,
+    "carrierLayersCleared": 0,
+    "redistributableSources": 0,
+    "sourceBodiesStored": 0,
+    "quoteTextsStored": 0,
+    "carrierFilesStored": 0,
+    "rightsBundleComplete": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "doesNotEstablish": [
+    "work_public_domain_legal_conclusion",
+    "transcription_or_edition_license_clearance",
+    "carrier_reuse_legal_clearance",
+    "jurisdiction_analysis",
+    "formal_source_rights_record",
+    "formal_source_carrier_record",
+    "content_truth",
+    "expert_truth",
+    "release_readiness",
+    "public_release_authorization",
+    "notice_projection_correction_is_not_rights_clearance"
+  ],
+  "ledgerDigest": "300e092c4913885cff626221b8734786128639c7d6cfd7c2be7bea2acc6bbefc",
+  "supersession": {
+    "supersedes": {
+      "path": "content/bazi-strength-source-rights-candidates.v1.json",
+      "ledgerId": "hakimi.bazi.strength.source-rights-candidates/1.1.0",
+      "ledgerDigest": "3776e4b8799ca5221c1765a735c3e34c637b4f4952c9243836fedfbf1ee30a36",
+      "rawBytes": 20806,
+      "rawSha256": "433116caf1a2b9c233739093b0a2436f13c7f268dfa8af6c1ce481964b48b179",
+      "dttCandidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v1",
+      "dttCandidateDigest": "631f530ded6a17652c8a419246805b278d0f6f5511b96a1fd6274f386fce633d"
+    },
+    "pairedSourceLedger": {
+      "path": "content/bazi-strength-source-binding-candidates.v1.6.0.json",
+      "ledgerId": "hakimi.bazi.strength.source-binding-candidates/1.6.0",
+      "ledgerDigest": "6f008058b282613fd131344206b27fccb1d80596bb49789f0554acdd69c1e44c"
+    },
+    "evidence": {
+      "publicEvidenceObservationId": "hakimi.bazi.dtt-month-command-public-evidence/2026-08-29T15:17:27.103Z",
+      "publicEvidenceObservationDigest": "01e61e4f77526270ef83a0d95fbcb165bf307d5efa09c5a0360ff49bf1735993",
+      "reconciliationId": "hakimi.bazi.dtt-notice-reconciliation/1.0.0",
+      "reconciliationDigest": "fabf96fddf7f3710b86f22b0d3f7aa7844087351f30c53fbb823780f3d81ba2f"
+    },
+    "historicalLedgerObservedAt": "2026-08-25T20:17:10.106Z",
+    "noticeProjectionObservedAt": "2026-08-29T15:17:27.103Z",
+    "supersessionCreatedAt": "2026-08-30T00:00:00.000Z",
+    "changeScope": "dtt_work_rendered_notice_and_per_carrier_notice_projection_only_no_clearance",
+    "historicalParentMutated": false,
+    "historicalParentBacklinkAdded": false,
+    "formalAdmissionEffect": "none"
+  }
+}

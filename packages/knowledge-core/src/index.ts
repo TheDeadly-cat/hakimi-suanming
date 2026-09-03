@@ -2,11 +2,13 @@ import {
   citationRecordSchema,
   evidenceSubjectIdSchema,
   knowledgeDocumentRecordSchema,
+  sourceCarrierRecordSchema,
   sourceRightsRecordSchema,
   type CitationRecord,
   type ChartFacts,
   type KnowledgeDocumentRecord,
   type KnowledgeSection,
+  type SourceCarrierRecord,
   type SourceRightsRecord
 } from "@hakimi/contracts";
 import { canonicalStringify, sha256Hex } from "@hakimi/integrity";
@@ -769,6 +771,27 @@ export function isRedistributableSourceRights(record: SourceRightsRecord): boole
     && rights.rights.status !== "blocked";
 }
 
+export function isRedistributableSourceMaterial(
+  rightsRecord: SourceRightsRecord,
+  carrierRecord: SourceCarrierRecord
+): boolean {
+  const rights = sourceRightsRecordSchema.parse(rightsRecord);
+  const carrier = sourceCarrierRecordSchema.parse(carrierRecord);
+  const carrierClear = carrier.rights.status === "public_domain"
+    || carrier.rights.status === "licensed"
+    || carrier.rights.status === "project_original_verified";
+  return rights.documentId === carrier.documentId
+    && rights.documentContentHash === carrier.documentContentHash
+    && isRedistributableSourceRights(rights)
+    && carrier.storagePolicy === "public_repo"
+    && carrier.review.status === "double_reviewed"
+    && carrierClear
+    && carrier.rights.reproductionAllowed
+    && carrier.rights.quotationAllowed
+    && carrier.rights.redistributionAllowed
+    && carrier.rights.evidenceRefs.length > 0;
+}
+
 export async function buildEvidenceCoverageReport(input: {
   provenance: ChartFacts["fieldProvenance"];
   citations: CitationRecord[];
@@ -869,12 +892,46 @@ export type BundledKnowledgeReleaseEntry = {
   documentId: string;
   contentHash: string;
   sourceRights: SourceRightsRecord;
+  sourceCarrier: SourceCarrierRecord;
 };
+
+export function compareBundledKnowledgePaths(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+/**
+ * Applies the path and file-format contract used by the Web build's
+ * `content/knowledge/manifest.v2.json` consumer before the shared rights gate.
+ *
+ * Callers must provide already-captured passive data (the Web consumer uses
+ * JSON.parse output; Stage C snapshots and freezes its input first).
+ *
+ * This only validates manifest metadata. It does not prove that the declared
+ * body exists, that its bytes are stable, or that its content hash matches;
+ * those filesystem checks remain the responsibility of the Web build audit.
+ */
+export function validateBundledKnowledgeManifestRelease(
+  entries: readonly BundledKnowledgeReleaseEntry[]
+): BundledKnowledgeReleaseEntry[] {
+  for (const entry of entries) {
+    if (!/\.(?:md|markdown|txt)$/iu.test(entry.path)) {
+      throw new Error(`随包资料只允许 Markdown/TXT：${entry.path}`);
+    }
+    if (!entry.path.startsWith("documents/")) {
+      throw new Error(`随包资料路径必须位于 documents/：${entry.path}`);
+    }
+    const segments = entry.path.split("/");
+    if (segments.some((segment) => segment === "" || segment === "." || segment === "..")) {
+      throw new Error(`随包资料路径必须使用规范化的非空相对段：${entry.path}`);
+    }
+  }
+  return validateBundledKnowledgeRelease(entries);
+}
 
 export function validateBundledKnowledgeRelease(entries: readonly BundledKnowledgeReleaseEntry[]): BundledKnowledgeReleaseEntry[] {
   const seenPaths = new Set<string>();
   const seenDocuments = new Set<string>();
-  return [...entries].sort((left, right) => left.path.localeCompare(right.path, "en")).map((entry) => {
+  return [...entries].sort((left, right) => compareBundledKnowledgePaths(left.path, right.path)).map((entry) => {
     if (!/^[A-Za-z0-9][A-Za-z0-9._/-]{0,299}$/.test(entry.path)
       || entry.path.includes("..") || entry.path.startsWith("/") || entry.path.includes("\\")) {
       throw new Error(`随包资料路径不安全：${entry.path}`);
@@ -885,13 +942,18 @@ export function validateBundledKnowledgeRelease(entries: readonly BundledKnowled
     seenPaths.add(entry.path);
     seenDocuments.add(entry.documentId);
     const rights = sourceRightsRecordSchema.parse(entry.sourceRights);
+    const carrier = sourceCarrierRecordSchema.parse(entry.sourceCarrier);
     if (rights.documentId !== entry.documentId || rights.documentContentHash !== entry.contentHash) {
       throw new Error(`随包资料 ${entry.path} 的正文哈希或 documentId 与权利台账不匹配。`);
     }
-    if (!isRedistributableSourceRights(rights)) {
-      throw new Error(`随包资料 ${entry.path} 尚未通过作品层、现代版本层及双人分发审核。`);
+    if (
+      carrier.documentId !== entry.documentId
+      || carrier.documentContentHash !== entry.contentHash
+      || !isRedistributableSourceMaterial(rights, carrier)
+    ) {
+      throw new Error(`随包资料 ${entry.path} 尚未通过作品层、现代版本层、载体层及双人分发审核。`);
     }
-    return { ...entry, sourceRights: rights };
+    return { ...entry, sourceRights: rights, sourceCarrier: carrier };
   });
 }
 

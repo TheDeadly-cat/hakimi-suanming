@@ -1,0 +1,398 @@
+{
+  "authorityBoundary": {
+    "activeAdmissionEffect": "none",
+    "baziRuleTruthEstablished": false,
+    "bindingFreezeEffect": "none",
+    "contentTruthEstablished": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "publicDeploymentAuthorized": false,
+    "releaseReady": false,
+    "rightsEffect": "none",
+    "rightsLegalConclusionEstablished": false
+  },
+  "carrierGapSequence": [
+    {
+      "fullRowDigest": "4fa180eef2cd9a81f23f0d50b4dd7506dee2c8644c9baddeb5fd57d5463492ff",
+      "ordinal": 1,
+      "rowId": "carrier-gap:smt-v10-gujin-volume-472-page-28-facsimile-v1"
+    },
+    {
+      "fullRowDigest": "f10168e4d447ecf426010add63845f47bfac9a19b06b3afb4c5c0c5adf806a04",
+      "ordinal": 2,
+      "rowId": "carrier-gap:dtt-chanwei-ssid-11335994-pages-170-176-facsimile-v1"
+    },
+    {
+      "fullRowDigest": "757248dbd0ddc99192c95a561033c9b8d77d50a03a8c6d80f511f4156c441dbf",
+      "ordinal": 3,
+      "rowId": "carrier-gap:dtt-chanwei-cadal-07005210-pages-178-184-facsimile-v1"
+    },
+    {
+      "fullRowDigest": "c667a58505e479d5ce5e395fbdd7439ac3070e39a0f957942271ba5c64157fc5",
+      "ordinal": 4,
+      "rowId": "carrier-gap:smt-v5-gujin-volume-470-page-115-facsimile-v1"
+    },
+    {
+      "fullRowDigest": "bc5bf1c3753e3b5661c5aa4c30a217a06204b1b19c5763f5f2b9e13a0c136ba3",
+      "ordinal": 5,
+      "rowId": "carrier-gap:yhzp-nlc416-15jh007754-99036-page-54-facsimile-v1"
+    },
+    {
+      "fullRowDigest": "6df41b2d5ec15ba3dcf5074478ec00ea0d96d5d11b067a5ced3a8577b3aea37e",
+      "ordinal": 6,
+      "rowId": "carrier-gap:smt-v10-cadal-06056486-pages-3-4-facsimile-v1"
+    }
+  ],
+  "counts": {
+    "adjudicationReceiptsIssued": 0,
+    "allSmtCarrierObservationLayersIncludingV5": 3,
+    "carrierLayersCleared": 0,
+    "carrierObservationLayers": 6,
+    "currentSourceCandidateFamilies": 4,
+    "distinctSourceFamilies": 4,
+    "domainExpertReviews": 0,
+    "dttCarrierObservationLayers": 2,
+    "editionOrTranscriptionLayersCleared": 0,
+    "formalSourceCarrierRecords": 0,
+    "formalSourceRightsRecords": 0,
+    "knowledgeDocuments": 0,
+    "materializationsVerified": 0,
+    "projectCopyMaterializationRecords": 0,
+    "redistributableSources": 0,
+    "rightsLegalReviews": 0,
+    "smtV10CarrierObservationLayers": 2,
+    "sourceBindingsFrozen": 0,
+    "sourceBindingsRequired": 12,
+    "verifiedNaturalPersonRightsReviewers": 0,
+    "versionedSourceCandidateIdentitiesReferenced": 5,
+    "workLayersCleared": 0
+  },
+  "createdAt": "2026-08-31T00:00:00.000Z",
+  "doesNotEstablish": [
+    "binding_readiness_or_c_m1_parent_rebind",
+    "same_edition_same_copy_or_bibliographic_identity",
+    "specific_wikisource_carrier_provenance_or_direct_derivation_chain",
+    "external_carrier_live_verification_this_run",
+    "formal_knowledge_document_source_rights_or_source_carrier_record",
+    "project_copy_materialization_or_adjudication_receipt",
+    "work_edition_transcription_or_carrier_rights_clearance",
+    "reviewer_real_identity_credentials_scope_or_independence",
+    "content_bazi_rule_or_expert_truth",
+    "binding_freeze",
+    "cross_file_atomic_snapshot_mutation_epoch_interval_or_aba_exclusion",
+    "release_readiness_or_public_release_authorization"
+  ],
+  "editionAndProvenanceBoundary": {
+    "bibliographicIdentityEstablished": false,
+    "directDerivationChainEstablished": false,
+    "externalCarrierLiveVerifiedThisRun": false,
+    "observationSource": "persisted_operator_recorded_public_evidence_not_live_replayed_by_offline_loader",
+    "sameCopyVerified": false,
+    "sameEditionVerified": false,
+    "specificWikisourceCarrierProvenanceEstablished": false
+  },
+  "integrityBoundary": {
+    "abaExcluded": false,
+    "crossFileAtomicSnapshot": false,
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi.bazi.source-carrier-record-readiness.version-aware-candidate.v1.1",
+    "digestIsDigitalSignature": false,
+    "digitalSignature": null,
+    "endpointSnapshotOnly": true,
+    "intervalMutationExcludedAcrossFiles": false,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "parentRawAndSemanticIdentityPinned": true,
+    "persistedChildMustEqualMechanicallyRebuiltExpected": true,
+    "predecessorRowDigestDomain": "hakimi.bazi.source-carrier-record-readiness.version-aware-candidate.row.v1",
+    "signerIdentity": null,
+    "stableSingleFileReadsUsed": true
+  },
+  "ledgerDigest": "ca2734777002a2e56d82ec3702f0517668ae68b23b423c2cb31e65164c225531",
+  "ledgerId": "hakimi.bazi.source-carrier-record-readiness.version-aware-candidate/1.1.0",
+  "predecessorProjection": {
+    "everyPredecessorFieldPreservedByFullRowDigest": true,
+    "predecessorFullRowsRepeatedInSuccessorArtifact": false,
+    "predecessorRawAndSemanticIdentityVerified": true,
+    "predecessorRowCount": 5,
+    "predecessorRowsCanonicalDigest": "0795ed5e2c2162ce8c071589ee9ffe44f97e81317ffd838e53efb1916eb6a17a",
+    "predecessorTopLevelFieldCount": 13,
+    "predecessorTopLevelFieldNames": [
+      "bindingId",
+      "decision",
+      "evidenceSubjectId",
+      "observedCarrierIdentity",
+      "ordinal",
+      "promotionBlockerCodes",
+      "rightsCandidateDigest",
+      "rightsCandidateId",
+      "rowId",
+      "sourceCandidateDigest",
+      "sourceCandidateId",
+      "sourceId",
+      "targetFieldReadiness"
+    ],
+    "projectionDigest": "d39371c6297dbfea6089cea0ce0405005c4bd0b5b15e816d7a4807563aeead8c",
+    "rowDigestDomain": "hakimi.bazi.source-carrier-record-readiness.version-aware-candidate.row.v1",
+    "rows": [
+      {
+        "anchorId": "smt-v10-gujin-volume-472-page-28-facsimile-v1",
+        "fullRowAvailableVia": "content/system-admission/bazi-source-carrier-record-readiness.v1.json",
+        "fullRowDigest": "4fa180eef2cd9a81f23f0d50b4dd7506dee2c8644c9baddeb5fd57d5463492ff",
+        "ordinal": 1,
+        "rowId": "carrier-gap:smt-v10-gujin-volume-472-page-28-facsimile-v1"
+      },
+      {
+        "anchorId": "dtt-chanwei-ssid-11335994-pages-170-176-facsimile-v1",
+        "fullRowAvailableVia": "content/system-admission/bazi-source-carrier-record-readiness.v1.json",
+        "fullRowDigest": "f10168e4d447ecf426010add63845f47bfac9a19b06b3afb4c5c0c5adf806a04",
+        "ordinal": 2,
+        "rowId": "carrier-gap:dtt-chanwei-ssid-11335994-pages-170-176-facsimile-v1"
+      },
+      {
+        "anchorId": "dtt-chanwei-cadal-07005210-pages-178-184-facsimile-v1",
+        "fullRowAvailableVia": "content/system-admission/bazi-source-carrier-record-readiness.v1.json",
+        "fullRowDigest": "757248dbd0ddc99192c95a561033c9b8d77d50a03a8c6d80f511f4156c441dbf",
+        "ordinal": 3,
+        "rowId": "carrier-gap:dtt-chanwei-cadal-07005210-pages-178-184-facsimile-v1"
+      },
+      {
+        "anchorId": "smt-v5-gujin-volume-470-page-115-facsimile-v1",
+        "fullRowAvailableVia": "content/system-admission/bazi-source-carrier-record-readiness.v1.json",
+        "fullRowDigest": "c667a58505e479d5ce5e395fbdd7439ac3070e39a0f957942271ba5c64157fc5",
+        "ordinal": 4,
+        "rowId": "carrier-gap:smt-v5-gujin-volume-470-page-115-facsimile-v1"
+      },
+      {
+        "anchorId": "yhzp-nlc416-15jh007754-99036-page-54-facsimile-v1",
+        "fullRowAvailableVia": "content/system-admission/bazi-source-carrier-record-readiness.v1.json",
+        "fullRowDigest": "bc5bf1c3753e3b5661c5aa4c30a217a06204b1b19c5763f5f2b9e13a0c136ba3",
+        "ordinal": 5,
+        "rowId": "carrier-gap:yhzp-nlc416-15jh007754-99036-page-54-facsimile-v1"
+      }
+    ]
+  },
+  "recordType": "bazi_source_carrier_record_readiness_version_aware_candidate_v1_1",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "expertClaimsAuthorized": false,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "reviewAndRightsBoundary": {
+    "carrierLayerCleared": false,
+    "distributionPolicy": "link_only",
+    "domainExpertReviewCount": 0,
+    "editionOrTranscriptionLayerCleared": false,
+    "expertReviewerIds": [],
+    "legalConclusion": "not_established",
+    "legalReviewerIds": [],
+    "quotationAuthorized": false,
+    "redistributionAuthorized": false,
+    "reproductionAuthorized": false,
+    "rightsLegalReviewCount": 0,
+    "rightsReviewerIds": [],
+    "verifiedNaturalPersonRightsReviewers": 0,
+    "workLayerCleared": false
+  },
+  "schemaVersion": "1.1.0",
+  "status": "candidate_only_version_aware_six_carrier_gap_inventory_zero_instance_no_admission_effect",
+  "successorCarrierGap": {
+    "bindingId": "binding:smt-v10:whole-chart",
+    "decision": {
+      "admissionEffect": "none",
+      "carrierByteIdentityObserved": true,
+      "carrierIdentityAdjudicated": false,
+      "carrierLayerCleared": false,
+      "distributionPolicy": "link_only",
+      "editionOrTranscriptionLayerCleared": false,
+      "legalConclusion": "not_established",
+      "quotationAllowed": false,
+      "redistributionAllowed": false,
+      "reproductionAllowed": false,
+      "workLayerCleared": false
+    },
+    "evidenceSubjectId": "bazi.strength.binding.smt-v10.whole-chart.v1",
+    "observedCarrierIdentity": {
+      "anchorId": "smt-v10-cadal-06056486-pages-3-4-facsimile-v1",
+      "anchorRole": "same_siku_label_visual_candidate_not_bibliographic_or_edition_identity_proof",
+      "carrierBytes": 8321599,
+      "carrierDescriptionUrl": "https://commons.wikimedia.org/wiki/File:CADAL06056486_%E4%B8%89%E5%91%BD%E9%80%9A%E6%9C%83%C2%B7%E5%8D%B7%E5%8D%81.djvu",
+      "carrierFilePageId": 85346504,
+      "carrierFileTimestamp": "2019-12-28T15:03:00Z",
+      "carrierFileTitle": "File:CADAL06056486 三命通會·卷十.djvu",
+      "carrierMediaWikiSha1": "01e1cde49e92697abd4ec7c671e96c28f07e854c",
+      "carrierMime": "image/vnd.djvu",
+      "carrierPageCount": 176,
+      "carrierRawSha256": "d532196ef4aa46c747c2a703c7c47c5fdb9cfce9bea8a654a652d6657b4e6fbe",
+      "comparisonScope": "visual_heading_and_passage_correspondence_only",
+      "editionRelation": "siku_labeled_scan_with_two_local_passage_correspondences_not_independently_collated",
+      "exactCollationStatus": "not_performed",
+      "fixedFilePageRevisionId": 1207460960,
+      "licenseOrNoticeObserved": "commons_pd_old_and_public_domain_mark_observed_without_pd_scan_template_not_adjudicated",
+      "markerAuthorityAndAccuracyVerified": false,
+      "provider": "Wikimedia Commons (CADAL carrier; Zhejiang University source credit)",
+      "publicDomainMarkCountsAsLicense": false,
+      "repositoryCarrierFileStored": false,
+      "repositoryPageImagesStored": false,
+      "reusePolicyId": "commons-reuse-r1259943424",
+      "rightsEvidenceRefCount": 5,
+      "rightsEvidenceRefsDigest": "e07ed1307fb1da133145f74eb2ad935af50f5e0bc8ae9ad947a2d13c13f9daa1",
+      "rightsNoticeState": "pd_old_and_public_domain_mark_observed_without_pd_scan_template_not_adjudicated",
+      "rightsReviewerIds": [],
+      "rightsStatus": "notice_observed_not_cleared",
+      "sourceProvenanceObservation": "shared_title_author_and_siku_label_only_no_shared_carrier_identifier_or_direct_derivation_chain",
+      "storagePolicy": "link_only"
+    },
+    "ordinal": 6,
+    "promotionBlockerCodes": [
+      "knowledge_document_absent",
+      "formal_source_rights_record_absent",
+      "formal_source_carrier_record_absent",
+      "work_layer_not_cleared",
+      "edition_or_transcription_layer_not_cleared",
+      "carrier_layer_not_cleared",
+      "jurisdiction_and_notice_applicability_not_adjudicated",
+      "carrier_permission_matrix_not_adjudicated",
+      "independent_rights_reviewer_identity_scope_and_independence_unverified",
+      "carrier_custody_acquisition_and_access_record_absent",
+      "normalized_text_content_digest_absent",
+      "project_copy_materialization_absent",
+      "platform_notice_is_observation_not_legal_conclusion",
+      "carrier_raw_digest_is_not_normalized_document_digest"
+    ],
+    "rightsCandidateDigest": "aed5031acb007b74092db96de4338d4148bc8518b4fb392cc59e18a0ba54295d",
+    "rightsCandidateId": "smt-siku-v10-wikisource-r761703-rights-candidate-v2",
+    "rowId": "carrier-gap:smt-v10-cadal-06056486-pages-3-4-facsimile-v1",
+    "sourceCandidateDigest": "2465b64080d4a9f0283212c994b1bd78ebe59ece26ed71e41601cc43a67d2d1d",
+    "sourceCandidateId": "smt-siku-v10-wikisource-r761703-candidate-v2",
+    "sourceId": "smt-siku-v10-wikisource-r761703",
+    "targetFieldReadiness": {
+      "accessMethod": null,
+      "acquiredAt": null,
+      "adjudicationReceiptIds": [],
+      "alignedSourceRightsRecordId": null,
+      "carrierId": null,
+      "carrierType": "not_formally_adjudicated",
+      "contentDigest": null,
+      "createdAt": null,
+      "documentContentHash": null,
+      "documentId": null,
+      "editVersion": null,
+      "eligibleForMaterialization": false,
+      "formalRecordCreated": false,
+      "imageDigest": "carrier_raw_sha256_observed_not_formalized",
+      "ocrDigest": null,
+      "projectCopyMaterializationRecordId": null,
+      "provider": "observed_candidate_not_formalized",
+      "recordType": "not_instantiated",
+      "review": "unreviewed_zero_attestations",
+      "rights": "unknown_not_adjudicated",
+      "schemaVersion": "contract_observed_no_instance",
+      "sourceCarrierRecordId": null,
+      "sourceUrl": "observed_candidate_not_formalized",
+      "storagePolicy": "link_only_candidate_default_not_formal_record",
+      "updatedAt": null
+    }
+  },
+  "unreboundConsumers": {
+    "bindingReadiness": {
+      "claimedToConsumeSupersedingParentsByThisSuccessor": false,
+      "consumesSupersedingParents": false,
+      "historicalRightsParentPath": "content/bazi-strength-source-rights-candidates.v1.2.0.json",
+      "historicalSourceParentPath": "content/bazi-strength-source-binding-candidates.v1.6.0.json",
+      "ledgerDigest": "afdebfa1fb7a797f02d136373eb9aef1afa26b38b755926f8930ea5de97316b8",
+      "ledgerId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.7.0",
+      "observationBasis": "verified_supersession_receipt_and_predecessor_parent_lock",
+      "path": "content/system-admission/bazi-binding-freeze-requirements.v1.7.0.json"
+    },
+    "projectCopyMaterializationCandidateCM1": {
+      "claimedToConsumeSupersedingParentsByThisSuccessor": false,
+      "consumesSupersedingParents": false,
+      "currentArtifactReexecutedByThisLayer": false,
+      "historicalRightsParentPath": "content/bazi-strength-source-rights-candidates.v1.2.0.json",
+      "historicalSourceParentPath": "content/bazi-strength-source-binding-candidates.v1.6.0.json",
+      "ledgerDigest": "d877ac00042d9e9635b0bf2cfe7b5f387f3aad82faa96c8a7214548299045d3f",
+      "ledgerId": "hakimi.bazi.project-copy-materialization-requirements.version-aware-candidate/1.1.0",
+      "path": "content/system-admission/bazi-project-copy-materialization-requirements.v1.1.0.json"
+    }
+  },
+  "versionAwareParentRebind": {
+    "historicalParentArtifactsMutated": false,
+    "predecessorArtifactMutated": false,
+    "predecessorReadiness": {
+      "ledgerDigest": "7b34f976c58b541895747177a2326af82241d76432acba3dbbd8fac2b68ad3c5",
+      "ledgerId": "hakimi.bazi.source-carrier-record-readiness/1.0.0",
+      "path": "content/system-admission/bazi-source-carrier-record-readiness.v1.json",
+      "rawBytes": 27322,
+      "rawSha256": "d5624c796f715b3e4a9846714a036621a8ccc66d8e3433a91e7bf69beba291e9"
+    },
+    "predecessorReadinessPrivateBrandVerified": true,
+    "rebindScope": "this_successor_candidate_only",
+    "smtSupersessionWeakSetBrandVerified": true,
+    "sourceBinding": {
+      "candidateDigests": [
+        {
+          "candidateDigest": "2465b64080d4a9f0283212c994b1bd78ebe59ece26ed71e41601cc43a67d2d1d",
+          "candidateId": "smt-siku-v10-wikisource-r761703-candidate-v2"
+        },
+        {
+          "candidateDigest": "2c59ee25081c6e0a88ee7f9da18395be2ea615bb289c28798e324e23befeeb59",
+          "candidateId": "dtt-chanwei-wikisource-r2600158-candidate-v2"
+        },
+        {
+          "candidateDigest": "c9dead89c020772224db8e0802373797d939839b184a32ab0d6db05c7a2c2b62",
+          "candidateId": "smt-v5-wikisource-r2706483-candidate-v1"
+        },
+        {
+          "candidateDigest": "8a2d7aa5705cd8735af2b9563bb094f09b0d9bcd9881bb6d711dc108f9fc0257",
+          "candidateId": "yhzp-wikisource-r2593607-candidate-v1"
+        }
+      ],
+      "ledgerDigest": "e705ef32eb2dc0d6651f314a6020b71c18070ba5b6702c6965b628d01f1ef5d9",
+      "ledgerId": "hakimi.bazi.strength.source-binding-candidates/1.7.0",
+      "path": "content/bazi-strength-source-binding-candidates.v1.7.0.json",
+      "rawBytes": 58579,
+      "rawSha256": "03bc334a507e224d8658cd2af5fe5d5a11e1db0553fa7e54bf1287010147ccd2"
+    },
+    "sourceRights": {
+      "candidateDigests": [
+        {
+          "candidateDigest": "aed5031acb007b74092db96de4338d4148bc8518b4fb392cc59e18a0ba54295d",
+          "rightsCandidateId": "smt-siku-v10-wikisource-r761703-rights-candidate-v2",
+          "sourceCandidateId": "smt-siku-v10-wikisource-r761703-candidate-v2"
+        },
+        {
+          "candidateDigest": "674a0b64179f5fbb0dff331fdad6b6ac93e3093de4a8459abf6ff9bdd6cd418c",
+          "rightsCandidateId": "dtt-chanwei-wikisource-r2600158-rights-candidate-v2",
+          "sourceCandidateId": "dtt-chanwei-wikisource-r2600158-candidate-v2"
+        },
+        {
+          "candidateDigest": "4b6b1187147e81ecee5e7f45b219a7c627b7da3d63a845f6faaf192ee9480d43",
+          "rightsCandidateId": "smt-v5-wikisource-r2706483-rights-candidate-v1",
+          "sourceCandidateId": "smt-v5-wikisource-r2706483-candidate-v1"
+        },
+        {
+          "candidateDigest": "2a4ed5ce56564eac5813bdd75378fff0d3288b92d3f9d4bb46cd2429c9c0ad43",
+          "rightsCandidateId": "yhzp-wikisource-r2593607-rights-candidate-v1",
+          "sourceCandidateId": "yhzp-wikisource-r2593607-candidate-v1"
+        }
+      ],
+      "ledgerDigest": "4b1183a85f1d2aeee537544a6b3711510406d98856a921730879c8a9ca782db1",
+      "ledgerId": "hakimi.bazi.strength.source-rights-candidates/1.3.0",
+      "path": "content/bazi-strength-source-rights-candidates.v1.3.0.json",
+      "rawBytes": 25852,
+      "rawSha256": "8b26eea65e9ee3e7876298c3f720c46c43d5ec7d444ad4a4252116fc1dc21f17"
+    },
+    "successorConsumesSupersedingParents": true,
+    "supportingSupersessionReceipt": {
+      "path": "content/system-admission/bazi-smt-v10-versioned-parent-supersession.v1.json",
+      "rawBytes": 12256,
+      "rawSha256": "e44740e013b4182a2a2aa4125ceda67cbf3c071c5f36db54fcdd35b7b17217b5",
+      "supersessionDigest": "a30313260723bfa24eff2704cb0d1f108b6b6fdfbf5e67639b4285745159e6bd",
+      "supersessionId": "hakimi.bazi.smt-v10-versioned-parent-supersession/1.0.0"
+    }
+  }
+}
