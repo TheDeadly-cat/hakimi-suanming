@@ -1,0 +1,902 @@
+{
+  "schemaVersion": "1.1.0",
+  "recordType": "independent_system_source_binding_requirements_successor_candidate",
+  "ledgerId": "hakimi.western-astrology.source-binding-requirements/1.1.0",
+  "productSystemId": "western-astrology",
+  "contractSystemId": "western",
+  "status": "requirements_plus_two_partial_candidates_no_bindings_frozen_not_manifest_integrated",
+  "createdAt": "2026-08-31T05:00:00.000Z",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "predecessorBinding": {
+    "path": "content/system-admission/western-source-binding-requirements.v1.json",
+    "rawBytes": 25909,
+    "rawSha256": "3f22c78279022a70d3a3a21e5a80a33b321a99793c033eb0a72c5171628107c9",
+    "ledgerId": "hakimi.western-astrology.source-binding-requirements/1.0.0",
+    "ledgerDigest": "2bb52306841098ee5e83906bffda400ad07efd706c7c294ee4d07115854849bd",
+    "remainsFormalCurrent": true
+  },
+  "childEvidenceBinding": {
+    "path": "content/system-admission/western-tzdb-2026c-source-rights-evidence.v1.json",
+    "rawBytes": 16931,
+    "rawSha256": "ee61453078f7e4df39c71ee59dcfc94f75ab37a7cd0d967849e1049d748d1ee1",
+    "evidenceId": "hakimi.western.source-rights/iana-tzdb-2026c-moment-timezone-0.6.3/1.0.0",
+    "evidenceDigest": "14361c93e29d257080b25c0f3e580345243930acb07da450f938fbf6f02b8465",
+    "privateBrandRequiredAtVerification": true,
+    "relationship": "one_way_child_evidence_to_non_consumed_successor_candidate"
+  },
+  "formalStateBoundary": {
+    "predecessorRemainsFormalCurrent": true,
+    "successorIsFormalCurrent": false,
+    "successorActiveEffect": "none",
+    "formalParentConsumptionEstablished": false,
+    "formalManifestIntegrated": false,
+    "formalRegistryIntegrated": false,
+    "ownerAdmissionAccepted": false,
+    "predecessorMutated": false,
+    "predecessorBacklinkAdded": false
+  },
+  "defaultClosureRequirements": {
+    "sourceIdentityRequired": true,
+    "versionIdentityRequired": true,
+    "sourceBodyDigestRequired": true,
+    "exactLocatorRequired": true,
+    "minimalSufficientQuotePolicyRequired": true,
+    "workRightsEvidenceRequired": true,
+    "editionRightsEvidenceRequired": true,
+    "carrierRightsEvidenceRequired": true,
+    "nonRedistributableMaterialPolicy": "private_or_link_only",
+    "twoIndependentDomainOpinionsRequiredForDomainClaims": true,
+    "generatedModelWinnerSelectionAllowed": false
+  },
+  "basisArtifacts": [
+    {
+      "path": "docs/西洋星盘契约草案与来源门-v0.1.md",
+      "bytes": 20999,
+      "sha256": "3a8e38d3f321e3232c0c895476cb4b7be61473c67d7a956444ccb8d4776c6c57"
+    },
+    {
+      "path": "packages/western-astrology-contracts-draft/src/index.ts",
+      "bytes": 41394,
+      "sha256": "3568cbe0568382354ed59c6bb9bacd0cf4c4d3c52490c1a80a614f2e9db60515"
+    },
+    {
+      "path": "packages/western-astronomy-engine-adapter-draft/src/index.ts",
+      "bytes": 19629,
+      "sha256": "ccf29e09dbcd0422da67cdb8c623061f974ff05335a768758254e869b8ac4d83"
+    }
+  ],
+  "candidateEvidenceBindings": [
+    {
+      "subjectId": "western.input.calendar-time-zone-and-dst",
+      "candidateId": "western-iana-tzdb-2026c-input-source-candidate-v1",
+      "coverageScope": "iana_2026c_release_and_bundled_packed_artifact_identity_only",
+      "bindingState": "candidate_only_unbound",
+      "evidenceArtifact": {
+        "path": "content/system-admission/western-tzdb-2026c-source-rights-evidence.v1.json",
+        "rawBytes": 16931,
+        "rawSha256": "ee61453078f7e4df39c71ee59dcfc94f75ab37a7cd0d967849e1049d748d1ee1",
+        "evidenceId": "hakimi.western.source-rights/iana-tzdb-2026c-moment-timezone-0.6.3/1.0.0",
+        "evidenceDigest": "14361c93e29d257080b25c0f3e580345243930acb07da450f938fbf6f02b8465"
+      },
+      "fixedSourceIdentities": [
+        {
+          "role": "iana_tzdb_2026c_release_archive",
+          "version": "2026c",
+          "url": "https://data.iana.org/time-zones/releases/tzdata2026c.tar.gz",
+          "rawBytes": 475694,
+          "rawSha256": "e4a178a4477f3d0ea77cc31828ff72aa38feff8d61aa13e7e99e142e9d902be4"
+        },
+        {
+          "role": "moment_timezone_0_6_3_packed_carrier",
+          "version": "0.6.3/iana-2026c",
+          "url": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.6.3.tgz",
+          "rawBytes": 238621,
+          "rawSha256": "09cc398dae4d95db31016e6e3e35eafff09244a72e0511a292702738e7c724ac"
+        }
+      ],
+      "minimalExactQuotes": [
+        {
+          "sourceId": "iana_tzdb_2026c_version_representation",
+          "text": "2026c",
+          "utf8Bytes": 5,
+          "sha256": "19fd9387dff1a60f2a3947d61232c982b3a52feb645b130e708a879936152da5",
+          "locator": "line_1_without_trailing_lf"
+        }
+      ],
+      "sourceBodyDigest": null,
+      "remoteBodiesPersistedInThisSuccessorRecord": 0,
+      "exactLocatorEstablished": true,
+      "subjectFullySatisfied": false,
+      "frozenBindingId": null,
+      "workRightsEstablished": false,
+      "versionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "independentExpertReviewVerified": false,
+      "countsTowardFrozenBindingGate": false
+    },
+    {
+      "subjectId": "western.rights.ephemeris-time-data-redistribution",
+      "candidateId": "western-iana-tzdb-2026c-moment-timezone-rights-candidate-v1",
+      "coverageScope": "iana_tzdb_and_moment_timezone_only",
+      "bindingState": "candidate_only_unbound",
+      "evidenceArtifact": {
+        "path": "content/system-admission/western-tzdb-2026c-source-rights-evidence.v1.json",
+        "rawBytes": 16931,
+        "rawSha256": "ee61453078f7e4df39c71ee59dcfc94f75ab37a7cd0d967849e1049d748d1ee1",
+        "evidenceId": "hakimi.western.source-rights/iana-tzdb-2026c-moment-timezone-0.6.3/1.0.0",
+        "evidenceDigest": "14361c93e29d257080b25c0f3e580345243930acb07da450f938fbf6f02b8465"
+      },
+      "fixedSourceIdentities": [
+        {
+          "role": "iana_tzdb_2026c_license_representation",
+          "version": "2026c",
+          "url": "https://data.iana.org/time-zones/tzdb-2026c/LICENSE",
+          "rawBytes": 252,
+          "rawSha256": "0613408568889f5739e5ae252b722a2659c02002839ad970a63dc5e9174b27cf"
+        },
+        {
+          "role": "moment_timezone_0_6_3_license_carrier",
+          "version": "0.6.3",
+          "path": "node_modules/moment-timezone/LICENSE",
+          "rawBytes": 1097,
+          "rawSha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+        }
+      ],
+      "minimalExactQuotes": [
+        {
+          "sourceId": "iana_tzdb_2026c_license_representation",
+          "text": "Unless specified below, all files in the tz code and data (including\nthis LICENSE file) are in the public domain.",
+          "utf8Bytes": 113,
+          "sha256": "72c3b37777104fdba9c140c56d93cd282266f283e848399f0d8e3cef9daaf0ff",
+          "locator": "LICENSE_lines_1_2_exact_lf"
+        },
+        {
+          "sourceId": "moment_timezone_0_6_3_license_carrier",
+          "text": "The MIT License (MIT)",
+          "utf8Bytes": 21,
+          "sha256": "74896d15800f7a637980e42b247d49c602d3b252520ad66a6cd1e852109cc9fb",
+          "locator": "package/LICENSE_line_1"
+        }
+      ],
+      "sourceBodyDigest": null,
+      "remoteBodiesPersistedInThisSuccessorRecord": 0,
+      "exactLocatorEstablished": true,
+      "subjectFullySatisfied": false,
+      "frozenBindingId": null,
+      "workRightsEstablished": false,
+      "versionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "independentRightsReviewVerified": false,
+      "countsTowardFrozenBindingGate": false
+    }
+  ],
+  "subjects": [
+    {
+      "subjectId": "western.astronomy.aberration-lighttime-and-deflection",
+      "category": "astronomy_semantics",
+      "title": "光行时、像差与太阳引力偏折策略",
+      "evidenceMode": "official_technical_artifact",
+      "reviewTrack": "engineering_reproducibility_review_required",
+      "basisAnchors": [
+        "current scope and fact layering",
+        "must fail closed"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.astronomy.ephemeris-version-coverage-and-artifacts",
+      "category": "astronomy_semantics",
+      "title": "星历数据集、版本、覆盖区间与工件清单",
+      "evidenceMode": "official_technical_artifact",
+      "reviewTrack": "engineering_reproducibility_review_required",
+      "basisAnchors": [
+        "source layering",
+        "must fail closed"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.astronomy.geocentric-topocentric-origin",
+      "category": "astronomy_semantics",
+      "title": "地心与地表观测原点及海拔要求",
+      "evidenceMode": "official_technical_artifact",
+      "reviewTrack": "engineering_reproducibility_review_required",
+      "basisAnchors": [
+        "current scope and fact layering",
+        "must fail closed"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.astronomy.official-horizons-differential",
+      "category": "engineering_identity",
+      "title": "JPL Horizons 官方响应、查询清单与差分容差",
+      "evidenceMode": "official_technical_artifact",
+      "reviewTrack": "engineering_reproducibility_review_required",
+      "basisAnchors": [
+        "JPL Horizons differential",
+        "strict receipt contract"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.astronomy.precession-nutation-and-ecliptic",
+      "category": "astronomy_semantics",
+      "title": "岁差、章动、黄道与坐标变换方案",
+      "evidenceMode": "official_technical_artifact",
+      "reviewTrack": "engineering_reproducibility_review_required",
+      "basisAnchors": [
+        "source layering",
+        "must fail closed"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.astronomy.provider-flags-and-no-fallback",
+      "category": "astronomy_semantics",
+      "title": "请求/生效选项、provider flags、warning 与零后备",
+      "evidenceMode": "locked_engineering_artifact",
+      "reviewTrack": "engineering_reproducibility_review_required",
+      "basisAnchors": [
+        "must fail closed",
+        "first isolated UTC diagnostic"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.astronomy.reference-frame-identity",
+      "category": "astronomy_semantics",
+      "title": "ICRF/J2000 等参考系身份与输出框架",
+      "evidenceMode": "official_technical_artifact",
+      "reviewTrack": "engineering_reproducibility_review_required",
+      "basisAnchors": [
+        "source layering",
+        "must fail closed"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.astronomy.target-center-identity",
+      "category": "astronomy_semantics",
+      "title": "天体实体中心与系统质心的目标身份",
+      "evidenceMode": "official_technical_artifact",
+      "reviewTrack": "engineering_reproducibility_review_required",
+      "basisAnchors": [
+        "current scope and fact layering",
+        "must fail closed"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.input.calendar-time-zone-and-dst",
+      "category": "input_semantics",
+      "title": "历法、IANA 时区、DST gap/overlap 与 UTC 转换",
+      "evidenceMode": "official_technical_artifact",
+      "reviewTrack": "engineering_reproducibility_review_required",
+      "basisAnchors": [
+        "current scope and fact layering",
+        "must fail closed"
+      ],
+      "bindingState": "candidate_only_unbound",
+      "sourceCandidateIds": [
+        "western-iana-tzdb-2026c-input-source-candidate-v1"
+      ],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": true,
+      "exactLocatorEstablished": true,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null,
+      "coverageScope": "iana_2026c_release_and_bundled_packed_artifact_identity_only",
+      "candidateEvidenceDigest": "14361c93e29d257080b25c0f3e580345243930acb07da450f938fbf6f02b8465",
+      "subjectFullySatisfied": false,
+      "countsTowardFrozenBindingGate": false
+    },
+    {
+      "subjectId": "western.input.coordinates-elevation-and-sign-convention",
+      "category": "input_semantics",
+      "title": "经纬度、海拔与东西经符号规范",
+      "evidenceMode": "official_technical_artifact",
+      "reviewTrack": "engineering_reproducibility_review_required",
+      "basisAnchors": [
+        "must fail closed"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.input.unknown-time-and-uncertainty",
+      "category": "input_semantics",
+      "title": "未知时辰、时间精度与候选输入策略",
+      "evidenceMode": "project_policy",
+      "reviewTrack": "two_independent_domain_reviews_required",
+      "basisAnchors": [
+        "must fail closed"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.interpretation.planet-sign-house-aspect",
+      "category": "interpretation",
+      "title": "行星、星座、宫位和相位解释及合成边界",
+      "evidenceMode": "domain_text_or_standard",
+      "reviewTrack": "two_independent_domain_reviews_required",
+      "basisAnchors": [
+        "current artifacts",
+        "next gate"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.policy.high-risk-expression-boundary",
+      "category": "high_risk_policy",
+      "title": "健康、法律、财务、生死与灾祸等高风险表达边界",
+      "evidenceMode": "project_policy",
+      "reviewTrack": "two_independent_domain_reviews_and_conservative_policy_required",
+      "basisAnchors": [
+        "strict receipt contract",
+        "next gate"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.rights.engine-code-and-distribution",
+      "category": "rights_dependency",
+      "title": "Astronomy Engine、SOFA、Swiss Ephemeris 候选代码许可和组合分发边界",
+      "evidenceMode": "rights_evidence",
+      "reviewTrack": "independent_rights_review_required",
+      "basisAnchors": [
+        "license gate"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.rights.ephemeris-time-data-redistribution",
+      "category": "rights_dependency",
+      "title": "JPL/NAIF kernel、IERS、EOP、闰秒和时区数据的再分发条件",
+      "evidenceMode": "rights_evidence",
+      "reviewTrack": "independent_rights_review_required",
+      "basisAnchors": [
+        "license gate"
+      ],
+      "bindingState": "candidate_only_unbound",
+      "sourceCandidateIds": [
+        "western-iana-tzdb-2026c-moment-timezone-rights-candidate-v1"
+      ],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": true,
+      "exactLocatorEstablished": true,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null,
+      "coverageScope": "iana_tzdb_and_moment_timezone_only",
+      "candidateEvidenceDigest": "14361c93e29d257080b25c0f3e580345243930acb07da450f938fbf6f02b8465",
+      "subjectFullySatisfied": false,
+      "countsTowardFrozenBindingGate": false
+    },
+    {
+      "subjectId": "western.rights.interpretation-assets",
+      "category": "rights_dependency",
+      "title": "占星解释文字、图标、字体和模板的作品/版本/载体权利",
+      "evidenceMode": "rights_evidence",
+      "reviewTrack": "independent_rights_review_required",
+      "basisAnchors": [
+        "license gate",
+        "next gate"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.rules.applying-and-separating",
+      "category": "rule_semantics",
+      "title": "入相、出相与相对黄经速度算法",
+      "evidenceMode": "domain_text_or_standard",
+      "reviewTrack": "two_independent_domain_reviews_required",
+      "basisAnchors": [
+        "must fail closed",
+        "independent astrology rules"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.rules.aspect-angles-and-orbs",
+      "category": "rule_semantics",
+      "title": "相位角、orb、优先级与重复消解",
+      "evidenceMode": "domain_text_or_standard",
+      "reviewTrack": "two_independent_domain_reviews_required",
+      "basisAnchors": [
+        "current artifacts",
+        "independent astrology rules"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.rules.dignity-policy",
+      "category": "rule_semantics",
+      "title": "庙旺落陷等 dignity 表及流派版本",
+      "evidenceMode": "domain_text_or_standard",
+      "reviewTrack": "two_independent_domain_reviews_required",
+      "basisAnchors": [
+        "current scope and fact layering",
+        "next gate"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.rules.house-systems",
+      "category": "rule_semantics",
+      "title": "Placidus、整宫、等宫、波菲利等宫制定义与失败行为",
+      "evidenceMode": "domain_text_or_standard",
+      "reviewTrack": "two_independent_domain_reviews_required",
+      "basisAnchors": [
+        "independent astrology rules",
+        "must fail closed"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.rules.node-policy",
+      "category": "rule_semantics",
+      "title": "月交点 true/mean 口径",
+      "evidenceMode": "domain_text_or_standard",
+      "reviewTrack": "two_independent_domain_reviews_required",
+      "basisAnchors": [
+        "current scope and fact layering",
+        "next gate"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.rules.retrograde-policy",
+      "category": "rule_semantics",
+      "title": "逆行判定、瞬时速度与边界",
+      "evidenceMode": "domain_text_or_standard",
+      "reviewTrack": "two_independent_domain_reviews_required",
+      "basisAnchors": [
+        "current scope and fact layering",
+        "next gate"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.rules.transit-and-progression",
+      "category": "rule_semantics",
+      "title": "行运、次限及其他推进方法的版本隔离",
+      "evidenceMode": "domain_text_or_standard",
+      "reviewTrack": "two_independent_domain_reviews_required",
+      "basisAnchors": [
+        "current scope and fact layering",
+        "next gate"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.rules.tropical-sidereal-and-ayanamsa",
+      "category": "rule_semantics",
+      "title": "热带/恒星黄道与 ayanamsa 口径",
+      "evidenceMode": "domain_text_or_standard",
+      "reviewTrack": "two_independent_domain_reviews_required",
+      "basisAnchors": [
+        "current scope and fact layering",
+        "next gate"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.rules.zodiac-sign-boundaries",
+      "category": "rule_semantics",
+      "title": "黄经到十二星座的规范边界与 0° 回绕",
+      "evidenceMode": "domain_text_or_standard",
+      "reviewTrack": "two_independent_domain_reviews_required",
+      "basisAnchors": [
+        "independent astrology rules"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.time.tt-tdb-and-deltat",
+      "category": "time_scale",
+      "title": "TT、TDB、DeltaT 与 Julian Day 关系",
+      "evidenceMode": "official_technical_artifact",
+      "reviewTrack": "engineering_reproducibility_review_required",
+      "basisAnchors": [
+        "current artifacts",
+        "must fail closed"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.time.ut1-and-eop",
+      "category": "time_scale",
+      "title": "UT1、DUT1、EOP 产品和缺失策略",
+      "evidenceMode": "official_technical_artifact",
+      "reviewTrack": "engineering_reproducibility_review_required",
+      "basisAnchors": [
+        "source layering",
+        "must fail closed"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    },
+    {
+      "subjectId": "western.time.utc-tai-and-leap-seconds",
+      "category": "time_scale",
+      "title": "UTC、TAI 与闰秒快照",
+      "evidenceMode": "official_technical_artifact",
+      "reviewTrack": "engineering_reproducibility_review_required",
+      "basisAnchors": [
+        "current artifacts",
+        "must fail closed"
+      ],
+      "bindingState": "required_unbound",
+      "sourceCandidateIds": [],
+      "frozenBindingId": null,
+      "sourceBodyDigest": null,
+      "exactQuoteStored": false,
+      "exactLocatorEstablished": false,
+      "workRightsEstablished": false,
+      "editionRightsEstablished": false,
+      "carrierRightsEstablished": false,
+      "rightsLegalConclusion": "not_established",
+      "expertReviewIds": [],
+      "frozenAt": null
+    }
+  ],
+  "gateSummary": {
+    "bindingRequired": 28,
+    "bindingFrozenVerified": 0,
+    "partialCandidatesAttached": 2,
+    "sourceCandidatesAttached": 2,
+    "subjectFullySatisfied": 0,
+    "sourceBodiesBound": 0,
+    "minimalExactQuotesStored": 3,
+    "minimalExactQuoteObservationsAttached": 3,
+    "exactQuotesBound": 0,
+    "exactLocatorsEstablished": 2,
+    "remoteBodiesPersistedInThisSuccessorRecord": 0,
+    "workRightsEstablished": 0,
+    "versionRightsEstablished": 0,
+    "editionRightsEstablished": 0,
+    "carrierRightsEstablished": 0,
+    "expertReviewedSubjects": 0,
+    "independentRightsReviewsVerified": 0,
+    "independentEngineeringReviewsVerified": 0,
+    "independentDomainExpertReviewsVerified": 0,
+    "sourceBundleComplete": false,
+    "rightsBundleComplete": false,
+    "expertReviewBundleComplete": false,
+    "rightsLegalConclusionEstablished": false,
+    "redistributionAuthorized": false,
+    "formalManifestIntegrated": false,
+    "formalRegistryIntegrated": false,
+    "ownerAdmissionAccepted": false,
+    "releaseReady": false,
+    "publicReleaseAuthorized": false
+  },
+  "evidenceLedger": {
+    "engineeringRequirementIdentity": "predecessor_raw_semantics_and_26_unchanged_subjects_plus_two_partial_candidates_verified",
+    "browserRuntimeEvidence": "not_assessed_in_successor_candidate",
+    "contentTruth": "not_established",
+    "expertTruth": "not_established",
+    "rightsLegalConclusion": "not_established",
+    "releaseReadiness": "not_ready",
+    "publicReleaseAuthorization": "not_authorized"
+  },
+  "integrityBoundary": {
+    "perFileHeldHandleStableReadsUsed": true,
+    "strictDuplicateKeyRejectingJsonUsed": true,
+    "exclusiveCreateWriterRequired": true,
+    "canonicalPrettyJsonWithLfRequired": true,
+    "domainSeparatedDigestIsDigitalSignature": false,
+    "crossFileAtomicSnapshotEstablished": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "intervalMutationExcludedAcrossFiles": false,
+    "abaExcluded": false
+  },
+  "doesNotEstablish": [
+    "formal_current_requirements_replacement_or_active_effect",
+    "formal_manifest_registry_or_owner_admission",
+    "complete_calendar_time_zone_and_dst_subject",
+    "complete_ephemeris_time_data_redistribution_subject",
+    "source_body_persistence_or_complete_subject_source_bundle",
+    "binding_freeze_or_subject_full_satisfaction",
+    "work_version_edition_or_carrier_rights_establishment",
+    "rights_legal_conclusion_or_redistribution_authorization",
+    "content_truth_or_western_astrology_domain_truth",
+    "expert_truth_or_independent_expert_review",
+    "browser_runtime_pwa_service_worker_or_cross_browser_validation",
+    "release_readiness_public_deployment_or_public_release_authorization",
+    "cross_system_equivalence_scoring_weighting_or_generated_model_winner",
+    "cross_file_atomic_snapshot_mutation_epoch_interval_integrity_or_aba_exclusion"
+  ],
+  "ledgerDigest": "254fbc561d3a82a4b9dfaf969b472de7dfcbb9543299b4f69cc9a9944e6994db"
+}

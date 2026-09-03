@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light" />
+    <!-- The isolated build emits this exact same-origin third-party license asset. -->
+    <link rel="license" type="text/plain" href="./licenses/astronomy-engine-2.1.19-LICENSE.txt" />
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'"
@@ -67,14 +69,14 @@
               <input id="obliquity-deg" name="obliquity" type="number" min="0" max="90" step="0.0001" value="23.436" required />
             </label>
             <label class="field" for="ayanamsha-deg">
-              <span>恒星岁差值（演示值）</span>
+              <span>恒星岁差值（手填演示值；方法未验证）</span>
               <input id="ayanamsha-deg" name="ayanamsha" type="number" min="0" max="360" step="0.0001" value="24.1" />
             </label>
           </div>
           <div class="field-row">
             <label class="check-field">
               <input id="sidereal-mode" name="sidereal" type="checkbox" />
-              <span>恒星黄道（演示；宫头按岁差值平移显示，不进入规则层契约）</span>
+              <span>恒星黄道（manual_offset_unverified；只减去手填值，不冒充命名岁差体系）</span>
             </label>
           </div>
           <button id="calculate-button" class="primary-action" type="submit">
@@ -157,6 +159,10 @@
           <div>
             <dt>绑定的规则事实 SHA-256</dt>
             <dd><code id="content-facts-hash">尚未生成</code></dd>
+          </div>
+          <div>
+            <dt>黄道方法身份</dt>
+            <dd><code id="content-zodiac-method">尚未生成</code></dd>
           </div>
           <div>
             <dt>专家结果</dt>
@@ -254,7 +260,7 @@
             <p class="section-kicker">07 · 人工审稿闭环</p>
             <h2 id="review-feedback-title">天体、星座、宫位、相位与轴点 · 43 项基础内容审稿</h2>
           </div>
-          <p>模板 <code>v0.6.0</code> · 只读预检</p>
+          <p>模板 <code>v0.8.0</code> · 只读预检</p>
         </div>
         <p class="review-feedback-intro">
           下载固定模板后，可由你或受邀研究者逐项填写所采用的占星传统、成立条件、反例与条件化方向提案。
@@ -306,7 +312,7 @@
             <p class="section-kicker">08 · 当前盘动态内容审稿</p>
             <h2 id="dynamic-review-feedback-title">当前已显示命盘 · 动态候选逐卡审稿</h2>
           </div>
-          <p>模板 <code>v0.7</code> · 独立于 43 项基础审稿</p>
+          <p>模板 <code>v0.10</code> · 绑定黄道方法身份 · 独立于 43 项基础审稿</p>
         </div>
         <p class="review-feedback-intro">
           完成排盘后，可主动下载仅含当前盘派生事实、候选文字与来源账的审稿包。包中不含姓名、UTC、地点或表单原值，

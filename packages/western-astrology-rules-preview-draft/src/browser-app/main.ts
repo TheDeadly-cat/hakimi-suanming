@@ -1,6 +1,13 @@
 import "./styles.css";
 import { runWesternRulesPreviewWorker } from "../browser-client.ts";
-import { runWesternRuleLayer } from "../rule-layer-bridge.ts";
+import {
+  WESTERN_RULE_LAYER_REQUEST_VERSION,
+  WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY,
+  WESTERN_TROPICAL_ZODIAC_IDENTITY,
+  deriveZodiacPlacement,
+  runWesternRuleLayer,
+  type WesternZodiacIdentityDraft
+} from "../rule-layer-bridge.ts";
 import {
   annularSectorPath,
   createWheelSectors,
@@ -28,6 +35,12 @@ import {
   westernDynamicContentReviewFeedbackFilename,
   type WesternDynamicContentReviewFeedbackPreflight
 } from "./dynamic-content-review-feedback.ts";
+import {
+  assertWesternHighRiskTemplateEgress,
+  screenWesternHighRiskEgressText,
+  type WesternHighRiskEgressAction,
+  type WesternHighRiskEgressSurfaceId
+} from "./high-risk-expression-egress-policy.ts";
 
 const ALL_BODY_IDS = Object.freeze([
   "sun",
@@ -141,6 +154,7 @@ const aspectContentEmpty = document.querySelector<HTMLParagraphElement>("#aspect
 const aspectContentList = document.querySelector<HTMLOListElement>("#aspect-content-list")!;
 const contentSources = document.querySelector<HTMLUListElement>("#content-sources")!;
 const contentFactsHash = document.querySelector<HTMLElement>("#content-facts-hash")!;
+const contentZodiacMethod = document.querySelector<HTMLElement>("#content-zodiac-method")!;
 const reviewFeedbackPanel = document.querySelector<HTMLElement>("#review-feedback-panel")!;
 const reviewFeedbackDownload = document.querySelector<HTMLButtonElement>("#review-feedback-download")!;
 const reviewFeedbackFile = document.querySelector<HTMLInputElement>("#review-feedback-file")!;
@@ -200,9 +214,12 @@ function clearError(): void {
 }
 
 function formatDegree(value: number): string {
-  const degrees = Math.floor(value);
-  const minutes = Math.floor((value - degrees) * 60);
-  const seconds = Math.round(((value - degrees) * 60 - minutes) * 60);
+  const secondsPerCircle = 360 * 60 * 60;
+  const totalSeconds = ((Math.round(value * 60 * 60) % secondsPerCircle) + secondsPerCircle)
+    % secondsPerCircle;
+  const degrees = Math.floor(totalSeconds / (60 * 60));
+  const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+  const seconds = totalSeconds % 60;
   return `${degrees}°${String(minutes).padStart(2, "0")}′${String(seconds).padStart(2, "0")}″`;
 }
 
@@ -240,17 +257,19 @@ function renderHouses(
       descendantDeg: number;
       imumCoeliDeg: number;
     }>;
-  }>
+  }>,
+  zodiac: WesternZodiacIdentityDraft
 ): void {
   housesList.replaceChildren();
   housesEmpty.hidden = true;
   housesList.hidden = false;
   for (const cusp of houses.cusps) {
+    const displayedCusp = deriveZodiacPlacement(cusp.longitudeDeg, zodiac);
     const item = document.createElement("li");
     const name = document.createElement("strong");
     name.textContent = HOUSE_LABELS[cusp.houseNumber - 1] ?? String(cusp.houseNumber);
     const value = document.createElement("span");
-    value.textContent = formatDegree(cusp.longitudeDeg);
+    value.textContent = formatDegree(displayedCusp.longitudeDeg);
     item.append(name, value);
     housesList.append(item);
   }
@@ -262,11 +281,12 @@ function renderHouses(
     ["天底", houses.angles.imumCoeliDeg]
   ] as const;
   for (const [label, value] of rows) {
+    const displayedAngle = deriveZodiacPlacement(value, zodiac);
     const row = document.createElement("div");
     const term = document.createElement("dt");
     term.textContent = label;
     const definition = document.createElement("dd");
-    definition.textContent = formatDegree(value);
+    definition.textContent = formatDegree(displayedAngle.longitudeDeg);
     row.append(term, definition);
     anglesList.append(row);
   }
@@ -329,6 +349,7 @@ function clearContentProjection(): void {
   aspectContentEmpty.hidden = false;
   contentSources.replaceChildren();
   contentFactsHash.textContent = "尚未生成";
+  contentZodiacMethod.textContent = "尚未生成";
   contentBoundary.textContent = "完成计算后，这里会显示来源绑定的现代西方占星候选内容；专家结论保持为空。";
   contentBoundary.removeAttribute("data-content-version");
 }
@@ -385,6 +406,23 @@ interface RenderedExpertReview {
   readonly result: null;
 }
 
+function setWesternHighRiskEgressText(
+  element: HTMLElement,
+  surfaceId: WesternHighRiskEgressSurfaceId,
+  candidateText: string
+): WesternHighRiskEgressAction {
+  const decision = screenWesternHighRiskEgressText(surfaceId, candidateText);
+  element.textContent = decision.displayText;
+  element.dataset.highRiskEgressPolicy = decision.receipt.policyId;
+  element.dataset.highRiskEgressAction = decision.action;
+  element.dataset.highRiskEgressCategories = decision.receipt.triggeredRiskCategoryIds.length === 0
+    ? "none"
+    : decision.receipt.triggeredRiskCategoryIds.join(",");
+  element.dataset.semanticSafetyEstablished = "false";
+  element.dataset.expertClaimsAuthorized = "false";
+  return decision.action;
+}
+
 function setCandidateAuditAttributes(
   element: HTMLElement,
   candidateId: string,
@@ -405,7 +443,11 @@ function createExpertReview(reviewFact: RenderedExpertReview): HTMLDetailsElemen
   const questions = document.createElement("ul");
   for (const question of reviewFact.questions) {
     const questionItem = document.createElement("li");
-    questionItem.textContent = question;
+    setWesternHighRiskEgressText(
+      questionItem,
+      "western.preview.expert-review-question",
+      question
+    );
     questions.append(questionItem);
   }
   const result = document.createElement("p");
@@ -434,27 +476,47 @@ function createCandidateCard(
   setCandidateAuditAttributes(item, candidate.candidateId, candidate.review, factsSha256);
 
   const heading = document.createElement("h4");
-  heading.textContent = candidate.factSummary;
+  setWesternHighRiskEgressText(
+    heading,
+    "western.preview.candidate-interpretation",
+    candidate.factSummary
+  );
 
   const direct = document.createElement("p");
   direct.className = "candidate-direct";
-  direct.textContent = candidate.directStatement;
+  setWesternHighRiskEgressText(
+    direct,
+    "western.preview.candidate-interpretation",
+    candidate.directStatement
+  );
 
   const polarity = document.createElement("div");
   polarity.className = "candidate-polarity";
   const resource = document.createElement("p");
   resource.className = "candidate-resource";
-  resource.textContent = candidate.resourceStatement;
+  setWesternHighRiskEgressText(
+    resource,
+    "western.preview.candidate-interpretation",
+    candidate.resourceStatement
+  );
   const tension = document.createElement("p");
   tension.className = "candidate-tension";
-  tension.textContent = candidate.tensionStatement;
+  setWesternHighRiskEgressText(
+    tension,
+    "western.preview.candidate-interpretation",
+    candidate.tensionStatement
+  );
   polarity.append(resource, tension);
 
   item.append(heading, direct, polarity);
   if (scopeNote !== null) {
     const note = document.createElement("p");
     note.className = "candidate-scope";
-    note.textContent = scopeNote;
+    setWesternHighRiskEgressText(
+      note,
+      "western.preview.candidate-interpretation",
+      scopeNote
+    );
     item.append(note);
   }
 
@@ -481,7 +543,11 @@ function createFirstReadCard(
 
   const heading = document.createElement("header");
   const title = document.createElement("h4");
-  title.textContent = candidate.factSummary;
+  setWesternHighRiskEgressText(
+    title,
+    "western.preview.candidate-interpretation",
+    candidate.factSummary
+  );
   const badges = document.createElement("div");
   badges.className = "first-read-badges";
   for (const value of [
@@ -497,7 +563,11 @@ function createFirstReadCard(
 
   const direct = document.createElement("p");
   direct.className = "candidate-direct";
-  direct.textContent = candidate.directStatement;
+  setWesternHighRiskEgressText(
+    direct,
+    "western.preview.candidate-interpretation",
+    candidate.directStatement
+  );
 
   const entries = document.createElement("ol");
   entries.className = "first-read-entry-list";
@@ -513,28 +583,52 @@ function createFirstReadCard(
     const sequence = document.createElement("small");
     sequence.textContent = `0${entry.sequence}`;
     const label = document.createElement("h5");
-    label.textContent = entry.label;
+    setWesternHighRiskEgressText(
+      label,
+      "western.preview.candidate-interpretation",
+      entry.label
+    );
     const availability = document.createElement("span");
     availability.textContent = entry.availability === "available" ? "事实可用" : "保持关闭";
     itemHeading.append(sequence, label, availability);
 
     const fact = document.createElement("strong");
-    fact.textContent = entry.factSummary;
+    setWesternHighRiskEgressText(
+      fact,
+      "western.preview.candidate-interpretation",
+      entry.factSummary
+    );
     const statement = document.createElement("p");
-    statement.textContent = entry.directStatement;
+    setWesternHighRiskEgressText(
+      statement,
+      "western.preview.candidate-interpretation",
+      entry.directStatement
+    );
     const correction = document.createElement("p");
     correction.className = "first-read-correction";
-    correction.textContent = entry.correctionStatement;
+    setWesternHighRiskEgressText(
+      correction,
+      "western.preview.candidate-interpretation",
+      entry.correctionStatement
+    );
     item.append(itemHeading, fact, statement, correction);
     entries.append(item);
   }
 
   const order = document.createElement("p");
   order.className = "structural-use";
-  order.textContent = candidate.readingOrderStatement;
+  setWesternHighRiskEgressText(
+    order,
+    "western.preview.candidate-interpretation",
+    candidate.readingOrderStatement
+  );
   const note = document.createElement("p");
   note.className = "candidate-scope";
-  note.textContent = candidate.scopeNote;
+  setWesternHighRiskEgressText(
+    note,
+    "western.preview.candidate-interpretation",
+    candidate.scopeNote
+  );
   const boundary = document.createElement("p");
   boundary.className = "structural-limit";
   boundary.textContent =
@@ -569,7 +663,11 @@ function createBodySynthesisCard(
 
   const heading = document.createElement("header");
   const title = document.createElement("h4");
-  title.textContent = candidate.factSummary;
+  setWesternHighRiskEgressText(
+    title,
+    "western.preview.candidate-interpretation",
+    candidate.factSummary
+  );
   const badges = document.createElement("div");
   badges.className = "body-synthesis-badges";
   if (candidate.chartRulerProfiles.length > 0) {
@@ -589,22 +687,38 @@ function createBodySynthesisCard(
 
   const direct = document.createElement("p");
   direct.className = "candidate-direct";
-  direct.textContent = candidate.directStatement;
+  setWesternHighRiskEgressText(
+    direct,
+    "western.preview.candidate-interpretation",
+    candidate.directStatement
+  );
 
   const placement = document.createElement("section");
   placement.className = "body-synthesis-placement";
   const placementTitle = document.createElement("h5");
   placementTitle.textContent = "落位主线";
   const placementText = document.createElement("p");
-  placementText.textContent = candidate.placement.directStatement;
+  setWesternHighRiskEgressText(
+    placementText,
+    "western.preview.candidate-interpretation",
+    candidate.placement.directStatement
+  );
   const polarity = document.createElement("div");
   polarity.className = "candidate-polarity";
   const resource = document.createElement("p");
   resource.className = "candidate-resource";
-  resource.textContent = candidate.placement.resourceStatement;
+  setWesternHighRiskEgressText(
+    resource,
+    "western.preview.candidate-interpretation",
+    candidate.placement.resourceStatement
+  );
   const tension = document.createElement("p");
   tension.className = "candidate-tension";
-  tension.textContent = candidate.placement.tensionStatement;
+  setWesternHighRiskEgressText(
+    tension,
+    "western.preview.candidate-interpretation",
+    candidate.placement.tensionStatement
+  );
   polarity.append(resource, tension);
   placement.append(placementTitle, placementText, polarity);
 
@@ -628,7 +742,11 @@ function createBodySynthesisCard(
       detail.textContent =
         `容许度 ${formatDegree(link.candidate.orbDeg)} · ${link.candidate.motion}`;
       const statement = document.createElement("p");
-      statement.textContent = link.candidate.directStatement;
+      setWesternHighRiskEgressText(
+        statement,
+        "western.preview.candidate-interpretation",
+        link.candidate.directStatement
+      );
       row.append(label, detail, statement);
       aspectList.append(row);
     }
@@ -651,17 +769,29 @@ function createBodySynthesisCard(
     const term = document.createElement("dt");
     term.textContent = label;
     const definition = document.createElement("dd");
-    definition.textContent = value;
+    setWesternHighRiskEgressText(
+      definition,
+      "western.preview.candidate-interpretation",
+      value
+    );
     row.append(term, definition);
     structure.append(row);
   }
 
   const order = document.createElement("p");
   order.className = "structural-use";
-  order.textContent = candidate.readingOrderStatement;
+  setWesternHighRiskEgressText(
+    order,
+    "western.preview.candidate-interpretation",
+    candidate.readingOrderStatement
+  );
   const note = document.createElement("p");
   note.className = "candidate-scope";
-  note.textContent = candidate.scopeNote;
+  setWesternHighRiskEgressText(
+    note,
+    "western.preview.candidate-interpretation",
+    candidate.scopeNote
+  );
   const boundary = document.createElement("p");
   boundary.className = "structural-limit";
   boundary.textContent =
@@ -723,10 +853,18 @@ function createDistributionCard(
   setCandidateAuditAttributes(card, candidate.candidateId, candidate.review, factsSha256);
 
   const heading = document.createElement("h4");
-  heading.textContent = candidate.factSummary;
+  setWesternHighRiskEgressText(
+    heading,
+    "western.preview.candidate-interpretation",
+    candidate.factSummary
+  );
   const direct = document.createElement("p");
   direct.className = "candidate-direct";
-  direct.textContent = candidate.directStatement;
+  setWesternHighRiskEgressText(
+    direct,
+    "western.preview.candidate-interpretation",
+    candidate.directStatement
+  );
   const grid = document.createElement("div");
   grid.className = "distribution-grid";
   for (const scope of candidate.scopes) {
@@ -744,13 +882,25 @@ function createDistributionCard(
   }
   const use = document.createElement("p");
   use.className = "structural-use";
-  use.textContent = candidate.useStatement;
+  setWesternHighRiskEgressText(
+    use,
+    "western.preview.candidate-interpretation",
+    candidate.useStatement
+  );
   const limit = document.createElement("p");
   limit.className = "structural-limit";
-  limit.textContent = candidate.limitStatement;
+  setWesternHighRiskEgressText(
+    limit,
+    "western.preview.candidate-interpretation",
+    candidate.limitStatement
+  );
   const note = document.createElement("p");
   note.className = "candidate-scope";
-  note.textContent = candidate.scopeNote;
+  setWesternHighRiskEgressText(
+    note,
+    "western.preview.candidate-interpretation",
+    candidate.scopeNote
+  );
   card.append(
     heading,
     direct,
@@ -781,7 +931,11 @@ function createRulerProfileGrid(
     const profileTitle = document.createElement("h5");
     profileTitle.textContent = label;
     const statement = document.createElement("p");
-    statement.textContent = path.statement;
+    setWesternHighRiskEgressText(
+      statement,
+      "western.preview.candidate-interpretation",
+      path.statement
+    );
     profile.append(profileTitle, statement);
     profiles.append(profile);
   }
@@ -799,13 +953,25 @@ function createChartRulerCard(
   card.dataset.ascendantSignId = candidate.ascendantSignId;
 
   const heading = document.createElement("h4");
-  heading.textContent = candidate.factSummary;
+  setWesternHighRiskEgressText(
+    heading,
+    "western.preview.candidate-interpretation",
+    candidate.factSummary
+  );
   const direct = document.createElement("p");
   direct.className = "candidate-direct";
-  direct.textContent = candidate.directStatement;
+  setWesternHighRiskEgressText(
+    direct,
+    "western.preview.candidate-interpretation",
+    candidate.directStatement
+  );
   const note = document.createElement("p");
   note.className = "candidate-scope";
-  note.textContent = candidate.scopeNote;
+  setWesternHighRiskEgressText(
+    note,
+    "western.preview.candidate-interpretation",
+    candidate.scopeNote
+  );
   card.append(
     heading,
     direct,
@@ -829,10 +995,18 @@ function createDispositorCard(
   item.dataset.profilesEqual = String(candidate.profilesEqual);
 
   const heading = document.createElement("h4");
-  heading.textContent = candidate.factSummary;
+  setWesternHighRiskEgressText(
+    heading,
+    "western.preview.candidate-interpretation",
+    candidate.factSummary
+  );
   const direct = document.createElement("p");
   direct.className = "candidate-direct";
-  direct.textContent = candidate.directStatement;
+  setWesternHighRiskEgressText(
+    direct,
+    "western.preview.candidate-interpretation",
+    candidate.directStatement
+  );
   const profiles = document.createElement("div");
   profiles.className = "chain-profile-grid";
   for (const [label, chain] of [
@@ -855,13 +1029,21 @@ function createDispositorCard(
         ? "循环候选"
         : "缺天体 · 停止";
     const statement = document.createElement("p");
-    statement.textContent = chain.statement;
+    setWesternHighRiskEgressText(
+      statement,
+      "western.preview.candidate-interpretation",
+      chain.statement
+    );
     profile.append(title, termination, statement);
     profiles.append(profile);
   }
   const note = document.createElement("p");
   note.className = "candidate-scope";
-  note.textContent = candidate.scopeNote;
+  setWesternHighRiskEgressText(
+    note,
+    "western.preview.candidate-interpretation",
+    candidate.scopeNote
+  );
   item.append(
     heading,
     direct,
@@ -882,10 +1064,18 @@ function createAngleProximityCard(
   card.className = "content-candidate-card angle-proximity-card";
   setCandidateAuditAttributes(card, candidate.candidateId, candidate.review, factsSha256);
   const heading = document.createElement("h4");
-  heading.textContent = candidate.factSummary;
+  setWesternHighRiskEgressText(
+    heading,
+    "western.preview.candidate-interpretation",
+    candidate.factSummary
+  );
   const direct = document.createElement("p");
   direct.className = "candidate-direct";
-  direct.textContent = candidate.directStatement;
+  setWesternHighRiskEgressText(
+    direct,
+    "western.preview.candidate-interpretation",
+    candidate.directStatement
+  );
   const entries = document.createElement("ol");
   entries.className = "angle-proximity-list";
   entries.setAttribute("aria-label", "天体到最近四轴的精确距离排序");
@@ -914,13 +1104,25 @@ function createAngleProximityCard(
   }
   const use = document.createElement("p");
   use.className = "structural-use";
-  use.textContent = candidate.useStatement;
+  setWesternHighRiskEgressText(
+    use,
+    "western.preview.candidate-interpretation",
+    candidate.useStatement
+  );
   const limit = document.createElement("p");
   limit.className = "structural-limit";
-  limit.textContent = candidate.limitStatement;
+  setWesternHighRiskEgressText(
+    limit,
+    "western.preview.candidate-interpretation",
+    candidate.limitStatement
+  );
   const note = document.createElement("p");
   note.className = "candidate-scope";
-  note.textContent = candidate.scopeNote;
+  setWesternHighRiskEgressText(
+    note,
+    "western.preview.candidate-interpretation",
+    candidate.scopeNote
+  );
   card.append(
     heading,
     direct,
@@ -945,14 +1147,26 @@ function createHouseRulerCard(
   item.dataset.cuspSignId = candidate.cuspSignId;
 
   const heading = document.createElement("h4");
-  heading.textContent = candidate.factSummary;
+  setWesternHighRiskEgressText(
+    heading,
+    "western.preview.candidate-interpretation",
+    candidate.factSummary
+  );
   const direct = document.createElement("p");
   direct.className = "candidate-direct";
-  direct.textContent = candidate.directStatement;
+  setWesternHighRiskEgressText(
+    direct,
+    "western.preview.candidate-interpretation",
+    candidate.directStatement
+  );
   const profiles = createRulerProfileGrid(candidate);
   const note = document.createElement("p");
   note.className = "candidate-scope";
-  note.textContent = candidate.scopeNote;
+  setWesternHighRiskEgressText(
+    note,
+    "western.preview.candidate-interpretation",
+    candidate.scopeNote
+  );
   item.append(
     heading,
     direct,
@@ -1093,7 +1307,16 @@ function renderContentProjection(projection: WesternContentProjection): void {
     contentSources.append(item);
   }
   contentFactsHash.textContent = projection.factsSha256;
-  contentBoundary.textContent = projection.boundary.note;
+  contentZodiacMethod.textContent = [
+    projection.zodiacMethod.kind,
+    projection.zodiacMethod.ayanamshaId ?? "ayanamsha:null",
+    projection.zodiacMethod.algorithmId
+  ].join(" / ");
+  setWesternHighRiskEgressText(
+    contentBoundary,
+    "western.preview.candidate-interpretation",
+    projection.boundary.note
+  );
   contentBoundary.dataset.contentVersion = projection.projectionVersion;
 }
 
@@ -1114,7 +1337,11 @@ function reviewSummaryPair(label: string, value: string): HTMLDivElement {
   const term = document.createElement("dt");
   term.textContent = label;
   const description = document.createElement("dd");
-  description.textContent = value;
+  setWesternHighRiskEgressText(
+    description,
+    "western.preview.imported-review-feedback",
+    value
+  );
   row.append(term, description);
   return row;
 }
@@ -1153,8 +1380,12 @@ function setReviewFeedbackMessage(
   message: string,
   state: "idle" | "loading" | "success" | "error"
 ): void {
-  reviewFeedbackMessage.textContent = message;
-  reviewFeedbackMessage.dataset.state = state;
+  const action = setWesternHighRiskEgressText(
+    reviewFeedbackMessage,
+    "western.preview.imported-review-feedback",
+    message
+  );
+  reviewFeedbackMessage.dataset.state = action === "pass_through" ? state : "error";
 }
 
 function setReviewFeedbackBoundary(
@@ -1205,9 +1436,13 @@ function renderReviewFeedbackPreflight(
   reviewFeedbackTotal.textContent = String(preflight.counts.total);
   reviewFeedbackResolved.textContent = String(preflight.resolvedCount);
   reviewFeedbackUnresolved.textContent = String(preflight.unresolvedCount);
-  reviewFeedbackReviewer.textContent = preflight.reviewerAttributionComplete
-    ? `${preflight.envelope.reviewer.displayName}（自述，未核验）`
-    : "尚未提供";
+  setWesternHighRiskEgressText(
+    reviewFeedbackReviewer,
+    "western.preview.imported-review-feedback",
+    preflight.reviewerAttributionComplete
+      ? `${preflight.envelope.reviewer.displayName}（自述，未核验）`
+      : "尚未提供"
+  );
   setReviewFeedbackBoundary(preflight);
 
   reviewFeedbackItems.replaceChildren();
@@ -1229,7 +1464,11 @@ function renderReviewFeedbackPreflight(
     const heading = document.createElement("div");
     heading.className = "review-feedback-item-heading";
     const title = document.createElement("strong");
-    title.textContent = `${reviewCategoryLabel(item.category)} · ${item.label}`;
+    setWesternHighRiskEgressText(
+      title,
+      "western.preview.imported-review-feedback",
+      `${reviewCategoryLabel(item.category)} · ${item.label}`
+    );
     const decision = document.createElement("span");
     decision.textContent = reviewDecisionLabel(item.decision);
     heading.append(title, decision);
@@ -1278,8 +1517,13 @@ async function downloadReviewFeedbackTemplate(): Promise<void> {
   setReviewFeedbackMessage("正在生成与当前 43 项基础内容及 31 条来源账严格绑定的模板…", "loading");
   try {
     const template = await createWesternContentReviewFeedbackTemplate();
+    const serializedTemplate = serializeWesternContentReviewFeedbackTemplate(template);
+    assertWesternHighRiskTemplateEgress(
+      "western.preview.primitive-review-template-download",
+      serializedTemplate
+    );
     startTextDownload(
-      serializeWesternContentReviewFeedbackTemplate(template),
+      serializedTemplate,
       WESTERN_CONTENT_REVIEW_FEEDBACK_FILENAME
     );
     setReviewFeedbackMessage(
@@ -1350,8 +1594,12 @@ function setDynamicReviewFeedbackMessage(
   message: string,
   state: "idle" | "loading" | "success" | "error"
 ): void {
-  dynamicReviewFeedbackMessage.textContent = message;
-  dynamicReviewFeedbackMessage.dataset.state = state;
+  const action = setWesternHighRiskEgressText(
+    dynamicReviewFeedbackMessage,
+    "western.preview.imported-review-feedback",
+    message
+  );
+  dynamicReviewFeedbackMessage.dataset.state = action === "pass_through" ? state : "error";
 }
 
 function setDynamicReviewFeedbackControls(available: boolean): void {
@@ -1425,9 +1673,13 @@ function renderDynamicReviewFeedbackPreflight(
   dynamicReviewFeedbackTotal.textContent = String(preflight.counts.total);
   dynamicReviewFeedbackResolved.textContent = String(preflight.resolvedCount);
   dynamicReviewFeedbackUnresolved.textContent = String(preflight.unresolvedCount);
-  dynamicReviewFeedbackReviewer.textContent = preflight.reviewerAttributionComplete
-    ? `${preflight.envelope.reviewer.displayName}（自述，未核验）`
-    : "尚未提供";
+  setWesternHighRiskEgressText(
+    dynamicReviewFeedbackReviewer,
+    "western.preview.imported-review-feedback",
+    preflight.reviewerAttributionComplete
+      ? `${preflight.envelope.reviewer.displayName}（自述，未核验）`
+      : "尚未提供"
+  );
   setDynamicReviewFeedbackBoundary(preflight);
 
   dynamicReviewFeedbackItems.replaceChildren();
@@ -1449,7 +1701,11 @@ function renderDynamicReviewFeedbackPreflight(
     const heading = document.createElement("div");
     heading.className = "review-feedback-item-heading";
     const title = document.createElement("strong");
-    title.textContent = `${dynamicReviewCategoryLabel(item.category)} · ${item.title}`;
+    setWesternHighRiskEgressText(
+      title,
+      "western.preview.imported-review-feedback",
+      `${dynamicReviewCategoryLabel(item.category)} · ${item.title}`
+    );
     const decision = document.createElement("span");
     decision.textContent = reviewDecisionLabel(item.decision);
     heading.append(title, decision);
@@ -1507,7 +1763,12 @@ async function downloadDynamicReviewFeedbackTemplate(): Promise<void> {
     const template = await createWesternDynamicContentReviewFeedbackTemplate(projection);
     if (epoch !== dynamicProjectionEpoch || currentContentProjection !== projection) return;
     const filename = westernDynamicContentReviewFeedbackFilename();
-    startTextDownload(serializeWesternDynamicContentReviewFeedbackTemplate(template), filename);
+    const serializedTemplate = serializeWesternDynamicContentReviewFeedbackTemplate(template);
+    assertWesternHighRiskTemplateEgress(
+      "western.preview.dynamic-review-template-download",
+      serializedTemplate
+    );
+    startTextDownload(serializedTemplate, filename);
     setDynamicReviewFeedbackMessage(
       `已生成 ${filename}；文件含精确派生盘面，请按敏感文件保管并自行决定是否外发。`,
       "success"
@@ -1595,12 +1856,11 @@ function renderWheel(
   }>>,
   houses: ReadonlyArray<Readonly<{ houseNumber: number; longitudeDeg: number }>>,
   aspects: ReadonlyArray<Readonly<{ bodyA: string; bodyB: string }>>,
-  sidereal: boolean,
-  ayanamshaDeg: number
+  zodiac: WesternZodiacIdentityDraft
 ): void {
   chartWheel.replaceChildren();
   const displayLongitude = (longitudeDeg: number): number =>
-    sidereal ? (longitudeDeg - ayanamshaDeg + 360) % 360 : longitudeDeg;
+    deriveZodiacPlacement(longitudeDeg, zodiac).longitudeDeg;
 
   const bodyByLongitude = new Map(bodies.map((body) => [
     body.bodyId,
@@ -1755,7 +2015,13 @@ async function calculate(): Promise<void> {
   const ramcDeg = Number(ramcInput.value);
   const latitude = Number(latitudeInput.value);
   const obliquity = Number(obliquityInput.value);
-  const ayanamsha = siderealInput.checked ? Number(ayanamshaInput.value) : null;
+  const ayanamshaRaw = ayanamshaInput.value.trim();
+  if (siderealInput.checked && ayanamshaRaw.length === 0) {
+    showError("恒星岁差值必须明确填写 0–360 之间的数值。");
+    setStatus("输入未通过校验；未启动 Worker，也未保留旧结果。");
+    return;
+  }
+  const ayanamsha = siderealInput.checked ? Number(ayanamshaRaw) : null;
   const houseSystem = houseSystemInput.value;
   if (!["whole_sign_v1", "equal_asc_v1", "porphyry_v1", "placidus_v1"].includes(houseSystem)
     || !Number.isFinite(ramcDeg) || ramcDeg < 0 || ramcDeg >= 360
@@ -1776,17 +2042,21 @@ async function calculate(): Promise<void> {
   try {
     const outcome = await runWesternRulesPreviewWorker(utcInstant, ALL_BODY_IDS);
     setStatus("天文位置已验真；正在生成规则层几何…");
+    const zodiac = ayanamsha === null
+      ? WESTERN_TROPICAL_ZODIAC_IDENTITY
+      : Object.freeze({
+        ...WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY,
+        ayanamshaDeg: ayanamsha
+      });
     const artifact = runWesternRuleLayer({
-      protocolVersion: "western-astrology-rules-request/0.1-draft",
+      protocolVersion: WESTERN_RULE_LAYER_REQUEST_VERSION,
       inputLabel: `rules preview ${utcInstant}`,
       bodies: outcome.bodies.map((body) => ({
         bodyId: body.bodyId,
         eclipticLongitudeDeg: body.trueEclipticOfDate.longitudeDeg,
         longitudeSpeedDegPerDay: body.finiteDifference.longitudeSpeedDegPerDay
       })),
-      zodiac: ayanamsha === null
-        ? { kind: "tropical", ayanamshaDeg: null }
-        : { kind: "sidereal", ayanamshaDeg: ayanamsha },
+      zodiac,
       houses: {
         systemId: houseSystem,
         ramcDeg,
@@ -1800,15 +2070,16 @@ async function calculate(): Promise<void> {
     }
     const contentProjection = buildWesternContentProjection(artifact);
     renderBodies(artifact.result.bodies);
-    if (artifact.result.houses !== null) renderHouses(artifact.result.houses);
+    if (artifact.result.houses !== null) {
+      renderHouses(artifact.result.houses, artifact.result.zodiac);
+    }
     renderAspects(artifact.result.aspects);
     if (artifact.result.houses !== null) {
       renderWheel(
         artifact.result.bodies,
         artifact.result.houses.cusps,
         artifact.result.aspects,
-        ayanamsha !== null,
-        ayanamsha ?? 0
+        artifact.result.zodiac
       );
     }
     renderContentProjection(contentProjection);

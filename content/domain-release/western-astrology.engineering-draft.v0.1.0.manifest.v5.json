@@ -1,0 +1,969 @@
+{
+  "schemaVersion": "5.0.0",
+  "recordType": "western_six_allowlisted_authored_root_recursive_machine_identity_manifest_v5",
+  "manifestId": "hakimi.western-astrology.six-allowlisted-authored-root-recursive-machine-identity-manifest/5.0.0",
+  "status": "current_six_allowlisted_authored_root_recursive_machine_identity_zero_admission_effect",
+  "createdAt": "2026-09-03T07:30:00.000Z",
+  "releaseStatus": "draft",
+  "activeAdmissionEffect": "none",
+  "systemIdentity": {
+    "contractSystemId": "western",
+    "productSystemId": "western-astrology",
+    "productStatus": "isolated_engineering_draft",
+    "baziAuthorityInherited": false
+  },
+  "lineage": {
+    "appendOnlySuccessor": true,
+    "predecessorModified": false,
+    "predecessorBacklinkAdded": false,
+    "predecessor": {
+      "role": "current_western_manifest_v4_private_brand_parent",
+      "path": "content/domain-release/western-astrology.engineering-draft.v0.1.0.manifest.v4.json",
+      "rawBytes": 54129,
+      "rawSha256": "05bc031267561e790b783bd0c06b10ecf0936af864a26a613800ffccfbe6854b",
+      "manifestId": "hakimi.western-astrology.nonce-bound-browser-child-selected-path-manifest/4.0.0",
+      "semanticDigest": "e61566259493c888a2e0de77c0886710b720df6fa61551ca4a6a2747803b313b",
+      "semanticDigestField": "manifestDigest",
+      "privateBrandConsumed": true
+    },
+    "predecessorSelectedPathCount": 151,
+    "predecessorSelectedPathsInsideSixRoots": 95,
+    "previouslyUnselectedCount": 15,
+    "predecessorBrowserChildBindingRetainedByReference": true,
+    "browserMatrixRerunByThisManifest": false
+  },
+  "recursiveAuthoredRootClosure": {
+    "scopeClass": "six_explicit_western_allowlisted_authored_roots_exact_not_entire_engineering_domain_product_or_dependency_closure",
+    "sixAllowlistedAuthoredRootsExact": true,
+    "allowlistedRootCount": 6,
+    "allowlistedRoots": [
+      "isolated-drafts/western-civil-time-fact-browser-draft",
+      "packages/tzdb-core",
+      "packages/western-astrology-contracts-draft",
+      "packages/western-astrology-rules-preview-draft",
+      "packages/western-astronomy-engine-adapter-draft",
+      "packages/western-civil-time-input-adapter-draft"
+    ],
+    "expectedAuthoredOrdinaryFileCount": 110,
+    "observedAuthoredOrdinaryFileCount": 110,
+    "files": [
+      {
+        "bytes": 4142,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/README.md",
+        "sha256": "a022616d4707274709eda1458790bb05e50dd7f5d77e9a6f31b61b4e77f43d90"
+      },
+      {
+        "bytes": 5309,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/browser-app/index.html",
+        "sha256": "2249cd554ee0c34c39112bc6798d0dc554a6c4c4dbdafe326d6fd0f7f98b362c"
+      },
+      {
+        "bytes": 2014,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/e2e/civil-time-browser-gate-v1-1.spec.ts",
+        "sha256": "7c1f6f1665582ccff8187e1e423b4bde654686541f1c9c47eb357974ab5b6fca"
+      },
+      {
+        "bytes": 9618,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/e2e/civil-time-browser-gate.spec.ts",
+        "sha256": "1906e5c7a3066f26c677bfa0db37f84d3372149677d0ee9ffaa9f30f50a288fb"
+      },
+      {
+        "bytes": 6698,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/e2e/same-artifact-summary-reporter-v1-1.ts",
+        "sha256": "f43c8d0de2d99e2c7767c32d6e38908417fb463589d9be2e2e4aa5e2f34a64a7"
+      },
+      {
+        "bytes": 9852,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/e2e/same-artifact-summary-reporter.ts",
+        "sha256": "d13252d76b529d97acfdf789170a6893173d727ea0fe23adebdd26b7b969119c"
+      },
+      {
+        "bytes": 403,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/package.json",
+        "sha256": "cecca149b72aa0aad1a10bd6a293d0df17b0c0630bfd56e9f01dd4f113efca73"
+      },
+      {
+        "bytes": 5381,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/playwright.same-artifact-evidence-v1-1.config.ts",
+        "sha256": "0af8ff82dbd273c4b465f2ebd0b89c93d9ef4ade3cfdc3dc43963fa58cfc53cc"
+      },
+      {
+        "bytes": 5067,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/playwright.same-artifact-evidence.config.ts",
+        "sha256": "3578a33e4cbbdcb02c01c1cb9e4f5632f59f0ed3ff00662e235d88fd62e80a22"
+      },
+      {
+        "bytes": 6503,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/browser-fact-projection.test.ts",
+        "sha256": "d979dae28eea2d59c0646ece6297e24fe3c074563014e8de1d516c64456b0d76"
+      },
+      {
+        "bytes": 17741,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/browser-fact-projection.ts",
+        "sha256": "2499987068dc513e4c34aadb472aaf0eeac94d553f78050651cddff919760ba0"
+      },
+      {
+        "bytes": 4901,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/civil-client.test.ts",
+        "sha256": "53a3d5ea87d83dd44e3ffba2725a89789110d69dbd46f7092d09dbbbc1a4698d"
+      },
+      {
+        "bytes": 9019,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/civil-client.ts",
+        "sha256": "1dae5b0ffcccad052e9c37557996052f89c1796622e4861d149369594903d1a7"
+      },
+      {
+        "bytes": 15107,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/civil-time.test.ts",
+        "sha256": "5e9c9a048a11fc49e4f3d7ea8ed84db6b6260f5a5f798567306e2fb91ce6a577"
+      },
+      {
+        "bytes": 32761,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/civil-time.ts",
+        "sha256": "3d253687acbc6bfdb30ef335d3d67f4cecd839edcceddaecbcb7121dd30fee76"
+      },
+      {
+        "bytes": 2975,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/civil-worker.ts",
+        "sha256": "84bad5ed7bfd9254cfffa2237cb7247dad90af5309e5c224027a927f388ada64"
+      },
+      {
+        "bytes": 6891,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/main.ts",
+        "sha256": "bb0302d657ac65216d4419509e52174b559fde8935b54d7e0ed73eae753951a1"
+      },
+      {
+        "bytes": 6657,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/protocol.ts",
+        "sha256": "67749a90e1fcf092e64dedebc778429257cd62910a3c9a58ced77fc20361bbea"
+      },
+      {
+        "bytes": 4808,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/styles.css",
+        "sha256": "49251b174498b81a9750c905231179e71957ef7794aa06136036f3f0c0e45ddb"
+      },
+      {
+        "bytes": 791,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/ui-format.test.ts",
+        "sha256": "dc9f6598e4c8f5b15bd13f0070b698843dff03e53e4848d00f7c8f1a287fddc0"
+      },
+      {
+        "bytes": 603,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/ui-format.ts",
+        "sha256": "7fe98a467d478f9bb21a2d63503b7981f1c8a8301f621ae12fe2b5cc5bab3971"
+      },
+      {
+        "bytes": 3789,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/worker-fact-projection.ts",
+        "sha256": "8e01a01f1f74352cb6aab41c6a258fb66f329ac0eca58890c4984d7cc1bdef33"
+      },
+      {
+        "bytes": 225,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/tsconfig.json",
+        "sha256": "f2fabd924aef089e92afc3e9f456379e1408527e56cb38a1a539f009be8e05ad"
+      },
+      {
+        "bytes": 174,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/tsconfig.same-artifact-evidence.json",
+        "sha256": "4c4b319ea32a9dbab022dae289b49b4628b0514487bc4ab5fffacd810b4fe53b"
+      },
+      {
+        "bytes": 8261,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/vite.config.mjs",
+        "sha256": "38f12ec96fd0d963a07fa3f130c853a4af678e806f20564149c8b6d0a86907e6"
+      },
+      {
+        "bytes": 6437,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/vite.same-artifact-evidence.config.mjs",
+        "sha256": "560a0a1574dc108b3a450945f1f9299934485a234f08cc8b89f641bb1c31b08e"
+      },
+      {
+        "bytes": 314,
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/vitest.config.ts",
+        "sha256": "ea0654c3137fa6ff32f2d6808948a37102ddf48c9dc60227bad0962e071f2397"
+      },
+      {
+        "bytes": 241,
+        "path": "packages/tzdb-core/package.json",
+        "sha256": "fb12b19a6f6c971185bd2f2c9226fe50ad816595e3acec4f0a0b373593136236"
+      },
+      {
+        "bytes": 770,
+        "path": "packages/tzdb-core/scripts/run-release-gate.mjs",
+        "sha256": "8e96e0769944af1c6ad078ec5f3b33c0b56e1fad7c1771c44fa5899073307dcc"
+      },
+      {
+        "bytes": 9473,
+        "path": "packages/tzdb-core/scripts/verify-artifact.mjs",
+        "sha256": "a0b643073f5ca99e6668c476c4382b9bdadf93d19422fe7f8558e98f9bb96164"
+      },
+      {
+        "bytes": 2759,
+        "path": "packages/tzdb-core/scripts/verify-artifact.test.mjs",
+        "sha256": "686dc986a0e6c522d16b6b00733774f46b86ed8f3687678405119515345041fd"
+      },
+      {
+        "bytes": 396,
+        "path": "packages/tzdb-core/src/artifacts/iana-2025b.ts",
+        "sha256": "b1236071105653538a259d929a57e7cd2bb97928429cefaef2ead9dd5019e613"
+      },
+      {
+        "bytes": 7551,
+        "path": "packages/tzdb-core/src/index.test.ts",
+        "sha256": "2d36c441795c918ad97df0e48931898df26c84f3614f024bccef88655478d7e2"
+      },
+      {
+        "bytes": 7819,
+        "path": "packages/tzdb-core/src/index.ts",
+        "sha256": "7c144f6446b3fdba55f7b7b947fe242348ba5010025af36868c39436bfea638e"
+      },
+      {
+        "bytes": 8495,
+        "path": "packages/tzdb-core/src/packed-resolver.ts",
+        "sha256": "bc13da5d2d9b8309aaad972662f8a31761a40afffbd9226bdf80159d43e5081f"
+      },
+      {
+        "bytes": 1484,
+        "path": "packages/western-astrology-contracts-draft/README.md",
+        "sha256": "d4b6db629686b8bb6de65b9b651012297ea27f32124c63e4dd87bfd12ecf60a1"
+      },
+      {
+        "bytes": 381,
+        "path": "packages/western-astrology-contracts-draft/package.json",
+        "sha256": "8e408c8e6b9e28b64000c4b800a822d0c982d49866e72f9a36ab995db306f54b"
+      },
+      {
+        "bytes": 2910,
+        "path": "packages/western-astrology-contracts-draft/src/civil-input.ts",
+        "sha256": "e1e9cfa1f8f800e5c1ef61b7fdd134fcf0276664411c0691d64ccba21ed81458"
+      },
+      {
+        "bytes": 18738,
+        "path": "packages/western-astrology-contracts-draft/src/index.test.ts",
+        "sha256": "ff029f322cc3243a40ad174cbc0e96a23b40d7a5603a21d711cbb79f32eba2d0"
+      },
+      {
+        "bytes": 39756,
+        "path": "packages/western-astrology-contracts-draft/src/index.ts",
+        "sha256": "87bf4fcecc7ec85542eed25c7c06869ba3a084c5e7d7fb305fcd7712ef508416"
+      },
+      {
+        "bytes": 182,
+        "path": "packages/western-astrology-contracts-draft/tsconfig.json",
+        "sha256": "63607b49052422c9e0bbb58b8f9074215a442bc2b65c39de60be162a4d5b04ef"
+      },
+      {
+        "bytes": 18037,
+        "path": "packages/western-astrology-rules-preview-draft/README.md",
+        "sha256": "74d1faf827c0acf301a644af51d1435d3f6ba522b58af20f8f4002f09ade6aa2"
+      },
+      {
+        "bytes": 19202,
+        "path": "packages/western-astrology-rules-preview-draft/browser-app/index.html",
+        "sha256": "44e4f245ccea8b6e0d35f0a85c69583e86cac90b337c3b9017127ec220e880d8"
+      },
+      {
+        "bytes": 39519,
+        "path": "packages/western-astrology-rules-preview-draft/e2e/rules-preview-browser-gate.spec.ts",
+        "sha256": "82b678f319a75261901c19d1748944654227749d7c68d8ca19ccbd91292c6e7f"
+      },
+      {
+        "bytes": 1095,
+        "path": "packages/western-astrology-rules-preview-draft/licenses/astronomy-engine-2.1.19-LICENSE.txt",
+        "sha256": "690dd98cb13ba4db77c6327deea852a816892bb9debbad5943405c66972f8023"
+      },
+      {
+        "bytes": 497,
+        "path": "packages/western-astrology-rules-preview-draft/package.json",
+        "sha256": "42d5a3860d53b3a1cd243341ecc9aee6b7ffc10ec7799d61a4218ff31f99418b"
+      },
+      {
+        "bytes": 1006,
+        "path": "packages/western-astrology-rules-preview-draft/playwright.rules-preview.config.ts",
+        "sha256": "c9ff8304c84df6fefe94158663f4ea1a3241f32a158c1ef57b5df283c3fcffd2"
+      },
+      {
+        "bytes": 1812,
+        "path": "packages/western-astrology-rules-preview-draft/src/browser-app/chart-wheel.ts",
+        "sha256": "82940da0f58f17893582493cb147e6795fdab1aadfb4e9eeec1a9bd03d6213ab"
+      },
+      {
+        "bytes": 86923,
+        "path": "packages/western-astrology-rules-preview-draft/src/browser-app/content-layer.ts",
+        "sha256": "0b53443ad3d39ba70e0572c33209e599a9da1cf9c8f1df5d45a1d32f88da11c7"
+      },
+      {
+        "bytes": 35764,
+        "path": "packages/western-astrology-rules-preview-draft/src/browser-app/content-review-feedback.ts",
+        "sha256": "b58d6ebbc4fc86bdae9a246c791ba90d1ec14c1a2df49764083ee2b8ed0899e4"
+      },
+      {
+        "bytes": 50521,
+        "path": "packages/western-astrology-rules-preview-draft/src/browser-app/dynamic-content-review-feedback.ts",
+        "sha256": "df540561017ca83f95e367c04c16bdd0b2012ba0b2c227a792086e0f84290334"
+      },
+      {
+        "bytes": 22464,
+        "path": "packages/western-astrology-rules-preview-draft/src/browser-app/high-risk-expression-egress-policy.ts",
+        "sha256": "2edb1f38df4dd8854648bfbdd4b321e2e5fad8bbff3710eff009814ac15eedf8"
+      },
+      {
+        "bytes": 78206,
+        "path": "packages/western-astrology-rules-preview-draft/src/browser-app/main.ts",
+        "sha256": "37d85c18a7895e5f75d3e1fc6fa8435b2f5c10376d5b2e6296bd5801fd59a61b"
+      },
+      {
+        "bytes": 20238,
+        "path": "packages/western-astrology-rules-preview-draft/src/browser-app/styles.css",
+        "sha256": "c70b418adc5834066137301ea49875841bc7562aaef076d3e8c0d35fb0d0ce48"
+      },
+      {
+        "bytes": 2558,
+        "path": "packages/western-astrology-rules-preview-draft/src/browser-client.test.ts",
+        "sha256": "c26b2b1f75f4283981efc2193daeebf76671b4a3edab96fa1ba8c20c091c0888"
+      },
+      {
+        "bytes": 5800,
+        "path": "packages/western-astrology-rules-preview-draft/src/browser-client.ts",
+        "sha256": "19af6ce2e9e0b2a93c295265d0c929302372a8500960f480f07a0a7d99d52198"
+      },
+      {
+        "bytes": 1158,
+        "path": "packages/western-astrology-rules-preview-draft/src/chart-wheel.test.ts",
+        "sha256": "566f6ae8c9e7df59ebfe94c9a28d8bc227734c4c04d42be450d7acd174000ad2"
+      },
+      {
+        "bytes": 16458,
+        "path": "packages/western-astrology-rules-preview-draft/src/content-layer.test.ts",
+        "sha256": "edf098daeba61e73a754c8033e8d5c7b0ed67c9b3036384a4b5b897f31501e27"
+      },
+      {
+        "bytes": 12674,
+        "path": "packages/western-astrology-rules-preview-draft/src/content-review-feedback.test.ts",
+        "sha256": "4079fc8310c0258966521e49b72f2500ea62b2de773b0a5dd74ac4f2180845fa"
+      },
+      {
+        "bytes": 17429,
+        "path": "packages/western-astrology-rules-preview-draft/src/dynamic-content-review-feedback.test.ts",
+        "sha256": "e7e459a152aee74d11ff9913d128cb494518e9fd83b33582c257ed603f5ec960"
+      },
+      {
+        "bytes": 16624,
+        "path": "packages/western-astrology-rules-preview-draft/src/high-risk-expression-egress-policy.test.ts",
+        "sha256": "4c2565a5b69f5d6e477a15b10f5765649a1b92116c874e96ae2009b45d81becc"
+      },
+      {
+        "bytes": 526,
+        "path": "packages/western-astrology-rules-preview-draft/src/rule-layer-bridge.ts",
+        "sha256": "4ca446e65844ebacd8c452389928df181395c93008da2946aad68491b284493b"
+      },
+      {
+        "bytes": 219,
+        "path": "packages/western-astrology-rules-preview-draft/tsconfig.browser-app.json",
+        "sha256": "88ab26d309308c65024edc2d4d78ea4745356281b3578b892e92300337ed698b"
+      },
+      {
+        "bytes": 226,
+        "path": "packages/western-astrology-rules-preview-draft/tsconfig.json",
+        "sha256": "65c984150e8a60fec9d9e4a5d5c464cec681cdadb3b621df8b7aca788a0706bc"
+      },
+      {
+        "bytes": 4227,
+        "path": "packages/western-astrology-rules-preview-draft/vite.rules-preview.config.mjs",
+        "sha256": "07651c18e415635a2bd751e3fce2b77f624b8be09c1f14f86b6ce8e9bbaf99d8"
+      },
+      {
+        "bytes": 8921,
+        "path": "packages/western-astronomy-engine-adapter-draft/README.md",
+        "sha256": "e36a5a2a76186d37a37ac514671b491d67e54fcb652610616a26ca07a5b512a1"
+      },
+      {
+        "bytes": 2527,
+        "path": "packages/western-astronomy-engine-adapter-draft/browser-parity/emit-node-reference.mjs",
+        "sha256": "c2db39ef961f6c3d9f3cf014a655ca039d9ce6107a5aa380c3074ee763fa315c"
+      },
+      {
+        "bytes": 4026,
+        "path": "packages/western-astronomy-engine-adapter-draft/browser-parity/index.html",
+        "sha256": "ffde5c75bda14e0e41a5579b4d48ef025bc595452b2503200cd1bcbe3b4864dd"
+      },
+      {
+        "bytes": 1095,
+        "path": "packages/western-astronomy-engine-adapter-draft/licenses/astronomy-engine-2.1.19-LICENSE.txt",
+        "sha256": "690dd98cb13ba4db77c6327deea852a816892bb9debbad5943405c66972f8023"
+      },
+      {
+        "bytes": 540,
+        "path": "packages/western-astronomy-engine-adapter-draft/package.json",
+        "sha256": "e7639fc309f3d92729ce2084275bad75702cb70df151c663bffd8b35cae15786"
+      },
+      {
+        "bytes": 960,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/astronomy-engine-2.1.19-lock-closure.json",
+        "sha256": "dd12ce93af144ee11965e0b89444150a2d0a6c68fe6bbf67650684ff3476bb39"
+      },
+      {
+        "bytes": 2547,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/astronomy-engine-2.1.19-source-lock.json",
+        "sha256": "a0d929d78cff75aa543e78350aece6a35636c4c081f5620c5a7cc9aaaf400975"
+      },
+      {
+        "bytes": 15910,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/astronomy-worker-entry.mjs",
+        "sha256": "ef001c2ce21caa489f5adb8327699be8400da28b5aee6dde36960e3005c8e0c3"
+      },
+      {
+        "bytes": 15183,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/browser-parity/browser-worker.ts",
+        "sha256": "c041f61cc2ab64aaebbd0e5cba76b799a1160ae67420c4723ef68b32882d41cd"
+      },
+      {
+        "bytes": 358,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/browser-parity/generated-node-reference.ts",
+        "sha256": "a6dd36450a22512a8383dc619f9eb88bda8931558ce72c70fe6e164204ebd8f3"
+      },
+      {
+        "bytes": 18284,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/browser-parity/main.ts",
+        "sha256": "ba0a2628069aa73888a92a1d45c8648c80ac6bfaef404898d348a747d87dd696"
+      },
+      {
+        "bytes": 4659,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/browser-parity/protocol.ts",
+        "sha256": "9070e22e2d4dce1c9b9abd86fc738cc3ec6f4c87858ed43cc8569ae1eade0c02"
+      },
+      {
+        "bytes": 3775,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/browser-parity/quantized-projection.ts",
+        "sha256": "abdaf1a8387a9344ea371a7ac0e1f47276a8ca8f3ff9fe5b3065684c772396d1"
+      },
+      {
+        "bytes": 4326,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/browser-parity/styles.css",
+        "sha256": "9a615bb5e345df62dc96b2a73a0a0351c3aeddb939266da20d689f9f0b0ba188"
+      },
+      {
+        "bytes": 237,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/contract-bridge.ts",
+        "sha256": "dc199071d2a678049e9433f32326a7d50b03a3e645568d73c9e28a309b6f3ace"
+      },
+      {
+        "bytes": 3129,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/cross-system-engineering-fact-projection.test.ts",
+        "sha256": "d82657c5eb0a22c413d97ca91010072445f2271f8e6665bdfd5185d4e147d8b5"
+      },
+      {
+        "bytes": 3997,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/cross-system-engineering-fact-projection.ts",
+        "sha256": "14bdcef16441f81da3b29401b9895fd465e8e311b418aa714aa8955803d808c6"
+      },
+      {
+        "bytes": 1780,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/delta-t-model-lock.json",
+        "sha256": "de5cb6ea1dda00ebe230394be38968b93c42b77988ba1d8437a1487fd46265f7"
+      },
+      {
+        "bytes": 544,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/demo.ts",
+        "sha256": "f352053eda65517f25cdfaa88671227b3a6b80ec93253f0dba3cb1a3a443547a"
+      },
+      {
+        "bytes": 2313,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/diagnostic-seed-lock.json",
+        "sha256": "399c465d4c5900ce0ebccf64e872e45c41b48e5b326930d3eeee147fc1af09c8"
+      },
+      {
+        "bytes": 16868,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/horizons-differential.test.ts",
+        "sha256": "d4d081b586aa8485c9518aa60045ea7f11cd4394fae727c69c5a511581b85ec8"
+      },
+      {
+        "bytes": 1922,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/horizons-differential/demo.ts",
+        "sha256": "091c4a4784124d06b3af4b8b83f24b755b5781d03c2a91f083093f8046fdfecd"
+      },
+      {
+        "bytes": 15450,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/horizons-differential/differential-report.ts",
+        "sha256": "b37f3b00f1ddd472ff7bf5ad59e30693ab3044439f4ccd7cf8ebc801f76811fd"
+      },
+      {
+        "bytes": 3629,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/horizons-differential/index.ts",
+        "sha256": "1ff66b40376ec7d88986dc4d542af50a6131a7a0690c7787604f1d1cd75e7617"
+      },
+      {
+        "bytes": 19804,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/horizons-differential/official-response.ts",
+        "sha256": "4348e61ab45ef35eb4c5cbba82b79d1416930b329867e37a20300dbdf0c0d4ab"
+      },
+      {
+        "bytes": 3411,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/horizons-differential/query-manifest.ts",
+        "sha256": "04ed83a8f9f7c177aaa09c45875502ce2408f894ad9386c8c94b9b5e51fb8792"
+      },
+      {
+        "bytes": 10887,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/index.test.ts",
+        "sha256": "e46513f8dc5df59db7c73af4014131629fe826912a971421d5507f785ac18dc2"
+      },
+      {
+        "bytes": 19629,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/index.ts",
+        "sha256": "ccf29e09dbcd0422da67cdb8c623061f974ff05335a768758254e869b8ac4d83"
+      },
+      {
+        "bytes": 12768,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer.test.ts",
+        "sha256": "db5ee5648fc18b494795b1de937da3a28404c3fae4692e3287de60a988b3e619"
+      },
+      {
+        "bytes": 3993,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer/aspects.ts",
+        "sha256": "887cfab663bc25a9757e062847afe033d11318d8d76cab5e47369a229507b9d1"
+      },
+      {
+        "bytes": 4753,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer/canonical.ts",
+        "sha256": "36a45ba2b2a5131b5d0e7c660ea114b73cd3578393d7dc2c7f337cbc6c3e0133"
+      },
+      {
+        "bytes": 1779,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer/demo.ts",
+        "sha256": "d0daba2127f65cc603936d086aa8b1be025332553d9cfd25e9f2f9cba6d6c657"
+      },
+      {
+        "bytes": 12180,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer/houses.ts",
+        "sha256": "e74cbbe7694075d98d5aa9fc66bf9c4f8bf0f8715d97fe061fe8515a403c6b11"
+      },
+      {
+        "bytes": 11183,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer/index.ts",
+        "sha256": "b28e7d3aa4bf881c1fc55c2a3821a9cc807751fe2e664ea08080c426cc8b9c49"
+      },
+      {
+        "bytes": 1738,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer/zodiac.ts",
+        "sha256": "fb9634d5af7020ca2a80521d091471ef67be342ac0fab92a955de64b48351d47"
+      },
+      {
+        "bytes": 2182,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/strict-receipt-draft.test.ts",
+        "sha256": "8a6eb53b2c21a362c22c3b6904663e996c1c468fdb03279d88b64bfb139dd1ba"
+      },
+      {
+        "bytes": 3616,
+        "path": "packages/western-astronomy-engine-adapter-draft/src/strict-receipt-draft.ts",
+        "sha256": "9b156ca0040c4216da08d65682da5bbfb1770858dccd7f4b604bf94f745cb14d"
+      },
+      {
+        "bytes": 222,
+        "path": "packages/western-astronomy-engine-adapter-draft/tsconfig.browser-parity.json",
+        "sha256": "bc5fa8dadff1430f0d218697d35037bc1f6578e569dc9df55ca1bd730db69b3d"
+      },
+      {
+        "bytes": 227,
+        "path": "packages/western-astronomy-engine-adapter-draft/tsconfig.json",
+        "sha256": "d409a6a9fcb8e898f3cf7eeeeef9aebf4eb82d5bf52a6fd42b8bcc79258c6648"
+      },
+      {
+        "bytes": 6186,
+        "path": "packages/western-astronomy-engine-adapter-draft/vite.browser-parity.config.mjs",
+        "sha256": "e300d0170e412ce23cef8f302633ee4e4f321a0ca4fa6ceadfb0cf0e65ff7eb0"
+      },
+      {
+        "bytes": 2853,
+        "path": "packages/western-civil-time-input-adapter-draft/README.md",
+        "sha256": "7679e6ad284349c1b2228018203ec31c4b535377aaf695e0a8b9851ded348b5d"
+      },
+      {
+        "bytes": 553,
+        "path": "packages/western-civil-time-input-adapter-draft/package.json",
+        "sha256": "7b196bb3cbb248a010e5b293d9447d861f7c1aca2629a320925ce22b1a69a8df"
+      },
+      {
+        "bytes": 16752,
+        "path": "packages/western-civil-time-input-adapter-draft/src/index.test.ts",
+        "sha256": "1a048047ace95ee30fb35584f05f64e64f0ef4dd0e9e24b79327d3c8e3ace4e5"
+      },
+      {
+        "bytes": 27692,
+        "path": "packages/western-civil-time-input-adapter-draft/src/index.ts",
+        "sha256": "80f7b3627d5a4651d0ab2d9509a314f49d93fbdac6d5f92b10ac97c34892fc77"
+      },
+      {
+        "bytes": 182,
+        "path": "packages/western-civil-time-input-adapter-draft/tsconfig.json",
+        "sha256": "63607b49052422c9e0bbb58b8f9074215a442bc2b65c39de60be162a4d5b04ef"
+      }
+    ],
+    "rootFileCounts": {
+      "isolated-drafts/western-civil-time-fact-browser-draft": 27,
+      "packages/tzdb-core": 8,
+      "packages/western-astrology-contracts-draft": 6,
+      "packages/western-astrology-rules-preview-draft": 24,
+      "packages/western-astronomy-engine-adapter-draft": 40,
+      "packages/western-civil-time-input-adapter-draft": 5
+    },
+    "recursiveEnumerationWithinVisitedAuthoredTreePerformed": true,
+    "ordinarySingleLinkFilesOnly": true,
+    "symlinkJunctionAndResolvedPathAliasRejected": true,
+    "genericNtfsReparseTagEnumerated": false,
+    "allReparseClassesExcluded": false,
+    "pathEscapeAndRootAliasRejected": true,
+    "unexpectedNonExcludedFileOrDirectoryRejected": true,
+    "exactRelativePathBytesAndSha256Recorded": true,
+    "directoryAndFileEndpointsReobservedAfterFileReads": true,
+    "completeTreeReadTwice": true,
+    "pathSetDigest": "175a633d27972698bca60782de195d08e533fb1e92d19deefbf6a0ea2478269b",
+    "treeDigestAlgorithm": "sha256_domain_separated_canonical_file_evidence_v1",
+    "treeDigestBefore": "4e9c35c244ff37baff1c20b147beae886ec673b6de313177b4987d89761b05c4",
+    "treeDigestAfter": "4e9c35c244ff37baff1c20b147beae886ec673b6de313177b4987d89761b05c4",
+    "prePostTreeDigestEqual": true,
+    "excludedRuntimeSubtreeCount": 30,
+    "excludedRuntimeSubtrees": [
+      "isolated-drafts/western-civil-time-fact-browser-draft/.tmp",
+      "isolated-drafts/western-civil-time-fact-browser-draft/dist",
+      "isolated-drafts/western-civil-time-fact-browser-draft/node_modules",
+      "isolated-drafts/western-civil-time-fact-browser-draft/temp",
+      "isolated-drafts/western-civil-time-fact-browser-draft/tmp",
+      "packages/tzdb-core/.tmp",
+      "packages/tzdb-core/dist",
+      "packages/tzdb-core/node_modules",
+      "packages/tzdb-core/temp",
+      "packages/tzdb-core/tmp",
+      "packages/western-astrology-contracts-draft/.tmp",
+      "packages/western-astrology-contracts-draft/dist",
+      "packages/western-astrology-contracts-draft/node_modules",
+      "packages/western-astrology-contracts-draft/temp",
+      "packages/western-astrology-contracts-draft/tmp",
+      "packages/western-astrology-rules-preview-draft/.tmp",
+      "packages/western-astrology-rules-preview-draft/dist",
+      "packages/western-astrology-rules-preview-draft/node_modules",
+      "packages/western-astrology-rules-preview-draft/temp",
+      "packages/western-astrology-rules-preview-draft/tmp",
+      "packages/western-astronomy-engine-adapter-draft/.tmp",
+      "packages/western-astronomy-engine-adapter-draft/dist",
+      "packages/western-astronomy-engine-adapter-draft/node_modules",
+      "packages/western-astronomy-engine-adapter-draft/temp",
+      "packages/western-astronomy-engine-adapter-draft/tmp",
+      "packages/western-civil-time-input-adapter-draft/.tmp",
+      "packages/western-civil-time-input-adapter-draft/dist",
+      "packages/western-civil-time-input-adapter-draft/node_modules",
+      "packages/western-civil-time-input-adapter-draft/temp",
+      "packages/western-civil-time-input-adapter-draft/tmp"
+    ],
+    "excludedRuntimeSubtreeContentsEnumerated": false,
+    "excludedRuntimeSubtreeContentsAuthoritative": false,
+    "exclusionLimitedToAllowlistedRootDirectRuntimeSubtrees": true,
+    "completeInstalledDependencyClosureEstablished": false,
+    "completeRepositoryClosureEstablished": false,
+    "entireWesternEngineeringClosureEstablished": false,
+    "fullDomainManifestEstablished": false,
+    "entireWesternProductClosureEstablished": false
+  },
+  "predecessorV4Partition": {
+    "predecessorSelectedPathCount": 151,
+    "predecessorSelectedPathsInsideSixRoots": 95,
+    "previouslyUnselectedFileCount": 15,
+    "previouslyUnselectedFiles": [
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/README.md",
+        "bytes": 4142,
+        "sha256": "a022616d4707274709eda1458790bb05e50dd7f5d77e9a6f31b61b4e77f43d90",
+        "priorState": "absent_from_v4_selected_path_set",
+        "coverageMeaning": "authored_root_machine_identity_only",
+        "authorizationDeterminationMade": false,
+        "formallyPromoted": false
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/browser-fact-projection.test.ts",
+        "bytes": 6503,
+        "sha256": "d979dae28eea2d59c0646ece6297e24fe3c074563014e8de1d516c64456b0d76",
+        "priorState": "absent_from_v4_selected_path_set",
+        "coverageMeaning": "authored_root_machine_identity_only",
+        "authorizationDeterminationMade": false,
+        "formallyPromoted": false
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/civil-client.test.ts",
+        "bytes": 4901,
+        "sha256": "53a3d5ea87d83dd44e3ffba2725a89789110d69dbd46f7092d09dbbbc1a4698d",
+        "priorState": "absent_from_v4_selected_path_set",
+        "coverageMeaning": "authored_root_machine_identity_only",
+        "authorizationDeterminationMade": false,
+        "formallyPromoted": false
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/civil-time.test.ts",
+        "bytes": 15107,
+        "sha256": "5e9c9a048a11fc49e4f3d7ea8ed84db6b6260f5a5f798567306e2fb91ce6a577",
+        "priorState": "absent_from_v4_selected_path_set",
+        "coverageMeaning": "authored_root_machine_identity_only",
+        "authorizationDeterminationMade": false,
+        "formallyPromoted": false
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/ui-format.test.ts",
+        "bytes": 791,
+        "sha256": "dc9f6598e4c8f5b15bd13f0070b698843dff03e53e4848d00f7c8f1a287fddc0",
+        "priorState": "absent_from_v4_selected_path_set",
+        "coverageMeaning": "authored_root_machine_identity_only",
+        "authorizationDeterminationMade": false,
+        "formallyPromoted": false
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/vitest.config.ts",
+        "bytes": 314,
+        "sha256": "ea0654c3137fa6ff32f2d6808948a37102ddf48c9dc60227bad0962e071f2397",
+        "priorState": "absent_from_v4_selected_path_set",
+        "coverageMeaning": "authored_root_machine_identity_only",
+        "authorizationDeterminationMade": false,
+        "formallyPromoted": false
+      },
+      {
+        "path": "packages/tzdb-core/scripts/run-release-gate.mjs",
+        "bytes": 770,
+        "sha256": "8e96e0769944af1c6ad078ec5f3b33c0b56e1fad7c1771c44fa5899073307dcc",
+        "priorState": "absent_from_v4_selected_path_set",
+        "coverageMeaning": "authored_root_machine_identity_only",
+        "authorizationDeterminationMade": false,
+        "formallyPromoted": false
+      },
+      {
+        "path": "packages/tzdb-core/scripts/verify-artifact.mjs",
+        "bytes": 9473,
+        "sha256": "a0b643073f5ca99e6668c476c4382b9bdadf93d19422fe7f8558e98f9bb96164",
+        "priorState": "absent_from_v4_selected_path_set",
+        "coverageMeaning": "authored_root_machine_identity_only",
+        "authorizationDeterminationMade": false,
+        "formallyPromoted": false
+      },
+      {
+        "path": "packages/tzdb-core/scripts/verify-artifact.test.mjs",
+        "bytes": 2759,
+        "sha256": "686dc986a0e6c522d16b6b00733774f46b86ed8f3687678405119515345041fd",
+        "priorState": "absent_from_v4_selected_path_set",
+        "coverageMeaning": "authored_root_machine_identity_only",
+        "authorizationDeterminationMade": false,
+        "formallyPromoted": false
+      },
+      {
+        "path": "packages/tzdb-core/src/index.test.ts",
+        "bytes": 7551,
+        "sha256": "2d36c441795c918ad97df0e48931898df26c84f3614f024bccef88655478d7e2",
+        "priorState": "absent_from_v4_selected_path_set",
+        "coverageMeaning": "authored_root_machine_identity_only",
+        "authorizationDeterminationMade": false,
+        "formallyPromoted": false
+      },
+      {
+        "path": "packages/western-civil-time-input-adapter-draft/README.md",
+        "bytes": 2853,
+        "sha256": "7679e6ad284349c1b2228018203ec31c4b535377aaf695e0a8b9851ded348b5d",
+        "priorState": "absent_from_v4_selected_path_set",
+        "coverageMeaning": "authored_root_machine_identity_only",
+        "authorizationDeterminationMade": false,
+        "formallyPromoted": false
+      },
+      {
+        "path": "packages/western-civil-time-input-adapter-draft/package.json",
+        "bytes": 553,
+        "sha256": "7b196bb3cbb248a010e5b293d9447d861f7c1aca2629a320925ce22b1a69a8df",
+        "priorState": "absent_from_v4_selected_path_set",
+        "coverageMeaning": "authored_root_machine_identity_only",
+        "authorizationDeterminationMade": false,
+        "formallyPromoted": false
+      },
+      {
+        "path": "packages/western-civil-time-input-adapter-draft/src/index.test.ts",
+        "bytes": 16752,
+        "sha256": "1a048047ace95ee30fb35584f05f64e64f0ef4dd0e9e24b79327d3c8e3ace4e5",
+        "priorState": "absent_from_v4_selected_path_set",
+        "coverageMeaning": "authored_root_machine_identity_only",
+        "authorizationDeterminationMade": false,
+        "formallyPromoted": false
+      },
+      {
+        "path": "packages/western-civil-time-input-adapter-draft/src/index.ts",
+        "bytes": 27692,
+        "sha256": "80f7b3627d5a4651d0ab2d9509a314f49d93fbdac6d5f92b10ac97c34892fc77",
+        "priorState": "absent_from_v4_selected_path_set",
+        "coverageMeaning": "authored_root_machine_identity_only",
+        "authorizationDeterminationMade": false,
+        "formallyPromoted": false
+      },
+      {
+        "path": "packages/western-civil-time-input-adapter-draft/tsconfig.json",
+        "bytes": 182,
+        "sha256": "63607b49052422c9e0bbb58b8f9074215a442bc2b65c39de60be162a4d5b04ef",
+        "priorState": "absent_from_v4_selected_path_set",
+        "coverageMeaning": "authored_root_machine_identity_only",
+        "authorizationDeterminationMade": false,
+        "formallyPromoted": false
+      }
+    ],
+    "previouslyUnselectedMeansOnlyAbsentFromV4SelectedPathSet": true,
+    "authorizationDeterminationMade": false,
+    "previouslyUnselectedFilesAuthorizedAsDomainContent": false,
+    "previouslyUnselectedFilesFormallyPromoted": false,
+    "allPreviouslyUnselectedFilesIncludedInCurrentRootIdentity": true
+  },
+  "sharedDependencyBoundary": {
+    "sharedRoot": "packages/tzdb-core",
+    "includedAsMachineIdentityDependencyRoot": true,
+    "exclusivelyOwnedByWesternEstablished": false,
+    "sourceProvenanceComplete": false,
+    "rightsOrRedistributionCleared": false,
+    "establishesWesternRuleset": false,
+    "establishesEntireWesternEngineeringClosure": false
+  },
+  "componentAndCapabilityBoundary": {
+    "predecessorSelectedPathLedgerRetainedByReference": true,
+    "previouslyUnselectedFilesSemanticallyClassifiedByThisSuccessor": false,
+    "semanticDependencyOrCallgraphEstablished": false,
+    "formalInputContractEstablished": false,
+    "factContractFormallyEstablished": false,
+    "executionRulesetEstablished": false,
+    "interpretationRulesetEstablished": false,
+    "reportContractEstablished": false,
+    "highRiskPolicyBound": false,
+    "sourceBundleComplete": false,
+    "rightsBundleComplete": false,
+    "expertReviewBundleComplete": false
+  },
+  "browserEvidenceBoundary": {
+    "predecessorCarriesCurrentBrowserChildPrivateBrand": true,
+    "browserChildPreservedByPredecessorReference": true,
+    "browserMatrixRerunByThisManifest": false,
+    "exactSingleBuildAtChildIssuance": true,
+    "sameOutputTreeServedToBothBrowsersAtChildIssuance": true,
+    "runNonceCommitmentAtChildIssuance": "b7a6696d1ab31f5bd272c22e4c38a9bc01c38dd1febdbaf373b8459803d7b729",
+    "inMatrixCdpProductProtocolAndUserAgentsAttachedAtChildIssuance": true,
+    "chromeScenarioOutcomesAtChildIssuance": 5,
+    "edgeScenarioOutcomesAtChildIssuance": 5,
+    "totalPassedScenarioOutcomesAtChildIssuance": 10,
+    "chromeVersionAtChildIssuance": "152.0.7977.75",
+    "edgeVersionAtChildIssuance": "152.0.4191.53",
+    "outputTreeDigestAtChildIssuance": "877bda4852ade2c1aabf7c246621b384d940b83749fd7add6befe1721780a9d9",
+    "browserExecutablePathOrHashEstablished": false,
+    "browserOsProcessOrNetworkPeerBindingEstablished": false,
+    "browserVendorSignatureEstablished": false,
+    "browserRuntimeEvidenceEstablishedByThisManifest": false,
+    "fullApplicationRuntimeValidated": false,
+    "mainApplicationRuntimeValidated": false,
+    "productionBrowserRuntimeEvidenceEstablished": false,
+    "publicHostValidated": false,
+    "pwaOrServiceWorkerValidated": false
+  },
+  "productBoundary": {
+    "productIdentity": null,
+    "releaseIdentity": null,
+    "targetSchema": null,
+    "migrationId": null,
+    "runtimeOption": "unselected",
+    "storageBackend": "unselected",
+    "formalProductSurface": "absent",
+    "mainApplicationIntegrated": false,
+    "centralRegistryIntegration": "absent"
+  },
+  "projectReleaseGovernanceContext": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "projectContextOnly": true,
+    "inheritedByWesternProductIdentity": false,
+    "mutationEpochBoundaryRequired": true,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "expertClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false
+  },
+  "currentnessBoundary": {
+    "predecessorV4PrivateBrandVerified": true,
+    "currentSixAllowlistedAuthoredRootMachineIdentityMechanicallyVerified": true,
+    "currentEngineeringManifestMechanicallyVerified": true,
+    "currentFullDomainManifestMechanicallyVerified": false,
+    "entireWesternEngineeringClosureEstablished": false,
+    "productIdentityEstablished": false,
+    "ownerPromotionDecisionReceipt": null
+  },
+  "gateState": {
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "bindingRequired": 28,
+    "bindingFrozenVerified": 0,
+    "independentExpertsRequired": 2,
+    "independentExpertReviewsVerified": 0,
+    "sourceBundleComplete": false,
+    "rightsBundleComplete": false,
+    "expertReviewBundleComplete": false,
+    "highRiskPolicyBound": false,
+    "releaseEvidenceComplete": false
+  },
+  "observationBoundary": {
+    "endpointObservationOnly": true,
+    "sameHeldHandleHashAndReadPerFile": true,
+    "completeTreeReadTwice": true,
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "intervalMutationExcludedAcrossFiles": false,
+    "abaExcluded": false,
+    "prePostDigestEqualityIsNotIntervalProof": true,
+    "manifestDigestIsDigitalSignature": false,
+    "signerIdentityEstablished": false,
+    "trustedTimestampEstablished": false,
+    "createdAtClock": "untrusted_local_clock_label"
+  },
+  "runtimeTrustBoundary": {
+    "hiddenPreloadExcluded": false,
+    "nodeRuntimeIdentityEstablished": false,
+    "loaderIdentityEstablished": false,
+    "runtimeLauncherIdentityEstablished": false,
+    "completeRuntimeToolClosureBound": false,
+    "cliOutputTrustedAttestation": false,
+    "mechanicalResultAssumesNoArbitraryPreEvaluationCodeExecution": true
+  },
+  "evidenceLedger": {
+    "engineeringEvidence": "six_allowlisted_authored_root_recursive_machine_identity_with_v4_browser_child_retained_by_reference",
+    "browserAndRuntimeEvidence": "predecessor_child_isolated_loopback_same_artifact_nonce_correlated_in_matrix_cdp_identity_only_not_rerun",
+    "contentTruth": "not_established",
+    "expertTruth": "not_established",
+    "rightsAndLegalJudgment": "not_established",
+    "releaseReadiness": "not_ready",
+    "publicReleaseAuthorization": "not_authorized"
+  },
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertIdentityQualificationIndependenceEstablished": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "highRiskClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "redistributionAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "safeToPublish": false
+  },
+  "doesNotEstablish": [
+    "complete_repository_installed_dependency_build_tooling_or_runtime_closure",
+    "entire_western_engineering_domain_or_product_closure",
+    "previously_unselected_files_as_authorized_unauthorized_or_formally_promoted_content",
+    "semantic_component_membership_input_fact_rule_report_completeness_or_domain_truth",
+    "source_body_exact_quote_frozen_binding_or_complete_source_bundle",
+    "work_edition_carrier_rights_legal_conclusion_or_redistribution_authorization",
+    "real_expert_identity_qualification_independence_opinion_or_truth",
+    "new_browser_run_full_application_pwa_service_worker_public_host_or_production_runtime",
+    "cross_file_atomic_snapshot_mutation_epoch_interval_integrity_or_aba_exclusion",
+    "trusted_runtime_launcher_loader_node_tool_time_signature_or_signer_identity",
+    "formal_admission_release_evidence_release_readiness_deployment_rollback_or_public_release_authorization",
+    "legacy_v13_or_bazi_authority_inheritance"
+  ],
+  "manifestDigest": "3617e2bb812e64ea6a79c5a9c6660344e09ed85f5869ff1528415cab13f434b4"
+}

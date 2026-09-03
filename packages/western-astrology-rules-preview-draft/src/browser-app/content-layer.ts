@@ -1,7 +1,12 @@
-import type { WesternRuleLayerArtifact } from "../rule-layer-bridge.ts";
+import {
+  deriveZodiacPlacement,
+  verifyWesternRuleLayerComputedArtifact,
+  type WesternRuleLayerArtifact,
+  type WesternZodiacIdentityDraft
+} from "../rule-layer-bridge.ts";
 
 export const WESTERN_CONTENT_LAYER_VERSION =
-  "western-astrology-neutral-content/0.5-draft" as const;
+  "western-astrology-neutral-content/0.8-draft" as const;
 
 const BODY_IDS = [
   "sun",
@@ -402,6 +407,10 @@ export interface WesternContentProjection {
   readonly projectionVersion: typeof WESTERN_CONTENT_LAYER_VERSION;
   readonly outcome: "candidate_content_built";
   readonly factsSha256: string;
+  readonly zodiacMethod: Readonly<Pick<
+    WesternZodiacIdentityDraft,
+    "kind" | "ayanamshaId" | "algorithmId"
+  >>;
   readonly framework: "modern_western_astrology_source_bound_candidate";
   readonly boundary: Readonly<{
     expertTruthClaimed: false;
@@ -932,24 +941,6 @@ function angularSeparation(leftDeg: number, rightDeg: number): number {
   return Math.min(direct, 360 - direct);
 }
 
-function deriveZodiacPoint(
-  eclipticLongitudeDeg: number,
-  ayanamshaDeg: number
-): Readonly<{
-  zodiacLongitudeDeg: number;
-  signId: SignId;
-  degreeWithinSign: number;
-}> {
-  const zodiacLongitudeDeg = normalizeLongitude(eclipticLongitudeDeg - ayanamshaDeg);
-  const signId = SIGN_IDS[Math.floor(zodiacLongitudeDeg / 30)];
-  if (signId === undefined) throw new Error("western content could not derive zodiac sign");
-  return Object.freeze({
-    zodiacLongitudeDeg,
-    signId,
-    degreeWithinSign: zodiacLongitudeDeg % 30
-  });
-}
-
 function buildDistributionScope(
   scopeId: WesternDistributionScope["scopeId"],
   label: string,
@@ -1169,10 +1160,13 @@ function assertPrimitiveContentReviewCandidates(): void {
 assertPrimitiveContentReviewCandidates();
 
 export function buildWesternContentProjection(
-  artifact: WesternRuleLayerArtifact
+  inputArtifact: WesternRuleLayerArtifact
 ): WesternContentProjection {
-  if (artifact.outcome !== "computed"
-    || artifact.evidence.productionEligible !== false
+  if (inputArtifact.outcome !== "computed") {
+    throw new Error("western content projection requires a diagnostic-only computed artifact");
+  }
+  const artifact = verifyWesternRuleLayerComputedArtifact(inputArtifact);
+  if (artifact.evidence.productionEligible !== false
     || artifact.evidence.expertTruthClaimed !== false
     || artifact.strictContractRelation.chartFixtureAccepted !== false
     || artifact.strictContractRelation.successReceiptIssued !== false
@@ -1181,9 +1175,7 @@ export function buildWesternContentProjection(
     throw new Error("western content projection requires a diagnostic-only computed artifact");
   }
 
-  const ayanamshaDeg = artifact.request.zodiac.kind === "sidereal"
-    ? artifact.request.zodiac.ayanamshaDeg
-    : 0;
+  const zodiacIdentity = artifact.result.zodiac;
 
   const placements = artifact.result.bodies.map((body): WesternPlacementContentCandidate => {
     if (!isBodyId(body.bodyId) || !isSignId(body.zodiac.signId)) {
@@ -1288,7 +1280,7 @@ export function buildWesternContentProjection(
   ];
   const angles = rawAngles.map((fact): WesternAngleContentCandidate => {
     const angle = ANGLES[fact.angleId];
-    const zodiac = deriveZodiacPoint(fact.eclipticLongitudeDeg, ayanamshaDeg);
+    const zodiac = deriveZodiacPlacement(fact.eclipticLongitudeDeg, zodiacIdentity);
     const sign = SIGNS[zodiac.signId];
     return Object.freeze({
       candidateId: `western.angle.${angle.angleId}.${zodiac.signId}`,
@@ -1298,7 +1290,7 @@ export function buildWesternContentProjection(
       signId: zodiac.signId,
       signLabel: sign.label,
       eclipticLongitudeDeg: fact.eclipticLongitudeDeg,
-      zodiacLongitudeDeg: zodiac.zodiacLongitudeDeg,
+      zodiacLongitudeDeg: zodiac.longitudeDeg,
       degreeWithinSign: zodiac.degreeWithinSign,
       factSummary: `${angle.label}（${angle.abbreviation}）在${sign.label} ${formatDegree(zodiac.degreeWithinSign)}`,
       directStatement: `${angle.label}用于观察“${angle.focus}”；${sign.label}（${sign.element}元素 · ${sign.modality}）让这组主题倾向以“${sign.style}”的方式被表达。`,
@@ -1367,7 +1359,7 @@ export function buildWesternContentProjection(
     if (house === undefined) {
       throw new Error(`western content projection received unsupported cusp ${cusp.houseNumber}`);
     }
-    const cuspZodiac = deriveZodiacPoint(cusp.longitudeDeg, ayanamshaDeg);
+    const cuspZodiac = deriveZodiacPlacement(cusp.longitudeDeg, zodiacIdentity);
     const cuspSign = SIGNS[cuspZodiac.signId];
     const traditionalBodyId = TRADITIONAL_RULERS[cuspZodiac.signId];
     const modernBodyId = MODERN_RULERS[cuspZodiac.signId];
@@ -1382,7 +1374,7 @@ export function buildWesternContentProjection(
       cuspSignId: cuspZodiac.signId,
       cuspSignLabel: cuspSign.label,
       eclipticLongitudeDeg: cusp.longitudeDeg,
-      zodiacLongitudeDeg: cuspZodiac.zodiacLongitudeDeg,
+      zodiacLongitudeDeg: cuspZodiac.longitudeDeg,
       degreeWithinSign: cuspZodiac.degreeWithinSign,
       factSummary: `${house.label}宫头在${cuspSign.label} ${formatDegree(cuspZodiac.degreeWithinSign)}`,
       directStatement: `${house.label}的“${house.area}”从${cuspSign.label}的“${cuspSign.style}”出发；宫主星追踪用于查看这组主题被带到哪类表达与生活领域，不直接推出结果${house.boundary ? `；${house.boundary}` : ""}。`,
@@ -1958,6 +1950,11 @@ export function buildWesternContentProjection(
     projectionVersion: WESTERN_CONTENT_LAYER_VERSION,
     outcome: "candidate_content_built" as const,
     factsSha256: artifact.digests.resultSha256,
+    zodiacMethod: Object.freeze({
+      kind: zodiacIdentity.kind,
+      ayanamshaId: zodiacIdentity.ayanamshaId,
+      algorithmId: zodiacIdentity.algorithmId
+    }),
     framework: "modern_western_astrology_source_bound_candidate" as const,
     boundary: Object.freeze({
       expertTruthClaimed: false as const,

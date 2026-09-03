@@ -19,6 +19,8 @@ const engineEsmPath = fileURLToPath(import.meta.resolve("astronomy-engine"));
 const enginePackageJsonPath = path.resolve(path.dirname(engineEsmPath), "..", "package.json");
 const sourceLockPath = path.join(packageRoot, "src", "astronomy-engine-2.1.19-source-lock.json");
 const deltaTLockPath = path.join(packageRoot, "src", "delta-t-model-lock.json");
+const licensePath = path.join(packageRoot, "licenses", "astronomy-engine-2.1.19-LICENSE.txt");
+const licenseAssetFile = "licenses/astronomy-engine-2.1.19-LICENSE.txt";
 
 const LOCKED_BUILD_INPUTS = Object.freeze([
   Object.freeze({
@@ -40,6 +42,11 @@ const LOCKED_BUILD_INPUTS = Object.freeze([
     path: deltaTLockPath,
     bytes: 1780,
     sha256: "de5cb6ea1dda00ebe230394be38968b93c42b77988ba1d8437a1487fd46265f7"
+  }),
+  Object.freeze({
+    path: licensePath,
+    bytes: 1095,
+    sha256: "690dd98cb13ba4db77c6327deea852a816892bb9debbad5943405c66972f8023"
   })
 ]);
 
@@ -55,21 +62,33 @@ function portablePath(value) {
 }
 
 function verifyLockedBuildInputs() {
+  let verifiedEngineEsmBytes;
+  let verifiedLicenseBytes;
   for (const expected of LOCKED_BUILD_INPUTS) {
     const bytes = readFileSync(expected.path);
     const actualDigest = createHash("sha256").update(bytes).digest("hex");
     if (bytes.byteLength !== expected.bytes || actualDigest !== expected.sha256) {
       throw new Error(`Western browser parity build input drifted: ${expected.path}`);
     }
+    if (expected.path === engineEsmPath) verifiedEngineEsmBytes = Buffer.from(bytes);
+    if (expected.path === licensePath) verifiedLicenseBytes = Buffer.from(bytes);
   }
+  if (!verifiedEngineEsmBytes) throw new Error("Astronomy Engine ESM source was not part of locked build inputs");
+  if (!verifiedLicenseBytes) throw new Error("Astronomy Engine license was not part of locked build inputs");
+  return Object.freeze({
+    engineEsmSource: verifiedEngineEsmBytes.toString("utf8"),
+    licenseBytes: verifiedLicenseBytes
+  });
 }
 
 function isolatedNodeReferencePlugin() {
+  let heldLicenseBytes;
   return {
     name: "hakimi-western-isolated-node-reference",
     enforce: "pre",
     buildStart() {
-      verifyLockedBuildInputs();
+      const heldInputs = verifyLockedBuildInputs();
+      heldLicenseBytes = heldInputs.licenseBytes;
     },
     resolveId(id, importer) {
       if (!importer || portablePath(importer) !== portablePath(mainModule)) return null;
@@ -95,6 +114,43 @@ function isolatedNodeReferencePlugin() {
         throw new Error("Fresh Node browser-parity reference is incomplete");
       }
       return `export default ${generatedReferenceSource};`;
+    },
+    generateBundle() {
+      if (!heldLicenseBytes) {
+        throw new Error("Astronomy Engine license bytes were not held by buildStart");
+      }
+      this.emitFile({
+        type: "asset",
+        fileName: licenseAssetFile,
+        source: heldLicenseBytes
+      });
+    }
+  };
+}
+
+function isolatedHeldAstronomyEnginePlugin() {
+  let heldEngineEsmSource;
+  let heldEngineSourceServed = false;
+  return {
+    name: "hakimi-western-held-astronomy-engine-source",
+    enforce: "pre",
+    buildStart() {
+      heldEngineEsmSource = verifyLockedBuildInputs().engineEsmSource;
+      heldEngineSourceServed = false;
+    },
+    resolveId(id) {
+      return id === "astronomy-engine" ? engineEsmPath : null;
+    },
+    load(id) {
+      if (portablePath(id) !== portablePath(engineEsmPath)) return null;
+      if (!heldEngineEsmSource) throw new Error("Astronomy Engine ESM bytes were not held by buildStart");
+      heldEngineSourceServed = true;
+      return heldEngineEsmSource;
+    },
+    generateBundle() {
+      if (!heldEngineSourceServed) {
+        throw new Error("Held Astronomy Engine source was not consumed by the Worker build");
+      }
     }
   };
 }
@@ -105,6 +161,9 @@ export default {
   publicDir: false,
   cacheDir: path.join(packageRoot, "node_modules", ".vite-browser-parity"),
   plugins: [isolatedNodeReferencePlugin()],
+  worker: {
+    plugins: () => [isolatedHeldAstronomyEnginePlugin()]
+  },
   build: {
     outDir: path.join(packageRoot, "dist", "browser-parity"),
     emptyOutDir: true,

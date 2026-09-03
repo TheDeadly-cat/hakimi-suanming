@@ -1,7 +1,40 @@
 import { z } from "zod";
 import { normalizeLongitudeDeg } from "./canonical.ts";
 
-export const WESTERN_ZODIAC_RULES_VERSION = "western-zodiac-rules/0.1-draft" as const;
+export const WESTERN_ZODIAC_RULES_VERSION = "western-zodiac-rules/0.3-draft" as const;
+export const WESTERN_ZODIAC_BOUNDARY_SNAP_VERSION =
+  "western-zodiac-boundary-snap/0.1-draft" as const;
+export const WESTERN_ZODIAC_BOUNDARY_SNAP_TOLERANCE_DEG = 1e-10 as const;
+
+export const WESTERN_TROPICAL_ZODIAC_IDENTITY = Object.freeze({
+  kind: "tropical",
+  ayanamshaId: null,
+  algorithmId: "tropical_identity_v1",
+  ayanamshaDeg: null
+} as const);
+
+export const WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY = Object.freeze({
+  kind: "sidereal",
+  ayanamshaId: "manual_offset_unverified",
+  algorithmId: "subtract_supplied_offset_v1"
+} as const);
+
+export const westernZodiacIdentityDraftSchema = z.discriminatedUnion("kind", [
+  z.strictObject({
+    kind: z.literal(WESTERN_TROPICAL_ZODIAC_IDENTITY.kind),
+    ayanamshaId: z.null(),
+    algorithmId: z.literal(WESTERN_TROPICAL_ZODIAC_IDENTITY.algorithmId),
+    ayanamshaDeg: z.null()
+  }),
+  z.strictObject({
+    kind: z.literal(WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY.kind),
+    ayanamshaId: z.literal(WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY.ayanamshaId),
+    algorithmId: z.literal(WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY.algorithmId),
+    ayanamshaDeg: z.number().finite().min(0).lt(360)
+  })
+]);
+
+export type WesternZodiacIdentityDraft = z.infer<typeof westernZodiacIdentityDraftSchema>;
 
 export const ZODIAC_SIGN_IDS = Object.freeze([
   "aries",
@@ -28,27 +61,37 @@ export const zodiacPlacementSchema = z.strictObject({
 
 export type ZodiacPlacement = z.infer<typeof zodiacPlacementSchema>;
 
-export type ZodiacRequestKind =
-  | { kind: "tropical"; ayanamshaDeg: null }
-  | { kind: "sidereal"; ayanamshaDeg: number };
+export type ZodiacRequestKind = WesternZodiacIdentityDraft;
+
+function snapZodiacBoundaryDeg(longitudeDeg: number): number {
+  const normalized = normalizeLongitudeDeg(longitudeDeg);
+  const nearestBoundaryDeg = Math.round(normalized / 30) * 30;
+  if (Math.abs(normalized - nearestBoundaryDeg)
+    <= WESTERN_ZODIAC_BOUNDARY_SNAP_TOLERANCE_DEG) {
+    return normalizeLongitudeDeg(nearestBoundaryDeg);
+  }
+  return normalized;
+}
 
 export function deriveZodiacPlacement(
   eclipticLongitudeDeg: number,
   zodiac: ZodiacRequestKind
 ): ZodiacPlacement {
+  if (!Number.isFinite(eclipticLongitudeDeg)) {
+    throw new Error("zodiac placement requires a finite ecliptic longitude");
+  }
+  const identity = westernZodiacIdentityDraftSchema.parse(zodiac);
   const ecliptic = normalizeLongitudeDeg(eclipticLongitudeDeg);
   let longitudeDeg: number;
   let ayanamshaDeg: number | null;
-  if (zodiac.kind === "tropical") {
+  if (identity.kind === WESTERN_TROPICAL_ZODIAC_IDENTITY.kind) {
     longitudeDeg = ecliptic;
     ayanamshaDeg = null;
   } else {
-    if (!Number.isFinite(zodiac.ayanamshaDeg)) {
-      throw new Error("sidereal zodiac requires a finite ayanamsha value");
-    }
-    ayanamshaDeg = normalizeLongitudeDeg(zodiac.ayanamshaDeg);
+    ayanamshaDeg = identity.ayanamshaDeg;
     longitudeDeg = normalizeLongitudeDeg(ecliptic - ayanamshaDeg);
   }
+  longitudeDeg = snapZodiacBoundaryDeg(longitudeDeg);
   const signIndex = Math.floor(longitudeDeg / 30);
   return zodiacPlacementSchema.parse({
     longitudeDeg,

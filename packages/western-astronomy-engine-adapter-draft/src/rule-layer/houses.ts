@@ -1,7 +1,11 @@
 import { z } from "zod";
 import { deg, nearlyEqual, normalizeLongitudeDeg, rad } from "./canonical.ts";
+import {
+  deriveZodiacPlacement,
+  type WesternZodiacIdentityDraft
+} from "./zodiac.ts";
 
-export const WESTERN_HOUSE_RULES_VERSION = "western-house-rules/0.1-draft" as const;
+export const WESTERN_HOUSE_RULES_VERSION = "western-house-rules/0.2-draft" as const;
 
 export const WESTERN_HOUSE_SYSTEM_IDS = Object.freeze([
   "whole_sign_v1",
@@ -31,6 +35,14 @@ export const westernHouseCuspsResultSchema = z.strictObject({
   armcDeg: z.number().finite().min(0).lt(360),
   algorithmId: z.string().min(1).max(120),
   fallbackUsed: z.literal(false)
+}).superRefine((value, context) => {
+  if (value.algorithmId !== ALGORITHM_IDS[value.systemId]) {
+    context.addIssue({
+      code: "custom",
+      path: ["algorithmId"],
+      message: "house result algorithm identity must match its exact house system"
+    });
+  }
 });
 
 export type WesternHouseCuspsResult = z.infer<typeof westernHouseCuspsResultSchema>;
@@ -226,21 +238,32 @@ function calculatePlacidusCusps(
 }
 
 const ALGORITHM_IDS = Object.freeze({
-  whole_sign_v1: "western-house-whole-sign/0.1-draft",
+  whole_sign_v1: "western-house-whole-sign/0.2-draft",
   equal_asc_v1: "western-house-equal-asc/0.1-draft",
   porphyry_v1: "western-house-porphyry/0.1-draft",
   placidus_v1: "western-house-placidus/0.1-draft"
 } as const);
 
-export function computeHouseCusps(input: WesternHouseRequest): WesternHouseCuspsResult {
+export function computeHouseCusps(
+  input: WesternHouseRequest,
+  zodiac: WesternZodiacIdentityDraft
+): WesternHouseCuspsResult {
   const ramc = normalizeLongitudeDeg(input.ramcDeg);
   const angles = computeAngles(ramc, input.geographicLatitudeDeg, input.obliquityTrueOfDateDeg);
+  const zodiacAscendant = deriveZodiacPlacement(angles.ascendantDeg, zodiac);
   const cuspLongitudes: number[] = [];
 
   if (input.systemId === "whole_sign_v1") {
-    const houseZeroSign = Math.floor(angles.ascendantDeg / 30);
+    const rawEclipticFrameOffsetDeg = normalizeLongitudeDeg(
+      angles.ascendantDeg - zodiacAscendant.longitudeDeg
+    );
     for (let houseNumber = 1; houseNumber <= 12; houseNumber += 1) {
-      cuspLongitudes.push(((houseZeroSign + houseNumber - 1) % 12) * 30);
+      const zodiacCuspDeg = (
+        (zodiacAscendant.signIndex + houseNumber - 1) % 12
+      ) * 30;
+      cuspLongitudes.push(normalizeLongitudeDeg(
+        zodiacCuspDeg + rawEclipticFrameOffsetDeg
+      ));
     }
   } else if (input.systemId === "equal_asc_v1") {
     for (let houseNumber = 1; houseNumber <= 12; houseNumber += 1) {
@@ -300,14 +323,35 @@ export function assignHousePlacement(
   if (cusps.length !== 12) {
     throw new Error("house placement requires exactly twelve cusps");
   }
+  if (!Number.isFinite(longitudeDeg)) {
+    throw new Error("house placement requires a finite longitude");
+  }
   const longitude = normalizeLongitudeDeg(longitudeDeg);
   const ordered = [...cusps].sort((left, right) => left.houseNumber - right.houseNumber);
+  const expectedHouseNumbers = Array.from({ length: 12 }, (_, index) => index + 1);
+  if (ordered.some((cusp, index) => cusp.houseNumber !== expectedHouseNumbers[index]
+    || !Number.isFinite(cusp.longitudeDeg)
+    || cusp.longitudeDeg < 0
+    || cusp.longitudeDeg >= 360)) {
+    throw new Error("house placement requires canonical houses 1 through 12 with finite raw longitudes");
+  }
+  const spans = ordered.map((cusp, index) => {
+    const next = ordered[(index + 1) % 12]!;
+    return normalizeLongitudeDeg(next.longitudeDeg - cusp.longitudeDeg);
+  });
+  if (spans.some((span) => nearlyEqual(span, 0))) {
+    throw new Error("house placement rejects degenerate zero-width cusp spans");
+  }
+  const totalSpan = spans.reduce((total, span) => total + span, 0);
+  if (!nearlyEqual(totalSpan, 360)) {
+    throw new Error("house placement cusp sequence must traverse exactly one circumference");
+  }
   for (let index = 0; index < 12; index += 1) {
     const start = ordered[index]!.longitudeDeg;
-    const end = index === 11
-      ? ordered[0]!.longitudeDeg + 360
-      : ordered[index + 1]!.longitudeDeg;
-    const candidate = index === 11 && longitude < start ? longitude + 360 : longitude;
+    const rawEnd = ordered[(index + 1) % 12]!.longitudeDeg;
+    const wraps = rawEnd <= start;
+    const end = wraps ? rawEnd + 360 : rawEnd;
+    const candidate = wraps && longitude < start ? longitude + 360 : longitude;
     if (candidate >= start && candidate < end) {
       return ordered[index]!.houseNumber;
     }

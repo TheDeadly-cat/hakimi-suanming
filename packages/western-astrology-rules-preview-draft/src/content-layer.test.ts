@@ -6,16 +6,21 @@ import {
   WESTERN_CONTENT_SOURCES,
   buildWesternContentProjection
 } from "./browser-app/content-layer.ts";
-import { runWesternRuleLayer } from "./rule-layer-bridge.ts";
+import {
+  WESTERN_RULE_LAYER_REQUEST_VERSION,
+  WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY,
+  WESTERN_TROPICAL_ZODIAC_IDENTITY,
+  runWesternRuleLayer
+} from "./rule-layer-bridge.ts";
 
 const request = {
-  protocolVersion: "western-astrology-rules-request/0.1-draft",
+  protocolVersion: WESTERN_RULE_LAYER_REQUEST_VERSION,
   inputLabel: "western content layer test",
   bodies: [
     { bodyId: "sun", eclipticLongitudeDeg: 0.5, longitudeSpeedDegPerDay: 0.99 },
     { bodyId: "mercury", eclipticLongitudeDeg: 60.5, longitudeSpeedDegPerDay: -0.5 }
   ],
-  zodiac: { kind: "tropical", ayanamshaDeg: null },
+  zodiac: WESTERN_TROPICAL_ZODIAC_IDENTITY,
   houses: {
     systemId: "whole_sign_v1",
     ramcDeg: 0,
@@ -62,6 +67,11 @@ describe("Western source-bound neutral content layer", () => {
       projectionVersion: WESTERN_CONTENT_LAYER_VERSION,
       outcome: "candidate_content_built",
       factsSha256: artifact.digests.resultSha256,
+      zodiacMethod: {
+        kind: "tropical",
+        ayanamshaId: null,
+        algorithmId: "tropical_identity_v1"
+      },
       framework: "modern_western_astrology_source_bound_candidate",
       boundary: {
         expertTruthClaimed: false,
@@ -372,6 +382,31 @@ describe("Western source-bound neutral content layer", () => {
     expect(WESTERN_CONTENT_SOURCES.filter((source) => source.role === "scientific_boundary"))
       .toHaveLength(1);
     expect(WESTERN_CONTENT_SOURCES.every((source) => source.url.startsWith("https://"))).toBe(true);
+  });
+
+  it("carries the supported manual sidereal identity into content and rejects artifact drift", () => {
+    const artifact = runWesternRuleLayer({
+      ...request,
+      zodiac: {
+        ...WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY,
+        ayanamshaDeg: 24.1
+      }
+    });
+    if (artifact.outcome !== "computed") throw new Error("sidereal rule layer did not compute");
+    const projection = buildWesternContentProjection(artifact);
+    expect(projection.zodiacMethod).toEqual({
+      kind: "sidereal",
+      ayanamshaId: "manual_offset_unverified",
+      algorithmId: "subtract_supplied_offset_v1"
+    });
+
+    const tampered = structuredClone(artifact);
+    tampered.execution.algorithms.zodiacMethod = {
+      kind: "tropical",
+      ayanamshaId: null,
+      algorithmId: "tropical_identity_v1"
+    };
+    expect(() => buildWesternContentProjection(tampered)).toThrow();
   });
 
   it("fails closed rather than generating content from a failed rule artifact", () => {

@@ -21,18 +21,36 @@ import {
   type WesternAspectRuleBody
 } from "./aspects.ts";
 import {
+  WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY,
+  WESTERN_TROPICAL_ZODIAC_IDENTITY,
+  WESTERN_ZODIAC_BOUNDARY_SNAP_VERSION,
   WESTERN_ZODIAC_RULES_VERSION,
   deriveZodiacPlacement,
+  westernZodiacIdentityDraftSchema,
   zodiacPlacementSchema,
+  type WesternZodiacIdentityDraft
+} from "./zodiac.ts";
+
+export {
+  WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY,
+  WESTERN_TROPICAL_ZODIAC_IDENTITY,
+  WESTERN_ZODIAC_BOUNDARY_SNAP_TOLERANCE_DEG,
+  WESTERN_ZODIAC_BOUNDARY_SNAP_VERSION,
+  WESTERN_ZODIAC_RULES_VERSION,
+  deriveZodiacPlacement,
+  westernZodiacIdentityDraftSchema,
+  zodiacPlacementSchema,
+  type WesternZodiacIdentityDraft,
+  type ZodiacPlacement,
   type ZodiacRequestKind
 } from "./zodiac.ts";
 
 export const WESTERN_RULE_LAYER_REQUEST_VERSION =
-  "western-astrology-rules-request/0.1-draft" as const;
+  "western-astrology-rules-request/0.4-draft" as const;
 export const WESTERN_RULE_LAYER_ARTIFACT_VERSION =
-  "western-astrology-rules-artifact/0.1-draft" as const;
+  "western-astrology-rules-artifact/0.4-draft" as const;
 export const WESTERN_RULE_LAYER_PROJECTION_VERSION =
-  "western-astrology-rules-projection/0.1-draft" as const;
+  "western-astrology-rules-projection/0.4-draft" as const;
 
 const BODY_ORDER = new Map(WESTERN_BODY_IDS.map((bodyId, index) => [bodyId, index]));
 
@@ -41,11 +59,6 @@ const bodyInputSchema = z.strictObject({
   eclipticLongitudeDeg: z.number().finite().min(0).lt(360),
   longitudeSpeedDegPerDay: z.number().finite()
 });
-
-const zodiacRequestSchema = z.discriminatedUnion("kind", [
-  z.strictObject({ kind: z.literal("tropical"), ayanamshaDeg: z.null() }),
-  z.strictObject({ kind: z.literal("sidereal"), ayanamshaDeg: z.number().finite().min(0).lt(360) })
-]);
 
 const housesRequestSchema = z.strictObject({
   systemId: z.enum(WESTERN_HOUSE_SYSTEM_IDS),
@@ -58,7 +71,7 @@ export const westernRuleLayerRequestSchema = z.strictObject({
   protocolVersion: z.literal(WESTERN_RULE_LAYER_REQUEST_VERSION),
   inputLabel: z.string().trim().min(1).max(120),
   bodies: z.array(bodyInputSchema).min(1).max(WESTERN_BODY_IDS.length),
-  zodiac: zodiacRequestSchema,
+  zodiac: westernZodiacIdentityDraftSchema,
   houses: housesRequestSchema,
   aspects: z.strictObject({
     definitions: z.array(westernAspectDefinitionSchema).min(1).max(50)
@@ -93,6 +106,7 @@ export type WesternRuleLayerRequest = z.infer<typeof westernRuleLayerRequestSche
 
 const ruleResultSchema = z.strictObject({
   projectionVersion: z.literal(WESTERN_RULE_LAYER_PROJECTION_VERSION),
+  zodiac: westernZodiacIdentityDraftSchema,
   bodies: z.array(z.strictObject({
     bodyId: z.enum(WESTERN_BODY_IDS),
     zodiac: zodiacPlacementSchema,
@@ -103,10 +117,27 @@ const ruleResultSchema = z.strictObject({
   aspects: z.array(westernAspectFactSchema).max(500)
 });
 
+const zodiacMethodIdentitySchema = z.discriminatedUnion("kind", [
+  z.strictObject({
+    kind: z.literal(WESTERN_TROPICAL_ZODIAC_IDENTITY.kind),
+    ayanamshaId: z.null(),
+    algorithmId: z.literal(WESTERN_TROPICAL_ZODIAC_IDENTITY.algorithmId)
+  }),
+  z.strictObject({
+    kind: z.literal(WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY.kind),
+    ayanamshaId: z.literal(WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY.ayanamshaId),
+    algorithmId: z.literal(WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY.algorithmId)
+  })
+]);
+
+type WesternZodiacMethodIdentity = z.infer<typeof zodiacMethodIdentitySchema>;
+
 const ruleExecutionSchema = z.strictObject({
   ruleLayerVersion: z.literal(WESTERN_RULE_LAYER_ARTIFACT_VERSION),
   algorithms: z.strictObject({
     zodiac: z.literal(WESTERN_ZODIAC_RULES_VERSION),
+    zodiacBoundarySnap: z.literal(WESTERN_ZODIAC_BOUNDARY_SNAP_VERSION),
+    zodiacMethod: zodiacMethodIdentitySchema,
     houses: z.literal(WESTERN_HOUSE_RULES_VERSION).nullable(),
     aspects: z.literal(WESTERN_ASPECT_RULES_VERSION)
   }),
@@ -132,10 +163,16 @@ const ruleStrictRelationSchema = z.strictObject({
   unmetFieldFamilies: z.array(z.string().min(1).max(120)).min(1).max(30)
 });
 
-const ruleDigestsSchema = z.strictObject({
+const ruleComputedDigestsSchema = z.strictObject({
+  algorithm: z.literal("sha256-canonical-json-v1"),
+  requestSha256: z.string().regex(/^[a-f0-9]{64}$/),
+  resultSha256: z.string().regex(/^[a-f0-9]{64}$/)
+});
+
+const ruleFailedDigestsSchema = z.strictObject({
   algorithm: z.literal("sha256-canonical-json-v1"),
   requestSha256: z.string().regex(/^[a-f0-9]{64}$/).nullable(),
-  resultSha256: z.string().regex(/^[a-f0-9]{64}$/).nullable()
+  resultSha256: z.null()
 });
 
 const commonShape = {
@@ -144,8 +181,7 @@ const commonShape = {
   artifactKind: z.literal("astrology_rules_engineering_artifact"),
   disposition: z.literal("diagnostic_only"),
   evidence: ruleEvidenceSchema,
-  strictContractRelation: ruleStrictRelationSchema,
-  digests: ruleDigestsSchema
+  strictContractRelation: ruleStrictRelationSchema
 } as const;
 
 export const westernRuleLayerArtifactSchema = z.discriminatedUnion("outcome", [
@@ -155,6 +191,7 @@ export const westernRuleLayerArtifactSchema = z.discriminatedUnion("outcome", [
     request: westernRuleLayerRequestSchema,
     execution: ruleExecutionSchema,
     result: ruleResultSchema,
+    digests: ruleComputedDigestsSchema,
     failure: z.null()
   }),
   z.strictObject({
@@ -163,6 +200,7 @@ export const westernRuleLayerArtifactSchema = z.discriminatedUnion("outcome", [
     request: westernRuleLayerRequestSchema.nullable(),
     execution: z.null(),
     result: z.null(),
+    digests: ruleFailedDigestsSchema,
     failure: z.strictObject({
       stage: z.enum(["request_validation", "zodiac", "houses", "aspects", "normalization"]),
       code: z.string().regex(/^[A-Z][A-Z0-9_]*$/).max(100),
@@ -170,9 +208,186 @@ export const westernRuleLayerArtifactSchema = z.discriminatedUnion("outcome", [
       partialResultReturned: z.literal(false)
     })
   })
-]);
+]).superRefine((value, context) => {
+  if (value.outcome === "failed_closed") {
+    const expectedRequestSha256 = value.request === null
+      ? null
+      : sha256CanonicalJson(value.request);
+    if (value.digests.requestSha256 !== expectedRequestSha256) {
+      context.addIssue({
+        code: "custom",
+        path: ["digests", "requestSha256"],
+        message: "failed artifact request digest must be recomputed from its parsed request"
+      });
+    }
+    return;
+  }
+
+  if (!zodiacIdentitiesEqual(value.request.zodiac, value.result.zodiac)) {
+    context.addIssue({
+      code: "custom",
+      path: ["result", "zodiac"],
+      message: "computed result must echo the exact requested zodiac identity and supplied offset"
+    });
+  }
+  if (!zodiacMethodIdentitiesEqual(value.execution.algorithms.zodiacMethod, value.request.zodiac)
+    || !zodiacMethodIdentitiesEqual(value.execution.algorithms.zodiacMethod, value.result.zodiac)) {
+    context.addIssue({
+      code: "custom",
+      path: ["execution", "algorithms", "zodiacMethod"],
+      message: "executed zodiac method must match both request and result identities"
+    });
+  }
+
+  const expectedHouseExecution = value.request.houses === null
+    ? null
+    : WESTERN_HOUSE_RULES_VERSION;
+  if (value.execution.algorithms.houses !== expectedHouseExecution) {
+    context.addIssue({
+      code: "custom",
+      path: ["execution", "algorithms", "houses"],
+      message: "executed house rules identity must match whether houses were requested"
+    });
+  }
+  let expectedHouses: z.infer<typeof westernHouseCuspsResultSchema> | null = null;
+  if (value.request.houses === null) {
+    if (value.result.houses !== null) {
+      context.addIssue({
+        code: "custom",
+        path: ["result", "houses"],
+        message: "computed result cannot contain houses when none were requested"
+      });
+    }
+  } else {
+    try {
+      expectedHouses = computeHouseCusps(value.request.houses, value.result.zodiac);
+      if (value.result.houses === null
+        || sha256CanonicalJson(value.result.houses) !== sha256CanonicalJson(expectedHouses)) {
+        context.addIssue({
+          code: "custom",
+          path: ["result", "houses"],
+          message: "computed house geometry must match the requested system and bound zodiac identity"
+        });
+      }
+    } catch {
+      context.addIssue({
+        code: "custom",
+        path: ["result", "houses"],
+        message: "computed artifact cannot claim houses for an unavailable house calculation"
+      });
+    }
+  }
+  if (value.result.bodies.length !== value.request.bodies.length) {
+    context.addIssue({
+      code: "custom",
+      path: ["result", "bodies"],
+      message: "computed bodies must exactly cover the request bodies"
+    });
+  }
+  value.result.bodies.forEach((body, index) => {
+    const requestedBody = value.request.bodies[index];
+    if (!requestedBody || requestedBody.bodyId !== body.bodyId) {
+      context.addIssue({
+        code: "custom",
+        path: ["result", "bodies", index, "bodyId"],
+        message: "computed bodies must preserve request identity and canonical order"
+      });
+      return;
+    }
+    const expectedPlacement = deriveZodiacPlacement(
+      requestedBody.eclipticLongitudeDeg,
+      value.result.zodiac
+    );
+    if (!zodiacPlacementsEqual(body.zodiac, expectedPlacement)) {
+      context.addIssue({
+        code: "custom",
+        path: ["result", "bodies", index, "zodiac"],
+        message: "computed zodiac placement must match the bound result zodiac transform"
+      });
+    }
+    const expectedHouseNumber = expectedHouses === null
+      ? null
+      : assignHousePlacement(requestedBody.eclipticLongitudeDeg, expectedHouses.cusps);
+    if (body.houseNumber !== expectedHouseNumber) {
+      context.addIssue({
+        code: "custom",
+        path: ["result", "bodies", index, "houseNumber"],
+        message: "computed body house must match the independently reconstructed raw cusp spans"
+      });
+    }
+  });
+
+  if (value.digests.requestSha256 !== sha256CanonicalJson(value.request)) {
+    context.addIssue({
+      code: "custom",
+      path: ["digests", "requestSha256"],
+      message: "computed artifact request digest does not match its parsed request"
+    });
+  }
+  if (value.digests.resultSha256 !== sha256CanonicalJson(value.result)) {
+    context.addIssue({
+      code: "custom",
+      path: ["digests", "resultSha256"],
+      message: "computed artifact result digest does not match its parsed result"
+    });
+  }
+});
 
 export type WesternRuleLayerArtifact = z.infer<typeof westernRuleLayerArtifactSchema>;
+export type WesternRuleLayerComputedArtifact = Extract<
+  WesternRuleLayerArtifact,
+  { outcome: "computed" }
+>;
+
+function zodiacIdentitiesEqual(
+  left: WesternZodiacIdentityDraft,
+  right: WesternZodiacIdentityDraft
+): boolean {
+  return left.kind === right.kind
+    && left.ayanamshaId === right.ayanamshaId
+    && left.algorithmId === right.algorithmId
+    && Object.is(left.ayanamshaDeg, right.ayanamshaDeg);
+}
+
+function zodiacMethodIdentitiesEqual(
+  method: WesternZodiacMethodIdentity,
+  zodiac: WesternZodiacIdentityDraft
+): boolean {
+  return method.kind === zodiac.kind
+    && method.ayanamshaId === zodiac.ayanamshaId
+    && method.algorithmId === zodiac.algorithmId;
+}
+
+function zodiacMethodIdentityFrom(
+  zodiac: WesternZodiacIdentityDraft
+): WesternZodiacMethodIdentity {
+  return zodiacMethodIdentitySchema.parse({
+    kind: zodiac.kind,
+    ayanamshaId: zodiac.ayanamshaId,
+    algorithmId: zodiac.algorithmId
+  });
+}
+
+function zodiacPlacementsEqual(
+  left: z.infer<typeof zodiacPlacementSchema>,
+  right: z.infer<typeof zodiacPlacementSchema>
+): boolean {
+  return left.signIndex === right.signIndex
+    && left.signId === right.signId
+    && Object.is(left.longitudeDeg, right.longitudeDeg)
+    && Object.is(left.degreeWithinSign, right.degreeWithinSign)
+    && Object.is(left.ayanamshaDeg, right.ayanamshaDeg);
+}
+
+export function verifyWesternRuleLayerComputedArtifact(
+  input: unknown
+): WesternRuleLayerComputedArtifact {
+  const artifact = westernRuleLayerArtifactSchema.parse(input);
+  if (artifact.outcome !== "computed") {
+    throw new Error("expected a computed Western rule-layer artifact");
+  }
+  return artifact;
+}
 
 const RULE_EVIDENCE = ruleEvidenceSchema.parse({
   evidenceStatus: "rule_layer_engineering",
@@ -246,13 +461,13 @@ export function runWesternRuleLayer(input: unknown): WesternRuleLayerArtifact {
   try {
     let houses: z.infer<typeof westernHouseCuspsResultSchema> | null = null;
     if (request.houses !== null) {
-      houses = computeHouseCusps(request.houses as WesternHouseRequest);
+      houses = computeHouseCusps(request.houses as WesternHouseRequest, request.zodiac);
     }
 
     const bodyResults = request.bodies.map((body) => {
       const zodiac = deriveZodiacPlacement(
         body.eclipticLongitudeDeg,
-        request.zodiac as ZodiacRequestKind
+        request.zodiac
       );
       return {
         bodyId: body.bodyId,
@@ -275,6 +490,7 @@ export function runWesternRuleLayer(input: unknown): WesternRuleLayerArtifact {
 
     const result = ruleResultSchema.parse({
       projectionVersion: WESTERN_RULE_LAYER_PROJECTION_VERSION,
+      zodiac: request.zodiac,
       bodies: bodyResults,
       houses,
       aspects
@@ -291,6 +507,8 @@ export function runWesternRuleLayer(input: unknown): WesternRuleLayerArtifact {
         ruleLayerVersion: WESTERN_RULE_LAYER_ARTIFACT_VERSION,
         algorithms: {
           zodiac: WESTERN_ZODIAC_RULES_VERSION,
+          zodiacBoundarySnap: WESTERN_ZODIAC_BOUNDARY_SNAP_VERSION,
+          zodiacMethod: zodiacMethodIdentityFrom(request.zodiac),
           houses: request.houses === null ? null : WESTERN_HOUSE_RULES_VERSION,
           aspects: WESTERN_ASPECT_RULES_VERSION
         },

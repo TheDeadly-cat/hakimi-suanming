@@ -1,0 +1,216 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "western_runtime_dependency_build_notice_evidence",
+  "evidenceLedgerId": "hakimi.western.astronomy-engine-build-notice-evidence/1.0.0",
+  "status": "controlled_ephemeral_build_notice_artifacts_observed_unbound",
+  "observedOn": "2026-08-30",
+  "systemIdentity": {
+    "productSystemId": "western-astrology",
+    "contractSystemId": "western",
+    "productStatus": "isolated_engineering_draft",
+    "releaseIdentity": null,
+    "targetSchema": null,
+    "migrationId": null
+  },
+  "dependencyIdentity": {
+    "packageName": "astronomy-engine",
+    "requestedVersion": "2.1.19",
+    "resolvedVersion": "2.1.19",
+    "resolved": "https://registry.npmjs.org/astronomy-engine/-/astronomy-engine-2.1.19.tgz",
+    "integrity": "sha512-8yWKNf7UeNbH458h3sAJ6ZgAjE5jTXp/mNNRFoC20j2SHwZIjAQeEsBB2Q3uCFRaTCCJRv33K2XhkhZQMXoX6w=="
+  },
+  "basisArtifacts": [
+    {
+      "role": "adapter_package_manifest",
+      "path": "packages/western-astronomy-engine-adapter-draft/package.json",
+      "bytes": 540,
+      "sha256": "e7639fc309f3d92729ce2084275bad75702cb70df151c663bffd8b35cae15786"
+    },
+    {
+      "role": "package_lock_closure",
+      "path": "packages/western-astronomy-engine-adapter-draft/src/astronomy-engine-2.1.19-lock-closure.json",
+      "bytes": 960,
+      "sha256": "dd12ce93af144ee11965e0b89444150a2d0a6c68fe6bbf67650684ff3476bb39"
+    },
+    {
+      "role": "source_lock",
+      "path": "packages/western-astronomy-engine-adapter-draft/src/astronomy-engine-2.1.19-source-lock.json",
+      "bytes": 2547,
+      "sha256": "a0d929d78cff75aa543e78350aece6a35636c4c081f5620c5a7cc9aaaf400975"
+    },
+    {
+      "role": "adapter_local_license_copy",
+      "path": "packages/western-astronomy-engine-adapter-draft/licenses/astronomy-engine-2.1.19-LICENSE.txt",
+      "bytes": 1095,
+      "sha256": "690dd98cb13ba4db77c6327deea852a816892bb9debbad5943405c66972f8023"
+    },
+    {
+      "role": "browser_parity_build_config",
+      "path": "packages/western-astronomy-engine-adapter-draft/vite.browser-parity.config.mjs",
+      "bytes": 6186,
+      "sha256": "e300d0170e412ce23cef8f302633ee4e4f321a0ca4fa6ceadfb0cf0e65ff7eb0"
+    },
+    {
+      "role": "browser_parity_source_html",
+      "path": "packages/western-astronomy-engine-adapter-draft/browser-parity/index.html",
+      "bytes": 4026,
+      "sha256": "ffde5c75bda14e0e41a5579b4d48ef025bc595452b2503200cd1bcbe3b4864dd"
+    },
+    {
+      "role": "rules_preview_local_license_copy",
+      "path": "packages/western-astrology-rules-preview-draft/licenses/astronomy-engine-2.1.19-LICENSE.txt",
+      "bytes": 1095,
+      "sha256": "690dd98cb13ba4db77c6327deea852a816892bb9debbad5943405c66972f8023"
+    },
+    {
+      "role": "rules_preview_build_config",
+      "path": "packages/western-astrology-rules-preview-draft/vite.rules-preview.config.mjs",
+      "bytes": 4227,
+      "sha256": "07651c18e415635a2bd751e3fce2b77f624b8be09c1f14f86b6ce8e9bbaf99d8"
+    },
+    {
+      "role": "rules_preview_source_html",
+      "path": "packages/western-astrology-rules-preview-draft/browser-app/index.html",
+      "bytes": 19202,
+      "sha256": "44e4f245ccea8b6e0d35f0a85c69583e86cac90b337c3b9017127ec220e880d8"
+    }
+  ],
+  "licenseTextObservation": {
+    "spdxIdentifierRecordedInSourceLock": "MIT",
+    "localCopyDigestMatched": true,
+    "standaloneLicenseInPublishedFilesRecordedBySourceLock": false,
+    "upstreamTarballIndependentlyReverifiedThisRun": false,
+    "publisherAuthenticityEstablished": false,
+    "semanticInterpretationReviewed": false
+  },
+  "noticeCandidate": {
+    "mode": "verbatim_full_local_license",
+    "sourcePath": "packages/western-astronomy-engine-adapter-draft/licenses/astronomy-engine-2.1.19-LICENSE.txt",
+    "bytes": 1095,
+    "sha256": "690dd98cb13ba4db77c6327deea852a816892bb9debbad5943405c66972f8023",
+    "noticeClauseCandidateLocator": {
+      "byteStartInclusive": 506,
+      "byteEndExclusive": 632,
+      "bytes": 126,
+      "sha256": "89fdc900e69446e48038e9db01dd71e62566997bd91135f0afbecc07ae997c8a",
+      "semanticInterpretationReviewed": false
+    },
+    "controlledBuildReceipt": {
+      "producer": "scripts/verify-western-isolated-build-license-notices.mjs",
+      "mode": "fixed_dual_vite_build_into_owned_ephemeral_root",
+      "outputPersistence": "deleted_after_endpoint_verification",
+      "platformSpecificOutputTreeDigestsBound": false,
+      "surfaces": [
+        {
+          "surfaceId": "browser-parity",
+          "sourceConfigPath": "packages/western-astronomy-engine-adapter-draft/vite.browser-parity.config.mjs",
+          "sourceHtmlPath": "packages/western-astronomy-engine-adapter-draft/browser-parity/index.html",
+          "fileCount": 7,
+          "licenseAsset": {
+            "path": "licenses/astronomy-engine-2.1.19-LICENSE.txt",
+            "bytes": 1095,
+            "sha256": "690dd98cb13ba4db77c6327deea852a816892bb9debbad5943405c66972f8023"
+          },
+          "htmlLicenseLink": {
+            "href": "./licenses/astronomy-engine-2.1.19-LICENSE.txt",
+            "linkCount": 1
+          },
+          "engineWorkerObservation": {
+            "nonSourcemapWorkerCount": 1,
+            "versionMarkerObserved": true,
+            "engineEsmDigestMarkerObserved": true,
+            "executionEstablished": false
+          }
+        },
+        {
+          "surfaceId": "rules-preview",
+          "sourceConfigPath": "packages/western-astrology-rules-preview-draft/vite.rules-preview.config.mjs",
+          "sourceHtmlPath": "packages/western-astrology-rules-preview-draft/browser-app/index.html",
+          "fileCount": 7,
+          "licenseAsset": {
+            "path": "licenses/astronomy-engine-2.1.19-LICENSE.txt",
+            "bytes": 1095,
+            "sha256": "690dd98cb13ba4db77c6327deea852a816892bb9debbad5943405c66972f8023"
+          },
+          "htmlLicenseLink": {
+            "href": "./licenses/astronomy-engine-2.1.19-LICENSE.txt",
+            "linkCount": 1
+          },
+          "engineWorkerObservation": {
+            "nonSourcemapWorkerCount": 1,
+            "versionMarkerObserved": true,
+            "engineEsmDigestMarkerObserved": true,
+            "executionEstablished": false
+          }
+        }
+      ]
+    },
+    "buildNoticeInclusionStatus": "observed_in_two_controlled_ephemeral_isolated_builds",
+    "noticeArtifactObservation": "exact_standalone_asset_observed_at_fixed_path_on_both_surfaces",
+    "releaseBuildProvenanceEstablished": false
+  },
+  "coverageBoundary": {
+    "coversAstronomyEngine2_1_19Only": true,
+    "coversSofa": false,
+    "coversSwissEphemeris": false,
+    "coversJplNaifKernels": false,
+    "coversTimeData": false,
+    "coversInterpretationAssets": false,
+    "westernRightsSubjectFullySatisfied": false
+  },
+  "parentBindingBoundary": {
+    "bindingDirection": "fixed_dependency_and_build_artifacts_to_child_only",
+    "bindsWesternManifest": false,
+    "bindsWesternRequirements": false,
+    "bindsFourSystemRegistry": false,
+    "bindsCrossSystemReceipts": false,
+    "bindsDefaultWeb": false
+  },
+  "readBoundary": {
+    "model": "held_file_handle_endpoint_snapshots",
+    "crossFileAtomicityEstablished": false,
+    "intervalIntegrityEstablished": false,
+    "abaResistanceEstablished": false,
+    "mutationEpochEstablished": false
+  },
+  "authorityBoundary": {
+    "publisherAuthenticityEstablished": false,
+    "licenseReviewComplete": false,
+    "rightsLegalConclusionEstablished": false,
+    "redistributionAuthorized": false,
+    "noticeObligationSatisfied": false,
+    "formalAdmissionAuthorized": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "baziAuthorityInherited": false
+  },
+  "legalDecisionBoundary": {
+    "decisionStatus": "not_established",
+    "selectedLicenseModel": null,
+    "ownerDecisionRefs": [],
+    "legalReviewAttestationIds": [],
+    "executedContractRefs": []
+  },
+  "integrityBoundary": {
+    "digestAlgorithm": "SHA-256",
+    "digestIsDigitalSignature": false,
+    "signerIdentity": null,
+    "digitalSignature": null
+  },
+  "doesNotEstablish": [
+    "publisher_identity_or_upstream_signature",
+    "license_authenticity_or_legal_interpretation",
+    "notice_obligation_satisfaction_or_redistribution_authority",
+    "sofa_swiss_ephemeris_jpl_naif_time_data_or_interpretation_asset_rights",
+    "western_rights_bundle_or_any_of_28_source_binding_subjects",
+    "domain_truth_expert_truth_scientific_validity_or_high_risk_expression_approval",
+    "default_web_full_build_browser_host_pwa_deployment_or_rollback_readiness",
+    "vite_watch_or_programmatic_rebuild_reference_freshness",
+    "bazi_schema_authority_cross_system_scoring_comparison_or_winner_selection",
+    "release_readiness_public_deployment_or_public_release_authorization",
+    "cross_file_atomicity_interval_integrity_aba_resistance_or_mutation_epoch"
+  ],
+  "evidenceDigest": "0645b6a4fd6308576346b9efefd9caabfd42684609702e87c6077e724b046a30"
+}

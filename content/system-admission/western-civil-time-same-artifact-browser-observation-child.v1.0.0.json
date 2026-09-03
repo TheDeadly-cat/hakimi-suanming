@@ -1,0 +1,1049 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "western_civil_time_same_artifact_edge_chrome_browser_observation_child",
+  "childId": "hakimi.western.civil-time.same-artifact-edge-chrome-observation/1.0.0",
+  "status": "isolated_fact_only_single_build_dual_browser_observation_not_admitted",
+  "createdAt": "2026-09-03T03:47:33.501Z",
+  "activeAdmissionEffect": "none",
+  "systemIdentity": {
+    "contractSystemId": "western",
+    "productIdentity": null,
+    "releaseIdentity": null,
+    "targetSchema": null,
+    "migrationId": null,
+    "projectDefaultReleaseGovernanceContext": {
+      "releaseIdentity": "legacy-v13",
+      "targetSchema": 13,
+      "migrationId": null
+    },
+    "projectDefaultReleaseGovernanceInherited": false
+  },
+  "expectedAuthoredBuildInputClosure": {
+    "graphId": "hakimi.western.civil-time.authored-build-source-graph/1",
+    "digestAlgorithm": "sha256-authored-build-source-graph-v1",
+    "fileCount": 24,
+    "files": [
+      {
+        "path": "package.json",
+        "bytes": 28879,
+        "sha256": "c601b1e560d988a82cfc8d9c374a06597bf8dd867e941a2f4e8cc57f3d59e076"
+      },
+      {
+        "path": "package-lock.json",
+        "bytes": 175812,
+        "sha256": "40a02c7c3166f0c9bc03afa9c1d1f342fb7f54efe1abbf7cb3f5cf6ecb482a4d"
+      },
+      {
+        "path": "tsconfig.json",
+        "bytes": 479,
+        "sha256": "bbed523406f38d3fe9757ef12accf9a02c98a75b3f9812d64fa302975c856cf3"
+      },
+      {
+        "path": "tsconfig.base.json",
+        "bytes": 3124,
+        "sha256": "181e40ee1a2565d45cd35d250085bc3395a07035bfba0a4f4e6fcc31e093164c"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/package.json",
+        "bytes": 403,
+        "sha256": "cecca149b72aa0aad1a10bd6a293d0df17b0c0630bfd56e9f01dd4f113efca73"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/tsconfig.json",
+        "bytes": 225,
+        "sha256": "f2fabd924aef089e92afc3e9f456379e1408527e56cb38a1a539f009be8e05ad"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/browser-app/index.html",
+        "bytes": 5309,
+        "sha256": "2249cd554ee0c34c39112bc6798d0dc554a6c4c4dbdafe326d6fd0f7f98b362c"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/vite.config.mjs",
+        "bytes": 8261,
+        "sha256": "38f12ec96fd0d963a07fa3f130c853a4af678e806f20564149c8b6d0a86907e6"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/vite.same-artifact-evidence.config.mjs",
+        "bytes": 6437,
+        "sha256": "560a0a1574dc108b3a450945f1f9299934485a234f08cc8b89f641bb1c31b08e"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/styles.css",
+        "bytes": 4808,
+        "sha256": "49251b174498b81a9750c905231179e71957ef7794aa06136036f3f0c0e45ddb"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/browser-fact-projection.ts",
+        "bytes": 17741,
+        "sha256": "2499987068dc513e4c34aadb472aaf0eeac94d553f78050651cddff919760ba0"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/civil-client.ts",
+        "bytes": 9019,
+        "sha256": "1dae5b0ffcccad052e9c37557996052f89c1796622e4861d149369594903d1a7"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/civil-time.ts",
+        "bytes": 32761,
+        "sha256": "3d253687acbc6bfdb30ef335d3d67f4cecd839edcceddaecbcb7121dd30fee76"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/civil-worker.ts",
+        "bytes": 2975,
+        "sha256": "84bad5ed7bfd9254cfffa2237cb7247dad90af5309e5c224027a927f388ada64"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/main.ts",
+        "bytes": 6891,
+        "sha256": "bb0302d657ac65216d4419509e52174b559fde8935b54d7e0ed73eae753951a1"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/protocol.ts",
+        "bytes": 6657,
+        "sha256": "67749a90e1fcf092e64dedebc778429257cd62910a3c9a58ced77fc20361bbea"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/ui-format.ts",
+        "bytes": 603,
+        "sha256": "7fe98a467d478f9bb21a2d63503b7981f1c8a8301f621ae12fe2b5cc5bab3971"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/worker-fact-projection.ts",
+        "bytes": 3789,
+        "sha256": "8e01a01f1f74352cb6aab41c6a258fb66f329ac0eca58890c4984d7cc1bdef33"
+      },
+      {
+        "path": "packages/western-astrology-contracts-draft/src/civil-input.ts",
+        "bytes": 2910,
+        "sha256": "e1e9cfa1f8f800e5c1ef61b7fdd134fcf0276664411c0691d64ccba21ed81458"
+      },
+      {
+        "path": "packages/western-astrology-contracts-draft/src/index.ts",
+        "bytes": 39756,
+        "sha256": "87bf4fcecc7ec85542eed25c7c06869ba3a084c5e7d7fb305fcd7712ef508416"
+      },
+      {
+        "path": "packages/tzdb-core/package.json",
+        "bytes": 241,
+        "sha256": "fb12b19a6f6c971185bd2f2c9226fe50ad816595e3acec4f0a0b373593136236"
+      },
+      {
+        "path": "packages/tzdb-core/src/index.ts",
+        "bytes": 7819,
+        "sha256": "7c144f6446b3fdba55f7b7b947fe242348ba5010025af36868c39436bfea638e"
+      },
+      {
+        "path": "packages/tzdb-core/src/packed-resolver.ts",
+        "bytes": 8495,
+        "sha256": "bc13da5d2d9b8309aaad972662f8a31761a40afffbd9226bdf80159d43e5081f"
+      },
+      {
+        "path": "packages/tzdb-core/src/artifacts/iana-2025b.ts",
+        "bytes": 396,
+        "sha256": "b1236071105653538a259d929a57e7cd2bb97928429cefaef2ead9dd5019e613"
+      }
+    ],
+    "graphDigest": "45b70e7373489b8eaf5d21fa68a881ae0c243a644d067e521c5e82cb85b6d0bb",
+    "closureKind": "static_audited_expected_pre_post_current_not_vite_module_load_telemetry",
+    "prePostEndpointDigestEqual": true,
+    "viteMainAndWorkerModuleLoadTelemetryEstablished": false,
+    "completeInstalledDependencyRuntimeClosureBound": false,
+    "crossFileAtomicSnapshot": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false
+  },
+  "lockedBuildInputSnapshot": {
+    "graphId": "hakimi.western.civil-time.base-config-locked-build-inputs/1",
+    "digestAlgorithm": "sha256-role-file-graph-v1",
+    "inputCount": 17,
+    "inputs": [
+      {
+        "role": "tzdbCorePath",
+        "path": "packages/tzdb-core/src/index.ts",
+        "bytes": 7819,
+        "sha256": "7c144f6446b3fdba55f7b7b947fe242348ba5010025af36868c39436bfea638e"
+      },
+      {
+        "role": "tzdbResolverPath",
+        "path": "packages/tzdb-core/src/packed-resolver.ts",
+        "bytes": 8495,
+        "sha256": "bc13da5d2d9b8309aaad972662f8a31761a40afffbd9226bdf80159d43e5081f"
+      },
+      {
+        "role": "momentEntryPath",
+        "path": "node_modules/moment-timezone/index.js",
+        "bytes": 114,
+        "sha256": "b93bc1a0ab15d56e12f0e281bf005d39166952d9208b828e8d056563f3ff1fd1"
+      },
+      {
+        "role": "momentImplementationPath",
+        "path": "node_modules/moment-timezone/moment-timezone.js",
+        "bytes": 17137,
+        "sha256": "c6ea311984ec62f79570fe9d440295978ec21518d4b8e3ac88117e729e85bc7b"
+      },
+      {
+        "role": "momentPackageJsonPath",
+        "path": "node_modules/moment-timezone/package.json",
+        "bytes": 1076,
+        "sha256": "131fc5c4b7ad0c5ebcc00b5670c49ef54c2cf0cd26f68670bee10bfd66276a2b"
+      },
+      {
+        "role": "momentDataPath",
+        "path": "node_modules/moment-timezone/data/packed/latest.json",
+        "bytes": 715527,
+        "sha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81"
+      },
+      {
+        "role": "momentLicensePath",
+        "path": "node_modules/moment-timezone/LICENSE",
+        "bytes": 1097,
+        "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+      },
+      {
+        "role": "retainedTzdbAdapterPath",
+        "path": "packages/tzdb-core/src/artifacts/iana-2025b.ts",
+        "bytes": 396,
+        "sha256": "b1236071105653538a259d929a57e7cd2bb97928429cefaef2ead9dd5019e613"
+      },
+      {
+        "role": "retainedMomentEntryPath",
+        "path": "node_modules/moment-timezone-2025b/index.js",
+        "bytes": 114,
+        "sha256": "b93bc1a0ab15d56e12f0e281bf005d39166952d9208b828e8d056563f3ff1fd1"
+      },
+      {
+        "role": "retainedMomentImplementationPath",
+        "path": "node_modules/moment-timezone-2025b/moment-timezone.js",
+        "bytes": 17139,
+        "sha256": "11de898e2d5abf498f56633f7f425512bb90bdfa0c1ad527eb4e88bb86e6c443"
+      },
+      {
+        "role": "retainedMomentPackageJsonPath",
+        "path": "node_modules/moment-timezone-2025b/package.json",
+        "bytes": 1077,
+        "sha256": "4b5a6218fe37ea04bbe19f463fc2477e141bfb8ee18506bd99e871a0d25c3dad"
+      },
+      {
+        "role": "retainedMomentDataPath",
+        "path": "node_modules/moment-timezone-2025b/data/packed/latest.json",
+        "bytes": 727104,
+        "sha256": "b1ad1446fbc94459f86c8e3f4ffadfc4170ad2af9cbd2a9b85c75d5436ce6425"
+      },
+      {
+        "role": "retainedMomentLicensePath",
+        "path": "node_modules/moment-timezone-2025b/LICENSE",
+        "bytes": 1097,
+        "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+      },
+      {
+        "role": "sharedMomentImplementationPath",
+        "path": "node_modules/moment/moment.js",
+        "bytes": 176435,
+        "sha256": "7dc0a51c32dae143f2eade235145dfd6a7756388c0f0bf409fa373dd6c233629"
+      },
+      {
+        "role": "sharedMomentBrowserImplementationPath",
+        "path": "node_modules/moment/dist/moment.js",
+        "bytes": 156326,
+        "sha256": "1e949937d4266c65affeb189ff0f4c0dafed235d8d314e32d6746f0334c95852"
+      },
+      {
+        "role": "sharedMomentPackageJsonPath",
+        "path": "node_modules/moment/package.json",
+        "bytes": 3556,
+        "sha256": "5e2f0870f4d1bbef11e8bf90babd72a4399b86b19da81de796a58457a37b8e13"
+      },
+      {
+        "role": "sharedMomentLicensePath",
+        "path": "node_modules/moment/LICENSE",
+        "bytes": 1075,
+        "sha256": "8f38f320bbf5eb84c08e08676f7ee1d2204ebe5797f6a090d077329cf212fca3"
+      }
+    ],
+    "graphDigest": "0f727b4e5eb591d671dc076b328007fa73a3ce96cd10432f3ab8e5886d9205a0",
+    "prePostEndpointDigestEqual": true,
+    "exactBaseConfigRolePathBytesAndSha256Verified": true,
+    "baseMainBuildStartExactPreflightConfigured": true,
+    "workerSameBufferVerificationEstablished": false,
+    "intervalLockEstablished": false,
+    "crossFileAtomicSnapshot": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false
+  },
+  "evidenceToolingSnapshot": {
+    "graphId": "hakimi.western.civil-time.same-artifact-evidence-tooling/1",
+    "digestAlgorithm": "sha256-file-graph-v1",
+    "fileCount": 20,
+    "files": [
+      {
+        "path": "scripts/western-civil-time-same-artifact-browser-observation-lib.mjs",
+        "bytes": 65332,
+        "sha256": "324bc4c44380416f895dcd3c58a7a73f2ab00c19085e454197b9cab8ac73ac61"
+      },
+      {
+        "path": "scripts/run-western-civil-time-same-artifact-browser-observation.mjs",
+        "bytes": 46438,
+        "sha256": "f4c635e0507411320321e6a33a00eeb4c9f55f99ba0fb021cba66249762e2cb3"
+      },
+      {
+        "path": "scripts/render-western-civil-time-same-artifact-browser-observation-candidate.mjs",
+        "bytes": 5052,
+        "sha256": "65e2a6b4479d086525c7cc9d030332f30e843f4af2dead833f12f6f5ffe38f4c"
+      },
+      {
+        "path": "scripts/verify-western-civil-time-same-artifact-browser-observation.mjs",
+        "bytes": 2796,
+        "sha256": "d6c3cbf10cfcda920744dad76bc5180dd2caf3860d383b5f201bb12e76224497"
+      },
+      {
+        "path": "scripts/verify-western-civil-time-same-artifact-browser-observation.test.mjs",
+        "bytes": 16745,
+        "sha256": "01d08eb7b73e4ecfe6cd5949ffb889911469e43c4be336fc2e8a08987f7ff70a"
+      },
+      {
+        "path": "scripts/verify-western-civil-time-same-artifact-config-cwd.test.mjs",
+        "bytes": 3788,
+        "sha256": "e719fe4037b541e2fc4938ada351cefba009fd5564357285c0bf9a7b383c86d8"
+      },
+      {
+        "path": "scripts/western-civil-time-fact-browser-observation-lib.mjs",
+        "bytes": 41842,
+        "sha256": "ee805132b822580dfa79f8d945a65847f0febd22b453eb3488cabc104c4ce00e"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/playwright.same-artifact-evidence.config.ts",
+        "bytes": 5067,
+        "sha256": "3578a33e4cbbdcb02c01c1cb9e4f5632f59f0ed3ff00662e235d88fd62e80a22"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/tsconfig.same-artifact-evidence.json",
+        "bytes": 174,
+        "sha256": "4c4b319ea32a9dbab022dae289b49b4628b0514487bc4ab5fffacd810b4fe53b"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/e2e/civil-time-browser-gate.spec.ts",
+        "bytes": 9618,
+        "sha256": "1906e5c7a3066f26c677bfa0db37f84d3372149677d0ee9ffaa9f30f50a288fb"
+      },
+      {
+        "path": "isolated-drafts/western-civil-time-fact-browser-draft/e2e/same-artifact-summary-reporter.ts",
+        "bytes": 9852,
+        "sha256": "d13252d76b529d97acfdf789170a6893173d727ea0fe23adebdd26b7b969119c"
+      },
+      {
+        "path": "apps/web/node_modules/vite/package.json",
+        "bytes": 5158,
+        "sha256": "e5ed0f85215f871fe22a48987dcd77fcfbe14064a53c0c9f7f48186a6b7e2cf0"
+      },
+      {
+        "path": "apps/web/node_modules/vite/bin/vite.js",
+        "bytes": 2574,
+        "sha256": "fa03478846d229651a3c6aa64833ba2c6cbf580a798b92bd8f47c7480bafb5d8"
+      },
+      {
+        "path": "node_modules/@playwright/test/package.json",
+        "bytes": 754,
+        "sha256": "be51f784a5742a1aa075e0173f5f04f189a791cc30c40e3bb18be584f696764e"
+      },
+      {
+        "path": "node_modules/@playwright/test/cli.js",
+        "bytes": 707,
+        "sha256": "79e23e6a249176295b8490567daa7717448a75866d6ea6f6b296ff3d23305c69"
+      },
+      {
+        "path": "node_modules/playwright-core/package.json",
+        "bytes": 876,
+        "sha256": "07c47543631fef9508760365dee9fbe958c562093ec8d122543949ed231f233f"
+      },
+      {
+        "path": "node_modules/esbuild/package.json",
+        "bytes": 3980,
+        "sha256": "d55d1d19fcc5b6079e4a71dd4111340c79c682bc36835ac7058a0c364c7db58a"
+      },
+      {
+        "path": "node_modules/esbuild/lib/main.js",
+        "bytes": 97214,
+        "sha256": "8331fe1d8b3a07381f33cc425fcfaa94776e263113653f80ec3ba433e9657e73"
+      },
+      {
+        "path": "node_modules/rollup/package.json",
+        "bytes": 12426,
+        "sha256": "c923db71dffef7c6c8bde4a658cb70aea7cbcee3123d9f1f382ffe0ff9423e5d"
+      },
+      {
+        "path": "node_modules/rollup/dist/rollup.js",
+        "bytes": 4701,
+        "sha256": "14a30f6c663b4311ab01518491f395d87ade2668b098d4b022c50109c661b72b"
+      }
+    ],
+    "graphDigest": "a09dcabc6fe704a6d130181d1b11c2cf8015f18812310c6e5d77f29d14d6e67f",
+    "prePostEndpointDigestEqual": true,
+    "viteEsbuildAndRollupStableResolutionIdentifiersObserved": true,
+    "completeNodePlaywrightViteRuntimeClosureBound": false,
+    "crossFileAtomicSnapshot": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false
+  },
+  "e2eAssertionContract": {
+    "contractId": "hakimi.western.civil-time.same-artifact-five-scenarios/1",
+    "scenarioCountPerBrowser": 5,
+    "expectedOutcomeCount": 10,
+    "scenarios": [
+      {
+        "scenarioId": "unique",
+        "assertionClass": "resolved_fact_only_then_all_ten_fact_value_slots_empty_after_input_change"
+      },
+      {
+        "scenarioId": "gap",
+        "assertionClass": "synthetic_dom_setup_without_input_events_then_completed_gap_failure_leaves_all_ten_previously_populated_fact_value_slots_empty"
+      },
+      {
+        "scenarioId": "overlap_reject",
+        "assertionClass": "synthetic_dom_setup_without_input_events_then_completed_overlap_failure_leaves_all_ten_previously_populated_fact_value_slots_empty"
+      },
+      {
+        "scenarioId": "overlap_earlier",
+        "assertionClass": "explicit_earlier_overlap_selection_resolved_fact_only"
+      },
+      {
+        "scenarioId": "overlap_later",
+        "assertionClass": "explicit_later_overlap_selection_resolved_fact_only"
+      }
+    ],
+    "exactFileInspection": {
+      "inspectionId": "hakimi.western.civil-time.same-artifact-exact-e2e-files/1",
+      "bindingCount": 3,
+      "bindings": [
+        {
+          "role": "playwrightConfig",
+          "path": "isolated-drafts/western-civil-time-fact-browser-draft/playwright.same-artifact-evidence.config.ts",
+          "bytes": 5067,
+          "sha256": "3578a33e4cbbdcb02c01c1cb9e4f5632f59f0ed3ff00662e235d88fd62e80a22"
+        },
+        {
+          "role": "fiveScenarioSpec",
+          "path": "isolated-drafts/western-civil-time-fact-browser-draft/e2e/civil-time-browser-gate.spec.ts",
+          "bytes": 9618,
+          "sha256": "1906e5c7a3066f26c677bfa0db37f84d3372149677d0ee9ffaa9f30f50a288fb"
+        },
+        {
+          "role": "sanitizedReporter",
+          "path": "isolated-drafts/western-civil-time-fact-browser-draft/e2e/same-artifact-summary-reporter.ts",
+          "bytes": 9852,
+          "sha256": "d13252d76b529d97acfdf789170a6893173d727ea0fe23adebdd26b7b969119c"
+        }
+      ],
+      "exactFiveScenarioSpecReporterAndConfigBytesVerified": true
+    },
+    "exactSecondHistoricalOffsetRangeGuardUnknownZoneOrResponsiveRunReceiptEstablished": false,
+    "generalControlFlowEquivalenceEstablished": false
+  },
+  "formalContext": {
+    "bindingCount": 4,
+    "bindings": [
+      {
+        "path": "content/system-admission/western-civil-time-fact-browser-observation-candidate.v1.0.0.json",
+        "bytes": 21132,
+        "sha256": "c23cef0c53f433e4996c78769c4f9ffe023309e8ef136414e67fc35d7e0932b2"
+      },
+      {
+        "path": "content/system-admission/western-independent-productization-version-aware-observation-child.v1.1.0.json",
+        "bytes": 12692,
+        "sha256": "140bed89a638deb970e1a60d3ffcbc96eebef509bd14bd692726b8c561d13593"
+      },
+      {
+        "path": "content/system-admission/western-source-binding-requirements.v1.4.0.json",
+        "bytes": 42349,
+        "sha256": "da755745c327b72aa617e40aed8d37a5e3f2c69aeb367dbfd9262dd5cece9f35"
+      },
+      {
+        "path": "content/domain-release/western-astrology.engineering-draft.v0.1.0.manifest.v2.json",
+        "bytes": 72472,
+        "sha256": "a4ba9ca6504e5d386be5302c28a498d95b172a3904c5ddc5f90a8adcc5951f27"
+      }
+    ],
+    "baselineCivilObservationDigest": "e898edd1e91aa69193157bdbfc5ea24610a828ce16588388cd9b7cb5b6331b81",
+    "parentCandidateDigest": "664bdbddd48bc0205eb6dba4cf923903a78d35e6d63ab29ca8e7de3faa5975af",
+    "currentSourceRequirementsLedgerDigest": "d2e13b51abfc0a4247d6b083f8121f5681a925122edcc73ef31819d9e3d23243",
+    "currentEngineeringManifestDigest": "4ed66eeae3d0f7a45dcb850a67dfb6407b695a2f6ecb58eac8b0dd1748db632d",
+    "currentEngineeringManifestConsumesThisChild": false,
+    "currentEngineeringManifestConsumesFactBrowserDraft": false
+  },
+  "runtimeObservation": {
+    "observedAt": "2026-09-03T03:47:33.501Z",
+    "nodeVersion": "24.16.0",
+    "viteVersion": "7.3.6",
+    "playwrightVersion": "1.62.1",
+    "buildExecutionCount": 1,
+    "buildExitCode": 0,
+    "transformedModuleCount": 88,
+    "sourceGraphDigestBefore": "45b70e7373489b8eaf5d21fa68a881ae0c243a644d067e521c5e82cb85b6d0bb",
+    "sourceGraphDigestAfter": "45b70e7373489b8eaf5d21fa68a881ae0c243a644d067e521c5e82cb85b6d0bb",
+    "lockedBuildInputGraphDigestBefore": "0f727b4e5eb591d671dc076b328007fa73a3ce96cd10432f3ab8e5886d9205a0",
+    "lockedBuildInputGraphDigestAfter": "0f727b4e5eb591d671dc076b328007fa73a3ce96cd10432f3ab8e5886d9205a0",
+    "evidenceToolGraphDigestBefore": "a09dcabc6fe704a6d130181d1b11c2cf8015f18812310c6e5d77f29d14d6e67f",
+    "evidenceToolGraphDigestAfter": "a09dcabc6fe704a6d130181d1b11c2cf8015f18812310c6e5d77f29d14d6e67f",
+    "outputTreeBefore": {
+      "digestAlgorithm": "sha256-file-tree-v1",
+      "fileCount": 12,
+      "files": [
+        {
+          "path": "assets/civil-worker-XIpVmNBy.js",
+          "bytes": 879462,
+          "sha256": "e2f2b20a5a54801571955f36cd97a899228c74426727f597df42af236c4183c3"
+        },
+        {
+          "path": "assets/civil-worker-XIpVmNBy.js.map",
+          "bytes": 805568,
+          "sha256": "42e1c249ad6d30b9ab8fc241bfaa6820e7506a8e67c819a2c285e0c4745301d2"
+        },
+        {
+          "path": "assets/iana-2025b-BLy5AmWt.js",
+          "bytes": 714805,
+          "sha256": "4c6ed210fe3c4589fa71235119b55c9c829291ad0a67201e7366159922cdcae3"
+        },
+        {
+          "path": "assets/iana-2025b-BLy5AmWt.js.map",
+          "bytes": 103,
+          "sha256": "53de463e0f11bb1f395fb120fca2f26855a939296b145fc972e70e92683d8e0b"
+        },
+        {
+          "path": "assets/index-BQePkjfo.js",
+          "bytes": 90510,
+          "sha256": "11742378b675f57f2e949bd842c22bc5f992e2ce525199200cf80e03103b926b"
+        },
+        {
+          "path": "assets/index-BQePkjfo.js.map",
+          "bytes": 461417,
+          "sha256": "407ad7a686968c695d1aa66206b436db24adc8754c3e60f4bfab11aab79d7047"
+        },
+        {
+          "path": "assets/index-BlhDAk9d.css",
+          "bytes": 4010,
+          "sha256": "ae6d6274d04ca2c58627b2277404bb0473700a280dc3fa83955b4b86964708f1"
+        },
+        {
+          "path": "hakimi-western-fact-only-build-manifest.v1.json",
+          "bytes": 2290,
+          "sha256": "1b884dee32ccea8f220c6ad3ad690b4db2ece94317b15b13ef335e2395475eb2"
+        },
+        {
+          "path": "index.html",
+          "bytes": 5408,
+          "sha256": "d50ce59d04cf222fee3d0735d418582516eb1f79b09fc3e90d4e96fa964d9333"
+        },
+        {
+          "path": "licenses/moment-2.30.1-LICENSE.txt",
+          "bytes": 1075,
+          "sha256": "8f38f320bbf5eb84c08e08676f7ee1d2204ebe5797f6a090d077329cf212fca3"
+        },
+        {
+          "path": "licenses/moment-timezone-0.5.48-retained-LICENSE.txt",
+          "bytes": 1097,
+          "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+        },
+        {
+          "path": "licenses/moment-timezone-0.6.3-LICENSE.txt",
+          "bytes": 1097,
+          "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+        }
+      ],
+      "treeDigest": "877bda4852ade2c1aabf7c246621b384d940b83749fd7add6befe1721780a9d9"
+    },
+    "outputTreeAfter": {
+      "digestAlgorithm": "sha256-file-tree-v1",
+      "fileCount": 12,
+      "files": [
+        {
+          "path": "assets/civil-worker-XIpVmNBy.js",
+          "bytes": 879462,
+          "sha256": "e2f2b20a5a54801571955f36cd97a899228c74426727f597df42af236c4183c3"
+        },
+        {
+          "path": "assets/civil-worker-XIpVmNBy.js.map",
+          "bytes": 805568,
+          "sha256": "42e1c249ad6d30b9ab8fc241bfaa6820e7506a8e67c819a2c285e0c4745301d2"
+        },
+        {
+          "path": "assets/iana-2025b-BLy5AmWt.js",
+          "bytes": 714805,
+          "sha256": "4c6ed210fe3c4589fa71235119b55c9c829291ad0a67201e7366159922cdcae3"
+        },
+        {
+          "path": "assets/iana-2025b-BLy5AmWt.js.map",
+          "bytes": 103,
+          "sha256": "53de463e0f11bb1f395fb120fca2f26855a939296b145fc972e70e92683d8e0b"
+        },
+        {
+          "path": "assets/index-BQePkjfo.js",
+          "bytes": 90510,
+          "sha256": "11742378b675f57f2e949bd842c22bc5f992e2ce525199200cf80e03103b926b"
+        },
+        {
+          "path": "assets/index-BQePkjfo.js.map",
+          "bytes": 461417,
+          "sha256": "407ad7a686968c695d1aa66206b436db24adc8754c3e60f4bfab11aab79d7047"
+        },
+        {
+          "path": "assets/index-BlhDAk9d.css",
+          "bytes": 4010,
+          "sha256": "ae6d6274d04ca2c58627b2277404bb0473700a280dc3fa83955b4b86964708f1"
+        },
+        {
+          "path": "hakimi-western-fact-only-build-manifest.v1.json",
+          "bytes": 2290,
+          "sha256": "1b884dee32ccea8f220c6ad3ad690b4db2ece94317b15b13ef335e2395475eb2"
+        },
+        {
+          "path": "index.html",
+          "bytes": 5408,
+          "sha256": "d50ce59d04cf222fee3d0735d418582516eb1f79b09fc3e90d4e96fa964d9333"
+        },
+        {
+          "path": "licenses/moment-2.30.1-LICENSE.txt",
+          "bytes": 1075,
+          "sha256": "8f38f320bbf5eb84c08e08676f7ee1d2204ebe5797f6a090d077329cf212fca3"
+        },
+        {
+          "path": "licenses/moment-timezone-0.5.48-retained-LICENSE.txt",
+          "bytes": 1097,
+          "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+        },
+        {
+          "path": "licenses/moment-timezone-0.6.3-LICENSE.txt",
+          "bytes": 1097,
+          "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+        }
+      ],
+      "treeDigest": "877bda4852ade2c1aabf7c246621b384d940b83749fd7add6befe1721780a9d9"
+    },
+    "server": {
+      "origin": "http://127.0.0.1:58418",
+      "host": "127.0.0.1",
+      "scheme": "http",
+      "projectHeaderName": "x-hakimi-western-evidence-project",
+      "responseHeaderName": "x-hakimi-western-output-tree-sha256",
+      "responseHeaderValue": "877bda4852ade2c1aabf7c246621b384d940b83749fd7add6befe1721780a9d9",
+      "requiredRuntimePaths": [
+        "assets/civil-worker-XIpVmNBy.js",
+        "assets/index-BQePkjfo.js",
+        "assets/index-BlhDAk9d.css",
+        "index.html"
+      ],
+      "requiredRuntimePathsServedByBothBrowsers": true,
+      "scenarioRuntimePaths": [
+        "assets/civil-worker-XIpVmNBy.js",
+        "assets/index-BQePkjfo.js",
+        "assets/index-BlhDAk9d.css",
+        "index.html"
+      ],
+      "scenarioRuntimePathsServedByBothBrowsers": true,
+      "evidenceOnlyOutputBodyProbePaths": [
+        "assets/iana-2025b-BLy5AmWt.js"
+      ],
+      "evidenceOnlyOutputBodyProbePathsServedByBothBrowsers": true,
+      "retained2025bChunkScenarioRuntimeRequested": false,
+      "retained2025bChunkEvidenceOnlyBodyProbeObserved": true,
+      "browserDefaultFaviconControl": {
+        "requestMethod": "GET",
+        "canonicalPath": "/favicon.ico",
+        "query": "",
+        "responseStatus": 204,
+        "noBody": true,
+        "cacheControl": "no-store",
+        "contentSecurityPolicy": "default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'",
+        "xContentTypeOptions": "nosniff",
+        "outputTreeResponseHeaderIncluded": false,
+        "excludedFromOutputTree": true,
+        "excludedFromServedBodyLedger": true,
+        "responsesByProject": [
+          {
+            "projectName": "chrome",
+            "responseCount": 6
+          },
+          {
+            "projectName": "msedge",
+            "responseCount": 6
+          }
+        ],
+        "aggregateResponseCount": 12
+      },
+      "servedResponseCount": 46,
+      "totalControlledHttpResponseCount": 58,
+      "unattributedResponseCount": 0,
+      "unexpectedResponseCount": 0,
+      "bodyMismatchResponseCount": 0,
+      "unmarkedRetainedChunkResponseCount": 0,
+      "servedArtifactsByProject": [
+        {
+          "projectName": "chrome",
+          "servedResponseCount": 23,
+          "scenarioRuntimeArtifactCount": 4,
+          "scenarioRuntimeArtifacts": [
+            {
+              "path": "assets/civil-worker-XIpVmNBy.js",
+              "bytes": 879462,
+              "sha256": "e2f2b20a5a54801571955f36cd97a899228c74426727f597df42af236c4183c3",
+              "responseCount": 7
+            },
+            {
+              "path": "assets/index-BQePkjfo.js",
+              "bytes": 90510,
+              "sha256": "11742378b675f57f2e949bd842c22bc5f992e2ce525199200cf80e03103b926b",
+              "responseCount": 5
+            },
+            {
+              "path": "assets/index-BlhDAk9d.css",
+              "bytes": 4010,
+              "sha256": "ae6d6274d04ca2c58627b2277404bb0473700a280dc3fa83955b4b86964708f1",
+              "responseCount": 5
+            },
+            {
+              "path": "index.html",
+              "bytes": 5408,
+              "sha256": "d50ce59d04cf222fee3d0735d418582516eb1f79b09fc3e90d4e96fa964d9333",
+              "responseCount": 5
+            }
+          ],
+          "scenarioRuntimeBodyManifestDigest": "4d45d2d79bb384ddb02e4dabae373bcdc1fe8a6a1bf5f600597bc02a6139332d",
+          "scenarioRuntimeResponseLedgerDigest": "21359beed92eb63a7d4fa08de99aabf6f29e26c80a258ee2217eb04b3e69dda0",
+          "evidenceOnlyProbeArtifactCount": 1,
+          "evidenceOnlyProbeArtifacts": [
+            {
+              "path": "assets/iana-2025b-BLy5AmWt.js",
+              "bytes": 714805,
+              "sha256": "4c6ed210fe3c4589fa71235119b55c9c829291ad0a67201e7366159922cdcae3",
+              "responseCount": 1
+            }
+          ],
+          "evidenceOnlyProbeBodyManifestDigest": "00581698a8ecc397eeff4916c95e737048d46d1f4b9174ea5e5877f866760ba1",
+          "evidenceOnlyProbeResponseLedgerDigest": "989cd06f2e4cff07b4e560e78c9805e5d6d14d668fe9e88ed0f53e16558b45a5",
+          "combinedServedBodyManifestDigest": "21292748e32b2e130ce49bf97de6885d37c3ecbcadcc1fe8e5d812b313430a32",
+          "combinedServedResponseLedgerDigest": "c92f852f778765fcc8d7a6ac23e4bed022f2fa3c4773e2293209f843728d8179"
+        },
+        {
+          "projectName": "msedge",
+          "servedResponseCount": 23,
+          "scenarioRuntimeArtifactCount": 4,
+          "scenarioRuntimeArtifacts": [
+            {
+              "path": "assets/civil-worker-XIpVmNBy.js",
+              "bytes": 879462,
+              "sha256": "e2f2b20a5a54801571955f36cd97a899228c74426727f597df42af236c4183c3",
+              "responseCount": 7
+            },
+            {
+              "path": "assets/index-BQePkjfo.js",
+              "bytes": 90510,
+              "sha256": "11742378b675f57f2e949bd842c22bc5f992e2ce525199200cf80e03103b926b",
+              "responseCount": 5
+            },
+            {
+              "path": "assets/index-BlhDAk9d.css",
+              "bytes": 4010,
+              "sha256": "ae6d6274d04ca2c58627b2277404bb0473700a280dc3fa83955b4b86964708f1",
+              "responseCount": 5
+            },
+            {
+              "path": "index.html",
+              "bytes": 5408,
+              "sha256": "d50ce59d04cf222fee3d0735d418582516eb1f79b09fc3e90d4e96fa964d9333",
+              "responseCount": 5
+            }
+          ],
+          "scenarioRuntimeBodyManifestDigest": "4d45d2d79bb384ddb02e4dabae373bcdc1fe8a6a1bf5f600597bc02a6139332d",
+          "scenarioRuntimeResponseLedgerDigest": "21359beed92eb63a7d4fa08de99aabf6f29e26c80a258ee2217eb04b3e69dda0",
+          "evidenceOnlyProbeArtifactCount": 1,
+          "evidenceOnlyProbeArtifacts": [
+            {
+              "path": "assets/iana-2025b-BLy5AmWt.js",
+              "bytes": 714805,
+              "sha256": "4c6ed210fe3c4589fa71235119b55c9c829291ad0a67201e7366159922cdcae3",
+              "responseCount": 1
+            }
+          ],
+          "evidenceOnlyProbeBodyManifestDigest": "00581698a8ecc397eeff4916c95e737048d46d1f4b9174ea5e5877f866760ba1",
+          "evidenceOnlyProbeResponseLedgerDigest": "989cd06f2e4cff07b4e560e78c9805e5d6d14d668fe9e88ed0f53e16558b45a5",
+          "combinedServedBodyManifestDigest": "21292748e32b2e130ce49bf97de6885d37c3ecbcadcc1fe8e5d812b313430a32",
+          "combinedServedResponseLedgerDigest": "c92f852f778765fcc8d7a6ac23e4bed022f2fa3c4773e2293209f843728d8179"
+        }
+      ],
+      "perBrowserServedBodyManifestsEqual": true,
+      "perBrowserScenarioRuntimeBodyManifestsEqual": true,
+      "perBrowserEvidenceOnlyProbeBodyManifestsEqual": true,
+      "allServedBodiesMatchedOutputTree": true,
+      "singleOutputTreeServedWithoutRebuild": true
+    },
+    "browserProbes": [
+      {
+        "projectName": "chrome",
+        "channel": "chrome",
+        "browserProduct": "Google Chrome",
+        "versionBefore": "152.0.7977.75",
+        "versionAfter": "152.0.7977.75",
+        "prePostVersionEqual": true
+      },
+      {
+        "projectName": "msedge",
+        "channel": "msedge",
+        "browserProduct": "Microsoft Edge",
+        "versionBefore": "152.0.4191.53",
+        "versionAfter": "152.0.4191.53",
+        "prePostVersionEqual": true
+      }
+    ],
+    "runtimeToolResolution": {
+      "resolutionAnchorIdentifier": "apps/web/node_modules/vite/package.json",
+      "viteCliIdentifier": "apps/web/node_modules/vite/bin/vite.js",
+      "viteConfigLoader": "runner",
+      "tools": [
+        {
+          "role": "esbuild",
+          "resolutionMode": "resolved_from_vite_package_anchor",
+          "packageIdentifier": "node_modules/esbuild/package.json",
+          "entryIdentifier": "node_modules/esbuild/lib/main.js",
+          "version": "0.28.1"
+        },
+        {
+          "role": "rollup",
+          "resolutionMode": "resolved_from_vite_package_anchor",
+          "packageIdentifier": "node_modules/rollup/package.json",
+          "entryIdentifier": "node_modules/rollup/dist/rollup.js",
+          "version": "4.62.3"
+        },
+        {
+          "role": "vite",
+          "resolutionMode": "explicit_workspace_relative_cli",
+          "packageIdentifier": "apps/web/node_modules/vite/package.json",
+          "entryIdentifier": "apps/web/node_modules/vite/bin/vite.js",
+          "version": "7.3.6"
+        }
+      ],
+      "completeInstalledRuntimeDependencyClosureBound": false
+    },
+    "playwrightSummary": {
+      "schemaVersion": "hakimi.western.same-artifact-playwright-summary/1",
+      "overallStatus": "passed",
+      "configuredProjectNames": [
+        "chrome",
+        "msedge"
+      ],
+      "outcomeCount": 10,
+      "outcomes": [
+        {
+          "projectName": "chrome",
+          "scenarioId": "unique",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "chrome",
+          "scenarioId": "gap",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "chrome",
+          "scenarioId": "overlap_reject",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "chrome",
+          "scenarioId": "overlap_earlier",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "chrome",
+          "scenarioId": "overlap_later",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "msedge",
+          "scenarioId": "unique",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "msedge",
+          "scenarioId": "gap",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "msedge",
+          "scenarioId": "overlap_reject",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "msedge",
+          "scenarioId": "overlap_earlier",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "projectName": "msedge",
+          "scenarioId": "overlap_later",
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    "cleanup": {
+      "viteCliExited": true,
+      "playwrightCliExited": true,
+      "browserVersionProbeHandlesClosed": true,
+      "runnerControlledChildProcessesStopped": true,
+      "serverStopped": true,
+      "portReleased": true,
+      "temporaryRootRemoved": true
+    }
+  },
+  "browserEvidenceBoundary": {
+    "exactSingleBuildExecuted": true,
+    "sameOutputTreeServedToBothBrowsers": true,
+    "perBrowserActualServedBodyIdentitiesObserved": true,
+    "retainedIanaChunkBodyObservedByEvidenceOnlyNavigation": true,
+    "retained2025bChunkScenarioRuntimeRequested": false,
+    "retainedIanaChunkExecutedByCivilResolverEstablished": false,
+    "exactBrowserVersionsObservedBeforeAndAfterMatrix": true,
+    "chromeScenarioOutcomes": 5,
+    "edgeScenarioOutcomes": 5,
+    "totalPassedScenarioOutcomes": 10,
+    "isolatedLoopbackBrowserRuntimeObservationEstablished": true,
+    "formalChromeBrowserReceiptIssued": false,
+    "formalEdgeBrowserReceiptIssued": false,
+    "productionBrowserRuntimeEvidenceEstablished": false,
+    "publicHostValidated": false,
+    "pwaOrServiceWorkerValidated": false
+  },
+  "storageBackupRecoveryBoundary": {
+    "storageProbePerformed": false,
+    "storageMutationObserved": null,
+    "independentStorageBackendSelected": false,
+    "independentStorageNamespaceSelected": false,
+    "backupExecutionCount": 0,
+    "recoveryExecutionCount": 0,
+    "rollbackExecutionCount": 0,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "uiViewGenerationIsProductMutationEpoch": false,
+    "productionBackupRecoveryCertified": false
+  },
+  "dataHandling": {
+    "syntheticInputsOnly": true,
+    "actualPersonDataEntered": false,
+    "candidateAnonymous": false,
+    "rawCivilTimeInputIncluded": false,
+    "utcInstantOrOffsetIncluded": false,
+    "requestOrProjectionDigestIncluded": false,
+    "rawPlaywrightReportIncluded": false,
+    "rawStdoutOrStderrIncluded": false,
+    "errorOrAttachmentIncluded": false,
+    "screenshotTraceVideoOrDownloadIncluded": false,
+    "temporaryOrAbsolutePathIncluded": false,
+    "safeToLog": false,
+    "safeToPersist": false,
+    "safeToPublish": false
+  },
+  "gateSummary": {
+    "bindingRequired": 28,
+    "bindingFrozenVerified": 0,
+    "independentExpertsRequired": 2,
+    "independentExpertReviewsVerified": 0,
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "requirementsUniverseClosed": false
+  },
+  "formalReceiptCounts": {
+    "releaseEvidenceReceipts": 0,
+    "productionBrowserReceipts": 0,
+    "artifactIdentityReceipts": 0,
+    "buildReceipts": 0,
+    "runtimeExecutionReceipts": 0,
+    "deploymentReceipts": 0,
+    "rollbackReceipts": 0,
+    "expertReviewReceipts": 0,
+    "rightsLegalDecisionReceipts": 0
+  },
+  "evidenceAccounts": [
+    {
+      "accountId": "engineering_evidence",
+      "state": "current_single_build_dual_browser_matrix_mechanically_observed"
+    },
+    {
+      "accountId": "browser_runtime_evidence",
+      "state": "isolated_loopback_current_output_tree_only"
+    },
+    {
+      "accountId": "content_truth",
+      "state": "not_established"
+    },
+    {
+      "accountId": "expert_truth",
+      "state": "not_established"
+    },
+    {
+      "accountId": "rights_legal_judgment",
+      "state": "not_established"
+    },
+    {
+      "accountId": "release_readiness",
+      "state": "not_ready"
+    },
+    {
+      "accountId": "public_release_authorization",
+      "state": "not_authorized"
+    }
+  ],
+  "authorityBoundary": {
+    "astronomicalFactsEstablished": false,
+    "civilTimeDomainTruthCertified": false,
+    "crossSystemAuthorityInherited": false,
+    "formalAdmissionAuthorized": false,
+    "formalInputContractAdmitted": false,
+    "domainAuthorityAuthorized": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "expertIdentityCredentialsIndependenceEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "sourceFreezeEstablished": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "highRiskClaimsAuthorized": false
+  },
+  "observationBoundary": {
+    "automatedSameRunLineageMechanicallyObserved": true,
+    "toolAttestationEstablished": false,
+    "completeSourceToBuildAttestationEstablished": false,
+    "viteMainAndWorkerModuleLoadTelemetryEstablished": false,
+    "outputTreePrePostDigestEqual": true,
+    "sourceAndToolGraphsPrePostDigestEqual": true,
+    "repositoryCrossFileAtomicSnapshot": false,
+    "repositoryIntervalMutationExcluded": false,
+    "repositoryAbaExcluded": false,
+    "mutationEpochClaimed": false,
+    "mutationEpochReceipt": null,
+    "digestIsDigitalSignature": false,
+    "signerIdentityEstablished": false,
+    "historicalRuntimeCanBeReverifiedFromCandidateAlone": false,
+    "cleanupObservedAtIssuanceOnly": true
+  },
+  "doesNotEstablish": [
+    "formal_product_manifest_parent_or_registry_integration",
+    "formal_release_evidence_or_production_browser_receipts",
+    "pwa_service_worker_public_host_deployment_or_rollback",
+    "storage_backend_namespace_backup_recovery_or_product_mutation_epoch",
+    "content_truth_expert_truth_source_freeze_or_rights_legal_judgment",
+    "release_readiness_public_deployment_or_public_release_authorization",
+    "cross_file_atomicity_interval_integrity_aba_exclusion_or_trusted_tool_attestation"
+  ],
+  "observationDigest": "c23522cd6eed4753efe12b9d4e9a5354afaa6e9df41d8b76f458706625715ded"
+}

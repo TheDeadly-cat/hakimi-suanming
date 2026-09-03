@@ -153,12 +153,14 @@ test("4219 规则层预览在双浏览器完成计算且零持久化", async ({ 
   await expect(page.locator("#content-sources > li[data-source-role='scientific_boundary']"))
     .toHaveCount(1);
   await expect(page.locator("#content-boundary"))
-    .toHaveAttribute("data-content-version", "western-astrology-neutral-content/0.5-draft");
+    .toHaveAttribute("data-content-version", "western-astrology-neutral-content/0.8-draft");
   await expect(page.locator("#content-boundary")).toContainText("不是经科学验证的因果结论");
   await expect(page.locator("#content-boundary")).toContainText("首读是导航而非主导排名");
   await expect(page.locator("#content-boundary")).toContainText("逐星综合不生成主导排序");
   await expect(page.locator("#content-boundary")).toContainText("不预设统一 orb 或强弱评分");
   await expect(page.locator("#content-facts-hash")).toHaveText(/^[a-f0-9]{64}$/);
+  await expect(page.locator("#content-zodiac-method"))
+    .toHaveText("tropical / ayanamsha:null / tropical_identity_v1");
   await expect(page.locator("#placement-content-list > li").first()).toContainText("太阳关注");
   await expect(page.locator("#placement-content-list > li").first()).toContainText("可用的一端");
   await expect(page.locator("#placement-content-list > li").first()).toContainText("需要留意的一端");
@@ -227,6 +229,25 @@ test("4219 规则层预览在双浏览器完成计算且零持久化", async ({ 
   await expect(page.locator("#aspect-content-list > li")).toHaveCount(23);
   await expect(page.locator("#content-facts-hash")).toHaveText(/^[a-f0-9]{64}$/);
   expect(await page.locator("#content-facts-hash").textContent()).not.toBe(tropicalFactsHash);
+  await expect(page.locator("#content-zodiac-method")).toHaveText(
+    "sidereal / manual_offset_unverified / subtract_supplied_offset_v1"
+  );
+
+  await page.locator("#house-system").selectOption("whole_sign_v1");
+  await page.locator("#calculate-button").click();
+  await expect(page.locator("#workspace-status")).toContainText(
+    "计算完成并通过工程核对（10 天体）",
+    { timeout: 60_000 }
+  );
+  const displayedWholeSignCusps = await page.locator("#houses-list > li > span").allTextContents();
+  expect(displayedWholeSignCusps).toHaveLength(12);
+  expect(displayedWholeSignCusps.every((value) => /^\d+°00′00″$/u.test(value))).toBe(true);
+  const displayedAngles = await page.locator("#angles-list > div > dd").allTextContents();
+  expect(displayedAngles).toHaveLength(4);
+  expect(displayedAngles.every((value) => !value.includes("′60″"))).toBe(true);
+  await expect(page.locator("#content-zodiac-method")).toHaveText(
+    "sidereal / manual_offset_unverified / subtract_supplied_offset_v1"
+  );
 
   await page.locator("#utc-instant").fill("2025-03-20 09:01:00.000Z");
   await page.locator("#calculate-button").click();
@@ -269,15 +290,15 @@ test("4219 西洋 43 项基础内容审稿模板可下载、只读预检且篡�
   const projectName = test.info().project.name;
   const downloadedPath = path.join(
     os.tmpdir(),
-    `hakimi-western-content-review-v006-template-${projectName}.json`
+    `hakimi-western-content-review-v008-template-${projectName}.json`
   );
   const validPath = path.join(
     os.tmpdir(),
-    `hakimi-western-content-review-v006-valid-${projectName}.json`
+    `hakimi-western-content-review-v008-valid-${projectName}.json`
   );
   const tamperedPath = path.join(
     os.tmpdir(),
-    `hakimi-western-content-review-v006-tampered-${projectName}.json`
+    `hakimi-western-content-review-v008-tampered-${projectName}.json`
   );
 
   await page.goto("/", { waitUntil: "domcontentloaded" });
@@ -293,15 +314,15 @@ test("4219 西洋 43 项基础内容审稿模板可下载、只读预检且篡�
   await page.locator("#review-feedback-download").click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe(
-    "hakimi-western-content-primitives-review-v006.json"
+    "hakimi-western-content-primitives-review-v008.json"
   );
   await download.saveAs(downloadedPath);
   const rawTemplate = await fs.readFile(downloadedPath, "utf8");
   expect(rawTemplate.endsWith("\n")).toBe(true);
   const feedback = JSON.parse(rawTemplate) as Record<string, any>;
   expect(feedback.profile).toMatchObject({
-    formatVersion: "hakimi.western.content_review_feedback/0.1.0",
-    templateVersion: "0.6.0",
+    formatVersion: "hakimi.western.content_review_feedback/0.2.0",
+    templateVersion: "0.8.0",
     expectedItemCount: 43,
     expectedSourceCount: 31,
     catalogScope: "fixed_43_primitive_content_only",
@@ -402,7 +423,7 @@ test("4219 西洋 43 项基础内容审稿模板可下载、只读预检且篡�
   await page.locator("#review-feedback-panel").screenshot({
     path: path.join(
       os.tmpdir(),
-      `hakimi-western-content-review-v006-${projectName}-desktop.png`
+      `hakimi-western-content-review-v008-${projectName}-desktop.png`
     ),
     animations: "disabled"
   });
@@ -414,7 +435,7 @@ test("4219 西洋 43 项基础内容审稿模板可下载、只读预检且篡�
   await page.locator("#review-feedback-panel").screenshot({
     path: path.join(
       os.tmpdir(),
-      `hakimi-western-content-review-v006-${projectName}-mobile.png`
+      `hakimi-western-content-review-v008-${projectName}-mobile.png`
     ),
     animations: "disabled"
   });
@@ -456,15 +477,15 @@ test("4219 西洋当前盘动态候选可下载去直接标识模板、只读预
   const projectName = test.info().project.name;
   const downloadedPath = path.join(
     os.tmpdir(),
-    `hakimi-western-dynamic-review-v007-template-${projectName}.json`
+    `hakimi-western-dynamic-review-v010-template-${projectName}.json`
   );
   const validPath = path.join(
     os.tmpdir(),
-    `hakimi-western-dynamic-review-v007-valid-${projectName}.json`
+    `hakimi-western-dynamic-review-v010-valid-${projectName}.json`
   );
   const tamperedPath = path.join(
     os.tmpdir(),
-    `hakimi-western-dynamic-review-v007-tampered-${projectName}.json`
+    `hakimi-western-dynamic-review-v010-tampered-${projectName}.json`
   );
 
   await page.goto("/", { waitUntil: "domcontentloaded" });
@@ -490,7 +511,7 @@ test("4219 西洋当前盘动态候选可下载去直接标识模板、只读预
   const downloadPromise = page.waitForEvent("download");
   await page.locator("#dynamic-review-feedback-download").click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toBe("hakimi-western-current-chart-review-v007.json");
+  expect(download.suggestedFilename()).toBe("hakimi-western-current-chart-review-v010.json");
   await download.saveAs(downloadedPath);
   const rawTemplate = await fs.readFile(downloadedPath, "utf8");
   expect(rawTemplate.endsWith("\n")).toBe(true);
@@ -502,8 +523,8 @@ test("4219 西洋当前盘动态候选可下载去直接标识模板、只读预
   expect(rawTemplate).not.toContain("ayanamshaDeg");
   const feedback = JSON.parse(rawTemplate) as Record<string, any>;
   expect(feedback.profile).toMatchObject({
-    formatVersion: "hakimi.western.dynamic_content_review_feedback/0.1.0",
-    templateVersion: "0.7.0",
+    formatVersion: "hakimi.western.dynamic_content_review_feedback/0.2.0",
+    templateVersion: "0.10.0",
     reviewScope: "current_projection_dynamic_candidates_only",
     privacyScope: "direct_identifiers_removed_derived_chart_facts",
     directIdentifiersIncluded: false,
@@ -514,6 +535,11 @@ test("4219 西洋当前盘动态候选可下载去直接标识模板、只读预
   });
   expect(feedback.projectionBinding).toMatchObject({
     factsSha256,
+    zodiacMethod: {
+      kind: "tropical",
+      ayanamshaId: null,
+      algorithmId: "tropical_identity_v1"
+    },
     itemCount: 73,
     sourceCount: 31
   });
@@ -628,7 +654,7 @@ test("4219 西洋当前盘动态候选可下载去直接标识模板、只读预
   await expect(page.locator(".content-candidate-card[data-review-result='null']")).toHaveCount(73);
 
   await page.locator("#dynamic-review-feedback-panel").screenshot({
-    path: path.join(os.tmpdir(), `hakimi-western-dynamic-review-v007-${projectName}-desktop.png`),
+    path: path.join(os.tmpdir(), `hakimi-western-dynamic-review-v010-${projectName}-desktop.png`),
     animations: "disabled"
   });
   await page.setViewportSize({ width: 390, height: 844 });
@@ -637,7 +663,7 @@ test("4219 西洋当前盘动态候选可下载去直接标识模板、只读预
     root: document.documentElement.scrollWidth - document.documentElement.clientWidth
   }))).toEqual({ body: 0, root: 0 });
   await page.locator("#dynamic-review-feedback-panel").screenshot({
-    path: path.join(os.tmpdir(), `hakimi-western-dynamic-review-v007-${projectName}-mobile.png`),
+    path: path.join(os.tmpdir(), `hakimi-western-dynamic-review-v010-${projectName}-mobile.png`),
     animations: "disabled"
   });
   await page.setViewportSize({ width: 1280, height: 720 });
@@ -728,5 +754,22 @@ test("4219 表单级参数错误在启动 Worker 前失败关闭", async ({ page
   await expect(page.locator("#form-error")).toContainText("纬度暂限 ±60°");
   await expect(page.locator("#workspace-status"))
     .toHaveText("输入未通过校验；未启动 Worker，也未保留旧结果。");
+
+  await page.locator("#latitude-deg").fill("51.4779");
+  await page.locator("#sidereal-mode").check();
+  await page.locator("#ayanamsha-deg").fill("24.1");
+  await page.locator("#calculate-button").click();
+  await expect(page.locator("#content-zodiac-method")).toHaveText(
+    "sidereal / manual_offset_unverified / subtract_supplied_offset_v1"
+  );
+
+  await page.locator("#ayanamsha-deg").fill("");
+  await page.locator("#calculate-button").click();
+  await expect(page.locator("#form-error")).toBeVisible();
+  await expect(page.locator("#form-error")).toContainText("恒星岁差值必须明确填写");
+  await expect(page.locator("#workspace-status"))
+    .toHaveText("输入未通过校验；未启动 Worker，也未保留旧结果。");
+  await expect(page.locator("#content-zodiac-method")).toHaveText("尚未生成");
+  await expect(page.locator("#content-facts-hash")).toHaveText("尚未生成");
   expect(consoleProblems).toEqual([]);
 });

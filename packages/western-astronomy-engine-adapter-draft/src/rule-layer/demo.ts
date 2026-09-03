@@ -4,6 +4,7 @@ import {
 } from "../index.ts";
 import {
   WESTERN_RULE_LAYER_REQUEST_VERSION,
+  WESTERN_TROPICAL_ZODIAC_IDENTITY,
   runWesternRuleLayer
 } from "./index.ts";
 
@@ -30,7 +31,7 @@ const ruleArtifact = runWesternRuleLayer({
     eclipticLongitudeDeg: body.trueEclipticOfDate.longitudeDeg,
     longitudeSpeedDegPerDay: body.finiteDifference.longitudeSpeedDegPerDay
   })),
-  zodiac: { kind: "tropical", ayanamshaDeg: null },
+  zodiac: WESTERN_TROPICAL_ZODIAC_IDENTITY,
   houses: {
     systemId: "porphyry_v1",
     ramcDeg: 0,

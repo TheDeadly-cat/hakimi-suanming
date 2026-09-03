@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="robots" content="noindex,nofollow,noarchive" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; worker-src 'self' blob:; connect-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>西洋民用时工程事实 · 隔离草案</title>
+    <script type="module" src="../src/main.ts"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">WESTERN · FACT-ONLY · ISOLATED</p>
+          <h1>民用时 → UTC 工程事实</h1>
+          <p class="lede">只验证时间解析、UTC 偏移、DST 决策与冻结 tzdb 身份；不接天文引擎、宫位、规则或解释。</p>
+        </div>
+        <div class="status-stack" aria-label="准入状态">
+          <span class="badge badge-warn">未正式准入</span>
+          <span class="badge">代码不主动存储或外传</span>
+        </div>
+      </header>
+
+      <section class="panel input-panel" aria-labelledby="input-heading">
+        <div class="section-heading">
+          <div>
+            <p class="step">STEP 01</p>
+            <h2 id="input-heading">显式民用时输入</h2>
+          </div>
+          <button id="load-overlap-example" class="ghost-button" type="button">载入 DST 重叠样例</button>
+        </div>
+
+        <form id="fact-form" novalidate>
+          <fieldset id="input-fieldset" class="input-fieldset">
+          <div class="form-grid">
+            <label>日期 <input id="date" type="date" value="2000-01-01" min="1900-01-01" max="2100-12-31" required /></label>
+            <label>当地时间 <input id="time" type="time" value="20:00" step="60" required /></label>
+            <label>时间精度
+              <select id="time-precision">
+                <option value="exact_minute" selected>精确到分钟</option>
+                <option value="exact_second">精确到秒</option>
+              </select>
+            </label>
+            <label>IANA 时区 <input id="time-zone" value="Asia/Shanghai" autocomplete="off" required /></label>
+            <label>DST 重叠策略
+              <select id="dst-policy">
+                <option value="reject" selected>拒绝重叠</option>
+                <option value="earlier">选择较早瞬时点</option>
+                <option value="later">选择较晚瞬时点</option>
+              </select>
+            </label>
+            <label>纬度（北为正） <input id="latitude" type="number" value="31.2304" min="-90" max="90" step="any" required /></label>
+            <label>经度（东为正） <input id="longitude" type="number" value="121.4737" min="-180" max="180" step="any" required /></label>
+          </div>
+          <div class="action-row">
+            <button id="run-chain" class="primary-button" type="button">生成工程事实</button>
+            <p>默认值是合成工程样例。应用代码不主动记录、持久化或向外部服务传输输入；摘要也属于个人派生数据，仍需在目标浏览器与主机复验运行时边界。</p>
+          </div>
+          </fieldset>
+        </form>
+      </section>
+
+      <section class="panel result-panel" aria-labelledby="result-heading">
+        <div class="section-heading">
+          <div>
+            <p class="step">STEP 02</p>
+            <h2 id="result-heading">链路结果</h2>
+          </div>
+          <output id="chain-status" class="run-status" data-state="idle" aria-live="polite">等待运行</output>
+        </div>
+
+        <div id="error-box" class="error-box" hidden></div>
+        <div id="fact-results" class="fact-results" hidden>
+          <dl class="fact-grid">
+            <div><dt>声明民用时</dt><dd id="declared-civil-time"></dd></div>
+            <div><dt>UTC 瞬时点</dt><dd id="utc-instant"></dd></div>
+            <div><dt>UTC 偏移</dt><dd id="utc-offset"></dd></div>
+            <div><dt>DST 决策</dt><dd id="dst-decision"></dd></div>
+            <div><dt>tzdb</dt><dd id="tzdb-identity"></dd></div>
+            <div><dt>本地时间回算</dt><dd id="round-trip"></dd></div>
+            <div><dt>工件覆盖范围</dt><dd id="supported-range"></dd></div>
+            <div><dt>适配器版本</dt><dd id="adapter-version"></dd></div>
+            <div><dt>数据处理</dt><dd id="data-handling"></dd></div>
+          </dl>
+          <p class="digest-line">链路摘要 <code id="chain-digest"></code></p>
+        </div>
+      </section>
+
+      <aside class="boundary-card" aria-label="证据边界">
+        <h2>这条链不证明什么</h2>
+        <ul>
+          <li>不产生 UT1／TT／TDB／EOP／RAMC、星历、星盘或天文精度结论。</li>
+          <li>不生成宫位、相位、解释、专家结论或高风险个人断语。</li>
+          <li>不建立来源权利法律结论、Release Evidence、发布就绪或公开授权。</li>
+          <li>不继承八字 v1.7 权威；没有 mutation epoch、跨文件原子或 ABA 排除证明。</li>
+        </ul>
+      </aside>
+    </main>
+  </body>
+</html>

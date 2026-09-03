@@ -1,0 +1,891 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "western_expert_public_candidate_prescreen_v1",
+  "ledgerId": "hakimi.western.expert-public-candidate-prescreen/1.0.0",
+  "status": "public_candidate_discovery_only_non_authoritative",
+  "createdAt": "2026-08-31T10:00:00.000Z",
+  "projectReleaseGovernance": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "expertClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false
+  },
+  "basisArtifacts": [
+    {
+      "path": "docs/阶段E-西洋现实专家公开候选预筛-2026-08-31.md",
+      "role": "non_authoritative_public_prescreen_narrative_basis",
+      "rawBytes": 10767,
+      "rawSha256": "0e14973a85f31c5bf4448578b939d99d70f6674bf3ec34442692f7d621037e7c"
+    }
+  ],
+  "upstreamArtifacts": [
+    {
+      "role": "current_western_source_binding_requirements",
+      "path": "content/system-admission/western-source-binding-requirements.v1.json",
+      "rawBytes": 25909,
+      "rawSha256": "3f22c78279022a70d3a3a21e5a80a33b321a99793c033eb0a72c5171628107c9",
+      "semanticDigestField": "ledgerDigest",
+      "semanticDigest": "2bb52306841098ee5e83906bffda400ad07efd706c7c294ee4d07115854849bd"
+    },
+    {
+      "role": "current_western_independent_domain_manifest",
+      "path": "content/domain-release/western-astrology.engineering-draft.v0.1.0.json",
+      "rawBytes": 10832,
+      "rawSha256": "c138220098346a3ff9857c1e8034914205277bdbe8cf5563e80b58687745a398",
+      "semanticDigestField": "manifestDigest",
+      "semanticDigest": "5c44fce96357ed80c4274f1f225151764ffe5998956e7e823764499ee45f993e"
+    },
+    {
+      "role": "current_western_version_aware_observation",
+      "path": "content/system-admission/western-independent-productization-version-aware-observation-candidate.v1.0.0.json",
+      "rawBytes": 18879,
+      "rawSha256": "956fa352a87253abc893056e443bd45e3fa731531b839144e3121c43639f19df",
+      "semanticDigestField": "candidateDigest",
+      "semanticDigest": "6f71eb3e0f8745c82b383e6e05bf9130d6249530f4ad1d872620480796b1deeb"
+    }
+  ],
+  "roleSeparation": [
+    {
+      "roleId": "western_domain_expert",
+      "mayReview": [
+        "astrology_rule_versions",
+        "interpretation_boundaries",
+        "high_risk_expression_boundary"
+      ],
+      "doesNotEstablish": [
+        "engineering_implementation_correctness",
+        "source_rights_or_legal_conclusion",
+        "release_authorization"
+      ]
+    },
+    {
+      "roleId": "astronomy_engineering_reproducibility_reviewer",
+      "mayReview": [
+        "time_scales_and_reference_frames",
+        "ephemeris_and_coordinate_reproducibility",
+        "implementation_summary_and_tolerances"
+      ],
+      "doesNotEstablish": [
+        "astrology_domain_truth",
+        "interpretation_authority",
+        "source_rights_or_legal_conclusion"
+      ]
+    },
+    {
+      "roleId": "source_rights_reviewer",
+      "mayReview": [
+        "work_version_carrier_identity",
+        "license_evidence",
+        "redistribution_facts"
+      ],
+      "doesNotEstablish": [
+        "astrology_domain_truth",
+        "legal_judgment",
+        "release_authorization"
+      ]
+    }
+  ],
+  "sourceGroupPolicy": {
+    "deduplicationKey": "sourceUpstreamGroupId",
+    "sameGroupObservationsCountOnce": true,
+    "sourceObservationCount": 11,
+    "deduplicatedSourceGroupCount": 6,
+    "sourceGroupCountDoesNotEstablishIdentityCredentialOrIndependence": true
+  },
+  "sourceGroups": [
+    {
+      "sourceUpstreamGroupId": "ASTROLOGICAL_ASSOCIATION",
+      "publicOwnerLabel": "Astrological Association",
+      "observationIds": [
+        "STACEY-AA-BOARD",
+        "CHATHAM-AA-HOUSE-WORKSHOP"
+      ]
+    },
+    {
+      "sourceUpstreamGroupId": "MAYO_SCHOOL",
+      "publicOwnerLabel": "Mayo School of Astrology",
+      "observationIds": [
+        "STACEY-MAYO-HISTORY"
+      ]
+    },
+    {
+      "sourceUpstreamGroupId": "OPA",
+      "publicOwnerLabel": "Organization for Professional Astrology",
+      "observationIds": [
+        "STACEY-OPA-MENTORSHIP",
+        "GRONLUND-OPA-ASTRONOMY"
+      ]
+    },
+    {
+      "sourceUpstreamGroupId": "KEPLER",
+      "publicOwnerLabel": "Kepler College",
+      "observationIds": [
+        "GRONLUND-KEPLER-FACULTY",
+        "SCOFIELD-KEPLER-FACULTY",
+        "CHATHAM-KEPLER-HOUSE-COURSE"
+      ]
+    },
+    {
+      "sourceUpstreamGroupId": "PAA_NCGR",
+      "publicOwnerLabel": "Professional Astrologers Alliance / NCGR-PAA",
+      "observationIds": [
+        "SCOFIELD-PAA-BOARD",
+        "SCOFIELD-PAA-CERTIFIED"
+      ]
+    },
+    {
+      "sourceUpstreamGroupId": "STA",
+      "publicOwnerLabel": "School of Traditional Astrology",
+      "observationIds": [
+        "CHATHAM-STA-DIRECTORY"
+      ]
+    }
+  ],
+  "sourceObservations": [
+    {
+      "sourceObservationId": "STACEY-AA-BOARD",
+      "candidateLeadId": "western-public-lead-001",
+      "sourceUrl": "https://www.astrologicalassociation.com/board-members/",
+      "sourceUpstreamGroupId": "ASTROLOGICAL_ASSOCIATION",
+      "sourceType": "public_association_board_page",
+      "observationSummary": "公开 board 页面提供管理、教学、写作与咨询相关候选线索。",
+      "observedAt": "2026-08-31",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "STACEY-MAYO-HISTORY",
+      "candidateLeadId": "western-public-lead-001",
+      "sourceUrl": "https://mayoastrology.com/history-of-the-mayo-school/",
+      "sourceUpstreamGroupId": "MAYO_SCHOOL",
+      "sourceType": "public_school_history_page",
+      "observationSummary": "公开学校历史页面提供 principal 角色候选线索。",
+      "observedAt": "2026-08-31",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "STACEY-OPA-MENTORSHIP",
+      "candidateLeadId": "western-public-lead-001",
+      "sourceUrl": "https://opaastrology.org/register/opa-mentorship-program-2026/",
+      "sourceUpstreamGroupId": "OPA",
+      "sourceType": "public_mentorship_program_page",
+      "observationSummary": "公开 mentorship 页面提供实践与沟通范围线索，并区分 mentorship 与 certification。",
+      "observedAt": "2026-08-31",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "GRONLUND-KEPLER-FACULTY",
+      "candidateLeadId": "western-public-lead-002",
+      "sourceUrl": "https://www.keplercollege.org/faculty/",
+      "sourceUpstreamGroupId": "KEPLER",
+      "sourceType": "public_faculty_page",
+      "observationSummary": "公开 faculty 页面提供 Astronomy for Astrologers 教学候选线索。",
+      "observedAt": "2026-08-31",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "GRONLUND-OPA-ASTRONOMY",
+      "candidateLeadId": "western-public-lead-002",
+      "sourceUrl": "https://opaastrology.org/immersion-workshops/astronomy-for-astrologers/",
+      "sourceUpstreamGroupId": "OPA",
+      "sourceType": "public_course_page",
+      "observationSummary": "公开课程页面提供占星天文学教学与 training 范围候选线索。",
+      "observedAt": "2026-08-31",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "SCOFIELD-PAA-BOARD",
+      "candidateLeadId": "western-public-lead-003",
+      "sourceUrl": "https://www.astrologersalliance.org/ncgr-paa-board",
+      "sourceUpstreamGroupId": "PAA_NCGR",
+      "sourceType": "public_professional_board_page",
+      "observationSummary": "公开 board 页面提供长期咨询、教育委员会和天文学教学候选线索。",
+      "observedAt": "2026-08-31",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "SCOFIELD-PAA-CERTIFIED",
+      "candidateLeadId": "western-public-lead-003",
+      "sourceUrl": "https://www.astrologersalliance.org/certified-astrologers-1",
+      "sourceUpstreamGroupId": "PAA_NCGR",
+      "sourceType": "public_certified_list_page",
+      "observationSummary": "公开 certified list 提供同一 PAA 上游内的候选发现线索。",
+      "observedAt": "2026-08-31",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "SCOFIELD-KEPLER-FACULTY",
+      "candidateLeadId": "western-public-lead-003",
+      "sourceUrl": "https://www.keplercollege.org/faculty/",
+      "sourceUpstreamGroupId": "KEPLER",
+      "sourceType": "public_faculty_page",
+      "observationSummary": "公开 faculty 页面提供天文学、技术占星与教学范围候选线索。",
+      "observedAt": "2026-08-31",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "CHATHAM-KEPLER-HOUSE-COURSE",
+      "candidateLeadId": "western-public-lead-004",
+      "sourceUrl": "https://store.keplercollege.org/courses/e212-astrological-house-division-the-symbolism-of-the-celestial-circles-spring-2024-25/",
+      "sourceUpstreamGroupId": "KEPLER",
+      "sourceType": "public_course_metadata_page",
+      "observationSummary": "公开课程元数据提供多种 house-system 比较范围候选线索。",
+      "observedAt": "2026-08-31",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "CHATHAM-STA-DIRECTORY",
+      "candidateLeadId": "western-public-lead-004",
+      "sourceUrl": "https://sta.co/directory/astrologers.html",
+      "sourceUpstreamGroupId": "STA",
+      "sourceType": "public_professional_directory_page",
+      "observationSummary": "公开目录提供 horary diploma 与实践范围候选线索。",
+      "observedAt": "2026-08-31",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "CHATHAM-AA-HOUSE-WORKSHOP",
+      "candidateLeadId": "western-public-lead-004",
+      "sourceUrl": "https://www.astrologicalassociation.com/product/astrological-house-division-and-the-symbolism-of-the-celestial-circles/",
+      "sourceUpstreamGroupId": "ASTROLOGICAL_ASSOCIATION",
+      "sourceType": "public_workshop_metadata_page",
+      "observationSummary": "公开 workshop 商品元数据提供 house-division 范围候选线索；未购买或访问材料。",
+      "observedAt": "2026-08-31",
+      "supportsCandidateDiscoveryOnly": true,
+      "authoritative": false
+    }
+  ],
+  "reviewQuestionIds": [
+    "technical-time-coordinate-astronomy",
+    "zodiac-house-node-aspect",
+    "dignity-retrograde-transit-progression",
+    "interpretation-high-risk-boundary",
+    "source-rights-role-boundary",
+    "uncertainty-counterexamples-abstention"
+  ],
+  "candidates": [
+    {
+      "candidateLeadId": "western-public-lead-001",
+      "publicDisplayName": "Wendy Stacey",
+      "candidateState": "uncontacted_public_candidate_lead",
+      "proposedReviewDirection": "western_domain_ethics_high_risk_and_methodology_candidate",
+      "sourceObservationIds": [
+        "STACEY-AA-BOARD",
+        "STACEY-MAYO-HISTORY",
+        "STACEY-OPA-MENTORSHIP"
+      ],
+      "sourceUpstreamGroupIds": [
+        "ASTROLOGICAL_ASSOCIATION",
+        "MAYO_SCHOOL",
+        "OPA"
+      ],
+      "deduplicatedSourceGroupCount": 3,
+      "multiplePublicUpstreamGroupsObserved": true,
+      "scopeMatrix": [
+        {
+          "questionId": "technical-time-coordinate-astronomy",
+          "state": "unknown"
+        },
+        {
+          "questionId": "zodiac-house-node-aspect",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "dignity-retrograde-transit-progression",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "interpretation-high-risk-boundary",
+          "state": "public_scope_lead_observed"
+        },
+        {
+          "questionId": "source-rights-role-boundary",
+          "state": "unknown"
+        },
+        {
+          "questionId": "uncertainty-counterexamples-abstention",
+          "state": "partial_methodology_or_training_scope"
+        }
+      ],
+      "reviewerSlot": null,
+      "identityVerified": false,
+      "credentialVerified": false,
+      "scopeVerified": false,
+      "independenceVerified": false,
+      "participationConsentVerified": false,
+      "expertStatusVerified": false,
+      "expertOpinionCollected": false,
+      "sealedOriginalOpinion": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "candidateLeadId": "western-public-lead-002",
+      "publicDisplayName": "Geoff Gronlund",
+      "candidateState": "uncontacted_public_candidate_lead",
+      "proposedReviewDirection": "astrology_astronomy_semantics_interface_candidate_not_engineering_reviewer",
+      "sourceObservationIds": [
+        "GRONLUND-KEPLER-FACULTY",
+        "GRONLUND-OPA-ASTRONOMY"
+      ],
+      "sourceUpstreamGroupIds": [
+        "KEPLER",
+        "OPA"
+      ],
+      "deduplicatedSourceGroupCount": 2,
+      "multiplePublicUpstreamGroupsObserved": true,
+      "scopeMatrix": [
+        {
+          "questionId": "technical-time-coordinate-astronomy",
+          "state": "public_scope_lead_observed"
+        },
+        {
+          "questionId": "zodiac-house-node-aspect",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "dignity-retrograde-transit-progression",
+          "state": "unknown"
+        },
+        {
+          "questionId": "interpretation-high-risk-boundary",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "source-rights-role-boundary",
+          "state": "unknown"
+        },
+        {
+          "questionId": "uncertainty-counterexamples-abstention",
+          "state": "unknown"
+        }
+      ],
+      "reviewerSlot": null,
+      "identityVerified": false,
+      "credentialVerified": false,
+      "scopeVerified": false,
+      "independenceVerified": false,
+      "participationConsentVerified": false,
+      "expertStatusVerified": false,
+      "expertOpinionCollected": false,
+      "sealedOriginalOpinion": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "candidateLeadId": "western-public-lead-003",
+      "publicDisplayName": "Bruce Scofield",
+      "candidateState": "uncontacted_public_candidate_lead",
+      "proposedReviewDirection": "technical_astrology_astronomy_and_predictive_scope_candidate",
+      "sourceObservationIds": [
+        "SCOFIELD-PAA-BOARD",
+        "SCOFIELD-PAA-CERTIFIED",
+        "SCOFIELD-KEPLER-FACULTY"
+      ],
+      "sourceUpstreamGroupIds": [
+        "PAA_NCGR",
+        "KEPLER"
+      ],
+      "deduplicatedSourceGroupCount": 2,
+      "multiplePublicUpstreamGroupsObserved": true,
+      "scopeMatrix": [
+        {
+          "questionId": "technical-time-coordinate-astronomy",
+          "state": "public_scope_lead_observed"
+        },
+        {
+          "questionId": "zodiac-house-node-aspect",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "dignity-retrograde-transit-progression",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "interpretation-high-risk-boundary",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "source-rights-role-boundary",
+          "state": "unknown"
+        },
+        {
+          "questionId": "uncertainty-counterexamples-abstention",
+          "state": "unknown"
+        }
+      ],
+      "reviewerSlot": null,
+      "identityVerified": false,
+      "credentialVerified": false,
+      "scopeVerified": false,
+      "independenceVerified": false,
+      "participationConsentVerified": false,
+      "expertStatusVerified": false,
+      "expertOpinionCollected": false,
+      "sealedOriginalOpinion": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "candidateLeadId": "western-public-lead-004",
+      "publicDisplayName": "Rhys Chatham",
+      "candidateState": "uncontacted_public_candidate_lead",
+      "proposedReviewDirection": "house_system_comparison_candidate",
+      "sourceObservationIds": [
+        "CHATHAM-KEPLER-HOUSE-COURSE",
+        "CHATHAM-STA-DIRECTORY",
+        "CHATHAM-AA-HOUSE-WORKSHOP"
+      ],
+      "sourceUpstreamGroupIds": [
+        "KEPLER",
+        "STA",
+        "ASTROLOGICAL_ASSOCIATION"
+      ],
+      "deduplicatedSourceGroupCount": 3,
+      "multiplePublicUpstreamGroupsObserved": true,
+      "scopeMatrix": [
+        {
+          "questionId": "technical-time-coordinate-astronomy",
+          "state": "partial_methodology_or_training_scope"
+        },
+        {
+          "questionId": "zodiac-house-node-aspect",
+          "state": "public_scope_lead_observed"
+        },
+        {
+          "questionId": "dignity-retrograde-transit-progression",
+          "state": "unknown"
+        },
+        {
+          "questionId": "interpretation-high-risk-boundary",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "source-rights-role-boundary",
+          "state": "unknown"
+        },
+        {
+          "questionId": "uncertainty-counterexamples-abstention",
+          "state": "partial_methodology_or_training_scope"
+        }
+      ],
+      "reviewerSlot": null,
+      "identityVerified": false,
+      "credentialVerified": false,
+      "scopeVerified": false,
+      "independenceVerified": false,
+      "participationConsentVerified": false,
+      "expertStatusVerified": false,
+      "expertOpinionCollected": false,
+      "sealedOriginalOpinion": false,
+      "countsTowardExpertGate": false
+    }
+  ],
+  "independenceFactorIds": [
+    "same_institution_or_organization",
+    "teacher_student_or_lineage_relationship",
+    "family_or_household_relationship",
+    "shared_commercial_interest",
+    "rule_or_case_set_coauthorship",
+    "shared_professional_service",
+    "reporting_or_supervision_relationship",
+    "prior_exposure_to_other_reviewer_conclusion",
+    "shared_unpublished_source_or_case_material",
+    "same_upstream_algorithm_or_textbook_dependency"
+  ],
+  "pairwiseIndependenceAssessments": [
+    {
+      "pairId": "western-public-lead-001--western-public-lead-002",
+      "candidateLeadIds": [
+        "western-public-lead-001",
+        "western-public-lead-002"
+      ],
+      "assessmentState": "not_started",
+      "factorStates": [
+        {
+          "factorId": "same_institution_or_organization",
+          "state": "unknown"
+        },
+        {
+          "factorId": "teacher_student_or_lineage_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "family_or_household_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_commercial_interest",
+          "state": "unknown"
+        },
+        {
+          "factorId": "rule_or_case_set_coauthorship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_professional_service",
+          "state": "unknown"
+        },
+        {
+          "factorId": "reporting_or_supervision_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "prior_exposure_to_other_reviewer_conclusion",
+          "state": "not_applicable_before_review"
+        },
+        {
+          "factorId": "shared_unpublished_source_or_case_material",
+          "state": "unknown"
+        },
+        {
+          "factorId": "same_upstream_algorithm_or_textbook_dependency",
+          "state": "unknown"
+        }
+      ],
+      "unknownFactorsPresent": true,
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "pairId": "western-public-lead-001--western-public-lead-003",
+      "candidateLeadIds": [
+        "western-public-lead-001",
+        "western-public-lead-003"
+      ],
+      "assessmentState": "not_started",
+      "factorStates": [
+        {
+          "factorId": "same_institution_or_organization",
+          "state": "unknown"
+        },
+        {
+          "factorId": "teacher_student_or_lineage_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "family_or_household_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_commercial_interest",
+          "state": "unknown"
+        },
+        {
+          "factorId": "rule_or_case_set_coauthorship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_professional_service",
+          "state": "unknown"
+        },
+        {
+          "factorId": "reporting_or_supervision_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "prior_exposure_to_other_reviewer_conclusion",
+          "state": "not_applicable_before_review"
+        },
+        {
+          "factorId": "shared_unpublished_source_or_case_material",
+          "state": "unknown"
+        },
+        {
+          "factorId": "same_upstream_algorithm_or_textbook_dependency",
+          "state": "unknown"
+        }
+      ],
+      "unknownFactorsPresent": true,
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "pairId": "western-public-lead-001--western-public-lead-004",
+      "candidateLeadIds": [
+        "western-public-lead-001",
+        "western-public-lead-004"
+      ],
+      "assessmentState": "not_started",
+      "factorStates": [
+        {
+          "factorId": "same_institution_or_organization",
+          "state": "unknown"
+        },
+        {
+          "factorId": "teacher_student_or_lineage_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "family_or_household_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_commercial_interest",
+          "state": "unknown"
+        },
+        {
+          "factorId": "rule_or_case_set_coauthorship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_professional_service",
+          "state": "unknown"
+        },
+        {
+          "factorId": "reporting_or_supervision_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "prior_exposure_to_other_reviewer_conclusion",
+          "state": "not_applicable_before_review"
+        },
+        {
+          "factorId": "shared_unpublished_source_or_case_material",
+          "state": "unknown"
+        },
+        {
+          "factorId": "same_upstream_algorithm_or_textbook_dependency",
+          "state": "unknown"
+        }
+      ],
+      "unknownFactorsPresent": true,
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "pairId": "western-public-lead-002--western-public-lead-003",
+      "candidateLeadIds": [
+        "western-public-lead-002",
+        "western-public-lead-003"
+      ],
+      "assessmentState": "not_started",
+      "factorStates": [
+        {
+          "factorId": "same_institution_or_organization",
+          "state": "unknown"
+        },
+        {
+          "factorId": "teacher_student_or_lineage_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "family_or_household_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_commercial_interest",
+          "state": "unknown"
+        },
+        {
+          "factorId": "rule_or_case_set_coauthorship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_professional_service",
+          "state": "unknown"
+        },
+        {
+          "factorId": "reporting_or_supervision_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "prior_exposure_to_other_reviewer_conclusion",
+          "state": "not_applicable_before_review"
+        },
+        {
+          "factorId": "shared_unpublished_source_or_case_material",
+          "state": "unknown"
+        },
+        {
+          "factorId": "same_upstream_algorithm_or_textbook_dependency",
+          "state": "unknown"
+        }
+      ],
+      "unknownFactorsPresent": true,
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "pairId": "western-public-lead-002--western-public-lead-004",
+      "candidateLeadIds": [
+        "western-public-lead-002",
+        "western-public-lead-004"
+      ],
+      "assessmentState": "not_started",
+      "factorStates": [
+        {
+          "factorId": "same_institution_or_organization",
+          "state": "unknown"
+        },
+        {
+          "factorId": "teacher_student_or_lineage_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "family_or_household_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_commercial_interest",
+          "state": "unknown"
+        },
+        {
+          "factorId": "rule_or_case_set_coauthorship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_professional_service",
+          "state": "unknown"
+        },
+        {
+          "factorId": "reporting_or_supervision_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "prior_exposure_to_other_reviewer_conclusion",
+          "state": "not_applicable_before_review"
+        },
+        {
+          "factorId": "shared_unpublished_source_or_case_material",
+          "state": "unknown"
+        },
+        {
+          "factorId": "same_upstream_algorithm_or_textbook_dependency",
+          "state": "unknown"
+        }
+      ],
+      "unknownFactorsPresent": true,
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "pairId": "western-public-lead-003--western-public-lead-004",
+      "candidateLeadIds": [
+        "western-public-lead-003",
+        "western-public-lead-004"
+      ],
+      "assessmentState": "not_started",
+      "factorStates": [
+        {
+          "factorId": "same_institution_or_organization",
+          "state": "unknown"
+        },
+        {
+          "factorId": "teacher_student_or_lineage_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "family_or_household_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_commercial_interest",
+          "state": "unknown"
+        },
+        {
+          "factorId": "rule_or_case_set_coauthorship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_professional_service",
+          "state": "unknown"
+        },
+        {
+          "factorId": "reporting_or_supervision_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "prior_exposure_to_other_reviewer_conclusion",
+          "state": "not_applicable_before_review"
+        },
+        {
+          "factorId": "shared_unpublished_source_or_case_material",
+          "state": "unknown"
+        },
+        {
+          "factorId": "same_upstream_algorithm_or_textbook_dependency",
+          "state": "unknown"
+        }
+      ],
+      "unknownFactorsPresent": true,
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    }
+  ],
+  "zeroInstanceReceipt": {
+    "publicCandidateLeadsObserved": 4,
+    "reviewerSlotsRequired": 2,
+    "reviewerSlotsOccupied": 0,
+    "identitiesVerified": 0,
+    "credentialsVerified": 0,
+    "scopeFitsVerified": 0,
+    "participationConsentsVerified": 0,
+    "pairwiseIndependenceAssessmentsCompleted": 0,
+    "independentExpertReviewsVerified": 0,
+    "sealedOriginalOpinions": 0,
+    "sourceBindingsRequired": 28,
+    "sourceBindingsFrozenVerified": 0,
+    "expertReviewBundleStatus": "absent/0",
+    "formalExpertGateCount": 0
+  },
+  "authorityBoundary": {
+    "candidateDiscoveryOnly": true,
+    "identityVerified": false,
+    "credentialVerified": false,
+    "scopeVerified": false,
+    "independenceVerified": false,
+    "participationConsentVerified": false,
+    "expertStatusVerified": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "releaseReady": false,
+    "expertClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "crossSystemAuthorityInheritanceAuthorized": false
+  },
+  "observationBoundary": {
+    "heldHandleReadForLocalArtifacts": true,
+    "sameBufferHashAndParseForLocalJson": true,
+    "basisSameBufferHashAndInspection": true,
+    "publicPageBodiesStored": false,
+    "publicPageCryptographicallyAuthenticated": false,
+    "privateContactDataStored": false,
+    "paidMaterialsAccessed": false,
+    "unknownFieldsRejected": true,
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "intervalMutationExcludedAcrossFiles": false,
+    "abaExcluded": false
+  },
+  "doesNotEstablish": [
+    "real_person_identity",
+    "current_credentials",
+    "six_question_scope_fit",
+    "participation_consent",
+    "pairwise_independence",
+    "expert_status_or_expert_opinion",
+    "content_truth_or_expert_truth",
+    "source_body_exact_quote_or_binding",
+    "rights_or_legal_conclusion",
+    "formal_review_gate_or_admission",
+    "cross_system_equivalence_scoring_weighting_or_winner",
+    "release_readiness_or_public_release_authorization",
+    "cross_file_atomic_snapshot_mutation_epoch_interval_integrity_or_aba_exclusion"
+  ],
+  "ledgerDigest": "7c573831d6af8904192e069298a1b91c0d9c5b9635753aeb56250d21bf204880"
+}

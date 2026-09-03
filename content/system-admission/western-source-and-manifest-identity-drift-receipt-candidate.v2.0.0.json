@@ -1,0 +1,453 @@
+{
+  "activeAdmissionEffect": "none",
+  "authorityBoundary": {
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "formalAdmissionAllowed": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "sourceRedistributionAuthorized": false
+  },
+  "candidateId": "hakimi.western.source-and-manifest-identity-drift-receipt-candidate/2.0.0",
+  "candidateStatus": "append_only_dual_partition_western_parent_graph_and_zodiac_method_source_identity_drift_observation_candidate_zero_admission_effect",
+  "crossPartitionBoundary": {
+    "changedPathSetsDisjoint": true,
+    "collapseIntoCurrentManifestForbidden": true,
+    "mustRemainSeparateAccounting": true,
+    "overlapPaths": [],
+    "packageGraphPathsOutsideSixWesternRoots": true,
+    "singleCausalEventEstablished": false,
+    "totalDistinctChangedPaths": 20,
+    "uniqueBlockerClaimed": false
+  },
+  "currentnessBoundary": {
+    "currentEngineeringManifestMechanicallyVerified": false,
+    "currentFourSystemStatusMechanicallyVerified": false,
+    "currentFullDomainManifestMechanicallyVerified": false,
+    "currentPrivateParentBrandsVerified": 0,
+    "historicalFourSystemV214Current": false,
+    "historicalWesternV5Current": false,
+    "newBrowserEvidenceEstablished": false,
+    "persistedAsCentralRegistry": false,
+    "persistedAsDomainManifest": false,
+    "persistedAsFourSystemChild": false
+  },
+  "doesNotEstablish": [
+    "current_western_manifest_or_four_system_status",
+    "full_domain_or_product_identity",
+    "content_or_expert_truth",
+    "source_rights_or_redistribution_legal_conclusion",
+    "real_expert_identity_qualification_independence_or_opinion",
+    "predictive_accuracy_or_scientific_validity",
+    "full_application_pwa_service_worker_public_host_or_release_evidence",
+    "cross_file_atomicity_mutation_epoch_interval_integrity_or_aba_exclusion",
+    "release_readiness_deployment_rollback_or_public_release_authorization"
+  ],
+  "driftPartitions": {
+    "preExistingParentBuildGraph": {
+      "causalOriginEstablished": false,
+      "classification": "pre_existing_parent_build_graph_drift_per_prior_read_only_observation",
+      "comparedPathCount": 24,
+      "currentGraphMatchesHistorical": false,
+      "doubleReadStable": true,
+      "drift": [
+        {
+          "current": {
+            "bytes": 29832,
+            "sha256": "dcc9e9f5bb1fd1ab97c2e0c2b2ecb2d8fdd38a7aef5be884e9fd7caff4464419"
+          },
+          "historical": {
+            "bytes": 28879,
+            "sha256": "c601b1e560d988a82cfc8d9c374a06597bf8dd867e941a2f4e8cc57f3d59e076"
+          },
+          "path": "package.json"
+        },
+        {
+          "current": {
+            "bytes": 176276,
+            "sha256": "fd94ca9ba0832c1cf596c3e05f980fde5af82849b4935877342cc67d4d22c0e2"
+          },
+          "historical": {
+            "bytes": 175812,
+            "sha256": "40a02c7c3166f0c9bc03afa9c1d1f342fb7f54efe1abbf7cb3f5cf6ecb482a4d"
+          },
+          "path": "package-lock.json"
+        }
+      ],
+      "driftCount": 2,
+      "historicalGraphPathCount": 24,
+      "missingCount": 0,
+      "persistedPreTrancheSnapshotAvailable": false,
+      "trustedTemporalOrderEstablished": false,
+      "unchangedCount": 22
+    },
+    "westernSixRootSource": {
+      "abaExcluded": false,
+      "addedPathCount": 0,
+      "allowlistedRoots": [
+        "isolated-drafts/western-civil-time-fact-browser-draft",
+        "packages/tzdb-core",
+        "packages/western-astrology-contracts-draft",
+        "packages/western-astrology-rules-preview-draft",
+        "packages/western-astronomy-engine-adapter-draft",
+        "packages/western-civil-time-input-adapter-draft"
+      ],
+      "classification": "current_western_zodiac_method_and_dependent_source_drift_observation",
+      "crossFileAtomicSnapshotEstablished": false,
+      "currentPathCount": 110,
+      "doubleReadStable": true,
+      "drift": [
+        {
+          "current": {
+            "bytes": 18721,
+            "sha256": "4e27a2e5d1919f32949be8870a8fd0c73110dd0e9e3f15f4f292416fe0803c3d"
+          },
+          "historical": {
+            "bytes": 18037,
+            "sha256": "74d1faf827c0acf301a644af51d1435d3f6ba522b58af20f8f4002f09ade6aa2"
+          },
+          "path": "packages/western-astrology-rules-preview-draft/README.md"
+        },
+        {
+          "current": {
+            "bytes": 19411,
+            "sha256": "7fb485c5fa7283f71e7416a83708560776149027c1fcd0bec637afc7f384a70d"
+          },
+          "historical": {
+            "bytes": 19202,
+            "sha256": "44e4f245ccea8b6e0d35f0a85c69583e86cac90b337c3b9017127ec220e880d8"
+          },
+          "path": "packages/western-astrology-rules-preview-draft/browser-app/index.html"
+        },
+        {
+          "current": {
+            "bytes": 41697,
+            "sha256": "8f7eadd883b78bbca3d6ddb06423da8504d407c6793b7d2566e87470f7c4cec0"
+          },
+          "historical": {
+            "bytes": 39519,
+            "sha256": "82b678f319a75261901c19d1748944654227749d7c68d8ca19ccbd91292c6e7f"
+          },
+          "path": "packages/western-astrology-rules-preview-draft/e2e/rules-preview-browser-gate.spec.ts"
+        },
+        {
+          "current": {
+            "bytes": 86895,
+            "sha256": "b79edce9ce40159f490a633f82e77d73bd7f1a03707bfd09a64eff8c3dd0e6d0"
+          },
+          "historical": {
+            "bytes": 86923,
+            "sha256": "0b53443ad3d39ba70e0572c33209e599a9da1cf9c8f1df5d45a1d32f88da11c7"
+          },
+          "path": "packages/western-astrology-rules-preview-draft/src/browser-app/content-layer.ts"
+        },
+        {
+          "current": {
+            "bytes": 35764,
+            "sha256": "c05cc62c4f024c805a3a8f4bdf32b7068662e79b26ef76fd646dd2ab2ed84113"
+          },
+          "historical": {
+            "bytes": 35764,
+            "sha256": "b58d6ebbc4fc86bdae9a246c791ba90d1ec14c1a2df49764083ee2b8ed0899e4"
+          },
+          "path": "packages/western-astrology-rules-preview-draft/src/browser-app/content-review-feedback.ts"
+        },
+        {
+          "current": {
+            "bytes": 52020,
+            "sha256": "0727e0da0f59c38c1d97029abb81235855048233f5afd856b8919997cbda311e"
+          },
+          "historical": {
+            "bytes": 50521,
+            "sha256": "df540561017ca83f95e367c04c16bdd0b2012ba0b2c227a792086e0f84290334"
+          },
+          "path": "packages/western-astrology-rules-preview-draft/src/browser-app/dynamic-content-review-feedback.ts"
+        },
+        {
+          "current": {
+            "bytes": 79428,
+            "sha256": "5da6645f195b3a832c952b33f3f1e7e1b7af272f6e802188e4f590f0f8c34c19"
+          },
+          "historical": {
+            "bytes": 78206,
+            "sha256": "37d85c18a7895e5f75d3e1fc6fa8435b2f5c10376d5b2e6296bd5801fd59a61b"
+          },
+          "path": "packages/western-astrology-rules-preview-draft/src/browser-app/main.ts"
+        },
+        {
+          "current": {
+            "bytes": 17572,
+            "sha256": "6ec70b800068aaa31cf8a0f102951bfd4f61bc2c62f32386c6fca190543fbbd0"
+          },
+          "historical": {
+            "bytes": 16458,
+            "sha256": "edf098daeba61e73a754c8033e8d5c7b0ed67c9b3036384a4b5b897f31501e27"
+          },
+          "path": "packages/western-astrology-rules-preview-draft/src/content-layer.test.ts"
+        },
+        {
+          "current": {
+            "bytes": 13378,
+            "sha256": "757995c2d824e426d0df518533c07eb4e76e7ef095de4ce6c126e35cc1a98295"
+          },
+          "historical": {
+            "bytes": 12674,
+            "sha256": "4079fc8310c0258966521e49b72f2500ea62b2de773b0a5dd74ac4f2180845fa"
+          },
+          "path": "packages/western-astrology-rules-preview-draft/src/content-review-feedback.test.ts"
+        },
+        {
+          "current": {
+            "bytes": 19809,
+            "sha256": "0c52d9688f605c4ba9a1983dab30006799e1f6d0c00a833f2c4b247c83142e8f"
+          },
+          "historical": {
+            "bytes": 17429,
+            "sha256": "e7e459a152aee74d11ff9913d128cb494518e9fd83b33582c257ed603f5ec960"
+          },
+          "path": "packages/western-astrology-rules-preview-draft/src/dynamic-content-review-feedback.test.ts"
+        },
+        {
+          "current": {
+            "bytes": 16683,
+            "sha256": "a37cea582b699f40d17f4dddea1be5a06db005044537eaa425c9dfcfdfcaa4a9"
+          },
+          "historical": {
+            "bytes": 16624,
+            "sha256": "4c2565a5b69f5d6e477a15b10f5765649a1b92116c874e96ae2009b45d81becc"
+          },
+          "path": "packages/western-astrology-rules-preview-draft/src/high-risk-expression-egress-policy.test.ts"
+        },
+        {
+          "current": {
+            "bytes": 740,
+            "sha256": "57a6ced19e8bb844462c4e36eaac1d2e5a09a2214b8967202737d3680f0e8e33"
+          },
+          "historical": {
+            "bytes": 526,
+            "sha256": "4ca446e65844ebacd8c452389928df181395c93008da2946aad68491b284493b"
+          },
+          "path": "packages/western-astrology-rules-preview-draft/src/rule-layer-bridge.ts"
+        },
+        {
+          "current": {
+            "bytes": 10392,
+            "sha256": "21f7ce11f0d2419acc2a5bef618831b31416d5b4a5cfd9e29f26db0b31a43d91"
+          },
+          "historical": {
+            "bytes": 8921,
+            "sha256": "e36a5a2a76186d37a37ac514671b491d67e54fcb652610616a26ca07a5b512a1"
+          },
+          "path": "packages/western-astronomy-engine-adapter-draft/README.md"
+        },
+        {
+          "current": {
+            "bytes": 26579,
+            "sha256": "84b2b35d109b4dd950eb522ca8aebcb2b8e24167d05d819149c8191db2d8b880"
+          },
+          "historical": {
+            "bytes": 12768,
+            "sha256": "db5ee5648fc18b494795b1de937da3a28404c3fae4692e3287de60a988b3e619"
+          },
+          "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer.test.ts"
+        },
+        {
+          "current": {
+            "bytes": 1807,
+            "sha256": "0fd05939914316e740cc17746cabaf7f561e87732786bc4a201f5650cd1b286e"
+          },
+          "historical": {
+            "bytes": 1779,
+            "sha256": "d0daba2127f65cc603936d086aa8b1be025332553d9cfd25e9f2f9cba6d6c657"
+          },
+          "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer/demo.ts"
+        },
+        {
+          "current": {
+            "bytes": 13892,
+            "sha256": "16cb59dbf3cb688ab28e5afa1cf25e30be803270b0f6e1ede6e744f3c31a9ebe"
+          },
+          "historical": {
+            "bytes": 12180,
+            "sha256": "e74cbbe7694075d98d5aa9fc66bf9c4f8bf0f8715d97fe061fe8515a403c6b11"
+          },
+          "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer/houses.ts"
+        },
+        {
+          "current": {
+            "bytes": 18807,
+            "sha256": "d73e31786833ea52278bd7ac6d34987599e2d3ecbc677d87df2ca1c408e40f3c"
+          },
+          "historical": {
+            "bytes": 11183,
+            "sha256": "b28e7d3aa4bf881c1fc55c2a3821a9cc807751fe2e664ea08080c426cc8b9c49"
+          },
+          "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer/index.ts"
+        },
+        {
+          "current": {
+            "bytes": 3414,
+            "sha256": "297d41b0f928c1c79a028841a011bf2ca8de76768dc34ad083a971eb0b5891a9"
+          },
+          "historical": {
+            "bytes": 1738,
+            "sha256": "fb9634d5af7020ca2a80521d091471ef67be342ac0fab92a955de64b48351d47"
+          },
+          "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer/zodiac.ts"
+        }
+      ],
+      "driftCount": 18,
+      "historicalPathCount": 110,
+      "intervalIntegrityEstablished": false,
+      "missingPathCount": 0,
+      "pathSetExact": true,
+      "rootDriftCounts": {
+        "isolated-drafts/western-civil-time-fact-browser-draft": 0,
+        "packages/tzdb-core": 0,
+        "packages/western-astrology-contracts-draft": 0,
+        "packages/western-astrology-rules-preview-draft": 12,
+        "packages/western-astronomy-engine-adapter-draft": 6,
+        "packages/western-civil-time-input-adapter-draft": 0
+      },
+      "rootFileCounts": {
+        "isolated-drafts/western-civil-time-fact-browser-draft": 27,
+        "packages/tzdb-core": 8,
+        "packages/western-astrology-contracts-draft": 6,
+        "packages/western-astrology-rules-preview-draft": 24,
+        "packages/western-astronomy-engine-adapter-draft": 40,
+        "packages/western-civil-time-input-adapter-draft": 5
+      },
+      "unchangedCount": 92
+    }
+  },
+  "evidenceLedgerSeparation": {
+    "browserRuntimeEvidenceIsExpertTruth": false,
+    "engineeringEvidenceIsContentTruth": false,
+    "expertOpinionIsPredictiveAccuracyProof": false,
+    "rightsEvidenceIsPublicReleaseAuthorization": false,
+    "sourceIdentityIsRightsLegalConclusion": false
+  },
+  "gateSummary": {
+    "bindingSubjectsFrozen": 0,
+    "bindingSubjectsRequired": 28,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "realIndependentExpertReviews": 0,
+    "realIndependentExpertReviewsRequired": 2,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "westernIndependentProductizationSubgatesPassed": 0,
+    "westernIndependentProductizationSubgatesTotal": 8
+  },
+  "historicalRawSelfBindings": [
+    {
+      "brandCurrent": false,
+      "currentEndpointClaimed": false,
+      "fullLoaderImported": false,
+      "fullLoaderInvoked": false,
+      "path": "content/system-admission/western-source-and-manifest-identity-drift-receipt-candidate.v1.0.0.json",
+      "preservedUnmodified": true,
+      "privateBrandConsumed": false,
+      "rawAndSelfDigestVerified": true,
+      "rawBytes": 12537,
+      "rawSha256": "09feb585528a6d390afda19a10d967ff2356714cbb00d4eef3462fe267d01c26",
+      "role": "direct_predecessor_append_only_drift_receipt_v1",
+      "semanticDigest": "f422b6b1bd61e97631b5ce5719877d0e17525b18cdfd7cc7d1c3257e85884097",
+      "semanticDigestField": "receiptDigest"
+    },
+    {
+      "brandCurrent": false,
+      "currentEndpointClaimed": false,
+      "fullLoaderImported": false,
+      "fullLoaderInvoked": false,
+      "path": "content/system-admission/western-civil-time-same-artifact-browser-observation-child.v1.0.0.json",
+      "preservedUnmodified": true,
+      "privateBrandConsumed": false,
+      "rawAndSelfDigestVerified": true,
+      "rawBytes": 40760,
+      "rawSha256": "0da9cd9bccfeb6d1d8234f5fac87b4f6d8999e7e6319aa4fce15a2050b3e7aca",
+      "role": "historical_root_build_graph_origin_observation",
+      "semanticDigest": "c23522cd6eed4753efe12b9d4e9a5354afaa6e9df41d8b76f458706625715ded",
+      "semanticDigestField": "observationDigest"
+    },
+    {
+      "brandCurrent": false,
+      "currentEndpointClaimed": false,
+      "fullLoaderImported": false,
+      "fullLoaderInvoked": false,
+      "path": "content/domain-release/western-astrology.engineering-draft.v0.1.0.manifest.v5.json",
+      "preservedUnmodified": true,
+      "privateBrandConsumed": false,
+      "rawAndSelfDigestVerified": true,
+      "rawBytes": 43571,
+      "rawSha256": "8dfe4a25fb4194d8e9e7b53f8d5b786813b11db9a7ed11e8a88c4f96aad41904",
+      "role": "historical_western_six_root_manifest_v5",
+      "semanticDigest": "3617e2bb812e64ea6a79c5a9c6660344e09ed85f5869ff1528415cab13f434b4",
+      "semanticDigestField": "manifestDigest"
+    },
+    {
+      "brandCurrent": false,
+      "currentEndpointClaimed": false,
+      "fullLoaderImported": false,
+      "fullLoaderInvoked": false,
+      "path": "content/system-admission/four-system-current-status-observation-child.v2.14.0.json",
+      "preservedUnmodified": true,
+      "privateBrandConsumed": false,
+      "rawAndSelfDigestVerified": true,
+      "rawBytes": 21317,
+      "rawSha256": "5aae5229c9e4cac8f15e31cfaa43f8f4bc6156fddedd74cbb206236dd29f954a",
+      "role": "historical_four_system_status_v2_14",
+      "semanticDigest": "78e493c478737baca20b73338310f3077fd172e20e5d1546077c9514b6b16eee",
+      "semanticDigestField": "childDigest"
+    }
+  ],
+  "lineage": {
+    "historicalFourSystemStatusPath": "content/system-admission/four-system-current-status-observation-child.v2.14.0.json",
+    "historicalWesternManifestPath": "content/domain-release/western-astrology.engineering-draft.v0.1.0.manifest.v5.json",
+    "predecessorCandidateId": "hakimi.western.source-and-manifest-identity-drift-receipt-candidate/1.0.0",
+    "successorFourSystemStatusCreated": false,
+    "successorManifestCreated": false
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "completeWesternTreeReadTwice": true,
+    "crossFileAtomicSnapshotEstablished": false,
+    "heldHandlePerFile": true,
+    "intervalMutationExcluded": false,
+    "mutationEpochBound": false,
+    "parentGraphReadTwice": true,
+    "trustedTimestampEstablished": false
+  },
+  "ownerDecisionBoundary": {
+    "centralRegistryResignAuthorized": false,
+    "centralRegistryUpdateAuthorized": false,
+    "currentAuthorityAuthorized": false,
+    "formalAdmissionPromotionAuthorized": false,
+    "fourSystemRebindAuthorized": false,
+    "fourSystemResignAuthorized": false,
+    "manifestRebindAuthorized": false,
+    "manifestResignAuthorized": false,
+    "ownerAcceptanceVerified": false,
+    "ownerAttributionVerified": false,
+    "ownerDecisionsRecorded": 0
+  },
+  "receiptDigest": "7e562d0fa00239f5ef5293d70f6e66f6742fde82ef107bfb0461309c15667b4c",
+  "recordType": "western_source_and_manifest_identity_drift_receipt_candidate",
+  "releaseGovernance": {
+    "expertClaimsAuthorized": false,
+    "migrationId": null,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseIdentity": "legacy-v13",
+    "targetSchema": 13
+  },
+  "runtimeTrustBoundary": {
+    "currentRuntimeAttested": false,
+    "digitalSignatureVerified": false,
+    "historicalFullLoaderImported": false,
+    "historicalFullLoaderInvoked": false,
+    "historicalPrivateBrandConsumed": false,
+    "signerIdentityEstablished": false
+  },
+  "schemaVersion": "2.0.0"
+}

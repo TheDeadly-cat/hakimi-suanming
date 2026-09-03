@@ -1,0 +1,662 @@
+{
+  "basisArtifacts": [
+    {
+      "path": "docs/阶段C-E-西洋IANA至MomentTimezone受控重放观察候选-2026-08-31.md",
+      "rawBytes": 13880,
+      "rawSha256": "6ce0cafdbc7dab24615f5fe38a35886c48a519555c121035b328aa0872980137",
+      "role": "non_authoritative_operator_recorded_controlled_reproduction_narrative_basis"
+    }
+  ],
+  "cleanupAndStorageBoundary": {
+    "probeRoot": "C:/Users/Administrator/AppData/Local/Temp/moment-tz-repro-8367467d02cb42c68fd164134e52df56",
+    "probeRootCleanupOperatorRecorded": true,
+    "probeRootExistsAfter": false,
+    "probeRunnerPersisted": false,
+    "projectFilesDeletedOperatorRecorded": 0,
+    "projectFilesModifiedOperatorRecorded": 0,
+    "rawProbeReceiptPersisted": false,
+    "remoteBodiesPersistedByThisProbeInRepoAfterCleanupOperatorRecorded": 0,
+    "remoteBodiesPersistedInThisRecord": 0,
+    "scope": "this_operator_recorded_probe_cleanup_only",
+    "workspaceWideAbsenceMechanicallyVerified": false,
+    "zigCacheCleanupOperatorRecorded": true,
+    "zigCacheExistsAfter": false,
+    "zigCacheObservedCreatedByThisProbe": true,
+    "zigDefaultCache": "C:/Users/Administrator/AppData/Local/zig"
+  },
+  "createdAt": "2026-08-31T06:10:00.000Z",
+  "doesNotEstablish": [
+    "complete_iana_to_moment_timezone_transformation_provenance",
+    "publisher_original_build_provenance_or_publisher_authenticity",
+    "commit_tag_or_detached_signature_verification_or_signing_key_trust",
+    "target_invisibility_os_level_read_set_trace_or_quarantine_unreachability",
+    "network_isolation_environment_closure_or_cross_host_tool_bit_reproducibility",
+    "all_intermediate_layers_are_time_independent",
+    "complete_source_binding_or_either_subject_fully_satisfied",
+    "rights_legal_clearance_or_redistribution_authorization",
+    "content_truth_expert_truth_or_independent_expert_review",
+    "browser_runtime_pwa_service_worker_or_cross_browser_validation",
+    "formal_binding_manifest_registry_owner_admission_or_active_effect",
+    "release_readiness_deployment_rollback_or_public_release_authorization",
+    "cross_file_atomic_snapshot_mutation_epoch_interval_integrity_or_aba_exclusion"
+  ],
+  "evidenceLedger": {
+    "browserRuntimeEvidence": "not_assessed",
+    "contentTruth": "not_established",
+    "engineeringEvidence": "operator_recorded_two_run_byte_exact_observation_without_persisted_raw_receipt",
+    "expertTruth": "not_established",
+    "publicReleaseAuthorization": "not_authorized",
+    "releaseReadiness": "not_ready",
+    "rightsLegalConclusion": "not_established"
+  },
+  "executionBoundaries": {
+    "allIntermediateLayersTimeIndependent": false,
+    "browserRuntimeValidated": false,
+    "commitOrTagSignatureVerified": false,
+    "completeProcessReadSetMechanicallyTraced": false,
+    "crossHostToolBitReproducibilityEstablished": false,
+    "detachedSignatureCryptographicallyVerified": false,
+    "environmentClosureEstablished": false,
+    "launcherIntegrityEstablished": false,
+    "networkIsolationEstablished": false,
+    "networkIsolationMechanicallyEstablished": false,
+    "osLevelExpectedOutputInvisibilityEstablished": false,
+    "osLevelReadSetTraceCaptured": false,
+    "preEntryExecutionOrErasureExcluded": false,
+    "probeReceiptCryptographicallyAttested": false,
+    "publisherAuthenticityEstablished": false,
+    "publisherBuildProvenanceEstablished": false,
+    "publisherOriginalBuildProvenanceEstablished": false,
+    "replayableFromThisRecordAlone": false,
+    "signingKeyTrustEstablished": false,
+    "targetInvisibilityMechanicallyEstablished": false,
+    "toolchainCrossHostBitReproducibilityEstablished": false,
+    "transformationProvenanceEstablished": false
+  },
+  "formalContext": [
+    {
+      "path": "content/system-admission/western-source-binding-requirements.v1.json",
+      "rawBytes": 25909,
+      "rawSha256": "3f22c78279022a70d3a3a21e5a80a33b321a99793c033eb0a72c5171628107c9",
+      "role": "current_western_source_binding_requirements",
+      "semanticDigest": "2bb52306841098ee5e83906bffda400ad07efd706c7c294ee4d07115854849bd",
+      "semanticDigestField": "ledgerDigest"
+    },
+    {
+      "path": "content/domain-release/western-astrology.engineering-draft.v0.1.0.json",
+      "rawBytes": 10832,
+      "rawSha256": "c138220098346a3ff9857c1e8034914205277bdbe8cf5563e80b58687745a398",
+      "role": "current_western_independent_domain_manifest",
+      "semanticDigest": "5c44fce96357ed80c4274f1f225151764ffe5998956e7e823764499ee45f993e",
+      "semanticDigestField": "manifestDigest"
+    },
+    {
+      "path": "content/system-admission/western-independent-productization-version-aware-observation-candidate.v1.0.0.json",
+      "rawBytes": 18879,
+      "rawSha256": "956fa352a87253abc893056e443bd45e3fa731531b839144e3121c43639f19df",
+      "role": "current_western_version_aware_observation",
+      "semanticDigest": "6f71eb3e0f8745c82b383e6e05bf9130d6249530f4ad1d872620480796b1deeb",
+      "semanticDigestField": "candidateDigest"
+    },
+    {
+      "path": "content/system-admission/four-system-current-observation-registry.v2.json",
+      "rawBytes": 22261,
+      "rawSha256": "1b73a55f74597712f84706b2a2046fe3907fd3726261d1f8703469c5fa9abc39",
+      "role": "four_system_current_observation_registry_v2",
+      "semanticDigest": "fa521f30a40fd1c006e886c30f8da5295fbb82784db5671d59df2691117f3738",
+      "semanticDigestField": "registryDigest"
+    }
+  ],
+  "formalIntegration": {
+    "activeEffect": "none",
+    "bindingModified": false,
+    "manifestModified": false,
+    "ownerAdmissionAccepted": false,
+    "registryModified": false
+  },
+  "gateSummary": {
+    "contentTruthEstablished": false,
+    "expertOpinionsVerified": 0,
+    "expertTruthEstablished": false,
+    "independentDomainExpertReviewsVerified": 0,
+    "independentEngineeringReviewsVerified": 0,
+    "observationSubjectsFullySatisfied": 0,
+    "observationSubjectsTotal": 2,
+    "partialObservationCandidatesAttached": 2,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "redistributionAuthorized": false,
+    "releaseReady": false,
+    "requiredIndependentExpertOpinions": 2,
+    "rightsLegalConclusionEstablished": false,
+    "sourceBindingsFrozenVerified": 0,
+    "sourceBindingsRequired": 28,
+    "transformationProvenanceEstablished": false
+  },
+  "observationDigest": "5d3eea3297b7cd024fb53f5a9c9e92d5a396f972d802fede6ced7c58f496b612",
+  "observationId": "hakimi.western.controlled-reproduction/iana-tzdb-2026c-to-moment-timezone-0.6.3/1.0.0",
+  "observationWindow": {
+    "compilerCacheSubwindow": {
+      "createdAt": "2026-08-31T05:29:08.8528987Z",
+      "explicitlyNotProbeFullWindow": true,
+      "lastWriteAt": "2026-08-31T05:39:59.9596076Z"
+    },
+    "fullWindowFabricated": false,
+    "operatorRecorded": true,
+    "pointInTimeObservationOnly": true,
+    "probeFullWindow": "unavailable_not_sampled",
+    "probeRunnerPersisted": false,
+    "rawProbeReceiptPersisted": false
+  },
+  "operatorRecordedProbe": {
+    "cleanExecution": {
+      "auditedTransformationCommandsContainDownloadTask": false,
+      "gruntCommands": [
+        "grunt.cmd data-meta data-zic --zic-path=<probe>/tzcode/zic.exe",
+        "grunt.cmd data-zdump --zdump-path=<probe>/tzcode/zdump.exe",
+        "grunt.cmd data-collect data-dedupe data-pack"
+      ],
+      "npmCacheScope": "probe_temp_only",
+      "npmCommand": "npm.cmd ci --offline --ignore-scripts --no-audit --no-fund",
+      "npmOfflineFlagUsed": true,
+      "projectNodeModulesUseMechanicallyExcluded": false,
+      "projectNodeModulesUseObservedInAuditedExecutionPaths": false,
+      "projectTargetComparisonAfterOutputOperatorRecorded": true,
+      "projectTargetComparisonOrderingMechanicallyTraced": false,
+      "runtimeNetworkAccessMechanicallyExcluded": false,
+      "wholeProbeNetworkIsolated": false
+    },
+    "failedDiagnosticOutputUseMechanicallyExcluded": false,
+    "failedDiagnosticOutputUseObservedInAuditedStaticInputs": false,
+    "failedDiagnosticRuns": [
+      {
+        "collectIdentity": "unavailable_not_captured",
+        "excludedFromAuditedStaticInputsOperatorRecorded": true,
+        "outputs": [
+          {
+            "name": "unpacked",
+            "rawBytes": 162529,
+            "rawSha256": "b690927225f9005e187f630368e9e46326d54c21d57e36983f9e8e0adb6dc017"
+          },
+          {
+            "name": "packed",
+            "rawBytes": 29296,
+            "rawSha256": "6ce2321ffa4efa29c4491c7408f8bf7fc58e3641d971c1739177e174ca8f6704"
+          }
+        ],
+        "runId": "diagnostic_missing_suppress_tzdir",
+        "useMechanicallyExcluded": false
+      },
+      {
+        "collectIdentity": "unavailable_not_captured",
+        "excludedFromAuditedStaticInputsOperatorRecorded": true,
+        "outputs": [
+          {
+            "name": "unpacked",
+            "rawBytes": 12379767,
+            "rawSha256": "229dac1864bea1bb23574862700ed201144a2c922d2f182f9245fa8f094802c5"
+          },
+          {
+            "name": "packed",
+            "rawBytes": 720209,
+            "rawSha256": "881b41090f0dd44fbfa541354414f1829871b2fe5891566ccfae617a4586054d"
+          }
+        ],
+        "runId": "diagnostic_abbreviation_missing_before_private_time_t",
+        "useMechanicallyExcluded": false
+      }
+    ],
+    "fixedOffsetZdumpFallbackReadsCurrentClock": true,
+    "networkReadSetOperatorRecorded": {
+      "credentialsAccessed": false,
+      "endpoints": [
+        "github_codeload",
+        "github_tag_ref_api",
+        "github_commit_api",
+        "iana_tzdata_archive",
+        "iana_tzcode_archive",
+        "ziglang_index_and_zip",
+        "npm_registry_tarballs_named_by_lock"
+      ],
+      "osLevelNetworkTraceCaptured": false,
+      "thirdPartyBackendOrAccountAccessed": false,
+      "wholeProbeNetworkIsolated": false
+    },
+    "outputSemantics": {
+      "metaCountries": 247,
+      "metaVersion": "2026c",
+      "metaZoneObjectKeys": 418,
+      "packedCountries": 247,
+      "packedLinks": 257,
+      "packedVersion": "2026c",
+      "packedZones": 340
+    },
+    "packedDependsOnIanaPlusPopulationGroupLeadersMomentAndUtils": true,
+    "quarantineObservation": {
+      "auditedStaticTaskPathsReadQuarantine": false,
+      "quarantineSharedSameCwd": true,
+      "quarantinedTargetsTheoreticallyAccessible": true,
+      "tagCommittedTargetsQuarantinedBeforeCleanRun": true,
+      "targetInvisibilityMechanicallyEstablished": false
+    },
+    "rawZdumpIntermediateStrictlyTimeIndependent": false,
+    "runtimeEnvironment": {
+      "ambientPathClosed": false,
+      "dotnet": "10.0.10",
+      "grunt": "1.5.3",
+      "gruntCli": "1.4.3",
+      "moment": "2.29.4",
+      "node": "v24.16.0",
+      "npm": "11.13.0",
+      "observedHostCpu": "Intel i5-12600KF 10C/16T alderlake",
+      "os": "Windows NT 10.0.26200.0 X64",
+      "outerCompleteCompilerArgvPersisted": false,
+      "zicAndZdumpTzcode": "2026c",
+      "zig": "0.16.0",
+      "zigDefaultSharedCacheUsed": true
+    },
+    "staticReadWriteReview": {
+      "dataCollect": "reads_zdump_and_generated_meta_population_and_moment_writes_collect",
+      "dataDedupe": "reads_collect_and_meta_writes_unpacked",
+      "dataMeta": "reads_NEWS_iso3166_zone1970_zone_tab_writes_meta",
+      "dataPack": "reads_unpacked_group_leaders_and_utils_writes_packed",
+      "dataZdump": "reads_597_tzif_writes_597_zdump",
+      "dataZic": "reads_nine_tzdata_sources_writes_597_tzif",
+      "osLevelReadSetTraceCaptured": false
+    },
+    "successOutputIdentity": [
+      {
+        "name": "meta",
+        "rawBytes": 97948,
+        "rawSha256": "89fdbb1808eb6b9a5d40ff63b694a3952bcf294384659b88c05f736c50d86ab5"
+      },
+      {
+        "name": "collect",
+        "rawBytes": 20285927,
+        "rawSha256": "ed166fef0b9697f47725339b68517412ca2dc1790afee17ffb21fc4f52d80a03"
+      },
+      {
+        "name": "unpacked",
+        "rawBytes": 11572929,
+        "rawSha256": "038699f5d72273ef90c7abe94b8f485776012840b340ddad79cd55cfe743565a"
+      },
+      {
+        "name": "packed",
+        "rawBytes": 715527,
+        "rawSha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81"
+      }
+    ],
+    "successfulRuns": [
+      {
+        "correctedRun": true,
+        "decoy": {
+          "decoyId": "empty_zones_links_countries",
+          "didNotAffectPackedOutput": true
+        },
+        "metaEqualsProjectInstalledTargetAfterOutputOperatorRecorded": true,
+        "outcome": "success",
+        "outputs": [
+          {
+            "name": "meta",
+            "rawBytes": 97948,
+            "rawSha256": "89fdbb1808eb6b9a5d40ff63b694a3952bcf294384659b88c05f736c50d86ab5"
+          },
+          {
+            "name": "collect",
+            "rawBytes": 20285927,
+            "rawSha256": "ed166fef0b9697f47725339b68517412ca2dc1790afee17ffb21fc4f52d80a03"
+          },
+          {
+            "name": "unpacked",
+            "rawBytes": 11572929,
+            "rawSha256": "038699f5d72273ef90c7abe94b8f485776012840b340ddad79cd55cfe743565a"
+          },
+          {
+            "name": "packed",
+            "rawBytes": 715527,
+            "rawSha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81"
+          }
+        ],
+        "packedEqualsProjectInstalledTargetAfterOutputOperatorRecorded": true,
+        "projectTargetUseMechanicallyExcluded": false,
+        "projectTargetUseObservedInAuditedStaticPaths": false,
+        "quarantinedTargetUseMechanicallyExcluded": false,
+        "quarantinedTargetUseObservedInAuditedStaticPaths": false,
+        "runId": "run_1_corrected",
+        "unpackedEqualsTagCommittedTargetAfterOutputOperatorRecorded": true,
+        "zdumpFilesGenerated": 597,
+        "zicFilesGenerated": 597
+      },
+      {
+        "correctedRun": true,
+        "decoy": {
+          "decoyId": "etc_decoy_dcoy_entry",
+          "didNotAffectPackedOutput": true,
+          "exactEntry": "Etc/Decoy|DCOY|0|0||"
+        },
+        "metaEqualsProjectInstalledTargetAfterOutputOperatorRecorded": true,
+        "outcome": "success",
+        "outputs": [
+          {
+            "name": "meta",
+            "rawBytes": 97948,
+            "rawSha256": "89fdbb1808eb6b9a5d40ff63b694a3952bcf294384659b88c05f736c50d86ab5"
+          },
+          {
+            "name": "collect",
+            "rawBytes": 20285927,
+            "rawSha256": "ed166fef0b9697f47725339b68517412ca2dc1790afee17ffb21fc4f52d80a03"
+          },
+          {
+            "name": "unpacked",
+            "rawBytes": 11572929,
+            "rawSha256": "038699f5d72273ef90c7abe94b8f485776012840b340ddad79cd55cfe743565a"
+          },
+          {
+            "name": "packed",
+            "rawBytes": 715527,
+            "rawSha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81"
+          }
+        ],
+        "packedEqualsProjectInstalledTargetAfterOutputOperatorRecorded": true,
+        "projectTargetUseMechanicallyExcluded": false,
+        "projectTargetUseObservedInAuditedStaticPaths": false,
+        "quarantinedTargetUseMechanicallyExcluded": false,
+        "quarantinedTargetUseObservedInAuditedStaticPaths": false,
+        "runId": "run_2_fresh_clean",
+        "unpackedEqualsTagCommittedTargetAfterOutputOperatorRecorded": true,
+        "zdumpFilesGenerated": 597,
+        "zicFilesGenerated": 597
+      }
+    ],
+    "tagObservation": {
+      "commit": "f5373b73ed47995924b53a0cac1e59730799887d",
+      "commitTime": "2026-07-19T07:56:36Z",
+      "githubApiBodiesAreDynamicPointInTimeRepresentations": true,
+      "githubApiBodiesUsedAsStablePublisherPins": false,
+      "githubVerificationReason": "unsigned",
+      "githubVerificationVerified": false,
+      "tag": "0.6.3",
+      "tree": "87ffb5e7c6a87facc3ddc75c685ee35dcf940220"
+    },
+    "transformationFileIdentities": [
+      {
+        "path": "package.json",
+        "rawBytes": 1076,
+        "rawSha256": "131fc5c4b7ad0c5ebcc00b5670c49ef54c2cf0cd26f68670bee10bfd66276a2b"
+      },
+      {
+        "path": "package-lock.json",
+        "rawBytes": 291520,
+        "rawSha256": "282251670f309243ced632791aa9f025a5b5ac8e4ca1caabd90af19de16f50c5"
+      },
+      {
+        "path": "Gruntfile.js",
+        "rawBytes": 1995,
+        "rawSha256": "08ac5403aca02bc49ceaeda82b5d832a57cea8554796ce00f94a1b6389a5843e"
+      },
+      {
+        "path": "tasks/data.js",
+        "rawBytes": 584,
+        "rawSha256": "622d24ec5c89d808cd77151d0960913f135db2b180f706b3a0f0b30fd0a72a3c"
+      },
+      {
+        "path": "tasks/data-meta.js",
+        "rawBytes": 4725,
+        "rawSha256": "441690ae8c041955dbc56885f0f794cc325c2cd72afb48ca0d6e1e130edae7d4"
+      },
+      {
+        "path": "tasks/data-zic.js",
+        "rawBytes": 1616,
+        "rawSha256": "20403322da9be80987107bb3cf4153c9096bd0af3cb1f1df02f194f1e152db2c"
+      },
+      {
+        "path": "tasks/data-zdump.js",
+        "rawBytes": 2931,
+        "rawSha256": "6ea0171a4d84c792f87503a9722c63b666780784618ab5aec1cd9be7ec4a9b41"
+      },
+      {
+        "path": "tasks/data-collect.js",
+        "rawBytes": 2933,
+        "rawSha256": "1e2341c3c9d2cbd93c25ae02445aadc925c3e4713b5de1310e1ee4215f1d1743"
+      },
+      {
+        "path": "tasks/data-dedupe.js",
+        "rawBytes": 1507,
+        "rawSha256": "bb4de7ce8b94d1b03546fbb88968f5f61e0c573eade6d9660d81e9b12ef35182"
+      },
+      {
+        "path": "tasks/data-pack.js",
+        "rawBytes": 878,
+        "rawSha256": "d4b315590835f8d725df303ec96163123253b4e141156dee9005e85acd0b5a6f"
+      },
+      {
+        "path": "tasks/population.json",
+        "rawBytes": 13000,
+        "rawSha256": "8669bfea8568dc369689976f984da88e8d31796bdeb16753925dab80f2ef5927"
+      },
+      {
+        "path": "tasks/group-leaders.json",
+        "rawBytes": 10049,
+        "rawSha256": "cb35d8264d15e972ba90ea522e91796049cee52c6e50cc268d6603d2b0258224"
+      },
+      {
+        "path": "moment-timezone-utils.js",
+        "rawBytes": 7741,
+        "rawSha256": "f0772f4dd6c857021cc1518ab5d2c1cca7b19e0d479ffb1b6a07848d84c7bd66"
+      },
+      {
+        "path": ".github/workflows/build-data.yml",
+        "rawBytes": 2613,
+        "rawSha256": "84f4639083cce5d0b03932f7d04e2e59d59382d4c9cf66dca581a1111ccb3349"
+      },
+      {
+        "path": "CONTRIBUTING.md",
+        "rawBytes": 8532,
+        "rawSha256": "1c2ae21a13e20d04cc5a6a63a119d8f3efd4da1f1f960ba36f129f781d56b2cf"
+      }
+    ],
+    "twoSuccessfulRunsByteExact": true,
+    "tzcodeFileIdentities": [
+      {
+        "path": "Makefile",
+        "rawBytes": 56279,
+        "rawSha256": "41406412425d58e5ba4327785557a3a79134d2b747584a1304e77892e617955f"
+      },
+      {
+        "path": "zic.c",
+        "rawBytes": 114982,
+        "rawSha256": "642f4dfccdf7fcadc36eb8e241d0d10404d3d6e4c24329d8ad7224433ec5a8c4"
+      },
+      {
+        "path": "zdump.c",
+        "rawBytes": 32871,
+        "rawSha256": "7ea2a00dfaf88491f99988d7d661af27b1c437ec09910c4a5e05a831c0860c68"
+      },
+      {
+        "path": "localtime.c",
+        "rawBytes": 83406,
+        "rawSha256": "e362fcc65b89034b0ed2ee54f213a52a860b044055b62103c983b662133b307d"
+      },
+      {
+        "path": "strftime.c",
+        "rawBytes": 19380,
+        "rawSha256": "119fd12398d687c366df07dbbde6530caf74979ea5ec2f90718f111b4e7fb717"
+      },
+      {
+        "path": "private.h",
+        "rawBytes": 31916,
+        "rawSha256": "e67d07e54606d68df765b7e69c1c5c29d29464c40c2b695d870d4fa7f26ce52e"
+      },
+      {
+        "path": "tzfile.h",
+        "rawBytes": 4194,
+        "rawSha256": "449eceb0318327d7e885c9ab537a88084c98f03735758e4cf3e9ad1ebae79a1c"
+      },
+      {
+        "path": "version",
+        "rawBytes": 6,
+        "rawSha256": "b8b066b540bc2870e6f1f3cd76f1b0e6c3629b2e3a12f14ba9e47085a1abb781"
+      },
+      {
+        "path": "version.h",
+        "rawBytes": 133,
+        "rawSha256": "e7814004c7a2b4ea599725dc56ff19590dad907529f24fd947d032d5be033508"
+      },
+      {
+        "path": "tzdir.h",
+        "rawBytes": 159,
+        "rawSha256": "eca5f1e44f56b3a110fd8d094d2dca1eebca11634428f644f05b774b7c077b3f"
+      }
+    ],
+    "upstreamAndToolIdentities": [
+      {
+        "rawBytes": 347,
+        "rawSha256": "3b8ab2f4cafdc8cfa050283a2de1f45720e2a8bf36d0f943bcee9c7a77d996d0",
+        "role": "github_tag_ref_api_json_point_in_time",
+        "stablePublisherPin": false
+      },
+      {
+        "rawBytes": 265289,
+        "rawSha256": "2d79eefdfa48375b6aa61e39239ec1eabdc5f2b8255058147de17cc4c51b1c46",
+        "role": "github_commit_api_json_point_in_time",
+        "stablePublisherPin": false
+      },
+      {
+        "rawBytes": 34395189,
+        "rawSha256": "ed1a494f029c4fd67b91a98bb4b31c9b570d1bc27c3046138a2dd5219cd31e87",
+        "role": "moment_timezone_0_6_3_source_archive"
+      },
+      {
+        "rawBytes": 475694,
+        "rawSha256": "e4a178a4477f3d0ea77cc31828ff72aa38feff8d61aa13e7e99e142e9d902be4",
+        "role": "iana_tzdata2026c_archive"
+      },
+      {
+        "rawBytes": 325445,
+        "rawSha256": "b1cffc3ace4c4c7cd0efba2f7add86ec3d0b79da48bcf03582671fd3c8feace8",
+        "role": "iana_tzcode2026c_archive"
+      },
+      {
+        "rawBytes": 76660,
+        "rawSha256": "13832f90796d8a4849a081ead72f7133f6ce1c9b8c1c61fa432a3f2ef18c7a8b",
+        "role": "zig_index_json_point_in_time",
+        "stablePublisherPin": false
+      },
+      {
+        "rawBytes": 97217739,
+        "rawSha256": "68659eb5f1e4eb1437a722f1dd889c5a322c9954607f5edcf337bc3684a75a7e",
+        "role": "zig_0_16_0_x86_64_windows_zip"
+      },
+      {
+        "rawBytes": 177108480,
+        "rawSha256": "086ce9d47ba42f33a514e1a6e04eb1d4a8fa1d75e0868e0213caad447c91e864",
+        "role": "zig_executable"
+      },
+      {
+        "rawBytes": 302080,
+        "rawSha256": "9417c6e96848cef83b85d00f3f3e9edadc2de637737a965b683fddad445632c6",
+        "role": "session_zic_executable"
+      },
+      {
+        "rawBytes": 272384,
+        "rawSha256": "e0f1ebe57d5da07f3a48b92fafa4a8e792b0ad8f48ffd6b54def926035558e29",
+        "role": "session_zdump_executable"
+      },
+      {
+        "rawBytes": 92279112,
+        "rawSha256": "b3094d0b49f9ad602262a9921551737bb97637c05dd357a06ae98188d7290aa3",
+        "role": "node_executable"
+      },
+      {
+        "rawBytes": 538,
+        "rawSha256": "21b46c69ad6e2f231f02a9e120f4ba6c8e75fef5a45637103002eab99f888ab8",
+        "role": "npm_cmd"
+      }
+    ],
+    "windowsHostAdaptations": {
+      "generalProductBuildDefaultAuthorized": false,
+      "haveTznameAdaptsAbbreviationSourceWithoutTmZone": true,
+      "probeWorkflow": "windows_zig_portability_macros",
+      "suppressTzdirChangesWindowsPathLookupSemantics": true,
+      "timeTzChangesInternalTypeAndSymbolRange": true,
+      "upstreamDefaultBuild": false,
+      "upstreamWorkflow": "ubuntu-latest_node-lts_tzcode-make",
+      "zdumpAdditionalMacros": [
+        "HAVE_STRUCT_STAT_ST_CTIM=0",
+        "SUPPRESS_TZDIR=1",
+        "HAVE_TZNAME=1",
+        "time_tz=__int64"
+      ],
+      "zdumpInputs": [
+        "zdump.c",
+        "localtime.c",
+        "strftime.c"
+      ],
+      "zicCommand": "zig.exe cc -std=gnu17 -O2 -DHAVE_DIRECT_H=1 -DHAVE_MEMPCPY=1 -DHAVE_GETEUID=0 -DHAVE_GETRESUID=0 -DHAVE_FCHMOD=0 -DHAVE_LINK=0 -DHAVE_SYMLINK=0 -DHAVE_SETENV=0 -DHAVE_LOCALTIME_R=0 -DHAVE_LOCALTIME_RZ=0 -DHAVE_POSIX_DECLS=0 -DHAVE_UNISTD_H=0 -DHAVE_GETTEXT=0 -o zic.exe zic.c"
+    },
+    "workspaceInteractionOperatorRecorded": {
+      "fileNameOnlyZicZdumpSearchOccurred": true,
+      "forbiddenLocalUserDataCleanupFileRead": false,
+      "gitExecuted": false,
+      "substantiveReads": [
+        "node_modules/moment-timezone/package.json",
+        "node_modules/moment-timezone/data/meta/latest.json_after_output_only",
+        "node_modules/moment-timezone/data/packed/latest.json_after_output_only"
+      ],
+      "workspaceDeletes": 0,
+      "workspaceWrites": 0
+    }
+  },
+  "projectReleaseGovernance": {
+    "activeLine": "legacy-v13",
+    "expertClaimsAuthorized": false,
+    "migrationId": null,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochBoundaryRequired": true,
+    "mutationEpochReceipt": null,
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "recordType": "western_tzdb_2026c_controlled_reproduction_observation_v1",
+  "schemaVersion": "1.0.0",
+  "snapshotBoundary": {
+    "abaExcluded": false,
+    "crossFileAtomicSnapshotEstablished": false,
+    "currentArtifactWriteProvenanceEstablished": false,
+    "intervalMutationExcluded": false,
+    "localArtifactReadSemantics": "per_file_held_handle_same_endpoint_revalidation",
+    "mutationEpochReceipt": null,
+    "operatorProbeSemantics": "two_successful_runs_without_persisted_raw_receipt_or_full_window",
+    "providedWriterUsesExclusiveCreate": true
+  },
+  "sourceRightsChild": {
+    "evidenceDigest": "14361c93e29d257080b25c0f3e580345243930acb07da450f938fbf6f02b8465",
+    "evidenceId": "hakimi.western.source-rights/iana-tzdb-2026c-moment-timezone-0.6.3/1.0.0",
+    "path": "content/system-admission/western-tzdb-2026c-source-rights-evidence.v1.json",
+    "rawBytes": 16931,
+    "rawSha256": "ee61453078f7e4df39c71ee59dcfc94f75ab37a7cd0d967849e1049d748d1ee1",
+    "requiredVerification": "existing_source_rights_child_private_brand"
+  },
+  "status": "operator_recorded_point_in_time_two_run_byte_exact_observation_candidate_only",
+  "subjectObservations": [
+    {
+      "countsTowardFrozenBindingGate": false,
+      "evidenceState": "partial_observation_candidate_only",
+      "frozenBindingId": null,
+      "observationCandidateId": "western-iana-tzdb-2026c-to-moment-timezone-controlled-reproduction-v1",
+      "subjectFullySatisfied": false,
+      "subjectId": "western.input.calendar-time-zone-and-dst",
+      "transformationProvenanceEstablished": false
+    },
+    {
+      "countsTowardFrozenBindingGate": false,
+      "evidenceState": "partial_observation_candidate_only",
+      "frozenBindingId": null,
+      "observationCandidateId": "western-iana-tzdb-2026c-to-moment-timezone-controlled-reproduction-rights-context-v1",
+      "subjectFullySatisfied": false,
+      "subjectId": "western.rights.ephemeris-time-data-redistribution",
+      "transformationProvenanceEstablished": false
+    }
+  ]
+}

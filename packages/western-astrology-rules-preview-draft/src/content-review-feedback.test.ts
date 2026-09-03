@@ -191,6 +191,19 @@ describe("western 43-item primitive content review feedback", () => {
     expect(result.result).toBeNull();
   });
 
+  it("fails closed for predecessor template identities bound to prior content layers", async () => {
+    const predecessorV06 = await editableTemplate();
+    predecessorV06.profile.formatVersion = "hakimi.western.content_review_feedback/0.1.0";
+    predecessorV06.profile.templateVersion = "0.6.0";
+    predecessorV06.catalogBinding.contentLayerVersion = "western-astrology-neutral-content/0.5-draft";
+    await expectRejected(predecessorV06);
+
+    const predecessorV07 = await editableTemplate();
+    predecessorV07.profile.templateVersion = "0.7.0";
+    predecessorV07.catalogBinding.contentLayerVersion = "western-astrology-neutral-content/0.7-draft";
+    await expectRejected(predecessorV07);
+  });
+
   it("fails closed for binding, source, coverage, snapshot, attribution, review, counts, or boundary tampering", async () => {
     const profileTamper = await editableTemplate();
     profileTamper.profile.catalogScope = "dynamic_chart_content";

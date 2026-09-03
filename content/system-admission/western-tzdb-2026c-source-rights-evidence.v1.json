@@ -1,0 +1,396 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "western_tzdb_2026c_source_rights_evidence_v1",
+  "evidenceId": "hakimi.western.source-rights/iana-tzdb-2026c-moment-timezone-0.6.3/1.0.0",
+  "status": "link_hash_and_minimal_quote_candidate_only_unbound",
+  "createdAt": "2026-08-31T04:30:00.000Z",
+  "observedWindow": {
+    "startedAt": "2026-08-31T04:21:16.887Z",
+    "endedAt": "2026-08-31T04:21:24.477Z",
+    "observationMode": "public_https_in_memory_no_remote_body_persistence",
+    "remoteCaptureMechanicallyReverifiedByOfflineLoader": false,
+    "offlineLoaderVerifiesPersistedRecordAndLocalClosureOnly": true
+  },
+  "projectReleaseGovernance": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "expertClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false
+  },
+  "basisArtifacts": [
+    {
+      "path": "docs/阶段C-E-西洋IANA-tzdb-2026c来源权利候选-2026-08-31.md",
+      "role": "non_authoritative_source_rights_candidate_narrative_basis",
+      "rawBytes": 8694,
+      "rawSha256": "819f8219988cff1912abbb2a0e9a46baf67a4ef876748a6ee7353568b84c8740"
+    }
+  ],
+  "formalParents": [
+    {
+      "role": "current_western_source_binding_requirements",
+      "path": "content/system-admission/western-source-binding-requirements.v1.json",
+      "rawBytes": 25909,
+      "rawSha256": "3f22c78279022a70d3a3a21e5a80a33b321a99793c033eb0a72c5171628107c9",
+      "semanticDigestField": "ledgerDigest",
+      "semanticDigest": "2bb52306841098ee5e83906bffda400ad07efd706c7c294ee4d07115854849bd"
+    },
+    {
+      "role": "current_western_independent_domain_manifest",
+      "path": "content/domain-release/western-astrology.engineering-draft.v0.1.0.json",
+      "rawBytes": 10832,
+      "rawSha256": "c138220098346a3ff9857c1e8034914205277bdbe8cf5563e80b58687745a398",
+      "semanticDigestField": "manifestDigest",
+      "semanticDigest": "5c44fce96357ed80c4274f1f225151764ffe5998956e7e823764499ee45f993e"
+    },
+    {
+      "role": "current_western_version_aware_observation",
+      "path": "content/system-admission/western-independent-productization-version-aware-observation-candidate.v1.0.0.json",
+      "rawBytes": 18879,
+      "rawSha256": "956fa352a87253abc893056e443bd45e3fa731531b839144e3121c43639f19df",
+      "semanticDigestField": "candidateDigest",
+      "semanticDigest": "6f71eb3e0f8745c82b383e6e05bf9130d6249530f4ad1d872620480796b1deeb"
+    },
+    {
+      "role": "four_system_current_observation_registry_v2",
+      "path": "content/system-admission/four-system-current-observation-registry.v2.json",
+      "rawBytes": 22261,
+      "rawSha256": "1b73a55f74597712f84706b2a2046fe3907fd3726261d1f8703469c5fa9abc39",
+      "semanticDigestField": "registryDigest",
+      "semanticDigest": "fa521f30a40fd1c006e886c30f8da5295fbb82784db5671d59df2691117f3738"
+    }
+  ],
+  "subjectProjections": [
+    {
+      "subjectId": "western.input.calendar-time-zone-and-dst",
+      "candidateId": "western-iana-tzdb-2026c-input-source-candidate-v1",
+      "coverageScope": "iana_2026c_release_and_bundled_packed_artifact_identity_only",
+      "bindingState": "candidate_only_unbound",
+      "subjectFullySatisfied": false,
+      "frozenBindingId": null,
+      "countsTowardFrozenBindingGate": false
+    },
+    {
+      "subjectId": "western.rights.ephemeris-time-data-redistribution",
+      "candidateId": "western-iana-tzdb-2026c-moment-timezone-rights-candidate-v1",
+      "coverageScope": "iana_tzdb_and_moment_timezone_only",
+      "bindingState": "candidate_only_unbound",
+      "subjectFullySatisfied": false,
+      "frozenBindingId": null,
+      "countsTowardFrozenBindingGate": false
+    }
+  ],
+  "officialIanaEvidence": {
+    "releasePage": {
+      "url": "https://www.iana.org/time-zones/releases/2026c",
+      "httpStatus": 200,
+      "rawBytes": 8924,
+      "rawSha256": "ee7b7dd9dd8a4cb9e37865ff699ad75032755e027668b028debd8f6e456529d0",
+      "releaseVersion": "2026c",
+      "releaseDate": "2026-07-08"
+    },
+    "dataArchive": {
+      "url": "https://data.iana.org/time-zones/releases/tzdata2026c.tar.gz",
+      "httpStatus": 200,
+      "rawBytes": 475694,
+      "rawSha256": "e4a178a4477f3d0ea77cc31828ff72aa38feff8d61aa13e7e99e142e9d902be4",
+      "rawSha512": "e0b4b7044b66fbc27bc21d13d18063abcdf78ab58d5ba5fd64bd1a88d86e9d495f45add4d8e65bb6c40249f9c94ca29b72c8ebba8d0e4c468f2965ac77932ef0",
+      "etag": "\"7422e-6561d50afc200\"",
+      "lastModified": "Wed, 08 Jul 2026 18:02:48 GMT"
+    },
+    "detachedSignature": {
+      "url": "https://data.iana.org/time-zones/releases/tzdata2026c.tar.gz.asc",
+      "httpStatus": 200,
+      "rawBytes": 833,
+      "rawSha256": "26cd02e034eed682aa911d224bca3247ff15914df317e3bb0b1a01dc557b46fe",
+      "rawSha512": "e1d44216608666bfb8a1855caacc9e6d30a1576f302c4db59faf8ec6aa2f7d5ae299c4c9b17b255b9612c30582358ca2a48f5fea82ab9b7d77d030e713c9010d",
+      "bytesObserved": true,
+      "cryptographicallyVerified": false,
+      "signingKeyTrustEstablished": false,
+      "publisherAuthenticityEstablished": false
+    },
+    "versionRepresentation": {
+      "url": "https://data.iana.org/time-zones/tzdb/version?version=2026c",
+      "httpStatus": 200,
+      "rawBytes": 6,
+      "rawSha256": "b8b066b540bc2870e6f1f3cd76f1b0e6c3629b2e3a12f14ba9e47085a1abb781",
+      "rawSha512": "e463bca75b77c320e645d265471410a6faad2d6c14d6ef5f0ece43b3c42903f33a968211bfca529e17c06785d0b8c899e8f60b0867cc00a796a41cabda813dcf",
+      "exactQuote": {
+        "text": "2026c",
+        "utf8Bytes": 5,
+        "sha256": "19fd9387dff1a60f2a3947d61232c982b3a52feb645b130e708a879936152da5",
+        "locator": "line_1_without_trailing_lf"
+      }
+    },
+    "licenseRepresentation": {
+      "url": "https://data.iana.org/time-zones/tzdb-2026c/LICENSE",
+      "httpStatus": 200,
+      "rawBytes": 252,
+      "rawSha256": "0613408568889f5739e5ae252b722a2659c02002839ad970a63dc5e9174b27cf",
+      "rawSha512": "9fe102f8894714cd0bd7d72a92e5ca29e4f75ff3f802d6fc363d5349b83345251b1d572a35321bd487cc70485da337b90df0cd37f896b6343f6f4c29cba7a295",
+      "exactQuote": {
+        "text": "Unless specified below, all files in the tz code and data (including\nthis LICENSE file) are in the public domain.",
+        "utf8Bytes": 113,
+        "sha256": "72c3b37777104fdba9c140c56d93cd282266f283e848399f0d8e3cef9daaf0ff",
+        "locator": "LICENSE_lines_1_2_exact_lf"
+      },
+      "licenseTextObserved": true,
+      "licenseTextAutomaticallyTreatedAsLegalConclusion": false
+    },
+    "announcement": {
+      "url": "https://lists.iana.org/hyperkitty/list/tz%40iana.org/thread/NVHSX2PAQIT44U5FCCEVNJJYXQMMTJSA/?sort=date",
+      "observedRawBytes": 27691,
+      "observedRawSha256": "6f63ccc3186c430d56135f96345e14b28e702654557fec599ccc6b8e3b9eac32",
+      "volatileDynamicRepresentation": true,
+      "statedDataArchiveSha512": "e0b4b7044b66fbc27bc21d13d18063abcdf78ab58d5ba5fd64bd1a88d86e9d495f45add4d8e65bb6c40249f9c94ca29b72c8ebba8d0e4c468f2965ac77932ef0",
+      "statedCommit": "71f28b9ab3b67c0f9466803f6151812d4fc8e357",
+      "statedTag": "2026c"
+    },
+    "archiveEntriesObservedInMemory": [
+      {
+        "path": "LICENSE",
+        "rawBytes": 252,
+        "rawSha256": "0613408568889f5739e5ae252b722a2659c02002839ad970a63dc5e9174b27cf"
+      },
+      {
+        "path": "africa",
+        "rawBytes": 58273,
+        "rawSha256": "f2851d4be4a4925cbdc9d56e10d780bccadb89d6ffb9aed78c3e35f97c200aed"
+      },
+      {
+        "path": "asia",
+        "rawBytes": 192871,
+        "rawSha256": "cd12fe2bd64a02d808fd34abb92f08f19e5da20133a1c6c347d11171c00d9e1c"
+      },
+      {
+        "path": "backward",
+        "rawBytes": 12039,
+        "rawSha256": "d2f4c8953f204982ddf4dc0c2debf41b2464de376dad7d546d0fc70f889fa706"
+      },
+      {
+        "path": "northamerica",
+        "rawBytes": 177085,
+        "rawSha256": "4046b382ee56e287a5ea0cfddae67297badcf9c8fb6b6e2ee8086898c847e147"
+      },
+      {
+        "path": "version",
+        "rawBytes": 6,
+        "rawSha256": "b8b066b540bc2870e6f1f3cd76f1b0e6c3629b2e3a12f14ba9e47085a1abb781"
+      },
+      {
+        "path": "zone1970.tab",
+        "rawBytes": 17596,
+        "rawSha256": "77b5e45415fa684fcc42de3421a6b0f15cc9b2c137f258083850346e8f76eea8"
+      }
+    ]
+  },
+  "npmCarrierEvidence": {
+    "packageName": "moment-timezone",
+    "packageVersion": "0.6.3",
+    "declaredLicense": "MIT",
+    "tarball": {
+      "url": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.6.3.tgz",
+      "httpStatus": 200,
+      "rawBytes": 238621,
+      "rawSha256": "09cc398dae4d95db31016e6e3e35eafff09244a72e0511a292702738e7c724ac",
+      "rawSha512": "a5510f03f1c21471dbc09d77d32c27cd8b99a6410670fe8369afcec0d79ba40d7c3326de1479908a50061a8bd78168a343cbd0b66b9df6366bce250182cca47e",
+      "sri": "sha512-pVEPA/HCFHHbwJ130ywnzYuZpkEGcP6Daa/OwNebpA18MybeFHmQilAGGovXgWijQ8vQtmud9jZrziUBgsykfg=="
+    },
+    "packageLockEntry": {
+      "path": "packages.node_modules/moment-timezone",
+      "version": "0.6.3",
+      "resolved": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.6.3.tgz",
+      "integrity": "sha512-pVEPA/HCFHHbwJ130ywnzYuZpkEGcP6Daa/OwNebpA18MybeFHmQilAGGovXgWijQ8vQtmud9jZrziUBgsykfg==",
+      "license": "MIT"
+    },
+    "tarballEntriesObservedInMemory": [
+      {
+        "path": "package/LICENSE",
+        "rawBytes": 1097,
+        "rawSha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+      },
+      {
+        "path": "package/data/meta/latest.json",
+        "rawBytes": 97948,
+        "rawSha256": "89fdbb1808eb6b9a5d40ff63b694a3952bcf294384659b88c05f736c50d86ab5"
+      },
+      {
+        "path": "package/data/packed/latest.json",
+        "rawBytes": 715527,
+        "rawSha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81"
+      },
+      {
+        "path": "package/package.json",
+        "rawBytes": 1076,
+        "rawSha256": "131fc5c4b7ad0c5ebcc00b5670c49ef54c2cf0cd26f68670bee10bfd66276a2b"
+      }
+    ],
+    "packedIanaVersion": "2026c",
+    "packedZoneCount": 340,
+    "packedLinkCount": 257,
+    "localInstalledEntriesByteEqualToObservedTarballEntriesInLiveWindow": true,
+    "ianaArchiveToPackedTransformationProvenanceEstablished": false,
+    "publisherAuthenticityEstablished": false,
+    "mitMinimalExactQuote": {
+      "text": "The MIT License (MIT)",
+      "utf8Bytes": 21,
+      "sha256": "74896d15800f7a637980e42b247d49c602d3b252520ad66a6cd1e852109cc9fb",
+      "locator": "package/LICENSE_line_1"
+    }
+  },
+  "localArtifactEvidence": [
+    {
+      "role": "workspace_dependency_lock",
+      "path": "package-lock.json",
+      "rawBytes": 175812,
+      "rawSha256": "40a02c7c3166f0c9bc03afa9c1d1f342fb7f54efe1abbf7cb3f5cf6ecb482a4d"
+    },
+    {
+      "role": "tzdb_core_package_contract",
+      "path": "packages/tzdb-core/package.json",
+      "rawBytes": 241,
+      "rawSha256": "fb12b19a6f6c971185bd2f2c9226fe50ad816595e3acec4f0a0b373593136236"
+    },
+    {
+      "role": "tzdb_core_content_addressed_registry",
+      "path": "packages/tzdb-core/src/index.ts",
+      "rawBytes": 7819,
+      "rawSha256": "7c144f6446b3fdba55f7b7b947fe242348ba5010025af36868c39436bfea638e"
+    },
+    {
+      "role": "tzdb_core_offline_artifact_verifier",
+      "path": "packages/tzdb-core/scripts/verify-artifact.mjs",
+      "rawBytes": 9473,
+      "rawSha256": "a0b643073f5ca99e6668c476c4382b9bdadf93d19422fe7f8558e98f9bb96164"
+    },
+    {
+      "role": "western_civil_time_fail_closed_adapter",
+      "path": "packages/western-civil-time-input-adapter-draft/src/index.ts",
+      "rawBytes": 27692,
+      "rawSha256": "80f7b3627d5a4651d0ab2d9509a314f49d93fbdac6d5f92b10ac97c34892fc77"
+    },
+    {
+      "role": "project_third_party_notice_inventory",
+      "path": "THIRD_PARTY_NOTICES.md",
+      "rawBytes": 7030,
+      "rawSha256": "d05d5d8a944cde7a739f3a64a1077fbedf706185a20e3e15c7ad423d7f0e8248"
+    },
+    {
+      "role": "installed_moment_timezone_packed_entry",
+      "path": "node_modules/moment-timezone/data/packed/latest.json",
+      "rawBytes": 715527,
+      "rawSha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81"
+    },
+    {
+      "role": "installed_moment_timezone_meta_entry",
+      "path": "node_modules/moment-timezone/data/meta/latest.json",
+      "rawBytes": 97948,
+      "rawSha256": "89fdbb1808eb6b9a5d40ff63b694a3952bcf294384659b88c05f736c50d86ab5"
+    },
+    {
+      "role": "installed_moment_timezone_package_manifest",
+      "path": "node_modules/moment-timezone/package.json",
+      "rawBytes": 1076,
+      "rawSha256": "131fc5c4b7ad0c5ebcc00b5670c49ef54c2cf0cd26f68670bee10bfd66276a2b"
+    },
+    {
+      "role": "installed_moment_timezone_license_carrier",
+      "path": "node_modules/moment-timezone/LICENSE",
+      "rawBytes": 1097,
+      "rawSha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+    }
+  ],
+  "rightsLayerObservations": [
+    {
+      "layerId": "work",
+      "evidenceObserved": true,
+      "observation": "IANA tzdb LICENSE public-domain wording and moment-timezone MIT wording",
+      "rightsEstablished": false,
+      "independentRightsReviewVerified": false
+    },
+    {
+      "layerId": "version",
+      "evidenceObserved": true,
+      "observation": "IANA 2026c and moment-timezone 0.6.3 fixed by version and content digests",
+      "rightsEstablished": false,
+      "independentRightsReviewVerified": false
+    },
+    {
+      "layerId": "carrier",
+      "evidenceObserved": true,
+      "observation": "IANA data archive, detached signature, npm tarball and installed entry identities observed",
+      "rightsEstablished": false,
+      "independentRightsReviewVerified": false
+    }
+  ],
+  "storageBoundary": {
+    "scope": "this_evidence_record_and_its_materialization_operation_only",
+    "remoteResponseBodiesPersistedInThisRecord": 0,
+    "remoteArchivesPersistedInThisRecord": 0,
+    "detachedSignaturesPersistedInThisRecord": 0,
+    "completeRemoteLicenseBodiesPersistedInThisRecord": 0,
+    "urlsBytesDigestsAndMinimalQuotesPersisted": true,
+    "operatorRecordedPaidOrPrivateMaterialsAccessed": false,
+    "operatorRecordedThirdPartyBackendsOrAccountsAccessed": false,
+    "workspaceWideAbsenceMechanicallyVerified": false
+  },
+  "snapshotBoundary": {
+    "localArtifactReadSemantics": "per_file_held_handle_same_endpoint_revalidation",
+    "liveRemoteObservationSemantics": "single_operator_retrieval_window_without_persisted_receipt",
+    "machineArtifactsUseExclusiveCreateWriter": true,
+    "crossFileAtomicSnapshotEstablished": false,
+    "mutationEpochReceipt": null,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false
+  },
+  "gateSummary": {
+    "sourceBindingsRequired": 28,
+    "sourceBindingsFrozenVerified": 0,
+    "partialCandidatesAttached": 2,
+    "subjectFullySatisfied": 0,
+    "subjectsWithMinimalExactQuote": 2,
+    "minimalExactQuotesStored": 3,
+    "remoteBodiesPersistedInThisRecord": 0,
+    "workRightsEstablished": 0,
+    "versionRightsEstablished": 0,
+    "carrierRightsEstablished": 0,
+    "independentRightsReviewsVerified": 0,
+    "independentEngineeringReviewsVerified": 0,
+    "independentDomainExpertReviewsVerified": 0,
+    "formalManifestIntegrated": false,
+    "formalRegistryIntegrated": false,
+    "ownerAdmissionAccepted": false,
+    "rightsLegalConclusionEstablished": false,
+    "redistributionAuthorized": false,
+    "releaseReady": false,
+    "publicReleaseAuthorized": false
+  },
+  "evidenceLedger": {
+    "engineeringEvidence": "local exact identities and existing fail_closed tzdb gate observed",
+    "browserRuntimeEvidence": "not_assessed",
+    "contentTruth": "not_established",
+    "expertTruth": "not_established",
+    "rightsLegalConclusion": "not_established",
+    "releaseReadiness": "not_ready",
+    "publicReleaseAuthorization": "not_authorized"
+  },
+  "doesNotEstablish": [
+    "complete_calendar_time_zone_and_dst_subject",
+    "complete_ephemeris_time_data_redistribution_subject",
+    "iana_to_moment_timezone_transformation_provenance_or_byte_equivalence",
+    "detached_signature_cryptographic_verification_signing_key_trust_or_publisher_authenticity",
+    "work_version_carrier_rights_establishment_or_legal_conclusion",
+    "jpl_naif_iers_eop_leap_seconds_sofa_swiss_ephemeris_or_other_provider_rights",
+    "content_truth_or_all_historical_or_future_civil_time_truth",
+    "independent_engineering_rights_or_domain_expert_review",
+    "browser_runtime_pwa_service_worker_or_cross_browser_validation",
+    "formal_manifest_registry_or_owner_admission",
+    "release_readiness_public_deployment_or_public_release_authorization",
+    "cross_system_equivalence_scoring_weighting_majority_vote_or_generated_model_winner",
+    "cross_file_atomic_snapshot_mutation_epoch_interval_integrity_or_aba_exclusion"
+  ],
+  "evidenceDigest": "14361c93e29d257080b25c0f3e580345243930acb07da450f938fbf6f02b8465"
+}

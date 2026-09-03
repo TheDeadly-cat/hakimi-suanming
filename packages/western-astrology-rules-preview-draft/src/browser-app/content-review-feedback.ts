@@ -9,8 +9,8 @@ import {
 } from "./content-layer.ts";
 
 export const WESTERN_CONTENT_REVIEW_FEEDBACK_PROFILE = Object.freeze({
-  formatVersion: "hakimi.western.content_review_feedback/0.1.0",
-  templateVersion: "0.6.0",
+  formatVersion: "hakimi.western.content_review_feedback/0.2.0",
+  templateVersion: "0.8.0",
   expectedItemCount: 43,
   expectedSourceCount: 31,
   catalogScope: "fixed_43_primitive_content_only" as const,
@@ -35,7 +35,7 @@ export const WESTERN_CONTENT_REVIEW_FEEDBACK_PROFILE = Object.freeze({
 });
 
 export const WESTERN_CONTENT_REVIEW_FEEDBACK_FILENAME =
-  "hakimi-western-content-primitives-review-v006.json" as const;
+  "hakimi-western-content-primitives-review-v008.json" as const;
 export const WESTERN_CONTENT_REVIEW_FEEDBACK_MAX_BYTES = 2 * 1024 * 1024;
 
 export type WesternContentReviewDecision =

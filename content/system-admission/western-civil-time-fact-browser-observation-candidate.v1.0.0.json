@@ -1,0 +1,553 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "western_civil_time_fact_only_browser_observation_candidate_v1",
+  "observationId": "hakimi.western.civil-time-fact-only-browser-observation/1.0.0",
+  "status": "isolated_controlled_loopback_browser_observation_only_not_admitted",
+  "createdAt": "2026-08-31T18:25:19.296Z",
+  "activeAdmissionEffect": "none",
+  "systemIdentity": {
+    "contractSystemId": "western",
+    "productSystemId": "western-astrology",
+    "surfaceId": "western-civil-time-fact-browser-draft",
+    "surfaceVersion": "0.0.0-draft.0",
+    "productStatus": "isolated_engineering_draft",
+    "releaseIdentity": null,
+    "targetSchema": null,
+    "migrationId": null,
+    "legacyV13Inherited": false,
+    "schema13Inherited": false,
+    "baziAuthorityInherited": false,
+    "crossSystemAuthorityInherited": false
+  },
+  "projectReleaseGovernanceContext": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "projectContextOnly": true,
+    "inheritedByWesternProductIdentity": false,
+    "mutationEpochBoundaryRequired": true,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "lineage": {
+    "appendOnlyChild": true,
+    "formalWesternDomainManifestModifiedByThisChild": false,
+    "formalSourceLedgerModifiedByThisChild": false,
+    "fourSystemRegistryModifiedByThisChild": false,
+    "defaultWebSurfaceModifiedByThisChild": false,
+    "parentBacklinkAdded": false,
+    "ownerAdmissionAccepted": false,
+    "activeAdmissionEffect": "none"
+  },
+  "scopeBoundary": {
+    "chain": "declared_gregorian_civil_wall_time_to_utc_engineering_facts_only",
+    "civilReceiptSchema": "hakimi.western-civil-time-fact-receipt/0.1-draft",
+    "browserProjectionSchema": "hakimi.western-civil-time-browser-facts/0.1-draft",
+    "workerProtocolVersion": "hakimi.western-civil-time-browser-worker/0.1-draft",
+    "chainVersion": "hakimi.western-civil-time-to-fact-only-browser-chain/0.1-draft",
+    "includedFactFamilies": [
+      "declared_civil_time_echo",
+      "utc_instant",
+      "utc_offset_seconds",
+      "dst_gap_or_overlap_decision",
+      "tzdb_snapshot_identity",
+      "round_trip_verification"
+    ],
+    "excludedDomains": [
+      "ut1_tt_tdb_eop_ramc",
+      "astronomical_positions",
+      "houses",
+      "aspects",
+      "zodiac_interpretation",
+      "rules_preview",
+      "cross_system_comparison",
+      "default_web_runtime",
+      "formal_storage"
+    ],
+    "mainApplicationIntegrated": false,
+    "formalProductSurface": false
+  },
+  "artifactBindings": [
+    {
+      "bytes": 5309,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/browser-app/index.html",
+      "role": "isolated_draft_file",
+      "sha256": "2249cd554ee0c34c39112bc6798d0dc554a6c4c4dbdafe326d6fd0f7f98b362c"
+    },
+    {
+      "bytes": 403,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/package.json",
+      "role": "isolated_draft_file",
+      "sha256": "cecca149b72aa0aad1a10bd6a293d0df17b0c0630bfd56e9f01dd4f113efca73"
+    },
+    {
+      "bytes": 4142,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/README.md",
+      "role": "isolated_draft_file",
+      "sha256": "a022616d4707274709eda1458790bb05e50dd7f5d77e9a6f31b61b4e77f43d90"
+    },
+    {
+      "bytes": 6503,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/browser-fact-projection.test.ts",
+      "role": "isolated_draft_file",
+      "sha256": "d979dae28eea2d59c0646ece6297e24fe3c074563014e8de1d516c64456b0d76"
+    },
+    {
+      "bytes": 17741,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/browser-fact-projection.ts",
+      "role": "isolated_draft_file",
+      "sha256": "2499987068dc513e4c34aadb472aaf0eeac94d553f78050651cddff919760ba0"
+    },
+    {
+      "bytes": 4901,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/civil-client.test.ts",
+      "role": "isolated_draft_file",
+      "sha256": "53a3d5ea87d83dd44e3ffba2725a89789110d69dbd46f7092d09dbbbc1a4698d"
+    },
+    {
+      "bytes": 9019,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/civil-client.ts",
+      "role": "isolated_draft_file",
+      "sha256": "1dae5b0ffcccad052e9c37557996052f89c1796622e4861d149369594903d1a7"
+    },
+    {
+      "bytes": 15107,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/civil-time.test.ts",
+      "role": "isolated_draft_file",
+      "sha256": "5e9c9a048a11fc49e4f3d7ea8ed84db6b6260f5a5f798567306e2fb91ce6a577"
+    },
+    {
+      "bytes": 32761,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/civil-time.ts",
+      "role": "isolated_draft_file",
+      "sha256": "3d253687acbc6bfdb30ef335d3d67f4cecd839edcceddaecbcb7121dd30fee76"
+    },
+    {
+      "bytes": 2975,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/civil-worker.ts",
+      "role": "isolated_draft_file",
+      "sha256": "84bad5ed7bfd9254cfffa2237cb7247dad90af5309e5c224027a927f388ada64"
+    },
+    {
+      "bytes": 6891,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/main.ts",
+      "role": "isolated_draft_file",
+      "sha256": "bb0302d657ac65216d4419509e52174b559fde8935b54d7e0ed73eae753951a1"
+    },
+    {
+      "bytes": 6657,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/protocol.ts",
+      "role": "isolated_draft_file",
+      "sha256": "67749a90e1fcf092e64dedebc778429257cd62910a3c9a58ced77fc20361bbea"
+    },
+    {
+      "bytes": 4808,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/styles.css",
+      "role": "isolated_draft_file",
+      "sha256": "49251b174498b81a9750c905231179e71957ef7794aa06136036f3f0c0e45ddb"
+    },
+    {
+      "bytes": 791,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/ui-format.test.ts",
+      "role": "isolated_draft_file",
+      "sha256": "dc9f6598e4c8f5b15bd13f0070b698843dff03e53e4848d00f7c8f1a287fddc0"
+    },
+    {
+      "bytes": 603,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/ui-format.ts",
+      "role": "isolated_draft_file",
+      "sha256": "7fe98a467d478f9bb21a2d63503b7981f1c8a8301f621ae12fe2b5cc5bab3971"
+    },
+    {
+      "bytes": 3789,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/src/worker-fact-projection.ts",
+      "role": "isolated_draft_file",
+      "sha256": "8e01a01f1f74352cb6aab41c6a258fb66f329ac0eca58890c4984d7cc1bdef33"
+    },
+    {
+      "bytes": 225,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/tsconfig.json",
+      "role": "isolated_draft_file",
+      "sha256": "f2fabd924aef089e92afc3e9f456379e1408527e56cb38a1a539f009be8e05ad"
+    },
+    {
+      "bytes": 8261,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/vite.config.mjs",
+      "role": "isolated_draft_file",
+      "sha256": "38f12ec96fd0d963a07fa3f130c853a4af678e806f20564149c8b6d0a86907e6"
+    },
+    {
+      "bytes": 314,
+      "path": "isolated-drafts/western-civil-time-fact-browser-draft/vitest.config.ts",
+      "role": "isolated_draft_file",
+      "sha256": "ea0654c3137fa6ff32f2d6808948a37102ddf48c9dc60227bad0962e071f2397"
+    },
+    {
+      "bytes": 2910,
+      "path": "packages/western-astrology-contracts-draft/src/civil-input.ts",
+      "role": "canonical_civil_input_contract",
+      "sha256": "e1e9cfa1f8f800e5c1ef61b7fdd134fcf0276664411c0691d64ccba21ed81458"
+    },
+    {
+      "bytes": 39756,
+      "path": "packages/western-astrology-contracts-draft/src/index.ts",
+      "role": "canonical_western_contract_barrel",
+      "sha256": "87bf4fcecc7ec85542eed25c7c06869ba3a084c5e7d7fb305fcd7712ef508416"
+    },
+    {
+      "bytes": 41842,
+      "path": "scripts/western-civil-time-fact-browser-observation-lib.mjs",
+      "role": "static_boundary_verifier",
+      "sha256": "ee805132b822580dfa79f8d945a65847f0febd22b453eb3488cabc104c4ce00e"
+    },
+    {
+      "bytes": 2745,
+      "path": "scripts/verify-western-civil-time-fact-browser-observation.mjs",
+      "role": "static_boundary_cli",
+      "sha256": "be41b033a062ac40ed99fffc71d856a6f5c5c609be857baa6e57430293f75824"
+    },
+    {
+      "bytes": 12602,
+      "path": "scripts/verify-western-civil-time-fact-browser-observation.test.mjs",
+      "role": "static_boundary_tests",
+      "sha256": "5c22b8f20562ec1078ce87aceb6c91b2379b345bc02d2d5d8ad948b5fcc7713a"
+    },
+    {
+      "bytes": 28879,
+      "path": "package.json",
+      "role": "root_governance_scripts",
+      "sha256": "c601b1e560d988a82cfc8d9c374a06597bf8dd867e941a2f4e8cc57f3d59e076"
+    }
+  ],
+  "buildObservation": {
+    "buildTool": {
+      "name": "vite",
+      "version": "7.3.6",
+      "invocationSource": "apps/web/node_modules/vite/bin/vite.js",
+      "buildToolDependencyOnly": true,
+      "runtimeOrProductImportFromAppsWeb": false,
+      "toolchainIndependenceEstablished": false
+    },
+    "outDirBoundary": {
+      "osTemporaryDirectoryRequired": true,
+      "leafPattern": "hakimi-western-facts-[a-f0-9]{32}",
+      "emptyOutDir": false,
+      "outputPersistedInRepository": false
+    },
+    "workerFormat": "es",
+    "buildSucceeded": true,
+    "freshBuildRunsCompared": 2,
+    "freshBuildRunsByteExact": true,
+    "transformedModuleCount": 88,
+    "finalBuildArtifacts": [
+      {
+        "bytes": 879462,
+        "path": "assets/civil-worker-XIpVmNBy.js",
+        "sha256": "e2f2b20a5a54801571955f36cd97a899228c74426727f597df42af236c4183c3"
+      },
+      {
+        "bytes": 805568,
+        "path": "assets/civil-worker-XIpVmNBy.js.map",
+        "sha256": "42e1c249ad6d30b9ab8fc241bfaa6820e7506a8e67c819a2c285e0c4745301d2"
+      },
+      {
+        "bytes": 714805,
+        "path": "assets/iana-2025b-BLy5AmWt.js",
+        "sha256": "4c6ed210fe3c4589fa71235119b55c9c829291ad0a67201e7366159922cdcae3"
+      },
+      {
+        "bytes": 103,
+        "path": "assets/iana-2025b-BLy5AmWt.js.map",
+        "sha256": "53de463e0f11bb1f395fb120fca2f26855a939296b145fc972e70e92683d8e0b"
+      },
+      {
+        "bytes": 4010,
+        "path": "assets/index-BlhDAk9d.css",
+        "sha256": "ae6d6274d04ca2c58627b2277404bb0473700a280dc3fa83955b4b86964708f1"
+      },
+      {
+        "bytes": 90510,
+        "path": "assets/index-BQePkjfo.js",
+        "sha256": "11742378b675f57f2e949bd842c22bc5f992e2ce525199200cf80e03103b926b"
+      },
+      {
+        "bytes": 461348,
+        "path": "assets/index-BQePkjfo.js.map",
+        "sha256": "7029b441778f9bdb95058142264944f4c82cb4f7dbe46327da84f3cdbf55a4d1"
+      },
+      {
+        "bytes": 5408,
+        "path": "index.html",
+        "sha256": "d50ce59d04cf222fee3d0735d418582516eb1f79b09fc3e90d4e96fa964d9333"
+      },
+      {
+        "bytes": 1075,
+        "path": "licenses/moment-2.30.1-LICENSE.txt",
+        "sha256": "8f38f320bbf5eb84c08e08676f7ee1d2204ebe5797f6a090d077329cf212fca3"
+      },
+      {
+        "bytes": 1097,
+        "path": "licenses/moment-timezone-0.5.48-retained-LICENSE.txt",
+        "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+      },
+      {
+        "bytes": 1097,
+        "path": "licenses/moment-timezone-0.6.3-LICENSE.txt",
+        "sha256": "b3a550795f41cdccdb5eb2523505ce54dc4a7a3e0d3a6d457d297591341795e7"
+      }
+    ],
+    "browserObservedBuildMatchesFinalBuildByByteIdentity": true,
+    "completeSupplyChainAttestationEstablished": false,
+    "publicHostHeaderBehaviorEstablished": false
+  },
+  "staticBoundaryObservation": {
+    "runtimeModuleCount": 12,
+    "runtimeImportEdgeCount": 21,
+    "isolatedDraftOwnedSourceScanPassed": true,
+    "mainBundleContainsResolverOrTzdbRuntime": false,
+    "workerBundleContainsAstronomyOrRulesRuntime": false,
+    "appsWebRuntimeImportObserved": false,
+    "otherSystemRuntimeImportObserved": false,
+    "authoredStorageCookieCacheServiceWorkerApiMatches": 0,
+    "authoredNetworkApiMatches": 0,
+    "sourceScanOnly": true,
+    "runtimeAbsenceEstablishedBySourceScan": false,
+    "productionReachabilityAudit": {
+      "readableAppsWebSourceFilesScanned": 372,
+      "restrictedPathIntentionallySkipped": "apps/web/src/lib/local-user-data-cleanup.ts",
+      "restrictedPathRead": false,
+      "observedReadableSourceReferences": 0,
+      "incompleteProductionReachabilityAudit": true,
+      "wholeRepositoryProductionUnreachableEstablished": false
+    }
+  },
+  "browserObservation": {
+    "observationClass": "controlled_loopback_preview",
+    "browserProduct": "Codex In-app Browser",
+    "browserVersion": null,
+    "browserEngine": null,
+    "browserEngineVersion": null,
+    "chromeValidated": false,
+    "edgeValidated": false,
+    "crossBrowserValidated": false,
+    "isolatedBrowserObservationRecorded": true,
+    "productionBrowserRuntimeEvidenceEstablished": false,
+    "previewOrigin": "http://127.0.0.1:4223",
+    "publicHost": false,
+    "headerObservation": {
+      "documentStatus": 200,
+      "workerStatus": 200,
+      "workerPath": "/assets/civil-worker-XIpVmNBy.js",
+      "contentSecurityPolicy": "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; worker-src 'self' blob:; connect-src 'none'; base-uri 'none'; form-action 'none'",
+      "cacheControl": "no-store",
+      "controlledPreviewOnly": true
+    },
+    "formSafetyObservation": {
+      "namedControls": 0,
+      "runButtonType": "button",
+      "formActionAttribute": null,
+      "implicitEnterQueryNavigationObserved": false,
+      "resultInvalidatedAndClearedAfterInputChange": true
+    },
+    "syntheticScenarios": [
+      {
+        "scenarioId": "unique_asia_shanghai_2000",
+        "realPersonData": false,
+        "declaredCivilTime": "2000-01-01 20:00",
+        "timeZoneToken": "Asia/Shanghai",
+        "utcInstant": "2000-01-01T12:00:00.000Z",
+        "utcOffsetSeconds": 28800,
+        "resolutionKind": "unique",
+        "decision": "unique",
+        "browserProjectionSha256": "ef2d23459d9f257026f22ddb11a2d1266f783a88297b6a372fd7cfcd9efabbee"
+      },
+      {
+        "scenarioId": "historical_second_offset_asia_shanghai_1900",
+        "realPersonData": false,
+        "declaredCivilTime": "1900-01-01 20:00",
+        "timeZoneToken": "Asia/Shanghai",
+        "utcInstant": "1900-01-01T11:54:17.000Z",
+        "utcOffsetSeconds": 29143,
+        "renderedOffset": "UTC+08:05:43",
+        "resolutionKind": "unique",
+        "decision": "unique"
+      },
+      {
+        "scenarioId": "dst_overlap_reject_america_new_york_2021",
+        "realPersonData": false,
+        "declaredCivilTime": "2021-11-07 01:30",
+        "timeZoneToken": "America/New_York",
+        "outcome": "failure",
+        "failureCode": "DST_OVERLAP_REJECTED",
+        "partialFactsPresent": false,
+        "staleFactsCleared": true
+      },
+      {
+        "scenarioId": "dst_overlap_earlier_america_new_york_2021",
+        "realPersonData": false,
+        "declaredCivilTime": "2021-11-07 01:30",
+        "timeZoneToken": "America/New_York",
+        "utcInstant": "2021-11-07T05:30:00.000Z",
+        "utcOffsetSeconds": -14400,
+        "resolutionKind": "overlap",
+        "decision": "earlier",
+        "browserProjectionSha256": "b8d30204081c4381cb47aff3b3773e0e5f5b8549b091c0055ce7ae2f36e711d6"
+      }
+    ],
+    "responsiveObservation": {
+      "requestedViewport": "390x844",
+      "effectiveClientWidth": 375,
+      "scrollWidth": 375,
+      "horizontalOverflowObserved": false
+    },
+    "consoleWarningOrErrorCount": 0,
+    "screenshotObservation": {
+      "persisted": false,
+      "rawArtifactAvailableToVerifier": false,
+      "bytesOperatorObserved": 101956,
+      "sha256OperatorObserved": "cbf2a856aac22c405602de0d8580aada85ef6a64f24e751c36437255e9cce666",
+      "identityClass": "operator_recorded_nonpersisted_screenshot_only"
+    }
+  },
+  "dataHandlingBoundary": {
+    "testInputsSyntheticOnly": true,
+    "realPersonDataEnteredInRecordedScenarios": false,
+    "surfaceCanProcessPersonDerivedData": true,
+    "candidateDigestIsAnonymous": false,
+    "safeToLog": false,
+    "safeToPersist": false,
+    "safeToPublish": false,
+    "networkTransmissionAuthorized": false,
+    "runtimeStorageProbe": {
+      "status": "unavailable_in_read_only_browser_evaluate_sandbox",
+      "runtimeZeroStorageClaimAllowed": false
+    },
+    "staticAuthoredStorageApiScan": {
+      "matches": 0,
+      "sourceOnly": true,
+      "runtimeStorageAbsenceEstablished": false
+    }
+  },
+  "trustBoundary": {
+    "freshDedicatedWorkerPerRequest": true,
+    "workerIsTrustedSameBuildComputationComponent": true,
+    "mainThreadIndependentlyRecomputesTimeZoneSemantics": false,
+    "hostileWorkerSemanticCorrectionGuaranteed": false,
+    "workerSelfReportEstablishesNetworkIsolation": false,
+    "externalNetworkIsolationEstablished": false,
+    "requestDigestBindingValidated": true,
+    "authorityAndPrivacyExactShapeValidated": true
+  },
+  "sourceAndExpertContext": {
+    "westernBindingRequired": 28,
+    "westernBindingFrozenVerified": 0,
+    "formalSourceRequirementsVersion": "1",
+    "nonformalSuccessorVersion": "1.2.0",
+    "nonformalPartialSourceCandidateSubjects": 2,
+    "independentExpertsRequired": 2,
+    "independentExpertReviewsVerified": 0
+  },
+  "gateSummary": {
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "bindingRequired": 28,
+    "bindingFrozenVerified": 0,
+    "formalSourceCandidatesAttached": 0,
+    "sourceBodiesBound": 0,
+    "exactQuotesBound": 0,
+    "workRightsEstablished": 0,
+    "editionRightsEstablished": 0,
+    "carrierRightsEstablished": 0,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "sourceBundleComplete": false,
+    "rightsBundleComplete": false,
+    "expertReviewBundleComplete": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "evidenceLedgerSeparation": {
+    "engineeringEvidence": "isolated_source_tests_build_and_static_boundary_observed",
+    "browserRuntimeEvidence": "codex_in_app_browser_controlled_loopback_only_not_production_not_cross_browser",
+    "contentTruth": "not_established",
+    "expertTruth": "not_established_0_of_2",
+    "rightsLegalConclusion": "not_established",
+    "releaseReadiness": "not_ready",
+    "publicDeploymentAndReleaseAuthorization": "not_authorized"
+  },
+  "authorityBoundary": {
+    "formalInputContractAdmitted": false,
+    "civilTimeDomainTruthCertified": false,
+    "canonicalZoneIdentityEstablished": false,
+    "astronomicalFactsEstablished": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "expertIdentityCredentialsIndependenceEstablished": false,
+    "sourceFreezeEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "formalAdmissionAuthorized": false,
+    "highRiskClaimsAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "crossSystemAuthorityInherited": false
+  },
+  "observationBoundary": {
+    "endpointSnapshotOnly": true,
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "uiGenerationCounterObserved": true,
+    "uiGenerationMeaning": "stale_view_suppression_only_not_mutation_epoch",
+    "intervalMutationExcluded": false,
+    "abaExcluded": false
+  },
+  "integrityBoundary": {
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi.western.civil-time-fact-browser-observation-candidate.v1",
+    "observationDigestExcludesOwnField": true,
+    "digestIsDigitalSignature": false,
+    "authenticityEstablished": false,
+    "digitalSignature": null,
+    "signerIdentity": null
+  },
+  "notExecuted": [
+    "full_repository_typecheck",
+    "default_web_build",
+    "complete_application_startup",
+    "formal_storage_boundary",
+    "pwa",
+    "service_worker",
+    "chrome_validation",
+    "edge_validation",
+    "public_host",
+    "release_evidence",
+    "deployment",
+    "rollback"
+  ],
+  "doesNotEstablish": [
+    "whole_repository_production_reachability_or_unreachability",
+    "runtime_zero_storage_cache_or_service_worker_activity",
+    "complete_network_isolation",
+    "hostile_worker_semantic_correction",
+    "complete_toolchain_independence",
+    "canonical_time_zone_identity_or_time_zone_domain_truth",
+    "astronomical_fact_chart_rule_interpretation_or_scientific_truth",
+    "source_body_exact_quote_frozen_binding_or_three_layer_rights",
+    "real_expert_identity_qualification_independence_opinion_or_truth",
+    "content_truth_rights_legal_conclusion_or_redistribution_authorization",
+    "cross_file_atomicity_mutation_epoch_interval_integrity_or_aba_exclusion",
+    "default_web_pwa_service_worker_public_host_or_cross_browser_evidence",
+    "release_readiness_deployment_rollback_or_public_release_authorization"
+  ],
+  "observationDigest": "e898edd1e91aa69193157bdbfc5ea24610a828ce16588388cd9b7cb5b6331b81"
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@hakimi/western-civil-time-input-adapter-draft",
+  "version": "0.0.0-draft.0",
+  "private": true,
+  "type": "module",
+  "exports": {},
+  "x-hakimi-isolated-draft": {
+    "schemaVersion": 1,
+    "kind": "adapter",
+    "systemId": "western-astrology",
+    "runtime": "node-test-only",
+    "productionImport": "forbidden",
+    "allowedDraftDependencies": [
+      "@hakimi/western-astrology-contracts-draft"
+    ]
+  },
+  "dependencies": {
+    "@hakimi/tzdb-core": "0.1.0",
+    "@hakimi/western-astrology-contracts-draft": "0.0.0-draft.0"
+  }
+}

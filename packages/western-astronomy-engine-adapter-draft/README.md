@@ -70,11 +70,13 @@ JPL Horizons 差分仍未形成通过门。本轮已把首个候选查询收窄�
 
 `src/rule-layer/` 是西洋体系第一个不依赖星历真值的功能竖切，只对调用方提供的黄道经度与瞬时速度做纯几何运算，并固定版本化算法 ID：
 
-- `western-zodiac-rules/0.1-draft`：热带/恒星黄道落位；恒星必须携带岁差值，热带不得伪造岁差值。
-- `western-house-rules/0.1-draft`：整宫、等宫（ASC）、波菲利与 Placidus 四种宫制；统一从 RAMC、地理纬度与 true-of-date 黄赤交角导出 ASC/MC/IC/DSC，极区或 ASC 不在地平线时失败关闭，不使用后备宫制。Porphyry 的四象限三等分由测试锁定结构不变式；Placidus 忠实移植自 Unlicense 参考实现（Phaen/CircularNatalHoroscopeJS，依据 Munkasey《An Astrological House Formulary》第 18 页及已记录的三角修正），并以赤道手工案例与 672 组 RAMC/纬度对照零差异锁定，纬度 ≥60° 失败关闭。
+- `western-zodiac-rules/0.3-draft`：只接受固定 `tropical_identity_v1`，或明确标为 `manual_offset_unverified` 且使用 `subtract_supplied_offset_v1` 的恒星黄道人工偏移。唯一 zodiac transform 在完成变换后应用版本化的 `western-zodiac-boundary-snap/0.1-draft`：只把距 30° 边界不超过 `1e-10°` 的浮点残差规范到边界，并把 360° 规范为 0°；明显越过容差的真实位置不会被吞掉。未知、缺失或交叉错配的身份会在执行前失败关闭；不提供或暗示任何默认 ayanamsha。
+- `western-house-rules/0.2-draft`：整宫、等宫（ASC）、波菲利与 Placidus 四种宫制；统一从 RAMC、地理纬度与 true-of-date 黄赤交角导出 ASC/MC/IC/DSC，极区或 ASC 不在地平线时失败关闭，不使用后备宫制。`western-house-whole-sign/0.2-draft` 必须消费已验证的黄道身份，并通过唯一 zodiac derivation 得到 ASC 星座与 raw ecliptic frame offset；因此恒星黄道宫头显示后仍严格落在星座 0°。Equal、Porphyry、Placidus 的 raw 几何保持原语义。Porphyry 的四象限三等分由测试锁定结构不变式；Placidus 忠实移植自 Unlicense 参考实现（Phaen/CircularNatalHoroscopeJS，依据 Munkasey《An Astrological House Formulary》第 18 页及已记录的三角修正），并以赤道手工案例与 672 组 RAMC/纬度对照零差异锁定，纬度 ≥60° 失败关闭。
 - `western-aspect-rules/0.1-draft`：按稳定天体顺序枚举相位，复算夹角与有向 orb，并由瞬时相对黄经速度派生 exact/applying/separating/indeterminate。
 
-每个天体会额外分配 `houseNumber`：按十二宫头在输出黄道上的升序跨度定位，跨 0° 的宫位正确回绕。输出固定为 `astrology_rules_engineering_artifact`、`diagnostic_only`、`productionEligible=false`、`expertTruthClaimed=false`、`chartFixtureAccepted=false`、`successReceiptIssued=false`，没有 `western-calculation-receipt`。规则层不计算星历位置、RAMC、岁差方案或宫制外部参考值；把这些纯几何结果当成天文或占星真值仍是被禁止的。
+每个天体会额外分配 `houseNumber`：每对相邻 raw 宫头独立判断跨 0° 区间，宫头本身包含、下一宫头排除；退化宫头或不能构成恰好一圈的序列失败关闭。输出固定为 `astrology_rules_engineering_artifact`、`diagnostic_only`、`productionEligible=false`、`expertTruthClaimed=false`、`chartFixtureAccepted=false`、`successReceiptIssued=false`，没有 `western-calculation-receipt`。规则层不计算星历位置、RAMC、岁差方案或宫制外部参考值；把这些纯几何结果当成天文或占星真值仍是被禁止的。
+
+规则请求、结果顶层 `zodiac`、执行记录 `algorithms.zodiacMethod` 以及 request/result SHA-256 共同绑定同一黄道身份。执行记录保存完整的 `{kind, ayanamshaId, algorithmId}` 方法身份，但刻意不复制调用方提供的 `ayanamshaDeg` 数值；该数值只存在于 request/result，并另行记录版本化的 `algorithms.zodiacBoundarySnap`。`deriveZodiacPlacement` 只从 `src/rule-layer/index.ts` 对消费者导出；`verifyWesternRuleLayerComputedArtifact` 会复算两个摘要并拒绝 request/result/execution 的身份错配。为避免旧边界语义复用同一身份，规则请求、工件和投影版本同步提升为 `0.4-draft`。
 
 ## JPL Horizons 差分离线管道
 

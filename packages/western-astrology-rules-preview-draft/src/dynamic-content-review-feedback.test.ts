@@ -8,7 +8,12 @@ import {
   westernDynamicContentReviewFeedbackFilename
 } from "./browser-app/dynamic-content-review-feedback.ts";
 import { buildWesternContentProjection } from "./browser-app/content-layer.ts";
-import { runWesternRuleLayer } from "./rule-layer-bridge.ts";
+import {
+  WESTERN_RULE_LAYER_REQUEST_VERSION,
+  WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY,
+  WESTERN_TROPICAL_ZODIAC_IDENTITY,
+  runWesternRuleLayer
+} from "./rule-layer-bridge.ts";
 
 type EditableFeedback = Record<string, any>;
 
@@ -33,12 +38,12 @@ const bodies = [
   { bodyId: "pluto", eclipticLongitudeDeg: 270.5, longitudeSpeedDegPerDay: 0.02 }
 ] as const;
 
-function projection(offset = 0) {
+function projection(offset = 0, zodiac: unknown = WESTERN_TROPICAL_ZODIAC_IDENTITY) {
   const artifact = runWesternRuleLayer({
-    protocolVersion: "western-astrology-rules-request/0.1-draft",
+    protocolVersion: WESTERN_RULE_LAYER_REQUEST_VERSION,
     inputLabel: `dynamic content review test ${offset}`,
     bodies: bodies.map((body) => ({ ...body, eclipticLongitudeDeg: body.eclipticLongitudeDeg + offset })),
-    zodiac: { kind: "tropical", ayanamshaDeg: null },
+    zodiac,
     houses: {
       systemId: "whole_sign_v1",
       ramcDeg: offset,
@@ -128,6 +133,11 @@ describe("western current-chart dynamic content review feedback", () => {
     expect(first.sourceRegistry).toHaveLength(31);
     expect(first.projectionBinding).toMatchObject({ itemCount: expectedCount, sourceCount: 31 });
     expect(first.projectionBinding.factsSha256).toBe(currentProjection.factsSha256);
+    expect(first.projectionBinding.zodiacMethod).toEqual({
+      kind: "tropical",
+      ayanamshaId: null,
+      algorithmId: "tropical_identity_v1"
+    });
     expect(first.projectionBinding.projectionSha256).toMatch(/^[a-f0-9]{64}$/u);
     expect(first.projectionBinding.orderedCandidateIdsSha256).toMatch(/^[a-f0-9]{64}$/u);
     expect(first.projectionBinding.sourceRegistrySha256).toMatch(/^[a-f0-9]{64}$/u);
@@ -190,16 +200,38 @@ describe("western current-chart dynamic content review feedback", () => {
     expect(serialized).not.toContain("obliquityTrueOfDateDeg");
     expect(serialized).not.toContain("ayanamshaDeg");
     expect(westernDynamicContentReviewFeedbackFilename()).toBe(
-      "hakimi-western-current-chart-review-v007.json"
+      "hakimi-western-current-chart-review-v010.json"
     );
+  });
+
+  it("exports the manual sidereal method identity without exporting the numeric offset", async () => {
+    const currentProjection = projection(0, {
+      ...WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY,
+      ayanamshaDeg: 24.1
+    });
+    const template = await createWesternDynamicContentReviewFeedbackTemplate(currentProjection);
+    expect(template.projectionBinding.zodiacMethod).toEqual({
+      kind: "sidereal",
+      ayanamshaId: "manual_offset_unverified",
+      algorithmId: "subtract_supplied_offset_v1"
+    });
+    const serialized = serializeWesternDynamicContentReviewFeedbackTemplate(template);
+    expect(serialized).toContain("manual_offset_unverified");
+    expect(serialized).toContain("subtract_supplied_offset_v1");
+    expect(serialized).not.toContain("ayanamshaDeg");
+    const angleItems = template.items.filter((item) => item.category === "angle");
+    expect(angleItems).toHaveLength(4);
+    expect(angleItems.every((item) => item.contextLines.length === 1
+      && item.contextLines[0]!.includes("黄道位置：")
+      && !item.contextLines[0]!.includes("黄经："))).toBe(true);
   });
 
   it("supports non-default dynamic candidate counts without a hard-coded 73-item contract", async () => {
     const smallerArtifact = runWesternRuleLayer({
-      protocolVersion: "western-astrology-rules-request/0.1-draft",
+      protocolVersion: WESTERN_RULE_LAYER_REQUEST_VERSION,
       inputLabel: "smaller dynamic review test",
       bodies: bodies.slice(0, 2),
-      zodiac: { kind: "tropical", ayanamshaDeg: null },
+      zodiac: WESTERN_TROPICAL_ZODIAC_IDENTITY,
       houses: {
         systemId: "whole_sign_v1", ramcDeg: 0, geographicLatitudeDeg: 0,
         obliquityTrueOfDateDeg: 23.436
@@ -263,6 +295,20 @@ describe("western current-chart dynamic content review feedback", () => {
     expect(result.currentProjectionBound).toBe(true);
   });
 
+  it("fails closed for predecessor template identities and content bindings", async () => {
+    const currentProjection = projection();
+    const predecessorV08 = await editableTemplate(currentProjection);
+    predecessorV08.profile.formatVersion = "hakimi.western.dynamic_content_review_feedback/0.1.0";
+    predecessorV08.profile.templateVersion = "0.8.0";
+    delete predecessorV08.projectionBinding.zodiacMethod;
+    await expectRejected(predecessorV08, currentProjection);
+
+    const predecessorV09 = await editableTemplate(currentProjection);
+    predecessorV09.profile.templateVersion = "0.9.0";
+    predecessorV09.projectionBinding.contentLayerVersion = "western-astrology-neutral-content/0.7-draft";
+    await expectRejected(predecessorV09, currentProjection);
+  });
+
   it("keeps all-approved feedback outside scientific truth, primitive inheritance and activation", async () => {
     const currentProjection = projection();
     const feedback = await editableTemplate(currentProjection);
@@ -289,6 +335,10 @@ describe("western current-chart dynamic content review feedback", () => {
     const bindingTamper = await editableTemplate(currentProjection);
     bindingTamper.projectionBinding.projectionSha256 = "0".repeat(64);
     await expectRejected(bindingTamper, currentProjection);
+
+    const zodiacMethodTamper = await editableTemplate(currentProjection);
+    zodiacMethodTamper.projectionBinding.zodiacMethod.algorithmId = "unknown_method_v1";
+    await expectRejected(zodiacMethodTamper, currentProjection);
 
     const snapshotTamper = await editableTemplate(currentProjection);
     snapshotTamper.items[0].contextLines[0] += " changed";

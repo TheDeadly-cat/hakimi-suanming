@@ -1,0 +1,350 @@
+{
+  "authorityBoundary": {
+    "candidateDiscoveryOnly": true,
+    "contentTruthEstablished": false,
+    "credentialValidityVerified": false,
+    "crossSystemAuthorityInheritanceAuthorized": false,
+    "currentRoleVerified": false,
+    "expertClaimsAuthorized": false,
+    "expertOpinionEstablished": false,
+    "expertStatusVerified": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "identityVerified": false,
+    "independenceVerified": false,
+    "participationConsentVerified": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "scopeVerified": false
+  },
+  "basisArtifact": {
+    "path": "docs/阶段D-E-西洋现实专家公开证据跟进-child-v1-2026-08-31.md",
+    "rawBytes": 4675,
+    "rawSha256": "5d89011599e14aa4aa2a03e7f7e5f556c11c890117f05d174fc6c32118f710d4",
+    "role": "non_authoritative_link_only_public_followup_narrative_basis"
+  },
+  "bindingBoundary": {
+    "childToParentOnly": true,
+    "countsTowardFormalExpertIntake": false,
+    "crossSystemAuthorityInherited": false,
+    "formalContextsBacklinkAdded": false,
+    "formalContextsMutated": false,
+    "noBacklinkContextPaths": [
+      "content/system-admission/western-expert-public-candidate-prescreen.v1.json",
+      "content/system-admission/western-source-binding-requirements.v1.json",
+      "content/domain-release/western-astrology.engineering-draft.v0.1.0.json",
+      "content/system-admission/western-independent-productization-version-aware-observation-candidate.v1.0.0.json",
+      "content/system-admission/four-system-current-observation-registry.v2.json"
+    ],
+    "parentBacklinkAdded": false,
+    "parentCandidateAndObservationIdsPinned": true,
+    "parentFullLoaderWeakSetBrandRequired": true,
+    "parentMutated": false,
+    "parentRawIdentityPinned": true,
+    "parentSemanticIdentityPinned": true
+  },
+  "candidateFollowup": {
+    "candidateLeadId": "western-public-lead-003",
+    "candidateTokenObservedOperatorRecorded": true,
+    "countsTowardExpertGate": false,
+    "credentialVerified": false,
+    "crossRecordPersonIdentityBindingVerified": false,
+    "currentRoleVerified": false,
+    "deduplicatedSourceGroupCount": 1,
+    "expertOpinionCollected": false,
+    "expertStatusVerified": false,
+    "followupState": "same_upstream_public_page_double_read_stable_operator_recorded_non_authoritative",
+    "formalExpertIntakeRef": null,
+    "formalReviewPacketRef": null,
+    "identityVerified": false,
+    "independenceVerified": false,
+    "parentCandidateState": "uncontacted_public_candidate_lead",
+    "parentSourceObservationIds": [
+      "SCOFIELD-PAA-BOARD",
+      "SCOFIELD-PAA-CERTIFIED"
+    ],
+    "participationConsentVerified": false,
+    "projectQuestionAnswered": false,
+    "reviewerSlot": null,
+    "scopeSignalMatrix": [
+      {
+        "questionId": "technical-time-coordinate-astronomy",
+        "state": "not_assessed_in_this_response_identity_followup"
+      },
+      {
+        "questionId": "zodiac-house-node-aspect",
+        "state": "not_assessed_in_this_response_identity_followup"
+      },
+      {
+        "questionId": "dignity-retrograde-transit-progression",
+        "state": "not_assessed_in_this_response_identity_followup"
+      },
+      {
+        "questionId": "interpretation-high-risk-boundary",
+        "state": "not_assessed_in_this_response_identity_followup"
+      },
+      {
+        "questionId": "source-rights-role-boundary",
+        "state": "not_assessed_in_this_response_identity_followup"
+      },
+      {
+        "questionId": "uncertainty-counterexamples-abstention",
+        "state": "not_assessed_in_this_response_identity_followup"
+      }
+    ],
+    "scopeVerified": false,
+    "sealedOriginalOpinion": false,
+    "seatAssignmentRef": null,
+    "sourceUpstreamGroupIds": [
+      "PAA_NCGR"
+    ]
+  },
+  "createdAt": "2026-08-31T07:54:09.0436262Z",
+  "doesNotEstablish": [
+    "capture_receipt_or_network_attestation",
+    "publisher_authenticity_or_future_freshness",
+    "real_person_identity_or_cross_record_person_binding",
+    "current_role_or_credential_validity",
+    "six_question_scope_fit",
+    "pairwise_independence_or_participation_consent",
+    "expert_status_or_expert_opinion",
+    "content_truth_or_expert_truth",
+    "source_body_exact_quote_or_binding",
+    "rights_or_legal_conclusion",
+    "formal_review_gate_or_admission",
+    "release_readiness_or_expert_claim_authorization",
+    "public_deployment_or_public_release_authorization",
+    "cross_system_authority_inheritance",
+    "cross_file_atomic_snapshot_mutation_epoch_interval_integrity_or_aba_exclusion"
+  ],
+  "followupDigest": "32be644f1e4c7b5b3b599dd59e85b0b3ad7c3ce491ad20980ea1a309aea24856",
+  "followupId": "hakimi.western.expert-public-evidence-followup/1.0.0",
+  "gateSummary": {
+    "credentialsVerified": 0,
+    "deduplicatedSourceGroups": 1,
+    "expertReviewBundleStatus": "absent/0",
+    "formalExpertGateCount": 0,
+    "identitiesVerified": 0,
+    "independentExpertReviewsVerified": 0,
+    "pairwiseIndependenceAssessmentsCompleted": 0,
+    "participationConsentsVerified": 0,
+    "publicCandidateLeadsFollowedUp": 1,
+    "publicSourceObservationsFollowedUp": 2,
+    "readAttemptsOperatorRecorded": 4,
+    "reviewerSlotsOccupied": 0,
+    "reviewerSlotsRequired": 2,
+    "scopeFitsVerified": 0,
+    "sealedOriginalOpinions": 0,
+    "sourceBindingsFrozenVerified": 0,
+    "sourceBindingsRequired": 28
+  },
+  "integrityBoundary": {
+    "abaExcluded": false,
+    "basisSameBufferHashAndInspection": true,
+    "callerMatchesPersistedSnapshotRequired": true,
+    "canonicalPrettyBytesRequired": true,
+    "crossFileAtomicSnapshot": false,
+    "directorySymlinkOrJunctionRejected": true,
+    "endpointRevalidated": true,
+    "finalFileSymlinkRejected": true,
+    "fullLoadResultWeakSetBranded": true,
+    "hardlinkRejected": true,
+    "heldHandleRead": true,
+    "intervalMutationExcludedAcrossFiles": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "parentFullLoadWeakSetBrandVerified": true,
+    "parentLoadedViaFullVerifier": true,
+    "parentRawIdentityPinned": true,
+    "parentSemanticDigestPinned": true,
+    "persistedRawIdentityPinned": true,
+    "sameBufferHashAndParse": true,
+    "unknownFieldsRejected": true
+  },
+  "networkObservationBoundary": {
+    "bodyLengthAndSha256OperatorRecorded": true,
+    "candidateTokenObservedOperatorRecorded": true,
+    "captureExecutionReceiptStored": false,
+    "finalUrlEqualsRequestedUrlOperatorRecorded": true,
+    "futureFreshnessRevalidated": false,
+    "http200OperatorRecorded": true,
+    "networkAttestationEstablished": false,
+    "operatorRecordedFactsMechanicallyReplayed": false,
+    "operatorRecordedNetworkFacts": true,
+    "operatorRecordedSummariesMechanicallyVerified": false,
+    "publisherAuthenticityEstablished": false,
+    "redirectChainCaptured": false,
+    "remoteCaptureMechanicallyVerified": false,
+    "repeatedReadStabilityOperatorRecorded": true,
+    "requestedToFinalUrlBindingMechanicallyVerified": false,
+    "sameProcessSequentialReadsOperatorRecorded": true,
+    "stableTwoReadEstablishesNetworkAttestation": false,
+    "tlsPeerCertificateCaptured": false,
+    "twoReadsPerUrlOperatorRecorded": true,
+    "wireBytesCaptured": false
+  },
+  "operatorObservationWindow": {
+    "endedAt": "2026-08-31T07:54:09.0436262Z",
+    "parentSourceObservationCount": 2,
+    "readAttemptCount": 4,
+    "startedAt": "2026-08-31T07:54:04.9600402Z"
+  },
+  "parentPrescreenArtifact": {
+    "candidateLeadIds": [
+      "western-public-lead-003"
+    ],
+    "ledgerDigest": "7c573831d6af8904192e069298a1b91c0d9c5b9635753aeb56250d21bf204880",
+    "ledgerId": "hakimi.western.expert-public-candidate-prescreen/1.0.0",
+    "path": "content/system-admission/western-expert-public-candidate-prescreen.v1.json",
+    "rawBytes": 29938,
+    "rawSha256": "5b98910325b953cbd29af3d194dbd31588ebc03e64319234088d17dfdca31ea8",
+    "sourceObservationIds": [
+      "SCOFIELD-PAA-BOARD",
+      "SCOFIELD-PAA-CERTIFIED"
+    ],
+    "sourceUpstreamGroupIds": [
+      "PAA_NCGR"
+    ]
+  },
+  "recordType": "western_expert_public_evidence_followup_v1",
+  "reviewQuestionIds": [
+    "technical-time-coordinate-astronomy",
+    "zodiac-house-node-aspect",
+    "dignity-retrograde-transit-progression",
+    "interpretation-high-risk-boundary",
+    "source-rights-role-boundary",
+    "uncertainty-counterexamples-abstention"
+  ],
+  "rightsBoundary": {
+    "buildInclusionAuthorized": false,
+    "carrierRightsEstablished": false,
+    "distributionPolicy": "link_only",
+    "editionRightsEstablished": false,
+    "legalReviewVerified": false,
+    "publicRepositoryInclusionAuthorized": false,
+    "redistributionRightsEstablished": false,
+    "rightsLegalConclusion": "not_established",
+    "storageRightsEstablished": false,
+    "workRightsEstablished": false
+  },
+  "schemaVersion": "1.0.0",
+  "sourceGroupPolicy": {
+    "deduplicatedSourceGroupCount": 1,
+    "deduplicationKey": "sourceUpstreamGroupId",
+    "parentSourceObservationCount": 2,
+    "readAttemptCount": 4,
+    "repeatedReadsDoNotAddSourceGroups": true,
+    "sameGroupObservationsCountOnce": true
+  },
+  "sourceGroups": [
+    {
+      "parentSourceObservationIds": [
+        "SCOFIELD-PAA-BOARD",
+        "SCOFIELD-PAA-CERTIFIED"
+      ],
+      "publicOwnerLabel": "Professional Astrologers Alliance / NCGR public record family",
+      "readAttemptCount": 4,
+      "sourceUpstreamGroupId": "PAA_NCGR"
+    }
+  ],
+  "sourceObservations": [
+    {
+      "authoritative": false,
+      "candidateLeadId": "western-public-lead-003",
+      "candidateTokenBindsRealPersonIdentity": false,
+      "deliveredBodyHashBindsSemanticSummary": false,
+      "observationWindowEndedAt": "2026-08-31T07:54:08.6777534Z",
+      "observationWindowStartedAt": "2026-08-31T07:54:04.9600402Z",
+      "parentSourceObservationId": "SCOFIELD-PAA-BOARD",
+      "readAttempts": [
+        {
+          "attemptIndex": 1,
+          "candidateTokenObservedOperatorRecorded": true,
+          "contentTypeOperatorRecorded": "text/html; charset=UTF-8",
+          "deliveredBodyBytesOperatorRecorded": 492253,
+          "deliveredBodySha256OperatorRecorded": "00030e65acb8dbe3ffa61d6194ec56cdc069296bfe95e95bd30a4b3ee311dadb",
+          "endedAt": "2026-08-31T07:54:08.4202608Z",
+          "finalUrlEqualsRequestedUrlOperatorRecorded": true,
+          "httpStatusOperatorRecorded": 200,
+          "startedAt": "2026-08-31T07:54:04.9600402Z"
+        },
+        {
+          "attemptIndex": 2,
+          "candidateTokenObservedOperatorRecorded": true,
+          "contentTypeOperatorRecorded": "text/html; charset=UTF-8",
+          "deliveredBodyBytesOperatorRecorded": 492253,
+          "deliveredBodySha256OperatorRecorded": "00030e65acb8dbe3ffa61d6194ec56cdc069296bfe95e95bd30a4b3ee311dadb",
+          "endedAt": "2026-08-31T07:54:08.6777534Z",
+          "finalUrlEqualsRequestedUrlOperatorRecorded": true,
+          "httpStatusOperatorRecorded": 200,
+          "startedAt": "2026-08-31T07:54:08.4424360Z"
+        }
+      ],
+      "repeatedReadsCount": 2,
+      "repeatedReadsStableOperatorRecorded": true,
+      "requestedUrl": "https://www.astrologersalliance.org/ncgr-paa-board",
+      "sourceType": "public_professional_board_page",
+      "sourceUpstreamGroupId": "PAA_NCGR",
+      "supportsFollowupDiscoveryOnly": true
+    },
+    {
+      "authoritative": false,
+      "candidateLeadId": "western-public-lead-003",
+      "candidateTokenBindsRealPersonIdentity": false,
+      "deliveredBodyHashBindsSemanticSummary": false,
+      "observationWindowEndedAt": "2026-08-31T07:54:09.0436262Z",
+      "observationWindowStartedAt": "2026-08-31T07:54:08.7134642Z",
+      "parentSourceObservationId": "SCOFIELD-PAA-CERTIFIED",
+      "readAttempts": [
+        {
+          "attemptIndex": 1,
+          "candidateTokenObservedOperatorRecorded": true,
+          "contentTypeOperatorRecorded": "text/html; charset=UTF-8",
+          "deliveredBodyBytesOperatorRecorded": 596252,
+          "deliveredBodySha256OperatorRecorded": "a33a03958ab0b856f00725cea4691fbaed4dcfd1c90c727a5afc3936c6cc957a",
+          "endedAt": "2026-08-31T07:54:08.8812750Z",
+          "finalUrlEqualsRequestedUrlOperatorRecorded": true,
+          "httpStatusOperatorRecorded": 200,
+          "startedAt": "2026-08-31T07:54:08.7134642Z"
+        },
+        {
+          "attemptIndex": 2,
+          "candidateTokenObservedOperatorRecorded": true,
+          "contentTypeOperatorRecorded": "text/html; charset=UTF-8",
+          "deliveredBodyBytesOperatorRecorded": 596252,
+          "deliveredBodySha256OperatorRecorded": "a33a03958ab0b856f00725cea4691fbaed4dcfd1c90c727a5afc3936c6cc957a",
+          "endedAt": "2026-08-31T07:54:09.0436262Z",
+          "finalUrlEqualsRequestedUrlOperatorRecorded": true,
+          "httpStatusOperatorRecorded": 200,
+          "startedAt": "2026-08-31T07:54:08.8829889Z"
+        }
+      ],
+      "repeatedReadsCount": 2,
+      "repeatedReadsStableOperatorRecorded": true,
+      "requestedUrl": "https://www.astrologersalliance.org/certified-astrologers-1",
+      "sourceType": "public_certified_list_page",
+      "sourceUpstreamGroupId": "PAA_NCGR",
+      "supportsFollowupDiscoveryOnly": true
+    }
+  ],
+  "status": "link_only_same_process_two_read_operator_recorded_public_followup_non_authoritative_not_formal_expert_intake",
+  "storageBoundary": {
+    "abstractsStored": 0,
+    "credentialDocumentsStored": 0,
+    "credentialsUsed": false,
+    "distributionPolicy": "link_only",
+    "exactQuotesStored": 0,
+    "keywordsStored": 0,
+    "loginOrProtectedBackendUsed": false,
+    "originalExpertOpinionsStored": 0,
+    "pageBodiesStored": 0,
+    "personalContactDetailsStored": 0,
+    "privateDossiersStored": 0,
+    "remoteResponseBodiesPersisted": 0,
+    "remoteResponseBodiesPrinted": 0,
+    "screenshotsStored": 0,
+    "sourceUrlsStored": 2
+  }
+}

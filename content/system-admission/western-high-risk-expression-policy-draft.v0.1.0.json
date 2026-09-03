@@ -1,0 +1,251 @@
+{
+  "activeAdmissionEffect": "none",
+  "artifactBindings": [
+    {
+      "bytes": 12692,
+      "path": "content/system-admission/western-independent-productization-version-aware-observation-child.v1.1.0.json",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "role": "verified_zero_admission_parent",
+      "sha256": "140bed89a638deb970e1a60d3ffcbc96eebef509bd14bd692726b8c561d13593"
+    },
+    {
+      "bytes": 22464,
+      "path": "packages/western-astrology-rules-preview-draft/src/browser-app/high-risk-expression-egress-policy.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "role": "lexical_egress_policy_runtime",
+      "sha256": "2edb1f38df4dd8854648bfbdd4b321e2e5fad8bbff3710eff009814ac15eedf8"
+    },
+    {
+      "bytes": 78206,
+      "path": "packages/western-astrology-rules-preview-draft/src/browser-app/main.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "role": "browser_dom_and_template_egress_call_sites",
+      "sha256": "37d85c18a7895e5f75d3e1fc6fa8435b2f5c10376d5b2e6296bd5801fd59a61b"
+    },
+    {
+      "bytes": 86923,
+      "path": "packages/western-astrology-rules-preview-draft/src/browser-app/content-layer.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "role": "candidate_content_projection_source",
+      "sha256": "0b53443ad3d39ba70e0572c33209e599a9da1cf9c8f1df5d45a1d32f88da11c7"
+    },
+    {
+      "bytes": 35764,
+      "path": "packages/western-astrology-rules-preview-draft/src/browser-app/content-review-feedback.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "role": "primitive_review_template_serializer",
+      "sha256": "b58d6ebbc4fc86bdae9a246c791ba90d1ec14c1a2df49764083ee2b8ed0899e4"
+    },
+    {
+      "bytes": 50521,
+      "path": "packages/western-astrology-rules-preview-draft/src/browser-app/dynamic-content-review-feedback.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "role": "dynamic_review_template_serializer",
+      "sha256": "df540561017ca83f95e367c04c16bdd0b2012ba0b2c227a792086e0f84290334"
+    },
+    {
+      "bytes": 16624,
+      "path": "packages/western-astrology-rules-preview-draft/src/high-risk-expression-egress-policy.test.ts",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "role": "policy_and_call_site_contract_tests",
+      "sha256": "4c2565a5b69f5d6e477a15b10f5765649a1b92116c874e96ae2009b45d81becc"
+    },
+    {
+      "bytes": 497,
+      "path": "packages/western-astrology-rules-preview-draft/package.json",
+      "rawHashAndUtf8DecodeUseSameBuffer": true,
+      "role": "isolated_package_boundary",
+      "sha256": "42d5a3860d53b3a1cd243341ecc9aee6b7ffc10ec7799d61a4218ff31f99418b"
+    }
+  ],
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "crossSystemAuthorityInherited": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertIdentityCredentialsIndependenceEstablished": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "highRiskClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "semanticSafetyEstablished": false
+  },
+  "candidateId": "hakimi.western.high-risk-expression-policy-draft/0.1.0",
+  "createdAt": "2026-09-01T00:00:00.000Z",
+  "doesNotEstablish": [
+    "semantic_or_paraphrase_complete_high_risk_detection",
+    "formal_or_expert_approved_high_risk_expression_policy",
+    "content_truth_expert_truth_source_freeze_or_rights_legal_conclusion",
+    "complete_text_leaf_inventory_or_registered_call_graph_closure",
+    "browser_runtime_chrome_edge_pwa_service_worker_or_public_host_evidence",
+    "mutation_epoch_cross_file_atomicity_interval_integrity_or_aba_exclusion",
+    "western_product_release_schema_migration_or_formal_admission_identity",
+    "release_readiness_public_deployment_public_release_or_expert_claims_authorization",
+    "bazi_ziwei_vedic_authority_inheritance_cross_system_scoring_or_winner_selection"
+  ],
+  "evidenceAccounts": [
+    {
+      "account": "engineering_evidence",
+      "establishedByThisCandidate": true
+    },
+    {
+      "account": "browser_runtime_evidence",
+      "establishedByThisCandidate": false
+    },
+    {
+      "account": "content_truth",
+      "establishedByThisCandidate": false
+    },
+    {
+      "account": "expert_truth",
+      "establishedByThisCandidate": false
+    },
+    {
+      "account": "rights_legal_judgment",
+      "establishedByThisCandidate": false
+    },
+    {
+      "account": "release_readiness",
+      "establishedByThisCandidate": false
+    },
+    {
+      "account": "public_release_authorization",
+      "establishedByThisCandidate": false
+    }
+  ],
+  "gateSummary": {
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 28,
+    "engineeringLexicalEgressGateImplemented": true,
+    "expertReviewBundleComplete": false,
+    "formalHighRiskPolicyBound": false,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "requirementsUniverseClosed": false,
+    "rightsBundleComplete": false,
+    "sourceBundleComplete": false
+  },
+  "integrityBoundary": {
+    "artifactBindingCount": 8,
+    "candidateDigestAlgorithm": "SHA-256",
+    "candidateDigestDomain": "hakimi.western.high-risk-expression-policy-draft.v0.1",
+    "candidateDigestExcludesOwnField": true,
+    "candidateDigestIsDigitalSignature": false,
+    "crossFileAtomicSnapshot": false,
+    "fixedPathCurrentVerificationRequired": true,
+    "intervalMutationExcluded": false,
+    "preImportIntrinsicIntegrityEstablished": false,
+    "rawIdentitiesAreDigitalSignatures": false,
+    "sequentialEndpointSnapshotsOnly": true,
+    "signerIdentityEstablished": false,
+    "sourceInspectionMechanicallyVerified": true,
+    "upstreamCapabilityBrandCount": 1
+  },
+  "mutationBoundary": {
+    "abaExcluded": false,
+    "crossFileAtomicSnapshot": false,
+    "intervalMutationExcluded": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "networkTransmissionPerformed": false,
+    "storageMutationPerformed": false
+  },
+  "policyBoundary": {
+    "actionIds": [
+      "pass_through",
+      "neutralized",
+      "failed_closed"
+    ],
+    "candidateDomTextNeutralizedOnMatch": true,
+    "completeTextLeafInventoryClosed": false,
+    "expertApproved": false,
+    "currentKnownExternalReviewFeedbackRoutedThroughGate": true,
+    "formalHighRiskPolicyBound": false,
+    "lexicalCoverageComplete": false,
+    "policyId": "hakimi.western.high-risk-expression-egress-policy/0.1.0",
+    "policyVersion": "0.1.0",
+    "registeredCallGraphClosureEstablished": false,
+    "riskCategoryCount": 8,
+    "riskCategoryIds": [
+      "deterministic_personal_outcome",
+      "health_medical_reproductive",
+      "legal_criminal",
+      "financial_investment_gambling",
+      "death_disaster_violence_self_harm",
+      "relationships_family",
+      "employment_education_social_identity",
+      "mental_health_personality_diagnosis"
+    ],
+    "safeTextExactPassThrough": true,
+    "semanticSafetyEstablished": false,
+    "surfaceCallerAuthenticityEstablished": false,
+    "surfaceCount": 5,
+    "surfaceIds": [
+      "western.preview.candidate-interpretation",
+      "western.preview.expert-review-question",
+      "western.preview.imported-review-feedback",
+      "western.preview.primitive-review-template-download",
+      "western.preview.dynamic-review-template-download"
+    ],
+    "templateDownloadFailedClosedOnMatch": true,
+    "templateGuardCallCount": 2,
+    "textGuardCallCount": 52
+  },
+  "productBoundary": {
+    "centralRegistryIntegration": false,
+    "legacyV13Inherited": false,
+    "mainApplicationReachable": false,
+    "migrationId": null,
+    "packageExportsEmpty": true,
+    "packagePrivate": true,
+    "productIdentity": null,
+    "productionImportForbidden": true,
+    "releaseIdentity": null,
+    "schema13Inherited": false,
+    "targetSchema": null
+  },
+  "projectReleaseGovernanceContext": {
+    "defaultArtifact": "legacy-v13",
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "projectContextOnly": true,
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "recordType": "western_high_risk_expression_policy_draft_v0_1",
+  "schemaVersion": "0.1.0",
+  "status": "isolated_runtime_lexical_egress_gate_candidate_zero_admission_effect",
+  "systemIdentity": {
+    "contractSystemId": "western",
+    "independentFromBaziZiweiVedic": true,
+    "migrationId": null,
+    "productIdentity": null,
+    "releaseIdentity": null,
+    "targetSchema": null
+  },
+  "upstreamBoundary": {
+    "admissionGatesSatisfied": 0,
+    "bindingFrozenVerified": 0,
+    "candidateDigest": "664bdbddd48bc0205eb6dba4cf923903a78d35e6d63ab29ca8e7de3faa5975af",
+    "candidateId": "hakimi.western.independent-productization.version-aware-observation-child/1.1.0",
+    "currentObservationRegistryMechanicallyCurrentForWestern": false,
+    "expertClaimsAuthorized": false,
+    "independentExpertReviewsVerified": 0,
+    "parentBacklinkAdded": false,
+    "parentModified": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "registryUpdated": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "verifiedPrivateBrandConsumed": true
+  },
+  "candidateDigest": "f04ac69f2eae777802dbe6946aeb1898eb21440f71d46cb0643b7e6fe38ca4ba"
+}

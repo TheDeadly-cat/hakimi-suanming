@@ -1,0 +1,258 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "system_domain_release_manifest",
+  "systemId": "western",
+  "surface": {
+    "surfaceId": "western-isolated-rules-preview-draft",
+    "surfaceVersion": "0.1.0",
+    "versionMeaning": "product_surface_contract_not_database_schema_or_domain_authority"
+  },
+  "releaseGovernance": {
+    "releaseIdentity": "isolated-western-draft-no-main-schema",
+    "targetSchema": null,
+    "migrationId": null,
+    "mutationEpochBoundary": "preserved",
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "components": [
+    {
+      "componentId": "execution_rules",
+      "version": "astronomy-engine@2.1.19+hakimi-fresh-worker-draft/0.1.0",
+      "status": "bound",
+      "files": [
+        {
+          "path": "packages/western-astrology-contracts-draft/src/index.ts",
+          "sha256": "3568cbe0568382354ed59c6bb9bacd0cf4c4d3c52490c1a80a614f2e9db60515"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/astronomy-engine-2.1.19-lock-closure.json",
+          "sha256": "dd12ce93af144ee11965e0b89444150a2d0a6c68fe6bbf67650684ff3476bb39"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/astronomy-engine-2.1.19-source-lock.json",
+          "sha256": "a0d929d78cff75aa543e78350aece6a35636c4c081f5620c5a7cc9aaaf400975"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/astronomy-worker-entry.mjs",
+          "sha256": "ef001c2ce21caa489f5adb8327699be8400da28b5aee6dde36960e3005c8e0c3"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/delta-t-model-lock.json",
+          "sha256": "de5cb6ea1dda00ebe230394be38968b93c42b77988ba1d8437a1487fd46265f7"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/index.ts",
+          "sha256": "ccf29e09dbcd0422da67cdb8c623061f974ff05335a768758254e869b8ac4d83"
+        }
+      ],
+      "digest": "b3eaf0b9f5d91d182a1cc9aad185b708388a1eee04c53e9a6766de80d0cf7748"
+    },
+    {
+      "componentId": "interpretation_rules",
+      "version": "hakimi.western.geometry-rules-engineering-draft/0.1.0",
+      "status": "bound",
+      "files": [
+        {
+          "path": "packages/western-astrology-contracts-draft/src/index.ts",
+          "sha256": "3568cbe0568382354ed59c6bb9bacd0cf4c4d3c52490c1a80a614f2e9db60515"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer/aspects.ts",
+          "sha256": "887cfab663bc25a9757e062847afe033d11318d8d76cab5e47369a229507b9d1"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer/canonical.ts",
+          "sha256": "36a45ba2b2a5131b5d0e7c660ea114b73cd3578393d7dc2c7f337cbc6c3e0133"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer/houses.ts",
+          "sha256": "e74cbbe7694075d98d5aa9fc66bf9c4f8bf0f8715d97fe061fe8515a403c6b11"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer/index.ts",
+          "sha256": "b28e7d3aa4bf881c1fc55c2a3821a9cc807751fe2e664ea08080c426cc8b9c49"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/rule-layer/zodiac.ts",
+          "sha256": "fb9634d5af7020ca2a80521d091471ef67be342ac0fab92a955de64b48351d47"
+        }
+      ],
+      "digest": "76e3929b057a129601ed88e150392c373ad1ffab4217e9453f1faeb25994af7c"
+    },
+    {
+      "componentId": "input_policy",
+      "version": "hakimi.western.input-contract-draft/0.1.0",
+      "status": "bound",
+      "files": [
+        {
+          "path": "packages/western-astrology-contracts-draft/src/index.ts",
+          "sha256": "3568cbe0568382354ed59c6bb9bacd0cf4c4d3c52490c1a80a614f2e9db60515"
+        }
+      ],
+      "digest": "3d010ea228360407c76b6332dad72c881d7065109ad7d3e9fac75a17fedc22a3"
+    },
+    {
+      "componentId": "fact_contract",
+      "version": "hakimi.western.astronomy-facts-draft/0.1.0",
+      "status": "bound",
+      "files": [
+        {
+          "path": "packages/western-astrology-contracts-draft/src/index.ts",
+          "sha256": "3568cbe0568382354ed59c6bb9bacd0cf4c4d3c52490c1a80a614f2e9db60515"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/contract-bridge.ts",
+          "sha256": "dc199071d2a678049e9433f32326a7d50b03a3e645568d73c9e28a309b6f3ace"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/cross-system-engineering-fact-projection.ts",
+          "sha256": "14bdcef16441f81da3b29401b9895fd465e8e311b418aa714aa8955803d808c6"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/index.ts",
+          "sha256": "ccf29e09dbcd0422da67cdb8c623061f974ff05335a768758254e869b8ac4d83"
+        }
+      ],
+      "digest": "3e1b629cf778b404353ebf244c19315746748b902c11f5ebd83953fce993a989"
+    },
+    {
+      "componentId": "source_bundle",
+      "version": "source-binding-requirements-inventory/1.0.0",
+      "status": "incomplete",
+      "files": [
+        {
+          "path": "content/system-admission/western-source-binding-requirements.v1.json",
+          "sha256": "3f22c78279022a70d3a3a21e5a80a33b321a99793c033eb0a72c5171628107c9"
+        },
+        {
+          "path": "packages/western-astrology-contracts-draft/README.md",
+          "sha256": "d4b6db629686b8bb6de65b9b651012297ea27f32124c63e4dd87bfd12ecf60a1"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/README.md",
+          "sha256": "e36a5a2a76186d37a37ac514671b491d67e54fcb652610616a26ca07a5b512a1"
+        },
+        {
+          "path": "scripts/independent-source-binding-requirements-lib.mjs",
+          "sha256": "39226710aa227b4483b3f491e98e5e1fd7ff8c62b625ed22703f53d58dbdb90e"
+        },
+        {
+          "path": "scripts/verify-independent-source-binding-requirements.mjs",
+          "sha256": "b888da6fc6b2e8b7418d358a40c42a4f637525116bded25a830bb55862cffac9"
+        }
+      ],
+      "digest": "5e3c3636a5995c15f143ec9645ac5032e028431982e9131ab8cd6372fe2a7cc6"
+    },
+    {
+      "componentId": "rights_bundle",
+      "version": "dependency-observations-not-product-clearance/0.1.0",
+      "status": "incomplete",
+      "files": [
+        {
+          "path": "packages/western-astrology-contracts-draft/package.json",
+          "sha256": "8e408c8e6b9e28b64000c4b800a822d0c982d49866e72f9a36ab995db306f54b"
+        },
+        {
+          "path": "packages/western-astrology-contracts-draft/README.md",
+          "sha256": "d4b6db629686b8bb6de65b9b651012297ea27f32124c63e4dd87bfd12ecf60a1"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/licenses/astronomy-engine-2.1.19-LICENSE.txt",
+          "sha256": "690dd98cb13ba4db77c6327deea852a816892bb9debbad5943405c66972f8023"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/package.json",
+          "sha256": "e7639fc309f3d92729ce2084275bad75702cb70df151c663bffd8b35cae15786"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/README.md",
+          "sha256": "e36a5a2a76186d37a37ac514671b491d67e54fcb652610616a26ca07a5b512a1"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/astronomy-engine-2.1.19-lock-closure.json",
+          "sha256": "dd12ce93af144ee11965e0b89444150a2d0a6c68fe6bbf67650684ff3476bb39"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/astronomy-engine-2.1.19-source-lock.json",
+          "sha256": "a0d929d78cff75aa543e78350aece6a35636c4c081f5620c5a7cc9aaaf400975"
+        }
+      ],
+      "digest": "322fa69419c17f623b2c2fd1adbd9be5da8e7bbfe4659cf4eca9ed6604ee0acd"
+    },
+    {
+      "componentId": "expert_review_bundle",
+      "version": "absent/0",
+      "status": "absent",
+      "files": [],
+      "digest": "68fcfdc575995155f709c1491f5404dbc8e1ffa6214e726afc6128ccf9872380"
+    },
+    {
+      "componentId": "high_risk_policy",
+      "version": "draft-boundary-only/0.1.0",
+      "status": "incomplete",
+      "files": [
+        {
+          "path": "packages/western-astrology-contracts-draft/README.md",
+          "sha256": "d4b6db629686b8bb6de65b9b651012297ea27f32124c63e4dd87bfd12ecf60a1"
+        },
+        {
+          "path": "packages/western-astrology-contracts-draft/src/index.ts",
+          "sha256": "3568cbe0568382354ed59c6bb9bacd0cf4c4d3c52490c1a80a614f2e9db60515"
+        },
+        {
+          "path": "packages/western-astronomy-engine-adapter-draft/src/strict-receipt-draft.ts",
+          "sha256": "9b156ca0040c4216da08d65682da5bbfb1770858dccd7f4b604bf94f745cb14d"
+        }
+      ],
+      "digest": "fb7f66e7398ec80301f449507a00683ed1f61acdd49746431ce91b22be0eb936"
+    },
+    {
+      "componentId": "report_contract",
+      "version": "isolated-rules-preview-not-formal-report/0.1.0",
+      "status": "incomplete",
+      "files": [
+        {
+          "path": "packages/western-astrology-rules-preview-draft/README.md",
+          "sha256": "74d1faf827c0acf301a644af51d1435d3f6ba522b58af20f8f4002f09ade6aa2"
+        },
+        {
+          "path": "packages/western-astrology-rules-preview-draft/src/browser-app/content-layer.ts",
+          "sha256": "0b53443ad3d39ba70e0572c33209e599a9da1cf9c8f1df5d45a1d32f88da11c7"
+        },
+        {
+          "path": "packages/western-astrology-rules-preview-draft/src/browser-app/main.ts",
+          "sha256": "27284f9817d6b8414402b8fbedbcb06e49aab738115c084a55a6c0100357ea7e"
+        },
+        {
+          "path": "packages/western-astrology-rules-preview-draft/src/rule-layer-bridge.ts",
+          "sha256": "4ca446e65844ebacd8c452389928df181395c93008da2946aad68491b284493b"
+        }
+      ],
+      "digest": "de813d916c6b9f558f0039fa91079282ae380ebe911e6072738271d7797a9dd7"
+    }
+  ],
+  "gateState": {
+    "bindingRequired": 28,
+    "bindingFrozenVerified": 0,
+    "independentExpertsRequired": 2,
+    "independentExpertReviewsVerified": 0,
+    "sourceBundleComplete": false,
+    "rightsBundleComplete": false,
+    "expertReviewBundleComplete": false,
+    "highRiskPolicyBound": false,
+    "releaseEvidenceComplete": false
+  },
+  "evidenceLedger": {
+    "engineeringIdentity": "component_digests_verified",
+    "browserRuntimeEvidence": "not_assessed_in_domain_manifest",
+    "contentTruth": "not_established",
+    "expertTruth": "not_established",
+    "rightsLegalConclusion": "not_established",
+    "releaseReadiness": "not_ready",
+    "publicReleaseAuthorization": "not_authorized"
+  },
+  "releaseStatus": "draft",
+  "createdAt": "2026-08-26T04:00:00.000Z",
+  "manifestDigest": "5c44fce96357ed80c4274f1f225151764ffe5998956e7e823764499ee45f993e"
+}

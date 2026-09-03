@@ -9,10 +9,14 @@ import {
   type WesternFirstReadCandidate,
   type WesternHouseRulerCandidate
 } from "./content-layer.ts";
+import {
+  WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY,
+  WESTERN_TROPICAL_ZODIAC_IDENTITY
+} from "../rule-layer-bridge.ts";
 
 export const WESTERN_DYNAMIC_CONTENT_REVIEW_FEEDBACK_PROFILE = Object.freeze({
-  formatVersion: "hakimi.western.dynamic_content_review_feedback/0.1.0",
-  templateVersion: "0.7.0",
+  formatVersion: "hakimi.western.dynamic_content_review_feedback/0.2.0",
+  templateVersion: "0.10.0",
   reviewScope: "current_projection_dynamic_candidates_only" as const,
   privacyScope: "direct_identifiers_removed_derived_chart_facts" as const,
   directIdentifiersIncluded: false as const,
@@ -74,6 +78,7 @@ export interface WesternDynamicContentReviewProjectionBinding {
   projectionOutcome: WesternContentProjection["outcome"];
   framework: WesternContentProjection["framework"];
   factsSha256: string;
+  zodiacMethod: WesternContentProjection["zodiacMethod"];
   projectionSha256: string;
   orderedCandidateIdsSha256: string;
   sourceRegistrySha256: string;
@@ -221,9 +226,10 @@ const PROFILE_KEYS = Object.freeze(Object.keys(
   WESTERN_DYNAMIC_CONTENT_REVIEW_FEEDBACK_PROFILE
 ));
 const BINDING_KEYS = Object.freeze([
-  "contentLayerVersion", "projectionOutcome", "framework", "factsSha256", "projectionSha256",
+  "contentLayerVersion", "projectionOutcome", "framework", "factsSha256", "zodiacMethod", "projectionSha256",
   "orderedCandidateIdsSha256", "sourceRegistrySha256", "itemCount", "sourceCount"
 ] as const);
+const ZODIAC_METHOD_KEYS = Object.freeze(["kind", "ayanamshaId", "algorithmId"] as const);
 const SOURCE_KEYS = Object.freeze([
   "sourceId", "title", "sourceUrl", "publisher", "role", "accessedAt", "usageBoundary",
   "expertTruthClaimed", "scientificValidityClaimed"
@@ -553,8 +559,7 @@ function buildCandidateSeeds(projection: WesternContentProjection): readonly Dyn
     tensionStatement: candidate.tensionStatement,
     scopeNote: candidate.scopeNote,
     contextLines: Object.freeze([
-      `星座：${candidate.signLabel} ${candidate.degreeWithinSign}°`,
-      `黄经：${candidate.eclipticLongitudeDeg}°；黄道位置：${candidate.zodiacLongitudeDeg}°`
+      `星座：${candidate.signLabel} ${candidate.degreeWithinSign}°；黄道位置：${candidate.zodiacLongitudeDeg}°`
     ]),
     reviewQuestions: candidate.review.questions,
     sourceIds: candidate.sourceIds,
@@ -686,6 +691,7 @@ async function createProjectionBinding(
     projectionOutcome: projection.outcome,
     framework: projection.framework,
     factsSha256: projection.factsSha256,
+    zodiacMethod: Object.freeze({ ...projection.zodiacMethod }),
     projectionSha256: await sha256Text(`${JSON.stringify(projection)}\n`),
     orderedCandidateIdsSha256: await sha256Text(
       `${items.map((item) => item.candidateId).join("\n")}\n`
@@ -728,7 +734,10 @@ function freezeEnvelope(
 ): WesternDynamicContentReviewFeedbackEnvelope {
   return Object.freeze({
     profile: WESTERN_DYNAMIC_CONTENT_REVIEW_FEEDBACK_PROFILE,
-    projectionBinding: Object.freeze({ ...envelope.projectionBinding }),
+    projectionBinding: Object.freeze({
+      ...envelope.projectionBinding,
+      zodiacMethod: Object.freeze({ ...envelope.projectionBinding.zodiacMethod })
+    }),
     sourceRegistry: Object.freeze(envelope.sourceRegistry.map((source) => Object.freeze({ ...source }))),
     reviewer: Object.freeze({ ...envelope.reviewer }),
     reviewSession: Object.freeze({ ...envelope.reviewSession }),
@@ -800,7 +809,7 @@ export function serializeWesternDynamicContentReviewFeedbackTemplate(
 }
 
 export function westernDynamicContentReviewFeedbackFilename(): string {
-  return "hakimi-western-current-chart-review-v007.json";
+  return "hakimi-western-current-chart-review-v010.json";
 }
 
 function parseProfile(value: unknown): typeof WESTERN_DYNAMIC_CONTENT_REVIEW_FEEDBACK_PROFILE {
@@ -811,10 +820,36 @@ function parseProfile(value: unknown): typeof WESTERN_DYNAMIC_CONTENT_REVIEW_FEE
       !== JSON.stringify(WESTERN_DYNAMIC_CONTENT_REVIEW_FEEDBACK_PROFILE[
         key as keyof typeof WESTERN_DYNAMIC_CONTENT_REVIEW_FEEDBACK_PROFILE
       ])) {
-      throw new Error(`动态审稿 profile.${key} 与当前 v0.7 契约不一致`);
+      throw new Error(`动态审稿 profile.${key} 与当前 v0.10 契约不一致`);
     }
   }
   return WESTERN_DYNAMIC_CONTENT_REVIEW_FEEDBACK_PROFILE;
+}
+
+function parseZodiacMethod(value: unknown): WesternContentProjection["zodiacMethod"] {
+  assertRecord(value, "projectionBinding.zodiacMethod");
+  assertExactKeys(value, ZODIAC_METHOD_KEYS, "projectionBinding.zodiacMethod");
+  const kind = stringValue(value.kind, "projectionBinding.zodiacMethod.kind", 40);
+  const algorithmId = stringValue(
+    value.algorithmId,
+    "projectionBinding.zodiacMethod.algorithmId",
+    180
+  );
+  if (kind === "tropical"
+    && value.ayanamshaId === null
+    && algorithmId === WESTERN_TROPICAL_ZODIAC_IDENTITY.algorithmId) {
+    return Object.freeze({ kind, ayanamshaId: null, algorithmId });
+  }
+  if (kind === "sidereal"
+    && value.ayanamshaId === WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY.ayanamshaId
+    && algorithmId === WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY.algorithmId) {
+    return Object.freeze({
+      kind,
+      ayanamshaId: WESTERN_SIDEREAL_MANUAL_ZODIAC_IDENTITY.ayanamshaId,
+      algorithmId
+    });
+  }
+  throw new Error("projectionBinding.zodiacMethod 不是当前受支持的工程身份");
 }
 
 function parseBinding(value: unknown): WesternDynamicContentReviewProjectionBinding {
@@ -833,6 +868,7 @@ function parseBinding(value: unknown): WesternDynamicContentReviewProjectionBind
     projectionOutcome,
     framework,
     factsSha256: digestValue(value.factsSha256, "projectionBinding.factsSha256"),
+    zodiacMethod: parseZodiacMethod(value.zodiacMethod),
     projectionSha256: digestValue(value.projectionSha256, "projectionBinding.projectionSha256"),
     orderedCandidateIdsSha256: digestValue(
       value.orderedCandidateIdsSha256, "projectionBinding.orderedCandidateIdsSha256"

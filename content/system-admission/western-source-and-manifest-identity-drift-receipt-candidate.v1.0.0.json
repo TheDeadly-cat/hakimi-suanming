@@ -1,0 +1,269 @@
+{
+  "activeAdmissionEffect": "none",
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertIdentityQualificationIndependenceEstablished": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "highRiskClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "safeToPublish": false
+  },
+  "candidateId": "hakimi.western.source-and-manifest-identity-drift-receipt-candidate/1.0.0",
+  "candidateStatus": "current_append_only_western_source_and_manifest_identity_drift_observation_candidate_zero_admission_effect",
+  "createdAt": "2026-09-01T10:30:00.000Z",
+  "currentEndpointBindings": {
+    "currentHighRiskCandidate": {
+      "candidateDigest": "f04ac69f2eae777802dbe6946aeb1898eb21440f71d46cb0643b7e6fe38ca4ba",
+      "candidateId": "hakimi.western.high-risk-expression-policy-draft/0.1.0",
+      "path": "content/system-admission/western-high-risk-expression-policy-draft.v0.1.0.json",
+      "rawBytes": 9526,
+      "rawSha256": "caf4b85e9ce72d0aaaec1b57e5a634b4acf7d376ef39ff6f02b9cf84875d1485"
+    },
+    "currentSourceSnapshots": [
+      {
+        "path": "packages/western-astrology-contracts-draft/src/index.ts",
+        "rawBytes": 39756,
+        "rawSha256": "87bf4fcecc7ec85542eed25c7c06869ba3a084c5e7d7fb305fcd7712ef508416",
+        "role": "current_contract_index"
+      },
+      {
+        "path": "packages/western-astrology-contracts-draft/src/civil-input.ts",
+        "rawBytes": 2910,
+        "rawSha256": "e1e9cfa1f8f800e5c1ef61b7fdd134fcf0276664411c0691d64ccba21ed81458",
+        "role": "current_split_civil_input_contract"
+      },
+      {
+        "path": "packages/western-astrology-contracts-draft/src/index.test.ts",
+        "rawBytes": 18738,
+        "rawSha256": "ff029f322cc3243a40ad174cbc0e96a23b40d7a5603a21d711cbb79f32eba2d0",
+        "role": "current_contract_focused_test"
+      },
+      {
+        "path": "packages/western-astrology-rules-preview-draft/src/browser-app/main.ts",
+        "rawBytes": 78206,
+        "rawSha256": "37d85c18a7895e5f75d3e1fc6fa8435b2f5c10376d5b2e6296bd5801fd59a61b",
+        "role": "current_rules_preview_main"
+      },
+      {
+        "path": "packages/western-astrology-rules-preview-draft/src/browser-app/high-risk-expression-egress-policy.ts",
+        "rawBytes": 22464,
+        "rawSha256": "2edb1f38df4dd8854648bfbdd4b321e2e5fad8bbff3710eff009814ac15eedf8",
+        "role": "current_high_risk_expression_egress"
+      }
+    ],
+    "currentVersionAwareObservation": {
+      "candidateDigest": "664bdbddd48bc0205eb6dba4cf923903a78d35e6d63ab29ca8e7de3faa5975af",
+      "candidateId": "hakimi.western.independent-productization.version-aware-observation-child/1.1.0",
+      "path": "content/system-admission/western-independent-productization-version-aware-observation-child.v1.1.0.json",
+      "rawBytes": 12692,
+      "rawSha256": "140bed89a638deb970e1a60d3ffcbc96eebef509bd14bd692726b8c561d13593"
+    }
+  },
+  "currentStatus": "current_append_only_western_source_and_manifest_identity_drift_observation_candidate_zero_admission_effect",
+  "doesNotEstablish": [
+    "current_complete_western_source_definition_or_engineering_manifest",
+    "source_binding_or_three_layer_rights",
+    "content_truth_expert_truth_or_domain_authority",
+    "rights_legal_conclusion_or_redistribution_authorization",
+    "current_browser_runtime_full_app_pwa_service_worker_or_public_host_evidence",
+    "cross_file_atomicity_mutation_epoch_interval_integrity_or_aba_exclusion",
+    "digital_signature_runtime_attestation_or_owner_acceptance",
+    "release_readiness_deployment_rollback_or_public_release_authorization",
+    "bazi_authority_or_legacy_v13_schema_inheritance"
+  ],
+  "formalManifestDrift": {
+    "changedComponentCount": 6,
+    "changedComponents": [
+      {
+        "componentId": "execution_rules",
+        "currentOldDefinitionCandidateDigest": "f45e5e0fbc9c57c933f67bbf987dfed9d8a51cfab05fc8da35121b0948c3a7cf",
+        "persistedDigest": "b3eaf0b9f5d91d182a1cc9aad185b708388a1eee04c53e9a6766de80d0cf7748",
+        "uniqueObservedHashDriftSource": "packages/western-astrology-contracts-draft/src/index.ts"
+      },
+      {
+        "componentId": "interpretation_rules",
+        "currentOldDefinitionCandidateDigest": "283a5e5f29ed05969a476e39dbb1cb77083ea146fdd1bfc9428b85cc487f73da",
+        "persistedDigest": "76e3929b057a129601ed88e150392c373ad1ffab4217e9453f1faeb25994af7c",
+        "uniqueObservedHashDriftSource": "packages/western-astrology-contracts-draft/src/index.ts"
+      },
+      {
+        "componentId": "input_policy",
+        "currentOldDefinitionCandidateDigest": "ec586d5ea27d37f585fa4d960235780a89155728ddc216bb6c5b9633f1e2add7",
+        "persistedDigest": "3d010ea228360407c76b6332dad72c881d7065109ad7d3e9fac75a17fedc22a3",
+        "uniqueObservedHashDriftSource": "packages/western-astrology-contracts-draft/src/index.ts"
+      },
+      {
+        "componentId": "fact_contract",
+        "currentOldDefinitionCandidateDigest": "6f3508a856cbfb8477c74cbf9b5d0ed9b5590d6c4267df0f0c4d938b4b225e95",
+        "persistedDigest": "3e1b629cf778b404353ebf244c19315746748b902c11f5ebd83953fce993a989",
+        "uniqueObservedHashDriftSource": "packages/western-astrology-contracts-draft/src/index.ts"
+      },
+      {
+        "componentId": "high_risk_policy",
+        "currentOldDefinitionCandidateDigest": "390cfffb571580988ae07a4ef657e569a80c4538afc86b8fcaba73767d538a29",
+        "persistedDigest": "fb7f66e7398ec80301f449507a00683ed1f61acdd49746431ce91b22be0eb936",
+        "uniqueObservedHashDriftSource": "packages/western-astrology-contracts-draft/src/index.ts"
+      },
+      {
+        "componentId": "report_contract",
+        "currentOldDefinitionCandidateDigest": "911b173f3396f11d38ce77ae3004ee331ccdc5c1b1068d99bd861cefe2c042eb",
+        "persistedDigest": "de813d916c6b9f558f0039fa91079282ae380ebe911e6072738271d7797a9dd7",
+        "uniqueObservedHashDriftSource": "packages/western-astrology-rules-preview-draft/src/browser-app/main.ts"
+      }
+    ],
+    "contractIndexOneSourceFansOutToFiveComponentDigests": true,
+    "currentLoaderFailureClass": "MANIFEST_MISMATCH",
+    "historicalManifest": {
+      "manifestDigest": "5c44fce96357ed80c4274f1f225151764ffe5998956e7e823764499ee45f993e",
+      "path": "content/domain-release/western-astrology.engineering-draft.v0.1.0.json",
+      "rawBytes": 10832,
+      "rawSha256": "c138220098346a3ff9857c1e8034914205277bdbe8cf5563e80b58687745a398",
+      "surfaceId": "western-isolated-rules-preview-draft",
+      "systemId": "western"
+    },
+    "historicalManifestMechanicallyCurrent": false,
+    "historicalManifestPreservedUnmodified": true,
+    "manifestRebindOrResignPerformed": false,
+    "oldDefinitionCounterfactual": {
+      "currentCompleteClosure": false,
+      "manifestDigest": "8dd95748538886284b2cde1413c963fb1e21606f431732492def2be338df7702",
+      "oldDefinitionOnly": true,
+      "persisted": false
+    },
+    "rulesPreviewMainIsOnlyObservedReportContractHashDriftSource": true,
+    "sixComponentDigestDriftsEqualSixIndependentSemanticChanges": false,
+    "unchangedComponentCount": 3,
+    "unchangedComponentIds": [
+      "source_bundle",
+      "rights_bundle",
+      "expert_review_bundle"
+    ],
+    "uniqueBlockerClaimed": false
+  },
+  "formalSourceDrift": {
+    "contractIndexDrift": {
+      "currentRawBytes": 39756,
+      "currentRawSha256": "87bf4fcecc7ec85542eed25c7c06869ba3a084c5e7d7fb305fcd7712ef508416",
+      "path": "packages/western-astrology-contracts-draft/src/index.ts",
+      "persistedRawBytes": 41394,
+      "persistedRawSha256": "3568cbe0568382354ed59c6bb9bacd0cf4c4d3c52490c1a80a614f2e9db60515"
+    },
+    "contractIndexIsOnlyObservedOldDefinitionBasisHashDriftSource": true,
+    "currentV12LoaderFailureClass": "LEDGER_MISMATCH",
+    "currentV12LoaderMechanicallyCurrent": false,
+    "formalCurrentRemainsV1": true,
+    "oldDefinitionCounterfactual": {
+      "currentCompleteClosure": false,
+      "ledgerDigest": "7ddaf8afc40bb6d3bddc0161e115ec2237b1a91305e885de32e49eb362d5cc44",
+      "oldDefinitionOnly": true,
+      "persisted": false
+    },
+    "sourceArtifactsPreservedUnmodified": true,
+    "sourceChain": [
+      {
+        "ledgerDigest": "2bb52306841098ee5e83906bffda400ad07efd706c7c294ee4d07115854849bd",
+        "ledgerId": "hakimi.western-astrology.source-binding-requirements/1.0.0",
+        "path": "content/system-admission/western-source-binding-requirements.v1.json",
+        "preservedUnmodified": true,
+        "rawBytes": 25909,
+        "rawSha256": "3f22c78279022a70d3a3a21e5a80a33b321a99793c033eb0a72c5171628107c9",
+        "rebindOrResignPerformed": false,
+        "versionRole": "formal_current_v1"
+      },
+      {
+        "ledgerDigest": "254fbc561d3a82a4b9dfaf969b472de7dfcbb9543299b4f69cc9a9944e6994db",
+        "ledgerId": "hakimi.western-astrology.source-binding-requirements/1.1.0",
+        "path": "content/system-admission/western-source-binding-requirements.v1.1.0.json",
+        "preservedUnmodified": true,
+        "rawBytes": 34338,
+        "rawSha256": "7f50fd5a7fd09647d1a91fc1c663e30acc56828962b98624aeeb73e985dba0fc",
+        "rebindOrResignPerformed": false,
+        "versionRole": "nonformal_successor_v1_1"
+      },
+      {
+        "ledgerDigest": "91708bf49785148eede41872717104949fa9725732e661c25a115788a983dd58",
+        "ledgerId": "hakimi.western-astrology.source-binding-requirements/1.2.0",
+        "path": "content/system-admission/western-source-binding-requirements.v1.2.0.json",
+        "preservedUnmodified": true,
+        "rawBytes": 40667,
+        "rawSha256": "e9894ce51541d284a58aa59b1d175a121746dbd1d6521b16a700cf64c05c63c1",
+        "rebindOrResignPerformed": false,
+        "versionRole": "nonformal_successor_v1_2"
+      }
+    ],
+    "sourceRebindOrResignPerformed": false,
+    "uniqueBlockerClaimed": false,
+    "v11AndV12RemainNonformal": true
+  },
+  "gateSummary": {
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 28,
+    "expertReviewBundleComplete": false,
+    "highRiskPolicyBound": false,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "releaseEvidenceComplete": false,
+    "rightsBundleComplete": false,
+    "sourceBundleComplete": false
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "crossFileAtomicSnapshot": false,
+    "endpointObservationOnly": true,
+    "intervalMutationExcludedAcrossFiles": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "receiptDigestIsDigitalSignature": false,
+    "sameHeldBufferHashAndParsePerJsonArtifact": true,
+    "sourceAndManifestIdentityDriftEstablished": true
+  },
+  "oldDefinitionCoverageBoundary": {
+    "civilInputDirectFileIncludedInFormalManifestInputPolicy": false,
+    "civilInputDirectFileIncludedInFormalSourceV1Basis": false,
+    "contractFocusedTestIncludedInFormalSourceOrManifestDefinition": false,
+    "currentEngineeringManifestComplete": false,
+    "highRiskCandidateIncludedInFormalManifestHighRiskPolicy": false,
+    "highRiskEgressSourceIncludedInFormalManifestHighRiskPolicy": false,
+    "oldDefinitionCounterfactualMayBeSignedAsCurrentEngineeringManifest": false
+  },
+  "ownerDecisionBoundary": {
+    "formalAdmissionPromotionAuthorized": false,
+    "manifestRebindAuthorized": false,
+    "manifestResignAuthorized": false,
+    "ownerAcceptanceVerified": false,
+    "ownerDecisionsRecorded": 0,
+    "sourceRebindAuthorized": false,
+    "sourceResignAuthorized": false
+  },
+  "receiptDigest": "f422b6b1bd61e97631b5ce5719877d0e17525b18cdfd7cc7d1c3257e85884097",
+  "recordType": "western_source_and_manifest_identity_drift_receipt_candidate",
+  "releaseGovernance": {
+    "migrationId": null,
+    "projectDefaultContext": {
+      "inheritedByWesternProductIdentity": false,
+      "migrationId": null,
+      "releaseIdentity": "legacy-v13",
+      "targetSchema": 13
+    },
+    "releaseIdentity": null,
+    "targetSchema": null
+  },
+  "runtimeTrustBoundary": {
+    "cliOutputTrustedAttestation": false,
+    "hiddenPreloadExcluded": false,
+    "loaderIdentityEstablished": false,
+    "mechanicalResultAssumesNoArbitraryPreEvaluationCodeExecution": true,
+    "nodeRuntimeIdentityEstablished": false,
+    "runtimeLauncherIdentityEstablished": false
+  },
+  "schemaVersion": "1.0.0"
+}
