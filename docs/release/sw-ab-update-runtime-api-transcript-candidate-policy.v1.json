@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "policyId": "hakimi.web-v1.sw-ab-update-runtime-api-transcript-candidate/v1",
+  "recordClass": "untrusted_decoded_browser_api_transcript_candidate",
+  "releaseIdentity": {
+    "channel": "default-v13",
+    "dbGeneration": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null
+  },
+  "capabilities": {
+    "mutationEpochCapability": "absent_schema13",
+    "epoch": null
+  },
+  "requiredBrowserProjects": [
+    "msedge",
+    "chrome"
+  ],
+  "requiredPhases": [
+    "initial-a",
+    "post-claim"
+  ],
+  "requiredSlots": [
+    "retained-old-a",
+    "reload-to-b"
+  ],
+  "requiredTupleFiles": [
+    "01-msedge-initial-a-retained-old-a.json",
+    "02-msedge-initial-a-reload-to-b.json",
+    "03-chrome-initial-a-retained-old-a.json",
+    "04-chrome-initial-a-reload-to-b.json",
+    "05-msedge-post-claim-retained-old-a.json",
+    "06-msedge-post-claim-reload-to-b.json",
+    "07-chrome-post-claim-retained-old-a.json",
+    "08-chrome-post-claim-reload-to-b.json"
+  ],
+  "requiredObservationTuples": [
+    {
+      "projectName": "msedge",
+      "phase": "initial-a",
+      "slot": "retained-old-a"
+    },
+    {
+      "projectName": "msedge",
+      "phase": "initial-a",
+      "slot": "reload-to-b"
+    },
+    {
+      "projectName": "chrome",
+      "phase": "initial-a",
+      "slot": "retained-old-a"
+    },
+    {
+      "projectName": "chrome",
+      "phase": "initial-a",
+      "slot": "reload-to-b"
+    },
+    {
+      "projectName": "msedge",
+      "phase": "post-claim",
+      "slot": "retained-old-a"
+    },
+    {
+      "projectName": "msedge",
+      "phase": "post-claim",
+      "slot": "reload-to-b"
+    },
+    {
+      "projectName": "chrome",
+      "phase": "post-claim",
+      "slot": "retained-old-a"
+    },
+    {
+      "projectName": "chrome",
+      "phase": "post-claim",
+      "slot": "reload-to-b"
+    }
+  ],
+  "requiredSourceBindings": [
+    {
+      "role": "api-transcript-policy",
+      "path": "docs/release/sw-ab-update-runtime-api-transcript-candidate-policy.v1.json"
+    },
+    {
+      "role": "api-transcript-schema",
+      "path": "docs/release/sw-ab-update-runtime-api-transcript-candidate-v1.schema.json"
+    },
+    {
+      "role": "runtime-capture-policy",
+      "path": "docs/release/sw-ab-update-runtime-client-capture-policy.v1.json"
+    },
+    {
+      "role": "runtime-capture-schema",
+      "path": "docs/release/sw-ab-update-runtime-client-capture-v1.schema.json"
+    }
+  ],
+  "captureSurface": {
+    "cdpApi": "playwright_cdp_session_decoded_object_v1",
+    "serviceWorkerMessageApi": "page_main_world_structured_clone_decoded_object_v1",
+    "serialization": "canonical_json_utf8_file_v1",
+    "cdpWireBytesCaptured": false,
+    "devtoolsWebSocketFramesCaptured": false,
+    "browserTransportAuthenticityVerified": false
+  },
+  "mutationBoundary": {
+    "overlappingFileHandleEpochEstablished": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false
+  },
+  "executionAdmission": {
+    "status": "closed_missing_selected_https_origin",
+    "selectedHttpsOriginConfigured": false,
+    "artifactADeploymentObserved": false,
+    "artifactBDeploymentObserved": false,
+    "realBrowserExecutionObserved": false
+  },
+  "terminalState": {
+    "status": "capture_incomplete",
+    "decodedApiObjectProjectionDerivationVerified": true,
+    "usableForRuntimeEvidence": false,
+    "usableForCandidateAssembly": false,
+    "formalReleaseEvidenceReceipt": false,
+    "cliExitCode": 1
+  },
+  "provenance": {
+    "callerSuppliedPageAuthenticityVerified": false,
+    "runtimeCollectorProvenanceVerified": false,
+    "browserBinaryProvenanceVerified": false,
+    "browserTransportAuthenticityVerified": false,
+    "osProcessRestartProvenanceVerified": false,
+    "twoClientRuntimeProvenanceVerified": false,
+    "serviceWorkerResponseProvenanceVerified": false,
+    "offlineTransportClosureVerified": false,
+    "attemptFreshnessExternallyVerified": false,
+    "bundleReplayResistanceVerified": false,
+    "concurrentFilesystemMutationResistanceVerified": false
+  },
+  "authority": {
+    "defaultV13ReceiptAllowlistMember": false,
+    "formalReleaseEvidenceReceipt": false,
+    "trustedProviderVerified": false,
+    "trustedHostVerified": false,
+    "trustedBrowserRuntimeVerified": false,
+    "deploymentReady": false,
+    "releaseReady": false,
+    "externalDeploymentExecutionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "contentTruthAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "rightsLegalConclusionAuthorized": false,
+    "schemaPromotionAuthorized": false
+  }
+}

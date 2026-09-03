@@ -1,0 +1,861 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hakimi.invalid/schemas/rollback-evidence-v1.json",
+  "title": "Hakimi engineering rollback execution evidence",
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "nullableSha256": {
+      "anyOf": [
+        { "$ref": "#/$defs/sha256" },
+        { "type": "null" }
+      ]
+    },
+    "utcTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-([0-2][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]\\.[0-9]{3}Z$"
+    },
+    "nullableUtcTimestamp": {
+      "anyOf": [
+        { "$ref": "#/$defs/utcTimestamp" },
+        { "type": "null" }
+      ]
+    },
+    "canonicalId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "nullableCanonicalId": {
+      "anyOf": [
+        { "$ref": "#/$defs/canonicalId" },
+        { "type": "null" }
+      ]
+    },
+    "httpsUrl": {
+      "type": "string",
+      "minLength": 9,
+      "maxLength": 2048,
+      "pattern": "^https://[^\\s]+$"
+    },
+    "nullableHttpsUrl": {
+      "anyOf": [
+        { "$ref": "#/$defs/httpsUrl" },
+        { "type": "null" }
+      ]
+    },
+    "releaseEvidenceId": {
+      "type": "string",
+      "pattern": "^hre1-[a-f0-9]{32}$"
+    },
+    "nullableReleaseEvidenceId": {
+      "anyOf": [
+        { "$ref": "#/$defs/releaseEvidenceId" },
+        { "type": "null" }
+      ]
+    },
+    "buildVersion": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{12}$"
+    },
+    "nullableBuildVersion": {
+      "anyOf": [
+        { "$ref": "#/$defs/buildVersion" },
+        { "type": "null" }
+      ]
+    },
+    "fileBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "size": { "type": "integer", "minimum": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "policyBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyId", "path", "sha256"],
+      "properties": {
+        "policyId": { "$ref": "#/$defs/canonicalId" },
+        "path": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "releaseDatabaseDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocolVersion",
+        "dbGeneration",
+        "databaseName",
+        "targetSchema",
+        "minReadableSchema",
+        "maxReadableSchema",
+        "migrationId",
+        "acceptedCommittedMigrationIds",
+        "sourceGeneration",
+        "sourceDatabaseName",
+        "sourceSchema"
+      ],
+      "properties": {
+        "protocolVersion": { "const": 1 },
+        "dbGeneration": { "const": "legacy-v13" },
+        "databaseName": { "const": "hakimi-bazi-research" },
+        "targetSchema": { "const": 13 },
+        "minReadableSchema": { "const": 13 },
+        "maxReadableSchema": { "const": 13 },
+        "migrationId": { "const": null },
+        "acceptedCommittedMigrationIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "uniqueItems": true,
+          "items": { "const": null }
+        },
+        "sourceGeneration": { "const": null },
+        "sourceDatabaseName": { "const": null },
+        "sourceSchema": { "const": null }
+      }
+    },
+    "artifactEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "size": { "type": "integer", "minimum": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "artifactComponents": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applicationShell", "pwaManifest", "serviceWorker", "hostingHeaders"],
+      "properties": {
+        "applicationShell": { "$ref": "#/$defs/artifactEntry" },
+        "pwaManifest": { "$ref": "#/$defs/artifactEntry" },
+        "serviceWorker": { "$ref": "#/$defs/artifactEntry" },
+        "hostingHeaders": { "$ref": "#/$defs/artifactEntry" }
+      }
+    },
+    "releaseEvidenceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "schemaId",
+        "evidenceType",
+        "evidenceId",
+        "path",
+        "size",
+        "sha256",
+        "sidecarPath",
+        "sidecarSha256"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "schemaId": { "const": "https://hakimi.invalid/schemas/release-evidence-v1.json" },
+        "evidenceType": { "const": "engineering_release_evidence" },
+        "evidenceId": { "$ref": "#/$defs/releaseEvidenceId" },
+        "path": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "size": { "type": "integer", "minimum": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "sidecarPath": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "sidecarSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "formalReleaseReceiptBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "receiptType",
+        "receiptId",
+        "releaseEvidenceId",
+        "status",
+        "verifiedAt",
+        "path",
+        "size",
+        "sha256"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "receiptType": { "const": "formal_release_evidence_verification" },
+        "receiptId": { "$ref": "#/$defs/canonicalId" },
+        "releaseEvidenceId": { "$ref": "#/$defs/releaseEvidenceId" },
+        "status": { "const": "passed" },
+        "verifiedAt": { "$ref": "#/$defs/utcTimestamp" },
+        "path": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "size": { "type": "integer", "minimum": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "artifactIdentityLockBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "size",
+        "sha256",
+        "lockDigest",
+        "artifactSetDigest",
+        "evidenceId",
+        "verified"
+      ],
+      "properties": {
+        "path": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "size": { "type": "integer", "minimum": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "lockDigest": { "$ref": "#/$defs/sha256" },
+        "artifactSetDigest": { "$ref": "#/$defs/sha256" },
+        "evidenceId": { "$ref": "#/$defs/releaseEvidenceId" },
+        "verified": { "type": "boolean" }
+      }
+    },
+    "artifactIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactRoot",
+        "channel",
+        "descriptor",
+        "buildVersion",
+        "manifestDigest",
+        "artifactSetDigest",
+        "releaseEvidence",
+        "formalReceipt",
+        "identityLock",
+        "components"
+      ],
+      "properties": {
+        "artifactRoot": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "channel": { "const": "default-v13" },
+        "descriptor": { "$ref": "#/$defs/releaseDatabaseDescriptor" },
+        "buildVersion": { "$ref": "#/$defs/buildVersion" },
+        "manifestDigest": { "$ref": "#/$defs/sha256" },
+        "artifactSetDigest": { "$ref": "#/$defs/sha256" },
+        "releaseEvidence": { "$ref": "#/$defs/releaseEvidenceBinding" },
+        "formalReceipt": { "$ref": "#/$defs/formalReleaseReceiptBinding" },
+        "identityLock": { "$ref": "#/$defs/artifactIdentityLockBinding" },
+        "components": { "$ref": "#/$defs/artifactComponents" }
+      }
+    },
+    "runtimeObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observedAt",
+        "origin",
+        "online",
+        "coldStart",
+        "applicationShellSha256",
+        "documentBuildVersion",
+        "documentEvidenceId",
+        "manifestDigest",
+        "controllerPresent",
+        "controllerScriptUrl",
+        "controllerScriptSha256",
+        "controllerBuildVersion",
+        "activeBuildVersion",
+        "waitingBuildVersion",
+        "installingBuildVersion",
+        "registrationScope",
+        "cacheGeneration"
+      ],
+      "properties": {
+        "observedAt": { "$ref": "#/$defs/nullableUtcTimestamp" },
+        "origin": { "$ref": "#/$defs/nullableHttpsUrl" },
+        "online": { "type": "boolean" },
+        "coldStart": { "type": "boolean" },
+        "applicationShellSha256": { "$ref": "#/$defs/nullableSha256" },
+        "documentBuildVersion": { "$ref": "#/$defs/nullableBuildVersion" },
+        "documentEvidenceId": { "$ref": "#/$defs/nullableReleaseEvidenceId" },
+        "manifestDigest": { "$ref": "#/$defs/nullableSha256" },
+        "controllerPresent": { "type": "boolean" },
+        "controllerScriptUrl": { "$ref": "#/$defs/nullableHttpsUrl" },
+        "controllerScriptSha256": { "$ref": "#/$defs/nullableSha256" },
+        "controllerBuildVersion": { "$ref": "#/$defs/nullableBuildVersion" },
+        "activeBuildVersion": { "$ref": "#/$defs/nullableBuildVersion" },
+        "waitingBuildVersion": { "$ref": "#/$defs/nullableBuildVersion" },
+        "installingBuildVersion": { "$ref": "#/$defs/nullableBuildVersion" },
+        "registrationScope": { "$ref": "#/$defs/nullableHttpsUrl" },
+        "cacheGeneration": { "$ref": "#/$defs/nullableCanonicalId" }
+      }
+    },
+    "phaseRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "phaseId",
+        "status",
+        "startedAt",
+        "completedAt",
+        "durationMs",
+        "runtimeObservation",
+        "receiptBinding",
+        "failureCode",
+        "evidenceDigest"
+      ],
+      "properties": {
+        "phaseId": { "enum": ["baseline", "candidate", "rollbackObserved"] },
+        "status": { "enum": ["passed", "failed", "aborted", "not_run"] },
+        "startedAt": { "$ref": "#/$defs/nullableUtcTimestamp" },
+        "completedAt": { "$ref": "#/$defs/nullableUtcTimestamp" },
+        "durationMs": { "type": ["integer", "null"], "minimum": 0 },
+        "runtimeObservation": { "$ref": "#/$defs/runtimeObservation" },
+        "receiptBinding": {
+          "anyOf": [
+            { "$ref": "#/$defs/fileBinding" },
+            { "type": "null" }
+          ]
+        },
+        "failureCode": { "type": ["string", "null"], "minLength": 1, "maxLength": 128, "pattern": "^[A-Z0-9_]+$" },
+        "evidenceDigest": { "$ref": "#/$defs/nullableSha256" }
+      }
+    },
+    "privatePackageBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "packageId",
+        "path",
+        "size",
+        "ciphertextSha256",
+        "encryption",
+        "plaintextEmbedded",
+        "keyMaterialEmbedded"
+      ],
+      "properties": {
+        "packageId": { "$ref": "#/$defs/canonicalId" },
+        "path": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "size": { "type": "integer", "minimum": 1 },
+        "ciphertextSha256": { "$ref": "#/$defs/sha256" },
+        "encryption": { "const": "encrypted_external" },
+        "plaintextEmbedded": { "const": false },
+        "keyMaterialEmbedded": { "const": false }
+      }
+    },
+    "signatureAttestationBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attestationId",
+        "attestationType",
+        "subjectId",
+        "keyId",
+        "signatureAlgorithm",
+        "signedAt",
+        "payloadDigest",
+        "path",
+        "size",
+        "sha256"
+      ],
+      "properties": {
+        "attestationId": { "$ref": "#/$defs/canonicalId" },
+        "attestationType": { "enum": ["detached_signature", "signed_external_attestation"] },
+        "subjectId": { "$ref": "#/$defs/canonicalId" },
+        "keyId": { "$ref": "#/$defs/canonicalId" },
+        "signatureAlgorithm": { "$ref": "#/$defs/canonicalId" },
+        "signedAt": { "$ref": "#/$defs/utcTimestamp" },
+        "payloadDigest": { "$ref": "#/$defs/sha256" },
+        "path": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "size": { "type": "integer", "minimum": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "approvalBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approvalId", "approvalScope", "status", "approvedAt", "expiresAt", "attestation"],
+      "properties": {
+        "approvalId": { "$ref": "#/$defs/canonicalId" },
+        "approvalScope": { "const": "isolated_rollback_rehearsal_v13_copy" },
+        "status": { "const": "approved" },
+        "approvedAt": { "$ref": "#/$defs/utcTimestamp" },
+        "expiresAt": { "$ref": "#/$defs/nullableUtcTimestamp" },
+        "attestation": { "$ref": "#/$defs/signatureAttestationBinding" }
+      }
+    },
+    "fingerprintBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "keyId",
+        "projectionVersion",
+        "domainSeparator",
+        "privatePackagePlaintextCommitment",
+        "beforeCommitment",
+        "afterCommitment",
+        "storeInventoryDigest",
+        "rowCountDigest",
+        "capturedBeforeAt",
+        "capturedAfterAt",
+        "keyMaterialEmbedded",
+        "sourceDataEmbedded"
+      ],
+      "properties": {
+        "algorithm": { "const": "hmac-sha256" },
+        "keyId": { "$ref": "#/$defs/canonicalId" },
+        "projectionVersion": { "const": "v13-deidentified-projection-v1" },
+        "domainSeparator": { "const": "hakimi.rollback.v13.fingerprint.v1" },
+        "privatePackagePlaintextCommitment": { "$ref": "#/$defs/sha256" },
+        "beforeCommitment": { "$ref": "#/$defs/sha256" },
+        "afterCommitment": { "$ref": "#/$defs/sha256" },
+        "storeInventoryDigest": { "$ref": "#/$defs/sha256" },
+        "rowCountDigest": { "$ref": "#/$defs/sha256" },
+        "capturedBeforeAt": { "$ref": "#/$defs/utcTimestamp" },
+        "capturedAfterAt": { "$ref": "#/$defs/utcTimestamp" },
+        "keyMaterialEmbedded": { "const": false },
+        "sourceDataEmbedded": { "const": false }
+      }
+    },
+    "operatorActor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actorId", "role", "identityAuthority", "attestation"],
+      "properties": {
+        "actorId": { "$ref": "#/$defs/canonicalId" },
+        "role": { "const": "operator" },
+        "identityAuthority": { "$ref": "#/$defs/canonicalId" },
+        "attestation": { "$ref": "#/$defs/signatureAttestationBinding" }
+      }
+    },
+    "acceptorActor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actorId", "role", "identityAuthority", "attestation"],
+      "properties": {
+        "actorId": { "$ref": "#/$defs/canonicalId" },
+        "role": { "const": "acceptor" },
+        "identityAuthority": { "$ref": "#/$defs/canonicalId" },
+        "attestation": { "$ref": "#/$defs/signatureAttestationBinding" }
+      }
+    },
+    "dataOwnerApproverActor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actorId", "role", "identityAuthority", "attestation"],
+      "properties": {
+        "actorId": { "$ref": "#/$defs/canonicalId" },
+        "role": { "const": "data_owner_approver" },
+        "identityAuthority": { "$ref": "#/$defs/canonicalId" },
+        "attestation": { "$ref": "#/$defs/signatureAttestationBinding" }
+      }
+    },
+    "hostReceiptBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "receiptType",
+        "receiptId",
+        "runId",
+        "phaseId",
+        "status",
+        "observedAt",
+        "origin",
+        "artifactSetDigest",
+        "applicationShellSha256",
+        "serviceWorkerSha256",
+        "path",
+        "size",
+        "sha256"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "receiptType": { "const": "host_observation" },
+        "receiptId": { "$ref": "#/$defs/canonicalId" },
+        "runId": { "type": "string", "pattern": "^hrr1-[a-f0-9]{32}$" },
+        "phaseId": { "enum": ["baseline", "candidate", "rollbackObserved"] },
+        "status": { "enum": ["passed", "failed", "aborted", "not_run"] },
+        "observedAt": { "$ref": "#/$defs/nullableUtcTimestamp" },
+        "origin": { "$ref": "#/$defs/httpsUrl" },
+        "artifactSetDigest": { "$ref": "#/$defs/nullableSha256" },
+        "applicationShellSha256": { "$ref": "#/$defs/nullableSha256" },
+        "serviceWorkerSha256": { "$ref": "#/$defs/nullableSha256" },
+        "path": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "size": { "type": "integer", "minimum": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "browserReceiptBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "receiptType",
+        "receiptId",
+        "runId",
+        "projectName",
+        "runtimeProduct",
+        "status",
+        "startedAt",
+        "completedAt",
+        "attempts",
+        "phaseIds",
+        "profileBindingDigest",
+        "path",
+        "size",
+        "sha256"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "receiptType": { "const": "browser_rollback_execution" },
+        "receiptId": { "$ref": "#/$defs/canonicalId" },
+        "runId": { "type": "string", "pattern": "^hrr1-[a-f0-9]{32}$" },
+        "projectName": { "enum": ["msedge", "chrome"] },
+        "runtimeProduct": { "type": ["string", "null"], "pattern": "^(Edg|Chrome)/[0-9]+(\\.[0-9]+)+$" },
+        "status": { "enum": ["passed", "failed", "aborted", "not_run"] },
+        "startedAt": { "$ref": "#/$defs/nullableUtcTimestamp" },
+        "completedAt": { "$ref": "#/$defs/nullableUtcTimestamp" },
+        "attempts": { "type": "integer", "minimum": 0 },
+        "phaseIds": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": { "enum": ["baseline", "candidate", "rollbackObserved"] }
+        },
+        "profileBindingDigest": { "$ref": "#/$defs/nullableSha256" },
+        "path": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "size": { "type": "integer", "minimum": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "deploymentReceiptBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "receiptType",
+        "receiptId",
+        "runId",
+        "phaseId",
+        "status",
+        "provider",
+        "deploymentId",
+        "startedAt",
+        "completedAt",
+        "origin",
+        "artifactLockDigest",
+        "path",
+        "size",
+        "sha256"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "receiptType": { "const": "deployment_action" },
+        "receiptId": { "$ref": "#/$defs/canonicalId" },
+        "runId": { "type": "string", "pattern": "^hrr1-[a-f0-9]{32}$" },
+        "phaseId": { "enum": ["candidate", "rollbackObserved"] },
+        "status": { "enum": ["passed", "failed", "aborted", "not_run"] },
+        "provider": { "type": ["string", "null"], "minLength": 1, "maxLength": 128 },
+        "deploymentId": { "$ref": "#/$defs/nullableCanonicalId" },
+        "startedAt": { "$ref": "#/$defs/nullableUtcTimestamp" },
+        "completedAt": { "$ref": "#/$defs/nullableUtcTimestamp" },
+        "origin": { "$ref": "#/$defs/httpsUrl" },
+        "artifactLockDigest": { "$ref": "#/$defs/nullableSha256" },
+        "path": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "size": { "type": "integer", "minimum": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "failureRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "category", "phaseId", "observedAt", "retryable", "messageDigest", "detailBinding"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Z0-9_]+$" },
+        "category": {
+          "enum": [
+            "policy",
+            "artifact_identity",
+            "host",
+            "browser",
+            "deployment",
+            "service_worker",
+            "data_integrity",
+            "mutation_boundary",
+            "actor_attestation",
+            "timing",
+            "aborted",
+            "not_run"
+          ]
+        },
+        "phaseId": { "enum": ["baseline", "candidate", "rollbackObserved"] },
+        "observedAt": { "$ref": "#/$defs/utcTimestamp" },
+        "retryable": { "type": "boolean" },
+        "messageDigest": { "$ref": "#/$defs/sha256" },
+        "detailBinding": {
+          "anyOf": [
+            { "$ref": "#/$defs/fileBinding" },
+            { "type": "null" }
+          ]
+        }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evidenceType",
+    "runId",
+    "rollbackEvidenceId",
+    "generatedAt",
+    "status",
+    "scope",
+    "policyBindings",
+    "identities",
+    "execution",
+    "dataCopy",
+    "actors",
+    "receipts",
+    "gates",
+    "claims",
+    "failure",
+    "evidenceDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "evidenceType": { "const": "engineering_rollback_execution_evidence" },
+    "runId": { "type": "string", "pattern": "^hrr1-[a-f0-9]{32}$" },
+    "rollbackEvidenceId": { "type": "string", "pattern": "^hrb1-[a-f0-9]{32}$" },
+    "generatedAt": { "$ref": "#/$defs/utcTimestamp" },
+    "status": { "enum": ["passed", "failed", "aborted", "not_run"] },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scopeId",
+        "runKind",
+        "hostMode",
+        "origin",
+        "channel",
+        "descriptor",
+        "browserProjects",
+        "dataClassification",
+        "mutationPolicy"
+      ],
+      "properties": {
+        "scopeId": { "$ref": "#/$defs/canonicalId" },
+        "runKind": { "const": "planned_drill" },
+        "hostMode": { "enum": ["real_https_staging", "real_https_production"] },
+        "origin": { "$ref": "#/$defs/httpsUrl" },
+        "channel": { "const": "default-v13" },
+        "descriptor": { "$ref": "#/$defs/releaseDatabaseDescriptor" },
+        "browserProjects": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": { "enum": ["msedge", "chrome"] }
+        },
+        "dataClassification": { "const": "private_approved_v13_copy" },
+        "mutationPolicy": { "const": "fail_closed_no_raw_idb_bypass" }
+      }
+    },
+    "policyBindings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/policyBinding" }
+    },
+    "identities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseline", "candidate", "rollbackObserved"],
+      "properties": {
+        "baseline": { "$ref": "#/$defs/artifactIdentity" },
+        "candidate": { "$ref": "#/$defs/artifactIdentity" },
+        "rollbackObserved": { "$ref": "#/$defs/artifactIdentity" }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseline", "candidate", "rollbackObserved"],
+      "properties": {
+        "baseline": { "$ref": "#/$defs/phaseRecord" },
+        "candidate": { "$ref": "#/$defs/phaseRecord" },
+        "rollbackObserved": { "$ref": "#/$defs/phaseRecord" }
+      }
+    },
+    "dataCopy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "classification",
+        "approvedCopyClass",
+        "copyId",
+        "databaseName",
+        "sourceSchema",
+        "epochSupport",
+        "epochBefore",
+        "epochAfter",
+        "rawIndexedDbBypassUsed",
+        "mutationEpochBypassed",
+        "releaseControlPointerModified",
+        "privatePackage",
+        "approval",
+        "fingerprint"
+      ],
+      "properties": {
+        "classification": { "const": "private_approved_v13_copy" },
+        "approvedCopyClass": {
+          "enum": [
+            "owner_approved_read_only_v13_copy",
+            "approved_deidentified_v13_copy"
+          ]
+        },
+        "copyId": { "$ref": "#/$defs/canonicalId" },
+        "databaseName": { "const": "hakimi-bazi-research" },
+        "sourceSchema": { "const": 13 },
+        "epochSupport": { "const": "absent_schema13" },
+        "epochBefore": { "const": null },
+        "epochAfter": { "const": null },
+        "rawIndexedDbBypassUsed": { "const": false },
+        "mutationEpochBypassed": { "const": false },
+        "releaseControlPointerModified": { "const": false },
+        "privatePackage": { "$ref": "#/$defs/privatePackageBinding" },
+        "approval": { "$ref": "#/$defs/approvalBinding" },
+        "fingerprint": { "$ref": "#/$defs/fingerprintBinding" }
+      }
+    },
+    "actors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operator", "acceptor", "dataOwnerApprover"],
+      "properties": {
+        "operator": { "$ref": "#/$defs/operatorActor" },
+        "acceptor": { "$ref": "#/$defs/acceptorActor" },
+        "dataOwnerApprover": { "$ref": "#/$defs/dataOwnerApproverActor" }
+      }
+    },
+    "receipts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["host", "browsers", "deployments"],
+      "properties": {
+        "host": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["baseline", "candidate", "rollbackObserved"],
+          "properties": {
+            "baseline": { "$ref": "#/$defs/hostReceiptBinding" },
+            "candidate": { "$ref": "#/$defs/hostReceiptBinding" },
+            "rollbackObserved": { "$ref": "#/$defs/hostReceiptBinding" }
+          }
+        },
+        "browsers": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/browserReceiptBinding" }
+        },
+        "deployments": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["candidate", "rollbackObserved"],
+          "properties": {
+            "candidate": { "$ref": "#/$defs/deploymentReceiptBinding" },
+            "rollbackObserved": { "$ref": "#/$defs/deploymentReceiptBinding" }
+          }
+        }
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyBindingsVerified",
+        "artifactLocksVerified",
+        "artifactPairDistinct",
+        "baselineIdentityVerified",
+        "candidateIdentityVerified",
+        "rollbackObservedMatchesBaseline",
+        "phaseOrderVerified",
+        "realHostVerified",
+        "hostReceiptsVerified",
+        "chromeEdgeVerified",
+        "deploymentReceiptsVerified",
+        "serviceWorkerControllerRestored",
+        "privateDataApprovalVerified",
+        "sourceV13FingerprintUnchanged",
+        "mutationBoundaryPreserved",
+        "actorAttestationsVerified",
+        "operatorAcceptorIndependent",
+        "allRequiredReceiptsPassed",
+        "terminalStatusPassed",
+        "rollbackEngineeringGatePassed"
+      ],
+      "properties": {
+        "policyBindingsVerified": { "type": "boolean" },
+        "artifactLocksVerified": { "type": "boolean" },
+        "artifactPairDistinct": { "type": "boolean" },
+        "baselineIdentityVerified": { "type": "boolean" },
+        "candidateIdentityVerified": { "type": "boolean" },
+        "rollbackObservedMatchesBaseline": { "type": "boolean" },
+        "phaseOrderVerified": { "type": "boolean" },
+        "realHostVerified": { "type": "boolean" },
+        "hostReceiptsVerified": { "type": "boolean" },
+        "chromeEdgeVerified": { "type": "boolean" },
+        "deploymentReceiptsVerified": { "type": "boolean" },
+        "serviceWorkerControllerRestored": { "type": "boolean" },
+        "privateDataApprovalVerified": { "type": "boolean" },
+        "sourceV13FingerprintUnchanged": { "type": "boolean" },
+        "mutationBoundaryPreserved": { "type": "boolean" },
+        "actorAttestationsVerified": { "type": "boolean" },
+        "operatorAcceptorIndependent": { "type": "boolean" },
+        "allRequiredReceiptsPassed": { "type": "boolean" },
+        "terminalStatusPassed": { "type": "boolean" },
+        "rollbackEngineeringGatePassed": { "type": "boolean" }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engineeringEvidenceOnly",
+        "rollbackExecutionEvidenceOnly",
+        "codeSignature",
+        "expertSignature",
+        "expertClaimsAuthorized",
+        "contentRightsGrant",
+        "dataRedistributionGrant",
+        "rollbackAuthorizationGranted",
+        "publicDeploymentAuthorized",
+        "publicReleaseAuthorized"
+      ],
+      "properties": {
+        "engineeringEvidenceOnly": { "const": true },
+        "rollbackExecutionEvidenceOnly": { "const": true },
+        "codeSignature": { "const": false },
+        "expertSignature": { "const": false },
+        "expertClaimsAuthorized": { "const": false },
+        "contentRightsGrant": { "const": false },
+        "dataRedistributionGrant": { "const": false },
+        "rollbackAuthorizationGranted": { "const": false },
+        "publicDeploymentAuthorized": { "const": false },
+        "publicReleaseAuthorized": { "const": false }
+      }
+    },
+    "failure": {
+      "anyOf": [
+        { "$ref": "#/$defs/failureRecord" },
+        { "type": "null" }
+      ]
+    },
+    "evidenceDigest": { "$ref": "#/$defs/sha256" }
+  }
+}

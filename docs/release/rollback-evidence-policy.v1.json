@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "policyId": "hakimi.web-v1.rollback-evidence/v1",
+  "status": "contract_only_not_executed",
+  "executionAdmission": {
+    "status": "closed_missing_trusted_raw_evidence",
+    "formalReleaseSemanticReplayVerified": false,
+    "hostRawProbeReceiptParserVerified": false,
+    "browserCdpControllerReceiptParserVerified": false,
+    "providerDeploymentReceiptParserVerified": false,
+    "dataFingerprintRecomputationVerified": false,
+    "actorRegistryGovernanceSignatureVerified": false,
+    "phaseCheckpointFreezeVerified": false,
+    "offlineRollbackObservationVerified": false
+  },
+  "evidenceType": "engineering_rollback_execution_evidence",
+  "releaseIdentity": {
+    "channel": "default-v13",
+    "dbGeneration": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null
+  },
+  "evidenceVisibility": "private_non_public_artifact",
+  "requiredPhases": [
+    "baseline_observed",
+    "candidate_deployed",
+    "rollback_restored"
+  ],
+  "requiredBrowserProjects": [
+    "msedge",
+    "chrome"
+  ],
+  "requiredHostVerificationKind": "real-network",
+  "requiredDataCopyClasses": [
+    "owner_approved_read_only_v13_copy",
+    "approved_deidentified_v13_copy"
+  ],
+  "mutationEpochCapability": "absent_schema13",
+  "requiredPolicyBindings": [
+    {
+      "role": "release-decisions",
+      "path": "docs/release/web-v1-release-decisions.json"
+    },
+    {
+      "role": "hosting-security-policy",
+      "path": "docs/security/hosting-security-policy.json"
+    },
+    {
+      "role": "release-and-rollback-runbook",
+      "path": "docs/release/web-v1-release-and-rollback-runbook.md"
+    },
+    {
+      "role": "release-evidence-schema",
+      "path": "docs/release/release-evidence.schema.json"
+    },
+    {
+      "role": "rollback-evidence-schema",
+      "path": "docs/release/rollback-evidence.schema.json"
+    },
+    {
+      "role": "rollback-evidence-policy",
+      "path": "docs/release/rollback-evidence-policy.v1.json"
+    },
+    {
+      "role": "rollback-actor-trust-registry",
+      "path": "docs/release/rollback-actor-trust-registry.v1.json"
+    }
+  ],
+  "signaturePolicy": {
+    "algorithm": "ed25519",
+    "operatorAndAcceptorMustDiffer": true,
+    "trustedOperatorRequired": true,
+    "trustedAcceptorRequired": true,
+    "acceptanceDecisionRequired": "accept"
+  },
+  "authorizationGates": {
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "contentTruthAuthorized": false,
+    "rightsLegalConclusionAuthorized": false,
+    "releaseReady": false
+  },
+  "doesNotEstablish": [
+    "real_rollback_without_a_verified_evidence_instance",
+    "real_actor_identity_or_independence",
+    "data_owner_consent_truth",
+    "content_truth",
+    "expert_truth",
+    "rights_or_legal_conclusion",
+    "release_readiness",
+    "public_release_authorization"
+  ]
+}

@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 2,
+  "policyId": "hakimi.web-v1.sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition/v2",
+  "evidenceClass": "offline_untrusted_four_chain_producer_bridge_composition_candidate",
+  "producerBridgeStatus": "producer_bridge_present_mechanically_untrusted",
+  "candidateBridgeArtifactPresent": true,
+  "trustedProducerBridgeVerified": false,
+  "runAttemptCoordinationStatus": "run_attempt_coordination_absent",
+  "releaseIdentity": {
+    "channel": "default-v13",
+    "dbGeneration": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null
+  },
+  "capabilities": {
+    "mutationEpochCapability": "absent_schema13",
+    "epoch": null
+  },
+  "requiredSourceBindings": [
+    {
+      "role": "producer-bridge-composition-v2-policy",
+      "path": "docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition-policy.v2.json"
+    },
+    {
+      "role": "producer-bridge-composition-v2-schema",
+      "path": "docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition-v2.schema.json"
+    },
+    {
+      "role": "two-chain-composition-policy",
+      "path": "docs/release/sw-ab-update-candidate-runtime-client-capture-composition-policy.v1.json"
+    },
+    {
+      "role": "two-chain-composition-schema",
+      "path": "docs/release/sw-ab-update-candidate-runtime-client-capture-composition-v1.schema.json"
+    },
+    {
+      "role": "sw-ab-update-candidate-policy",
+      "path": "docs/release/sw-ab-update-candidate-policy.v1.json"
+    },
+    {
+      "role": "sw-ab-update-candidate-schema",
+      "path": "docs/release/sw-ab-update-candidate-v1.schema.json"
+    },
+    {
+      "role": "runtime-client-capture-policy",
+      "path": "docs/release/sw-ab-update-runtime-client-capture-policy.v1.json"
+    },
+    {
+      "role": "runtime-client-capture-schema",
+      "path": "docs/release/sw-ab-update-runtime-client-capture-v1.schema.json"
+    },
+    {
+      "role": "runtime-api-transcript-policy",
+      "path": "docs/release/sw-ab-update-runtime-api-transcript-candidate-policy.v1.json"
+    },
+    {
+      "role": "runtime-api-transcript-schema",
+      "path": "docs/release/sw-ab-update-runtime-api-transcript-candidate-v1.schema.json"
+    },
+    {
+      "role": "runtime-collector-issuance-policy",
+      "path": "docs/release/sw-ab-update-runtime-collector-issuance-candidate-policy.v1.json"
+    },
+    {
+      "role": "runtime-collector-issuance-schema",
+      "path": "docs/release/sw-ab-update-runtime-collector-issuance-candidate-v1.schema.json"
+    },
+    {
+      "role": "runtime-derived-evidence-producer-bridge-policy",
+      "path": "docs/release/sw-ab-update-runtime-derived-evidence-producer-bridge-policy.v1.json"
+    },
+    {
+      "role": "runtime-derived-evidence-producer-bridge-schema",
+      "path": "docs/release/sw-ab-update-runtime-derived-evidence-producer-bridge-v1.schema.json"
+    }
+  ],
+  "requiredCrossBindings": [
+    "old_two_chain_composition_reverified_without_four_chain_v1",
+    "fixed_bridge_derived_runtime_primary_input",
+    "candidate_and_bridge_primary_inputs_held_across_issuance",
+    "runtime_input_transcript_issuance_and_bridge_evidence_digest",
+    "bridge_derived_file_raw_canonical_and_semantic_digest",
+    "transcript_complete_derived_projection",
+    "collector_issuance_identity_and_receipt",
+    "producer_bridge_identity_and_publication",
+    "phase_major_exact_eight_tuple_projection",
+    "canonical_origin_artifacts_release_capabilities_run_attempt_and_capture_time",
+    "fourteen_unique_checked_policy_and_schema_sources",
+    "issuance_files_held_across_composition_branches"
+  ],
+  "executionAdmission": "closed_missing_selected_https_origin",
+  "terminalState": {
+    "trustClass": "untrusted_four_chain_producer_bridge_composition_candidate",
+    "status": "not_admitted",
+    "strictGatePassed": false,
+    "runtimeAdmissionPassed": false,
+    "admissionPassed": false,
+    "usableForRuntimeEvidence": false,
+    "usableForCandidateAssembly": false,
+    "usableForAdmission": false,
+    "formalReleaseEvidenceReceipt": false,
+    "cliExitCode": 1
+  },
+  "runAttemptBoundary": {
+    "runAttemptIdentifiersMatched": true,
+    "runAttemptCoordinationStatus": "run_attempt_coordination_absent",
+    "runAttemptCoordinationVerified": false,
+    "candidateProducerBoundToIssuanceAttempt": false
+  },
+  "mutationBoundary": {
+    "candidateAndBridgePrimaryInputsHeldAcrossIssuance": true,
+    "issuanceFilesHeldAcrossCompositionBranches": true,
+    "allEvidenceFilesContinuouslyHeldAcrossCaptureAndComposition": false,
+    "continuousMutationEpochVerified": false,
+    "samePermissionMutationExcluded": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false,
+    "mutationEpochCapability": "absent_schema13",
+    "epoch": null
+  },
+  "attempts": {
+    "networkAttempted": false,
+    "browserAttempted": false,
+    "deploymentAttempted": false,
+    "rollbackAttempted": false,
+    "gitAttempted": false
+  },
+  "provenance": {
+    "candidateProducerProvenanceVerified": false,
+    "trustedProducerBridgeVerified": false,
+    "runtimeCollectorProvenanceVerified": false,
+    "callerSuppliedObservationAuthenticityVerified": false,
+    "browserObjectIssuanceAuthenticityVerified": false,
+    "browserBinaryProvenanceVerified": false,
+    "browserRuntimeProvenanceVerified": false,
+    "browserTransportAuthenticityVerified": false,
+    "realBrowserExecutionVerified": false,
+    "realHttpsHostVerified": false,
+    "externalAttemptFreshnessVerified": false,
+    "bundleReplayResistanceVerified": false,
+    "deploymentExecutionVerified": false,
+    "rollbackExecutionVerified": false,
+    "releaseReadinessVerified": false,
+    "contentTruthVerified": false,
+    "expertClaimsVerified": false,
+    "rightsLegalConclusionVerified": false
+  },
+  "authority": {
+    "defaultV13ReceiptAllowlistMember": false,
+    "formalReleaseEvidenceReceipt": false,
+    "trustedProviderVerified": false,
+    "trustedHostVerified": false,
+    "trustedBrowserRuntimeVerified": false,
+    "deploymentReady": false,
+    "releaseReady": false,
+    "externalDeploymentExecutionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "contentTruthAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "rightsLegalConclusionAuthorized": false,
+    "schemaPromotionAuthorized": false
+  },
+  "limitations": [
+    "The mechanically present bridge republishes a transcript-derived runtime document but is not a trusted producer.",
+    "Matching run and attempt identifiers do not establish a natural candidate-to-issuance coordinator.",
+    "The candidate producer remains absent; injected or synthetic equality is not natural production reachability.",
+    "The four bound views share producer lineage and are not four independent runtime attestations.",
+    "Schema 13 exposes no mutation epoch and cannot exclude interval mutation, same-permission mutation, or ABA.",
+    "Offline composition does not establish browser, HTTPS host, deployment, content, expert, rights, or release authority."
+  ]
+}

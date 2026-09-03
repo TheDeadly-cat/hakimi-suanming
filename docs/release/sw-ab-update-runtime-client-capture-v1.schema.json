@@ -1,0 +1,408 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hakimi.invalid/schemas/sw-ab-update-runtime-client-capture-v1.json",
+  "title": "Hakimi partial SW A to B runtime client capture candidate v1",
+  "$defs": {
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "RunId": {
+      "type": "string",
+      "pattern": "^run-[a-f0-9]{64}$"
+    },
+    "AttemptId": {
+      "type": "string",
+      "pattern": "^attempt-[a-f0-9]{64}$"
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ProjectName": {
+      "enum": ["msedge", "chrome"]
+    },
+    "Phase": {
+      "enum": ["initial-a", "post-claim"]
+    },
+    "Slot": {
+      "enum": ["retained-old-a", "reload-to-b"]
+    },
+    "ReleaseIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channel", "dbGeneration", "targetSchema", "migrationId"],
+      "properties": {
+        "channel": { "const": "default-v13" },
+        "dbGeneration": { "const": "legacy-v13" },
+        "targetSchema": { "const": 13 },
+        "migrationId": { "type": "null" }
+      }
+    },
+    "Capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mutationEpochCapability", "epoch"],
+      "properties": {
+        "mutationEpochCapability": { "const": "absent_schema13" },
+        "epoch": { "type": "null" }
+      }
+    },
+    "ArtifactBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "releaseEvidenceId",
+        "buildVersion",
+        "serviceWorkerSha256",
+        "artifactSetDigest"
+      ],
+      "properties": {
+        "label": { "enum": ["A", "B"] },
+        "releaseEvidenceId": {
+          "type": "string",
+          "pattern": "^hre1-[a-f0-9]{32}$"
+        },
+        "buildVersion": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{12}$"
+        },
+        "serviceWorkerSha256": { "$ref": "#/$defs/Sha256" },
+        "artifactSetDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "WorkerDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "challengeNonce",
+        "sourceClientId",
+        "buildVersion",
+        "protocolVersion",
+        "dbGeneration",
+        "databaseName",
+        "targetSchema",
+        "minReadableSchema",
+        "maxReadableSchema",
+        "migrationId",
+        "acceptedCommittedMigrationIds",
+        "sourceGeneration",
+        "sourceDatabaseName",
+        "sourceSchema"
+      ],
+      "properties": {
+        "type": { "const": "SW_AB_RUNTIME_CHALLENGE_RESULT_V1" },
+        "challengeNonce": {
+          "type": "string",
+          "pattern": "^challenge-[a-f0-9]{64}$"
+        },
+        "sourceClientId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "buildVersion": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{12}$"
+        },
+        "protocolVersion": { "const": 1 },
+        "dbGeneration": { "const": "legacy-v13" },
+        "databaseName": { "const": "hakimi-bazi-research" },
+        "targetSchema": { "const": 13 },
+        "minReadableSchema": { "const": 13 },
+        "maxReadableSchema": { "const": 13 },
+        "migrationId": { "type": "null" },
+        "acceptedCommittedMigrationIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": { "type": "null" }
+        },
+        "sourceGeneration": { "type": "null" },
+        "sourceDatabaseName": { "type": "null" },
+        "sourceSchema": { "type": "null" }
+      }
+    },
+    "CdpObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "sourceTrust",
+        "sessionHeldAcrossChallenge",
+        "preChallengeResponseProjection",
+        "preChallengeResponseProjectionDigest",
+        "postChallengeResponseProjection",
+        "postChallengeResponseProjectionDigest",
+        "rawTargetId",
+        "pseudonymousTargetId"
+      ],
+      "properties": {
+        "method": { "const": "Target.getTargetInfo" },
+        "sourceTrust": { "const": "caller_supplied_page_adapter_untrusted" },
+        "sessionHeldAcrossChallenge": { "const": true },
+        "preChallengeResponseProjection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["targetId", "type", "url", "attached"],
+          "properties": {
+            "targetId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "type": { "const": "page" },
+            "url": { "type": "string", "minLength": 10, "maxLength": 2048 },
+            "attached": { "const": true }
+          }
+        },
+        "preChallengeResponseProjectionDigest": { "$ref": "#/$defs/Sha256" },
+        "postChallengeResponseProjection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["targetId", "type", "url", "attached"],
+          "properties": {
+            "targetId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "type": { "const": "page" },
+            "url": { "type": "string", "minLength": 10, "maxLength": 2048 },
+            "attached": { "const": true }
+          }
+        },
+        "postChallengeResponseProjectionDigest": { "$ref": "#/$defs/Sha256" },
+        "rawTargetId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "pseudonymousTargetId": {
+          "type": "string",
+          "pattern": "^target-[a-f0-9]{64}$"
+        }
+      }
+    },
+    "MessageObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "realm",
+        "request",
+        "requestDigest",
+        "response",
+        "responseDigest",
+        "rawSourceClientId",
+        "pseudonymousClientId"
+      ],
+      "properties": {
+        "realm": { "const": "page_main_world_untrusted" },
+        "request": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "challengeNonce"],
+          "properties": {
+            "type": { "const": "SW_AB_RUNTIME_CHALLENGE_V1" },
+            "challengeNonce": {
+              "type": "string",
+              "pattern": "^challenge-[a-f0-9]{64}$"
+            }
+          }
+        },
+        "requestDigest": { "$ref": "#/$defs/Sha256" },
+        "response": { "$ref": "#/$defs/WorkerDescriptor" },
+        "responseDigest": { "$ref": "#/$defs/Sha256" },
+        "rawSourceClientId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "pseudonymousClientId": {
+          "type": "string",
+          "pattern": "^client-[a-f0-9]{64}$"
+        }
+      }
+    },
+    "Observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projectName",
+        "phase",
+        "slot",
+        "sequence",
+        "observedAt",
+        "pageUrl",
+        "cdp",
+        "serviceWorkerMessage",
+        "observationDigest"
+      ],
+      "properties": {
+        "projectName": { "$ref": "#/$defs/ProjectName" },
+        "phase": { "$ref": "#/$defs/Phase" },
+        "slot": { "$ref": "#/$defs/Slot" },
+        "sequence": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "observedAt": { "$ref": "#/$defs/Timestamp" },
+        "pageUrl": { "type": "string", "minLength": 10, "maxLength": 2048 },
+        "cdp": { "$ref": "#/$defs/CdpObservation" },
+        "serviceWorkerMessage": { "$ref": "#/$defs/MessageObservation" },
+        "observationDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "callerSuppliedPageAuthenticityVerified",
+        "runtimeCollectorProvenanceVerified",
+        "osProcessRestartProvenanceVerified",
+        "twoClientRuntimeProvenanceVerified",
+        "serviceWorkerResponseProvenanceVerified",
+        "cacheApiProvenanceVerified",
+        "attemptFreshnessExternallyVerified",
+        "bundleReplayResistanceVerified",
+        "concurrentFilesystemMutationResistanceVerified"
+      ],
+      "properties": {
+        "callerSuppliedPageAuthenticityVerified": { "const": false },
+        "runtimeCollectorProvenanceVerified": { "const": false },
+        "osProcessRestartProvenanceVerified": { "const": false },
+        "twoClientRuntimeProvenanceVerified": { "const": false },
+        "serviceWorkerResponseProvenanceVerified": { "const": false },
+        "cacheApiProvenanceVerified": { "const": false },
+        "attemptFreshnessExternallyVerified": { "const": false },
+        "bundleReplayResistanceVerified": { "const": false },
+        "concurrentFilesystemMutationResistanceVerified": { "const": false }
+      }
+    },
+    "Authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "defaultV13ReceiptAllowlistMember",
+        "formalReleaseEvidenceReceipt",
+        "trustedProviderVerified",
+        "trustedHostVerified",
+        "trustedBrowserRuntimeVerified",
+        "deploymentReady",
+        "releaseReady",
+        "externalDeploymentExecutionAuthorized",
+        "publicDeploymentAuthorized",
+        "publicReleaseAuthorized",
+        "contentTruthAuthorized",
+        "expertClaimsAuthorized",
+        "rightsLegalConclusionAuthorized",
+        "schemaPromotionAuthorized"
+      ],
+      "properties": {
+        "defaultV13ReceiptAllowlistMember": { "const": false },
+        "formalReleaseEvidenceReceipt": { "const": false },
+        "trustedProviderVerified": { "const": false },
+        "trustedHostVerified": { "const": false },
+        "trustedBrowserRuntimeVerified": { "const": false },
+        "deploymentReady": { "const": false },
+        "releaseReady": { "const": false },
+        "externalDeploymentExecutionAuthorized": { "const": false },
+        "publicDeploymentAuthorized": { "const": false },
+        "publicReleaseAuthorized": { "const": false },
+        "contentTruthAuthorized": { "const": false },
+        "expertClaimsAuthorized": { "const": false },
+        "rightsLegalConclusionAuthorized": { "const": false },
+        "schemaPromotionAuthorized": { "const": false }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evidenceType",
+    "trustClass",
+    "status",
+    "executionAdmission",
+    "usableForCandidateAssembly",
+    "runId",
+    "attemptId",
+    "capturedAt",
+    "origin",
+    "releaseIdentity",
+    "capabilities",
+    "artifactBindings",
+    "implementedObservationScopes",
+    "deferredObservationScopes",
+    "observations",
+    "provenance",
+    "authority",
+    "evidenceDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "evidenceType": { "const": "sw_ab_update_runtime_client_capture_candidate_v1" },
+    "trustClass": { "const": "untrusted_raw_capture_candidate" },
+    "status": { "const": "capture_incomplete" },
+    "executionAdmission": { "const": "closed_missing_https_origin" },
+    "usableForCandidateAssembly": { "const": false },
+    "runId": { "$ref": "#/$defs/RunId" },
+    "attemptId": { "$ref": "#/$defs/AttemptId" },
+    "capturedAt": { "$ref": "#/$defs/Timestamp" },
+    "origin": { "type": "string", "minLength": 10, "maxLength": 256 },
+    "releaseIdentity": { "$ref": "#/$defs/ReleaseIdentity" },
+    "capabilities": { "$ref": "#/$defs/Capabilities" },
+    "artifactBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["A", "B"],
+      "properties": {
+        "A": { "$ref": "#/$defs/ArtifactBinding" },
+        "B": { "$ref": "#/$defs/ArtifactBinding" }
+      }
+    },
+    "implementedObservationScopes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "cdp_page_target_info_projection",
+          "sw_runtime_challenge_v1"
+        ]
+      }
+    },
+    "deferredObservationScopes": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "os_process_restart",
+          "service_worker_target_and_source",
+          "service_worker_response",
+          "cache_api_raw_bodies",
+          "offline_request_closure",
+          "stale_a_production_write",
+          "provider_switch",
+          "host_tls_and_response_bytes"
+        ]
+      }
+    },
+    "observations": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/Observation" }
+    },
+    "provenance": { "$ref": "#/$defs/Provenance" },
+    "authority": { "$ref": "#/$defs/Authority" },
+    "evidenceDigest": { "$ref": "#/$defs/Sha256" }
+  }
+}

@@ -2,12 +2,18 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ReportExportPort } from "@hakimi/platform";
 import {
+  BRIDGE_RELEASE_DATABASE_DESCRIPTOR,
+  PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
+  PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR
+} from "../../release-protocol";
+import {
   getPreparedFileDeliverySnapshot,
   resetPreparedFileDeliveryCoordinatorForTests
 } from "../components/prepared-file-delivery-coordinator";
 import {
   OrphanedV13RecoveryPage,
   type OrphanedV13BackupCapture,
+  type OrphanedV13RecoveryPageProps,
   type OrphanedV13RecoveryState
 } from "./orphaned-v13-recovery-page";
 
@@ -39,8 +45,19 @@ vi.mock("@hakimi/platform", async (importOriginal) => {
   };
 });
 
-const SOURCE_DATABASE_NAME = "hakimi-bazi-research-v13";
+const SOURCE_DATABASE_NAME = BRIDGE_RELEASE_DATABASE_DESCRIPTOR.databaseName;
 const SOURCE_NATIVE_VERSION = 130;
+
+function RecoveryPage(
+  props: Omit<OrphanedV13RecoveryPageProps, "recoveryShellDescriptor">
+) {
+  return (
+    <OrphanedV13RecoveryPage
+      {...props}
+      recoveryShellDescriptor={PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR}
+    />
+  );
+}
 
 const orphanedState: OrphanedV13RecoveryState = {
   kind: "orphaned_v13",
@@ -114,7 +131,7 @@ describe("OrphanedV13RecoveryPage", () => {
   it("提供 writes-frozen 的 legacy-v13 独立救援壳，且没有普通导航或危险操作入口", () => {
     const captureBackup = vi.fn();
     const { container } = render(
-      <OrphanedV13RecoveryPage state={orphanedState} captureBackup={captureBackup} />
+      <RecoveryPage state={orphanedState} captureBackup={captureBackup} />
     );
 
     expect(screen.getByRole("heading", { level: 1, name: "检测到未登记的 v13 本地数据库" })).toBeTruthy();
@@ -124,7 +141,7 @@ describe("OrphanedV13RecoveryPage", () => {
     expect(links).toHaveLength(1);
     expect(links[0]?.getAttribute("href")).toBe("#main-content");
     expect(screen.queryByRole("navigation")).toBeNull();
-    expect(screen.getByText("legacy-v13 / Schema 13")).toBeTruthy();
+    expect(screen.getByText("legacy-v13 / Schema 13 / migrationId null")).toBeTruthy();
     expect(screen.getByText("未绑定 · 仅本地构建")).toBeTruthy();
 
     const shell = container.querySelector<HTMLElement>(".orphaned-v13-shell");
@@ -132,6 +149,15 @@ describe("OrphanedV13RecoveryPage", () => {
     expect(shell?.getAttribute("data-write-mode")).toBe("frozen");
     expect(shell?.getAttribute("data-delivery-mode")).toBe("prepared-file-dialog");
     expect(shell?.getAttribute("data-release-identity")).toBe("legacy-v13");
+    expect(shell?.getAttribute("data-target-schema")).toBe("13");
+    expect(shell?.getAttribute("data-migration-id")).toBe("null");
+    expect(shell?.getAttribute("data-recovery-shell-release-identity")).toBe(
+      PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR.dbGeneration
+    );
+    expect(shell?.getAttribute("data-recovery-shell-target-schema")).toBe("15");
+    expect(shell?.getAttribute("data-recovery-shell-migration-id")).toBe(
+      PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR.migrationId
+    );
     expect(screen.getByRole("button", { name: "生成最小技术诊断 JSON" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "生成只读完整备份 ZIP" })).toBeTruthy();
     expect(captureBackup).not.toHaveBeenCalled();
@@ -142,9 +168,45 @@ describe("OrphanedV13RecoveryPage", () => {
     }
   });
 
+  it("v13 -> v16 壳保持 source ledger 与 shell ledger 分离并开放已绑定只读捕获", () => {
+    const captureBackup = vi.fn();
+    const { container } = render(
+      <OrphanedV13RecoveryPage
+        state={orphanedState}
+        captureBackup={captureBackup}
+        recoveryShellDescriptor={PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR}
+      />
+    );
+    const shell = container.querySelector<HTMLElement>(".orphaned-v13-shell");
+    expect(shell?.getAttribute("data-capture-capability")).toBe("bound_read_only");
+    expect(shell?.getAttribute("data-release-identity")).toBe("legacy-v13");
+    expect(shell?.getAttribute("data-target-schema")).toBe("13");
+    expect(shell?.getAttribute("data-migration-id")).toBe("null");
+    expect(shell?.getAttribute("data-recovery-shell-release-identity")).toBe(
+      PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR.dbGeneration
+    );
+    expect(shell?.getAttribute("data-recovery-shell-target-schema")).toBe("16");
+    expect(screen.getByRole("button", { name: "生成只读完整备份 ZIP" })).toBeTruthy();
+  });
+
+  it("bridge/null 不能作为恢复执行壳，页面保持只读诊断且不开放完整捕获", () => {
+    const captureBackup = vi.fn();
+    const { container } = render(
+      <OrphanedV13RecoveryPage
+        state={orphanedState}
+        captureBackup={captureBackup}
+        recoveryShellDescriptor={BRIDGE_RELEASE_DATABASE_DESCRIPTOR}
+      />
+    );
+    expect(container.querySelector(".orphaned-v13-shell")?.getAttribute("data-capture-capability")).toBe("closed");
+    expect(screen.getAllByText(/恢复执行壳不是精确绑定 legacy-v13 源/)).toHaveLength(2);
+    expect(screen.queryByRole("button", { name: /完整备份 ZIP/ })).toBeNull();
+    expect(captureBackup).not.toHaveBeenCalled();
+  });
+
   it("状态有歧义时只开放最小诊断，不调用完整捕获", () => {
     const captureBackup = vi.fn();
-    render(<OrphanedV13RecoveryPage state={ambiguousState} captureBackup={captureBackup} />);
+    render(<RecoveryPage state={ambiguousState} captureBackup={captureBackup} />);
 
     expect(screen.getByRole("heading", { level: 1, name: "本地数据库状态无法安全判定" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "生成最小技术诊断 JSON" })).toBeTruthy();
@@ -156,7 +218,7 @@ describe("OrphanedV13RecoveryPage", () => {
   it("诊断和完整备份都先冻结工件且不调用文件端口，并在平台支持分享时仍关闭分享", async () => {
     const capture = backupCapture();
     const captureBackup = vi.fn().mockResolvedValue(capture);
-    render(<OrphanedV13RecoveryPage state={orphanedState} captureBackup={captureBackup} />);
+    render(<RecoveryPage state={orphanedState} captureBackup={captureBackup} />);
 
     fireEvent.click(screen.getByRole("button", { name: "生成最小技术诊断 JSON" }));
 
@@ -190,7 +252,7 @@ describe("OrphanedV13RecoveryPage", () => {
     savePreparedFileMock.mockReturnValueOnce(new Promise((resolve) => {
       resolveDownload = resolve;
     }));
-    render(<OrphanedV13RecoveryPage state={orphanedState} captureBackup={captureBackup} />);
+    render(<RecoveryPage state={orphanedState} captureBackup={captureBackup} />);
 
     const prepareButton = screen.getByRole("button", { name: "生成只读完整备份 ZIP" });
     fireEvent.click(prepareButton);
@@ -225,7 +287,7 @@ describe("OrphanedV13RecoveryPage", () => {
         recordCount: 42
       }]
     } as unknown) as OrphanedV13RecoveryState;
-    render(<OrphanedV13RecoveryPage state={stateWithUnexpectedRuntimeFields} captureBackup={vi.fn()} />);
+    render(<RecoveryPage state={stateWithUnexpectedRuntimeFields} captureBackup={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("button", { name: "生成最小技术诊断 JSON" }));
     expect(screen.getByRole("dialog", { name: /待交付文件已在本机生成/ })).toBeTruthy();
@@ -246,8 +308,20 @@ describe("OrphanedV13RecoveryPage", () => {
       appVersion: expect.any(String),
       release: {
         dbGeneration: "legacy-v13",
+        databaseName: BRIDGE_RELEASE_DATABASE_DESCRIPTOR.databaseName,
         targetSchema: 13,
         migrationId: null,
+        nativeVersion: 130,
+        engineeringEvidenceOnly: true
+      },
+      recoveryShell: {
+        dbGeneration: PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR.dbGeneration,
+        databaseName: PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR.databaseName,
+        targetSchema: 15,
+        migrationId: PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR.migrationId,
+        sourceGeneration: "legacy-v13",
+        sourceDatabaseName: BRIDGE_RELEASE_DATABASE_DESCRIPTOR.databaseName,
+        sourceSchema: 13,
         evidenceBound: false,
         engineeringEvidenceOnly: true
       },
@@ -278,7 +352,7 @@ describe("OrphanedV13RecoveryPage", () => {
   it("只在显式下载后交付同一个只读捕获 Blob，并让 requested 保持人工核对 checkpoint", async () => {
     const capture = backupCapture();
     const captureBackup = vi.fn().mockResolvedValue(capture);
-    render(<OrphanedV13RecoveryPage state={orphanedState} captureBackup={captureBackup} />);
+    render(<RecoveryPage state={orphanedState} captureBackup={captureBackup} />);
 
     fireEvent.click(screen.getByRole("button", { name: "生成只读完整备份 ZIP" }));
     expect(await screen.findByRole("dialog", { name: /待交付文件已在本机生成/ })).toBeTruthy();
@@ -311,7 +385,7 @@ describe("OrphanedV13RecoveryPage", () => {
       bytesWritten: blob.size
     }));
     render(
-      <OrphanedV13RecoveryPage
+      <RecoveryPage
         state={orphanedState}
         captureBackup={vi.fn().mockResolvedValue(capture)}
       />
@@ -337,7 +411,7 @@ describe("OrphanedV13RecoveryPage", () => {
       operation: "save"
     }));
     render(
-      <OrphanedV13RecoveryPage
+      <RecoveryPage
         state={orphanedState}
         captureBackup={vi.fn().mockResolvedValue(capture)}
       />
@@ -358,7 +432,7 @@ describe("OrphanedV13RecoveryPage", () => {
   it("只读捕获失败或 capture/source binding 不匹配时不准备工件也不调用文件端口", async () => {
     const captureBackup = vi.fn().mockRejectedValueOnce(new Error("v13 只读快照验真失败"));
     const view = render(
-      <OrphanedV13RecoveryPage state={orphanedState} captureBackup={captureBackup} />
+      <RecoveryPage state={orphanedState} captureBackup={captureBackup} />
     );
 
     fireEvent.click(screen.getByRole("button", { name: "生成只读完整备份 ZIP" }));
@@ -370,14 +444,41 @@ describe("OrphanedV13RecoveryPage", () => {
     const mismatchedCapture = backupCapture("unexpected-v13-source", SOURCE_NATIVE_VERSION);
     captureBackup.mockResolvedValueOnce(mismatchedCapture);
     view.rerender(
-      <OrphanedV13RecoveryPage
+      <RecoveryPage
         state={orphanedState}
         captureBackup={captureBackup}
-        requireVerifiedCaptureBinding
       />
     );
     fireEvent.click(screen.getByRole("button", { name: "生成只读完整备份 ZIP" }));
     expect(await screen.findByText(/源库名称或原生版本与当前救援目标不一致/)).toBeTruthy();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expectNoDeliverySideEffect();
+  });
+
+  it("只读捕获缺少源库绑定时保持关闭，不回退到页面当前状态", async () => {
+    const {
+      sourceDatabaseName: _sourceDatabaseName,
+      sourceNativeVersion: _sourceNativeVersion,
+      ...captureWithoutSourceBinding
+    } = backupCapture();
+    const captureBackup = vi.fn().mockResolvedValue(captureWithoutSourceBinding);
+    render(<RecoveryPage state={orphanedState} captureBackup={captureBackup} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "生成只读完整备份 ZIP" }));
+
+    expect(await screen.findByText(/源库名称或原生版本与当前救援目标不一致/)).toBeTruthy();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expectNoDeliverySideEffect();
+  });
+
+  it("只读捕获缺少日期绑定文件名时保持关闭，不生成兼容文件名", async () => {
+    const { filename: _filename, ...captureWithoutFilename } = backupCapture();
+    const captureBackup = vi.fn().mockResolvedValue(captureWithoutFilename);
+    render(<RecoveryPage state={orphanedState} captureBackup={captureBackup} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "生成只读完整备份 ZIP" }));
+
+    expect(await screen.findByText(/文件名没有与捕获日期精确绑定/)).toBeTruthy();
     expect(screen.queryByRole("dialog")).toBeNull();
     expectNoDeliverySideEffect();
   });
@@ -390,7 +491,7 @@ describe("OrphanedV13RecoveryPage", () => {
       stage: "download",
       reason: "浏览器拒绝了文件下载"
     }));
-    render(<OrphanedV13RecoveryPage state={ambiguousState} captureBackup={vi.fn()} />);
+    render(<RecoveryPage state={ambiguousState} captureBackup={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("button", { name: "生成最小技术诊断 JSON" }));
     expectNoDeliverySideEffect();
@@ -413,7 +514,7 @@ describe("OrphanedV13RecoveryPage", () => {
       resolveOldDownload = resolve;
     }));
     const view = render(
-      <OrphanedV13RecoveryPage
+      <RecoveryPage
         state={orphanedState}
         captureBackup={vi.fn().mockResolvedValue(capture)}
       />
@@ -433,7 +534,7 @@ describe("OrphanedV13RecoveryPage", () => {
       inventory: [{ name: "hakimi-bazi-research-v13-rebound", version: 131 }]
     };
     view.rerender(
-      <OrphanedV13RecoveryPage
+      <RecoveryPage
         state={nextState}
         captureBackup={vi.fn().mockResolvedValue(backupCapture("hakimi-bazi-research-v13-rebound", 131))}
       />

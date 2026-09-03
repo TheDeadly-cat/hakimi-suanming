@@ -46,7 +46,7 @@ describe("PwaInstallBanner", () => {
     expect(accepted).toBeTruthy();
     expect(document.activeElement).toBe(accepted);
     expect(screen.getByText("安装请求已交给浏览器")).toBeTruthy();
-    expect(screen.getByText("事件未收到")).toBeTruthy();
+    expect(screen.getByText("未收到")).toBeTruthy();
     expect(screen.queryByText("系统已报告应用入口创建完成")).toBeNull();
 
     fireEvent(window, new Event("appinstalled"));

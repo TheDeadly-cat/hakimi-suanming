@@ -281,10 +281,16 @@ function loadRevisionReplayModule(): Promise<RevisionReplayModule> {
   return revisionReplayModulePromise;
 }
 
+export type ReleaseControllerTakeoverWriteFence = {
+  readonly kind: "release_controller_takeover_write_fence_v1";
+  readonly locked: boolean;
+};
+
 export type ResearchDatabaseRuntimeConfiguration = {
   databaseName: string;
   targetSchema: number;
   releaseWritesLocked: boolean;
+  controllerTakeoverWriteFence?: ReleaseControllerTakeoverWriteFence;
 };
 
 declare global {
@@ -302,6 +308,39 @@ export class ResearchDatabaseRuntimeConfigurationError extends Error {
   }
 }
 
+function isReleaseControllerTakeoverWriteFence(
+  value: unknown
+): value is ReleaseControllerTakeoverWriteFence {
+  try {
+    if (value === undefined) return true;
+    if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
+    const record = value as Record<string, unknown>;
+    return (
+      Object.getPrototypeOf(value) === Object.prototype &&
+      Object.keys(record).sort().join(",") === "kind,locked" &&
+      record.kind === "release_controller_takeover_write_fence_v1" &&
+      typeof record.locked === "boolean"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function releaseControllerTakeoverWriteFenceIsLocked(
+  fence: ReleaseControllerTakeoverWriteFence
+): boolean {
+  try {
+    // Corruption is fail-closed after construction: only the exact branded
+    // facade reporting literal false is an open fence.
+    return (
+      fence.kind !== "release_controller_takeover_write_fence_v1" ||
+      fence.locked !== false
+    );
+  } catch {
+    return true;
+  }
+}
+
 function configuredResearchDatabaseRuntime(): ResearchDatabaseRuntimeConfiguration | undefined {
   const configured = globalThis.__HAKIMI_RESEARCH_DATABASE_RUNTIME__;
   if (!configured) return undefined;
@@ -311,7 +350,8 @@ function configuredResearchDatabaseRuntime(): ResearchDatabaseRuntimeConfigurati
     !Number.isSafeInteger(configured.targetSchema) ||
     configured.targetSchema < 1 ||
     configured.targetSchema > RESEARCH_DATABASE_MAX_SCHEMA_VERSION ||
-    typeof configured.releaseWritesLocked !== "boolean"
+    typeof configured.releaseWritesLocked !== "boolean" ||
+    !isReleaseControllerTakeoverWriteFence(configured.controllerTakeoverWriteFence)
   ) {
     throw new Error("ResearchDatabase 运行时代际配置无效。");
   }
@@ -497,6 +537,7 @@ function validateMutationVerificationInput(
 export type ResearchDatabaseOptions = {
   targetSchema?: number;
   releaseWritesLocked?: boolean;
+  controllerTakeoverWriteFence?: ReleaseControllerTakeoverWriteFence;
 };
 
 function parseStoredEventRecord(input: unknown): EventRecord {
@@ -1017,6 +1058,7 @@ export class ResearchDatabase extends Dexie {
   mutationState!: EntityTable<ResearchDatabaseMutationState, "id">;
   readonly targetSchemaVersion: number;
   private releaseWritesLocked: boolean;
+  private readonly controllerTakeoverWriteFences: readonly ReleaseControllerTakeoverWriteFence[];
   private readonly migrationWriteTransactions = new WeakSet<IDBTransaction>();
 
   constructor(
@@ -1039,6 +1081,16 @@ export class ResearchDatabase extends Dexie {
     }
     this.targetSchemaVersion = targetSchema;
     this.releaseWritesLocked = options.releaseWritesLocked ?? runtime?.releaseWritesLocked ?? false;
+    const controllerTakeoverWriteFences = [
+      runtime?.controllerTakeoverWriteFence,
+      options.controllerTakeoverWriteFence
+    ].filter((fence): fence is ReleaseControllerTakeoverWriteFence => fence !== undefined);
+    if (controllerTakeoverWriteFences.some((fence) => !isReleaseControllerTakeoverWriteFence(fence))) {
+      throw new Error("ResearchDatabase 控制器接管写栅栏配置无效。");
+    }
+    // An explicit per-instance fence may add a stricter boundary, but it must
+    // never replace the Web runtime's page-wide absolute fence.
+    this.controllerTakeoverWriteFences = [...new Set(controllerTakeoverWriteFences)];
     const trackMutationEpoch = targetSchema >= 16;
     this.use({
       stack: "dbcore",
@@ -1080,6 +1132,12 @@ export class ResearchDatabase extends Dexie {
             return {
               ...table,
               mutate: (request) => {
+                // A controller takeover is an absolute page-generation boundary.
+                // It must also stop an already-authorized migration transaction;
+                // only a newly booted page may obtain a fresh mutable fence.
+                if (this.areControllerTakeoverWritesLocked()) {
+                  return Promise.reject(new ReleaseDatabaseWriteLockedError());
+                }
                 if (
                   this.releaseWritesLocked &&
                   (
@@ -1464,7 +1522,29 @@ export class ResearchDatabase extends Dexie {
   }
 
   areReleaseWritesLocked(): boolean {
-    return this.releaseWritesLocked;
+    return this.releaseWritesLocked || this.areControllerTakeoverWritesLocked();
+  }
+
+  private areControllerTakeoverWritesLocked(): boolean {
+    return this.controllerTakeoverWriteFences.some(releaseControllerTakeoverWriteFenceIsLocked);
+  }
+
+  /**
+   * Establishes a storage-wide ordering barrier after the caller synchronously
+   * closes its controller-takeover fence. The all-store readwrite transaction
+   * queues behind every earlier conflicting transaction; the final lock check
+   * prevents an ACK if the shared facade was corrupted or reopened meanwhile.
+   */
+  async drainControllerTakeoverWrites(): Promise<void> {
+    if (!this.areControllerTakeoverWritesLocked()) {
+      throw new ReleaseDatabaseWriteLockedError();
+    }
+    await Dexie.ignoreTransaction(() => this.transaction("rw", this.tables, async () => {
+      await this.appSettings.count();
+    }));
+    if (!this.areControllerTakeoverWritesLocked()) {
+      throw new ReleaseDatabaseWriteLockedError();
+    }
   }
 
   lockReleaseWrites(): void {
@@ -2738,10 +2818,11 @@ function captureExpectedCurrentPayloadDigest(
   if (descriptor && !descriptor.enumerable) {
     throw new TypeError("Full data replacement options must use an own enumerable data property.");
   }
+  if (!descriptor) return undefined;
   const expectedCurrentPayloadDigest = descriptor?.value as unknown;
   if (
-    expectedCurrentPayloadDigest !== undefined
-    && (typeof expectedCurrentPayloadDigest !== "string" || !LOWERCASE_SHA256.test(expectedCurrentPayloadDigest))
+    typeof expectedCurrentPayloadDigest !== "string"
+    || !LOWERCASE_SHA256.test(expectedCurrentPayloadDigest)
   ) {
     throw new TypeError("Expected current full-data payload digest must be a lowercase SHA-256 digest.");
   }

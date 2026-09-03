@@ -1,8 +1,15 @@
 import type { FullBackupPayload } from "@hakimi/contracts";
 import { describe, expect, it, vi } from "vitest";
-import { PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR } from "../../release-protocol";
+import {
+  BRIDGE_RELEASE_DATABASE_DESCRIPTOR,
+  PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
+  PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR,
+  PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR,
+  type ReleaseDatabaseDescriptor
+} from "../../release-protocol";
 import {
   captureOrphanedV13Backup,
+  orphanedV13ReadOnlyBackupFilename,
   type OrphanedV13Disposition,
   type OrphanedV13RescueRuntime
 } from "./orphaned-v13-rescue";
@@ -21,6 +28,38 @@ const snapshot = {
   appSettings: [], ruleRegistry: [], tzdbMigrationReceipts: [], eventTimeMigrationReceipts: [],
   revisionCalculationReceipts: []
 } as unknown as FullBackupPayload;
+
+function descriptorCopy(
+  descriptor: ReleaseDatabaseDescriptor,
+  overrides: Partial<ReleaseDatabaseDescriptor> = {}
+): ReleaseDatabaseDescriptor {
+  return {
+    ...descriptor,
+    acceptedCommittedMigrationIds: [...descriptor.acceptedCommittedMigrationIds],
+    ...overrides
+  };
+}
+
+function descriptorWithOverriddenEvery(): ReleaseDatabaseDescriptor {
+  const migrationIds: Array<string | null> = ["unexpected-migration"];
+  Object.defineProperty(migrationIds, "every", {
+    value: () => true,
+    enumerable: false
+  });
+  return descriptorCopy(PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR, {
+    acceptedCommittedMigrationIds: migrationIds
+  });
+}
+
+class MigrationIdArray extends Array<string | null> {}
+
+function descriptorWithArraySubclass(): ReleaseDatabaseDescriptor {
+  return descriptorCopy(PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR, {
+    acceptedCommittedMigrationIds: new MigrationIdArray(
+      ...PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR.acceptedCommittedMigrationIds
+    )
+  });
+}
 
 function successfulRuntime(): {
   runtime: OrphanedV13RescueRuntime;
@@ -80,15 +119,25 @@ function successfulRuntime(): {
 }
 
 describe("orphaned v13 rescue", () => {
-  it("opens only a locked v13 source, snapshots once, closes it, then packages that snapshot", async () => {
+  it("shares one canonical filename contract with the recovery page", () => {
+    expect(orphanedV13ReadOnlyBackupFilename("2026-08-03T00:00:00.000Z"))
+      .toBe("hakimi-v13-read-only-full-backup-2026-08-03.zip");
+    expect(() => orphanedV13ReadOnlyBackupFilename("2026-08-03"))
+      .toThrow("规范 UTC 捕获时间");
+  });
+
+  it.each([
+    ["v13 -> v15", PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR],
+    ["v13 -> v16", PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR]
+  ])("opens only a locked v13 source for the exact %s shell, snapshots once, closes it, then packages that snapshot", async (_label, descriptor) => {
     const { runtime, events, createArtifact } = successfulRuntime();
     await expect(captureOrphanedV13Backup(
       disposition,
-      PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
+      descriptorCopy(descriptor),
       runtime
     )).resolves.toMatchObject({
       payloadDigest: "a".repeat(64),
-      filename: "hakimi-v13-read-only-rescue-2026-08-03.zip",
+      filename: "hakimi-v13-read-only-full-backup-2026-08-03.zip",
       capturedAt: "2026-08-03T12:00:00.000Z"
     });
     expect(events).toEqual(["dexie-open", "native-close", "snapshot", "dexie-close", "worker"]);
@@ -99,6 +148,59 @@ describe("orphaned v13 rescue", () => {
       targetSchema: 13,
       releaseWritesLocked: true
     });
+  });
+
+  it.each([
+    ["bridge/null", BRIDGE_RELEASE_DATABASE_DESCRIPTOR],
+    ["wrong source", descriptorCopy(
+      PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
+      { sourceDatabaseName: "hakimi-bazi-research.rebound" }
+    )],
+    ["v14 -> v15 rebound", PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR],
+    ["candidate-controlled every", descriptorWithOverriddenEvery()],
+    ["accepted migration array subclass", descriptorWithArraySubclass()],
+    ["mixed target rebound", descriptorCopy(
+      PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
+      {
+        dbGeneration: PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR.dbGeneration,
+        databaseName: PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR.databaseName
+      }
+    )]
+  ])("rejects the %s descriptor before inventory or source access", async (_label, descriptor) => {
+    const { runtime, createArtifact } = successfulRuntime();
+    await expect(captureOrphanedV13Backup(
+      disposition,
+      descriptor,
+      runtime
+    )).rejects.toThrow(/只读救援壳描述符/);
+    expect(runtime.inspect).not.toHaveBeenCalled();
+    expect(runtime.openVerifiedSource).not.toHaveBeenCalled();
+    expect(runtime.loadStorageRuntime).not.toHaveBeenCalled();
+    expect(createArtifact).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["reason code", { ...disposition, reasonCode: "FORGED_ORPHANED_STATE" }],
+    ["source name", { ...disposition, sourceDatabaseName: "hakimi-bazi-research.rebound" }],
+    ["native version", { ...disposition, sourceNativeVersion: 131 }],
+    ["inventory binding", { ...disposition, inventory: [{ name: disposition.sourceDatabaseName, version: 131 }] }],
+    ["extra inventory entry", {
+      ...disposition,
+      inventory: [
+        ...disposition.inventory,
+        { name: "hakimi-bazi-research.generation.unexpected", version: 150 }
+      ]
+    }]
+  ])("rejects an orphaned disposition with a mismatched %s before inventory access", async (_label, invalidDisposition) => {
+    const { runtime, createArtifact } = successfulRuntime();
+    await expect(captureOrphanedV13Backup(
+      invalidDisposition as unknown as OrphanedV13Disposition,
+      PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
+      runtime
+    )).rejects.toThrow(/唯一绑定/);
+    expect(runtime.inspect).not.toHaveBeenCalled();
+    expect(runtime.openVerifiedSource).not.toHaveBeenCalled();
+    expect(createArtifact).not.toHaveBeenCalled();
   });
 
   it("stops before opening the source when inventory changed", async () => {
@@ -113,6 +215,23 @@ describe("orphaned v13 rescue", () => {
       PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
       runtime
     )).rejects.toThrow("状态发生变化");
+    expect(runtime.openVerifiedSource).not.toHaveBeenCalled();
+  });
+
+  it("rejects a pre-capture inspect result that self-labels extra inventory as orphaned", async () => {
+    const { runtime } = successfulRuntime();
+    runtime.inspect = vi.fn(async () => ({
+      ...disposition,
+      inventory: [
+        ...disposition.inventory,
+        { name: "hakimi-bazi-research.generation.unexpected", version: 150 }
+      ]
+    }));
+    await expect(captureOrphanedV13Backup(
+      disposition,
+      PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
+      runtime
+    )).rejects.toThrow(/唯一绑定/);
     expect(runtime.openVerifiedSource).not.toHaveBeenCalled();
   });
 
@@ -149,5 +268,24 @@ describe("orphaned v13 rescue", () => {
       PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
       runtime
     )).rejects.toThrow("状态发生变化");
+  });
+
+  it("rejects a post-capture inspect result that self-labels extra inventory as orphaned", async () => {
+    const { runtime, createArtifact } = successfulRuntime();
+    runtime.inspect = vi.fn()
+      .mockResolvedValueOnce(disposition)
+      .mockResolvedValueOnce({
+        ...disposition,
+        inventory: [
+          ...disposition.inventory,
+          { name: "hakimi-bazi-research.generation.unexpected", version: 150 }
+        ]
+      });
+    await expect(captureOrphanedV13Backup(
+      disposition,
+      PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
+      runtime
+    )).rejects.toThrow(/唯一绑定/);
+    expect(createArtifact).toHaveBeenCalledTimes(1);
   });
 });

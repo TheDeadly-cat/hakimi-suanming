@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 2,
+  "policyId": "storage-v13-matrix-candidate-policy-v2",
+  "evidenceClass": "untrusted_locked_artifact_browser_candidate",
+  "formalReleaseEvidenceReceipt": false,
+  "releaseIdentity": {
+    "channel": "default-v13",
+    "dbGeneration": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null
+  },
+  "physicalDatabase": {
+    "databaseName": "hakimi-bazi-research",
+    "dexieVersion": 13,
+    "nativeVersion": 130,
+    "storeNames": [
+      "appSettings",
+      "attachments",
+      "birthFingerprints",
+      "candidateSets",
+      "cases",
+      "citations",
+      "eventTimeMigrationReceipts",
+      "events",
+      "knowledgeDocuments",
+      "researchNotes",
+      "researcherProfiles",
+      "revisions",
+      "ruleRegistry",
+      "savedViews",
+      "sourceRights",
+      "tzdbMigrationReceipts"
+    ]
+  },
+  "logicalBackup": {
+    "formatVersion": "1.2.0",
+    "partitionNames": [
+      "appSettings",
+      "attachments",
+      "candidateSets",
+      "cases",
+      "citations",
+      "eventTimeMigrationReceipts",
+      "events",
+      "knowledgeDocuments",
+      "researchNotes",
+      "researcherProfiles",
+      "revisionCalculationReceipts",
+      "revisions",
+      "ruleRegistry",
+      "savedViews",
+      "sourceRights",
+      "tzdbMigrationReceipts"
+    ],
+    "sharedPhysicalPartitionNames": [
+      "appSettings",
+      "attachments",
+      "candidateSets",
+      "cases",
+      "citations",
+      "eventTimeMigrationReceipts",
+      "events",
+      "knowledgeDocuments",
+      "researchNotes",
+      "researcherProfiles",
+      "revisions",
+      "ruleRegistry",
+      "savedViews",
+      "sourceRights",
+      "tzdbMigrationReceipts"
+    ],
+    "sharedPartitionContentDigestAlgorithm": "sha256_canonical_json_multiset_v1",
+    "requiredAbsentPhysicalStore": "revisionCalculationReceipts",
+    "requiredInternalPhysicalStoreExcluded": "birthFingerprints"
+  },
+  "semanticWitness": {
+    "witnessType": "bounded_hashed_case_revision_relationships_v1",
+    "maximumEntriesPerCollection": 4096,
+    "inventoryScope": "all_cases_revisions_and_revision_fingerprints",
+    "identifierDisclosure": "sha256_only",
+    "recordDisclosure": "sha256_only"
+  },
+  "capabilities": {
+    "calculationReceiptCapability": "absent_schema13",
+    "mutationEpochCapability": "absent_schema13",
+    "epoch": null
+  },
+  "observedOperations": [
+    {
+      "operationId": "create",
+      "uiPath": "new-demo-save",
+      "capturePhases": ["before_ui_write", "after_ui_write"],
+      "exactChangedStores": ["birthFingerprints", "cases", "revisions"],
+      "countDeltas": {
+        "birthFingerprints": 1,
+        "cases": 1,
+        "revisions": 1
+      },
+      "relationship": "one_case_revision_and_revision_fingerprint_created_with_exact_latest_binding"
+    },
+    {
+      "operationId": "edit",
+      "uiPath": "derive-revision-save",
+      "capturePhases": ["before_ui_write", "after_ui_write"],
+      "exactChangedStores": ["birthFingerprints", "cases", "revisions"],
+      "countDeltas": {
+        "birthFingerprints": 1,
+        "cases": 0,
+        "revisions": 1
+      },
+      "relationship": "one_revision_appended_old_revisions_immutable_and_case_latest_advanced"
+    },
+    {
+      "operationId": "delete",
+      "uiPath": "cases-trash-permanent-delete",
+      "capturePhases": [
+        "before_trash",
+        "after_trash_before_permanent_delete",
+        "after_permanent_delete"
+      ],
+      "exactChangedStores": ["birthFingerprints", "cases", "revisions"],
+      "countDeltas": {
+        "birthFingerprints": -2,
+        "cases": -1,
+        "revisions": -2
+      },
+      "relationship": "active_case_first_becomes_trashed_then_exact_case_revision_graph_is_removed"
+    },
+    {
+      "operationId": "export",
+      "uiPath": "settings-data-full-zip",
+      "capturePhases": ["before_ui_read", "after_ui_read"],
+      "exactChangedStores": [],
+      "countDeltas": {},
+      "relationship": "logical_backup_shared_counts_and_content_digests_equal_after_ui_read_snapshot"
+    },
+    {
+      "operationId": "restore",
+      "uiPath": "settings-data-preflight-safety-gate-restore",
+      "capturePhases": [
+        "backup_baseline",
+        "before_preflight",
+        "after_preflight",
+        "before_commit",
+        "after_commit"
+      ],
+      "relationship": "preflight_unchanged_commit_equals_backup_baseline_and_safety_backup_content_bound"
+    },
+    {
+      "operationId": "cancel",
+      "uiPath": "settings-data-restore-preflight-cancel",
+      "capturePhases": ["before_cancel", "after_cancel"],
+      "exactChangedStores": [],
+      "countDeltas": {},
+      "downloadEventCount": 0
+    }
+  ],
+  "deferredBoundaries": [
+    {
+      "boundaryId": "two-tab",
+      "status": "deferred_not_executed",
+      "satisfied": false,
+      "evidence": null,
+      "reasonCode": "DEDICATED_MULTI_TAB_WRITE_COORDINATION_MATRIX_REQUIRED"
+    },
+    {
+      "boundaryId": "transaction-failure",
+      "status": "deferred_not_executed",
+      "satisfied": false,
+      "evidence": null,
+      "reasonCode": "STORAGE_TRANSACTION_ABORT_RUNTIME_MATRIX_REQUIRED"
+    },
+    {
+      "boundaryId": "read-only-recovery",
+      "status": "deferred_not_executed",
+      "satisfied": false,
+      "evidence": null,
+      "reasonCode": "REAL_OLD_V13_ARTIFACT_RECOVERY_REQUIRED"
+    },
+    {
+      "boundaryId": "cross-schema-no-backwrite",
+      "status": "deferred_not_executed",
+      "satisfied": false,
+      "evidence": null,
+      "reasonCode": "V13_TO_V16_SHADOW_AND_NO_REVERSE_MIGRATION_RUNTIME_MATRIX_REQUIRED"
+    }
+  ],
+  "terminalState": {
+    "trustClass": "untrusted_candidate",
+    "status": "not_admitted",
+    "executionAdmission": "closed_deferred_boundaries",
+    "matrixComplete": false,
+    "strictGatePassed": false
+  },
+  "authority": {
+    "defaultV13ReceiptAllowlistMember": false,
+    "formalStorageBoundaryVerified": false,
+    "oldV13ArtifactVerified": false,
+    "crossTabCoordinationVerified": false,
+    "transactionRollbackVerified": false,
+    "readOnlyRecoveryVerified": false,
+    "crossSchemaNoBackwriteVerified": false,
+    "deploymentRollbackVerified": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "contentTruthAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "rightsLegalConclusionAuthorized": false,
+    "schemaPromotionAuthorized": false
+  }
+}

@@ -2,6 +2,172 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hakimi.invalid/schemas/release-evidence-v1.json",
   "title": "Hakimi engineering release evidence",
+  "$defs": {
+    "artifactEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "size": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "releaseDatabaseDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocolVersion",
+        "dbGeneration",
+        "databaseName",
+        "targetSchema",
+        "minReadableSchema",
+        "maxReadableSchema",
+        "migrationId",
+        "acceptedCommittedMigrationIds",
+        "sourceGeneration",
+        "sourceDatabaseName",
+        "sourceSchema"
+      ],
+      "properties": {
+        "protocolVersion": { "const": 1 },
+        "dbGeneration": { "type": "string", "minLength": 1 },
+        "databaseName": { "type": "string", "minLength": 1 },
+        "targetSchema": { "type": "integer", "minimum": 1 },
+        "minReadableSchema": { "type": "integer", "minimum": 1 },
+        "maxReadableSchema": { "type": "integer", "minimum": 1 },
+        "migrationId": { "type": ["string", "null"], "minLength": 1 },
+        "acceptedCommittedMigrationIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": { "type": ["string", "null"], "minLength": 1 }
+        },
+        "sourceGeneration": { "type": ["string", "null"], "minLength": 1 },
+        "sourceDatabaseName": { "type": ["string", "null"], "minLength": 1 },
+        "sourceSchema": { "type": ["integer", "null"], "minimum": 1 }
+      }
+    },
+    "releaseBrowserProjectSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projectName",
+        "discovered",
+        "passed",
+        "skipped",
+        "failed",
+        "timedOut",
+        "interrupted",
+        "unexpected",
+        "flaky",
+        "nonPassedExpectedStatus",
+        "attempts"
+      ],
+      "properties": {
+        "projectName": { "enum": ["msedge", "chrome"] },
+        "discovered": { "enum": [1, 4, 6] },
+        "passed": { "enum": [1, 4, 6] },
+        "skipped": { "const": 0 },
+        "failed": { "const": 0 },
+        "timedOut": { "const": 0 },
+        "interrupted": { "const": 0 },
+        "unexpected": { "const": 0 },
+        "flaky": { "const": 0 },
+        "nonPassedExpectedStatus": { "const": 0 },
+        "attempts": { "enum": [1, 4, 6] }
+      }
+    },
+    "releaseBrowserResultSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "summaryType",
+        "receiptId",
+        "expectedTestsPerProject",
+        "expectedProjectNames",
+        "fullResultStatus",
+        "strictGatePassed",
+        "unexpectedProjectNames",
+        "errors",
+        "projects"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "summaryType": { "const": "release_browser_test_summary" },
+        "receiptId": { "enum": ["backup", "boot", "pwa", "web-v1-flow"] },
+        "expectedTestsPerProject": { "enum": [1, 4, 6] },
+        "expectedProjectNames": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": { "enum": ["msedge", "chrome"] }
+        },
+        "fullResultStatus": { "const": "passed" },
+        "strictGatePassed": { "const": true },
+        "unexpectedProjectNames": {
+          "type": "array",
+          "maxItems": 0,
+          "items": { "type": "string" }
+        },
+        "errors": {
+          "type": "array",
+          "maxItems": 0,
+          "items": { "type": "string" }
+        },
+        "projects": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/releaseBrowserProjectSummary" }
+        }
+      }
+    },
+    "releaseBrowserResultBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "summary"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "summary": { "$ref": "#/$defs/releaseBrowserResultSummary" }
+      }
+    },
+    "artifactMutationBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "boundaryType",
+        "coveredReceiptIds",
+        "endpointSnapshotsMatched",
+        "verificationScope",
+        "mutationEpochCapability",
+        "intervalMutationExclusionClaimed",
+        "abaMutationExclusionClaimed"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "boundaryType": { "const": "release_artifact_endpoint_snapshot_boundary_v1" },
+        "coveredReceiptIds": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": { "enum": ["backup", "boot", "pwa", "web-v1-flow"] }
+        },
+        "endpointSnapshotsMatched": { "const": true },
+        "verificationScope": { "const": "endpoint_snapshots_only_no_interval_mutation_epoch" },
+        "mutationEpochCapability": { "const": "absent_schema13" },
+        "intervalMutationExclusionClaimed": { "const": false },
+        "abaMutationExclusionClaimed": { "const": false }
+      }
+    }
+  },
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -21,7 +187,7 @@
   "properties": {
     "schemaVersion": { "const": 1 },
     "evidenceType": { "const": "engineering_release_evidence" },
-    "evidenceId": { "pattern": "^hre1-[a-f0-9]{32}$" },
+    "evidenceId": { "type": "string", "pattern": "^hre1-[a-f0-9]{32}$" },
     "generatedAt": { "type": "string", "format": "date-time" },
     "source": {
       "type": "object",
@@ -44,41 +210,123 @@
       "properties": {
         "channel": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" },
         "candidateLabel": { "type": "string", "minLength": 1, "maxLength": 120 },
-        "descriptor": {
-          "type": "object",
-          "required": ["dbGeneration", "databaseName", "targetSchema", "migrationId"],
-          "properties": {
-            "dbGeneration": { "type": "string" },
-            "databaseName": { "type": "string" },
-            "targetSchema": { "type": "integer" },
-            "migrationId": { "type": ["string", "null"] }
-          }
-        },
+        "descriptor": { "$ref": "#/$defs/releaseDatabaseDescriptor" },
         "manifestVersion": { "const": 1 },
         "manifestDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "buildVersion": { "type": "string", "pattern": "^[a-f0-9]{12}$" },
         "builtEvidenceId": { "type": "string" },
         "evidenceIdBound": { "type": "boolean" },
-        "requiredReceiptIds": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" } }
+        "requiredReceiptIds": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" } }
       }
     },
-    "toolchain": { "type": "object" },
-    "policyFiles": { "type": "array", "items": { "type": "object", "required": ["path", "sha256"] } },
-    "testReceipts": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "evidenceId", "status", "exitCode", "command", "browserResultSummary", "path", "sha256"],
-        "properties": {
-          "browserResultSummary": { "type": ["object", "null"] }
+    "toolchain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node", "npm", "platform", "arch", "osRelease", "browsers"],
+      "properties": {
+        "node": { "type": "string", "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+" },
+        "npm": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+" },
+        "platform": { "type": "string", "minLength": 1 },
+        "arch": { "type": "string", "minLength": 1 },
+        "osRelease": { "type": "string", "minLength": 1 },
+        "browsers": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["edge", "chrome"],
+          "properties": {
+            "edge": { "type": "string", "minLength": 1 },
+            "chrome": { "type": "string", "minLength": 1 }
+          }
         }
       }
     },
-    "artifacts": { "type": "object", "required": ["root", "count", "artifactSetDigest", "files"] },
+    "policyFiles": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      }
+    },
+    "testReceipts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "evidenceId", "status", "exitCode", "command", "startedAt", "completedAt", "durationMs", "browserResultSummary", "path", "sha256"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "evidenceId": { "type": "string", "pattern": "^hre1-[a-f0-9]{32}$" },
+          "status": { "const": "passed" },
+          "exitCode": { "const": 0 },
+          "command": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+          "startedAt": { "type": "string", "format": "date-time" },
+          "completedAt": { "type": "string", "format": "date-time" },
+          "durationMs": { "type": "number", "minimum": 0 },
+          "browserResultSummary": {
+            "anyOf": [
+              { "$ref": "#/$defs/releaseBrowserResultBinding" },
+              { "type": "null" }
+            ]
+          },
+          "path": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root", "count", "artifactSetDigest", "identityLock", "mutationBoundary", "components", "files"],
+      "properties": {
+        "root": { "type": "string", "minLength": 1 },
+        "count": { "type": "integer", "minimum": 4 },
+        "artifactSetDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "identityLock": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "sha256", "lockDigest", "artifactSetDigest", "verified"],
+          "properties": {
+            "path": { "type": "string", "minLength": 1 },
+            "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "lockDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "artifactSetDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "verified": { "const": true }
+          }
+        },
+        "mutationBoundary": { "$ref": "#/$defs/artifactMutationBoundary" },
+        "components": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["applicationShell", "pwaManifest", "serviceWorker", "hostingHeaders"],
+          "properties": {
+            "applicationShell": { "$ref": "#/$defs/artifactEntry" },
+            "pwaManifest": { "$ref": "#/$defs/artifactEntry" },
+            "serviceWorker": { "$ref": "#/$defs/artifactEntry" },
+            "hostingHeaders": { "$ref": "#/$defs/artifactEntry" }
+          }
+        },
+        "files": {
+          "type": "array",
+          "minItems": 4,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/artifactEntry" }
+        }
+      }
+    },
     "gates": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["sourceTreeClean", "evidenceIdBound", "defaultReleaseDescriptorMatched", "requiredReceiptsPresent", "allRecordedReceiptsPassed", "policyReceiptSetMatched", "policyReceiptCommandsMatched", "browserResultSummariesMatched", "engineeringGatePassed", "releaseHistoryOwnerConfirmed", "hostingSecurityVerified", "publicDeploymentAuthorized", "licenseOwnerSelectionRecorded", "expertClaimsAuthorized"],
+      "required": ["sourceTreeClean", "evidenceIdBound", "defaultReleaseDescriptorMatched", "requiredReceiptsPresent", "allRecordedReceiptsPassed", "policyReceiptSetMatched", "recordedReceiptSetMatched", "policyReceiptCommandsMatched", "browserResultSummariesMatched", "artifactIdentityStable", "requiredArtifactComponentsPresent", "engineeringGatePassed", "releaseHistoryOwnerConfirmed", "hostingSecurityVerified", "publicDeploymentAuthorized", "licenseOwnerSelectionRecorded", "expertClaimsAuthorized"],
       "properties": {
         "sourceTreeClean": { "type": "boolean" },
         "evidenceIdBound": { "type": "boolean" },
@@ -86,8 +334,11 @@
         "requiredReceiptsPresent": { "type": "boolean" },
         "allRecordedReceiptsPassed": { "type": "boolean" },
         "policyReceiptSetMatched": { "type": "boolean" },
+        "recordedReceiptSetMatched": { "type": "boolean" },
         "policyReceiptCommandsMatched": { "type": "boolean" },
         "browserResultSummariesMatched": { "type": "boolean" },
+        "artifactIdentityStable": { "type": "boolean" },
+        "requiredArtifactComponentsPresent": { "type": "boolean" },
         "engineeringGatePassed": { "type": "boolean" },
         "releaseHistoryOwnerConfirmed": { "type": "boolean" },
         "hostingSecurityVerified": { "type": "boolean" },

@@ -320,7 +320,10 @@ function withMatchingInterpretationCitation(
     reference: "C1",
     status,
     statusLabel: SINGLE_CHART_REPORT_PRESENTATION_CONTRACT.citationStatusLabels[status],
-    targets: [`证据主题 ${INTERPRETATION_EVIDENCE_SUBJECT_ID}`],
+    targets: [
+      "命盘字段 pillars.day.ganZhi",
+      `证据主题 ${INTERPRETATION_EVIDENCE_SUBJECT_ID}`
+    ],
     evidenceSubjectIds: [INTERPRETATION_EVIDENCE_SUBJECT_ID],
     quote: "测试引文",
     annotation: "仅用于机械准入合同测试。",
@@ -742,6 +745,58 @@ describe("SingleChartReport binding contracts", () => {
     expect(document.body.textContent).toContain("verified 不等于内容正确或专家审定");
     expect(document.body.textContent).toContain("redistributable 不等于内容正确、专家审定或公开发布授权");
     view.unmount();
+  });
+
+  it("Web binding 只把同一 C# 的可见 chart_field + binding subject 合取计入准入", () => {
+    const clearAdmission = (report: ReportModel) => {
+      const evidence = interpretationEvidenceRecord(report);
+      const binding = (evidence.sourceBindings as Array<Record<string, unknown>>)[0]!;
+      binding.mechanicalAdmission = {
+        sourceIdentityStatus: "not_assessed",
+        citationReviewState: "no_citation",
+        redistributionState: "not_applicable_no_verified",
+        candidateCitationReferences: [],
+        verifiedCitationReferences: [],
+        rejectedCitationReferences: [],
+        redistributableVerifiedCitationReferences: []
+      };
+      evidence.admissionSummary = {
+        visibility: "full",
+        evaluationStatus: "evaluated",
+        bindingsTotal: 1,
+        bindingsWithNonRejectedCitation: 0,
+        bindingsWithVerifiedCitation: 0,
+        bindingsWithRedistributableVerifiedCitation: 0,
+        citationRecords: { matching: 0, structured: 0, candidate: 0, verified: 0, rejected: 0 },
+        knowledgeDocumentsBound: 0,
+        sourceRightsRecordsBound: 0,
+        sourceTextCopiedIntoAdmissionLedger: false,
+        structuredCitationCoverage: "none",
+        distributionRightsState: "no_matching_source_text"
+      };
+    };
+
+    const subjectOnly = withMatchingInterpretationCitation("user_candidate");
+    const subjectOnlyCitation = (
+      subjectOnly as unknown as { citations: Array<Record<string, unknown>> }
+    ).citations[0]!;
+    subjectOnlyCitation.targets = [`证据主题 ${INTERPRETATION_EVIDENCE_SUBJECT_ID}`];
+    clearAdmission(subjectOnly);
+    expect(findSingleChartReportBindingIssue(subjectOnly)).toBeNull();
+
+    const splitAcrossCitations = withMatchingInterpretationCitation("user_candidate");
+    const splitCitations = (
+      splitAcrossCitations as unknown as { citations: Array<Record<string, unknown>> }
+    ).citations;
+    const chartOnly = splitCitations[0]!;
+    const subjectOnlySecond = structuredClone(chartOnly);
+    chartOnly.targets = ["命盘字段 pillars.day.ganZhi"];
+    chartOnly.evidenceSubjectIds = [];
+    subjectOnlySecond.reference = "C2";
+    subjectOnlySecond.targets = [`证据主题 ${INTERPRETATION_EVIDENCE_SUBJECT_ID}`];
+    splitCitations.push(subjectOnlySecond);
+    clearAdmission(splitAcrossCitations);
+    expect(findSingleChartReportBindingIssue(splitAcrossCitations)).toBeNull();
   });
 
   it("同一 D# 可由多条连续 C# 复用，但 summary 只按唯一 D# 计算资料与权利记录", () => {

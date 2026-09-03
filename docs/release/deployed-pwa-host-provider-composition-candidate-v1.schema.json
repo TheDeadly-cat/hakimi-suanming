@@ -1,0 +1,633 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hakimi.invalid/schemas/deployed-pwa-host-provider-composition-candidate-v1.json",
+  "title": "Hakimi deployed PWA host provider composition candidate v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "recordType",
+    "verificationKind",
+    "trustClass",
+    "status",
+    "usableForAdmission",
+    "compositionId",
+    "scope",
+    "commonArtifactIdentity",
+    "packageBindings",
+    "sourceBindings",
+    "sourceSetDigest",
+    "mechanicalChecks",
+    "limitations",
+    "mutationBoundary",
+    "attempts",
+    "admissionGates",
+    "authorizationBoundary",
+    "claims",
+    "compositionDigest"
+  ],
+  "$defs": {
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "ReleaseEvidenceId": {
+      "type": "string",
+      "pattern": "^hre1-[a-f0-9]{32}$"
+    },
+    "BuildVersion": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{12}$"
+    },
+    "CanonicalId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "PlatformId": {
+      "type": "string",
+      "pattern": "^(?!unselected$)[a-z0-9][a-z0-9._-]{0,63}$"
+    },
+    "CanonicalPath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^(?!/)(?!\\.{1,2}(?:/|$))(?!.*//)(?!.*/\\.{1,2}(?:/|$))[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$"
+    },
+    "HttpsOrigin": {
+      "type": "string",
+      "minLength": 9,
+      "maxLength": 2048,
+      "pattern": "^https://(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\\.)+[A-Za-z](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$"
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "Descriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocolVersion",
+        "dbGeneration",
+        "databaseName",
+        "targetSchema",
+        "minReadableSchema",
+        "maxReadableSchema",
+        "migrationId",
+        "acceptedCommittedMigrationIds",
+        "sourceGeneration",
+        "sourceDatabaseName",
+        "sourceSchema"
+      ],
+      "properties": {
+        "protocolVersion": { "const": 1 },
+        "dbGeneration": { "const": "legacy-v13" },
+        "databaseName": { "const": "hakimi-bazi-research" },
+        "targetSchema": { "const": 13 },
+        "minReadableSchema": { "const": 13 },
+        "maxReadableSchema": { "const": 13 },
+        "migrationId": { "const": null },
+        "acceptedCommittedMigrationIds": {
+          "type": "array",
+          "items": { "const": null },
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "sourceGeneration": { "const": null },
+        "sourceDatabaseName": { "const": null },
+        "sourceSchema": { "const": null }
+      }
+    },
+    "ReleaseIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channel", "descriptor", "manifestVersion", "manifestDigest", "buildVersion", "releaseEvidenceId", "artifactSetDigest"],
+      "properties": {
+        "channel": { "const": "default-v13" },
+        "descriptor": { "$ref": "#/$defs/Descriptor" },
+        "manifestVersion": { "const": 1 },
+        "manifestDigest": { "$ref": "#/$defs/Sha256" },
+        "buildVersion": { "$ref": "#/$defs/BuildVersion" },
+        "releaseEvidenceId": { "$ref": "#/$defs/ReleaseEvidenceId" },
+        "artifactSetDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "Scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "releaseIdentity",
+        "candidatePlatform",
+        "canonicalOrigin",
+        "providerAccountId",
+        "providerProjectId",
+        "providerEnvironment",
+        "providerDeploymentId",
+        "providerImmutableDeploymentUrl"
+      ],
+      "properties": {
+        "releaseIdentity": { "$ref": "#/$defs/ReleaseIdentity" },
+        "candidatePlatform": { "$ref": "#/$defs/PlatformId" },
+        "canonicalOrigin": { "$ref": "#/$defs/HttpsOrigin" },
+        "providerAccountId": { "$ref": "#/$defs/CanonicalId" },
+        "providerProjectId": { "$ref": "#/$defs/CanonicalId" },
+        "providerEnvironment": { "$ref": "#/$defs/CanonicalId" },
+        "providerDeploymentId": { "$ref": "#/$defs/CanonicalId" },
+        "providerImmutableDeploymentUrl": { "$ref": "#/$defs/HttpsOrigin" }
+      }
+    },
+    "FileBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "sha256"],
+      "properties": {
+        "path": { "$ref": "#/$defs/CanonicalPath" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 134217728 },
+        "sha256": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "TerminalGateBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "sha256", "commitsReceiptSha256"],
+      "properties": {
+        "path": { "$ref": "#/$defs/CanonicalPath" },
+        "size": { "const": 65 },
+        "sha256": { "$ref": "#/$defs/Sha256" },
+        "commitsReceiptSha256": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "ArtifactComponents": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applicationShell", "pwaManifest", "serviceWorker", "hostingHeaders"],
+      "properties": {
+        "applicationShell": { "$ref": "#/$defs/FileBinding" },
+        "pwaManifest": { "$ref": "#/$defs/FileBinding" },
+        "serviceWorker": { "$ref": "#/$defs/FileBinding" },
+        "hostingHeaders": { "$ref": "#/$defs/FileBinding" }
+      }
+    },
+    "CommonArtifactIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identityLock",
+        "releaseEvidence",
+        "components",
+        "hostingPolicy",
+        "artifactInventoryFileCount",
+        "artifactInventoryDigest"
+      ],
+      "properties": {
+        "identityLock": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "sha256", "lockDigest", "artifactSetDigest"],
+          "properties": {
+            "path": { "$ref": "#/$defs/CanonicalPath" },
+            "sha256": { "$ref": "#/$defs/Sha256" },
+            "lockDigest": { "$ref": "#/$defs/Sha256" },
+            "artifactSetDigest": { "$ref": "#/$defs/Sha256" }
+          }
+        },
+        "releaseEvidence": { "$ref": "#/$defs/FileBinding" },
+        "components": { "$ref": "#/$defs/ArtifactComponents" },
+        "hostingPolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "rawSha256", "canonicalSha256"],
+          "properties": {
+            "path": { "const": "docs/security/hosting-security-policy.json" },
+            "rawSha256": { "$ref": "#/$defs/Sha256" },
+            "canonicalSha256": { "$ref": "#/$defs/Sha256" }
+          }
+        },
+        "artifactInventoryFileCount": { "type": "integer", "minimum": 4, "maximum": 100000 },
+        "artifactInventoryDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "HostPackage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receiptId",
+        "receiptDigest",
+        "attachmentSetDigest",
+        "outputRoot",
+        "receiptPath",
+        "receiptSize",
+        "receiptSha256",
+        "terminalGateBinding",
+        "exactFileCount",
+        "exactFileSetDigest",
+        "packageProjectionDigest",
+        "observationLabel",
+        "sourceVerificationKind",
+        "startedAt",
+        "completedAt"
+      ],
+      "properties": {
+        "receiptId": { "$ref": "#/$defs/CanonicalId" },
+        "receiptDigest": { "$ref": "#/$defs/Sha256" },
+        "attachmentSetDigest": { "$ref": "#/$defs/Sha256" },
+        "outputRoot": { "$ref": "#/$defs/CanonicalPath" },
+        "receiptPath": { "$ref": "#/$defs/CanonicalPath" },
+        "receiptSize": { "type": "integer", "minimum": 1, "maximum": 134217728 },
+        "receiptSha256": { "$ref": "#/$defs/Sha256" },
+        "terminalGateBinding": { "$ref": "#/$defs/TerminalGateBinding" },
+        "exactFileCount": { "const": 5 },
+        "exactFileSetDigest": { "$ref": "#/$defs/Sha256" },
+        "packageProjectionDigest": { "$ref": "#/$defs/Sha256" },
+        "observationLabel": {
+          "enum": ["synthetic_injected_test_fixture", "node_http_pinned_real_network_v1"]
+        },
+        "sourceVerificationKind": {
+          "enum": ["synthetic-offline-candidate-contract", "real-network-candidate-observation"]
+        },
+        "startedAt": { "$ref": "#/$defs/Timestamp" },
+        "completedAt": { "$ref": "#/$defs/Timestamp" }
+      }
+    },
+    "ProviderPackage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receiptId",
+        "receiptDigest",
+        "attachmentSetDigest",
+        "outputRoot",
+        "receiptPath",
+        "receiptSize",
+        "receiptSha256",
+        "terminalGateBinding",
+        "exactFileCount",
+        "exactFileSetDigest",
+        "packageProjectionDigest",
+        "adapterId",
+        "adapterVersion",
+        "action",
+        "operationId",
+        "resultDeploymentId",
+        "immutableDeploymentUrl",
+        "finalReadbackObservedAt",
+        "operationCompletedAt"
+      ],
+      "properties": {
+        "receiptId": { "$ref": "#/$defs/CanonicalId" },
+        "receiptDigest": { "$ref": "#/$defs/Sha256" },
+        "attachmentSetDigest": { "$ref": "#/$defs/Sha256" },
+        "outputRoot": { "$ref": "#/$defs/CanonicalPath" },
+        "receiptPath": { "$ref": "#/$defs/CanonicalPath" },
+        "receiptSize": { "type": "integer", "minimum": 1, "maximum": 134217728 },
+        "receiptSha256": { "$ref": "#/$defs/Sha256" },
+        "terminalGateBinding": { "$ref": "#/$defs/TerminalGateBinding" },
+        "exactFileCount": { "const": 7 },
+        "exactFileSetDigest": { "$ref": "#/$defs/Sha256" },
+        "packageProjectionDigest": { "$ref": "#/$defs/Sha256" },
+        "adapterId": { "$ref": "#/$defs/CanonicalId" },
+        "adapterVersion": { "$ref": "#/$defs/CanonicalId" },
+        "action": { "const": "deploy_candidate" },
+        "operationId": { "$ref": "#/$defs/CanonicalId" },
+        "resultDeploymentId": { "$ref": "#/$defs/CanonicalId" },
+        "immutableDeploymentUrl": { "$ref": "#/$defs/HttpsOrigin" },
+        "finalReadbackObservedAt": { "$ref": "#/$defs/Timestamp" },
+        "operationCompletedAt": { "$ref": "#/$defs/Timestamp" }
+      }
+    },
+    "PwaPackage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceId",
+        "evidenceDigest",
+        "inputPath",
+        "inputSize",
+        "inputSha256",
+        "sidecarPath",
+        "sidecarSize",
+        "sidecarSha256",
+        "receiptPathSetDigest",
+        "receiptFileCount",
+        "receiptBindingSetDigest",
+        "packageProjectionDigest",
+        "generatedAt"
+      ],
+      "properties": {
+        "evidenceId": {
+          "type": "string",
+          "pattern": "^hpwa3-[a-f0-9]{32}$"
+        },
+        "evidenceDigest": { "$ref": "#/$defs/Sha256" },
+        "inputPath": { "$ref": "#/$defs/CanonicalPath" },
+        "inputSize": { "type": "integer", "minimum": 1, "maximum": 33554432 },
+        "inputSha256": { "$ref": "#/$defs/Sha256" },
+        "sidecarPath": { "$ref": "#/$defs/CanonicalPath" },
+        "sidecarSize": { "type": "integer", "minimum": 1, "maximum": 1024 },
+        "sidecarSha256": { "$ref": "#/$defs/Sha256" },
+        "receiptPathSetDigest": { "$ref": "#/$defs/Sha256" },
+        "receiptFileCount": { "const": 26 },
+        "receiptBindingSetDigest": { "$ref": "#/$defs/Sha256" },
+        "packageProjectionDigest": { "$ref": "#/$defs/Sha256" },
+        "generatedAt": { "$ref": "#/$defs/Timestamp" }
+      }
+    },
+    "PackageBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["host", "provider", "pwaV3"],
+      "properties": {
+        "host": { "$ref": "#/$defs/HostPackage" },
+        "provider": { "$ref": "#/$defs/ProviderPackage" },
+        "pwaV3": { "$ref": "#/$defs/PwaPackage" }
+      }
+    },
+    "SourceBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "composition-schema",
+        "host-receipt-schema",
+        "provider-receipt-schema",
+        "pwa-v3-schema",
+        "pwa-v3-policy",
+        "hosting-policy",
+        "release-decisions",
+        "release-evidence-schema"
+      ],
+      "properties": {
+        "composition-schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "size", "rawSha256", "canonicalSha256"],
+          "properties": {
+            "path": { "const": "docs/release/deployed-pwa-host-provider-composition-candidate-v1.schema.json" },
+            "size": { "type": "integer", "minimum": 1, "maximum": 134217728 },
+            "rawSha256": { "$ref": "#/$defs/Sha256" },
+            "canonicalSha256": { "$ref": "#/$defs/Sha256" }
+          }
+        },
+        "host-receipt-schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "size", "rawSha256", "canonicalSha256"],
+          "properties": {
+            "path": { "const": "docs/release/deployed-host-http-receipt-candidate-v1.schema.json" },
+            "size": { "type": "integer", "minimum": 1, "maximum": 134217728 },
+            "rawSha256": { "$ref": "#/$defs/Sha256" },
+            "canonicalSha256": { "$ref": "#/$defs/Sha256" }
+          }
+        },
+        "provider-receipt-schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "size", "rawSha256", "canonicalSha256"],
+          "properties": {
+            "path": { "const": "docs/release/provider-deployment-receipt-candidate-v1.schema.json" },
+            "size": { "type": "integer", "minimum": 1, "maximum": 134217728 },
+            "rawSha256": { "$ref": "#/$defs/Sha256" },
+            "canonicalSha256": { "$ref": "#/$defs/Sha256" }
+          }
+        },
+        "pwa-v3-schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "size", "rawSha256", "canonicalSha256"],
+          "properties": {
+            "path": { "const": "docs/release/deployed-pwa-evidence-v3.schema.json" },
+            "size": { "type": "integer", "minimum": 1, "maximum": 134217728 },
+            "rawSha256": { "$ref": "#/$defs/Sha256" },
+            "canonicalSha256": { "$ref": "#/$defs/Sha256" }
+          }
+        },
+        "pwa-v3-policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "size", "rawSha256", "canonicalSha256"],
+          "properties": {
+            "path": { "const": "docs/release/deployed-pwa-evidence-policy.v3.json" },
+            "size": { "type": "integer", "minimum": 1, "maximum": 134217728 },
+            "rawSha256": { "$ref": "#/$defs/Sha256" },
+            "canonicalSha256": { "$ref": "#/$defs/Sha256" }
+          }
+        },
+        "hosting-policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "size", "rawSha256", "canonicalSha256"],
+          "properties": {
+            "path": { "const": "docs/security/hosting-security-policy.json" },
+            "size": { "type": "integer", "minimum": 1, "maximum": 134217728 },
+            "rawSha256": { "$ref": "#/$defs/Sha256" },
+            "canonicalSha256": { "$ref": "#/$defs/Sha256" }
+          }
+        },
+        "release-decisions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "size", "rawSha256", "canonicalSha256"],
+          "properties": {
+            "path": { "const": "docs/release/web-v1-release-decisions.json" },
+            "size": { "type": "integer", "minimum": 1, "maximum": 134217728 },
+            "rawSha256": { "$ref": "#/$defs/Sha256" },
+            "canonicalSha256": { "$ref": "#/$defs/Sha256" }
+          }
+        },
+        "release-evidence-schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "size", "rawSha256", "canonicalSha256"],
+          "properties": {
+            "path": { "const": "docs/release/release-evidence.schema.json" },
+            "size": { "type": "integer", "minimum": 1, "maximum": 134217728 },
+            "rawSha256": { "$ref": "#/$defs/Sha256" },
+            "canonicalSha256": { "$ref": "#/$defs/Sha256" }
+          }
+        }
+      }
+    },
+    "MechanicalChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hostCandidatePackageIntegrityVerified",
+        "providerCandidatePackageIntegrityVerified",
+        "pwaV3SemanticConsistencyVerified",
+        "commonReleaseIdentityMatched",
+        "commonArtifactIdentityMatched",
+        "platformAndOriginMatched",
+        "deploymentProjectionCrossBound",
+        "candidateChronologyMatched",
+        "exactPackageSetsVerified",
+        "checkedSourceSetVerified",
+        "authoritativeConsumersReexecuted",
+        "terminalEndpointSnapshotsMatched",
+        "compositionDigestVerified",
+        "semanticConsistencyVerified"
+      ],
+      "properties": {
+        "hostCandidatePackageIntegrityVerified": { "const": true },
+        "providerCandidatePackageIntegrityVerified": { "const": true },
+        "pwaV3SemanticConsistencyVerified": { "const": true },
+        "commonReleaseIdentityMatched": { "const": true },
+        "commonArtifactIdentityMatched": { "const": true },
+        "platformAndOriginMatched": { "const": true },
+        "deploymentProjectionCrossBound": { "const": true },
+        "candidateChronologyMatched": { "const": true },
+        "exactPackageSetsVerified": { "const": true },
+        "checkedSourceSetVerified": { "const": true },
+        "authoritativeConsumersReexecuted": { "const": true },
+        "terminalEndpointSnapshotsMatched": { "const": true },
+        "compositionDigestVerified": { "const": true },
+        "semanticConsistencyVerified": { "const": true }
+      }
+    },
+    "Limitations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hostSemanticEvaluatorImplementationIndependent",
+        "realNetworkTransportProvenanceVerified",
+        "providerOriginalRawSourcesCurrentVerified",
+        "providerCurrentArtifactSourceReopenedByProviderLoader",
+        "providerAuthenticatedReceiptVerified",
+        "rawProjectionDerivationVerified",
+        "pwaBrowserRuntimeExternallyVerified",
+        "trustedClockOrderVerified",
+        "bundleReplayResistanceVerified",
+        "attemptFreshnessExternallyVerified"
+      ],
+      "properties": {
+        "hostSemanticEvaluatorImplementationIndependent": { "const": false },
+        "realNetworkTransportProvenanceVerified": { "const": false },
+        "providerOriginalRawSourcesCurrentVerified": { "const": false },
+        "providerCurrentArtifactSourceReopenedByProviderLoader": { "const": false },
+        "providerAuthenticatedReceiptVerified": { "const": false },
+        "rawProjectionDerivationVerified": { "const": false },
+        "pwaBrowserRuntimeExternallyVerified": { "const": false },
+        "trustedClockOrderVerified": { "const": false },
+        "bundleReplayResistanceVerified": { "const": false },
+        "attemptFreshnessExternallyVerified": { "const": false }
+      }
+    },
+    "MutationBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "boundaryType",
+        "verificationScope",
+        "mutationEpochCapability",
+        "initialAndTerminalEndpointSnapshotsMatched",
+        "continuousMutationEpochVerified",
+        "intervalMutationExclusionClaimed",
+        "abaMutationExclusionClaimed",
+        "samePermissionMutationExcluded"
+      ],
+      "properties": {
+        "boundaryType": { "const": "deployed_pwa_host_provider_composition_endpoint_snapshot_boundary_v1" },
+        "verificationScope": { "const": "three_independent_loader_endpoint_snapshots_no_continuous_mutation_epoch" },
+        "mutationEpochCapability": { "const": "absent_schema13" },
+        "initialAndTerminalEndpointSnapshotsMatched": { "const": true },
+        "continuousMutationEpochVerified": { "const": false },
+        "intervalMutationExclusionClaimed": { "const": false },
+        "abaMutationExclusionClaimed": { "const": false },
+        "samePermissionMutationExcluded": { "const": false }
+      }
+    },
+    "Attempts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["networkAttempted", "browserAttempted", "deploymentAttempted", "rollbackAttempted", "gitAttempted"],
+      "properties": {
+        "networkAttempted": { "const": false },
+        "browserAttempted": { "const": false },
+        "deploymentAttempted": { "const": false },
+        "rollbackAttempted": { "const": false },
+        "gitAttempted": { "const": false }
+      }
+    },
+    "AdmissionGates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trustedHostParserVerified", "trustedProviderParserVerified", "compositionAdmissionPassed", "deploymentAdmissionPassed", "publicReleaseGatePassed"],
+      "properties": {
+        "trustedHostParserVerified": { "const": false },
+        "trustedProviderParserVerified": { "const": false },
+        "compositionAdmissionPassed": { "const": false },
+        "deploymentAdmissionPassed": { "const": false },
+        "publicReleaseGatePassed": { "const": false }
+      }
+    },
+    "AuthorizationBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["externalDeploymentExecutionAuthorized", "rollbackExecutionAuthorized", "publicDeploymentAuthorized", "publicReleaseAuthorized", "authorizationMayNotBeDerivedFromCandidateEvidence"],
+      "properties": {
+        "externalDeploymentExecutionAuthorized": { "const": false },
+        "rollbackExecutionAuthorized": { "const": false },
+        "publicDeploymentAuthorized": { "const": false },
+        "publicReleaseAuthorized": { "const": false },
+        "authorizationMayNotBeDerivedFromCandidateEvidence": { "const": true }
+      }
+    },
+    "Claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "networkObserved",
+        "realHostVerified",
+        "providerAuthenticated",
+        "deploymentOperationObserved",
+        "pwaBrowserRuntimeVerified",
+        "deployedPwaEngineeringVerified",
+        "releaseReady",
+        "publicDeploymentAuthorized",
+        "publicReleaseAuthorized",
+        "contentTruthAuthorized",
+        "expertClaimsAuthorized",
+        "rightsLegalConclusionAuthorized"
+      ],
+      "properties": {
+        "networkObserved": { "const": false },
+        "realHostVerified": { "const": false },
+        "providerAuthenticated": { "const": false },
+        "deploymentOperationObserved": { "const": false },
+        "pwaBrowserRuntimeVerified": { "const": false },
+        "deployedPwaEngineeringVerified": { "const": false },
+        "releaseReady": { "const": false },
+        "publicDeploymentAuthorized": { "const": false },
+        "publicReleaseAuthorized": { "const": false },
+        "contentTruthAuthorized": { "const": false },
+        "expertClaimsAuthorized": { "const": false },
+        "rightsLegalConclusionAuthorized": { "const": false }
+      }
+    }
+  },
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "recordType": { "const": "deployed_pwa_host_provider_composition_candidate_v1" },
+    "verificationKind": { "const": "offline-three-independent-candidate-verifiers-v1" },
+    "trustClass": { "const": "untrusted_candidate_composition" },
+    "status": { "const": "not_admitted" },
+    "usableForAdmission": { "const": false },
+    "compositionId": {
+      "type": "string",
+      "pattern": "^hpcomp1-[a-f0-9]{32}$"
+    },
+    "scope": { "$ref": "#/$defs/Scope" },
+    "commonArtifactIdentity": { "$ref": "#/$defs/CommonArtifactIdentity" },
+    "packageBindings": { "$ref": "#/$defs/PackageBindings" },
+    "sourceBindings": { "$ref": "#/$defs/SourceBindings" },
+    "sourceSetDigest": { "$ref": "#/$defs/Sha256" },
+    "mechanicalChecks": { "$ref": "#/$defs/MechanicalChecks" },
+    "limitations": { "$ref": "#/$defs/Limitations" },
+    "mutationBoundary": { "$ref": "#/$defs/MutationBoundary" },
+    "attempts": { "$ref": "#/$defs/Attempts" },
+    "admissionGates": { "$ref": "#/$defs/AdmissionGates" },
+    "authorizationBoundary": { "$ref": "#/$defs/AuthorizationBoundary" },
+    "claims": { "$ref": "#/$defs/Claims" },
+    "compositionDigest": { "$ref": "#/$defs/Sha256" }
+  }
+}

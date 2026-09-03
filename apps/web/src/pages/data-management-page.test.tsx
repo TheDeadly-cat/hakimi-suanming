@@ -815,7 +815,7 @@ describe("DataManagementPage", () => {
     const initialChoice = await screen.findByLabelText(/我已人工核对一份可用的完整 ZIP/);
     await waitFor(() => expect(document.activeElement).toBe(initialChoice));
     fireEvent.click(screen.getByLabelText(/我明确接受没有可恢复副本仍继续/));
-    const confirmation = screen.getByLabelText(/确认文字：输入/);
+    const confirmation = screen.getByLabelText<HTMLInputElement>(/确认文字：输入/);
     await waitFor(() => expect(confirmation).toHaveProperty("disabled", false));
     const deleteButton = screen.getByRole("button", { name: "永久删除全部数据" });
     expect(deleteButton).toHaveProperty("disabled", true);

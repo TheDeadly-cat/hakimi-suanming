@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "registryType": "rollback_actor_trust_registry",
+  "registryId": "hakimi.web-v1.rollback-actors/v1",
+  "status": "unconfigured_no_trusted_actors",
+  "actors": [],
+  "gateSummary": {
+    "trustedOperators": 0,
+    "trustedAcceptors": 0,
+    "realIdentityRecordsBound": 0,
+    "rollbackAcceptanceAuthorized": false
+  },
+  "claims": {
+    "engineeringRegistryOnly": true,
+    "realIdentityVerified": false,
+    "realIndependenceVerified": false,
+    "publicDeploymentAuthorized": false,
+    "releaseReady": false
+  }
+}

@@ -250,7 +250,7 @@ describe("BaziInterpretationPanel", () => {
     });
     expect(ledger?.getAttribute("aria-busy")).toBe("false");
     expect(ledger?.dataset).toMatchObject({
-      projectionVersion: "hakimi.bazi.strength_evidence_narrative/0.1.0",
+      projectionVersion: "hakimi.bazi.strength_evidence_narrative/0.2.0",
       contentVersion: "0.18.0",
       bindingState: "bound",
       includeHour: "true",
@@ -433,7 +433,7 @@ describe("BaziInterpretationPanel", () => {
       expect(evidenceLedger?.dataset.bindingState).toBe("bound");
     });
     expect(evidenceLedger?.dataset).toMatchObject({
-      projectionVersion: "hakimi.bazi.strength_evidence_narrative/0.1.0",
+      projectionVersion: "hakimi.bazi.strength_evidence_narrative/0.2.0",
       contentVersion: "0.18.0",
       includeHour: "false",
       claimCount: "12",

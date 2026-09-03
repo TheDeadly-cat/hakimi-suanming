@@ -1,0 +1,389 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hakimi.invalid/schemas/sw-ab-update-runtime-api-transcript-candidate-v1.json",
+  "title": "Hakimi SW runtime decoded browser API transcript candidate v1",
+  "$defs": {
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "RunId": {
+      "type": "string",
+      "pattern": "^run-[a-f0-9]{64}$"
+    },
+    "AttemptId": {
+      "type": "string",
+      "pattern": "^attempt-[a-f0-9]{64}$"
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ReleaseIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channel", "dbGeneration", "targetSchema", "migrationId"],
+      "properties": {
+        "channel": { "const": "default-v13" },
+        "dbGeneration": { "const": "legacy-v13" },
+        "targetSchema": { "const": 13 },
+        "migrationId": { "type": "null" }
+      }
+    },
+    "Capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mutationEpochCapability", "epoch"],
+      "properties": {
+        "mutationEpochCapability": { "const": "absent_schema13" },
+        "epoch": { "type": "null" }
+      }
+    },
+    "ArtifactBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "releaseEvidenceId",
+        "buildVersion",
+        "serviceWorkerSha256",
+        "artifactSetDigest"
+      ],
+      "properties": {
+        "label": { "enum": ["A", "B"] },
+        "releaseEvidenceId": {
+          "type": "string",
+          "pattern": "^hre1-[a-f0-9]{32}$"
+        },
+        "buildVersion": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{12}$"
+        },
+        "serviceWorkerSha256": { "$ref": "#/$defs/Sha256" },
+        "artifactSetDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "CaptureSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cdpApi",
+        "serviceWorkerMessageApi",
+        "serialization",
+        "cdpWireBytesCaptured",
+        "devtoolsWebSocketFramesCaptured",
+        "browserTransportAuthenticityVerified"
+      ],
+      "properties": {
+        "cdpApi": { "const": "playwright_cdp_session_decoded_object_v1" },
+        "serviceWorkerMessageApi": {
+          "const": "page_main_world_structured_clone_decoded_object_v1"
+        },
+        "serialization": { "const": "canonical_json_utf8_file_v1" },
+        "cdpWireBytesCaptured": { "const": false },
+        "devtoolsWebSocketFramesCaptured": { "const": false },
+        "browserTransportAuthenticityVerified": { "const": false }
+      }
+    },
+    "CanonicalExchange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestStartedAt",
+        "responseReceivedAt",
+        "request",
+        "response",
+        "canonicalRequestSha256",
+        "canonicalResponseSha256"
+      ],
+      "properties": {
+        "requestStartedAt": { "$ref": "#/$defs/Timestamp" },
+        "responseReceivedAt": { "$ref": "#/$defs/Timestamp" },
+        "request": { "type": "object" },
+        "response": { "type": "object" },
+        "canonicalRequestSha256": { "$ref": "#/$defs/Sha256" },
+        "canonicalResponseSha256": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "CdpSession": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surface",
+        "instanceNonce",
+        "createdAt",
+        "detachedAt",
+        "preChallenge",
+        "postChallenge"
+      ],
+      "properties": {
+        "surface": { "const": "playwright_cdp_session_decoded_object_v1" },
+        "instanceNonce": {
+          "type": "string",
+          "pattern": "^session-[a-f0-9]{64}$"
+        },
+        "createdAt": { "$ref": "#/$defs/Timestamp" },
+        "detachedAt": { "$ref": "#/$defs/Timestamp" },
+        "preChallenge": { "$ref": "#/$defs/CanonicalExchange" },
+        "postChallenge": { "$ref": "#/$defs/CanonicalExchange" }
+      }
+    },
+    "ServiceWorkerChallenge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surface",
+        "realm",
+        "requestStartedAt",
+        "responseReceivedAt",
+        "request",
+        "response",
+        "canonicalRequestSha256",
+        "canonicalResponseSha256"
+      ],
+      "properties": {
+        "surface": {
+          "const": "page_main_world_structured_clone_decoded_object_v1"
+        },
+        "realm": { "const": "page_main_world_untrusted" },
+        "requestStartedAt": { "$ref": "#/$defs/Timestamp" },
+        "responseReceivedAt": { "$ref": "#/$defs/Timestamp" },
+        "request": { "type": "object" },
+        "response": { "type": "object" },
+        "canonicalRequestSha256": { "$ref": "#/$defs/Sha256" },
+        "canonicalResponseSha256": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "TupleRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "recordType",
+        "projectName",
+        "phase",
+        "slot",
+        "sequence",
+        "startedAt",
+        "completedAt",
+        "pageUrlBefore",
+        "pageUrlAfter",
+        "cdpSession",
+        "serviceWorkerChallenge",
+        "recordDigest"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "recordType": { "const": "sw_ab_update_runtime_api_transcript_tuple_candidate_v1" },
+        "projectName": { "enum": ["msedge", "chrome"] },
+        "phase": { "enum": ["initial-a", "post-claim"] },
+        "slot": { "enum": ["retained-old-a", "reload-to-b"] },
+        "sequence": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "startedAt": { "$ref": "#/$defs/Timestamp" },
+        "completedAt": { "$ref": "#/$defs/Timestamp" },
+        "pageUrlBefore": { "type": "string", "minLength": 10, "maxLength": 2048 },
+        "pageUrlAfter": { "type": "string", "minLength": 10, "maxLength": 2048 },
+        "cdpSession": { "$ref": "#/$defs/CdpSession" },
+        "serviceWorkerChallenge": { "$ref": "#/$defs/ServiceWorkerChallenge" },
+        "recordDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "TupleBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "projectName",
+        "phase",
+        "slot",
+        "path",
+        "size",
+        "sha256",
+        "recordDigest"
+      ],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "projectName": { "enum": ["msedge", "chrome"] },
+        "phase": { "enum": ["initial-a", "post-claim"] },
+        "slot": { "enum": ["retained-old-a", "reload-to-b"] },
+        "path": {
+          "type": "string",
+          "pattern": "^[0-9]{2}-(?:msedge|chrome)-(?:initial-a|post-claim)-(?:retained-old-a|reload-to-b)\\.json$"
+        },
+        "size": { "type": "integer", "minimum": 2, "maximum": 524288 },
+        "sha256": { "$ref": "#/$defs/Sha256" },
+        "recordDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "SourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "path",
+        "size",
+        "rawSha256",
+        "canonicalSha256"
+      ],
+      "properties": {
+        "role": {
+          "enum": [
+            "api-transcript-policy",
+            "api-transcript-schema",
+            "runtime-capture-policy",
+            "runtime-capture-schema"
+          ]
+        },
+        "path": { "type": "string", "minLength": 10, "maxLength": 256 },
+        "size": { "type": "integer", "minimum": 2, "maximum": 4194304 },
+        "rawSha256": { "$ref": "#/$defs/Sha256" },
+        "canonicalSha256": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "callerSuppliedPageAuthenticityVerified",
+        "runtimeCollectorProvenanceVerified",
+        "browserBinaryProvenanceVerified",
+        "browserTransportAuthenticityVerified",
+        "osProcessRestartProvenanceVerified",
+        "twoClientRuntimeProvenanceVerified",
+        "serviceWorkerResponseProvenanceVerified",
+        "offlineTransportClosureVerified",
+        "attemptFreshnessExternallyVerified",
+        "bundleReplayResistanceVerified",
+        "concurrentFilesystemMutationResistanceVerified"
+      ],
+      "properties": {
+        "callerSuppliedPageAuthenticityVerified": { "const": false },
+        "runtimeCollectorProvenanceVerified": { "const": false },
+        "browserBinaryProvenanceVerified": { "const": false },
+        "browserTransportAuthenticityVerified": { "const": false },
+        "osProcessRestartProvenanceVerified": { "const": false },
+        "twoClientRuntimeProvenanceVerified": { "const": false },
+        "serviceWorkerResponseProvenanceVerified": { "const": false },
+        "offlineTransportClosureVerified": { "const": false },
+        "attemptFreshnessExternallyVerified": { "const": false },
+        "bundleReplayResistanceVerified": { "const": false },
+        "concurrentFilesystemMutationResistanceVerified": { "const": false }
+      }
+    },
+    "Authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "defaultV13ReceiptAllowlistMember",
+        "formalReleaseEvidenceReceipt",
+        "trustedProviderVerified",
+        "trustedHostVerified",
+        "trustedBrowserRuntimeVerified",
+        "deploymentReady",
+        "releaseReady",
+        "externalDeploymentExecutionAuthorized",
+        "publicDeploymentAuthorized",
+        "publicReleaseAuthorized",
+        "contentTruthAuthorized",
+        "expertClaimsAuthorized",
+        "rightsLegalConclusionAuthorized",
+        "schemaPromotionAuthorized"
+      ],
+      "properties": {
+        "defaultV13ReceiptAllowlistMember": { "const": false },
+        "formalReleaseEvidenceReceipt": { "const": false },
+        "trustedProviderVerified": { "const": false },
+        "trustedHostVerified": { "const": false },
+        "trustedBrowserRuntimeVerified": { "const": false },
+        "deploymentReady": { "const": false },
+        "releaseReady": { "const": false },
+        "externalDeploymentExecutionAuthorized": { "const": false },
+        "publicDeploymentAuthorized": { "const": false },
+        "publicReleaseAuthorized": { "const": false },
+        "contentTruthAuthorized": { "const": false },
+        "expertClaimsAuthorized": { "const": false },
+        "rightsLegalConclusionAuthorized": { "const": false },
+        "schemaPromotionAuthorized": { "const": false }
+      }
+    },
+    "Manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "recordType",
+        "trustClass",
+        "status",
+        "executionAdmission",
+        "usableForRuntimeEvidence",
+        "usableForCandidateAssembly",
+        "formalReleaseEvidenceReceipt",
+        "runId",
+        "attemptId",
+        "capturedAt",
+        "origin",
+        "releaseIdentity",
+        "capabilities",
+        "artifactBindings",
+        "captureSurface",
+        "tupleBindings",
+        "sourceBindings",
+        "sourceSetDigest",
+        "provenance",
+        "authority",
+        "bundleId",
+        "bundleDigest"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "recordType": { "const": "sw_ab_update_runtime_api_transcript_bundle_candidate_v1" },
+        "trustClass": { "const": "untrusted_decoded_browser_api_transcript_candidate" },
+        "status": { "const": "capture_incomplete" },
+        "executionAdmission": { "const": "closed_missing_selected_https_origin" },
+        "usableForRuntimeEvidence": { "const": false },
+        "usableForCandidateAssembly": { "const": false },
+        "formalReleaseEvidenceReceipt": { "const": false },
+        "runId": { "$ref": "#/$defs/RunId" },
+        "attemptId": { "$ref": "#/$defs/AttemptId" },
+        "capturedAt": { "$ref": "#/$defs/Timestamp" },
+        "origin": { "type": "string", "minLength": 10, "maxLength": 256 },
+        "releaseIdentity": { "$ref": "#/$defs/ReleaseIdentity" },
+        "capabilities": { "$ref": "#/$defs/Capabilities" },
+        "artifactBindings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["A", "B"],
+          "properties": {
+            "A": { "$ref": "#/$defs/ArtifactBinding" },
+            "B": { "$ref": "#/$defs/ArtifactBinding" }
+          }
+        },
+        "captureSurface": { "$ref": "#/$defs/CaptureSurface" },
+        "tupleBindings": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/TupleBinding" }
+        },
+        "sourceBindings": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/SourceBinding" }
+        },
+        "sourceSetDigest": { "$ref": "#/$defs/Sha256" },
+        "provenance": { "$ref": "#/$defs/Provenance" },
+        "authority": { "$ref": "#/$defs/Authority" },
+        "bundleId": {
+          "type": "string",
+          "pattern": "^swabapi1-[a-f0-9]{32}$"
+        },
+        "bundleDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/Manifest" },
+    { "$ref": "#/$defs/TupleRecord" }
+  ]
+}

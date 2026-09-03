@@ -5,6 +5,7 @@ import { calculateChart } from "@hakimi/bazi-core";
 import { sha256Hex } from "@hakimi/integrity";
 import { withDayBoundaryFromProfile, WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
 import { caseRepository } from "@hakimi/storage";
+import { clearBootGovernanceFixture, installLegacyV13BootGovernance } from "../test/boot-governance-fixture";
 import { ComparePage } from "./compare-page";
 
 const baseInput: BirthInput = {
@@ -66,14 +67,14 @@ function exactComparisonUrl(
 beforeEach(async () => {
   Object.defineProperty(window, "innerWidth", { configurable: true, value: 1280 });
   await caseRepository.clearAll();
-  document.documentElement.dataset.appBootReady = "true";
+  installLegacyV13BootGovernance();
   window.history.replaceState({}, "", "/compare");
   window.scrollTo = vi.fn();
 });
 
 afterEach(async () => {
   await caseRepository.clearAll();
-  delete document.documentElement.dataset.appBootReady;
+  clearBootGovernanceFixture();
   window.history.replaceState({}, "", "/compare");
   Object.defineProperty(window, "innerWidth", { configurable: true, value: ORIGINAL_INNER_WIDTH });
 });
@@ -85,7 +86,7 @@ describe("ComparePage", () => {
     render(<ComparePage />);
 
     expect(await screen.findByRole("heading", { name: "正式命盘对照台" })).toBeTruthy();
-    await screen.findByRole("heading", { name: "先保存两个正式命盘" });
+    await screen.findByRole("heading", { name: "先保存一张正式命盘" });
     expect(`${window.location.pathname}${window.location.search}`).toBe("/compare");
   });
 
@@ -120,7 +121,7 @@ describe("ComparePage", () => {
       const libraryStatus = screen.getByText("正在读取案例索引");
       expect(libraryStatus.closest('[role="status"]')).not.toBeNull();
       releaseLibrary();
-      const projectionStatus = await screen.findByText("正在验签修订并同步计算运限");
+      const projectionStatus = await screen.findByText("正在复核修订摘要、来源绑定并同步计算运限");
       expect(projectionStatus.closest('[role="status"]')).not.toBeNull();
 
       releaseProjection();
@@ -165,8 +166,10 @@ describe("ComparePage", () => {
 
     render(<ComparePage />);
 
-    const revisionSelect = await screen.findByRole("combobox", { name: "对照位 A 修订" });
-    expect((revisionSelect as HTMLSelectElement).value).toBe(original.id);
+    await screen.findByRole("combobox", { name: "对照位 A 修订" });
+    await waitFor(() => expect(
+      (screen.getByRole("combobox", { name: "对照位 A 修订" }) as HTMLSelectElement).value
+    ).toBe(original.id));
     fireEvent.click(screen.getByRole("button", { name: "生成并保存相反换日修订" }));
 
     const matrix = await screen.findByRole(
@@ -243,7 +246,7 @@ describe("ComparePage", () => {
       expect(matrix.dataset.differenceScope).toBe("active_pair");
       expect(screen.getByRole("heading", { name: /A ↔ C：/ })).toBeTruthy();
       expect(screen.getByText(/A · 窄屏基准甲 · R1 ↔ 当前 C · 窄屏比较丙 · R1/)).toBeTruthy();
-      expect(screen.getByRole("button", { name: "C · 窄屏比较丙" }).getAttribute("aria-pressed")).toBe("true");
+      expect(screen.getByRole("button", { name: "切换到比较盘 C：窄屏比较丙 · Revision 1" }).getAttribute("aria-pressed")).toBe("true");
       expect(screen.getByRole("link", {
         name: "从当前身份区研读 A：窄屏基准甲 · Revision 1"
       }).getAttribute("href")).toBe(
@@ -267,30 +270,30 @@ describe("ComparePage", () => {
       historyPushSpy.mockRestore();
 
       const sexRow = matrix.querySelector<HTMLElement>('[data-field-id="input.sex"]');
-      expect(sexRow?.querySelector("th")?.textContent).toContain("相同");
-      const differencesOnly = screen.getByRole("checkbox", { name: "只看当前 A–C 变化的字段" });
+      expect(sexRow?.querySelector("th")?.textContent).toContain("一致");
+      const differencesOnly = screen.getByRole("checkbox", { name: "只看当前 A–C 存在差异的字段" });
       fireEvent.click(differencesOnly);
       expect(matrix.querySelector('[data-field-id="input.sex"]')).toBeNull();
       expect(within(screen.getByRole("navigation", { name: "跳到差异分组" }))
         .queryByRole("link", { name: /四柱/ })).toBeNull();
 
-      fireEvent.click(screen.getByRole("button", { name: "D · 窄屏比较丁" }));
+      fireEvent.click(screen.getByRole("button", { name: "切换到比较盘 D：窄屏比较丁 · Revision 1" }));
       await waitFor(() => {
         expect(new URLSearchParams(window.location.search).get("focus")).toBe("D");
         expect(window.location.hash).toBe("#compare-section-pillar_fact");
         expect(matrix.querySelector('[data-field-id="input.sex"]')).not.toBeNull();
       });
-      expect(matrix.querySelector('[data-field-id="input.sex"] th')?.textContent).toContain("变化");
-      expect(screen.getByRole("checkbox", { name: "只看当前 A–D 变化的字段" })).toBeTruthy();
+      expect(matrix.querySelector('[data-field-id="input.sex"] th')?.textContent).toContain("不同");
+      expect(screen.getByRole("checkbox", { name: "只看当前 A–D 存在差异的字段" })).toBeTruthy();
       expect(screen.getByRole("link", {
         name: "从当前身份区研读 D：窄屏比较丁 · Revision 1"
       }).getAttribute("href")).toBe(
         `/cases/${fourth.caseRecord.id}/revisions/${fourth.revisions[0].id}?view=research`
       );
 
-      fireEvent.click(screen.getByRole("button", { name: "B · 窄屏比较乙" }));
+      fireEvent.click(screen.getByRole("button", { name: "切换到比较盘 B：窄屏比较乙 · Revision 1" }));
       await waitFor(() => expect(new URLSearchParams(window.location.search).has("focus")).toBe(false));
-      expect(screen.getByRole("button", { name: "B · 窄屏比较乙" }).getAttribute("aria-pressed")).toBe("true");
+      expect(screen.getByRole("button", { name: "切换到比较盘 B：窄屏比较乙 · Revision 1" }).getAttribute("aria-pressed")).toBe("true");
       expect(sourcesSpy).toHaveBeenCalledTimes(originalProjectionCalls);
       expect(document.querySelector<HTMLElement>(".comparison-evidence-footer code")?.textContent).toBe(resultHash);
     } finally {
@@ -312,11 +315,11 @@ describe("ComparePage", () => {
     render(<ComparePage />);
 
     await screen.findByRole("region", { name: "正式命盘字段对照表" });
-    expect(screen.getByRole("button", { name: "D · 焦点收缩样本4" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: "切换到比较盘 D：焦点收缩样本4 · Revision 1" }).getAttribute("aria-pressed")).toBe("true");
     fireEvent.click(screen.getByRole("button", { name: "移除对照位 D" }));
     await waitFor(() => {
       expect(new URLSearchParams(window.location.search).get("focus")).toBe("C");
-      expect(screen.getByRole("button", { name: "C · 焦点收缩样本3" }).getAttribute("aria-pressed")).toBe("true");
+      expect(screen.getByRole("button", { name: "切换到比较盘 C：焦点收缩样本3 · Revision 1" }).getAttribute("aria-pressed")).toBe("true");
     });
     expect(screen.queryByRole("alert")).toBeNull();
 
@@ -376,6 +379,9 @@ describe("ComparePage", () => {
     expect(new URLSearchParams(window.location.search).get("focus")).toBe("C");
 
     fireEvent.change(middleCase, { target: { value: bundles[1].caseRecord.id } });
+    const middleRevision = screen.getByRole("combobox", { name: "对照位 B 修订" });
+    await waitFor(() => expect((middleRevision as HTMLSelectElement).disabled).toBe(false));
+    fireEvent.change(middleRevision, { target: { value: bundles[1].revisions[0].id } });
     await screen.findByRole("region", { name: "正式命盘字段对照表" });
     await waitFor(() => expect(`${window.location.pathname}${window.location.search}`).toBe(requestedRoute));
   }, 15_000);
@@ -415,8 +421,8 @@ describe("ComparePage", () => {
     const boundHeader = within(matrix).getByRole("columnheader", { name: /绑定规则包盘/ });
     const unboundHeader = within(matrix).getByRole("columnheader", { name: /内置规则盘/ });
     expect(boundHeader.textContent).toContain(`规则包 ${binding.packId} · exact`);
-    expect(unboundHeader.textContent).toContain("内置 / 未绑定规则快照");
-    const selectionRegion = screen.getByRole("group", { name: "正式命盘对照位" });
+    expect(unboundHeader.textContent).toContain("未提供规则包绑定 · 不推断迁移");
+    const selectionRegion = screen.getByRole("group", { name: /正式命盘对照位/ });
     expect(selectionRegion.textContent).toContain(`${binding.packId} · exact`);
     expect(selectionRegion.textContent).toContain("内置 / 未绑定规则快照");
   });
@@ -439,7 +445,7 @@ describe("ComparePage", () => {
       expect(row).not.toBeNull();
       expect(row?.querySelectorAll("td")).toHaveLength(2);
     }
-    expect(screen.getByText("2026-08-01T12:30:00.000Z")).toBeTruthy();
+    expect(screen.getByLabelText("当前已提交的 UTC 瞬时点").textContent).toBe("2026-08-01T12:30:00.000Z");
     expect(new URLSearchParams(window.location.search).get("at")).toBe("2026-08-01T12:30:00.000Z");
   });
 
@@ -562,8 +568,10 @@ describe("ComparePage", () => {
 
     render(<ComparePage />);
 
-    const revisionSelect = await screen.findByRole("combobox", { name: "对照位 A 修订" });
-    expect((revisionSelect as HTMLSelectElement).value).toBe(revision.id);
+    await screen.findByRole("combobox", { name: "对照位 A 修订" });
+    await waitFor(() => expect(
+      (screen.getByRole("combobox", { name: "对照位 A 修订" }) as HTMLSelectElement).value
+    ).toBe(revision.id));
     await waitFor(() => {
       const params = new URLSearchParams(window.location.search);
       expect(params.getAll("item")).toEqual([`revision:${bundle.caseRecord.id}:${revision.id}`]);

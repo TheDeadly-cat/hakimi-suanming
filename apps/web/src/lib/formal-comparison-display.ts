@@ -113,14 +113,14 @@ export function buildFormalComparisonDisplay(
       if (row.category !== section.category) {
         throw new RangeError(`字段 ${row.id} 的分组身份与所在分组不一致。`);
       }
+      if (row.cells.length !== matrix.items.length) {
+        throw new RangeError(`字段 ${row.id} 的单元格数量与当前对照盘数量不一致。`);
+      }
       if (
         row.values.length !== row.cells.length ||
         row.values.some((value, index) => value !== row.cells[index]?.value)
       ) {
         throw new RangeError(`字段 ${row.id} 的展示值与单元格证据不一致。`);
-      }
-      if (row.cells.length !== matrix.items.length) {
-        throw new RangeError(`字段 ${row.id} 的单元格数量与当前对照盘数量不一致。`);
       }
       const derived = displayStateForCells(row.cells);
       if (row.status !== derived.status || row.different !== derived.different) {

@@ -1,0 +1,518 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hakimi.invalid/schemas/sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition-v2.json",
+  "title": "Hakimi SW A-to-B candidate runtime transcript collector issuance producer-bridge composition v2",
+  "$defs": {
+    "Sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    },
+    "RelativePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*//)(?!.*\\/$)[A-Za-z0-9._/-]+$"
+    },
+    "ReleaseIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channel", "dbGeneration", "targetSchema", "migrationId"],
+      "properties": {
+        "channel": { "const": "default-v13" },
+        "dbGeneration": { "const": "legacy-v13" },
+        "targetSchema": { "const": 13 },
+        "migrationId": { "const": null }
+      }
+    },
+    "Capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mutationEpochCapability", "epoch"],
+      "properties": {
+        "mutationEpochCapability": { "const": "absent_schema13" },
+        "epoch": { "const": null }
+      }
+    },
+    "ArtifactBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "releaseEvidenceId", "buildVersion", "serviceWorkerSha256", "artifactSetDigest"],
+      "properties": {
+        "label": { "enum": ["A", "B"] },
+        "releaseEvidenceId": { "type": "string", "pattern": "^hre1-[a-f0-9]{32}$" },
+        "buildVersion": { "type": "string", "pattern": "^[a-f0-9]{12}$" },
+        "serviceWorkerSha256": { "$ref": "#/$defs/Sha256" },
+        "artifactSetDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "FileBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "sha256"],
+      "properties": {
+        "path": { "$ref": "#/$defs/RelativePath" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 33554432 },
+        "sha256": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "CandidateInputBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "rawSha256", "evidenceDigest", "capturedAt", "heldIdentityDigest"],
+      "properties": {
+        "path": { "$ref": "#/$defs/RelativePath" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 33554432 },
+        "rawSha256": { "$ref": "#/$defs/Sha256" },
+        "evidenceDigest": { "$ref": "#/$defs/Sha256" },
+        "capturedAt": { "$ref": "#/$defs/Timestamp" },
+        "heldIdentityDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "RuntimeInputBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "rawSha256", "canonicalSha256", "evidenceDigest", "capturedAt", "heldIdentityDigest"],
+      "properties": {
+        "path": { "$ref": "#/$defs/RelativePath" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 33554432 },
+        "rawSha256": { "$ref": "#/$defs/Sha256" },
+        "canonicalSha256": { "$ref": "#/$defs/Sha256" },
+        "evidenceDigest": { "$ref": "#/$defs/Sha256" },
+        "capturedAt": { "$ref": "#/$defs/Timestamp" },
+        "heldIdentityDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "PublicationInputBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "rawSha256", "canonicalSha256", "bridgeId", "publicationDigest", "heldIdentityDigest"],
+      "properties": {
+        "path": { "$ref": "#/$defs/RelativePath" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 33554432 },
+        "rawSha256": { "$ref": "#/$defs/Sha256" },
+        "canonicalSha256": { "$ref": "#/$defs/Sha256" },
+        "bridgeId": { "type": "string", "pattern": "^swabpb1-[a-f0-9]{32}$" },
+        "publicationDigest": { "$ref": "#/$defs/Sha256" },
+        "heldIdentityDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "SourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "path", "size", "rawSha256", "canonicalSha256"],
+      "properties": {
+        "role": {
+          "enum": [
+            "producer-bridge-composition-v2-policy",
+            "producer-bridge-composition-v2-schema",
+            "two-chain-composition-policy",
+            "two-chain-composition-schema",
+            "sw-ab-update-candidate-policy",
+            "sw-ab-update-candidate-schema",
+            "runtime-client-capture-policy",
+            "runtime-client-capture-schema",
+            "runtime-api-transcript-policy",
+            "runtime-api-transcript-schema",
+            "runtime-collector-issuance-policy",
+            "runtime-collector-issuance-schema",
+            "runtime-derived-evidence-producer-bridge-policy",
+            "runtime-derived-evidence-producer-bridge-schema"
+          ]
+        },
+        "path": { "$ref": "#/$defs/RelativePath" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 8388608 },
+        "rawSha256": { "$ref": "#/$defs/Sha256" },
+        "canonicalSha256": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "DerivedEvidenceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "rawSha256", "canonicalSha256", "semanticDigest"],
+      "properties": {
+        "path": { "const": "01-derived-runtime-client-capture.json" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 33554432 },
+        "rawSha256": { "$ref": "#/$defs/Sha256" },
+        "canonicalSha256": { "$ref": "#/$defs/Sha256" },
+        "semanticDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "RuntimeTuple": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence", "projectName", "phase", "slot", "observedAt",
+        "pseudonymousClientId", "pseudonymousTargetId", "challengeNonce",
+        "runtimeRequestDigest", "runtimeResponseDigest", "runtimeObservationDigest"
+      ],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "projectName": { "enum": ["msedge", "chrome"] },
+        "phase": { "enum": ["initial-a", "post-claim"] },
+        "slot": { "enum": ["retained-old-a", "reload-to-b"] },
+        "observedAt": { "$ref": "#/$defs/Timestamp" },
+        "pseudonymousClientId": { "type": "string", "pattern": "^client-[a-f0-9]{64}$" },
+        "pseudonymousTargetId": { "type": "string", "pattern": "^target-[a-f0-9]{64}$" },
+        "challengeNonce": { "type": "string", "pattern": "^challenge-[a-f0-9]{64}$" },
+        "runtimeRequestDigest": { "$ref": "#/$defs/Sha256" },
+        "runtimeResponseDigest": { "$ref": "#/$defs/Sha256" },
+        "runtimeObservationDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "ClientMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence", "projectName", "phase", "slot", "artifactLabel", "documentTag",
+        "controllerTag", "controllerChangeCount", "pseudonymousClientId",
+        "pseudonymousTargetId", "challengeNonce", "candidateChallengeResponseDigest",
+        "runtimeRequestDigest", "runtimeResponseDigest", "runtimeObservationDigest",
+        "runtimeObservedAt", "mappingDigest"
+      ],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "projectName": { "enum": ["msedge", "chrome"] },
+        "phase": { "enum": ["initial-a", "post-claim"] },
+        "slot": { "enum": ["retained-old-a", "reload-to-b"] },
+        "artifactLabel": { "enum": ["A", "B"] },
+        "documentTag": { "enum": ["A", "B"] },
+        "controllerTag": { "enum": ["A", "B"] },
+        "controllerChangeCount": { "type": "integer", "minimum": 0, "maximum": 1 },
+        "pseudonymousClientId": { "type": "string", "pattern": "^client-[a-f0-9]{64}$" },
+        "pseudonymousTargetId": { "type": "string", "pattern": "^target-[a-f0-9]{64}$" },
+        "challengeNonce": { "type": "string", "pattern": "^challenge-[a-f0-9]{64}$" },
+        "candidateChallengeResponseDigest": { "$ref": "#/$defs/Sha256" },
+        "runtimeRequestDigest": { "$ref": "#/$defs/Sha256" },
+        "runtimeResponseDigest": { "$ref": "#/$defs/Sha256" },
+        "runtimeObservationDigest": { "$ref": "#/$defs/Sha256" },
+        "runtimeObservedAt": { "$ref": "#/$defs/Timestamp" },
+        "mappingDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "BrowserChronology": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projectName", "capturedAt", "twoArtifactAClientsControlledAt",
+        "artifactBActivationAndClaimObservedAt", "oneADocumentReloadedToBAt",
+        "staleAProductionWriteRejectedAt"
+      ],
+      "properties": {
+        "projectName": { "enum": ["msedge", "chrome"] },
+        "capturedAt": { "$ref": "#/$defs/Timestamp" },
+        "twoArtifactAClientsControlledAt": { "$ref": "#/$defs/Timestamp" },
+        "artifactBActivationAndClaimObservedAt": { "$ref": "#/$defs/Timestamp" },
+        "oneADocumentReloadedToBAt": { "$ref": "#/$defs/Timestamp" },
+        "staleAProductionWriteRejectedAt": { "$ref": "#/$defs/Timestamp" }
+      }
+    },
+    "Attempts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["networkAttempted", "browserAttempted", "deploymentAttempted", "rollbackAttempted", "gitAttempted"],
+      "properties": {
+        "networkAttempted": { "const": false },
+        "browserAttempted": { "const": false },
+        "deploymentAttempted": { "const": false },
+        "rollbackAttempted": { "const": false },
+        "gitAttempted": { "const": false }
+      }
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateProducerProvenanceVerified", "trustedProducerBridgeVerified",
+        "runtimeCollectorProvenanceVerified", "callerSuppliedObservationAuthenticityVerified",
+        "browserObjectIssuanceAuthenticityVerified", "browserBinaryProvenanceVerified",
+        "browserRuntimeProvenanceVerified", "browserTransportAuthenticityVerified",
+        "realBrowserExecutionVerified", "realHttpsHostVerified", "externalAttemptFreshnessVerified",
+        "bundleReplayResistanceVerified", "deploymentExecutionVerified", "rollbackExecutionVerified",
+        "releaseReadinessVerified", "contentTruthVerified", "expertClaimsVerified",
+        "rightsLegalConclusionVerified"
+      ],
+      "properties": {
+        "candidateProducerProvenanceVerified": { "const": false },
+        "trustedProducerBridgeVerified": { "const": false },
+        "runtimeCollectorProvenanceVerified": { "const": false },
+        "callerSuppliedObservationAuthenticityVerified": { "const": false },
+        "browserObjectIssuanceAuthenticityVerified": { "const": false },
+        "browserBinaryProvenanceVerified": { "const": false },
+        "browserRuntimeProvenanceVerified": { "const": false },
+        "browserTransportAuthenticityVerified": { "const": false },
+        "realBrowserExecutionVerified": { "const": false },
+        "realHttpsHostVerified": { "const": false },
+        "externalAttemptFreshnessVerified": { "const": false },
+        "bundleReplayResistanceVerified": { "const": false },
+        "deploymentExecutionVerified": { "const": false },
+        "rollbackExecutionVerified": { "const": false },
+        "releaseReadinessVerified": { "const": false },
+        "contentTruthVerified": { "const": false },
+        "expertClaimsVerified": { "const": false },
+        "rightsLegalConclusionVerified": { "const": false }
+      }
+    },
+    "Authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "defaultV13ReceiptAllowlistMember", "formalReleaseEvidenceReceipt",
+        "trustedProviderVerified", "trustedHostVerified", "trustedBrowserRuntimeVerified",
+        "deploymentReady", "releaseReady", "externalDeploymentExecutionAuthorized",
+        "publicDeploymentAuthorized", "publicReleaseAuthorized", "contentTruthAuthorized",
+        "expertClaimsAuthorized", "rightsLegalConclusionAuthorized", "schemaPromotionAuthorized"
+      ],
+      "properties": {
+        "defaultV13ReceiptAllowlistMember": { "const": false },
+        "formalReleaseEvidenceReceipt": { "const": false },
+        "trustedProviderVerified": { "const": false },
+        "trustedHostVerified": { "const": false },
+        "trustedBrowserRuntimeVerified": { "const": false },
+        "deploymentReady": { "const": false },
+        "releaseReady": { "const": false },
+        "externalDeploymentExecutionAuthorized": { "const": false },
+        "publicDeploymentAuthorized": { "const": false },
+        "publicReleaseAuthorized": { "const": false },
+        "contentTruthAuthorized": { "const": false },
+        "expertClaimsAuthorized": { "const": false },
+        "rightsLegalConclusionAuthorized": { "const": false },
+        "schemaPromotionAuthorized": { "const": false }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "policyId", "evidenceClass", "producerBridgeStatus",
+    "candidateBridgeArtifactPresent", "trustedProducerBridgeVerified",
+    "runAttemptIdentifiersMatched", "runAttemptCoordinationStatus",
+    "runAttemptCoordinationVerified", "candidateProducerBoundToIssuanceAttempt",
+    "recordType", "verificationKind", "trustClass",
+    "status", "executionAdmission", "strictGatePassed", "runtimeAdmissionPassed",
+    "admissionPassed", "usableForRuntimeEvidence", "usableForCandidateAssembly",
+    "usableForAdmission", "formalReleaseEvidenceReceipt", "cliExitCode", "compositionId",
+    "scope", "artifactBindings", "inputBindings", "oldCompositionBinding",
+    "transcriptBinding", "issuanceBinding", "producerBridgeBinding", "runtimeTupleBindings",
+    "clientMappings", "chronologyBindings", "sourceBindings", "sourceSetDigest",
+    "runAttemptBoundary", "mechanicalChecks", "mutationBoundary", "attempts",
+    "provenance", "authority", "limitations", "compositionDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "policyId": { "const": "hakimi.web-v1.sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition/v2" },
+    "evidenceClass": { "const": "offline_untrusted_four_chain_producer_bridge_composition_candidate" },
+    "producerBridgeStatus": { "const": "producer_bridge_present_mechanically_untrusted" },
+    "candidateBridgeArtifactPresent": { "const": true },
+    "trustedProducerBridgeVerified": { "const": false },
+    "runAttemptIdentifiersMatched": { "const": true },
+    "runAttemptCoordinationStatus": { "const": "run_attempt_coordination_absent" },
+    "runAttemptCoordinationVerified": { "const": false },
+    "candidateProducerBoundToIssuanceAttempt": { "const": false },
+    "recordType": { "const": "sw_ab_update_candidate_runtime_client_capture_collector_issuance_producer_bridge_composition_v2" },
+    "verificationKind": { "const": "offline_four_chain_producer_bridge_primary_input_and_issuance_overlap_v2" },
+    "trustClass": { "const": "untrusted_four_chain_producer_bridge_composition_candidate" },
+    "status": { "const": "not_admitted" },
+    "executionAdmission": { "const": "closed_missing_selected_https_origin" },
+    "strictGatePassed": { "const": false },
+    "runtimeAdmissionPassed": { "const": false },
+    "admissionPassed": { "const": false },
+    "usableForRuntimeEvidence": { "const": false },
+    "usableForCandidateAssembly": { "const": false },
+    "usableForAdmission": { "const": false },
+    "formalReleaseEvidenceReceipt": { "const": false },
+    "cliExitCode": { "const": 1 },
+    "compositionId": { "type": "string", "pattern": "^swab4pb2-[a-f0-9]{32}$" },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runId", "attemptId", "canonicalHttpsOrigin", "releaseIdentity", "capabilities", "browserProjects", "phases", "slots"],
+      "properties": {
+        "runId": { "type": "string", "pattern": "^run-[a-f0-9]{64}$" },
+        "attemptId": { "type": "string", "pattern": "^attempt-[a-f0-9]{64}$" },
+        "canonicalHttpsOrigin": { "type": "string", "pattern": "^https://" },
+        "releaseIdentity": { "$ref": "#/$defs/ReleaseIdentity" },
+        "capabilities": { "$ref": "#/$defs/Capabilities" },
+        "browserProjects": { "type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": { "enum": ["msedge", "chrome"] } },
+        "phases": { "type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": { "enum": ["initial-a", "post-claim"] } },
+        "slots": { "type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": { "enum": ["retained-old-a", "reload-to-b"] } }
+      }
+    },
+    "artifactBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["A", "B"],
+      "properties": { "A": { "$ref": "#/$defs/ArtifactBinding" }, "B": { "$ref": "#/$defs/ArtifactBinding" } }
+    },
+    "inputBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate", "runtimeCapture", "producerBridgePublication"],
+      "properties": {
+        "candidate": { "$ref": "#/$defs/CandidateInputBinding" },
+        "runtimeCapture": { "$ref": "#/$defs/RuntimeInputBinding" },
+        "producerBridgePublication": { "$ref": "#/$defs/PublicationInputBinding" }
+      }
+    },
+    "oldCompositionBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compositionId", "compositionDigest", "sourceSetDigest"],
+      "properties": {
+        "compositionId": { "type": "string", "pattern": "^swabrc1-[a-f0-9]{32}$" },
+        "compositionDigest": { "$ref": "#/$defs/Sha256" },
+        "sourceSetDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "transcriptBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bundleId", "bundleDigest", "derivedEvidenceDigest", "manifestBinding", "tupleBindings", "endpointFingerprintDigest"],
+      "properties": {
+        "bundleId": { "type": "string", "pattern": "^swabapi1-[a-f0-9]{32}$" },
+        "bundleDigest": { "$ref": "#/$defs/Sha256" },
+        "derivedEvidenceDigest": { "$ref": "#/$defs/Sha256" },
+        "manifestBinding": { "$ref": "#/$defs/FileBinding" },
+        "tupleBindings": { "type": "array", "minItems": 8, "maxItems": 8, "items": { "$ref": "#/$defs/FileBinding" } },
+        "endpointFingerprintDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "issuanceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issuanceId", "receiptDigest", "bundleId", "bundleDigest", "derivedEvidenceDigest", "markerBinding", "receiptBinding", "endpointFingerprintDigest"],
+      "properties": {
+        "issuanceId": { "type": "string", "pattern": "^swabci1-[a-f0-9]{32}$" },
+        "receiptDigest": { "$ref": "#/$defs/Sha256" },
+        "bundleId": { "type": "string", "pattern": "^swabapi1-[a-f0-9]{32}$" },
+        "bundleDigest": { "$ref": "#/$defs/Sha256" },
+        "derivedEvidenceDigest": { "$ref": "#/$defs/Sha256" },
+        "markerBinding": { "$ref": "#/$defs/FileBinding" },
+        "receiptBinding": { "$ref": "#/$defs/FileBinding" },
+        "endpointFingerprintDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "producerBridgeBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bridgeId", "publicationDigest", "producerBridgeStatus", "issuanceId", "receiptDigest", "bundleId", "bundleDigest", "derivedEvidenceBinding", "sourceSetDigest", "endpointFingerprintDigest"],
+      "properties": {
+        "bridgeId": { "type": "string", "pattern": "^swabpb1-[a-f0-9]{32}$" },
+        "publicationDigest": { "$ref": "#/$defs/Sha256" },
+        "producerBridgeStatus": { "const": "producer_bridge_present_mechanically_untrusted" },
+        "issuanceId": { "type": "string", "pattern": "^swabci1-[a-f0-9]{32}$" },
+        "receiptDigest": { "$ref": "#/$defs/Sha256" },
+        "bundleId": { "type": "string", "pattern": "^swabapi1-[a-f0-9]{32}$" },
+        "bundleDigest": { "$ref": "#/$defs/Sha256" },
+        "derivedEvidenceBinding": { "$ref": "#/$defs/DerivedEvidenceBinding" },
+        "sourceSetDigest": { "$ref": "#/$defs/Sha256" },
+        "endpointFingerprintDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "runtimeTupleBindings": { "type": "array", "minItems": 8, "maxItems": 8, "items": { "$ref": "#/$defs/RuntimeTuple" } },
+    "clientMappings": { "type": "array", "minItems": 8, "maxItems": 8, "items": { "$ref": "#/$defs/ClientMapping" } },
+    "chronologyBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["edgeTwoAClientsReadyAt", "chromeTwoAClientsReadyAt", "artifactBProviderSwitchStartedAt", "bothBrowsersBActivatedAndClaimedAt", "bothOldAWritesRejectedAt", "browserReceipts", "runtimeCaptureCapturedAt", "candidateCapturedAt"],
+      "properties": {
+        "edgeTwoAClientsReadyAt": { "$ref": "#/$defs/Timestamp" },
+        "chromeTwoAClientsReadyAt": { "$ref": "#/$defs/Timestamp" },
+        "artifactBProviderSwitchStartedAt": { "$ref": "#/$defs/Timestamp" },
+        "bothBrowsersBActivatedAndClaimedAt": { "$ref": "#/$defs/Timestamp" },
+        "bothOldAWritesRejectedAt": { "$ref": "#/$defs/Timestamp" },
+        "browserReceipts": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/BrowserChronology" } },
+        "runtimeCaptureCapturedAt": { "$ref": "#/$defs/Timestamp" },
+        "candidateCapturedAt": { "$ref": "#/$defs/Timestamp" }
+      }
+    },
+    "sourceBindings": { "type": "array", "minItems": 14, "maxItems": 14, "uniqueItems": true, "items": { "$ref": "#/$defs/SourceBinding" } },
+    "sourceSetDigest": { "$ref": "#/$defs/Sha256" },
+    "runAttemptBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runAttemptIdentifiersMatched", "runAttemptCoordinationStatus", "runAttemptCoordinationVerified", "candidateProducerBoundToIssuanceAttempt"],
+      "properties": {
+        "runAttemptIdentifiersMatched": { "const": true },
+        "runAttemptCoordinationStatus": { "const": "run_attempt_coordination_absent" },
+        "runAttemptCoordinationVerified": { "const": false },
+        "candidateProducerBoundToIssuanceAttempt": { "const": false }
+      }
+    },
+    "mechanicalChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "oldTwoChainCompositionReverified", "fixedBridgeRuntimeInputEnforced",
+        "candidateAndBridgePrimaryInputsHeldAcrossIssuance", "issuanceCheckpointCalledExactlyOnce",
+        "issuanceCheckpointPhaseMatched", "allCompositionBranchesSettledInsideIssuanceHeldWindow",
+        "independentTranscriptReverifiedInsideIssuanceHeldWindow",
+        "producerBridgeReverifiedInsideIssuanceHeldWindow",
+        "nestedSourceBytesAndCanonicalDigestsMatched", "physicalAliasRejectedExceptExactSharedEndpoints",
+        "scopeArtifactAndEvidenceDigestsMatched", "bridgeRawCanonicalAndSemanticDigestsMatched",
+        "exactPhaseMajorTupleProjectionMatched", "runAttemptIdentifiersMatched",
+        "runAttemptCoordinationVerified", "issuanceFilesHeldAcrossCompositionBranches",
+        "allEvidenceFilesContinuouslyHeldAcrossCaptureAndComposition", "endpointStabilityVerified",
+        "compositionDigestMatched"
+      ],
+      "properties": {
+        "oldTwoChainCompositionReverified": { "const": true },
+        "fixedBridgeRuntimeInputEnforced": { "const": true },
+        "candidateAndBridgePrimaryInputsHeldAcrossIssuance": { "const": true },
+        "issuanceCheckpointCalledExactlyOnce": { "const": true },
+        "issuanceCheckpointPhaseMatched": { "const": true },
+        "allCompositionBranchesSettledInsideIssuanceHeldWindow": { "const": true },
+        "independentTranscriptReverifiedInsideIssuanceHeldWindow": { "const": true },
+        "producerBridgeReverifiedInsideIssuanceHeldWindow": { "const": true },
+        "nestedSourceBytesAndCanonicalDigestsMatched": { "const": true },
+        "physicalAliasRejectedExceptExactSharedEndpoints": { "const": true },
+        "scopeArtifactAndEvidenceDigestsMatched": { "const": true },
+        "bridgeRawCanonicalAndSemanticDigestsMatched": { "const": true },
+        "exactPhaseMajorTupleProjectionMatched": { "const": true },
+        "runAttemptIdentifiersMatched": { "const": true },
+        "runAttemptCoordinationVerified": { "const": false },
+        "issuanceFilesHeldAcrossCompositionBranches": { "const": true },
+        "allEvidenceFilesContinuouslyHeldAcrossCaptureAndComposition": { "const": false },
+        "endpointStabilityVerified": { "const": true },
+        "compositionDigestMatched": { "const": true }
+      }
+    },
+    "mutationBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidateAndBridgePrimaryInputsHeldAcrossIssuance", "issuanceFilesHeldAcrossCompositionBranches", "allEvidenceFilesContinuouslyHeldAcrossCaptureAndComposition", "continuousMutationEpochVerified", "samePermissionMutationExcluded", "intervalMutationExcluded", "abaExcluded", "mutationEpochCapability", "epoch"],
+      "properties": {
+        "candidateAndBridgePrimaryInputsHeldAcrossIssuance": { "const": true },
+        "issuanceFilesHeldAcrossCompositionBranches": { "const": true },
+        "allEvidenceFilesContinuouslyHeldAcrossCaptureAndComposition": { "const": false },
+        "continuousMutationEpochVerified": { "const": false },
+        "samePermissionMutationExcluded": { "const": false },
+        "intervalMutationExcluded": { "const": false },
+        "abaExcluded": { "const": false },
+        "mutationEpochCapability": { "const": "absent_schema13" },
+        "epoch": { "const": null }
+      }
+    },
+    "attempts": { "$ref": "#/$defs/Attempts" },
+    "provenance": { "$ref": "#/$defs/Provenance" },
+    "authority": { "$ref": "#/$defs/Authority" },
+    "limitations": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "producer_bridge_is_mechanically_present_but_untrusted",
+          "matching_run_attempt_identifiers_do_not_establish_natural_candidate_coordination",
+          "candidate_producer_is_not_bound_to_the_issuance_attempt",
+          "four_bound_views_share_producer_lineage_and_are_not_independent_attestations",
+          "schema13_has_no_mutation_epoch_and_no_epoch_is_fabricated",
+          "composition_does_not_authorize_runtime_admission_deployment_release_content_expert_or_rights_claims"
+        ]
+      }
+    },
+    "compositionDigest": { "$ref": "#/$defs/Sha256" }
+  }
+}

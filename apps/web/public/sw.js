@@ -2,6 +2,10 @@ const CACHE_PREFIX = "hakimi-shell-";
 const CACHE_VERSION = "__CACHE_VERSION__";
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 const CACHE_META_URL = new URL("/__hakimi_cache_meta__", self.location.origin).toString();
+const CONTROLLER_TAKEOVER_HOLD_URL = new URL(
+  "/__hakimi_controller_takeover_hold_v1__",
+  self.location.origin
+).toString();
 const MAX_CACHE_GENERATIONS = 2;
 const RELEASE_CONTROL_DATABASE = "hakimi-bazi-release-control";
 const RELEASE_CONTROL_STORE = "releaseState";
@@ -9,6 +13,30 @@ const RELEASE_CONTROL_KEY = "current";
 const SUPPORTED_RELEASE_PROTOCOL_VERSION = 1;
 const CLIENT_FREEZE_LEASE_MS = 30_000;
 const CLIENT_DRAFT_CLEANUP_TIMEOUT_MS = 5_000;
+const CONTROLLER_TAKEOVER_CLIENT_TIMEOUT_MS = 15_000;
+const CONTROLLER_TAKEOVER_PREPARATION_TIMEOUT_MS = 60_000;
+const CONTROLLER_TAKEOVER_MAX_CLIENT_PASSES = 32;
+const CONTROLLER_TAKEOVER_ACK_REASON_CODES = new Set([
+  "PROTOCOL_MISMATCH",
+  "TAKEOVER_SESSION_BUSY",
+  "TAKEOVER_HOLD_PRESENT",
+  "TAKEOVER_HOLD_STATUS_UNKNOWN",
+  "WAITING_WORKER_NOT_INSTALLED",
+  "WAITING_PREPARATION_TIMEOUT",
+  "WAITING_PREPARATION_REJECTED",
+  "WAITING_PREPARATION_POST_FAILED",
+  "TAKEOVER_SESSION_CANCELLED",
+  "SOURCE_CLIENT_NOT_ENUMERATED",
+  "CLIENT_NOT_FROZEN",
+  "CLIENT_SET_DID_NOT_STABILIZE",
+  "TAKEOVER_HOLD_PERSIST_FAILED",
+  "TAKEOVER_HOLD_CLEAR_FAILED",
+  "WAITING_COMMIT_OUTCOME_UNKNOWN",
+  "WAITING_COMMIT_KNOWN_REJECTED:PROTOCOL_MISMATCH",
+  "WAITING_COMMIT_KNOWN_REJECTED:SKIP_WAITING_FAILED",
+  "TAKEOVER_PREPARATION_FAILED",
+  "ALL_CLIENTS_DRAINED_BEFORE_SKIP_WAITING"
+]);
 const RELEASE_DATABASE = JSON.parse("__RELEASE_DATABASE_DESCRIPTOR__");
 const LEGACY_BRIDGE_DATABASE = Object.freeze(JSON.parse("__BRIDGE_RELEASE_DATABASE_DESCRIPTOR__"));
 const BUILD_ASSETS = [];
@@ -24,6 +52,10 @@ const STATIC_PATHS = new Set(APP_SHELL.map((path) => new URL(path, self.location
 const clientCacheNames = new Map();
 let activationStarted = false;
 let activeClientFreezeSession = null;
+let activeControllerTakeoverSession = null;
+let pendingInstalledGenerationActivation = null;
+const knownRejectedWaitingCommitErrors = new WeakSet();
+let completedMigrationResolutionReceipt = null;
 
 function isRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -39,6 +71,15 @@ function isSchemaVersion(value) {
 
 function isNullableString(value) {
   return value === null || isNonEmptyString(value);
+}
+
+function isControllerTakeoverRequestId(value) {
+  return typeof value === "string" &&
+    /^takeover-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(value);
+}
+
+function isControllerTakeoverChallengeNonce(value) {
+  return typeof value === "string" && /^challenge-[a-f0-9]{64}$/.test(value);
 }
 
 function normalizeAcceptedCommittedMigrationIds(value, primaryMigrationId) {
@@ -163,6 +204,48 @@ function descriptorsEqual(left, right) {
   }
 }
 
+const RELEASE_DESCRIPTOR_KEYS = [
+  "acceptedCommittedMigrationIds",
+  "databaseName",
+  "dbGeneration",
+  "maxReadableSchema",
+  "migrationId",
+  "minReadableSchema",
+  "protocolVersion",
+  "sourceDatabaseName",
+  "sourceGeneration",
+  "sourceSchema",
+  "targetSchema"
+];
+
+function normalizeExactReleaseDescriptor(value) {
+  if (
+    !isRecord(value) ||
+    Object.keys(value).sort().join(",") !== RELEASE_DESCRIPTOR_KEYS.join(",")
+  ) return undefined;
+  return normalizeReleaseDescriptor(value);
+}
+
+function releaseTransitionCanTakeOver(source, target) {
+  // Controller takeover is deliberately same-Schema and same-descriptor.
+  // Cross-Schema releases have a separate migration freeze/commit protocol.
+  return descriptorsEqual(source, target);
+}
+
+function isServiceWorkerMessageSource(source) {
+  return isRecord(source) &&
+    typeof source.id !== "string" &&
+    typeof source.scriptURL === "string" &&
+    typeof source.state === "string" &&
+    typeof source.postMessage === "function";
+}
+
+function createControllerTakeoverChallengeNonce() {
+  const bytes = new Uint8Array(32);
+  self.crypto.getRandomValues(bytes);
+  return `challenge-${Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
+}
+
 function isLegacyBridgeDescriptor(descriptor) {
   return descriptorsEqual(descriptor, LEGACY_BRIDGE_DATABASE);
 }
@@ -172,6 +255,9 @@ self.addEventListener("install", (event) => {
     (async () => {
       const cache = await caches.open(CACHE_NAME);
       try {
+        // An exact A build may be installed again during an authorized B -> A
+        // rollback. Never inherit its earlier A -> B uncertainty marker.
+        await cache.delete(CONTROLLER_TAKEOVER_HOLD_URL);
         await cache.addAll(APP_SHELL);
         await cache.put(
           CACHE_META_URL,
@@ -197,7 +283,16 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   // Activation only grants control. A generation is stable after a matching BOOT_OK.
-  event.waitUntil(self.clients.claim());
+  event.waitUntil((async () => {
+    await self.clients.claim();
+    const cacheNames = await caches.keys();
+    await Promise.allSettled(cacheNames
+      .filter((cacheName) => cacheName.startsWith(CACHE_PREFIX) && cacheName !== CACHE_NAME)
+      .map(async (cacheName) => {
+        const cache = await caches.open(cacheName);
+        await cache.delete(CONTROLLER_TAKEOVER_HOLD_URL);
+      }));
+  })());
 });
 
 function cacheNameForVersion(buildVersion) {
@@ -685,10 +780,28 @@ function clientFreezeRequestMatchesCurrentRelease(message) {
   return (
     CURRENT_RELEASE_DATABASE.migrationId !== null &&
     isNonEmptyString(message?.requestId) &&
+    message.requestId.length <= 128 &&
     message?.migrationId === CURRENT_RELEASE_DATABASE.migrationId &&
     message?.sourceGeneration === CURRENT_RELEASE_DATABASE.sourceGeneration &&
     message?.sourceDatabaseName === CURRENT_RELEASE_DATABASE.sourceDatabaseName &&
     message?.sourceSchema === CURRENT_RELEASE_DATABASE.sourceSchema
+  );
+}
+
+function migrationResolutionRequestMatchesCurrentRelease(message) {
+  return (
+    message?.resolutionProtocolVersion === 1 &&
+    (message?.type === "ABORT_DATABASE_MIGRATION" ||
+      message?.type === "FINISH_DATABASE_MIGRATION") &&
+    isNonEmptyString(message?.requestId) &&
+    message.requestId.length <= 128 &&
+    message?.migrationId === CURRENT_RELEASE_DATABASE.migrationId &&
+    message?.sourceGeneration === CURRENT_RELEASE_DATABASE.sourceGeneration &&
+    message?.sourceDatabaseName === CURRENT_RELEASE_DATABASE.sourceDatabaseName &&
+    message?.sourceSchema === CURRENT_RELEASE_DATABASE.sourceSchema &&
+    message?.targetGeneration === CURRENT_RELEASE_DATABASE.dbGeneration &&
+    message?.targetDatabaseName === CURRENT_RELEASE_DATABASE.databaseName &&
+    message?.targetSchema === CURRENT_RELEASE_DATABASE.targetSchema
   );
 }
 
@@ -884,9 +997,45 @@ async function requestClientWriteFreeze(client, message, leaseDeadline) {
   });
 }
 
-async function broadcastMigrationResolutionToClientIds(clientIds, migrationId, type) {
+async function broadcastMigrationResolutionToClientIds(
+  clientIds,
+  requestId,
+  migrationId,
+  resolutionIsCurrent = () => true
+) {
   const targetIds = new Set(clientIds);
-  if (targetIds.size === 0) return;
+  let clients;
+  try {
+    clients = await self.clients.matchAll({ type: "window", includeUncontrolled: false });
+  } catch {
+    return {
+      accepted: false,
+      reason: "CLIENT_ENUMERATION_FAILED",
+      effectiveResolution: null,
+      committedState: null,
+      peerClientCount: targetIds.size,
+      matchedClientCount: 0,
+      dispatchedClientCount: 0,
+      failedClientIds: []
+    };
+  }
+  if (!resolutionIsCurrent()) {
+    return {
+      accepted: false,
+      reason: "RESOLUTION_SUPERSEDED",
+      effectiveResolution: null,
+      committedState: null,
+      peerClientCount: targetIds.size,
+      matchedClientCount: 0,
+      dispatchedClientCount: 0,
+      failedClientIds: []
+    };
+  }
+
+  // Enumerate first, then read the authoritative pointer last. There is no
+  // await between the final epoch check and the synchronous postMessage loop,
+  // so a lease expiry cannot let an older resolution dispatch after a newer
+  // session decision on this worker event loop.
   const committed = await readCommittedReleaseState();
   let resolvedType;
   if (
@@ -906,43 +1055,105 @@ async function broadcastMigrationResolutionToClientIds(clientIds, migrationId, t
   } else {
     // Unknown/corrupt control state must not unlock a source database. Frozen
     // clients retain their own recovery loop until a verifiable pointer exists.
-    return;
+    return {
+      accepted: false,
+      reason: "CONTROL_STATE_UNVERIFIED",
+      effectiveResolution: null,
+      committedState: null,
+      peerClientCount: targetIds.size,
+      matchedClientCount: 0,
+      dispatchedClientCount: 0,
+      failedClientIds: []
+    };
   }
-  let clients;
-  try {
-    clients = await self.clients.matchAll({ type: "window", includeUncontrolled: false });
-  } catch {
-    return;
+  if (!resolutionIsCurrent()) {
+    return {
+      accepted: false,
+      reason: "RESOLUTION_SUPERSEDED",
+      effectiveResolution: resolvedType,
+      committedState: committed.state,
+      peerClientCount: targetIds.size,
+      matchedClientCount: 0,
+      dispatchedClientCount: 0,
+      failedClientIds: []
+    };
   }
-  await Promise.allSettled(clients
-    .filter((client) => targetIds.has(client.id))
-    .map(async (client) => client.postMessage({
-      type: resolvedType,
-      migrationId,
-      targetGeneration: CURRENT_RELEASE_DATABASE.dbGeneration,
-      targetDatabaseName: CURRENT_RELEASE_DATABASE.databaseName,
-      targetSchema: CURRENT_RELEASE_DATABASE.targetSchema
-    })));
+  const matchedClients = clients.filter((client) => targetIds.has(client.id));
+  const failedClientIds = [];
+  let dispatchedClientCount = 0;
+  for (const client of matchedClients) {
+    try {
+      client.postMessage({
+        type: resolvedType,
+        requestId,
+        migrationId,
+        sourceGeneration: CURRENT_RELEASE_DATABASE.sourceGeneration,
+        sourceDatabaseName: CURRENT_RELEASE_DATABASE.sourceDatabaseName,
+        sourceSchema: CURRENT_RELEASE_DATABASE.sourceSchema,
+        targetGeneration: CURRENT_RELEASE_DATABASE.dbGeneration,
+        targetDatabaseName: CURRENT_RELEASE_DATABASE.databaseName,
+        targetSchema: CURRENT_RELEASE_DATABASE.targetSchema
+      });
+      dispatchedClientCount += 1;
+    } catch {
+      failedClientIds.push(client.id);
+    }
+  }
+  return {
+    accepted: failedClientIds.length === 0,
+    reason: failedClientIds.length === 0
+      ? "RESOLUTION_DISPATCHED"
+      : "CLIENT_DISPATCH_FAILED",
+    effectiveResolution: resolvedType,
+    committedState: committed.state,
+    peerClientCount: targetIds.size,
+    matchedClientCount: matchedClients.length,
+    dispatchedClientCount,
+    failedClientIds
+  };
 }
 
 function clearClientFreezeSession(session) {
+  session.resolutionEpoch += 1;
   if (session.leaseTimer !== null) clearTimeout(session.leaseTimer);
+  session.leaseTimer = null;
   if (activeClientFreezeSession === session) activeClientFreezeSession = null;
+}
+
+function startClientFreezeSessionResolution(session, state) {
+  session.resolutionEpoch += 1;
+  session.state = state;
+  return session.resolutionEpoch;
+}
+
+function clientFreezeSessionResolutionIsCurrent(session, resolutionEpoch) {
+  return activeClientFreezeSession === session &&
+    session.resolutionEpoch === resolutionEpoch;
 }
 
 function startClientFreezeSessionLease(session) {
   if (session.leaseTimer !== null) clearTimeout(session.leaseTimer);
   const timeout = setTimeout(async () => {
     if (activeClientFreezeSession !== session) return;
-    activeClientFreezeSession = null;
+    session.leaseTimer = null;
+    if (session.state === "resolved") {
+      clearClientFreezeSession(session);
+      return;
+    }
+    const resolutionEpoch = startClientFreezeSessionResolution(session, "expiring");
     try {
       await broadcastMigrationResolutionToClientIds(
         session.peerClientIds,
+        session.requestId,
         session.migrationId,
-        "DATABASE_MIGRATION_ABORTED"
+        () => clientFreezeSessionResolutionIsCurrent(session, resolutionEpoch)
       );
     } catch (error) {
       console.error("Failed to broadcast an expired database migration lease.", error);
+    } finally {
+      if (clientFreezeSessionResolutionIsCurrent(session, resolutionEpoch)) {
+        clearClientFreezeSession(session);
+      }
     }
   }, Math.max(0, session.leaseDeadline - Date.now()));
   // Node's unit-test timer supports unref; browsers return a numeric handle.
@@ -974,6 +1185,39 @@ function postMigrationRenewalAck(port, message, result) {
   });
 }
 
+function migrationResolutionAck(message, result) {
+  const committed = result?.committedState;
+  const { committedState: _committedState, ...publicResult } = result ?? {};
+  return {
+    type: "DATABASE_MIGRATION_RESOLUTION_ACK_V1",
+    resolutionProtocolVersion: 1,
+    requestId: message?.requestId,
+    migrationId: message?.migrationId,
+    requestedCommand: message?.type,
+    sourceGeneration: CURRENT_RELEASE_DATABASE.sourceGeneration,
+    sourceDatabaseName: CURRENT_RELEASE_DATABASE.sourceDatabaseName,
+    sourceSchema: CURRENT_RELEASE_DATABASE.sourceSchema,
+    targetGeneration: CURRENT_RELEASE_DATABASE.dbGeneration,
+    targetDatabaseName: CURRENT_RELEASE_DATABASE.databaseName,
+    targetSchema: CURRENT_RELEASE_DATABASE.targetSchema,
+    committedGeneration: committed?.committedGeneration ?? null,
+    committedDatabaseName: committed?.committedDatabaseName ?? null,
+    committedSchema: committed?.committedSchema ?? null,
+    committedMigrationId: committed?.migrationId ?? null,
+    committedReceiptDigest: committed?.receiptDigest ?? null,
+    ...publicResult
+  };
+}
+
+function postMigrationResolutionAck(port, acknowledgement) {
+  try {
+    port.postMessage(acknowledgement);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function freezeSourceGenerationClients(event, message) {
   const responsePort = messagePort(event);
   const sourceClientId = typeof event.source?.id === "string" ? event.source.id : "";
@@ -981,6 +1225,18 @@ async function freezeSourceGenerationClients(event, message) {
     if (responsePort) postMigrationPreparationAck(responsePort, message, {
       accepted: false,
       reason: "PROTOCOL_MISMATCH"
+    });
+    return;
+  }
+
+  if (
+    completedMigrationResolutionReceipt?.sourceClientId === sourceClientId &&
+    completedMigrationResolutionReceipt.requestId === message.requestId &&
+    completedMigrationResolutionReceipt.migrationId === message.migrationId
+  ) {
+    postMigrationPreparationAck(responsePort, message, {
+      accepted: false,
+      reason: "REQUEST_ID_REUSED"
     });
     return;
   }
@@ -1003,6 +1259,26 @@ async function freezeSourceGenerationClients(event, message) {
     });
     return;
   }
+  // matchAll yields. Recheck admission so concurrent PREPARE events cannot
+  // both pass the original empty-session observation and overwrite ownership.
+  if (activeClientFreezeSession !== null) {
+    postMigrationPreparationAck(responsePort, message, {
+      accepted: false,
+      reason: "MIGRATION_SESSION_ACTIVE"
+    });
+    return;
+  }
+  if (
+    completedMigrationResolutionReceipt?.sourceClientId === sourceClientId &&
+    completedMigrationResolutionReceipt.requestId === message.requestId &&
+    completedMigrationResolutionReceipt.migrationId === message.migrationId
+  ) {
+    postMigrationPreparationAck(responsePort, message, {
+      accepted: false,
+      reason: "REQUEST_ID_REUSED"
+    });
+    return;
+  }
   const peers = clients.filter((client) => client.id !== sourceClientId);
   const session = {
     requestId: message.requestId,
@@ -1011,7 +1287,8 @@ async function freezeSourceGenerationClients(event, message) {
     peerClientIds: peers.map((client) => client.id),
     state: "preparing",
     leaseDeadline: Date.now() + CLIENT_FREEZE_LEASE_MS,
-    leaseTimer: null
+    leaseTimer: null,
+    resolutionEpoch: 0
   };
   activeClientFreezeSession = session;
   startClientFreezeSessionLease(session);
@@ -1019,19 +1296,28 @@ async function freezeSourceGenerationClients(event, message) {
     requestClientWriteFreeze(client, message, session.leaseDeadline)
   ));
   const rejected = results.filter((result) => !result.accepted);
-  const sessionCancelled = activeClientFreezeSession !== session;
-  if (rejected.length > 0 || sessionCancelled) {
-    clearClientFreezeSession(session);
-    // Broadcast to every requested peer, not only clients whose ACK arrived. A
-    // source tab may have closed its database and then lost its ACK in transit.
-    await broadcastMigrationResolutionToClientIds(
-      session.peerClientIds,
-      session.migrationId,
-      "DATABASE_MIGRATION_ABORTED"
-    );
+  const sessionInterrupted = activeClientFreezeSession !== session || session.state !== "preparing";
+  if (rejected.length > 0 || sessionInterrupted) {
+    if (!sessionInterrupted) {
+      const resolutionEpoch = startClientFreezeSessionResolution(session, "resolving");
+      try {
+        // Broadcast to every requested peer, not only clients whose ACK arrived.
+        // A source tab may have closed its database and then lost its ACK.
+        await broadcastMigrationResolutionToClientIds(
+          session.peerClientIds,
+          session.requestId,
+          session.migrationId,
+          () => clientFreezeSessionResolutionIsCurrent(session, resolutionEpoch)
+        );
+      } finally {
+        if (clientFreezeSessionResolutionIsCurrent(session, resolutionEpoch)) {
+          clearClientFreezeSession(session);
+        }
+      }
+    }
     postMigrationPreparationAck(responsePort, message, {
       accepted: false,
-      reason: sessionCancelled ? "MIGRATION_SESSION_CANCELLED" : "CLIENT_NOT_FROZEN",
+      reason: sessionInterrupted ? "MIGRATION_SESSION_CANCELLED" : "CLIENT_NOT_FROZEN",
       clientCount: peers.length,
       acknowledgedClientCount: results.filter((result) => result.accepted).length,
       frozenClientCount: results.filter((result) => result.accepted && result.reason === "SOURCE_CLOSED").length,
@@ -1082,6 +1368,14 @@ async function renewSourceGenerationClientFreeze(event, message) {
     return;
   }
 
+  if (activeClientFreezeSession !== session || session.state !== "prepared") {
+    postMigrationRenewalAck(responsePort, message, {
+      accepted: false,
+      reason: "MIGRATION_SESSION_CANCELLED"
+    });
+    return;
+  }
+
   // Include newly controlled tabs in every heartbeat. This narrows the window in
   // which an old source shell can appear after the initial freeze snapshot.
   const peers = clients.filter((client) => client.id !== sourceClientId);
@@ -1100,19 +1394,26 @@ async function renewSourceGenerationClientFreeze(event, message) {
     requestClientWriteFreeze(client, freezeMessage, nextLeaseDeadline)
   ));
   const rejected = results.filter((result) => !result.accepted);
-  const sessionCancelled = activeClientFreezeSession !== session;
-  if (rejected.length > 0 || sessionCancelled) {
-    clearClientFreezeSession(session);
-    if (!sessionCancelled) {
-      await broadcastMigrationResolutionToClientIds(
-        session.peerClientIds,
-        session.migrationId,
-        "DATABASE_MIGRATION_ABORTED"
-      );
+  const sessionInterrupted = activeClientFreezeSession !== session || session.state !== "renewing";
+  if (rejected.length > 0 || sessionInterrupted) {
+    if (!sessionInterrupted) {
+      const resolutionEpoch = startClientFreezeSessionResolution(session, "resolving");
+      try {
+        await broadcastMigrationResolutionToClientIds(
+          session.peerClientIds,
+          session.requestId,
+          session.migrationId,
+          () => clientFreezeSessionResolutionIsCurrent(session, resolutionEpoch)
+        );
+      } finally {
+        if (clientFreezeSessionResolutionIsCurrent(session, resolutionEpoch)) {
+          clearClientFreezeSession(session);
+        }
+      }
     }
     postMigrationRenewalAck(responsePort, message, {
       accepted: false,
-      reason: sessionCancelled ? "MIGRATION_SESSION_CANCELLED" : "CLIENT_NOT_FROZEN",
+      reason: sessionInterrupted ? "MIGRATION_SESSION_CANCELLED" : "CLIENT_NOT_FROZEN",
       clientCount: peers.length,
       acknowledgedClientCount: results.filter((result) => result.accepted).length,
       frozenClientCount: results.filter((result) => result.accepted && result.reason === "SOURCE_CLOSED").length,
@@ -1135,23 +1436,772 @@ async function renewSourceGenerationClientFreeze(event, message) {
   });
 }
 
-async function broadcastMigrationResolution(event, message, type) {
+async function broadcastMigrationResolution(event, message) {
+  const responsePort = messagePort(event);
   const sourceClientId = typeof event.source?.id === "string" ? event.source.id : "";
+  const nack = (reason, result = {}) => migrationResolutionAck(message, {
+    accepted: false,
+    reason,
+    effectiveResolution: null,
+    committedState: null,
+    peerClientCount: 0,
+    matchedClientCount: 0,
+    dispatchedClientCount: 0,
+    failedClientIds: [],
+    ...result
+  });
+  if (!responsePort || !sourceClientId || !migrationResolutionRequestMatchesCurrentRelease(message)) {
+    if (responsePort) postMigrationResolutionAck(responsePort, nack("PROTOCOL_MISMATCH"));
+    return;
+  }
+
   const session = activeClientFreezeSession;
+  const completed = completedMigrationResolutionReceipt;
+  const completedSessionMatches =
+    session?.state === "resolved" &&
+    session.initiatorClientId === sourceClientId &&
+    session.requestId === message.requestId &&
+    session.migrationId === message.migrationId;
+  if (
+    completed?.sourceClientId === sourceClientId &&
+    completed.requestId === message.requestId &&
+    completed.migrationId === message.migrationId &&
+    completed.requestedCommand === message.type &&
+    (!session || completedSessionMatches)
+  ) {
+    if (postMigrationResolutionAck(responsePort, completed.acknowledgement)) {
+      if (completedSessionMatches) clearClientFreezeSession(session);
+    }
+    return;
+  }
+
   if (
     !session ||
-    session.state !== "prepared" ||
     sourceClientId !== session.initiatorClientId ||
-    message?.requestId !== session.requestId ||
-    message?.migrationId !== session.migrationId ||
-    message.migrationId !== CURRENT_RELEASE_DATABASE.migrationId
+    message.requestId !== session.requestId ||
+    message.migrationId !== session.migrationId
+  ) {
+    postMigrationResolutionAck(responsePort, nack("MIGRATION_SESSION_NOT_ACTIVE"));
+    return;
+  }
+  if (session.state === "resolving" || session.state === "expiring") {
+    postMigrationResolutionAck(responsePort, nack("RESOLUTION_IN_PROGRESS"));
+    return;
+  }
+  if (session.state !== "prepared") {
+    postMigrationResolutionAck(responsePort, nack("PROTOCOL_MISMATCH"));
+    return;
+  }
+
+  session.leaseDeadline = Date.now() + CLIENT_FREEZE_LEASE_MS;
+  const resolutionEpoch = startClientFreezeSessionResolution(session, "resolving");
+  startClientFreezeSessionLease(session);
+  const result = await broadcastMigrationResolutionToClientIds(
+    session.peerClientIds,
+    session.requestId,
+    session.migrationId,
+    () => clientFreezeSessionResolutionIsCurrent(session, resolutionEpoch)
+  );
+  if (!clientFreezeSessionResolutionIsCurrent(session, resolutionEpoch)) {
+    postMigrationResolutionAck(responsePort, nack("MIGRATION_SESSION_CANCELLED", {
+      effectiveResolution: result.effectiveResolution,
+      committedState: result.committedState,
+      peerClientCount: result.peerClientCount,
+      matchedClientCount: result.matchedClientCount,
+      dispatchedClientCount: result.dispatchedClientCount,
+      failedClientIds: result.failedClientIds
+    }));
+    return;
+  }
+  if (!result.accepted) {
+    session.state = "prepared";
+    postMigrationResolutionAck(responsePort, migrationResolutionAck(message, result));
+    return;
+  }
+
+  const acknowledgement = migrationResolutionAck(message, result);
+  session.state = "resolved";
+  completedMigrationResolutionReceipt = {
+    sourceClientId,
+    requestId: session.requestId,
+    migrationId: session.migrationId,
+    requestedCommand: message.type,
+    acknowledgement
+  };
+  // Dispatch the exact receipt before clearing the live session. If the port
+  // throws or the ACK is lost after dispatch, the same authenticated request
+  // can replay the bounded in-memory terminal receipt without rebroadcasting.
+  if (postMigrationResolutionAck(responsePort, acknowledgement)) {
+    clearClientFreezeSession(session);
+  }
+}
+
+function clearPendingInstalledGenerationActivation(pending) {
+  if (pending?.timer !== null) clearTimeout(pending.timer);
+  if (pendingInstalledGenerationActivation === pending) {
+    pendingInstalledGenerationActivation = null;
+  }
+  pending?.resolveLifetime?.();
+}
+
+function postInstalledGenerationPreparationAck(port, message, result) {
+  port.postMessage({
+    type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+    requestId: message?.requestId,
+    sourceBuildVersion: message?.sourceBuildVersion,
+    targetBuildVersion: CACHE_VERSION,
+    targetRelease: releaseDescriptorFields(CURRENT_RELEASE_DATABASE),
+    ...result
+  });
+}
+
+function prepareInstalledGenerationActivation(event, message) {
+  const responsePort = messagePort(event);
+  const sourceWorker = event.source;
+  const sourceRelease = normalizeExactReleaseDescriptor(message?.sourceRelease);
+  if (
+    !responsePort ||
+    !isServiceWorkerMessageSource(sourceWorker) ||
+    !isControllerTakeoverRequestId(message?.requestId) ||
+    !isNonEmptyString(message?.sourceBuildVersion) ||
+    message.sourceBuildVersion.length > 256 ||
+    message.sourceBuildVersion === CACHE_VERSION ||
+    !sourceRelease ||
+    !releaseTransitionCanTakeOver(sourceRelease, CURRENT_RELEASE_DATABASE) ||
+    activationStarted ||
+    pendingInstalledGenerationActivation !== null
+  ) {
+    if (responsePort) postInstalledGenerationPreparationAck(responsePort, message, {
+      accepted: false,
+      reason: "PROTOCOL_MISMATCH",
+      challengeNonce: null
+    });
+    return Promise.resolve();
+  }
+
+  let resolveLifetime;
+  const lifetimePromise = new Promise((resolve) => {
+    resolveLifetime = resolve;
+  });
+  const pending = {
+    requestId: message.requestId,
+    sourceBuildVersion: message.sourceBuildVersion,
+    sourceRelease,
+    sourceWorker,
+    challengeNonce: createControllerTakeoverChallengeNonce(),
+    timer: null,
+    lifetimePromise,
+    resolveLifetime
+  };
+  const timeout = setTimeout(() => {
+    clearPendingInstalledGenerationActivation(pending);
+  }, CONTROLLER_TAKEOVER_PREPARATION_TIMEOUT_MS);
+  timeout?.unref?.();
+  pending.timer = timeout;
+  pendingInstalledGenerationActivation = pending;
+  postInstalledGenerationPreparationAck(responsePort, message, {
+    accepted: true,
+    reason: "CHALLENGE_ISSUED",
+    challengeNonce: pending.challengeNonce
+  });
+  return pending.lifetimePromise;
+}
+
+function abortInstalledGenerationActivation(event, message) {
+  const pending = pendingInstalledGenerationActivation;
+  const authenticatedChallengeAbort =
+    message?.targetBuildVersion === CACHE_VERSION &&
+    message?.challengeNonce === pending?.challengeNonce;
+  const authenticatedUnobservedPreparationAbort =
+    message?.targetBuildVersion === null &&
+    message?.challengeNonce === null &&
+    message?.reason === "PREPARATION_ACK_NOT_OBSERVED";
+  if (
+    !pending ||
+    event.source !== pending.sourceWorker ||
+    message?.requestId !== pending.requestId ||
+    message?.sourceBuildVersion !== pending.sourceBuildVersion ||
+    (!authenticatedChallengeAbort && !authenticatedUnobservedPreparationAbort)
   ) return;
-  clearClientFreezeSession(session);
-  await broadcastMigrationResolutionToClientIds(session.peerClientIds, session.migrationId, type);
+  clearPendingInstalledGenerationActivation(pending);
+}
+
+async function commitInstalledGenerationActivation(event, message) {
+  const responsePort = messagePort(event);
+  const pending = pendingInstalledGenerationActivation;
+  if (
+    !responsePort ||
+    !pending ||
+    event.source !== pending.sourceWorker ||
+    message?.requestId !== pending.requestId ||
+    message?.sourceBuildVersion !== pending.sourceBuildVersion ||
+    message?.targetBuildVersion !== CACHE_VERSION ||
+    message?.challengeNonce !== pending.challengeNonce ||
+    !isControllerTakeoverChallengeNonce(message?.challengeNonce) ||
+    activationStarted
+  ) {
+    responsePort?.postMessage({
+      type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+      requestId: message?.requestId,
+      sourceBuildVersion: message?.sourceBuildVersion,
+      targetBuildVersion: CACHE_VERSION,
+      accepted: false,
+      reason: "PROTOCOL_MISMATCH"
+    });
+    return;
+  }
+
+  clearPendingInstalledGenerationActivation(pending);
+  activationStarted = true;
+  try {
+    await self.skipWaiting();
+  } catch {
+    activationStarted = false;
+    try {
+      responsePort.postMessage({
+        type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+        requestId: pending.requestId,
+        sourceBuildVersion: pending.sourceBuildVersion,
+        targetBuildVersion: CACHE_VERSION,
+        accepted: false,
+        reason: "SKIP_WAITING_FAILED"
+      });
+    } catch {
+      // The active worker will classify a missing ACK as outcome unknown. A
+      // failed negative ACK is never evidence that the caller observed it.
+    }
+    return;
+  }
+  try {
+    responsePort.postMessage({
+      type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+      requestId: pending.requestId,
+      sourceBuildVersion: pending.sourceBuildVersion,
+      targetBuildVersion: CACHE_VERSION,
+      accepted: true,
+      reason: "SKIP_WAITING_REQUESTED"
+    });
+  } catch {
+    // skipWaiting already succeeded. Never reset activationStarted or emit a
+    // known-rejected NACK: the active worker must time out and retain its hold.
+  }
+}
+
+function requestWaitingActivationPreparation(waitingWorker, session) {
+  return new Promise((resolve, reject) => {
+    const channel = new MessageChannel();
+    let settled = false;
+    const finish = (operation) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      channel.port1.close();
+      operation();
+    };
+    const timeout = setTimeout(() => finish(() => reject(new Error("WAITING_PREPARATION_TIMEOUT"))), 5_000);
+    channel.port1.onmessage = (event) => {
+      const response = event.data;
+      const targetRelease = normalizeExactReleaseDescriptor(response?.targetRelease);
+      if (
+        response?.type !== "PREPARE_INSTALLED_GENERATION_ACTIVATION_ACK_V1" ||
+        response?.requestId !== session.requestId ||
+        response?.sourceBuildVersion !== CACHE_VERSION ||
+        !isNonEmptyString(response?.targetBuildVersion) ||
+        response.targetBuildVersion.length > 256 ||
+        response.targetBuildVersion === CACHE_VERSION ||
+        response?.accepted !== true ||
+        response?.reason !== "CHALLENGE_ISSUED" ||
+        !isControllerTakeoverChallengeNonce(response?.challengeNonce) ||
+        !targetRelease ||
+        !releaseTransitionCanTakeOver(CURRENT_RELEASE_DATABASE, targetRelease)
+      ) {
+        finish(() => reject(new Error("WAITING_PREPARATION_REJECTED")));
+        return;
+      }
+      finish(() => resolve({
+        targetBuildVersion: response.targetBuildVersion,
+        targetRelease,
+        challengeNonce: response.challengeNonce
+      }));
+    };
+    try {
+      waitingWorker.postMessage({
+        type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: session.requestId,
+        sourceBuildVersion: CACHE_VERSION,
+        sourceRelease: releaseDescriptorFields(CURRENT_RELEASE_DATABASE)
+      }, [channel.port2]);
+    } catch {
+      finish(() => reject(new Error("WAITING_PREPARATION_POST_FAILED")));
+    }
+  });
+}
+
+function requestClientControllerTakeoverFreeze(client, session) {
+  return new Promise((resolve) => {
+    const channel = new MessageChannel();
+    let settled = false;
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      channel.port1.close();
+      resolve(result);
+    };
+    const timeout = setTimeout(() => {
+      finish({ accepted: false, clientId: client.id, reason: "CLIENT_TIMEOUT" });
+    }, CONTROLLER_TAKEOVER_CLIENT_TIMEOUT_MS);
+    channel.port1.onmessage = (event) => {
+      const response = event.data;
+      const accepted =
+        response?.type === "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_ACK_V1" &&
+        response?.requestId === session.requestId &&
+        response?.sourceBuildVersion === CACHE_VERSION &&
+        response?.targetBuildVersion === session.targetBuildVersion &&
+        response?.accepted === true &&
+        response?.reason === "WRITES_DRAINED";
+      finish({
+        accepted,
+        clientId: client.id,
+        reason: response?.reason ?? "INVALID_CLIENT_ACK"
+      });
+    };
+    try {
+      client.postMessage({
+        type: "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_V1",
+        requestId: session.requestId,
+        sourceBuildVersion: CACHE_VERSION,
+        targetBuildVersion: session.targetBuildVersion,
+        sourceRelease: releaseDescriptorFields(CURRENT_RELEASE_DATABASE),
+        targetRelease: releaseDescriptorFields(session.targetRelease)
+      }, [channel.port2]);
+    } catch {
+      finish({ accepted: false, clientId: client.id, reason: "CLIENT_POST_FAILED" });
+    }
+  });
+}
+
+async function freezeAllControllerTakeoverClients(session) {
+  for (let pass = 0; pass < CONTROLLER_TAKEOVER_MAX_CLIENT_PASSES; pass += 1) {
+    if (activeControllerTakeoverSession !== session) {
+      throw new Error("TAKEOVER_SESSION_CANCELLED");
+    }
+    // A force-reloaded or not-yet-claimed same-origin page can still hold the
+    // v13 database. Include it so its inability to authenticate A produces a
+    // fail-closed NACK instead of letting it write through the A -> B boundary.
+    const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    if (!clients.some((client) => client.id === session.initiatorClientId)) {
+      throw new Error("SOURCE_CLIENT_NOT_ENUMERATED");
+    }
+    const unfrozen = clients.filter((client) => !session.frozenClientIds.has(client.id));
+    if (unfrozen.length === 0) {
+      return {
+        clientCount: clients.length,
+        frozenClientCount: session.frozenClientIds.size
+      };
+    }
+    const results = await Promise.all(unfrozen.map((client) =>
+      requestClientControllerTakeoverFreeze(client, session)
+    ));
+    const rejected = results.filter((result) => !result.accepted);
+    for (const result of results) {
+      if (result.accepted) session.frozenClientIds.add(result.clientId);
+    }
+    if (rejected.length > 0) {
+      session.rejectedClientIds.push(...rejected.map((result) => result.clientId));
+      throw new Error("CLIENT_NOT_FROZEN");
+    }
+  }
+  throw new Error("CLIENT_SET_DID_NOT_STABILIZE");
+}
+
+function commitWaitingActivation(waitingWorker, session) {
+  return new Promise((resolve, reject) => {
+    const channel = new MessageChannel();
+    let settled = false;
+    const finish = (operation) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      channel.port1.close();
+      operation();
+    };
+    const timeout = setTimeout(() => {
+      finish(() => reject(new Error("WAITING_COMMIT_OUTCOME_UNKNOWN")));
+    }, 5_000);
+    channel.port1.onmessage = (event) => {
+      const response = event.data;
+      const identityMatches =
+        response?.type === "COMMIT_INSTALLED_GENERATION_ACTIVATION_ACK_V1" &&
+        response?.requestId === session.requestId &&
+        response?.sourceBuildVersion === CACHE_VERSION &&
+        response?.targetBuildVersion === session.targetBuildVersion;
+      if (!identityMatches) {
+        finish(() => reject(new Error("WAITING_COMMIT_OUTCOME_UNKNOWN")));
+        return;
+      }
+      if (response?.accepted === true && response?.reason === "SKIP_WAITING_REQUESTED") {
+        finish(resolve);
+        return;
+      }
+      if (
+        response?.accepted === false &&
+        (response?.reason === "PROTOCOL_MISMATCH" || response?.reason === "SKIP_WAITING_FAILED")
+      ) {
+        const knownRejected = new Error(`WAITING_COMMIT_KNOWN_REJECTED:${response.reason}`);
+        knownRejected.name = "WaitingCommitKnownRejectedError";
+        knownRejectedWaitingCommitErrors.add(knownRejected);
+        finish(() => reject(knownRejected));
+        return;
+      }
+      finish(() => reject(new Error("WAITING_COMMIT_OUTCOME_UNKNOWN")));
+    };
+    try {
+      waitingWorker.postMessage({
+        type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: session.requestId,
+        sourceBuildVersion: CACHE_VERSION,
+        targetBuildVersion: session.targetBuildVersion,
+        challengeNonce: session.challengeNonce
+      }, [channel.port2]);
+    } catch {
+      finish(() => reject(new Error("WAITING_COMMIT_OUTCOME_UNKNOWN")));
+    }
+  });
+}
+
+function abortWaitingActivationPreparation(waitingWorker, session) {
+  if (!waitingWorker) return;
+  const challengeObserved = Boolean(session.challengeNonce && session.targetBuildVersion);
+  try {
+    waitingWorker.postMessage({
+      type: "ABORT_INSTALLED_GENERATION_ACTIVATION_V1",
+      requestId: session.requestId,
+      sourceBuildVersion: CACHE_VERSION,
+      targetBuildVersion: challengeObserved ? session.targetBuildVersion : null,
+      challengeNonce: challengeObserved ? session.challengeNonce : null,
+      reason: challengeObserved ? "PRECOMMIT_ABORT" : "PREPARATION_ACK_NOT_OBSERVED"
+    });
+  } catch {
+    // The challenge expires independently in the waiting worker.
+  }
+}
+
+async function persistControllerTakeoverNavigationHold(session) {
+  // Mark cleanup as required before the write starts. CacheStorage failures are
+  // not proof that the marker was absent, so the abort path must still delete
+  // and verify absence before it releases A navigation.
+  session.irreversibleHoldPersisted = true;
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.put(
+      CONTROLLER_TAKEOVER_HOLD_URL,
+      new Response(
+        JSON.stringify({
+          kind: "controller_takeover_navigation_hold_v1",
+          requestId: session.requestId,
+          sourceBuildVersion: CACHE_VERSION,
+          targetBuildVersion: session.targetBuildVersion
+        }),
+        {
+          headers: {
+            "cache-control": "no-store",
+            "content-type": "application/json"
+          }
+        }
+      )
+    );
+    if (!await cache.match(CONTROLLER_TAKEOVER_HOLD_URL)) {
+      throw new Error("persistent marker was not observable");
+    }
+  } catch {
+    // Never surface a native CacheStorage error message across the protocol.
+    throw new Error("TAKEOVER_HOLD_PERSIST_FAILED");
+  }
+}
+
+async function clearControllerTakeoverNavigationHold(session) {
+  if (!session.irreversibleHoldPersisted) return;
+  const cache = await caches.open(CACHE_NAME);
+  await cache.delete(CONTROLLER_TAKEOVER_HOLD_URL);
+  if (await cache.match(CONTROLLER_TAKEOVER_HOLD_URL)) {
+    throw new Error("TAKEOVER_HOLD_NOT_CLEARED");
+  }
+  session.irreversibleHoldPersisted = false;
+}
+
+async function releaseControllerTakeoverHoldingDocuments(session) {
+  try {
+    const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    for (const client of clients) {
+      try {
+        client.postMessage({
+          type: "RELEASE_CONTROLLER_TAKEOVER_HOLDING_DOCUMENT_V1",
+          requestId: session.requestId,
+          sourceBuildVersion: CACHE_VERSION,
+          targetBuildVersion: session.targetBuildVersion
+        });
+      } catch {
+        // A holding document also has a bounded reload fallback. Other pages
+        // deliberately keep their irreversible write latch until navigation.
+      }
+    }
+  } catch {
+    // Marker absence, not notification delivery, is the safety condition.
+  }
+}
+
+function abortControllerTakeoverBeforeCommit(waitingWorker, session) {
+  if (session.abortPromise) return session.abortPromise;
+  session.state = "aborting_before_commit";
+  abortWaitingActivationPreparation(waitingWorker, session);
+  const cleanup = (async () => {
+    try {
+      // Serialize cleanup behind a CacheStorage write already in flight. This
+      // prevents a timeout from deleting first and the late put from restoring
+      // a stale hold marker after the session has been released.
+      if (session.holdPersistencePromise) {
+        try {
+          await session.holdPersistencePromise;
+        } catch {
+          // Deletion and absence verification below decide whether A may resume.
+        }
+      }
+      await clearControllerTakeoverNavigationHold(session);
+      clearControllerTakeoverSession(session);
+      await releaseControllerTakeoverHoldingDocuments(session);
+      return true;
+    } catch {
+      if (session.timer !== null) clearTimeout(session.timer);
+      session.state = "takeover_hold_clear_failed";
+      return false;
+    }
+  })();
+  session.abortPromise = cleanup;
+  return cleanup;
+}
+
+function clearControllerTakeoverSession(session) {
+  if (session.timer !== null) clearTimeout(session.timer);
+  if (activeControllerTakeoverSession === session) activeControllerTakeoverSession = null;
+}
+
+function postControllerTakeoverRequestAck(port, message, result) {
+  const reason = CONTROLLER_TAKEOVER_ACK_REASON_CODES.has(result?.reason)
+    ? result.reason
+    : "TAKEOVER_PREPARATION_FAILED";
+  const accepted = result?.accepted === true && reason === "ALL_CLIENTS_DRAINED_BEFORE_SKIP_WAITING";
+  port.postMessage({
+    type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+    requestId: message?.requestId,
+    sourceBuildVersion: CACHE_VERSION,
+    ...result,
+    accepted,
+    reason
+  });
+}
+
+function fixedControllerTakeoverFailureReason(reason) {
+  const reasonCode = reason instanceof Error ? reason.message : null;
+  if (
+    typeof reasonCode === "string" &&
+    reasonCode !== "ALL_CLIENTS_DRAINED_BEFORE_SKIP_WAITING" &&
+    CONTROLLER_TAKEOVER_ACK_REASON_CODES.has(reasonCode)
+  ) return reasonCode;
+  return "TAKEOVER_PREPARATION_FAILED";
+}
+
+async function prepareControllerTakeoverAndActivateWaiting(event, message) {
+  const responsePort = messagePort(event);
+  const sourceClientId = typeof event.source?.id === "string" ? event.source.id : "";
+  const sourceRelease = normalizeExactReleaseDescriptor(message?.sourceRelease);
+  if (
+    !responsePort ||
+    !sourceClientId ||
+    !isControllerTakeoverRequestId(message?.requestId) ||
+    message?.sourceBuildVersion !== CACHE_VERSION ||
+    !sourceRelease ||
+    !descriptorsEqual(sourceRelease, CURRENT_RELEASE_DATABASE)
+  ) {
+    if (responsePort) postControllerTakeoverRequestAck(responsePort, message, {
+      targetBuildVersion: null,
+      targetRelease: null,
+      accepted: false,
+      reason: "PROTOCOL_MISMATCH",
+      clientCount: 0,
+      frozenClientCount: 0,
+      rejectedClientIds: []
+    });
+    return;
+  }
+
+  if (activeControllerTakeoverSession !== null || activeClientFreezeSession !== null) {
+    postControllerTakeoverRequestAck(responsePort, message, {
+      targetBuildVersion: null,
+      targetRelease: null,
+      accepted: false,
+      reason: "TAKEOVER_SESSION_BUSY",
+      clientCount: 0,
+      frozenClientCount: 0,
+      rejectedClientIds: []
+    });
+    return;
+  }
+
+  const persistentTakeoverHoldStatus = await currentBuildPersistentControllerTakeoverHoldStatus();
+  // A restarted worker has lost its in-memory session, but the persisted marker
+  // still means that A cannot prove the earlier takeover was safely cleared.
+  // Recheck the volatile sessions after the CacheStorage await so two requests
+  // cannot both pass the original synchronous admission check.
+  if (
+    persistentTakeoverHoldStatus !== "absent" ||
+    activeControllerTakeoverSession !== null ||
+    activeClientFreezeSession !== null
+  ) {
+    const reason = activeControllerTakeoverSession !== null || activeClientFreezeSession !== null
+      ? "TAKEOVER_SESSION_BUSY"
+      : persistentTakeoverHoldStatus === "present"
+        ? "TAKEOVER_HOLD_PRESENT"
+        : "TAKEOVER_HOLD_STATUS_UNKNOWN";
+    postControllerTakeoverRequestAck(responsePort, message, {
+      targetBuildVersion: null,
+      targetRelease: null,
+      accepted: false,
+      reason,
+      clientCount: 0,
+      frozenClientCount: 0,
+      rejectedClientIds: []
+    });
+    return;
+  }
+
+  const waitingWorker = self.registration?.waiting;
+  if (!waitingWorker || waitingWorker.state !== "installed") {
+    postControllerTakeoverRequestAck(responsePort, message, {
+      targetBuildVersion: null,
+      targetRelease: null,
+      accepted: false,
+      reason: "WAITING_WORKER_NOT_INSTALLED",
+      clientCount: 0,
+      frozenClientCount: 0,
+      rejectedClientIds: []
+    });
+    return;
+  }
+
+  const session = {
+    requestId: message.requestId,
+    initiatorClientId: sourceClientId,
+    waitingWorker,
+    targetBuildVersion: null,
+    targetRelease: null,
+    challengeNonce: null,
+    frozenClientIds: new Set(),
+    rejectedClientIds: [],
+    state: "preparing",
+    timer: null,
+    irreversibleHoldPersisted: false,
+    holdPersistencePromise: null,
+    abortPromise: null
+  };
+  activeControllerTakeoverSession = session;
+  const timeout = setTimeout(() => {
+    if (activeControllerTakeoverSession !== session || session.state === "activation_dispatched") return;
+    void abortControllerTakeoverBeforeCommit(waitingWorker, session);
+  }, CONTROLLER_TAKEOVER_PREPARATION_TIMEOUT_MS);
+  timeout?.unref?.();
+  session.timer = timeout;
+
+  try {
+    const preparation = await requestWaitingActivationPreparation(waitingWorker, session);
+    if (activeControllerTakeoverSession !== session) throw new Error("TAKEOVER_SESSION_CANCELLED");
+    session.targetBuildVersion = preparation.targetBuildVersion;
+    session.targetRelease = preparation.targetRelease;
+    session.challengeNonce = preparation.challengeNonce;
+    session.state = "freezing_clients";
+    let closure = await freezeAllControllerTakeoverClients(session);
+    if (
+      activeControllerTakeoverSession !== session ||
+      session.abortPromise !== null
+    ) throw new Error("TAKEOVER_SESSION_CANCELLED");
+    session.state = "persisting_irreversible_hold";
+    session.holdPersistencePromise = persistControllerTakeoverNavigationHold(session);
+    await session.holdPersistencePromise;
+    session.holdPersistencePromise = null;
+    if (
+      activeControllerTakeoverSession !== session ||
+      session.abortPromise !== null
+    ) throw new Error("TAKEOVER_SESSION_CANCELLED");
+    // Persisting the restart-safe hold yielded. Re-enumerate and re-freeze so
+    // every client created during that await is included in the final census.
+    session.state = "refreezing_clients_after_hold";
+    closure = await freezeAllControllerTakeoverClients(session);
+    if (
+      activeControllerTakeoverSession !== session ||
+      session.abortPromise !== null
+    ) throw new Error("TAKEOVER_SESSION_CANCELLED");
+    session.state = "clients_frozen_after_hold";
+    // No await occurs between the final stable matchAll result and this
+    // synchronous postMessage. Navigation fetch tasks remain held by A.
+    const activation = commitWaitingActivation(waitingWorker, session);
+    session.state = "activation_dispatched";
+    await activation;
+    if (session.timer !== null) clearTimeout(session.timer);
+    postControllerTakeoverRequestAck(responsePort, message, {
+      targetBuildVersion: session.targetBuildVersion,
+      targetRelease: releaseDescriptorFields(session.targetRelease),
+      accepted: true,
+      reason: "ALL_CLIENTS_DRAINED_BEFORE_SKIP_WAITING",
+      clientCount: closure.clientCount,
+      frozenClientCount: closure.frozenClientCount,
+      rejectedClientIds: []
+    });
+  } catch (reason) {
+    let failureReason = fixedControllerTakeoverFailureReason(reason);
+    if (
+      session.state === "activation_dispatched" &&
+      !(reason instanceof Error && knownRejectedWaitingCommitErrors.has(reason))
+    ) {
+      // The waiting worker may already have completed skipWaiting even when
+      // its ACK is lost or malformed. Keep both the in-memory and persisted A
+      // navigation holds until A is replaced; ABORT can no longer prove safety.
+      if (session.timer !== null) clearTimeout(session.timer);
+      session.state = "activation_outcome_unknown";
+      failureReason = "WAITING_COMMIT_OUTCOME_UNKNOWN";
+    } else {
+      const released = await abortControllerTakeoverBeforeCommit(waitingWorker, session);
+      if (!released) failureReason = "TAKEOVER_HOLD_CLEAR_FAILED";
+    }
+    postControllerTakeoverRequestAck(responsePort, message, {
+      targetBuildVersion: session.targetBuildVersion,
+      targetRelease: session.targetRelease ? releaseDescriptorFields(session.targetRelease) : null,
+      accepted: false,
+      reason: failureReason,
+      clientCount: session.frozenClientIds.size + session.rejectedClientIds.length,
+      frozenClientCount: session.frozenClientIds.size,
+      rejectedClientIds: [...session.rejectedClientIds]
+    });
+  }
 }
 
 self.addEventListener("message", (event) => {
   const message = event.data;
+  if (message?.type === "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1") {
+    event.waitUntil(prepareControllerTakeoverAndActivateWaiting(event, message));
+    return;
+  }
+  if (message?.type === "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1") {
+    event.waitUntil(prepareInstalledGenerationActivation(event, message));
+    return;
+  }
+  if (message?.type === "ABORT_INSTALLED_GENERATION_ACTIVATION_V1") {
+    abortInstalledGenerationActivation(event, message);
+    return;
+  }
+  if (message?.type === "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1") {
+    event.waitUntil(commitInstalledGenerationActivation(event, message));
+    return;
+  }
   if (message?.type === "CLEAR_RESEARCH_QUERY_SESSION_DRAFTS_ACROSS_CLIENTS") {
     event.waitUntil(clearResearchQueryDraftsAcrossControlledClients(event, message));
     return;
@@ -1165,17 +2215,17 @@ self.addEventListener("message", (event) => {
     return;
   }
   if (message?.type === "ABORT_DATABASE_MIGRATION") {
-    event.waitUntil(broadcastMigrationResolution(event, message, "DATABASE_MIGRATION_ABORTED"));
+    event.waitUntil(broadcastMigrationResolution(event, message));
     return;
   }
   if (message?.type === "FINISH_DATABASE_MIGRATION") {
-    event.waitUntil(broadcastMigrationResolution(event, message, "DATABASE_MIGRATION_COMMITTED"));
+    event.waitUntil(broadcastMigrationResolution(event, message));
     return;
   }
   if (message?.type === "ACTIVATE_INSTALLED_GENERATION") {
-    if (activationStarted) return;
-    activationStarted = true;
-    event.waitUntil(self.skipWaiting());
+    // Legacy page-to-waiting activation has no all-client drain proof.
+    // Keep the message recognizable for explicit rejection and compatibility
+    // diagnostics, but never grant it skipWaiting authority.
     return;
   }
   if (message?.type === "GET_BUILD_VERSION") {
@@ -1186,6 +2236,28 @@ self.addEventListener("message", (event) => {
     });
     return;
   }
+  // BEGIN SW_AB_RUNTIME_CHALLENGE_V1_READ_ONLY
+  if (message?.type === "SW_AB_RUNTIME_CHALLENGE_V1") {
+    const challengeNonce = typeof message.challengeNonce === "string"
+      ? message.challengeNonce
+      : "";
+    const sourceClientId = typeof event.source?.id === "string" ? event.source.id : "";
+    const responsePort = event.ports?.[0];
+    if (
+      !/^challenge-[a-f0-9]{64}$/.test(challengeNonce)
+      || sourceClientId.length === 0
+      || typeof responsePort?.postMessage !== "function"
+    ) return;
+    responsePort.postMessage({
+      type: "SW_AB_RUNTIME_CHALLENGE_RESULT_V1",
+      challengeNonce,
+      sourceClientId,
+      buildVersion: CACHE_VERSION,
+      ...releaseDescriptorFields(CURRENT_RELEASE_DATABASE)
+    });
+    return;
+  }
+  // END SW_AB_RUNTIME_CHALLENGE_V1_READ_ONLY
   if (message?.type !== "BOOT_OK" || typeof message.buildVersion !== "string") return;
 
   if (message.buildVersion === CACHE_VERSION) {
@@ -1299,7 +2371,82 @@ function migrationHoldingResponse() {
   );
 }
 
+function controllerTakeoverHoldingResponse() {
+  const expectedRelease = JSON.stringify(releaseDescriptorFields(CURRENT_RELEASE_DATABASE));
+  const inlineExpectedRelease = JSON.stringify(expectedRelease).replaceAll("<", "\\u003c");
+  const inlineSourceBuildVersion = JSON.stringify(CACHE_VERSION).replaceAll("<", "\\u003c");
+  const holdingScript =
+    "(() => {" +
+    `const sourceBuildVersion=${inlineSourceBuildVersion};` +
+    `const expectedRelease=${inlineExpectedRelease};` +
+    "const requestIdPattern=/^takeover-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;" +
+    "const exactRelease=(value)=>{try{return JSON.stringify(value)===expectedRelease;}catch{return false;}};" +
+    "navigator.serviceWorker.addEventListener('message',(event)=>{" +
+    "const message=event.data;const controller=navigator.serviceWorker.controller;" +
+    "if(!controller||event.source!==controller||!requestIdPattern.test(message?.requestId)||message?.sourceBuildVersion!==sourceBuildVersion)return;" +
+    "if(message?.type==='FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_V1'){" +
+    "const port=event.ports?.[0];" +
+    "if(!port||typeof message.targetBuildVersion!=='string'||message.targetBuildVersion.length===0||message.targetBuildVersion.length>256||message.targetBuildVersion===sourceBuildVersion||!exactRelease(message.sourceRelease)||!exactRelease(message.targetRelease))return;" +
+    "port.postMessage({type:'FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_ACK_V1',requestId:message.requestId,sourceBuildVersion,targetBuildVersion:message.targetBuildVersion,accepted:true,reason:'WRITES_DRAINED'});return;}" +
+    "if(message?.type==='RELEASE_CONTROLLER_TAKEOVER_HOLDING_DOCUMENT_V1')window.location.reload();" +
+    "});" +
+    "navigator.serviceWorker.addEventListener('controllerchange',()=>window.location.reload(),{once:true});" +
+    `window.setTimeout(()=>window.location.reload(),${CONTROLLER_TAKEOVER_PREPARATION_TIMEOUT_MS + 5_000});` +
+    "})();";
+  return new Response(
+    "<!doctype html><html lang=\"zh-CN\"><meta charset=\"utf-8\">" +
+      "<meta name=\"viewport\" content=\"width=device-width\">" +
+      `<title>正在安全切换版本</title><script>${holdingScript}</script>` +
+      "<body><main><h1>正在安全切换离线版本</h1>" +
+      "<p>此页面不访问研究仓储；完成接管或安全解除后会自动重试。</p></main></body></html>",
+    {
+      status: 503,
+      headers: {
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'",
+        "content-type": "text/html; charset=utf-8",
+        "retry-after": "2"
+      }
+    }
+  );
+}
+
+async function currentBuildHasPersistentControllerTakeoverHold() {
+  return (await currentBuildPersistentControllerTakeoverHoldStatus()) !== "absent";
+}
+
+async function currentBuildPersistentControllerTakeoverHoldStatus() {
+  try {
+    const cacheNames = await caches.keys();
+    if (!cacheNames.includes(CACHE_NAME)) return "absent";
+    const cache = await caches.open(CACHE_NAME);
+    return await cache.match(CONTROLLER_TAKEOVER_HOLD_URL) ? "present" : "absent";
+  } catch {
+    // Once the current build cannot prove the hold marker absent, returning an
+    // A shell would be unsafe. B uses a different CACHE_NAME and is unaffected.
+    return "unknown";
+  }
+}
+
+async function controllerTakeoverNavigationMustHold() {
+  if (activeControllerTakeoverSession !== null) return true;
+  const persisted = await currentBuildHasPersistentControllerTakeoverHold();
+  // A session may have started while the CacheStorage lookup was pending.
+  return persisted || activeControllerTakeoverSession !== null;
+}
+
+async function finalizeControllerTakeoverSafeNavigation(response, clientId, cacheName) {
+  if (await controllerTakeoverNavigationMustHold()) {
+    return controllerTakeoverHoldingResponse();
+  }
+  bindClientToCache(clientId, cacheName);
+  return response;
+}
+
 async function handleNavigation(event) {
+  if (await controllerTakeoverNavigationMustHold()) {
+    return controllerTakeoverHoldingResponse();
+  }
   const request = event.request;
   const clientId = eventClientId(event);
   const cacheNames = await caches.keys();
@@ -1310,8 +2457,11 @@ async function handleNavigation(event) {
     if (activeFreezeBlocksSourceNavigation(rollbackOrFirstBoot.cacheName, generations, committed)) {
       return migrationHoldingResponse();
     }
-    bindClientToCache(clientId, rollbackOrFirstBoot.cacheName);
-    return rollbackOrFirstBoot.response;
+    return finalizeControllerTakeoverSafeNavigation(
+      rollbackOrFirstBoot.response,
+      clientId,
+      rollbackOrFirstBoot.cacheName
+    );
   }
 
   const currentGeneration = generations.find((generation) => generation.cacheName === CACHE_NAME);
@@ -1321,8 +2471,7 @@ async function handleNavigation(event) {
   ) {
     const currentShell = await matchCurrentCache("/");
     if (currentShell) {
-      bindClientToCache(clientId, CACHE_NAME);
-      return currentShell;
+      return finalizeControllerTakeoverSafeNavigation(currentShell, clientId, CACHE_NAME);
     }
   }
 
@@ -1333,8 +2482,11 @@ async function handleNavigation(event) {
     }
     const rollbackShell = await matchGenerationCache(rollbackGeneration.cacheName, "/");
     if (rollbackShell) {
-      bindClientToCache(clientId, rollbackGeneration.cacheName);
-      return rollbackShell;
+      return finalizeControllerTakeoverSafeNavigation(
+        rollbackShell,
+        clientId,
+        rollbackGeneration.cacheName
+      );
     }
   }
 
@@ -1343,8 +2495,7 @@ async function handleNavigation(event) {
   if (generations.length > 0) throw new Error("No compatible offline application shell");
 
   const response = await fetch(request);
-  bindClientToCache(clientId, CACHE_NAME);
-  return response;
+  return finalizeControllerTakeoverSafeNavigation(response, clientId, CACHE_NAME);
 }
 
 async function handleStaticResource(event) {

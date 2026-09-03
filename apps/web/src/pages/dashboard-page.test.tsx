@@ -57,16 +57,16 @@ describe("DashboardPage", () => {
     render(<DashboardPage />);
 
     expect(await screen.findByRole("heading", { name: "首页待考" })).toBeTruthy();
-    expect(screen.getByText("八字 · 时辰待考", { selector: ".status-pill" })).toBeTruthy();
+    expect(screen.getByText("八字 · 时辰待考", { selector: ".status-pill__label" })).toBeTruthy();
     expect(screen.getByRole("link", { name: /打开候选组/ }).getAttribute("href"))
       .toBe(`/candidate-sets/${candidate.id}`);
     expect(screen.getByText("2 条本地记录")).toBeTruthy();
-    expect(screen.getByText(/13 个候选 · 时辰待考/)).toBeTruthy();
+    expect(screen.getByText("八字 · 13 个候选 · 时辰待考", { selector: "dd" })).toBeTruthy();
     expect(screen.getByRole("complementary", { name: "研究快捷入口" })).toBeTruthy();
     expect(screen.getByText("最近保存视图")).toBeTruthy();
     expect(screen.getByRole("link", { name: /最近事业复盘/ }).getAttribute("href"))
       .toBe(`/cases/research?view=${savedView.id}`);
-    expect(screen.getByRole("link", { name: /CSV 批量导入/ }).getAttribute("href")).toBe("/cases");
+    expect(screen.getByRole("link", { name: /CSV 批量导入/ }).getAttribute("href")).toBe("/cases?import=csv");
     expect(screen.getByRole("link", { name: /完整备份与恢复/ }).getAttribute("href")).toBe("/settings/data");
     expect(screen.queryByRole("img", { name: /72/ })).toBeNull();
     expect(screen.queryByText("紫微斗数")).toBeNull();
@@ -85,7 +85,7 @@ describe("DashboardPage", () => {
     expect(await screen.findByRole("heading", { name: "先建立第一张可复算的研究样本" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "从空白开始" }).getAttribute("href")).toBe("/new");
     expect(screen.getByRole("link", { name: "载入演示值" }).getAttribute("href")).toBe("/new?demo=1");
-    expect(screen.getByRole("link", { name: "导入 CSV" }).getAttribute("href")).toBe("/cases");
+    expect(screen.getByRole("link", { name: "导入 CSV" }).getAttribute("href")).toBe("/cases?import=csv");
     expect(await screen.findByText("在专业研究检索中保存常用条件后，会出现在这里。")).toBeTruthy();
   });
 
@@ -126,7 +126,7 @@ describe("DashboardPage", () => {
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain("没有执行或近似恢复任何查询");
     expect(screen.queryByRole("link", { name: /不得近似恢复/ })).toBeNull();
-    expect(screen.getByRole("heading", { name: "等待第一条记录" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "等待第一条记录" })).toBeTruthy();
   });
 
   it("存在本地记录但从未确认完整备份时显示备份健康警告", async () => {
@@ -135,7 +135,7 @@ describe("DashboardPage", () => {
 
     render(<DashboardPage />);
 
-    expect(await screen.findByRole("heading", { name: "备份健康" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "备份记录" })).toBeTruthy();
     expect(screen.getByText("尚未确认完整备份")).toBeTruthy();
     expect(screen.getByRole("link", { name: /导出完整备份/ }).getAttribute("href")).toBe("/settings/data");
   });
@@ -145,13 +145,13 @@ describe("DashboardPage", () => {
     await caseRepository.createCase({ alias: "已备份盘", calculated: chart });
     window.localStorage.setItem(
       "hakimi:backup-health:v1:lastFullBackupExportedAt",
-      "2026-08-10T00:00:00.000Z"
+      new Date().toISOString()
     );
 
     render(<DashboardPage />);
 
-    expect(await screen.findByRole("heading", { name: "备份健康" })).toBeTruthy();
-    expect(screen.getByText(/上次完整备份：/)).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "备份记录" })).toBeTruthy();
+    expect(screen.getByText(/上次完整备份导出记录：/)).toBeTruthy();
     expect(screen.queryByText("尚未确认完整备份")).toBeNull();
   });
 });

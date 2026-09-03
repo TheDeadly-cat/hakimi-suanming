@@ -91,7 +91,7 @@ describe("App research query route", () => {
     expect(alert.textContent).toContain("请勿清除浏览器数据");
     expect(screen.getByRole("link", { name: "启动诊断" }).getAttribute("href")).toBe("/settings");
     expect(screen.getByRole("link", { name: "只读安全备份" }).getAttribute("href")).toBe("/settings/data");
-    expect(screen.getByRole("button", { name: "导出启动诊断 JSON" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "生成启动诊断 JSON" })).toBeTruthy();
     expect(document.title).toBe("启动恢复诊断 · 哈基米八字研究台");
   });
 
@@ -147,8 +147,8 @@ describe("App data management route", () => {
     render(<App bootFailure={bootFailure(false, "storage")} />);
 
     expect(screen.queryByRole("heading", { name: "数据管理路由" })).toBeNull();
-    expect(screen.getByRole("heading", { name: "导出当前完整安全备份" })).toBeTruthy();
-    expect(screen.getByRole<HTMLButtonElement>("button", { name: "导出只读完整备份 ZIP" }).disabled).toBe(true);
+    expect(screen.getByRole("heading", { name: "生成当前完整安全备份" })).toBeTruthy();
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "生成只读完整备份 ZIP" }).disabled).toBe(true);
     expect(screen.getByText(/本次启动不会重新打开数据库/)).toBeTruthy();
     expect(document.title).toBe("只读安全备份 · 哈基米八字研究台");
   });

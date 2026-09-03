@@ -1,0 +1,619 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hakimi.invalid/schemas/sw-ab-update-runtime-collector-issuance-candidate-v1.json",
+  "title": "Hakimi SW runtime ephemeral self-signed collector issuance candidate v1",
+  "$defs": {
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "RunId": {
+      "type": "string",
+      "pattern": "^run-[a-f0-9]{64}$"
+    },
+    "AttemptId": {
+      "type": "string",
+      "pattern": "^attempt-[a-f0-9]{64}$"
+    },
+    "CollectorInstanceNonce": {
+      "type": "string",
+      "pattern": "^collector-[a-f0-9]{64}$"
+    },
+    "BrowserIssuanceNonce": {
+      "type": "string",
+      "pattern": "^browser-[a-f0-9]{64}$"
+    },
+    "BrowserContextIssuanceNonce": {
+      "type": "string",
+      "pattern": "^context-[a-f0-9]{64}$"
+    },
+    "PageIssuanceNonce": {
+      "type": "string",
+      "pattern": "^page-[a-f0-9]{64}$"
+    },
+    "SessionNonce": {
+      "type": "string",
+      "pattern": "^session-[a-f0-9]{64}$"
+    },
+    "ChallengeNonce": {
+      "type": "string",
+      "pattern": "^challenge-[a-f0-9]{64}$"
+    },
+    "IssuerKeyId": {
+      "type": "string",
+      "pattern": "^ed25519-[a-f0-9]{64}$"
+    },
+    "IssuerPublicKeySpkiDerBase64": {
+      "type": "string",
+      "minLength": 60,
+      "maxLength": 60,
+      "pattern": "^MCowBQYDK2VwAyEA[A-Za-z0-9+/]{43}=$"
+    },
+    "Ed25519SignatureBase64": {
+      "type": "string",
+      "minLength": 88,
+      "maxLength": 88,
+      "pattern": "^(?:[A-Za-z0-9+/]{4}){21}[A-Za-z0-9+/]{2}==$"
+    },
+    "IssuanceId": {
+      "type": "string",
+      "pattern": "^swabci1-[a-f0-9]{32}$"
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "Origin": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 256,
+      "pattern": "^https://[A-Za-z0-9](?:[A-Za-z0-9.-]{0,251}[A-Za-z0-9])?(?::[0-9]{1,5})?$"
+    },
+    "ReleaseIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channel", "dbGeneration", "targetSchema", "migrationId"],
+      "properties": {
+        "channel": { "const": "default-v13" },
+        "dbGeneration": { "const": "legacy-v13" },
+        "targetSchema": { "const": 13 },
+        "migrationId": { "type": "null" }
+      }
+    },
+    "Capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mutationEpochCapability", "epoch"],
+      "properties": {
+        "mutationEpochCapability": { "const": "absent_schema13" },
+        "epoch": { "type": "null" }
+      }
+    },
+    "RootLayout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attemptMarkerFile",
+        "transcriptDirectory",
+        "terminalIssuanceFile"
+      ],
+      "properties": {
+        "attemptMarkerFile": { "const": "00-collector-attempt-marker.json" },
+        "transcriptDirectory": { "const": "api-transcript" },
+        "terminalIssuanceFile": { "const": "99-collector-issuance.json" }
+      }
+    },
+    "ArtifactBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "releaseEvidenceId",
+        "buildVersion",
+        "serviceWorkerSha256",
+        "artifactSetDigest"
+      ],
+      "properties": {
+        "label": { "enum": ["A", "B"] },
+        "releaseEvidenceId": {
+          "type": "string",
+          "pattern": "^hre1-[a-f0-9]{32}$"
+        },
+        "buildVersion": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{12}$"
+        },
+        "serviceWorkerSha256": { "$ref": "#/$defs/Sha256" },
+        "artifactSetDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "ArtifactBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["A", "B"],
+      "properties": {
+        "A": { "$ref": "#/$defs/ArtifactBinding" },
+        "B": { "$ref": "#/$defs/ArtifactBinding" }
+      }
+    },
+    "SourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "path",
+        "size",
+        "rawSha256",
+        "canonicalSha256"
+      ],
+      "properties": {
+        "role": {
+          "enum": [
+            "collector-issuance-policy",
+            "collector-issuance-schema",
+            "api-transcript-policy",
+            "api-transcript-schema",
+            "runtime-capture-policy",
+            "runtime-capture-schema"
+          ]
+        },
+        "path": {
+          "enum": [
+            "docs/release/sw-ab-update-runtime-collector-issuance-candidate-policy.v1.json",
+            "docs/release/sw-ab-update-runtime-collector-issuance-candidate-v1.schema.json",
+            "docs/release/sw-ab-update-runtime-api-transcript-candidate-policy.v1.json",
+            "docs/release/sw-ab-update-runtime-api-transcript-candidate-v1.schema.json",
+            "docs/release/sw-ab-update-runtime-client-capture-policy.v1.json",
+            "docs/release/sw-ab-update-runtime-client-capture-v1.schema.json"
+          ]
+        },
+        "size": { "type": "integer", "minimum": 2, "maximum": 4194304 },
+        "rawSha256": { "$ref": "#/$defs/Sha256" },
+        "canonicalSha256": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "SignatureBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "keyScope",
+        "signedDigestEncoding",
+        "publicKeyEncoding",
+        "signatureEncoding",
+        "externalTrustAnchor",
+        "externalIdentityBinding",
+        "externalTimestampAuthority",
+        "historicalRevocationRegistry",
+        "provesOnly"
+      ],
+      "properties": {
+        "algorithm": { "const": "ed25519" },
+        "keyScope": { "const": "ephemeral_per_attempt_self_issued" },
+        "signedDigestEncoding": { "const": "raw_sha256_bytes" },
+        "publicKeyEncoding": { "const": "canonical_spki_der_base64" },
+        "signatureEncoding": { "const": "base64" },
+        "externalTrustAnchor": { "const": false },
+        "externalIdentityBinding": { "const": false },
+        "externalTimestampAuthority": { "const": false },
+        "historicalRevocationRegistry": { "const": false },
+        "provesOnly": { "const": "single_ephemeral_key_internal_chain_integrity" }
+      }
+    },
+    "MechanicalChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ephemeralSelfSignatureChainVerified",
+        "collectorIssuanceProjectionVerified",
+        "phaseMajorIssuanceChainVerified",
+        "transcriptBundleBindingVerified",
+        "overlappingHeldFileEpochEstablished",
+        "intervalMutationExcluded",
+        "abaExcluded"
+      ],
+      "properties": {
+        "ephemeralSelfSignatureChainVerified": { "const": true },
+        "collectorIssuanceProjectionVerified": { "const": true },
+        "phaseMajorIssuanceChainVerified": { "const": true },
+        "transcriptBundleBindingVerified": { "const": true },
+        "overlappingHeldFileEpochEstablished": { "const": true },
+        "intervalMutationExcluded": { "const": false },
+        "abaExcluded": { "const": false }
+      }
+    },
+    "MutationBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attemptMarkerHandleHeldAcrossIssuance",
+        "overlappingHeldFileEpochEstablished",
+        "allEvidenceFilesContinuouslyHeldAcrossIssuance",
+        "intervalMutationExcluded",
+        "abaExcluded"
+      ],
+      "properties": {
+        "attemptMarkerHandleHeldAcrossIssuance": { "const": true },
+        "overlappingHeldFileEpochEstablished": { "const": true },
+        "allEvidenceFilesContinuouslyHeldAcrossIssuance": { "const": false },
+        "intervalMutationExcluded": { "const": false },
+        "abaExcluded": { "const": false }
+      }
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "callerSuppliedObservationAuthenticityVerified",
+        "runtimeCollectorProvenanceVerified",
+        "browserObjectIssuanceAuthenticityVerified",
+        "browserBinaryProvenanceVerified",
+        "browserRuntimeProvenanceVerified",
+        "browserTransportAuthenticityVerified",
+        "realBrowserExecutionVerified",
+        "osProcessRestartProvenanceVerified",
+        "twoClientRuntimeProvenanceVerified",
+        "serviceWorkerResponseProvenanceVerified",
+        "offlineTransportClosureVerified",
+        "attemptFreshnessExternallyVerified",
+        "bundleReplayResistanceVerified",
+        "concurrentFilesystemMutationResistanceVerified"
+      ],
+      "properties": {
+        "callerSuppliedObservationAuthenticityVerified": { "const": false },
+        "runtimeCollectorProvenanceVerified": { "const": false },
+        "browserObjectIssuanceAuthenticityVerified": { "const": false },
+        "browserBinaryProvenanceVerified": { "const": false },
+        "browserRuntimeProvenanceVerified": { "const": false },
+        "browserTransportAuthenticityVerified": { "const": false },
+        "realBrowserExecutionVerified": { "const": false },
+        "osProcessRestartProvenanceVerified": { "const": false },
+        "twoClientRuntimeProvenanceVerified": { "const": false },
+        "serviceWorkerResponseProvenanceVerified": { "const": false },
+        "offlineTransportClosureVerified": { "const": false },
+        "attemptFreshnessExternallyVerified": { "const": false },
+        "bundleReplayResistanceVerified": { "const": false },
+        "concurrentFilesystemMutationResistanceVerified": { "const": false }
+      }
+    },
+    "Authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "defaultV13ReceiptAllowlistMember",
+        "formalReleaseEvidenceReceipt",
+        "trustedProviderVerified",
+        "trustedHostVerified",
+        "trustedBrowserRuntimeVerified",
+        "deploymentReady",
+        "releaseReady",
+        "externalDeploymentExecutionAuthorized",
+        "publicDeploymentAuthorized",
+        "publicReleaseAuthorized",
+        "contentTruthAuthorized",
+        "expertClaimsAuthorized",
+        "rightsLegalConclusionAuthorized",
+        "schemaPromotionAuthorized"
+      ],
+      "properties": {
+        "defaultV13ReceiptAllowlistMember": { "const": false },
+        "formalReleaseEvidenceReceipt": { "const": false },
+        "trustedProviderVerified": { "const": false },
+        "trustedHostVerified": { "const": false },
+        "trustedBrowserRuntimeVerified": { "const": false },
+        "deploymentReady": { "const": false },
+        "releaseReady": { "const": false },
+        "externalDeploymentExecutionAuthorized": { "const": false },
+        "publicDeploymentAuthorized": { "const": false },
+        "publicReleaseAuthorized": { "const": false },
+        "contentTruthAuthorized": { "const": false },
+        "expertClaimsAuthorized": { "const": false },
+        "rightsLegalConclusionAuthorized": { "const": false },
+        "schemaPromotionAuthorized": { "const": false }
+      }
+    },
+    "AttemptMarkerBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "size",
+        "sha256",
+        "markerDigest",
+        "issuerKeyId",
+        "issuerPublicKeySpkiDerBase64"
+      ],
+      "properties": {
+        "path": { "const": "00-collector-attempt-marker.json" },
+        "size": { "type": "integer", "minimum": 2, "maximum": 1048576 },
+        "sha256": { "$ref": "#/$defs/Sha256" },
+        "markerDigest": { "$ref": "#/$defs/Sha256" },
+        "issuerKeyId": { "$ref": "#/$defs/IssuerKeyId" },
+        "issuerPublicKeySpkiDerBase64": {
+          "$ref": "#/$defs/IssuerPublicKeySpkiDerBase64"
+        }
+      }
+    },
+    "TranscriptTupleBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "projectName",
+        "phase",
+        "slot",
+        "path",
+        "size",
+        "sha256",
+        "recordDigest"
+      ],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "projectName": { "enum": ["msedge", "chrome"] },
+        "phase": { "enum": ["initial-a", "post-claim"] },
+        "slot": { "enum": ["retained-old-a", "reload-to-b"] },
+        "path": {
+          "type": "string",
+          "pattern": "^[0-9]{2}-(?:msedge|chrome)-(?:initial-a|post-claim)-(?:retained-old-a|reload-to-b)\\.json$"
+        },
+        "size": { "type": "integer", "minimum": 2, "maximum": 524288 },
+        "sha256": { "$ref": "#/$defs/Sha256" },
+        "recordDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "TranscriptBundleBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relativeDirectory",
+        "manifestPath",
+        "manifestSize",
+        "manifestSha256",
+        "bundleId",
+        "bundleDigest",
+        "derivedEvidenceDigest",
+        "sourceSetDigest",
+        "tupleFileCount",
+        "tupleBindings"
+      ],
+      "properties": {
+        "relativeDirectory": { "const": "api-transcript" },
+        "manifestPath": { "const": "api-transcript/bundle-manifest.json" },
+        "manifestSize": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 4194304
+        },
+        "manifestSha256": { "$ref": "#/$defs/Sha256" },
+        "bundleId": {
+          "type": "string",
+          "pattern": "^swabapi1-[a-f0-9]{32}$"
+        },
+        "bundleDigest": { "$ref": "#/$defs/Sha256" },
+        "derivedEvidenceDigest": { "$ref": "#/$defs/Sha256" },
+        "sourceSetDigest": { "$ref": "#/$defs/Sha256" },
+        "tupleFileCount": { "const": 8 },
+        "tupleBindings": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/TranscriptTupleBinding" }
+        }
+      }
+    },
+    "TupleIssuance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "projectName",
+        "phase",
+        "slot",
+        "browserIssuanceNonce",
+        "browserContextIssuanceNonce",
+        "pageIssuanceNonce",
+        "sessionNonce",
+        "challengeNonce",
+        "transcriptPath",
+        "transcriptSize",
+        "transcriptSha256",
+        "transcriptRecordDigest",
+        "previousIssuanceDigest",
+        "issuanceDigest"
+      ],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "projectName": { "enum": ["msedge", "chrome"] },
+        "phase": { "enum": ["initial-a", "post-claim"] },
+        "slot": { "enum": ["retained-old-a", "reload-to-b"] },
+        "browserIssuanceNonce": { "$ref": "#/$defs/BrowserIssuanceNonce" },
+        "browserContextIssuanceNonce": {
+          "$ref": "#/$defs/BrowserContextIssuanceNonce"
+        },
+        "pageIssuanceNonce": { "$ref": "#/$defs/PageIssuanceNonce" },
+        "sessionNonce": { "$ref": "#/$defs/SessionNonce" },
+        "challengeNonce": { "$ref": "#/$defs/ChallengeNonce" },
+        "transcriptPath": {
+          "type": "string",
+          "pattern": "^api-transcript/[0-9]{2}-(?:msedge|chrome)-(?:initial-a|post-claim)-(?:retained-old-a|reload-to-b)\\.json$"
+        },
+        "transcriptSize": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 524288
+        },
+        "transcriptSha256": { "$ref": "#/$defs/Sha256" },
+        "transcriptRecordDigest": { "$ref": "#/$defs/Sha256" },
+        "previousIssuanceDigest": { "$ref": "#/$defs/Sha256" },
+        "issuanceDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "AttemptMarker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "recordType",
+        "trustClass",
+        "status",
+        "executionAdmission",
+        "runId",
+        "attemptId",
+        "collectorInstanceNonce",
+        "issuerKeyId",
+        "issuerPublicKeySpkiDerBase64",
+        "createdAt",
+        "origin",
+        "releaseIdentity",
+        "capabilities",
+        "rootLayout",
+        "artifactBindings",
+        "sourceBindings",
+        "sourceSetDigest",
+        "signatureBoundary",
+        "authority",
+        "markerDigest",
+        "markerSignatureBase64"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "recordType": {
+          "const": "sw_ab_update_runtime_collector_attempt_marker_candidate_v1"
+        },
+        "trustClass": {
+          "const": "untrusted_ephemeral_self_signed_collector_issuance_candidate"
+        },
+        "status": { "const": "issuance_incomplete" },
+        "executionAdmission": {
+          "const": "closed_missing_selected_https_origin"
+        },
+        "runId": { "$ref": "#/$defs/RunId" },
+        "attemptId": { "$ref": "#/$defs/AttemptId" },
+        "collectorInstanceNonce": { "$ref": "#/$defs/CollectorInstanceNonce" },
+        "issuerKeyId": { "$ref": "#/$defs/IssuerKeyId" },
+        "issuerPublicKeySpkiDerBase64": {
+          "$ref": "#/$defs/IssuerPublicKeySpkiDerBase64"
+        },
+        "createdAt": { "$ref": "#/$defs/Timestamp" },
+        "origin": { "$ref": "#/$defs/Origin" },
+        "releaseIdentity": { "$ref": "#/$defs/ReleaseIdentity" },
+        "capabilities": { "$ref": "#/$defs/Capabilities" },
+        "rootLayout": { "$ref": "#/$defs/RootLayout" },
+        "artifactBindings": { "$ref": "#/$defs/ArtifactBindings" },
+        "sourceBindings": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/SourceBinding" }
+        },
+        "sourceSetDigest": { "$ref": "#/$defs/Sha256" },
+        "signatureBoundary": { "$ref": "#/$defs/SignatureBoundary" },
+        "authority": { "$ref": "#/$defs/Authority" },
+        "markerDigest": { "$ref": "#/$defs/Sha256" },
+        "markerSignatureBase64": {
+          "$ref": "#/$defs/Ed25519SignatureBase64"
+        }
+      }
+    },
+    "CollectorIssuanceReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "recordType",
+        "trustClass",
+        "status",
+        "executionAdmission",
+        "usableForRuntimeEvidence",
+        "usableForCandidateAssembly",
+        "formalReleaseEvidenceReceipt",
+        "cliExitCode",
+        "runId",
+        "attemptId",
+        "collectorInstanceNonce",
+        "issuerKeyId",
+        "capturedAt",
+        "origin",
+        "releaseIdentity",
+        "capabilities",
+        "rootLayout",
+        "artifactBindings",
+        "attemptMarkerBinding",
+        "transcriptBundleBinding",
+        "tupleIssuances",
+        "sourceBindings",
+        "sourceSetDigest",
+        "signatureBoundary",
+        "mechanicalChecks",
+        "mutationBoundary",
+        "provenance",
+        "authority",
+        "issuanceId",
+        "receiptDigest",
+        "receiptSignatureBase64"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "recordType": {
+          "const": "sw_ab_update_runtime_collector_issuance_candidate_v1"
+        },
+        "trustClass": {
+          "const": "untrusted_ephemeral_self_signed_collector_issuance_candidate"
+        },
+        "status": { "const": "issuance_incomplete" },
+        "executionAdmission": {
+          "const": "closed_missing_selected_https_origin"
+        },
+        "usableForRuntimeEvidence": { "const": false },
+        "usableForCandidateAssembly": { "const": false },
+        "formalReleaseEvidenceReceipt": { "const": false },
+        "cliExitCode": { "const": 1 },
+        "runId": { "$ref": "#/$defs/RunId" },
+        "attemptId": { "$ref": "#/$defs/AttemptId" },
+        "collectorInstanceNonce": { "$ref": "#/$defs/CollectorInstanceNonce" },
+        "issuerKeyId": { "$ref": "#/$defs/IssuerKeyId" },
+        "capturedAt": { "$ref": "#/$defs/Timestamp" },
+        "origin": { "$ref": "#/$defs/Origin" },
+        "releaseIdentity": { "$ref": "#/$defs/ReleaseIdentity" },
+        "capabilities": { "$ref": "#/$defs/Capabilities" },
+        "rootLayout": { "$ref": "#/$defs/RootLayout" },
+        "artifactBindings": { "$ref": "#/$defs/ArtifactBindings" },
+        "attemptMarkerBinding": { "$ref": "#/$defs/AttemptMarkerBinding" },
+        "transcriptBundleBinding": {
+          "$ref": "#/$defs/TranscriptBundleBinding"
+        },
+        "tupleIssuances": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/TupleIssuance" }
+        },
+        "sourceBindings": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/SourceBinding" }
+        },
+        "sourceSetDigest": { "$ref": "#/$defs/Sha256" },
+        "signatureBoundary": { "$ref": "#/$defs/SignatureBoundary" },
+        "mechanicalChecks": { "$ref": "#/$defs/MechanicalChecks" },
+        "mutationBoundary": { "$ref": "#/$defs/MutationBoundary" },
+        "provenance": { "$ref": "#/$defs/Provenance" },
+        "authority": { "$ref": "#/$defs/Authority" },
+        "issuanceId": { "$ref": "#/$defs/IssuanceId" },
+        "receiptDigest": { "$ref": "#/$defs/Sha256" },
+        "receiptSignatureBase64": {
+          "$ref": "#/$defs/Ed25519SignatureBase64"
+        }
+      }
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/AttemptMarker" },
+    { "$ref": "#/$defs/CollectorIssuanceReceipt" }
+  ]
+}

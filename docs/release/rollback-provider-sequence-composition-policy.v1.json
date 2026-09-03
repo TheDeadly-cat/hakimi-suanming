@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "policyId": "hakimi.web-v1.rollback-provider-sequence-composition/v1",
+  "evidenceClass": "offline_projection_only_untrusted_candidate_composition",
+  "releaseIdentity": {
+    "channel": "default-v13",
+    "dbGeneration": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null
+  },
+  "capabilities": {
+    "mutationEpochCapability": "absent_schema13",
+    "epoch": null,
+    "rawIndexedDbBypassAllowed": false,
+    "mutationEpochBypassAllowed": false
+  },
+  "requiredCrossBindings": [
+    "rollback_checked_schema_id_and_digest",
+    "current_rollback_policy_binding_raw_hashes",
+    "persisted_provider_sequence_overlapping_epoch",
+    "provider_origin_and_hosting_policy_raw_sha256",
+    "candidate_b_and_restored_a_deployment_ids",
+    "five_shared_artifact_projection_fields",
+    "candidate_readback_before_restore_start"
+  ],
+  "formalBoundary": {
+    "formalRollbackEvidenceVerified": false,
+    "formalRollbackDownstreamReached": false,
+    "samePolicyEpochFormalCompositionAvailable": false,
+    "formalRollbackAdmissionMayNotBeBypassed": true
+  },
+  "terminalState": {
+    "trustClass": "untrusted_candidate_composition",
+    "status": "not_admitted",
+    "admissionStatus": "not_admitted",
+    "usableForAdmission": false,
+    "cliExitCode": 1
+  },
+  "attempts": {
+    "networkAttempted": false,
+    "deploymentAttempted": false,
+    "rollbackAttempted": false
+  },
+  "authority": {
+    "defaultV13ReceiptAllowlistMember": false,
+    "externalDeploymentExecutionAuthorized": false,
+    "rollbackExecutionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "contentTruthAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "rightsLegalConclusionAuthorized": false,
+    "schemaPromotionAuthorized": false
+  }
+}

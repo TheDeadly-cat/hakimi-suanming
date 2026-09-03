@@ -5,6 +5,7 @@ import type { BirthInput } from "@hakimi/contracts";
 import { WORKING_DEFAULT_RULE_PROFILE, withDayBoundary } from "@hakimi/rule-profiles";
 import { caseRepository } from "@hakimi/storage";
 import { serializePairResearchRoute } from "../lib/pair-research-route";
+import { clearBootGovernanceFixture, installLegacyV13BootGovernance } from "../test/boot-governance-fixture";
 import { PairResearchPage } from "./pair-research-page";
 
 const AT = "2026-08-02T09:15:00.000Z";
@@ -41,14 +42,14 @@ function exactPairUrl(
 
 beforeEach(async () => {
   await caseRepository.clearAll();
-  document.documentElement.dataset.appBootReady = "true";
+  installLegacyV13BootGovernance();
   window.history.replaceState({}, "", "/compare/pair");
   window.scrollTo = vi.fn();
 });
 
 afterEach(async () => {
   await caseRepository.clearAll();
-  delete document.documentElement.dataset.appBootReady;
+  clearBootGovernanceFixture();
   window.history.replaceState({}, "", "/compare/pair");
 });
 
@@ -58,7 +59,7 @@ describe("PairResearchPage", () => {
 
     render(<PairResearchPage />);
 
-    expect(await screen.findByRole("heading", { name: "双案例结构研究 · 事实层" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "双案例结构研究 · 工程事实层" })).toBeTruthy();
     await screen.findByRole("heading", { name: "先保存两个不同正式案例" });
     expect(`${window.location.pathname}${window.location.search}`).toBe("/compare/pair");
   });
@@ -74,7 +75,7 @@ describe("PairResearchPage", () => {
     expect(await screen.findByRole("combobox", { name: "对象甲案例" })).toBeTruthy();
     expect((screen.getByRole("combobox", { name: "对象乙案例" }) as HTMLSelectElement).disabled).toBe(true);
     expect(screen.getByText(/不生成跨盘干支推导、吉凶、因果、缘分、婚配结论或任何评分/)).toBeTruthy();
-    expect(screen.getByRole("navigation", { name: "对照研究模式" })).toBeTruthy();
+    expect(screen.getByRole("navigation", { name: "对照研究模式，当前为双案例结构研究" })).toBeTruthy();
     expect(screen.queryByRole("region", { name: "双案例事实字段并列表" })).toBeNull();
   });
 
@@ -109,8 +110,8 @@ describe("PairResearchPage", () => {
       expect(transit.querySelector(`[data-field-id="transit.${track}"]`)?.querySelectorAll("td")).toHaveLength(2);
     }
     expect(screen.getByRole("region", { name: "导出确切双案例研究工件" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "导出匿名双案例 Markdown" })).toBeTruthy();
-    expect((screen.getByRole("button", { name: "导出完整审计 JSON" }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByRole("button", { name: "准备去标识双案例 Markdown" })).toBeTruthy();
+    expect((screen.getByRole("button", { name: "准备完整审计 JSON" }) as HTMLButtonElement).disabled).toBe(true);
     expect(window.location.search).toContain(encodeURIComponent(`revision:${first.caseRecord.id}:${first.revisions[0].id}`));
     expect(window.location.search).toContain(encodeURIComponent(`revision:${second.caseRecord.id}:${second.revisions[0].id}`));
   }, 15_000);
@@ -135,7 +136,7 @@ describe("PairResearchPage", () => {
     expect((screen.getByRole("combobox", { name: "对象乙人工顺逆" }) as HTMLSelectElement).value).toBe("backward");
     expect(updated.caseRecord.latestRevisionId).not.toBe(first.revisions[0].id);
     expect(new URLSearchParams(window.location.search).getAll("dir")).toEqual(["A:forward", "B:backward"]);
-    expect(screen.getByText(AT)).toBeTruthy();
+    expect(screen.getByLabelText("当前已应用的 UTC 瞬时点").textContent).toBe(AT);
   }, 15_000);
 
   it("伪造同一 Case 的双 Revision 链接会失败关闭并引导到正式对照台", async () => {

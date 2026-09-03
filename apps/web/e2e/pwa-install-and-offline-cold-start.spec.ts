@@ -1,11 +1,13 @@
 ﻿import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import type { Page, Response } from "@playwright/test";
 import { BRIDGE_RELEASE_DATABASE_DESCRIPTOR } from "../release-protocol";
 import { DEFAULT_V13_RELEASE_BROWSER_IDENTITY } from "../playwright.release-browser-matrix.ts";
 import { pageReleaseEvidence } from "./cross-schema-upgrade-helpers";
 import {
   MOBILE_VIEWPORT,
   collectConsoleProblems,
+  createDemoCase,
   expectMobileNoOverflow,
   waitForAppReady,
   waitForServiceWorker
@@ -14,6 +16,107 @@ import {
   launchReleasePersistentContext,
   requireReleaseBrowserRuntimeProduct
 } from "./release-browser-persistent-context.ts";
+
+type ServiceWorkerRuntimeObservation = {
+  origin: string;
+  controllerScriptUrl: string;
+  controllerState: string;
+  registrationScope: string;
+  activeScriptUrl: string;
+  activeState: string;
+  waitingScriptUrl: string | null;
+  installingScriptUrl: string | null;
+  workerMessage: Record<string, unknown>;
+};
+
+async function observeServiceWorkerRuntime(
+  page: Page
+): Promise<ServiceWorkerRuntimeObservation> {
+  return page.evaluate(async () => {
+    const registration = await navigator.serviceWorker.getRegistration("/");
+    const controller = navigator.serviceWorker.controller;
+    const active = registration?.active ?? null;
+    if (!registration || !controller || !active) {
+      throw new Error("Service Worker registration, controller, and active worker must all exist.");
+    }
+
+    const workerMessage = await new Promise<Record<string, unknown>>((resolve, reject) => {
+      const channel = new MessageChannel();
+      let settled = false;
+      const cleanup = () => {
+        window.clearTimeout(timeout);
+        channel.port1.onmessage = null;
+        channel.port1.onmessageerror = null;
+        channel.port1.close();
+      };
+      const finish = (callback: () => void) => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        callback();
+      };
+      const timeout = window.setTimeout(() => {
+        finish(() => reject(new Error("Service Worker build identity query timed out.")));
+      }, 5_000);
+      channel.port1.onmessage = (event: MessageEvent<unknown>) => {
+        finish(() => {
+          if (
+            event.data === null
+            || typeof event.data !== "object"
+            || Array.isArray(event.data)
+          ) {
+            reject(new Error("Service Worker build identity reply must be an object."));
+            return;
+          }
+          resolve(event.data as Record<string, unknown>);
+        });
+      };
+      channel.port1.onmessageerror = () => {
+        finish(() => reject(new Error("Service Worker build identity reply could not be decoded.")));
+      };
+      try {
+        controller.postMessage({ type: "GET_BUILD_VERSION" }, [channel.port2]);
+      } catch (error) {
+        finish(() => reject(error));
+      }
+    });
+
+    return {
+      origin: window.location.origin,
+      controllerScriptUrl: controller.scriptURL,
+      controllerState: controller.state,
+      registrationScope: registration.scope,
+      activeScriptUrl: active.scriptURL,
+      activeState: active.state,
+      waitingScriptUrl: registration.waiting?.scriptURL ?? null,
+      installingScriptUrl: registration.installing?.scriptURL ?? null,
+      workerMessage
+    };
+  });
+}
+
+function expectLockedServiceWorkerIdentity(
+  observation: ServiceWorkerRuntimeObservation,
+  baseURL: string,
+  buildVersion: string
+): void {
+  const origin = new URL(baseURL).origin;
+  expect(observation).toMatchObject({
+    origin,
+    controllerScriptUrl: `${origin}/sw.js`,
+    controllerState: "activated",
+    registrationScope: `${origin}/`,
+    activeScriptUrl: `${origin}/sw.js`,
+    activeState: "activated",
+    waitingScriptUrl: null,
+    installingScriptUrl: null
+  });
+  expect(observation.workerMessage).toEqual({
+    type: "BUILD_VERSION",
+    buildVersion,
+    ...BRIDGE_RELEASE_DATABASE_DESCRIPTOR
+  });
+}
 
 test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可离线冷启动深链", async ({
   baseURL
@@ -45,6 +148,19 @@ test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可
       evidenceId: process.env.HAKIMI_RELEASE_EVIDENCE_ID ?? "unbound-local-build",
       descriptor: BRIDGE_RELEASE_DATABASE_DESCRIPTOR
     });
+    const pageIdentity = await pageReleaseEvidence(page);
+    const buildVersion = pageIdentity.buildVersion;
+    if (
+      typeof buildVersion !== "string"
+      || !/^[a-f0-9]{12}$/u.test(buildVersion)
+    ) {
+      throw new Error("Locked release page buildVersion is missing or invalid.");
+    }
+    expectLockedServiceWorkerIdentity(
+      await observeServiceWorkerRuntime(page),
+      baseURL,
+      buildVersion
+    );
 
     const devtools = await context.newCDPSession(page);
     await devtools.send("Page.enable");
@@ -142,6 +258,10 @@ test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可
     await installBanner.getByRole("button", { name: "关闭安装提示", exact: true }).click();
     await expect(installBanner).toHaveCount(0);
 
+    await createDemoCase(page);
+    const revisionPath = new URL(page.url()).pathname;
+    expect(revisionPath).toMatch(/^\/cases\/[0-9a-f-]+\/revisions\/[0-9a-f-]+$/iu);
+
     await devtools.send("Network.enable");
     await devtools.send("Network.setCacheDisabled", { cacheDisabled: true });
     await devtools.send("Network.clearBrowserCache");
@@ -151,11 +271,20 @@ test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可
     const offlinePage = await context.newPage();
     const offlineProblems = collectConsoleProblems(offlinePage);
     await offlinePage.setViewportSize(MOBILE_VIEWPORT);
-    await offlinePage.goto(`${baseURL}/settings/data`, { waitUntil: "domcontentloaded" });
+    const settingsResponse = await offlinePage.goto(`${baseURL}/settings/data`, {
+      waitUntil: "domcontentloaded"
+    });
+    expect(settingsResponse, "离线 /settings/data 导航必须返回响应").not.toBeNull();
+    expect(settingsResponse!.fromServiceWorker(), "离线 /settings/data 响应必须来自 Service Worker").toBe(true);
     await expect(offlinePage).toHaveTitle("数据管理与完整备份 · 哈基米八字研究台");
     await expect(offlinePage.getByRole("heading", { name: "数据管理与完整备份" })).toBeVisible();
     await waitForAppReady(offlinePage);
     await waitForServiceWorker(offlinePage);
+    expectLockedServiceWorkerIdentity(
+      await observeServiceWorkerRuntime(offlinePage),
+      baseURL,
+      buildVersion
+    );
     await expect(offlinePage.getByRole("region", { name: "此浏览器中的十六个用户数据分区" })).toBeVisible();
     await expectMobileNoOverflow(offlinePage);
     await offlinePage.screenshot({
@@ -165,16 +294,60 @@ test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可
     expect(offlineProblems).toEqual([]);
     await offlinePage.close();
 
+    const offlineRevisionPage = await context.newPage();
+    const offlineRevisionProblems = collectConsoleProblems(offlineRevisionPage);
+    await offlineRevisionPage.setViewportSize(MOBILE_VIEWPORT);
+    const revisionResponse = await offlineRevisionPage.goto(`${baseURL}${revisionPath}`, {
+      waitUntil: "domcontentloaded"
+    });
+    expect(revisionResponse, "离线精确 case/revision 导航必须返回响应").not.toBeNull();
+    expect(
+      revisionResponse!.fromServiceWorker(),
+      "离线精确 case/revision 响应必须来自 Service Worker"
+    ).toBe(true);
+    await expect(offlineRevisionPage).toHaveURL(`${baseURL}${revisionPath}`);
+    await expect(offlineRevisionPage.getByRole("heading", { name: "演示案例 · 辰时研究" })).toBeVisible();
+    await waitForAppReady(offlineRevisionPage);
+    await waitForServiceWorker(offlineRevisionPage);
+    expectLockedServiceWorkerIdentity(
+      await observeServiceWorkerRuntime(offlineRevisionPage),
+      baseURL,
+      buildVersion
+    );
+    await expect(
+      offlineRevisionPage.getByRole("combobox", { name: "历史 Revision" })
+    ).toBeVisible();
+    await expectMobileNoOverflow(offlineRevisionPage);
+    await offlineRevisionPage.screenshot({
+      path: testInfo.outputPath("pwa-offline-case-revision-deep-link-390.png"),
+      fullPage: false
+    });
+    expect(offlineRevisionProblems).toEqual([]);
+    await offlineRevisionPage.close();
+
     const offlineHelpPage = await context.newPage();
     const offlineHelpProblems = collectConsoleProblems(offlineHelpPage);
     await offlineHelpPage.setViewportSize(MOBILE_VIEWPORT);
 
-    const expectOfflineHelpReady = async (phase: "cold-start" | "reload") => {
+    const expectOfflineHelpReady = async (
+      phase: "cold-start" | "reload",
+      navigationResponse: Response | null
+    ) => {
+      expect(navigationResponse, `/help 离线 ${phase} 导航必须返回响应`).not.toBeNull();
+      expect(
+        navigationResponse!.fromServiceWorker(),
+        `/help 离线 ${phase} 响应必须来自 Service Worker`
+      ).toBe(true);
       await expect(offlineHelpPage).toHaveURL(`${baseURL}/help`);
       await expect(offlineHelpPage).toHaveTitle("帮助与安全边界 · 哈基米八字研究台");
       await expect(offlineHelpPage.getByRole("heading", { name: "帮助与安全边界", level: 1 })).toBeVisible();
       await waitForAppReady(offlineHelpPage);
       await waitForServiceWorker(offlineHelpPage);
+      expectLockedServiceWorkerIdentity(
+        await observeServiceWorkerRuntime(offlineHelpPage),
+        baseURL,
+        buildVersion
+      );
       await expectMobileNoOverflow(offlineHelpPage);
 
       const backupCta = offlineHelpPage.getByRole("link", { name: "检查完整备份", exact: true });
@@ -210,10 +383,12 @@ test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可
       expect(offlineHelpProblems, `/help 离线 ${phase} 不应有 console error/warning`).toEqual([]);
     };
 
-    await offlineHelpPage.goto(`${baseURL}/help`, { waitUntil: "domcontentloaded" });
-    await expectOfflineHelpReady("cold-start");
-    await offlineHelpPage.reload({ waitUntil: "domcontentloaded" });
-    await expectOfflineHelpReady("reload");
+    const helpColdStartResponse = await offlineHelpPage.goto(`${baseURL}/help`, {
+      waitUntil: "domcontentloaded"
+    });
+    await expectOfflineHelpReady("cold-start", helpColdStartResponse);
+    const helpReloadResponse = await offlineHelpPage.reload({ waitUntil: "domcontentloaded" });
+    await expectOfflineHelpReady("reload", helpReloadResponse);
     await offlineHelpPage.screenshot({
       path: testInfo.outputPath("pwa-offline-help-reload-390.png"),
       fullPage: false

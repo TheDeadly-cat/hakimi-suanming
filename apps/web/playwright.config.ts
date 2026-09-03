@@ -9,6 +9,7 @@ export default defineConfig({
   outputDir: path.join(os.tmpdir(), "hakimi-bazi-playwright-results"),
   timeout: 120_000,
   expect: { timeout: 15_000 },
+  forbidOnly: true,
   fullyParallel: false,
   workers: 1,
   reporter: "line",

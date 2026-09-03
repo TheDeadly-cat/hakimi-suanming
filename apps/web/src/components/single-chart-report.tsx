@@ -1291,7 +1291,11 @@ function interpretationEvidenceBindingIssue(
       }
       const bindingSubjectId = readReportText(binding, "evidenceSubjectId");
       const matchingCitations = citations.filter((citation) => (
-        Array.isArray(citation.evidenceSubjectIds)
+        Array.isArray(citation.targets)
+        && citation.targets.some((target) => (
+          typeof target === "string" && target.startsWith("命盘字段 ")
+        ))
+        && Array.isArray(citation.evidenceSubjectIds)
         && citation.evidenceSubjectIds.includes(bindingSubjectId)
       ));
       const referencesForStatus = (citationStatus: string) => matchingCitations
@@ -1351,7 +1355,11 @@ function interpretationEvidenceBindingIssue(
 
     const bindingSubjects = new Set(bindingEvidenceSubjectIds);
     const matchingCitations = citations.filter((citation) => (
-      Array.isArray(citation.evidenceSubjectIds)
+      Array.isArray(citation.targets)
+      && citation.targets.some((target) => (
+        typeof target === "string" && target.startsWith("命盘字段 ")
+      ))
+      && Array.isArray(citation.evidenceSubjectIds)
       && citation.evidenceSubjectIds.some((subjectId) => (
         typeof subjectId === "string" && bindingSubjects.has(subjectId)
       ))
@@ -2184,7 +2192,7 @@ function InterpretationEvidenceSection({
 
       <aside className="single-chart-interpretation-boundary" role="note">
         <strong>逐句规范重建与机械准入，不是内容、专家或发布真值</strong>
-        <p>正文与冻结 Envelope 的规范渲染器逐字匹配，只证明当前工程投影未被自由改写。Citation 的 verified 与来源权利的 redistributable 也不证明术数内容正确、专家已审定、科学有效、Citation 所指资料就是 registry 来源，或获准公开发布。</p>
+        <p>正文与冻结 Envelope 的规范渲染器逐字匹配，只证明当前工程投影未被自由改写。v1.7 独立文本只保留可见 target 与权利投影；精确 Case／Revision 合取和 SourceCarrier material gate 必须由本机构建器或带原输入 validator 重建。Citation 的 verified 与 redistributable 也不证明术数内容正确、专家已审定、科学有效、Citation 所指资料就是 registry 来源，或获准公开发布。</p>
       </aside>
 
       <dl className="single-chart-interpretation-meta">
@@ -2854,7 +2862,7 @@ export const SingleChartReport = forwardRef<HTMLElement, { report: SingleChartRe
             {!report.anonymized ? (
               <aside className="single-chart-interpretation-boundary" role="note">
                 <strong>状态是机械治理投影，不是内容或发布真值</strong>
-                <p>verified 只表示当前 Citation 复核状态；redistributable 只表示公开 SourceRights 字段满足机械条件。两者都不认证 Citation 所指资料就是 registry 来源，也不等于内容正确、专家审定、科学有效或公开发布授权。</p>
+                <p>verified 只表示当前 Citation 复核状态；redistributableSourceRights 是报告内机械投影。本机构建还要求 SourceCarrier material gate，但独立解析 v1.7 文本不能重演该门。redistributable 不等于内容正确、专家审定、科学有效或公开发布授权，也不认证 Citation 所指资料就是 registry 来源。</p>
               </aside>
             ) : null}
             {report.anonymized ? (

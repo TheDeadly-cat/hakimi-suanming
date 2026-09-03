@@ -1,0 +1,921 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hakimi.invalid/schemas/deployed-pwa-evidence-v1.json",
+  "title": "Hakimi Web v1 Deployed PWA Engineering Evidence",
+  "$defs": {
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "CanonicalId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]{0,127}$"
+    },
+    "ArtifactPath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$"
+    },
+    "PlatformId": {
+      "type": "string",
+      "pattern": "^(?!unselected$)[a-z0-9][a-z0-9._-]{0,63}$"
+    },
+    "HttpsOrigin": {
+      "type": "string",
+      "maxLength": 256,
+      "pattern": "^https://[A-Za-z0-9](?:[A-Za-z0-9.-]{0,251}[A-Za-z0-9])?$"
+    },
+    "HttpsUrl": {
+      "type": "string",
+      "maxLength": 1024,
+      "pattern": "^https://[A-Za-z0-9.-]+/[^\\r\\n]*$"
+    },
+    "BuildVersion": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{12}$"
+    },
+    "ReleaseIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "channel",
+        "dbGeneration",
+        "targetSchema",
+        "migrationId"
+      ],
+      "properties": {
+        "channel": {
+          "const": "default-v13"
+        },
+        "dbGeneration": {
+          "const": "legacy-v13"
+        },
+        "targetSchema": {
+          "const": 13
+        },
+        "migrationId": {
+          "const": null
+        }
+      }
+    },
+    "ReleaseDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocolVersion",
+        "dbGeneration",
+        "databaseName",
+        "targetSchema",
+        "minReadableSchema",
+        "maxReadableSchema",
+        "migrationId",
+        "acceptedCommittedMigrationIds",
+        "sourceGeneration",
+        "sourceDatabaseName",
+        "sourceSchema"
+      ],
+      "properties": {
+        "protocolVersion": {
+          "const": 1
+        },
+        "dbGeneration": {
+          "const": "legacy-v13"
+        },
+        "databaseName": {
+          "const": "hakimi-bazi-research"
+        },
+        "targetSchema": {
+          "const": 13
+        },
+        "minReadableSchema": {
+          "const": 13
+        },
+        "maxReadableSchema": {
+          "const": 13
+        },
+        "migrationId": {
+          "const": null
+        },
+        "acceptedCommittedMigrationIds": {
+          "type": "array",
+          "items": {
+            "const": null
+          },
+          "minItems": 1,
+          "maxItems": 1,
+          "uniqueItems": true
+        },
+        "sourceGeneration": {
+          "const": null
+        },
+        "sourceDatabaseName": {
+          "const": null
+        },
+        "sourceSchema": {
+          "const": null
+        }
+      }
+    },
+    "PolicyBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "role": {
+          "enum": [
+            "release-decisions",
+            "hosting-security-policy",
+            "release-evidence-schema",
+            "deployed-pwa-evidence-schema",
+            "deployed-pwa-evidence-policy"
+          ]
+        },
+        "path": {
+          "$ref": "#/$defs/ArtifactPath"
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "ArtifactEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "size",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/ArtifactPath"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "ArtifactComponents": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "applicationShell",
+        "pwaManifest",
+        "serviceWorker",
+        "hostingHeaders"
+      ],
+      "properties": {
+        "applicationShell": {
+          "$ref": "#/$defs/ArtifactEntry"
+        },
+        "pwaManifest": {
+          "$ref": "#/$defs/ArtifactEntry"
+        },
+        "serviceWorker": {
+          "$ref": "#/$defs/ArtifactEntry"
+        },
+        "hostingHeaders": {
+          "$ref": "#/$defs/ArtifactEntry"
+        }
+      }
+    },
+    "ReleaseEvidenceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "evidenceId",
+        "generatedAt"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/ArtifactPath"
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "evidenceId": {
+          "type": "string",
+          "pattern": "^hre1-[a-f0-9]{32}$"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "FormalVerificationBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "receiptId",
+        "releaseEvidenceId",
+        "status",
+        "verifiedAt",
+        "formalReleaseEvidenceVerified"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/ArtifactPath"
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "receiptId": {
+          "$ref": "#/$defs/CanonicalId"
+        },
+        "releaseEvidenceId": {
+          "type": "string",
+          "pattern": "^hre1-[a-f0-9]{32}$"
+        },
+        "status": {
+          "const": "passed"
+        },
+        "verifiedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "formalReleaseEvidenceVerified": {
+          "const": true
+        }
+      }
+    },
+    "IdentityLockBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "lockDigest",
+        "artifactSetDigest",
+        "createdAt"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/ArtifactPath"
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "lockDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "artifactSetDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ArtifactIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "releaseEvidence",
+        "formalVerification",
+        "identityLock",
+        "descriptor",
+        "manifestVersion",
+        "manifestDigest",
+        "buildVersion",
+        "artifactSetDigest",
+        "components"
+      ],
+      "properties": {
+        "releaseEvidence": {
+          "$ref": "#/$defs/ReleaseEvidenceBinding"
+        },
+        "formalVerification": {
+          "$ref": "#/$defs/FormalVerificationBinding"
+        },
+        "identityLock": {
+          "$ref": "#/$defs/IdentityLockBinding"
+        },
+        "descriptor": {
+          "$ref": "#/$defs/ReleaseDescriptor"
+        },
+        "manifestVersion": {
+          "const": 1
+        },
+        "manifestDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "buildVersion": {
+          "$ref": "#/$defs/BuildVersion"
+        },
+        "artifactSetDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "components": {
+          "$ref": "#/$defs/ArtifactComponents"
+        }
+      }
+    },
+    "HostReceiptBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "receiptId",
+        "summaryType",
+        "verificationKind",
+        "targetOrigin",
+        "deploymentPlatform",
+        "releaseEvidenceId",
+        "artifactSetDigest",
+        "networkCompleted",
+        "strictGatePassed",
+        "realHostVerified",
+        "publicDeploymentAuthorized",
+        "completedAt"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/ArtifactPath"
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "receiptId": {
+          "$ref": "#/$defs/CanonicalId"
+        },
+        "summaryType": {
+          "const": "deployed_host_verification_v1"
+        },
+        "verificationKind": {
+          "const": "real-network"
+        },
+        "targetOrigin": {
+          "$ref": "#/$defs/HttpsOrigin"
+        },
+        "deploymentPlatform": {
+          "$ref": "#/$defs/PlatformId"
+        },
+        "releaseEvidenceId": {
+          "type": "string",
+          "pattern": "^hre1-[a-f0-9]{32}$"
+        },
+        "artifactSetDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "networkCompleted": {
+          "const": true
+        },
+        "strictGatePassed": {
+          "const": true
+        },
+        "realHostVerified": {
+          "const": true
+        },
+        "publicDeploymentAuthorized": {
+          "const": false
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "BrowserRuntimeReceiptBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "receiptId",
+        "projectName",
+        "browserChannel",
+        "actualProduct",
+        "targetOrigin",
+        "releaseEvidenceId",
+        "artifactSetDigest",
+        "profileBindingDigest",
+        "profileDirectoryExistedBeforeRun",
+        "profileCreatedByRunner",
+        "registrationScope",
+        "controllerPresent",
+        "controllerScriptUrl",
+        "controllerState",
+        "activeScriptUrl",
+        "activeState",
+        "waitingScriptUrl",
+        "installingScriptUrl",
+        "controllerBuildVersion",
+        "controllerDescriptor",
+        "remoteServiceWorkerSha256",
+        "controllerSourceSha256",
+        "controllerSourceEvidenceMethod",
+        "attemptCount",
+        "retryCount",
+        "skippedCount",
+        "flakyCount",
+        "onlineRootVerified",
+        "offlineSettingsDataFromServiceWorkerVerified",
+        "offlineCaseRevisionFromServiceWorkerVerified",
+        "offlineHelpColdStartFromServiceWorkerVerified",
+        "offlineHelpReloadFromServiceWorkerVerified",
+        "playwrightFromServiceWorkerVerified",
+        "cdpFromServiceWorkerVerified",
+        "caseRevisionPath",
+        "caseRevisionFingerprintBefore",
+        "caseRevisionFingerprintAfter",
+        "unexpectedExternalRequestCount",
+        "rawAttachmentSetDigest",
+        "strictGatePassed",
+        "startedAt",
+        "completedAt"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/ArtifactPath"
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "receiptId": {
+          "$ref": "#/$defs/CanonicalId"
+        },
+        "projectName": {
+          "enum": [
+            "msedge",
+            "chrome"
+          ]
+        },
+        "browserChannel": {
+          "enum": [
+            "msedge",
+            "chrome"
+          ]
+        },
+        "actualProduct": {
+          "type": "string",
+          "pattern": "^(?:Edg|Chrome)/[0-9]+(?:\\.[0-9]+){1,3}$"
+        },
+        "targetOrigin": {
+          "$ref": "#/$defs/HttpsOrigin"
+        },
+        "releaseEvidenceId": {
+          "type": "string",
+          "pattern": "^hre1-[a-f0-9]{32}$"
+        },
+        "artifactSetDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "profileBindingDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "profileDirectoryExistedBeforeRun": {
+          "const": false
+        },
+        "profileCreatedByRunner": {
+          "const": true
+        },
+        "registrationScope": {
+          "$ref": "#/$defs/HttpsUrl"
+        },
+        "controllerPresent": {
+          "const": true
+        },
+        "controllerScriptUrl": {
+          "$ref": "#/$defs/HttpsUrl"
+        },
+        "controllerState": {
+          "const": "activated"
+        },
+        "activeScriptUrl": {
+          "$ref": "#/$defs/HttpsUrl"
+        },
+        "activeState": {
+          "const": "activated"
+        },
+        "waitingScriptUrl": {
+          "const": null
+        },
+        "installingScriptUrl": {
+          "const": null
+        },
+        "controllerBuildVersion": {
+          "$ref": "#/$defs/BuildVersion"
+        },
+        "controllerDescriptor": {
+          "$ref": "#/$defs/ReleaseDescriptor"
+        },
+        "remoteServiceWorkerSha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "controllerSourceSha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "controllerSourceEvidenceMethod": {
+          "const": "cdp_debugger_get_script_source_v1"
+        },
+        "attemptCount": {
+          "const": 1
+        },
+        "retryCount": {
+          "const": 0
+        },
+        "skippedCount": {
+          "const": 0
+        },
+        "flakyCount": {
+          "const": 0
+        },
+        "onlineRootVerified": {
+          "const": true
+        },
+        "offlineSettingsDataFromServiceWorkerVerified": {
+          "const": true
+        },
+        "offlineCaseRevisionFromServiceWorkerVerified": {
+          "const": true
+        },
+        "offlineHelpColdStartFromServiceWorkerVerified": {
+          "const": true
+        },
+        "offlineHelpReloadFromServiceWorkerVerified": {
+          "const": true
+        },
+        "playwrightFromServiceWorkerVerified": {
+          "const": true
+        },
+        "cdpFromServiceWorkerVerified": {
+          "const": true
+        },
+        "caseRevisionPath": {
+          "type": "string",
+          "pattern": "^/cases/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/revisions/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "caseRevisionFingerprintBefore": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "caseRevisionFingerprintAfter": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "unexpectedExternalRequestCount": {
+          "const": 0
+        },
+        "rawAttachmentSetDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "strictGatePassed": {
+          "const": true
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "DeploymentReceiptBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "receiptId",
+        "provider",
+        "deploymentId",
+        "targetOrigin",
+        "releaseEvidenceId",
+        "artifactSetDigest",
+        "action",
+        "completedAt"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/ArtifactPath"
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "receiptId": {
+          "$ref": "#/$defs/CanonicalId"
+        },
+        "provider": {
+          "$ref": "#/$defs/PlatformId"
+        },
+        "deploymentId": {
+          "$ref": "#/$defs/CanonicalId"
+        },
+        "targetOrigin": {
+          "$ref": "#/$defs/HttpsOrigin"
+        },
+        "releaseEvidenceId": {
+          "type": "string",
+          "pattern": "^hre1-[a-f0-9]{32}$"
+        },
+        "artifactSetDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "action": {
+          "const": "deploy_candidate"
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Receipts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "host",
+        "browsers",
+        "deployment"
+      ],
+      "properties": {
+        "host": {
+          "$ref": "#/$defs/HostReceiptBinding"
+        },
+        "browsers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BrowserRuntimeReceiptBinding"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "deployment": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DeploymentReceiptBinding"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deploymentPlatform",
+        "canonicalOrigin",
+        "hostVerificationKind",
+        "browserProjects",
+        "releaseIdentity"
+      ],
+      "properties": {
+        "deploymentPlatform": {
+          "$ref": "#/$defs/PlatformId"
+        },
+        "canonicalOrigin": {
+          "$ref": "#/$defs/HttpsOrigin"
+        },
+        "hostVerificationKind": {
+          "const": "real-network"
+        },
+        "browserProjects": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "msedge",
+              "chrome"
+            ]
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "releaseIdentity": {
+          "$ref": "#/$defs/ReleaseIdentity"
+        }
+      }
+    },
+    "Gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyBindingsVerified",
+        "releaseIdentityVerified",
+        "artifactIdentityVerified",
+        "formalReleaseEvidenceVerified",
+        "realHostReceiptVerified",
+        "edgePwaRuntimeReceiptVerified",
+        "chromePwaRuntimeReceiptVerified",
+        "deploymentReceiptVerified",
+        "deployedPwaEngineeringVerified"
+      ],
+      "properties": {
+        "policyBindingsVerified": {
+          "type": "boolean"
+        },
+        "releaseIdentityVerified": {
+          "type": "boolean"
+        },
+        "artifactIdentityVerified": {
+          "type": "boolean"
+        },
+        "formalReleaseEvidenceVerified": {
+          "type": "boolean"
+        },
+        "realHostReceiptVerified": {
+          "type": "boolean"
+        },
+        "edgePwaRuntimeReceiptVerified": {
+          "type": "boolean"
+        },
+        "chromePwaRuntimeReceiptVerified": {
+          "type": "boolean"
+        },
+        "deploymentReceiptVerified": {
+          "type": "boolean"
+        },
+        "deployedPwaEngineeringVerified": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engineeringEvidenceOnly",
+        "sourceAndArtifactCurrentVerified",
+        "realHostVerified",
+        "pwaBrowserRuntimeVerified",
+        "deploymentOperationObserved",
+        "externalDeploymentExecutionAuthorized",
+        "publicDeploymentAuthorized",
+        "publicReleaseAuthorized",
+        "releaseReady",
+        "contentTruthAuthorized",
+        "expertClaimsAuthorized",
+        "rightsLegalConclusionAuthorized"
+      ],
+      "properties": {
+        "engineeringEvidenceOnly": {
+          "const": true
+        },
+        "sourceAndArtifactCurrentVerified": {
+          "type": "boolean"
+        },
+        "realHostVerified": {
+          "type": "boolean"
+        },
+        "pwaBrowserRuntimeVerified": {
+          "type": "boolean"
+        },
+        "deploymentOperationObserved": {
+          "type": "boolean"
+        },
+        "externalDeploymentExecutionAuthorized": {
+          "const": false
+        },
+        "publicDeploymentAuthorized": {
+          "const": false
+        },
+        "publicReleaseAuthorized": {
+          "const": false
+        },
+        "releaseReady": {
+          "const": false
+        },
+        "contentTruthAuthorized": {
+          "const": false
+        },
+        "expertClaimsAuthorized": {
+          "const": false
+        },
+        "rightsLegalConclusionAuthorized": {
+          "const": false
+        }
+      }
+    },
+    "Failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "category",
+        "messageDigest",
+        "detailBinding"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]{2,127}$"
+        },
+        "category": {
+          "enum": [
+            "policy",
+            "artifact",
+            "host",
+            "browser",
+            "deployment",
+            "authorization"
+          ]
+        },
+        "messageDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "detailBinding": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512
+        }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evidenceType",
+    "evidenceId",
+    "status",
+    "generatedAt",
+    "scope",
+    "policyBindings",
+    "artifactIdentity",
+    "receipts",
+    "gates",
+    "claims",
+    "failures",
+    "evidenceDigest"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "evidenceType": {
+      "const": "deployed_pwa_engineering_evidence"
+    },
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^hpwa1-[a-f0-9]{32}$"
+    },
+    "status": {
+      "enum": [
+        "passed",
+        "failed"
+      ]
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scope": {
+      "$ref": "#/$defs/Scope"
+    },
+    "policyBindings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PolicyBinding"
+      },
+      "minItems": 5,
+      "maxItems": 5,
+      "uniqueItems": true
+    },
+    "artifactIdentity": {
+      "$ref": "#/$defs/ArtifactIdentity"
+    },
+    "receipts": {
+      "$ref": "#/$defs/Receipts"
+    },
+    "gates": {
+      "$ref": "#/$defs/Gates"
+    },
+    "claims": {
+      "$ref": "#/$defs/Claims"
+    },
+    "failures": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Failure"
+      },
+      "minItems": 0,
+      "maxItems": 128,
+      "uniqueItems": true
+    },
+    "evidenceDigest": {
+      "$ref": "#/$defs/Sha256"
+    }
+  }
+}

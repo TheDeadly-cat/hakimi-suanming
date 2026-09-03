@@ -1,18 +1,27 @@
 import { Component, StrictMode, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
-import type { ReleaseDatabaseDescriptor } from "../release-protocol";
 import {
+  BRIDGE_RELEASE_DATABASE_DESCRIPTOR,
+  type ReleaseDatabaseDescriptor
+} from "../release-protocol";
+import {
+  assertOrphanedV13DispositionBinding,
+  assertSupportedOrphanedV13RecoveryShellDescriptor,
   captureOrphanedV13Backup,
-  type OrphanedV13Disposition
+  type OrphanedV13Disposition,
+  type SupportedOrphanedV13RecoveryShellDescriptor
 } from "./lib/orphaned-v13-rescue";
-import type { PrebootRecoveryState } from "./lib/preboot-database-inventory";
+import {
+  LEGACY_V13_NATIVE_VERSION,
+  type PrebootRecoveryState
+} from "./lib/preboot-database-inventory";
 import {
   OrphanedV13RecoveryPage,
   type OrphanedV13RecoveryState
 } from "./pages/orphaned-v13-recovery-page";
 import "./styles.css";
 
-type RecoveryDisposition = Exclude<PrebootRecoveryState, { kind: "normal" }>;
+export type RecoveryDisposition = Exclude<PrebootRecoveryState, { kind: "normal" }>;
 
 type RecoveryRenderBoundaryProps = {
   children: ReactNode;
@@ -51,19 +60,20 @@ function requireRecoveryRoot(): HTMLElement {
   return root;
 }
 
-function assertRecoveryInputs(
+export function assertRecoveryInputs(
   disposition: RecoveryDisposition,
   descriptor: ReleaseDatabaseDescriptor
-): void {
+): asserts descriptor is SupportedOrphanedV13RecoveryShellDescriptor {
   if (disposition.kind !== "orphaned_v13" && disposition.kind !== "ambiguous") {
     throw new TypeError("预启动恢复状态不受支持。");
   }
-  if (
-    descriptor.dbGeneration !== "legacy-v13"
-    || descriptor.targetSchema !== 13
-    || descriptor.migrationId !== null
-  ) {
-    throw new Error("只读恢复入口拒绝了不匹配的发布数据库描述符。");
+  assertSupportedOrphanedV13RecoveryShellDescriptor(descriptor);
+  if (disposition.kind === "orphaned_v13") {
+    assertOrphanedV13DispositionBinding(disposition, descriptor);
+    return;
+  }
+  if ("sourceDatabaseName" in disposition || "sourceNativeVersion" in disposition) {
+    throw new TypeError("来源有歧义的恢复状态不得伪装成已绑定的孤立 v13 来源。");
   }
 }
 
@@ -210,8 +220,8 @@ export function mountPrebootRecovery(
   disposition: RecoveryDisposition,
   descriptor: ReleaseDatabaseDescriptor
 ): void {
-  const root = requireRecoveryRoot();
   assertRecoveryInputs(disposition, descriptor);
+  const root = requireRecoveryRoot();
 
   document.title = disposition.kind === "orphaned_v13"
     ? "v13 数据救援 · 哈基米八字研究台"
@@ -219,9 +229,27 @@ export function mountPrebootRecovery(
   const dataset = document.documentElement.dataset;
   dataset.appBootReady = "false";
   dataset.swBootSignalSent = "false";
-  dataset.releaseContract = descriptor.dbGeneration;
-  dataset.targetSchema = String(descriptor.targetSchema);
+  dataset.releaseContract = BRIDGE_RELEASE_DATABASE_DESCRIPTOR.dbGeneration;
+  dataset.targetSchema = String(BRIDGE_RELEASE_DATABASE_DESCRIPTOR.targetSchema);
   dataset.migrationId = "null";
+  dataset.recoverySourceReleaseContract = BRIDGE_RELEASE_DATABASE_DESCRIPTOR.dbGeneration;
+  dataset.recoverySourceDatabaseName = BRIDGE_RELEASE_DATABASE_DESCRIPTOR.databaseName;
+  dataset.recoverySourceTargetSchema = String(BRIDGE_RELEASE_DATABASE_DESCRIPTOR.targetSchema);
+  dataset.recoverySourceMigrationId = "null";
+  if (disposition.kind === "orphaned_v13") {
+    dataset.recoveryDispositionSourceDatabaseName = disposition.sourceDatabaseName;
+    dataset.recoveryDispositionSourceNativeVersion = String(disposition.sourceNativeVersion);
+  } else {
+    delete dataset.recoveryDispositionSourceDatabaseName;
+    delete dataset.recoveryDispositionSourceNativeVersion;
+  }
+  dataset.recoveryShellReleaseContract = descriptor.dbGeneration;
+  dataset.recoveryShellDatabaseName = descriptor.databaseName;
+  dataset.recoveryShellTargetSchema = String(descriptor.targetSchema);
+  dataset.recoveryShellMigrationId = descriptor.migrationId;
+  dataset.recoveryShellSourceGeneration = descriptor.sourceGeneration;
+  dataset.recoveryShellSourceDatabaseName = descriptor.sourceDatabaseName;
+  dataset.recoveryShellSourceSchema = String(descriptor.sourceSchema);
   dataset.engineeringEvidenceOnly = "true";
   dataset.publicReleaseAuthorized = "false";
   dataset.expertTruthClaimed = "false";
@@ -247,7 +275,7 @@ export function mountPrebootRecovery(
         <OrphanedV13RecoveryPage
           state={pageState(disposition)}
           captureBackup={captureBackup}
-          requireVerifiedCaptureBinding
+          recoveryShellDescriptor={descriptor}
         />
       </RecoveryRenderBoundary>
     </StrictMode>

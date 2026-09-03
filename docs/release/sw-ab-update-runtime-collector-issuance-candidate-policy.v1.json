@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "policyId": "hakimi.web-v1.sw-ab-update-runtime-collector-issuance-candidate/v1",
+  "trustClass": "untrusted_ephemeral_self_signed_collector_issuance_candidate",
+  "status": "issuance_incomplete",
+  "executionAdmission": "closed_missing_selected_https_origin",
+  "releaseIdentity": {
+    "channel": "default-v13",
+    "dbGeneration": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null
+  },
+  "capabilities": {
+    "mutationEpochCapability": "absent_schema13",
+    "epoch": null
+  },
+  "rootLayout": {
+    "attemptMarkerFile": "00-collector-attempt-marker.json",
+    "transcriptDirectory": "api-transcript",
+    "terminalIssuanceFile": "99-collector-issuance.json"
+  },
+  "requiredBrowserProjects": [
+    "msedge",
+    "chrome"
+  ],
+  "requiredPhases": [
+    "initial-a",
+    "post-claim"
+  ],
+  "requiredSlots": [
+    "retained-old-a",
+    "reload-to-b"
+  ],
+  "requiredTupleIssuances": [
+    {
+      "sequence": 1,
+      "projectName": "msedge",
+      "phase": "initial-a",
+      "slot": "retained-old-a",
+      "transcriptPath": "api-transcript/01-msedge-initial-a-retained-old-a.json"
+    },
+    {
+      "sequence": 2,
+      "projectName": "msedge",
+      "phase": "initial-a",
+      "slot": "reload-to-b",
+      "transcriptPath": "api-transcript/02-msedge-initial-a-reload-to-b.json"
+    },
+    {
+      "sequence": 3,
+      "projectName": "chrome",
+      "phase": "initial-a",
+      "slot": "retained-old-a",
+      "transcriptPath": "api-transcript/03-chrome-initial-a-retained-old-a.json"
+    },
+    {
+      "sequence": 4,
+      "projectName": "chrome",
+      "phase": "initial-a",
+      "slot": "reload-to-b",
+      "transcriptPath": "api-transcript/04-chrome-initial-a-reload-to-b.json"
+    },
+    {
+      "sequence": 5,
+      "projectName": "msedge",
+      "phase": "post-claim",
+      "slot": "retained-old-a",
+      "transcriptPath": "api-transcript/05-msedge-post-claim-retained-old-a.json"
+    },
+    {
+      "sequence": 6,
+      "projectName": "msedge",
+      "phase": "post-claim",
+      "slot": "reload-to-b",
+      "transcriptPath": "api-transcript/06-msedge-post-claim-reload-to-b.json"
+    },
+    {
+      "sequence": 7,
+      "projectName": "chrome",
+      "phase": "post-claim",
+      "slot": "retained-old-a",
+      "transcriptPath": "api-transcript/07-chrome-post-claim-retained-old-a.json"
+    },
+    {
+      "sequence": 8,
+      "projectName": "chrome",
+      "phase": "post-claim",
+      "slot": "reload-to-b",
+      "transcriptPath": "api-transcript/08-chrome-post-claim-reload-to-b.json"
+    }
+  ],
+  "requiredSourceBindings": [
+    {
+      "role": "collector-issuance-policy",
+      "path": "docs/release/sw-ab-update-runtime-collector-issuance-candidate-policy.v1.json"
+    },
+    {
+      "role": "collector-issuance-schema",
+      "path": "docs/release/sw-ab-update-runtime-collector-issuance-candidate-v1.schema.json"
+    },
+    {
+      "role": "api-transcript-policy",
+      "path": "docs/release/sw-ab-update-runtime-api-transcript-candidate-policy.v1.json"
+    },
+    {
+      "role": "api-transcript-schema",
+      "path": "docs/release/sw-ab-update-runtime-api-transcript-candidate-v1.schema.json"
+    },
+    {
+      "role": "runtime-capture-policy",
+      "path": "docs/release/sw-ab-update-runtime-client-capture-policy.v1.json"
+    },
+    {
+      "role": "runtime-capture-schema",
+      "path": "docs/release/sw-ab-update-runtime-client-capture-v1.schema.json"
+    }
+  ],
+  "signatureBoundary": {
+    "algorithm": "ed25519",
+    "keyScope": "ephemeral_per_attempt_self_issued",
+    "signedDigestEncoding": "raw_sha256_bytes",
+    "publicKeyEncoding": "canonical_spki_der_base64",
+    "signatureEncoding": "base64",
+    "externalTrustAnchor": false,
+    "externalIdentityBinding": false,
+    "externalTimestampAuthority": false,
+    "historicalRevocationRegistry": false,
+    "provesOnly": "single_ephemeral_key_internal_chain_integrity"
+  },
+  "terminalState": {
+    "ephemeralSelfSignatureChainVerified": true,
+    "collectorIssuanceProjectionVerified": true,
+    "phaseMajorIssuanceChainVerified": true,
+    "transcriptBundleBindingVerified": true,
+    "overlappingHeldFileEpochEstablished": true,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false,
+    "usableForRuntimeEvidence": false,
+    "usableForCandidateAssembly": false,
+    "formalReleaseEvidenceReceipt": false,
+    "cliExitCode": 1
+  },
+  "mutationBoundary": {
+    "attemptMarkerHandleHeldAcrossIssuance": true,
+    "overlappingHeldFileEpochEstablished": true,
+    "allEvidenceFilesContinuouslyHeldAcrossIssuance": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false
+  },
+  "provenance": {
+    "callerSuppliedObservationAuthenticityVerified": false,
+    "runtimeCollectorProvenanceVerified": false,
+    "browserObjectIssuanceAuthenticityVerified": false,
+    "browserBinaryProvenanceVerified": false,
+    "browserRuntimeProvenanceVerified": false,
+    "browserTransportAuthenticityVerified": false,
+    "realBrowserExecutionVerified": false,
+    "osProcessRestartProvenanceVerified": false,
+    "twoClientRuntimeProvenanceVerified": false,
+    "serviceWorkerResponseProvenanceVerified": false,
+    "offlineTransportClosureVerified": false,
+    "attemptFreshnessExternallyVerified": false,
+    "bundleReplayResistanceVerified": false,
+    "concurrentFilesystemMutationResistanceVerified": false
+  },
+  "authority": {
+    "defaultV13ReceiptAllowlistMember": false,
+    "formalReleaseEvidenceReceipt": false,
+    "trustedProviderVerified": false,
+    "trustedHostVerified": false,
+    "trustedBrowserRuntimeVerified": false,
+    "deploymentReady": false,
+    "releaseReady": false,
+    "externalDeploymentExecutionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "contentTruthAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "rightsLegalConclusionAuthorized": false,
+    "schemaPromotionAuthorized": false
+  }
+}

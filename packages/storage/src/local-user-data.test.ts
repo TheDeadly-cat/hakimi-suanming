@@ -995,6 +995,11 @@ describe("sixteen-partition full data operations", () => {
     expect(optionGetter).not.toHaveBeenCalled();
 
     await expect(repository.replaceFullDataSnapshot(safeSnapshot, {
+      expectedCurrentPayloadDigest: undefined
+    } as never)).rejects.toThrow(
+      "Expected current full-data payload digest must be a lowercase SHA-256 digest."
+    );
+    await expect(repository.replaceFullDataSnapshot(safeSnapshot, {
       expectedCurrentPayloadDigest: "0".repeat(64),
       unexpected: true
     } as never)).rejects.toThrow("Full data replacement options must be a plain exact object.");
@@ -1010,6 +1015,8 @@ describe("sixteen-partition full data operations", () => {
     await expect(repository.replaceFullDataSnapshot(safeSnapshot, nonEnumerableOptions)).rejects.toThrow(
       "Full data replacement options must use an own enumerable data property."
     );
+    await expect(repository.replaceFullDataSnapshot(safeSnapshot, {})).resolves.toBeUndefined();
+    await expect(repository.replaceFullDataSnapshot(safeSnapshot)).resolves.toBeUndefined();
   });
 
   it.each([

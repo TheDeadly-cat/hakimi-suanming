@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "policyId": "hakimi.web-v1.sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition/v1",
+  "evidenceClass": "offline_untrusted_four_chain_composition_candidate",
+  "producerBridgeStatus": "producer_bridge_absent",
+  "releaseIdentity": {
+    "channel": "default-v13",
+    "dbGeneration": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null
+  },
+  "capabilities": {
+    "mutationEpochCapability": "absent_schema13",
+    "epoch": null
+  },
+  "requiredSourceBindings": [
+    { "role": "four-chain-composition-policy", "path": "docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition-policy.v1.json" },
+    { "role": "four-chain-composition-schema", "path": "docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition-v1.schema.json" },
+    { "role": "two-chain-composition-policy", "path": "docs/release/sw-ab-update-candidate-runtime-client-capture-composition-policy.v1.json" },
+    { "role": "two-chain-composition-schema", "path": "docs/release/sw-ab-update-candidate-runtime-client-capture-composition-v1.schema.json" },
+    { "role": "sw-ab-update-candidate-policy", "path": "docs/release/sw-ab-update-candidate-policy.v1.json" },
+    { "role": "sw-ab-update-candidate-schema", "path": "docs/release/sw-ab-update-candidate-v1.schema.json" },
+    { "role": "runtime-client-capture-policy", "path": "docs/release/sw-ab-update-runtime-client-capture-policy.v1.json" },
+    { "role": "runtime-client-capture-schema", "path": "docs/release/sw-ab-update-runtime-client-capture-v1.schema.json" },
+    { "role": "runtime-api-transcript-policy", "path": "docs/release/sw-ab-update-runtime-api-transcript-candidate-policy.v1.json" },
+    { "role": "runtime-api-transcript-schema", "path": "docs/release/sw-ab-update-runtime-api-transcript-candidate-v1.schema.json" },
+    { "role": "runtime-collector-issuance-policy", "path": "docs/release/sw-ab-update-runtime-collector-issuance-candidate-policy.v1.json" },
+    { "role": "runtime-collector-issuance-schema", "path": "docs/release/sw-ab-update-runtime-collector-issuance-candidate-v1.schema.json" }
+  ],
+  "requiredCrossBindings": [
+    "old_two_chain_composition_projection",
+    "candidate_and_runtime_primary_inputs_held_across_issuance",
+    "runtime_input_transcript_and_issuance_evidence_digest",
+    "transcript_complete_derived_projection",
+    "collector_issuance_identity_and_receipt",
+    "phase_major_exact_eight_tuple_projection",
+    "canonical_origin_artifacts_release_capabilities_run_attempt_and_capture_time",
+    "twelve_unique_checked_policy_and_schema_sources",
+    "issuance_files_held_across_old_composition_and_transcript_reverification"
+  ],
+  "executionAdmission": "closed_missing_selected_https_origin",
+  "terminalState": {
+    "trustClass": "untrusted_four_chain_composition_candidate",
+    "status": "not_admitted",
+    "strictGatePassed": false,
+    "usableForRuntimeEvidence": false,
+    "usableForCandidateAssembly": false,
+    "usableForAdmission": false,
+    "formalReleaseEvidenceReceipt": false,
+    "cliExitCode": 1
+  },
+  "mutationBoundary": {
+    "candidateAndRuntimePrimaryInputsHeldAcrossIssuance": true,
+    "issuanceFilesHeldAcrossOldCompositionAndTranscriptReverification": true,
+    "allEvidenceFilesContinuouslyHeldAcrossComposition": false,
+    "continuousMutationEpochVerified": false,
+    "samePermissionMutationExcluded": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false,
+    "mutationEpochCapability": "absent_schema13",
+    "epoch": null
+  },
+  "attempts": {
+    "networkAttempted": false,
+    "browserAttempted": false,
+    "deploymentAttempted": false,
+    "rollbackAttempted": false,
+    "gitAttempted": false
+  },
+  "authority": {
+    "defaultV13ReceiptAllowlistMember": false,
+    "formalReleaseEvidenceReceipt": false,
+    "trustedProviderVerified": false,
+    "trustedHostVerified": false,
+    "trustedBrowserRuntimeVerified": false,
+    "deploymentReady": false,
+    "releaseReady": false,
+    "externalDeploymentExecutionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "contentTruthAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "rightsLegalConclusionAuthorized": false,
+    "schemaPromotionAuthorized": false
+  }
+}

@@ -15,10 +15,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  default-v13:
-    name: Default legacy-v13 gate
+  toolchain-and-boundaries:
+    name: Toolchain and boundaries
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
 
     steps:
       - name: Check out repository
@@ -41,20 +41,193 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      - name: Verify Western isolated build license notices
+        run: npm run check:western-isolated-build-license-notices
+
+      - name: Test Western isolated build license notice rejection paths
+        run: npm run test:western-isolated-build-license-notices
+
+      - name: Verify Ziwei iztro isolated build license notices
+        run: npm run check:ziwei-iztro-isolated-build-license-notices
+
+      - name: Test Ziwei iztro isolated build license notice rejection paths
+        run: npm run test:ziwei-iztro-isolated-build-license-notices
+
+      - name: Verify system-contract draft boundaries
+        run: npm run check:system-contract-draft-boundaries
+
+      - name: Verify independent Ziwei and Western source-binding requirement inventories
+        run: npm run check:independent-source-binding-requirements
+
+      - name: Verify all 12 Bazi binding freeze-readiness requirements
+        run: npm run check:bazi-binding-freeze-requirements
+
+      - name: Verify independent Ziwei and Western domain manifests
+        run: npm run check:independent-domain-release-manifests
+
+      - name: Verify four-system independent admission registry
+        run: npm run check:system-admission-registry
+
+      - name: Verify Web storage import boundary
+        run: npm run check:web-storage-import-boundary
+
       - name: Verify release governance contracts
         run: npm run check:release-governance
+
+      - name: Verify historical natal source lock
+        run: npm run check:historical-natal-source-lock
+
+      - name: Verify historical natal runtime closure
+        run: npm run check:historical-natal-runtime-closure
 
       - name: Test release evidence tooling
         run: npm run test:release-evidence
 
+  full-typecheck:
+    name: Full workspace typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Set up pinned npm
+        run: npm install --global npm@11.13.0
+
+      - name: Install locked dependencies
+        run: npm ci
+
       - name: Typecheck default application graph
         run: npm run typecheck
+
+  full-vitest:
+    name: Full Vitest suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Set up pinned npm
+        run: npm install --global npm@11.13.0
+
+      - name: Install locked dependencies
+        run: npm ci
 
       - name: Run Vitest suite
         run: npm test
 
+  default-v13-web-build:
+    name: Default legacy-v13 Web build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Set up pinned npm
+        run: npm install --global npm@11.13.0
+
+      - name: Install locked dependencies
+        run: npm ci
+
       - name: Build default legacy-v13 release
         run: npm run build
 
+      - name: Upload the exact default v13 build
+        uses: actions/upload-artifact@v4
+        with:
+          name: quick-ci-default-v13-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist/web
+          if-no-files-found: error
+          retention-days: 14
+
+  artifact-manifest-verification:
+    name: Built artifact manifest verification
+    needs: default-v13-web-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+
+      - name: Set up pinned npm
+        run: npm install --global npm@11.13.0
+
+      - name: Download the exact default v13 build
+        uses: actions/download-artifact@v4
+        with:
+          name: quick-ci-default-v13-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist/web
+
       - name: Verify built release storage manifest
         run: npm run verify:built-release-storage-manifest
+
+  release-gate-aggregate:
+    name: Default legacy-v13 aggregate gate
+    if: ${{ always() }}
+    needs:
+      - toolchain-and-boundaries
+      - full-typecheck
+      - full-vitest
+      - default-v13-web-build
+      - artifact-manifest-verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Require every evidence job to succeed
+        shell: bash
+        env:
+          TOOLCHAIN_AND_BOUNDARIES: ${{ needs.toolchain-and-boundaries.result }}
+          FULL_TYPECHECK: ${{ needs.full-typecheck.result }}
+          FULL_VITEST: ${{ needs.full-vitest.result }}
+          DEFAULT_V13_WEB_BUILD: ${{ needs.default-v13-web-build.result }}
+          ARTIFACT_MANIFEST_VERIFICATION: ${{ needs.artifact-manifest-verification.result }}
+        run: |
+          failures=0
+          for gate in \
+            "toolchain-and-boundaries=$TOOLCHAIN_AND_BOUNDARIES" \
+            "full-typecheck=$FULL_TYPECHECK" \
+            "full-vitest=$FULL_VITEST" \
+            "default-v13-web-build=$DEFAULT_V13_WEB_BUILD" \
+            "artifact-manifest-verification=$ARTIFACT_MANIFEST_VERIFICATION"
+          do
+            gate_name="${gate%%=*}"
+            gate_result="${gate#*=}"
+            printf '%s: %s\n' "$gate_name" "$gate_result"
+            if [ "$gate_result" != "success" ]; then
+              failures=$((failures + 1))
+            fi
+          done
+          if [ "$failures" -ne 0 ]; then
+            printf 'Default legacy-v13 aggregate gate failed closed: %s evidence job(s) did not succeed.\n' "$failures"
+            exit 1
+          fi

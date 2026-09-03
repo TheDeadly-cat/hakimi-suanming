@@ -2074,8 +2074,8 @@ describe("knowledge data in restore transactions", () => {
     await expect(cases.replaceCoreDataSnapshot(collision)).rejects.toBeInstanceOf(CoreDataIdentityConflictError);
   });
 
-  it("rolls back all nine modeled partitions on a late write failure and includes knowledge in CAS", async () => {
-    const { database, cases, research, knowledge } = repositories();
+  it("rolls back the exact schema-13 full snapshot after a staged write and includes knowledge in CAS", async () => {
+    const { database, cases, research, knowledge } = repositories(13);
     const bundle = await cases.createCase({ alias: "九分区", calculated: await chart() });
     await cases.createCandidateSet({ alias: "九分区候选", candidateSet: await candidates() });
     const note = await research.createResearchNote({
@@ -2104,9 +2104,21 @@ describe("knowledge data in restore transactions", () => {
       targets: [{ kind: "research_note", noteId: note.id }]
     });
     const snapshot = await cases.readFullDataSnapshot();
+    expect(database.targetSchemaVersion).toBe(13);
+    expect(database.tables.map((table) => table.name)).not.toContain("mutationState");
+    expect(database.tables.map((table) => table.name)).not.toContain("revisionCalculationReceipts");
 
-    vi.spyOn(database.knowledgeDocuments, "bulkAdd").mockRejectedValueOnce(new Error("模拟第七分区写入失败"));
-    await expect(cases.replaceFullDataSnapshot(structuredClone(snapshot))).rejects.toThrow("模拟第七分区写入失败");
+    const replacement = structuredClone(snapshot);
+    replacement.cases[0]!.alias = "Schema 13 staged replacement";
+    let stagedAlias: string | null = null;
+    vi.spyOn(database.knowledgeDocuments, "bulkAdd").mockImplementationOnce(() =>
+      database.cases.get(bundle.caseRecord.id).then((stagedCase) => {
+        stagedAlias = stagedCase?.alias ?? null;
+        throw new Error("模拟第七分区写入失败");
+      })
+    );
+    await expect(cases.replaceFullDataSnapshot(replacement)).rejects.toThrow("模拟第七分区写入失败");
+    expect(stagedAlias).toBe("Schema 13 staged replacement");
     expect(await cases.readFullDataSnapshot()).toEqual(snapshot);
 
     const expectedDigest = await sha256Hex(snapshot);

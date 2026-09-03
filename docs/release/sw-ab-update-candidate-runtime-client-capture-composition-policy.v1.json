@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "policyId": "hakimi.web-v1.sw-ab-update-candidate-runtime-client-capture-composition/v1",
+  "evidenceClass": "offline_untrusted_supplemental_crosscheck",
+  "releaseIdentity": {
+    "channel": "default-v13",
+    "dbGeneration": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null
+  },
+  "capabilities": {
+    "mutationEpochCapability": "absent_schema13",
+    "epoch": null
+  },
+  "requiredBrowserProjects": [
+    "msedge",
+    "chrome"
+  ],
+  "requiredPhases": [
+    "initial-a",
+    "post-claim"
+  ],
+  "requiredSlots": [
+    "retained-old-a",
+    "reload-to-b"
+  ],
+  "requiredCrossBindings": [
+    "run_and_attempt_identity",
+    "canonical_https_origin",
+    "legacy_v13_release_identity_and_capabilities",
+    "artifact_a_and_b_identity",
+    "phase_major_observation_tuple_order",
+    "pseudonymous_window_client_identity",
+    "pseudonymous_cdp_target_identity",
+    "runtime_challenge_nonce",
+    "shared_switch_chronology"
+  ],
+  "executionAdmission": "closed_missing_https_origin",
+  "terminalState": {
+    "trustClass": "untrusted_candidate_composition",
+    "status": "not_admitted",
+    "strictGatePassed": false,
+    "usableForCandidateAssembly": false,
+    "usableForAdmission": false,
+    "formalReleaseEvidenceReceipt": false,
+    "cliExitCode": 1
+  },
+  "provenance": {
+    "callerSuppliedPageAuthenticityVerified": false,
+    "runtimeCollectorProvenanceVerified": false,
+    "twoClientRuntimeProvenanceVerified": false,
+    "serviceWorkerResponseProvenanceVerified": false,
+    "osProcessRestartProvenanceVerified": false,
+    "cacheApiProvenanceVerified": false,
+    "attemptFreshnessExternallyVerified": false,
+    "bundleReplayResistanceVerified": false,
+    "concurrentFilesystemMutationResistanceVerified": false
+  },
+  "authority": {
+    "defaultV13ReceiptAllowlistMember": false,
+    "formalReleaseEvidenceReceipt": false,
+    "trustedProviderVerified": false,
+    "trustedHostVerified": false,
+    "trustedBrowserRuntimeVerified": false,
+    "deploymentReady": false,
+    "releaseReady": false,
+    "externalDeploymentExecutionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "contentTruthAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "rightsLegalConclusionAuthorized": false,
+    "schemaPromotionAuthorized": false
+  }
+}

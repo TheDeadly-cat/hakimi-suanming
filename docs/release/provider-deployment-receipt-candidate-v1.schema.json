@@ -1,0 +1,289 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hakimi.invalid/schemas/provider-deployment-receipt-candidate-v1.json",
+  "title": "Hakimi provider deployment receipt candidate v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "receiptType",
+    "receiptId",
+    "trustClass",
+    "admissionStatus",
+    "verificationKind",
+    "adapter",
+    "candidateScope",
+    "operation",
+    "artifactIdentity",
+    "rawInputs",
+    "semanticGates",
+    "attempts",
+    "admissionGates",
+    "authorizationBoundary",
+    "claims",
+    "attachments",
+    "attachmentSetDigest",
+    "startedAt",
+    "completedAt",
+    "receiptDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "receiptType": { "const": "provider_deployment_receipt_candidate_v1" },
+    "receiptId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{7,159}$" },
+    "trustClass": { "const": "untrusted_candidate" },
+    "admissionStatus": { "const": "not_admitted" },
+    "verificationKind": { "const": "synthetic-offline-adapter-contract-existing-sanitized-files" },
+    "adapter": { "$ref": "#/$defs/Adapter" },
+    "candidateScope": { "$ref": "#/$defs/CandidateScope" },
+    "operation": { "$ref": "#/$defs/Operation" },
+    "artifactIdentity": { "$ref": "#/$defs/ArtifactIdentity" },
+    "rawInputs": { "$ref": "#/$defs/RawInputs" },
+    "semanticGates": { "$ref": "#/$defs/SemanticGates" },
+    "attempts": { "$ref": "#/$defs/Attempts" },
+    "admissionGates": { "$ref": "#/$defs/AdmissionGates" },
+    "authorizationBoundary": { "$ref": "#/$defs/AuthorizationBoundary" },
+    "claims": { "$ref": "#/$defs/Claims" },
+    "attachments": { "$ref": "#/$defs/Attachments" },
+    "attachmentSetDigest": { "$ref": "#/$defs/Sha256" },
+    "startedAt": { "$ref": "#/$defs/Timestamp" },
+    "completedAt": { "$ref": "#/$defs/Timestamp" },
+    "receiptDigest": { "$ref": "#/$defs/Sha256" }
+  },
+  "$defs": {
+    "Sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "EvidenceId": { "type": "string", "pattern": "^hre1-[a-f0-9]{32}$" },
+    "BuildVersion": { "type": "string", "pattern": "^[a-f0-9]{12}$" },
+    "CanonicalId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "NullableCanonicalId": { "type": ["string", "null"], "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "Timestamp": { "type": "string", "format": "date-time" },
+    "Origin": { "type": "string", "pattern": "^https://[A-Za-z0-9.-]+$", "maxLength": 256 },
+    "Binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "sha256"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$", "maxLength": 512 },
+        "size": { "type": "integer", "minimum": 1, "maximum": 16777216 },
+        "sha256": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "Attachment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "sha256", "mediaType"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$", "maxLength": 512 },
+        "size": { "type": "integer", "minimum": 1, "maximum": 16777216 },
+        "sha256": { "$ref": "#/$defs/Sha256" },
+        "mediaType": { "const": "application/json" }
+      }
+    },
+    "Attachments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw-action-response", "raw-final-readback", "synthetic-normalized-projection", "artifact-initial", "artifact-final"],
+      "properties": {
+        "raw-action-response": { "$ref": "#/$defs/Attachment" },
+        "raw-final-readback": { "$ref": "#/$defs/Attachment" },
+        "synthetic-normalized-projection": { "$ref": "#/$defs/Attachment" },
+        "artifact-initial": { "$ref": "#/$defs/Attachment" },
+        "artifact-final": { "$ref": "#/$defs/Attachment" }
+      }
+    },
+    "Adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adapterId", "adapterVersion", "trustClass", "providerAuthenticated"],
+      "properties": {
+        "adapterId": { "$ref": "#/$defs/CanonicalId" },
+        "adapterVersion": { "$ref": "#/$defs/CanonicalId" },
+        "trustClass": { "const": "synthetic_contract_only" },
+        "providerAuthenticated": { "const": false }
+      }
+    },
+    "CandidateScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "action", "accountId", "projectId", "environment", "origin", "immutableDeploymentUrl"],
+      "properties": {
+        "provider": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$" },
+        "action": { "enum": ["deploy_candidate", "restore_baseline"] },
+        "accountId": { "$ref": "#/$defs/CanonicalId" },
+        "projectId": { "$ref": "#/$defs/CanonicalId" },
+        "environment": { "$ref": "#/$defs/CanonicalId" },
+        "origin": { "$ref": "#/$defs/Origin" },
+        "immutableDeploymentUrl": { "$ref": "#/$defs/Origin" }
+      }
+    },
+    "Operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationId",
+        "beforeActiveDeploymentId",
+        "requestedTargetDeploymentId",
+        "resultActiveDeploymentId",
+        "resultDerivation",
+        "derivedFromDeploymentId",
+        "sequenceEligible",
+        "providerStatus",
+        "terminal",
+        "successful",
+        "startedAt",
+        "acceptedAt",
+        "completedAt",
+        "finalReadbackObservedAt"
+      ],
+      "properties": {
+        "operationId": { "$ref": "#/$defs/CanonicalId" },
+        "beforeActiveDeploymentId": { "$ref": "#/$defs/NullableCanonicalId" },
+        "requestedTargetDeploymentId": { "$ref": "#/$defs/NullableCanonicalId" },
+        "resultActiveDeploymentId": { "$ref": "#/$defs/CanonicalId" },
+        "resultDerivation": { "enum": ["activated_requested", "provider_created_from_requested", "provider_assigned_new"] },
+        "derivedFromDeploymentId": { "$ref": "#/$defs/NullableCanonicalId" },
+        "sequenceEligible": { "type": "boolean" },
+        "providerStatus": { "$ref": "#/$defs/CanonicalId" },
+        "terminal": { "const": true },
+        "successful": { "const": true },
+        "startedAt": { "$ref": "#/$defs/Timestamp" },
+        "acceptedAt": { "$ref": "#/$defs/Timestamp" },
+        "completedAt": { "$ref": "#/$defs/Timestamp" },
+        "finalReadbackObservedAt": { "$ref": "#/$defs/Timestamp" }
+      }
+    },
+    "ArtifactIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channel", "releaseEvidenceId", "descriptor", "buildVersion", "artifactSetDigest", "identityLock", "releaseEvidence", "hostingPolicy", "expectationDigest"],
+      "properties": {
+        "channel": { "const": "default-v13" },
+        "releaseEvidenceId": { "$ref": "#/$defs/EvidenceId" },
+        "descriptor": { "$ref": "#/$defs/DefaultDescriptor" },
+        "buildVersion": { "$ref": "#/$defs/BuildVersion" },
+        "artifactSetDigest": { "$ref": "#/$defs/Sha256" },
+        "identityLock": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "sha256", "lockDigest"],
+          "properties": {
+            "path": { "type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$", "maxLength": 512 },
+            "sha256": { "$ref": "#/$defs/Sha256" },
+            "lockDigest": { "$ref": "#/$defs/Sha256" }
+          }
+        },
+        "releaseEvidence": { "$ref": "#/$defs/Binding" },
+        "hostingPolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "policyId", "sha256", "canonicalSha256"],
+          "properties": {
+            "path": { "type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$", "maxLength": 512 },
+            "policyId": { "$ref": "#/$defs/CanonicalId" },
+            "sha256": { "$ref": "#/$defs/Sha256" },
+            "canonicalSha256": { "$ref": "#/$defs/Sha256" }
+          }
+        },
+        "expectationDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "DefaultDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocolVersion", "dbGeneration", "databaseName", "targetSchema", "minReadableSchema", "maxReadableSchema", "migrationId", "acceptedCommittedMigrationIds", "sourceGeneration", "sourceDatabaseName", "sourceSchema"],
+      "properties": {
+        "protocolVersion": { "const": 1 },
+        "dbGeneration": { "const": "legacy-v13" },
+        "databaseName": { "const": "hakimi-bazi-research" },
+        "targetSchema": { "const": 13 },
+        "minReadableSchema": { "const": 13 },
+        "maxReadableSchema": { "const": 13 },
+        "migrationId": { "const": null },
+        "acceptedCommittedMigrationIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "uniqueItems": true,
+          "items": { "const": null }
+        },
+        "sourceGeneration": { "const": null },
+        "sourceDatabaseName": { "const": null },
+        "sourceSchema": { "const": null }
+      }
+    },
+    "RawInputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["credentialMaterialEmbedded", "actionResponse", "finalReadback"],
+      "properties": {
+        "credentialMaterialEmbedded": { "const": false },
+        "actionResponse": { "$ref": "#/$defs/Binding" },
+        "finalReadback": { "$ref": "#/$defs/Binding" }
+      }
+    },
+    "SemanticGates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rawFilesStable", "artifactIdentityStableDuringOfflineParse", "syntheticProjectionConsistent", "operationTerminal", "operationSuccessful", "credentialMaterialAbsent"],
+      "properties": {
+        "rawFilesStable": { "const": true },
+        "artifactIdentityStableDuringOfflineParse": { "const": true },
+        "syntheticProjectionConsistent": { "const": true },
+        "operationTerminal": { "const": true },
+        "operationSuccessful": { "const": true },
+        "credentialMaterialAbsent": { "const": true }
+      }
+    },
+    "Attempts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["networkAttempted", "deploymentAttempted", "rollbackAttempted"],
+      "properties": {
+        "networkAttempted": { "const": false },
+        "deploymentAttempted": { "const": false },
+        "rollbackAttempted": { "const": false }
+      }
+    },
+    "AdmissionGates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trustedProviderParserVerified", "providerAuthenticatedReceiptVerified", "deploymentAdmissionPassed", "rollbackAdmissionPassed", "publicReleaseGatePassed"],
+      "properties": {
+        "trustedProviderParserVerified": { "const": false },
+        "providerAuthenticatedReceiptVerified": { "const": false },
+        "deploymentAdmissionPassed": { "const": false },
+        "rollbackAdmissionPassed": { "const": false },
+        "publicReleaseGatePassed": { "const": false }
+      }
+    },
+    "AuthorizationBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["externalDeploymentExecutionAuthorized", "rollbackExecutionAuthorized", "publicDeploymentAuthorized", "publicReleaseAuthorized", "authorizationMayNotBeDerivedFromCandidateEvidence"],
+      "properties": {
+        "externalDeploymentExecutionAuthorized": { "const": false },
+        "rollbackExecutionAuthorized": { "const": false },
+        "publicDeploymentAuthorized": { "const": false },
+        "publicReleaseAuthorized": { "const": false },
+        "authorizationMayNotBeDerivedFromCandidateEvidence": { "const": true }
+      }
+    },
+    "Claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["networkObserved", "providerAuthenticated", "deploymentOperationObserved", "rollbackObserved", "releaseReady", "publicDeploymentAuthorized", "publicReleaseAuthorized", "contentTruthAuthorized", "expertClaimsAuthorized", "rightsLegalConclusionAuthorized"],
+      "properties": {
+        "networkObserved": { "const": false },
+        "providerAuthenticated": { "const": false },
+        "deploymentOperationObserved": { "const": false },
+        "rollbackObserved": { "const": false },
+        "releaseReady": { "const": false },
+        "publicDeploymentAuthorized": { "const": false },
+        "publicReleaseAuthorized": { "const": false },
+        "contentTruthAuthorized": { "const": false },
+        "expertClaimsAuthorized": { "const": false },
+        "rightsLegalConclusionAuthorized": { "const": false }
+      }
+    }
+  }
+}

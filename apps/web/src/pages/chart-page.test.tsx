@@ -20,15 +20,16 @@ import {
 import { ChartPage, LuckCyclePanel, PillarRelationsPanel } from "./chart-page";
 import { shortHash } from "../lib/format";
 import { EXPERT_MODE_KEY } from "../lib/expert-mode";
+import { clearBootGovernanceFixture, installLegacyV13BootGovernance } from "../test/boot-governance-fixture";
 
 beforeEach(() => {
-  document.documentElement.dataset.appBootReady = "true";
+  installLegacyV13BootGovernance();
   window.localStorage.clear();
 });
 
 afterEach(() => {
   vi.restoreAllMocks();
-  delete document.documentElement.dataset.appBootReady;
+  clearBootGovernanceFixture();
   window.history.replaceState({}, "", "/");
   window.localStorage.clear();
 });

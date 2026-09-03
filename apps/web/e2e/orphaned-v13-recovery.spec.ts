@@ -2,9 +2,12 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { chromium, expect, test, type BrowserContext, type Page } from "@playwright/test";
+import { createFullBackupFromSnapshot, preflightFullBackupFile } from "@hakimi/backup";
+import type { FullBackupPayload } from "@hakimi/contracts";
 import {
   BRIDGE_RELEASE_DATABASE_DESCRIPTOR,
   PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
+  PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR,
   PRODUCTION_V14_RELEASE_DATABASE_DESCRIPTOR
 } from "../release-protocol";
 import {
@@ -31,6 +34,7 @@ import {
 
 const SOURCE_DATABASE = BRIDGE_RELEASE_DATABASE_DESCRIPTOR.databaseName;
 const TARGET_DATABASE = PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR.databaseName;
+const TARGET_V16_DATABASE = PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR.databaseName;
 const INTERMEDIATE_V14_DATABASE = PRODUCTION_V14_RELEASE_DATABASE_DESCRIPTOR.databaseName;
 const SOURCE_NATIVE_VERSION = 130;
 
@@ -39,11 +43,47 @@ type SanitizedDatabaseInventory = Array<{
   version: number;
 }>;
 
+function logicalFullBackupSnapshot(source: NativeDatabaseSnapshot): FullBackupPayload {
+  const rows = source.rows;
+  return {
+    cases: [...(rows.cases ?? [])],
+    revisions: [...(rows.revisions ?? [])],
+    candidateSets: [...(rows.candidateSets ?? [])],
+    researchNotes: [...(rows.researchNotes ?? [])],
+    events: [...(rows.events ?? [])],
+    savedViews: [...(rows.savedViews ?? [])],
+    knowledgeDocuments: [...(rows.knowledgeDocuments ?? [])],
+    citations: [...(rows.citations ?? [])],
+    sourceRights: [...(rows.sourceRights ?? [])],
+    attachments: [...(rows.attachments ?? [])],
+    researcherProfiles: [...(rows.researcherProfiles ?? [])],
+    appSettings: [...(rows.appSettings ?? [])],
+    ruleRegistry: [...(rows.ruleRegistry ?? [])],
+    tzdbMigrationReceipts: [...(rows.tzdbMigrationReceipts ?? [])],
+    eventTimeMigrationReceipts: [...(rows.eventTimeMigrationReceipts ?? [])],
+    revisionCalculationReceipts: []
+  } as FullBackupPayload;
+}
+
 let fixtureRoot = "";
 let sourceV13: GenerationFixture;
 let targetV15: GenerationFixture;
+let targetV16: GenerationFixture;
 let switchServer: SwitchServer;
 const browserProfilePaths = new Set<string>();
+
+const ORPHANED_RECOVERY_TARGETS = [
+  {
+    label: "v15",
+    descriptor: PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
+    generation: () => targetV15
+  },
+  {
+    label: "v16",
+    descriptor: PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR,
+    generation: () => targetV16
+  }
+] as const;
 
 async function launchFixtureContext(label: string): Promise<BrowserContext> {
   const projectName = test.info().project.name;
@@ -152,6 +192,7 @@ async function expectNoReleaseSideEffects(
   expect(await readNativeDatabase(page, RELEASE_CONTROL_DATABASE)).toBeNull();
   expect(await readNativeDatabase(page, INTERMEDIATE_V14_DATABASE)).toBeNull();
   expect(await readNativeDatabase(page, TARGET_DATABASE)).toBeNull();
+  expect(await readNativeDatabase(page, TARGET_V16_DATABASE)).toBeNull();
   expect(await cacheInventory(page)).toEqual(cacheBefore);
   expect(await page.evaluate(async () => ({
     controller: Boolean(navigator.serviceWorker.controller),
@@ -161,7 +202,7 @@ async function expectNoReleaseSideEffects(
 
 test.beforeAll(async () => {
   fixtureRoot = await mkdtemp(path.join(os.tmpdir(), "hakimi-orphaned-v13-generations-"));
-  [sourceV13, targetV15] = await Promise.all([
+  [sourceV13, targetV15, targetV16] = await Promise.all([
     buildGeneration(
       fixtureRoot,
       "orphaned-source-v13",
@@ -171,9 +212,15 @@ test.beforeAll(async () => {
       fixtureRoot,
       "orphaned-target-v15",
       PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR
+    ),
+    buildGeneration(
+      fixtureRoot,
+      "orphaned-target-v16",
+      PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR
     )
   ]);
   expect(sourceV13.version).not.toBe(targetV15.version);
+  expect(sourceV13.version).not.toBe(targetV16.version);
   switchServer = await startSwitchServer(sourceV13);
 });
 
@@ -186,20 +233,29 @@ test.afterAll(async () => {
   browserProfilePaths.clear();
 });
 
-test("仅遗留精确 v13 数据库且无旧壳时，v15 只读救援并导出可预检 ZIP", async () => {
-  const context = await launchFixtureContext("rescue");
+for (const target of ORPHANED_RECOVERY_TARGETS) {
+test(`仅遗留精确 v13 数据库且无旧壳时，${target.label} 只读救援并导出可预检 ZIP`, async () => {
+  const targetGeneration = target.generation();
+  const context = await launchFixtureContext(`rescue-${target.label}`);
   const externalRequests = collectExternalRequests(context, switchServer.origin);
   let verificationContext: BrowserContext | null = null;
   try {
     const stable = await openStableBridge(context, switchServer, sourceV13);
     await createDemoCase(stable.page, switchServer.origin);
     await openDataManagement(stable.page);
-    await seedPortableData(stable.page, portableFixture("R0 orphaned v13"));
+    await seedPortableData(stable.page, portableFixture(`R0 orphaned v13 ${target.label}`));
     await seedActiveRulePack(stable.page);
 
     const sourceBefore = await readNativeDatabase(stable.page, SOURCE_DATABASE);
     if (!sourceBefore) throw new Error("The rich v13 source database was not created.");
     expectRichV13Source(sourceBefore);
+    const expectedSourceBackup = await createFullBackupFromSnapshot(
+      logicalFullBackupSnapshot(sourceBefore),
+      {
+        appVersion: "0.0.0-orphaned-v13-e2e",
+        exportedAt: "2026-08-27T00:00:00.000Z"
+      }
+    );
     expect(await readNativeDatabase(stable.page, INTERMEDIATE_V14_DATABASE)).toBeNull();
     expect(await readNativeDatabase(stable.page, TARGET_DATABASE)).toBeNull();
 
@@ -213,7 +269,7 @@ test("仅遗留精确 v13 数据库且无旧壳时，v15 只读救援并导出�
 
     for (const page of context.pages()) await page.close();
     switchServer.requests.length = 0;
-    switchServer.setGeneration(targetV15);
+    switchServer.setGeneration(targetGeneration);
 
     const targetPage = await context.newPage();
     const targetProblems = collectConsoleProblems(targetPage);
@@ -226,29 +282,53 @@ test("仅遗留精确 v13 数据库且无旧壳时，v15 只读救援并导出�
     await expect(targetPage.getByRole("heading", {
       name: "检测到未登记的 v13 本地数据库"
     })).toBeVisible();
+    await expect(targetPage.locator(".orphaned-v13-shell")).toHaveAttribute(
+      "data-recovery-shell-target-schema",
+      String(target.descriptor.targetSchema)
+    );
+    await expect(targetPage.locator(".orphaned-v13-shell")).toHaveAttribute(
+      "data-recovery-shell-migration-id",
+      target.descriptor.migrationId ?? "null"
+    );
     await expect.poll(() => targetPage.evaluate(() => ({
       recoveryMode: document.documentElement.dataset.prebootRecoveryMode ?? null,
       appBootReady: document.documentElement.dataset.appBootReady ?? null,
       swRegistered: document.documentElement.dataset.swRegistered ?? null,
       swReady: document.documentElement.dataset.swReady ?? null,
-      swBootSignalSent: document.documentElement.dataset.swBootSignalSent ?? null
+      swBootSignalSent: document.documentElement.dataset.swBootSignalSent ?? null,
+      sourceReleaseContract: document.documentElement.dataset.recoverySourceReleaseContract ?? null,
+      sourceDatabaseName: document.documentElement.dataset.recoverySourceDatabaseName ?? null,
+      sourceTargetSchema: document.documentElement.dataset.recoverySourceTargetSchema ?? null,
+      sourceMigrationId: document.documentElement.dataset.recoverySourceMigrationId ?? null,
+      shellReleaseContract: document.documentElement.dataset.recoveryShellReleaseContract ?? null,
+      shellDatabaseName: document.documentElement.dataset.recoveryShellDatabaseName ?? null,
+      shellTargetSchema: document.documentElement.dataset.recoveryShellTargetSchema ?? null,
+      shellMigrationId: document.documentElement.dataset.recoveryShellMigrationId ?? null
     }))).toEqual({
       recoveryMode: "orphaned_v13",
       appBootReady: "false",
       swRegistered: null,
       swReady: null,
-      swBootSignalSent: null
+      swBootSignalSent: "false",
+      sourceReleaseContract: BRIDGE_RELEASE_DATABASE_DESCRIPTOR.dbGeneration,
+      sourceDatabaseName: BRIDGE_RELEASE_DATABASE_DESCRIPTOR.databaseName,
+      sourceTargetSchema: String(BRIDGE_RELEASE_DATABASE_DESCRIPTOR.targetSchema),
+      sourceMigrationId: "null",
+      shellReleaseContract: target.descriptor.dbGeneration,
+      shellDatabaseName: target.descriptor.databaseName,
+      shellTargetSchema: String(target.descriptor.targetSchema),
+      shellMigrationId: target.descriptor.migrationId
     });
     await expectNoReleaseSideEffects(targetPage, sourceBefore, cacheBefore);
 
     expect(targetRequestPaths).not.toContain("/sw.js");
     expect(switchServer.requests.filter((request) => (
-      request.generation === targetV15.name && request.pathname === "/sw.js"
+      request.generation === targetGeneration.name && request.pathname === "/sw.js"
     ))).toEqual([]);
     expect(externalRequests).toEqual([]);
 
     await targetPage.screenshot({
-      path: test.info().outputPath("orphaned-v13-recovery-desktop.png"),
+      path: test.info().outputPath(`orphaned-v13-recovery-${target.label}-desktop.png`),
       fullPage: true
     });
     await targetPage.setViewportSize({ width: 390, height: 844 });
@@ -257,15 +337,17 @@ test("仅遗留精确 v13 数据库且无旧壳时，v15 只读救援并导出�
       scrollWidth: document.documentElement.scrollWidth
     }))).toEqual({ clientWidth: 390, scrollWidth: 390 });
     await targetPage.screenshot({
-      path: test.info().outputPath("orphaned-v13-recovery-mobile.png"),
+      path: test.info().outputPath(`orphaned-v13-recovery-${target.label}-mobile.png`),
       fullPage: true
     });
 
-    const downloadPromise = targetPage.waitForEvent("download");
     await targetPage.getByRole("button", {
-      name: "生成并下载只读完整备份 ZIP",
+      name: "生成只读完整备份 ZIP",
       exact: true
     }).click();
+    await expect(targetPage.getByRole("dialog")).toBeVisible();
+    const downloadPromise = targetPage.waitForEvent("download");
+    await targetPage.getByRole("button", { name: /^下载文件/u }).click();
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(
       /^hakimi-v13-read-only-full-backup-\d{4}-\d{2}-\d{2}\.zip$/u
@@ -275,12 +357,19 @@ test("仅遗留精确 v13 数据库且无旧壳时，v15 只读救援并导出�
     if (!downloadPath) throw new Error("The orphaned-v13 backup download path is unavailable.");
     const backupBytes = await readFile(downloadPath);
     expect([...backupBytes.subarray(0, 4)]).toEqual([0x50, 0x4b, 0x03, 0x04]);
+    const downloadedBackup = await preflightFullBackupFile(new Uint8Array(backupBytes));
+    expect(downloadedBackup.migratedFromFormatVersion).toBeNull();
+    expect(downloadedBackup.manifest.counts).toEqual(expectedSourceBackup.manifest.counts);
+    expect(downloadedBackup.digests.payload).toBe(expectedSourceBackup.digests.payload);
+    expect(downloadedBackup.payload).toEqual(expectedSourceBackup.payload);
+    await expect(targetPage.locator(".orphaned-v13-receipt__digest code"))
+      .toHaveText(downloadedBackup.digests.payload);
     await expect(targetPage.getByRole("status")).toBeVisible();
 
     await expectNoReleaseSideEffects(targetPage, sourceBefore, cacheBefore);
     expect(targetRequestPaths).not.toContain("/sw.js");
     expect(switchServer.requests.filter((request) => (
-      request.generation === targetV15.name && request.pathname === "/sw.js"
+      request.generation === targetGeneration.name && request.pathname === "/sw.js"
     ))).toEqual([]);
     expect(targetProblems).toEqual([]);
 
@@ -289,7 +378,7 @@ test("仅遗留精确 v13 数据库且无旧壳时，v15 只读救援并导出�
     // create its own v13 control records; the rescued profile above remains
     // unchanged and is asserted before this server switch.
     switchServer.setGeneration(sourceV13);
-    verificationContext = await launchFixtureContext("preflight");
+    verificationContext = await launchFixtureContext(`preflight-${target.label}`);
     const verifier = await openStableBridge(verificationContext, switchServer, sourceV13);
     await openDataManagement(verifier.page);
     await preflightBackupZip(verifier.page, backupBytes, download.suggestedFilename());
@@ -303,3 +392,4 @@ test("仅遗留精确 v13 数据库且无旧壳时，v15 只读救援并导出�
     await context.close();
   }
 });
+}

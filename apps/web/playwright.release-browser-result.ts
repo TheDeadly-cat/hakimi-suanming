@@ -2,9 +2,17 @@ import { RELEASE_BROWSER_MATRIX } from "./playwright.release-browser-matrix.ts";
 
 export const RELEASE_BROWSER_RESULT_SUMMARY_SCHEMA_VERSION = 1 as const;
 export const REQUIRED_RELEASE_BROWSER_RECEIPT_IDS = Object.freeze([
+  "backup",
+  "boot",
   "pwa",
   "web-v1-flow"
 ] as const);
+export const REQUIRED_RELEASE_BROWSER_TESTS_PER_PROJECT = Object.freeze({
+  backup: 4,
+  boot: 6,
+  pwa: 1,
+  "web-v1-flow": 1
+} as const);
 export const REQUIRED_RELEASE_BROWSER_PROJECT_NAMES = Object.freeze(
   RELEASE_BROWSER_MATRIX.map((browser) => browser.projectName)
 );
@@ -71,7 +79,7 @@ function isNonNegativeInteger(value: unknown): value is number {
 
 export function isReleaseBrowserReceiptId(value: unknown): value is ReleaseBrowserReceiptId {
   return typeof value === "string"
-    && (REQUIRED_RELEASE_BROWSER_RECEIPT_IDS as readonly string[]).includes(value);
+    && Object.hasOwn(REQUIRED_RELEASE_BROWSER_TESTS_PER_PROJECT, value);
 }
 
 export function buildReleaseBrowserResultSummary({
@@ -144,8 +152,7 @@ export function buildReleaseBrowserResultSummary({
     && project.attempts === expectedTestsPerProject
   );
   const strictGatePassed = isReleaseBrowserReceiptId(receiptId)
-    && Number.isInteger(expectedTestsPerProject)
-    && expectedTestsPerProject > 0
+    && expectedTestsPerProject === REQUIRED_RELEASE_BROWSER_TESTS_PER_PROJECT[receiptId]
     && fullResultStatus === "passed"
     && unexpectedProjectNames.length === 0
     && errors.length === 0
@@ -172,12 +179,15 @@ export function assertStrictReleaseBrowserResultSummary(
   if (!isRecord(value) || !hasExactKeys(value, SUMMARY_KEYS)) {
     throw new Error("Release browser result summary shape is invalid.");
   }
+  const expectedTestsPerProject = isReleaseBrowserReceiptId(value.receiptId)
+    ? REQUIRED_RELEASE_BROWSER_TESTS_PER_PROJECT[value.receiptId]
+    : null;
   if (
     value.schemaVersion !== RELEASE_BROWSER_RESULT_SUMMARY_SCHEMA_VERSION
     || value.summaryType !== "release_browser_test_summary"
     || value.receiptId !== expectedReceiptId
     || !isReleaseBrowserReceiptId(value.receiptId)
-    || value.expectedTestsPerProject !== 1
+    || value.expectedTestsPerProject !== expectedTestsPerProject
     || value.fullResultStatus !== "passed"
     || value.strictGatePassed !== true
     || JSON.stringify(value.expectedProjectNames) !==
@@ -199,8 +209,8 @@ export function assertStrictReleaseBrowserResultSummary(
     }
     if (
       project.projectName !== REQUIRED_RELEASE_BROWSER_PROJECT_NAMES[index]
-      || project.discovered !== 1
-      || project.passed !== 1
+      || project.discovered !== expectedTestsPerProject
+      || project.passed !== expectedTestsPerProject
       || project.skipped !== 0
       || project.failed !== 0
       || project.timedOut !== 0
@@ -208,7 +218,7 @@ export function assertStrictReleaseBrowserResultSummary(
       || project.unexpected !== 0
       || project.flaky !== 0
       || project.nonPassedExpectedStatus !== 0
-      || project.attempts !== 1
+      || project.attempts !== expectedTestsPerProject
       || !PROJECT_SUMMARY_KEYS.slice(1).every((key) => isNonNegativeInteger(project[key]))
     ) {
       throw new Error(`Release browser project result is not an exact pass: ${String(project.projectName)}.`);

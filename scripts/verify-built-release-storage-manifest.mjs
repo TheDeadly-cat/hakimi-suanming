@@ -84,7 +84,8 @@ export async function verifyBuiltReleaseStorageManifest(outputDirectory) {
     "X-Content-Type-Options:",
     "X-Frame-Options:",
     "Permissions-Policy:",
-    "Cross-Origin-Opener-Policy:"
+    "Cross-Origin-Opener-Policy:",
+    "Strict-Transport-Security:"
   ];
   for (const header of requiredHostingHeaders) {
     if (!hostingHeaders.includes(header)) throw new Error(`Built hosting policy is missing ${header}`);

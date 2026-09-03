@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
 import { execFileSync, spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import { lstat, readFile, readdir, readlink } from "node:fs/promises";
+import { constants as fsConstants, existsSync } from "node:fs";
+import { lstat, open, readFile, readdir, readlink, realpath } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 
 export const RELEASE_POLICY_PATHS = Object.freeze([
@@ -10,6 +11,13 @@ export const RELEASE_POLICY_PATHS = Object.freeze([
   "docs/security/hosting-security-policy.json",
   "docs/release/release-evidence.schema.json"
 ]);
+
+export const REQUIRED_RELEASE_ARTIFACT_COMPONENT_PATHS = Object.freeze({
+  applicationShell: "index.html",
+  pwaManifest: "manifest.webmanifest",
+  serviceWorker: "sw.js",
+  hostingHeaders: "_headers"
+});
 
 const EPHEMERAL_PREFIXES = [
   ".release-evidence/",
@@ -92,8 +100,228 @@ export function canonicalJson(value) {
   return JSON.stringify(sortValue(value));
 }
 
+function canonicalReceiptIds(values, label) {
+  if (
+    !Array.isArray(values)
+    || values.some((value) => typeof value !== "string" || !/^[a-z0-9][a-z0-9-]*$/u.test(value))
+  ) throw new Error(`${label} is malformed.`);
+  const ids = [...values].sort();
+  if (new Set(ids).size !== ids.length) throw new Error(`${label} contains duplicates.`);
+  return ids;
+}
+
+export function releaseReceiptSetMatchesPolicy(receipts, policyReceiptIds) {
+  if (!Array.isArray(receipts)) throw new Error("Recorded release receipts are malformed.");
+  const recordedIds = canonicalReceiptIds(
+    receipts.map((receipt) => receipt?.id),
+    "Recorded release receipt id set"
+  );
+  const policyIds = canonicalReceiptIds(policyReceiptIds, "Release receipt policy id set");
+  return canonicalJson(recordedIds) === canonicalJson(policyIds);
+}
+
+export function defaultV13ReleaseDescriptorMatches({
+  channel,
+  descriptor,
+  decision,
+  canonicalDescriptor
+}) {
+  return channel === "default-v13"
+    && decision?.dbGeneration === canonicalDescriptor?.dbGeneration
+    && decision?.targetSchema === canonicalDescriptor?.targetSchema
+    && decision?.migrationId === canonicalDescriptor?.migrationId
+    && canonicalJson(descriptor) === canonicalJson(canonicalDescriptor);
+}
+
 export function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
+}
+
+function sameResolvedPath(left, right) {
+  const comparable = (value) => {
+    const resolved = path.resolve(value);
+    return process.platform === "win32"
+      ? path.toNamespacedPath(resolved).toLocaleLowerCase("en-US")
+      : resolved;
+  };
+  return comparable(left) === comparable(right);
+}
+
+function stableStatIdentity(details) {
+  return Object.freeze({
+    dev: String(details.dev),
+    ino: String(details.ino),
+    mode: String(details.mode),
+    nlink: String(details.nlink),
+    size: String(details.size),
+    mtimeNs: String(details.mtimeNs),
+    ctimeNs: String(details.ctimeNs),
+    birthtimeNs: String(details.birthtimeNs)
+  });
+}
+
+function sameStableStat(left, right) {
+  return canonicalJson(stableStatIdentity(left)) === canonicalJson(stableStatIdentity(right));
+}
+
+function requireStableDirectoryStat(details, label) {
+  if (details.isSymbolicLink() || !details.isDirectory()) {
+    throw new Error(`${label} must be a regular directory and cannot be a symlink, junction, or reparse alias.`);
+  }
+  if (details.dev === 0n || details.ino === 0n) {
+    throw new Error(`${label} filesystem does not expose a usable device/inode identity.`);
+  }
+}
+
+function requireStableRegularFileStat(details, label) {
+  if (details.isSymbolicLink() || !details.isFile()) {
+    throw new Error(`${label} must be a regular file and cannot be a symlink, junction, reparse alias, or non-regular entry.`);
+  }
+  if (details.dev === 0n || details.ino === 0n) {
+    throw new Error(`${label} filesystem does not expose a usable device/inode identity.`);
+  }
+  if (details.nlink !== 1n) {
+    throw new Error(`${label} must not be a hardlink.`);
+  }
+}
+
+async function stableContainmentRoot(containmentRoot, label) {
+  const absoluteRoot = path.resolve(containmentRoot);
+  const details = await lstat(absoluteRoot, { bigint: true });
+  requireStableDirectoryStat(details, `${label} containment root`);
+  const realPath = await realpath(absoluteRoot);
+  if (!sameResolvedPath(absoluteRoot, realPath)) {
+    throw new Error(`${label} containment root real path does not match its lexical path; ancestor aliases and reparse redirection are forbidden.`);
+  }
+  return Object.freeze({
+    absolutePath: absoluteRoot,
+    realPath,
+    details
+  });
+}
+
+async function stableDirectoryState({
+  containmentRoot,
+  containmentRealPath,
+  directory,
+  label
+}) {
+  const absoluteDirectory = path.resolve(directory);
+  const relativeDirectory = relativePathWithin(containmentRoot, absoluteDirectory, label);
+  const details = await lstat(absoluteDirectory, { bigint: true });
+  requireStableDirectoryStat(details, label);
+  const realDirectory = await realpath(absoluteDirectory);
+  const expectedRealDirectory = path.resolve(containmentRealPath, relativeDirectory);
+  if (!sameResolvedPath(realDirectory, expectedRealDirectory)) {
+    throw new Error(`${label} real path does not match its lexical path; aliases and reparse redirection are forbidden.`);
+  }
+  return Object.freeze({
+    absolutePath: absoluteDirectory,
+    realPath: realDirectory,
+    identity: stableStatIdentity(details),
+    details
+  });
+}
+
+export async function assertStableDirectoryPathWithin(containmentRoot, directory, label) {
+  const root = await stableContainmentRoot(containmentRoot, label);
+  const absoluteDirectory = path.resolve(directory);
+  const relativeDirectory = relativePathWithin(root.absolutePath, absoluteDirectory, label);
+  const segments = relativeDirectory === "" ? [] : relativeDirectory.split(/[\\/]+/u);
+  let current = root.absolutePath;
+  let state = Object.freeze({
+    absolutePath: root.absolutePath,
+    realPath: root.realPath,
+    identity: stableStatIdentity(root.details),
+    details: root.details
+  });
+  for (let index = 0; index < segments.length; index += 1) {
+    current = path.join(current, segments[index]);
+    state = await stableDirectoryState({
+      containmentRoot: root.absolutePath,
+      containmentRealPath: root.realPath,
+      directory: current,
+      label: index === segments.length - 1 ? label : `${label} parent directory`
+    });
+  }
+  return Object.freeze({
+    ...state,
+    containmentRoot: root.absolutePath,
+    containmentRealPath: root.realPath
+  });
+}
+
+async function readStableRegularFileSnapshotFromRoot({
+  containmentRoot,
+  containmentRealPath,
+  filePath,
+  label
+}) {
+  const absolutePath = path.resolve(filePath);
+  const relativePath = relativePathWithin(containmentRoot, absolutePath, label);
+  const expectedRealPath = path.resolve(containmentRealPath, relativePath);
+  const beforeLstat = await lstat(absolutePath, { bigint: true });
+  requireStableRegularFileStat(beforeLstat, label);
+  const beforeRealPath = await realpath(absolutePath);
+  if (!sameResolvedPath(beforeRealPath, expectedRealPath)) {
+    throw new Error(`${label} real path does not match its lexical path; aliases and reparse redirection are forbidden.`);
+  }
+
+  const noFollow = process.platform === "win32" || !Number.isInteger(fsConstants.O_NOFOLLOW)
+    ? 0
+    : fsConstants.O_NOFOLLOW;
+  const handle = await open(absolutePath, fsConstants.O_RDONLY | noFollow);
+  try {
+    const beforeFstat = await handle.stat({ bigint: true });
+    requireStableRegularFileStat(beforeFstat, label);
+    if (!sameStableStat(beforeLstat, beforeFstat)) {
+      throw new Error(`${label} changed identity between lstat and held-file open.`);
+    }
+    const bytes = await handle.readFile();
+    const afterFstat = await handle.stat({ bigint: true });
+    requireStableRegularFileStat(afterFstat, label);
+    const afterLstat = await lstat(absolutePath, { bigint: true });
+    requireStableRegularFileStat(afterLstat, label);
+    const afterRealPath = await realpath(absolutePath);
+    if (!sameResolvedPath(afterRealPath, expectedRealPath)
+      || !sameResolvedPath(beforeRealPath, afterRealPath)
+      || !sameStableStat(beforeFstat, afterFstat)
+      || !sameStableStat(beforeLstat, afterLstat)
+      || !sameStableStat(afterFstat, afterLstat)) {
+      throw new Error(`${label} changed while its held-file byte snapshot was read.`);
+    }
+    if (afterFstat.size > BigInt(Number.MAX_SAFE_INTEGER)
+      || bytes.byteLength !== Number(afterFstat.size)) {
+      throw new Error(`${label} byte length does not match its stable file identity.`);
+    }
+    return Object.freeze({
+      absolutePath,
+      realPath: afterRealPath,
+      identity: stableStatIdentity(afterFstat),
+      bytes,
+      size: bytes.byteLength,
+      sha256: sha256(bytes)
+    });
+  } finally {
+    await handle.close();
+  }
+}
+
+export async function readStableRegularFileSnapshot(
+  filePath,
+  { containmentRoot = path.dirname(path.resolve(filePath)), label = "File" } = {}
+) {
+  const parent = await assertStableDirectoryPathWithin(
+    containmentRoot,
+    path.dirname(path.resolve(filePath)),
+    `${label} parent directory`
+  );
+  return readStableRegularFileSnapshotFromRoot({
+    containmentRoot: parent.containmentRoot,
+    containmentRealPath: parent.containmentRealPath,
+    filePath,
+    label
+  });
 }
 
 export async function sha256File(filePath) {
@@ -185,22 +413,36 @@ export function readHtmlMeta(html, name) {
   return decodeHtmlAttribute(match[2]);
 }
 
-export async function readBuiltReleaseMetadata(distDirectory) {
-  const html = await readFile(path.resolve(distDirectory, "index.html"), "utf8");
+export async function readBuiltReleaseMetadata(
+  distDirectory,
+  { containmentRoot = distDirectory } = {}
+) {
+  const indexSnapshot = await readStableRegularFileSnapshot(
+    path.resolve(distDirectory, "index.html"),
+    { containmentRoot, label: "Built release index" }
+  );
+  const html = indexSnapshot.bytes.toString("utf8");
   const serializedManifest = readHtmlMeta(html, "hakimi-release-storage-manifest");
   const manifestDigest = sha256(serializedManifest);
   const injectedDigest = readHtmlMeta(html, "hakimi-release-storage-manifest-digest");
   if (manifestDigest !== injectedDigest) throw new Error("Built manifest digest does not match canonical bytes.");
+  const descriptor = JSON.parse(readHtmlMeta(html, "hakimi-release-database"));
+  const manifest = JSON.parse(serializedManifest);
+  if (canonicalJson(descriptor) !== canonicalJson(manifest?.database)) {
+    throw new Error("Built release descriptor does not match the storage manifest database descriptor.");
+  }
   const evidenceId = readHtmlMeta(html, "hakimi-release-evidence-id");
   if (evidenceId !== UNBOUND_RELEASE_EVIDENCE_ID && !BOUND_RELEASE_EVIDENCE_ID.test(evidenceId)) {
     throw new Error("Built release evidence id is not canonical.");
   }
   return Object.freeze({
-    descriptor: JSON.parse(readHtmlMeta(html, "hakimi-release-database")),
-    manifest: JSON.parse(serializedManifest),
+    descriptor,
+    manifest,
     manifestDigest,
     buildVersion: readHtmlMeta(html, "hakimi-build-version"),
-    evidenceId
+    evidenceId,
+    indexSha256: indexSnapshot.sha256,
+    indexSize: indexSnapshot.size
   });
 }
 
@@ -215,25 +457,119 @@ export function computeEvidenceId({ gitCommit, sourceTreeDigest, lockfileDigest,
   return `hre1-${digest.slice(0, 32)}`;
 }
 
-async function walkFiles(root, directory = root) {
+async function walkArtifactFiles({
+  artifactRoot,
+  containmentRoot,
+  containmentRealPath,
+  directory,
+  excluded,
+  files
+}) {
+  const label = `Release artifact directory ${normalizedPath(path.relative(artifactRoot, directory)) || "."}`;
+  const before = await stableDirectoryState({
+    containmentRoot,
+    containmentRealPath,
+    directory,
+    label
+  });
   const entries = await readdir(directory, { withFileTypes: true });
-  const files = [];
   for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
     const absolutePath = path.join(directory, entry.name);
-    if (entry.isDirectory()) files.push(...await walkFiles(root, absolutePath));
-    else if (entry.isFile()) files.push(normalizedPath(path.relative(root, absolutePath)));
+    const relativePath = normalizedPath(path.relative(artifactRoot, absolutePath));
+    const details = await lstat(absolutePath, { bigint: true });
+    const entryLabel = `Release artifact ${relativePath}`;
+    if (details.isSymbolicLink() || entry.isSymbolicLink()) {
+      throw new Error(`${entryLabel} cannot be a symlink, junction, or reparse alias.`);
+    }
+    if (details.isDirectory() && entry.isDirectory()) {
+      await walkArtifactFiles({
+        artifactRoot,
+        containmentRoot,
+        containmentRealPath,
+        directory: absolutePath,
+        excluded,
+        files
+      });
+    } else if (details.isFile() && entry.isFile()) {
+      const snapshot = await readStableRegularFileSnapshotFromRoot({
+        containmentRoot,
+        containmentRealPath,
+        filePath: absolutePath,
+        label: entryLabel
+      });
+      if (!excluded.has(relativePath)) {
+        files.push({ path: relativePath, size: snapshot.size, sha256: snapshot.sha256 });
+      }
+    } else {
+      throw new Error(`${entryLabel} is non-regular or changed type during artifact enumeration.`);
+    }
   }
+  const after = await stableDirectoryState({
+    containmentRoot,
+    containmentRealPath,
+    directory,
+    label
+  });
+  if (canonicalJson(before.identity) !== canonicalJson(after.identity)
+    || !sameResolvedPath(before.realPath, after.realPath)) {
+    throw new Error(`${label} changed while the artifact snapshot was enumerated.`);
+  }
+}
+
+export async function collectArtifactEntries(
+  root,
+  excludedPaths = [],
+  { containmentRoot = root } = {}
+) {
+  const artifactRoot = path.resolve(root);
+  const stableRoot = await assertStableDirectoryPathWithin(
+    containmentRoot,
+    artifactRoot,
+    "Release artifact root"
+  );
+  const excluded = new Set(excludedPaths.map(normalizedPath));
+  const files = [];
+  await walkArtifactFiles({
+    artifactRoot,
+    containmentRoot: stableRoot.containmentRoot,
+    containmentRealPath: stableRoot.containmentRealPath,
+    directory: artifactRoot,
+    excluded,
+    files
+  });
   return files;
 }
 
-export async function collectArtifactEntries(root, excludedPaths = []) {
-  const excluded = new Set(excludedPaths.map(normalizedPath));
-  const files = (await walkFiles(root)).filter((filePath) => !excluded.has(filePath));
-  return Promise.all(files.map(async (filePath) => {
-    const absolutePath = path.resolve(root, filePath);
-    const bytes = await readFile(absolutePath);
-    return { path: filePath, size: bytes.byteLength, sha256: sha256(bytes) };
-  }));
+export function releaseArtifactComponents(artifactEntries) {
+  if (!Array.isArray(artifactEntries)) {
+    throw new Error("Release artifact inventory must be an array.");
+  }
+  const components = {};
+  for (const [componentId, componentPath] of Object.entries(
+    REQUIRED_RELEASE_ARTIFACT_COMPONENT_PATHS
+  )) {
+    const matches = artifactEntries.filter((entry) => entry?.path === componentPath);
+    if (matches.length !== 1) {
+      throw new Error(
+        `Required release artifact component must appear exactly once: ${componentId}/${componentPath}.`
+      );
+    }
+    const entry = matches[0];
+    if (
+      !Number.isInteger(entry.size)
+      || entry.size <= 0
+      || typeof entry.sha256 !== "string"
+      || !/^[a-f0-9]{64}$/u.test(entry.sha256)
+    ) {
+      throw new Error(`Required release artifact component is malformed: ${componentId}.`);
+    }
+    components[componentId] = Object.freeze({
+      path: entry.path,
+      size: entry.size,
+      sha256: entry.sha256
+    });
+  }
+  return Object.freeze(components);
 }
 
 function browserCandidates(name) {
@@ -298,6 +634,17 @@ export function npmVersion(cwd) {
     encoding: "utf8",
     windowsHide: true
   }).trim();
+}
+
+export function releaseToolchain(cwd) {
+  return Object.freeze({
+    node: process.version,
+    npm: npmVersion(cwd),
+    platform: process.platform,
+    arch: process.arch,
+    osRelease: os.release(),
+    browsers: detectBrowserVersions()
+  });
 }
 
 export async function policyFileEntries(cwd) {

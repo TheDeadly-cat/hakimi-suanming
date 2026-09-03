@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "policyId": "sw-ab-update-runtime-derived-evidence-producer-bridge-policy-v1",
+  "producerBridgeStatus": "producer_bridge_present_mechanically_untrusted",
+  "evidenceClass": "offline_untrusted_runtime_derived_evidence_producer_bridge_candidate",
+  "status": "bridge_candidate_not_admitted",
+  "executionAdmission": "closed_missing_selected_https_origin",
+  "releaseIdentity": {
+    "channel": "default-v13",
+    "dbGeneration": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null
+  },
+  "capabilities": {
+    "mutationEpochCapability": "absent_schema13",
+    "epoch": null
+  },
+  "requiredSourceBindings": [
+    {
+      "role": "producer-bridge-policy",
+      "path": "docs/release/sw-ab-update-runtime-derived-evidence-producer-bridge-policy.v1.json"
+    },
+    {
+      "role": "producer-bridge-schema",
+      "path": "docs/release/sw-ab-update-runtime-derived-evidence-producer-bridge-v1.schema.json"
+    },
+    {
+      "role": "runtime-capture-policy",
+      "path": "docs/release/sw-ab-update-runtime-client-capture-policy.v1.json"
+    },
+    {
+      "role": "runtime-capture-schema",
+      "path": "docs/release/sw-ab-update-runtime-client-capture-v1.schema.json"
+    },
+    {
+      "role": "api-transcript-policy",
+      "path": "docs/release/sw-ab-update-runtime-api-transcript-candidate-policy.v1.json"
+    },
+    {
+      "role": "api-transcript-schema",
+      "path": "docs/release/sw-ab-update-runtime-api-transcript-candidate-v1.schema.json"
+    },
+    {
+      "role": "collector-issuance-policy",
+      "path": "docs/release/sw-ab-update-runtime-collector-issuance-candidate-policy.v1.json"
+    },
+    {
+      "role": "collector-issuance-schema",
+      "path": "docs/release/sw-ab-update-runtime-collector-issuance-candidate-v1.schema.json"
+    }
+  ],
+  "outputLayout": {
+    "derivedEvidenceFile": "01-derived-runtime-client-capture.json",
+    "terminalPublicationFile": "99-producer-bridge-publication.json",
+    "pendingCommitMarkerFile": ".producer-bridge-publication-pending",
+    "terminalCommitMarkerFile": "100-producer-bridge-publication-commit.sha256",
+    "terminalCommitMarkerEncoding": "lowercase_publication_digest_hex_plus_lf",
+    "exactFileCount": 3,
+    "artifactOutputCount": 2,
+    "publicationDocumentWrittenBeforeTerminalCommit": true,
+    "terminalCommitMarkerPublishedLast": true,
+    "existingFinalRootReuseAllowed": false
+  },
+  "publicationBoundary": {
+    "issuanceFilesHeldAcrossPendingRootMaterialization": true,
+    "issuanceFilesHeldAcrossTerminalCommit": false,
+    "issuanceTerminalRereadCompletedBeforeTerminalCommit": true,
+    "bridgeOwnContractSourcesHeldAcrossTerminalCommit": true,
+    "allEightContractSourcesHeldAcrossTerminalCommit": false,
+    "allEightContractSourcesTerminalRereadCompletedBeforeTerminalCommit": true,
+    "completePendingSetVerifiedBeforeRootRename": true,
+    "sameParentPendingRootRenameCompleted": true,
+    "finalPendingSetVerifiedBeforeTerminalCommit": true,
+    "derivedDocumentProjectionAndDigestTripleMatched": true,
+    "terminalCommitMarkerBoundToPublicationDigest": true,
+    "terminalCommitMarkerPublishedLastBySameDirectoryRename": true,
+    "publicLoaderRequiresTerminalCommitMarker": true,
+    "businessOutputHandlesHeldAcrossTerminalCommit": true,
+    "pendingCommitMarkerHandleHeldAcrossRename": false,
+    "postTerminalCommitThrowingWorkAbsent": true,
+    "allEvidenceFilesContinuouslyHeldAcrossCaptureAndPublication": false,
+    "crashDurabilityVerified": false,
+    "concurrentReaderSnapshotIsolationVerified": false
+  },
+  "mutationBoundary": {
+    "continuousMutationEpochVerified": false,
+    "samePermissionMutationExcluded": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false,
+    "mutationEpochCapability": "absent_schema13",
+    "epoch": null
+  },
+  "provenance": {
+    "trustedImmutableProducerVerified": false,
+    "callerSuppliedPageAuthenticityVerified": false,
+    "runtimeCollectorProvenanceVerified": false,
+    "browserObjectIssuanceAuthenticityVerified": false,
+    "browserBinaryProvenanceVerified": false,
+    "browserTransportAuthenticityVerified": false,
+    "realBrowserExecutionVerified": false,
+    "realHttpsHostVerified": false,
+    "externalIssuerIdentityVerified": false,
+    "attemptFreshnessExternallyVerified": false,
+    "bundleReplayResistanceVerified": false,
+    "publicRedistributionAuthorized": false
+  },
+  "authority": {
+    "defaultV13ReceiptAllowlistMember": false,
+    "formalReleaseEvidenceReceipt": false,
+    "trustedProviderVerified": false,
+    "trustedHostVerified": false,
+    "trustedBrowserRuntimeVerified": false,
+    "deploymentReady": false,
+    "releaseReady": false,
+    "externalDeploymentExecutionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "contentTruthAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "rightsLegalConclusionAuthorized": false,
+    "schemaPromotionAuthorized": false
+  },
+  "attempts": {
+    "networkAttempted": false,
+    "browserAttempted": false,
+    "deploymentAttempted": false,
+    "rollbackAttempted": false,
+    "gitAttempted": false
+  },
+  "terminalState": {
+    "trustClass": "untrusted_derived_evidence_producer_bridge_candidate",
+    "strictGatePassed": false,
+    "runtimeAdmissionPassed": false,
+    "admissionPassed": false,
+    "usableForRuntimeEvidence": false,
+    "usableForCandidateAssembly": false,
+    "usableForAdmission": false,
+    "formalReleaseEvidenceReceipt": false,
+    "cliExitCode": 1
+  },
+  "limitations": [
+    "The bridge deterministically republishes an already decoded transcript projection; it does not establish browser or transport authenticity.",
+    "Fresh staging and a terminal publication-digest commit marker establish a checked publication snapshot, not operating-system immutability against a same-permission process.",
+    "Schema 13 exposes no mutation epoch; continuous mutation, interval mutation, and ABA exclusion remain unavailable.",
+    "Mechanical bridge publication does not authorize deployment, expert claims, rights conclusions, or public release."
+  ]
+}

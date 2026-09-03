@@ -20,6 +20,7 @@
     "build:e2e": "vite build --config vite.e2e.config.ts --configLoader runner",
     "preview:e2e": "vite preview --config vite.e2e.config.ts --configLoader runner",
     "serve:e2e": "npm run build:e2e && npm run preview:e2e",
+    "preview:release-artifact": "node ../../scripts/release-artifact-identity.mjs --verify --dist dist/web --lock tmp/release-artifact-identity.json && vite preview --config vite.release-artifact-preview.config.ts --configLoader runner",
     "preview:e2e:v15": "vite preview --config vite.production-v15.config.ts --host 127.0.0.1 --port 4198 --strictPort",
     "serve:e2e:v15": "npm run build:production-v15:candidate && npm run preview:e2e:v15",
     "preview:e2e:v13-to-v15": "vite preview --config vite.production-v13-to-v15.config.ts --host 127.0.0.1 --port 4199 --strictPort",

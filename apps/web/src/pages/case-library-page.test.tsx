@@ -1,9 +1,13 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { BirthInput } from "@hakimi/contracts";
 import { calculateChart, calculateUnknownHourCandidates } from "@hakimi/bazi-core";
 import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
-import { caseRepository, researchRepository } from "@hakimi/storage";
+import {
+  caseRepository,
+  ReleaseDatabaseWriteLockedError,
+  researchRepository
+} from "@hakimi/storage";
 import { createDefaultResearchQuery } from "@hakimi/research-query";
 import { CaseLibraryPage } from "./case-library-page";
 
@@ -50,6 +54,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
+  vi.restoreAllMocks();
   await caseRepository.clearAll();
 });
 
@@ -162,14 +167,14 @@ describe("CaseLibraryPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "收藏" }));
     expect(await screen.findByText("常用正式盘")).toBeTruthy();
-    expect(screen.getByText("常用候选组")).toBeTruthy();
+    expect(screen.getByRole("row", { name: /常用候选组/ })).toBeTruthy();
     expect(screen.queryByText("普通案例")).toBeNull();
     expect(screen.getByRole("button", { name: "取消收藏案例 常用正式盘" }).getAttribute("aria-pressed")).toBe("true");
 
     const favoriteSearch = screen.getByLabelText("搜索案例与研究笔记");
     fireEvent.change(favoriteSearch, { target: { value: "常用候选组" } });
     await waitFor(() => expect(screen.queryByText("常用正式盘")).toBeNull());
-    expect(screen.getByText("常用候选组")).toBeTruthy();
+    expect(screen.getByRole("row", { name: /常用候选组/ })).toBeTruthy();
     fireEvent.change(favoriteSearch, { target: { value: "普通案例" } });
     expect(await screen.findByText("没有匹配的研究记录")).toBeTruthy();
     fireEvent.change(favoriteSearch, { target: { value: "" } });
@@ -180,6 +185,23 @@ describe("CaseLibraryPage", () => {
     await waitFor(() => expect(screen.queryByText("常用正式盘")).toBeNull());
     await waitFor(() => expect(document.activeElement).toBe(favoritesScope));
     expect((await caseRepository.getCase(formal.caseRecord.id))?.caseRecord.favorite).toBe(false);
+  });
+
+  it("把接管写栅栏的精确拒绝显示为未执行，不把它误报成提交结果未知", async () => {
+    await createFormalCase("接管中的旧页面案例");
+    vi.spyOn(caseRepository, "setCaseFavorite")
+      .mockRejectedValueOnce(new ReleaseDatabaseWriteLockedError());
+
+    render(<CaseLibraryPage />);
+    expect(await screen.findByText("接管中的旧页面案例")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "收藏案例 接管中的旧页面案例" }));
+
+    const alert = await screen.findByRole("alert");
+    expect(within(alert).getByText(
+      "当前页面已进入版本接管写入锁定，本次案例写入未执行；请重新载入后再操作。"
+    )).toBeTruthy();
+    expect(within(alert).queryByText(/结果未知/u)).toBeNull();
+    expect(within(alert).queryByRole("button", { name: "重新读取并解除锁定" })).toBeNull();
   });
 
   it("以内联可访问编辑区更新两类记录的别名、标签和备注，并把错误焦点留在字段", async () => {
@@ -247,9 +269,14 @@ describe("CaseLibraryPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "回收站" }));
     expect(await screen.findByText("待恢复案例")).toBeTruthy();
     fireEvent.change(screen.getByLabelText("搜索案例与研究笔记"), { target: { value: "回收站检索" } });
-    expect(await screen.findByText("待恢复案例")).toBeTruthy();
-    fireEvent.click(await screen.findByRole("button", { name: "恢复案例 待恢复案例" }));
-    expect(await screen.findByText("已恢复案例“待恢复案例”。")).toBeTruthy();
+    expect(await screen.findByText("1 条笔记", {}, { timeout: 5_000 })).toBeTruthy();
+    const currentRestoreButton = screen.getByRole("button", { name: "恢复案例 待恢复案例" }) as HTMLButtonElement;
+    expect({ disabled: currentRestoreButton.disabled, connected: currentRestoreButton.isConnected }).toEqual({ disabled: false, connected: true });
+    fireEvent.click(currentRestoreButton);
+    await waitFor(async () => {
+      expect((await caseRepository.getCase(target.caseRecord.id))?.caseRecord.deletedAt).toBeNull();
+    }, { timeout: 5_000 });
+    expect(await screen.findByText("已恢复案例“待恢复案例”。", {}, { timeout: 5_000 })).toBeTruthy();
     await waitFor(() => expect(screen.queryByText("待恢复案例")).toBeNull());
     await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("button", { name: "回收站" })));
     expect((await caseRepository.getCase(target.caseRecord.id))?.caseRecord.deletedAt).toBeNull();
@@ -277,10 +304,10 @@ describe("CaseLibraryPage", () => {
 
     const deleteFormal = screen.getByRole("button", { name: "永久删除案例 待永久删除案例" });
     fireEvent.click(deleteFormal);
-    const confirmGroup = screen.getByRole("group", { name: "永久删除“待永久删除案例”？" });
+    const confirmGroup = screen.getByRole("alertdialog", { name: "永久删除“待永久删除案例”？" });
     expect(within(confirmGroup).getByText(/此操作不可恢复/)).toBeTruthy();
     const confirmFormal = within(confirmGroup).getByRole("button", { name: "永久删除案例" });
-    expect(document.activeElement).toBe(confirmFormal);
+    expect(document.activeElement).toBe(within(confirmGroup).getByRole("button", { name: "取消" }));
     fireEvent.keyDown(confirmGroup, { key: "Escape" });
     await waitFor(() => expect(document.activeElement).toBe(deleteFormal));
 

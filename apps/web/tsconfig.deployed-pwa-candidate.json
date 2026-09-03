@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "playwright.deployed-pwa-candidate.config.ts",
+    "playwright.release-browser-matrix.ts",
+    "e2e/deployed-pwa-candidate.spec.ts",
+    "e2e/release-browser-persistent-context.ts",
+    "e2e/full-backup-helpers.ts",
+    "e2e/cross-schema-upgrade-helpers.ts",
+    "../../scripts/deployed-pwa-candidate-runtime.d.mts"
+  ]
+}

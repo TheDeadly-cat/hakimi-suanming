@@ -4,11 +4,17 @@ import path from "node:path";
 import { runInNewContext } from "node:vm";
 import { IDBFactory } from "fake-indexeddb";
 import { describe, expect, it, vi } from "vitest";
+import {
+  controllerTakeoverFailureFromNack,
+  createControllerTakeoverScheduler,
+  type ControllerTakeoverFailure
+} from "./lib/service-worker-takeover-retry";
 
 const ORIGIN = "https://hakimi.test";
 const CURRENT_VERSION = "current-build";
 const CURRENT_CACHE = `hakimi-shell-${CURRENT_VERSION}`;
 const CACHE_META_URL = `${ORIGIN}/__hakimi_cache_meta__`;
+const CONTROLLER_TAKEOVER_HOLD_URL = `${ORIGIN}/__hakimi_controller_takeover_hold_v1__`;
 const BRIDGE_DESCRIPTOR = {
   protocolVersion: 1,
   dbGeneration: "legacy-v13",
@@ -82,6 +88,19 @@ class FakeCache {
   readonly entries = new Map<string, FakeResponse>();
   addedRequests: string[] = [];
   failAddAll = false;
+  putEffect: ((
+    key: string,
+    response: FakeResponse,
+    commit: () => void
+  ) => void | Promise<void>) | null = null;
+  matchEffect: ((
+    key: string,
+    read: () => FakeResponse | undefined
+  ) => FakeResponse | undefined | Promise<FakeResponse | undefined>) | null = null;
+  deleteEffect: ((
+    key: string,
+    remove: () => boolean
+  ) => boolean | Promise<boolean>) | null = null;
 
   async addAll(requests: string[]) {
     if (this.failAddAll) throw new Error("synthetic precache failure");
@@ -90,11 +109,29 @@ class FakeCache {
   }
 
   async put(request: string | { url: string }, response: FakeResponse) {
-    this.entries.set(requestKey(request), response);
+    const key = requestKey(request);
+    const commit = () => {
+      this.entries.set(key, response);
+    };
+    if (this.putEffect) {
+      await this.putEffect(key, response, commit);
+      return;
+    }
+    commit();
   }
 
   async match(request: string | { url: string }) {
-    return this.entries.get(requestKey(request));
+    const key = requestKey(request);
+    const read = () => this.entries.get(key);
+    if (this.matchEffect) return this.matchEffect(key, read);
+    return read();
+  }
+
+  async delete(request: string | { url: string }) {
+    const key = requestKey(request);
+    const remove = () => this.entries.delete(key);
+    if (this.deleteEffect) return this.deleteEffect(key, remove);
+    return remove();
   }
 }
 
@@ -141,21 +178,33 @@ type WorkerEvent = {
   data?: unknown;
   ports?: Array<{ postMessage: (message: unknown) => void }>;
   request?: { method: string; mode: string; url: string };
-  source?: { id: string; postMessage?: (message: unknown) => void };
+  source?: {
+    id?: string;
+    scriptURL?: string;
+    state?: string;
+    postMessage?: (message: unknown, ports?: FakeMessagePort[]) => void;
+  };
   clientId?: string;
   resultingClientId?: string;
   respondWith?: (promise: Promise<unknown>) => void;
   waitUntil?: (promise: Promise<unknown>) => void;
 };
 
-async function createWorkerHarness(descriptor: ReleaseDescriptor = BRIDGE_DESCRIPTOR) {
+async function createWorkerHarness(
+  descriptor: ReleaseDescriptor = BRIDGE_DESCRIPTOR,
+  persistentState: {
+    buildVersion?: string;
+    cacheStore?: Map<string, FakeCache>;
+    indexedDB?: IDBFactory;
+  } = {}
+) {
   const workerPath = path.resolve(import.meta.dirname, "../public/sw.js");
   const workerSource = (await readFile(workerPath, "utf8"))
-    .replace("__CACHE_VERSION__", CURRENT_VERSION)
+    .replace("__CACHE_VERSION__", persistentState.buildVersion ?? CURRENT_VERSION)
     .replace("__RELEASE_DATABASE_DESCRIPTOR__", encodedDescriptor(descriptor))
     .replace("__BRIDGE_RELEASE_DATABASE_DESCRIPTOR__", encodedDescriptor(BRIDGE_DESCRIPTOR));
-  const cacheStore = new Map<string, FakeCache>();
-  const indexedDB = new IDBFactory();
+  const cacheStore = persistentState.cacheStore ?? new Map<string, FakeCache>();
+  const indexedDB = persistentState.indexedDB ?? new IDBFactory();
   const listeners = new Map<string, (event: WorkerEvent) => void>();
   const windowClients = new Map<string, FakeWindowClient>();
   const timerTasks = new Set<Promise<unknown>>();
@@ -181,6 +230,13 @@ async function createWorkerHarness(descriptor: ReleaseDescriptor = BRIDGE_DESCRI
   const fetchRequest = vi.fn(async (): Promise<FakeResponse> => {
     throw new Error("offline");
   });
+  const registration: {
+    waiting: {
+      state: string;
+      scriptURL: string;
+      postMessage: (message: Record<string, unknown>, ports?: FakeMessagePort[]) => void;
+    } | null;
+  } = { waiting: null };
   const caches = {
     async open(cacheName: string) {
       let cache = cacheStore.get(cacheName);
@@ -207,6 +263,7 @@ async function createWorkerHarness(descriptor: ReleaseDescriptor = BRIDGE_DESCRI
     crypto: webcrypto,
     indexedDB,
     clients: { claim, matchAll: matchAllClients },
+    registration,
     skipWaiting,
     addEventListener(type: string, listener: (event: WorkerEvent) => void) {
       listeners.set(type, listener);
@@ -306,6 +363,9 @@ async function createWorkerHarness(descriptor: ReleaseDescriptor = BRIDGE_DESCRI
     windowClients.set(id, client);
     return client;
   };
+  const setWaitingWorker = (waiting: typeof registration.waiting) => {
+    registration.waiting = waiting;
+  };
 
   return {
     cacheStore,
@@ -323,6 +383,7 @@ async function createWorkerHarness(descriptor: ReleaseDescriptor = BRIDGE_DESCRI
     seedResource,
     seedShell,
     setCommittedState,
+    setWaitingWorker,
     skipWaiting,
     windowClients
   };
@@ -402,6 +463,26 @@ function renewMigrationMessage(
   };
 }
 
+function resolutionMigrationMessage(
+  type: "ABORT_DATABASE_MIGRATION" | "FINISH_DATABASE_MIGRATION",
+  requestId = "freeze-request-1",
+  overrides: Record<string, unknown> = {}
+) {
+  return {
+    type,
+    resolutionProtocolVersion: 1,
+    requestId,
+    migrationId: TARGET_DESCRIPTOR.migrationId,
+    sourceGeneration: TARGET_DESCRIPTOR.sourceGeneration,
+    sourceDatabaseName: TARGET_DESCRIPTOR.sourceDatabaseName,
+    sourceSchema: TARGET_DESCRIPTOR.sourceSchema,
+    targetGeneration: TARGET_DESCRIPTOR.dbGeneration,
+    targetDatabaseName: TARGET_DESCRIPTOR.databaseName,
+    targetSchema: TARGET_DESCRIPTOR.targetSchema,
+    ...overrides
+  };
+}
+
 function freezeResponder(reason: "SOURCE_CLOSED" | "CLIENT_NOT_SOURCE") {
   return (message: Record<string, unknown>, responsePort: FakeMessagePort | undefined) => {
     if (message.type !== "FREEZE_DATABASE_WRITES") return;
@@ -424,6 +505,71 @@ function rejectFreezeResponder(reason = "LOCK_FAILED") {
       reason
     });
   };
+}
+
+function controllerTakeoverFreezeResponder(
+  accepted = true,
+  reason = accepted ? "WRITES_DRAINED" : "LOCK_FAILED",
+  onFreeze?: () => void
+): FakeClientResponder {
+  return (message, responsePort) => {
+    if (message.type !== "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_V1") return;
+    onFreeze?.();
+    responsePort?.postMessage({
+      type: "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_ACK_V1",
+      requestId: message.requestId,
+      sourceBuildVersion: message.sourceBuildVersion,
+      targetBuildVersion: message.targetBuildVersion,
+      accepted,
+      reason
+    });
+  };
+}
+
+function createWaitingTakeoverResponder(
+  order: string[] = [],
+  targetBuildVersion = "next-build",
+  targetRelease: ReleaseDescriptor = BRIDGE_DESCRIPTOR,
+  commitReply: "success" | "rejected" | "known_rejected" = "success"
+) {
+  const messages: Array<Record<string, unknown>> = [];
+  const worker = {
+    state: "installed",
+    scriptURL: `${ORIGIN}/sw.js`,
+    postMessage: vi.fn((message: Record<string, unknown>, ports?: FakeMessagePort[]) => {
+      messages.push(message);
+      if (message.type === "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1") {
+        order.push("waiting:prepare");
+        ports?.[0]?.postMessage({
+          type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+          requestId: message.requestId,
+          sourceBuildVersion: message.sourceBuildVersion,
+          targetBuildVersion,
+          targetRelease,
+          accepted: true,
+          reason: "CHALLENGE_ISSUED",
+          challengeNonce: `challenge-${"a".repeat(64)}`
+        });
+      } else if (message.type === "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1") {
+        order.push("waiting:commit");
+        ports?.[0]?.postMessage({
+          type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+          requestId: message.requestId,
+          sourceBuildVersion: message.sourceBuildVersion,
+          targetBuildVersion: message.targetBuildVersion,
+          accepted: commitReply === "success",
+          reason: commitReply === "success"
+            ? "SKIP_WAITING_REQUESTED"
+            : commitReply === "known_rejected"
+              ? "SKIP_WAITING_FAILED"
+              : "ACK_OUTCOME_UNKNOWN"
+        });
+      } else if (message.type === "ABORT_INSTALLED_GENERATION_ACTIVATION_V1") {
+        order.push("waiting:abort");
+      }
+    })
+  };
+  return { messages, worker };
 }
 
 function draftCleanupResponder(options: {
@@ -708,6 +854,56 @@ describe("Service Worker upgrade safety", () => {
       bootConfirmed: false
     });
     expect(harness.deleteCache).not.toHaveBeenCalled();
+  });
+
+  it("PR6 只读 challenge 回显 nonce 与真实 event.source.id，且不改变 cache 元数据", async () => {
+    const harness = await createWorkerHarness();
+    await harness.seedGeneration(CURRENT_CACHE, 200, false);
+    const challengeNonce = `challenge-${"a".repeat(64)}`;
+    const posted: unknown[] = [];
+
+    await harness.dispatch("message", {
+      data: { type: "SW_AB_RUNTIME_CHALLENGE_V1", challengeNonce },
+      source: { id: "window-client-from-worker-event" },
+      ports: [{ postMessage: (message) => posted.push(message) }]
+    });
+
+    expect(posted).toEqual([{
+      type: "SW_AB_RUNTIME_CHALLENGE_RESULT_V1",
+      challengeNonce,
+      sourceClientId: "window-client-from-worker-event",
+      buildVersion: CURRENT_VERSION,
+      ...BRIDGE_DESCRIPTOR
+    }]);
+    expect(await harness.cacheStore.get(CURRENT_CACHE)?.match(CACHE_META_URL).then((response) => response?.json())).toMatchObject({
+      bootAttempted: false,
+      bootConfirmed: false
+    });
+    expect(harness.deleteCache).not.toHaveBeenCalled();
+    expect(harness.skipWaiting).not.toHaveBeenCalled();
+  });
+
+  it("PR6 challenge 缺少合格 nonce、source client 或响应端口时静默拒绝", async () => {
+    const harness = await createWorkerHarness();
+    const posted: unknown[] = [];
+
+    await harness.dispatch("message", {
+      data: { type: "SW_AB_RUNTIME_CHALLENGE_V1", challengeNonce: "challenge-short" },
+      source: { id: "window-client" },
+      ports: [{ postMessage: (message) => posted.push(message) }]
+    });
+    await harness.dispatch("message", {
+      data: { type: "SW_AB_RUNTIME_CHALLENGE_V1", challengeNonce: `challenge-${"b".repeat(64)}` },
+      ports: [{ postMessage: (message) => posted.push(message) }]
+    });
+    await harness.dispatch("message", {
+      data: { type: "SW_AB_RUNTIME_CHALLENGE_V1", challengeNonce: `challenge-${"c".repeat(64)}` },
+      source: { id: "window-client" }
+    });
+
+    expect(posted).toEqual([]);
+    expect(harness.deleteCache).not.toHaveBeenCalled();
+    expect(harness.skipWaiting).not.toHaveBeenCalled();
   });
 
   it("完整 BOOT_OK 只有在独立控制库提交记录与回执完全匹配后才返回 ACK", async () => {
@@ -1382,12 +1578,34 @@ describe("Service Worker upgrade safety", () => {
       const lateClient = harness.addWindowClient("late-client");
       const requestId = `freeze-for-${resolution[0]}`;
 
+      const wrongSenderAcks: unknown[] = [];
       await harness.dispatch("message", {
-        data: { type: resolution[0], requestId, migrationId: TARGET_DESCRIPTOR.migrationId },
-        source: { id: "other-target-tab" }
+        data: resolutionMigrationMessage(resolution[0], requestId),
+        source: { id: "other-target-tab" },
+        ports: [{ postMessage: (message) => wrongSenderAcks.push(message) }]
       });
+      const wrongMigrationAcks: unknown[] = [];
       await harness.dispatch("message", {
-        data: { type: resolution[0], requestId, migrationId: "wrong-migration" },
+        data: resolutionMigrationMessage(resolution[0], requestId, {
+          migrationId: "wrong-migration"
+        }),
+        source: { id: "migration-coordinator" },
+        ports: [{ postMessage: (message) => wrongMigrationAcks.push(message) }]
+      });
+      expect(wrongSenderAcks).toEqual([expect.objectContaining({
+        type: "DATABASE_MIGRATION_RESOLUTION_ACK_V1",
+        accepted: false,
+        reason: "MIGRATION_SESSION_NOT_ACTIVE"
+      })]);
+      expect(wrongMigrationAcks).toEqual([expect.objectContaining({
+        type: "DATABASE_MIGRATION_RESOLUTION_ACK_V1",
+        accepted: false,
+        reason: "PROTOCOL_MISMATCH"
+      })]);
+      // Even an otherwise exact command cannot consume the session without a
+      // private response port; the caller must be able to prove completion.
+      await harness.dispatch("message", {
+        data: resolutionMigrationMessage(resolution[0], requestId),
         source: { id: "migration-coordinator" }
       });
       expect(source.messages).toHaveLength(1);
@@ -1396,10 +1614,32 @@ describe("Service Worker upgrade safety", () => {
       if (resolution[0] === "FINISH_DATABASE_MIGRATION") {
         await harness.setCommittedState(committedState(TARGET_DESCRIPTOR, CURRENT_VERSION));
       }
+      const resolutionAcks: unknown[] = [];
       await harness.dispatch("message", {
-        data: { type: resolution[0], requestId, migrationId: TARGET_DESCRIPTOR.migrationId },
-        source: { id: "migration-coordinator" }
+        data: resolutionMigrationMessage(resolution[0], requestId),
+        source: { id: "migration-coordinator" },
+        ports: [{ postMessage: (message) => resolutionAcks.push(message) }]
       });
+
+      expect(resolutionAcks).toEqual([expect.objectContaining({
+        type: "DATABASE_MIGRATION_RESOLUTION_ACK_V1",
+        resolutionProtocolVersion: 1,
+        accepted: true,
+        reason: "RESOLUTION_DISPATCHED",
+        requestedCommand: resolution[0],
+        effectiveResolution: resolution[1],
+        sourceGeneration: TARGET_DESCRIPTOR.sourceGeneration,
+        sourceDatabaseName: TARGET_DESCRIPTOR.sourceDatabaseName,
+        sourceSchema: TARGET_DESCRIPTOR.sourceSchema,
+        targetGeneration: TARGET_DESCRIPTOR.dbGeneration,
+        targetDatabaseName: TARGET_DESCRIPTOR.databaseName,
+        targetSchema: TARGET_DESCRIPTOR.targetSchema,
+        peerClientCount: 2,
+        matchedClientCount: 2,
+        dispatchedClientCount: 2,
+        failedClientIds: [],
+        committedReceiptDigest: expect.stringMatching(/^[a-f0-9]{64}$/u)
+      })]);
 
       for (const client of [source, existingTarget]) {
         expect(client.messages.map((message) => message.type)).toEqual([
@@ -1409,6 +1649,164 @@ describe("Service Worker upgrade safety", () => {
       }
       expect(lateClient.messages).toEqual([]);
     }
+  });
+
+  it("resolution ACK 发送失败后同一精确请求只重放 receipt，不重复广播", async () => {
+    const harness = await createWorkerHarness(TARGET_DESCRIPTOR);
+    await harness.setCommittedState(committedState(BRIDGE_DESCRIPTOR, "stable"));
+    const source = harness.addWindowClient("source-peer", freezeResponder("SOURCE_CLOSED"));
+    await harness.dispatch("message", {
+      data: prepareMigrationMessage("resolution-ack-replay"),
+      source: { id: "migration-coordinator" },
+      ports: [{ postMessage: () => undefined }]
+    });
+    const request = resolutionMigrationMessage(
+      "ABORT_DATABASE_MIGRATION",
+      "resolution-ack-replay"
+    );
+
+    await harness.dispatch("message", {
+      data: request,
+      source: { id: "migration-coordinator" },
+      ports: [{ postMessage: () => { throw new Error("synthetic resolution ACK loss"); } }]
+    });
+    expect(source.messages.map((message) => message.type)).toEqual([
+      "FREEZE_DATABASE_WRITES",
+      "DATABASE_MIGRATION_ABORTED"
+    ]);
+
+    for (let replay = 0; replay < 2; replay += 1) {
+      const replayAcks: unknown[] = [];
+      await harness.dispatch("message", {
+        data: request,
+        source: { id: "migration-coordinator" },
+        ports: [{ postMessage: (message) => replayAcks.push(message) }]
+      });
+      expect(replayAcks).toEqual([expect.objectContaining({
+        type: "DATABASE_MIGRATION_RESOLUTION_ACK_V1",
+        accepted: true,
+        reason: "RESOLUTION_DISPATCHED",
+        requestedCommand: "ABORT_DATABASE_MIGRATION",
+        effectiveResolution: "DATABASE_MIGRATION_ABORTED"
+      })]);
+      expect(source.messages.filter(
+        (message) => message.type === "DATABASE_MIGRATION_ABORTED"
+      )).toHaveLength(1);
+    }
+  });
+
+  it("terminal receipt 的 requestId 不能被新 PREPARE 会话复用", async () => {
+    const harness = await createWorkerHarness(TARGET_DESCRIPTOR);
+    await harness.setCommittedState(committedState(BRIDGE_DESCRIPTOR, "stable"));
+    const source = harness.addWindowClient("source-peer", freezeResponder("SOURCE_CLOSED"));
+    const requestId = "terminal-request-id-reuse";
+    await harness.dispatch("message", {
+      data: prepareMigrationMessage(requestId),
+      source: { id: "migration-coordinator" },
+      ports: [{ postMessage: () => undefined }]
+    });
+    await harness.dispatch("message", {
+      data: resolutionMigrationMessage("ABORT_DATABASE_MIGRATION", requestId),
+      source: { id: "migration-coordinator" },
+      ports: [{ postMessage: () => undefined }]
+    });
+
+    const reusedPrepareAcks: unknown[] = [];
+    await harness.dispatch("message", {
+      data: prepareMigrationMessage(requestId),
+      source: { id: "migration-coordinator" },
+      ports: [{ postMessage: (message) => reusedPrepareAcks.push(message) }]
+    });
+
+    expect(reusedPrepareAcks).toEqual([expect.objectContaining({
+      type: "PREPARE_DATABASE_MIGRATION_ACK",
+      accepted: false,
+      reason: "REQUEST_ID_REUSED"
+    })]);
+    expect(source.messages.map((message) => message.type)).toEqual([
+      "FREEZE_DATABASE_WRITES",
+      "DATABASE_MIGRATION_ABORTED"
+    ]);
+  });
+
+  it("source pointer 收到 FINISH 时如实回执 aborted，绝不伪造 committed", async () => {
+    const harness = await createWorkerHarness(TARGET_DESCRIPTOR);
+    await harness.setCommittedState(committedState(BRIDGE_DESCRIPTOR, "stable"));
+    const source = harness.addWindowClient("source-peer", freezeResponder("SOURCE_CLOSED"));
+    await harness.dispatch("message", {
+      data: prepareMigrationMessage("finish-against-source"),
+      source: { id: "migration-coordinator" },
+      ports: [{ postMessage: () => undefined }]
+    });
+    const acks: unknown[] = [];
+
+    await harness.dispatch("message", {
+      data: resolutionMigrationMessage("FINISH_DATABASE_MIGRATION", "finish-against-source"),
+      source: { id: "migration-coordinator" },
+      ports: [{ postMessage: (message) => acks.push(message) }]
+    });
+
+    expect(acks).toEqual([expect.objectContaining({
+      accepted: true,
+      requestedCommand: "FINISH_DATABASE_MIGRATION",
+      effectiveResolution: "DATABASE_MIGRATION_ABORTED",
+      committedGeneration: BRIDGE_DESCRIPTOR.dbGeneration,
+      committedDatabaseName: BRIDGE_DESCRIPTOR.databaseName,
+      committedSchema: BRIDGE_DESCRIPTOR.targetSchema,
+      committedMigrationId: null
+    })]);
+    expect(source.messages.map((message) => message.type)).toEqual([
+      "FREEZE_DATABASE_WRITES",
+      "DATABASE_MIGRATION_ABORTED"
+    ]);
+    expect(source.messages.some(
+      (message) => message.type === "DATABASE_MIGRATION_COMMITTED"
+    )).toBe(false);
+  });
+
+  it("未验证 control receipt 时 NACK 并保留 session，修复后同一请求可重试", async () => {
+    const harness = await createWorkerHarness(TARGET_DESCRIPTOR);
+    const validSourceState = committedState(BRIDGE_DESCRIPTOR, "stable");
+    await harness.setCommittedState(validSourceState);
+    const source = harness.addWindowClient("source-peer", freezeResponder("SOURCE_CLOSED"));
+    await harness.dispatch("message", {
+      data: prepareMigrationMessage("resolution-control-retry"),
+      source: { id: "migration-coordinator" },
+      ports: [{ postMessage: () => undefined }]
+    });
+    await harness.setCommittedState({ ...validSourceState, receiptDigest: "0".repeat(64) });
+    const request = resolutionMigrationMessage(
+      "ABORT_DATABASE_MIGRATION",
+      "resolution-control-retry"
+    );
+    const rejectedAcks: unknown[] = [];
+
+    await harness.dispatch("message", {
+      data: request,
+      source: { id: "migration-coordinator" },
+      ports: [{ postMessage: (message) => rejectedAcks.push(message) }]
+    });
+    expect(rejectedAcks).toEqual([expect.objectContaining({
+      accepted: false,
+      reason: "CONTROL_STATE_UNVERIFIED"
+    })]);
+    expect(source.messages.map((message) => message.type)).toEqual(["FREEZE_DATABASE_WRITES"]);
+
+    await harness.setCommittedState(validSourceState);
+    const retryAcks: unknown[] = [];
+    await harness.dispatch("message", {
+      data: request,
+      source: { id: "migration-coordinator" },
+      ports: [{ postMessage: (message) => retryAcks.push(message) }]
+    });
+    expect(retryAcks).toEqual([expect.objectContaining({
+      accepted: true,
+      effectiveResolution: "DATABASE_MIGRATION_ABORTED"
+    })]);
+    expect(source.messages.map((message) => message.type)).toEqual([
+      "FREEZE_DATABASE_WRITES",
+      "DATABASE_MIGRATION_ABORTED"
+    ]);
   });
 
   it("协调页消失且未发送 resolution 时，SW 在冻结租约到期后自动 abort 并允许新会话", async () => {
@@ -1442,6 +1840,111 @@ describe("Service Worker upgrade safety", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("租约到期会 supersede 卡住的旧 resolution，target commit 后绝不迟到广播 aborted", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
+    try {
+      const harness = await createWorkerHarness(TARGET_DESCRIPTOR);
+      await harness.setCommittedState(committedState(BRIDGE_DESCRIPTOR, "stable"));
+      const source = harness.addWindowClient("source-peer", freezeResponder("SOURCE_CLOSED"));
+      const requestId = "resolution-lease-epoch-race";
+      await harness.dispatch("message", {
+        data: prepareMigrationMessage(requestId),
+        source: { id: "migration-coordinator" },
+        ports: [{ postMessage: () => undefined }]
+      });
+
+      let releaseOldEnumeration!: () => void;
+      const oldEnumerationGate = new Promise<void>((resolve) => {
+        releaseOldEnumeration = resolve;
+      });
+      harness.matchAllClients.mockImplementationOnce(async () => {
+        await oldEnumerationGate;
+        return [...harness.windowClients.values()];
+      });
+      const explicitAcks: unknown[] = [];
+      const explicitResolution = harness.dispatch("message", {
+        data: resolutionMigrationMessage("ABORT_DATABASE_MIGRATION", requestId),
+        source: { id: "migration-coordinator" },
+        ports: [{ postMessage: (message) => explicitAcks.push(message) }]
+      });
+      await vi.waitFor(() => expect(harness.matchAllClients).toHaveBeenCalledTimes(2));
+
+      await harness.setCommittedState(committedState(TARGET_DESCRIPTOR, CURRENT_VERSION));
+      await vi.advanceTimersByTimeAsync(30_000);
+      await harness.flushTimerTasks();
+      expect(source.messages.map((message) => message.type)).toEqual([
+        "FREEZE_DATABASE_WRITES",
+        "DATABASE_MIGRATION_COMMITTED"
+      ]);
+      expect(source.messages[1]).toMatchObject({
+        requestId,
+        migrationId: TARGET_DESCRIPTOR.migrationId,
+        sourceGeneration: TARGET_DESCRIPTOR.sourceGeneration,
+        sourceDatabaseName: TARGET_DESCRIPTOR.sourceDatabaseName,
+        sourceSchema: TARGET_DESCRIPTOR.sourceSchema,
+        targetGeneration: TARGET_DESCRIPTOR.dbGeneration,
+        targetDatabaseName: TARGET_DESCRIPTOR.databaseName,
+        targetSchema: TARGET_DESCRIPTOR.targetSchema
+      });
+
+      releaseOldEnumeration();
+      await explicitResolution;
+      expect(explicitAcks).toEqual([expect.objectContaining({
+        accepted: false,
+        reason: "MIGRATION_SESSION_CANCELLED"
+      })]);
+      expect(source.messages.some(
+        (message) => message.type === "DATABASE_MIGRATION_ABORTED"
+      )).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("并发 PREPARE 在 client enumeration 后重新检查会话准入，只冻结一次", async () => {
+    const harness = await createWorkerHarness(TARGET_DESCRIPTOR);
+    await harness.setCommittedState(committedState(BRIDGE_DESCRIPTOR, "stable"));
+    const source = harness.addWindowClient("source-peer", freezeResponder("SOURCE_CLOSED"));
+    let releaseFirstEnumeration!: () => void;
+    const firstEnumerationGate = new Promise<void>((resolve) => {
+      releaseFirstEnumeration = resolve;
+    });
+    harness.matchAllClients.mockImplementationOnce(async () => {
+      await firstEnumerationGate;
+      return [...harness.windowClients.values()];
+    });
+    const firstAcks: unknown[] = [];
+    const firstPrepare = harness.dispatch("message", {
+      data: prepareMigrationMessage("concurrent-prepare-first"),
+      source: { id: "first-coordinator" },
+      ports: [{ postMessage: (message) => firstAcks.push(message) }]
+    });
+    await vi.waitFor(() => expect(harness.matchAllClients).toHaveBeenCalledOnce());
+
+    const secondAcks: unknown[] = [];
+    await harness.dispatch("message", {
+      data: prepareMigrationMessage("concurrent-prepare-second"),
+      source: { id: "second-coordinator" },
+      ports: [{ postMessage: (message) => secondAcks.push(message) }]
+    });
+    expect(secondAcks).toEqual([expect.objectContaining({
+      accepted: true,
+      requestId: "concurrent-prepare-second"
+    })]);
+
+    releaseFirstEnumeration();
+    await firstPrepare;
+    expect(firstAcks).toEqual([expect.objectContaining({
+      accepted: false,
+      reason: "MIGRATION_SESSION_ACTIVE"
+    })]);
+    expect(source.messages).toHaveLength(1);
+    expect(source.messages[0]).toMatchObject({
+      type: "FREEZE_DATABASE_WRITES",
+      requestId: "concurrent-prepare-second"
+    });
   });
 
   it("同 initiator/requestId/migrationId 可连续续租；旧 deadline 不会终止新 lease，且新标签页也会被冻结", async () => {
@@ -1633,15 +2136,26 @@ describe("Service Worker upgrade safety", () => {
     });
 
     await harness.setCommittedState(committedState(TARGET_DESCRIPTOR, CURRENT_VERSION));
+    const resolutionAcks: unknown[] = [];
     await harness.dispatch("message", {
-      data: {
-        type: "ABORT_DATABASE_MIGRATION",
-        requestId: "post-commit-explicit-abort",
-        migrationId: TARGET_DESCRIPTOR.migrationId
-      },
-      source: { id: "migration-coordinator" }
+      data: resolutionMigrationMessage(
+        "ABORT_DATABASE_MIGRATION",
+        "post-commit-explicit-abort"
+      ),
+      source: { id: "migration-coordinator" },
+      ports: [{ postMessage: (message) => resolutionAcks.push(message) }]
     });
 
+    expect(resolutionAcks).toEqual([expect.objectContaining({
+      type: "DATABASE_MIGRATION_RESOLUTION_ACK_V1",
+      accepted: true,
+      requestedCommand: "ABORT_DATABASE_MIGRATION",
+      effectiveResolution: "DATABASE_MIGRATION_COMMITTED",
+      committedGeneration: TARGET_DESCRIPTOR.dbGeneration,
+      committedDatabaseName: TARGET_DESCRIPTOR.databaseName,
+      committedSchema: TARGET_DESCRIPTOR.targetSchema,
+      committedMigrationId: TARGET_DESCRIPTOR.migrationId
+    })]);
     expect(source.messages.map((message) => message.type)).toEqual([
       "FREEZE_DATABASE_WRITES",
       "DATABASE_MIGRATION_COMMITTED"
@@ -1654,6 +2168,7 @@ describe("Service Worker upgrade safety", () => {
     const peer = harness.addWindowClient("source-peer", freezeResponder("SOURCE_CLOSED"));
     const cases = [
       { message: prepareMigrationMessage("", {}), source: { id: "migration-coordinator" } },
+      { message: prepareMigrationMessage("x".repeat(129)), source: { id: "migration-coordinator" } },
       {
         message: prepareMigrationMessage("wrong-source-schema", { sourceSchema: 12 }),
         source: { id: "migration-coordinator" }
@@ -1677,18 +2192,1685 @@ describe("Service Worker upgrade safety", () => {
     expect(peer.messages).toEqual([]);
   });
 
-  it("waiting 代激活消息只调用 skipWaiting，不确认或清理 cache", async () => {
+  it("legacy 页面直发激活消息没有 skipWaiting 权限", async () => {
     const harness = await createWorkerHarness();
     await harness.seedGeneration(CURRENT_CACHE, 200, false);
 
     await harness.dispatch("message", { data: { type: "ACTIVATE_INSTALLED_GENERATION" } });
     await harness.dispatch("message", { data: { type: "ACTIVATE_INSTALLED_GENERATION" } });
 
-    expect(harness.skipWaiting).toHaveBeenCalledOnce();
+    expect(harness.skipWaiting).not.toHaveBeenCalled();
     expect(await harness.cacheStore.get(CURRENT_CACHE)?.match(CACHE_META_URL).then((response) => response?.json())).toMatchObject({
       bootAttempted: false,
       bootConfirmed: false
     });
     expect(harness.deleteCache).not.toHaveBeenCalled();
+  });
+
+  it("waiting B 只接受同一 active worker 的一次性 challenge/commit 并拒绝重放", async () => {
+    const harness = await createWorkerHarness();
+    const requestId = "takeover-00000000-0000-4000-8000-000000000001";
+    const activeWorker = {
+      scriptURL: `${ORIGIN}/sw.js`,
+      state: "activated",
+      postMessage: vi.fn()
+    };
+    const preparationAcks: Array<Record<string, unknown>> = [];
+
+    let preparationLifetimeSettled = false;
+    const preparationLifetime = harness.dispatch("message", {
+      data: {
+        type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId,
+        sourceBuildVersion: "previous-build",
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: activeWorker,
+      ports: [{ postMessage: (message) => preparationAcks.push(message as Record<string, unknown>) }]
+    }).then(() => {
+      preparationLifetimeSettled = true;
+    });
+    await vi.waitFor(() => expect(preparationAcks).toEqual([expect.objectContaining({
+      accepted: true,
+      reason: "CHALLENGE_ISSUED",
+      targetBuildVersion: CURRENT_VERSION,
+      targetRelease: BRIDGE_DESCRIPTOR
+    })]));
+    expect(preparationLifetimeSettled).toBe(false);
+    const challengeNonce = preparationAcks[0]?.challengeNonce;
+    expect(challengeNonce).toMatch(/^challenge-[a-f0-9]{64}$/u);
+
+    const forgedAcks: unknown[] = [];
+    await harness.dispatch("message", {
+      data: {
+        type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId,
+        sourceBuildVersion: "previous-build",
+        targetBuildVersion: CURRENT_VERSION,
+        challengeNonce
+      },
+      source: {
+        scriptURL: `${ORIGIN}/sw.js`,
+        state: "activated",
+        postMessage: vi.fn()
+      },
+      ports: [{ postMessage: (message) => forgedAcks.push(message) }]
+    });
+    expect(forgedAcks).toEqual([expect.objectContaining({ accepted: false })]);
+    expect(harness.skipWaiting).not.toHaveBeenCalled();
+
+    const commitAcks: unknown[] = [];
+    const commit = {
+      type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1",
+      requestId,
+      sourceBuildVersion: "previous-build",
+      targetBuildVersion: CURRENT_VERSION,
+      challengeNonce
+    };
+    await harness.dispatch("message", {
+      data: commit,
+      source: activeWorker,
+      ports: [{ postMessage: (message) => commitAcks.push(message) }]
+    });
+    await preparationLifetime;
+    expect(preparationLifetimeSettled).toBe(true);
+    await harness.dispatch("message", {
+      data: commit,
+      source: activeWorker,
+      ports: [{ postMessage: (message) => commitAcks.push(message) }]
+    });
+
+    expect(harness.skipWaiting).toHaveBeenCalledOnce();
+    expect(commitAcks).toEqual([
+      expect.objectContaining({ accepted: true, reason: "SKIP_WAITING_REQUESTED" }),
+      expect.objectContaining({ accepted: false, reason: "PROTOCOL_MISMATCH" })
+    ]);
+  });
+
+  it("waiting B 的 PREPARE ACK 丢失后在 60 秒租约内拒绝第二项 PREPARE", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
+    try {
+      const harness = await createWorkerHarness();
+      const activeWorker = {
+        scriptURL: `${ORIGIN}/sw.js`,
+        state: "activated",
+        postMessage: vi.fn()
+      };
+      let firstLifetimeSettled = false;
+      const firstLifetime = harness.dispatch("message", {
+        data: {
+          type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+          requestId: "takeover-00000000-0000-4000-8000-000000000011",
+          sourceBuildVersion: "previous-build",
+          sourceRelease: BRIDGE_DESCRIPTOR
+        },
+        source: activeWorker,
+        // The waiting worker emits the challenge, but the active worker never
+        // observes it. Its private pending slot must still remain occupied.
+        ports: [{ postMessage: () => undefined }]
+      }).then(() => {
+        firstLifetimeSettled = true;
+      });
+      expect(firstLifetimeSettled).toBe(false);
+
+      const retryAcks: Array<Record<string, unknown>> = [];
+      await harness.dispatch("message", {
+        data: {
+          type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+          requestId: "takeover-00000000-0000-4000-8000-000000000012",
+          sourceBuildVersion: "previous-build",
+          sourceRelease: BRIDGE_DESCRIPTOR
+        },
+        source: activeWorker,
+        ports: [{ postMessage: (message) => retryAcks.push(message as Record<string, unknown>) }]
+      });
+
+      expect(retryAcks).toEqual([expect.objectContaining({
+        accepted: false,
+        reason: "PROTOCOL_MISMATCH",
+        challengeNonce: null
+      })]);
+      expect(harness.skipWaiting).not.toHaveBeenCalled();
+      expect(firstLifetimeSettled).toBe(false);
+
+      await vi.advanceTimersByTimeAsync(60_000);
+      await firstLifetime;
+      expect(firstLifetimeSettled).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("waiting B 允许同一 active worker 在未观察 challenge 时认证取消并立即释放槽位", async () => {
+    const harness = await createWorkerHarness();
+    const activeWorker = {
+      scriptURL: `${ORIGIN}/sw.js`,
+      state: "activated",
+      postMessage: vi.fn()
+    };
+    const lostRequestId = "takeover-00000000-0000-4000-8000-000000000019";
+    let lostLifetimeSettled = false;
+    const lostLifetime = harness.dispatch("message", {
+      data: {
+        type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: lostRequestId,
+        sourceBuildVersion: "previous-build",
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: activeWorker,
+      ports: [{ postMessage: () => undefined }]
+    }).then(() => {
+      lostLifetimeSettled = true;
+    });
+    expect(lostLifetimeSettled).toBe(false);
+
+    await harness.dispatch("message", {
+      data: {
+        type: "ABORT_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: lostRequestId,
+        sourceBuildVersion: "previous-build",
+        targetBuildVersion: null,
+        challengeNonce: null,
+        reason: "PREPARATION_ACK_NOT_OBSERVED"
+      },
+      source: activeWorker
+    });
+    await lostLifetime;
+    expect(lostLifetimeSettled).toBe(true);
+
+    const retryRequestId = "takeover-00000000-0000-4000-8000-000000000020";
+    const retryAcks: Array<Record<string, unknown>> = [];
+    const retryLifetime = harness.dispatch("message", {
+      data: {
+        type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: retryRequestId,
+        sourceBuildVersion: "previous-build",
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: activeWorker,
+      ports: [{ postMessage: (message) => retryAcks.push(message as Record<string, unknown>) }]
+    });
+    expect(retryAcks).toEqual([expect.objectContaining({
+      accepted: true,
+      reason: "CHALLENGE_ISSUED"
+    })]);
+    await harness.dispatch("message", {
+      data: {
+        type: "ABORT_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: retryRequestId,
+        sourceBuildVersion: "previous-build",
+        targetBuildVersion: CURRENT_VERSION,
+        challengeNonce: retryAcks[0]?.challengeNonce,
+        reason: "PRECOMMIT_ABORT"
+      },
+      source: activeWorker
+    });
+    await retryLifetime;
+    expect(harness.skipWaiting).not.toHaveBeenCalled();
+  });
+
+  it("页面调度器在 B 的首个 challenge ACK 真丢失后等待 A 超时、无 challenge 取消并重试同一 B", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
+    try {
+      const activeA = await createWorkerHarness();
+      const waitingB = await createWorkerHarness(BRIDGE_DESCRIPTOR, {
+        buildVersion: "next-build",
+        cacheStore: activeA.cacheStore,
+        indexedDB: activeA.indexedDB
+      });
+      await activeA.dispatch("install");
+      await waitingB.dispatch("install");
+      activeA.addWindowClient("takeover-initiator", controllerTakeoverFreezeResponder());
+
+      const activeAWorkerFacade = {
+        scriptURL: `${ORIGIN}/sw.js`,
+        state: "activated",
+        postMessage: vi.fn()
+      };
+      const waitingMessages: Array<Record<string, unknown>> = [];
+      const waitingDispatchTasks: Array<Promise<unknown>> = [];
+      const droppedPreparationAcks: Array<Record<string, unknown>> = [];
+      let firstPreparationLifetimeSettled = false;
+      let dropFirstPreparationAck = true;
+
+      const trackWaitingDispatch = (
+        task: Promise<unknown>,
+        message: Record<string, unknown>
+      ) => {
+        waitingDispatchTasks.push(task);
+        if (
+          message.type === "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1" &&
+          message.requestId === "takeover-00000000-0000-4000-8000-000000000031"
+        ) {
+          void task.then(() => { firstPreparationLifetimeSettled = true; });
+        }
+        void task.catch(() => undefined);
+      };
+
+      const waitingBFacade = {
+        state: "installed" as const,
+        scriptURL: `${ORIGIN}/sw.js`,
+        postMessage: vi.fn((
+          message: Record<string, unknown>,
+          ports?: FakeMessagePort[]
+        ) => {
+          waitingMessages.push(message);
+          const bridgedPorts = ports?.map((port) => ({
+            postMessage(reply: unknown) {
+              const acknowledgement = reply as Record<string, unknown>;
+              if (
+                dropFirstPreparationAck &&
+                message.type === "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1" &&
+                acknowledgement.type === "PREPARE_INSTALLED_GENERATION_ACTIVATION_ACK_V1" &&
+                acknowledgement.accepted === true
+              ) {
+                dropFirstPreparationAck = false;
+                droppedPreparationAcks.push(acknowledgement);
+                return;
+              }
+              port.postMessage(reply);
+            }
+          }));
+          const task = waitingB.dispatch("message", {
+            data: message,
+            source: activeAWorkerFacade,
+            ports: bridgedPorts
+          });
+          trackWaitingDispatch(task, message);
+        })
+      };
+      activeA.setWaitingWorker(waitingBFacade);
+
+      const pageControllerA = { id: "page-controller-a" };
+      const requestIds = [
+        "takeover-00000000-0000-4000-8000-000000000031",
+        "takeover-00000000-0000-4000-8000-000000000032"
+      ];
+      const activeDispatchTasks: Array<Promise<unknown>> = [];
+      const outerAcks: Array<Record<string, unknown>> = [];
+      let requestCount = 0;
+      const requestActivation = (
+        controller: typeof pageControllerA,
+        worker: typeof waitingBFacade
+      ): Promise<void> => new Promise((resolve, reject) => {
+        expect(controller).toBe(pageControllerA);
+        expect(worker).toBe(waitingBFacade);
+        const requestId = requestIds[requestCount];
+        requestCount += 1;
+        if (!requestId) {
+          reject(Object.freeze({
+            reasonCode: "UNEXPECTED_EXTRA_REQUEST",
+            outcome: "commit_outcome_unknown" as const
+          }));
+          return;
+        }
+        const task = activeA.dispatch("message", {
+          data: {
+            type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+            requestId,
+            sourceBuildVersion: CURRENT_VERSION,
+            sourceRelease: BRIDGE_DESCRIPTOR
+          },
+          source: { id: "takeover-initiator" },
+          ports: [{
+            postMessage(reply: unknown) {
+              const acknowledgement = reply as Record<string, unknown>;
+              outerAcks.push(acknowledgement);
+              if (
+                acknowledgement.type !== "REQUEST_INSTALLED_GENERATION_ACTIVATION_ACK_V1" ||
+                acknowledgement.requestId !== requestId ||
+                acknowledgement.sourceBuildVersion !== CURRENT_VERSION
+              ) {
+                reject(Object.freeze({
+                  reasonCode: "INVALID_ACK_IDENTITY",
+                  outcome: "commit_outcome_unknown" as const
+                }));
+                return;
+              }
+              if (
+                acknowledgement.accepted === true &&
+                acknowledgement.reason === "ALL_CLIENTS_DRAINED_BEFORE_SKIP_WAITING"
+              ) {
+                resolve();
+                return;
+              }
+              if (
+                acknowledgement.accepted === false &&
+                typeof acknowledgement.reason === "string"
+              ) {
+                reject(controllerTakeoverFailureFromNack(acknowledgement.reason));
+                return;
+              }
+              reject(Object.freeze({
+                reasonCode: "INVALID_ACCEPTED_ACK",
+                outcome: "commit_outcome_unknown" as const
+              }));
+            }
+          }]
+        });
+        activeDispatchTasks.push(task);
+        void task.catch((reason: unknown) => reject(reason));
+      });
+
+      const transitionKinds: string[] = [];
+      const scheduler = createControllerTakeoverScheduler({
+        clock: {
+          setTimeout: (callback, delayMs) => globalThis.setTimeout(callback, delayMs),
+          clearTimeout: (timer) => globalThis.clearTimeout(timer)
+        },
+        getWaitingWorker: () => waitingBFacade,
+        getController: () => pageControllerA,
+        isWaitingWorkerReady: (worker) => worker.state === "installed",
+        requestActivation,
+        classifyFailure: (reason): ControllerTakeoverFailure => {
+          if (
+            typeof reason === "object" &&
+            reason !== null &&
+            "reasonCode" in reason &&
+            "outcome" in reason
+          ) return reason as ControllerTakeoverFailure;
+          return Object.freeze({
+            reasonCode: "UNCLASSIFIED_REQUEST_FAILURE",
+            outcome: "commit_outcome_unknown" as const
+          });
+        },
+        onTransition: (transition) => transitionKinds.push(transition.kind)
+      });
+
+      scheduler.promoteWaiting();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(requestCount).toBe(1);
+      expect(droppedPreparationAcks).toEqual([expect.objectContaining({
+        accepted: true,
+        reason: "CHALLENGE_ISSUED",
+        sourceBuildVersion: CURRENT_VERSION,
+        targetBuildVersion: "next-build",
+        challengeNonce: expect.stringMatching(/^challenge-[a-f0-9]{64}$/u)
+      })]);
+      expect(firstPreparationLifetimeSettled).toBe(false);
+
+      await vi.advanceTimersByTimeAsync(4_999);
+      expect(outerAcks).toEqual([]);
+      expect(requestCount).toBe(1);
+      await vi.advanceTimersByTimeAsync(1);
+
+      expect(outerAcks).toEqual([expect.objectContaining({
+        accepted: false,
+        reason: "WAITING_PREPARATION_TIMEOUT"
+      })]);
+      const firstAbort = waitingMessages.find((message) =>
+        message.type === "ABORT_INSTALLED_GENERATION_ACTIVATION_V1" &&
+        message.requestId === requestIds[0]
+      );
+      expect(firstAbort).toMatchObject({
+        sourceBuildVersion: CURRENT_VERSION,
+        targetBuildVersion: null,
+        challengeNonce: null,
+        reason: "PREPARATION_ACK_NOT_OBSERVED"
+      });
+      expect(firstPreparationLifetimeSettled).toBe(true);
+      expect(waitingMessages.some((message) =>
+        message.type === "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1" &&
+        message.requestId === requestIds[0]
+      )).toBe(false);
+      expect(scheduler.pendingRetryCount()).toBe(1);
+
+      await vi.advanceTimersByTimeAsync(999);
+      expect(requestCount).toBe(1);
+      await vi.advanceTimersByTimeAsync(1);
+
+      expect(requestCount).toBe(2);
+      expect(waitingMessages.map((message) => ({
+        requestId: message.requestId,
+        type: message.type
+      }))).toEqual([
+        { requestId: requestIds[0], type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1" },
+        { requestId: requestIds[0], type: "ABORT_INSTALLED_GENERATION_ACTIVATION_V1" },
+        { requestId: requestIds[1], type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1" },
+        { requestId: requestIds[1], type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1" }
+      ]);
+      expect(waitingB.skipWaiting).toHaveBeenCalledOnce();
+      expect(activeA.skipWaiting).not.toHaveBeenCalled();
+      expect(outerAcks).toEqual([
+        expect.objectContaining({
+          accepted: false,
+          reason: "WAITING_PREPARATION_TIMEOUT"
+        }),
+        expect.objectContaining({
+          accepted: true,
+          reason: "ALL_CLIENTS_DRAINED_BEFORE_SKIP_WAITING",
+          targetBuildVersion: "next-build"
+        })
+      ]);
+      expect(scheduler.stateFor(waitingBFacade)).toMatchObject({
+        phase: "succeeded",
+        attemptsStarted: 2
+      });
+      expect(scheduler.isClosed()).toBe(true);
+      expect(scheduler.pendingRetryCount()).toBe(0);
+      expect(transitionKinds).toEqual([
+        "attempt_started",
+        "retry_scheduled",
+        "attempt_started",
+        "succeeded"
+      ]);
+
+      const waitingResults = await Promise.allSettled(waitingDispatchTasks);
+      const activeResults = await Promise.allSettled(activeDispatchTasks);
+      expect(waitingResults.every((result) => result.status === "fulfilled")).toBe(true);
+      expect(activeResults.every((result) => result.status === "fulfilled")).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("waiting B 在 PREPARE 租约到期后拒绝旧 nonce，并允许全新 PREPARE/COMMIT", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
+    try {
+      const harness = await createWorkerHarness();
+      const activeWorker = {
+        scriptURL: `${ORIGIN}/sw.js`,
+        state: "activated",
+        postMessage: vi.fn()
+      };
+      const expiredRequestId = "takeover-00000000-0000-4000-8000-000000000013";
+      const expiredAcks: Array<Record<string, unknown>> = [];
+      const expiredLifetime = harness.dispatch("message", {
+        data: {
+          type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+          requestId: expiredRequestId,
+          sourceBuildVersion: "previous-build",
+          sourceRelease: BRIDGE_DESCRIPTOR
+        },
+        source: activeWorker,
+        ports: [{ postMessage: (message) => expiredAcks.push(message as Record<string, unknown>) }]
+      });
+      const expiredChallenge = expiredAcks[0]?.challengeNonce;
+      expect(expiredChallenge).toMatch(/^challenge-[a-f0-9]{64}$/u);
+
+      await vi.advanceTimersByTimeAsync(60_000);
+      await expiredLifetime;
+      const staleCommitAcks: Array<Record<string, unknown>> = [];
+      await harness.dispatch("message", {
+        data: {
+          type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1",
+          requestId: expiredRequestId,
+          sourceBuildVersion: "previous-build",
+          targetBuildVersion: CURRENT_VERSION,
+          challengeNonce: expiredChallenge
+        },
+        source: activeWorker,
+        ports: [{ postMessage: (message) => staleCommitAcks.push(message as Record<string, unknown>) }]
+      });
+      expect(staleCommitAcks).toEqual([expect.objectContaining({
+        accepted: false,
+        reason: "PROTOCOL_MISMATCH"
+      })]);
+      expect(harness.skipWaiting).not.toHaveBeenCalled();
+
+      const freshRequestId = "takeover-00000000-0000-4000-8000-000000000014";
+      const freshPreparationAcks: Array<Record<string, unknown>> = [];
+      const freshLifetime = harness.dispatch("message", {
+        data: {
+          type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+          requestId: freshRequestId,
+          sourceBuildVersion: "previous-build",
+          sourceRelease: BRIDGE_DESCRIPTOR
+        },
+        source: activeWorker,
+        ports: [{ postMessage: (message) => freshPreparationAcks.push(message as Record<string, unknown>) }]
+      });
+      const freshChallenge = freshPreparationAcks[0]?.challengeNonce;
+      expect(freshChallenge).toMatch(/^challenge-[a-f0-9]{64}$/u);
+      const freshCommitAcks: Array<Record<string, unknown>> = [];
+      await harness.dispatch("message", {
+        data: {
+          type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1",
+          requestId: freshRequestId,
+          sourceBuildVersion: "previous-build",
+          targetBuildVersion: CURRENT_VERSION,
+          challengeNonce: freshChallenge
+        },
+        source: activeWorker,
+        ports: [{ postMessage: (message) => freshCommitAcks.push(message as Record<string, unknown>) }]
+      });
+      await freshLifetime;
+
+      expect(harness.skipWaiting).toHaveBeenCalledOnce();
+      expect(freshCommitAcks).toEqual([expect.objectContaining({
+        accepted: true,
+        reason: "SKIP_WAITING_REQUESTED"
+      })]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("waiting B 只有认证 ABORT 能释放 pending，且旧 COMMIT 不能迟到激活", async () => {
+    const harness = await createWorkerHarness();
+    const activeWorker = {
+      scriptURL: `${ORIGIN}/sw.js`,
+      state: "activated",
+      postMessage: vi.fn()
+    };
+    const requestId = "takeover-00000000-0000-4000-8000-000000000015";
+    const preparationAcks: Array<Record<string, unknown>> = [];
+    let preparationLifetimeSettled = false;
+    const preparationLifetime = harness.dispatch("message", {
+      data: {
+        type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId,
+        sourceBuildVersion: "previous-build",
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: activeWorker,
+      ports: [{ postMessage: (message) => preparationAcks.push(message as Record<string, unknown>) }]
+    }).then(() => {
+      preparationLifetimeSettled = true;
+    });
+    const challengeNonce = preparationAcks[0]?.challengeNonce;
+    expect(challengeNonce).toMatch(/^challenge-[a-f0-9]{64}$/u);
+
+    const abort = {
+      type: "ABORT_INSTALLED_GENERATION_ACTIVATION_V1",
+      requestId,
+      sourceBuildVersion: "previous-build",
+      targetBuildVersion: CURRENT_VERSION,
+      challengeNonce
+    };
+    await harness.dispatch("message", {
+      data: abort,
+      source: {
+        scriptURL: `${ORIGIN}/sw.js`,
+        state: "activated",
+        postMessage: vi.fn()
+      }
+    });
+    expect(preparationLifetimeSettled).toBe(false);
+
+    await harness.dispatch("message", { data: abort, source: activeWorker });
+    await preparationLifetime;
+    expect(preparationLifetimeSettled).toBe(true);
+
+    const lateCommitAcks: Array<Record<string, unknown>> = [];
+    await harness.dispatch("message", {
+      data: { ...abort, type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1" },
+      source: activeWorker,
+      ports: [{ postMessage: (message) => lateCommitAcks.push(message as Record<string, unknown>) }]
+    });
+    expect(lateCommitAcks).toEqual([expect.objectContaining({
+      accepted: false,
+      reason: "PROTOCOL_MISMATCH"
+    })]);
+    expect(harness.skipWaiting).not.toHaveBeenCalled();
+
+    const retryAcks: Array<Record<string, unknown>> = [];
+    const retryLifetime = harness.dispatch("message", {
+      data: {
+        type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000016",
+        sourceBuildVersion: "previous-build",
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: activeWorker,
+      ports: [{ postMessage: (message) => retryAcks.push(message as Record<string, unknown>) }]
+    });
+    expect(retryAcks).toEqual([expect.objectContaining({ accepted: true })]);
+    await harness.dispatch("message", {
+      data: {
+        type: "ABORT_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000016",
+        sourceBuildVersion: "previous-build",
+        targetBuildVersion: CURRENT_VERSION,
+        challengeNonce: retryAcks[0]?.challengeNonce
+      },
+      source: activeWorker
+    });
+    await retryLifetime;
+  });
+
+  it("waiting B 的 skipWaiting 明确失败会复位 activationStarted 并允许全新请求", async () => {
+    const harness = await createWorkerHarness();
+    harness.skipWaiting.mockRejectedValueOnce(new Error("synthetic skipWaiting rejection"));
+    const activeWorker = {
+      scriptURL: `${ORIGIN}/sw.js`,
+      state: "activated",
+      postMessage: vi.fn()
+    };
+    const firstRequestId = "takeover-00000000-0000-4000-8000-000000000017";
+    const firstPreparationAcks: Array<Record<string, unknown>> = [];
+    const firstLifetime = harness.dispatch("message", {
+      data: {
+        type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: firstRequestId,
+        sourceBuildVersion: "previous-build",
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: activeWorker,
+      ports: [{ postMessage: (message) => firstPreparationAcks.push(message as Record<string, unknown>) }]
+    });
+    const firstCommitAcks: Array<Record<string, unknown>> = [];
+    await harness.dispatch("message", {
+      data: {
+        type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: firstRequestId,
+        sourceBuildVersion: "previous-build",
+        targetBuildVersion: CURRENT_VERSION,
+        challengeNonce: firstPreparationAcks[0]?.challengeNonce
+      },
+      source: activeWorker,
+      ports: [{ postMessage: (message) => firstCommitAcks.push(message as Record<string, unknown>) }]
+    });
+    await firstLifetime;
+    expect(firstCommitAcks).toEqual([expect.objectContaining({
+      accepted: false,
+      reason: "SKIP_WAITING_FAILED"
+    })]);
+
+    const retryRequestId = "takeover-00000000-0000-4000-8000-000000000018";
+    const retryPreparationAcks: Array<Record<string, unknown>> = [];
+    const retryLifetime = harness.dispatch("message", {
+      data: {
+        type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: retryRequestId,
+        sourceBuildVersion: "previous-build",
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: activeWorker,
+      ports: [{ postMessage: (message) => retryPreparationAcks.push(message as Record<string, unknown>) }]
+    });
+    const retryCommitAcks: Array<Record<string, unknown>> = [];
+    await harness.dispatch("message", {
+      data: {
+        type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: retryRequestId,
+        sourceBuildVersion: "previous-build",
+        targetBuildVersion: CURRENT_VERSION,
+        challengeNonce: retryPreparationAcks[0]?.challengeNonce
+      },
+      source: activeWorker,
+      ports: [{ postMessage: (message) => retryCommitAcks.push(message as Record<string, unknown>) }]
+    });
+    await retryLifetime;
+
+    expect(harness.skipWaiting).toHaveBeenCalledTimes(2);
+    expect(retryCommitAcks).toEqual([expect.objectContaining({
+      accepted: true,
+      reason: "SKIP_WAITING_REQUESTED"
+    })]);
+  });
+
+  it("waiting B 的 skipWaiting 成功后即使 ACK 发送失败也绝不复位或伪造 known rejection", async () => {
+    const harness = await createWorkerHarness();
+    const activeWorker = {
+      scriptURL: `${ORIGIN}/sw.js`,
+      state: "activated",
+      postMessage: vi.fn()
+    };
+    const requestId = "takeover-00000000-0000-4000-8000-000000000021";
+    const preparationAcks: Array<Record<string, unknown>> = [];
+    const preparationLifetime = harness.dispatch("message", {
+      data: {
+        type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId,
+        sourceBuildVersion: "previous-build",
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: activeWorker,
+      ports: [{ postMessage: (message) => preparationAcks.push(message as Record<string, unknown>) }]
+    });
+    const acknowledgementFailure = new Error("synthetic success ACK transport failure");
+    await expect(harness.dispatch("message", {
+      data: {
+        type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId,
+        sourceBuildVersion: "previous-build",
+        targetBuildVersion: CURRENT_VERSION,
+        challengeNonce: preparationAcks[0]?.challengeNonce
+      },
+      source: activeWorker,
+      ports: [{ postMessage: () => { throw acknowledgementFailure; } }]
+    })).resolves.toBeUndefined();
+    await preparationLifetime;
+    expect(harness.skipWaiting).toHaveBeenCalledOnce();
+
+    const retryAcks: Array<Record<string, unknown>> = [];
+    await harness.dispatch("message", {
+      data: {
+        type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000022",
+        sourceBuildVersion: "previous-build",
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: activeWorker,
+      ports: [{ postMessage: (message) => retryAcks.push(message as Record<string, unknown>) }]
+    });
+    expect(retryAcks).toEqual([expect.objectContaining({
+      accepted: false,
+      reason: "PROTOCOL_MISMATCH",
+      challengeNonce: null
+    })]);
+    expect(harness.skipWaiting).toHaveBeenCalledOnce();
+  });
+
+  it("页面伪造 waiting preparation 即使字段完整也不能取得 challenge", async () => {
+    const harness = await createWorkerHarness();
+    const acks: unknown[] = [];
+    await harness.dispatch("message", {
+      data: {
+        type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000002",
+        sourceBuildVersion: "previous-build",
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "forged-window-client" },
+      ports: [{ postMessage: (message) => acks.push(message) }]
+    });
+
+    expect(acks).toEqual([expect.objectContaining({
+      accepted: false,
+      challengeNonce: null
+    })]);
+    expect(harness.skipWaiting).not.toHaveBeenCalled();
+  });
+
+  it("active A 在全部 client 排空后才把一次性 commit 发给 waiting B，并在期间阻止新导航", async () => {
+    const harness = await createWorkerHarness();
+    const order: string[] = [];
+    const initiator = harness.addWindowClient(
+      "takeover-initiator",
+      controllerTakeoverFreezeResponder(true, "WRITES_DRAINED", () => order.push("freeze:initiator"))
+    );
+    harness.addWindowClient(
+      "takeover-peer",
+      controllerTakeoverFreezeResponder(true, "WRITES_DRAINED", () => order.push("freeze:peer"))
+    );
+    const waiting = createWaitingTakeoverResponder(order);
+    harness.setWaitingWorker(waiting.worker);
+    const acks: Array<Record<string, unknown>> = [];
+
+    await harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000003",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: initiator.id },
+      ports: [{ postMessage: (message) => acks.push(message as Record<string, unknown>) }]
+    });
+
+    expect(order).toEqual([
+      "waiting:prepare",
+      "freeze:initiator",
+      "freeze:peer",
+      "waiting:commit"
+    ]);
+    expect(acks).toEqual([expect.objectContaining({
+      accepted: true,
+      reason: "ALL_CLIENTS_DRAINED_BEFORE_SKIP_WAITING",
+      clientCount: 2,
+      frozenClientCount: 2,
+      rejectedClientIds: []
+    })]);
+    expect(initiator.messages[0]).toMatchObject({
+      type: "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_V1",
+      sourceBuildVersion: CURRENT_VERSION,
+      targetBuildVersion: "next-build",
+      sourceRelease: BRIDGE_DESCRIPTOR,
+      targetRelease: BRIDGE_DESCRIPTOR
+    });
+    expect(harness.matchAllClients).toHaveBeenCalledWith({
+      type: "window",
+      includeUncontrolled: true
+    });
+    const heldNavigation = (await harness.dispatch("fetch", {
+      request: { method: "GET", mode: "navigate", url: `${ORIGIN}/cases` },
+      resultingClientId: "new-navigation"
+    })) as FakeResponse;
+    expect(heldNavigation.status).toBe(503);
+    expect(heldNavigation.body).toContain("正在安全切换离线版本");
+    expect(heldNavigation.body).toContain("FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_ACK_V1");
+    expect(heldNavigation.body).toContain("event.source!==controller");
+    expect(heldNavigation.body).not.toContain('http-equiv="refresh"');
+    const holdingScript = heldNavigation.body.match(/<script>([\s\S]+)<\/script>/u)?.[1];
+    expect(holdingScript).toBeTruthy();
+    const holdingController = {};
+    const holdingListeners = new Map<string, (...args: unknown[]) => void>();
+    const reloadHoldingDocument = vi.fn();
+    const scheduleHoldingFallback = vi.fn();
+    runInNewContext(holdingScript ?? "", {
+      navigator: {
+        serviceWorker: {
+          controller: holdingController,
+          addEventListener: (type: string, listener: (...args: unknown[]) => void) => {
+            holdingListeners.set(type, listener);
+          }
+        }
+      },
+      window: {
+        location: { reload: reloadHoldingDocument },
+        setTimeout: scheduleHoldingFallback
+      }
+    });
+    const holdingMessage = holdingListeners.get("message");
+    expect(holdingMessage).toBeTypeOf("function");
+    const holdingAck = vi.fn();
+    const exactFreezeMessage = {
+      type: "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_V1",
+      requestId: "takeover-00000000-0000-4000-8000-000000000003",
+      sourceBuildVersion: CURRENT_VERSION,
+      targetBuildVersion: "next-build",
+      sourceRelease: BRIDGE_DESCRIPTOR,
+      targetRelease: BRIDGE_DESCRIPTOR
+    };
+    holdingMessage?.({ data: exactFreezeMessage, source: {}, ports: [{ postMessage: holdingAck }] });
+    expect(holdingAck).not.toHaveBeenCalled();
+    holdingMessage?.({
+      data: exactFreezeMessage,
+      source: holdingController,
+      ports: [{ postMessage: holdingAck }]
+    });
+    expect(holdingAck).toHaveBeenCalledWith({
+      type: "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_ACK_V1",
+      requestId: exactFreezeMessage.requestId,
+      sourceBuildVersion: CURRENT_VERSION,
+      targetBuildVersion: "next-build",
+      accepted: true,
+      reason: "WRITES_DRAINED"
+    });
+    holdingMessage?.({
+      data: {
+        type: "RELEASE_CONTROLLER_TAKEOVER_HOLDING_DOCUMENT_V1",
+        requestId: exactFreezeMessage.requestId,
+        sourceBuildVersion: CURRENT_VERSION
+      },
+      source: holdingController,
+      ports: []
+    });
+    expect(reloadHoldingDocument).toHaveBeenCalledOnce();
+    expect(scheduleHoldingFallback).toHaveBeenCalledWith(expect.any(Function), 65_000);
+    expect(harness.skipWaiting).not.toHaveBeenCalled();
+  });
+
+  it("client 集合在冻结中增长时继续冻结新 client，稳定前不 commit", async () => {
+    const harness = await createWorkerHarness();
+    const order: string[] = [];
+    let lateAdded = false;
+    harness.addWindowClient(
+      "takeover-initiator",
+      controllerTakeoverFreezeResponder(true, "WRITES_DRAINED", () => {
+        order.push("freeze:initiator");
+        if (!lateAdded) {
+          lateAdded = true;
+          harness.addWindowClient(
+            "late-controlled-client",
+            controllerTakeoverFreezeResponder(true, "WRITES_DRAINED", () => order.push("freeze:late"))
+          );
+        }
+      })
+    );
+    const waiting = createWaitingTakeoverResponder(order);
+    harness.setWaitingWorker(waiting.worker);
+    const acks: Array<Record<string, unknown>> = [];
+
+    await harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000004",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: (message) => acks.push(message as Record<string, unknown>) }]
+    });
+
+    expect(order).toEqual([
+      "waiting:prepare",
+      "freeze:initiator",
+      "freeze:late",
+      "waiting:commit"
+    ]);
+    expect(acks).toEqual([expect.objectContaining({
+      accepted: true,
+      clientCount: 2,
+      frozenClientCount: 2
+    })]);
+  });
+
+  it("任一 client NACK 时不 commit、不 skipWaiting，并清除导航 holding", async () => {
+    const harness = await createWorkerHarness();
+    const order: string[] = [];
+    harness.addWindowClient("takeover-initiator", controllerTakeoverFreezeResponder());
+    harness.addWindowClient("rejecting-peer", controllerTakeoverFreezeResponder(false, "LOCK_FAILED"));
+    const holdingDocument = harness.addWindowClient(
+      "takeover-holding-document",
+      controllerTakeoverFreezeResponder()
+    );
+    const waiting = createWaitingTakeoverResponder(order);
+    harness.setWaitingWorker(waiting.worker);
+    const acks: Array<Record<string, unknown>> = [];
+
+    await harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000005",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: (message) => acks.push(message as Record<string, unknown>) }]
+    });
+
+    expect(order).toEqual(["waiting:prepare", "waiting:abort"]);
+    expect(waiting.messages.some((message) =>
+      message.type === "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1"
+    )).toBe(false);
+    expect(acks).toEqual([expect.objectContaining({
+      accepted: false,
+      reason: "CLIENT_NOT_FROZEN",
+      frozenClientCount: 2,
+      rejectedClientIds: ["rejecting-peer"]
+    })]);
+    expect(holdingDocument.messages).toContainEqual(expect.objectContaining({
+      type: "RELEASE_CONTROLLER_TAKEOVER_HOLDING_DOCUMENT_V1",
+      requestId: "takeover-00000000-0000-4000-8000-000000000005",
+      sourceBuildVersion: CURRENT_VERSION
+    }));
+    expect(harness.skipWaiting).not.toHaveBeenCalled();
+    harness.fetchRequest.mockResolvedValueOnce(new FakeResponse("network after safe abort"));
+    const navigationAfterAbort = (await harness.dispatch("fetch", {
+      request: { method: "GET", mode: "navigate", url: `${ORIGIN}/cases` },
+      resultingClientId: "navigation-after-safe-abort"
+    })) as FakeResponse;
+    expect(navigationAfterAbort.status).toBe(200);
+    expect(navigationAfterAbort.body).toBe("network after safe abort");
+    harness.windowClients.delete("rejecting-peer");
+    const retryAcks: Array<Record<string, unknown>> = [];
+    await harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000009",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: (message) => retryAcks.push(message as Record<string, unknown>) }]
+    });
+    expect(retryAcks).toEqual([expect.objectContaining({
+      accepted: true,
+      reason: "ALL_CLIENTS_DRAINED_BEFORE_SKIP_WAITING"
+    })]);
+    expect(order).toEqual([
+      "waiting:prepare",
+      "waiting:abort",
+      "waiting:prepare",
+      "waiting:commit"
+    ]);
+  });
+
+  it("同 schema takeover 拒绝借 source 指针绕入跨 schema migration descriptor", async () => {
+    const harness = await createWorkerHarness();
+    harness.addWindowClient("takeover-initiator", controllerTakeoverFreezeResponder());
+    const order: string[] = [];
+    const waiting = createWaitingTakeoverResponder(order, "next-build", TARGET_DESCRIPTOR);
+    harness.setWaitingWorker(waiting.worker);
+    const acks: Array<Record<string, unknown>> = [];
+
+    await harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000006",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: (message) => acks.push(message as Record<string, unknown>) }]
+    });
+
+    expect(order).toEqual(["waiting:prepare", "waiting:abort"]);
+    expect(waiting.messages).toContainEqual(expect.objectContaining({
+      type: "ABORT_INSTALLED_GENERATION_ACTIVATION_V1",
+      targetBuildVersion: null,
+      challengeNonce: null,
+      reason: "PREPARATION_ACK_NOT_OBSERVED"
+    }));
+    expect(acks).toEqual([expect.objectContaining({
+      accepted: false,
+      reason: "WAITING_PREPARATION_REJECTED",
+      frozenClientCount: 0
+    })]);
+    expect(waiting.messages.some((message) =>
+      message.type === "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1"
+    )).toBe(false);
+    expect(harness.skipWaiting).not.toHaveBeenCalled();
+  });
+
+  it("commit 已发出但 ACK 不可信时永久保持 A 导航 holding，不回到旧壳", async () => {
+    const harness = await createWorkerHarness();
+    harness.addWindowClient("takeover-initiator", controllerTakeoverFreezeResponder());
+    const order: string[] = [];
+    const waiting = createWaitingTakeoverResponder(
+      order,
+      "next-build",
+      BRIDGE_DESCRIPTOR,
+      "rejected"
+    );
+    harness.setWaitingWorker(waiting.worker);
+    const acks: Array<Record<string, unknown>> = [];
+
+    await harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000007",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: (message) => acks.push(message as Record<string, unknown>) }]
+    });
+
+    expect(order).toEqual(["waiting:prepare", "waiting:commit"]);
+    expect(acks).toEqual([expect.objectContaining({
+      accepted: false,
+      reason: "WAITING_COMMIT_OUTCOME_UNKNOWN"
+    })]);
+    const heldNavigation = (await harness.dispatch("fetch", {
+      request: { method: "GET", mode: "navigate", url: `${ORIGIN}/cases` },
+      resultingClientId: "post-commit-uncertain-navigation"
+    })) as FakeResponse;
+    expect(heldNavigation.status).toBe(503);
+    expect(heldNavigation.body).toContain("正在安全切换离线版本");
+    expect(waiting.messages.filter((message) =>
+      message.type === "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1"
+    )).toHaveLength(1);
+    const restartedA = await createWorkerHarness(BRIDGE_DESCRIPTOR, {
+      cacheStore: harness.cacheStore
+    });
+    const heldAfterWorkerRestart = (await restartedA.dispatch("fetch", {
+      request: { method: "GET", mode: "navigate", url: `${ORIGIN}/cases` },
+      resultingClientId: "post-restart-uncertain-navigation"
+    })) as FakeResponse;
+    expect(heldAfterWorkerRestart.status).toBe(503);
+    expect(restartedA.fetchRequest).not.toHaveBeenCalled();
+
+    await restartedA.dispatch("install");
+    expect(
+      await restartedA.cacheStore.get(CURRENT_CACHE)?.match(CONTROLLER_TAKEOVER_HOLD_URL)
+    ).toBeUndefined();
+    const exactARollbackNavigation = (await restartedA.dispatch("fetch", {
+      request: { method: "GET", mode: "navigate", url: `${ORIGIN}/cases` },
+      resultingClientId: "exact-a-rollback-navigation"
+    })) as FakeResponse;
+    expect(exactARollbackNavigation.status).toBe(200);
+    expect(exactARollbackNavigation.body).not.toContain("正在安全切换离线版本");
+  });
+
+  it("waiting commit 成功后页面 success ACK 发送失败只能降级为 outcome unknown", async () => {
+    const harness = await createWorkerHarness();
+    harness.addWindowClient("takeover-initiator", controllerTakeoverFreezeResponder());
+    const order: string[] = [];
+    const waiting = createWaitingTakeoverResponder(order);
+    harness.setWaitingWorker(waiting.worker);
+    const deliveredAcks: Array<Record<string, unknown>> = [];
+    let ackPostAttempts = 0;
+
+    await harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000017",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{
+        postMessage: (message) => {
+          ackPostAttempts += 1;
+          if (ackPostAttempts === 1) {
+            const spoofedKnownRejection = new Error("synthetic outer success ACK transport failure");
+            spoofedKnownRejection.name = "WaitingCommitKnownRejectedError";
+            throw spoofedKnownRejection;
+          }
+          deliveredAcks.push(message as Record<string, unknown>);
+        }
+      }]
+    });
+
+    expect(order).toEqual(["waiting:prepare", "waiting:commit"]);
+    expect(ackPostAttempts).toBe(2);
+    expect(deliveredAcks).toEqual([expect.objectContaining({
+      accepted: false,
+      reason: "WAITING_COMMIT_OUTCOME_UNKNOWN"
+    })]);
+    const heldNavigation = (await harness.dispatch("fetch", {
+      request: { method: "GET", mode: "navigate", url: `${ORIGIN}/cases` },
+      resultingClientId: "success-ack-transport-failed-navigation"
+    })) as FakeResponse;
+    expect(heldNavigation.status).toBe(503);
+    expect(heldNavigation.body).toContain("正在安全切换离线版本");
+  });
+
+  it("waiting B 明确证明 commit 未启动时清除 holding，并允许新的精确请求重试", async () => {
+    const harness = await createWorkerHarness();
+    await harness.dispatch("install");
+    harness.addWindowClient("takeover-initiator", controllerTakeoverFreezeResponder());
+    const order: string[] = [];
+    harness.setWaitingWorker(createWaitingTakeoverResponder(
+      order,
+      "next-build",
+      BRIDGE_DESCRIPTOR,
+      "known_rejected"
+    ).worker);
+    const firstAcks: Array<Record<string, unknown>> = [];
+
+    await harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000009",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: (message) => firstAcks.push(message as Record<string, unknown>) }]
+    });
+
+    expect(firstAcks).toEqual([expect.objectContaining({
+      accepted: false,
+      reason: "WAITING_COMMIT_KNOWN_REJECTED:SKIP_WAITING_FAILED"
+    })]);
+    expect(order).toEqual(["waiting:prepare", "waiting:commit", "waiting:abort"]);
+    expect(
+      await harness.cacheStore.get(CURRENT_CACHE)?.match(CONTROLLER_TAKEOVER_HOLD_URL)
+    ).toBeUndefined();
+    const navigationAfterKnownRejection = (await harness.dispatch("fetch", {
+      request: { method: "GET", mode: "navigate", url: `${ORIGIN}/cases` },
+      resultingClientId: "known-rejection-navigation"
+    })) as FakeResponse;
+    expect(navigationAfterKnownRejection.status).toBe(200);
+    expect(navigationAfterKnownRejection.body).not.toContain("正在安全切换离线版本");
+
+    const retryOrder: string[] = [];
+    harness.setWaitingWorker(createWaitingTakeoverResponder(retryOrder).worker);
+    const retryAcks: Array<Record<string, unknown>> = [];
+    await harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000010",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: (message) => retryAcks.push(message as Record<string, unknown>) }]
+    });
+    expect(retryOrder).toEqual(["waiting:prepare", "waiting:commit"]);
+    expect(retryAcks).toEqual([expect.objectContaining({ accepted: true })]);
+  });
+
+  it("两个合法 REQUEST 同时等待 CacheStorage admission 时只允许一项进入，另一项固定返回 busy", async () => {
+    const harness = await createWorkerHarness();
+    await harness.dispatch("install");
+    harness.addWindowClient("takeover-initiator", controllerTakeoverFreezeResponder());
+    const order: string[] = [];
+    harness.setWaitingWorker(createWaitingTakeoverResponder(order).worker);
+
+    const originalKeys = harness.caches.keys.bind(harness.caches);
+    let releaseLookup!: () => void;
+    const lookupGate = new Promise<void>((resolve) => {
+      releaseLookup = resolve;
+    });
+    const keysSpy = vi.spyOn(harness.caches, "keys").mockImplementation(async () => {
+      await lookupGate;
+      return originalKeys();
+    });
+    const firstAcks: Array<Record<string, unknown>> = [];
+    const secondAcks: Array<Record<string, unknown>> = [];
+    const firstRequest = harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000020",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: (message) => firstAcks.push(message as Record<string, unknown>) }]
+    });
+    const secondRequest = harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000021",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: (message) => secondAcks.push(message as Record<string, unknown>) }]
+    });
+
+    await vi.waitFor(() => expect(keysSpy).toHaveBeenCalledTimes(2));
+    expect(firstAcks).toEqual([]);
+    expect(secondAcks).toEqual([]);
+    releaseLookup();
+    await Promise.all([firstRequest, secondRequest]);
+
+    const allAcks = [...firstAcks, ...secondAcks];
+    expect(allAcks).toHaveLength(2);
+    expect(allAcks.filter((ack) => ack.accepted === true)).toEqual([
+      expect.objectContaining({ reason: "ALL_CLIENTS_DRAINED_BEFORE_SKIP_WAITING" })
+    ]);
+    expect(allAcks.filter((ack) => ack.accepted === false)).toEqual([
+      expect.objectContaining({ reason: "TAKEOVER_SESSION_BUSY" })
+    ]);
+    expect(order).toEqual(["waiting:prepare", "waiting:commit"]);
+  });
+
+  it.each(["keys", "open", "match"] as const)(
+    "CacheStorage %s admission 状态未知时使用固定 NACK，并保持导航 503",
+    async (failurePoint) => {
+      const harness = await createWorkerHarness();
+      await harness.dispatch("install");
+      const currentCache = await harness.caches.open(CURRENT_CACHE);
+      harness.addWindowClient("takeover-initiator", controllerTakeoverFreezeResponder());
+      const waiting = createWaitingTakeoverResponder();
+      harness.setWaitingWorker(waiting.worker);
+      const rawFailure = `synthetic private ${failurePoint} failure detail`;
+
+      if (failurePoint === "keys") {
+        vi.spyOn(harness.caches, "keys").mockRejectedValue(new Error(rawFailure));
+      } else if (failurePoint === "open") {
+        vi.spyOn(harness.caches, "open").mockRejectedValue(new Error(rawFailure));
+      } else {
+        currentCache.matchEffect = (key, read) => {
+          if (key === CONTROLLER_TAKEOVER_HOLD_URL) throw new Error(rawFailure);
+          return read();
+        };
+      }
+
+      const acks: Array<Record<string, unknown>> = [];
+      await harness.dispatch("message", {
+        data: {
+          type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+          requestId: `takeover-00000000-0000-4000-8000-00000000002${failurePoint.length}`,
+          sourceBuildVersion: CURRENT_VERSION,
+          sourceRelease: BRIDGE_DESCRIPTOR
+        },
+        source: { id: "takeover-initiator" },
+        ports: [{ postMessage: (message) => acks.push(message as Record<string, unknown>) }]
+      });
+
+      expect(acks).toEqual([expect.objectContaining({
+        accepted: false,
+        reason: "TAKEOVER_HOLD_STATUS_UNKNOWN"
+      })]);
+      expect(JSON.stringify(acks)).not.toContain(rawFailure);
+      expect(waiting.messages).toEqual([]);
+
+      const heldNavigation = (await harness.dispatch("fetch", {
+        request: { method: "GET", mode: "navigate", url: `${ORIGIN}/hold-status-unknown-${failurePoint}` },
+        resultingClientId: `hold-status-unknown-${failurePoint}`
+      })) as FakeResponse;
+      expect(heldNavigation.status).toBe(503);
+      expect(heldNavigation.body).toContain("正在安全切换离线版本");
+      expect(harness.fetchRequest).not.toHaveBeenCalled();
+    }
+  );
+
+  it("持久 hold 的 put 跨过 preparation timeout 时，abort 等待写入结束并验证清除后才恢复", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
+    try {
+      const harness = await createWorkerHarness();
+      await harness.dispatch("install");
+      const currentCache = await harness.caches.open(CURRENT_CACHE);
+      const order: string[] = [];
+      harness.addWindowClient(
+        "takeover-initiator",
+        controllerTakeoverFreezeResponder(true, "WRITES_DRAINED", () => order.push("freeze:initiator"))
+      );
+      const waiting = createWaitingTakeoverResponder(order);
+      harness.setWaitingWorker(waiting.worker);
+
+      let notifyHoldPutStarted: (() => void) | undefined;
+      const holdPutStarted = new Promise<void>((resolve) => {
+        notifyHoldPutStarted = resolve;
+      });
+      let releaseHoldPut: (() => void) | undefined;
+      currentCache.putEffect = (key, _response, commit) => {
+        if (key !== CONTROLLER_TAKEOVER_HOLD_URL) {
+          commit();
+          return;
+        }
+        order.push("hold:put_started");
+        notifyHoldPutStarted?.();
+        return new Promise<void>((resolve) => {
+          releaseHoldPut = () => {
+            order.push("hold:put_committed");
+            commit();
+            resolve();
+          };
+        });
+      };
+      currentCache.deleteEffect = (key, remove) => {
+        if (key === CONTROLLER_TAKEOVER_HOLD_URL) order.push("hold:delete");
+        return remove();
+      };
+      const firstAcks: Array<Record<string, unknown>> = [];
+      const firstRequest = harness.dispatch("message", {
+        data: {
+          type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+          requestId: "takeover-00000000-0000-4000-8000-000000000011",
+          sourceBuildVersion: CURRENT_VERSION,
+          sourceRelease: BRIDGE_DESCRIPTOR
+        },
+        source: { id: "takeover-initiator" },
+        ports: [{ postMessage: (message) => firstAcks.push(message as Record<string, unknown>) }]
+      });
+
+      await holdPutStarted;
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(order).toEqual([
+        "waiting:prepare",
+        "freeze:initiator",
+        "hold:put_started",
+        "waiting:abort"
+      ]);
+      expect(firstAcks).toEqual([]);
+      expect(currentCache.entries.has(CONTROLLER_TAKEOVER_HOLD_URL)).toBe(false);
+
+      const heldDuringAbort = (await harness.dispatch("fetch", {
+        request: { method: "GET", mode: "navigate", url: `${ORIGIN}/during-delayed-hold-put` },
+        resultingClientId: "navigation-during-delayed-hold-put"
+      })) as FakeResponse;
+      expect(heldDuringAbort.status).toBe(503);
+      expect(harness.fetchRequest).not.toHaveBeenCalled();
+
+      const prematureRetryAcks: Array<Record<string, unknown>> = [];
+      await harness.dispatch("message", {
+        data: {
+          type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+          requestId: "takeover-00000000-0000-4000-8000-000000000012",
+          sourceBuildVersion: CURRENT_VERSION,
+          sourceRelease: BRIDGE_DESCRIPTOR
+        },
+        source: { id: "takeover-initiator" },
+        ports: [{ postMessage: (message) => prematureRetryAcks.push(message as Record<string, unknown>) }]
+      });
+      expect(prematureRetryAcks).toEqual([expect.objectContaining({
+        accepted: false,
+        reason: "TAKEOVER_SESSION_BUSY"
+      })]);
+      expect(order).not.toContain("hold:delete");
+
+      currentCache.putEffect = null;
+      releaseHoldPut?.();
+      await firstRequest;
+      expect(order).toEqual([
+        "waiting:prepare",
+        "freeze:initiator",
+        "hold:put_started",
+        "waiting:abort",
+        "hold:put_committed",
+        "hold:delete"
+      ]);
+      expect(firstAcks).toEqual([expect.objectContaining({ accepted: false })]);
+      expect(await currentCache.match(CONTROLLER_TAKEOVER_HOLD_URL)).toBeUndefined();
+
+      currentCache.deleteEffect = null;
+      const navigationAfterCleanup = (await harness.dispatch("fetch", {
+        request: { method: "GET", mode: "navigate", url: `${ORIGIN}/after-delayed-hold-cleanup` },
+        resultingClientId: "navigation-after-delayed-hold-cleanup"
+      })) as FakeResponse;
+      expect(navigationAfterCleanup.status).toBe(200);
+      expect(navigationAfterCleanup.body).not.toContain("正在安全切换离线版本");
+
+      const retryAcks: Array<Record<string, unknown>> = [];
+      harness.setWaitingWorker(createWaitingTakeoverResponder().worker);
+      await harness.dispatch("message", {
+        data: {
+          type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+          requestId: "takeover-00000000-0000-4000-8000-000000000013",
+          sourceBuildVersion: CURRENT_VERSION,
+          sourceRelease: BRIDGE_DESCRIPTOR
+        },
+        source: { id: "takeover-initiator" },
+        ports: [{ postMessage: (message) => retryAcks.push(message as Record<string, unknown>) }]
+      });
+      expect(retryAcks).toEqual([expect.objectContaining({
+        accepted: true,
+        reason: "ALL_CLIENTS_DRAINED_BEFORE_SKIP_WAITING"
+      })]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("持久 hold 的 put 已落盘后抛错时，abort 删除并验证 absence 后才恢复和允许重试", async () => {
+    const harness = await createWorkerHarness();
+    await harness.dispatch("install");
+    const currentCache = await harness.caches.open(CURRENT_CACHE);
+    harness.addWindowClient("takeover-initiator", controllerTakeoverFreezeResponder());
+    const waiting = createWaitingTakeoverResponder();
+    harness.setWaitingWorker(waiting.worker);
+    currentCache.putEffect = (key, _response, commit) => {
+      commit();
+      if (key === CONTROLLER_TAKEOVER_HOLD_URL) {
+        throw new Error("synthetic hold put outcome unknown");
+      }
+    };
+    const firstAcks: Array<Record<string, unknown>> = [];
+
+    await harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000014",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: (message) => firstAcks.push(message as Record<string, unknown>) }]
+    });
+
+    expect(firstAcks).toEqual([expect.objectContaining({
+      accepted: false,
+      reason: "TAKEOVER_HOLD_PERSIST_FAILED"
+    })]);
+    expect(JSON.stringify(firstAcks)).not.toContain("synthetic hold put outcome unknown");
+    expect(waiting.messages.some((message) =>
+      message.type === "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1"
+    )).toBe(false);
+    expect(await currentCache.match(CONTROLLER_TAKEOVER_HOLD_URL)).toBeUndefined();
+
+    currentCache.putEffect = null;
+    const navigationAfterCleanup = (await harness.dispatch("fetch", {
+      request: { method: "GET", mode: "navigate", url: `${ORIGIN}/after-ambiguous-put-cleanup` },
+      resultingClientId: "navigation-after-ambiguous-put-cleanup"
+    })) as FakeResponse;
+    expect(navigationAfterCleanup.status).toBe(200);
+    expect(navigationAfterCleanup.body).not.toContain("正在安全切换离线版本");
+
+    const retryAcks: Array<Record<string, unknown>> = [];
+    harness.setWaitingWorker(createWaitingTakeoverResponder().worker);
+    await harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000015",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: (message) => retryAcks.push(message as Record<string, unknown>) }]
+    });
+    expect(retryAcks).toEqual([expect.objectContaining({ accepted: true })]);
+  });
+
+  it.each([
+    {
+      failure: "delete 抛错",
+      restartReason: "TAKEOVER_HOLD_PRESENT",
+      configure(cache: FakeCache) {
+        cache.deleteEffect = (key, remove) => {
+          if (key === CONTROLLER_TAKEOVER_HOLD_URL) throw new Error("synthetic hold delete failure");
+          return remove();
+        };
+      }
+    },
+    {
+      failure: "delete 返回但 marker 残留",
+      restartReason: "TAKEOVER_HOLD_PRESENT",
+      configure(cache: FakeCache) {
+        cache.deleteEffect = (key, remove) =>
+          key === CONTROLLER_TAKEOVER_HOLD_URL ? false : remove();
+      }
+    },
+    {
+      failure: "cleanup match 抛错",
+      restartReason: "TAKEOVER_HOLD_STATUS_UNKNOWN",
+      configure(cache: FakeCache) {
+        let cleanupDeleteCompleted = false;
+        cache.deleteEffect = (key, remove) => {
+          const removed = remove();
+          if (key === CONTROLLER_TAKEOVER_HOLD_URL) cleanupDeleteCompleted = true;
+          return removed;
+        };
+        cache.matchEffect = (key, read) => {
+          if (key === CONTROLLER_TAKEOVER_HOLD_URL && cleanupDeleteCompleted) {
+            throw new Error("synthetic hold absence verification failure");
+          }
+          return read();
+        };
+      }
+    }
+  ])("$failure 时保持导航 fail-closed，并在 worker 重启后拒绝 fresh takeover", async ({
+    configure,
+    restartReason
+  }) => {
+    const harness = await createWorkerHarness();
+    await harness.dispatch("install");
+    const currentCache = await harness.caches.open(CURRENT_CACHE);
+    configure(currentCache);
+    harness.addWindowClient("takeover-initiator", controllerTakeoverFreezeResponder());
+    harness.setWaitingWorker(createWaitingTakeoverResponder(
+      [],
+      "next-build",
+      BRIDGE_DESCRIPTOR,
+      "known_rejected"
+    ).worker);
+    const firstAcks: Array<Record<string, unknown>> = [];
+
+    await harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000016",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: (message) => firstAcks.push(message as Record<string, unknown>) }]
+    });
+    expect(firstAcks).toEqual([expect.objectContaining({
+      accepted: false,
+      reason: "TAKEOVER_HOLD_CLEAR_FAILED"
+    })]);
+
+    const heldByFailedCleanup = (await harness.dispatch("fetch", {
+      request: { method: "GET", mode: "navigate", url: `${ORIGIN}/after-hold-cleanup-failure` },
+      resultingClientId: "navigation-after-hold-cleanup-failure"
+    })) as FakeResponse;
+    expect(heldByFailedCleanup.status).toBe(503);
+    expect(harness.fetchRequest).not.toHaveBeenCalled();
+
+    const sameWorkerRetryAcks: Array<Record<string, unknown>> = [];
+    await harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000017",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: (message) => sameWorkerRetryAcks.push(message as Record<string, unknown>) }]
+    });
+    expect(sameWorkerRetryAcks).toEqual([expect.objectContaining({
+      accepted: false,
+      reason: "TAKEOVER_SESSION_BUSY"
+    })]);
+
+    const restartedA = await createWorkerHarness(BRIDGE_DESCRIPTOR, { cacheStore: harness.cacheStore });
+    restartedA.addWindowClient("takeover-initiator", controllerTakeoverFreezeResponder());
+    const restartedWaiting = createWaitingTakeoverResponder();
+    restartedA.setWaitingWorker(restartedWaiting.worker);
+    const heldAfterRestart = (await restartedA.dispatch("fetch", {
+      request: { method: "GET", mode: "navigate", url: `${ORIGIN}/after-hold-cleanup-worker-restart` },
+      resultingClientId: "navigation-after-hold-cleanup-worker-restart"
+    })) as FakeResponse;
+    expect(heldAfterRestart.status).toBe(503);
+    expect(restartedA.fetchRequest).not.toHaveBeenCalled();
+
+    const restartedRetryAcks: Array<Record<string, unknown>> = [];
+    await restartedA.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000018",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: (message) => restartedRetryAcks.push(message as Record<string, unknown>) }]
+    });
+    expect(restartedRetryAcks).toEqual([expect.objectContaining({
+      accepted: false,
+      reason: restartReason
+    })]);
+    expect(restartedWaiting.messages).toEqual([]);
+
+    currentCache.putEffect = null;
+    currentCache.deleteEffect = null;
+    currentCache.matchEffect = null;
+    await restartedA.dispatch("install");
+    expect(await currentCache.match(CONTROLLER_TAKEOVER_HOLD_URL)).toBeUndefined();
+
+    const recoveredRetryAcks: Array<Record<string, unknown>> = [];
+    await restartedA.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000019",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: (message) => recoveredRetryAcks.push(message as Record<string, unknown>) }]
+    });
+    expect(recoveredRetryAcks).toEqual([expect.objectContaining({ accepted: true })]);
+  });
+
+  it("takeover 前已开始但尚未 materialize 的导航在返回 A 壳前再次被 holding 截断", async () => {
+    const harness = await createWorkerHarness();
+    harness.addWindowClient("takeover-initiator", controllerTakeoverFreezeResponder());
+    const waiting = createWaitingTakeoverResponder();
+    harness.setWaitingWorker(waiting.worker);
+    let releaseNetworkResponse: ((response: FakeResponse) => void) | undefined;
+    harness.fetchRequest.mockImplementationOnce(() => new Promise<FakeResponse>((resolve) => {
+      releaseNetworkResponse = resolve;
+    }));
+
+    const pendingNavigation = harness.dispatch("fetch", {
+      request: { method: "GET", mode: "navigate", url: `${ORIGIN}/slow-preboot` },
+      resultingClientId: "reserved-navigation-not-yet-enumerable"
+    }) as Promise<FakeResponse>;
+    await vi.waitFor(() => expect(harness.fetchRequest).toHaveBeenCalledOnce());
+
+    await harness.dispatch("message", {
+      data: {
+        type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId: "takeover-00000000-0000-4000-8000-000000000008",
+        sourceBuildVersion: CURRENT_VERSION,
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: { id: "takeover-initiator" },
+      ports: [{ postMessage: () => undefined }]
+    });
+    releaseNetworkResponse?.(new FakeResponse("late A network shell"));
+
+    const response = await pendingNavigation;
+    expect(response.status).toBe(503);
+    expect(response.body).toContain("正在安全切换离线版本");
+    expect(response.body).not.toContain("late A network shell");
   });
 });

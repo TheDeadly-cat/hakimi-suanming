@@ -44,17 +44,19 @@
   },
   "releaseEvidence": {
     "defaultV13RequiredReceiptCommands": {
-      "boot": ["npm", "run", "test:e2e:boot"],
+      "backup": ["npm", "run", "test:release:backup-artifact"],
+      "artifact-stability": ["node", "scripts/release-artifact-identity.mjs", "--verify", "--dist", "dist/web", "--lock", "tmp/release-artifact-identity.json"],
+      "boot": ["npm", "run", "test:release:boot-artifact"],
       "build": ["npm", "run", "build"],
       "built-contract": ["npm", "run", "verify:built-release-storage-manifest"],
       "cross-schema-v13-v16": ["npm", "run", "test:e2e:cross-schema-v13-v16"],
       "evidence-tooling": ["npm", "run", "test:release-evidence"],
       "governance": ["npm", "run", "check:release-governance"],
       "orphaned-v13-recovery": ["npm", "run", "test:e2e:orphaned-v13-recovery"],
-      "pwa": ["npm", "run", "test:e2e:pwa"],
+      "pwa": ["npm", "run", "test:release:pwa-artifact"],
       "typecheck": ["npm", "run", "typecheck"],
       "unit": ["npm", "test"],
-      "web-v1-flow": ["npm", "run", "test:e2e:web-v1-flow"]
+      "web-v1-flow": ["npm", "run", "test:release:web-v1-artifact"]
     }
   },
   "approvals": []

@@ -6,12 +6,21 @@ import {
 } from "@hakimi/backup";
 import { webReportExportPort } from "@hakimi/platform";
 import {
+  BRIDGE_RELEASE_DATABASE_DESCRIPTOR,
+  type ReleaseDatabaseDescriptor
+} from "../../release-protocol";
+import {
   PreparedFileDeliveryDialog,
   type PreparedFileArtifact,
   type PreparedFileDeliveryResolution
 } from "../components/prepared-file-delivery-dialog";
 import { APP_VERSION } from "../lib/app-version";
 import { CURRENT_RELEASE_ENGINEERING_IDENTITY } from "../lib/current-release";
+import {
+  assertSupportedOrphanedV13RecoveryShellDescriptor,
+  orphanedV13ReadOnlyBackupFilename
+} from "../lib/orphaned-v13-rescue";
+import { LEGACY_V13_NATIVE_VERSION } from "../lib/preboot-database-inventory";
 import { safeVisibleErrorMessage, safeVisibleText } from "../lib/visible-text";
 import "./recovery-page.css";
 import "./orphaned-v13-recovery-page.css";
@@ -50,7 +59,7 @@ export type OrphanedV13BackupCapture = Readonly<{
 export type OrphanedV13RecoveryPageProps = Readonly<{
   state: OrphanedV13RecoveryState;
   captureBackup: () => Promise<OrphanedV13BackupCapture>;
-  requireVerifiedCaptureBinding?: boolean;
+  recoveryShellDescriptor: ReleaseDatabaseDescriptor;
 }>;
 
 type RecoveryFeedback = Readonly<{
@@ -110,6 +119,14 @@ const ORPHANED_V13_INVENTORY_LIMIT = 128;
 const ORPHANED_V13_DIAGNOSTIC_BYTE_LIMIT = 256 * 1024;
 const UNSAFE_LOCAL_IDENTIFIER_PATTERN = /[\u0000-\u001f\u007f-\u009f\u00ad\u061c\u180e\u200b-\u200f\u2028-\u202e\u2060-\u206f\ufeff\ufff9-\ufffb]/u;
 const numberFormatter = new Intl.NumberFormat("zh-CN");
+const ORPHANED_V13_SOURCE_RELEASE_IDENTITY = Object.freeze({
+  dbGeneration: BRIDGE_RELEASE_DATABASE_DESCRIPTOR.dbGeneration,
+  databaseName: BRIDGE_RELEASE_DATABASE_DESCRIPTOR.databaseName,
+  targetSchema: BRIDGE_RELEASE_DATABASE_DESCRIPTOR.targetSchema,
+  migrationId: BRIDGE_RELEASE_DATABASE_DESCRIPTOR.migrationId,
+  nativeVersion: LEGACY_V13_NATIVE_VERSION,
+  engineeringEvidenceOnly: true as const
+});
 
 function errorMessage(reason: unknown, fallback: string): string {
   return safeVisibleErrorMessage(reason, fallback);
@@ -136,18 +153,19 @@ function sanitizedInventory(state: OrphanedV13RecoveryState): OrphanedV13Invento
     });
 }
 
-function recoveryReleaseIdentityIssue(): string | null {
-  if (
-    CURRENT_RELEASE_ENGINEERING_IDENTITY.dbGeneration !== "legacy-v13" ||
-    CURRENT_RELEASE_ENGINEERING_IDENTITY.targetSchema !== 13 ||
-    CURRENT_RELEASE_ENGINEERING_IDENTITY.migrationId !== null
-  ) {
-    return "当前工程身份不是 legacy-v13 / targetSchema 13 / migrationId null，只读 v13 捕获保持关闭。";
+function recoveryShellIdentityIssue(descriptor: ReleaseDatabaseDescriptor): string | null {
+  try {
+    assertSupportedOrphanedV13RecoveryShellDescriptor(descriptor);
+  } catch {
+    return "恢复执行壳不是精确绑定 legacy-v13 源的受支持 v15/v16 影子发布，只读 v13 捕获保持关闭。";
   }
   return null;
 }
 
-function recoveryStateIntegrityIssue(state: OrphanedV13RecoveryState): string | null {
+function recoveryStateIntegrityIssue(
+  state: OrphanedV13RecoveryState,
+  recoveryShellDescriptor: ReleaseDatabaseDescriptor
+): string | null {
   if (state.kind !== "orphaned_v13" && state.kind !== "ambiguous") {
     return "恢复状态没有提供受支持的状态种类。";
   }
@@ -191,10 +209,17 @@ function recoveryStateIntegrityIssue(state: OrphanedV13RecoveryState): string | 
     ) {
       return "已识别源库没有有效的数据库名称或原生版本。";
     }
-    const exactMatches = state.inventory.filter((entry) => (
-      entry.name === state.sourceDatabaseName && entry.version === state.nativeVersion
-    ));
-    if (exactMatches.length !== 1) {
+    if (
+      state.sourceDatabaseName !== recoveryShellDescriptor.sourceDatabaseName ||
+      state.nativeVersion !== LEGACY_V13_NATIVE_VERSION
+    ) {
+      return "已识别源库没有与恢复执行壳声明的 legacy-v13 数据库和原生版本精确绑定。";
+    }
+    const onlyInventoryEntry = state.inventory.length === 1 ? state.inventory[0] : undefined;
+    if (
+      onlyInventoryEntry?.name !== state.sourceDatabaseName ||
+      onlyInventoryEntry.version !== state.nativeVersion
+    ) {
       return "已识别源库无法与来源清单中的唯一名称和版本精确绑定。";
     }
   }
@@ -204,7 +229,8 @@ function recoveryStateIntegrityIssue(state: OrphanedV13RecoveryState): string | 
 function diagnosticPayload(
   state: OrphanedV13RecoveryState,
   stateIntegrityIssue: string | null,
-  exportedAt: string
+  exportedAt: string,
+  recoveryShellDescriptor: ReleaseDatabaseDescriptor
 ) {
   const inventory = sanitizedInventory(state);
   const inventoryTotal = Array.isArray(state.inventory) ? state.inventory.length : 0;
@@ -216,7 +242,25 @@ function diagnosticPayload(
     containsUserResearchData: false,
     containsLocalDatabaseIdentifiers: true,
     sensitivity: "local_technical_identifiers",
-    release: CURRENT_RELEASE_ENGINEERING_IDENTITY,
+    release: ORPHANED_V13_SOURCE_RELEASE_IDENTITY,
+    recoveryShell: {
+      protocolVersion: recoveryShellDescriptor.protocolVersion,
+      dbGeneration: recoveryShellDescriptor.dbGeneration,
+      databaseName: recoveryShellDescriptor.databaseName,
+      targetSchema: recoveryShellDescriptor.targetSchema,
+      minReadableSchema: recoveryShellDescriptor.minReadableSchema,
+      maxReadableSchema: recoveryShellDescriptor.maxReadableSchema,
+      migrationId: recoveryShellDescriptor.migrationId,
+      acceptedCommittedMigrationIds: [...recoveryShellDescriptor.acceptedCommittedMigrationIds],
+      sourceGeneration: recoveryShellDescriptor.sourceGeneration,
+      sourceDatabaseName: recoveryShellDescriptor.sourceDatabaseName,
+      sourceSchema: recoveryShellDescriptor.sourceSchema,
+      buildVersion: CURRENT_RELEASE_ENGINEERING_IDENTITY.buildVersion,
+      manifestDigest: CURRENT_RELEASE_ENGINEERING_IDENTITY.manifestDigest,
+      evidenceId: CURRENT_RELEASE_ENGINEERING_IDENTITY.evidenceId,
+      evidenceBound: CURRENT_RELEASE_ENGINEERING_IDENTITY.evidenceBound,
+      engineeringEvidenceOnly: true
+    },
     recoveryState: state.kind,
     reasonCode: safeVisibleText(state.reasonCode, "invalid_reason_code", 160),
     stateIntegrityIssue,
@@ -243,8 +287,7 @@ function assertBackupCapture(
   capture: OrphanedV13BackupCapture,
   captureStartedAt: number,
   expectedSourceDatabaseName: string,
-  expectedSourceNativeVersion: number,
-  requireVerifiedCaptureBinding: boolean
+  expectedSourceNativeVersion: number
 ): void {
   if (
     !(capture.blob instanceof Blob) ||
@@ -272,7 +315,8 @@ function assertBackupCapture(
   const hasSourceDatabaseName = typeof capture.sourceDatabaseName === "string";
   const hasSourceNativeVersion = capture.sourceNativeVersion !== undefined;
   if (
-    (requireVerifiedCaptureBinding && (!hasSourceDatabaseName || !hasSourceNativeVersion)) ||
+    !hasSourceDatabaseName ||
+    !hasSourceNativeVersion ||
     hasSourceDatabaseName !== hasSourceNativeVersion ||
     (hasSourceDatabaseName && (
       capture.sourceDatabaseName !== expectedSourceDatabaseName ||
@@ -291,9 +335,9 @@ function assertBackupCapture(
   ) {
     throw new Error("只读捕获没有返回有效的捕获时间。");
   }
-  const expectedFilename = `hakimi-v13-read-only-full-backup-${capture.capturedAt.slice(0, 10)}.zip`;
+  const expectedFilename = orphanedV13ReadOnlyBackupFilename(capture.capturedAt);
   if (
-    (requireVerifiedCaptureBinding && capture.filename === undefined) ||
+    capture.filename === undefined ||
     (capture.filename !== undefined && capture.filename !== expectedFilename)
   ) {
     throw new Error("只读捕获返回的文件名没有与捕获日期精确绑定。");
@@ -303,7 +347,7 @@ function assertBackupCapture(
 export function OrphanedV13RecoveryPage({
   state,
   captureBackup,
-  requireVerifiedCaptureBinding = false
+  recoveryShellDescriptor
 }: OrphanedV13RecoveryPageProps) {
   const [busy, setBusy] = useState<"diagnostic" | "backup" | null>(null);
   const [feedback, setFeedback] = useState<RecoveryFeedback | null>(null);
@@ -313,7 +357,8 @@ export function OrphanedV13RecoveryPage({
   const busyRef = useRef<"diagnostic" | "backup" | null>(null);
   const mountedRef = useRef(true);
   const preparedDeliveryRef = useRef<PreparedRecoveryDelivery | null>(null);
-  const stateIntegrityIssue = recoveryStateIntegrityIssue(state) ?? recoveryReleaseIdentityIssue();
+  const stateIntegrityIssue = recoveryShellIdentityIssue(recoveryShellDescriptor) ??
+    recoveryStateIntegrityIssue(state, recoveryShellDescriptor);
   const canCaptureBackup = state.kind === "orphaned_v13" && stateIntegrityIssue === null;
   const displayReasonCode = safeVisibleText(state.reasonCode, "invalid_reason_code", 160);
   const displayInventory = sanitizedInventory(state);
@@ -341,12 +386,24 @@ export function OrphanedV13RecoveryPage({
     source: state.kind === "orphaned_v13"
       ? [displaySourceDatabaseName ?? "数据库名称不可显示", state.nativeVersion]
       : null,
-    release: [
-      CURRENT_RELEASE_ENGINEERING_IDENTITY.dbGeneration,
-      CURRENT_RELEASE_ENGINEERING_IDENTITY.targetSchema,
-      CURRENT_RELEASE_ENGINEERING_IDENTITY.migrationId
+    sourceRelease: [
+      ORPHANED_V13_SOURCE_RELEASE_IDENTITY.dbGeneration,
+      ORPHANED_V13_SOURCE_RELEASE_IDENTITY.targetSchema,
+      ORPHANED_V13_SOURCE_RELEASE_IDENTITY.migrationId,
+      ORPHANED_V13_SOURCE_RELEASE_IDENTITY.nativeVersion
     ],
-    requireVerifiedCaptureBinding
+    recoveryShell: [
+      recoveryShellDescriptor.dbGeneration,
+      recoveryShellDescriptor.databaseName,
+      recoveryShellDescriptor.targetSchema,
+      recoveryShellDescriptor.migrationId,
+      recoveryShellDescriptor.sourceGeneration,
+      recoveryShellDescriptor.sourceDatabaseName,
+      recoveryShellDescriptor.sourceSchema,
+      CURRENT_RELEASE_ENGINEERING_IDENTITY.buildVersion,
+      CURRENT_RELEASE_ENGINEERING_IDENTITY.evidenceId
+    ],
+    requireVerifiedCaptureBinding: true
   });
   const sourceBindingKey = state.kind === "orphaned_v13"
     ? JSON.stringify([state.sourceDatabaseName, state.nativeVersion])
@@ -475,7 +532,12 @@ export function OrphanedV13RecoveryPage({
     try {
       const generatedAt = new Date().toISOString();
       const filename = `hakimi-v13-recovery-diagnostic-${generatedAt.slice(0, 10)}.json`;
-      const payload = `${JSON.stringify(diagnosticPayload(state, stateIntegrityIssue, generatedAt), null, 2)}\n`;
+      const payload = `${JSON.stringify(diagnosticPayload(
+        state,
+        stateIntegrityIssue,
+        generatedAt,
+        recoveryShellDescriptor
+      ), null, 2)}\n`;
       const blob = new Blob([payload], { type: "application/json;charset=utf-8" });
       const payloadByteLength = blob.size;
       if (
@@ -533,10 +595,9 @@ export function OrphanedV13RecoveryPage({
         capture,
         captureStartedAt,
         sourceDatabaseName,
-        sourceNativeVersion,
-        requireVerifiedCaptureBinding
+        sourceNativeVersion
       );
-      const filename = capture.filename ?? `hakimi-v13-read-only-full-backup-${capture.capturedAt.slice(0, 10)}.zip`;
+      const filename = capture.filename ?? orphanedV13ReadOnlyBackupFilename(capture.capturedAt);
       const captureSourceDatabaseName = capture.sourceDatabaseName ?? sourceDatabaseName;
       const captureSourceNativeVersion = capture.sourceNativeVersion ?? sourceNativeVersion;
       const artifact: PreparedFileArtifact = Object.freeze({
@@ -676,11 +737,20 @@ export function OrphanedV13RecoveryPage({
       data-inventory-truncated={String(inventoryTruncated)}
       data-delivery-mode="prepared-file-dialog"
       data-delivery-open={String(deliveryOpen)}
-      data-release-identity={CURRENT_RELEASE_ENGINEERING_IDENTITY.dbGeneration}
-      data-target-schema={String(CURRENT_RELEASE_ENGINEERING_IDENTITY.targetSchema)}
-      data-migration-id={CURRENT_RELEASE_ENGINEERING_IDENTITY.migrationId ?? "null"}
+      data-release-identity={ORPHANED_V13_SOURCE_RELEASE_IDENTITY.dbGeneration}
+      data-target-schema={String(ORPHANED_V13_SOURCE_RELEASE_IDENTITY.targetSchema)}
+      data-migration-id="null"
+      data-recovery-shell-release-identity={recoveryShellDescriptor.dbGeneration}
+      data-recovery-shell-database-name={recoveryShellDescriptor.databaseName}
+      data-recovery-shell-target-schema={String(recoveryShellDescriptor.targetSchema)}
+      data-recovery-shell-migration-id={recoveryShellDescriptor.migrationId ?? "null"}
+      data-recovery-shell-source-generation={recoveryShellDescriptor.sourceGeneration ?? "null"}
+      data-recovery-shell-source-database-name={recoveryShellDescriptor.sourceDatabaseName ?? "null"}
+      data-recovery-shell-source-schema={recoveryShellDescriptor.sourceSchema === null
+        ? "null"
+        : String(recoveryShellDescriptor.sourceSchema)}
       data-engineering-evidence-only="true"
-      data-source-capture-binding={requireVerifiedCaptureBinding ? "required" : "compatibility_optional"}
+      data-source-capture-binding="required"
       data-write-reconciliation-required="false"
       data-public-release-authorized="false"
       data-expert-truth-claimed="false"
@@ -798,7 +868,7 @@ export function OrphanedV13RecoveryPage({
               </div>
               <div>
                 <dt>写入模式</dt>
-                <dd>完全冻结 · 捕获来源绑定{requireVerifiedCaptureBinding ? "强制" : "兼容"}</dd>
+                <dd>完全冻结 · 捕获来源绑定强制</dd>
               </div>
               <div>
                 <dt>可执行动作</dt>
@@ -809,8 +879,12 @@ export function OrphanedV13RecoveryPage({
                 <dd>{displayReasonCode}</dd>
               </div>
               <div>
-                <dt>当前工程身份</dt>
-                <dd>{CURRENT_RELEASE_ENGINEERING_IDENTITY.dbGeneration} / targetSchema {CURRENT_RELEASE_ENGINEERING_IDENTITY.targetSchema} / migrationId {CURRENT_RELEASE_ENGINEERING_IDENTITY.migrationId ?? "null"}</dd>
+                <dt>源救援身份</dt>
+                <dd>{ORPHANED_V13_SOURCE_RELEASE_IDENTITY.dbGeneration} / targetSchema {ORPHANED_V13_SOURCE_RELEASE_IDENTITY.targetSchema} / migrationId null</dd>
+              </div>
+              <div>
+                <dt>恢复执行壳</dt>
+                <dd>{recoveryShellDescriptor.dbGeneration} / targetSchema {recoveryShellDescriptor.targetSchema} / migrationId {recoveryShellDescriptor.migrationId ?? "null"}</dd>
               </div>
             </dl>
           </section>
@@ -874,8 +948,8 @@ export function OrphanedV13RecoveryPage({
             <h2 id="v13-diagnostic-title">不含研究记录正文的最小诊断</h2>
               <p>诊断只记录恢复状态、原因代码，以及已清洗的数据库名称和版本；不枚举记录，也不包含案例、出生资料、笔记、事件或知识正文，但数据库标识仍属于敏感技术指纹。</p>
               <dl>
-                <div><dt>当前应用代</dt><dd className="mono">{CURRENT_RELEASE_ENGINEERING_IDENTITY.dbGeneration} / Schema {CURRENT_RELEASE_ENGINEERING_IDENTITY.targetSchema}</dd></div>
-                <div><dt>migrationId</dt><dd className="mono">{CURRENT_RELEASE_ENGINEERING_IDENTITY.migrationId ?? "null"}</dd></div>
+                <div><dt>源救援身份</dt><dd className="mono">{ORPHANED_V13_SOURCE_RELEASE_IDENTITY.dbGeneration} / Schema {ORPHANED_V13_SOURCE_RELEASE_IDENTITY.targetSchema} / migrationId null</dd></div>
+                <div><dt>恢复执行壳</dt><dd className="mono">{recoveryShellDescriptor.dbGeneration} / Schema {recoveryShellDescriptor.targetSchema} / migrationId {recoveryShellDescriptor.migrationId ?? "null"}</dd></div>
                 <div><dt>应用壳 / SW 缓存代</dt><dd className="mono">{CURRENT_RELEASE_ENGINEERING_IDENTITY.buildVersion ?? "开发模式"}</dd></div>
                 <div><dt>Release Evidence</dt><dd className="mono">{releaseEvidenceLabel}</dd></div>
               </dl>
@@ -940,7 +1014,8 @@ export function OrphanedV13RecoveryPage({
                 <div><dt>交付状态</dt><dd>{diagnosticReceipt.deliveryStatus === "saved" ? "平台确认保存" : "浏览器仅确认请求"}</dd></div>
                 <div><dt>用户记录</dt><dd>未枚举 · 未读取</dd></div>
                 <div><dt>数据库动作</dt><dd>未打开源库 · 未迁移 · 未登记</dd></div>
-                <div><dt>工程身份</dt><dd>{CURRENT_RELEASE_ENGINEERING_IDENTITY.dbGeneration} / Schema {CURRENT_RELEASE_ENGINEERING_IDENTITY.targetSchema}</dd></div>
+                <div><dt>源救援身份</dt><dd>{ORPHANED_V13_SOURCE_RELEASE_IDENTITY.dbGeneration} / Schema {ORPHANED_V13_SOURCE_RELEASE_IDENTITY.targetSchema}</dd></div>
+                <div><dt>恢复执行壳</dt><dd>{recoveryShellDescriptor.dbGeneration} / Schema {recoveryShellDescriptor.targetSchema}</dd></div>
               </dl>
               <p>{diagnosticReceipt.deliveryStatus === "saved"
                 ? "当前平台已确认诊断文件保存完成。该收据只证明最小环境诊断已交付，不证明来源歧义或孤立状态已经解除。"

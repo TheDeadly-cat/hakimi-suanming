@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 2,
+  "policyId": "hakimi.web-v1.deployed-pwa-evidence/v2",
+  "status": "offline_semantic_verifier_only_not_admitted",
+  "executionAdmission": {
+    "status": "closed_missing_https_origin",
+    "auditedHostingPlatformSelected": false,
+    "canonicalHttpsOriginConfigured": false,
+    "formalArtifactIdentityPackageAvailable": false,
+    "trustedRealHostReceiptWriterVerified": false,
+    "trustedRealHostReceiptParserVerified": false,
+    "trustedPwaRuntimeReceiptWriterVerified": false,
+    "trustedPwaRuntimeReceiptParserVerified": false,
+    "trustedProviderDeploymentReceiptParserVerified": false
+  },
+  "semanticVerification": {
+    "enabled": true,
+    "verificationKind": "offline-no-git-no-network-no-browser-no-deployment",
+    "resultClass": "candidate_internal_consistency_only",
+    "receiptTrustClass": "untrusted_candidate_envelopes",
+    "canOpenExecutionAdmission": false,
+    "canEstablishSourceAndArtifactCurrent": false,
+    "canEstablishRealHost": false,
+    "canEstablishBrowserRuntime": false,
+    "canEstablishDeploymentOperation": false,
+    "canEstablishPublicAuthorization": false
+  },
+  "blockingReasons": [
+    "hosting_platform_unselected",
+    "canonical_https_origin_null",
+    "current_formal_artifact_absent",
+    "trusted_real_host_receipt_writer_absent",
+    "trusted_real_host_receipt_parser_absent",
+    "trusted_pwa_runtime_receipt_writer_absent",
+    "trusted_pwa_runtime_receipt_parser_absent",
+    "trusted_provider_deployment_receipt_parser_absent",
+    "external_deployment_execution_authorization_absent"
+  ],
+  "releaseIdentity": {
+    "channel": "default-v13",
+    "dbGeneration": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null
+  },
+  "requiredBrowserProjects": [
+    "msedge",
+    "chrome"
+  ],
+  "requiredHostVerificationKind": "real-network",
+  "requiredOfflineRouteIds": [
+    "online-root",
+    "offline-settings-data",
+    "offline-case-revision",
+    "offline-help-cold-start",
+    "offline-help-reload"
+  ],
+  "requiredBrowserAttachmentRoles": [
+    "browser-version",
+    "profile-preflight",
+    "network-events",
+    "controller-script-meta",
+    "controller-source",
+    "remote-service-worker-body",
+    "case-revision-before",
+    "case-revision-after"
+  ],
+  "requiredPolicyBindings": [
+    {
+      "role": "release-decisions",
+      "path": "docs/release/web-v1-release-decisions.json"
+    },
+    {
+      "role": "hosting-security-policy",
+      "path": "docs/security/hosting-security-policy.json"
+    },
+    {
+      "role": "release-evidence-schema",
+      "path": "docs/release/release-evidence.schema.json"
+    },
+    {
+      "role": "deployed-pwa-evidence-schema",
+      "path": "docs/release/deployed-pwa-evidence-v2.schema.json"
+    },
+    {
+      "role": "deployed-pwa-evidence-policy",
+      "path": "docs/release/deployed-pwa-evidence-policy.v2.json"
+    }
+  ],
+  "rootIsolation": {
+    "requiredCliRoots": [
+      "artifact-root",
+      "receipts-root",
+      "private-root"
+    ],
+    "inputAndSidecarMustBeInsidePrivateRoot": true,
+    "rootsMustBeWorkspaceContained": true,
+    "rootsMustBeRealpathDistinct": true,
+    "rootsMustBeNonNested": true,
+    "symlinkOrJunctionRootsAllowed": false,
+    "bindingFilesMustBeRegularNonSymlinkFiles": true,
+    "bindingFilesMustHaveSingleLink": true
+  },
+  "authorizationBoundary": {
+    "externalDeploymentExecutionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "authorizationMayNotBeDerivedFromEngineeringEvidence": true
+  },
+  "terminalBoundary": {
+    "status": "not_admitted",
+    "executionAdmission": "closed_missing_https_origin",
+    "strictGatePassed": false,
+    "deployedPwaEngineeringVerified": false,
+    "cliExitCode": 1,
+    "futureOpeningRequiresNewPolicyVersion": true
+  }
+}

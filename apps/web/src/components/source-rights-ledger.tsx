@@ -648,7 +648,7 @@ export function SourceRightsLedger() {
             <p className="rights-ledger-result-count" role="status" aria-live="polite">
               {filtering ? "正在更新筛选结果…" : filterActive ? `匹配 ${visibleRows.length} / ${rows.length} 份正文记录` : `共 ${rows.length} 份正文记录`}
             </p>
-            {filterActive ? <button type="button" className="rights-ledger-clear-filters" onClick={clearLedgerFilters}>清除筛选</button> : null}
+            {filterActive && visibleRows.length > 0 ? <button type="button" className="rights-ledger-clear-filters" onClick={clearLedgerFilters}>清除筛选</button> : null}
           </div>
         </div>
       ) : null}

@@ -9,7 +9,11 @@ describe("AppBootFailureLatch", () => {
     const first = latch.report("storage", firstError);
     const second = latch.report("route", new Error("route failed"));
 
-    expect(first).toEqual({ source: "storage", error: firstError });
+    expect(first.source).toBe("storage");
+    expect(first.error).not.toBe(firstError);
+    expect(first.error).toMatchObject({ name: "Error", message: "storage failed" });
+    expect(Object.isFrozen(first.error)).toBe(true);
+    expect(Object.isFrozen(first)).toBe(true);
     expect(second).toBe(first);
     expect(latch.current).toBe(first);
   });

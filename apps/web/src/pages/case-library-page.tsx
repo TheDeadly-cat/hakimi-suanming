@@ -33,6 +33,7 @@ import {
 import { createDefaultResearchQuery } from "@hakimi/research-query";
 import {
   caseRepository,
+  ReleaseDatabaseWriteLockedError,
   researchRepository,
   type ResearchSubjectPageCursor
 } from "@hakimi/storage";
@@ -969,6 +970,13 @@ export function CaseLibraryPage() {
         return "committed_refresh_failed";
       }
     } catch (reason) {
+      if (reason instanceof ReleaseDatabaseWriteLockedError) {
+        subjectMutationReconciliationRequiredRef.current = false;
+        setResearchError(
+          "当前页面已进入版本接管写入锁定，本次案例写入未执行；请重新载入后再操作。"
+        );
+        return "locked";
+      }
       subjectMutationReconciliationRequiredRef.current = true;
       setResearchError(safeLibraryText(
         `${operationLabel}结果未知：${safeLibraryText(reason, "本地仓库未返回可确认结果")}。为避免重复写入，主体操作入口已锁定；请先重新读取案例库。`,

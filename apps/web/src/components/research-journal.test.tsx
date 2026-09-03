@@ -865,10 +865,10 @@ describe("ResearchJournal", () => {
       `匿名模式 · 格式 ${SINGLE_CHART_REPORT_PRESENTATION_CONTRACT.identity.formatVersion}`
     );
     expect(reportRegion.textContent).toContain("旺衰叙事证据");
-    expect(reportRegion.textContent).toContain("逐句规范重建，不是专家或科学真值");
+    expect(reportRegion.textContent).toContain("逐句规范重建与机械准入，不是内容、专家或发布真值");
     expect(reportRegion.textContent).toContain("注册表 locator 已核");
-    expect(reportRegion.textContent).toContain("结构化 citation 未评估");
-    expect(reportRegion.textContent).toContain("分发权利未评估");
+    expect(reportRegion.textContent).toContain("机械准入动态数量与状态不展示");
+    expect(reportRegion.textContent).toContain("结构化本地文献引用已按匿名策略移除");
     expect(reportRegion.textContent).not.toContain("唯一来源资格账（注册表快照）");
     const sourceMarker = within(reportRegion).getByRole("group", {
       name: /下游计算来源：当前版本即时投影；精确复演：不适用；收据账本：当前发布代无收据账本/
@@ -1153,8 +1153,8 @@ describe("ResearchJournal", () => {
     expect(dialog.textContent).not.toContain("local_private_only");
     expect(dialog.textContent).not.toContain("09:26（exact_minute）");
     expect(dialog.textContent).toContain("8 个来源、12 条 binding、10 条注册表 locator 已核");
-    expect(dialog.textContent).toContain("结构化 citation 未评估");
-    expect(dialog.textContent).toContain("分发权利未评估");
+    expect(dialog.textContent).toContain("机械准入动态数量与状态不展示");
+    expect(dialog.textContent).toContain("结构化本地文献引用已按匿名策略移除");
     expect(dialog.textContent).not.toContain("唯一来源资格账（注册表快照）");
     expect(dialog.textContent).not.toContain("哈基米旺衰因素共享派生核");
     const anonymousSource = within(dialog).getByRole("region", { name: "下游计算来源" });
@@ -1189,8 +1189,8 @@ describe("ResearchJournal", () => {
     expect(dialog.textContent).toContain("来源 binding 与反向边界");
     expect(dialog.textContent).toContain("哈基米旺衰因素共享派生核");
     expect(dialog.textContent).toContain("hakimi-bazi-strength-ten-god-candidate/0.1.0");
-    expect(dialog.textContent).toContain("未绑定结构化 citation record");
-    expect(dialog.textContent).toContain("未绑定 SourceRights record");
+    expect(dialog.textContent).toContain("无匹配结构化 Citation");
+    expect(dialog.textContent).toContain("无 verified Citation，不适用");
     expect(dialog.textContent).toContain("该 binding 不支持");
     const completeSource = within(dialog).getByRole("region", { name: "下游计算来源" });
     expect(completeSource.textContent).toContain("已保存计算收据");

@@ -1,0 +1,472 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hakimi.invalid/schemas/rollback-provider-sequence-composition-candidate-v1.json",
+  "title": "Hakimi rollback and persisted provider sequence projection-only composition candidate v1",
+  "$defs": {
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "RelativePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*//)(?!.*\\/$)[A-Za-z0-9._/-]+$"
+    },
+    "CanonicalId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    },
+    "Binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "sha256"],
+      "properties": {
+        "path": { "$ref": "#/$defs/RelativePath" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 33554432 },
+        "sha256": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "TerminalGateBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "sha256", "commitsReceiptSha256"],
+      "properties": {
+        "path": { "$ref": "#/$defs/RelativePath" },
+        "size": { "const": 65 },
+        "sha256": { "$ref": "#/$defs/Sha256" },
+        "commitsReceiptSha256": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "ProviderTerminalGates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["deploy", "restore"],
+      "properties": {
+        "deploy": { "$ref": "#/$defs/TerminalGateBinding" },
+        "restore": { "$ref": "#/$defs/TerminalGateBinding" }
+      }
+    },
+    "PolicyBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyId", "path", "size", "sha256"],
+      "properties": {
+        "policyId": { "$ref": "#/$defs/CanonicalId" },
+        "path": { "$ref": "#/$defs/RelativePath" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 33554432 },
+        "sha256": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "Descriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocolVersion",
+        "dbGeneration",
+        "databaseName",
+        "targetSchema",
+        "minReadableSchema",
+        "maxReadableSchema",
+        "migrationId",
+        "acceptedCommittedMigrationIds",
+        "sourceGeneration",
+        "sourceDatabaseName",
+        "sourceSchema"
+      ],
+      "properties": {
+        "protocolVersion": { "const": 1 },
+        "dbGeneration": { "const": "legacy-v13" },
+        "databaseName": { "const": "hakimi-bazi-research" },
+        "targetSchema": { "const": 13 },
+        "minReadableSchema": { "const": 13 },
+        "maxReadableSchema": { "const": 13 },
+        "migrationId": { "const": null },
+        "acceptedCommittedMigrationIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "uniqueItems": true,
+          "items": { "const": null }
+        },
+        "sourceGeneration": { "const": null },
+        "sourceDatabaseName": { "const": null },
+        "sourceSchema": { "const": null }
+      }
+    },
+    "ArtifactEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "size": { "type": "integer", "minimum": 1 },
+        "sha256": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "ArtifactComponents": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applicationShell", "pwaManifest", "serviceWorker", "hostingHeaders"],
+      "properties": {
+        "applicationShell": { "$ref": "#/$defs/ArtifactEntry" },
+        "pwaManifest": { "$ref": "#/$defs/ArtifactEntry" },
+        "serviceWorker": { "$ref": "#/$defs/ArtifactEntry" },
+        "hostingHeaders": { "$ref": "#/$defs/ArtifactEntry" }
+      }
+    },
+    "ExpectedIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "descriptor",
+        "evidenceId",
+        "buildVersion",
+        "manifestDigest",
+        "artifactSetDigest",
+        "components"
+      ],
+      "properties": {
+        "descriptor": { "$ref": "#/$defs/Descriptor" },
+        "evidenceId": { "type": "string", "pattern": "^hre1-[a-f0-9]{32}$" },
+        "buildVersion": { "type": "string", "pattern": "^[a-f0-9]{12}$" },
+        "manifestDigest": { "$ref": "#/$defs/Sha256" },
+        "artifactSetDigest": { "$ref": "#/$defs/Sha256" },
+        "components": { "$ref": "#/$defs/ArtifactComponents" }
+      }
+    },
+    "DeploymentReceiptProjection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "receiptType",
+        "receiptId",
+        "runId",
+        "phaseId",
+        "status",
+        "provider",
+        "deploymentId",
+        "startedAt",
+        "completedAt",
+        "origin",
+        "artifactLockDigest",
+        "action",
+        "expectedIdentity",
+        "binding"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "receiptType": { "const": "deployment_action" },
+        "receiptId": { "$ref": "#/$defs/CanonicalId" },
+        "runId": { "type": "string", "pattern": "^hrr1-[a-f0-9]{32}$" },
+        "phaseId": { "enum": ["candidate", "rollbackObserved"] },
+        "status": { "const": "passed" },
+        "provider": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "deploymentId": { "$ref": "#/$defs/CanonicalId" },
+        "startedAt": { "$ref": "#/$defs/Timestamp" },
+        "completedAt": { "$ref": "#/$defs/Timestamp" },
+        "origin": { "type": "string", "pattern": "^https://[A-Za-z0-9.-]+$", "maxLength": 256 },
+        "artifactLockDigest": { "$ref": "#/$defs/Sha256" },
+        "action": { "enum": ["deploy_candidate", "restore_baseline"] },
+        "expectedIdentity": { "$ref": "#/$defs/ExpectedIdentity" },
+        "binding": { "$ref": "#/$defs/Binding" }
+      }
+    },
+    "SharedArtifactProjection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "releaseEvidenceId",
+        "buildVersion",
+        "artifactSetDigest",
+        "identityLockDigest",
+        "releaseEvidenceSha256"
+      ],
+      "properties": {
+        "releaseEvidenceId": { "type": "string", "pattern": "^hre1-[a-f0-9]{32}$" },
+        "buildVersion": { "type": "string", "pattern": "^[a-f0-9]{12}$" },
+        "artifactSetDigest": { "$ref": "#/$defs/Sha256" },
+        "identityLockDigest": { "$ref": "#/$defs/Sha256" },
+        "releaseEvidenceSha256": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "Attempts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["networkAttempted", "deploymentAttempted", "rollbackAttempted"],
+      "properties": {
+        "networkAttempted": { "const": false },
+        "deploymentAttempted": { "const": false },
+        "rollbackAttempted": { "const": false }
+      }
+    },
+    "Authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "defaultV13ReceiptAllowlistMember",
+        "externalDeploymentExecutionAuthorized",
+        "rollbackExecutionAuthorized",
+        "publicDeploymentAuthorized",
+        "publicReleaseAuthorized",
+        "contentTruthAuthorized",
+        "expertClaimsAuthorized",
+        "rightsLegalConclusionAuthorized",
+        "schemaPromotionAuthorized"
+      ],
+      "properties": {
+        "defaultV13ReceiptAllowlistMember": { "const": false },
+        "externalDeploymentExecutionAuthorized": { "const": false },
+        "rollbackExecutionAuthorized": { "const": false },
+        "publicDeploymentAuthorized": { "const": false },
+        "publicReleaseAuthorized": { "const": false },
+        "contentTruthAuthorized": { "const": false },
+        "expertClaimsAuthorized": { "const": false },
+        "rightsLegalConclusionAuthorized": { "const": false },
+        "schemaPromotionAuthorized": { "const": false }
+      }
+    },
+    "Claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "providerReceiptAuthenticityVerified",
+        "providerOperationAuthenticityVerified",
+        "hostAuthenticityVerified",
+        "browserAuthenticityVerified",
+        "realAtoBtoAObserved",
+        "rollbackObserved",
+        "artifactServedByDeploymentIds",
+        "liveHostBytesVerified",
+        "browserRuntimeVerified",
+        "dataRollbackVerified",
+        "applicationDataMutationEpochVerified",
+        "continuousMutationIntervalVerified",
+        "abaResistanceVerified",
+        "releaseReady",
+        "contentTruthAuthorized",
+        "expertClaimsAuthorized",
+        "rightsLegalConclusionAuthorized"
+      ],
+      "properties": {
+        "providerReceiptAuthenticityVerified": { "const": false },
+        "providerOperationAuthenticityVerified": { "const": false },
+        "hostAuthenticityVerified": { "const": false },
+        "browserAuthenticityVerified": { "const": false },
+        "realAtoBtoAObserved": { "const": false },
+        "rollbackObserved": { "const": false },
+        "artifactServedByDeploymentIds": { "const": false },
+        "liveHostBytesVerified": { "const": false },
+        "browserRuntimeVerified": { "const": false },
+        "dataRollbackVerified": { "const": false },
+        "applicationDataMutationEpochVerified": { "const": false },
+        "continuousMutationIntervalVerified": { "const": false },
+        "abaResistanceVerified": { "const": false },
+        "releaseReady": { "const": false },
+        "contentTruthAuthorized": { "const": false },
+        "expertClaimsAuthorized": { "const": false },
+        "rightsLegalConclusionAuthorized": { "const": false }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "recordType",
+    "verificationKind",
+    "trustClass",
+    "status",
+    "admissionStatus",
+    "usableForAdmission",
+    "formalRollbackEvidenceVerified",
+    "formalRollbackDownstreamReached",
+    "samePolicyEpochFormalCompositionAvailable",
+    "compositionId",
+    "releaseIdentity",
+    "rollbackEvidence",
+    "providerSequence",
+    "currentPolicyBindings",
+    "compositionSources",
+    "hostingPolicy",
+    "artifactProjection",
+    "deploymentReceipts",
+    "deploymentRelation",
+    "mechanicalChecks",
+    "attempts",
+    "claims",
+    "authority",
+    "compositionDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "recordType": { "const": "rollback_provider_sequence_composition_candidate_v1" },
+    "verificationKind": { "const": "offline-projection-only-overlapping-persisted-provider-sequence-v1" },
+    "trustClass": { "const": "untrusted_candidate_composition" },
+    "status": { "const": "not_admitted" },
+    "admissionStatus": { "const": "not_admitted" },
+    "usableForAdmission": { "const": false },
+    "formalRollbackEvidenceVerified": { "const": false },
+    "formalRollbackDownstreamReached": { "const": false },
+    "samePolicyEpochFormalCompositionAvailable": { "const": false },
+    "compositionId": { "type": "string", "pattern": "^rollback-provider-composition-[a-f0-9]{32}$" },
+    "releaseIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channel", "descriptor", "mutationEpochCapability", "epoch"],
+      "properties": {
+        "channel": { "const": "default-v13" },
+        "descriptor": { "$ref": "#/$defs/Descriptor" },
+        "mutationEpochCapability": { "const": "absent_schema13" },
+        "epoch": { "const": null }
+      }
+    },
+    "rollbackEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["binding", "sidecarBinding", "runId", "rollbackEvidenceId", "evidenceDigest"],
+      "properties": {
+        "binding": { "$ref": "#/$defs/Binding" },
+        "sidecarBinding": { "$ref": "#/$defs/Binding" },
+        "runId": { "type": "string", "pattern": "^hrr1-[a-f0-9]{32}$" },
+        "rollbackEvidenceId": { "type": "string", "pattern": "^hrb1-[a-f0-9]{32}$" },
+        "evidenceDigest": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "providerSequence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["binding", "sequenceId", "sequenceDigest", "terminalGates"],
+      "properties": {
+        "binding": { "$ref": "#/$defs/Binding" },
+        "sequenceId": { "type": "string", "pattern": "^provider-sequence-[a-f0-9]{32}$" },
+        "sequenceDigest": { "$ref": "#/$defs/Sha256" },
+        "terminalGates": { "$ref": "#/$defs/ProviderTerminalGates" }
+      }
+    },
+    "currentPolicyBindings": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/PolicyBinding" }
+    },
+    "compositionSources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy", "schema"],
+      "properties": {
+        "policy": { "$ref": "#/$defs/Binding" },
+        "schema": { "$ref": "#/$defs/Binding" }
+      }
+    },
+    "hostingPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyId", "path", "size", "sha256", "deploymentPlatform", "origin"],
+      "properties": {
+        "policyId": { "const": "hakimi-web-public-hosting-baseline-v2" },
+        "path": { "const": "docs/security/hosting-security-policy.json" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 33554432 },
+        "sha256": { "$ref": "#/$defs/Sha256" },
+        "deploymentPlatform": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "origin": { "type": "string", "pattern": "^https://[A-Za-z0-9.-]+$", "maxLength": 256 }
+      }
+    },
+    "artifactProjection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidateB", "restoredA", "artifactsDistinct"],
+      "properties": {
+        "candidateB": { "$ref": "#/$defs/SharedArtifactProjection" },
+        "restoredA": { "$ref": "#/$defs/SharedArtifactProjection" },
+        "artifactsDistinct": { "const": true }
+      }
+    },
+    "deploymentReceipts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate", "rollbackObserved"],
+      "properties": {
+        "candidate": { "$ref": "#/$defs/DeploymentReceiptProjection" },
+        "rollbackObserved": { "$ref": "#/$defs/DeploymentReceiptProjection" }
+      }
+    },
+    "deploymentRelation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baselineAId",
+        "candidateBId",
+        "restoredActiveDeploymentId",
+        "candidateReceiptDeploymentId",
+        "rollbackReceiptDeploymentId",
+        "candidateReceiptCompletedAt",
+        "deployFinalReadbackObservedAt",
+        "restoreOperationStartedAt",
+        "rollbackReceiptStartedAt"
+      ],
+      "properties": {
+        "baselineAId": { "$ref": "#/$defs/CanonicalId" },
+        "candidateBId": { "$ref": "#/$defs/CanonicalId" },
+        "restoredActiveDeploymentId": { "$ref": "#/$defs/CanonicalId" },
+        "candidateReceiptDeploymentId": { "$ref": "#/$defs/CanonicalId" },
+        "rollbackReceiptDeploymentId": { "$ref": "#/$defs/CanonicalId" },
+        "candidateReceiptCompletedAt": { "$ref": "#/$defs/Timestamp" },
+        "deployFinalReadbackObservedAt": { "$ref": "#/$defs/Timestamp" },
+        "restoreOperationStartedAt": { "$ref": "#/$defs/Timestamp" },
+        "rollbackReceiptStartedAt": { "$ref": "#/$defs/Timestamp" }
+      }
+    },
+    "mechanicalChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rollbackCheckedSchemaVerified",
+        "rollbackIdentityAndDigestVerified",
+        "currentPolicyRawHashesVerified",
+        "defaultV13BoundaryVerified",
+        "declaredRollbackIdentityMatchesBaselineProjection",
+        "distinctArtifactPairVerified",
+        "schema13EpochAbsenceVerified",
+        "deploymentReceiptProjectionVerified",
+        "providerSequencePersistedVerifierConsumed",
+        "providerTerminalGatesCrossBound",
+        "overlappingFilesystemEpochVerified",
+        "providerOriginHostingPolicyCrossBound",
+        "fiveFieldArtifactProjectionCrossBound",
+        "deploymentIdRelationCrossBound",
+        "timeRelationCrossBound"
+      ],
+      "properties": {
+        "rollbackCheckedSchemaVerified": { "const": true },
+        "rollbackIdentityAndDigestVerified": { "const": true },
+        "currentPolicyRawHashesVerified": { "const": true },
+        "defaultV13BoundaryVerified": { "const": true },
+        "declaredRollbackIdentityMatchesBaselineProjection": { "const": true },
+        "distinctArtifactPairVerified": { "const": true },
+        "schema13EpochAbsenceVerified": { "const": true },
+        "deploymentReceiptProjectionVerified": { "const": true },
+        "providerSequencePersistedVerifierConsumed": { "const": true },
+        "providerTerminalGatesCrossBound": { "const": true },
+        "overlappingFilesystemEpochVerified": { "const": true },
+        "providerOriginHostingPolicyCrossBound": { "const": true },
+        "fiveFieldArtifactProjectionCrossBound": { "const": true },
+        "deploymentIdRelationCrossBound": { "const": true },
+        "timeRelationCrossBound": { "const": true }
+      }
+    },
+    "attempts": { "$ref": "#/$defs/Attempts" },
+    "claims": { "$ref": "#/$defs/Claims" },
+    "authority": { "$ref": "#/$defs/Authority" },
+    "compositionDigest": { "$ref": "#/$defs/Sha256" }
+  }
+}

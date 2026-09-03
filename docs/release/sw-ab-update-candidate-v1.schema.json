@@ -1,0 +1,1532 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hakimi.invalid/schemas/sw-ab-update-candidate-v1.json",
+  "title": "Hakimi untrusted SW A to B update candidate evidence v1",
+  "$defs": {
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "RunId": {
+      "type": "string",
+      "pattern": "^run-[a-f0-9]{64}$"
+    },
+    "AttemptId": {
+      "type": "string",
+      "pattern": "^attempt-[a-f0-9]{64}$"
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "RelativePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "pattern": "^(?!.*(?:^|/)\\.\\.?(?:/|$))[A-Za-z0-9_][A-Za-z0-9._/-]*$"
+    },
+    "ProjectName": {
+      "enum": [
+        "msedge",
+        "chrome"
+      ]
+    },
+    "GenerationTag": {
+      "enum": [
+        "A",
+        "B"
+      ]
+    },
+    "NullableGenerationTag": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GenerationTag"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "ReleaseIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "channel",
+        "dbGeneration",
+        "targetSchema",
+        "migrationId"
+      ],
+      "properties": {
+        "channel": {
+          "const": "default-v13"
+        },
+        "dbGeneration": {
+          "const": "legacy-v13"
+        },
+        "targetSchema": {
+          "const": 13
+        },
+        "migrationId": {
+          "const": null
+        }
+      }
+    },
+    "Capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mutationEpochCapability",
+        "epoch"
+      ],
+      "properties": {
+        "mutationEpochCapability": {
+          "const": "absent_schema13"
+        },
+        "epoch": {
+          "const": null
+        }
+      }
+    },
+    "GovernanceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "path",
+        "size",
+        "sha256",
+        "canonicalSha256"
+      ],
+      "properties": {
+        "role": {
+          "enum": [
+            "release-decisions",
+            "release-generation-history",
+            "hosting-security-policy",
+            "release-evidence-schema",
+            "sw-ab-update-policy",
+            "sw-ab-update-schema"
+          ]
+        },
+        "path": {
+          "$ref": "#/$defs/RelativePath"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 33554432
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "canonicalSha256": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "AttachmentReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "path",
+        "size",
+        "sha256",
+        "digest"
+      ],
+      "properties": {
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "path": {
+          "$ref": "#/$defs/RelativePath"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 33554432
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "digest": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "NullableProjectName": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ProjectName"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "Attachment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "browserProject",
+        "runId",
+        "attemptId",
+        "path",
+        "size",
+        "sha256",
+        "digest"
+      ],
+      "properties": {
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "browserProject": {
+          "$ref": "#/$defs/NullableProjectName"
+        },
+        "runId": {
+          "$ref": "#/$defs/RunId"
+        },
+        "attemptId": {
+          "$ref": "#/$defs/AttemptId"
+        },
+        "path": {
+          "$ref": "#/$defs/RelativePath"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 33554432
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "digest": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "ArtifactRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "releaseIdentity",
+        "releaseEvidenceId",
+        "buildVersion",
+        "artifactIdentityDigest",
+        "artifactSetDigest",
+        "serviceWorkerSha256",
+        "artifactRoot",
+        "files",
+        "identityLock",
+        "releaseEvidence",
+        "remoteArtifactCapture"
+      ],
+      "properties": {
+        "label": {
+          "$ref": "#/$defs/GenerationTag"
+        },
+        "releaseIdentity": {
+          "$ref": "#/$defs/ReleaseIdentity"
+        },
+        "releaseEvidenceId": {
+          "type": "string",
+          "pattern": "^hre1-[a-f0-9]{32}$"
+        },
+        "buildVersion": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{12}$"
+        },
+        "artifactIdentityDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "artifactSetDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "serviceWorkerSha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "artifactRoot": {
+          "$ref": "#/$defs/ArtifactRoot"
+        },
+        "files": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 10000,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/ArtifactFile"
+          }
+        },
+        "identityLock": {
+          "$ref": "#/$defs/AttachmentReference"
+        },
+        "releaseEvidence": {
+          "$ref": "#/$defs/AttachmentReference"
+        },
+        "remoteArtifactCapture": {
+          "$ref": "#/$defs/AttachmentReference"
+        }
+      }
+    },
+    "ArtifactRoot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "dev",
+        "ino",
+        "birthtimeNs",
+        "realPathDigest",
+        "fileCount",
+        "inventoryDigest",
+        "immutableSnapshot"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/RelativePath"
+        },
+        "dev": {
+          "type": "string",
+          "pattern": "^(?:0|[1-9][0-9]*)$"
+        },
+        "ino": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "birthtimeNs": {
+          "type": "string",
+          "pattern": "^(?:0|[1-9][0-9]*)$"
+        },
+        "realPathDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "fileCount": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 10000
+        },
+        "inventoryDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "immutableSnapshot": {
+          "const": true
+        }
+      }
+    },
+    "ArtifactFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "urlPath",
+        "size",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/RelativePath"
+        },
+        "urlPath": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 260,
+          "pattern": "^/[A-Za-z0-9._/-]*$"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 33554432
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "ArtifactReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "releaseEvidenceId",
+        "buildVersion",
+        "artifactIdentityDigest",
+        "artifactSetDigest",
+        "artifactRootInventoryDigest",
+        "identityLockDigest",
+        "releaseEvidenceDigest",
+        "remoteArtifactCaptureDigest",
+        "serviceWorkerSha256"
+      ],
+      "properties": {
+        "label": {
+          "$ref": "#/$defs/GenerationTag"
+        },
+        "releaseEvidenceId": {
+          "type": "string",
+          "pattern": "^hre1-[a-f0-9]{32}$"
+        },
+        "buildVersion": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{12}$"
+        },
+        "artifactIdentityDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "artifactSetDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "artifactRootInventoryDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "identityLockDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "releaseEvidenceDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "remoteArtifactCaptureDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "serviceWorkerSha256": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "ProviderBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "platformId",
+        "accountBindingDigest",
+        "projectBindingDigest",
+        "artifactADeploymentDigest",
+        "artifactBDeploymentDigest",
+        "bindingTrust"
+      ],
+      "properties": {
+        "platformId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "accountBindingDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "projectBindingDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "artifactADeploymentDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "artifactBDeploymentDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "bindingTrust": {
+          "const": "untrusted_candidate"
+        }
+      }
+    },
+    "HostBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hostname",
+        "hostBindingDigest",
+        "tlsBindingDigest",
+        "artifactAResponseSetDigest",
+        "artifactBResponseSetDigest",
+        "bindingTrust"
+      ],
+      "properties": {
+        "hostname": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 253,
+          "pattern": "^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])$"
+        },
+        "hostBindingDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "tlsBindingDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "artifactAResponseSetDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "artifactBResponseSetDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "bindingTrust": {
+          "const": "untrusted_candidate"
+        }
+      }
+    },
+    "DeploymentCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonicalHttpsOrigin",
+        "provider",
+        "host",
+        "deploymentEventLedgerDigest"
+      ],
+      "properties": {
+        "canonicalHttpsOrigin": {
+          "type": "string",
+          "minLength": 12,
+          "maxLength": 256,
+          "pattern": "^https://[a-z0-9](?:[a-z0-9.-]*[a-z0-9])$"
+        },
+        "provider": {
+          "$ref": "#/$defs/ProviderBinding"
+        },
+        "host": {
+          "$ref": "#/$defs/HostBinding"
+        },
+        "deploymentEventLedgerDigest": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "AttemptMarker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "markerType",
+        "trustClass",
+        "status",
+        "executionAdmission",
+        "runId",
+        "attemptId",
+        "createdAt",
+        "privateRootPath",
+        "attachmentsRootPath",
+        "artifactARootPath",
+        "artifactBRootPath",
+        "createdFresh",
+        "preexistingEntryCount",
+        "markerDigest"
+      ],
+      "properties": {
+        "markerType": {
+          "const": "sw_ab_update_candidate_attempt_marker_v1"
+        },
+        "trustClass": {
+          "const": "untrusted_candidate"
+        },
+        "status": {
+          "const": "not_admitted"
+        },
+        "executionAdmission": {
+          "const": "closed_missing_https_origin"
+        },
+        "runId": {
+          "$ref": "#/$defs/RunId"
+        },
+        "attemptId": {
+          "$ref": "#/$defs/AttemptId"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "privateRootPath": {
+          "$ref": "#/$defs/RelativePath"
+        },
+        "attachmentsRootPath": {
+          "$ref": "#/$defs/RelativePath"
+        },
+        "artifactARootPath": {
+          "$ref": "#/$defs/RelativePath"
+        },
+        "artifactBRootPath": {
+          "$ref": "#/$defs/RelativePath"
+        },
+        "createdFresh": {
+          "const": true
+        },
+        "preexistingEntryCount": {
+          "const": 0
+        },
+        "markerDigest": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "DeploymentEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "eventId",
+        "observedAt"
+      ],
+      "properties": {
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 14
+        },
+        "eventId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96,
+          "pattern": "^[a-z0-9][a-z0-9_]*$"
+        },
+        "observedAt": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      }
+    },
+    "DeploymentEventLedger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runId",
+        "attemptId",
+        "deploymentMode",
+        "events",
+        "ledgerDigest"
+      ],
+      "properties": {
+        "runId": {
+          "$ref": "#/$defs/RunId"
+        },
+        "attemptId": {
+          "$ref": "#/$defs/AttemptId"
+        },
+        "deploymentMode": {
+          "const": "one_global_a_to_b_switch_both_browsers_already_on_a"
+        },
+        "events": {
+          "type": "array",
+          "minItems": 14,
+          "maxItems": 14,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/DeploymentEvent"
+          }
+        },
+        "ledgerDigest": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "Profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "freshProfile",
+        "persistentProfile",
+        "preflightEntryCount",
+        "profileInstanceId",
+        "physicalProfileRootDigest",
+        "initialContextId",
+        "initialProcess",
+        "reopenedProcess",
+        "allPagesClosedBeforeRestart",
+        "browserProcessClosed",
+        "oldProcessExitObserved",
+        "differentProcessIdentity",
+        "samePhysicalProfileRoot",
+        "persistentProfileReopened",
+        "reopenedOffline",
+        "offlineBeforeFirstNavigation",
+        "firstNavigationAfterReopenAt",
+        "attempts"
+      ],
+      "properties": {
+        "freshProfile": {
+          "const": true
+        },
+        "persistentProfile": {
+          "const": true
+        },
+        "preflightEntryCount": {
+          "const": 0
+        },
+        "profileInstanceId": {
+          "type": "string",
+          "pattern": "^profile-[a-f0-9]{64}$"
+        },
+        "physicalProfileRootDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "initialContextId": {
+          "type": "string",
+          "pattern": "^context-[a-f0-9]{64}$"
+        },
+        "initialProcess": {
+          "$ref": "#/$defs/ProcessIdentity"
+        },
+        "reopenedProcess": {
+          "$ref": "#/$defs/ProcessIdentity"
+        },
+        "allPagesClosedBeforeRestart": {
+          "const": true
+        },
+        "browserProcessClosed": {
+          "const": true
+        },
+        "oldProcessExitObserved": {
+          "const": true
+        },
+        "differentProcessIdentity": {
+          "const": true
+        },
+        "samePhysicalProfileRoot": {
+          "const": true
+        },
+        "persistentProfileReopened": {
+          "const": true
+        },
+        "reopenedOffline": {
+          "const": true
+        },
+        "offlineBeforeFirstNavigation": {
+          "const": true
+        },
+        "firstNavigationAfterReopenAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "attempts": {
+          "const": 1
+        }
+      }
+    },
+    "ProcessIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "processIdDigest",
+        "createdAt"
+      ],
+      "properties": {
+        "processIdDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      }
+    },
+    "TimelineEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "eventId",
+        "observedAt",
+        "documentTags",
+        "controllerTags",
+        "installingTag",
+        "waitingTag",
+        "activeTag",
+        "networkState",
+        "pageCount",
+        "processState"
+      ],
+      "properties": {
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 15
+        },
+        "eventId": {
+          "enum": [
+            "fresh_profile_started_online",
+            "two_artifact_a_clients_controlled",
+            "artifact_b_update_requested",
+            "artifact_b_installing_observed",
+            "artifact_b_waiting_observed",
+            "network_interrupted_during_update",
+            "artifact_b_activation_and_claim_observed",
+            "one_a_document_reloaded_to_b",
+            "stale_a_production_write_rejected",
+            "all_pages_closed",
+            "browser_process_closed",
+            "persistent_profile_process_reopened_offline",
+            "offline_root_opened",
+            "offline_deep_link_opened",
+            "final_v13_snapshot_recorded"
+          ]
+        },
+        "observedAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "documentTags": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/GenerationTag"
+          }
+        },
+        "controllerTags": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/GenerationTag"
+          }
+        },
+        "installingTag": {
+          "$ref": "#/$defs/NullableGenerationTag"
+        },
+        "waitingTag": {
+          "$ref": "#/$defs/NullableGenerationTag"
+        },
+        "activeTag": {
+          "$ref": "#/$defs/NullableGenerationTag"
+        },
+        "networkState": {
+          "enum": [
+            "online",
+            "offline"
+          ]
+        },
+        "pageCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "processState": {
+          "enum": [
+            "running",
+            "stopped"
+          ]
+        }
+      }
+    },
+    "NetworkInterruption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observed",
+        "duringUpdate",
+        "afterBInstallStarted",
+        "afterBWaitingObserved",
+        "beforeBActivation",
+        "unexpectedOnlineRequestCount"
+      ],
+      "properties": {
+        "observed": {
+          "const": true
+        },
+        "duringUpdate": {
+          "const": true
+        },
+        "afterBInstallStarted": {
+          "const": true
+        },
+        "afterBWaitingObserved": {
+          "const": true
+        },
+        "beforeBActivation": {
+          "const": true
+        },
+        "unexpectedOnlineRequestCount": {
+          "const": 0
+        }
+      }
+    },
+    "OfflineRoute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "routeId",
+        "path",
+        "networkState",
+        "controllerTag",
+        "servedArtifactTag",
+        "loadSucceeded",
+        "fromServiceWorker",
+        "networkForwarded",
+        "cacheName",
+        "requestUrl",
+        "matchedCacheEntryUrl",
+        "cacheBodySha256",
+        "responseDigest"
+      ],
+      "properties": {
+        "routeId": {
+          "enum": [
+            "offline-root",
+            "offline-deep-link"
+          ]
+        },
+        "path": {
+          "enum": [
+            "/",
+            "/help"
+          ]
+        },
+        "networkState": {
+          "const": "offline"
+        },
+        "controllerTag": {
+          "const": "B"
+        },
+        "servedArtifactTag": {
+          "const": "B"
+        },
+        "loadSucceeded": {
+          "const": true
+        },
+        "fromServiceWorker": {
+          "const": true
+        },
+        "networkForwarded": {
+          "const": false
+        },
+        "cacheName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160,
+          "pattern": "^[A-Za-z0-9._-]+$"
+        },
+        "requestUrl": {
+          "type": "string",
+          "minLength": 12,
+          "maxLength": 512,
+          "pattern": "^https://"
+        },
+        "matchedCacheEntryUrl": {
+          "type": "string",
+          "minLength": 12,
+          "maxLength": 512,
+          "pattern": "^https://"
+        },
+        "cacheBodySha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "responseDigest": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "V13Snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dbGeneration",
+        "targetSchema",
+        "migrationId",
+        "mutationEpochCapability",
+        "epoch",
+        "storeSetDigest",
+        "dataFingerprint",
+        "recordCount"
+      ],
+      "properties": {
+        "dbGeneration": {
+          "const": "legacy-v13"
+        },
+        "targetSchema": {
+          "const": 13
+        },
+        "migrationId": {
+          "const": null
+        },
+        "mutationEpochCapability": {
+          "const": "absent_schema13"
+        },
+        "epoch": {
+          "const": null
+        },
+        "storeSetDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "dataFingerprint": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "recordCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        }
+      }
+    },
+    "DataIntegrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "before",
+        "after",
+        "endpointFingerprintsEqual",
+        "intervalNoMutationVerified",
+        "abaResistance"
+      ],
+      "properties": {
+        "before": {
+          "$ref": "#/$defs/V13Snapshot"
+        },
+        "after": {
+          "$ref": "#/$defs/V13Snapshot"
+        },
+        "endpointFingerprintsEqual": {
+          "const": true
+        },
+        "intervalNoMutationVerified": {
+          "const": false
+        },
+        "abaResistance": {
+          "const": "absent_schema13"
+        }
+      }
+    },
+    "StaleAWrite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attempted",
+        "productionWritePath",
+        "repositoryLayer",
+        "pageControllerTag",
+        "pageDocumentTag",
+        "targetActiveTag",
+        "rejected",
+        "reasonCode",
+        "typedErrorName",
+        "errorInstanceOf",
+        "databaseAreReleaseWritesLocked",
+        "productionWriteCommitted",
+        "transactionCommitCount",
+        "beforeSnapshotDigest",
+        "afterAttemptSnapshotDigest",
+        "finalSnapshotDigest",
+        "finalSnapshotUnchanged"
+      ],
+      "properties": {
+        "attempted": {
+          "const": true
+        },
+        "productionWritePath": {
+          "const": true
+        },
+        "repositoryLayer": {
+          "const": "production_repository_dbcore"
+        },
+        "pageControllerTag": {
+          "const": "B"
+        },
+        "pageDocumentTag": {
+          "const": "A"
+        },
+        "targetActiveTag": {
+          "const": "B"
+        },
+        "rejected": {
+          "const": true
+        },
+        "reasonCode": {
+          "const": "STALE_CONTROLLER_PRODUCTION_WRITE_REJECTED"
+        },
+        "typedErrorName": {
+          "const": "ReleaseDatabaseWriteLockedError"
+        },
+        "errorInstanceOf": {
+          "const": true
+        },
+        "databaseAreReleaseWritesLocked": {
+          "const": true
+        },
+        "productionWriteCommitted": {
+          "const": false
+        },
+        "transactionCommitCount": {
+          "const": 0
+        },
+        "beforeSnapshotDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "afterAttemptSnapshotDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "finalSnapshotDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "finalSnapshotUnchanged": {
+          "const": true
+        }
+      }
+    },
+    "ClientProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slot",
+        "documentTag",
+        "controllerTag",
+        "clientId",
+        "cdpTargetId",
+        "challengeNonce",
+        "challengeResponseDigest",
+        "controllerChangeCount"
+      ],
+      "properties": {
+        "slot": {
+          "enum": [
+            "retained-old-a",
+            "reload-to-b"
+          ]
+        },
+        "documentTag": {
+          "$ref": "#/$defs/GenerationTag"
+        },
+        "controllerTag": {
+          "$ref": "#/$defs/GenerationTag"
+        },
+        "clientId": {
+          "type": "string",
+          "pattern": "^client-[a-f0-9]{64}$"
+        },
+        "cdpTargetId": {
+          "type": "string",
+          "pattern": "^target-[a-f0-9]{64}$"
+        },
+        "challengeNonce": {
+          "type": "string",
+          "pattern": "^challenge-[a-f0-9]{64}$"
+        },
+        "challengeResponseDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "controllerChangeCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "ClientProofs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "initialAClients",
+        "postClaimClients"
+      ],
+      "properties": {
+        "initialAClients": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/ClientProof"
+          }
+        },
+        "postClaimClients": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/ClientProof"
+          }
+        }
+      }
+    },
+    "OfflineCanary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "offlineBeforeRequest",
+        "cacheMatch",
+        "responseReceived",
+        "loadFailed"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^/__sw_ab_uncached_canary__/[a-f0-9]{64}$"
+        },
+        "offlineBeforeRequest": {
+          "const": true
+        },
+        "cacheMatch": {
+          "const": false
+        },
+        "responseReceived": {
+          "const": false
+        },
+        "loadFailed": {
+          "const": true
+        }
+      }
+    },
+    "CacheProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactTag",
+        "serviceWorkerSha256",
+        "cacheInventoryDigest",
+        "cacheMetadataSha256",
+        "rootBodySha256",
+        "deepLinkBodySha256"
+      ],
+      "properties": {
+        "artifactTag": {
+          "const": "B"
+        },
+        "serviceWorkerSha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "cacheInventoryDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "cacheMetadataSha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "rootBodySha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "deepLinkBodySha256": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "BrowserReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projectName",
+        "receiptType",
+        "evidenceClass",
+        "actualProduct",
+        "attempts",
+        "passed",
+        "failed",
+        "skipped",
+        "flaky",
+        "runId",
+        "attemptId",
+        "attemptMarkerDigest",
+        "deploymentEventLedgerDigest",
+        "capturedAt",
+        "releaseIdentity",
+        "profile",
+        "clientProofs",
+        "artifactBindings",
+        "timeline",
+        "networkInterruption",
+        "offlineRoutes",
+        "offlineUncachedCanary",
+        "cacheProof",
+        "dataIntegrity",
+        "staleAWrite",
+        "attachmentRoles",
+        "receiptDigest"
+      ],
+      "properties": {
+        "projectName": {
+          "$ref": "#/$defs/ProjectName"
+        },
+        "receiptType": {
+          "const": "sw_ab_update_browser_receipt_candidate_v1"
+        },
+        "evidenceClass": {
+          "const": "untrusted_candidate"
+        },
+        "actualProduct": {
+          "enum": [
+            "Microsoft Edge",
+            "Google Chrome"
+          ]
+        },
+        "attempts": {
+          "const": 1
+        },
+        "passed": {
+          "const": 1
+        },
+        "failed": {
+          "const": 0
+        },
+        "skipped": {
+          "const": 0
+        },
+        "flaky": {
+          "const": 0
+        },
+        "runId": {
+          "$ref": "#/$defs/RunId"
+        },
+        "attemptId": {
+          "$ref": "#/$defs/AttemptId"
+        },
+        "attemptMarkerDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "deploymentEventLedgerDigest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "capturedAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "releaseIdentity": {
+          "$ref": "#/$defs/ReleaseIdentity"
+        },
+        "profile": {
+          "$ref": "#/$defs/Profile"
+        },
+        "clientProofs": {
+          "$ref": "#/$defs/ClientProofs"
+        },
+        "artifactBindings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "A",
+            "B"
+          ],
+          "properties": {
+            "A": {
+              "$ref": "#/$defs/ArtifactReference"
+            },
+            "B": {
+              "$ref": "#/$defs/ArtifactReference"
+            }
+          }
+        },
+        "timeline": {
+          "type": "array",
+          "minItems": 15,
+          "maxItems": 15,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/TimelineEvent"
+          }
+        },
+        "networkInterruption": {
+          "$ref": "#/$defs/NetworkInterruption"
+        },
+        "offlineRoutes": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/OfflineRoute"
+          }
+        },
+        "offlineUncachedCanary": {
+          "$ref": "#/$defs/OfflineCanary"
+        },
+        "cacheProof": {
+          "$ref": "#/$defs/CacheProof"
+        },
+        "dataIntegrity": {
+          "$ref": "#/$defs/DataIntegrity"
+        },
+        "staleAWrite": {
+          "$ref": "#/$defs/StaleAWrite"
+        },
+        "attachmentRoles": {
+          "type": "array",
+          "minItems": 16,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          }
+        },
+        "receiptDigest": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "Authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "defaultV13ReceiptAllowlistMember",
+        "formalReleaseEvidenceReceipt",
+        "trustedProviderVerified",
+        "trustedHostVerified",
+        "trustedBrowserRuntimeVerified",
+        "deploymentReady",
+        "releaseReady",
+        "externalDeploymentExecutionAuthorized",
+        "publicDeploymentAuthorized",
+        "publicReleaseAuthorized",
+        "contentTruthAuthorized",
+        "expertClaimsAuthorized",
+        "rightsLegalConclusionAuthorized",
+        "schemaPromotionAuthorized"
+      ],
+      "properties": {
+        "defaultV13ReceiptAllowlistMember": {
+          "const": false
+        },
+        "formalReleaseEvidenceReceipt": {
+          "const": false
+        },
+        "trustedProviderVerified": {
+          "const": false
+        },
+        "trustedHostVerified": {
+          "const": false
+        },
+        "trustedBrowserRuntimeVerified": {
+          "const": false
+        },
+        "deploymentReady": {
+          "const": false
+        },
+        "releaseReady": {
+          "const": false
+        },
+        "externalDeploymentExecutionAuthorized": {
+          "const": false
+        },
+        "publicDeploymentAuthorized": {
+          "const": false
+        },
+        "publicReleaseAuthorized": {
+          "const": false
+        },
+        "contentTruthAuthorized": {
+          "const": false
+        },
+        "expertClaimsAuthorized": {
+          "const": false
+        },
+        "rightsLegalConclusionAuthorized": {
+          "const": false
+        },
+        "schemaPromotionAuthorized": {
+          "const": false
+        }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evidenceType",
+    "trustClass",
+    "status",
+    "executionAdmission",
+    "strictGatePassed",
+    "runId",
+    "attemptId",
+    "attemptMarker",
+    "capturedAt",
+    "releaseIdentity",
+    "capabilities",
+    "governanceBindings",
+    "deploymentCandidate",
+    "deploymentEventLedger",
+    "artifacts",
+    "attachments",
+    "browserReceipts",
+    "authority",
+    "evidenceDigest"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "evidenceType": {
+      "const": "sw_ab_update_candidate_v1"
+    },
+    "trustClass": {
+      "const": "untrusted_candidate"
+    },
+    "status": {
+      "const": "not_admitted"
+    },
+    "executionAdmission": {
+      "const": "closed_missing_https_origin"
+    },
+    "strictGatePassed": {
+      "const": false
+    },
+    "runId": {
+      "$ref": "#/$defs/RunId"
+    },
+    "attemptId": {
+      "$ref": "#/$defs/AttemptId"
+    },
+    "attemptMarker": {
+      "$ref": "#/$defs/AttemptMarker"
+    },
+    "capturedAt": {
+      "$ref": "#/$defs/Timestamp"
+    },
+    "releaseIdentity": {
+      "$ref": "#/$defs/ReleaseIdentity"
+    },
+    "capabilities": {
+      "$ref": "#/$defs/Capabilities"
+    },
+    "governanceBindings": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/GovernanceBinding"
+      }
+    },
+    "deploymentCandidate": {
+      "$ref": "#/$defs/DeploymentCandidate"
+    },
+    "deploymentEventLedger": {
+      "$ref": "#/$defs/DeploymentEventLedger"
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "A",
+        "B"
+      ],
+      "properties": {
+        "A": {
+          "$ref": "#/$defs/ArtifactRecord"
+        },
+        "B": {
+          "$ref": "#/$defs/ArtifactRecord"
+        }
+      }
+    },
+    "attachments": {
+      "type": "array",
+      "minItems": 38,
+      "maxItems": 38,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/Attachment"
+      }
+    },
+    "browserReceipts": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/BrowserReceipt"
+      }
+    },
+    "authority": {
+      "$ref": "#/$defs/Authority"
+    },
+    "evidenceDigest": {
+      "$ref": "#/$defs/Sha256"
+    }
+  }
+}

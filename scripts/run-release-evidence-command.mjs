@@ -12,6 +12,10 @@ import {
   assertStrictReleaseBrowserResultSummary,
   isReleaseBrowserReceiptId
 } from "../apps/web/playwright.release-browser-result.ts";
+import {
+  buildReleaseArtifactReceiptBinding,
+  verifyReleaseArtifactIdentityLock
+} from "./release-artifact-identity-lib.mjs";
 
 const separator = process.argv.indexOf("--");
 if (separator < 0) throw new Error("Expected -- before the command to execute.");
@@ -48,7 +52,27 @@ if (browserResultOutput) {
 const startedAt = new Date();
 const started = Date.now();
 const invocation = releaseCommandInvocation(command, commandArgs);
-const result = await (async () => {
+let artifactIdentityBeforeCommand = null;
+let artifactIdentityBinding = null;
+let artifactIdentityBindingFailure = null;
+if (browserResultRequired) {
+  try {
+    if (evidenceId === null) {
+      throw new Error("Formal release browser receipts require HAKIMI_RELEASE_EVIDENCE_ID.");
+    }
+    artifactIdentityBeforeCommand = await verifyReleaseArtifactIdentityLock({
+      cwd: process.cwd(),
+      dist: path.resolve(process.cwd(), "dist/web"),
+      lockPath: path.resolve(process.cwd(), "tmp/release-artifact-identity.json"),
+      evidenceId
+    });
+  } catch (error) {
+    artifactIdentityBindingFailure = error;
+  }
+}
+const result = browserResultRequired && artifactIdentityBeforeCommand === null
+  ? { exitCode: null, signal: null, launchError: artifactIdentityBindingFailure }
+  : await (async () => {
   try {
     const child = spawn(invocation.executable, invocation.args, {
       cwd: process.cwd(),
@@ -77,6 +101,22 @@ const result = await (async () => {
     return { exitCode: null, signal: null, launchError: error };
   }
 })();
+if (browserResultRequired && artifactIdentityBeforeCommand !== null) {
+  try {
+    const artifactIdentityAfterCommand = await verifyReleaseArtifactIdentityLock({
+      cwd: process.cwd(),
+      dist: path.resolve(process.cwd(), "dist/web"),
+      lockPath: path.resolve(process.cwd(), "tmp/release-artifact-identity.json"),
+      evidenceId
+    });
+    artifactIdentityBinding = buildReleaseArtifactReceiptBinding({
+      beforeCommand: artifactIdentityBeforeCommand,
+      afterCommand: artifactIdentityAfterCommand
+    });
+  } catch (error) {
+    artifactIdentityBindingFailure = error;
+  }
+}
 let browserResultSummary = null;
 let browserResultSummaryError = null;
 if (browserResultOutput) {
@@ -95,7 +135,8 @@ if (browserResultOutput) {
 }
 const passed = result.exitCode === 0
   && result.launchError === null
-  && (!browserResultRequired || browserResultSummary !== null);
+  && (!browserResultRequired
+    || (browserResultSummary !== null && artifactIdentityBinding !== null));
 const receipt = {
   schemaVersion: 1,
   receiptType: "release_test_command",
@@ -113,6 +154,12 @@ const receipt = {
     : null,
   browserResultSummary,
   browserResultSummaryError,
+  artifactIdentityBinding,
+  artifactIdentityBindingError: artifactIdentityBindingFailure === null
+    ? null
+    : (artifactIdentityBindingFailure instanceof Error
+      ? artifactIdentityBindingFailure.message
+      : String(artifactIdentityBindingFailure)).slice(0, 500),
   runtime: {
     node: process.version,
     platform: process.platform,

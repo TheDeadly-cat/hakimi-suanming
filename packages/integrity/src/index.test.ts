@@ -52,9 +52,12 @@ describe("原始字节 SHA-256", () => {
     );
   });
 
-  it("不会把字节数组规范化为 JSON 后再摘要", async () => {
+  it("不会把字节数组误当作可规范化 JSON", async () => {
     const bytes = new Uint8Array([0x61, 0x62, 0x63]);
-    await expect(sha256BytesHex(bytes)).resolves.not.toBe(await sha256Hex(bytes));
+    await expect(sha256BytesHex(bytes)).resolves.toBe(
+      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+    );
+    await expect(sha256Hex(bytes)).rejects.toThrow("普通对象");
   });
 
   it("在运行时拒绝非 Uint8Array 输入", async () => {

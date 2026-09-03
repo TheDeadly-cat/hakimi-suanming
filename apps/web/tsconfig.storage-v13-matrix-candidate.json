@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "playwright.storage-v13-matrix-candidate.config.ts",
+    "playwright.storage-v13-matrix-candidate-global-setup.ts",
+    "playwright.storage-v13-matrix-candidate-reporter.ts",
+    "playwright.release-browser-matrix.ts",
+    "e2e/storage-v13-matrix-candidate.spec.ts",
+    "e2e/storage-v13-native-readonly.ts",
+    "e2e/full-backup-helpers.ts",
+    "e2e/cross-schema-upgrade-helpers.ts",
+    "e2e/release-browser-persistent-context.ts",
+    "../../scripts/deployed-pwa-candidate-runtime.d.mts",
+    "../../scripts/storage-v13-matrix-candidate-runtime.d.mts"
+  ]
+}

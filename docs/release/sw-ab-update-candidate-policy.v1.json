@@ -1,0 +1,306 @@
+{
+  "schemaVersion": 1,
+  "policyId": "hakimi.web-v1.sw-ab-update-candidate/v1",
+  "evidenceClass": "untrusted_future_https_sw_ab_update_candidate",
+  "formalReleaseEvidenceReceipt": false,
+  "releaseIdentity": {
+    "channel": "default-v13",
+    "dbGeneration": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null
+  },
+  "capabilities": {
+    "mutationEpochCapability": "absent_schema13",
+    "epoch": null
+  },
+  "executionAdmission": {
+    "status": "closed_missing_https_origin",
+    "canonicalHttpsOriginConfigured": false,
+    "providerBindingTrusted": false,
+    "hostBindingTrusted": false,
+    "artifactADeploymentObserved": false,
+    "artifactBDeploymentObserved": false,
+    "realBrowserExecutionObserved": false
+  },
+  "requiredBrowserProjects": [
+    "msedge",
+    "chrome"
+  ],
+  "artifactLabels": [
+    "A",
+    "B"
+  ],
+  "executionShape": {
+    "deploymentMode": "one_global_a_to_b_switch_both_browsers_already_on_a",
+    "clientsPerBrowser": 2,
+    "initialDocumentTag": "A",
+    "initialControllerTag": "A",
+    "postClaimControllerTag": "B",
+    "retainedOldDocumentTag": "A",
+    "reloadedDocumentTag": "B",
+    "controllerChangeCountPerClient": 1,
+    "offlineBeforeFirstReopenedNavigation": true,
+    "uncachedCanaryMustFail": true,
+    "remoteBodiesMustBeRetained": true,
+    "offlineResponseBodiesMustBeRetained": true,
+    "offlineBundleReplayResistanceVerified": false,
+    "staleWriteRuntimeFactsMustBeRetained": true,
+    "remoteResponseStatus": 200,
+    "remoteRedirectCount": 0,
+    "remoteContentEncoding": "identity",
+    "intervalNoMutationVerified": false,
+    "abaResistance": "absent_schema13"
+  },
+  "requiredTimeline": [
+    {
+      "eventId": "fresh_profile_started_online",
+      "documentTags": [],
+      "controllerTags": [],
+      "installingTag": null,
+      "waitingTag": null,
+      "activeTag": null,
+      "networkState": "online",
+      "pageCount": 0,
+      "processState": "running"
+    },
+    {
+      "eventId": "two_artifact_a_clients_controlled",
+      "documentTags": ["A", "A"],
+      "controllerTags": ["A", "A"],
+      "installingTag": null,
+      "waitingTag": null,
+      "activeTag": "A",
+      "networkState": "online",
+      "pageCount": 2,
+      "processState": "running"
+    },
+    {
+      "eventId": "artifact_b_update_requested",
+      "documentTags": ["A", "A"],
+      "controllerTags": ["A", "A"],
+      "installingTag": null,
+      "waitingTag": null,
+      "activeTag": "A",
+      "networkState": "online",
+      "pageCount": 2,
+      "processState": "running"
+    },
+    {
+      "eventId": "artifact_b_installing_observed",
+      "documentTags": ["A", "A"],
+      "controllerTags": ["A", "A"],
+      "installingTag": "B",
+      "waitingTag": null,
+      "activeTag": "A",
+      "networkState": "online",
+      "pageCount": 2,
+      "processState": "running"
+    },
+    {
+      "eventId": "artifact_b_waiting_observed",
+      "documentTags": ["A", "A"],
+      "controllerTags": ["A", "A"],
+      "installingTag": null,
+      "waitingTag": "B",
+      "activeTag": "A",
+      "networkState": "online",
+      "pageCount": 2,
+      "processState": "running"
+    },
+    {
+      "eventId": "network_interrupted_during_update",
+      "documentTags": ["A", "A"],
+      "controllerTags": ["A", "A"],
+      "installingTag": null,
+      "waitingTag": "B",
+      "activeTag": "A",
+      "networkState": "offline",
+      "pageCount": 2,
+      "processState": "running"
+    },
+    {
+      "eventId": "artifact_b_activation_and_claim_observed",
+      "documentTags": ["A", "A"],
+      "controllerTags": ["B", "B"],
+      "installingTag": null,
+      "waitingTag": null,
+      "activeTag": "B",
+      "networkState": "offline",
+      "pageCount": 2,
+      "processState": "running"
+    },
+    {
+      "eventId": "one_a_document_reloaded_to_b",
+      "documentTags": ["A", "B"],
+      "controllerTags": ["B", "B"],
+      "installingTag": null,
+      "waitingTag": null,
+      "activeTag": "B",
+      "networkState": "offline",
+      "pageCount": 2,
+      "processState": "running"
+    },
+    {
+      "eventId": "stale_a_production_write_rejected",
+      "documentTags": ["A", "B"],
+      "controllerTags": ["B", "B"],
+      "installingTag": null,
+      "waitingTag": null,
+      "activeTag": "B",
+      "networkState": "offline",
+      "pageCount": 2,
+      "processState": "running"
+    },
+    {
+      "eventId": "all_pages_closed",
+      "documentTags": [],
+      "controllerTags": [],
+      "installingTag": null,
+      "waitingTag": null,
+      "activeTag": "B",
+      "networkState": "offline",
+      "pageCount": 0,
+      "processState": "running"
+    },
+    {
+      "eventId": "browser_process_closed",
+      "documentTags": [],
+      "controllerTags": [],
+      "installingTag": null,
+      "waitingTag": null,
+      "activeTag": "B",
+      "networkState": "offline",
+      "pageCount": 0,
+      "processState": "stopped"
+    },
+    {
+      "eventId": "persistent_profile_process_reopened_offline",
+      "documentTags": [],
+      "controllerTags": [],
+      "installingTag": null,
+      "waitingTag": null,
+      "activeTag": "B",
+      "networkState": "offline",
+      "pageCount": 0,
+      "processState": "running"
+    },
+    {
+      "eventId": "offline_root_opened",
+      "documentTags": ["B"],
+      "controllerTags": ["B"],
+      "installingTag": null,
+      "waitingTag": null,
+      "activeTag": "B",
+      "networkState": "offline",
+      "pageCount": 1,
+      "processState": "running"
+    },
+    {
+      "eventId": "offline_deep_link_opened",
+      "documentTags": ["B"],
+      "controllerTags": ["B"],
+      "installingTag": null,
+      "waitingTag": null,
+      "activeTag": "B",
+      "networkState": "offline",
+      "pageCount": 1,
+      "processState": "running"
+    },
+    {
+      "eventId": "final_v13_snapshot_recorded",
+      "documentTags": ["B"],
+      "controllerTags": ["B"],
+      "installingTag": null,
+      "waitingTag": null,
+      "activeTag": "B",
+      "networkState": "offline",
+      "pageCount": 1,
+      "processState": "running"
+    }
+  ],
+  "requiredOfflineRoutes": [
+    {
+      "routeId": "offline-root",
+      "path": "/"
+    },
+    {
+      "routeId": "offline-deep-link",
+      "path": "/help"
+    }
+  ],
+  "requiredSharedAttachmentRoles": [
+    "artifact-a-identity-lock",
+    "artifact-a-release-evidence",
+    "artifact-a-remote-artifact-capture",
+    "artifact-b-identity-lock",
+    "artifact-b-release-evidence",
+    "artifact-b-remote-artifact-capture"
+  ],
+  "requiredPerBrowserAttachmentRoles": [
+    "browser-version",
+    "fresh-persistent-profile-preflight",
+    "initial-two-client-census",
+    "post-claim-two-client-census",
+    "artifact-a-controller-source",
+    "artifact-b-controller-source",
+    "sw-controller-install-wait-activation-timeline",
+    "update-network-interruption",
+    "process-and-profile-reopen",
+    "offline-root-result",
+    "offline-deep-link-result",
+    "offline-uncached-canary",
+    "artifact-b-cache-inventory",
+    "v13-data-before",
+    "v13-data-after",
+    "stale-a-write-rejection"
+  ],
+  "requiredGovernanceBindings": [
+    {
+      "role": "release-decisions",
+      "path": "docs/release/web-v1-release-decisions.json"
+    },
+    {
+      "role": "release-generation-history",
+      "path": "docs/release/release-generation-history.json"
+    },
+    {
+      "role": "hosting-security-policy",
+      "path": "docs/security/hosting-security-policy.json"
+    },
+    {
+      "role": "release-evidence-schema",
+      "path": "docs/release/release-evidence.schema.json"
+    },
+    {
+      "role": "sw-ab-update-policy",
+      "path": "docs/release/sw-ab-update-candidate-policy.v1.json"
+    },
+    {
+      "role": "sw-ab-update-schema",
+      "path": "docs/release/sw-ab-update-candidate-v1.schema.json"
+    }
+  ],
+  "terminalState": {
+    "trustClass": "untrusted_candidate",
+    "status": "not_admitted",
+    "executionAdmission": "closed_missing_https_origin",
+    "strictGatePassed": false,
+    "cliExitCode": 1
+  },
+  "authority": {
+    "defaultV13ReceiptAllowlistMember": false,
+    "formalReleaseEvidenceReceipt": false,
+    "trustedProviderVerified": false,
+    "trustedHostVerified": false,
+    "trustedBrowserRuntimeVerified": false,
+    "deploymentReady": false,
+    "releaseReady": false,
+    "externalDeploymentExecutionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "contentTruthAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "rightsLegalConclusionAuthorized": false,
+    "schemaPromotionAuthorized": false
+  }
+}

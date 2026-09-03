@@ -1,6 +1,7 @@
 import {
   FullBackupArchiveError,
   FullBackupError,
+  captureVerifiedFullBackupReplacement,
   type CreateFullBackupOptions,
   type FullBackupArchiveErrorCode,
   type FullBackupErrorCode,
@@ -177,9 +178,20 @@ function validateSuccessfulWorkerResponse(
       }
       return null;
     case "verified_ready":
-      return isRecord(message.verified)
-        ? null
-        : "备份 Worker 返回了无效的替换验证结果。";
+      try {
+        const verifiedDescriptor = Object.getOwnPropertyDescriptor(message, "verified");
+        if (
+          !verifiedDescriptor
+          || !verifiedDescriptor.enumerable
+          || !Object.hasOwn(verifiedDescriptor, "value")
+        ) {
+          return "备份 Worker 返回了无效的替换验证结果。";
+        }
+        captureVerifiedFullBackupReplacement(verifiedDescriptor.value);
+        return null;
+      } catch {
+        return "备份 Worker 返回了无效的替换验证结果。";
+      }
     case "snapshot_verified":
       return hasCanonicalDigest(message.payloadDigest)
         && isPositiveSafeInteger(message.canonicalJsonByteLength)

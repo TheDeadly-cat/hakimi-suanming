@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "policyId": "hakimi.web-v1.deployed-pwa-evidence/v1",
+  "status": "contract_only_not_executed",
+  "executionAdmission": {
+    "status": "closed_missing_https_origin",
+    "auditedHostingPlatformSelected": false,
+    "canonicalHttpsOriginConfigured": false,
+    "formalArtifactIdentityPackageAvailable": false,
+    "trustedRealHostReceiptWriterVerified": false,
+    "trustedRealHostReceiptParserVerified": false,
+    "trustedPwaRuntimeReceiptWriterVerified": false,
+    "trustedPwaRuntimeReceiptParserVerified": false,
+    "trustedProviderDeploymentReceiptParserVerified": false
+  },
+  "blockingReasons": [
+    "hosting_platform_unselected",
+    "canonical_https_origin_null",
+    "current_formal_artifact_absent",
+    "trusted_real_host_receipt_writer_absent",
+    "trusted_real_host_receipt_parser_absent",
+    "trusted_pwa_runtime_receipt_writer_absent",
+    "trusted_pwa_runtime_receipt_parser_absent",
+    "trusted_provider_deployment_receipt_parser_absent",
+    "external_deployment_execution_authorization_absent"
+  ],
+  "releaseIdentity": {
+    "channel": "default-v13",
+    "dbGeneration": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null
+  },
+  "requiredBrowserProjects": [
+    "msedge",
+    "chrome"
+  ],
+  "requiredHostVerificationKind": "real-network",
+  "requiredPolicyBindings": [
+    {
+      "role": "release-decisions",
+      "path": "docs/release/web-v1-release-decisions.json"
+    },
+    {
+      "role": "hosting-security-policy",
+      "path": "docs/security/hosting-security-policy.json"
+    },
+    {
+      "role": "release-evidence-schema",
+      "path": "docs/release/release-evidence.schema.json"
+    },
+    {
+      "role": "deployed-pwa-evidence-schema",
+      "path": "docs/release/deployed-pwa-evidence.schema.json"
+    },
+    {
+      "role": "deployed-pwa-evidence-policy",
+      "path": "docs/release/deployed-pwa-evidence-policy.v1.json"
+    }
+  ],
+  "authorizationBoundary": {
+    "externalDeploymentExecutionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "authorizationMayNotBeDerivedFromEngineeringEvidence": true
+  }
+}

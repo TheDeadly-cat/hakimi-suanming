@@ -64,7 +64,7 @@ describe("research query session draft", () => {
   });
 
   it("单个草稿删除失败时报告精确部分完成计数", () => {
-    const keys = [
+    const keys: string[] = [
       `hakimi:research-query-draft:v1:${draftId}`,
       "hakimi:research-query-draft:v1:blocked",
       "unrelated",
@@ -74,6 +74,8 @@ describe("research query session draft", () => {
       key: (index: number) => keys[index] ?? null,
       removeItem: (key: string) => {
         if (key.endsWith(":blocked")) throw new Error("synthetic removal failure");
+        const index = keys.indexOf(key);
+        if (index >= 0) keys.splice(index, 1);
       },
     };
 

@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "policyId": "hakimi.web-v1.sw-ab-update-runtime-client-capture/v1",
+  "evidenceClass": "untrusted_partial_runtime_capture_candidate",
+  "releaseIdentity": {
+    "channel": "default-v13",
+    "dbGeneration": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null
+  },
+  "capabilities": {
+    "mutationEpochCapability": "absent_schema13",
+    "epoch": null
+  },
+  "requiredBrowserProjects": [
+    "msedge",
+    "chrome"
+  ],
+  "requiredPhases": [
+    "initial-a",
+    "post-claim"
+  ],
+  "requiredSlots": [
+    "retained-old-a",
+    "reload-to-b"
+  ],
+  "requiredObservationTuples": [
+    {
+      "projectName": "msedge",
+      "phase": "initial-a",
+      "slot": "retained-old-a"
+    },
+    {
+      "projectName": "msedge",
+      "phase": "initial-a",
+      "slot": "reload-to-b"
+    },
+    {
+      "projectName": "chrome",
+      "phase": "initial-a",
+      "slot": "retained-old-a"
+    },
+    {
+      "projectName": "chrome",
+      "phase": "initial-a",
+      "slot": "reload-to-b"
+    },
+    {
+      "projectName": "msedge",
+      "phase": "post-claim",
+      "slot": "retained-old-a"
+    },
+    {
+      "projectName": "msedge",
+      "phase": "post-claim",
+      "slot": "reload-to-b"
+    },
+    {
+      "projectName": "chrome",
+      "phase": "post-claim",
+      "slot": "retained-old-a"
+    },
+    {
+      "projectName": "chrome",
+      "phase": "post-claim",
+      "slot": "reload-to-b"
+    }
+  ],
+  "implementedObservationScopes": [
+    "cdp_page_target_info_projection",
+    "sw_runtime_challenge_v1"
+  ],
+  "deferredObservationScopes": [
+    "os_process_restart",
+    "service_worker_target_and_source",
+    "service_worker_response",
+    "cache_api_raw_bodies",
+    "offline_request_closure",
+    "stale_a_production_write",
+    "provider_switch",
+    "host_tls_and_response_bytes"
+  ],
+  "executionAdmission": {
+    "status": "closed_missing_https_origin",
+    "canonicalHttpsOriginConfigured": false,
+    "artifactADeploymentObserved": false,
+    "artifactBDeploymentObserved": false,
+    "realBrowserExecutionObserved": false
+  },
+  "terminalState": {
+    "trustClass": "untrusted_raw_capture_candidate",
+    "status": "capture_incomplete",
+    "usableForCandidateAssembly": false,
+    "formalReleaseEvidenceReceipt": false,
+    "cliExitCode": 1
+  },
+  "provenance": {
+    "callerSuppliedPageAuthenticityVerified": false,
+    "runtimeCollectorProvenanceVerified": false,
+    "osProcessRestartProvenanceVerified": false,
+    "twoClientRuntimeProvenanceVerified": false,
+    "serviceWorkerResponseProvenanceVerified": false,
+    "cacheApiProvenanceVerified": false,
+    "attemptFreshnessExternallyVerified": false,
+    "bundleReplayResistanceVerified": false,
+    "concurrentFilesystemMutationResistanceVerified": false
+  },
+  "authority": {
+    "defaultV13ReceiptAllowlistMember": false,
+    "formalReleaseEvidenceReceipt": false,
+    "trustedProviderVerified": false,
+    "trustedHostVerified": false,
+    "trustedBrowserRuntimeVerified": false,
+    "deploymentReady": false,
+    "releaseReady": false,
+    "externalDeploymentExecutionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "contentTruthAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "rightsLegalConclusionAuthorized": false,
+    "schemaPromotionAuthorized": false
+  }
+}

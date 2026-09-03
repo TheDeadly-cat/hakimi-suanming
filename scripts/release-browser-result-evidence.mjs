@@ -1,4 +1,3 @@
-import { readFile } from "node:fs/promises";
 import path from "node:path";
 import {
   assertStrictReleaseBrowserResultSummary,
@@ -6,8 +5,8 @@ import {
 } from "../apps/web/playwright.release-browser-result.ts";
 import {
   canonicalJson,
+  readStableRegularFileSnapshot,
   relativePathWithin,
-  sha256
 } from "./release-evidence-lib.mjs";
 
 function exactKeys(value, keys) {
@@ -51,11 +50,14 @@ export async function verifyReleaseBrowserResultSummaryBinding({
   ) {
     throw new Error(`Release browser result path is not canonical: ${receipt.id}`);
   }
-  const bytes = await readFile(summaryPath);
-  if (sha256(bytes) !== binding.sha256) {
+  const snapshot = await readStableRegularFileSnapshot(summaryPath, {
+    containmentRoot: receiptsDirectory,
+    label: `Browser result ${receipt.id}`
+  });
+  if (snapshot.sha256 !== binding.sha256) {
     throw new Error(`Release browser result digest mismatch: ${receipt.id}`);
   }
-  const summary = JSON.parse(bytes.toString("utf8"));
+  const summary = JSON.parse(snapshot.bytes.toString("utf8"));
   if (canonicalJson(summary) !== canonicalJson(binding.summary)) {
     throw new Error(`Release browser result embedded summary mismatch: ${receipt.id}`);
   }

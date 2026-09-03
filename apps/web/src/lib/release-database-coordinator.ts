@@ -34,11 +34,26 @@ export type ReleaseBootConfirmation = {
   migrationReceiptDigest: string;
 };
 
+type MigrationResolutionCommand =
+  | "ABORT_DATABASE_MIGRATION"
+  | "FINISH_DATABASE_MIGRATION";
+
+type MigrationResolutionEvidence = Readonly<{
+  requestedCommand: MigrationResolutionCommand;
+  effectiveResolution: "DATABASE_MIGRATION_ABORTED" | "DATABASE_MIGRATION_COMMITTED";
+  committedGeneration: string;
+  committedDatabaseName: string;
+  committedSchema: number;
+  committedMigrationId: string | null;
+  committedReceiptDigest: string;
+}>;
+
 const DATABASE_OPEN_TIMEOUT_MS = 8_000;
 const BRIDGE_DATABASE_OPEN_TIMEOUT_MS = 20_000;
 const DATABASE_DELETE_TIMEOUT_MS = 5_000;
 const SOURCE_FREEZE_RENEW_INTERVAL_MS = 8_000;
 const SOURCE_FREEZE_MESSAGE_TIMEOUT_MS = 7_000;
+const SOURCE_RESOLUTION_MESSAGE_TIMEOUT_MS = 3_000;
 const SOURCE_FREEZE_RETRY_BACKOFF_MS = 2_000;
 const SOURCE_FREEZE_MAX_ATTEMPTS = 5;
 const PEER_MIGRATION_POLL_INTERVAL_MS = 1_000;
@@ -67,10 +82,19 @@ function migrationProtocolReason(value: unknown): string {
     : "INVALID_ACK";
 }
 
+function isSha256Digest(value: unknown): value is string {
+  return typeof value === "string" && /^[a-f0-9]{64}$/u.test(value);
+}
+
+function isNullableProtocolString(value: unknown): value is string | null {
+  return value === null || (typeof value === "string" && value.length > 0 && value.length <= 512);
+}
+
 function requestMigrationControlAck<Response>(
   controller: Pick<ServiceWorker, "postMessage">,
   message: unknown,
-  timeoutMessage: string
+  timeoutMessage: string,
+  timeoutMs = SOURCE_FREEZE_MESSAGE_TIMEOUT_MS
 ): Promise<Response> {
   return new Promise((resolve, reject) => {
     const channel = new MessageChannel();
@@ -91,7 +115,7 @@ function requestMigrationControlAck<Response>(
     };
     timeout = window.setTimeout(() => {
       finish(() => reject(new Error(timeoutMessage)));
-    }, SOURCE_FREEZE_MESSAGE_TIMEOUT_MS);
+    }, timeoutMs);
     channel.port1.onmessage = (event: MessageEvent<unknown>) => {
       finish(() => resolve((event.data ?? {}) as Response));
     };
@@ -247,6 +271,14 @@ export class ReleaseDatabaseCoordinator {
   private preparationCancelled: Error | null = null;
   private targetMaterializationStarted = false;
   private integrityContractPromise: Promise<string> | null = null;
+  private controllerTakeoverFrozen = false;
+  private readonly activeControllerMutationPromises = new Set<Promise<unknown>>();
+  private controllerTakeoverDrainPromise: Promise<void> | null = null;
+  private cancellationFinalizationPromise: Promise<void> | null = null;
+  private failureJournalTransitionPromise: Promise<MigrationResolutionCommand> | null = null;
+  private failureFinalizationPromise: Promise<void> | null = null;
+  private sourceResolutionPromise: Promise<MigrationResolutionEvidence> | null = null;
+  private activeBootCommitPromise: Promise<ReleaseBootConfirmation> | null = null;
 
   constructor(
     readonly descriptor: ReleaseDatabaseDescriptor,
@@ -472,46 +504,190 @@ export class ReleaseDatabaseCoordinator {
 
   cancelPreparation(cause: unknown): void {
     if (this.descriptor.migrationId === null || this.committedState) return;
+    this.assertControllerTakeoverMutationOpen();
     const cancellation = cause instanceof Error
       ? cause
       : new Error("跨 Schema 数据库准备已取消。");
     this.preparationCancelled ??= cancellation;
-    this.stopSourceFreezeHeartbeat();
-    // Source writes may resume because this page is now forbidden from
-    // committing the target. Target cleanup waits for the in-flight Dexie
-    // transaction to settle so it cannot race a delete against materialization.
-    void this.notifySourceClients("ABORT_DATABASE_MIGRATION").catch(() => undefined);
-    if (this.preparePromise) {
-      void this.preparePromise
-        .catch(() => undefined)
-        .finally(() => this.failPreparedMigration(cancellation).catch(() => undefined));
+    // Keep renewing an already-established source freeze until the in-flight
+    // preparation reaches a terminal point and its shared failure finalizer can
+    // resolve the journal and release peers with one exact receipt.
+    if (!this.cancellationFinalizationPromise) {
+      const finalization = this.trackControllerTakeoverMutation(
+        () => this.finalizeCancelledPreparation(cancellation)
+      );
+      this.cancellationFinalizationPromise = finalization;
+      void finalization.catch(() => undefined);
     }
   }
 
+  private async finalizeCancelledPreparation(cancellation: Error): Promise<void> {
+    const preparation = this.preparePromise;
+    if (preparation) await Promise.allSettled([preparation]);
+    await this.ensureFailureFinalized(cancellation);
+  }
+
   private async notifySourceClients(
-    type: "ABORT_DATABASE_MIGRATION" | "FINISH_DATABASE_MIGRATION"
-  ): Promise<void> {
-    if (!this.sourceClientsFrozen || this.descriptor.migrationId === null) return;
+    type: MigrationResolutionCommand
+  ): Promise<MigrationResolutionEvidence | null> {
+    if (this.descriptor.migrationId === null) return null;
+    if (!this.sourceClientsFrozen) {
+      if (!this.sourceResolutionPromise) return null;
+      const evidence = await this.sourceResolutionPromise;
+      this.assertResolutionSupportsCommand(type, evidence);
+      return evidence;
+    }
+    if (!this.sourceResolutionPromise) {
+      const resolution = this.requestSourceClientResolution(type);
+      this.sourceResolutionPromise = resolution;
+      void resolution.catch(() => {
+        if (this.sourceResolutionPromise === resolution) {
+          // Preserve the exact freeze requestId so an ACK-loss retry can ask the
+          // worker to replay its bounded terminal receipt.
+          this.sourceResolutionPromise = null;
+        }
+      });
+    }
+    const evidence = await this.sourceResolutionPromise;
+    this.assertResolutionSupportsCommand(type, evidence);
+    return evidence;
+  }
+
+  private assertResolutionSupportsCommand(
+    type: MigrationResolutionCommand,
+    evidence: MigrationResolutionEvidence
+  ): void {
+    if (type !== "FINISH_DATABASE_MIGRATION") return;
+    if (
+      evidence.effectiveResolution !== "DATABASE_MIGRATION_COMMITTED" ||
+      !this.committedState ||
+      evidence.committedReceiptDigest !== this.committedState.receiptDigest
+    ) {
+      throw new Error("数据库提交确认没有取得与本地 commit receipt 一致的 committed resolution。");
+    }
+  }
+
+  private async requestSourceClientResolution(
+    type: MigrationResolutionCommand
+  ): Promise<MigrationResolutionEvidence> {
     this.stopSourceFreezeHeartbeat();
     await this.sourceFreezeHeartbeatPromise?.catch(() => undefined);
     const serviceWorkerController = navigator.serviceWorker?.controller;
+    const requestId = this.sourceFreezeRequestId;
     if (!serviceWorkerController) {
       throw new Error("数据库迁移写锁通知缺少受控 Service Worker 会话；保持当前写锁状态并失败关闭。");
     }
-    serviceWorkerController.postMessage({
+    if (!requestId) {
+      throw new Error("数据库迁移写锁通知缺少精确冻结请求标识；保持当前写锁状态并失败关闭。");
+    }
+    const response = await requestMigrationControlAck<{
+      type?: unknown;
+      resolutionProtocolVersion?: unknown;
+      accepted?: unknown;
+      reason?: unknown;
+      requestId?: unknown;
+      migrationId?: unknown;
+      requestedCommand?: unknown;
+      sourceGeneration?: unknown;
+      sourceDatabaseName?: unknown;
+      sourceSchema?: unknown;
+      targetGeneration?: unknown;
+      targetDatabaseName?: unknown;
+      targetSchema?: unknown;
+      effectiveResolution?: unknown;
+      committedGeneration?: unknown;
+      committedDatabaseName?: unknown;
+      committedSchema?: unknown;
+      committedMigrationId?: unknown;
+      committedReceiptDigest?: unknown;
+      peerClientCount?: unknown;
+      matchedClientCount?: unknown;
+      dispatchedClientCount?: unknown;
+      failedClientIds?: unknown;
+    }>(serviceWorkerController, {
       type,
-      requestId: this.sourceFreezeRequestId,
-      migrationId: this.descriptor.migrationId
-    });
+      resolutionProtocolVersion: 1,
+      requestId,
+      migrationId: this.descriptor.migrationId,
+      sourceGeneration: this.descriptor.sourceGeneration,
+      sourceDatabaseName: this.descriptor.sourceDatabaseName,
+      sourceSchema: this.descriptor.sourceSchema,
+      targetGeneration: this.descriptor.dbGeneration,
+      targetDatabaseName: this.descriptor.databaseName,
+      targetSchema: this.descriptor.targetSchema
+    }, "等待旧标签页迁移写锁释放回执超时。", SOURCE_RESOLUTION_MESSAGE_TIMEOUT_MS);
+    const effectiveResolutionIsSafe =
+      response.effectiveResolution === "DATABASE_MIGRATION_COMMITTED" ||
+      (type === "ABORT_DATABASE_MIGRATION" &&
+        response.effectiveResolution === "DATABASE_MIGRATION_ABORTED");
+    const committedIdentityMatches = response.effectiveResolution === "DATABASE_MIGRATION_COMMITTED"
+      ? response.committedGeneration === this.descriptor.dbGeneration &&
+        response.committedDatabaseName === this.descriptor.databaseName &&
+        response.committedSchema === this.descriptor.targetSchema &&
+        response.committedMigrationId === this.descriptor.migrationId
+      : response.committedGeneration === this.descriptor.sourceGeneration &&
+        response.committedDatabaseName === this.descriptor.sourceDatabaseName &&
+        response.committedSchema === this.descriptor.sourceSchema &&
+        isNullableProtocolString(response.committedMigrationId);
+    if (
+      navigator.serviceWorker?.controller !== serviceWorkerController ||
+      response.type !== "DATABASE_MIGRATION_RESOLUTION_ACK_V1" ||
+      response.resolutionProtocolVersion !== 1 ||
+      response.accepted !== true ||
+      response.reason !== "RESOLUTION_DISPATCHED" ||
+      response.requestId !== requestId ||
+      response.migrationId !== this.descriptor.migrationId ||
+      response.requestedCommand !== type ||
+      response.sourceGeneration !== this.descriptor.sourceGeneration ||
+      response.sourceDatabaseName !== this.descriptor.sourceDatabaseName ||
+      response.sourceSchema !== this.descriptor.sourceSchema ||
+      response.targetGeneration !== this.descriptor.dbGeneration ||
+      response.targetDatabaseName !== this.descriptor.databaseName ||
+      response.targetSchema !== this.descriptor.targetSchema ||
+      !effectiveResolutionIsSafe ||
+      !committedIdentityMatches ||
+      !isSha256Digest(response.committedReceiptDigest) ||
+      !Number.isSafeInteger(response.peerClientCount) ||
+      Number(response.peerClientCount) < 0 ||
+      !Number.isSafeInteger(response.matchedClientCount) ||
+      Number(response.matchedClientCount) < 0 ||
+      Number(response.matchedClientCount) > Number(response.peerClientCount) ||
+      response.dispatchedClientCount !== response.matchedClientCount ||
+      !Array.isArray(response.failedClientIds) ||
+      response.failedClientIds.length !== 0
+    ) {
+      throw new Error(`旧标签页迁移写锁释放未获精确回执：${migrationProtocolReason(response.reason)}`);
+    }
+    const evidence = Object.freeze({
+      requestedCommand: type,
+      effectiveResolution: response.effectiveResolution,
+      committedGeneration: response.committedGeneration,
+      committedDatabaseName: response.committedDatabaseName,
+      committedSchema: response.committedSchema,
+      committedMigrationId: response.committedMigrationId,
+      committedReceiptDigest: response.committedReceiptDigest
+    }) as MigrationResolutionEvidence;
+    this.assertResolutionSupportsCommand(type, evidence);
     this.sourceClientsFrozen = false;
     this.sourceFreezeRequestId = null;
     this.sourceFreezeHeartbeatPromise = null;
     this.sourceFreezeFailure = null;
     document.documentElement.dataset.dbSourceClientsFrozen = "false";
+    return evidence;
   }
 
   prepareStorage(): Promise<void> {
-    this.preparePromise ??= this.prepareStorageOnce();
+    try {
+      this.assertControllerTakeoverMutationOpen();
+    } catch (cause) {
+      return Promise.reject(cause);
+    }
+    this.preparePromise ??= this.trackControllerTakeoverMutation(
+      () => this.runWithFailureFinalization(
+        () => this.prepareStorageOnce(),
+        "数据库准备失败且失败收尾未能完整结束。"
+      )
+    );
     return this.preparePromise;
   }
 
@@ -864,25 +1040,96 @@ export class ReleaseDatabaseCoordinator {
     }
   }
 
-  async failPreparedMigration(cause: unknown): Promise<void> {
-    let resolution: "ABORT_DATABASE_MIGRATION" | "FINISH_DATABASE_MIGRATION" =
-      "ABORT_DATABASE_MIGRATION";
+  failPreparedMigration(cause: unknown): Promise<void> {
     try {
-      if (isPeerMigrationContention(cause)) return;
+      return this.trackControllerTakeoverMutation(
+        () => this.ensureFailureFinalized(cause)
+      );
+    } catch (failure) {
+      return Promise.reject(failure);
+    }
+  }
+
+  private ensureFailureFinalized(cause: unknown): Promise<void> {
+    if (this.failureFinalizationPromise) return this.failureFinalizationPromise;
+    const finalization = Promise.resolve().then(
+      () => this.failPreparedMigrationOnce(cause)
+    );
+    this.failureFinalizationPromise = finalization;
+    void finalization.catch(() => {
+      if (this.failureFinalizationPromise === finalization) {
+        // A failed full finalizer keeps the freeze identity intact. The journal
+        // transition promise remains sticky; a later entry can only retry the
+        // exact Service Worker resolution request, never failMigration itself.
+        this.failureFinalizationPromise = null;
+      }
+    });
+    return finalization;
+  }
+
+  private ensureFailureJournalTransition(
+    cause: unknown
+  ): Promise<MigrationResolutionCommand> {
+    if (this.failureJournalTransitionPromise) {
+      return this.failureJournalTransitionPromise;
+    }
+    const transition = Promise.resolve().then(
+      () => this.failPreparedMigrationJournalOnce(cause)
+    );
+    // The journal transition is an immutable, single-attempt control write.
+    // Keep both success and rejection sticky. A later finalizer may replay only
+    // the exact Service Worker resolution request; it must never infer that a
+    // rejected controller promise authorizes a second failMigration call.
+    this.failureJournalTransitionPromise = transition;
+    void transition.catch(() => undefined);
+    return transition;
+  }
+
+  private async failPreparedMigrationOnce(cause: unknown): Promise<void> {
+    const transition = await this.ensureFailureJournalTransition(cause).then(
+      (resolution) => ({ accepted: true as const, resolution }),
+      (failure: unknown) => ({
+        accepted: false as const,
+        // The worker independently verifies the committed pointer, so ABORT is
+        // only a conservative request label when the journal outcome is unknown.
+        resolution: "ABORT_DATABASE_MIGRATION" as const,
+        failure
+      })
+    );
+    const resolution = await this.notifySourceClients(transition.resolution).then(
+      () => ({ accepted: true as const }),
+      (failure: unknown) => ({ accepted: false as const, failure })
+    );
+    if (!transition.accepted && !resolution.accepted) {
+      throw new AggregateError(
+        [transition.failure, resolution.failure],
+        "数据库迁移失败回执写入及来源写锁释放均未成功完成。"
+      );
+    }
+    if (!transition.accepted) throw transition.failure;
+    if (!resolution.accepted) throw resolution.failure;
+  }
+
+  private async failPreparedMigrationJournalOnce(
+    cause: unknown
+  ): Promise<MigrationResolutionCommand> {
+    let resolution: MigrationResolutionCommand = "ABORT_DATABASE_MIGRATION";
+    try {
+      if (isPeerMigrationContention(cause)) return resolution;
       if (this.descriptor.migrationId === null || !this.migrationJournal) {
         // This page never owned a migration journal (for example its freeze
         // was rejected or it lost the boot race). Mark the failure explicitly
         // so diagnostics never linger in the misleading "pending" state.
         document.documentElement.dataset.dbMigrationPhase = "failed";
-        return;
+        return resolution;
       }
       if (this.migrationJournal.phase === "committed") {
         // The control pointer already moved atomically. Reopening the source here
         // would create a split-brain writer, so old tabs must converge to target.
         resolution = "FINISH_DATABASE_MIGRATION";
-        return;
+        return resolution;
       }
-      if (this.migrationJournal.phase === "failed") return;
+      if (this.migrationJournal.phase === "failed") return resolution;
       const controller = await this.controllerPromise;
       this.migrationJournal = await controller.failMigration(
         this.descriptor.migrationId,
@@ -895,15 +1142,111 @@ export class ReleaseDatabaseCoordinator {
         } : undefined
       );
       document.documentElement.dataset.dbMigrationPhase = "failed";
+      return resolution;
     } catch (failure) {
       document.documentElement.dataset.dbMigrationPhase = "failed";
       throw failure;
-    } finally {
-      await this.notifySourceClients(resolution);
     }
   }
 
+  private async runWithFailureFinalization<T>(
+    operation: () => Promise<T>,
+    finalizationMessage: string
+  ): Promise<T> {
+    try {
+      return await operation();
+    } catch (cause) {
+      try {
+        await this.ensureFailureFinalized(cause);
+      } catch (finalizationFailure) {
+        throw new AggregateError([cause, finalizationFailure], finalizationMessage);
+      }
+      throw cause;
+    }
+  }
+
+  private controllerTakeoverFrozenError(): Error {
+    const error = new Error("Service Worker 接管已冻结当前页面的发布控制写入。");
+    error.name = "ReleaseControllerTakeoverFrozenError";
+    return error;
+  }
+
+  private assertControllerTakeoverMutationOpen(): void {
+    if (this.controllerTakeoverFrozen) throw this.controllerTakeoverFrozenError();
+  }
+
+  private assertControllerTakeoverCommitOpen(): void {
+    this.assertControllerTakeoverMutationOpen();
+  }
+
+  private trackControllerTakeoverMutation<T>(operation: () => Promise<T>): Promise<T> {
+    this.assertControllerTakeoverMutationOpen();
+    let resolveMutation!: (value: T | PromiseLike<T>) => void;
+    let rejectMutation!: (reason?: unknown) => void;
+    const mutation = new Promise<T>((resolve, reject) => {
+      resolveMutation = resolve;
+      rejectMutation = reject;
+    });
+    // Register the admission placeholder before invoking user-controlled or
+    // mocked async code. A synchronous re-entry into freeze must observe this
+    // operation even though its concrete promise has not been returned yet.
+    // Admitted operations must never await freezeForControllerTakeover(): the
+    // drain deliberately waits for them, so such a dependency would deadlock.
+    this.activeControllerMutationPromises.add(mutation);
+    const remove = () => {
+      this.activeControllerMutationPromises.delete(mutation);
+    };
+    void mutation.then(remove, remove);
+    try {
+      void Promise.resolve(operation()).then(resolveMutation, rejectMutation);
+    } catch (cause) {
+      rejectMutation(cause);
+    }
+    return mutation;
+  }
+
+  private async drainControllerTakeoverMutations(): Promise<void> {
+    while (this.activeControllerMutationPromises.size > 0) {
+      const admitted = Array.from(this.activeControllerMutationPromises);
+      await Promise.allSettled(admitted);
+    }
+  }
+
+  /**
+   * Monotonically closes this page's independent release-control writer and
+   * all-settles every preparation, commit, or failure finalizer admitted before
+   * the close. The page never reopens this coordinator instance.
+   */
+  freezeForControllerTakeover(): Promise<void> {
+    if (this.controllerTakeoverDrainPromise) return this.controllerTakeoverDrainPromise;
+    this.controllerTakeoverFrozen = true;
+    const drain = this.drainControllerTakeoverMutations();
+    this.controllerTakeoverDrainPromise = drain;
+    return drain;
+  }
+
   async commitForBoot(): Promise<ReleaseBootConfirmation> {
+    this.assertControllerTakeoverCommitOpen();
+    if (this.activeBootCommitPromise) return this.activeBootCommitPromise;
+    const commit = this.trackControllerTakeoverMutation(
+      () => this.runWithFailureFinalization(
+        () => this.commitForBootUntilSettled(),
+        "数据库提交失败且失败收尾未能完整结束。"
+      )
+    );
+    this.activeBootCommitPromise = commit;
+    void commit.then(
+      () => {
+        if (this.activeBootCommitPromise === commit) this.activeBootCommitPromise = null;
+      },
+      () => {
+        if (this.activeBootCommitPromise === commit) this.activeBootCommitPromise = null;
+      }
+    );
+    return commit;
+  }
+
+  private async commitForBootUntilSettled(): Promise<ReleaseBootConfirmation> {
     await this.prepareStorage();
     const controller = await this.controllerPromise;
     // A peer page may commit the same migration while this page is sending its
@@ -911,6 +1254,7 @@ export class ReleaseDatabaseCoordinator {
     // path instead of failing the boot on a lease race.
     while (true) {
       try {
+        this.assertControllerTakeoverCommitOpen();
         return await this.commitForBootAttempt(controller);
       } catch (cause) {
         if (!isPeerMigrationContention(cause)) throw cause;
@@ -923,6 +1267,7 @@ export class ReleaseDatabaseCoordinator {
     controller: DatabaseGenerationController
   ): Promise<ReleaseBootConfirmation> {
     if (!this.targetRepository) throw new Error("目标数据库尚未准备。");
+    this.assertControllerTakeoverCommitOpen();
     const target = await this.verifiedTargetSnapshot();
     let state = await controller.readCommittedGeneration();
     if (
@@ -934,6 +1279,7 @@ export class ReleaseDatabaseCoordinator {
     }
 
     if (this.descriptor.migrationId !== null && state && sameSourceGeneration(state, this.descriptor)) {
+      this.assertControllerTakeoverCommitOpen();
       await this.renewSourceClientFreeze();
       this.assertSourceFreezeHealthy();
       const journal = await controller.commitMigration(this.descriptor.migrationId, {
@@ -942,6 +1288,7 @@ export class ReleaseDatabaseCoordinator {
       this.migrationJournal = journal;
       state = await controller.readCommittedGeneration();
     } else if (!state) {
+      this.assertControllerTakeoverCommitOpen();
       state = await controller.initializeCommittedGeneration({
         generation: this.descriptor.dbGeneration,
         databaseName: this.descriptor.databaseName,
@@ -951,6 +1298,7 @@ export class ReleaseDatabaseCoordinator {
       });
     } else if (samePhysicalGeneration(state, this.descriptor)) {
       if (state.committedBuild !== this.buildId) {
+        this.assertControllerTakeoverCommitOpen();
         state = await controller.commitCompatibleGenerationSnapshot({
           generation: this.descriptor.dbGeneration,
           databaseName: this.descriptor.databaseName,
@@ -974,7 +1322,17 @@ export class ReleaseDatabaseCoordinator {
     return { state, migrationReceiptDigest: state.receiptDigest };
   }
 
-  async acknowledgeServiceWorkerCommit(): Promise<void> {
+  acknowledgeServiceWorkerCommit(): Promise<void> {
+    try {
+      return this.trackControllerTakeoverMutation(
+        () => this.acknowledgeServiceWorkerCommitOnce()
+      );
+    } catch (failure) {
+      return Promise.reject(failure);
+    }
+  }
+
+  private async acknowledgeServiceWorkerCommitOnce(): Promise<void> {
     await this.notifySourceClients("FINISH_DATABASE_MIGRATION");
     this.targetDatabase?.unlockReleaseWrites();
     document.documentElement.dataset.dbMigrationPhase = "committed";

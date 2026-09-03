@@ -40,11 +40,15 @@ jobs:
       - run: node scripts/run-release-evidence-command.mjs --id typecheck --output tmp/release-evidence-receipts/typecheck.json -- npm run typecheck
       - run: node scripts/run-release-evidence-command.mjs --id unit --output tmp/release-evidence-receipts/unit.json -- npm test
       - run: node scripts/run-release-evidence-command.mjs --id build --output tmp/release-evidence-receipts/build.json -- npm run build
-      - run: node scripts/run-release-evidence-command.mjs --id boot --output tmp/release-evidence-receipts/boot.json -- npm run test:e2e:boot
-      - run: node scripts/run-release-evidence-command.mjs --id pwa --output tmp/release-evidence-receipts/pwa.json -- npm run test:e2e:pwa
-      - run: node scripts/run-release-evidence-command.mjs --id web-v1-flow --output tmp/release-evidence-receipts/web-v1-flow.json -- npm run test:e2e:web-v1-flow
+      - name: Lock the exact default v13 artifact before browser evidence
+        run: node scripts/release-artifact-identity.mjs --write --dist dist/web --lock tmp/release-artifact-identity.json
+      - run: node scripts/run-release-evidence-command.mjs --id boot --output tmp/release-evidence-receipts/boot.json -- npm run test:release:boot-artifact
+      - run: node scripts/run-release-evidence-command.mjs --id backup --output tmp/release-evidence-receipts/backup.json -- npm run test:release:backup-artifact
+      - run: node scripts/run-release-evidence-command.mjs --id pwa --output tmp/release-evidence-receipts/pwa.json -- npm run test:release:pwa-artifact
+      - run: node scripts/run-release-evidence-command.mjs --id web-v1-flow --output tmp/release-evidence-receipts/web-v1-flow.json -- npm run test:release:web-v1-artifact
       - run: node scripts/run-release-evidence-command.mjs --id cross-schema-v13-v16 --output tmp/release-evidence-receipts/cross-schema-v13-v16.json -- npm run test:e2e:cross-schema-v13-v16
       - run: node scripts/run-release-evidence-command.mjs --id orphaned-v13-recovery --output tmp/release-evidence-receipts/orphaned-v13-recovery.json -- npm run test:e2e:orphaned-v13-recovery
+      - run: node scripts/run-release-evidence-command.mjs --id artifact-stability --output tmp/release-evidence-receipts/artifact-stability.json -- node scripts/release-artifact-identity.mjs --verify --dist dist/web --lock tmp/release-artifact-identity.json
       - run: node scripts/run-release-evidence-command.mjs --id built-contract --output tmp/release-evidence-receipts/built-contract.json -- npm run verify:built-release-storage-manifest
       - name: Generate and verify engineering evidence
         run: >-
@@ -52,14 +56,24 @@ jobs:
           --channel default-v13
           --dist dist/web
           --receipts tmp/release-evidence-receipts
+          --artifact-lock tmp/release-artifact-identity.json
           --output dist/web/release-evidence.json
-          --require-receipts boot,build,built-contract,cross-schema-v13-v16,evidence-tooling,governance,orphaned-v13-recovery,pwa,typecheck,unit,web-v1-flow
-      - run: node scripts/verify-release-evidence.mjs --input dist/web/release-evidence.json --receipts tmp/release-evidence-receipts
+          --require-receipts artifact-stability,backup,boot,build,built-contract,cross-schema-v13-v16,evidence-tooling,governance,orphaned-v13-recovery,pwa,typecheck,unit,web-v1-flow
+      - run: node scripts/verify-release-evidence.mjs --input dist/web/release-evidence.json --receipts tmp/release-evidence-receipts --output tmp/release-evidence-receipts/formal-verification.json
       - uses: actions/upload-artifact@v4
         with:
           name: hakimi-default-v13-${{ github.run_id }}-${{ github.sha }}
           path: |
             dist/web
+            tmp/release-artifact-identity.json
             tmp/release-evidence-receipts
           if-no-files-found: error
+          retention-days: 30
+      - name: Upload failed Release Evidence diagnostics
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: hakimi-default-v13-failure-diagnostics-${{ github.run_id }}-${{ github.sha }}
+          path: tmp/release-evidence-receipts
+          if-no-files-found: warn
           retention-days: 30

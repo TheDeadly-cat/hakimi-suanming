@@ -636,6 +636,7 @@ export type FullBackupErrorCode =
   | "REVISION_CALCULATION_RECEIPT_INTEGRITY_MISMATCH"
   | "REVISION_CALCULATION_RECEIPT_CONTEXT_MISMATCH"
   | "DUPLICATE_REVISION_CALCULATION_REQUEST"
+  | "VERIFIED_REPLACEMENT_INVALID"
   | "CURRENT_DATA_CHANGED";
 
 export class FullBackupError extends Error {
@@ -733,6 +734,221 @@ export type VerifiedFullBackupReplacement = {
   incoming: FullBackupPreflightResult;
   expectedCurrentPayloadDigest: string;
 };
+
+const VERIFIED_FULL_BACKUP_REPLACEMENT_KEYS = Object.freeze([
+  "incoming",
+  "expectedCurrentPayloadDigest"
+] as const);
+
+const FULL_BACKUP_PREFLIGHT_RESULT_KEYS = Object.freeze([
+  "scope",
+  "manifest",
+  "payload",
+  "digests",
+  "migratedFromFormatVersion",
+  "remainingP111Gaps",
+  "eventTimeVerification"
+] as const);
+
+const FULL_BACKUP_MIGRATED_FORMAT_VERSIONS = new Set<unknown>([
+  LEGACY_FULL_BACKUP_FORMAT_VERSION,
+  PREVIOUS_FULL_BACKUP_FORMAT_VERSION,
+  KNOWLEDGE_FULL_BACKUP_FORMAT_VERSION,
+  SOURCE_RIGHTS_FULL_BACKUP_FORMAT_VERSION,
+  LIFECYCLE_FULL_BACKUP_FORMAT_VERSION,
+  EVENT_TIME_FULL_BACKUP_FORMAT_VERSION,
+  SAVED_VIEW_FULL_BACKUP_FORMAT_VERSION,
+  LOCAL_USER_DATA_FULL_BACKUP_FORMAT_VERSION,
+  RULE_REGISTRY_FULL_BACKUP_FORMAT_VERSION,
+  TZDB_MIGRATION_FULL_BACKUP_FORMAT_VERSION,
+  EVENT_TIME_MIGRATION_FULL_BACKUP_FORMAT_VERSION,
+  null
+]);
+
+const CANONICAL_FULL_BACKUP_SHA256 = /^[a-f0-9]{64}$/u;
+
+function invalidVerifiedFullBackupReplacement(message: string, cause?: unknown): never {
+  throw new FullBackupError(
+    "VERIFIED_REPLACEMENT_INVALID",
+    message,
+    cause === undefined ? undefined : { cause }
+  );
+}
+
+function captureExactOwnDataObject(
+  input: unknown,
+  expectedKeys: readonly string[],
+  label: string
+): Record<string, unknown> {
+  try {
+    if (
+      input === null
+      || typeof input !== "object"
+      || Array.isArray(input)
+      || ![Object.prototype, null].includes(Object.getPrototypeOf(input))
+    ) {
+      return invalidVerifiedFullBackupReplacement(`${label} must be a plain object.`);
+    }
+    const ownKeys = Reflect.ownKeys(input);
+    if (
+      ownKeys.length !== expectedKeys.length
+      || ownKeys.some((key) => typeof key !== "string" || !expectedKeys.includes(key))
+      || expectedKeys.some((key) => !ownKeys.includes(key))
+    ) {
+      return invalidVerifiedFullBackupReplacement(`${label} must contain exactly its required own keys.`);
+    }
+    const captured: Record<string, unknown> = {};
+    for (const key of expectedKeys) {
+      const descriptor = Object.getOwnPropertyDescriptor(input, key);
+      if (
+        !descriptor
+        || !descriptor.enumerable
+        || !Object.hasOwn(descriptor, "value")
+      ) {
+        return invalidVerifiedFullBackupReplacement(
+          `${label}.${key} must be an own enumerable data property.`
+        );
+      }
+      Object.defineProperty(captured, key, {
+        configurable: false,
+        enumerable: true,
+        value: descriptor.value,
+        writable: false
+      });
+    }
+    return Object.freeze(captured);
+  } catch (cause) {
+    if (cause instanceof FullBackupError) throw cause;
+    return invalidVerifiedFullBackupReplacement(`${label} could not be inspected safely.`, cause);
+  }
+}
+
+function requirePlainRecord(value: unknown, label: string): void {
+  try {
+    if (
+      value === null
+      || typeof value !== "object"
+      || Array.isArray(value)
+      || ![Object.prototype, null].includes(Object.getPrototypeOf(value))
+    ) {
+      invalidVerifiedFullBackupReplacement(`${label} must be a plain object.`);
+    }
+  } catch (cause) {
+    if (cause instanceof FullBackupError) throw cause;
+    invalidVerifiedFullBackupReplacement(`${label} could not be inspected safely.`, cause);
+  }
+}
+
+function requireExactOwnStringArray(
+  value: unknown,
+  expected: readonly string[],
+  label: string
+): void {
+  try {
+    if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype) {
+      invalidVerifiedFullBackupReplacement(`${label} must be an ordinary array.`);
+    }
+    const expectedOwnKeys = [
+      ...expected.map((_, index) => String(index)),
+      "length"
+    ];
+    const ownKeys = Reflect.ownKeys(value);
+    if (
+      ownKeys.length !== expectedOwnKeys.length
+      || ownKeys.some((key) => typeof key !== "string" || !expectedOwnKeys.includes(key))
+    ) {
+      invalidVerifiedFullBackupReplacement(`${label} must contain exactly the frozen entries.`);
+    }
+    const lengthDescriptor = Object.getOwnPropertyDescriptor(value, "length");
+    if (
+      !lengthDescriptor
+      || !Object.hasOwn(lengthDescriptor, "value")
+      || lengthDescriptor.value !== expected.length
+    ) {
+      invalidVerifiedFullBackupReplacement(`${label} length is invalid.`);
+    }
+    for (let index = 0; index < expected.length; index += 1) {
+      const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+      if (
+        !descriptor
+        || !descriptor.enumerable
+        || !Object.hasOwn(descriptor, "value")
+        || descriptor.value !== expected[index]
+      ) {
+        invalidVerifiedFullBackupReplacement(`${label} entry ${index} is invalid.`);
+      }
+    }
+  } catch (cause) {
+    if (cause instanceof FullBackupError) throw cause;
+    invalidVerifiedFullBackupReplacement(`${label} could not be inspected safely.`, cause);
+  }
+}
+
+/**
+ * Captures the Worker/JavaScript replacement envelope without invoking caller
+ * accessors. This is intentionally a lightweight shell check: the production
+ * repository remains the deep payload-shape authority, while the restore CAS
+ * digest is mandatory at this boundary and can never degrade to `undefined`.
+ */
+export function captureVerifiedFullBackupReplacement(
+  input: unknown
+): Readonly<VerifiedFullBackupReplacement> {
+  const root = captureExactOwnDataObject(
+    input,
+    VERIFIED_FULL_BACKUP_REPLACEMENT_KEYS,
+    "Verified full-backup replacement"
+  );
+  const incomingShell = captureExactOwnDataObject(
+    root.incoming,
+    FULL_BACKUP_PREFLIGHT_RESULT_KEYS,
+    "Verified full-backup replacement incoming result"
+  );
+  if (incomingShell.scope !== FULL_BACKUP_SCOPE) {
+    invalidVerifiedFullBackupReplacement(
+      "Verified full-backup replacement incoming scope is invalid."
+    );
+  }
+  requirePlainRecord(incomingShell.manifest, "Verified full-backup replacement manifest");
+  requirePlainRecord(incomingShell.payload, "Verified full-backup replacement payload");
+  requirePlainRecord(incomingShell.digests, "Verified full-backup replacement digests");
+  requirePlainRecord(
+    incomingShell.eventTimeVerification,
+    "Verified full-backup replacement event-time verification"
+  );
+  if (
+    !FULL_BACKUP_MIGRATED_FORMAT_VERSIONS.has(incomingShell.migratedFromFormatVersion)
+  ) {
+    invalidVerifiedFullBackupReplacement(
+      "Verified full-backup replacement provenance diagnostics are invalid."
+    );
+  }
+  requireExactOwnStringArray(
+    incomingShell.remainingP111Gaps,
+    FULL_BACKUP_P1_11_REMAINING_GAPS,
+    "Verified full-backup replacement remaining-gap ledger"
+  );
+  if (
+    typeof root.expectedCurrentPayloadDigest !== "string"
+    || !CANONICAL_FULL_BACKUP_SHA256.test(root.expectedCurrentPayloadDigest)
+  ) {
+    invalidVerifiedFullBackupReplacement(
+      "Verified full-backup replacement requires a lowercase SHA-256 current-payload digest."
+    );
+  }
+  const incoming = Object.freeze({
+    scope: incomingShell.scope,
+    manifest: incomingShell.manifest,
+    payload: incomingShell.payload,
+    digests: incomingShell.digests,
+    migratedFromFormatVersion: incomingShell.migratedFromFormatVersion,
+    remainingP111Gaps: incomingShell.remainingP111Gaps,
+    eventTimeVerification: incomingShell.eventTimeVerification
+  }) as FullBackupPreflightResult;
+  return Object.freeze({
+    incoming,
+    expectedCurrentPayloadDigest: root.expectedCurrentPayloadDigest
+  });
+}
 
 function canonicalFullPayload(snapshot: FullBackupPayload): FullBackupPayload {
   return fullBackupPayloadSchema.parse({
@@ -4074,19 +4290,20 @@ export async function verifyPreparedFullBackup(
     migratedFromFormatVersion: preparation.incoming.migratedFromFormatVersion
   };
   const safety = await preflightFullBackup(preparation.currentSafetyBackup);
-  return {
+  return captureVerifiedFullBackupReplacement({
     incoming,
     expectedCurrentPayloadDigest: safety.digests.payload
-  };
+  });
 }
 
 export async function applyVerifiedFullBackup(
   repository: CaseRepository,
   verified: VerifiedFullBackupReplacement
 ): Promise<FullBackupPreflightResult> {
+  const capturedVerified = captureVerifiedFullBackupReplacement(verified);
   try {
-    await repository.replaceFullDataSnapshot(verified.incoming.payload, {
-      expectedCurrentPayloadDigest: verified.expectedCurrentPayloadDigest
+    await repository.replaceFullDataSnapshot(capturedVerified.incoming.payload, {
+      expectedCurrentPayloadDigest: capturedVerified.expectedCurrentPayloadDigest
     });
   } catch (cause) {
     if (!(cause instanceof FullDataReplaceConflictError)) throw cause;
@@ -4096,7 +4313,7 @@ export async function applyVerifiedFullBackup(
       { cause }
     );
   }
-  return verified.incoming;
+  return capturedVerified.incoming;
 }
 
 export async function applyPreparedFullBackup(

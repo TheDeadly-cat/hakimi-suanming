@@ -26,21 +26,33 @@ import {
 } from "./lib/service-worker-boot-ack";
 import {
   isShadowDatabaseRelease,
-  serializeReleaseStorageManifest
+  parseReleaseDatabaseDescriptor,
+  serializeReleaseStorageManifest,
+  type ReleaseDatabaseDescriptor
 } from "../release-protocol";
+import { ReleaseControllerTakeoverWriteLatch } from "./lib/release-controller-takeover-write-fence";
+import {
+  controllerTakeoverFailureFromNack,
+  createControllerTakeoverScheduler,
+  type ControllerTakeoverFailure,
+  type ControllerTakeoverFailureOutcome
+} from "./lib/service-worker-takeover-retry";
 import "./styles.css";
 
 const pageBuildVersion = document.querySelector<HTMLMetaElement>('meta[name="hakimi-build-version"]')?.content;
 const shadowDatabaseRelease = isShadowDatabaseRelease(CURRENT_RELEASE_DATABASE);
+const releaseControllerTakeoverWriteLatch = new ReleaseControllerTakeoverWriteLatch();
 globalThis.__HAKIMI_RESEARCH_DATABASE_RUNTIME__ = {
   databaseName: CURRENT_RELEASE_DATABASE.databaseName,
   targetSchema: CURRENT_RELEASE_DATABASE.targetSchema,
-  releaseWritesLocked: shadowDatabaseRelease
+  releaseWritesLocked: shadowDatabaseRelease,
+  controllerTakeoverWriteFence: releaseControllerTakeoverWriteLatch.facade
 };
 document.documentElement.dataset.dbGeneration = CURRENT_RELEASE_DATABASE.dbGeneration;
 document.documentElement.dataset.dbSchema = String(CURRENT_RELEASE_DATABASE.targetSchema);
 document.documentElement.dataset.dbManifestDigest = CURRENT_RELEASE_STORAGE_MANIFEST_DIGEST ?? "development";
 document.documentElement.dataset.dbMigrationPhase = shadowDatabaseRelease ? "pending" : "bridge";
+document.documentElement.dataset.dbControllerTakeoverWriteFrozen = "false";
 // Pages may canonicalize shareable URLs after they mount. Mark the whole
 // readiness window explicitly so those effects cannot change the route that
 // the production boot verifier is still proving.
@@ -200,6 +212,85 @@ function isBoundedProtocolString(value: unknown, maxLength: number): value is st
     && value.length > 0
     && value.length <= maxLength
     && value === value.trim();
+}
+
+function releaseDatabaseDescriptorsEqual(
+  left: ReleaseDatabaseDescriptor,
+  right: ReleaseDatabaseDescriptor
+): boolean {
+  return (
+    left.protocolVersion === right.protocolVersion &&
+    left.dbGeneration === right.dbGeneration &&
+    left.databaseName === right.databaseName &&
+    left.targetSchema === right.targetSchema &&
+    left.minReadableSchema === right.minReadableSchema &&
+    left.maxReadableSchema === right.maxReadableSchema &&
+    left.migrationId === right.migrationId &&
+    left.sourceGeneration === right.sourceGeneration &&
+    left.sourceDatabaseName === right.sourceDatabaseName &&
+    left.sourceSchema === right.sourceSchema &&
+    left.acceptedCommittedMigrationIds.length === right.acceptedCommittedMigrationIds.length &&
+    left.acceptedCommittedMigrationIds.every(
+      (migrationId, index) => migrationId === right.acceptedCommittedMigrationIds[index]
+    )
+  );
+}
+
+function releaseControllerTakeoverMatchesCurrentPage(target: ReleaseDatabaseDescriptor): boolean {
+  // This protocol is only for a new build over the same database descriptor.
+  // Cross-Schema releases must keep using the separately governed migration
+  // protocol; accepting its source pointer here would bypass that boundary.
+  return releaseDatabaseDescriptorsEqual(target, CURRENT_RELEASE_DATABASE);
+}
+
+function isControllerTakeoverRequestId(value: unknown): value is string {
+  return typeof value === "string" &&
+    /^takeover-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(value);
+}
+
+class ControllerTakeoverRequestError extends Error {
+  readonly failure: ControllerTakeoverFailure;
+
+  constructor(reasonCode: string, outcome: ControllerTakeoverFailureOutcome) {
+    super(`Service Worker 接管激活请求失败：${reasonCode}`);
+    this.name = "ControllerTakeoverRequestError";
+    this.failure = Object.freeze({ reasonCode, outcome });
+  }
+}
+
+function controllerTakeoverFailure(reason: unknown): ControllerTakeoverFailure {
+  if (reason instanceof ControllerTakeoverRequestError) return reason.failure;
+  return Object.freeze({
+    reasonCode: "UNCLASSIFIED_REQUEST_FAILURE",
+    outcome: "commit_outcome_unknown" as const
+  });
+}
+
+const RELEASE_DATABASE_DESCRIPTOR_KEYS = [
+  "acceptedCommittedMigrationIds",
+  "databaseName",
+  "dbGeneration",
+  "maxReadableSchema",
+  "migrationId",
+  "minReadableSchema",
+  "protocolVersion",
+  "sourceDatabaseName",
+  "sourceGeneration",
+  "sourceSchema",
+  "targetSchema"
+] as const;
+
+function parseExactReleaseDatabaseDescriptor(input: unknown): ReleaseDatabaseDescriptor {
+  if (
+    input === null ||
+    typeof input !== "object" ||
+    Array.isArray(input) ||
+    Object.getPrototypeOf(input) !== Object.prototype ||
+    Object.keys(input).sort().join(",") !== RELEASE_DATABASE_DESCRIPTOR_KEYS.join(",")
+  ) {
+    throw new Error("Service Worker 接管发布描述符形状无效。");
+  }
+  return parseReleaseDatabaseDescriptor(input);
 }
 
 async function verifyCalculationCore(): Promise<void> {
@@ -391,10 +482,15 @@ if ("serviceWorker" in navigator) {
 
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
   let frozenMigration: {
+    requestId: string;
     migrationId: string;
+    sourceGeneration: string;
+    sourceDatabaseName: string;
+    sourceSchema: number;
     targetGeneration: string;
     targetDatabaseName: string;
     targetSchema: number;
+    sourceController: ServiceWorker;
     timer: number | null;
   } | null = null;
 
@@ -448,9 +544,21 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
     }, 30_000);
   };
 
+  let activeControllerTakeoverFreeze: {
+    requestId: string;
+    sourceBuildVersion: string;
+    targetBuildVersion: string;
+    sourceController: ServiceWorker;
+    drain: Promise<void>;
+  } | null = null;
+
   navigator.serviceWorker.addEventListener("message", (event: MessageEvent<{
     type?: unknown;
     requestId?: unknown;
+    sourceBuildVersion?: unknown;
+    targetBuildVersion?: unknown;
+    sourceRelease?: unknown;
+    targetRelease?: unknown;
     migrationId?: unknown;
     sourceGeneration?: unknown;
     sourceDatabaseName?: unknown;
@@ -460,9 +568,102 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
     targetSchema?: unknown;
   }>) => {
     const message = event.data;
+    if (message?.type === "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_V1") {
+      // This is deliberately the first state mutation in the handler. Parsing,
+      // dynamic imports and transaction draining may all yield; the page must
+      // already be unable to start another production write before they do.
+      releaseControllerTakeoverWriteLatch.latch("pre_activation_freeze");
+      document.documentElement.dataset.dbControllerTakeoverWriteFrozen = "true";
+      document.documentElement.dataset.dbControllerTakeoverWriteFreezePhase = "draining";
+      const responsePort = event.ports[0];
+      if (!responsePort) return;
+      const respond = (accepted: boolean, reason: string) => {
+        try {
+          responsePort.postMessage({
+            type: "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_ACK_V1",
+            requestId: message.requestId,
+            sourceBuildVersion: message.sourceBuildVersion,
+            targetBuildVersion: message.targetBuildVersion,
+            accepted,
+            reason
+          });
+        } catch {
+          // The active A worker owns timeout and fails activation closed.
+        }
+      };
+      void (async () => {
+        try {
+          const messageSource = event.source;
+          if (
+            messageSource === null ||
+            messageSource !== navigator.serviceWorker.controller ||
+            !isControllerTakeoverRequestId(message.requestId) ||
+            !isBoundedProtocolString(pageBuildVersion, 256) ||
+            message.sourceBuildVersion !== pageBuildVersion ||
+            !isBoundedProtocolString(message.targetBuildVersion, 256) ||
+            message.targetBuildVersion === pageBuildVersion
+          ) {
+            throw new Error("Service Worker 接管冻结消息身份无效。");
+          }
+          const sourceController = messageSource as ServiceWorker;
+          const sourceRelease = parseExactReleaseDatabaseDescriptor(message.sourceRelease);
+          const targetRelease = parseExactReleaseDatabaseDescriptor(message.targetRelease);
+          if (
+            !releaseDatabaseDescriptorsEqual(sourceRelease, CURRENT_RELEASE_DATABASE) ||
+            !releaseControllerTakeoverMatchesCurrentPage(targetRelease)
+          ) {
+            throw new Error("Service Worker 接管冻结消息发布代际不匹配。");
+          }
+          const existing = activeControllerTakeoverFreeze;
+          if (existing?.requestId === message.requestId) {
+            if (
+              existing.sourceBuildVersion !== message.sourceBuildVersion ||
+              existing.targetBuildVersion !== message.targetBuildVersion ||
+              existing.sourceController !== sourceController
+            ) {
+              throw new Error("当前页面已锁存另一项 Service Worker 接管冻结请求。");
+            }
+            await existing.drain;
+            respond(true, "WRITES_DRAINED");
+            return;
+          }
+          // A failed pre-commit session never unlocks this document. A later
+          // exact request from the same current controller may rebind the
+          // already-closed latch and establish a fresh ordering barrier.
+          const session = {
+            requestId: message.requestId,
+            sourceBuildVersion: pageBuildVersion,
+            targetBuildVersion: message.targetBuildVersion,
+            sourceController,
+            drain: Promise.resolve()
+          };
+          session.drain = (async () => {
+            await releaseDatabaseCoordinator.freezeForControllerTakeover();
+            const { caseRepository } = await import("@hakimi/storage");
+            await caseRepository.database.drainControllerTakeoverWrites();
+            if (
+              activeControllerTakeoverFreeze !== session ||
+              navigator.serviceWorker.controller !== sourceController ||
+              !releaseControllerTakeoverWriteLatch.locked
+            ) {
+              throw new Error("Service Worker 接管冻结排空期间控制器身份已变化。");
+            }
+          })();
+          activeControllerTakeoverFreeze = session;
+          await session.drain;
+          document.documentElement.dataset.dbControllerTakeoverWriteFreezePhase = "drained";
+          respond(true, "WRITES_DRAINED");
+        } catch (reason) {
+          document.documentElement.dataset.dbControllerTakeoverWriteFreezePhase = "failed";
+          respond(false, reason instanceof Error ? reason.name : "FREEZE_FAILED");
+        }
+      })();
+      return;
+    }
     if (message?.type === "FREEZE_DATABASE_WRITES") {
       const responsePort = event.ports[0];
       if (!responsePort) return;
+      const sourceController = navigator.serviceWorker.controller;
       const respond = (payload: Record<string, unknown>) => {
         try {
           responsePort.postMessage(payload);
@@ -471,23 +672,17 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
         }
       };
       void (async () => {
-        const isSource =
-          message.sourceGeneration === CURRENT_RELEASE_DATABASE.dbGeneration &&
-          message.sourceDatabaseName === CURRENT_RELEASE_DATABASE.databaseName &&
-          message.sourceSchema === CURRENT_RELEASE_DATABASE.targetSchema;
-        if (!isSource) {
-          respond({
-            type: "DATABASE_WRITES_FROZEN",
-            requestId: message.requestId,
-            accepted: true,
-            reason: "CLIENT_NOT_SOURCE"
-          });
-          return;
-        }
         let sourceWritesLocked = false;
         try {
           if (
+            sourceController === null ||
+            event.source !== sourceController ||
+            !isBoundedProtocolString(message.requestId, 128) ||
             !isBoundedProtocolString(message.migrationId, 128) ||
+            !isBoundedProtocolString(message.sourceGeneration, 128) ||
+            !isBoundedProtocolString(message.sourceDatabaseName, 512) ||
+            !Number.isSafeInteger(message.sourceSchema) ||
+            Number(message.sourceSchema) <= 0 ||
             !isBoundedProtocolString(message.targetGeneration, 128) ||
             !isBoundedProtocolString(message.targetDatabaseName, 512) ||
             !Number.isSafeInteger(message.targetSchema) ||
@@ -495,9 +690,27 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
           ) {
             throw new Error("旧标签页收到的迁移冻结消息无效。");
           }
+          const isSource =
+            message.sourceGeneration === CURRENT_RELEASE_DATABASE.dbGeneration &&
+            message.sourceDatabaseName === CURRENT_RELEASE_DATABASE.databaseName &&
+            message.sourceSchema === CURRENT_RELEASE_DATABASE.targetSchema;
+          if (!isSource) {
+            respond({
+              type: "DATABASE_WRITES_FROZEN",
+              requestId: message.requestId,
+              accepted: true,
+              reason: "CLIENT_NOT_SOURCE"
+            });
+            return;
+          }
           if (frozenMigration) {
             const matchesExistingFreeze =
+              frozenMigration.sourceController === sourceController &&
+              frozenMigration.requestId === message.requestId &&
               frozenMigration.migrationId === message.migrationId &&
+              frozenMigration.sourceGeneration === message.sourceGeneration &&
+              frozenMigration.sourceDatabaseName === message.sourceDatabaseName &&
+              frozenMigration.sourceSchema === message.sourceSchema &&
               frozenMigration.targetGeneration === message.targetGeneration &&
               frozenMigration.targetDatabaseName === message.targetDatabaseName &&
               frozenMigration.targetSchema === message.targetSchema;
@@ -522,10 +735,15 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
           // ReleaseDatabaseWriteLockedError instead of a generic closed-DB error.
           caseRepository.database.close({ disableAutoOpen: false });
           frozenMigration = {
+            requestId: message.requestId,
             migrationId: message.migrationId,
+            sourceGeneration: message.sourceGeneration,
+            sourceDatabaseName: message.sourceDatabaseName,
+            sourceSchema: Number(message.sourceSchema),
             targetGeneration: message.targetGeneration,
             targetDatabaseName: message.targetDatabaseName,
             targetSchema: Number(message.targetSchema),
+            sourceController,
             timer: null
           };
           document.documentElement.dataset.dbSourceWriteFrozen = "true";
@@ -552,10 +770,23 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
       })();
       return;
     }
+    const resolutionMatchesFrozenMigration = (() => {
+      const current = frozenMigration;
+      return current !== null &&
+        navigator.serviceWorker.controller === current.sourceController &&
+        event.source === current.sourceController &&
+        message?.requestId === current.requestId &&
+        message?.migrationId === current.migrationId &&
+        message?.sourceGeneration === current.sourceGeneration &&
+        message?.sourceDatabaseName === current.sourceDatabaseName &&
+        message?.sourceSchema === current.sourceSchema &&
+        message?.targetGeneration === current.targetGeneration &&
+        message?.targetDatabaseName === current.targetDatabaseName &&
+        message?.targetSchema === current.targetSchema;
+    })();
     if (
       message?.type === "DATABASE_MIGRATION_ABORTED" &&
-      typeof message.migrationId === "string" &&
-      frozenMigration?.migrationId === message.migrationId
+      resolutionMatchesFrozenMigration
     ) {
       if (frozenMigration.timer !== null) window.clearTimeout(frozenMigration.timer);
       frozenMigration = null;
@@ -564,8 +795,7 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
     }
     if (
       message?.type === "DATABASE_MIGRATION_COMMITTED" &&
-      typeof message.migrationId === "string" &&
-      frozenMigration?.migrationId === message.migrationId
+      resolutionMatchesFrozenMigration
     ) {
       if (frozenMigration.timer !== null) window.clearTimeout(frozenMigration.timer);
       window.location.reload();
@@ -573,6 +803,7 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
   });
 
   const startServiceWorkerLifecycle = () => {
+    const controllerPresentAtLifecycleStart = Boolean(navigator.serviceWorker.controller);
     const updateControlState = () => {
       document.documentElement.dataset.swControlled = String(Boolean(navigator.serviceWorker.controller));
     };
@@ -670,24 +901,187 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
       return activeBootConfirmation;
     };
 
+    const requestInstalledGenerationActivation = (controller: ServiceWorker): Promise<void> =>
+      new Promise((resolve, reject) => {
+        if (!pageBuildVersion || navigator.serviceWorker.controller !== controller) {
+          reject(new ControllerTakeoverRequestError(
+            "SOURCE_CONTROLLER_CHANGED",
+            "known_not_committed"
+          ));
+          return;
+        }
+        const requestId = `takeover-${crypto.randomUUID()}`;
+        const channel = new MessageChannel();
+        const timeout = window.setTimeout(() => {
+          channel.port1.close();
+          // The active worker can enter commit before this outer acknowledgement
+          // arrives. A timeout therefore cannot prove that commit did not happen.
+          reject(new ControllerTakeoverRequestError(
+            "REQUEST_ACK_TIMEOUT",
+            "commit_outcome_unknown"
+          ));
+          // The active worker owns a 60 s fail-closed preparation lease and may
+          // need a 15 s client drain plus its bounded commit handshake.
+        }, 70_000);
+        channel.port1.onmessage = (event: MessageEvent<{
+          type?: unknown;
+          requestId?: unknown;
+          sourceBuildVersion?: unknown;
+          targetBuildVersion?: unknown;
+          targetRelease?: unknown;
+          accepted?: unknown;
+          reason?: unknown;
+        }>) => {
+          window.clearTimeout(timeout);
+          channel.port1.close();
+          try {
+            const acknowledgement = event.data;
+            if (
+              acknowledgement?.type !== "REQUEST_INSTALLED_GENERATION_ACTIVATION_ACK_V1" ||
+              acknowledgement.requestId !== requestId ||
+              acknowledgement.sourceBuildVersion !== pageBuildVersion
+            ) {
+              throw new ControllerTakeoverRequestError(
+                "INVALID_ACK_IDENTITY",
+                "commit_outcome_unknown"
+              );
+            }
+            if (acknowledgement.accepted === false) {
+              if (!isBoundedProtocolString(acknowledgement.reason, 256)) {
+                throw new ControllerTakeoverRequestError(
+                  "INVALID_NACK_REASON",
+                  "commit_outcome_unknown"
+                );
+              }
+              throw new ControllerTakeoverRequestError(
+                acknowledgement.reason,
+                controllerTakeoverFailureFromNack(acknowledgement.reason).outcome
+              );
+            }
+            if (
+              acknowledgement.accepted !== true ||
+              acknowledgement.reason !== "ALL_CLIENTS_DRAINED_BEFORE_SKIP_WAITING" ||
+              !isBoundedProtocolString(acknowledgement.targetBuildVersion, 256) ||
+              acknowledgement.targetBuildVersion === pageBuildVersion
+            ) {
+              throw new ControllerTakeoverRequestError(
+                "INVALID_ACCEPTED_ACK",
+                "commit_outcome_unknown"
+              );
+            }
+            const targetRelease = parseExactReleaseDatabaseDescriptor(acknowledgement.targetRelease);
+            if (!releaseControllerTakeoverMatchesCurrentPage(targetRelease)) {
+              throw new ControllerTakeoverRequestError(
+                "TARGET_RELEASE_MISMATCH",
+                "commit_outcome_unknown"
+              );
+            }
+            document.documentElement.dataset.swTakeoverTargetBuild = acknowledgement.targetBuildVersion;
+            resolve();
+          } catch (reason) {
+            reject(reason instanceof ControllerTakeoverRequestError
+              ? reason
+              : new ControllerTakeoverRequestError(
+                "INVALID_ACCEPTED_ACK",
+                "commit_outcome_unknown"
+              ));
+          }
+        };
+        try {
+          controller.postMessage({
+            type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+            requestId,
+            sourceBuildVersion: pageBuildVersion,
+            sourceRelease: CURRENT_RELEASE_DATABASE
+          }, [channel.port2]);
+        } catch {
+          window.clearTimeout(timeout);
+          channel.port1.close();
+          channel.port2.close();
+          reject(new ControllerTakeoverRequestError(
+            "REQUEST_POST_FAILED",
+            "known_not_committed"
+          ));
+          return;
+        }
+        // Once postMessage returns, the active worker may already have entered
+        // commit. A diagnostic DOM write is not part of that transport and must
+        // never reclassify the request as known-not-dispatched or authorize a
+        // retry if a host object setter happens to throw.
+        try {
+          document.documentElement.dataset.swTakeoverPreparation = "requested";
+        } catch {
+          // Telemetry is best-effort; request certainty stays outcome-unknown
+          // until the authenticated acknowledgement settles it.
+        }
+      });
+
+    let controllerTakeoverPromotionClosed = false;
+    let closeControllerTakeoverPromotion: ((reasonCode: string) => void) | null = null;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
+      // This document belongs to the controller epoch that just ended. It may
+      // confirm the new worker only through the normal navigation/boot path;
+      // it must never promote another waiting worker in place.
+      controllerTakeoverPromotionClosed = true;
+      closeControllerTakeoverPromotion?.("CONTROLLER_CHANGED_AFTER_DISPATCH");
+      releaseControllerTakeoverWriteLatch.latch("controller_changed");
+      void releaseDatabaseCoordinator.freezeForControllerTakeover().catch(() => undefined);
+      document.documentElement.dataset.dbControllerTakeoverWriteFrozen = "true";
+      document.documentElement.dataset.dbControllerTakeoverWriteFreezePhase = "controller_changed";
       void confirmActiveWorkerBoot().catch(() => undefined);
     });
     navigator.serviceWorker
       .register("/sw.js", { updateViaCache: "none" })
       .then(async (registration) => {
         document.documentElement.dataset.swRegistered = "true";
-        const activationRequested = new WeakSet<ServiceWorker>();
         const observedInstallers = new WeakSet<ServiceWorker>();
         let activationPromotionEnabled = false;
         let activationWindowDeadline = 0;
         let activationWindowTimer: number | null = null;
+        const takeoverScheduler = createControllerTakeoverScheduler<
+          ServiceWorker,
+          ServiceWorker,
+          number
+        >({
+          clock: {
+            setTimeout: (callback, delayMs) => window.setTimeout(callback, delayMs),
+            clearTimeout: (timer) => window.clearTimeout(timer)
+          },
+          getWaitingWorker: () => registration.waiting,
+          getController: () => navigator.serviceWorker.controller,
+          isWaitingWorkerReady: (worker) => worker.state === "installed",
+          requestActivation: (controller) => requestInstalledGenerationActivation(controller),
+          classifyFailure: controllerTakeoverFailure,
+          onTransition: (transition) => {
+            document.documentElement.dataset.swTakeoverPreparation =
+              transition.kind === "succeeded"
+                ? "activation_dispatched"
+                : transition.kind === "retry_scheduled"
+                  ? "retry_scheduled"
+                  : transition.kind === "commit_outcome_unknown"
+                    ? "commit_outcome_unknown"
+                    : transition.kind === "exhausted"
+                      ? "retry_exhausted"
+                      : transition.kind === "terminal"
+                        ? "failed_closed_terminal"
+                        : document.documentElement.dataset.swTakeoverPreparation;
+          }
+        });
+        closeControllerTakeoverPromotion = (reasonCode: string) => {
+          activationPromotionEnabled = false;
+          activationWindowDeadline = 0;
+          if (activationWindowTimer !== null) {
+            window.clearTimeout(activationWindowTimer);
+            activationWindowTimer = null;
+          }
+          takeoverScheduler.close(reasonCode);
+        };
+        if (controllerTakeoverPromotionClosed) {
+          closeControllerTakeoverPromotion("CONTROLLER_CHANGED_BEFORE_SCHEDULER_READY");
+        }
         const promoteWaiting = () => {
           if (!activationPromotionEnabled) return;
-          const currentWaiting = registration.waiting;
-          if (currentWaiting?.state !== "installed" || activationRequested.has(currentWaiting)) return;
-          activationRequested.add(currentWaiting);
-          currentWaiting.postMessage({ type: "ACTIVATE_INSTALLED_GENERATION" });
+          takeoverScheduler.promoteWaiting();
         };
         const observeInstalling = () => {
           const installing = registration.installing;
@@ -700,6 +1094,10 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
           promoteWhenInstalled();
         };
         const runActivationWindow = () => {
+          if (!activationPromotionEnabled) {
+            activationWindowTimer = null;
+            return;
+          }
           observeInstalling();
           if (registration.installing) {
             // 预缓存可能受网络与设备速度影响；安装尚未结束时持续顺延，
@@ -740,6 +1138,19 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
         } catch {
           return;
         }
+        if (
+          !controllerPresentAtLifecycleStart &&
+          releaseControllerTakeoverWriteLatch.reason === "controller_changed"
+        ) {
+          // The first claim also latches this document before any asynchronous
+          // identity check. After its exact BOOT_OK succeeds, a full navigation
+          // creates the first writable controlled page; the old document is
+          // never unlocked in place.
+          document.documentElement.dataset.swGenerationConvergence = "first_control_reload";
+          window.location.reload();
+          return;
+        }
+        if (controllerTakeoverPromotionClosed) return;
         activationPromotionEnabled = true;
         reconcileGenerationCandidates();
 

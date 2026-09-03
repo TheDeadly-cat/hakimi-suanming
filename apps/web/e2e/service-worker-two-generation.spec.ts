@@ -1,10 +1,32 @@
-import { execFile } from "node:child_process";
 import { createServer, type Server } from "node:http";
-import { mkdtemp, readFile, readdir, rm, stat } from "node:fs/promises";
-import os from "node:os";
+import { stat } from "node:fs/promises";
 import path from "node:path";
-import { promisify } from "node:util";
-import { chromium, expect, test, type BrowserContext, type Page } from "@playwright/test";
+import {
+  chromium,
+  expect,
+  test,
+  type BrowserContext,
+  type Page,
+  type TestInfo
+} from "@playwright/test";
+import {
+  releasePersistentContextOptionsForProject,
+  requireReleaseBrowserRuntimeProduct
+} from "./release-browser-persistent-context.ts";
+import {
+  SW_TWO_GENERATION_FIXTURE_ANNOTATIONS,
+  SW_TWO_GENERATION_FIXTURE_SCENARIO_IDS
+} from "../playwright.sw-two-generation-fixture-result.ts";
+import {
+  isCanonicalSwTwoGenerationArtifactPath,
+  isSwTwoGenerationArtifactSetSnapshot,
+  isSwTwoGenerationArtifactSnapshot,
+  readSwTwoGenerationArtifactSnapshot,
+  snapshotSwTwoGenerationArtifactSetDirectory,
+  type SwTwoGenerationArtifactFileIdentity,
+  type SwTwoGenerationArtifactSetSnapshot,
+  type SwTwoGenerationArtifactSnapshot
+} from "../sw-two-generation-artifact-identity.ts";
 import {
   MOBILE_VIEWPORT,
   collectConsoleProblems,
@@ -13,24 +35,16 @@ import {
   waitForAppReady,
   waitForServiceWorker
 } from "./full-backup-helpers";
+import {
+  captureStorageV13NativeReadonlySnapshot,
+  storageV13ChangedStores,
+  storageV13SnapshotsEqual
+} from "./storage-v13-native-readonly";
 
-const execFileAsync = promisify(execFile);
-const workspaceRoot = path.resolve(import.meta.dirname, "../../..");
-const viteBin = path.resolve(workspaceRoot, "node_modules/vite/bin/vite.js");
-const fixtureConfig = path.resolve(workspaceRoot, "apps/web/vite.sw-upgrade.config.ts");
 const shellCachePrefix = "hakimi-shell-";
 const cacheMetaPath = "/__hakimi_cache_meta__";
 
-type FixtureFault = "none" | "research-route";
-
-type GenerationFixture = {
-  name: string;
-  directory: string;
-  version: string;
-  entryPath: string;
-  markerPath: string;
-  researchRoutePath: string;
-};
+type GenerationFixture = SwTwoGenerationArtifactSnapshot;
 
 type CacheGeneration = {
   cacheName: string;
@@ -44,6 +58,10 @@ type ServerRequest = {
   method: string;
   pathname: string;
   status: number;
+  artifactPath?: string;
+  artifactSize?: number;
+  artifactSha256?: string;
+  artifactSetSha256: string;
 };
 
 type SwitchServer = {
@@ -53,7 +71,6 @@ type SwitchServer = {
   close: () => Promise<void>;
 };
 
-let fixtureRoot = "";
 let stableA: GenerationFixture;
 let healthyB: GenerationFixture;
 let brokenB: GenerationFixture;
@@ -74,108 +91,121 @@ function contentType(filePath: string): string {
   }
 }
 
-async function buildGeneration(name: string, fault: FixtureFault): Promise<GenerationFixture> {
-  const directory = path.join(fixtureRoot, name);
-  const result = await execFileAsync(process.execPath, [viteBin, "build", "--config", fixtureConfig], {
-    cwd: workspaceRoot,
-    env: {
-      ...process.env,
-      HAKIMI_SW_UPGRADE_GENERATION: name,
-      HAKIMI_SW_UPGRADE_OUT_DIR: directory,
-      HAKIMI_SW_UPGRADE_FAULT: fault
-    },
-    maxBuffer: 50 * 1024 * 1024,
-    windowsHide: true
-  });
-  if (result.stderr && !result.stderr.includes("Some chunks are larger than")) {
-    throw new Error(`构建 ${name} 输出了未预期 stderr：\n${result.stderr}`);
+function artifactPathForRequest(pathname: string): string | null {
+  if (pathname.includes("%")) return null;
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    return null;
   }
-
-  const index = await readFile(path.join(directory, "index.html"), "utf8");
-  const version = index.match(/<meta name="hakimi-build-version" content="([^"]+)"/u)?.[1];
-  const entryPath = index.match(/<script[^>]+src="([^"]+\.js)"/u)?.[1];
-  const assetNames = await readdir(path.join(directory, "assets"));
-  const researchRouteName = assetNames.find((fileName) => /^research-query-page-.*\.js$/u.test(fileName));
-  if (!version || !entryPath || !researchRouteName) {
-    throw new Error(`构建 ${name} 缺少版本、入口或研究检索路由资源`);
-  }
-  return {
-    name,
-    directory,
-    version,
-    entryPath,
-    markerPath: `/e2e-sw-generation-${name}.txt`,
-    researchRoutePath: `/assets/${researchRouteName}`
-  };
+  if (decoded === "/") return "index.html";
+  if (!decoded.startsWith("/") || decoded.startsWith("//")) return null;
+  const artifactPath = decoded.slice(1);
+  return isCanonicalSwTwoGenerationArtifactPath(artifactPath) ? artifactPath : null;
 }
 
-async function startSwitchServer(initialGeneration: GenerationFixture): Promise<SwitchServer> {
+function artifactFileIdentity(
+  generation: GenerationFixture,
+  artifactPath: string
+): SwTwoGenerationArtifactFileIdentity | null {
+  return generation.identity.files.find((file) => file.path === artifactPath) ?? null;
+}
+
+async function startSwitchServer(
+  artifactSet: SwTwoGenerationArtifactSetSnapshot
+): Promise<SwitchServer> {
+  if (!isSwTwoGenerationArtifactSetSnapshot(artifactSet)) {
+    throw new Error("SW fixture server rejected an unregistered shared artifact set.");
+  }
+  const initialGeneration = artifactSet.generations[0];
+  if (!initialGeneration) {
+    throw new Error("SW fixture shared artifact set did not contain stable A.");
+  }
   let active = {
     generation: initialGeneration,
     failPaths: new Set<string>()
   };
   const requests: ServerRequest[] = [];
   const server: Server = createServer(async (request, response) => {
-    const generation = active.generation;
+    const selected = active;
+    const generation = selected.generation;
+    const artifactSetSha256 = artifactSet.identity.canonicalSha256;
     const method = request.method ?? "GET";
     let pathname = "/";
     try {
       pathname = new URL(request.url ?? "/", "http://127.0.0.1").pathname;
       if (method !== "GET" && method !== "HEAD") {
-        requests.push({ generation: generation.name, method, pathname, status: 405 });
+        requests.push({ generation: generation.name, method, pathname, status: 405, artifactSetSha256 });
         response.writeHead(405, { "cache-control": "no-store" });
-        response.end("Method Not Allowed");
+        response.end(method === "HEAD" ? undefined : "Method Not Allowed");
         return;
       }
-      if (active.failPaths.has(pathname)) {
-        requests.push({ generation: generation.name, method, pathname, status: 404 });
-        response.writeHead(404, { "cache-control": "no-store", "content-type": "text/plain; charset=utf-8" });
-        response.end("Synthetic missing precache resource");
-        return;
-      }
-
-      const decoded = decodeURIComponent(pathname);
-      const relative = decoded === "/" ? "index.html" : decoded.replace(/^\/+/, "");
-      let filePath = path.resolve(generation.directory, relative);
-      const rootWithSeparator = `${path.resolve(generation.directory)}${path.sep}`;
-      if (filePath !== path.resolve(generation.directory) && !filePath.startsWith(rootWithSeparator)) {
-        requests.push({ generation: generation.name, method, pathname, status: 400 });
+      let artifactPath = artifactPathForRequest(pathname);
+      if (artifactPath === null) {
+        requests.push({ generation: generation.name, method, pathname, status: 400, artifactSetSha256 });
         response.writeHead(400, { "cache-control": "no-store" });
-        response.end("Bad Request");
+        response.end(method === "HEAD" ? undefined : "Bad Request");
         return;
       }
-
-      let fileExists = false;
-      try {
-        fileExists = (await stat(filePath)).isFile();
-      } catch {
-        fileExists = false;
-      }
-      if (!fileExists && (request.headers.accept ?? "").includes("text/html")) {
-        filePath = path.join(generation.directory, "index.html");
-        fileExists = true;
-      }
-      if (!fileExists) {
-        requests.push({ generation: generation.name, method, pathname, status: 404 });
+      if (selected.failPaths.has(artifactPath)) {
+        const artifact = artifactFileIdentity(generation, artifactPath);
+        requests.push({
+          generation: generation.name,
+          method,
+          pathname,
+          status: 404,
+          artifactPath,
+          artifactSize: artifact?.size,
+          artifactSha256: artifact?.sha256,
+          artifactSetSha256
+        });
         response.writeHead(404, { "cache-control": "no-store", "content-type": "text/plain; charset=utf-8" });
-        response.end("Not Found");
+        response.end(method === "HEAD" ? undefined : "Synthetic missing precache resource");
         return;
       }
 
-      const bytes = await readFile(filePath);
+      let bytes = readSwTwoGenerationArtifactSnapshot(generation, artifactPath);
+      if (bytes === null && (request.headers.accept ?? "").includes("text/html")) {
+        artifactPath = "index.html";
+        bytes = readSwTwoGenerationArtifactSnapshot(generation, artifactPath);
+      }
+      if (bytes === null) {
+        requests.push({ generation: generation.name, method, pathname, status: 404, artifactSetSha256 });
+        response.writeHead(404, { "cache-control": "no-store", "content-type": "text/plain; charset=utf-8" });
+        response.end(method === "HEAD" ? undefined : "Not Found");
+        return;
+      }
+      const artifact = artifactFileIdentity(generation, artifactPath);
+      if (artifact === null || artifact.size !== bytes.byteLength) {
+        throw new Error(`SW fixture snapshot metadata mismatch: ${artifactPath}.`);
+      }
+
       const headers: Record<string, string> = {
         "cache-control": "no-store, max-age=0",
-        "content-type": contentType(filePath),
+        "content-length": String(bytes.byteLength),
+        "content-type": contentType(artifactPath),
         "x-content-type-options": "nosniff"
       };
-      if (pathname === "/sw.js") headers["service-worker-allowed"] = "/";
-      requests.push({ generation: generation.name, method, pathname, status: 200 });
+      if (artifactPath === "sw.js") headers["service-worker-allowed"] = "/";
+      requests.push({
+        generation: generation.name,
+        method,
+        pathname,
+        status: 200,
+        artifactPath,
+        artifactSize: artifact.size,
+        artifactSha256: artifact.sha256,
+        artifactSetSha256
+      });
       response.writeHead(200, headers);
       response.end(method === "HEAD" ? undefined : bytes);
     } catch (error) {
-      requests.push({ generation: generation.name, method, pathname, status: 500 });
+      requests.push({ generation: generation.name, method, pathname, status: 500, artifactSetSha256 });
       response.writeHead(500, { "cache-control": "no-store", "content-type": "text/plain; charset=utf-8" });
-      response.end(error instanceof Error ? error.message : "Fixture server error");
+      response.end(method === "HEAD"
+        ? undefined
+        : error instanceof Error ? error.message : "Fixture server error");
     }
   });
 
@@ -190,7 +220,25 @@ async function startSwitchServer(initialGeneration: GenerationFixture): Promise<
     origin: `http://127.0.0.1:${address.port}`,
     requests,
     setGeneration(generation, failPaths = []) {
-      active = { generation, failPaths: new Set(failPaths) };
+      if (
+        !isSwTwoGenerationArtifactSnapshot(generation)
+        || !artifactSet.generations.includes(generation)
+      ) {
+        throw new Error("SW fixture server rejected a generation outside the shared artifact set.");
+      }
+      const canonicalFailPaths = failPaths.map((failPath) => artifactPathForRequest(failPath));
+      if (
+        canonicalFailPaths.some((failPath) => failPath === null)
+        || canonicalFailPaths.some((failPath) =>
+          failPath === null || readSwTwoGenerationArtifactSnapshot(generation, failPath) === null
+        )
+      ) {
+        throw new Error("SW fixture server rejected a non-canonical or unknown failure path.");
+      }
+      active = {
+        generation,
+        failPaths: new Set(canonicalFailPaths as string[])
+      };
     },
     close: () => new Promise<void>((resolve, reject) => {
       server.close((error) => error ? reject(error) : resolve());
@@ -330,14 +378,53 @@ async function expectInstalledUnconfirmed(page: Page, fixture: GenerationFixture
   });
 }
 
-async function launchFixtureContext(testInfo: { outputPath: (name: string) => string }, profileName: string) {
-  return chromium.launchPersistentContext(testInfo.outputPath(profileName), {
-    channel: "msedge",
-    headless: true,
-    acceptDownloads: true,
-    serviceWorkers: "allow",
-    viewport: { width: 1280, height: 820 }
-  });
+async function requireFixtureProfileAbsent(profilePath: string) {
+  try {
+    await stat(profilePath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
+    throw error;
+  }
+  throw new Error(`SW two-generation fixture profile must not pre-exist: ${profilePath}`);
+}
+
+async function requireFixtureBrowserRuntime(
+  context: BrowserContext,
+  projectName: string
+) {
+  const page = context.pages()[0] ?? await context.newPage();
+  const session = await context.newCDPSession(page);
+  try {
+    const version = await session.send("Browser.getVersion");
+    return requireReleaseBrowserRuntimeProduct(projectName, version.product);
+  } finally {
+    await session.detach();
+  }
+}
+
+async function launchFixtureContext(testInfo: TestInfo, profileName: string) {
+  const projectName = testInfo.project.name;
+  const profilePath = testInfo.outputPath(`${projectName}-${profileName}`);
+  await requireFixtureProfileAbsent(profilePath);
+  const context = await chromium.launchPersistentContext(
+    profilePath,
+    releasePersistentContextOptionsForProject(projectName)
+  );
+  try {
+    const runtimeProduct = await requireFixtureBrowserRuntime(context, projectName);
+    testInfo.annotations.push({
+      type: SW_TWO_GENERATION_FIXTURE_ANNOTATIONS.runtimeProduct,
+      description: runtimeProduct
+    });
+    testInfo.annotations.push({
+      type: SW_TWO_GENERATION_FIXTURE_ANNOTATIONS.freshProfileVerified,
+      description: "true"
+    });
+    return context;
+  } catch (error) {
+    await context.close();
+    throw error;
+  }
 }
 
 async function openStableA(context: BrowserContext) {
@@ -389,23 +476,35 @@ async function openNaturalNavigation(context: BrowserContext, fixture: Generatio
 }
 
 test.beforeAll(async () => {
-  fixtureRoot = await mkdtemp(path.join(os.tmpdir(), "hakimi-sw-generations-"));
-  stableA = await buildGeneration("stable-a", "none");
-  healthyB = await buildGeneration("healthy-b", "none");
-  brokenB = await buildGeneration("broken-b", "research-route");
-  expect(new Set([stableA.version, healthyB.version, brokenB.version]).size).toBe(3);
-  expect(stableA.entryPath).not.toBe(healthyB.entryPath);
-  expect(stableA.entryPath).not.toBe(brokenB.entryPath);
-  expect(stableA.researchRoutePath).not.toBe(brokenB.researchRoutePath);
-  switchServer = await startSwitchServer(stableA);
+  const artifactRoot = process.env.HAKIMI_SW_TWO_GENERATION_ARTIFACT_ROOT;
+  const expectedArtifactSetSha256 = process.env.HAKIMI_SW_TWO_GENERATION_ARTIFACT_SET_SHA256;
+  if (!artifactRoot || !path.isAbsolute(artifactRoot) || !expectedArtifactSetSha256) {
+    throw new Error("Canonical fixture runner did not provide the shared artifact set.");
+  }
+  const artifactSet = await snapshotSwTwoGenerationArtifactSetDirectory(artifactRoot);
+  if (artifactSet.identity.canonicalSha256 !== expectedArtifactSetSha256) {
+    throw new Error("Shared SW fixture artifact identity does not match the runner binding.");
+  }
+  const [sharedStableA, sharedHealthyB, sharedBrokenB] = artifactSet.generations;
+  if (!sharedStableA || !sharedHealthyB || !sharedBrokenB) {
+    throw new Error("Shared SW fixture artifact set is incomplete.");
+  }
+  stableA = sharedStableA;
+  healthyB = sharedHealthyB;
+  brokenB = sharedBrokenB;
+  switchServer = await startSwitchServer(artifactSet);
 });
 
 test.afterAll(async () => {
   await switchServer?.close();
-  if (fixtureRoot) await rm(fixtureRoot, { recursive: true, force: true });
 });
 
-test("已确认 A 不混入新 HTML，健康 B 受控接管并可离线冷启动", async ({}, testInfo) => {
+test("已确认 A 不混入新 HTML，健康 B 受控接管并可离线冷启动", {
+  annotation: {
+    type: SW_TWO_GENERATION_FIXTURE_ANNOTATIONS.scenarioId,
+    description: SW_TWO_GENERATION_FIXTURE_SCENARIO_IDS[0]
+  }
+}, async ({}, testInfo) => {
   const context = await launchFixtureContext(testInfo, "healthy-upgrade-profile");
   let baselineProblems: string[] = [];
   const externalRequests = collectExternalRequests(context, switchServer.origin);
@@ -417,6 +516,19 @@ test("已确认 A 不混入新 HTML，健康 B 受控接管并可离线冷启动
     const caseUrl = new URL(pageA.url());
     const caseId = caseUrl.pathname.split("/")[2];
     expect(caseId).toMatch(/^[0-9a-f-]{36}$/i);
+
+    const staleWriter = await context.newPage();
+    const staleWriterProblems = collectConsoleProblems(staleWriter);
+    await staleWriter.goto(`${switchServer.origin}/cases`, { waitUntil: "domcontentloaded" });
+    await waitForAppReady(staleWriter);
+    await waitForServiceWorker(staleWriter);
+    await expectPageGeneration(staleWriter, stableA);
+    await expect(staleWriter.getByText("演示案例 · 辰时研究", { exact: true }).first()).toBeVisible();
+    const beforeTakeoverWrite = await captureStorageV13NativeReadonlySnapshot(staleWriter, {
+      captureId: "same-schema-takeover-before-stale-write",
+      operationId: "edit",
+      phase: "before_stale_a_write"
+    });
 
     await startControllerChangeObserver(pageA);
     switchServer.setGeneration(healthyB);
@@ -435,6 +547,29 @@ test("已确认 A 不混入新 HTML，健康 B 受控接管并可离线冷启动
     await expect.poll(() => workerBuildVersion(natural.page, "active")).toBe(healthyB.version);
     expect(natural.problems).toEqual([]);
 
+    await expect.poll(() => pageGeneration(staleWriter)).toMatchObject({
+      version: stableA.version,
+      marker: stableA.name
+    });
+    await expect.poll(() => workerBuildVersion(staleWriter, "controller")).toBe(healthyB.version);
+    await expect.poll(() => staleWriter.evaluate(() => ({
+      frozen: document.documentElement.dataset.dbControllerTakeoverWriteFrozen ?? null,
+      phase: document.documentElement.dataset.dbControllerTakeoverWriteFreezePhase ?? null
+    }))).toMatchObject({ frozen: "true" });
+    await staleWriter.getByRole("button", { name: "收藏案例 演示案例 · 辰时研究" }).click();
+    await expect(staleWriter.getByRole("alert")).toContainText(
+      "当前页面已进入版本接管写入锁定，本次案例写入未执行；请重新载入后再操作。"
+    );
+    await expect(staleWriter.getByRole("button", { name: "重新读取并解除锁定" })).toHaveCount(0);
+    const afterRejectedStaleWrite = await captureStorageV13NativeReadonlySnapshot(staleWriter, {
+      captureId: "same-schema-takeover-after-stale-write",
+      operationId: "edit",
+      phase: "after_rejected_stale_a_write"
+    });
+    expect(storageV13SnapshotsEqual(beforeTakeoverWrite, afterRejectedStaleWrite)).toBe(true);
+    expect(storageV13ChangedStores(beforeTakeoverWrite, afterRejectedStaleWrite)).toEqual([]);
+    expect(staleWriterProblems).toEqual([]);
+
     const pageB = await context.newPage();
     const pageBProblems = collectConsoleProblems(pageB);
     await pageB.goto(`${switchServer.origin}/cases`, { waitUntil: "domcontentloaded" });
@@ -446,6 +581,15 @@ test("已确认 A 不混入新 HTML，健康 B 受控接管并可离线冷启动
     await expectConfirmed(pageB, healthyB);
     await expectConfirmed(pageB, stableA);
     await expect.poll(() => cacheGenerations(pageB).then((items) => items.length)).toBe(2);
+    await pageB.getByRole("button", { name: "收藏案例 演示案例 · 辰时研究" }).click();
+    await expect(pageB.getByRole("status")).toContainText("已收藏案例“演示案例 · 辰时研究”");
+    const afterWritableB = await captureStorageV13NativeReadonlySnapshot(pageB, {
+      captureId: "same-schema-takeover-after-writable-b",
+      operationId: "edit",
+      phase: "after_new_b_write"
+    });
+    expect(storageV13SnapshotsEqual(afterRejectedStaleWrite, afterWritableB)).toBe(false);
+    expect(storageV13ChangedStores(afterRejectedStaleWrite, afterWritableB)).toEqual(["cases"]);
     expect(pageBProblems).toEqual([]);
 
     await disableNetworkCacheAndGoOffline(context, pageB);
@@ -470,8 +614,13 @@ test("已确认 A 不混入新 HTML，健康 B 受控接管并可离线冷启动
   expect(baselineProblems).toEqual([]);
 });
 
-test("B 已安装但研究路由启动失败时，第二次断网冷启动回到已确认 A", async ({}, testInfo) => {
-  const context = await launchFixtureContext(testInfo, "runtime-rollback-profile");
+test("B 已安装但研究路由启动失败时，第二次断网冷启动使用已确认 A 壳缓存（controller 仍为 B，非 worker 回滚）", {
+  annotation: {
+    type: SW_TWO_GENERATION_FIXTURE_ANNOTATIONS.scenarioId,
+    description: SW_TWO_GENERATION_FIXTURE_SCENARIO_IDS[1]
+  }
+}, async ({}, testInfo) => {
+  const context = await launchFixtureContext(testInfo, "old-shell-cache-fallback-profile");
   let baselineProblems: string[] = [];
   const externalRequests = collectExternalRequests(context, switchServer.origin);
   try {
@@ -534,7 +683,7 @@ test("B 已安装但研究路由启动失败时，第二次断网冷启动回到
     });
     await expectConfirmed(recoveredPage, stableA);
     await expect.poll(() => cacheGenerations(recoveredPage).then((items) => items.length)).toBe(2);
-    await recoveredPage.screenshot({ path: testInfo.outputPath("broken-b-rollback-a-390.png"), fullPage: false });
+    await recoveredPage.screenshot({ path: testInfo.outputPath("broken-b-old-shell-cache-fallback-390.png"), fullPage: false });
     expect(recoveredProblems).toEqual([]);
     expect(externalRequests).toEqual([]);
   } finally {
@@ -544,7 +693,12 @@ test("B 已安装但研究路由启动失败时，第二次断网冷启动回到
   expect(baselineProblems).toEqual([]);
 });
 
-test("B 预缓存资源缺失时安装失败并清除残缺 cache，A 仍可离线冷启动", async ({}, testInfo) => {
+test("B 预缓存资源缺失时安装失败并清除残缺 cache，A 仍可离线冷启动", {
+  annotation: {
+    type: SW_TWO_GENERATION_FIXTURE_ANNOTATIONS.scenarioId,
+    description: SW_TWO_GENERATION_FIXTURE_SCENARIO_IDS[2]
+  }
+}, async ({}, testInfo) => {
   const context = await launchFixtureContext(testInfo, "install-failure-profile");
   let baselineProblems: string[] = [];
   const externalRequests = collectExternalRequests(context, switchServer.origin);

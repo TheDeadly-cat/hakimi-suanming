@@ -1,12 +1,20 @@
 import { describe, expect, it, vi } from "vitest";
-import { FullBackupArchiveError } from "@hakimi/backup";
-import type { FullBackupEnvelope, FullBackupPayload } from "@hakimi/contracts";
+import {
+  FULL_BACKUP_P1_11_REMAINING_GAPS,
+  FullBackupArchiveError
+} from "@hakimi/backup";
+import {
+  FULL_BACKUP_SCOPE,
+  type FullBackupEnvelope,
+  type FullBackupPayload
+} from "@hakimi/contracts";
 import {
   FullBackupWorkerCancelledError,
   FullBackupWorkerProtocolError,
   FullBackupWorkerUnavailableError,
   createFullBackupArtifactOffMainThread,
   prepareFullBackupImportOffMainThread,
+  verifyPreparedFullBackupOffMainThread,
   type FullBackupWorkerRuntime
 } from "./full-backup-worker-client";
 import {
@@ -22,6 +30,101 @@ const preparation = {
   incoming: { manifest: {}, payload: {}, digests: {} },
   currentSafetyBackup: envelope
 } as never;
+const verifiedReplacement = {
+  incoming: {
+    scope: FULL_BACKUP_SCOPE,
+    manifest: {},
+    payload: {},
+    digests: {},
+    migratedFromFormatVersion: null,
+    remainingP111Gaps: [...FULL_BACKUP_P1_11_REMAINING_GAPS],
+    eventTimeVerification: {
+      events: [],
+      targets: [],
+      degradedEventCount: 0,
+      degradedTargetCount: 0
+    }
+  },
+  expectedCurrentPayloadDigest: "c".repeat(64)
+} as const;
+
+type InvalidVerifiedWorkerCase = Readonly<{
+  name: string;
+  create: () => Readonly<{
+    value: unknown;
+    assertSideEffects?: () => void;
+  }>;
+}>;
+
+const invalidVerifiedWorkerCases: readonly InvalidVerifiedWorkerCase[] = [
+  {
+    name: "missing CAS digest",
+    create() {
+      const value = structuredClone(verifiedReplacement) as Record<string, unknown>;
+      delete value.expectedCurrentPayloadDigest;
+      return { value };
+    }
+  },
+  {
+    name: "undefined CAS digest",
+    create() {
+      return {
+        value: {
+          ...structuredClone(verifiedReplacement),
+          expectedCurrentPayloadDigest: undefined
+        }
+      };
+    }
+  },
+  {
+    name: "accessor CAS digest",
+    create() {
+      let getterCalls = 0;
+      const value = Object.defineProperty(
+        { incoming: verifiedReplacement.incoming },
+        "expectedCurrentPayloadDigest",
+        {
+          configurable: true,
+          enumerable: true,
+          get() {
+            getterCalls += 1;
+            return verifiedReplacement.expectedCurrentPayloadDigest;
+          }
+        }
+      );
+      return { value, assertSideEffects: () => expect(getterCalls).toBe(0) };
+    }
+  },
+  {
+    name: "extra root key",
+    create() {
+      return { value: { ...structuredClone(verifiedReplacement), unexpected: true } };
+    }
+  },
+  {
+    name: "custom root prototype",
+    create() {
+      return {
+        value: Object.assign(
+          Object.create({ inherited: true }),
+          structuredClone(verifiedReplacement)
+        )
+      };
+    }
+  },
+  {
+    name: "uppercase CAS digest",
+    create() {
+      return {
+        value: {
+          ...structuredClone(verifiedReplacement),
+          expectedCurrentPayloadDigest:
+            verifiedReplacement.expectedCurrentPayloadDigest.toUpperCase()
+        }
+      };
+    }
+  }
+];
 
 class FakeWorker {
   onmessage: Worker["onmessage"] = null;
@@ -128,6 +231,53 @@ describe("full backup worker client", () => {
     expect(worker.terminateCount).toBe(1);
   });
 
+  it("接受具有强制 CAS 摘要的精确 verified_ready 结果", async () => {
+    const worker = new FakeWorker((request, current) => {
+      if (request.type !== "verify_prepared") return;
+      queueMicrotask(() => current.emit({
+        ...responseBase(request.jobId),
+        type: "verified_ready",
+        verified: structuredClone(verifiedReplacement) as never
+      }));
+    });
+
+    await expect(verifyPreparedFullBackupOffMainThread(
+      preparation,
+      undefined,
+      runtimeFor(worker)
+    )).resolves.toMatchObject({
+      type: "verified_ready",
+      verified: verifiedReplacement
+    });
+    expect(worker.terminateCount).toBe(1);
+  });
+
+  it.each(invalidVerifiedWorkerCases)(
+    "拒绝 $name 的 verified_ready 结果",
+    async ({ create }) => {
+      const malformed = create();
+      const worker = new FakeWorker((request, current) => {
+        if (request.type !== "verify_prepared") return;
+        queueMicrotask(() => current.emit({
+          ...responseBase(request.jobId),
+          type: "verified_ready",
+          verified: malformed.value
+        } as never));
+      });
+
+      await expect(verifyPreparedFullBackupOffMainThread(
+        preparation,
+        undefined,
+        runtimeFor(worker)
+      )).rejects.toMatchObject({
+        name: "FullBackupWorkerProtocolError",
+        code: "BACKUP_WORKER_RESULT_INVALID"
+      });
+      malformed.assertSideEffects?.();
+      expect(worker.terminateCount).toBe(1);
+    }
+  );
+
   it("错版本、错 job 与错响应类型都失败关闭", async () => {
     for (const response of [
       { ...responseBase(), version: 2, type: "artifact_ready" },
@@ -227,4 +377,3 @@ describe("full backup worker client", () => {
     expect(worker.terminateCount).toBe(1);
   });
 });
-

@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "known_restricted_blocker_registry",
+  "updatedAt": "2026-08-26T00:00:00.000Z",
+  "releaseGovernance": {
+    "releaseIdentity": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "mutationEpochBoundary": "preserved",
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "blockers": [
+    {
+      "blockerId": "known-restricted-full-workspace-typecheck/1",
+      "status": "blocked-known-restricted",
+      "affectedGates": [
+        "full-workspace-typecheck"
+      ],
+      "aggregateImpact": [
+        "default-legacy-v13-aggregate-gate"
+      ],
+      "restrictedPaths": [
+        "apps/web/src/lib/local-user-data-cleanup.ts"
+      ],
+      "allowedActions": [
+        "record_status",
+        "improve_ci_observability"
+      ],
+      "forbiddenActions": [
+        "read_source",
+        "modify_source",
+        "exclude_from_typecheck",
+        "suppress_error",
+        "xfail",
+        "infer_internal_bug"
+      ],
+      "observation": {
+        "state": "prior_quick_ci_failure_reported_not_reverified_in_this_registry",
+        "source": "user_supplied_handoff_and_second_round_audit",
+        "observedAt": null,
+        "gitSha": null,
+        "sourceReadOrBugInferencePerformed": false
+      }
+    }
+  ],
+  "quickCiObservability": {
+    "workflow": ".github/workflows/quick-ci.yml",
+    "parallelEvidenceJobs": [
+      "toolchain-and-boundaries",
+      "full-typecheck",
+      "full-vitest",
+      "default-v13-web-build"
+    ],
+    "artifactVerificationDependsOnlyOn": [
+      "default-v13-web-build"
+    ],
+    "aggregateGate": "release-gate-aggregate",
+    "aggregateFailClosed": true,
+    "parallelJobsDoNotDependOnFullTypecheck": true
+  },
+  "currentEvidenceLedger": {
+    "fullWorkspaceTypecheck": "failed_known_restricted_prior_run",
+    "currentCommitFullVitest": "not_established_by_this_registry",
+    "currentCommitDefaultBuild": "not_established_by_this_registry",
+    "currentCommitArtifactManifest": "not_established_by_this_registry",
+    "completeReleaseEvidence": "not_established"
+  },
+  "doesNotEstablish": [
+    "restricted_source_contents",
+    "restricted_source_root_cause",
+    "current_commit_full_vitest_result",
+    "current_commit_default_build_result",
+    "current_commit_artifact_manifest_result",
+    "release_readiness",
+    "public_release_authorization"
+  ]
+}
