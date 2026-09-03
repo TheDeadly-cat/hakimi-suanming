@@ -1,15 +1,19 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import adapterBrowserPreviewConfig from "../ziwei-iztro-adapter-draft/vite.browser-preview.config.mjs";
+import adapterBrowserPreviewConfig, {
+  createIztroLicenseNoticePlugin,
+  createZiweiBrowserPreviewMainPlugins
+} from "../ziwei-iztro-adapter-draft/vite.browser-preview.config.mjs";
 
 const packageRoot = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.join(packageRoot, "browser-app");
 
 export default {
   root: appRoot,
+  base: "./",
   publicDir: false,
   cacheDir: path.join(packageRoot, "node_modules", ".vite-browser-app"),
-  plugins: adapterBrowserPreviewConfig.plugins,
+  plugins: [createIztroLicenseNoticePlugin("browser-workspace"), ...createZiweiBrowserPreviewMainPlugins()],
   worker: adapterBrowserPreviewConfig.worker,
   build: {
     outDir: path.join(packageRoot, "dist", "browser-app"),

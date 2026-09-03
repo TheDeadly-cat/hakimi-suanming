@@ -1,0 +1,315 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "ziwei_iztro_top_level_build_notice_evidence",
+  "evidenceLedgerId": "hakimi.ziwei.iztro-build-notice-evidence/1.0.0",
+  "status": "controlled_ephemeral_build_top_level_notice_observed_unbound",
+  "observedOn": "2026-08-30",
+  "systemIdentity": {
+    "productSystemId": "ziwei-doushu",
+    "contractSystemId": "ziwei",
+    "productStatus": "isolated_engineering_draft",
+    "releaseIdentity": null,
+    "targetSchema": null,
+    "migrationId": null
+  },
+  "dependencyIdentity": {
+    "packageName": "iztro",
+    "requestedVersion": "2.5.8",
+    "resolvedVersion": "2.5.8",
+    "resolved": "https://registry.npmjs.org/iztro/-/iztro-2.5.8.tgz",
+    "integrity": "sha512-kgyyvxdSEvgJxi6zvHpvzGbXZLGXCdhTHYK2Pe/sRdBIQ7RfCArvupmg2ChUMQCSQGomW7XCI0gWwUuKJwPENg=="
+  },
+  "basisArtifacts": [
+    {
+      "role": "adapter_package_manifest",
+      "path": "packages/ziwei-iztro-adapter-draft/package.json",
+      "bytes": 500,
+      "sha256": "717b64a0d9a38a98a6f1b567aa060aaeb53f25f03ede5302048180398ffedda1"
+    },
+    {
+      "role": "package_lock_closure",
+      "path": "packages/ziwei-iztro-adapter-draft/src/iztro-2.5.8-lock-closure.json",
+      "bytes": 3846,
+      "sha256": "c372bf14630eee36fa01ac654b8939622900a3e469a8f69db7bd2c7baa1d2724"
+    },
+    {
+      "role": "controlled_top_level_license_copy",
+      "path": "packages/ziwei-iztro-adapter-draft/licenses/iztro-2.5.8-LICENSE.txt",
+      "bytes": 1073,
+      "sha256": "e6c7b6e313cbda3135b41bccc66c98be132cb8319d0d465903d17e669e748b36"
+    },
+    {
+      "role": "browser_preview_build_config",
+      "path": "packages/ziwei-iztro-adapter-draft/vite.browser-preview.config.mjs",
+      "bytes": 14314,
+      "sha256": "e2a034fdb78fb8f00f6c034e0fa2bc9b4e452c1fcc12fda71282657775d7a138"
+    },
+    {
+      "role": "browser_preview_source_html",
+      "path": "packages/ziwei-iztro-adapter-draft/browser-preview/index.html",
+      "bytes": 6557,
+      "sha256": "e6c23bdc56b02cd738a8831b4f41e295820d0535781dfdd9b9af4d1924060baa"
+    },
+    {
+      "role": "workspace_package_manifest",
+      "path": "packages/ziwei-workspace-artifact-draft/package.json",
+      "bytes": 586,
+      "sha256": "f2f549ee442f28e744b293609d513ff9e69d90a3fabb6255136fad2a6fa6c17a"
+    },
+    {
+      "role": "browser_workspace_build_config",
+      "path": "packages/ziwei-workspace-artifact-draft/vite.browser-app.config.mjs",
+      "bytes": 938,
+      "sha256": "3d948e78b33c859af6be9c46cf7a54ff752ee28bba3247410782e37e45032432"
+    },
+    {
+      "role": "browser_workspace_source_html",
+      "path": "packages/ziwei-workspace-artifact-draft/browser-app/index.html",
+      "bytes": 19993,
+      "sha256": "82fd5d26221a72da69f8663a102acdcd806a1d68add3f793071255c1a16afca3"
+    }
+  ],
+  "installedEndpointObservation": {
+    "scope": "three_fixed_endpoints_only_not_complete_installed_package_bytes",
+    "endpoints": [
+      {
+        "role": "installed_package_manifest_endpoint",
+        "path": "node_modules/iztro/package.json",
+        "bytes": 2255,
+        "sha256": "a5a85df951d28965caa7bf9a9fe6b44e3df676c8dd938573061257cff681a20f"
+      },
+      {
+        "role": "installed_commonjs_entry_endpoint",
+        "path": "node_modules/iztro/lib/index.js",
+        "bytes": 1368,
+        "sha256": "10ab83d0ebfe3e5b335589767f4851034e1cf029c7ca7cbc231c22b562c7e4fb"
+      },
+      {
+        "role": "installed_top_level_license_endpoint",
+        "path": "node_modules/iztro/LICENSE",
+        "bytes": 1073,
+        "sha256": "e6c7b6e313cbda3135b41bccc66c98be132cb8319d0d465903d17e669e748b36"
+      }
+    ],
+    "installedPackageFullBytesCovered": false,
+    "packageLockClosureIdentityOnly": true
+  },
+  "buildExecutionObservation": {
+    "mode": "fixed_vite_7_3_6_endpoints_and_controlled_input_attestations",
+    "viteIdentity": {
+      "packageName": "vite",
+      "version": "7.3.6",
+      "fixedExecutionEndpointsVerified": true,
+      "endpoints": [
+        {
+          "role": "vite_package_manifest_endpoint",
+          "path": "apps/web/node_modules/vite/package.json",
+          "bytes": 5158,
+          "sha256": "e5ed0f85215f871fe22a48987dcd77fcfbe14064a53c0c9f7f48186a6b7e2cf0"
+        },
+        {
+          "role": "vite_launcher_endpoint",
+          "path": "apps/web/node_modules/vite/bin/vite.js",
+          "bytes": 2574,
+          "sha256": "fa03478846d229651a3c6aa64833ba2c6cbf580a798b92bd8f47c7480bafb5d8"
+        },
+        {
+          "role": "vite_cli_endpoint",
+          "path": "apps/web/node_modules/vite/dist/node/cli.js",
+          "bytes": 26755,
+          "sha256": "6b9001816eb5fb0979cbe380ed2116db93e315ff22ebf7fe55a4fc60458fa067"
+        }
+      ]
+    },
+    "rootLockSemanticIdentity": {
+      "path": "package-lock.json",
+      "lockfileVersion": 3,
+      "appPackagePath": "apps/web",
+      "requestedVersion": "7.3.6",
+      "packagePath": "apps/web/node_modules/vite",
+      "resolvedVersion": "7.3.6",
+      "resolved": "https://registry.npmjs.org/vite/-/vite-7.3.6.tgz",
+      "integrity": "sha512-4XP60spRGjSZFf1qYH+dJIkK2znL3zQfl9KkOV9MkkRR/3Dls0dxaBsQPTloEc5BLXWPL9vsOxopxyKoMmDueg==",
+      "binPath": "bin/vite.js",
+      "semanticIdentityVerified": true,
+      "rawRootLockBytesPromotedToReleaseEvidence": false
+    },
+    "controlledInputEquality": {
+      "comparedInputCount": 15,
+      "browserPreviewPrePostEqual": true,
+      "browserWorkspacePrePostEqual": true,
+      "betweenBuildsEqual": true,
+      "crossFileAtomicityEstablished": false,
+      "intervalIntegrityEstablished": false,
+      "abaResistanceEstablished": false,
+      "mutationEpochEstablished": false
+    },
+    "inheritedNodeAndViteEnvironmentAccepted": false,
+    "nodeRuntimeBinaryIdentityEstablished": false
+  },
+  "licenseTextObservation": {
+    "declaredSpdxIdentifier": "MIT",
+    "controlledCopyMatchesInstalledTopLevelLicenseEndpoint": true,
+    "upstreamTarballIndependentlyReverifiedThisRun": false,
+    "publisherAuthenticityEstablished": false,
+    "semanticInterpretationReviewed": false
+  },
+  "noticeCandidate": {
+    "mode": "verbatim_full_top_level_license_only",
+    "sourcePath": "packages/ziwei-iztro-adapter-draft/licenses/iztro-2.5.8-LICENSE.txt",
+    "bytes": 1073,
+    "sha256": "e6c7b6e313cbda3135b41bccc66c98be132cb8319d0d465903d17e669e748b36",
+    "noticeClauseCandidateLocator": {
+      "byteStartInclusive": 484,
+      "byteEndExclusive": 610,
+      "bytes": 126,
+      "sha256": "89fdc900e69446e48038e9db01dd71e62566997bd91135f0afbecc07ae997c8a",
+      "semanticInterpretationReviewed": false
+    },
+    "controlledBuildReceipt": {
+      "producer": "scripts/verify-ziwei-iztro-isolated-build-license-notices.mjs",
+      "mode": "fixed_dual_vite_build_into_owned_ephemeral_root",
+      "outputPersistence": "deleted_after_endpoint_verification",
+      "platformSpecificOutputTreeDigestsBound": false,
+      "controlledInputEquality": {
+        "comparedInputCount": 15,
+        "browserPreviewPrePostEqual": true,
+        "browserWorkspacePrePostEqual": true,
+        "betweenBuildsEqual": true,
+        "crossFileAtomicityEstablished": false,
+        "intervalIntegrityEstablished": false,
+        "abaResistanceEstablished": false,
+        "mutationEpochEstablished": false
+      },
+      "nodeRuntimeBinaryIdentityEstablished": false,
+      "surfaces": [
+        {
+          "surfaceId": "browser-preview",
+          "sourceConfigPath": "packages/ziwei-iztro-adapter-draft/vite.browser-preview.config.mjs",
+          "sourceHtmlPath": "packages/ziwei-iztro-adapter-draft/browser-preview/index.html",
+          "licenseAsset": {
+            "path": "licenses/iztro-2.5.8-LICENSE.txt",
+            "bytes": 1073,
+            "sha256": "e6c7b6e313cbda3135b41bccc66c98be132cb8319d0d465903d17e669e748b36"
+          },
+          "htmlLicenseLink": {
+            "href": "./licenses/iztro-2.5.8-LICENSE.txt",
+            "linkCount": 1
+          },
+          "buildInputAttestation": {
+            "path": "build-attestations/ziwei-iztro-license-inputs.v1.json",
+            "bytes": 1793,
+            "sha256": "340e450519d446fc77313c48f937fa9b2ffaeccd8b309368007ba3a4f80b4cb3",
+            "schemaVersion": "ziwei-iztro-build-input-attestation/1",
+            "surfaceId": "browser-preview",
+            "producerPlugin": "hakimi-ziwei-iztro-top-level-license",
+            "inputCount": 7
+          },
+          "workerObservation": {
+            "nonSourcemapWorkerCount": 1,
+            "versionMarkerObserved": true,
+            "integrityMarkerObserved": true,
+            "dependencyExecutionEstablished": false
+          }
+        },
+        {
+          "surfaceId": "browser-workspace",
+          "sourceConfigPath": "packages/ziwei-workspace-artifact-draft/vite.browser-app.config.mjs",
+          "sourceHtmlPath": "packages/ziwei-workspace-artifact-draft/browser-app/index.html",
+          "licenseAsset": {
+            "path": "licenses/iztro-2.5.8-LICENSE.txt",
+            "bytes": 1073,
+            "sha256": "e6c7b6e313cbda3135b41bccc66c98be132cb8319d0d465903d17e669e748b36"
+          },
+          "htmlLicenseLink": {
+            "href": "./licenses/iztro-2.5.8-LICENSE.txt",
+            "linkCount": 1
+          },
+          "buildInputAttestation": {
+            "path": "build-attestations/ziwei-iztro-license-inputs.v1.json",
+            "bytes": 2043,
+            "sha256": "a8544e068dd98a27f905ef8bc4fc9fc5faaa9a1f3d73973130844470b45c04a7",
+            "schemaVersion": "ziwei-iztro-build-input-attestation/1",
+            "surfaceId": "browser-workspace",
+            "producerPlugin": "hakimi-ziwei-iztro-top-level-license",
+            "inputCount": 8
+          },
+          "workerObservation": {
+            "nonSourcemapWorkerCount": 1,
+            "versionMarkerObserved": true,
+            "integrityMarkerObserved": true,
+            "dependencyExecutionEstablished": false
+          }
+        }
+      ]
+    },
+    "buildNoticeInclusionStatus": "observed_in_two_controlled_ephemeral_isolated_builds",
+    "releaseBuildProvenanceEstablished": false
+  },
+  "coverageBoundary": {
+    "coversIztro2_5_8TopLevelLicenseOnly": true,
+    "completeDependencyClosureCovered": false,
+    "fortelCovered": false,
+    "zodCovered": false,
+    "installedPackageFullBytesCovered": false,
+    "sourceBindingSubjectId": "ziwei.rights.engine-code-and-dependency-notices",
+    "subjectFullySatisfied": false
+  },
+  "parentBindingBoundary": {
+    "bindingDirection": "fixed_dependency_and_build_artifacts_to_child_only",
+    "bindsZiweiManifest": false,
+    "bindsZiweiRequirements": false,
+    "bindsFourSystemRegistry": false,
+    "bindsCrossSystemReceipts": false,
+    "bindsDefaultWeb": false
+  },
+  "readBoundary": {
+    "model": "held_file_handle_endpoint_snapshots",
+    "crossFileAtomicityEstablished": false,
+    "intervalIntegrityEstablished": false,
+    "abaResistanceEstablished": false,
+    "mutationEpochEstablished": false
+  },
+  "authorityBoundary": {
+    "publisherAuthenticityEstablished": false,
+    "licenseSemanticReviewComplete": false,
+    "rightsLegalConclusionEstablished": false,
+    "redistributionAuthorized": false,
+    "noticeObligationSatisfied": false,
+    "bindingFrozenVerified": false,
+    "formalAdmissionAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false
+  },
+  "legalDecisionBoundary": {
+    "decisionStatus": "not_established",
+    "selectedLicenseModel": null,
+    "ownerDecisionRefs": [],
+    "legalReviewAttestationIds": [],
+    "executedContractRefs": []
+  },
+  "integrityBoundary": {
+    "digestAlgorithm": "SHA-256",
+    "digestIsDigitalSignature": false,
+    "signerIdentity": null,
+    "digitalSignature": null
+  },
+  "doesNotEstablish": [
+    "publisher_identity_upstream_signature_or_independent_tarball_authenticity",
+    "license_authenticity_legal_interpretation_or_notice_obligation_satisfaction",
+    "complete_iztro_dependency_closure_fortel_zod_or_other_dependency_notice_coverage",
+    "ziwei_source_binding_freeze_rights_bundle_or_any_of_27_required_subjects",
+    "installed_package_full_byte_identity_or_dependency_execution",
+    "domain_truth_expert_truth_scientific_validity_or_high_risk_expression_approval",
+    "default_web_full_build_browser_host_pwa_service_worker_deployment_or_rollback_readiness",
+    "vite_watch_or_programmatic_rebuild_reference_freshness",
+    "complete_vite_package_or_build_toolchain_byte_identity",
+    "node_runtime_binary_identity",
+    "uninterrupted_execution_interval_integrity_or_true_release_build_provenance",
+    "bazi_authority_vedic_authority_cross_system_consensus_scoring_or_winner_selection",
+    "release_readiness_public_deployment_or_public_release_authorization",
+    "cross_file_atomicity_interval_integrity_aba_resistance_or_mutation_epoch"
+  ],
+  "evidenceDigest": "d0618f4162d508dc24cc27609454813108f90ba77630976284036873d7bfe075"
+}

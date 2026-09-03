@@ -1,0 +1,213 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "ziwei_hko_calendar_source_candidate_evidence",
+  "evidenceLedgerId": "hakimi.ziwei.hko-calendar-source-evidence/1.0.0",
+  "status": "candidate_evidence_replayed_unbound_not_admitted",
+  "createdAt": "2026-08-29T07:00:00.000Z",
+  "systemIdentity": {
+    "productSystemId": "ziwei-doushu",
+    "contractSystemId": "ziwei",
+    "releaseIdentity": "isolated-ziwei-draft-no-main-schema",
+    "targetSchema": null,
+    "migrationId": null,
+    "baziLegacyV13AuthorityInherited": false
+  },
+  "artifactRole": {
+    "evidenceClass": "source_candidate_engineering_replay",
+    "productArtifact": false,
+    "formalSourceBinding": false,
+    "centralRegistryEntry": false,
+    "crossSystemReceipt": false
+  },
+  "candidateIdentity": {
+    "subjectId": "ziwei.engineering.official-calendar-differential",
+    "candidateId": "hakimi.ziwei.source-candidate/hko-calendar-boundary-replay-2023-2028/1.0.0",
+    "candidateState": "candidate_only_unbound",
+    "coverageScope": "calendar_resolution",
+    "sourceBodySetDigest": "580108d977a4a4586115921e03502306ea8b5f8efe4558f76f37d072e8e8a445",
+    "subjectFullySatisfied": false,
+    "bindingFrozenVerified": false
+  },
+  "boundaryBindings": {
+    "bindingDirection": "hko_child_to_ziwei_source_requirements_only",
+    "childBindsDomainManifestDirectly": false,
+    "childBindsCentralRegistry": false,
+    "childBindsCrossSystemRegistry": false,
+    "authorityInheritanceAllowed": false
+  },
+  "sourceArtifacts": [
+    {
+      "role": "annual_raw_response_snapshots",
+      "path": "packages/ziwei-iztro-adapter-draft/fixtures/hko-data-gov-hk-calendar-source-snapshots-2023-2028.json",
+      "bytes": 15501,
+      "sha256": "32dfd1a9ed204c5b96a100a082d1d02f0b9391ddcc867f32c2c06d39f2972fe2"
+    },
+    {
+      "role": "calendar_boundary_matrix",
+      "path": "packages/ziwei-iztro-adapter-draft/fixtures/hko-data-gov-hk-calendar-boundaries-2023-2028.json",
+      "bytes": 13700,
+      "sha256": "6d89fc823112556b21e3792637db3164a380cde2d2a8c28206bb9b83975e64ec"
+    },
+    {
+      "role": "strict_parser_and_replay_implementation",
+      "path": "packages/ziwei-iztro-adapter-draft/src/official-calendar-evidence.ts",
+      "bytes": 26429,
+      "sha256": "5b653c50eb81144e2fa1738a6c0f34b425b23901e18078f38fa4273cdc9f9399"
+    }
+  ],
+  "resources": [
+    {
+      "year": 2023,
+      "resourceUrl": "https://data.weather.gov.hk/weatherAPI/hko_data/calendar/nongli_calendar_2023.csv",
+      "gzipBytes": 1810,
+      "gzipSha256": "a47d523c041d1bb88ba40b29d7b35da0a87e4cfbe9fca42bb03ff4e2910a02ab",
+      "rawBytes": 14054,
+      "rawSha256": "765361bc4a65ce8bc4687f062d1c8afdb08deba1fb365aaea7c7b44481cb7419",
+      "rowCount": 365,
+      "boundaryCount": 12,
+      "hasUtf8Bom": true,
+      "lineEnding": "LF"
+    },
+    {
+      "year": 2024,
+      "resourceUrl": "https://data.weather.gov.hk/weatherAPI/hko_data/calendar/nongli_calendar_2024.csv",
+      "gzipBytes": 1809,
+      "gzipSha256": "7229e310fdd84ebb03cb06dad4f74db712c0badeb0020fc8eb09a5482a649ecb",
+      "rawBytes": 14095,
+      "rawSha256": "f2d67d5407e433bcaebbfd048bc54e4ab5c12bfb65a91b4e00af52db11278175",
+      "rowCount": 366,
+      "boundaryCount": 13,
+      "hasUtf8Bom": false,
+      "lineEnding": "LF"
+    },
+    {
+      "year": 2025,
+      "resourceUrl": "https://data.weather.gov.hk/weatherAPI/hko_data/calendar/nongli_calendar_2025.csv",
+      "gzipBytes": 1828,
+      "gzipSha256": "7b843d29284f16951ee4cc07ce7bd64671d05f595b2cadcd9714940ed8207d79",
+      "rawBytes": 14418,
+      "rawSha256": "d2c5d752f370d3e583bde4950845fb6b4bfce1e1551da913ad14d655014fb32c",
+      "rowCount": 365,
+      "boundaryCount": 12,
+      "hasUtf8Bom": false,
+      "lineEnding": "CRLF"
+    },
+    {
+      "year": 2026,
+      "resourceUrl": "https://data.weather.gov.hk/weatherAPI/hko_data/calendar/nongli_calendar_2026.csv",
+      "gzipBytes": 1848,
+      "gzipSha256": "4fd3256fe7f73728f06a52da7f625eeaf6e25edce3978c33b0d4e66c47b22f3c",
+      "rawBytes": 14421,
+      "rawSha256": "8b2892b0e04faa632f09ea36ffee29e67b4427b85a18708d907d88d8be452b98",
+      "rowCount": 365,
+      "boundaryCount": 12,
+      "hasUtf8Bom": false,
+      "lineEnding": "CRLF"
+    },
+    {
+      "year": 2027,
+      "resourceUrl": "https://data.weather.gov.hk/weatherAPI/hko_data/calendar/nongli_calendar_2027.csv",
+      "gzipBytes": 1839,
+      "gzipSha256": "77d4403d14d25376e4b42adf9f8a6f18e5bd223cdcf635c07513e06ef49f3b88",
+      "rawBytes": 14055,
+      "rawSha256": "11de6b80c61769851aa579af009dc728ca4c544b75b9a0a466ef36446c6bb4fe",
+      "rowCount": 365,
+      "boundaryCount": 13,
+      "hasUtf8Bom": false,
+      "lineEnding": "LF"
+    },
+    {
+      "year": 2028,
+      "resourceUrl": "https://data.weather.gov.hk/weatherAPI/hko_data/calendar/nongli_calendar_2028.csv",
+      "gzipBytes": 1821,
+      "gzipSha256": "3492e08f4f7a8b070818caec04ce2c9432bde66487605358b7ab4d3ac7700a1b",
+      "rawBytes": 14093,
+      "rawSha256": "49304a711e0e57db7b8b2733159e735550febb17c1a4998a3cd9179dad78bd8a",
+      "rowCount": 366,
+      "boundaryCount": 12,
+      "hasUtf8Bom": false,
+      "lineEnding": "LF"
+    }
+  ],
+  "derivedCoverage": {
+    "annualResourcesBound": 6,
+    "rawSourceBodiesStored": 6,
+    "dailyRowsBound": 2192,
+    "crossFileSeamsBound": 5,
+    "boundaryPairsBound": 74,
+    "boundaryKindCounts": {
+      "lunar_new_year": 6,
+      "ordinary_month_transition": 62,
+      "leap_month_start": 3,
+      "leap_month_end": 3
+    },
+    "calendarResolutionOnly": true,
+    "solarTermsCovered": false
+  },
+  "observationBoundary": {
+    "datasetPage": "https://data.gov.hk/en-data/dataset/hk-hko-rss-gregorian-lunar-calendar-conversion-table",
+    "termsUrl": "https://data.gov.hk/tc/terms-and-conditions",
+    "frozenResourcesRetrievedAt": "2026-08-10T05:54:25.9279352+08:00",
+    "attributionObservedInExistingArtifact": "Gregorian-lunar calendar conversion data supplied by the Hong Kong Observatory through DATA.GOV.HK; intellectual-property attribution remains with the Government of the Hong Kong Special Administrative Region and the Hong Kong Observatory.",
+    "currentRemoteFreshnessRevalidated": false,
+    "publisherIdentityIndependentlyVerified": false,
+    "digitalSignatureVerified": false
+  },
+  "rightsBoundary": {
+    "termsUrlBound": true,
+    "termsBodyStored": false,
+    "currentTermsVersionFrozen": false,
+    "workRightsEstablished": false,
+    "editionRightsEstablished": false,
+    "carrierRightsEstablished": false,
+    "rightsLegalConclusion": "not_established",
+    "redistributionAuthorized": false,
+    "publicRepositoryBodyInclusionAuthorized": false,
+    "publicBuildInclusionAuthorized": false,
+    "storagePolicy": "existing_workspace_snapshot_pending_independent_rights_review"
+  },
+  "expertBoundary": {
+    "expertTruthClaimed": false,
+    "independentDomainReviewsVerified": 0,
+    "expertClaimsAuthorized": false
+  },
+  "integrityBoundary": {
+    "replayParserImplementation": "independent_child_parser_not_draft_ts_execution",
+    "resourceHashAndParseUseSameDecodedBuffer": true,
+    "fixtureHashAndJsonParseUseSameReadBuffer": true,
+    "parserHashAndExecutionUseSameReadBuffer": false,
+    "digestIsDigitalSignature": false,
+    "artifactAuthenticityEstablished": false,
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailable": false,
+    "intervalMutationExcluded": false,
+    "abaExcluded": false
+  },
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "ziweiRuleTruthEstablished": false,
+    "sourceBundleComplete": false,
+    "rightsBundleComplete": false,
+    "expertReviewBundleComplete": false,
+    "browserRuntimeEvidenceEstablished": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "baziAuthority": false,
+    "westernAuthority": false,
+    "vedicAuthority": false
+  },
+  "doesNotEstablish": [
+    "late_zi_day_boundary",
+    "shichen",
+    "year_month_day_or_hour_pillars",
+    "solar_time_adjustment",
+    "ziwei_chart_rules",
+    "expert_interpretation",
+    "source_authenticity_or_digital_signature",
+    "three_layer_rights_or_legal_conclusion",
+    "redistribution_authorization",
+    "browser_runtime_or_release_evidence",
+    "release_readiness_or_public_authorization"
+  ],
+  "evidenceDigest": "10fb1417fcca03b9a106aff5cfb11469bf454199b9cfb3ec35ee16b5b03f9b9d"
+}

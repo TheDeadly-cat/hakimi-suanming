@@ -1,0 +1,217 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "ziwei_expert_public_candidate_prescreen_cli_runtime_boundary_erratum_v1",
+  "erratumId": "hakimi.ziwei.expert-public-candidate-prescreen-cli-runtime-boundary-erratum/1.0.0",
+  "status": "append_only_runtime_boundary_claim_correction_zero_admission_effect",
+  "createdOnLabel": "2026-09-03",
+  "basisArtifact": {
+    "role": "runtime_boundary_erratum_narrative_basis",
+    "path": "docs/阶段E-紫微公开候选预筛CLI运行时边界勘误-2026-09-03.md",
+    "rawBytes": 5670,
+    "rawSha256": "688f3116fcdfc496af0a54a485731bf147c25270b951f4164c89310f667092a9"
+  },
+  "originalFiveArtifacts": [
+    {
+      "role": "predecessor_public_candidate_prescreen_ledger",
+      "path": "content/system-admission/ziwei-expert-public-candidate-prescreen.v1.json",
+      "rawBytes": 29196,
+      "rawSha256": "3dcf8c849aae41e5afec8b08653432504160a53006a3e82458a5bc5dc4947f89"
+    },
+    {
+      "role": "predecessor_full_loader_library",
+      "path": "scripts/ziwei-expert-public-candidate-prescreen-lib.mjs",
+      "rawBytes": 43868,
+      "rawSha256": "466ac907d9a5f3dde85e5930b75543e6520db14c9ee7c7a77273dc6da24bbbbc"
+    },
+    {
+      "role": "affected_legacy_fixed_cli",
+      "path": "scripts/verify-ziwei-expert-public-candidate-prescreen.mjs",
+      "rawBytes": 4291,
+      "rawSha256": "3d9c34ae24319f833035987b22207a01a85a6f1e54328413ea6ef69e18d8774a"
+    },
+    {
+      "role": "predecessor_test_evidence",
+      "path": "scripts/verify-ziwei-expert-public-candidate-prescreen.test.mjs",
+      "rawBytes": 21295,
+      "rawSha256": "7c6c6c822263d27459fa4a050a12ec1ae1a42c59e743c9b7b4bc63707bd308d4"
+    },
+    {
+      "role": "predecessor_narrative_basis",
+      "path": "docs/阶段E-紫微现实专家公开候选预筛-2026-09-01.md",
+      "rawBytes": 7524,
+      "rawSha256": "f5f1b56c486072f8c1ea7453a1328db78eeb936d69a8bee5c26a0e7b3b965da5"
+    }
+  ],
+  "predecessorBinding": {
+    "ledgerId": "hakimi.ziwei.expert-public-candidate-prescreen/1.0.0",
+    "ledgerDigest": "d2885be87211af363cabddaa8f4ebc1d45774070429e3e2757496fde93f92294",
+    "fullLoaderPrivateBrandRequired": true,
+    "plainCloneCarriesPrivateBrand": false,
+    "predecessorContentSemanticsChanged": false,
+    "predecessorRuntimeClaimScopeCorrectedOnlyByThisChild": true
+  },
+  "reproducedOperatorPocs": [
+    {
+      "pocId": "direct-import-clears-execargv-before-cli-evaluation",
+      "observationMethod": "operator_local_read_only_process_reproduction",
+      "observedOnLabel": "2026-09-01",
+      "launchSurface": "direct_node_exec_argv_import",
+      "exactPreloadValue": "--import=data:text/javascript,process.execArgv.length=0",
+      "preEvaluationMutation": "process.execArgv.length=0",
+      "legacyCliExitCode": 0,
+      "legacyCliStdoutPrefix": "ZIWEI_EXPERT_PUBLIC_CANDIDATE_PRESCREEN_OK",
+      "legacyCliStdoutBytes": 611,
+      "legacyCliStdoutSha256": "8098f69663eb58cf04d333ee546f5e38e8ee06833700295e940622591584b5bf",
+      "legacyCliStderrBytes": 0,
+      "legacyOkOutputTrustedAttestation": false,
+      "preloadArbitraryLocalCodeExecutionAlreadyAvailable": true,
+      "newAttackerCapabilityDemonstrated": false,
+      "networkAttemptedByPoc": false,
+      "projectFilesModifiedByPoc": false
+    },
+    {
+      "pocId": "node-options-import-deletes-env-and-clears-execargv-before-cli-evaluation",
+      "observationMethod": "operator_local_read_only_process_reproduction",
+      "observedOnLabel": "2026-09-01",
+      "launchSurface": "node_options_import",
+      "exactPreloadValue": "--import=data:text/javascript,delete%20process.env.NODE_OPTIONS%3Bprocess.execArgv.length%3D0",
+      "preEvaluationMutation": "delete process.env.NODE_OPTIONS; process.execArgv.length=0",
+      "legacyCliExitCode": 0,
+      "legacyCliStdoutPrefix": "ZIWEI_EXPERT_PUBLIC_CANDIDATE_PRESCREEN_OK",
+      "legacyCliStdoutBytes": 611,
+      "legacyCliStdoutSha256": "8098f69663eb58cf04d333ee546f5e38e8ee06833700295e940622591584b5bf",
+      "legacyCliStderrBytes": 0,
+      "legacyOkOutputTrustedAttestation": false,
+      "preloadArbitraryLocalCodeExecutionAlreadyAvailable": true,
+      "newAttackerCapabilityDemonstrated": false,
+      "networkAttemptedByPoc": false,
+      "projectFilesModifiedByPoc": false
+    }
+  ],
+  "runtimeClaimCorrection": {
+    "allPreloadsRejected": false,
+    "wholeProcessOffline": false,
+    "cliOutputTrustedAttestation": false,
+    "launcherIdentityEstablished": false,
+    "loaderIdentityEstablished": false,
+    "nodeRuntimeIdentityEstablished": false,
+    "hiddenPreEvaluationExcluded": false,
+    "visibleInputGuardRejectsOnlyInputsStillVisibleAtCliEvaluationStart": true,
+    "visibleInputGuardSecurityBoundary": false,
+    "preloadAlreadyHasArbitraryLocalCodeExecution": true,
+    "erratumDemonstratesNewAttackerCapability": false
+  },
+  "postImportPrimordialBoundary": {
+    "weakSetConstructorCapturedAtModuleEvaluation": true,
+    "weakSetPrototypeAddCapturedAtModuleEvaluation": true,
+    "weakSetPrototypeHasCapturedAtModuleEvaluation": true,
+    "reflectApplyCapturedAtModuleEvaluation": true,
+    "objectFreezeCapturedAtModuleEvaluation": true,
+    "objectIsFrozenCapturedAtModuleEvaluation": true,
+    "objectValuesCapturedAtModuleEvaluation": true,
+    "liveWeakSetPrototypeAddOrHasUsedByBrandPaths": false,
+    "postImportPrimordialPollutionResistanceMechanicallyTested": true,
+    "preEvaluationPrimordialIntegrityEstablished": false,
+    "hostilePreloadBlocked": false,
+    "securityBoundaryPromoted": false
+  },
+  "fixedVerifierStaticScope": {
+    "scope": "own_source_static_token_absence_only",
+    "paths": [
+      "scripts/ziwei-expert-public-candidate-prescreen-cli-runtime-boundary-erratum-lib.mjs",
+      "scripts/verify-ziwei-expert-public-candidate-prescreen-cli-runtime-boundary-erratum.mjs"
+    ],
+    "forbiddenDirectNetworkTokens": [
+      "node:http",
+      "node:https",
+      "node:net",
+      "node:tls",
+      "node:dns",
+      "fetch("
+    ],
+    "forbiddenDirectNetworkTokensFound": 0,
+    "normalCleanInvocationRefetchesPublicSources": false,
+    "transitiveWholeProcessNetworkAbsenceEstablished": false,
+    "preloadOrLoaderHookNetworkAbsenceEstablished": false
+  },
+  "zeroState": {
+    "publicCandidateLeadsObserved": 4,
+    "independentExpertsRequired": 2,
+    "independentExpertReviewsVerified": 0,
+    "sourceRequirementPartialCandidates": 2,
+    "sourceBindingsRequired": 27,
+    "sourceBindingsFrozenVerified": 0,
+    "formalExpertEntriesAdded": 0,
+    "currentExpertEntriesAdded": 0,
+    "formalOrCurrentEndpointIntegrationsAdded": 0
+  },
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "expertClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false
+  },
+  "authorityBoundary": {
+    "identityVerified": false,
+    "credentialVerified": false,
+    "scopeVerified": false,
+    "independenceVerified": false,
+    "participationConsentVerified": false,
+    "expertStatusVerified": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "sourceRightsEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "redistributionAuthorized": false,
+    "formalAdmissionAuthorized": false,
+    "releaseReady": false,
+    "expertClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "crossSystemAuthorityInheritanceAuthorized": false
+  },
+  "observationBoundary": {
+    "createdOnIsUntrustedDateLabelOnly": true,
+    "trustedTimestampEstablished": false,
+    "externalTimeAuthorityEstablished": false,
+    "serverDateHeaderCaptured": false,
+    "firstSeenEstablished": false,
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "intervalMutationExcludedAcrossFiles": false,
+    "abaExcluded": false,
+    "runtimeLauncherIdentityEstablished": false,
+    "loaderHookIdentityEstablished": false,
+    "nodeRuntimeIdentityEstablished": false,
+    "hiddenPreEvaluationExcluded": false
+  },
+  "lineageBoundary": {
+    "appendOnlyChild": true,
+    "activeAdmissionEffect": "none",
+    "originalFiveArtifactsModified": 0,
+    "originalFiveBacklinksAdded": 0,
+    "predecessorLedgerReplaced": false,
+    "formalManifestIntegrated": false,
+    "formalRegistryIntegrated": false,
+    "currentRegistryIntegrated": false,
+    "fourSystemEndpointIntegrated": false,
+    "defaultBuildOrRuntimeIntegrated": false
+  },
+  "doesNotEstablish": [
+    "all_preloads_rejected_or_hostile_pre_evaluation_excluded",
+    "whole_process_offline_or_network_absence",
+    "trusted_cli_attestation_launcher_loader_or_node_runtime_identity",
+    "real_person_identity_credentials_scope_consent_independence_opinion_or_expert_truth",
+    "source_body_semantic_binding_content_truth_rights_legal_or_redistribution_conclusion",
+    "formal_or_current_registry_manifest_endpoint_or_runtime_integration",
+    "release_readiness_expert_claims_public_deployment_or_public_release_authorization",
+    "trusted_time_first_seen_cross_file_atomic_snapshot_mutation_epoch_interval_integrity_or_aba_exclusion"
+  ],
+  "erratumDigest": "4f57b22fd86c6f557925010079e5b22738d8ddfc210017f3d374a9250d74ab54"
+}

@@ -1,0 +1,706 @@
+{
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "rightsBundleComplete": false,
+    "rightsLegalConclusionEstablished": false,
+    "sourceBundleComplete": false
+  },
+  "childDigest": "778eac80398629ee92b8bb1fbac902a605766461c26498794960d16b915ea59d",
+  "childId": "hakimi.ziwei.registry-tarball-parity-observation-child/1.0.0",
+  "contractSystemId": "ziwei",
+  "createdAt": "2026-09-01T15:02:45.000Z",
+  "doesNotEstablish": [
+    "http_status_final_url_redirect_headers_tls_session_or_network_time",
+    "publisher_identity_package_signature_first_seen_or_package_authenticity",
+    "license_authenticity_applicability_notice_satisfaction_or_complete_dependency_closure",
+    "work_edition_carrier_rights_legal_conclusion_or_redistribution",
+    "source_body_exact_quote_formal_locator_new_candidate_or_binding_freeze",
+    "content_truth_expert_truth_or_domain_authority",
+    "browser_pwa_service_worker_cross_browser_or_release_evidence",
+    "formal_current_registry_manifest_owner_or_public_admission",
+    "trusted_time_mutation_epoch_cross_file_atomicity_interval_integrity_or_aba_exclusion"
+  ],
+  "evidenceLedger": {
+    "browserRuntimeEvidence": "not_assessed",
+    "contentTruth": "not_established",
+    "engineeringEvidence": "operator_observed_registry_dist_tarball_lock_and_current_local_manifest_license_byte_parity_only",
+    "expertTruth": "not_established",
+    "publicReleaseAuthorization": "not_authorized",
+    "releaseReadiness": "not_ready",
+    "rightsLegalConclusion": "not_established"
+  },
+  "gateSummary": {
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 27,
+    "carrierRightsEstablished": 0,
+    "editionRightsEstablished": 0,
+    "exactLocatorsEstablished": 1,
+    "exactQuotesBound": 0,
+    "independentDomainExpertReviewsVerified": 0,
+    "independentRightsReviewsVerified": 0,
+    "inheritedPartialCandidates": 2,
+    "licenseCarrierByteParitiesOperatorObserved": 7,
+    "newCandidateIdsAdded": 0,
+    "packageManifestByteParitiesOperatorObserved": 7,
+    "packagesObserved": 7,
+    "redistributionAuthorizations": 0,
+    "selectedEntryByteParitiesOperatorObserved": 14,
+    "sourceBodiesBound": 1,
+    "subjectFullySatisfied": 0,
+    "tarballsObserved": 7,
+    "workRightsEstablished": 0
+  },
+  "integrityBoundary": {
+    "authenticityEstablished": false,
+    "canonicalPrettyJsonWithLfRequired": true,
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi.ziwei.registry-tarball-parity-observation-child.v1\u0000",
+    "digestExcludesOwnField": true,
+    "digestIsDigitalSignature": false,
+    "exclusiveCreateWriterRequired": true
+  },
+  "lineage": {
+    "declaredDependencyLicenseCarrierChild": {
+      "childDigest": "714b5e0b1ff2c75a85bd3804ca53f01b07ad2e663c0f89b381b3cdcbb4df0c27",
+      "childId": "hakimi.ziwei.declared-dependency-license-carrier-observation-child/1.0.0",
+      "path": "content/system-admission/ziwei-declared-dependency-license-carrier-observation-child.v1.json",
+      "rawBytes": 14812,
+      "rawSha256": "201c5b85cf94bf9467ff18e5391fcbdfee4de54893c5fe997994a39c1f0685e8",
+      "relationship": "append_only_operator_registry_tarball_parity_observation"
+    },
+    "predecessorBacklinkAdded": false,
+    "predecessorModified": false
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "crossFileAndNetworkAtomicSnapshotEstablished": false,
+    "currentLocalEndpointsRevalidatedByPredecessorFullLoader": true,
+    "externalMetadataRawJsonWasNotCapturedForReparse": true,
+    "intervalMutationExcluded": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "strictDuplicateKeyRejectingJsonUsedForPersistedArtifacts": true
+  },
+  "operatorObservationBoundary": {
+    "fixedVerifierRecontactsNetwork": false,
+    "httpStatusCaptured": false,
+    "isolatedNpmCacheUsed": true,
+    "lifecycleScriptsExecuted": false,
+    "networkTimeCaptured": false,
+    "npmAuditDisabled": true,
+    "npmFundDisabled": true,
+    "npmPackExactVersionsUsed": true,
+    "npmPackIgnoreScriptsUsed": true,
+    "npmUpdateNotifierDisabled": true,
+    "npmViewExactVersionsUsed": true,
+    "observationSource": "root_operator_supplied_completed_local_command_observation",
+    "operatorObservationIsAuthenticityAttestation": false,
+    "operatorObservationIsDigitalSignature": false,
+    "rawMetadataResponsesPersisted": false,
+    "redirectBehaviorCaptured": false,
+    "responseHeadersCaptured": false,
+    "tlsSessionEvidenceCaptured": false
+  },
+  "packageObservations": [
+    {
+      "firstSeenEstablished": false,
+      "lockProjection": {
+        "integrity": "sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==",
+        "metadataIntegrityMatchesLockIntegrity": true,
+        "metadataTarballMatchesLockResolved": true,
+        "path": "node_modules/@babel/runtime",
+        "resolved": "https://registry.npmjs.org/@babel/runtime/-/runtime-7.29.7.tgz"
+      },
+      "metadataDistObservation": {
+        "finalUrl": null,
+        "finalUrlCaptured": false,
+        "httpStatus": null,
+        "httpStatusCaptured": false,
+        "integrity": "sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==",
+        "networkObservedAt": null,
+        "networkObservedAtCaptured": false,
+        "rawMetadataResponseCaptured": false,
+        "redirectChain": null,
+        "redirectChainCaptured": false,
+        "responseHeaders": null,
+        "responseHeadersCaptured": false,
+        "shasum": "12022450c45a4da6d8d8287b18a4ff2ddb23f768",
+        "tarball": "https://registry.npmjs.org/@babel/runtime/-/runtime-7.29.7.tgz",
+        "tool": "npm_view_exact_version"
+      },
+      "ordinal": 1,
+      "packageAuthenticityEstablished": false,
+      "packageName": "@babel/runtime",
+      "packageSignatureVerified": false,
+      "publisherIdentityVerified": false,
+      "selectedEntries": [
+        {
+          "exactByteEqualityOperatorObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 41106,
+            "rawSha256": "8c4bf20c55e3f3a93df034b12746bf72185cf2acb0ef52847a3465d6e67c61e7"
+          },
+          "localPath": "node_modules/@babel/runtime/package.json",
+          "role": "package_manifest",
+          "tarEntryIdentity": {
+            "rawBytes": 41106,
+            "rawSha256": "8c4bf20c55e3f3a93df034b12746bf72185cf2acb0ef52847a3465d6e67c61e7"
+          },
+          "tarPath": "package/package.json"
+        },
+        {
+          "exactByteEqualityOperatorObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 1106,
+            "rawSha256": "117da2af0d4ce0fe1c8e19b5cff9dcd806adf973d328d27b11d4448c4ff24f76"
+          },
+          "localPath": "node_modules/@babel/runtime/LICENSE",
+          "role": "license_carrier",
+          "tarEntryIdentity": {
+            "rawBytes": 1106,
+            "rawSha256": "117da2af0d4ce0fe1c8e19b5cff9dcd806adf973d328d27b11d4448c4ff24f76"
+          },
+          "tarPath": "package/LICENSE"
+        }
+      ],
+      "tarballObservation": {
+        "metadataIntegrityMatchesDownloadSri": true,
+        "metadataShasumMatchesDownloadSha1": true,
+        "rawBytes": 55313,
+        "rawSha1": "12022450c45a4da6d8d8287b18a4ff2ddb23f768",
+        "rawSha256": "4d7f1bd502a1a64d47625cc738d13284865f0666d2ed01f244de0adf05b69aa5",
+        "rawSha512": "36af0e8465a264864657a84b1e8c8028b2dc26284fff115e04c189a14af14d7da9b08f1d0a27f32e16484856fe5564b7c053110e6086c3947e74ec920aa3cb87",
+        "sriSha512": "sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==",
+        "tarballBodyPersistedInWorkspace": false,
+        "tarballUrl": "https://registry.npmjs.org/@babel/runtime/-/runtime-7.29.7.tgz",
+        "tool": "npm_pack_exact_version_ignore_scripts"
+      },
+      "version": "7.29.7"
+    },
+    {
+      "firstSeenEstablished": false,
+      "lockProjection": {
+        "integrity": "sha512-98IT+HOahAisibz/yjKbzuOBwYcjJ7BCLPzARyHiyEBmRz4fatF+KPJszEHXsGYjUG234aH/cOjW1wwTbKUZlA==",
+        "metadataIntegrityMatchesLockIntegrity": true,
+        "metadataTarballMatchesLockResolved": true,
+        "path": "node_modules/dayjs",
+        "resolved": "https://registry.npmjs.org/dayjs/-/dayjs-1.11.21.tgz"
+      },
+      "metadataDistObservation": {
+        "finalUrl": null,
+        "finalUrlCaptured": false,
+        "httpStatus": null,
+        "httpStatusCaptured": false,
+        "integrity": "sha512-98IT+HOahAisibz/yjKbzuOBwYcjJ7BCLPzARyHiyEBmRz4fatF+KPJszEHXsGYjUG234aH/cOjW1wwTbKUZlA==",
+        "networkObservedAt": null,
+        "networkObservedAtCaptured": false,
+        "rawMetadataResponseCaptured": false,
+        "redirectChain": null,
+        "redirectChainCaptured": false,
+        "responseHeaders": null,
+        "responseHeadersCaptured": false,
+        "shasum": "57f87562e62de76f3c704bd2b8d522fc33068eb2",
+        "tarball": "https://registry.npmjs.org/dayjs/-/dayjs-1.11.21.tgz",
+        "tool": "npm_view_exact_version"
+      },
+      "ordinal": 2,
+      "packageAuthenticityEstablished": false,
+      "packageName": "dayjs",
+      "packageSignatureVerified": false,
+      "publisherIdentityVerified": false,
+      "selectedEntries": [
+        {
+          "exactByteEqualityOperatorObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 2676,
+            "rawSha256": "dcb46b4045ace466baa3972d8d85d81f9036ac0ca23f48a8fe77d0d786de0400"
+          },
+          "localPath": "node_modules/dayjs/package.json",
+          "role": "package_manifest",
+          "tarEntryIdentity": {
+            "rawBytes": 2676,
+            "rawSha256": "dcb46b4045ace466baa3972d8d85d81f9036ac0ca23f48a8fe77d0d786de0400"
+          },
+          "tarPath": "package/package.json"
+        },
+        {
+          "exactByteEqualityOperatorObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 1072,
+            "rawSha256": "5faab7526d055651be3aab769d58897be6bd91f3d39d137f25f12dba1b31d5dc"
+          },
+          "localPath": "node_modules/dayjs/LICENSE",
+          "role": "license_carrier",
+          "tarEntryIdentity": {
+            "rawBytes": 1072,
+            "rawSha256": "5faab7526d055651be3aab769d58897be6bd91f3d39d137f25f12dba1b31d5dc"
+          },
+          "tarPath": "package/LICENSE"
+        }
+      ],
+      "tarballObservation": {
+        "metadataIntegrityMatchesDownloadSri": true,
+        "metadataShasumMatchesDownloadSha1": true,
+        "rawBytes": 147879,
+        "rawSha1": "57f87562e62de76f3c704bd2b8d522fc33068eb2",
+        "rawSha256": "290ec8bf81878ae4927581d9be74125f07722ea8bbea2ff77a2226dce12df876",
+        "rawSha512": "f7c213f8739a8408ac89bcffca329bcee381c1872327b0422cfcc04721e2c84066473e1f6ad17e28f26ccc41d7b06623506db7e1a1ff70e8d6d70c136ca51994",
+        "sriSha512": "sha512-98IT+HOahAisibz/yjKbzuOBwYcjJ7BCLPzARyHiyEBmRz4fatF+KPJszEHXsGYjUG234aH/cOjW1wwTbKUZlA==",
+        "tarballBodyPersistedInWorkspace": false,
+        "tarballUrl": "https://registry.npmjs.org/dayjs/-/dayjs-1.11.21.tgz",
+        "tool": "npm_pack_exact_version_ignore_scripts"
+      },
+      "version": "1.11.21"
+    },
+    {
+      "firstSeenEstablished": false,
+      "lockProjection": {
+        "integrity": "sha512-06r/TitrM88Mg5FdUXAKL96dJMzgqLE5dv3ryBAra4KCwD9mJ4ndOTS95ZuymIGoE+2hzfdaMak2X11/es7ZWg==",
+        "metadataIntegrityMatchesLockIntegrity": true,
+        "metadataTarballMatchesLockResolved": true,
+        "path": "node_modules/i18next",
+        "resolved": "https://registry.npmjs.org/i18next/-/i18next-23.16.8.tgz"
+      },
+      "metadataDistObservation": {
+        "finalUrl": null,
+        "finalUrlCaptured": false,
+        "httpStatus": null,
+        "httpStatusCaptured": false,
+        "integrity": "sha512-06r/TitrM88Mg5FdUXAKL96dJMzgqLE5dv3ryBAra4KCwD9mJ4ndOTS95ZuymIGoE+2hzfdaMak2X11/es7ZWg==",
+        "networkObservedAt": null,
+        "networkObservedAtCaptured": false,
+        "rawMetadataResponseCaptured": false,
+        "redirectChain": null,
+        "redirectChainCaptured": false,
+        "responseHeaders": null,
+        "responseHeadersCaptured": false,
+        "shasum": "3ae1373d344c2393f465556f394aba5a9233b93a",
+        "tarball": "https://registry.npmjs.org/i18next/-/i18next-23.16.8.tgz",
+        "tool": "npm_view_exact_version"
+      },
+      "ordinal": 3,
+      "packageAuthenticityEstablished": false,
+      "packageName": "i18next",
+      "packageSignatureVerified": false,
+      "publisherIdentityVerified": false,
+      "selectedEntries": [
+        {
+          "exactByteEqualityOperatorObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 4379,
+            "rawSha256": "eed0139050cc6d3b62e97a29529bd4d729d1d5f993af8e78fe48564c246648fc"
+          },
+          "localPath": "node_modules/i18next/package.json",
+          "role": "package_manifest",
+          "tarEntryIdentity": {
+            "rawBytes": 4379,
+            "rawSha256": "eed0139050cc6d3b62e97a29529bd4d729d1d5f993af8e78fe48564c246648fc"
+          },
+          "tarPath": "package/package.json"
+        },
+        {
+          "exactByteEqualityOperatorObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 1074,
+            "rawSha256": "c83b2035d5a4740f8739869a994acc24559e2946219b15091922b52e7b2a7287"
+          },
+          "localPath": "node_modules/i18next/LICENSE",
+          "role": "license_carrier",
+          "tarEntryIdentity": {
+            "rawBytes": 1074,
+            "rawSha256": "c83b2035d5a4740f8739869a994acc24559e2946219b15091922b52e7b2a7287"
+          },
+          "tarPath": "package/LICENSE"
+        }
+      ],
+      "tarballObservation": {
+        "metadataIntegrityMatchesDownloadSri": true,
+        "metadataShasumMatchesDownloadSha1": true,
+        "rawBytes": 139913,
+        "rawSha1": "3ae1373d344c2393f465556f394aba5a9233b93a",
+        "rawSha256": "283f7f0da577e8ee54eb5fdeb4c97cdaecbb54e28fc85b32e5c908731d131015",
+        "rawSha512": "d3aaff4e2b6b33cf0c83915d51700a2fde9d24cce0a8b13976fdebc8102b6b8282c03f662789dd3934bde59bb29881a813eda1cdf75a31a9365f5d7f7aced95a",
+        "sriSha512": "sha512-06r/TitrM88Mg5FdUXAKL96dJMzgqLE5dv3ryBAra4KCwD9mJ4ndOTS95ZuymIGoE+2hzfdaMak2X11/es7ZWg==",
+        "tarballBodyPersistedInWorkspace": false,
+        "tarballUrl": "https://registry.npmjs.org/i18next/-/i18next-23.16.8.tgz",
+        "tool": "npm_pack_exact_version_ignore_scripts"
+      },
+      "version": "23.16.8"
+    },
+    {
+      "firstSeenEstablished": false,
+      "lockProjection": {
+        "integrity": "sha512-kgyyvxdSEvgJxi6zvHpvzGbXZLGXCdhTHYK2Pe/sRdBIQ7RfCArvupmg2ChUMQCSQGomW7XCI0gWwUuKJwPENg==",
+        "metadataIntegrityMatchesLockIntegrity": true,
+        "metadataTarballMatchesLockResolved": true,
+        "path": "node_modules/iztro",
+        "resolved": "https://registry.npmjs.org/iztro/-/iztro-2.5.8.tgz"
+      },
+      "metadataDistObservation": {
+        "finalUrl": null,
+        "finalUrlCaptured": false,
+        "httpStatus": null,
+        "httpStatusCaptured": false,
+        "integrity": "sha512-kgyyvxdSEvgJxi6zvHpvzGbXZLGXCdhTHYK2Pe/sRdBIQ7RfCArvupmg2ChUMQCSQGomW7XCI0gWwUuKJwPENg==",
+        "networkObservedAt": null,
+        "networkObservedAtCaptured": false,
+        "rawMetadataResponseCaptured": false,
+        "redirectChain": null,
+        "redirectChainCaptured": false,
+        "responseHeaders": null,
+        "responseHeadersCaptured": false,
+        "shasum": "c559a7384036596c1971faace403f4a658076a81",
+        "tarball": "https://registry.npmjs.org/iztro/-/iztro-2.5.8.tgz",
+        "tool": "npm_view_exact_version"
+      },
+      "ordinal": 4,
+      "packageAuthenticityEstablished": false,
+      "packageName": "iztro",
+      "packageSignatureVerified": false,
+      "publisherIdentityVerified": false,
+      "selectedEntries": [
+        {
+          "exactByteEqualityOperatorObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 2255,
+            "rawSha256": "a5a85df951d28965caa7bf9a9fe6b44e3df676c8dd938573061257cff681a20f"
+          },
+          "localPath": "node_modules/iztro/package.json",
+          "role": "package_manifest",
+          "tarEntryIdentity": {
+            "rawBytes": 2255,
+            "rawSha256": "a5a85df951d28965caa7bf9a9fe6b44e3df676c8dd938573061257cff681a20f"
+          },
+          "tarPath": "package/package.json"
+        },
+        {
+          "exactByteEqualityOperatorObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 1073,
+            "rawSha256": "e6c7b6e313cbda3135b41bccc66c98be132cb8319d0d465903d17e669e748b36"
+          },
+          "localPath": "node_modules/iztro/LICENSE",
+          "role": "license_carrier",
+          "tarEntryIdentity": {
+            "rawBytes": 1073,
+            "rawSha256": "e6c7b6e313cbda3135b41bccc66c98be132cb8319d0d465903d17e669e748b36"
+          },
+          "tarPath": "package/LICENSE"
+        }
+      ],
+      "tarballObservation": {
+        "metadataIntegrityMatchesDownloadSri": true,
+        "metadataShasumMatchesDownloadSha1": true,
+        "rawBytes": 534282,
+        "rawSha1": "c559a7384036596c1971faace403f4a658076a81",
+        "rawSha256": "8293c6a587de521b0713e45826745ba4b7482fc507bd2da43fc820cadf06deca",
+        "rawSha512": "920cb2bf175212f809c62eb3bc7a6fcc66d764b19709d8531d82b63defec45d04843b45f080aefba99a0d82854310092406a265bb5c2234816c14b8a2703c436",
+        "sriSha512": "sha512-kgyyvxdSEvgJxi6zvHpvzGbXZLGXCdhTHYK2Pe/sRdBIQ7RfCArvupmg2ChUMQCSQGomW7XCI0gWwUuKJwPENg==",
+        "tarballBodyPersistedInWorkspace": false,
+        "tarballUrl": "https://registry.npmjs.org/iztro/-/iztro-2.5.8.tgz",
+        "tool": "npm_pack_exact_version_ignore_scripts"
+      },
+      "version": "2.5.8"
+    },
+    {
+      "firstSeenEstablished": false,
+      "lockProjection": {
+        "integrity": "sha512-Y4tba4RaIFI0ikImJhgoEsyqtDE64lJIM3yFwRX01dbmagCDq7rNmpDQFrSFFy4WXeuywdRVFpIBoT1GGCEizw==",
+        "metadataIntegrityMatchesLockIntegrity": true,
+        "metadataTarballMatchesLockResolved": true,
+        "path": "node_modules/lunar-lite",
+        "resolved": "https://registry.npmjs.org/lunar-lite/-/lunar-lite-0.2.8.tgz"
+      },
+      "metadataDistObservation": {
+        "finalUrl": null,
+        "finalUrlCaptured": false,
+        "httpStatus": null,
+        "httpStatusCaptured": false,
+        "integrity": "sha512-Y4tba4RaIFI0ikImJhgoEsyqtDE64lJIM3yFwRX01dbmagCDq7rNmpDQFrSFFy4WXeuywdRVFpIBoT1GGCEizw==",
+        "networkObservedAt": null,
+        "networkObservedAtCaptured": false,
+        "rawMetadataResponseCaptured": false,
+        "redirectChain": null,
+        "redirectChainCaptured": false,
+        "responseHeaders": null,
+        "responseHeadersCaptured": false,
+        "shasum": "a0caad44ee65c75d28c9430c890c544f9c5572ee",
+        "tarball": "https://registry.npmjs.org/lunar-lite/-/lunar-lite-0.2.8.tgz",
+        "tool": "npm_view_exact_version"
+      },
+      "ordinal": 5,
+      "packageAuthenticityEstablished": false,
+      "packageName": "lunar-lite",
+      "packageSignatureVerified": false,
+      "publisherIdentityVerified": false,
+      "selectedEntries": [
+        {
+          "exactByteEqualityOperatorObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 1465,
+            "rawSha256": "be39ac7d686fd9e1eee487e4e1960ff670e368ad6529bd435d2d0222521147dd"
+          },
+          "localPath": "node_modules/lunar-lite/package.json",
+          "role": "package_manifest",
+          "tarEntryIdentity": {
+            "rawBytes": 1465,
+            "rawSha256": "be39ac7d686fd9e1eee487e4e1960ff670e368ad6529bd435d2d0222521147dd"
+          },
+          "tarPath": "package/package.json"
+        },
+        {
+          "exactByteEqualityOperatorObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 1062,
+            "rawSha256": "21c79dc1c4df538c682573291f8824be1b1313e309a32f1e2367e3fd4c66d62a"
+          },
+          "localPath": "node_modules/lunar-lite/LICENSE",
+          "role": "license_carrier",
+          "tarEntryIdentity": {
+            "rawBytes": 1062,
+            "rawSha256": "21c79dc1c4df538c682573291f8824be1b1313e309a32f1e2367e3fd4c66d62a"
+          },
+          "tarPath": "package/LICENSE"
+        }
+      ],
+      "tarballObservation": {
+        "metadataIntegrityMatchesDownloadSri": true,
+        "metadataShasumMatchesDownloadSha1": true,
+        "rawBytes": 8520,
+        "rawSha1": "a0caad44ee65c75d28c9430c890c544f9c5572ee",
+        "rawSha256": "963f134a8a46b92ec6e243a98be90dc5a33c33637581b151b7c11e5833d0b157",
+        "rawSha512": "638b5b6b845a2052348a422626182812ccaab4313ae25248337c85c115f4d5d6e66a0083abbacd9a90d016b485172e165debb2c1d455169201a13d46182122cf",
+        "sriSha512": "sha512-Y4tba4RaIFI0ikImJhgoEsyqtDE64lJIM3yFwRX01dbmagCDq7rNmpDQFrSFFy4WXeuywdRVFpIBoT1GGCEizw==",
+        "tarballBodyPersistedInWorkspace": false,
+        "tarballUrl": "https://registry.npmjs.org/lunar-lite/-/lunar-lite-0.2.8.tgz",
+        "tool": "npm_pack_exact_version_ignore_scripts"
+      },
+      "version": "0.2.8"
+    },
+    {
+      "firstSeenEstablished": false,
+      "lockProjection": {
+        "integrity": "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA==",
+        "metadataIntegrityMatchesLockIntegrity": true,
+        "metadataTarballMatchesLockResolved": true,
+        "path": "node_modules/lunar-typescript",
+        "resolved": "https://registry.npmjs.org/lunar-typescript/-/lunar-typescript-1.8.6.tgz"
+      },
+      "metadataDistObservation": {
+        "finalUrl": null,
+        "finalUrlCaptured": false,
+        "httpStatus": null,
+        "httpStatusCaptured": false,
+        "integrity": "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA==",
+        "networkObservedAt": null,
+        "networkObservedAtCaptured": false,
+        "rawMetadataResponseCaptured": false,
+        "redirectChain": null,
+        "redirectChainCaptured": false,
+        "responseHeaders": null,
+        "responseHeadersCaptured": false,
+        "shasum": "9ecadd8610369f800bf46a517da7f6c598f6491d",
+        "tarball": "https://registry.npmjs.org/lunar-typescript/-/lunar-typescript-1.8.6.tgz",
+        "tool": "npm_view_exact_version"
+      },
+      "ordinal": 6,
+      "packageAuthenticityEstablished": false,
+      "packageName": "lunar-typescript",
+      "packageSignatureVerified": false,
+      "publisherIdentityVerified": false,
+      "selectedEntries": [
+        {
+          "exactByteEqualityOperatorObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 2188,
+            "rawSha256": "f66f1217e67e227f77b7a35b3c5b40d3835842856920e99ebd7e10f2d940e21c"
+          },
+          "localPath": "node_modules/lunar-typescript/package.json",
+          "role": "package_manifest",
+          "tarEntryIdentity": {
+            "rawBytes": 2188,
+            "rawSha256": "f66f1217e67e227f77b7a35b3c5b40d3835842856920e99ebd7e10f2d940e21c"
+          },
+          "tarPath": "package/package.json"
+        },
+        {
+          "exactByteEqualityOperatorObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 1062,
+            "rawSha256": "097ec7989106eb9a27b6eff71dbaf1cd6bb04a9b35b6c94b54fff0829a041a8c"
+          },
+          "localPath": "node_modules/lunar-typescript/LICENSE",
+          "role": "license_carrier",
+          "tarEntryIdentity": {
+            "rawBytes": 1062,
+            "rawSha256": "097ec7989106eb9a27b6eff71dbaf1cd6bb04a9b35b6c94b54fff0829a041a8c"
+          },
+          "tarPath": "package/LICENSE"
+        }
+      ],
+      "tarballObservation": {
+        "metadataIntegrityMatchesDownloadSri": true,
+        "metadataShasumMatchesDownloadSha1": true,
+        "rawBytes": 335460,
+        "rawSha1": "9ecadd8610369f800bf46a517da7f6c598f6491d",
+        "rawSha256": "257163cff2e2bb8359861721e72e5dbed2f583340b1400e459fd27816ac2ac39",
+        "rawSha512": "e44a384ff727b977eb80ee24e4b0a93861c850ebb3e61085fc87cdbf44f6f56636b21477e878b3f9e70df568e752ec542a1aa5f606ce90f690a2a2c52ad3d134",
+        "sriSha512": "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA==",
+        "tarballBodyPersistedInWorkspace": false,
+        "tarballUrl": "https://registry.npmjs.org/lunar-typescript/-/lunar-typescript-1.8.6.tgz",
+        "tool": "npm_pack_exact_version_ignore_scripts"
+      },
+      "version": "1.8.6"
+    },
+    {
+      "firstSeenEstablished": false,
+      "lockProjection": {
+        "integrity": "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==",
+        "metadataIntegrityMatchesLockIntegrity": true,
+        "metadataTarballMatchesLockResolved": true,
+        "path": "node_modules/zod",
+        "resolved": "https://registry.npmjs.org/zod/-/zod-4.4.3.tgz"
+      },
+      "metadataDistObservation": {
+        "finalUrl": null,
+        "finalUrlCaptured": false,
+        "httpStatus": null,
+        "httpStatusCaptured": false,
+        "integrity": "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==",
+        "networkObservedAt": null,
+        "networkObservedAtCaptured": false,
+        "rawMetadataResponseCaptured": false,
+        "redirectChain": null,
+        "redirectChainCaptured": false,
+        "responseHeaders": null,
+        "responseHeadersCaptured": false,
+        "shasum": "b680f172885d18bbebf21a834ea25e55a1bbf356",
+        "tarball": "https://registry.npmjs.org/zod/-/zod-4.4.3.tgz",
+        "tool": "npm_view_exact_version"
+      },
+      "ordinal": 7,
+      "packageAuthenticityEstablished": false,
+      "packageName": "zod",
+      "packageSignatureVerified": false,
+      "publisherIdentityVerified": false,
+      "selectedEntries": [
+        {
+          "exactByteEqualityOperatorObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 3796,
+            "rawSha256": "c630bd10b52dcf71c112a2bf78dbf2734b9db58d62de663b8d86c2ec2c8cda2e"
+          },
+          "localPath": "node_modules/zod/package.json",
+          "role": "package_manifest",
+          "tarEntryIdentity": {
+            "rawBytes": 3796,
+            "rawSha256": "c630bd10b52dcf71c112a2bf78dbf2734b9db58d62de663b8d86c2ec2c8cda2e"
+          },
+          "tarPath": "package/package.json"
+        },
+        {
+          "exactByteEqualityOperatorObserved": true,
+          "localCarrierIdentity": {
+            "rawBytes": 1072,
+            "rawSha256": "3f1189b28e3866e0d979968d466b78f813f76827cfdca1fbb124cc0a5c8841f8"
+          },
+          "localPath": "node_modules/zod/LICENSE",
+          "role": "license_carrier",
+          "tarEntryIdentity": {
+            "rawBytes": 1072,
+            "rawSha256": "3f1189b28e3866e0d979968d466b78f813f76827cfdca1fbb124cc0a5c8841f8"
+          },
+          "tarPath": "package/LICENSE"
+        }
+      ],
+      "tarballObservation": {
+        "metadataIntegrityMatchesDownloadSri": true,
+        "metadataShasumMatchesDownloadSha1": true,
+        "rawBytes": 759588,
+        "rawSha1": "b680f172885d18bbebf21a834ea25e55a1bbf356",
+        "rawSha256": "ee38f17f533fd500610685a483ae2f413c26f4eb33a51684314563c8d60f279c",
+        "rawSha512": "cad10d163209165d94c1882575eda37215b61f09b818914b0e249759d4eb25004837d15cca9ee7e0387124489634024c575fc1a967d6fe4920ef55037072724d",
+        "sriSha512": "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==",
+        "tarballBodyPersistedInWorkspace": false,
+        "tarballUrl": "https://registry.npmjs.org/zod/-/zod-4.4.3.tgz",
+        "tool": "npm_pack_exact_version_ignore_scripts"
+      },
+      "version": "4.4.3"
+    }
+  ],
+  "productSystemId": "ziwei-doushu",
+  "recordType": "ziwei_public_registry_tarball_local_carrier_parity_operator_observation_child",
+  "releaseGovernance": {
+    "activeLine": "legacy-v13",
+    "expertClaimsAuthorized": false,
+    "migrationId": null,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "rightsBoundary": {
+    "carrierRightsEstablished": false,
+    "editionRightsEstablished": false,
+    "firstSeenEstablished": false,
+    "licenseApplicabilityEstablished": false,
+    "licenseAuthenticityEstablished": false,
+    "noticeObligationSatisfied": false,
+    "packageAuthenticityEstablished": false,
+    "packageSignatureVerified": false,
+    "publisherIdentityVerified": false,
+    "redistributionAuthorized": false,
+    "rightsLegalConclusionEstablished": false,
+    "sevenPublicRegistryTarballToLocalManifestLicenseParitiesOperatorObserved": true,
+    "workRightsEstablished": false
+  },
+  "runtimeTrustBoundary": {
+    "assumesNoArbitraryPreEvaluationCodeExecution": true,
+    "cliOutputTrustedAttestation": false,
+    "fixedPathCliImplementationBoundByChildIdentity": false,
+    "hiddenPreEvaluationCodeExecutionExcluded": false,
+    "launcherIntegrityEstablished": false,
+    "loaderIdentityEstablished": false,
+    "nodeRuntimeIdentityEstablished": false,
+    "visibleGuardIsSecurityBoundary": false
+  },
+  "schemaVersion": "1.0.0",
+  "sourceRequirementsProjectionBoundary": {
+    "completeDependencyNoticeClosureEstablished": false,
+    "countsTowardFrozenBindingGate": false,
+    "exactQuoteBound": false,
+    "existingCandidateId": "hakimi.ziwei.source-candidate/declared-dependency-license-carriers/1.0.0",
+    "formalExactLocatorEstablished": false,
+    "newCandidateAdded": false,
+    "sourceBodyBound": false,
+    "subjectFullySatisfied": false,
+    "supplementsExistingCandidateOnly": true,
+    "targetSubjectId": "ziwei.rights.engine-code-and-dependency-notices"
+  },
+  "status": "seven_exact_package_tarball_manifest_and_license_local_byte_parities_operator_observed_unbound",
+  "temporaryExecutionBoundary": {
+    "currentAbsenceRecheckedReadOnly": true,
+    "currentPathExists": false,
+    "exactTemporaryDirectoryPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\hakimi-ziwei-npm-parity-20260901-01",
+    "operatorReportedRemoved": true,
+    "parentWasVerifiedAsExactSystemTemporaryDirectory": true,
+    "pathWasHardcodedBeforeCleanup": true,
+    "recursiveCleanupApi": "System.IO.Directory.Delete(path,true)",
+    "temporaryDirectoryPersisted": false
+  },
+  "timeBoundary": {
+    "clockRollbackExcluded": false,
+    "createdAtClock": "untrusted_local_clock_label",
+    "createdAtUpperBoundObservedOnSameUntrustedLocalClock": "2026-09-01T15:02:45.437Z",
+    "externalTimeAuthorityEstablished": false,
+    "operatorNetworkObservationTime": null,
+    "operatorNetworkObservationTimeCaptured": false,
+    "trustedTimestampEstablished": false
+  }
+}

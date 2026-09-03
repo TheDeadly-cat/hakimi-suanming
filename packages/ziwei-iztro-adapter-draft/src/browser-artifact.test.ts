@@ -1042,7 +1042,13 @@ describe("Ziwei Browser engineering artifact", () => {
   it("builds twelve traceable four-part palace candidates without selecting an outcome", () => {
     expect(ZIWEI_PALACE_FOUR_PART_SYNTHESIS_CONTENT_VERSION)
       .toBe("ziwei.palace_sanfang.four_part_synthesis_candidate/0.1");
-    expect(ZIWEI_BROWSER_SOURCE_PATHS.filter((path) => path.endsWith(".ts"))).toHaveLength(21);
+    expect(ZIWEI_BROWSER_SOURCE_PATHS.filter((path) => path.endsWith(".ts"))).toHaveLength(23);
+    expect(ZIWEI_BROWSER_SOURCE_PATHS).toContain(
+      "src/browser-preview/high-risk-expression-egress-policy.ts"
+    );
+    expect(ZIWEI_BROWSER_SOURCE_PATHS).toContain(
+      "src/browser-preview/high-risk-expression-egress-view.ts"
+    );
     expect(ZIWEI_BROWSER_SOURCE_PATHS).toContain(
       "src/browser-preview/palace-four-part-synthesis-content.ts"
     );

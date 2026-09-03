@@ -1,0 +1,278 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "system_domain_release_manifest",
+  "systemId": "ziwei",
+  "surface": {
+    "surfaceId": "ziwei-isolated-workspace-draft",
+    "surfaceVersion": "0.1.0",
+    "versionMeaning": "product_surface_contract_not_database_schema_or_domain_authority"
+  },
+  "releaseGovernance": {
+    "releaseIdentity": "isolated-ziwei-draft-no-main-schema",
+    "targetSchema": null,
+    "migrationId": null,
+    "mutationEpochBoundary": "preserved",
+    "publicDeploymentAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "components": [
+    {
+      "componentId": "execution_rules",
+      "version": "iztro@2.5.8+hakimi-fresh-worker-draft/0.1.0",
+      "status": "bound",
+      "files": [
+        {
+          "path": "packages/ziwei-doushu-contracts-draft/src/index.ts",
+          "sha256": "0474abe7170f17352efd9b0d0f2735f2edbec049bb331441b7bd77ff2b79acc0"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/src/index.ts",
+          "sha256": "555674ad51f4f4825472cc54be7f580e3d9c0ab5fd9ca7003e1dafae42bee05f"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/src/iztro-2.5.8-lock-closure.json",
+          "sha256": "c372bf14630eee36fa01ac654b8939622900a3e469a8f69db7bd2c7baa1d2724"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/src/node-worker-entry.mjs",
+          "sha256": "3b997e992a50ed11fb929f1b2672ae568945302acc61542be2c392134f067f64"
+        }
+      ],
+      "digest": "bd734ca369fecc05147aef91fb65430afd1b2aca8862a246ec8deaeaa3c8245d"
+    },
+    {
+      "componentId": "interpretation_rules",
+      "version": "hakimi.ziwei.interpretation-engineering-draft/0.1.0",
+      "status": "bound",
+      "files": [
+        {
+          "path": "packages/ziwei-doushu-contracts-draft/src/index.ts",
+          "sha256": "0474abe7170f17352efd9b0d0f2735f2edbec049bb331441b7bd77ff2b79acc0"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/core-minor-star-content.ts",
+          "sha256": "d80f82925688c59419ebfd135172495b0f3c4d5da4ccc82a614cba45fee9f343"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/major-star-content.ts",
+          "sha256": "7cfaca5402e6ad8b48faa80e9ce8bd529e03923faea9735a9caf12f01a4aa3c1"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/major-star-palace-content.ts",
+          "sha256": "96503fb39487b9f9b939a70f922cf810814dcd7b176b278379ed7a4f811143e2"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/natal-transformation-content.ts",
+          "sha256": "68adf4c783241a6b834096ed8286c5bdeee08fd867c04669ff75796c620f7378"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/natal-transformation-palace-content.ts",
+          "sha256": "19a09c55967b53bb013395b89b58aff2658b7f5da4710cded816d8eca08708b1"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/palace-four-part-synthesis-content.ts",
+          "sha256": "1ba435c3f6b7df0250875c7a3e455d8cc77a35ba3243b18f11b31ea3b933f171"
+        }
+      ],
+      "digest": "7579a19bde8b936de2682e0d38e87b0d1e4d9a9ce1742f82f9efb9b0b29bddff"
+    },
+    {
+      "componentId": "input_policy",
+      "version": "hakimi.ziwei.input-contract-draft/0.1.0",
+      "status": "bound",
+      "files": [
+        {
+          "path": "packages/ziwei-doushu-contracts-draft/src/index.ts",
+          "sha256": "0474abe7170f17352efd9b0d0f2735f2edbec049bb331441b7bd77ff2b79acc0"
+        }
+      ],
+      "digest": "dff5a8c23adfdf3a87940f6e382aade2a1afe922cff13fd70750eb84b634c958"
+    },
+    {
+      "componentId": "fact_contract",
+      "version": "hakimi.ziwei.natal-facts-draft/0.1.0",
+      "status": "bound",
+      "files": [
+        {
+          "path": "packages/ziwei-doushu-contracts-draft/src/index.ts",
+          "sha256": "0474abe7170f17352efd9b0d0f2735f2edbec049bb331441b7bd77ff2b79acc0"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/browser-artifact.ts",
+          "sha256": "baf9b58904863eb1ec23deb8bd46da4abca1bc4a70c41bf6f56176310b292bf7"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/src/cross-system-engineering-fact-projection.ts",
+          "sha256": "5df8347691f24deddde8cc347d5c52791c8983e1677032f5b5bd168a63cef5b3"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/src/index.ts",
+          "sha256": "555674ad51f4f4825472cc54be7f580e3d9c0ab5fd9ca7003e1dafae42bee05f"
+        }
+      ],
+      "digest": "437820e5ca8f9fcec98bad5f5662312915a46ae2cdbd86c1aaa3166020d6425f"
+    },
+    {
+      "componentId": "source_bundle",
+      "version": "source-binding-requirements-plus-hko-calendar-candidate/1.1.0",
+      "status": "incomplete",
+      "files": [
+        {
+          "path": "content/system-admission/ziwei-hko-calendar-source-evidence.v1.json",
+          "sha256": "61a9607aaa9b1133501fb9194f7be97e01f42e360b069fe38aa34d6eb8e2fd0e"
+        },
+        {
+          "path": "content/system-admission/ziwei-source-binding-requirements.v1.json",
+          "sha256": "6ea7baee1e0ea63d7337ea6b6d78b8e7cb5da91a62bb902eaa591245539c7b3f"
+        },
+        {
+          "path": "packages/ziwei-doushu-contracts-draft/README.md",
+          "sha256": "8c5c8be9d9a6394d7a6ad20150ae460cfa829cd49726e09b2d3ccb96e67e3677"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/fixtures/hko-data-gov-hk-calendar-boundaries-2023-2028.json",
+          "sha256": "6d89fc823112556b21e3792637db3164a380cde2d2a8c28206bb9b83975e64ec"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/fixtures/hko-data-gov-hk-calendar-source-snapshots-2023-2028.json",
+          "sha256": "32dfd1a9ed204c5b96a100a082d1d02f0b9391ddcc867f32c2c06d39f2972fe2"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/README.md",
+          "sha256": "5458076097c00a155b1e716655bf166e1f57bf530fcaf50ee5b878131209ddca"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/src/official-calendar-evidence.ts",
+          "sha256": "5b653c50eb81144e2fa1738a6c0f34b425b23901e18078f38fa4273cdc9f9399"
+        },
+        {
+          "path": "scripts/independent-source-binding-requirements-lib.mjs",
+          "sha256": "39226710aa227b4483b3f491e98e5e1fd7ff8c62b625ed22703f53d58dbdb90e"
+        },
+        {
+          "path": "scripts/verify-independent-source-binding-requirements.mjs",
+          "sha256": "b888da6fc6b2e8b7418d358a40c42a4f637525116bded25a830bb55862cffac9"
+        },
+        {
+          "path": "scripts/verify-ziwei-hko-calendar-source-evidence.mjs",
+          "sha256": "c20d1a609389269959e73158b8265e420cf532e82bf9d54659e15ae18b9d8edd"
+        },
+        {
+          "path": "scripts/ziwei-hko-calendar-source-evidence-lib.mjs",
+          "sha256": "e42771d71b2c164a57b8cd6a0d4cd8a5ebdac625bc1faaba8713bf8caa457a31"
+        }
+      ],
+      "digest": "6edc853105a9a34087bfd97d619a61d549abb1dfefcf240651d22f0e52165e6e"
+    },
+    {
+      "componentId": "rights_bundle",
+      "version": "dependency-observations-not-product-clearance/0.1.0",
+      "status": "incomplete",
+      "files": [
+        {
+          "path": "packages/ziwei-doushu-contracts-draft/package.json",
+          "sha256": "b17ec03e75495a1cf06361bd23307bf097a622f0d6740523ad2f5b636dca4683"
+        },
+        {
+          "path": "packages/ziwei-doushu-contracts-draft/README.md",
+          "sha256": "8c5c8be9d9a6394d7a6ad20150ae460cfa829cd49726e09b2d3ccb96e67e3677"
+        },
+        {
+          "path": "packages/ziwei-fortel-differential-draft/package.json",
+          "sha256": "55b6832e7c9f2f114cffa0f650d4a3a68147813a07c19dba46cbd07c5fab80bc"
+        },
+        {
+          "path": "packages/ziwei-fortel-differential-draft/README.md",
+          "sha256": "d7d09fbe6a0fc9fb9f3cd9c905524a12be01977e109ecc08c07465d8c9074cf9"
+        },
+        {
+          "path": "packages/ziwei-fortel-differential-draft/src/fortel-ziweidoushu-1.3.4-lock-closure.json",
+          "sha256": "e6814ab795c059d3ba27d968e3e8229a55a3a06e5aa88dec85c12119c5fd15c8"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/package.json",
+          "sha256": "717b64a0d9a38a98a6f1b567aa060aaeb53f25f03ede5302048180398ffedda1"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/README.md",
+          "sha256": "5458076097c00a155b1e716655bf166e1f57bf530fcaf50ee5b878131209ddca"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/src/iztro-2.5.8-lock-closure.json",
+          "sha256": "c372bf14630eee36fa01ac654b8939622900a3e469a8f69db7bd2c7baa1d2724"
+        }
+      ],
+      "digest": "6be66a574f4244ada635a41ed5790ad1661905f8e2e736c027aa7317f09eb213"
+    },
+    {
+      "componentId": "expert_review_bundle",
+      "version": "absent/0",
+      "status": "absent",
+      "files": [],
+      "digest": "68fcfdc575995155f709c1491f5404dbc8e1ffa6214e726afc6128ccf9872380"
+    },
+    {
+      "componentId": "high_risk_policy",
+      "version": "draft-boundary-only/0.1.0",
+      "status": "incomplete",
+      "files": [
+        {
+          "path": "packages/ziwei-doushu-contracts-draft/README.md",
+          "sha256": "8c5c8be9d9a6394d7a6ad20150ae460cfa829cd49726e09b2d3ccb96e67e3677"
+        },
+        {
+          "path": "packages/ziwei-doushu-contracts-draft/src/index.ts",
+          "sha256": "0474abe7170f17352efd9b0d0f2735f2edbec049bb331441b7bd77ff2b79acc0"
+        },
+        {
+          "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/main-response-gate.ts",
+          "sha256": "ec108489e28edc630ea281c4c2d8e06473bc6d870b7e78a16ee26d726c5da278"
+        }
+      ],
+      "digest": "ac332d48be33385b48af912f9d932d90b3f2b25cc241019cf9728d405c26117c"
+    },
+    {
+      "componentId": "report_contract",
+      "version": "isolated-workspace-preview-not-formal-report/0.1.0",
+      "status": "incomplete",
+      "files": [
+        {
+          "path": "packages/ziwei-workspace-artifact-draft/README.md",
+          "sha256": "769b0d86f69c97db7f7255dc8963ed65b264ac5ebc5ef0c40b8ec82a0c2b0628"
+        },
+        {
+          "path": "packages/ziwei-workspace-artifact-draft/src/browser-app/main.ts",
+          "sha256": "074e93b441691c9c2d2535f09216b4c893bdbf8623cc2227a162f7c6ee235cf7"
+        },
+        {
+          "path": "packages/ziwei-workspace-artifact-draft/src/index.ts",
+          "sha256": "ccce79ece7ef9b3f4d81eb724b8593b76dc1f86299b6984eea7298d6c8fb244c"
+        }
+      ],
+      "digest": "7ccf97999e3de5fe75817eba222a4ae2b5ad1891b319ac553af95d4a201561ad"
+    }
+  ],
+  "gateState": {
+    "bindingRequired": 27,
+    "bindingFrozenVerified": 0,
+    "independentExpertsRequired": 2,
+    "independentExpertReviewsVerified": 0,
+    "sourceBundleComplete": false,
+    "rightsBundleComplete": false,
+    "expertReviewBundleComplete": false,
+    "highRiskPolicyBound": false,
+    "releaseEvidenceComplete": false
+  },
+  "evidenceLedger": {
+    "engineeringIdentity": "component_digests_verified",
+    "browserRuntimeEvidence": "not_assessed_in_domain_manifest",
+    "contentTruth": "not_established",
+    "expertTruth": "not_established",
+    "rightsLegalConclusion": "not_established",
+    "releaseReadiness": "not_ready",
+    "publicReleaseAuthorization": "not_authorized"
+  },
+  "releaseStatus": "draft",
+  "createdAt": "2026-08-26T04:00:00.000Z",
+  "manifestDigest": "ac8d05dbfe45846e1edbb277ce2e34f076a8e2c7e6adb8c57b75366d04c8eed7"
+}

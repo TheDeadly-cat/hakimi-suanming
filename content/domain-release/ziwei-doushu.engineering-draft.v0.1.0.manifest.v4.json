@@ -1,0 +1,928 @@
+{
+  "activeAdmissionEffect": "none",
+  "authoredSourceRootClosure": {
+    "allReparseClassesExcluded": false,
+    "authoredFileCount": 91,
+    "completeInstalledDependencyClosureEstablished": false,
+    "completeRepositoryClosureEstablished": false,
+    "entireZiweiDomainClosureEstablished": false,
+    "entireZiweiEngineeringClosureEstablished": false,
+    "entireZiweiProductClosureEstablished": false,
+    "excludedGeneratedSubtreeContentsBound": false,
+    "excludedGeneratedSubtrees": [
+      "packages/ziwei-doushu-contracts-draft/dist",
+      "packages/ziwei-doushu-contracts-draft/node_modules",
+      "packages/ziwei-fortel-differential-draft/dist",
+      "packages/ziwei-fortel-differential-draft/node_modules",
+      "packages/ziwei-iztro-adapter-draft/dist",
+      "packages/ziwei-iztro-adapter-draft/node_modules",
+      "packages/ziwei-workspace-artifact-draft/dist",
+      "packages/ziwei-workspace-artifact-draft/node_modules"
+    ],
+    "exclusionLimitedToDirectDistAndNodeModules": true,
+    "files": [
+      {
+        "bytes": 2982,
+        "path": "packages/ziwei-doushu-contracts-draft/README.md",
+        "sha256": "8c5c8be9d9a6394d7a6ad20150ae460cfa829cd49726e09b2d3ccb96e67e3677"
+      },
+      {
+        "bytes": 371,
+        "path": "packages/ziwei-doushu-contracts-draft/package.json",
+        "sha256": "b17ec03e75495a1cf06361bd23307bf097a622f0d6740523ad2f5b636dca4683"
+      },
+      {
+        "bytes": 30647,
+        "path": "packages/ziwei-doushu-contracts-draft/src/index.test.ts",
+        "sha256": "5cd0a7eef6c6522c5b6cf641d0340fe4e2618d02706e8e73cddcee85251ab74e"
+      },
+      {
+        "bytes": 46181,
+        "path": "packages/ziwei-doushu-contracts-draft/src/index.ts",
+        "sha256": "2a9555dba509873e6c436dcdc9121fcd90e943d880984581fbff865feca15685"
+      },
+      {
+        "bytes": 182,
+        "path": "packages/ziwei-doushu-contracts-draft/tsconfig.json",
+        "sha256": "63607b49052422c9e0bbb58b8f9074215a442bc2b65c39de60be162a4d5b04ef"
+      },
+      {
+        "bytes": 2599,
+        "path": "packages/ziwei-fortel-differential-draft/README.md",
+        "sha256": "d7d09fbe6a0fc9fb9f3cd9c905524a12be01977e109ecc08c07465d8c9074cf9"
+      },
+      {
+        "bytes": 605,
+        "path": "packages/ziwei-fortel-differential-draft/package.json",
+        "sha256": "55b6832e7c9f2f114cffa0f650d4a3a68147813a07c19dba46cbd07c5fab80bc"
+      },
+      {
+        "bytes": 460,
+        "path": "packages/ziwei-fortel-differential-draft/src/contract-bridge.ts",
+        "sha256": "731390f477ea5fc5c4083c78b098382586f351a802dd765768c485bff0824035"
+      },
+      {
+        "bytes": 1227,
+        "path": "packages/ziwei-fortel-differential-draft/src/demo.ts",
+        "sha256": "31460972002744c6669aa8aaa7a7c61d7499ee2ca45c4abe585000d96c8427c6"
+      },
+      {
+        "bytes": 12900,
+        "path": "packages/ziwei-fortel-differential-draft/src/fortel-worker-entry.mjs",
+        "sha256": "4b967cde0b27873bc38a8869c8146d54244ba1628f4cfd87add28f98a3829ac5"
+      },
+      {
+        "bytes": 24583,
+        "path": "packages/ziwei-fortel-differential-draft/src/fortel-ziweidoushu-1.3.4-lock-closure.json",
+        "sha256": "e6814ab795c059d3ba27d968e3e8229a55a3a06e5aa88dec85c12119c5fd15c8"
+      },
+      {
+        "bytes": 12163,
+        "path": "packages/ziwei-fortel-differential-draft/src/index.test.ts",
+        "sha256": "3f5bcdff56139e38de71563416be542d8cca6ded65ff1d7ff220038e3eb3fec4"
+      },
+      {
+        "bytes": 57397,
+        "path": "packages/ziwei-fortel-differential-draft/src/index.ts",
+        "sha256": "6de8cbf5c16a4a3fc62056569a2a26a129a529695a4cbb0093e9affce164aa2f"
+      },
+      {
+        "bytes": 257,
+        "path": "packages/ziwei-fortel-differential-draft/src/iztro-adapter-bridge.ts",
+        "sha256": "ab737e923881b54ecb50c9b515a2d2265376cc08bb74a1089a8cd1860dfb4443"
+      },
+      {
+        "bytes": 182,
+        "path": "packages/ziwei-fortel-differential-draft/tsconfig.json",
+        "sha256": "63607b49052422c9e0bbb58b8f9074215a442bc2b65c39de60be162a4d5b04ef"
+      },
+      {
+        "bytes": 9937,
+        "path": "packages/ziwei-iztro-adapter-draft/README.md",
+        "sha256": "5458076097c00a155b1e716655bf166e1f57bf530fcaf50ee5b878131209ddca"
+      },
+      {
+        "bytes": 174,
+        "path": "packages/ziwei-iztro-adapter-draft/browser-preview/emit-rule-snapshot.mjs",
+        "sha256": "401fa5a7c11517062607993e16b8bda6a55be179ca4468b8cddd66993c0eb9e2"
+      },
+      {
+        "bytes": 6557,
+        "path": "packages/ziwei-iztro-adapter-draft/browser-preview/index.html",
+        "sha256": "e6c23bdc56b02cd738a8831b4f41e295820d0535781dfdd9b9af4d1924060baa"
+      },
+      {
+        "bytes": 2196,
+        "path": "packages/ziwei-iztro-adapter-draft/fixtures/hko-data-gov-hk-calendar-2025.json",
+        "sha256": "06da54c6412eda2fa7063463526a057cbdcdd5259c34f33a53a39cbef30a8eab"
+      },
+      {
+        "bytes": 13700,
+        "path": "packages/ziwei-iztro-adapter-draft/fixtures/hko-data-gov-hk-calendar-boundaries-2023-2028.json",
+        "sha256": "6d89fc823112556b21e3792637db3164a380cde2d2a8c28206bb9b83975e64ec"
+      },
+      {
+        "bytes": 15501,
+        "path": "packages/ziwei-iztro-adapter-draft/fixtures/hko-data-gov-hk-calendar-source-snapshots-2023-2028.json",
+        "sha256": "32dfd1a9ed204c5b96a100a082d1d02f0b9391ddcc867f32c2c06d39f2972fe2"
+      },
+      {
+        "bytes": 1073,
+        "path": "packages/ziwei-iztro-adapter-draft/licenses/iztro-2.5.8-LICENSE.txt",
+        "sha256": "e6c7b6e313cbda3135b41bccc66c98be132cb8319d0d465903d17e669e748b36"
+      },
+      {
+        "bytes": 500,
+        "path": "packages/ziwei-iztro-adapter-draft/package.json",
+        "sha256": "717b64a0d9a38a98a6f1b567aa060aaeb53f25f03ede5302048180398ffedda1"
+      },
+      {
+        "bytes": 4822,
+        "path": "packages/ziwei-iztro-adapter-draft/scripts/audit-hko-calendar-boundary-matrix.ts",
+        "sha256": "f927187a8cb42bf0768777b2bdf738198345433647be0254487f701de57db955"
+      },
+      {
+        "bytes": 68427,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-artifact.test.ts",
+        "sha256": "165c9efb53649f49ac8286ff8da46288f75268b8b5b49abfe72f87dce3bb9048"
+      },
+      {
+        "bytes": 23724,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/browser-artifact.ts",
+        "sha256": "14f75f337fe12e126bf2cb9e315e6106e6137973f349fa151b85b51e0ed56e1c"
+      },
+      {
+        "bytes": 6927,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/browser-client.ts",
+        "sha256": "e492acafe1e6b312e8c00dddd0e1f4d9bc5076bb66dd7269b44096927f59e2fd"
+      },
+      {
+        "bytes": 26844,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/browser-protocol.ts",
+        "sha256": "754fdd4f5d456ef42ca4f7efd8b0d8db953a28db3e1983200afa85dd4834b098"
+      },
+      {
+        "bytes": 24234,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/browser-worker.ts",
+        "sha256": "a730f0028c58460737fb2199b5855ea3c3c29bfd506963e40d0d7b346fa52596"
+      },
+      {
+        "bytes": 39928,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/core-minor-star-content.ts",
+        "sha256": "d80f82925688c59419ebfd135172495b0f3c4d5da4ccc82a614cba45fee9f343"
+      },
+      {
+        "bytes": 50650,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/core-minor-star-sanfang-review-feedback.ts",
+        "sha256": "df3bcf4018ccf56239dfc9ec90b09ee4c54e74783649653ac49c811eb4b87a5c"
+      },
+      {
+        "bytes": 22659,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/core-minor-star-sanfang-review.ts",
+        "sha256": "ace96b60ceb25fb50ac3ec138c43a91b174de83250419101ad80407124a621ff"
+      },
+      {
+        "bytes": 10507,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/display-projection.ts",
+        "sha256": "6211f602c3465f986224d8e2aa6c4c5b6a0eb654367f4c2458136b16428786ed"
+      },
+      {
+        "bytes": 489,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/generated-browser-source-identity.ts",
+        "sha256": "bc0c5072f0f0cfc0b009e40f4f4d899560ede0a84438a480d514debff319989e"
+      },
+      {
+        "bytes": 363,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/generated-rule-snapshot.ts",
+        "sha256": "e9c295aaaa227f8e1dc056ed6e668e0c0b8fbf78bef882f581235d1efb66fbc9"
+      },
+      {
+        "bytes": 34053,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/high-risk-expression-egress-policy.ts",
+        "sha256": "7b10bb23fe0194b0dc564eec895d9dc1bb99658ad5fcc710f8edd14d1fdd8616"
+      },
+      {
+        "bytes": 48019,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/high-risk-expression-egress-view.ts",
+        "sha256": "926f932d45b22b0fc6e4b0b6a1c92f4b6ddb579603973bc74492bfff4790050c"
+      },
+      {
+        "bytes": 5353,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/main-response-gate.ts",
+        "sha256": "ec108489e28edc630ea281c4c2d8e06473bc6d870b7e78a16ee26d726c5da278"
+      },
+      {
+        "bytes": 9383,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/main.ts",
+        "sha256": "166aa694a89cb1fcb22f1292d40f8bef925197312ae0be2dc20b871ffd590378"
+      },
+      {
+        "bytes": 15231,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/major-star-combination-review.ts",
+        "sha256": "b899d3c7a0ba711e7a486eef9fb3890a6b2e3fcdbdf7ef7ff903e48d38a88187"
+      },
+      {
+        "bytes": 11354,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/major-star-content.ts",
+        "sha256": "7cfaca5402e6ad8b48faa80e9ce8bd529e03923faea9735a9caf12f01a4aa3c1"
+      },
+      {
+        "bytes": 24737,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/major-star-palace-content.ts",
+        "sha256": "96503fb39487b9f9b939a70f922cf810814dcd7b176b278379ed7a4f811143e2"
+      },
+      {
+        "bytes": 7711,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/major-star-synthesis-review.ts",
+        "sha256": "de990e67bafa47aca40f21b66fc569254c1c044312132d6f3c711a9e1b1df21e"
+      },
+      {
+        "bytes": 9338,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/natal-transformation-content.ts",
+        "sha256": "68adf4c783241a6b834096ed8286c5bdeee08fd867c04669ff75796c620f7378"
+      },
+      {
+        "bytes": 20120,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/natal-transformation-palace-content.ts",
+        "sha256": "19a09c55967b53bb013395b89b58aff2658b7f5da4710cded816d8eca08708b1"
+      },
+      {
+        "bytes": 37796,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/natal-transformation-palace-review-feedback.ts",
+        "sha256": "a5c1f52cfd44d862c6a3cd6a2317587e966666538f2a9494d8b9967747c9c982"
+      },
+      {
+        "bytes": 19677,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/natal-transformation-review.ts",
+        "sha256": "008863d1e00e8d2d44648ea5b337995b91dbc79d0df8ead8acbb08118367cdea"
+      },
+      {
+        "bytes": 16840,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/palace-first-synthesis-review.ts",
+        "sha256": "a70981876b88bb63a4de097decacedc999907a2408f6f89ee64f88446dbaccbd"
+      },
+      {
+        "bytes": 27933,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/palace-four-part-synthesis-content.ts",
+        "sha256": "1ba435c3f6b7df0250875c7a3e455d8cc77a35ba3243b18f11b31ea3b933f171"
+      },
+      {
+        "bytes": 12510,
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/styles.css",
+        "sha256": "4a5c8fc69923f995535e513ac846169124c078455d3ce34dcb1ff592dc7b7c10"
+      },
+      {
+        "bytes": 899,
+        "path": "packages/ziwei-iztro-adapter-draft/src/contract-bridge.ts",
+        "sha256": "fe8bf6ae7df49e86c13a92fbddbc9c0105ae4817d9214c9aa594e21a8bc8ae64"
+      },
+      {
+        "bytes": 14457,
+        "path": "packages/ziwei-iztro-adapter-draft/src/core-minor-star-sanfang-review-feedback.test.ts",
+        "sha256": "5a49d5b469826637b1e201e200fdb70ecc66e4ae2f2c58a859adaa45da15109a"
+      },
+      {
+        "bytes": 3166,
+        "path": "packages/ziwei-iztro-adapter-draft/src/cross-system-engineering-fact-projection.test.ts",
+        "sha256": "5ea27f03b5bdb2e1fff2a29ce8383335ab4125883f0b808020464ff5e758ee12"
+      },
+      {
+        "bytes": 3815,
+        "path": "packages/ziwei-iztro-adapter-draft/src/cross-system-engineering-fact-projection.ts",
+        "sha256": "5df8347691f24deddde8cc347d5c52791c8983e1677032f5b5bd168a63cef5b3"
+      },
+      {
+        "bytes": 1763,
+        "path": "packages/ziwei-iztro-adapter-draft/src/demo.ts",
+        "sha256": "5eaa8d83284e63b7c11e071a2fafe87537efc5cb697e8a5d4a295600c99e42aa"
+      },
+      {
+        "bytes": 23884,
+        "path": "packages/ziwei-iztro-adapter-draft/src/high-risk-expression-egress-policy.test.ts",
+        "sha256": "07f046acfd1117a37de04f9f34a6f6f33d47dd31b2e39a801fe55eccaa2f57ce"
+      },
+      {
+        "bytes": 31679,
+        "path": "packages/ziwei-iztro-adapter-draft/src/high-risk-expression-egress-view.test.ts",
+        "sha256": "41c59332d7792d90ed87230e78bfb9c3a7a2531fb02ae81121fb3d87fd9d7aef"
+      },
+      {
+        "bytes": 11053,
+        "path": "packages/ziwei-iztro-adapter-draft/src/index.test.ts",
+        "sha256": "5107945737aef20e0caebf69e47a3ceb46b1343a73973f9ecc80d5a7f04d2d7f"
+      },
+      {
+        "bytes": 40691,
+        "path": "packages/ziwei-iztro-adapter-draft/src/index.ts",
+        "sha256": "555674ad51f4f4825472cc54be7f580e3d9c0ab5fd9ca7003e1dafae42bee05f"
+      },
+      {
+        "bytes": 3846,
+        "path": "packages/ziwei-iztro-adapter-draft/src/iztro-2.5.8-lock-closure.json",
+        "sha256": "c372bf14630eee36fa01ac654b8939622900a3e469a8f69db7bd2c7baa1d2724"
+      },
+      {
+        "bytes": 16080,
+        "path": "packages/ziwei-iztro-adapter-draft/src/natal-transformation-palace-review-feedback.test.ts",
+        "sha256": "4d6c195ea4f765b867cb09c19783b726ed67b3b02c87bbb18c57ca787d070e25"
+      },
+      {
+        "bytes": 23378,
+        "path": "packages/ziwei-iztro-adapter-draft/src/node-worker-entry.mjs",
+        "sha256": "3b997e992a50ed11fb929f1b2672ae568945302acc61542be2c392134f067f64"
+      },
+      {
+        "bytes": 11688,
+        "path": "packages/ziwei-iztro-adapter-draft/src/official-calendar-evidence.test.ts",
+        "sha256": "c6fe47140bcb6c3425fbccb26092cbde9e7ac87c926a4a9a8e62ad0e432f0556"
+      },
+      {
+        "bytes": 26429,
+        "path": "packages/ziwei-iztro-adapter-draft/src/official-calendar-evidence.ts",
+        "sha256": "5b653c50eb81144e2fa1738a6c0f34b425b23901e18078f38fa4273cdc9f9399"
+      },
+      {
+        "bytes": 223,
+        "path": "packages/ziwei-iztro-adapter-draft/tsconfig.browser-preview.json",
+        "sha256": "f3e0879deba3a348c02965bf8858287728a2471dbba4c7f27addae2a9f6a0161"
+      },
+      {
+        "bytes": 228,
+        "path": "packages/ziwei-iztro-adapter-draft/tsconfig.json",
+        "sha256": "f69e4e1821eb2c12da80a5427f599f160a5d37ad758bde83ef8a7802ad3856e9"
+      },
+      {
+        "bytes": 14314,
+        "path": "packages/ziwei-iztro-adapter-draft/vite.browser-preview.config.mjs",
+        "sha256": "e2a034fdb78fb8f00f6c034e0fa2bc9b4e452c1fcc12fda71282657775d7a138"
+      },
+      {
+        "bytes": 28626,
+        "path": "packages/ziwei-workspace-artifact-draft/README.md",
+        "sha256": "0352df4e4a526e7a8ec343e7b41be2d4d1bb74d1b93be3a3d58fb7fd5064a076"
+      },
+      {
+        "bytes": 19993,
+        "path": "packages/ziwei-workspace-artifact-draft/browser-app/index.html",
+        "sha256": "82fd5d26221a72da69f8663a102acdcd806a1d68add3f793071255c1a16afca3"
+      },
+      {
+        "bytes": 14437,
+        "path": "packages/ziwei-workspace-artifact-draft/e2e/core-minor-sanfang-review-v013.spec.ts",
+        "sha256": "561fb92af7eda924202679dcfc9ed61e43a04a07f39972e3c1901f52e065d2a4"
+      },
+      {
+        "bytes": 7743,
+        "path": "packages/ziwei-workspace-artifact-draft/e2e/same-artifact-summary-reporter.ts",
+        "sha256": "a653724114f47160567fb1bd8b8abe004fd1e643a5659d13eb96ec52d5f67e81"
+      },
+      {
+        "bytes": 93337,
+        "path": "packages/ziwei-workspace-artifact-draft/e2e/workspace-browser-gate.spec.ts",
+        "sha256": "df5f550b227ea856f96da9aaf3d65c079cef74490fde39ba3c4b8c225daee1e4"
+      },
+      {
+        "bytes": 586,
+        "path": "packages/ziwei-workspace-artifact-draft/package.json",
+        "sha256": "f2f549ee442f28e744b293609d513ff9e69d90a3fabb6255136fad2a6fa6c17a"
+      },
+      {
+        "bytes": 4478,
+        "path": "packages/ziwei-workspace-artifact-draft/playwright.same-artifact-evidence.config.ts",
+        "sha256": "39c4984d1f4caf20539329af75ea37a4e6d7a2f581100f9d23e94852eecf6ce2"
+      },
+      {
+        "bytes": 1184,
+        "path": "packages/ziwei-workspace-artifact-draft/playwright.v013.config.ts",
+        "sha256": "2ff71204b1dced7d99f15e61b5cc75ba4bbf6287d5009e8dc1a231e1ed4fed16"
+      },
+      {
+        "bytes": 1060,
+        "path": "packages/ziwei-workspace-artifact-draft/playwright.workspace.config.ts",
+        "sha256": "a26304809777843f9c6d4d8180d98ae04948578d0822405adaed88b4fa31e4c3"
+      },
+      {
+        "bytes": 148531,
+        "path": "packages/ziwei-workspace-artifact-draft/src/browser-app/main.ts",
+        "sha256": "5dfd2f4003aea118666f135a17d87844c0eff97e5e283bfc7ccbb29319d6610a"
+      },
+      {
+        "bytes": 44651,
+        "path": "packages/ziwei-workspace-artifact-draft/src/browser-app/styles.css",
+        "sha256": "94b830a3b34dca83e9e2b47e4002e1cd1c937a0a5b1769d2b9ce020366e315d2"
+      },
+      {
+        "bytes": 886,
+        "path": "packages/ziwei-workspace-artifact-draft/src/browser-artifact-bridge.ts",
+        "sha256": "64eb7fe120e812e8f79ec64efe9b3a7b57052cb12592f629cef8d25ce85c4c6c"
+      },
+      {
+        "bytes": 2752,
+        "path": "packages/ziwei-workspace-artifact-draft/src/browser-calculation-bridge.ts",
+        "sha256": "8f4662bc26ca34596751eafe10ca474ff3041f87593f8d743058bad9197e52ef"
+      },
+      {
+        "bytes": 22167,
+        "path": "packages/ziwei-workspace-artifact-draft/src/browser-persistence.test.ts",
+        "sha256": "b568c4f8e53d6ef759e1ece7580db450b722110cd47d3138893f5e48de509255"
+      },
+      {
+        "bytes": 64192,
+        "path": "packages/ziwei-workspace-artifact-draft/src/browser-persistence.ts",
+        "sha256": "9f04f2d9482282bc1819cdc8b39bf374d2a699e947c98824188dd44356dcb2f1"
+      },
+      {
+        "bytes": 596,
+        "path": "packages/ziwei-workspace-artifact-draft/src/contract-bridge.ts",
+        "sha256": "4fe55dad518208c1d0a349fcd9b7a3febf194e24793cc41427eef3d12fc0e759"
+      },
+      {
+        "bytes": 3076,
+        "path": "packages/ziwei-workspace-artifact-draft/src/demo.ts",
+        "sha256": "ff239ebb1f440f1bc38ce7a22b7f5628dd283626cd892b0d2cad9570a0e41ec9"
+      },
+      {
+        "bytes": 10344,
+        "path": "packages/ziwei-workspace-artifact-draft/src/index.test.ts",
+        "sha256": "ade5f9119bb5376d209913a299268e55c9c53c53fe0e4f642ffcd68110b5984c"
+      },
+      {
+        "bytes": 23302,
+        "path": "packages/ziwei-workspace-artifact-draft/src/index.ts",
+        "sha256": "ccce79ece7ef9b3f4d81eb724b8593b76dc1f86299b6984eea7298d6c8fb244c"
+      },
+      {
+        "bytes": 293,
+        "path": "packages/ziwei-workspace-artifact-draft/src/iztro-adapter-bridge.ts",
+        "sha256": "2b76885ea0bfd5d79b0f3c47e0709eeb2ab793b4390ced93566d7371b252fb00"
+      },
+      {
+        "bytes": 219,
+        "path": "packages/ziwei-workspace-artifact-draft/tsconfig.browser-app.json",
+        "sha256": "88ab26d309308c65024edc2d4d78ea4745356281b3578b892e92300337ed698b"
+      },
+      {
+        "bytes": 226,
+        "path": "packages/ziwei-workspace-artifact-draft/tsconfig.json",
+        "sha256": "65c984150e8a60fec9d9e4a5d5c464cec681cdadb3b621df8b7aca788a0706bc"
+      },
+      {
+        "bytes": 938,
+        "path": "packages/ziwei-workspace-artifact-draft/vite.browser-app.config.mjs",
+        "sha256": "3d948e78b33c859af6be9c46cf7a54ff752ee28bba3247410782e37e45032432"
+      },
+      {
+        "bytes": 2423,
+        "path": "packages/ziwei-workspace-artifact-draft/vite.same-artifact-evidence.config.mjs",
+        "sha256": "de36f7ab11e52e6b00269e3e8676c2b1ed858f9e92b1f75a89165490e4f9dfff"
+      }
+    ],
+    "fourPackageAuthoredSourceRootsExact": true,
+    "genericNtfsReparseTagEnumerated": false,
+    "newlyCoveredExtra": [
+      {
+        "authorizationClaimed": false,
+        "bytes": 30647,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-doushu-contracts-draft/src/index.test.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "5cd0a7eef6c6522c5b6cf641d0340fe4e2618d02706e8e73cddcee85251ab74e"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 460,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-fortel-differential-draft/src/contract-bridge.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "731390f477ea5fc5c4083c78b098382586f351a802dd765768c485bff0824035"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 1227,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-fortel-differential-draft/src/demo.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "31460972002744c6669aa8aaa7a7c61d7499ee2ca45c4abe585000d96c8427c6"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 12900,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-fortel-differential-draft/src/fortel-worker-entry.mjs",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "4b967cde0b27873bc38a8869c8146d54244ba1628f4cfd87add28f98a3829ac5"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 12163,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-fortel-differential-draft/src/index.test.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "3f5bcdff56139e38de71563416be542d8cca6ded65ff1d7ff220038e3eb3fec4"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 57397,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-fortel-differential-draft/src/index.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "6de8cbf5c16a4a3fc62056569a2a26a129a529695a4cbb0093e9affce164aa2f"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 257,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-fortel-differential-draft/src/iztro-adapter-bridge.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "ab737e923881b54ecb50c9b515a2d2265376cc08bb74a1089a8cd1860dfb4443"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 182,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-fortel-differential-draft/tsconfig.json",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "63607b49052422c9e0bbb58b8f9074215a442bc2b65c39de60be162a4d5b04ef"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 6557,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-iztro-adapter-draft/browser-preview/index.html",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "e6c23bdc56b02cd738a8831b4f41e295820d0535781dfdd9b9af4d1924060baa"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 2196,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-iztro-adapter-draft/fixtures/hko-data-gov-hk-calendar-2025.json",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "06da54c6412eda2fa7063463526a057cbdcdd5259c34f33a53a39cbef30a8eab"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 4822,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-iztro-adapter-draft/scripts/audit-hko-calendar-boundary-matrix.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "f927187a8cb42bf0768777b2bdf738198345433647be0254487f701de57db955"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 68427,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-artifact.test.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "165c9efb53649f49ac8286ff8da46288f75268b8b5b49abfe72f87dce3bb9048"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 12510,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-iztro-adapter-draft/src/browser-preview/styles.css",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "4a5c8fc69923f995535e513ac846169124c078455d3ce34dcb1ff592dc7b7c10"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 14457,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-iztro-adapter-draft/src/core-minor-star-sanfang-review-feedback.test.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "5a49d5b469826637b1e201e200fdb70ecc66e4ae2f2c58a859adaa45da15109a"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 3166,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-iztro-adapter-draft/src/cross-system-engineering-fact-projection.test.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "5ea27f03b5bdb2e1fff2a29ce8383335ab4125883f0b808020464ff5e758ee12"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 1763,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-iztro-adapter-draft/src/demo.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "5eaa8d83284e63b7c11e071a2fafe87537efc5cb697e8a5d4a295600c99e42aa"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 23884,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-iztro-adapter-draft/src/high-risk-expression-egress-policy.test.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "07f046acfd1117a37de04f9f34a6f6f33d47dd31b2e39a801fe55eccaa2f57ce"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 31679,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-iztro-adapter-draft/src/high-risk-expression-egress-view.test.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "41c59332d7792d90ed87230e78bfb9c3a7a2531fb02ae81121fb3d87fd9d7aef"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 11053,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-iztro-adapter-draft/src/index.test.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "5107945737aef20e0caebf69e47a3ceb46b1343a73973f9ecc80d5a7f04d2d7f"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 16080,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-iztro-adapter-draft/src/natal-transformation-palace-review-feedback.test.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "4d6c195ea4f765b867cb09c19783b726ed67b3b02c87bbb18c57ca787d070e25"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 11688,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-iztro-adapter-draft/src/official-calendar-evidence.test.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "c6fe47140bcb6c3425fbccb26092cbde9e7ac87c926a4a9a8e62ad0e432f0556"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 223,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-iztro-adapter-draft/tsconfig.browser-preview.json",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "f3e0879deba3a348c02965bf8858287728a2471dbba4c7f27addae2a9f6a0161"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 14437,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-workspace-artifact-draft/e2e/core-minor-sanfang-review-v013.spec.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "561fb92af7eda924202679dcfc9ed61e43a04a07f39972e3c1901f52e065d2a4"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 7743,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-workspace-artifact-draft/e2e/same-artifact-summary-reporter.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "a653724114f47160567fb1bd8b8abe004fd1e643a5659d13eb96ec52d5f67e81"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 93337,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-workspace-artifact-draft/e2e/workspace-browser-gate.spec.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "df5f550b227ea856f96da9aaf3d65c079cef74490fde39ba3c4b8c225daee1e4"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 4478,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-workspace-artifact-draft/playwright.same-artifact-evidence.config.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "39c4984d1f4caf20539329af75ea37a4e6d7a2f581100f9d23e94852eecf6ce2"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 1184,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-workspace-artifact-draft/playwright.v013.config.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "2ff71204b1dced7d99f15e61b5cc75ba4bbf6287d5009e8dc1a231e1ed4fed16"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 1060,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-workspace-artifact-draft/playwright.workspace.config.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "a26304809777843f9c6d4d8180d98ae04948578d0822405adaed88b4fa31e4c3"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 22167,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-workspace-artifact-draft/src/browser-persistence.test.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "b568c4f8e53d6ef759e1ece7580db450b722110cd47d3138893f5e48de509255"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 3076,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-workspace-artifact-draft/src/demo.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "ff239ebb1f440f1bc38ce7a22b7f5628dd283626cd892b0d2cad9570a0e41ec9"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 10344,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-workspace-artifact-draft/src/index.test.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "ade5f9119bb5376d209913a299268e55c9c53c53fe0e4f642ffcd68110b5984c"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 293,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-workspace-artifact-draft/src/iztro-adapter-bridge.ts",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "2b76885ea0bfd5d79b0f3c47e0709eeb2ab793b4390ced93566d7371b252fb00"
+      },
+      {
+        "authorizationClaimed": false,
+        "bytes": 219,
+        "coverageMeaning": "authored_source_identity_only",
+        "path": "packages/ziwei-workspace-artifact-draft/tsconfig.browser-app.json",
+        "priorState": "known_v3_unselected_nonruntime_path",
+        "sha256": "88ab26d309308c65024edc2d4d78ea4745356281b3578b892e92300337ed698b"
+      }
+    ],
+    "newlyCoveredExtraAuthorizationClaimed": false,
+    "newlyCoveredExtraCount": 33,
+    "ordinarySingleLinkFilesOnly": true,
+    "packageRootCount": 4,
+    "packageRoots": [
+      "packages/ziwei-doushu-contracts-draft",
+      "packages/ziwei-fortel-differential-draft",
+      "packages/ziwei-iztro-adapter-draft",
+      "packages/ziwei-workspace-artifact-draft"
+    ],
+    "pathEscapeAndRootAliasRejected": true,
+    "pathSetDigest": "39f9d44ff3c8338d4f02750142b0ff07d6754e1100267d4878e37d1116efc86e",
+    "prePostTreeDigestEqual": true,
+    "recursiveEnumerationPerformed": true,
+    "rootFileCounts": {
+      "packages/ziwei-doushu-contracts-draft": 5,
+      "packages/ziwei-fortel-differential-draft": 10,
+      "packages/ziwei-iztro-adapter-draft": 52,
+      "packages/ziwei-workspace-artifact-draft": 24
+    },
+    "scopeClass": "four_explicit_ziwei_package_authored_source_roots_exact_not_domain_product_or_dependency_closure",
+    "symlinkJunctionAndResolvedPathAliasRejected": true,
+    "treeDigestAfter": "5a2970df410e4d96ce598e4449bf5689a05276f7df4615de7ed9d26592fc53bc",
+    "treeDigestAlgorithm": "sha256_domain_separated_canonical_file_evidence_v1",
+    "treeDigestBefore": "5a2970df410e4d96ce598e4449bf5689a05276f7df4615de7ed9d26592fc53bc",
+    "unexpectedNonExcludedFileOrDirectoryRejected": true
+  },
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertIdentityQualificationIndependenceEstablished": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "redistributionAuthorized": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "safeToPublish": false
+  },
+  "componentBoundary": {
+    "componentCompletenessEstablished": false,
+    "domainTruthEstablished": false,
+    "predecessorComponentLedgerRetainedByReference": true,
+    "semanticComponentMembershipEstablished": false,
+    "v4ReclassifiesNewlyCoveredFilesSemantically": false
+  },
+  "createdAt": "2026-09-03T05:10:47.068Z",
+  "doesNotEstablish": [
+    "complete_repository_installed_dependency_build_tooling_or_runtime_closure",
+    "entire_ziwei_engineering_domain_or_product_closure",
+    "semantic_component_membership_component_completeness_or_domain_truth",
+    "source_body_exact_quote_frozen_binding_or_complete_source_bundle",
+    "work_edition_carrier_rights_legal_conclusion_or_redistribution_authorization",
+    "real_expert_identity_qualification_independence_opinion_or_truth",
+    "browser_runtime_full_application_pwa_service_worker_public_host_or_fixed_device_evidence",
+    "cross_file_atomic_snapshot_mutation_epoch_interval_integrity_or_aba_exclusion",
+    "trusted_runtime_launcher_loader_node_tool_time_signature_or_signer_identity",
+    "formal_admission_release_evidence_release_readiness_deployment_rollback_or_public_release_authorization",
+    "legacy_v13_or_bazi_authority_inheritance"
+  ],
+  "evidenceLedgerSeparation": [
+    {
+      "accountId": "engineering_evidence",
+      "state": "four_package_authored_source_root_identity_observed"
+    },
+    {
+      "accountId": "browser_runtime_evidence",
+      "state": "not_established_by_this_manifest"
+    },
+    {
+      "accountId": "content_truth",
+      "state": "not_established"
+    },
+    {
+      "accountId": "expert_truth",
+      "state": "not_established"
+    },
+    {
+      "accountId": "rights_legal_judgment",
+      "state": "not_established"
+    },
+    {
+      "accountId": "release_readiness",
+      "state": "not_ready"
+    },
+    {
+      "accountId": "public_release_authorization",
+      "state": "not_authorized"
+    }
+  ],
+  "gateState": {
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 27,
+    "expertReviewBundleComplete": false,
+    "highRiskPolicyBound": false,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "releaseEvidenceComplete": false,
+    "rightsBundleComplete": false,
+    "sourceBundleComplete": false
+  },
+  "lineage": {
+    "appendOnlySuccessor": true,
+    "newlyCoveredExtraCount": 33,
+    "predecessor": {
+      "currentFullLoaderVerified": true,
+      "manifestDigest": "7018bf1df4bec8f6c753a11f72bcb2f3f2d63f3d46b194ef27fc2991dd06cb60",
+      "manifestId": "hakimi.ziwei-doushu.definition-and-browser-child-selected-path-machine-identity-manifest/3.0.0",
+      "path": "content/domain-release/ziwei-doushu.engineering-draft.v0.1.0.manifest.v3.json",
+      "privateBrandRequired": true,
+      "rawBytes": 68696,
+      "rawSha256": "6a95c2eca3524763c20b03d389c4d7d14d0639bafb6db31c361b384946430396",
+      "role": "current_selected_path_manifest_v3_private_brand_parent"
+    },
+    "predecessorBacklinkAdded": false,
+    "predecessorModified": false,
+    "predecessorSelectedPackageFileCount": 58
+  },
+  "manifestDigest": "46c2784875462e1851d0e3c7e352163660fbe29916e6ad6abd4f50065db42170",
+  "manifestId": "hakimi.ziwei-doushu.four-package-authored-source-root-machine-identity-manifest/4.0.0",
+  "observationBoundary": {
+    "abaExcluded": false,
+    "completeTreeReadTwice": true,
+    "crossFileAtomicSnapshot": false,
+    "digestIsDigitalSignature": false,
+    "endpointObservationOnly": true,
+    "intervalMutationExcludedAcrossFiles": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "prePostDigestEqualityIsNotIntervalProof": true,
+    "sameHeldHandleHashAndReadPerFile": true,
+    "signerIdentityEstablished": false,
+    "trustedTimestampEstablished": false
+  },
+  "productBoundary": {
+    "formalProductSurface": "absent",
+    "mainApplicationIntegrated": false,
+    "migrationId": null,
+    "productIdentity": null,
+    "publicHostValidated": false,
+    "pwaOrServiceWorkerValidated": false,
+    "releaseIdentity": null,
+    "targetSchema": null
+  },
+  "projectDefaultReleaseGovernance": {
+    "activeLine": "legacy-v13",
+    "inheritedByThisSystem": false,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "targetSchema": 13
+  },
+  "recordType": "ziwei_four_package_authored_source_root_machine_identity_manifest_v4",
+  "releaseStatus": "draft",
+  "runtimeTrustBoundary": {
+    "cliOutputTrustedAttestation": false,
+    "hiddenPreEvaluationCodeExcluded": false,
+    "launcherIdentityEstablished": false,
+    "loaderIdentityEstablished": false,
+    "nodeRuntimeIdentityEstablished": false,
+    "toolAttestationEstablished": false
+  },
+  "schemaVersion": "4.0.0",
+  "status": "current_four_package_authored_source_root_machine_identity_zero_admission_effect",
+  "systemIdentity": {
+    "contractSystemId": "ziwei",
+    "productSystemId": "ziwei-doushu",
+    "systemId": "ziwei"
+  },
+  "versionBoundary": {
+    "currentFourPackageAuthoredSourceRootManifestMechanicallyVerified": true,
+    "currentFullDomainManifestMechanicallyVerified": false,
+    "currentPredecessorSelectedPathManifestMechanicallyVerified": true,
+    "entireZiweiEngineeringClosureEstablished": false,
+    "ownerPromotionDecisionReceipt": null,
+    "productIdentityEstablished": false
+  }
+}

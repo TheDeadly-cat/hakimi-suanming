@@ -11,6 +11,8 @@ import {
   projectZiweiRuleSnapshotForDigest,
   sha256ZiweiCanonicalJson,
   ziweiBirthInputDraftSchema,
+  ziweiFactProvenanceDraftSchema,
+  ziweiFixtureEvidenceDraftSchema,
   ziweiNatalFixtureDraftSchema,
   verifyZiweiNatalFixtureDraft
 } from "./index";
@@ -429,7 +431,7 @@ describe("Ziwei Doushu isolated contract draft", () => {
     expect(ziweiNatalFixtureDraftSchema.safeParse(afterRange).success).toBe(false);
   });
 
-  it("requires two distinct rule_profile reviewers for an expert-reviewed rule claim", async () => {
+  it("keeps local review IDs structural and rejects reserved expert promotions without external receipts", async () => {
     const structureOnlyReviews = await buildFixture();
     structureOnlyReviews.ruleSnapshot.review = {
       status: "double_reviewed",
@@ -470,13 +472,80 @@ describe("Ziwei Doushu isolated contract draft", () => {
         }
       ]
     };
-    ruleReviews.evidence.truthStatus = "expert_reviewed_rule";
-    ruleReviews.evidence.claimScopes = ["rule_profile"];
     expect(ziweiNatalFixtureDraftSchema.safeParse(ruleReviews).success).toBe(true);
 
-    const overclaimedRuleReview = structuredClone(ruleReviews);
-    overclaimedRuleReview.evidence.claimScopes = ["rule_profile", "chart_structure"];
-    expect(ziweiNatalFixtureDraftSchema.safeParse(overclaimedRuleReview).success).toBe(false);
+    const selfAttestedExpertRule = structuredClone(ruleReviews);
+    selfAttestedExpertRule.evidence.truthStatus = "expert_reviewed_rule";
+    selfAttestedExpertRule.evidence.claimScopes = ["rule_profile"];
+    const selfAttestedExpertRuleResult = ziweiNatalFixtureDraftSchema.safeParse(selfAttestedExpertRule);
+    expect(selfAttestedExpertRuleResult.success).toBe(false);
+    if (!selfAttestedExpertRuleResult.success) {
+      expect(selfAttestedExpertRuleResult.error.issues).toEqual(expect.arrayContaining([
+        expect.objectContaining({ path: ["evidence", "truthStatus"] })
+      ]));
+    }
+    const selfAttestedExpertRuleVerification = await verifyZiweiNatalFixtureDraft(
+      selfAttestedExpertRule
+    );
+    expect(selfAttestedExpertRuleVerification.success).toBe(false);
+    if (!selfAttestedExpertRuleVerification.success) {
+      expect(selfAttestedExpertRuleVerification.reason).toBe("schema_invalid");
+    }
+
+    const selfAttestedExpertProvenance = structuredClone(ruleReviews);
+    selfAttestedExpertProvenance.provenance[0]!.verificationStatus = "expert_double_reviewed";
+    const selfAttestedExpertProvenanceResult = ziweiNatalFixtureDraftSchema.safeParse(
+      selfAttestedExpertProvenance
+    );
+    expect(selfAttestedExpertProvenanceResult.success).toBe(false);
+    if (!selfAttestedExpertProvenanceResult.success) {
+      expect(selfAttestedExpertProvenanceResult.error.issues).toEqual(expect.arrayContaining([
+        expect.objectContaining({ path: ["provenance", 0, "verificationStatus"] })
+      ]));
+    }
+    const selfAttestedExpertProvenanceVerification = await verifyZiweiNatalFixtureDraft(
+      selfAttestedExpertProvenance
+    );
+    expect(selfAttestedExpertProvenanceVerification.success).toBe(false);
+    if (!selfAttestedExpertProvenanceVerification.success) {
+      expect(selfAttestedExpertProvenanceVerification.reason).toBe("schema_invalid");
+    }
+
+    const duplicateLocalReviewer = structuredClone(ruleReviews);
+    duplicateLocalReviewer.ruleSnapshot.review.attestations[1]!.reviewerId =
+      duplicateLocalReviewer.ruleSnapshot.review.attestations[0]!.reviewerId;
+    expect(ziweiNatalFixtureDraftSchema.safeParse(duplicateLocalReviewer).success).toBe(false);
+
+    const mismatchedLocalReviewCount = structuredClone(ruleReviews);
+    mismatchedLocalReviewCount.ruleSnapshot.review.status = "single_reviewed";
+    expect(ziweiNatalFixtureDraftSchema.safeParse(mismatchedLocalReviewCount).success).toBe(false);
+
+    const directExpertEvidence = ziweiFixtureEvidenceDraftSchema.safeParse({
+      truthStatus: "expert_reviewed_rule",
+      claimScopes: ["rule_profile"],
+      productionEligible: false,
+      expertTruthClaimed: false,
+      note: "仅有本地 reviewerId，尚无外部验真收据"
+    });
+    expect(directExpertEvidence.success).toBe(false);
+    if (!directExpertEvidence.success) {
+      expect(directExpertEvidence.error.issues).toEqual(expect.arrayContaining([
+        expect.objectContaining({ path: ["truthStatus"] })
+      ]));
+    }
+    const directExpertProvenance = ziweiFactProvenanceDraftSchema.safeParse({
+      factFamily: "palaces",
+      fieldPath: "facts.palaces[0].roleId",
+      algorithmId: "ziwei.algorithm.local-review-only",
+      sourceIds: ["source:fixture"],
+      verificationStatus: "expert_double_reviewed"
+    });
+    expect(directExpertProvenance.success).toBe(false);
+    if (!directExpertProvenance.success) {
+      expect(directExpertProvenance.error.issues).toEqual(expect.arrayContaining([
+        expect.objectContaining({ path: ["verificationStatus"] })
+      ]));
+    }
   });
 
   it("binds the active four-transformations manifest and keeps every star in natal scope", async () => {

@@ -1,0 +1,209 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "ziwei_hko_restricted_source_pre_release_policy",
+  "policyId": "hakimi.ziwei.hko-restricted-source-pre-release/1.0.0",
+  "status": "mandatory_live_check_policy_no_persisted_pass_receipt",
+  "systemIdentity": {
+    "productSystemId": "ziwei-doushu",
+    "contractSystemId": "ziwei",
+    "releaseIdentity": "isolated-ziwei-draft-no-main-schema",
+    "targetSchema": null,
+    "migrationId": null
+  },
+  "sourceMaterialScope": {
+    "candidateId": "hakimi.ziwei.source-candidate/hko-calendar-boundary-replay-2023-2028/1.0.0",
+    "sourceBodySetDigest": "580108d977a4a4586115921e03502306ea8b5f8efe4558f76f37d072e8e8a445",
+    "annualBodyCount": 6,
+    "years": [
+      2023,
+      2024,
+      2025,
+      2026,
+      2027,
+      2028
+    ],
+    "sourceEvidenceArtifact": {
+      "path": "content/system-admission/ziwei-hko-calendar-source-evidence.v1.json",
+      "bytes": 8316,
+      "sha256": "61a9607aaa9b1133501fb9194f7be97e01f42e360b069fe38aa34d6eb8e2fd0e"
+    },
+    "rawSnapshotFixtureArtifact": {
+      "path": "packages/ziwei-iztro-adapter-draft/fixtures/hko-data-gov-hk-calendar-source-snapshots-2023-2028.json",
+      "bytes": 15501,
+      "sha256": "32dfd1a9ed204c5b96a100a082d1d02f0b9391ddcc867f32c2c06d39f2972fe2"
+    },
+    "storagePolicy": "existing_workspace_snapshot_pending_independent_rights_review"
+  },
+  "requiredLiveCheck": {
+    "command": "npm run check:ziwei-iztro-isolated-build-license-notices",
+    "directEntrypoint": "node scripts/verify-ziwei-iztro-isolated-build-license-notices.mjs",
+    "testCommand": "npm run test:ziwei-iztro-isolated-build-license-notices",
+    "surfaces": [
+      "browser-preview",
+      "browser-workspace"
+    ],
+    "representationClasses": [
+      "source_evidence_exact_json",
+      "raw_snapshot_fixture_exact_json",
+      "restricted_artifact_path_reference_utf8",
+      "gzip_base64_payload_utf8",
+      "gzip_payload_bytes",
+      "decompressed_raw_csv_bytes"
+    ],
+    "mustExecuteFresh": true,
+    "historicalPassMaySatisfy": false,
+    "gateFailureModeWhenExecuted": "fail_closed",
+    "preLifecycleCannotBeSkippedEstablished": false,
+    "lifecycleBindings": [
+      {
+        "surfaceId": "browser-preview",
+        "buildScript": "build:ziwei-browser-preview",
+        "buildCommand": "node apps/web/node_modules/vite/bin/vite.js build --config packages/ziwei-iztro-adapter-draft/vite.browser-preview.config.mjs --configLoader runner",
+        "prebuildScript": "prebuild:ziwei-browser-preview",
+        "prebuildCommand": "npm run check:ziwei-iztro-isolated-build-license-notices && npm run check:system-contract-draft-boundaries",
+        "previewScript": "preview:ziwei-browser-preview",
+        "previewCommand": "node apps/web/node_modules/vite/bin/vite.js preview --config packages/ziwei-iztro-adapter-draft/vite.browser-preview.config.mjs --configLoader runner --host 127.0.0.1 --port 4216 --strictPort",
+        "prepreviewScript": "prepreview:ziwei-browser-preview",
+        "prepreviewCommand": "npm run build:ziwei-browser-preview"
+      },
+      {
+        "surfaceId": "browser-workspace",
+        "buildScript": "build:ziwei-browser-workspace",
+        "buildCommand": "node apps/web/node_modules/vite/bin/vite.js build --config packages/ziwei-workspace-artifact-draft/vite.browser-app.config.mjs --configLoader runner",
+        "prebuildScript": "prebuild:ziwei-browser-workspace",
+        "prebuildCommand": "npm run check:ziwei-iztro-isolated-build-license-notices && npm run check:system-contract-draft-boundaries",
+        "previewScript": "preview:ziwei-browser-workspace",
+        "previewCommand": "node apps/web/node_modules/vite/bin/vite.js preview --config packages/ziwei-workspace-artifact-draft/vite.browser-app.config.mjs --configLoader runner --host 127.0.0.1 --port 4218 --strictPort",
+        "prepreviewScript": "prepreview:ziwei-browser-workspace",
+        "prepreviewCommand": "npm run build:ziwei-browser-workspace"
+      }
+    ],
+    "quickCi": {
+      "workflowPath": ".github/workflows/quick-ci.yml",
+      "jobId": "toolchain-and-boundaries",
+      "jobBlockBytes": 2300,
+      "jobBlockSha256": "c11c430b0642e9bb7f593df4eef220a2ede751e721cb7e7fb969c6ec5afaa73e",
+      "checkCommand": "npm run check:ziwei-iztro-isolated-build-license-notices",
+      "testCommand": "npm run test:ziwei-iztro-isolated-build-license-notices",
+      "checkExactCount": 1,
+      "testExactCount": 1,
+      "checkBeforeTest": true,
+      "bothBeforeCommands": [
+        "npm run check:system-contract-draft-boundaries",
+        "npm run check:independent-source-binding-requirements",
+        "npm run check:independent-domain-release-manifests",
+        "npm run check:system-admission-registry",
+        "npm run check:release-governance"
+      ]
+    },
+    "futureRootPackageZiweiNamedBuildOrPreviewScriptsRequireExplicitPolicyRegistration": true,
+    "currentRootPackageProtectedCommandAliasRegistrationRequired": true
+  },
+  "implementationBindings": [
+    {
+      "role": "live_gate_library",
+      "path": "scripts/ziwei-iztro-isolated-build-license-notice-lib.mjs",
+      "bytes": 65072,
+      "sha256": "d6f2f1e91e4ea0b4dcf5319df49d216be7920c9262028869c4eeacba9683a577"
+    },
+    {
+      "role": "live_gate_cli",
+      "path": "scripts/verify-ziwei-iztro-isolated-build-license-notices.mjs",
+      "bytes": 2260,
+      "sha256": "b05e8a989d6bd565f7f10033dfd1acfb226ce8b3e09448df20962fdb2a0318c1"
+    },
+    {
+      "role": "live_gate_rejection_tests",
+      "path": "scripts/verify-ziwei-iztro-isolated-build-license-notices.test.mjs",
+      "bytes": 37382,
+      "sha256": "fb9ca02f96370198383cf3bf6c4e77262e8064de5952c85d9a94957b54e0f603"
+    },
+    {
+      "role": "formal_npm_lifecycle_closure_resolver",
+      "path": "scripts/formal-npm-lifecycle-closure-lib.mjs",
+      "bytes": 11589,
+      "sha256": "7cc1c4d8e31861636bc4f18e5817f6ff3ffed9b60f8092f630e422678d97ebc9"
+    }
+  ],
+  "persistenceBoundary": {
+    "policyPersisted": true,
+    "pointInTimeExecutionReceiptPersisted": false,
+    "outputAbsenceProofPersisted": false,
+    "latestPassPersisted": false,
+    "formalReleaseEvidenceReceipt": false,
+    "fourSystemRegistryAdmissionClaimed": false,
+    "independentDomainManifestAdmissionClaimed": false
+  },
+  "observationBoundary": {
+    "exactCurrentRepresentationsOnly": true,
+    "universalTranscodingAbsenceEstablished": false,
+    "workspaceRawBodiesRemovedOrVaulted": false,
+    "linkOnlyStorageEstablished": false,
+    "crossFileAtomicityEstablished": false,
+    "intervalIntegrityEstablished": false,
+    "abaResistanceEstablished": false,
+    "mutationEpochEstablished": false
+  },
+  "authorityBoundary": {
+    "sourceBindingFrozen": false,
+    "sourceBundleComplete": false,
+    "workRightsEstablished": false,
+    "editionRightsEstablished": false,
+    "carrierRightsEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "redistributionAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "publicBuildInclusionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false
+  },
+  "parentBindingBoundary": {
+    "bindsPersistedIztroNoticeEvidence": false,
+    "bindsIndependentZiweiManifest": false,
+    "bindsFourSystemRegistry": false,
+    "bindsDefaultV13FormalReceiptAllowlist": false,
+    "defaultV13FormalNpmClosureIsolation": {
+      "scope": "static_modeled_command_and_npm_lifecycle_reference_graph_only",
+      "independentlyRecomputedFromReceiptAndPackageInputs": true,
+      "exactParentClosureIdentityPersisted": false,
+      "terminalCommandGrammar": "exact_static_release_terminal_allowlist_v1",
+      "allowedTerminalCommandCount": 28,
+      "opaqueOrDynamicTerminalCommandsAcceptedByStaticModel": false,
+      "modeledStaticHkoReferenceCount": 0,
+      "effectiveNpmRuntimeClosureEstablished": false,
+      "ambientNpmConfigNeutralized": false,
+      "preLifecycleCannotBeSkippedEstablished": false,
+      "transitiveModuleConfigOrWrapperExecutionAbsenceEstablished": false
+    },
+    "isolationArtifactPaths": [
+      "content/domain-release/ziwei-doushu.engineering-draft.v0.1.0.json",
+      "content/system-admission/four-system-admission.v1.json",
+      "content/system-admission/ziwei-iztro-build-notice-evidence.v1.json"
+    ],
+    "parentArtifactReferenceCount": 0
+  },
+  "integrityBoundary": {
+    "digestAlgorithm": "SHA-256",
+    "digestDomain": "hakimi.ziwei.hko-restricted-source-pre-release-policy/1",
+    "digestIsDigitalSignature": false,
+    "signerIdentity": null,
+    "digitalSignature": null
+  },
+  "doesNotEstablish": [
+    "point_in_time_output_absence_without_a_fresh_live_run",
+    "unknown_transcoding_fragmentation_reordering_or_other_encoding_absence",
+    "link_only_storage_or_workspace_raw_body_removal_or_private_vaulting",
+    "work_edition_carrier_rights_or_legal_conclusion",
+    "source_binding_freeze_source_bundle_or_content_truth",
+    "expert_identity_independence_opinion_or_expert_truth",
+    "browser_runtime_public_host_pwa_or_cross_browser_evidence",
+    "release_evidence_release_readiness_or_public_authorization",
+    "cross_file_atomicity_interval_integrity_aba_resistance_or_mutation_epoch",
+    "effective_npm_runtime_closure_or_effective_npm_config_neutralization",
+    "pre_or_post_lifecycle_execution_cannot_be_skipped",
+    "transitive_module_config_or_wrapper_execution_absence"
+  ],
+  "policyDigest": "19c562326ee4da68f767025adb192b2e92190645862c9c357e9f5af29630d6b0"
+}

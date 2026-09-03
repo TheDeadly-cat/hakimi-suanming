@@ -39,6 +39,8 @@ export const ZIWEI_BROWSER_SOURCE_PATHS = Object.freeze([
   "src/browser-preview/browser-protocol.ts",
   "src/browser-preview/browser-worker.ts",
   "src/browser-preview/display-projection.ts",
+  "src/browser-preview/high-risk-expression-egress-policy.ts",
+  "src/browser-preview/high-risk-expression-egress-view.ts",
   "src/browser-preview/major-star-content.ts",
   "src/browser-preview/major-star-palace-content.ts",
   "src/browser-preview/core-minor-star-content.ts",

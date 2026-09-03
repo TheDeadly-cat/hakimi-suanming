@@ -1,0 +1,855 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "ziwei_expert_public_candidate_prescreen_v1",
+  "ledgerId": "hakimi.ziwei.expert-public-candidate-prescreen/1.0.0",
+  "status": "public_candidate_discovery_only_non_authoritative_nonformal_zero_active_effect",
+  "createdOnLabel": "2026-09-01",
+  "projectReleaseGovernance": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null,
+    "mutationEpochBoundaryRequired": true,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "expertClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false
+  },
+  "basisArtifacts": [
+    {
+      "path": "docs/阶段E-紫微现实专家公开候选预筛-2026-09-01.md",
+      "role": "non_authoritative_public_prescreen_narrative_basis",
+      "rawBytes": 7524,
+      "rawSha256": "f5f1b56c486072f8c1ea7453a1328db78eeb936d69a8bee5c26a0e7b3b965da5"
+    }
+  ],
+  "upstreamArtifacts": [
+    {
+      "role": "current_nonformal_ziwei_source_requirements_successor_private_brand",
+      "path": "content/system-admission/ziwei-source-binding-requirements.v1.2.0.json",
+      "rawBytes": 37570,
+      "rawSha256": "63c0b8776978432dbcaaaaf5b2638acbc5d28d755dc1387c59c7e3421865c9a1",
+      "semanticDigestField": "ledgerDigest",
+      "semanticDigest": "0ea8fa98ac54926a019cb1aa428cdc8150e5a824400cc144b85bc1a645092624"
+    },
+    {
+      "role": "current_ziwei_independent_engineering_manifest_v3_private_brand",
+      "path": "content/domain-release/ziwei-doushu.engineering-draft.v0.1.0.manifest.v3.json",
+      "rawBytes": 68696,
+      "rawSha256": "6a95c2eca3524763c20b03d389c4d7d14d0639bafb6db31c361b384946430396",
+      "semanticDigestField": "manifestDigest",
+      "semanticDigest": "7018bf1df4bec8f6c753a11f72bcb2f3f2d63f3d46b194ef27fc2991dd06cb60"
+    }
+  ],
+  "lineageBoundary": {
+    "appendOnlyChild": true,
+    "activeAdmissionEffect": "none",
+    "predecessorArtifactsModified": 0,
+    "predecessorBacklinksAdded": 0,
+    "formalManifestIntegrated": false,
+    "formalRegistryIntegrated": false,
+    "centralAdmissionIntegrated": false,
+    "formalZiweiSourceRequirementsV1RemainsCurrent": true,
+    "sourceRequirementsV12RemainsNonformal": true
+  },
+  "noBacklinkScan": {
+    "upstreamArtifactsChecked": 2,
+    "formalOrCurrentConsumerArtifactsChecked": 4,
+    "backlinksFound": 0,
+    "formalOrCurrentRegistryManifestIntegrationAdded": false,
+    "paths": [
+      "content/system-admission/ziwei-source-binding-requirements.v1.json",
+      "content/domain-release/ziwei-doushu.engineering-draft.v0.1.0.json",
+      "content/system-admission/four-system-current-observation-registry.v2.json",
+      "content/system-admission/four-system-admission.v1.json"
+    ]
+  },
+  "roleSeparation": [
+    {
+      "roleId": "ziwei_domain_expert",
+      "mayReview": [
+        "ziwei_rule_versions",
+        "school_profile",
+        "interpretation_and_high_risk_expression_boundary"
+      ],
+      "doesNotEstablish": [
+        "engineering_implementation_correctness",
+        "source_rights_or_legal_conclusion",
+        "release_authorization"
+      ]
+    },
+    {
+      "roleId": "calendar_engineering_reproducibility_reviewer",
+      "mayReview": [
+        "civil_time_and_calendar_inputs",
+        "calendar_conversion_reproducibility",
+        "boundary_cases_and_tolerances"
+      ],
+      "doesNotEstablish": [
+        "ziwei_domain_truth",
+        "interpretation_authority",
+        "source_rights_or_legal_conclusion"
+      ]
+    },
+    {
+      "roleId": "source_rights_reviewer",
+      "mayReview": [
+        "work_version_carrier_identity",
+        "license_evidence",
+        "redistribution_facts"
+      ],
+      "doesNotEstablish": [
+        "ziwei_domain_truth",
+        "legal_judgment",
+        "release_authorization"
+      ]
+    }
+  ],
+  "sourceGroupPolicy": {
+    "deduplicationKey": "sourceUpstreamGroupId",
+    "sameGroupObservationsCountOnce": true,
+    "sourceObservationCount": 4,
+    "deduplicatedSourceGroupCount": 4,
+    "distinctPublicUpstreamGroupsDoNotEstablishCandidatePairwiseIndependence": true,
+    "sourceGroupCountDoesNotEstablishIdentityCredentialOrScope": true
+  },
+  "sourceGroups": [
+    {
+      "sourceUpstreamGroupId": "NUK",
+      "publicOwnerLabel": "National University of Kaohsiung Extension Education Center",
+      "observationIds": [
+        "ZIWEI-NUK-2026-COURSE"
+      ]
+    },
+    {
+      "sourceUpstreamGroupId": "NTUB",
+      "publicOwnerLabel": "National Taipei University of Business Continuing Education",
+      "observationIds": [
+        "ZIWEI-NTUB-2026-COURSE"
+      ]
+    },
+    {
+      "sourceUpstreamGroupId": "PCCU",
+      "publicOwnerLabel": "Chinese Culture University School of Continuing Education",
+      "observationIds": [
+        "ZIWEI-PCCU-2026-COURSE"
+      ]
+    },
+    {
+      "sourceUpstreamGroupId": "YUNTECH_GHC_JOURNAL",
+      "publicOwnerLabel": "National Yunlin University of Science and Technology GHC Journal",
+      "observationIds": [
+        "ZIWEI-YUNTECH-2021-JOURNAL-PDF"
+      ]
+    }
+  ],
+  "sourceObservations": [
+    {
+      "sourceObservationId": "ZIWEI-NUK-2026-COURSE",
+      "candidateLeadId": "ziwei-public-lead-001",
+      "sourceUrl": "https://eec.nuk.edu.tw/course_detail.php?sn=1310",
+      "finalUrl": "https://eec.nuk.edu.tw/course_detail.php?sn=1310",
+      "sourceUpstreamGroupId": "NUK",
+      "sourceType": "public_official_course_page",
+      "httpStatus": 200,
+      "redirectObserved": false,
+      "contentType": "text/html; charset=utf-8",
+      "observedResponseBytes": 54043,
+      "observedResponseSha256": "3adaf422315f6c1c13e2147162295134836b546f180ddd83a9357c9cb6d1fdec",
+      "observationSummary": "公开课程页只提供课程教师以及三合派、飞星派、主星和格局教学主题的候选线索。",
+      "observedOnLabel": "2026-09-01",
+      "observationMethod": "operator_recorded_public_read_only_no_credentials",
+      "responseBodyRetained": false,
+      "supportsCandidateDiscoveryOnly": true,
+      "sourceMeaningBoundByObservedResponseHash": false,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "ZIWEI-NTUB-2026-COURSE",
+      "candidateLeadId": "ziwei-public-lead-002",
+      "sourceUrl": "https://cec.ntub.edu.tw/p/405-1030-118315,c818.php?Lang=zh-tw",
+      "finalUrl": "https://cec.ntub.edu.tw/p/405-1030-118315,c818.php?Lang=zh-tw",
+      "sourceUpstreamGroupId": "NTUB",
+      "sourceType": "public_official_course_page",
+      "httpStatus": 200,
+      "redirectObserved": false,
+      "contentType": "text/html; charset=UTF-8",
+      "observedResponseBytes": 61875,
+      "observedResponseSha256": "a5f78e4ef5a1872dca0c02da384328e268825f089574e7275e440cf113728546",
+      "observationSummary": "公开课程页只提供资深讲师标签、紫微斗数专业领域以及星曜、四化、庙旺平陷教学主题的候选线索。",
+      "observedOnLabel": "2026-09-01",
+      "observationMethod": "operator_recorded_public_read_only_no_credentials",
+      "responseBodyRetained": false,
+      "supportsCandidateDiscoveryOnly": true,
+      "sourceMeaningBoundByObservedResponseHash": false,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "ZIWEI-PCCU-2026-COURSE",
+      "candidateLeadId": "ziwei-public-lead-003",
+      "sourceUrl": "https://www.sce.pccu.edu.tw/courses/3O14B5080?c=2500",
+      "finalUrl": "https://www.sce.pccu.edu.tw/courses/3O14B5080?c=2500",
+      "sourceUpstreamGroupId": "PCCU",
+      "sourceType": "public_official_course_marketing_page",
+      "httpStatus": 200,
+      "redirectObserved": false,
+      "contentType": "text/html; charset=utf-8",
+      "observedResponseBytes": 60444,
+      "observedResponseSha256": "537d7cce893c05ef9195174dae62eaf938efff6afa3cc59771963a98cbf7c090",
+      "observationSummary": "公开页面只提供别名关联、课程与著作营销说明以及古今斗数、闰月教学主题的候选线索；营销自述不是 credential 或 authenticity。",
+      "observedOnLabel": "2026-09-01",
+      "observationMethod": "operator_recorded_public_read_only_no_credentials",
+      "responseBodyRetained": false,
+      "supportsCandidateDiscoveryOnly": true,
+      "sourceMeaningBoundByObservedResponseHash": false,
+      "authoritative": false
+    },
+    {
+      "sourceObservationId": "ZIWEI-YUNTECH-2021-JOURNAL-PDF",
+      "candidateLeadId": "ziwei-public-lead-004",
+      "sourceUrl": "https://ghc.yuntech.edu.tw/images/Journal/Journal22.pdf",
+      "finalUrl": "https://ghc.yuntech.edu.tw/images/Journal/Journal22.pdf",
+      "sourceUpstreamGroupId": "YUNTECH_GHC_JOURNAL",
+      "sourceType": "public_official_journal_pdf",
+      "httpStatus": 200,
+      "redirectObserved": false,
+      "contentType": "application/pdf",
+      "observedResponseBytes": 4355708,
+      "observedResponseSha256": "869899282cd4eb2b5dd5dbafe9413759c1f4e9e89b352932c33e4097d3835064",
+      "observationSummary": "公开 journal PDF 只提供论文作者、当时硕士生脚注和题名《紫微斗數之起源與發展》的候选线索，不证明当前角色或实务规则能力。",
+      "observedOnLabel": "2026-09-01",
+      "observationMethod": "operator_recorded_public_read_only_no_credentials",
+      "responseBodyRetained": false,
+      "supportsCandidateDiscoveryOnly": true,
+      "sourceMeaningBoundByObservedResponseHash": false,
+      "authoritative": false
+    }
+  ],
+  "reviewQuestionIds": [
+    "civil-time-calendar-policy",
+    "sex-parameter-major-period-direction",
+    "leap-month-lunar-policy",
+    "natal-palace-star-four-transformations-school-profile",
+    "major-period-rule-counterexamples",
+    "high-risk-expression-uncertainty-abstention"
+  ],
+  "candidates": [
+    {
+      "candidateLeadId": "ziwei-public-lead-001",
+      "publicDisplayName": "宋杭融",
+      "candidateState": "uncontacted_public_candidate_lead",
+      "proposedReviewDirection": "ziwei_school_profile_and_natal_rule_candidate",
+      "sourceObservationIds": [
+        "ZIWEI-NUK-2026-COURSE"
+      ],
+      "sourceUpstreamGroupIds": [
+        "NUK"
+      ],
+      "deduplicatedSourceGroupCount": 1,
+      "scopeMatrix": [
+        {
+          "questionId": "civil-time-calendar-policy",
+          "state": "unknown"
+        },
+        {
+          "questionId": "sex-parameter-major-period-direction",
+          "state": "unknown"
+        },
+        {
+          "questionId": "leap-month-lunar-policy",
+          "state": "unknown"
+        },
+        {
+          "questionId": "natal-palace-star-four-transformations-school-profile",
+          "state": "public_scope_lead_observed"
+        },
+        {
+          "questionId": "major-period-rule-counterexamples",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "high-risk-expression-uncertainty-abstention",
+          "state": "unknown"
+        }
+      ],
+      "reviewerSlot": null,
+      "identityVerified": false,
+      "credentialVerified": false,
+      "scopeVerified": false,
+      "independenceVerified": false,
+      "participationConsentVerified": false,
+      "expertStatusVerified": false,
+      "expertOpinionCollected": false,
+      "sealedOriginalOpinion": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "candidateLeadId": "ziwei-public-lead-002",
+      "publicDisplayName": "林于棻",
+      "candidateState": "uncontacted_public_candidate_lead",
+      "proposedReviewDirection": "ziwei_star_four_transformations_and_dignity_candidate",
+      "sourceObservationIds": [
+        "ZIWEI-NTUB-2026-COURSE"
+      ],
+      "sourceUpstreamGroupIds": [
+        "NTUB"
+      ],
+      "deduplicatedSourceGroupCount": 1,
+      "scopeMatrix": [
+        {
+          "questionId": "civil-time-calendar-policy",
+          "state": "unknown"
+        },
+        {
+          "questionId": "sex-parameter-major-period-direction",
+          "state": "unknown"
+        },
+        {
+          "questionId": "leap-month-lunar-policy",
+          "state": "unknown"
+        },
+        {
+          "questionId": "natal-palace-star-four-transformations-school-profile",
+          "state": "public_scope_lead_observed"
+        },
+        {
+          "questionId": "major-period-rule-counterexamples",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "high-risk-expression-uncertainty-abstention",
+          "state": "unknown"
+        }
+      ],
+      "reviewerSlot": null,
+      "identityVerified": false,
+      "credentialVerified": false,
+      "scopeVerified": false,
+      "independenceVerified": false,
+      "participationConsentVerified": false,
+      "expertStatusVerified": false,
+      "expertOpinionCollected": false,
+      "sealedOriginalOpinion": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "candidateLeadId": "ziwei-public-lead-003",
+      "publicDisplayName": "了無居士（黃忠霖）",
+      "candidateState": "uncontacted_public_candidate_lead",
+      "proposedReviewDirection": "ziwei_leap_month_and_historical_school_candidate_marketing_claims_unverified",
+      "sourceObservationIds": [
+        "ZIWEI-PCCU-2026-COURSE"
+      ],
+      "sourceUpstreamGroupIds": [
+        "PCCU"
+      ],
+      "deduplicatedSourceGroupCount": 1,
+      "scopeMatrix": [
+        {
+          "questionId": "civil-time-calendar-policy",
+          "state": "unknown"
+        },
+        {
+          "questionId": "sex-parameter-major-period-direction",
+          "state": "unknown"
+        },
+        {
+          "questionId": "leap-month-lunar-policy",
+          "state": "public_scope_lead_observed"
+        },
+        {
+          "questionId": "natal-palace-star-four-transformations-school-profile",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "major-period-rule-counterexamples",
+          "state": "unknown"
+        },
+        {
+          "questionId": "high-risk-expression-uncertainty-abstention",
+          "state": "unknown"
+        }
+      ],
+      "reviewerSlot": null,
+      "identityVerified": false,
+      "credentialVerified": false,
+      "scopeVerified": false,
+      "independenceVerified": false,
+      "participationConsentVerified": false,
+      "expertStatusVerified": false,
+      "expertOpinionCollected": false,
+      "sealedOriginalOpinion": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "candidateLeadId": "ziwei-public-lead-004",
+      "publicDisplayName": "趙翊吾",
+      "candidateState": "uncontacted_public_candidate_lead",
+      "proposedReviewDirection": "ziwei_history_and_source_context_candidate_not_practice_rule_credential",
+      "sourceObservationIds": [
+        "ZIWEI-YUNTECH-2021-JOURNAL-PDF"
+      ],
+      "sourceUpstreamGroupIds": [
+        "YUNTECH_GHC_JOURNAL"
+      ],
+      "deduplicatedSourceGroupCount": 1,
+      "scopeMatrix": [
+        {
+          "questionId": "civil-time-calendar-policy",
+          "state": "unknown"
+        },
+        {
+          "questionId": "sex-parameter-major-period-direction",
+          "state": "unknown"
+        },
+        {
+          "questionId": "leap-month-lunar-policy",
+          "state": "unknown"
+        },
+        {
+          "questionId": "natal-palace-star-four-transformations-school-profile",
+          "state": "potentially_related_scope_confirmation_required"
+        },
+        {
+          "questionId": "major-period-rule-counterexamples",
+          "state": "unknown"
+        },
+        {
+          "questionId": "high-risk-expression-uncertainty-abstention",
+          "state": "unknown"
+        }
+      ],
+      "reviewerSlot": null,
+      "identityVerified": false,
+      "credentialVerified": false,
+      "scopeVerified": false,
+      "independenceVerified": false,
+      "participationConsentVerified": false,
+      "expertStatusVerified": false,
+      "expertOpinionCollected": false,
+      "sealedOriginalOpinion": false,
+      "countsTowardExpertGate": false
+    }
+  ],
+  "independenceFactorIds": [
+    "same_institution_or_organization",
+    "teacher_student_or_lineage_relationship",
+    "family_or_household_relationship",
+    "shared_commercial_interest",
+    "rule_or_case_set_coauthorship",
+    "shared_professional_service",
+    "reporting_or_supervision_relationship",
+    "prior_exposure_to_other_reviewer_conclusion",
+    "shared_unpublished_source_or_case_material",
+    "same_upstream_algorithm_or_textbook_dependency"
+  ],
+  "pairwiseIndependenceAssessments": [
+    {
+      "pairId": "ziwei-public-lead-001--ziwei-public-lead-002",
+      "candidateLeadIds": [
+        "ziwei-public-lead-001",
+        "ziwei-public-lead-002"
+      ],
+      "assessmentState": "not_started",
+      "factorStates": [
+        {
+          "factorId": "same_institution_or_organization",
+          "state": "unknown"
+        },
+        {
+          "factorId": "teacher_student_or_lineage_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "family_or_household_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_commercial_interest",
+          "state": "unknown"
+        },
+        {
+          "factorId": "rule_or_case_set_coauthorship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_professional_service",
+          "state": "unknown"
+        },
+        {
+          "factorId": "reporting_or_supervision_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "prior_exposure_to_other_reviewer_conclusion",
+          "state": "not_applicable_before_review"
+        },
+        {
+          "factorId": "shared_unpublished_source_or_case_material",
+          "state": "unknown"
+        },
+        {
+          "factorId": "same_upstream_algorithm_or_textbook_dependency",
+          "state": "unknown"
+        }
+      ],
+      "unknownFactorsPresent": true,
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "pairId": "ziwei-public-lead-001--ziwei-public-lead-003",
+      "candidateLeadIds": [
+        "ziwei-public-lead-001",
+        "ziwei-public-lead-003"
+      ],
+      "assessmentState": "not_started",
+      "factorStates": [
+        {
+          "factorId": "same_institution_or_organization",
+          "state": "unknown"
+        },
+        {
+          "factorId": "teacher_student_or_lineage_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "family_or_household_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_commercial_interest",
+          "state": "unknown"
+        },
+        {
+          "factorId": "rule_or_case_set_coauthorship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_professional_service",
+          "state": "unknown"
+        },
+        {
+          "factorId": "reporting_or_supervision_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "prior_exposure_to_other_reviewer_conclusion",
+          "state": "not_applicable_before_review"
+        },
+        {
+          "factorId": "shared_unpublished_source_or_case_material",
+          "state": "unknown"
+        },
+        {
+          "factorId": "same_upstream_algorithm_or_textbook_dependency",
+          "state": "unknown"
+        }
+      ],
+      "unknownFactorsPresent": true,
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "pairId": "ziwei-public-lead-001--ziwei-public-lead-004",
+      "candidateLeadIds": [
+        "ziwei-public-lead-001",
+        "ziwei-public-lead-004"
+      ],
+      "assessmentState": "not_started",
+      "factorStates": [
+        {
+          "factorId": "same_institution_or_organization",
+          "state": "unknown"
+        },
+        {
+          "factorId": "teacher_student_or_lineage_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "family_or_household_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_commercial_interest",
+          "state": "unknown"
+        },
+        {
+          "factorId": "rule_or_case_set_coauthorship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_professional_service",
+          "state": "unknown"
+        },
+        {
+          "factorId": "reporting_or_supervision_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "prior_exposure_to_other_reviewer_conclusion",
+          "state": "not_applicable_before_review"
+        },
+        {
+          "factorId": "shared_unpublished_source_or_case_material",
+          "state": "unknown"
+        },
+        {
+          "factorId": "same_upstream_algorithm_or_textbook_dependency",
+          "state": "unknown"
+        }
+      ],
+      "unknownFactorsPresent": true,
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "pairId": "ziwei-public-lead-002--ziwei-public-lead-003",
+      "candidateLeadIds": [
+        "ziwei-public-lead-002",
+        "ziwei-public-lead-003"
+      ],
+      "assessmentState": "not_started",
+      "factorStates": [
+        {
+          "factorId": "same_institution_or_organization",
+          "state": "unknown"
+        },
+        {
+          "factorId": "teacher_student_or_lineage_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "family_or_household_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_commercial_interest",
+          "state": "unknown"
+        },
+        {
+          "factorId": "rule_or_case_set_coauthorship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_professional_service",
+          "state": "unknown"
+        },
+        {
+          "factorId": "reporting_or_supervision_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "prior_exposure_to_other_reviewer_conclusion",
+          "state": "not_applicable_before_review"
+        },
+        {
+          "factorId": "shared_unpublished_source_or_case_material",
+          "state": "unknown"
+        },
+        {
+          "factorId": "same_upstream_algorithm_or_textbook_dependency",
+          "state": "unknown"
+        }
+      ],
+      "unknownFactorsPresent": true,
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "pairId": "ziwei-public-lead-002--ziwei-public-lead-004",
+      "candidateLeadIds": [
+        "ziwei-public-lead-002",
+        "ziwei-public-lead-004"
+      ],
+      "assessmentState": "not_started",
+      "factorStates": [
+        {
+          "factorId": "same_institution_or_organization",
+          "state": "unknown"
+        },
+        {
+          "factorId": "teacher_student_or_lineage_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "family_or_household_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_commercial_interest",
+          "state": "unknown"
+        },
+        {
+          "factorId": "rule_or_case_set_coauthorship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_professional_service",
+          "state": "unknown"
+        },
+        {
+          "factorId": "reporting_or_supervision_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "prior_exposure_to_other_reviewer_conclusion",
+          "state": "not_applicable_before_review"
+        },
+        {
+          "factorId": "shared_unpublished_source_or_case_material",
+          "state": "unknown"
+        },
+        {
+          "factorId": "same_upstream_algorithm_or_textbook_dependency",
+          "state": "unknown"
+        }
+      ],
+      "unknownFactorsPresent": true,
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    },
+    {
+      "pairId": "ziwei-public-lead-003--ziwei-public-lead-004",
+      "candidateLeadIds": [
+        "ziwei-public-lead-003",
+        "ziwei-public-lead-004"
+      ],
+      "assessmentState": "not_started",
+      "factorStates": [
+        {
+          "factorId": "same_institution_or_organization",
+          "state": "unknown"
+        },
+        {
+          "factorId": "teacher_student_or_lineage_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "family_or_household_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_commercial_interest",
+          "state": "unknown"
+        },
+        {
+          "factorId": "rule_or_case_set_coauthorship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "shared_professional_service",
+          "state": "unknown"
+        },
+        {
+          "factorId": "reporting_or_supervision_relationship",
+          "state": "unknown"
+        },
+        {
+          "factorId": "prior_exposure_to_other_reviewer_conclusion",
+          "state": "not_applicable_before_review"
+        },
+        {
+          "factorId": "shared_unpublished_source_or_case_material",
+          "state": "unknown"
+        },
+        {
+          "factorId": "same_upstream_algorithm_or_textbook_dependency",
+          "state": "unknown"
+        }
+      ],
+      "unknownFactorsPresent": true,
+      "pairwiseIndependenceEstablished": false,
+      "countsTowardExpertGate": false
+    }
+  ],
+  "disagreementPolicy": {
+    "opinionsStoredSideBySideWhenAvailable": true,
+    "majorityVoteAllowed": false,
+    "opinionAveragingAllowed": false,
+    "generatedModelWinnerSelectionAllowed": false
+  },
+  "zeroInstanceReceipt": {
+    "publicCandidateLeadsObserved": 4,
+    "reviewerSlotsRequired": 2,
+    "reviewerSlotsOccupied": 0,
+    "identitiesVerified": 0,
+    "credentialsVerified": 0,
+    "scopeFitsVerified": 0,
+    "participationConsentsVerified": 0,
+    "pairwiseIndependenceAssessmentsCompleted": 0,
+    "independentExpertReviewsVerified": 0,
+    "sealedOriginalOpinions": 0,
+    "sourceBindingsRequired": 27,
+    "sourceBindingsFrozenVerified": 0,
+    "sourceRequirementPartialCandidates": 2,
+    "expertReviewBundleStatus": "absent/0",
+    "formalExpertGateCount": 0
+  },
+  "authorityBoundary": {
+    "candidateDiscoveryOnly": true,
+    "identityVerified": false,
+    "credentialVerified": false,
+    "scopeVerified": false,
+    "independenceVerified": false,
+    "participationConsentVerified": false,
+    "expertStatusVerified": false,
+    "contentTruthEstablished": false,
+    "expertTruthEstablished": false,
+    "sourceRightsEstablished": false,
+    "rightsLegalConclusionEstablished": false,
+    "redistributionAuthorized": false,
+    "formalAdmissionAuthorized": false,
+    "releaseReady": false,
+    "expertClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "crossSystemAuthorityInheritanceAuthorized": false
+  },
+  "observationBoundary": {
+    "heldHandleReadForLocalArtifacts": true,
+    "sameBufferHashAndParseForLocalJson": true,
+    "basisSameBufferHashAndInspection": true,
+    "publicObservationMethod": "operator_recorded_public_read_only_no_credentials",
+    "exactUserAgentStringStored": false,
+    "publicResponseBodiesStored": false,
+    "publicResponseBodiesRefetchedByFixedVerifier": false,
+    "fixedVerifierNetworkAttempted": false,
+    "observedStatusFinalUrlRedirectContentTypeBytesAndSha256Recorded": true,
+    "sourceMeaningBoundByObservedResponseHash": false,
+    "serverDateHeaderCaptured": false,
+    "exactLocalClockInstantCaptured": false,
+    "redirectHopHeadersCaptured": false,
+    "tlsPeerCertificateCaptured": false,
+    "networkProvenanceEstablished": false,
+    "publisherAuthenticityEstablished": false,
+    "publisherSignatureVerified": false,
+    "firstSeenEstablished": false,
+    "futureFreshnessEstablished": false,
+    "privateContactDataStored": false,
+    "paidOrBackendMaterialsAccessed": false,
+    "unknownFieldsRejected": true,
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "intervalMutationExcludedAcrossFiles": false,
+    "abaExcluded": false
+  },
+  "doesNotEstablish": [
+    "real_person_identity_or_current_role",
+    "current_credentials_or_practice_rule_capability",
+    "six_question_scope_fit",
+    "participation_consent",
+    "pairwise_independence",
+    "expert_status_opinion_or_seal",
+    "content_truth_or_expert_truth",
+    "source_body_exact_quote_or_binding",
+    "work_version_carrier_rights_legal_or_redistribution_conclusion",
+    "publisher_authenticity_signature_tls_identity_first_seen_or_future_freshness",
+    "response_hash_to_semantic_interpretation_binding",
+    "formal_review_gate_admission_registry_or_manifest_integration",
+    "cross_system_equivalence_scoring_weighting_or_winner",
+    "release_readiness_public_deployment_or_public_release_authorization",
+    "cross_file_atomic_snapshot_mutation_epoch_interval_integrity_or_aba_exclusion"
+  ],
+  "ledgerDigest": "d2885be87211af363cabddaa8f4ebc1d45774070429e3e2757496fde93f92294"
+}

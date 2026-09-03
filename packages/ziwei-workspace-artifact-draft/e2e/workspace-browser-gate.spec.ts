@@ -1,10 +1,20 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 import FDBFactory from "fake-indexeddb/lib/FDBFactory";
-import { collectConsoleProblems } from "../../../apps/web/e2e/full-backup-helpers";
 import { IndexedDbZiweiBrowserWorkspaceDraft } from "../src/browser-persistence.ts";
 
 type SaveInput = Parameters<IndexedDbZiweiBrowserWorkspaceDraft["saveRevision"]>[0];
+
+function collectConsoleProblems(page: Page): string[] {
+  const problems: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error" || message.type() === "warning") {
+      problems.push(`${message.type()}: ${message.text()}`);
+    }
+  });
+  page.on("pageerror", (error) => problems.push(`pageerror: ${error.message}`));
+  return problems;
+}
 
 async function buildConflictingZiweiBackups(
   artifact: SaveInput["artifact"]
@@ -992,7 +1002,9 @@ test("四化十二宫审稿模板可下载、只读预检且篡改失败后零�
   await expect(page.locator("#review-feedback-total")).toHaveText("48");
   await expect(page.locator("#review-feedback-resolved")).toHaveText("1");
   await expect(page.locator("#review-feedback-unresolved")).toHaveText("47");
-  await expect(page.locator("#review-feedback-reviewer")).toHaveText("浏览器示例审稿人（自述，未核验）");
+  await expect(page.locator("#review-feedback-reviewer")).toHaveText("已提供自述身份（未核验）");
+  await expect(page.locator("body")).not.toContainText("浏览器示例审稿人");
+  await expect(page.locator("body")).not.toContainText("filled-ziwei-review.json");
   await expect(page.locator(".review-feedback-item")).toHaveCount(1);
   await expect(page.locator(".review-feedback-item")).toHaveAttribute("data-decision", "approve");
   await expect(page.locator(".review-feedback-item")).toHaveAttribute(
@@ -1003,7 +1015,16 @@ test("四化十二宫审稿模板可下载、只读预检且篡改失败后零�
   await expect(page.locator(".review-feedback-item-details")).toContainText("正反并见，取决于条件");
   await expect(page.locator(".review-feedback-item-details")).toContainText("成立条件");
   await expect(page.locator(".review-feedback-item-details")).toContainText("反例提醒");
-  await expect(page.locator(".review-feedback-item-details a")).toHaveCount(1);
+  const natalReviewSourceLink = page.locator(".review-feedback-item-details a");
+  await expect(natalReviewSourceLink).toHaveCount(1);
+  await expect(natalReviewSourceLink).toHaveAttribute(
+    "href",
+    "https://example.org/ziwei-review-note"
+  );
+  await expect(natalReviewSourceLink).toHaveAttribute("target", "_blank");
+  await expect(natalReviewSourceLink).toHaveAttribute("rel", /(?:^|\s)noopener(?:\s|$)/u);
+  await expect(natalReviewSourceLink).toHaveAttribute("rel", /(?:^|\s)noreferrer(?:\s|$)/u);
+  await expect(natalReviewSourceLink).toHaveText("来源 1");
   await expect(page.locator("#revision-count")).toHaveText("0");
   await expect(page.locator("#mutation-epoch")).toHaveText("0");
   await expect(page.locator("#total-bytes")).toHaveText("0 B");
@@ -1021,6 +1042,35 @@ test("四化十二宫审稿模板可下载、只读预检且篡改失败后零�
     animations: "disabled"
   });
   await page.setViewportSize({ width: 1280, height: 720 });
+
+  const highRiskNarrativeTemplate = structuredClone(template);
+  highRiskNarrativeTemplate.items[0]!.decisionReason = "此人必然死亡。";
+  await page.locator("#review-feedback-file").setInputFiles({
+    name: "high-risk-ziwei-review.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(highRiskNarrativeTemplate), "utf8")
+  });
+  await expect(page.locator("#review-feedback-message")).toHaveAttribute("data-state", "success");
+  await expect(page.locator("#review-feedback-items")).not.toContainText("此人必然死亡。");
+  await expect(page.locator("#review-feedback-items")).toContainText(
+    "该候选触及高风险或确定性个人结果边界，当前仅保留可核对的结构事实，不显示解释性结论。"
+  );
+
+  const credentialUrlTemplate = structuredClone(template);
+  credentialUrlTemplate.items[0]!.additionalSourceUrls = [
+    "https://user:secret@example.org/ziwei"
+  ];
+  await page.locator("#review-feedback-file").setInputFiles({
+    name: "credential-url-ziwei-review.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(credentialUrlTemplate), "utf8")
+  });
+  await expect(page.locator("#review-feedback-message")).toHaveAttribute("data-state", "error");
+  await expect(page.locator("#review-feedback-message")).toContainText(
+    "补充来源 URL 必须是无账号信息的绝对 HTTPS 地址"
+  );
+  await expect(page.locator("#review-feedback-items")).toBeHidden();
+  await expect(page.locator("body")).not.toContainText("user:secret");
 
   template.matrixBinding.matrixSha256 = "0".repeat(64);
   await page.locator("#review-feedback-file").setInputFiles({
@@ -1369,7 +1419,9 @@ test("v0.13 当前盘核心十二辅煞三方四正审稿包保持只读、整�
     .toHaveAttribute("data-state", "success");
   await expect(page.locator("#core-minor-sanfang-review-resolved")).toHaveText("1");
   await expect(page.locator("#core-minor-sanfang-review-reviewer"))
-    .toHaveText("浏览器具名示例审稿人（自述，未核验）");
+    .toHaveText("已提供自述身份（未核验）");
+  await expect(page.locator("body")).not.toContainText("浏览器具名示例审稿人");
+  await expect(page.locator("body")).not.toContainText("filled-current-chart-v013.json");
   await expect(page.locator(".core-minor-sanfang-review-item")).toHaveCount(1);
   await expect(page.locator(".core-minor-sanfang-review-item"))
     .toHaveAttribute("data-decision", "approve");
@@ -1379,7 +1431,16 @@ test("v0.13 当前盘核心十二辅煞三方四正审稿包保持只读、整�
     .toHaveAttribute("data-good-bad-orientation", "null");
   await expect(page.locator(".core-minor-sanfang-review-item dl")).toContainText("成立条件");
   await expect(page.locator(".core-minor-sanfang-review-item dl")).toContainText("反例提醒");
-  await expect(page.locator(".core-minor-sanfang-review-item a")).toHaveCount(1);
+  const coreReviewSourceLink = page.locator(".core-minor-sanfang-review-item a");
+  await expect(coreReviewSourceLink).toHaveCount(1);
+  await expect(coreReviewSourceLink).toHaveAttribute(
+    "href",
+    "https://docs.iztro.com/learn/minor-star"
+  );
+  await expect(coreReviewSourceLink).toHaveAttribute("target", "_blank");
+  await expect(coreReviewSourceLink).toHaveAttribute("rel", /(?:^|\s)noopener(?:\s|$)/u);
+  await expect(coreReviewSourceLink).toHaveAttribute("rel", /(?:^|\s)noreferrer(?:\s|$)/u);
+  await expect(coreReviewSourceLink).toHaveText("来源 1");
 
   const preparedOccurrenceProjectionSha256 =
     template.projectionBinding.occurrenceProjectionSha256;
@@ -1428,6 +1489,36 @@ test("v0.13 当前盘核心十二辅煞三方四正审稿包保持只读、整�
     animations: "disabled"
   });
   await page.setViewportSize({ width: 1280, height: 720 });
+
+  const highRiskCoreReviewTemplate = structuredClone(template);
+  highRiskCoreReviewTemplate.items[0]!.decisionReason = "此人必然死亡。";
+  await page.locator("#core-minor-sanfang-review-file").setInputFiles({
+    name: "high-risk-current-chart-v013.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(highRiskCoreReviewTemplate), "utf8")
+  });
+  await expect(panel).toHaveAttribute("data-preflight-state", "valid");
+  await expect(page.locator("#core-minor-sanfang-review-items"))
+    .not.toContainText("此人必然死亡。");
+  await expect(page.locator("#core-minor-sanfang-review-items")).toContainText(
+    "该候选触及高风险或确定性个人结果边界，当前仅保留可核对的结构事实，不显示解释性结论。"
+  );
+
+  const credentialUrlCoreReviewTemplate = structuredClone(template);
+  credentialUrlCoreReviewTemplate.items[0]!.additionalSourceUrls = [
+    "https://user:secret@example.org/ziwei"
+  ];
+  await page.locator("#core-minor-sanfang-review-file").setInputFiles({
+    name: "credential-url-current-chart-v013.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(credentialUrlCoreReviewTemplate), "utf8")
+  });
+  await expect(panel).toHaveAttribute("data-preflight-state", "invalid");
+  await expect(page.locator("#core-minor-sanfang-review-message")).toContainText(
+    "补充来源 URL 必须是无账号信息的绝对 HTTPS 地址"
+  );
+  await expect(page.locator("#core-minor-sanfang-review-items")).toBeHidden();
+  await expect(page.locator("body")).not.toContainText("user:secret");
 
   const tamperedTemplate = structuredClone(template);
   tamperedTemplate.projectionBinding.artifactFactsSha256 = "0".repeat(64);

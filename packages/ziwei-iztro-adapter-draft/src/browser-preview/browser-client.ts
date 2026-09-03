@@ -9,6 +9,32 @@ import type { ZiweiBirthInputDraft } from "../contract-bridge.ts";
 
 export { createZiweiBrowserDisplayProjection } from "./display-projection.ts";
 export {
+  ZIWEI_HIGH_RISK_FEEDBACK_DOM_COMMON_SOURCE_FIELDS,
+  ZIWEI_HIGH_RISK_FEEDBACK_DOM_DECISION_MAP_VERSION,
+  ZIWEI_HIGH_RISK_FEEDBACK_DOM_EXCLUDED_CATEGORIES,
+  ZIWEI_HIGH_RISK_FEEDBACK_DOM_SURFACE_IDS,
+  ZIWEI_HIGH_RISK_FEEDBACK_DOM_TEXT_ROLE,
+  ZIWEI_HIGH_RISK_EGRESS_BROWSER_DISPLAY_SURFACE_ID,
+  ZIWEI_HIGH_RISK_EGRESS_DECISION_MAP_VERSION,
+  ZIWEI_HIGH_RISK_EGRESS_EXCLUDED_FEEDBACK_SURFACE_IDS,
+  ZIWEI_HIGH_RISK_EGRESS_EXCLUDED_TEXT_ROLES,
+  ZIWEI_HIGH_RISK_EGRESS_INCLUDED_SURFACE_IDS,
+  ZIWEI_HIGH_RISK_EGRESS_INCLUDED_TEXT_ROLES,
+  ZIWEI_HIGH_RISK_EGRESS_REVIEW_GUARDRAIL_SOURCE_FIELDS,
+  ZIWEI_HIGH_RISK_EGRESS_SOURCE_SURFACE_IDS,
+  createZiweiCoreMinorStarSanfangFeedbackDomDecisionView,
+  createZiweiHighRiskFeedbackDomDecisionKey,
+  createZiweiHighRiskEgressDecisionKey,
+  createZiweiHighRiskEgressDecisionMap,
+  createZiweiNatalTransformationPalaceFeedbackDomDecisionView,
+  getZiweiCoreMinorStarSanfangFeedbackDomDecisionEntry,
+  getZiweiHighRiskEgressDecisionEntry,
+  getZiweiNatalTransformationPalaceFeedbackDomDecisionEntry,
+  isZiweiCoreMinorStarSanfangFeedbackDomDecisionMap,
+  isZiweiHighRiskEgressDecisionMap,
+  isZiweiNatalTransformationPalaceFeedbackDomDecisionMap
+} from "./high-risk-expression-egress-view.ts";
+export {
   ZIWEI_NATAL_TRANSFORMATION_PALACE_REVIEW_FEEDBACK_FILENAME,
   ZIWEI_NATAL_TRANSFORMATION_PALACE_REVIEW_FEEDBACK_MAX_BYTES,
   createZiweiNatalTransformationPalaceReviewFeedbackTemplate,
@@ -27,6 +53,21 @@ export type {
   BrowserProbeDisplayProjection,
   BrowserProbeSuccessResult
 } from "./browser-protocol.ts";
+export type {
+  ZiweiCoreMinorStarSanfangFeedbackDomDecisionView,
+  ZiweiHighRiskFeedbackDomDecisionEntry,
+  ZiweiHighRiskFeedbackDomDecisionMap,
+  ZiweiHighRiskFeedbackDomSourceField,
+  ZiweiHighRiskFeedbackDomSurfaceId,
+  ZiweiHighRiskEgressDecisionEntry,
+  ZiweiHighRiskEgressDecisionMap,
+  ZiweiHighRiskEgressExcludedTextRole,
+  ZiweiHighRiskEgressIncludedSurfaceId,
+  ZiweiHighRiskEgressIncludedTextRole,
+  ZiweiHighRiskEgressSourceSurfaceId,
+  ZiweiHighRiskEgressTextRole,
+  ZiweiNatalTransformationPalaceFeedbackDomDecisionView
+} from "./high-risk-expression-egress-view.ts";
 export type {
   ZiweiNatalTransformationPalaceReviewFeedbackEnvelope,
   ZiweiNatalTransformationPalaceReviewFeedbackPreflight,

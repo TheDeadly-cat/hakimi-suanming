@@ -1,0 +1,380 @@
+{
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "formalAdmissionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsBundleComplete": false,
+    "sourceBundleComplete": false
+  },
+  "basisArtifacts": [
+    {
+      "path": "package-lock.json",
+      "rawBytes": 175812,
+      "rawSha256": "40a02c7c3166f0c9bc03afa9c1d1f342fb7f54efe1abbf7cb3f5cf6ecb482a4d"
+    },
+    {
+      "path": "packages/ziwei-iztro-adapter-draft/package.json",
+      "rawBytes": 500,
+      "rawSha256": "717b64a0d9a38a98a6f1b567aa060aaeb53f25f03ede5302048180398ffedda1"
+    },
+    {
+      "path": "packages/ziwei-iztro-adapter-draft/src/iztro-2.5.8-lock-closure.json",
+      "rawBytes": 3846,
+      "rawSha256": "c372bf14630eee36fa01ac654b8939622900a3e469a8f69db7bd2c7baa1d2724"
+    }
+  ],
+  "childDigest": "714b5e0b1ff2c75a85bd3804ca53f01b07ad2e663c0f89b381b3cdcbb4df0c27",
+  "childId": "hakimi.ziwei.declared-dependency-license-carrier-observation-child/1.0.0",
+  "createdAt": "2026-09-01T12:22:00.000Z",
+  "crossSystemIsolationBoundary": {
+    "baziAuthorityInherited": false,
+    "crossSystemExpertConclusionInherited": false,
+    "crossSystemLicenseConclusionInherited": false,
+    "vedicAuthorityInherited": false,
+    "westernAuthorityInherited": false
+  },
+  "dependencyCarriers": [
+    {
+      "licenseCarrier": {
+        "bodyCopiedIntoChild": false,
+        "exactQuoteStoredInChild": false,
+        "locator": "whole_file_exact_bytes",
+        "path": "node_modules/@babel/runtime/LICENSE",
+        "rawBytes": 1106,
+        "rawSha256": "117da2af0d4ce0fe1c8e19b5cff9dcd806adf973d328d27b11d4448c4ff24f76",
+        "semanticInterpretationReviewed": false
+      },
+      "lockEntry": {
+        "declaredLicense": "MIT",
+        "integrity": "sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==",
+        "packagePath": "node_modules/@babel/runtime",
+        "resolved": "https://registry.npmjs.org/@babel/runtime/-/runtime-7.29.7.tgz"
+      },
+      "ordinal": 1,
+      "packageManifest": {
+        "declaredLicense": "MIT",
+        "declaredName": "@babel/runtime",
+        "declaredVersion": "7.29.7",
+        "path": "node_modules/@babel/runtime/package.json",
+        "rawBytes": 41106,
+        "rawSha256": "8c4bf20c55e3f3a93df034b12746bf72185cf2acb0ef52847a3465d6e67c61e7"
+      },
+      "packageName": "@babel/runtime",
+      "relationship": "iztro_declared_lock_closure",
+      "version": "7.29.7"
+    },
+    {
+      "licenseCarrier": {
+        "bodyCopiedIntoChild": false,
+        "exactQuoteStoredInChild": false,
+        "locator": "whole_file_exact_bytes",
+        "path": "node_modules/dayjs/LICENSE",
+        "rawBytes": 1072,
+        "rawSha256": "5faab7526d055651be3aab769d58897be6bd91f3d39d137f25f12dba1b31d5dc",
+        "semanticInterpretationReviewed": false
+      },
+      "lockEntry": {
+        "declaredLicense": "MIT",
+        "integrity": "sha512-98IT+HOahAisibz/yjKbzuOBwYcjJ7BCLPzARyHiyEBmRz4fatF+KPJszEHXsGYjUG234aH/cOjW1wwTbKUZlA==",
+        "packagePath": "node_modules/dayjs",
+        "resolved": "https://registry.npmjs.org/dayjs/-/dayjs-1.11.21.tgz"
+      },
+      "ordinal": 2,
+      "packageManifest": {
+        "declaredLicense": "MIT",
+        "declaredName": "dayjs",
+        "declaredVersion": "1.11.21",
+        "path": "node_modules/dayjs/package.json",
+        "rawBytes": 2676,
+        "rawSha256": "dcb46b4045ace466baa3972d8d85d81f9036ac0ca23f48a8fe77d0d786de0400"
+      },
+      "packageName": "dayjs",
+      "relationship": "iztro_declared_lock_closure",
+      "version": "1.11.21"
+    },
+    {
+      "licenseCarrier": {
+        "bodyCopiedIntoChild": false,
+        "exactQuoteStoredInChild": false,
+        "locator": "whole_file_exact_bytes",
+        "path": "node_modules/i18next/LICENSE",
+        "rawBytes": 1074,
+        "rawSha256": "c83b2035d5a4740f8739869a994acc24559e2946219b15091922b52e7b2a7287",
+        "semanticInterpretationReviewed": false
+      },
+      "lockEntry": {
+        "declaredLicense": "MIT",
+        "integrity": "sha512-06r/TitrM88Mg5FdUXAKL96dJMzgqLE5dv3ryBAra4KCwD9mJ4ndOTS95ZuymIGoE+2hzfdaMak2X11/es7ZWg==",
+        "packagePath": "node_modules/i18next",
+        "resolved": "https://registry.npmjs.org/i18next/-/i18next-23.16.8.tgz"
+      },
+      "ordinal": 3,
+      "packageManifest": {
+        "declaredLicense": "MIT",
+        "declaredName": "i18next",
+        "declaredVersion": "23.16.8",
+        "path": "node_modules/i18next/package.json",
+        "rawBytes": 4379,
+        "rawSha256": "eed0139050cc6d3b62e97a29529bd4d729d1d5f993af8e78fe48564c246648fc"
+      },
+      "packageName": "i18next",
+      "relationship": "iztro_declared_lock_closure",
+      "version": "23.16.8"
+    },
+    {
+      "licenseCarrier": {
+        "bodyCopiedIntoChild": false,
+        "exactQuoteStoredInChild": false,
+        "locator": "whole_file_exact_bytes",
+        "path": "node_modules/iztro/LICENSE",
+        "rawBytes": 1073,
+        "rawSha256": "e6c7b6e313cbda3135b41bccc66c98be132cb8319d0d465903d17e669e748b36",
+        "semanticInterpretationReviewed": false
+      },
+      "lockEntry": {
+        "declaredLicense": "MIT",
+        "integrity": "sha512-kgyyvxdSEvgJxi6zvHpvzGbXZLGXCdhTHYK2Pe/sRdBIQ7RfCArvupmg2ChUMQCSQGomW7XCI0gWwUuKJwPENg==",
+        "packagePath": "node_modules/iztro",
+        "resolved": "https://registry.npmjs.org/iztro/-/iztro-2.5.8.tgz"
+      },
+      "ordinal": 4,
+      "packageManifest": {
+        "declaredLicense": "MIT",
+        "declaredName": "iztro",
+        "declaredVersion": "2.5.8",
+        "path": "node_modules/iztro/package.json",
+        "rawBytes": 2255,
+        "rawSha256": "a5a85df951d28965caa7bf9a9fe6b44e3df676c8dd938573061257cff681a20f"
+      },
+      "packageName": "iztro",
+      "relationship": "iztro_declared_lock_closure",
+      "version": "2.5.8"
+    },
+    {
+      "licenseCarrier": {
+        "bodyCopiedIntoChild": false,
+        "exactQuoteStoredInChild": false,
+        "locator": "whole_file_exact_bytes",
+        "path": "node_modules/lunar-lite/LICENSE",
+        "rawBytes": 1062,
+        "rawSha256": "21c79dc1c4df538c682573291f8824be1b1313e309a32f1e2367e3fd4c66d62a",
+        "semanticInterpretationReviewed": false
+      },
+      "lockEntry": {
+        "declaredLicense": "MIT",
+        "integrity": "sha512-Y4tba4RaIFI0ikImJhgoEsyqtDE64lJIM3yFwRX01dbmagCDq7rNmpDQFrSFFy4WXeuywdRVFpIBoT1GGCEizw==",
+        "packagePath": "node_modules/lunar-lite",
+        "resolved": "https://registry.npmjs.org/lunar-lite/-/lunar-lite-0.2.8.tgz"
+      },
+      "ordinal": 5,
+      "packageManifest": {
+        "declaredLicense": "MIT",
+        "declaredName": "lunar-lite",
+        "declaredVersion": "0.2.8",
+        "path": "node_modules/lunar-lite/package.json",
+        "rawBytes": 1465,
+        "rawSha256": "be39ac7d686fd9e1eee487e4e1960ff670e368ad6529bd435d2d0222521147dd"
+      },
+      "packageName": "lunar-lite",
+      "relationship": "iztro_declared_lock_closure",
+      "version": "0.2.8"
+    },
+    {
+      "licenseCarrier": {
+        "bodyCopiedIntoChild": false,
+        "exactQuoteStoredInChild": false,
+        "locator": "whole_file_exact_bytes",
+        "path": "node_modules/lunar-typescript/LICENSE",
+        "rawBytes": 1062,
+        "rawSha256": "097ec7989106eb9a27b6eff71dbaf1cd6bb04a9b35b6c94b54fff0829a041a8c",
+        "semanticInterpretationReviewed": false
+      },
+      "lockEntry": {
+        "declaredLicense": "MIT",
+        "integrity": "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA==",
+        "packagePath": "node_modules/lunar-typescript",
+        "resolved": "https://registry.npmjs.org/lunar-typescript/-/lunar-typescript-1.8.6.tgz"
+      },
+      "ordinal": 6,
+      "packageManifest": {
+        "declaredLicense": "MIT",
+        "declaredName": "lunar-typescript",
+        "declaredVersion": "1.8.6",
+        "path": "node_modules/lunar-typescript/package.json",
+        "rawBytes": 2188,
+        "rawSha256": "f66f1217e67e227f77b7a35b3c5b40d3835842856920e99ebd7e10f2d940e21c"
+      },
+      "packageName": "lunar-typescript",
+      "relationship": "iztro_declared_lock_closure",
+      "version": "1.8.6"
+    },
+    {
+      "licenseCarrier": {
+        "bodyCopiedIntoChild": false,
+        "exactQuoteStoredInChild": false,
+        "locator": "whole_file_exact_bytes",
+        "path": "node_modules/zod/LICENSE",
+        "rawBytes": 1072,
+        "rawSha256": "3f1189b28e3866e0d979968d466b78f813f76827cfdca1fbb124cc0a5c8841f8",
+        "semanticInterpretationReviewed": false
+      },
+      "lockEntry": {
+        "declaredLicense": "MIT",
+        "integrity": "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==",
+        "packagePath": "node_modules/zod",
+        "resolved": "https://registry.npmjs.org/zod/-/zod-4.4.3.tgz"
+      },
+      "ordinal": 7,
+      "packageManifest": {
+        "declaredLicense": "MIT",
+        "declaredName": "zod",
+        "declaredVersion": "4.4.3",
+        "path": "node_modules/zod/package.json",
+        "rawBytes": 3796,
+        "rawSha256": "c630bd10b52dcf71c112a2bf78dbf2734b9db58d62de663b8d86c2ec2c8cda2e"
+      },
+      "packageName": "zod",
+      "relationship": "ziwei_adapter_direct_dependency_outside_iztro_closure",
+      "version": "4.4.3"
+    }
+  ],
+  "doesNotEstablish": [
+    "publisher_or_license_authenticity",
+    "license_semantic_interpretation_applicability_or_compatibility",
+    "work_version_or_carrier_rights",
+    "complete_installed_runtime_build_tooling_fortel_or_default_web_dependency_closure",
+    "notice_obligation_satisfaction_or_redistribution_authorization",
+    "source_body_exact_quote_or_formal_binding",
+    "any_of_27_ziwei_subjects_fully_satisfied",
+    "content_truth_expert_truth_or_domain_authority",
+    "formal_manifest_registry_or_central_admission",
+    "release_evidence_release_readiness_or_public_release_authorization",
+    "node_runtime_loader_launcher_identity_or_cli_attestation",
+    "trusted_time_cross_file_atomicity_mutation_epoch_interval_integrity_or_aba_exclusion"
+  ],
+  "expertBoundary": {
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2
+  },
+  "gateSummary": {
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 27,
+    "carrierRightsEstablished": 0,
+    "dependenciesExpected": 7,
+    "dependenciesObserved": 7,
+    "exactQuotesStored": 0,
+    "expertReviewsVerified": 0,
+    "licenseCarrierEndpointsVerified": 7,
+    "packageManifestsVerified": 7,
+    "redistributionAuthorizations": 0,
+    "sourceBodiesCopied": 0,
+    "subjectFullySatisfied": 0,
+    "versionRightsEstablished": 0,
+    "workRightsEstablished": 0
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "crossFileAtomicSnapshotEstablished": false,
+    "digitalSignatureVerified": false,
+    "exactQuotesStoredInChild": 0,
+    "fixedLocalEndpointsOnly": true,
+    "intervalMutationExcluded": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "packageManifestAndLicenseHashUseSameHeldFileBuffer": true,
+    "perFilePathEndpointRevalidated": true,
+    "publisherIdentityIndependentlyVerified": false,
+    "sourceBodiesCopiedIntoChild": 0
+  },
+  "observationScope": {
+    "adapterAdditionalDirectDependencyCount": 1,
+    "adapterPackage": "@hakimi/ziwei-iztro-adapter-draft@0.0.0-draft.0",
+    "buildToolingDependencyClosureCovered": false,
+    "completeInstalledRuntimeClosureBound": false,
+    "defaultWebCovered": false,
+    "exactDeclaredPackageSetObserved": true,
+    "fortelCovered": false,
+    "iztroDeclaredClosureEntry": "iztro@2.5.8",
+    "iztroDeclaredClosureNodeCount": 6,
+    "observedDependencyCarrierCount": 7,
+    "runtimeExecutionEstablished": false
+  },
+  "parentBindingBoundary": {
+    "bindingDirection": "fixed_local_declared_dependency_carriers_to_child_only",
+    "bindsCentralAdmission": false,
+    "bindsDefaultWeb": false,
+    "bindsFourSystemRegistry": false,
+    "bindsZiweiManifest": false,
+    "bindsZiweiSourceRequirementsV1": false
+  },
+  "recordType": "ziwei_declared_dependency_license_carrier_observation_child_v1",
+  "rightsBoundary": {
+    "carrierRightsEstablished": false,
+    "independentRightsReviewIds": [],
+    "licenseApplicabilityEstablished": false,
+    "licenseAuthenticityEstablished": false,
+    "licenseCarrierIdentityObserved": true,
+    "noticeObligationSatisfied": false,
+    "ownerDecisionRefs": [],
+    "redistributionAuthorized": false,
+    "rightsLegalConclusionEstablished": false,
+    "selectedLicenseModel": null,
+    "versionRightsEstablished": false,
+    "workRightsEstablished": false
+  },
+  "runtimeTrustBoundary": {
+    "assumesNoArbitraryPreEvaluationCodeExecution": true,
+    "cliOutputTrustedAttestation": false,
+    "fixedPathCliRejectsVisiblePreloadEnvironment": true,
+    "fixedPathCliRejectsVisiblePreloadOrLoaderArguments": true,
+    "hiddenPreEvaluationCodeExecutionExcluded": false,
+    "launcherIdentityEstablished": false,
+    "loaderIdentityEstablished": false,
+    "nodeRuntimeIdentityEstablished": false,
+    "selectedChildIdentityBindsCliImplementation": false,
+    "visibleGuardIsSecurityBoundary": false,
+    "visibleGuardScope": "invocation_visible_inputs_only"
+  },
+  "schemaVersion": "1.0.0",
+  "sourceRequirementsProjectionBoundary": {
+    "candidateProjectionAllowedOnlyAsPartialUnbound": true,
+    "completeDependencyNoticeClosureEstablished": false,
+    "formalExactQuoteBound": false,
+    "sourceBodyBound": false,
+    "subjectFullySatisfied": false,
+    "targetSubjectId": "ziwei.rights.engine-code-and-dependency-notices"
+  },
+  "status": "seven_declared_local_license_carriers_observed_unbound_no_legal_conclusion",
+  "systemIdentity": {
+    "migrationId": null,
+    "productIdentity": null,
+    "productSystemId": "ziwei-doushu",
+    "projectDefaultReleaseGovernanceContext": {
+      "activeLine": "legacy-v13",
+      "expertClaimsAuthorized": false,
+      "migrationId": null,
+      "mutationEpochAvailableForSchema13": false,
+      "mutationEpochBoundaryRequired": true,
+      "mutationEpochReceipt": null,
+      "publicDeploymentAuthorized": false,
+      "targetSchema": 13
+    },
+    "projectDefaultReleaseGovernanceInherited": false,
+    "releaseIdentity": null,
+    "systemId": "ziwei",
+    "targetSchema": null
+  },
+  "timeBoundary": {
+    "createdAtClock": "untrusted_local_clock_label",
+    "createdAtUpperBoundObservedOnSameUntrustedLocalClock": "2026-09-01T12:22:29.817Z",
+    "crossArtifactTemporalOrderEstablished": false,
+    "externalTimeAuthorityEstablished": false,
+    "trustedTimestampEstablished": false
+  }
+}

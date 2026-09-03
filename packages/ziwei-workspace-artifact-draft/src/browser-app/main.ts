@@ -14,15 +14,26 @@ import {
   ZIWEI_NATAL_TRANSFORMATION_PALACE_REVIEW_FEEDBACK_MAX_BYTES,
   calculateZiweiInFreshBrowserWorker,
   createZiweiBrowserDisplayProjection,
+  createZiweiCoreMinorStarSanfangFeedbackDomDecisionView,
+  createZiweiHighRiskEgressDecisionKey,
+  createZiweiHighRiskEgressDecisionMap,
+  createZiweiHighRiskFeedbackDomDecisionKey,
   createZiweiCoreMinorStarSanfangReviewFeedbackTemplate,
+  createZiweiNatalTransformationPalaceFeedbackDomDecisionView,
   createZiweiNatalTransformationPalaceReviewFeedbackTemplate,
-  preflightZiweiCoreMinorStarSanfangReviewFeedback,
-  preflightZiweiNatalTransformationPalaceReviewFeedback,
+  getZiweiCoreMinorStarSanfangFeedbackDomDecisionEntry,
+  getZiweiHighRiskEgressDecisionEntry,
+  getZiweiNatalTransformationPalaceFeedbackDomDecisionEntry,
+  isZiweiHighRiskEgressDecisionMap,
   serializeZiweiCoreMinorStarSanfangReviewFeedbackTemplate,
   serializeZiweiNatalTransformationPalaceReviewFeedbackTemplate,
   ziweiCoreMinorStarSanfangReviewFeedbackFilename,
   type BrowserProbeDisplayProjection,
   type BrowserProbeSuccessResult,
+  type ZiweiHighRiskFeedbackDomDecisionMap,
+  type ZiweiHighRiskEgressDecisionMap,
+  type ZiweiHighRiskEgressIncludedTextRole,
+  type ZiweiHighRiskEgressSourceSurfaceId,
   type ZiweiCoreMinorStarSanfangReviewFeedbackPreflight,
   type ZiweiNatalTransformationPalaceReviewFeedbackPreflight
 } from "../browser-calculation-bridge.ts";
@@ -49,6 +60,20 @@ type CoreMinorSanfangScope = NonNullable<typeof currentCoreMinorSanfangReviewSco
 type CoreMinorSanfangSourceRef =
   | BrowserProbeDisplayProjection["coreMinorStarSanfangReviews"][number]["sourceRefs"][number]
   | BrowserProbeDisplayProjection["coreMinorStarSanfangReviews"][number]["occurrences"][number]["sourceRefs"][number];
+type CommonFeedbackDomNarrativeField =
+  | "decisionReason"
+  | "applicabilityConditions"
+  | "counterexamples"
+  | "revisionRequest";
+type CoreMinorSanfangFeedbackDomNarrativeField =
+  | "selectedTradition"
+  | CommonFeedbackDomNarrativeField;
+type NatalTransformationFeedbackDomNarrativeField =
+  | "selectedSchool"
+  | CommonFeedbackDomNarrativeField;
+
+const UNSAFE_FEEDBACK_NAVIGATION_TEXT =
+  /[\u0000-\u001f\u007f-\u009f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/u;
 
 const repository = new IndexedDbZiweiBrowserWorkspaceDraft(indexedDB);
 const updateChannel = typeof BroadcastChannel === "function"
@@ -63,6 +88,7 @@ let mutationState: ZiweiBrowserWorkspaceMutationStateDraft = {
 let currentArtifact: BrowserArtifact | null = null;
 let currentRevision: ZiweiBrowserWorkspaceRevisionDraft | null = null;
 let currentProjection: BrowserProbeDisplayProjection | null = null;
+let currentEgressDecisionMap: ZiweiHighRiskEgressDecisionMap | null = null;
 let resultMatchesInput = false;
 let pendingRestore: Readonly<{
   bytes: Uint8Array;
@@ -260,11 +286,16 @@ async function calculateFromForm(): Promise<void> {
   try {
     const result = await calculateZiweiInFreshBrowserWorker(input, { signal: controller.signal });
     if (operationEpoch !== viewEpoch) return;
+    const projection = createZiweiBrowserDisplayProjection(result.artifact);
+    const egressDecisionMap = await createZiweiHighRiskEgressDecisionMap(projection);
+    if (operationEpoch !== viewEpoch) return;
+    if (!isZiweiHighRiskEgressDecisionMap(egressDecisionMap)) {
+      throw new Error("紫微候选文本出口没有获得当前进程的私有校验品牌");
+    }
     currentArtifact = result.artifact;
     currentRevision = null;
     resultMatchesInput = true;
-    const projection = createZiweiBrowserDisplayProjection(result.artifact);
-    renderArtifact(result.artifact, projection, null);
+    renderArtifact(result.artifact, projection, egressDecisionMap, null);
     revisionTitle.value = `${projection.displaySummary.gregorianDate} · ${projection.displaySummary.shichen} · ${projection.displaySummary.sex}`;
     revisionNote.value = "";
     saveForm.hidden = false;
@@ -412,10 +443,15 @@ async function reopenRevision(revisionId: string): Promise<void> {
     const revision = await repository.reopenRevision(revisionId);
     if (operationEpoch !== viewEpoch) return;
     const projection = createZiweiBrowserDisplayProjection(revision.artifact);
+    const egressDecisionMap = await createZiweiHighRiskEgressDecisionMap(projection);
+    if (operationEpoch !== viewEpoch) return;
+    if (!isZiweiHighRiskEgressDecisionMap(egressDecisionMap)) {
+      throw new Error("紫微候选文本出口没有获得当前进程的私有校验品牌");
+    }
     currentArtifact = revision.artifact;
     currentRevision = revision;
     resultMatchesInput = false;
-    renderArtifact(revision.artifact, projection, revision);
+    renderArtifact(revision.artifact, projection, egressDecisionMap, revision);
     saveForm.hidden = true;
     artifactBadge.textContent = "已重开 · 内容核对通过";
     artifactBadge.dataset.state = "saved";
@@ -500,11 +536,12 @@ async function inspectSelectedReviewFeedback(): Promise<void> {
       || file.size > ZIWEI_NATAL_TRANSFORMATION_PALACE_REVIEW_FEEDBACK_MAX_BYTES) {
       throw new Error("审稿反馈文件必须是 1 字节至 2 MiB 的 UTF-8 JSON");
     }
-    const raw = new TextDecoder("utf-8", { fatal: true }).decode(await file.arrayBuffer());
+    const bytes = await file.arrayBuffer();
     if (token !== reviewFeedbackReadToken) return;
-    const preflight = await preflightZiweiNatalTransformationPalaceReviewFeedback(raw);
+    const raw = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    const view = await createZiweiNatalTransformationPalaceFeedbackDomDecisionView(raw);
     if (token !== reviewFeedbackReadToken) return;
-    renderReviewFeedbackPreflight(preflight, file.name);
+    renderReviewFeedbackPreflight(view.preflight, view.decisionMap);
   } catch (cause) {
     if (token !== reviewFeedbackReadToken) return;
     clearReviewFeedbackPreview(
@@ -520,19 +557,55 @@ async function inspectSelectedReviewFeedback(): Promise<void> {
 
 function renderReviewFeedbackPreflight(
   preflight: ZiweiNatalTransformationPalaceReviewFeedbackPreflight,
-  fileName: string
+  decisionMap: ZiweiHighRiskFeedbackDomDecisionMap
 ): void {
-  reviewFeedbackTotal.textContent = String(preflight.counts.total);
-  reviewFeedbackResolved.textContent = String(preflight.resolvedCount);
-  reviewFeedbackUnresolved.textContent = String(preflight.unresolvedCount);
-  reviewFeedbackReviewer.textContent = preflight.reviewerAttributionComplete
-    ? `${preflight.envelope.reviewer.displayName}（自述，未核验）`
-    : "尚未提供";
-  setReviewFeedbackBoundary(preflight);
-
-  reviewFeedbackItems.replaceChildren();
   const resolvedItems = preflight.envelope.items.filter((item) => item.decision !== "unresolved");
-  for (const item of resolvedItems) {
+  const displayItems = resolvedItems.map((item) => Object.freeze({
+    item,
+    selectedSchool: requireNatalFeedbackDomDisplayText(
+      preflight,
+      decisionMap,
+      item.contentId,
+      "selectedSchool",
+      item.selectedSchool
+    ),
+    decisionReason: requireNatalFeedbackDomDisplayText(
+      preflight,
+      decisionMap,
+      item.contentId,
+      "decisionReason",
+      item.decisionReason
+    ),
+    applicabilityConditions: requireNatalFeedbackDomDisplayText(
+      preflight,
+      decisionMap,
+      item.contentId,
+      "applicabilityConditions",
+      item.applicabilityConditions
+    ),
+    counterexamples: requireNatalFeedbackDomDisplayText(
+      preflight,
+      decisionMap,
+      item.contentId,
+      "counterexamples",
+      item.counterexamples
+    ),
+    revisionRequest: item.revisionRequest.trim()
+      ? requireNatalFeedbackDomDisplayText(
+        preflight,
+        decisionMap,
+        item.contentId,
+        "revisionRequest",
+        item.revisionRequest
+      )
+      : null,
+    additionalSourceHrefs: Object.freeze(
+      item.additionalSourceUrls.map(requireFeedbackNavigationHref)
+    )
+  }));
+  const fragment = document.createDocumentFragment();
+  for (const display of displayItems) {
+    const { item } = display;
     const card = document.createElement("li");
     card.className = "review-feedback-item";
     card.dataset.contentId = item.contentId;
@@ -556,24 +629,24 @@ function renderReviewFeedbackPreflight(
     details.className = "review-feedback-item-details";
     details.append(
       summaryPair("方向提案", reviewOrientationLabel(item.orientationProposal)),
-      summaryPair("流派口径", item.selectedSchool),
-      summaryPair("审稿理由", item.decisionReason),
-      summaryPair("成立条件", item.applicabilityConditions),
-      summaryPair("反例提醒", item.counterexamples)
+      summaryPair("流派口径", display.selectedSchool),
+      summaryPair("审稿理由", display.decisionReason),
+      summaryPair("成立条件", display.applicabilityConditions),
+      summaryPair("反例提醒", display.counterexamples)
     );
-    if (item.revisionRequest) {
-      details.append(summaryPair("退修要求", item.revisionRequest));
+    if (display.revisionRequest !== null) {
+      details.append(summaryPair("退修要求", display.revisionRequest));
     }
-    if (item.additionalSourceUrls.length > 0) {
+    if (display.additionalSourceHrefs.length > 0) {
       const sourceRow = document.createElement("div");
       const term = document.createElement("dt");
       term.textContent = "补充来源";
       const description = document.createElement("dd");
-      item.additionalSourceUrls.forEach((sourceUrl, index) => {
+      display.additionalSourceHrefs.forEach((href, index) => {
         const link = document.createElement("a");
-        link.href = sourceUrl;
+        link.href = href;
         link.target = "_blank";
-        link.rel = "noreferrer";
+        link.rel = "noreferrer noopener";
         link.textContent = `来源 ${index + 1}`;
         if (index > 0) description.append("、");
         description.append(link);
@@ -582,11 +655,20 @@ function renderReviewFeedbackPreflight(
       details.append(sourceRow);
     }
     card.append(heading, details);
-    reviewFeedbackItems.append(card);
+    fragment.append(card);
   }
-  reviewFeedbackItems.hidden = resolvedItems.length === 0;
+
+  reviewFeedbackTotal.textContent = String(preflight.counts.total);
+  reviewFeedbackResolved.textContent = String(preflight.resolvedCount);
+  reviewFeedbackUnresolved.textContent = String(preflight.unresolvedCount);
+  reviewFeedbackReviewer.textContent = preflight.reviewerAttributionComplete
+    ? "已提供自述身份（未核验）"
+    : "尚未提供";
+  setReviewFeedbackBoundary(preflight);
+  reviewFeedbackItems.replaceChildren(fragment);
+  reviewFeedbackItems.hidden = displayItems.length === 0;
   setReviewFeedbackMessage(
-    `预检通过：${fileName} 覆盖 48 项，已裁决 ${preflight.resolvedCount} 项、未裁决 ${preflight.unresolvedCount} 项。身份仅自述且文件无签名；本次没有写入工件、Revision、IndexedDB 或资料代次。`,
+    `预检通过：所选 JSON 文件覆盖 48 项，已裁决 ${preflight.resolvedCount} 项、未裁决 ${preflight.unresolvedCount} 项。身份仅自述且文件无签名；本次没有写入工件、Revision、IndexedDB 或资料代次。`,
     "success"
   );
 }
@@ -655,6 +737,69 @@ function reviewOrientationLabel(
     mixed_conditional: "正反并见，取决于条件",
     not_assessable: "现有证据不足以提出方向"
   } as const)[orientation];
+}
+
+function requireNatalFeedbackDomDisplayText(
+  preflight: ZiweiNatalTransformationPalaceReviewFeedbackPreflight,
+  decisionMap: ZiweiHighRiskFeedbackDomDecisionMap,
+  sourceIdentity: string,
+  sourceField: NatalTransformationFeedbackDomNarrativeField,
+  currentSourceText: string
+): string {
+  const decisionKey = createZiweiHighRiskFeedbackDomDecisionKey(
+    "ziwei.candidate.natal-transformation.palace-feedback-preflight",
+    sourceIdentity,
+    sourceField
+  );
+  return getZiweiNatalTransformationPalaceFeedbackDomDecisionEntry(
+    decisionMap,
+    preflight,
+    decisionKey,
+    currentSourceText
+  ).displayText;
+}
+
+function requireCoreMinorSanfangFeedbackDomDisplayText(
+  preflight: ZiweiCoreMinorStarSanfangReviewFeedbackPreflight,
+  decisionMap: ZiweiHighRiskFeedbackDomDecisionMap,
+  projection: BrowserProbeDisplayProjection,
+  sourceIdentity: string,
+  sourceField: CoreMinorSanfangFeedbackDomNarrativeField,
+  currentSourceText: string
+): string {
+  const decisionKey = createZiweiHighRiskFeedbackDomDecisionKey(
+    "ziwei.candidate.core-minor-star.sanfang-feedback-preflight",
+    sourceIdentity,
+    sourceField
+  );
+  return getZiweiCoreMinorStarSanfangFeedbackDomDecisionEntry(
+    decisionMap,
+    projection,
+    preflight,
+    decisionKey,
+    currentSourceText
+  ).displayText;
+}
+
+function requireFeedbackNavigationHref(rawValue: string): string {
+  if (rawValue.length === 0
+    || rawValue !== rawValue.trim()
+    || UNSAFE_FEEDBACK_NAVIGATION_TEXT.test(rawValue)) {
+    throw new Error("补充来源 URL 包含不允许的空白、控制字符或双向文本控制符");
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(rawValue);
+  } catch (cause) {
+    throw new Error("补充来源 URL 不是有效的绝对 HTTPS 地址", { cause });
+  }
+  if (parsed.protocol !== "https:"
+    || parsed.hostname.length === 0
+    || parsed.username.length > 0
+    || parsed.password.length > 0) {
+    throw new Error("补充来源 URL 必须是无账号信息的绝对 HTTPS 地址");
+  }
+  return parsed.href;
 }
 
 function beginViewReplacement(): number {
@@ -961,12 +1106,16 @@ async function inspectSelectedCoreMinorSanfangReviewFeedback(): Promise<void> {
     const bytes = await file.arrayBuffer();
     if (!isCurrentCoreMinorSanfangReviewOperation(scope, token)) return;
     const raw = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
-    const preflight = await preflightZiweiCoreMinorStarSanfangReviewFeedback(
+    const view = await createZiweiCoreMinorStarSanfangFeedbackDomDecisionView(
       raw,
       scope.projection
     );
     if (!isCurrentCoreMinorSanfangReviewOperation(scope, token)) return;
-    renderCoreMinorSanfangReviewPreflight(preflight, file.name);
+    renderCoreMinorSanfangReviewPreflight(
+      view.preflight,
+      view.decisionMap,
+      scope.projection
+    );
   } catch (cause) {
     if (!isCurrentCoreMinorSanfangReviewOperation(scope, token)) return;
     clearCoreMinorSanfangReviewPreflight(
@@ -987,23 +1136,63 @@ async function inspectSelectedCoreMinorSanfangReviewFeedback(): Promise<void> {
 
 function renderCoreMinorSanfangReviewPreflight(
   preflight: ZiweiCoreMinorStarSanfangReviewFeedbackPreflight,
-  fileName: string
+  decisionMap: ZiweiHighRiskFeedbackDomDecisionMap,
+  projection: BrowserProbeDisplayProjection
 ): void {
-  coreMinorSanfangReviewReviewCount.textContent = String(
-    preflight.envelope.projectionBinding.reviewCount
-  );
-  coreMinorSanfangReviewOccurrenceCount.textContent = String(preflight.counts.total);
-  coreMinorSanfangReviewResolved.textContent = String(preflight.resolvedCount);
-  coreMinorSanfangReviewReviewer.textContent = preflight.reviewerAttributionComplete
-    ? `${preflight.envelope.reviewer.displayName}（自述，未核验）`
-    : "尚未提供";
-  setCoreMinorSanfangReviewBoundary(preflight);
-  coreMinorSanfangReviewPanel.dataset.preflightState = "valid";
-  coreMinorSanfangReviewItems.replaceChildren();
   const resolvedItems = preflight.envelope.items.filter(
     (item) => item.decision !== "unresolved"
   );
-  for (const item of resolvedItems) {
+  const displayItems = resolvedItems.map((item) => Object.freeze({
+    item,
+    selectedTradition: requireCoreMinorSanfangFeedbackDomDisplayText(
+      preflight,
+      decisionMap,
+      projection,
+      item.occurrenceId,
+      "selectedTradition",
+      item.selectedTradition
+    ),
+    decisionReason: requireCoreMinorSanfangFeedbackDomDisplayText(
+      preflight,
+      decisionMap,
+      projection,
+      item.occurrenceId,
+      "decisionReason",
+      item.decisionReason
+    ),
+    applicabilityConditions: requireCoreMinorSanfangFeedbackDomDisplayText(
+      preflight,
+      decisionMap,
+      projection,
+      item.occurrenceId,
+      "applicabilityConditions",
+      item.applicabilityConditions
+    ),
+    counterexamples: requireCoreMinorSanfangFeedbackDomDisplayText(
+      preflight,
+      decisionMap,
+      projection,
+      item.occurrenceId,
+      "counterexamples",
+      item.counterexamples
+    ),
+    revisionRequest: item.revisionRequest.trim()
+      ? requireCoreMinorSanfangFeedbackDomDisplayText(
+        preflight,
+        decisionMap,
+        projection,
+        item.occurrenceId,
+        "revisionRequest",
+        item.revisionRequest
+      )
+      : null,
+    additionalSourceHrefs: Object.freeze(
+      item.additionalSourceUrls.map(requireFeedbackNavigationHref)
+    )
+  }));
+  const fragment = document.createDocumentFragment();
+  for (const display of displayItems) {
+    const { item } = display;
     const card = document.createElement("li");
     card.className = "core-minor-sanfang-review-item";
     card.dataset.occurrenceId = item.occurrenceId;
@@ -1027,22 +1216,24 @@ function renderCoreMinorSanfangReviewPreflight(
     const details = document.createElement("dl");
     details.append(
       summaryPair("方向提案", coreMinorSanfangReviewOrientationLabel(item.orientationProposal)),
-      summaryPair("流派口径", item.selectedTradition || "尚未提供"),
-      summaryPair("审稿理由", item.decisionReason || "尚未提供"),
-      summaryPair("成立条件", item.applicabilityConditions || "尚未提供"),
-      summaryPair("反例提醒", item.counterexamples || "尚未提供"),
+      summaryPair("流派口径", display.selectedTradition),
+      summaryPair("审稿理由", display.decisionReason),
+      summaryPair("成立条件", display.applicabilityConditions),
+      summaryPair("反例提醒", display.counterexamples),
       summaryPair("候选反向约束", item.counterweight)
     );
-    if (item.revisionRequest) details.append(summaryPair("退修要求", item.revisionRequest));
+    if (display.revisionRequest !== null) {
+      details.append(summaryPair("退修要求", display.revisionRequest));
+    }
     details.append(renderCoreMinorSanfangFeedbackSourceRow(item, preflight));
-    if (item.additionalSourceUrls.length > 0) {
+    if (display.additionalSourceHrefs.length > 0) {
       const sourceRow = document.createElement("div");
       const term = document.createElement("dt");
       term.textContent = "补充来源";
       const description = document.createElement("dd");
-      item.additionalSourceUrls.forEach((sourceUrl, index) => {
+      display.additionalSourceHrefs.forEach((href, index) => {
         const link = document.createElement("a");
-        link.href = sourceUrl;
+        link.href = href;
         link.target = "_blank";
         link.rel = "noreferrer noopener";
         link.textContent = `来源 ${index + 1}`;
@@ -1053,11 +1244,23 @@ function renderCoreMinorSanfangReviewPreflight(
       details.append(sourceRow);
     }
     card.append(heading, details);
-    coreMinorSanfangReviewItems.append(card);
+    fragment.append(card);
   }
-  coreMinorSanfangReviewItems.hidden = resolvedItems.length === 0;
+
+  coreMinorSanfangReviewReviewCount.textContent = String(
+    preflight.envelope.projectionBinding.reviewCount
+  );
+  coreMinorSanfangReviewOccurrenceCount.textContent = String(preflight.counts.total);
+  coreMinorSanfangReviewResolved.textContent = String(preflight.resolvedCount);
+  coreMinorSanfangReviewReviewer.textContent = preflight.reviewerAttributionComplete
+    ? "已提供自述身份（未核验）"
+    : "尚未提供";
+  setCoreMinorSanfangReviewBoundary(preflight);
+  coreMinorSanfangReviewPanel.dataset.preflightState = "valid";
+  coreMinorSanfangReviewItems.replaceChildren(fragment);
+  coreMinorSanfangReviewItems.hidden = displayItems.length === 0;
   setCoreMinorSanfangReviewMessage(
-    `预检通过：${fileName} 严格绑定当前整盘 ${preflight.envelope.projectionBinding.reviewCount} 个目标宫复核与 ${preflight.counts.total} 项 occurrence；已裁决 ${preflight.resolvedCount} 项、未裁决 ${preflight.unresolvedCount} 项。身份仅自述且无签名；本次零网络、零规则写入、零浏览器存储写入。`,
+    `预检通过：所选 JSON 文件严格绑定当前整盘 ${preflight.envelope.projectionBinding.reviewCount} 个目标宫复核与 ${preflight.counts.total} 项 occurrence；已裁决 ${preflight.resolvedCount} 项、未裁决 ${preflight.unresolvedCount} 项。身份仅自述且无签名；本次零网络、零规则写入、零浏览器存储写入。`,
     "success"
   );
 }
@@ -1224,10 +1427,12 @@ async function clearWorkspace(): Promise<void> {
 function renderArtifact(
   artifact: BrowserArtifact,
   projection: BrowserProbeDisplayProjection,
+  egressDecisionMap: ZiweiHighRiskEgressDecisionMap,
   revision: ZiweiBrowserWorkspaceRevisionDraft | null
 ): void {
   const { displayPalaces, displaySummary } = projection;
   currentProjection = projection;
+  currentEgressDecisionMap = egressDecisionMap;
   bindCoreMinorSanfangReviewProjection(artifact, projection);
   board.querySelectorAll(".palace-cell").forEach((element) => element.remove());
   board.dataset.hasResult = "true";
@@ -1300,6 +1505,7 @@ function clearArtifact(invalidateView = true): void {
   currentArtifact = null;
   currentRevision = null;
   currentProjection = null;
+  currentEgressDecisionMap = null;
   resultMatchesInput = false;
   board.querySelectorAll(".palace-cell").forEach((element) => element.remove());
   delete board.dataset.hasResult;
@@ -1551,7 +1757,13 @@ function renderCoreMinorSanfangReviewSelection(
   coreMinorSanfangReviewFocusTitle.textContent =
     `${review.targetPalaceRoleLabel} · 当前证据浏览`;
   coreMinorSanfangReviewFocusSummary.textContent =
-    `${review.directStatement} ${review.readingOrderStatement}`;
+    `${requireZiweiEgressDisplayText(
+      "ziwei.candidate.core-minor-star.sanfang-review",
+      "derived_direct_statement",
+      review.reviewId,
+      "directStatement",
+      review.directStatement
+    )} ${review.readingOrderStatement}`;
   coreMinorSanfangReviewFocusCount.textContent = `${review.occurrences.length} 项 occurrence`;
   coreMinorSanfangReviewOccurrences.replaceChildren();
 
@@ -1594,7 +1806,13 @@ function renderCoreMinorSanfangReviewSelection(
       }
       const statement = document.createElement("p");
       statement.className = "core-minor-sanfang-review-occurrence-statement";
-      statement.textContent = occurrence.directStatement;
+      statement.textContent = requireZiweiEgressDisplayText(
+        "ziwei.candidate.core-minor-star.sanfang-review",
+        "derived_direct_statement",
+        `${review.reviewId}/${occurrence.occurrenceId}`,
+        "directStatement",
+        occurrence.directStatement
+      );
 
       const sourceDetail = document.createElement("details");
       const sourceSummary = document.createElement("summary");
@@ -1737,11 +1955,26 @@ function renderPalaceFirstSynthesisReview(
   domain.className = "palace-first-domain";
   const domainLabel = document.createElement("strong");
   domainLabel.textContent = "问题域候选：";
-  domain.append(domainLabel, review.palaceRoleContent.domainSummary);
+  domain.append(
+    domainLabel,
+    requireZiweiEgressDisplayText(
+      "ziwei.candidate.palace-role.base",
+      "forward_candidate",
+      review.palaceRoleContent.contentId,
+      "domainSummary",
+      review.palaceRoleContent.domainSummary
+    )
+  );
 
   const direct = document.createElement("p");
   direct.className = "palace-first-direct";
-  direct.textContent = review.directStatement;
+  direct.textContent = requireZiweiEgressDisplayText(
+    "ziwei.candidate.palace.first-synthesis",
+    "derived_direct_statement",
+    review.reviewId,
+    "directStatement",
+    review.directStatement
+  );
 
   const memberGrid = document.createElement("div");
   memberGrid.className = "palace-first-member-grid";
@@ -1956,7 +2189,13 @@ function renderPalaceFourPartSynthesisContent(
 
     const direct = document.createElement("p");
     direct.className = "palace-four-part-direct";
-    direct.textContent = part.directStatement;
+    direct.textContent = requireZiweiEgressDisplayText(
+      "ziwei.candidate.palace.four-part-synthesis",
+      "derived_direct_statement",
+      content.contentId,
+      `parts.${part.sectionId}.directStatement`,
+      part.directStatement
+    );
 
     const evidence = document.createElement("details");
     evidence.className = "palace-four-part-evidence";
@@ -1989,7 +2228,13 @@ function renderPalaceFourPartSynthesisContent(
         label.textContent = `${binding.relationLabel}${binding.palaceRoleLabel} · ${binding.starLabel}`
           + `${markers.length > 0 ? `〔${markers.join("·")}〕` : ""}`;
         const statement = document.createElement("span");
-        statement.textContent = binding.positionSummary;
+        statement.textContent = requireZiweiEgressDisplayText(
+          "ziwei.candidate.major-star.palace",
+          "forward_candidate",
+          binding.positionCandidateContentId,
+          "positionSummary",
+          binding.positionSummary
+        );
         item.append(label, statement);
         starList.append(item);
       }
@@ -2104,7 +2349,13 @@ function renderPalaceFourPartCoreMinorSupplement(
 
       const position = document.createElement("p");
       position.className = "palace-four-part-core-minor-position";
-      position.textContent = pair.palace.positionSummary;
+      position.textContent = requireZiweiEgressDisplayText(
+        "ziwei.candidate.core-minor-star.palace",
+        "forward_candidate",
+        pair.palace.contentId,
+        "positionSummary",
+        pair.palace.positionSummary
+      );
       const counterweight = document.createElement("p");
       counterweight.className = "palace-four-part-core-minor-counterweight";
       counterweight.textContent = pair.palace.counterweight;
@@ -2214,7 +2465,13 @@ function renderPalaceNatalTransformationReview(
 
   const summary = document.createElement("p");
   summary.className = "natal-transformation-summary";
-  summary.textContent = review.directStatement;
+  summary.textContent = requireZiweiEgressDisplayText(
+    "ziwei.candidate.natal-transformation.review",
+    "derived_direct_statement",
+    review.reviewId,
+    "directStatement",
+    review.directStatement
+  );
 
   const occurrenceGrid = document.createElement("div");
   occurrenceGrid.className = "natal-transformation-occurrence-grid";
@@ -2247,7 +2504,16 @@ function renderPalaceNatalTransformationReview(
     domain.className = "natal-transformation-domain";
     const domainLabel = document.createElement("strong");
     domainLabel.textContent = "问题域：";
-    domain.append(domainLabel, occurrence.palaceRoleContent.domainSummary);
+    domain.append(
+      domainLabel,
+      requireZiweiEgressDisplayText(
+        "ziwei.candidate.palace-role.base",
+        "forward_candidate",
+        occurrence.palaceRoleContent.contentId,
+        "domainSummary",
+        occurrence.palaceRoleContent.domainSummary
+      )
+    );
 
     const position = document.createElement("p");
     position.className = "natal-transformation-position";
@@ -2255,15 +2521,37 @@ function renderPalaceNatalTransformationReview(
     positionLabel.textContent = "原位置主线：";
     position.append(
       positionLabel,
-      occurrence.basePositionCandidate?.positionSummary
-        ?? "本星不是十四主星，当前不补写主星落宫位置主线。"
+      occurrence.basePositionCandidate
+        ? requireZiweiEgressDisplayText(
+          "ziwei.candidate.major-star.palace",
+          "forward_candidate",
+          occurrence.basePositionCandidate.contentId,
+          "positionSummary",
+          occurrence.basePositionCandidate.positionSummary
+        )
+        : "本星不是十四主星，当前不补写主星落宫位置主线。"
     );
 
     const modifier = document.createElement("p");
     modifier.className = "natal-transformation-modifier";
     const modifierLabel = document.createElement("strong");
-    modifierLabel.textContent = `通用方向 · ${occurrence.candidateContent.motionLabel}：`;
-    modifier.append(modifierLabel, occurrence.candidateContent.plainLanguage);
+    modifierLabel.textContent = `通用方向 · ${requireZiweiEgressDisplayText(
+      "ziwei.candidate.natal-transformation.base",
+      "forward_candidate",
+      occurrence.candidateContent.contentId,
+      "motionLabel",
+      occurrence.candidateContent.motionLabel
+    )}：`;
+    modifier.append(
+      modifierLabel,
+      requireZiweiEgressDisplayText(
+        "ziwei.candidate.natal-transformation.base",
+        "forward_candidate",
+        occurrence.candidateContent.contentId,
+        "plainLanguage",
+        occurrence.candidateContent.plainLanguage
+      )
+    );
 
     const palaceModifier = document.createElement("p");
     palaceModifier.className = "natal-transformation-palace-modifier";
@@ -2271,7 +2559,13 @@ function renderPalaceNatalTransformationReview(
     palaceModifierLabel.textContent = "落宫修正：";
     palaceModifier.append(
       palaceModifierLabel,
-      occurrence.palaceCandidateContent.positionSummary
+      requireZiweiEgressDisplayText(
+        "ziwei.candidate.natal-transformation.palace",
+        "forward_candidate",
+        occurrence.palaceCandidateContent.contentId,
+        "positionSummary",
+        occurrence.palaceCandidateContent.positionSummary
+      )
     );
 
     const counterweight = document.createElement("p");
@@ -2409,18 +2703,36 @@ function renderCoreMinorStarCandidate(
   const themes = document.createElement("ul");
   themes.className = "core-minor-theme-list";
   themes.setAttribute("aria-label", `${base.label}候选主题`);
-  for (const theme of base.coreThemes) {
+  for (let themeIndex = 0; themeIndex < base.coreThemes.length; themeIndex += 1) {
     const item = document.createElement("li");
-    item.textContent = theme;
+    item.textContent = requireZiweiEgressDisplayText(
+      "ziwei.candidate.core-minor-star.base",
+      "forward_candidate",
+      base.contentId,
+      `coreThemes[${themeIndex}]`,
+      base.coreThemes[themeIndex]!
+    );
     themes.append(item);
   }
 
   const plainLanguage = document.createElement("p");
   plainLanguage.className = "core-minor-summary";
-  plainLanguage.textContent = base.plainLanguage;
+  plainLanguage.textContent = requireZiweiEgressDisplayText(
+    "ziwei.candidate.core-minor-star.base",
+    "forward_candidate",
+    base.contentId,
+    "plainLanguage",
+    base.plainLanguage
+  );
   const position = document.createElement("p");
   position.className = "core-minor-position";
-  position.textContent = palaceCandidate.positionSummary;
+  position.textContent = requireZiweiEgressDisplayText(
+    "ziwei.candidate.core-minor-star.palace",
+    "forward_candidate",
+    palaceCandidate.contentId,
+    "positionSummary",
+    palaceCandidate.positionSummary
+  );
 
   const factState = document.createElement("p");
   factState.className = "core-minor-fact-state";
@@ -2594,15 +2906,27 @@ function renderMajorStarCandidate(
   const themes = document.createElement("ul");
   themes.className = "theme-list";
   themes.setAttribute("aria-label", `${candidate.label}候选主题`);
-  for (const theme of candidate.coreThemes) {
+  for (let themeIndex = 0; themeIndex < candidate.coreThemes.length; themeIndex += 1) {
     const item = document.createElement("li");
-    item.textContent = theme;
+    item.textContent = requireZiweiEgressDisplayText(
+      "ziwei.candidate.major-star.base",
+      "forward_candidate",
+      candidate.contentId,
+      `coreThemes[${themeIndex}]`,
+      candidate.coreThemes[themeIndex]!
+    );
     themes.append(item);
   }
 
   const plainLanguage = document.createElement("p");
   plainLanguage.className = "candidate-summary";
-  plainLanguage.textContent = candidate.plainLanguage;
+  plainLanguage.textContent = requireZiweiEgressDisplayText(
+    "ziwei.candidate.major-star.base",
+    "forward_candidate",
+    candidate.contentId,
+    "plainLanguage",
+    candidate.plainLanguage
+  );
   const balance = document.createElement("p");
   balance.className = "candidate-balance";
   const balanceLabel = document.createElement("strong");
@@ -2652,7 +2976,13 @@ function renderMajorStarCandidate(
 
     const palaceSummary = document.createElement("p");
     palaceSummary.className = "palace-candidate-summary";
-    palaceSummary.textContent = palaceCandidate.positionSummary;
+    palaceSummary.textContent = requireZiweiEgressDisplayText(
+      "ziwei.candidate.major-star.palace",
+      "forward_candidate",
+      palaceCandidate.contentId,
+      "positionSummary",
+      palaceCandidate.positionSummary
+    );
 
     const palaceReview = document.createElement("p");
     palaceReview.className = "palace-candidate-review";
@@ -2723,7 +3053,13 @@ function renderMajorStarSameStarSynthesisReview(
 
   const direct = document.createElement("p");
   direct.className = "same-star-synthesis-direct";
-  direct.textContent = synthesis.directStatement;
+  direct.textContent = requireZiweiEgressDisplayText(
+    "ziwei.candidate.major-star.same-star-synthesis",
+    "derived_direct_statement",
+    synthesis.synthesisId,
+    "directStatement",
+    synthesis.directStatement
+  );
 
   const readingOrder = document.createElement("p");
   readingOrder.className = "same-star-synthesis-order";
@@ -2789,7 +3125,13 @@ function renderMajorStarCombinationReview(
 
   const summary = document.createElement("p");
   summary.className = "combination-fact-summary";
-  summary.textContent = review.factSummary;
+  summary.textContent = requireZiweiEgressDisplayText(
+    "ziwei.candidate.major-star.combination-review",
+    "forward_candidate",
+    review.reviewId,
+    "factSummary",
+    review.factSummary
+  );
 
   const facts = document.createElement("dl");
   facts.className = "combination-facts";
@@ -3088,6 +3430,38 @@ function userFacingError(cause: unknown, fallback: string): string {
     TRANSACTION_ABORTED: "本次事务中止，没有部分写入。"
   };
   return messages[cause.code] ?? fallback;
+}
+
+function requireZiweiEgressDisplayText(
+  sourceSurfaceId: ZiweiHighRiskEgressSourceSurfaceId,
+  textRole: ZiweiHighRiskEgressIncludedTextRole,
+  sourceIdentity: string,
+  sourceField: string,
+  currentSourceText: string
+): string {
+  const decisionMap = currentEgressDecisionMap;
+  const projection = currentProjection;
+  if (!decisionMap || !projection || !isZiweiHighRiskEgressDecisionMap(decisionMap)) {
+    throw new Error("紫微候选文本出口缺少当前进程的私有 decision-map 品牌");
+  }
+  const decisionKey = createZiweiHighRiskEgressDecisionKey(
+    sourceSurfaceId,
+    textRole,
+    sourceIdentity,
+    sourceField
+  );
+  const entry = getZiweiHighRiskEgressDecisionEntry(
+    decisionMap,
+    projection,
+    decisionKey,
+    currentSourceText
+  );
+  if (!entry) {
+    throw new Error(
+      `紫微候选文本出口缺少固定字段映射：${sourceSurfaceId}/${sourceIdentity}/${sourceField}`
+    );
+  }
+  return entry.displayText;
 }
 
 function requireElement<T extends HTMLElement>(id: string): T {

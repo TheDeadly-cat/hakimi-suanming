@@ -1,0 +1,184 @@
+{
+  "activeAdmissionEffect": "none",
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertIdentityQualificationIndependenceEstablished": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "highRiskClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false,
+    "safeToPublish": false
+  },
+  "browserObservationDrift": {
+    "browserRerunPerformedByThisReceipt": false,
+    "currentBrowserRuntimeEvidenceEstablished": false,
+    "failureClass": "SOURCE_GRAPH_MISMATCH",
+    "historicalBrowserEvidenceMayBePromotedAsCurrent": false,
+    "historicalChild": {
+      "childId": "hakimi.ziwei.same-artifact-browser-observation/1.0.0",
+      "observationDigest": "792bba4b3c5307fe3bc08aed849eaeb092787eb9e171e09a9e82b3be4dd71a1b",
+      "path": "content/system-admission/ziwei-same-artifact-browser-observation-child.v1.0.0.json",
+      "rawBytes": 37337,
+      "rawSha256": "7cd6365d6f6ad18f0460418e5b745da0f0e68761cea361886729e55563e4db16"
+    },
+    "historicalChildMechanicallyCurrent": false,
+    "historicalChildPreservedUnmodified": true,
+    "uniqueBlockerClaimed": false
+  },
+  "candidateId": "hakimi.ziwei.expert-promotion-boundary.identity-drift-receipt-candidate/1.0.0",
+  "candidateStatus": "candidate_only_single_source_five_component_and_browser_graph_drift_zero_admission_effect",
+  "createdAt": "2026-09-01T07:30:00.000Z",
+  "doesNotEstablish": [
+    "real_expert_identity_qualification_independence_or_opinion",
+    "expert_truth_or_content_truth",
+    "current_full_ziwei_domain_manifest",
+    "current_ziwei_browser_runtime_evidence",
+    "manifest_rebind_resign_or_owner_acceptance",
+    "source_binding_or_three_layer_rights",
+    "rights_legal_conclusion_or_redistribution_authorization",
+    "formal_admission_or_domain_authority",
+    "web_pwa_service_worker_or_public_host_evidence",
+    "cross_file_atomicity_mutation_epoch_interval_integrity_or_aba_exclusion",
+    "release_readiness_deployment_rollback_or_public_release_authorization",
+    "bazi_authority_or_legacy_v13_schema_inheritance"
+  ],
+  "gateSummary": {
+    "admissionGatesRequired": 8,
+    "admissionGatesSatisfied": 0,
+    "bindingFrozenVerified": 0,
+    "bindingRequired": 27,
+    "expertReviewBundleComplete": false,
+    "externalVerifiedExpertReceiptsRequired": 2,
+    "externalVerifiedExpertReceiptsVerified": 0,
+    "independentExpertReviewsVerified": 0,
+    "independentExpertsRequired": 2,
+    "releaseEvidenceComplete": false,
+    "rightsBundleComplete": false,
+    "sourceBundleComplete": false
+  },
+  "manifestDrift": {
+    "changedComponentCount": 5,
+    "changedComponents": [
+      {
+        "componentId": "execution_rules",
+        "currentCandidateDigest": "2f1800d9878ae45cbc7591058b11345c0e31f66c97a987998e767b67cd7fc05d",
+        "persistedDigest": "501f2b2a97a3986f78e9a9d73581410381c560ff5599be9629ea70e332ce6c17"
+      },
+      {
+        "componentId": "interpretation_rules",
+        "currentCandidateDigest": "35aa0b900592397e753d8e693a3dbd522b610c07630c3285c7804da680a44c12",
+        "persistedDigest": "7579a19bde8b936de2682e0d38e87b0d1e4d9a9ce1742f82f9efb9b0b29bddff"
+      },
+      {
+        "componentId": "input_policy",
+        "currentCandidateDigest": "10e7c444f9c04a24c4afedfffb73cabe8b049ed3512779c7310512ca824cbf83",
+        "persistedDigest": "dff5a8c23adfdf3a87940f6e382aade2a1afe922cff13fd70750eb84b634c958"
+      },
+      {
+        "componentId": "fact_contract",
+        "currentCandidateDigest": "0ad26a351c9f4774314e8a8d735fa8646e5a79ea4a81d656e61a4e3d490de386",
+        "persistedDigest": "394eb11e7cc2b8b21fad894ea09408b087a1551d7043d4f5d51d0b92f798f32e"
+      },
+      {
+        "componentId": "high_risk_policy",
+        "currentCandidateDigest": "fd694af774917da59a4a2575bc2f31d660c17f18bf3f6b64ee185d9f656a8bd9",
+        "persistedDigest": "c2982c9987fd896deb5d2d39f1d24d192d6a877eb911ad4fd8550b0dace5d24d"
+      }
+    ],
+    "currentCandidateManifestDigest": "24ddffd0caebbce4f800154ad70fb24e441e67b3580785b798044b0393d70b66",
+    "currentCandidateManifestPersisted": false,
+    "fiveIndependentSemanticChangesClaimed": false,
+    "historicalManifest": {
+      "manifestDigest": "f16f4e023248d4362fe42b28e34fd054a3451980d437ca9c83b6bdfb053fb34e",
+      "manifestId": "hakimi.ziwei-doushu.isolated-engineering-domain-release-manifest/2.0.0",
+      "path": "content/domain-release/ziwei-doushu.engineering-draft.v0.1.0.manifest.v2.json",
+      "rawBytes": 17968,
+      "rawSha256": "f886e95815109d670b65628db403a2fb86e69e5af4088466de1330a15695a867"
+    },
+    "historicalManifestMechanicallyCurrent": false,
+    "historicalManifestPreservedUnmodified": true,
+    "manifestRebindOrResignPerformed": false,
+    "oneSourceIdentityFansOutToFiveComponentDigests": true,
+    "unchangedComponentCount": 4,
+    "unchangedComponentIds": [
+      "source_bundle",
+      "rights_bundle",
+      "expert_review_bundle",
+      "report_contract"
+    ],
+    "uniqueBlockerClaimed": false
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "crossFileAtomicSnapshot": false,
+    "endpointObservationOnly": true,
+    "engineeringIdentityDriftEstablished": true,
+    "intervalMutationExcludedAcrossFiles": false,
+    "mutationEpochAvailable": false,
+    "mutationEpochReceipt": null,
+    "receiptDigestIsDigitalSignature": false,
+    "sameHeldBufferHashAndParsePerJsonArtifact": true
+  },
+  "ownerDecisionBoundary": {
+    "browserEvidenceRerunAuthorizedByThisReceipt": false,
+    "formalAdmissionPromotionAuthorized": false,
+    "manifestRebindAuthorized": false,
+    "manifestResignAuthorized": false,
+    "ownerAcceptanceVerified": false,
+    "ownerDecisionsRecorded": 0
+  },
+  "receiptDigest": "09d86df6f23d4c1cbc0a76df359dd0738f793de5bdf84e4784b0620a3a6f05bb",
+  "recordType": "ziwei_expert_promotion_boundary_identity_drift_receipt_candidate",
+  "releaseGovernance": {
+    "migrationId": null,
+    "projectDefaultContext": {
+      "inheritedByZiweiProductIdentity": false,
+      "migrationId": null,
+      "releaseIdentity": "legacy-v13",
+      "targetSchema": 13
+    },
+    "releaseIdentity": null,
+    "targetSchema": null
+  },
+  "runtimeTrustBoundary": {
+    "cliOutputTrustedAttestation": false,
+    "hiddenPreloadExcluded": false,
+    "loaderIdentityEstablished": false,
+    "mechanicalResultAssumesNoArbitraryPreEvaluationCodeExecution": true,
+    "nodeRuntimeIdentityEstablished": false,
+    "runtimeLauncherIdentityEstablished": false
+  },
+  "schemaVersion": "1.0.0",
+  "scope": {
+    "expertPromotionBoundary": {
+      "expertDoubleReviewedProvenanceReservedUntilExternalVerifiedReceipt": true,
+      "expertReviewedRuleReservedUntilExternalVerifiedReceipt": true,
+      "externalVerifiedExpertReceiptSchemaIntegrated": false,
+      "localDoubleReviewedMetadataMayRemainStructural": true,
+      "localReviewerIdsEstablishRealIdentityQualificationOrIndependence": false,
+      "verifiedExpertReceiptCount": 0
+    },
+    "focusedTestSource": {
+      "currentRawBytes": 30647,
+      "currentRawSha256": "5cd0a7eef6c6522c5b6cf641d0340fe4e2618d02706e8e73cddcee85251ab74e",
+      "path": "packages/ziwei-doushu-contracts-draft/src/index.test.ts",
+      "testsExecutedByThisReceipt": false
+    },
+    "productSystemId": "ziwei-doushu",
+    "sourceChange": {
+      "currentRawBytes": 46181,
+      "currentRawSha256": "2a9555dba509873e6c436dcdc9121fcd90e943d880984581fbff865feca15685",
+      "path": "packages/ziwei-doushu-contracts-draft/src/index.ts",
+      "persistedRawBytes": 45329,
+      "persistedRawSha256": "0474abe7170f17352efd9b0d0f2735f2edbec049bb331441b7bd77ff2b79acc0",
+      "uniqueRootSourceClaimedForObservedComponentFanout": true
+    },
+    "systemId": "ziwei"
+  }
+}

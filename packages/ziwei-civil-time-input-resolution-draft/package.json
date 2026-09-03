@@ -1,0 +1,21 @@
+{
+  "name": "@hakimi/ziwei-civil-time-input-resolution-draft",
+  "version": "0.0.0-draft.0",
+  "private": true,
+  "type": "module",
+  "exports": {},
+  "x-hakimi-isolated-draft": {
+    "schemaVersion": 1,
+    "kind": "adapter",
+    "systemId": "ziwei-doushu",
+    "runtime": "node-test-only",
+    "productionImport": "forbidden",
+    "allowedDraftDependencies": [
+      "@hakimi/ziwei-doushu-contracts-draft"
+    ]
+  },
+  "dependencies": {
+    "@hakimi/tzdb-core": "0.1.0",
+    "@hakimi/ziwei-doushu-contracts-draft": "0.0.0-draft.0"
+  }
+}

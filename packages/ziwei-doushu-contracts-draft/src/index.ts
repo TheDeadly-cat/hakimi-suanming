@@ -469,37 +469,57 @@ export const ziweiNatalFactsDraftSchema = z.strictObject({
   majorPeriods: z.array(ziweiMajorPeriodFactDraftSchema).length(12)
 });
 
-export const ziweiFixtureEvidenceDraftSchema = z.strictObject({
-  truthStatus: z.enum([
-    "synthetic_contract_fixture",
-    "official_calendar",
-    "expert_reviewed_rule",
-    "upstream_regression",
-    "differential_diagnostic"
-  ]),
-  claimScopes: z.array(z.enum([
-    "calendar_resolution",
-    "rule_profile",
-    "chart_structure",
-    "adapter_behavior",
-    "fixture_structure"
-  ])).min(1).max(4),
-  productionEligible: z.literal(false),
-  expertTruthClaimed: z.literal(false),
-  note: z.string().trim().min(1).max(1_000)
-});
+export const ziweiFixtureEvidenceDraftSchema = z
+  .strictObject({
+    truthStatus: z.enum([
+      "synthetic_contract_fixture",
+      "official_calendar",
+      "expert_reviewed_rule",
+      "upstream_regression",
+      "differential_diagnostic"
+    ]),
+    claimScopes: z.array(z.enum([
+      "calendar_resolution",
+      "rule_profile",
+      "chart_structure",
+      "adapter_behavior",
+      "fixture_structure"
+    ])).min(1).max(4),
+    productionEligible: z.literal(false),
+    expertTruthClaimed: z.literal(false),
+    note: z.string().trim().min(1).max(1_000)
+  })
+  .superRefine((value, context) => {
+    if (value.truthStatus === "expert_reviewed_rule") {
+      context.addIssue({
+        code: "custom",
+        path: ["truthStatus"],
+        message: "expert_reviewed_rule 是保留提升态；在外部机器验真的专家身份、资质、独立性与意见收据接入前必须失败关闭"
+      });
+    }
+  });
 
-export const ziweiFactProvenanceDraftSchema = z.strictObject({
-  factFamily: z.enum(["calendar", "palaces", "natal_stars", "transformations", "major_periods"]),
-  fieldPath: z.string().regex(/^facts(?:\.[a-zA-Z0-9_-]+|\[\d+\])+$/).max(300),
-  algorithmId: stableIdSchema,
-  sourceIds: z.array(sourceIdSchema).min(1).max(50),
-  verificationStatus: z.enum([
-    "engineering_fixture_only",
-    "official_calendar_checked",
-    "expert_double_reviewed"
-  ])
-});
+export const ziweiFactProvenanceDraftSchema = z
+  .strictObject({
+    factFamily: z.enum(["calendar", "palaces", "natal_stars", "transformations", "major_periods"]),
+    fieldPath: z.string().regex(/^facts(?:\.[a-zA-Z0-9_-]+|\[\d+\])+$/).max(300),
+    algorithmId: stableIdSchema,
+    sourceIds: z.array(sourceIdSchema).min(1).max(50),
+    verificationStatus: z.enum([
+      "engineering_fixture_only",
+      "official_calendar_checked",
+      "expert_double_reviewed"
+    ])
+  })
+  .superRefine((value, context) => {
+    if (value.verificationStatus === "expert_double_reviewed") {
+      context.addIssue({
+        code: "custom",
+        path: ["verificationStatus"],
+        message: "expert_double_reviewed 是保留提升态；在外部机器验真的专家身份、资质、独立性与意见收据接入前必须失败关闭"
+      });
+    }
+  });
 
 export const ziweiCalculationReceiptDraftSchema = z.strictObject({
   receiptVersion: z.literal("ziwei-calculation-receipt/0.3-draft"),
@@ -803,14 +823,14 @@ export const ziweiNatalFixtureDraftSchema = z
         context.addIssue({
           code: "custom",
           path: ["evidence", "claimScopes"],
-          message: "专家规则复核只能声明已签署的 rule_profile 范围，不能替历法、整盘结构或适配器行为背书"
+          message: "保留的专家规则态只能声明已签署的 rule_profile 范围，不能替历法、整盘结构或适配器行为背书"
         });
       }
       if (ruleReviewers.size < 2) {
         context.addIssue({
           code: "custom",
           path: ["ruleSnapshot", "review", "attestations"],
-          message: "专家规则样例必须有至少两名不同审核者明确签署 rule_profile 范围"
+          message: "保留的专家规则态还必须有至少两个不同本地复核标识签署 rule_profile；这本身不建立现实专家身份或独立性"
         });
       }
     }
