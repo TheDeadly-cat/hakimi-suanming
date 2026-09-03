@@ -1,0 +1,427 @@
+{
+  "activeAdmissionEffect": "none",
+  "artifactBindings": [
+    {
+      "path": "content/system-admission/four-system-current-status-observation-child.v2.6.0.json",
+      "rawBytes": 18673,
+      "rawSha256": "7e82402069b9a761cd23a8d428b74f389754bd1e30654428fc5bd965bdf57dd5",
+      "role": "current_direct_predecessor_four_system_current_status_observation_child_v2_6",
+      "semanticDigest": "72f9cb10f46025662730bd2a4d12c1d7ec8796109350358c815a97c492b07ee7",
+      "semanticDigestField": "childDigest"
+    },
+    {
+      "path": "content/domain-release/vedic-astrology.engineering-draft.v0.1.0.manifest.v2.json",
+      "rawBytes": 47107,
+      "rawSha256": "ad69843f8e9ec9f1f3f5a446c2107389753100fe371fdbcef7202cbdb39639c4",
+      "role": "vedic_current_parent_declared_selected_path_engineering_manifest_v2",
+      "semanticDigest": "7d4fcf50e4fdfa513611ace4331abf2079b1faf433f0a1c58e60603a9584a347",
+      "semanticDigestField": "manifestDigest"
+    }
+  ],
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "highRiskClaimsAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseEvidenceComplete": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false
+  },
+  "childDigest": "2dde1ccaf92d3437da13dc0ebcd2153fa11724b0be5bfed832ba519b9d5b9637",
+  "childId": "hakimi.system-admission/four-system-current-status-observation-child/2.7.0",
+  "createdAt": "2026-09-01T11:11:59.397Z",
+  "crossSystemPolicy": {
+    "authorityInheritanceAllowed": false,
+    "autoPersonMergeAllowed": false,
+    "conceptEquivalenceInferenceAllowed": false,
+    "factsFrozenForFormalComparison": false,
+    "formalComparisonAuthorized": false,
+    "generatedModelWinnerSelectionAllowed": false,
+    "majorityVoteAllowed": false,
+    "mode": "independent_status_observation_only",
+    "opinionAveragingAllowed": false,
+    "scoringAllowed": false,
+    "weightingAllowed": false
+  },
+  "currentStatusSummary": {
+    "allSystemsCurrentFullDomainManifestMechanicallyVerified": false,
+    "bindingFrozenVerifiedBySystem": {
+      "bazi": "0/12",
+      "vedic": "0/38",
+      "western": "0/28",
+      "ziwei": "0/27"
+    },
+    "independentExpertReviewsVerifiedBySystem": {
+      "bazi": "0/2",
+      "vedic": "0/2",
+      "western": "0/2",
+      "ziwei": "0/2"
+    },
+    "systemsDomainAuthorityAuthorized": 0,
+    "systemsFormallyAdmitted": 0,
+    "systemsPublicReleaseAuthorized": 0,
+    "systemsReleaseReady": 0,
+    "systemsRequired": 4,
+    "systemsWithCurrentEndpointMechanicallyVerified": 4,
+    "totalAdmissionGatesRequired": 32,
+    "totalAdmissionGatesSatisfied": 0
+  },
+  "doesNotEstablish": [
+    "formal_central_registry_supersession_or_owner_acceptance",
+    "all_four_current_full_domain_manifests",
+    "current_ziwei_formal_domain_manifest_or_production_browser_runtime_evidence",
+    "formal_admission_for_any_system",
+    "content_truth_or_domain_authority_for_any_system",
+    "real_expert_identity_qualification_independence_opinion_or_truth",
+    "source_body_exact_quote_frozen_binding_or_three_layer_rights",
+    "rights_or_legal_conclusion_or_redistribution_authorization",
+    "cross_system_input_fact_rule_or_concept_equivalence",
+    "formal_cross_system_comparison_scoring_weighting_or_arbitration",
+    "web_pwa_service_worker_public_host_or_product_runtime_evidence",
+    "cross_file_atomicity_mutation_epoch_interval_integrity_or_aba_exclusion",
+    "release_readiness_deployment_rollback_or_public_release_authorization"
+  ],
+  "evidenceLedgerSeparation": [
+    "engineering_evidence",
+    "browser_and_runtime_evidence",
+    "content_truth",
+    "expert_truth",
+    "rights_and_legal_judgment",
+    "release_readiness",
+    "public_release_authorization"
+  ],
+  "lineage": {
+    "otherSystemCanonicalCopiesPreserved": [
+      "bazi",
+      "ziwei-doushu",
+      "western-astrology"
+    ],
+    "parent": {
+      "path": "content/system-admission/four-system-current-status-observation-child.v2.6.0.json",
+      "rawBytes": 18673,
+      "rawSha256": "7e82402069b9a761cd23a8d428b74f389754bd1e30654428fc5bd965bdf57dd5",
+      "role": "current_direct_predecessor_four_system_current_status_observation_child_v2_6",
+      "semanticDigest": "72f9cb10f46025662730bd2a4d12c1d7ec8796109350358c815a97c492b07ee7",
+      "semanticDigestField": "childDigest"
+    },
+    "parentBacklinkToThisChildPresent": false,
+    "parentMechanicallyCurrent": true,
+    "parentOverwritten": false,
+    "parentPreservedUnmodified": true,
+    "parentPrivateBrandLoaderRecursivelyReverifiedItsUpstreams": true,
+    "uniqueBlockerClaimed": false,
+    "vedicBrowserRuntimeEvidenceUnchangedAtIsolatedCivilTimeFactOnly10Of10": true,
+    "vedicCurrentEngineeringManifestFlagRemainsTrue": true,
+    "vedicCurrentFullDomainManifestFlagRemainsFalse": true,
+    "vedicEngineeringManifest": {
+      "path": "content/domain-release/vedic-astrology.engineering-draft.v0.1.0.manifest.v2.json",
+      "rawBytes": 47107,
+      "rawSha256": "ad69843f8e9ec9f1f3f5a446c2107389753100fe371fdbcef7202cbdb39639c4",
+      "role": "vedic_current_parent_declared_selected_path_engineering_manifest_v2",
+      "semanticDigest": "7d4fcf50e4fdfa513611ace4331abf2079b1faf433f0a1c58e60603a9584a347",
+      "semanticDigestField": "manifestDigest"
+    },
+    "vedicEngineeringManifestMechanicallyCurrent": true,
+    "vedicEngineeringManifestPrivateBrandLoaderRecursivelyReverifiedItsUpstreams": true,
+    "vedicManifestEndpointReplacedFromV1ToV2": true
+  },
+  "observationBoundary": {
+    "abaExcluded": false,
+    "childDigestIsDigitalSignature": false,
+    "crossFileAtomicSnapshot": false,
+    "exactPersistedRawIdentitiesVerified": 2,
+    "intervalMutationExcludedAcrossFiles": false,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "pointInTimeOnly": true,
+    "sameHeldBufferHashAndParsePerJsonArtifact": true,
+    "upstreamPrivateBrandsVerified": 2
+  },
+  "projectReleaseGovernanceContext": {
+    "activeLine": "legacy-v13",
+    "expertClaimsAuthorized": false,
+    "inheritedByZiweiWesternOrVedicProductIdentity": false,
+    "migrationId": null,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochBoundaryRequired": true,
+    "mutationEpochReceipt": null,
+    "projectContextOnly": true,
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "recordType": "four_system_current_status_observation_child_v2_7",
+  "runtimeTrustBoundary": {
+    "cliOutputTrustedAttestation": false,
+    "hiddenPreloadExcluded": false,
+    "loaderIdentityEstablished": false,
+    "mechanicalResultAssumesNoArbitraryPreEvaluationCodeExecution": true,
+    "nodeRuntimeIdentityEstablished": false,
+    "runtimeLauncherIdentityEstablished": false
+  },
+  "schemaVersion": "2.7.0",
+  "status": "append_only_non_atomic_current_status_observation_child_zero_admission_effect",
+  "systems": [
+    {
+      "authorityBoundary": {
+        "contentTruthEstablished": false,
+        "domainAuthorityAuthorized": false,
+        "expertClaimsAuthorized": false,
+        "expertTruthEstablished": false,
+        "formalAdmissionAuthorized": false,
+        "highRiskClaimsAuthorized": false,
+        "publicDeploymentAuthorized": false,
+        "publicReleaseAuthorized": false,
+        "releaseEvidenceComplete": false,
+        "releaseReady": false,
+        "rightsLegalConclusionEstablished": false
+      },
+      "contractSystemId": "bazi",
+      "currentEvidence": {
+        "activeAdmissionEffect": "none",
+        "browserRuntimeEvidence": "not_assessed_by_this_child",
+        "currentEndpointMechanicallyVerified": true,
+        "currentEngineeringManifestMechanicallyVerified": false,
+        "currentFullDomainManifestMechanicallyVerified": false,
+        "endpoints": [
+          {
+            "path": "content/system-admission/bazi-current-machine-identity-successor.v1.0.0.json",
+            "rawBytes": 30801,
+            "rawSha256": "9360655d17b23ea8c7c68e44af3177f8ccc72b350046d4f7dca5f8a8c83b717d",
+            "role": "current_bazi_machine_identity_successor",
+            "semanticDigest": "f7ae6009bea62156a82de86ee0be3c353b022035194881001a913066ed8c4b05",
+            "semanticDigestField": "receiptDigest"
+          }
+        ]
+      },
+      "currentStatus": "current_machine_identity_successor_full_component_file_set_observed_formal_domain_manifest_not_current_expert_zero_instance",
+      "gateSummary": {
+        "admissionGatesRequired": 8,
+        "admissionGatesSatisfied": 0,
+        "bindingFrozenVerified": 0,
+        "bindingRequired": 12,
+        "independentExpertReviewsVerified": 0,
+        "independentExpertsRequired": 2,
+        "releaseEvidenceComplete": false
+      },
+      "productBoundary": {
+        "baziAuthorityInherited": false,
+        "independentSystemBoundaryPreserved": true,
+        "mainApplicationIntegrated": false,
+        "migrationId": null,
+        "releaseIdentity": "legacy-v13",
+        "targetSchema": 13
+      },
+      "productSystemId": "bazi"
+    },
+    {
+      "authorityBoundary": {
+        "contentTruthEstablished": false,
+        "domainAuthorityAuthorized": false,
+        "expertClaimsAuthorized": false,
+        "expertTruthEstablished": false,
+        "formalAdmissionAuthorized": false,
+        "highRiskClaimsAuthorized": false,
+        "publicDeploymentAuthorized": false,
+        "publicReleaseAuthorized": false,
+        "releaseEvidenceComplete": false,
+        "releaseReady": false,
+        "rightsLegalConclusionEstablished": false
+      },
+      "contractSystemId": "ziwei",
+      "currentEvidence": {
+        "activeAdmissionEffect": "none",
+        "browserRuntimeEvidence": "isolated_same_artifact_edge_chrome_28_of_28_current_source_graph_not_web_pwa_or_product_runtime",
+        "currentEndpointMechanicallyVerified": true,
+        "currentEngineeringManifestMechanicallyVerified": false,
+        "currentFullDomainManifestMechanicallyVerified": false,
+        "endpoints": [
+          {
+            "path": "content/system-admission/ziwei-expert-promotion-boundary-identity-drift-receipt-candidate.v1.0.0.json",
+            "rawBytes": 7905,
+            "rawSha256": "c6728e943d713cf63be2b1d7e01d5170cf2a2b7b308e332abbbc53ff1ab37348",
+            "role": "current_ziwei_expert_promotion_boundary_identity_drift_receipt_candidate",
+            "semanticDigest": "09d86df6f23d4c1cbc0a76df359dd0738f793de5bdf84e4784b0620a3a6f05bb",
+            "semanticDigestField": "receiptDigest"
+          },
+          {
+            "path": "content/system-admission/ziwei-same-artifact-browser-observation-child.v1.1.0.json",
+            "rawBytes": 57541,
+            "rawSha256": "da3c5da3b0e587e826235af9401df2b5b48618c7e37f89ede3d5a5deb7ed80c5",
+            "role": "current_ziwei_same_artifact_browser_observation_child_v1_1",
+            "semanticDigest": "08d717d62f84dc3146069d387904aa7e8626cca2f12594154b5e5002b2e355e7",
+            "semanticDigestField": "childDigest"
+          }
+        ]
+      },
+      "currentStatus": "current_expert_promotion_boundary_identity_drift_receipt_plus_current_isolated_same_artifact_browser_child_formal_manifest_stale",
+      "gateSummary": {
+        "admissionGatesRequired": 8,
+        "admissionGatesSatisfied": 0,
+        "bindingFrozenVerified": 0,
+        "bindingRequired": 27,
+        "independentExpertReviewsVerified": 0,
+        "independentExpertsRequired": 2,
+        "releaseEvidenceComplete": false
+      },
+      "productBoundary": {
+        "baziAuthorityInherited": false,
+        "independentSystemBoundaryPreserved": true,
+        "mainApplicationIntegrated": false,
+        "migrationId": null,
+        "releaseIdentity": null,
+        "targetSchema": null
+      },
+      "productSystemId": "ziwei-doushu"
+    },
+    {
+      "authorityBoundary": {
+        "contentTruthEstablished": false,
+        "domainAuthorityAuthorized": false,
+        "expertClaimsAuthorized": false,
+        "expertTruthEstablished": false,
+        "formalAdmissionAuthorized": false,
+        "highRiskClaimsAuthorized": false,
+        "publicDeploymentAuthorized": false,
+        "publicReleaseAuthorized": false,
+        "releaseEvidenceComplete": false,
+        "releaseReady": false,
+        "rightsLegalConclusionEstablished": false
+      },
+      "contractSystemId": "western",
+      "currentEvidence": {
+        "activeAdmissionEffect": "none",
+        "browserRuntimeEvidence": "not_assessed_by_this_child",
+        "currentEndpointMechanicallyVerified": true,
+        "currentEngineeringManifestMechanicallyVerified": true,
+        "currentFullDomainManifestMechanicallyVerified": false,
+        "endpoints": [
+          {
+            "path": "content/system-admission/western-independent-productization-version-aware-observation-child.v1.1.0.json",
+            "rawBytes": 12692,
+            "rawSha256": "140bed89a638deb970e1a60d3ffcbc96eebef509bd14bd692726b8c561d13593",
+            "role": "current_western_version_aware_observation_child_v1_1",
+            "semanticDigest": "664bdbddd48bc0205eb6dba4cf923903a78d35e6d63ab29ca8e7de3faa5975af",
+            "semanticDigestField": "candidateDigest"
+          },
+          {
+            "path": "content/system-admission/western-source-and-manifest-identity-drift-receipt-candidate.v1.0.0.json",
+            "rawBytes": 12537,
+            "rawSha256": "09feb585528a6d390afda19a10d967ff2356714cbb00d4eef3462fe267d01c26",
+            "role": "current_append_only_source_and_manifest_identity_drift_receipt_candidate",
+            "semanticDigest": "f422b6b1bd61e97631b5ce5719877d0e17525b18cdfd7cc7d1c3257e85884097",
+            "semanticDigestField": "receiptDigest"
+          },
+          {
+            "path": "content/domain-release/western-astrology.engineering-draft.v0.1.0.manifest.v2.json",
+            "rawBytes": 72472,
+            "rawSha256": "a4ba9ca6504e5d386be5302c28a498d95b172a3904c5ddc5f90a8adcc5951f27",
+            "role": "current_western_three_selected_package_roots_machine_identity_manifest_v2",
+            "semanticDigest": "4ed66eeae3d0f7a45dcb850a67dfb6407b695a2f6ecb58eac8b0dd1748db632d",
+            "semanticDigestField": "manifestDigest"
+          }
+        ]
+      },
+      "currentStatus": "current_three_selected_package_roots_machine_identity_manifest_plus_source_and_manifest_drift_receipt_formal_source_and_historical_domain_manifest_stale",
+      "gateSummary": {
+        "admissionGatesRequired": 8,
+        "admissionGatesSatisfied": 0,
+        "bindingFrozenVerified": 0,
+        "bindingRequired": 28,
+        "independentExpertReviewsVerified": 0,
+        "independentExpertsRequired": 2,
+        "releaseEvidenceComplete": false
+      },
+      "productBoundary": {
+        "baziAuthorityInherited": false,
+        "independentSystemBoundaryPreserved": true,
+        "mainApplicationIntegrated": false,
+        "migrationId": null,
+        "releaseIdentity": null,
+        "targetSchema": null
+      },
+      "productSystemId": "western-astrology"
+    },
+    {
+      "authorityBoundary": {
+        "contentTruthEstablished": false,
+        "domainAuthorityAuthorized": false,
+        "expertClaimsAuthorized": false,
+        "expertTruthEstablished": false,
+        "formalAdmissionAuthorized": false,
+        "highRiskClaimsAuthorized": false,
+        "publicDeploymentAuthorized": false,
+        "publicReleaseAuthorized": false,
+        "releaseEvidenceComplete": false,
+        "releaseReady": false,
+        "rightsLegalConclusionEstablished": false
+      },
+      "contractSystemId": "vedic",
+      "currentEvidence": {
+        "activeAdmissionEffect": "none",
+        "browserRuntimeEvidence": "isolated_civil_time_fact_only_edge_chrome_10_of_10_not_web_pwa_or_product_runtime",
+        "currentEndpointMechanicallyVerified": true,
+        "currentEngineeringManifestMechanicallyVerified": true,
+        "currentFullDomainManifestMechanicallyVerified": false,
+        "endpoints": [
+          {
+            "path": "content/system-admission/vedic-independent-productization-version-aware-observation-child.v1.2.0.json",
+            "rawBytes": 16272,
+            "rawSha256": "78b4f27c24182a73ab9da86065829990e053834f49785d394878ca7ad79e2845",
+            "role": "current_vedic_version_aware_observation_child_v1_2",
+            "semanticDigest": "462498245b533db031ed25a1a8808e4e77dc2ea92f17154013a04d487ebdb171",
+            "semanticDigestField": "candidateDigest"
+          },
+          {
+            "path": "content/domain-release/vedic-astrology.engineering-draft.v0.1.0.manifest.v2.json",
+            "rawBytes": 47107,
+            "rawSha256": "ad69843f8e9ec9f1f3f5a446c2107389753100fe371fdbcef7202cbdb39639c4",
+            "role": "vedic_current_parent_declared_selected_path_engineering_manifest_v2",
+            "semanticDigest": "7d4fcf50e4fdfa513611ace4331abf2079b1faf433f0a1c58e60603a9584a347",
+            "semanticDigestField": "manifestDigest"
+          },
+          {
+            "path": "content/system-admission/vedic-civil-time-same-artifact-browser-observation-child.v1.0.0.json",
+            "rawBytes": 41077,
+            "rawSha256": "fef063bb880ca0f65aa9fa10ac65cd5d6733216c1aa83faaa05fc536e7431710",
+            "role": "current_vedic_isolated_civil_time_same_artifact_browser_child",
+            "semanticDigest": "795638cbe93459ad598c2a138f627c2ba4a9db28b4bebd528e78d934083f3f6e",
+            "semanticDigestField": "observationDigest"
+          }
+        ]
+      },
+      "currentStatus": "current_observation_plus_engineering_manifest_plus_isolated_fact_browser_child_no_product_identity",
+      "gateSummary": {
+        "admissionGatesRequired": 8,
+        "admissionGatesSatisfied": 0,
+        "bindingFrozenVerified": 0,
+        "bindingRequired": 38,
+        "independentExpertReviewsVerified": 0,
+        "independentExpertsRequired": 2,
+        "releaseEvidenceComplete": false
+      },
+      "productBoundary": {
+        "baziAuthorityInherited": false,
+        "independentSystemBoundaryPreserved": true,
+        "mainApplicationIntegrated": false,
+        "migrationId": null,
+        "releaseIdentity": null,
+        "targetSchema": null
+      },
+      "productSystemId": "vedic-astrology"
+    }
+  ],
+  "versionBoundary": {
+    "activeAdmissionEffect": "none",
+    "appendOnlyChild": true,
+    "centralRegistryModifiedByThisChild": false,
+    "existingDomainManifestsModifiedByThisChild": false,
+    "formalAdmissionRegistryModifiedByThisChild": false,
+    "manifestRebindOrResignPerformed": false,
+    "ownerPromotionDecisionReceipt": null,
+    "persistedAsCentralRegistry": false
+  }
+}

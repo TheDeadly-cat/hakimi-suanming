@@ -9,6 +9,7 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
     />
+    <link rel="stylesheet" href="./styles.css" />
     <title>跨体系只读并列 · 隔离草案</title>
   </head>
   <body>
@@ -24,7 +25,7 @@
       <h2 id="input-title">冻结事实摘要与显式人物关联</h2>
       <p>
         只接受已冻结的体系事实摘要（不是数据库或 Revision Schema），强制
-        <code>factsFrozen / noScoring / noAutoPersonMerge</code>；人物关联必须是用户显式确认且可删除。
+        <code>factsFrozen / noScoring / noWeighting / noMajorityVote / noModelArbitration / noAutoPersonMerge / noConceptEquivalenceInference</code>；人物关联必须是用户显式确认且可删除。
       </p>
       <label class="field">
         <span>完整并列 JSON（含 contentSha256）</span>
@@ -38,6 +39,7 @@
       <h2 id="result-title">并列结果</h2>
       <dl id="result-meta" class="result-meta"></dl>
       <div id="system-results"></div>
+      <div id="observation-results" aria-label="显式跨体系观察分区"></div>
       <p id="boundary-note" class="boundary-note"></p>
     </section>
 

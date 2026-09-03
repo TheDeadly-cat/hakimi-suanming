@@ -1,0 +1,544 @@
+{
+  "authorityBoundary": {
+    "contentTruthEstablished": false,
+    "domainAuthorityAuthorized": false,
+    "expertClaimsAuthorized": false,
+    "expertTruthEstablished": false,
+    "formalAdmissionAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "releaseReady": false,
+    "rightsLegalConclusionEstablished": false
+  },
+  "createdAt": "2026-08-31T08:00:00.000Z",
+  "crossSystemPolicy": {
+    "authorityInheritanceAllowed": false,
+    "autoPersonMergeAllowed": false,
+    "comparisonContract": {
+      "currentDraftSystemIds": [
+        "bazi",
+        "ziwei-doushu",
+        "western-astrology"
+      ],
+      "path": "packages/cross-system-comparison-draft/src/index.ts",
+      "rawBytes": 35051,
+      "rawSha256": "7924c58143c0f95da2f0595c3bc0b2113593101af78b3d588e39c540f0c4ee49",
+      "vedicSupportedByCurrentComparisonContract": false
+    },
+    "conceptEquivalenceInferenceAllowed": false,
+    "factsFrozenForFormalComparison": false,
+    "formalComparisonAuthorized": false,
+    "generatedModelWinnerSelectionAllowed": false,
+    "legacyEngineeringReceiptRegistry": {
+      "consumesThisRegistryV2": false,
+      "currentForFormalComparison": false,
+      "path": "packages/cross-system-comparison-draft/src/generated-engineering-fact-receipts.v1.json",
+      "rawBytes": 18816,
+      "rawSha256": "7fabe16ea747877cb18692ffc5033fb58ea2d43058deb89aa3039446d47f555d",
+      "registryDigest": "27630244f1ec8bc90a3a1ad5ebd3b1fa97d0a1d09d497f747d88a27d1872e263",
+      "registryId": "hakimi.cross-system/engineering-fact-replay/1.0.0"
+    },
+    "majorityVoteAllowed": false,
+    "mode": "authority_free_current_identity_observation_only",
+    "nonEquivalentConceptExamples": [
+      {
+        "conceptId": "bazi.wealth_star",
+        "label": "财星",
+        "productSystemId": "bazi"
+      },
+      {
+        "conceptId": "ziwei.wealth_palace",
+        "label": "财帛宫",
+        "productSystemId": "ziwei-doushu"
+      },
+      {
+        "conceptId": "western.house_2",
+        "label": "第二宫",
+        "productSystemId": "western-astrology"
+      },
+      {
+        "conceptId": "vedic.d2_hora",
+        "label": "D2/Hora",
+        "productSystemId": "vedic-astrology"
+      }
+    ],
+    "opinionAveragingAllowed": false,
+    "scoringAllowed": false,
+    "systemsFormallyAdmitted": 0,
+    "systemsWithCurrentMachineIdentityOrObservation": 4,
+    "systemsWithDomainReleaseManifest": 3,
+    "weightingAllowed": false
+  },
+  "doesNotEstablish": [
+    "formal_central_registry_supersession_or_owner_acceptance",
+    "browser_runtime_pwa_service_worker_or_public_host_evidence",
+    "content_truth_or_domain_authority_for_any_system",
+    "real_expert_identity_qualification_independence_opinion_or_truth",
+    "source_body_exact_quote_frozen_binding_or_three_layer_rights",
+    "rights_or_legal_conclusion_or_redistribution_authorization",
+    "cross_system_input_or_concept_equivalence",
+    "vedic_product_identity_domain_manifest_or_comparison_support",
+    "facts_frozen_for_formal_cross_system_comparison",
+    "cross_file_atomicity_mutation_epoch_interval_integrity_or_aba_exclusion",
+    "release_readiness_deployment_rollback_or_public_release_authorization"
+  ],
+  "gateSummary": {
+    "admissionGatesRequiredPerSystem": 8,
+    "expertClaimsAuthorized": false,
+    "formalCrossSystemComparisonAuthorized": false,
+    "publicDeploymentAuthorized": false,
+    "systemsDomainAuthorityAuthorized": 0,
+    "systemsFormallyAdmitted": 0,
+    "systemsObservedWithCurrentMachineIdentityOrObservation": 4,
+    "systemsPublicReleaseAuthorized": 0,
+    "systemsReleaseReady": 0,
+    "systemsRequired": 4,
+    "systemsWithDomainReleaseManifest": 3,
+    "totalAdmissionGatesRequired": 32,
+    "totalAdmissionGatesSatisfied": 0
+  },
+  "lineage": {
+    "formalCentralRegistry": false,
+    "ownerFormalAdmissionAcceptanceEstablished": false,
+    "predecessor": {
+      "path": "content/system-admission/four-system-admission.v1.json",
+      "rawBytes": 19093,
+      "rawSha256": "a81550320e25b5dc696eaa1e2490f93aaf3ccfc0e41a9fb1fa088ceddf434959",
+      "registryDigest": "a992d58ce2c98b5282ffafafb38e05c20c1d294e99b150674fdf01684f86097a"
+    },
+    "predecessorCurrent": false,
+    "predecessorFailureClass": "current_bazi_manifest_mismatch",
+    "predecessorFormalVerifierExpectedToFailClosed": true,
+    "predecessorPreservedUnmodified": true,
+    "replacesOrMutatesPredecessor": false
+  },
+  "projectReleaseGovernance": {
+    "activeLine": "legacy-v13",
+    "expertClaimsAuthorized": false,
+    "migrationId": null,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochBoundaryRequired": true,
+    "mutationEpochReceipt": null,
+    "publicDeploymentAuthorized": false,
+    "targetSchema": 13
+  },
+  "recordType": "four_system_current_machine_identity_observation_registry_v2",
+  "registryDigest": "fa521f30a40fd1c006e886c30f8da5295fbb82784db5671d59df2691117f3738",
+  "registryId": "hakimi.system-admission/four-system-current-observation/2.0.0",
+  "registryStatus": "authority_free_current_observation_candidate_not_formal_central_registry",
+  "schemaVersion": "2.0.0",
+  "snapshotBoundary": {
+    "abaExcluded": false,
+    "crossFileAtomicSnapshot": false,
+    "heldHandleEndpointSnapshots": true,
+    "intervalMutationExcludedAcrossFiles": false,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "registryDigestIsDigitalSignature": false,
+    "upstreamPrivateBrandsVerified": 5
+  },
+  "systems": [
+    {
+      "admissionGates": {
+        "deterministicFacts": {
+          "closureState": "formal_fact_bundle_not_admitted",
+          "engineeringState": "bound_current_surface_engineering_identity",
+          "formalGateSatisfied": false
+        },
+        "expertReviewBundle": {
+          "closureState": "verified_independent_experts_0_of_2",
+          "engineeringState": "no_verified_review_bundle",
+          "formalGateSatisfied": false
+        },
+        "highRiskPolicy": {
+          "closureState": "system_specific_policy_not_formally_admitted",
+          "engineeringState": "candidate_or_boundary_observed",
+          "formalGateSatisfied": false
+        },
+        "inputContract": {
+          "closureState": "formal_input_contract_not_admitted",
+          "engineeringState": "bound_current_surface_engineering_identity",
+          "formalGateSatisfied": false
+        },
+        "releaseEvidence": {
+          "closureState": "formal_release_evidence_absent",
+          "engineeringState": "engineering_observation_only",
+          "formalGateSatisfied": false
+        },
+        "rightsBundle": {
+          "closureState": "three_layer_rights_and_legal_closure_not_established",
+          "engineeringState": "candidate_or_requirement_mechanics_observed",
+          "formalGateSatisfied": false
+        },
+        "ruleset": {
+          "closureState": "versioned_ruleset_not_expert_admitted",
+          "engineeringState": "versioned_engineering_candidate",
+          "formalGateSatisfied": false
+        },
+        "sourceBundle": {
+          "closureState": "binding_frozen_0_of_12",
+          "engineeringState": "requirements_or_candidates_observed",
+          "formalGateSatisfied": false
+        }
+      },
+      "authorityBoundary": {
+        "contentTruthEstablished": false,
+        "domainAuthorityAuthorized": false,
+        "expertClaimsAuthorized": false,
+        "expertTruthEstablished": false,
+        "formalAdmissionAuthorized": false,
+        "publicDeploymentAuthorized": false,
+        "publicReleaseAuthorized": false,
+        "releaseReady": false,
+        "rightsLegalConclusionEstablished": false
+      },
+      "contractSystemId": "bazi",
+      "currentMachineIdentity": {
+        "formalAdmissionEffect": "none",
+        "observationClass": "authority_free_current_endpoint_identity",
+        "primary": {
+          "path": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.json",
+          "rawBytes": 16743,
+          "rawSha256": "f5d7c2793f29a1b36e65c2cf087994bb2ed4be84e4fbb3d40e7ecdf13f6921c1",
+          "role": "current_domain_release_machine_identity_manifest",
+          "semanticDigest": "5236c63f4586e64a06e5d4304c7d40900d5ef6be41268e0b2d01ee4b566a5c80",
+          "semanticDigestField": "manifestDigest",
+          "upstreamDeclaresFormalCentralIntegration": false
+        },
+        "secondaryObservation": null
+      },
+      "evidenceAccounts": {
+        "browserRuntimeEvidence": "not_assessed_by_this_registry",
+        "contentTruth": "not_established",
+        "engineeringIdentity": "current_machine_identity_mechanically_observed",
+        "expertTruth": "not_established",
+        "publicReleaseAuthorization": "not_authorized",
+        "releaseReadiness": "not_ready",
+        "rightsLegalConclusion": "not_established"
+      },
+      "gateSummary": {
+        "admissionGatesRequired": 8,
+        "admissionGatesSatisfied": 0,
+        "bindingFrozenVerified": 0,
+        "bindingRequired": 12,
+        "independentExpertReviewsVerified": 0,
+        "independentExpertsRequired": 2
+      },
+      "integrationBoundary": {
+        "baziAuthorityInherited": false,
+        "isolatedFromOtherSystems": true,
+        "mainApplicationIntegrated": false,
+        "migrationId": null,
+        "releaseIdentity": "legacy-v13",
+        "surface": "single-chart-report@1.7.0-on-legacy-v13",
+        "targetSchema": 13
+      },
+      "productState": "existing_research_surface_current_machine_identity_not_formally_admitted",
+      "productSystemId": "bazi"
+    },
+    {
+      "admissionGates": {
+        "deterministicFacts": {
+          "closureState": "formal_fact_bundle_not_admitted",
+          "engineeringState": "isolated_adapter_and_workspace_draft",
+          "formalGateSatisfied": false
+        },
+        "expertReviewBundle": {
+          "closureState": "verified_independent_experts_0_of_2",
+          "engineeringState": "no_verified_review_bundle",
+          "formalGateSatisfied": false
+        },
+        "highRiskPolicy": {
+          "closureState": "system_specific_policy_not_formally_admitted",
+          "engineeringState": "candidate_or_boundary_observed",
+          "formalGateSatisfied": false
+        },
+        "inputContract": {
+          "closureState": "formal_input_contract_not_admitted",
+          "engineeringState": "isolated_contract_draft",
+          "formalGateSatisfied": false
+        },
+        "releaseEvidence": {
+          "closureState": "formal_release_evidence_absent",
+          "engineeringState": "engineering_observation_only",
+          "formalGateSatisfied": false
+        },
+        "rightsBundle": {
+          "closureState": "three_layer_rights_and_legal_closure_not_established",
+          "engineeringState": "candidate_or_requirement_mechanics_observed",
+          "formalGateSatisfied": false
+        },
+        "ruleset": {
+          "closureState": "versioned_ruleset_not_expert_admitted",
+          "engineeringState": "isolated_rule_and_high_risk_candidate",
+          "formalGateSatisfied": false
+        },
+        "sourceBundle": {
+          "closureState": "binding_frozen_0_of_27",
+          "engineeringState": "requirements_or_candidates_observed",
+          "formalGateSatisfied": false
+        }
+      },
+      "authorityBoundary": {
+        "contentTruthEstablished": false,
+        "domainAuthorityAuthorized": false,
+        "expertClaimsAuthorized": false,
+        "expertTruthEstablished": false,
+        "formalAdmissionAuthorized": false,
+        "publicDeploymentAuthorized": false,
+        "publicReleaseAuthorized": false,
+        "releaseReady": false,
+        "rightsLegalConclusionEstablished": false
+      },
+      "contractSystemId": "ziwei",
+      "currentMachineIdentity": {
+        "formalAdmissionEffect": "none",
+        "observationClass": "authority_free_current_endpoint_identity",
+        "primary": {
+          "path": "content/domain-release/ziwei-doushu.engineering-draft.v0.1.0.manifest.v2.json",
+          "rawBytes": 17968,
+          "rawSha256": "f886e95815109d670b65628db403a2fb86e69e5af4088466de1330a15695a867",
+          "role": "current_independent_domain_manifest_v2",
+          "semanticDigest": "f16f4e023248d4362fe42b28e34fd054a3451980d437ca9c83b6bdfb053fb34e",
+          "semanticDigestField": "manifestDigest",
+          "upstreamDeclaresFormalCentralIntegration": false
+        },
+        "secondaryObservation": null
+      },
+      "evidenceAccounts": {
+        "browserRuntimeEvidence": "not_assessed_by_this_registry",
+        "contentTruth": "not_established",
+        "engineeringIdentity": "current_machine_identity_mechanically_observed",
+        "expertTruth": "not_established",
+        "publicReleaseAuthorization": "not_authorized",
+        "releaseReadiness": "not_ready",
+        "rightsLegalConclusion": "not_established"
+      },
+      "gateSummary": {
+        "admissionGatesRequired": 8,
+        "admissionGatesSatisfied": 0,
+        "bindingFrozenVerified": 0,
+        "bindingRequired": 27,
+        "independentExpertReviewsVerified": 0,
+        "independentExpertsRequired": 2
+      },
+      "integrationBoundary": {
+        "baziAuthorityInherited": false,
+        "isolatedFromOtherSystems": true,
+        "mainApplicationIntegrated": false,
+        "migrationId": null,
+        "releaseIdentity": null,
+        "surface": "ziwei-isolated-workspace-draft@0.1.0",
+        "targetSchema": null
+      },
+      "productState": "isolated_engineering_draft_current_machine_identity_not_formally_admitted",
+      "productSystemId": "ziwei-doushu"
+    },
+    {
+      "admissionGates": {
+        "deterministicFacts": {
+          "closureState": "formal_fact_bundle_not_admitted",
+          "engineeringState": "isolated_astronomy_adapter_draft",
+          "formalGateSatisfied": false
+        },
+        "expertReviewBundle": {
+          "closureState": "verified_independent_experts_0_of_2",
+          "engineeringState": "no_verified_review_bundle",
+          "formalGateSatisfied": false
+        },
+        "highRiskPolicy": {
+          "closureState": "system_specific_policy_not_formally_admitted",
+          "engineeringState": "candidate_or_boundary_observed",
+          "formalGateSatisfied": false
+        },
+        "inputContract": {
+          "closureState": "formal_input_contract_not_admitted",
+          "engineeringState": "isolated_contract_and_civil_time_adapter_draft",
+          "formalGateSatisfied": false
+        },
+        "releaseEvidence": {
+          "closureState": "formal_release_evidence_absent",
+          "engineeringState": "engineering_observation_only",
+          "formalGateSatisfied": false
+        },
+        "rightsBundle": {
+          "closureState": "three_layer_rights_and_legal_closure_not_established",
+          "engineeringState": "candidate_or_requirement_mechanics_observed",
+          "formalGateSatisfied": false
+        },
+        "ruleset": {
+          "closureState": "versioned_ruleset_not_expert_admitted",
+          "engineeringState": "isolated_geometry_and_content_preview_draft",
+          "formalGateSatisfied": false
+        },
+        "sourceBundle": {
+          "closureState": "binding_frozen_0_of_28",
+          "engineeringState": "requirements_or_candidates_observed",
+          "formalGateSatisfied": false
+        }
+      },
+      "authorityBoundary": {
+        "contentTruthEstablished": false,
+        "domainAuthorityAuthorized": false,
+        "expertClaimsAuthorized": false,
+        "expertTruthEstablished": false,
+        "formalAdmissionAuthorized": false,
+        "publicDeploymentAuthorized": false,
+        "publicReleaseAuthorized": false,
+        "releaseReady": false,
+        "rightsLegalConclusionEstablished": false
+      },
+      "contractSystemId": "western",
+      "currentMachineIdentity": {
+        "formalAdmissionEffect": "none",
+        "observationClass": "authority_free_current_endpoint_identity",
+        "primary": {
+          "path": "content/domain-release/western-astrology.engineering-draft.v0.1.0.json",
+          "rawBytes": 10832,
+          "rawSha256": "c138220098346a3ff9857c1e8034914205277bdbe8cf5563e80b58687745a398",
+          "role": "current_independent_domain_manifest",
+          "semanticDigest": "5c44fce96357ed80c4274f1f225151764ffe5998956e7e823764499ee45f993e",
+          "semanticDigestField": "manifestDigest"
+        },
+        "secondaryObservation": {
+          "path": "content/system-admission/western-independent-productization-version-aware-observation-candidate.v1.0.0.json",
+          "rawBytes": 18879,
+          "rawSha256": "956fa352a87253abc893056e443bd45e3fa731531b839144e3121c43639f19df",
+          "role": "current_version_aware_productization_observation",
+          "semanticDigest": "6f71eb3e0f8745c82b383e6e05bf9130d6249530f4ad1d872620480796b1deeb",
+          "semanticDigestField": "candidateDigest"
+        }
+      },
+      "evidenceAccounts": {
+        "browserRuntimeEvidence": "not_assessed_by_this_registry",
+        "contentTruth": "not_established",
+        "engineeringIdentity": "current_machine_identity_mechanically_observed",
+        "expertTruth": "not_established",
+        "publicReleaseAuthorization": "not_authorized",
+        "releaseReadiness": "not_ready",
+        "rightsLegalConclusion": "not_established"
+      },
+      "gateSummary": {
+        "admissionGatesRequired": 8,
+        "admissionGatesSatisfied": 0,
+        "bindingFrozenVerified": 0,
+        "bindingRequired": 28,
+        "independentExpertReviewsVerified": 0,
+        "independentExpertsRequired": 2
+      },
+      "integrationBoundary": {
+        "baziAuthorityInherited": false,
+        "isolatedFromOtherSystems": true,
+        "mainApplicationIntegrated": false,
+        "migrationId": null,
+        "releaseIdentity": null,
+        "surface": "western-isolated-rules-preview-draft@0.1.0",
+        "targetSchema": null
+      },
+      "productState": "isolated_engineering_draft_current_observation_not_formally_admitted",
+      "productSystemId": "western-astrology"
+    },
+    {
+      "admissionGates": {
+        "deterministicFacts": {
+          "closureState": "formal_fact_bundle_not_admitted",
+          "engineeringState": "formal_fact_bundle_absent",
+          "formalGateSatisfied": false
+        },
+        "expertReviewBundle": {
+          "closureState": "verified_independent_experts_0_of_2",
+          "engineeringState": "no_verified_review_bundle",
+          "formalGateSatisfied": false
+        },
+        "highRiskPolicy": {
+          "closureState": "system_specific_policy_not_formally_admitted",
+          "engineeringState": "candidate_or_boundary_observed",
+          "formalGateSatisfied": false
+        },
+        "inputContract": {
+          "closureState": "formal_input_contract_not_admitted",
+          "engineeringState": "input_kernel_and_transition_candidates_observed",
+          "formalGateSatisfied": false
+        },
+        "releaseEvidence": {
+          "closureState": "formal_release_evidence_absent",
+          "engineeringState": "engineering_observation_only",
+          "formalGateSatisfied": false
+        },
+        "rightsBundle": {
+          "closureState": "three_layer_rights_and_legal_closure_not_established",
+          "engineeringState": "candidate_or_requirement_mechanics_observed",
+          "formalGateSatisfied": false
+        },
+        "ruleset": {
+          "closureState": "versioned_ruleset_not_expert_admitted",
+          "engineeringState": "versioned_ruleset_authority_absent",
+          "formalGateSatisfied": false
+        },
+        "sourceBundle": {
+          "closureState": "binding_frozen_0_of_38",
+          "engineeringState": "requirements_or_candidates_observed",
+          "formalGateSatisfied": false
+        }
+      },
+      "authorityBoundary": {
+        "contentTruthEstablished": false,
+        "domainAuthorityAuthorized": false,
+        "expertClaimsAuthorized": false,
+        "expertTruthEstablished": false,
+        "formalAdmissionAuthorized": false,
+        "publicDeploymentAuthorized": false,
+        "publicReleaseAuthorized": false,
+        "releaseReady": false,
+        "rightsLegalConclusionEstablished": false
+      },
+      "contractSystemId": "vedic",
+      "currentMachineIdentity": {
+        "formalAdmissionEffect": "none",
+        "observationClass": "authority_free_current_endpoint_identity",
+        "primary": {
+          "path": "content/system-admission/vedic-independent-productization-version-aware-observation-child.v1.2.0.json",
+          "rawBytes": 16272,
+          "rawSha256": "78b4f27c24182a73ab9da86065829990e053834f49785d394878ca7ad79e2845",
+          "role": "current_version_aware_research_boundary_observation",
+          "semanticDigest": "462498245b533db031ed25a1a8808e4e77dc2ea92f17154013a04d487ebdb171",
+          "semanticDigestField": "candidateDigest"
+        },
+        "secondaryObservation": {
+          "domainReleaseManifestPresent": false,
+          "inputKernelFormalParentIntegrated": false,
+          "mutationExperimentProductGateSatisfied": false,
+          "productIdentityEstablished": false
+        }
+      },
+      "evidenceAccounts": {
+        "browserRuntimeEvidence": "not_assessed_by_this_registry",
+        "contentTruth": "not_established",
+        "engineeringIdentity": "current_machine_identity_mechanically_observed",
+        "expertTruth": "not_established",
+        "publicReleaseAuthorization": "not_authorized",
+        "releaseReadiness": "not_ready",
+        "rightsLegalConclusion": "not_established"
+      },
+      "gateSummary": {
+        "admissionGatesRequired": 8,
+        "admissionGatesSatisfied": 0,
+        "bindingFrozenVerified": 0,
+        "bindingRequired": 38,
+        "independentExpertReviewsVerified": 0,
+        "independentExpertsRequired": 2
+      },
+      "integrationBoundary": {
+        "baziAuthorityInherited": false,
+        "isolatedFromOtherSystems": true,
+        "mainApplicationIntegrated": false,
+        "migrationId": null,
+        "releaseIdentity": null,
+        "surface": "no_admitted_product_surface",
+        "targetSchema": null
+      },
+      "productState": "research_boundary_current_observation_no_domain_manifest_no_product_identity",
+      "productSystemId": "vedic-astrology"
+    }
+  ]
+}

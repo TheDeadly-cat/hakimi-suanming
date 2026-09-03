@@ -1,5 +1,121 @@
 {
   "schemaVersion": 1,
+  "evidenceTools": [
+    {
+      "path": "scripts/cross-system-engineering-fact-receipt-lib.mjs",
+      "allowedCallers": [
+        "scripts/verify-cross-system-engineering-fact-receipts.mjs",
+        "scripts/verify-cross-system-engineering-fact-receipts.test.mjs"
+      ],
+      "allowedBareImports": [
+        "@babel/parser",
+        "node:crypto",
+        "node:fs/promises",
+        "node:path"
+      ],
+      "allowedDraftTargets": [
+        "packages/cross-system-comparison-draft/src/index.ts",
+        "packages/ziwei-doushu-contracts-draft/src/index.ts",
+        "packages/ziwei-iztro-adapter-draft/src/cross-system-engineering-fact-projection.ts",
+        "packages/ziwei-iztro-adapter-draft/src/index.ts",
+        "packages/western-astronomy-engine-adapter-draft/src/cross-system-engineering-fact-projection.ts",
+        "packages/western-astronomy-engine-adapter-draft/src/index.ts"
+      ],
+      "allowedScriptTargets": [
+        "scripts/bazi-v17-manifest-drift-decision-lib.mjs",
+        "scripts/independent-domain-release-manifest-lib.mjs",
+        "scripts/independent-source-binding-requirements-lib.mjs",
+        "scripts/system-admission-registry-lib.mjs"
+      ],
+      "productionImport": "forbidden",
+      "browserImport": "forbidden",
+      "scriptDependencyPolicies": [
+        {
+          "path": "scripts/bazi-domain-release-manifest-lib.mjs",
+          "allowedBareImports": [
+            "node:crypto",
+            "node:fs/promises",
+            "node:path"
+          ],
+          "allowedLocalTargets": []
+        },
+        {
+          "path": "scripts/bazi-engineering-binding-candidate-lib.mjs",
+          "allowedBareImports": [
+            "node:crypto",
+            "node:fs/promises",
+            "node:path"
+          ],
+          "allowedLocalTargets": []
+        },
+        {
+          "path": "scripts/bazi-expert-review-packet-lib.mjs",
+          "allowedBareImports": [
+            "node:crypto",
+            "node:fs/promises",
+            "node:path"
+          ],
+          "allowedLocalTargets": [
+            "scripts/bazi-engineering-binding-candidate-lib.mjs"
+          ]
+        },
+        {
+          "path": "scripts/bazi-v17-manifest-drift-decision-lib.mjs",
+          "allowedBareImports": [
+            "@babel/parser",
+            "node:crypto",
+            "node:fs/promises",
+            "node:path"
+          ],
+          "allowedLocalTargets": [
+            "scripts/bazi-domain-release-manifest-lib.mjs",
+            "scripts/bazi-expert-review-packet-lib.mjs"
+          ]
+        },
+        {
+          "path": "scripts/independent-domain-release-manifest-lib.mjs",
+          "allowedBareImports": [
+            "node:crypto",
+            "node:fs/promises",
+            "node:path"
+          ],
+          "allowedLocalTargets": []
+        },
+        {
+          "path": "scripts/independent-source-binding-requirements-lib.mjs",
+          "allowedBareImports": [
+            "node:crypto",
+            "node:fs/promises",
+            "node:path"
+          ],
+          "allowedLocalTargets": [
+            "scripts/ziwei-hko-calendar-source-evidence-lib.mjs"
+          ]
+        },
+        {
+          "path": "scripts/system-admission-registry-lib.mjs",
+          "allowedBareImports": [
+            "node:crypto",
+            "node:fs/promises",
+            "node:path"
+          ],
+          "allowedLocalTargets": [
+            "scripts/bazi-domain-release-manifest-lib.mjs"
+          ]
+        },
+        {
+          "path": "scripts/ziwei-hko-calendar-source-evidence-lib.mjs",
+          "allowedBareImports": [
+            "node:crypto",
+            "node:fs/promises",
+            "node:path",
+            "node:zlib"
+          ],
+          "allowedLocalTargets": []
+        }
+      ]
+    }
+  ],
   "drafts": [
     {
       "directoryName": "ziwei-doushu-contracts-draft",
@@ -281,6 +397,27 @@
         "western-rules-preview-v1"
       ],
       "lockClosures": []
+    },
+    {
+      "directoryName": "vedic-input-preflight-draft",
+      "packageName": "@hakimi/vedic-input-preflight-draft",
+      "presence": "when-present",
+      "kind": "workspace",
+      "systemId": "vedic-astrology",
+      "dependencies": {},
+      "allowedBareImports": [
+        "virtual:vedic-input-draft-schema"
+      ],
+      "crossDraftEdges": [],
+      "specialChecks": [],
+      "lockClosures": [],
+      "browserPreview": {
+        "sourceDirectory": "src/browser-app",
+        "allowedBareImports": [],
+        "allowedSharedFiles": [
+          "src/browser-client.ts"
+        ]
+      }
     },
     {
       "directoryName": "cross-system-comparison-draft",

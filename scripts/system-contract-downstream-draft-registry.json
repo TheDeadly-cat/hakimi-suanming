@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "registryClass": "downstream-isolated-drafts-not-bound-into-upstream-readiness",
+  "upstreamRegistryPath": "scripts/system-contract-draft-registry.json",
+  "drafts": [
+    {
+      "directoryName": "vedic-input-admission-kernel-draft",
+      "packageName": "@hakimi/vedic-input-admission-kernel-draft",
+      "presence": "when-present",
+      "kind": "contract",
+      "systemId": "vedic-astrology",
+      "dependencies": {},
+      "allowedBareImports": [
+        "node:crypto"
+      ],
+      "crossDraftEdges": [],
+      "specialChecks": [],
+      "lockClosures": []
+    },
+    {
+      "directoryName": "vedic-mutation-epoch-runtime-experiment-draft",
+      "packageName": "@hakimi/vedic-mutation-epoch-runtime-experiment-draft",
+      "presence": "when-present",
+      "kind": "workspace",
+      "systemId": "vedic-astrology",
+      "dependencies": {},
+      "allowedBareImports": [],
+      "crossDraftEdges": [],
+      "specialChecks": [
+        "fake-indexeddb-test-only-v1"
+      ],
+      "lockClosures": []
+    },
+    {
+      "directoryName": "western-civil-time-input-adapter-draft",
+      "packageName": "@hakimi/western-civil-time-input-adapter-draft",
+      "presence": "when-present",
+      "kind": "adapter",
+      "systemId": "western-astrology",
+      "dependencies": {
+        "@hakimi/tzdb-core": "0.1.0",
+        "@hakimi/western-astrology-contracts-draft": "0.0.0-draft.0"
+      },
+      "allowedBareImports": [
+        "@hakimi/tzdb-core",
+        "node:crypto",
+        "node:fs",
+        "node:path"
+      ],
+      "crossDraftEdges": [
+        {
+          "from": "src/index.ts",
+          "toPackage": "@hakimi/western-astrology-contracts-draft",
+          "to": "src/index.ts"
+        }
+      ],
+      "specialChecks": [],
+      "lockClosures": []
+    },
+    {
+      "directoryName": "ziwei-civil-time-input-resolution-draft",
+      "packageName": "@hakimi/ziwei-civil-time-input-resolution-draft",
+      "presence": "when-present",
+      "kind": "adapter",
+      "systemId": "ziwei-doushu",
+      "dependencies": {
+        "@hakimi/tzdb-core": "0.1.0",
+        "@hakimi/ziwei-doushu-contracts-draft": "0.0.0-draft.0"
+      },
+      "allowedBareImports": [
+        "@hakimi/tzdb-core",
+        "node:crypto"
+      ],
+      "crossDraftEdges": [
+        {
+          "from": "src/contract-bridge.ts",
+          "toPackage": "@hakimi/ziwei-doushu-contracts-draft",
+          "to": "src/index.ts"
+        }
+      ],
+      "specialChecks": [],
+      "lockClosures": []
+    }
+  ]
+}

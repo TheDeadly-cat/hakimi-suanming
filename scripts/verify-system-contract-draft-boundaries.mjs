@@ -1,17 +1,58 @@
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { parse } from "@babel/parser";
+import {
+  WESTERN_CIVIL_TIME_FACT_BROWSER_DRAFT,
+  verifyWesternCivilTimeFactBrowserObservation
+} from "./western-civil-time-fact-browser-observation-lib.mjs";
 
 const verifierPath = fs.realpathSync(fileURLToPath(import.meta.url));
 const defaultWorkspaceRoot = path.resolve(path.dirname(verifierPath), "..");
 const draftRegistryPath = path.resolve(path.dirname(verifierPath), "system-contract-draft-registry.json");
-const defaultDraftRegistry = JSON.parse(fs.readFileSync(draftRegistryPath, "utf8"));
+const downstreamDraftRegistryPath = path.resolve(
+  path.dirname(verifierPath),
+  "system-contract-downstream-draft-registry.json"
+);
+const primaryDraftRegistry = JSON.parse(fs.readFileSync(draftRegistryPath, "utf8"));
+const downstreamDraftRegistry = JSON.parse(fs.readFileSync(downstreamDraftRegistryPath, "utf8"));
+const defaultRegistryCompositionFailures = [];
+const downstreamRegistryKeys = Object.keys(downstreamDraftRegistry).sort();
+if (JSON.stringify(downstreamRegistryKeys) !== JSON.stringify([
+  "drafts",
+  "registryClass",
+  "schemaVersion",
+  "upstreamRegistryPath"
+])) {
+  defaultRegistryCompositionFailures.push(
+    "system-contract-downstream-draft-registry.json must keep its exact top-level shape"
+  );
+}
+if (downstreamDraftRegistry.schemaVersion !== 1
+  || downstreamDraftRegistry.registryClass
+    !== "downstream-isolated-drafts-not-bound-into-upstream-readiness"
+  || downstreamDraftRegistry.upstreamRegistryPath
+    !== "scripts/system-contract-draft-registry.json"
+  || !Array.isArray(downstreamDraftRegistry.drafts)) {
+  defaultRegistryCompositionFailures.push(
+    "system-contract-downstream-draft-registry.json has an invalid downstream registry identity"
+  );
+}
+const defaultDraftRegistry = Object.freeze({
+  ...primaryDraftRegistry,
+  drafts: Object.freeze([
+    ...primaryDraftRegistry.drafts,
+    ...(Array.isArray(downstreamDraftRegistry.drafts) ? downstreamDraftRegistry.drafts : [])
+  ])
+});
 const supportedDraftKinds = new Set(["contract", "adapter", "differential", "workspace"]);
 const supportedDraftPresence = new Set(["required", "when-present"]);
 const supportedSpecialChecks = new Set([
   "astronomy-engine-browser-parity-v1",
   "astronomy-engine-fresh-worker-v1",
+  "fake-indexeddb-test-only-v1",
   "fortel-fresh-node-worker-v1",
   "iztro-browser-preview-v1",
   "iztro-locked-worker-imports-v1",
@@ -21,6 +62,9 @@ const supportedSpecialChecks = new Set([
 ]);
 const generatedWorkspaceDirectories = new Set([".vite", "dist", "tmp"]);
 const verifierTestPath = path.resolve(path.dirname(verifierPath), "verify-system-contract-draft-boundaries.test.mjs");
+const knownRestrictedSourcePaths = new Set([
+  "apps/web/src/lib/local-user-data-cleanup.ts"
+]);
 const verifierFiles = new Set([
   verifierPath,
   ...(fs.existsSync(verifierTestPath) ? [fs.realpathSync(verifierTestPath)] : [])
@@ -36,9 +80,179 @@ function allowedDraftDependencies(draft) {
 }
 
 function isSafeRegistryRelativePath(value) {
-  if (typeof value !== "string" || value.length === 0 || path.isAbsolute(value)) return false;
-  const normalized = path.normalize(value);
-  return normalized !== ".." && !normalized.startsWith(`..${path.sep}`);
+  if (typeof value !== "string" || value.length === 0 || value.includes("\0")
+    || value.includes("\\") || path.isAbsolute(value) || /[<>:"|?*]/u.test(value)) {
+    return false;
+  }
+  const normalized = path.posix.normalize(value);
+  const segments = value.split("/");
+  return normalized === value && normalized !== "." && normalized !== ".."
+    && !normalized.startsWith("../") && !normalized.startsWith("/")
+    && !normalized.endsWith("/")
+    && segments.every((segment) => segment.length > 0
+      && !segment.endsWith(".") && !segment.endsWith(" "));
+}
+
+function validateEvidenceTools(registry, drafts, record) {
+  if (!Array.isArray(registry?.evidenceTools)) {
+    record("system-contract-draft-registry.json must keep an evidenceTools array");
+    return [];
+  }
+  const expectedKeys = [
+    "allowedBareImports",
+    "allowedCallers",
+    "allowedDraftTargets",
+    "allowedScriptTargets",
+    "browserImport",
+    "path",
+    "productionImport",
+    "scriptDependencyPolicies"
+  ];
+  const seenTools = new Set();
+  const seenCallers = new Set();
+  const draftSourcePrefixes = drafts.map((draft) =>
+    `packages/${draft.directoryName}/src/`
+  );
+  for (const tool of registry.evidenceTools) {
+    if (!tool || typeof tool !== "object" || Array.isArray(tool)
+      || canonicalJson(Object.keys(tool).sort()) !== canonicalJson(expectedKeys)) {
+      record("system-contract-draft-registry.json contains an invalid evidence tool entry");
+      continue;
+    }
+    if (!isSafeRegistryRelativePath(tool.path)
+      || !tool.path.startsWith("scripts/") || !tool.path.endsWith(".mjs")) {
+      record("system-contract-draft-registry.json contains an invalid evidence tool path");
+    } else if (seenTools.has(tool.path)) {
+      record(`system-contract-draft-registry.json duplicates evidence tool ${tool.path}`);
+    } else {
+      seenTools.add(tool.path);
+    }
+    if (tool.productionImport !== "forbidden" || tool.browserImport !== "forbidden") {
+      record(`system-contract-draft-registry.json evidence tool ${String(tool.path)} must remain unreachable from production and Browser code`);
+    }
+    if (!Array.isArray(tool.allowedBareImports)
+      || tool.allowedBareImports.some((entry) => typeof entry !== "string" || entry.length === 0)
+      || new Set(tool.allowedBareImports).size !== tool.allowedBareImports.length) {
+      record(`system-contract-draft-registry.json evidence tool ${String(tool.path)} has invalid allowedBareImports`);
+    }
+    if (!Array.isArray(tool.allowedCallers) || tool.allowedCallers.length === 0
+      || tool.allowedCallers.some((entry) => !isSafeRegistryRelativePath(entry)
+        || !entry.startsWith("scripts/") || !entry.endsWith(".mjs"))
+      || new Set(tool.allowedCallers).size !== tool.allowedCallers.length) {
+      record(`system-contract-draft-registry.json evidence tool ${String(tool.path)} has invalid allowedCallers`);
+    } else {
+      for (const caller of tool.allowedCallers) {
+        if (caller === tool.path || seenCallers.has(caller)) {
+          record(`system-contract-draft-registry.json evidence tool caller ${caller} is duplicated or self-referential`);
+        }
+        seenCallers.add(caller);
+      }
+    }
+    if (!Array.isArray(tool.allowedDraftTargets) || tool.allowedDraftTargets.length === 0
+      || tool.allowedDraftTargets.some((entry) => !isSafeRegistryRelativePath(entry))
+      || new Set(tool.allowedDraftTargets).size !== tool.allowedDraftTargets.length) {
+      record(`system-contract-draft-registry.json evidence tool ${String(tool.path)} has invalid allowedDraftTargets`);
+    } else {
+      for (const target of tool.allowedDraftTargets) {
+        if (!draftSourcePrefixes.some((prefix) => target.startsWith(prefix))) {
+          record(`system-contract-draft-registry.json evidence tool ${String(tool.path)} targets non-draft source ${target}`);
+        }
+      }
+    }
+    if (!Array.isArray(tool.allowedScriptTargets)
+      || tool.allowedScriptTargets.some((entry) => !isSafeRegistryRelativePath(entry)
+        || !entry.startsWith("scripts/") || !entry.endsWith(".mjs"))
+      || new Set(tool.allowedScriptTargets).size !== tool.allowedScriptTargets.length) {
+      record(`system-contract-draft-registry.json evidence tool ${String(tool.path)} has invalid allowedScriptTargets`);
+    }
+    const dependencyPolicies = tool.scriptDependencyPolicies;
+    const dependencyPolicyByPath = new Map();
+    if (!Array.isArray(dependencyPolicies) || dependencyPolicies.length === 0) {
+      record(`system-contract-draft-registry.json evidence tool ${String(tool.path)} has invalid scriptDependencyPolicies`);
+    } else {
+      for (const policy of dependencyPolicies) {
+        const validShape = policy && typeof policy === "object" && !Array.isArray(policy)
+          && canonicalJson(Object.keys(policy).sort()) === canonicalJson([
+            "allowedBareImports",
+            "allowedLocalTargets",
+            "path"
+          ]);
+        if (!validShape) {
+          record(`system-contract-draft-registry.json evidence tool ${String(tool.path)} has an invalid script dependency policy`);
+          continue;
+        }
+        if (!isSafeRegistryRelativePath(policy.path)
+          || !policy.path.startsWith("scripts/") || !policy.path.endsWith(".mjs")) {
+          record(`system-contract-draft-registry.json evidence tool ${String(tool.path)} has an invalid script dependency path`);
+          continue;
+        }
+        if (policy.path === tool.path || tool.allowedCallers?.includes(policy.path)
+          || dependencyPolicyByPath.has(policy.path)) {
+          record(`system-contract-draft-registry.json evidence dependency ${policy.path} is duplicated or conflicts with an entrypoint`);
+          continue;
+        }
+        dependencyPolicyByPath.set(policy.path, policy);
+        if (!Array.isArray(policy.allowedBareImports)
+          || policy.allowedBareImports.some((entry) => typeof entry !== "string" || entry.length === 0
+            || entry.startsWith(".") || entry.startsWith("/") || /^file:/iu.test(entry))
+          || new Set(policy.allowedBareImports).size !== policy.allowedBareImports.length) {
+          record(`system-contract-draft-registry.json evidence dependency ${policy.path} has invalid allowedBareImports`);
+        }
+        if (!Array.isArray(policy.allowedLocalTargets)
+          || policy.allowedLocalTargets.some((entry) => !isSafeRegistryRelativePath(entry)
+            || !entry.startsWith("scripts/") || !entry.endsWith(".mjs") || entry === policy.path)
+          || new Set(policy.allowedLocalTargets).size !== policy.allowedLocalTargets.length) {
+          record(`system-contract-draft-registry.json evidence dependency ${policy.path} has invalid allowedLocalTargets`);
+        }
+      }
+      for (const target of tool.allowedScriptTargets ?? []) {
+        if (!dependencyPolicyByPath.has(target)) {
+          record(`system-contract-draft-registry.json evidence direct dependency ${target} has no script dependency policy`);
+        }
+      }
+      for (const policy of dependencyPolicyByPath.values()) {
+        for (const target of policy.allowedLocalTargets ?? []) {
+          if (!dependencyPolicyByPath.has(target)) {
+            record(`system-contract-draft-registry.json evidence dependency ${policy.path} targets unregistered script dependency ${target}`);
+          }
+        }
+      }
+      const reachable = new Set();
+      const pending = [...(tool.allowedScriptTargets ?? [])];
+      while (pending.length > 0) {
+        const candidate = pending.pop();
+        if (reachable.has(candidate)) continue;
+        reachable.add(candidate);
+        const policy = dependencyPolicyByPath.get(candidate);
+        if (policy) pending.push(...(policy.allowedLocalTargets ?? []));
+      }
+      for (const dependencyPath of dependencyPolicyByPath.keys()) {
+        if (!reachable.has(dependencyPath)) {
+          record(`system-contract-draft-registry.json evidence dependency ${dependencyPath} is unreachable from the registered tool`);
+        }
+      }
+    }
+  }
+  return registry.evidenceTools
+    .filter((tool) => tool && typeof tool === "object" && typeof tool.path === "string")
+    .map((tool) => ({
+      path: tool.path,
+      allowedBareImports: Array.isArray(tool.allowedBareImports) ? tool.allowedBareImports : [],
+      allowedCallers: Array.isArray(tool.allowedCallers) ? tool.allowedCallers : [],
+      allowedDraftTargets: Array.isArray(tool.allowedDraftTargets) ? tool.allowedDraftTargets : [],
+      allowedScriptTargets: Array.isArray(tool.allowedScriptTargets) ? tool.allowedScriptTargets : [],
+      scriptDependencyPolicies: Array.isArray(tool.scriptDependencyPolicies)
+        ? tool.scriptDependencyPolicies
+          .filter((policy) => policy && typeof policy === "object" && typeof policy.path === "string")
+          .map((policy) => ({
+            path: policy.path,
+            allowedBareImports: Array.isArray(policy.allowedBareImports) ? policy.allowedBareImports : [],
+            allowedLocalTargets: Array.isArray(policy.allowedLocalTargets) ? policy.allowedLocalTargets : []
+          }))
+        : [],
+      productionImport: tool.productionImport,
+      browserImport: tool.browserImport
+    }));
 }
 
 function validateDraftRegistry(registry, record) {
@@ -137,6 +351,14 @@ function validateDraftRegistry(registry, record) {
         }
       }
     }
+    if (draft.packageName === "@hakimi/vedic-mutation-epoch-runtime-experiment-draft") {
+      if (canonicalJson(draft.allowedBareImports) !== canonicalJson([])) {
+        record("system-contract-downstream-draft-registry.json must not grant package-wide bare imports to the Vedic mutation epoch runtime experiment");
+      }
+      if (canonicalJson(draft.specialChecks) !== canonicalJson(["fake-indexeddb-test-only-v1"])) {
+        record("system-contract-downstream-draft-registry.json must keep fake-indexeddb-test-only-v1 as the sole Vedic mutation epoch experiment special check");
+      }
+    }
     if (draft.packageName === "@hakimi/western-astrology-rules-preview-draft") {
       const expectedBrowserPolicy = {
         sourceDirectory: "src/browser-app",
@@ -174,12 +396,16 @@ function validateDraftRegistry(registry, record) {
         ["src/browser-artifact-bridge.ts", "src/browser-preview/browser-artifact.ts"],
         ["src/browser-calculation-bridge.ts", "src/browser-preview/browser-client.ts"]
       ];
-      for (const [from, to] of expectedBrowserEdges) {
-        if (!draft.crossDraftEdges.some((edge) => edge.from === from
-          && edge.toPackage === "@hakimi/ziwei-iztro-adapter-draft"
-          && edge.to === to)) {
-          record(`system-contract-draft-registry.json must keep the exact Ziwei workspace Browser bridge ${from} -> ${to}`);
-        }
+      const registeredBrowserEdges = draft.crossDraftEdges
+        .filter((edge) => edge?.toPackage === "@hakimi/ziwei-iztro-adapter-draft"
+          && typeof edge.to === "string"
+          && edge.to.startsWith("src/browser-preview/"))
+        .map((edge) => [edge.from, edge.to])
+        .sort((left, right) => canonicalJson(left).localeCompare(canonicalJson(right)));
+      const sortedExpectedBrowserEdges = [...expectedBrowserEdges]
+        .sort((left, right) => canonicalJson(left).localeCompare(canonicalJson(right)));
+      if (canonicalJson(registeredBrowserEdges) !== canonicalJson(sortedExpectedBrowserEdges)) {
+        record("system-contract-draft-registry.json must keep the exact Ziwei workspace Browser bridge set");
       }
     }
     for (const closure of draft.lockClosures) {
@@ -253,6 +479,19 @@ function listFiles(workspaceRoot, directoryPath, predicate) {
     }
   }
   return output;
+}
+
+function inspectWorkspaceLinks(workspaceRoot, directoryPath, record) {
+  for (const entry of fs.readdirSync(directoryPath, { withFileTypes: true })) {
+    const entryPath = path.join(directoryPath, entry.name);
+    if (entry.isSymbolicLink()) {
+      record(`${relative(workspaceRoot, entryPath)} is a forbidden workspace symbolic link or junction`);
+      continue;
+    }
+    if (entry.isDirectory() && !shouldSkipDirectory(workspaceRoot, entryPath)) {
+      inspectWorkspaceLinks(workspaceRoot, entryPath, record);
+    }
+  }
 }
 
 function listExistingPaths(directoryPath) {
@@ -746,6 +985,27 @@ function scanModuleLoadCalls(source) {
   return calls;
 }
 
+function extractStaticImportMetaUrlSpecifiers(source) {
+  const withoutComments = maskJavaScriptComments(source);
+  const codeMask = maskJavaScriptNonCode(source);
+  const specifiers = [];
+  for (const match of codeMask.matchAll(/\bnew\s+URL\b/gu)) {
+    let cursor = match.index + match[0].length;
+    while (/\s/u.test(codeMask[cursor] ?? "")) cursor += 1;
+    if (codeMask[cursor] !== "(") continue;
+    const closingIndex = findMatchingJavaScriptDelimiter(withoutComments, cursor);
+    if (closingIndex < 0) continue;
+    const argumentRanges = splitTopLevelArguments(withoutComments, cursor + 1, closingIndex);
+    if (!argumentRanges || argumentRanges.length !== 2) continue;
+    const specifier = staticModuleLiteral(source, ...argumentRanges[0]);
+    if (specifier === null) continue;
+    const [baseStart, baseEnd] = argumentRanges[1];
+    const baseExpression = maskJavaScriptComments(source.slice(baseStart, baseEnd)).replace(/\s/gu, "");
+    if (baseExpression === "import.meta.url") specifiers.push(specifier);
+  }
+  return specifiers;
+}
+
 function extractModuleSpecifiers(source, moduleLoadCalls = scanModuleLoadCalls(source)) {
   const withoutComments = maskJavaScriptComments(source);
   const specifiers = [];
@@ -764,6 +1024,43 @@ function htmlAttribute(attributes, name) {
   return match?.[2] ?? match?.[3] ?? null;
 }
 
+function hasExactAstronomyEngineLicenseLink(source) {
+  const withoutComments = source.replace(/<!--[\s\S]*?-->/gu, "");
+  if (/<base\b/iu.test(withoutComments)) return false;
+  const licenseLinks = [];
+  const linkPattern = /<link\b((?:[^>"']|"[^"]*"|'[^']*')*)>/giu;
+  for (const match of withoutComments.matchAll(linkPattern)) {
+    const rel = (htmlAttribute(match[1], "rel") ?? "").trim().toLowerCase();
+    if (rel.split(/\s+/u).filter(Boolean).includes("license")) {
+      licenseLinks.push({ rel, href: htmlAttribute(match[1], "href") });
+    }
+  }
+  return licenseLinks.length === 1
+    && licenseLinks[0].rel === "license"
+    && licenseLinks[0].href === "./licenses/astronomy-engine-2.1.19-LICENSE.txt";
+}
+
+function hasExactIztroLicenseLink(source) {
+  const withoutComments = source.replace(/<!--[\s\S]*?-->/gu, "");
+  if (/<base\b/iu.test(withoutComments)) return false;
+  const licenseLinks = [];
+  const linkPattern = /<link\b((?:[^>"']|"[^"]*"|'[^']*')*)>/giu;
+  for (const match of withoutComments.matchAll(linkPattern)) {
+    const rel = (htmlAttribute(match[1], "rel") ?? "").trim().toLowerCase();
+    if (rel.split(/\s+/u).filter(Boolean).includes("license")) {
+      licenseLinks.push({
+        rel,
+        type: htmlAttribute(match[1], "type"),
+        href: htmlAttribute(match[1], "href")
+      });
+    }
+  }
+  return licenseLinks.length === 1
+    && licenseLinks[0].rel === "license"
+    && licenseLinks[0].type === "text/plain"
+    && licenseLinks[0].href === "./licenses/iztro-2.5.8-LICENSE.txt";
+}
+
 function extractHtmlModuleSpecifiers(source) {
   const withoutComments = source.replace(/<!--[\s\S]*?-->/gu, (comment) => comment.replace(/[^\r\n]/gu, " "));
   const specifiers = [];
@@ -774,6 +1071,7 @@ function extractHtmlModuleSpecifiers(source) {
     if (sourceAttribute) specifiers.push(sourceAttribute);
     if ((htmlAttribute(attributes, "type") ?? "").trim().toLowerCase() === "module") {
       specifiers.push(...extractModuleSpecifiers(match[2]));
+      specifiers.push(...extractStaticImportMetaUrlSpecifiers(match[2]));
     }
   }
   const linkPattern = /<link\b((?:[^>"']|"[^"]*"|'[^']*')*)>/giu;
@@ -818,11 +1116,464 @@ function resolveRelativeModule(sourceFile, specifier) {
   return candidate ? fs.realpathSync(candidate) : null;
 }
 
-function resolveWorkspaceModule(sourceFile, specifier) {
+function isLocalModuleSpecifier(specifier) {
+  return specifier.startsWith("./") || specifier.startsWith("../")
+    || specifier.startsWith("/") || /^file:/iu.test(specifier)
+    || isEncodedRelativeUrlSpecifier(specifier);
+}
+
+function isEncodedRelativeUrlSpecifier(specifier) {
+  try {
+    const decoded = decodeURIComponent(specifier.split(/[?#]/u, 1)[0]).replaceAll("\\", "/");
+    return decoded.startsWith("./") || decoded.startsWith("../");
+  } catch {
+    return false;
+  }
+}
+
+function resolveFileUrlModule(specifier) {
+  try {
+    const targetUrl = new URL(specifier);
+    if (targetUrl.protocol !== "file:") return null;
+    targetUrl.search = "";
+    targetUrl.hash = "";
+    const targetPath = fileURLToPath(targetUrl);
+    return fs.existsSync(targetPath) && fs.statSync(targetPath).isFile()
+      ? fs.realpathSync(targetPath)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function resolveWorkspaceModule(workspaceRoot, sourceFile, specifier) {
+  if (/^file:/iu.test(specifier)) return resolveFileUrlModule(specifier);
   if (specifier.startsWith("/")) {
-    return resolveRelativeModule(sourceFile, `.${specifier}`);
+    return resolveRelativeModule(path.join(workspaceRoot, "__workspace_root__.mjs"), `.${specifier}`);
+  }
+  if (isEncodedRelativeUrlSpecifier(specifier)) {
+    try {
+      const targetUrl = new URL(specifier, pathToFileURL(sourceFile));
+      targetUrl.search = "";
+      targetUrl.hash = "";
+      return resolveRelativeModule(sourceFile, fileURLToPath(targetUrl));
+    } catch {
+      return null;
+    }
   }
   return resolveRelativeModule(sourceFile, specifier);
+}
+
+function buildLexicalScopeIndex(ast) {
+  const nodeScopes = new WeakMap();
+  const createScope = (parent, kind) => ({ parent, kind, bindings: new Map() });
+  const rootScope = createScope(null, "program");
+  const addBinding = (scope, name, init) => {
+    if (!scope.bindings.has(name)) scope.bindings.set(name, []);
+    scope.bindings.get(name).push({ init, scope });
+  };
+  const addPatternBindings = (scope, pattern, init = null) => {
+    if (!pattern || typeof pattern !== "object") return;
+    if (pattern.type === "Identifier") {
+      addBinding(scope, pattern.name, init);
+      return;
+    }
+    if (pattern.type === "AssignmentPattern") {
+      addPatternBindings(scope, pattern.left, null);
+      return;
+    }
+    if (pattern.type === "RestElement") {
+      addPatternBindings(scope, pattern.argument, null);
+      return;
+    }
+    if (pattern.type === "ObjectPattern") {
+      for (const property of pattern.properties ?? []) {
+        if (property?.type === "ObjectProperty") addPatternBindings(scope, property.value, null);
+        if (property?.type === "RestElement") addPatternBindings(scope, property.argument, null);
+      }
+      return;
+    }
+    if (pattern.type === "ArrayPattern") {
+      for (const element of pattern.elements ?? []) addPatternBindings(scope, element, null);
+    }
+  };
+  const nearestFunctionScope = (scope) => {
+    let current = scope;
+    while (current.parent && !["function", "program"].includes(current.kind)) current = current.parent;
+    return current;
+  };
+  const indexChildren = (node, scope, excludedKeys = new Set()) => {
+    for (const [key, child] of Object.entries(node)) {
+      if (["loc", "start", "end", "extra"].includes(key) || excludedKeys.has(key)) continue;
+      if (Array.isArray(child)) {
+        for (const entry of child) indexNode(entry, scope);
+      } else if (child && typeof child === "object") {
+        indexNode(child, scope);
+      }
+    }
+  };
+  const indexNode = (node, scope) => {
+    if (!node || typeof node !== "object") return;
+    nodeScopes.set(node, scope);
+    if (["FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression", "ObjectMethod", "ClassMethod"].includes(node.type)) {
+      if (node.type === "FunctionDeclaration" && node.id?.type === "Identifier") {
+        addBinding(scope, node.id.name, null);
+      }
+      const functionScope = createScope(scope, "function");
+      if (node.type === "FunctionExpression" && node.id?.type === "Identifier") {
+        addBinding(functionScope, node.id.name, null);
+      }
+      for (const parameter of node.params ?? []) addPatternBindings(functionScope, parameter, null);
+      for (const [key, child] of Object.entries(node)) {
+        if (["loc", "start", "end", "extra", "id", "params", "body"].includes(key)) continue;
+        if (Array.isArray(child)) {
+          for (const entry of child) indexNode(entry, functionScope);
+        } else if (child && typeof child === "object") {
+          indexNode(child, functionScope);
+        }
+      }
+      if (node.body?.type === "BlockStatement") {
+        nodeScopes.set(node.body, functionScope);
+        for (const statement of node.body.body ?? []) indexNode(statement, functionScope);
+      } else {
+        indexNode(node.body, functionScope);
+      }
+      return;
+    }
+    if (node.type === "BlockStatement") {
+      const blockScope = createScope(scope, "block");
+      nodeScopes.set(node, blockScope);
+      for (const statement of node.body ?? []) indexNode(statement, blockScope);
+      return;
+    }
+    if (node.type === "CatchClause") {
+      const catchScope = createScope(scope, "block");
+      nodeScopes.set(node, catchScope);
+      addPatternBindings(catchScope, node.param, null);
+      indexNode(node.body, catchScope);
+      return;
+    }
+    if (node.type === "VariableDeclaration") {
+      const bindingScope = node.kind === "var" ? nearestFunctionScope(scope) : scope;
+      for (const declarator of node.declarations ?? []) {
+        nodeScopes.set(declarator, scope);
+        addPatternBindings(bindingScope, declarator.id, declarator.init ?? null);
+        indexNode(declarator.id, scope);
+        indexNode(declarator.init, scope);
+      }
+      return;
+    }
+    indexChildren(node, scope);
+  };
+  nodeScopes.set(ast, rootScope);
+  if (ast.program) indexNode(ast.program, rootScope);
+  else indexNode(ast, rootScope);
+  return { nodeScopes, rootScope };
+}
+
+function nearestStaticBindings(scope, name) {
+  let current = scope;
+  while (current) {
+    if (current.bindings.has(name)) return current.bindings.get(name);
+    current = current.parent;
+  }
+  return [];
+}
+
+function visitResolvedStaticNodes(node, scope, nodeScopes, seenBindings, callback) {
+  if (!node || typeof node !== "object") return;
+  const effectiveScope = nodeScopes.get(node) ?? scope;
+  if (["TSAsExpression", "TSTypeAssertion", "TSNonNullExpression", "ParenthesizedExpression"].includes(node.type)) {
+    visitResolvedStaticNodes(node.expression, effectiveScope, nodeScopes, seenBindings, callback);
+    return;
+  }
+  if (node.type !== "Identifier") {
+    callback(node, effectiveScope, seenBindings);
+    return;
+  }
+  const bindings = nearestStaticBindings(effectiveScope, node.name);
+  if (bindings.length === 0) {
+    callback(node, effectiveScope, seenBindings);
+    return;
+  }
+  for (const binding of bindings) {
+    if (!binding.init || seenBindings.has(binding)) continue;
+    const nextSeen = new Set(seenBindings);
+    nextSeen.add(binding);
+    visitResolvedStaticNodes(binding.init, binding.scope, nodeScopes, nextSeen, callback);
+  }
+}
+
+function staticStringValues(node, scope, nodeScopes, seenBindings = new Set()) {
+  const output = [];
+  visitResolvedStaticNodes(node, scope, nodeScopes, seenBindings, (resolved) => {
+    if (resolved.type === "StringLiteral") output.push(resolved.value);
+    if (resolved.type === "TemplateLiteral" && resolved.expressions?.length === 0) {
+      output.push(resolved.quasis?.[0]?.value?.cooked ?? resolved.quasis?.[0]?.value?.raw ?? "");
+    }
+  });
+  return [...new Set(output)];
+}
+
+function staticPropertyNames(property, scope, nodeScopes) {
+  if (!property) return [];
+  if (!property.computed && property.key?.type === "Identifier") return [property.key.name];
+  if (!property.computed && property.key?.type === "StringLiteral") return [property.key.value];
+  return staticStringValues(property.key, scope, nodeScopes);
+}
+
+function collectStaticStringsFromAliasValue(
+  node,
+  scope,
+  nodeScopes,
+  output,
+  seenBindings = new Set()
+) {
+  visitResolvedStaticNodes(node, scope, nodeScopes, seenBindings, (resolved, resolvedScope, nextSeen) => {
+    if (resolved.type === "StringLiteral") {
+      output.push(resolved.value);
+      return;
+    }
+    if (resolved.type === "TemplateLiteral" && resolved.expressions?.length === 0) {
+      output.push(resolved.quasis?.[0]?.value?.cooked ?? resolved.quasis?.[0]?.value?.raw ?? "");
+      return;
+    }
+    if (resolved.type === "ObjectExpression") {
+      for (const property of resolved.properties ?? []) {
+        const propertyScope = nodeScopes.get(property) ?? resolvedScope;
+        if (property?.type === "ObjectProperty") {
+          collectStaticStringsFromAliasValue(
+            property.value,
+            propertyScope,
+            nodeScopes,
+            output,
+            nextSeen
+          );
+        } else if (property?.type === "SpreadElement") {
+          collectStaticStringsFromAliasValue(
+            property.argument,
+            propertyScope,
+            nodeScopes,
+            output,
+            nextSeen
+          );
+        }
+      }
+      return;
+    }
+    if (resolved.type === "ArrayExpression") {
+      for (const element of resolved.elements ?? []) {
+        collectStaticStringsFromAliasArrayEntry(
+          element,
+          nodeScopes.get(element) ?? resolvedScope,
+          nodeScopes,
+          output,
+          nextSeen
+        );
+      }
+      return;
+    }
+    for (const [key, child] of Object.entries(resolved)) {
+      if (["loc", "start", "end", "extra", "key"].includes(key)) continue;
+      if (Array.isArray(child)) {
+        for (const entry of child) {
+          collectStaticStringsFromAliasValue(
+            entry,
+            nodeScopes.get(entry) ?? resolvedScope,
+            nodeScopes,
+            output,
+            nextSeen
+          );
+        }
+      } else if (child && typeof child === "object") {
+        collectStaticStringsFromAliasValue(
+          child,
+          nodeScopes.get(child) ?? resolvedScope,
+          nodeScopes,
+          output,
+          nextSeen
+        );
+      }
+    }
+  });
+}
+
+function collectStaticStringsFromAliasArrayEntry(
+  node,
+  scope,
+  nodeScopes,
+  output,
+  seenBindings = new Set()
+) {
+  if (node?.type === "SpreadElement") {
+    collectStaticStringsFromAliasArrayEntry(
+      node.argument,
+      nodeScopes.get(node.argument) ?? scope,
+      nodeScopes,
+      output,
+      seenBindings
+    );
+    return;
+  }
+  visitResolvedStaticNodes(node, scope, nodeScopes, seenBindings, (resolved, resolvedScope, nextSeen) => {
+    if (resolved.type === "ArrayExpression") {
+      collectStaticStringsFromAliasValue(resolved, resolvedScope, nodeScopes, output, nextSeen);
+      return;
+    }
+    if (resolved.type !== "ObjectExpression") return;
+    for (const property of resolved.properties ?? []) {
+      const propertyScope = nodeScopes.get(property) ?? resolvedScope;
+      if (property?.type === "ObjectProperty"
+        && staticPropertyNames(property, propertyScope, nodeScopes).includes("replacement")) {
+        collectStaticStringsFromAliasValue(
+          property.value,
+          propertyScope,
+          nodeScopes,
+          output,
+          nextSeen
+        );
+      } else if (property?.type === "SpreadElement") {
+        collectStaticStringsFromAliasArrayEntry(
+          property.argument,
+          propertyScope,
+          nodeScopes,
+          output,
+          nextSeen
+        );
+      }
+    }
+  });
+}
+
+function extractViteAliasTargetLiterals(source) {
+  const ast = parse(source, {
+    sourceType: "unambiguous",
+    errorRecovery: false,
+    plugins: ["typescript", "jsx", "importAttributes", "topLevelAwait"]
+  });
+  const { nodeScopes, rootScope } = buildLexicalScopeIndex(ast);
+  const literals = [];
+  const visit = (node, callback) => {
+    if (!node || typeof node !== "object") return;
+    callback(node, nodeScopes.get(node) ?? rootScope);
+    for (const [key, child] of Object.entries(node)) {
+      if (["loc", "start", "end", "extra"].includes(key)) continue;
+      if (Array.isArray(child)) {
+        for (const entry of child) visit(entry, callback);
+      } else if (child && typeof child === "object") {
+        visit(child, callback);
+      }
+    }
+  };
+  const memberPaths = (node, scope) => {
+    if (node?.type === "Identifier") return [[node.name]];
+    if (node?.type !== "MemberExpression" && node?.type !== "OptionalMemberExpression") return [];
+    const objectPaths = memberPaths(node.object, nodeScopes.get(node.object) ?? scope);
+    const propertyNames = node.computed
+      ? staticStringValues(node.property, nodeScopes.get(node.property) ?? scope, nodeScopes)
+      : node.property?.type === "Identifier" ? [node.property.name] : [];
+    return objectPaths.flatMap((objectPath) => propertyNames.map((name) => [...objectPath, name]));
+  };
+  const collectAliasPropertyFromObject = (candidate, scope, seenBindings = new Set()) => {
+    visitResolvedStaticNodes(candidate, scope, nodeScopes, seenBindings, (resolved, resolvedScope, nextSeen) => {
+      if (resolved.type !== "ObjectExpression") return;
+      for (const property of resolved.properties ?? []) {
+        const propertyScope = nodeScopes.get(property) ?? resolvedScope;
+        if (property?.type === "ObjectProperty"
+          && staticPropertyNames(property, propertyScope, nodeScopes).includes("alias")) {
+          collectStaticStringsFromAliasValue(
+            property.value,
+            propertyScope,
+            nodeScopes,
+            literals,
+            nextSeen
+          );
+        } else if (property?.type === "SpreadElement") {
+          collectAliasPropertyFromObject(property.argument, propertyScope, nextSeen);
+        }
+      }
+    });
+  };
+  visit(ast, (node, scope) => {
+    if (node.type === "ObjectProperty"
+      && staticPropertyNames(node, scope, nodeScopes).includes("resolve")) {
+      collectAliasPropertyFromObject(node.value, scope);
+      return;
+    }
+    if (node.type !== "AssignmentExpression") return;
+    const assignmentPaths = memberPaths(node.left, scope);
+    for (const assignmentPath of assignmentPaths) {
+      if (assignmentPath.slice(-2).join(".") === "resolve.alias") {
+        collectStaticStringsFromAliasValue(node.right, scope, nodeScopes, literals);
+      } else if (assignmentPath.at(-1) === "resolve") {
+        collectAliasPropertyFromObject(node.right, scope);
+      }
+    }
+  });
+  return [...new Set(literals)];
+}
+
+function aliasLiteralReachesEvidenceSurface(
+  workspaceRoot,
+  aliasFile,
+  literal,
+  evidenceSurfacePaths,
+  evidenceSurfaceRealPaths
+) {
+  const normalizedLiteral = literal.replaceAll("\\", "/").split(/[?#]/u, 1)[0];
+  if ([...evidenceSurfacePaths].some((surfacePath) =>
+    normalizedLiteral === surfacePath || normalizedLiteral.endsWith(`/${surfacePath}`))) {
+    return true;
+  }
+  const candidates = [];
+  if (/^file:/iu.test(literal)) {
+    const resolved = resolveFileUrlModule(literal);
+    if (resolved) candidates.push(resolved);
+  } else {
+    const cleanLiteral = literal.split(/[?#]/u, 1)[0];
+    if (path.isAbsolute(cleanLiteral)) {
+      candidates.push(cleanLiteral);
+    } else if (cleanLiteral.startsWith(".")) {
+      candidates.push(path.resolve(path.dirname(aliasFile), cleanLiteral));
+    } else if (cleanLiteral.startsWith("scripts/") || cleanLiteral.startsWith("scripts\\")) {
+      candidates.push(path.resolve(workspaceRoot, cleanLiteral));
+    }
+  }
+  return candidates.some((candidate) => {
+    const physical = realPathIfExisting(candidate) ?? path.resolve(candidate);
+    if (evidenceSurfaceRealPaths.has(physical)) return true;
+    const candidateRelativePath = relative(workspaceRoot, physical);
+    return evidenceSurfacePaths.has(candidateRelativePath);
+  });
+}
+
+function aliasLiteralReachesDraft(workspaceRoot, aliasFile, literal, draft, draftRoot) {
+  const normalizedLiteral = literal.replaceAll("\\", "/").split(/[?#]/u, 1)[0];
+  if (normalizedLiteral === draft.packageName
+    || normalizedLiteral.startsWith(`${draft.packageName}/`)
+    || normalizedLiteral === draft.directoryName
+    || normalizedLiteral.endsWith(`/${draft.directoryName}`)
+    || normalizedLiteral.includes(`/${draft.directoryName}/`)) {
+    return true;
+  }
+  const candidates = [];
+  if (/^file:/iu.test(literal)) {
+    const resolved = resolveFileUrlModule(literal);
+    if (resolved) candidates.push(resolved);
+  } else {
+    const cleanLiteral = literal.split(/[?#]/u, 1)[0];
+    if (path.isAbsolute(cleanLiteral)) {
+      candidates.push(cleanLiteral);
+    } else if (cleanLiteral.startsWith(".")) {
+      candidates.push(path.resolve(path.dirname(aliasFile), cleanLiteral));
+    } else if (cleanLiteral.startsWith("packages/") || cleanLiteral.startsWith("packages\\")) {
+      candidates.push(path.resolve(workspaceRoot, cleanLiteral));
+    }
+  }
+  return candidates.some((candidate) => {
+    const physical = realPathIfExisting(candidate) ?? path.resolve(candidate);
+    return isSameOrWithin(draftRoot, physical);
+  });
 }
 
 function wildcardCaptures(pattern, value) {
@@ -901,6 +1652,7 @@ function inspectAdapterBrowserPreviewBoundary(workspaceRoot, adapterRoot, adapte
   const snapshotEmitterPath = path.join(previewRoot, "emit-rule-snapshot.mjs");
   const previewHtmlPath = path.join(previewRoot, "index.html");
   const previewTsconfigPath = path.join(adapterRoot, "tsconfig.browser-preview.json");
+  const licensePath = path.join(adapterRoot, "licenses", "iztro-2.5.8-LICENSE.txt");
   const expectedEmitterTarget = path.join(adapterSourceRoot, "index.ts");
   const expectedHtmlTarget = path.join(adapterSourceRoot, "browser-preview", "main.ts");
   const browserWorkerPath = path.join(adapterSourceRoot, "browser-preview", "browser-worker.ts");
@@ -918,6 +1670,8 @@ function inspectAdapterBrowserPreviewBoundary(workspaceRoot, adapterRoot, adapte
     "src/browser-preview/browser-protocol.ts",
     "src/browser-preview/browser-worker.ts",
     "src/browser-preview/display-projection.ts",
+    "src/browser-preview/high-risk-expression-egress-policy.ts",
+    "src/browser-preview/high-risk-expression-egress-view.ts",
     "src/browser-preview/main-response-gate.ts",
     "src/browser-preview/main.ts",
     "src/contract-bridge.ts",
@@ -938,6 +1692,7 @@ function inspectAdapterBrowserPreviewBoundary(workspaceRoot, adapterRoot, adapte
     snapshotEmitterPath,
     previewHtmlPath,
     previewTsconfigPath,
+    licensePath,
     expectedHtmlTarget,
     browserWorkerPath,
     browserClientPath,
@@ -950,7 +1705,7 @@ function inspectAdapterBrowserPreviewBoundary(workspaceRoot, adapterRoot, adapte
     }
   }
   if (![viteConfigPath, snapshotEmitterPath, previewHtmlPath, previewTsconfigPath, expectedHtmlTarget,
-    browserWorkerPath, browserClientPath, snapshotSentinelPath, sourceIdentitySentinelPath]
+    browserWorkerPath, browserClientPath, snapshotSentinelPath, sourceIdentitySentinelPath, licensePath]
     .every((entry) => fs.existsSync(entry))) {
     return;
   }
@@ -978,6 +1733,26 @@ function inspectAdapterBrowserPreviewBoundary(workspaceRoot, adapterRoot, adapte
     || !configSource.includes("readFileSync")
     || !/worker\s*:\s*\{[\s\S]*?plugins\s*:/u.test(maskJavaScriptComments(configSource))) {
     record(`${relative(workspaceRoot, viteConfigPath)} must inject the fixed rule snapshot and Browser source identity through the dedicated main/Worker plugin chains`);
+  }
+  const requiredNoticeMarkers = [
+    'const iztroLicenseAssetFile = "licenses/iztro-2.5.8-LICENSE.txt"',
+    'const buildInputAttestationAssetFile = "build-attestations/ziwei-iztro-license-inputs.v1.json"',
+    'sha256: "e6c7b6e313cbda3135b41bccc66c98be132cb8319d0d465903d17e669e748b36"',
+    "export function createIztroLicenseNoticePlugin(surfaceId)",
+    "export function createZiweiBrowserPreviewMainPlugins()",
+    'name: "hakimi-ziwei-iztro-top-level-license"',
+    'enforce: "pre"',
+    "buildStart()",
+    "generateBundle()",
+    "fileName: iztroLicenseAssetFile",
+    "source: heldLicenseBytes",
+    "fileName: buildInputAttestationAssetFile",
+    "source: heldAttestationBytes",
+    "base: \"./\"",
+    'plugins: [createIztroLicenseNoticePlugin("browser-preview"), ...createZiweiBrowserPreviewMainPlugins()]'
+  ];
+  if (requiredNoticeMarkers.some((marker) => !maskJavaScriptComments(configSource).includes(marker))) {
+    record(`${relative(workspaceRoot, viteConfigPath)} must verify and emit the exact held iztro 2.5.8 top-level license on the main build chain`);
   }
   for (const sourcePath of browserSourceGraphRelativePaths) {
     if (!configSource.includes(`\"${sourcePath}\"`)) {
@@ -1019,6 +1794,15 @@ function inspectAdapterBrowserPreviewBoundary(workspaceRoot, adapterRoot, adapte
   const htmlSource = fs.readFileSync(previewHtmlPath, "utf8");
   if (!/http-equiv=["']Content-Security-Policy["']/iu.test(htmlSource)) {
     record(`${relative(workspaceRoot, previewHtmlPath)} must keep a same-origin Content-Security-Policy`);
+  }
+  if (!hasExactIztroLicenseLink(htmlSource)) {
+    record(`${relative(workspaceRoot, previewHtmlPath)} must expose exactly one same-origin iztro 2.5.8 top-level license link with no base redirect`);
+  }
+  const licenseBytes = fs.readFileSync(licensePath);
+  const licenseSha256 = createHash("sha256").update(licenseBytes).digest("hex");
+  if (licenseBytes.byteLength !== 1073
+    || licenseSha256 !== "e6c7b6e313cbda3135b41bccc66c98be132cb8319d0d465903d17e669e748b36") {
+    record(`${relative(workspaceRoot, licensePath)} must keep the exact 1073-byte iztro 2.5.8 top-level license copy`);
   }
   const htmlSpecifiers = extractHtmlModuleSpecifiers(htmlSource);
   if (htmlSpecifiers.length !== 1) {
@@ -1108,6 +1892,9 @@ function inspectZiweiWorkspaceBrowserAppBoundary(
     || !/form-action 'none'/u.test(htmlSource)) {
     record(`${relative(workspaceRoot, htmlPath)} must keep the fixed offline, same-origin Content-Security-Policy`);
   }
+  if (!hasExactIztroLicenseLink(htmlSource)) {
+    record(`${relative(workspaceRoot, htmlPath)} must expose exactly one same-origin iztro 2.5.8 top-level license link with no base redirect`);
+  }
   const htmlSpecifiers = extractHtmlModuleSpecifiers(htmlSource);
   const expectedHtmlTarget = realPathIfExisting(mainPath) ?? mainPath;
   if (htmlSpecifiers.length !== 1
@@ -1138,8 +1925,11 @@ function inspectZiweiWorkspaceBrowserAppBoundary(
     }
   }
   if (!configSpecifiers.includes("../ziwei-iztro-adapter-draft/vite.browser-preview.config.mjs")
-    || !configSource.includes("adapterBrowserPreviewConfig.plugins")
+    || !configSource.includes("createIztroLicenseNoticePlugin")
+    || !configSource.includes("createZiweiBrowserPreviewMainPlugins")
+    || !configSource.includes('plugins: [createIztroLicenseNoticePlugin("browser-workspace"), ...createZiweiBrowserPreviewMainPlugins()]')
     || !configSource.includes("adapterBrowserPreviewConfig.worker")
+    || !configSource.includes('base: "./"')
     || !configSource.includes("const appRoot = path.join(packageRoot, \"browser-app\")")
     || !configSource.includes("path.join(packageRoot, \"dist\", \"browser-app\")")
     || /\balias\s*:/u.test(maskJavaScriptComments(configSource))) {
@@ -1268,18 +2058,23 @@ function inspectWesternRulesPreviewBoundary(workspaceRoot, packageRoot, sourceRo
   const scriptPattern = /<script\b((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<\/script\s*>/giu;
   const appRoot = path.join(packageRoot, "browser-app");
   const htmlPath = path.join(appRoot, "index.html");
+  const viteConfigPath = path.join(packageRoot, "vite.rules-preview.config.mjs");
+  const licensePath = path.join(packageRoot, "licenses", "astronomy-engine-2.1.19-LICENSE.txt");
   const mainPath = path.join(sourceRoot, "browser-app", "main.ts");
   const clientPath = path.join(sourceRoot, "browser-client.ts");
   const bridgePath = path.join(sourceRoot, "rule-layer-bridge.ts");
-  const requiredPaths = [htmlPath, mainPath, clientPath, bridgePath];
+  const requiredPaths = [htmlPath, viteConfigPath, licensePath, mainPath, clientPath, bridgePath];
   if (!requiredPaths.every((entry) => fs.existsSync(entry) && fs.statSync(entry).isFile())) {
-    record(`${relative(workspaceRoot, packageRoot)} requires browser-app/index.html, src/browser-app/main.ts, src/browser-client.ts and src/rule-layer-bridge.ts`);
+    record(`${relative(workspaceRoot, packageRoot)} requires its Browser entry, fixed Vite license emitter, exact local license, Worker client and rule-layer bridge`);
     return;
   }
 
   const htmlSource = fs.readFileSync(htmlPath, "utf8");
   if (!htmlSource.includes("connect-src 'none'") || !htmlSource.includes("worker-src 'self'")) {
     record(`${relative(workspaceRoot, htmlPath)} must forbid external network access and restrict workers to self`);
+  }
+  if (!hasExactAstronomyEngineLicenseLink(htmlSource)) {
+    record(`${relative(workspaceRoot, htmlPath)} must expose exactly one same-origin Astronomy Engine 2.1.19 license link with no base redirect`);
   }
   const scripts = [...htmlSource.matchAll(scriptPattern)];
   const htmlSpecifiers = extractHtmlModuleSpecifiers(htmlSource);
@@ -1290,6 +2085,44 @@ function inspectWesternRulesPreviewBoundary(workspaceRoot, packageRoot, sourceRo
     || htmlSpecifiers.length !== 1
     || resolveRelativeModule(htmlPath, htmlSpecifiers[0] ?? "") !== expectedHtmlTarget) {
     record(`${relative(workspaceRoot, htmlPath)} must expose exactly one empty inline-body module script targeting ${relative(workspaceRoot, mainPath)}`);
+  }
+
+  const viteSource = maskJavaScriptComments(fs.readFileSync(viteConfigPath, "utf8"));
+  const expectedViteImports = ["node:crypto", "node:fs", "node:path", "node:url"];
+  const viteImports = [...new Set(extractModuleSpecifiers(viteSource))].sort();
+  const requiredViteMarkers = [
+    'const engineEsmPath = fileURLToPath(import.meta.resolve("astronomy-engine"))',
+    'const enginePackageJsonPath = path.resolve(path.dirname(engineEsmPath), "..", "package.json")',
+    'const licensePath = path.join(packageRoot, "licenses", "astronomy-engine-2.1.19-LICENSE.txt")',
+    'const licenseAssetFile = "licenses/astronomy-engine-2.1.19-LICENSE.txt"',
+    'sha256: "068f1445ed0c636c94818fe6d20d7d125120e605e0bab9fc4675c3d531be5ad7"',
+    'sha256: "690dd98cb13ba4db77c6327deea852a816892bb9debbad5943405c66972f8023"',
+    'name: "hakimi-western-astronomy-engine-license"',
+    'enforce: "pre"',
+    "buildStart()",
+    'if (expected.path === engineEsmPath) verifiedEngineEsmSource = Buffer.from(bytes).toString("utf8")',
+    'if (expected.path === licensePath) verifiedLicenseBytes = Buffer.from(bytes)',
+    "function isolatedHeldAstronomyEnginePlugin()",
+    'name: "hakimi-western-held-astronomy-engine-source"',
+    "heldEngineEsmSource = verifyLockedBuildInputs().engineEsmSource",
+    "resolveId(id)",
+    'return id === "astronomy-engine" ? engineEsmPath : null',
+    "load(id)",
+    "portablePath(id) !== portablePath(engineEsmPath)",
+    "heldEngineSourceServed = true",
+    "generateBundle()",
+    "fileName: licenseAssetFile",
+    "source: heldLicenseBytes",
+    "plugins: [emitAstronomyEngineLicensePlugin()]",
+    "plugins: () => [isolatedHeldAstronomyEnginePlugin()]"
+  ];
+  if (canonicalJson(viteImports) !== canonicalJson(expectedViteImports)
+    || requiredViteMarkers.some((marker) => !viteSource.includes(marker))) {
+    record(`${relative(workspaceRoot, viteConfigPath)} must verify the locked engine and license bytes and emit the held standalone license asset`);
+  }
+  const licenseBytes = fs.readFileSync(licensePath);
+  if (licenseBytes.byteLength !== 1095) {
+    record(`${relative(workspaceRoot, licensePath)} must keep the exact 1095-byte Astronomy Engine 2.1.19 license copy`);
   }
 
   const mainSource = maskJavaScriptComments(fs.readFileSync(mainPath, "utf8"));
@@ -1338,6 +2171,7 @@ function inspectAstronomyEngineBrowserParityBoundary(workspaceRoot, adapterRoot,
   const generatedReferencePath = path.join(paritySourceRoot, "generated-node-reference.ts");
   const sourceLockPath = path.join(adapterSourceRoot, "astronomy-engine-2.1.19-source-lock.json");
   const deltaTLockPath = path.join(adapterSourceRoot, "delta-t-model-lock.json");
+  const licensePath = path.join(adapterRoot, "licenses", "astronomy-engine-2.1.19-LICENSE.txt");
   const requiredPaths = [
     viteConfigPath,
     emitterPath,
@@ -1351,7 +2185,8 @@ function inspectAstronomyEngineBrowserParityBoundary(workspaceRoot, adapterRoot,
     stableProjectionPath,
     generatedReferencePath,
     sourceLockPath,
-    deltaTLockPath
+    deltaTLockPath,
+    licensePath
   ];
   for (const requiredPath of requiredPaths) {
     if (!fs.existsSync(requiredPath) || !fs.statSync(requiredPath).isFile()) {
@@ -1404,11 +2239,13 @@ function inspectAstronomyEngineBrowserParityBoundary(workspaceRoot, adapterRoot,
     'const engineEsmPath = fileURLToPath(import.meta.resolve("astronomy-engine"))',
     'const sourceLockPath = path.join(packageRoot, "src", "astronomy-engine-2.1.19-source-lock.json")',
     'const deltaTLockPath = path.join(packageRoot, "src", "delta-t-model-lock.json")',
+    'const licensePath = path.join(packageRoot, "licenses", "astronomy-engine-2.1.19-LICENSE.txt")',
+    'const licenseAssetFile = "licenses/astronomy-engine-2.1.19-LICENSE.txt"',
     'const generatedReferenceSpecifier = "./generated-node-reference.ts"',
     'const generatedReferenceModule = "\\0hakimi:western-browser-node-reference"',
     'name: "hakimi-western-isolated-node-reference"',
     "buildStart()",
-    "verifyLockedBuildInputs();",
+    "const heldInputs = verifyLockedBuildInputs()",
     "resolveId(id, importer)",
     "portablePath(importer) !== portablePath(mainModule)",
     "load(id)",
@@ -1416,7 +2253,20 @@ function inspectAstronomyEngineBrowserParityBoundary(workspaceRoot, adapterRoot,
     "execFileSync(",
     '[path.join(previewRoot, "emit-node-reference.mjs")]',
     "return `export default ${generatedReferenceSource};`;",
-    "plugins: [isolatedNodeReferencePlugin()]"
+    'sha256: "690dd98cb13ba4db77c6327deea852a816892bb9debbad5943405c66972f8023"',
+    "verifiedEngineEsmBytes = Buffer.from(bytes)",
+    "verifiedLicenseBytes = Buffer.from(bytes)",
+    "function isolatedHeldAstronomyEnginePlugin()",
+    'name: "hakimi-western-held-astronomy-engine-source"',
+    "heldEngineEsmSource = verifyLockedBuildInputs().engineEsmSource",
+    'return id === "astronomy-engine" ? engineEsmPath : null',
+    "portablePath(id) !== portablePath(engineEsmPath)",
+    "heldEngineSourceServed = true",
+    "generateBundle()",
+    "fileName: licenseAssetFile",
+    "source: heldLicenseBytes",
+    "plugins: [isolatedNodeReferencePlugin()]",
+    "plugins: () => [isolatedHeldAstronomyEnginePlugin()]"
   ];
   if (requiredViteMarkers.some((marker) => !viteSource.includes(marker))) {
     record(`${relative(workspaceRoot, viteConfigPath)} must replace the fail-closed generated reference only for the fixed main module by replaying the fixed Node emitter`);
@@ -1491,6 +2341,9 @@ function inspectAstronomyEngineBrowserParityBoundary(workspaceRoot, adapterRoot,
   }
   if (canonicalJson(actualCsp) !== canonicalJson(expectedCsp)) {
     record(`${relative(workspaceRoot, htmlPath)} must keep the exact same-origin, no-connect Browser parity Content-Security-Policy`);
+  }
+  if (!hasExactAstronomyEngineLicenseLink(htmlSource)) {
+    record(`${relative(workspaceRoot, htmlPath)} must expose exactly one same-origin Astronomy Engine 2.1.19 license link with no base redirect`);
   }
   const scriptPattern = /<script\b((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<\/script\s*>/giu;
   const scripts = [...htmlSource.matchAll(scriptPattern)];
@@ -1916,12 +2769,104 @@ export function verifySystemContractDraftBoundaries(
   workspaceRootInput = defaultWorkspaceRoot,
   registryInput = defaultDraftRegistry
 ) {
-  const workspaceRoot = fs.realpathSync(path.resolve(workspaceRootInput));
   const failures = [];
   const record = (message) => failures.push(message);
+  if (registryInput === defaultDraftRegistry) {
+    for (const failure of defaultRegistryCompositionFailures) record(failure);
+  }
+  const requestedWorkspaceRoot = path.resolve(workspaceRootInput);
+  if (fs.lstatSync(requestedWorkspaceRoot).isSymbolicLink()) {
+    record("workspace root must not be a symbolic link or junction");
+  }
+  const workspaceRoot = fs.realpathSync(requestedWorkspaceRoot);
+  inspectWorkspaceLinks(workspaceRoot, workspaceRoot, record);
+  for (const restrictedPath of knownRestrictedSourcePaths) {
+    const absoluteRestrictedPath = path.resolve(workspaceRoot, ...restrictedPath.split("/"));
+    if (fs.existsSync(absoluteRestrictedPath)) {
+      record(`${restrictedPath} is a known restricted source and was not inspected by the draft boundary check`);
+    }
+  }
   const draftPackages = validateDraftRegistry(registryInput, record).filter((draft) =>
     draft && typeof draft.directoryName === "string" && typeof draft.packageName === "string"
   );
+  const specializedIsolatedRoots = [];
+  const westernCivilFactBrowserRoot = path.resolve(
+    workspaceRoot,
+    ...WESTERN_CIVIL_TIME_FACT_BROWSER_DRAFT.split("/")
+  );
+  if (fs.existsSync(westernCivilFactBrowserRoot)) {
+    try {
+      verifyWesternCivilTimeFactBrowserObservation(workspaceRoot);
+      specializedIsolatedRoots.push(
+        realPathIfExisting(westernCivilFactBrowserRoot) ?? westernCivilFactBrowserRoot
+      );
+    } catch (cause) {
+      record(
+        `${WESTERN_CIVIL_TIME_FACT_BROWSER_DRAFT} fails its specialized isolated boundary: `
+          + `${cause instanceof Error ? cause.message : String(cause)}`
+      );
+    }
+  }
+  const evidenceTools = validateEvidenceTools(registryInput, draftPackages, record);
+  const evidenceToolByPath = new Map(evidenceTools.map((tool) => [tool.path, tool]));
+  const evidenceImportPolicyByPath = new Map();
+  const evidenceEntrypointOwnerByPath = new Map();
+  const evidenceToolByRealPath = new Map();
+  const evidenceEntrypointOwnerByRealPath = new Map();
+  const evidenceSurfacePathByRealPath = new Map();
+  const evidenceSurfacePaths = new Set();
+  const evidenceSurfaceRealPaths = new Set();
+  for (const tool of evidenceTools) {
+    evidenceImportPolicyByPath.set(tool.path, {
+      allowedBareImports: tool.allowedBareImports,
+      allowedLocalTargets: [...tool.allowedDraftTargets, ...tool.allowedScriptTargets]
+    });
+    for (const policy of tool.scriptDependencyPolicies ?? []) {
+      if (isSafeRegistryRelativePath(policy.path)
+        && policy.path.startsWith("scripts/") && policy.path.endsWith(".mjs")) {
+        evidenceImportPolicyByPath.set(policy.path, policy);
+      }
+    }
+    for (const caller of tool.allowedCallers ?? []) {
+      evidenceEntrypointOwnerByPath.set(caller, tool.path);
+    }
+    const dependencyPaths = (tool.scriptDependencyPolicies ?? []).map((policy) => policy.path);
+    for (const evidencePath of [tool.path, ...(tool.allowedCallers ?? []), ...dependencyPaths]) {
+      if (!isSafeRegistryRelativePath(evidencePath)
+        || !evidencePath.startsWith("scripts/") || !evidencePath.endsWith(".mjs")) {
+        continue;
+      }
+      evidenceSurfacePaths.add(evidencePath);
+      const absoluteEvidencePath = path.resolve(workspaceRoot, ...evidencePath.split("/"));
+      if (!fs.existsSync(absoluteEvidencePath)) {
+        record(`registered evidence-only path is missing: ${evidencePath}`);
+        continue;
+      }
+      if (!fs.statSync(absoluteEvidencePath).isFile()) {
+        record(`registered evidence-only path is not a file: ${evidencePath}`);
+        continue;
+      }
+      const realEvidencePath = fs.realpathSync(absoluteEvidencePath);
+      if (!isSameOrWithin(workspaceRoot, realEvidencePath)) {
+        record(`registered evidence-only path escapes the workspace: ${evidencePath}`);
+        continue;
+      }
+      const canonicalEvidencePath = relative(workspaceRoot, realEvidencePath);
+      if (canonicalEvidencePath !== evidencePath) {
+        record(`registered evidence-only path must use its canonical workspace identity: ${evidencePath} -> ${canonicalEvidencePath}`);
+      }
+      const duplicatePath = evidenceSurfacePathByRealPath.get(realEvidencePath);
+      if (duplicatePath && duplicatePath !== evidencePath) {
+        record(`registered evidence-only paths ${duplicatePath} and ${evidencePath} resolve to the same file`);
+      }
+      evidenceSurfacePathByRealPath.set(realEvidencePath, evidencePath);
+      evidenceSurfaceRealPaths.add(realEvidencePath);
+      if (evidencePath === tool.path) evidenceToolByRealPath.set(realEvidencePath, tool);
+      if (tool.allowedCallers?.includes(evidencePath)) {
+        evidenceEntrypointOwnerByRealPath.set(realEvidencePath, tool.path);
+      }
+    }
+  }
   const packageDirectories = draftPackages.map((draft) => path.join(workspaceRoot, "packages", draft.directoryName));
   const draftRoots = packageDirectories.map((directory) => realPathIfExisting(directory) ?? path.resolve(directory));
   const draftByDirectory = new Map(draftPackages.map((draft) => [draft.directoryName, draft]));
@@ -2029,6 +2974,10 @@ export function verifySystemContractDraftBoundaries(
         }
         if (draft.allowedBareImports.includes(specifier)) continue;
         if (specifier === "vitest" && /\.test\.[cm]?[jt]sx?$/u.test(sourceFile)) continue;
+        if (specifier === "fake-indexeddb"
+          && /\.test\.[cm]?[jt]sx?$/u.test(sourceFile)
+          && Array.isArray(draft.specialChecks)
+          && draft.specialChecks.includes("fake-indexeddb-test-only-v1")) continue;
         if (specifier.startsWith("./") || specifier.startsWith("../")) {
           const resolved = resolveRelativeModule(sourceFile, specifier);
           if (!resolved) {
@@ -2092,21 +3041,30 @@ export function verifySystemContractDraftBoundaries(
 
   const productionFiles = listFiles(workspaceRoot, workspaceRoot, (filePath) => {
     if (!codeFilePattern.test(filePath) && path.extname(filePath).toLowerCase() !== ".html") return false;
+    if (knownRestrictedSourcePaths.has(relative(workspaceRoot, filePath))) return false;
     const realPath = fs.realpathSync(filePath);
     if (verifierFiles.has(realPath)) return false;
-    return !activeDraftRoots.some((draftRoot) => isSameOrWithin(draftRoot, realPath));
+    return !activeDraftRoots.some((draftRoot) => isSameOrWithin(draftRoot, realPath))
+      && !specializedIsolatedRoots.some((draftRoot) => isSameOrWithin(draftRoot, realPath));
   });
 
   for (const sourceFile of productionFiles) {
     const source = fs.readFileSync(sourceFile, "utf8");
+    const sourceRelativePath = relative(workspaceRoot, sourceFile);
+    const evidenceToolPolicy = evidenceToolByPath.get(sourceRelativePath);
+    const evidenceImportPolicy = evidenceImportPolicyByPath.get(sourceRelativePath);
+    const isRuntimeSource = sourceRelativePath.startsWith("apps/")
+      || sourceRelativePath.startsWith("packages/");
     const isHtml = path.extname(sourceFile).toLowerCase() === ".html";
     const moduleLoads = isHtml ? scanHtmlModuleLoadCalls(source) : scanModuleLoadCalls(source);
     for (const moduleLoad of moduleLoads.filter((entry) => entry.nonLiteral)) {
       record(`${relative(workspaceRoot, sourceFile)} uses non-literal ${moduleLoad.kind} module loading`);
     }
-    const specifiers = isHtml
+    const extractedSpecifiers = isHtml
       ? extractHtmlModuleSpecifiers(source)
       : extractModuleSpecifiers(source, moduleLoads);
+    if (!isHtml) extractedSpecifiers.push(...extractStaticImportMetaUrlSpecifiers(source));
+    const specifiers = [...new Set(extractedSpecifiers)];
     for (const specifier of specifiers) {
       const forbiddenPackage = draftPackages.find((draft) =>
         specifier === draft.packageName || specifier.startsWith(`${draft.packageName}/`)
@@ -2115,13 +3073,57 @@ export function verifySystemContractDraftBoundaries(
         record(`${relative(workspaceRoot, sourceFile)} imports isolated draft ${forbiddenPackage.packageName}`);
         continue;
       }
-      if (specifier.startsWith("./") || specifier.startsWith("../") || specifier.startsWith("/")) {
-        const resolved = resolveWorkspaceModule(sourceFile, specifier);
+      const localSpecifier = isLocalModuleSpecifier(specifier);
+      if (evidenceImportPolicy && !localSpecifier
+        && !evidenceImportPolicy.allowedBareImports.includes(specifier)) {
+        record(`${sourceRelativePath} imports unregistered bare module ${specifier}`);
+        continue;
+      }
+      if (localSpecifier) {
+        const resolved = resolveWorkspaceModule(workspaceRoot, sourceFile, specifier);
+        const resolvedRelativePath = resolved ? relative(workspaceRoot, resolved) : null;
+        const referencedEvidenceTool = resolved
+          ? evidenceToolByRealPath.get(resolved)
+          : resolvedRelativePath
+            ? evidenceToolByPath.get(resolvedRelativePath)
+            : null;
+        if (referencedEvidenceTool) {
+          if (!referencedEvidenceTool.allowedCallers.includes(sourceRelativePath)) {
+            record(`${sourceRelativePath} imports evidence-only tool ${referencedEvidenceTool.path}`);
+          }
+          continue;
+        }
+        const referencedEntrypointOwner = resolved
+          ? evidenceEntrypointOwnerByRealPath.get(resolved)
+          : resolvedRelativePath
+            ? evidenceEntrypointOwnerByPath.get(resolvedRelativePath)
+            : null;
+        if (referencedEntrypointOwner) {
+          record(`${sourceRelativePath} imports evidence-only entrypoint ${resolvedRelativePath}`);
+          continue;
+        }
+        const referencedEvidenceSurface = resolved
+          ? evidenceSurfacePathByRealPath.get(resolved)
+          : null;
+        if (isRuntimeSource && referencedEvidenceSurface) {
+          record(`${sourceRelativePath} imports evidence audit surface ${referencedEvidenceSurface}`);
+          continue;
+        }
+        if (evidenceImportPolicy && !resolved) {
+          record(`${sourceRelativePath} imports unresolved local target ${specifier}`);
+          continue;
+        }
+        if (evidenceImportPolicy && resolvedRelativePath
+          && !evidenceImportPolicy.allowedLocalTargets.includes(resolvedRelativePath)) {
+          record(`${sourceRelativePath} imports unregistered local target ${resolvedRelativePath}`);
+          continue;
+        }
         const draftIndex = resolved
           ? activeDraftRoots.findIndex((draftRoot) => isSameOrWithin(draftRoot, resolved))
           : -1;
         if (draftIndex >= 0) {
-          record(`${relative(workspaceRoot, sourceFile)} resolves into isolated draft ${activeDrafts[draftIndex].packageName}`);
+          if (evidenceToolPolicy?.allowedDraftTargets.includes(resolvedRelativePath)) continue;
+          record(`${sourceRelativePath} resolves into isolated draft ${activeDrafts[draftIndex].packageName}`);
         }
       }
     }
@@ -2154,18 +3156,55 @@ export function verifySystemContractDraftBoundaries(
   const executableAliasFiles = listFiles(workspaceRoot, workspaceRoot, (filePath) =>
     /(?:vite|vitest|playwright).*\.(?:[cm]?[jt]s)$/u.test(path.basename(filePath))
   );
-  const allowedIsolatedViteBridge = realPathIfExisting(path.join(
-    workspaceRoot,
-    "packages",
-    "ziwei-workspace-artifact-draft",
-    "vite.browser-app.config.mjs"
-  ));
+  const allowedIsolatedViteBridges = new Set([
+    realPathIfExisting(path.join(
+      workspaceRoot,
+      "packages",
+      "ziwei-iztro-adapter-draft",
+      "vite.browser-preview.config.mjs"
+    )),
+    realPathIfExisting(path.join(
+      workspaceRoot,
+      "packages",
+      "ziwei-workspace-artifact-draft",
+      "vite.browser-app.config.mjs"
+    ))
+  ].filter(Boolean));
   for (const aliasFile of executableAliasFiles) {
-    if (allowedIsolatedViteBridge && fs.realpathSync(aliasFile) === allowedIsolatedViteBridge) continue;
     const sourceWithoutComments = maskJavaScriptComments(fs.readFileSync(aliasFile, "utf8"));
-    for (const draft of draftPackages) {
-      if (sourceWithoutComments.includes(draft.packageName) || sourceWithoutComments.includes(draft.directoryName)) {
-        record(`${relative(workspaceRoot, aliasFile)} must not alias isolated draft ${draft.packageName}`);
+    if (!allowedIsolatedViteBridges.has(fs.realpathSync(aliasFile))) {
+      for (const draft of draftPackages) {
+        if (sourceWithoutComments.includes(draft.packageName) || sourceWithoutComments.includes(draft.directoryName)) {
+          record(`${relative(workspaceRoot, aliasFile)} must not alias isolated draft ${draft.packageName}`);
+        }
+      }
+    }
+    let aliasTargetLiterals = [];
+    try {
+      aliasTargetLiterals = extractViteAliasTargetLiterals(fs.readFileSync(aliasFile, "utf8"));
+    } catch (cause) {
+      record(`${relative(workspaceRoot, aliasFile)} cannot be statically parsed for Vite alias governance: ${cause instanceof Error ? cause.message : String(cause)}`);
+    }
+    for (const literal of aliasTargetLiterals) {
+      draftPackages.forEach((draft, draftIndex) => {
+        if (aliasLiteralReachesDraft(
+          workspaceRoot,
+          aliasFile,
+          literal,
+          draft,
+          draftRoots[draftIndex]
+        )) {
+          record(`${relative(workspaceRoot, aliasFile)} must not alias isolated draft ${draft.packageName}`);
+        }
+      });
+      if (aliasLiteralReachesEvidenceSurface(
+        workspaceRoot,
+        aliasFile,
+        literal,
+        evidenceSurfacePaths,
+        evidenceSurfaceRealPaths
+      )) {
+        record(`${relative(workspaceRoot, aliasFile)} must not alias evidence audit surface ${literal}`);
       }
     }
   }

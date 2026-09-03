@@ -10,5 +10,9 @@
     "apps/web/vite.production-v14.config.ts",
     "apps/web/vitest.config.ts",
     "packages/*/src"
+  ],
+  "exclude": [
+    "apps/web/e2e/storage-v13-matrix-candidate.spec.ts",
+    "apps/web/e2e/storage-v13-native-readonly.ts"
   ]
 }

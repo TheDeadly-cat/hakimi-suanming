@@ -3169,6 +3169,382 @@ export const sourceRightsRecordSchema = z.strictObject({
   }
 });
 
+export const SOURCE_CARRIER_SCHEMA_VERSION = "1.0.0" as const;
+
+export const sourceCarrierRecordSchema = z.strictObject({
+  schemaVersion: z.literal(SOURCE_CARRIER_SCHEMA_VERSION),
+  recordType: z.literal("knowledge_source_carrier"),
+  carrierId: z.string().uuid(),
+  documentId: z.string().uuid(),
+  documentContentHash: sha256Schema,
+  carrierType: z.enum([
+    "physical_book",
+    "public_scan",
+    "licensed_scan",
+    "website",
+    "commercial_database",
+    "private_transcription",
+    "ocr_output",
+    "link_only"
+  ]),
+  provider: canonicalShortTextSchema(300),
+  sourceUrl: z.string().url().max(2_000).nullable(),
+  acquiredAt: z.string().datetime(),
+  accessMethod: canonicalShortTextSchema(500),
+  contentDigest: sha256Schema.nullable(),
+  imageDigest: sha256Schema.nullable(),
+  ocrDigest: sha256Schema.nullable(),
+  rights: z.strictObject({
+    status: z.enum([
+      "public_domain",
+      "licensed",
+      "restricted",
+      "unknown",
+      "project_original_verified"
+    ]),
+    jurisdiction: canonicalShortTextSchema(200).nullable(),
+    licenseId: canonicalShortTextSchema(200).nullable(),
+    copyrightNotice: z.string().max(2_000),
+    reproductionAllowed: z.boolean(),
+    quotationAllowed: z.boolean(),
+    redistributionAllowed: z.boolean(),
+    evidenceRefs: z.array(z.string().url().max(2_000)).max(100)
+  }),
+  storagePolicy: z.enum(["public_repo", "private_vault", "link_only", "do_not_store"]),
+  review: z.strictObject({
+    status: z.enum(["unreviewed", "single_reviewed", "double_reviewed"]),
+    attestations: z.array(reviewAttestationSchema).max(20),
+    note: z.string().max(4_000)
+  }),
+  editVersion: z.number().int().positive(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime()
+}).superRefine((value, context) => {
+  if (value.updatedAt < value.createdAt) {
+    context.addIssue({ code: "custom", path: ["updatedAt"], message: "updatedAt 不能早于 createdAt" });
+  }
+  const reviewers = new Set(value.review.attestations.map((item) => item.reviewerId));
+  if (reviewers.size !== value.review.attestations.length) {
+    context.addIssue({ code: "custom", path: ["review", "attestations"], message: "同一载体复核身份不能重复签署" });
+  }
+  const expectedReviewStatus = reviewers.size >= 2
+    ? "double_reviewed"
+    : reviewers.size === 1
+      ? "single_reviewed"
+      : "unreviewed";
+  if (value.review.status !== expectedReviewStatus) {
+    context.addIssue({ code: "custom", path: ["review", "status"], message: "载体复核状态必须与不同复核身份数量一致" });
+  }
+
+  const carrierClear = value.rights.status === "public_domain"
+    || value.rights.status === "licensed"
+    || value.rights.status === "project_original_verified";
+  if (value.rights.status === "unknown" && (
+    value.rights.reproductionAllowed
+    || value.rights.quotationAllowed
+    || value.rights.redistributionAllowed
+  )) {
+    context.addIssue({ code: "custom", path: ["rights", "status"], message: "载体权利未知时不能授予复制、引用或再分发权限" });
+  }
+  if (value.rights.status === "restricted" && value.rights.redistributionAllowed) {
+    context.addIssue({ code: "custom", path: ["rights", "redistributionAllowed"], message: "受限载体不能允许再分发" });
+  }
+  if (value.rights.redistributionAllowed && (
+    !carrierClear
+    || value.review.status !== "double_reviewed"
+    || value.rights.evidenceRefs.length === 0
+  )) {
+    context.addIssue({ code: "custom", path: ["rights", "redistributionAllowed"], message: "载体再分发必须有明确权利状态、证据和双人复核" });
+  }
+  if (value.storagePolicy === "public_repo" && (
+    !carrierClear
+    || value.contentDigest !== value.documentContentHash
+    || !value.rights.reproductionAllowed
+    || !value.rights.quotationAllowed
+    || !value.rights.redistributionAllowed
+    || value.review.status !== "double_reviewed"
+    || value.rights.evidenceRefs.length === 0
+  )) {
+    context.addIssue({ code: "custom", path: ["storagePolicy"], message: "公开仓库存储必须绑定实际正文摘要、逐项允许复制、引用和再分发并完成双人复核" });
+  }
+  if (value.carrierType === "link_only" && (
+    value.storagePolicy !== "link_only"
+    || value.rights.reproductionAllowed
+    || value.rights.redistributionAllowed
+    || value.sourceUrl === null
+  )) {
+    context.addIssue({ code: "custom", path: ["carrierType"], message: "link-only 载体只能保存链接元数据，不能授权复制或再分发" });
+  }
+  if (value.storagePolicy === "link_only" && value.carrierType !== "link_only") {
+    context.addIssue({ code: "custom", path: ["storagePolicy"], message: "link_only 存储策略必须对应 link_only 载体" });
+  }
+  if (["public_scan", "licensed_scan", "website", "commercial_database", "link_only"].includes(value.carrierType)
+    && value.sourceUrl === null) {
+    context.addIssue({ code: "custom", path: ["sourceUrl"], message: "远程载体必须记录可审计 URL" });
+  }
+  if (value.rights.status === "public_domain" && (
+    !value.rights.jurisdiction
+    || value.rights.evidenceRefs.length === 0
+  )) {
+    context.addIssue({ code: "custom", path: ["rights", "status"], message: "公版载体判断必须记录司法辖区和证据" });
+  }
+  if (value.rights.status === "licensed" && (
+    (!value.rights.licenseId && !value.rights.copyrightNotice)
+    || value.rights.evidenceRefs.length === 0
+  )) {
+    context.addIssue({ code: "custom", path: ["rights", "status"], message: "许可载体必须记录许可标识或版权说明以及证据" });
+  }
+  if (value.rights.status === "project_original_verified" && (
+    !value.rights.copyrightNotice
+    || value.rights.evidenceRefs.length === 0
+  )) {
+    context.addIssue({ code: "custom", path: ["rights", "status"], message: "项目原创载体必须记录版权说明和证据" });
+  }
+});
+
+export const SYSTEM_DOMAIN_RELEASE_MANIFEST_SCHEMA_VERSION = "1.0.0" as const;
+
+export const systemDomainReleaseComponentIdSchema = z.enum([
+  "execution_rules",
+  "interpretation_rules",
+  "input_policy",
+  "fact_contract",
+  "source_bundle",
+  "rights_bundle",
+  "expert_review_bundle",
+  "high_risk_policy",
+  "report_contract"
+]);
+
+export const systemDomainReleaseFileSchema = z.strictObject({
+  path: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._/-]{0,299}$/),
+  sha256: sha256Schema
+});
+
+export const systemDomainReleaseComponentSchema = z.strictObject({
+  componentId: systemDomainReleaseComponentIdSchema,
+  version: canonicalShortTextSchema(200),
+  status: z.enum(["bound", "incomplete", "absent"]),
+  files: z.array(systemDomainReleaseFileSchema).max(100),
+  digest: sha256Schema
+}).superRefine((value, context) => {
+  const paths = value.files.map((file) => file.path);
+  if (new Set(paths).size !== paths.length) {
+    context.addIssue({ code: "custom", path: ["files"], message: "体系组件文件路径不能重复" });
+  }
+  if (paths.some((path) => path.includes("..") || path.startsWith("/") || path.includes("\\"))) {
+    context.addIssue({ code: "custom", path: ["files"], message: "体系组件文件路径必须保持在工作区内" });
+  }
+  if (JSON.stringify(paths) !== JSON.stringify([...paths].sort((left, right) => left.localeCompare(right, "en")))) {
+    context.addIssue({ code: "custom", path: ["files"], message: "体系组件文件必须按规范路径排序" });
+  }
+  if ((value.status === "absent") !== (value.files.length === 0)) {
+    context.addIssue({ code: "custom", path: ["files"], message: "缺失组件不得声明文件，非缺失组件必须至少绑定一个文件" });
+  }
+});
+
+export const systemDomainReleaseManifestSchema = z.strictObject({
+  schemaVersion: z.literal(SYSTEM_DOMAIN_RELEASE_MANIFEST_SCHEMA_VERSION),
+  recordType: z.literal("system_domain_release_manifest"),
+  systemId: z.enum(["bazi", "ziwei", "western", "vedic"]),
+  surface: z.strictObject({
+    surfaceId: canonicalShortTextSchema(120),
+    surfaceVersion: z.string().regex(/^\d+\.\d+\.\d+$/),
+    versionMeaning: z.literal("product_surface_contract_not_database_schema_or_domain_authority")
+  }),
+  releaseGovernance: z.strictObject({
+    releaseIdentity: canonicalShortTextSchema(120),
+    targetSchema: z.number().int().positive().nullable(),
+    migrationId: canonicalShortTextSchema(200).nullable(),
+    mutationEpochBoundary: z.literal("preserved"),
+    publicDeploymentAuthorized: z.boolean(),
+    expertClaimsAuthorized: z.boolean()
+  }),
+  components: z.array(systemDomainReleaseComponentSchema).length(9),
+  gateState: z.strictObject({
+    bindingRequired: z.number().int().nonnegative().nullable(),
+    engineeringBindingCandidatesMechanicallyVerified: z.number().int().nonnegative().optional(),
+    engineeringRationalesFrozen: z.number().int().nonnegative().optional(),
+    bindingFrozenVerified: z.number().int().nonnegative(),
+    independentExpertsRequired: z.number().int().nonnegative(),
+    independentExpertReviewsVerified: z.number().int().nonnegative(),
+    sourceBundleComplete: z.boolean(),
+    rightsBundleComplete: z.boolean(),
+    expertReviewBundleComplete: z.boolean(),
+    highRiskPolicyBound: z.boolean(),
+    releaseEvidenceComplete: z.boolean()
+  }),
+  evidenceLedger: z.strictObject({
+    engineeringIdentity: z.enum(["unverified", "component_digests_verified"]),
+    browserRuntimeEvidence: z.enum(["not_assessed_in_domain_manifest", "separately_verified"]),
+    contentTruth: z.enum(["not_established", "established_for_declared_scope"]),
+    expertTruth: z.enum(["not_established", "independently_reviewed_for_declared_scope"]),
+    rightsLegalConclusion: z.enum(["not_established", "separately_established_for_declared_scope"]),
+    releaseReadiness: z.enum(["not_ready", "ready"]),
+    publicReleaseAuthorization: z.enum(["not_authorized", "authorized"])
+  }),
+  releaseStatus: z.enum([
+    "draft",
+    "engineering_candidate",
+    "expert_reviewed",
+    "release_candidate",
+    "released"
+  ]),
+  createdAt: z.string().datetime(),
+  manifestDigest: sha256Schema
+}).superRefine((value, context) => {
+  const componentIds = value.components.map((component) => component.componentId);
+  const expectedComponentIds = [...systemDomainReleaseComponentIdSchema.options];
+  if (new Set(componentIds).size !== componentIds.length
+    || JSON.stringify(componentIds) !== JSON.stringify(expectedComponentIds)) {
+    context.addIssue({ code: "custom", path: ["components"], message: "体系发布组件必须按固定顺序完整出现且不得重复" });
+  }
+  if (value.gateState.bindingRequired === null && (
+    value.gateState.bindingFrozenVerified !== 0
+    || value.gateState.sourceBundleComplete
+  )) {
+    context.addIssue({
+      code: "custom",
+      path: ["gateState", "bindingRequired"],
+      message: "来源 binding 总量未建账时必须保持零冻结且来源包未完成"
+    });
+  }
+  if (value.gateState.bindingRequired !== null
+    && value.gateState.bindingFrozenVerified > value.gateState.bindingRequired) {
+    context.addIssue({ code: "custom", path: ["gateState", "bindingFrozenVerified"], message: "已冻结 binding 数不能超过要求数" });
+  }
+  const hasEngineeringCandidateCount =
+    value.gateState.engineeringBindingCandidatesMechanicallyVerified !== undefined;
+  const hasFrozenRationaleCount = value.gateState.engineeringRationalesFrozen !== undefined;
+  if (value.systemId === "bazi" && (!hasEngineeringCandidateCount || !hasFrozenRationaleCount)) {
+    context.addIssue({
+      code: "custom",
+      path: ["gateState"],
+      message: "八字工程候选必须同时登记机械核验数与工程理由冻结数"
+    });
+  }
+  if (value.systemId !== "bazi" && (hasEngineeringCandidateCount || hasFrozenRationaleCount)) {
+    context.addIssue({
+      code: "custom",
+      path: ["gateState"],
+      message: "其他体系不得继承八字工程候选计数"
+    });
+  }
+  if (hasEngineeringCandidateCount && hasFrozenRationaleCount) {
+    const mechanicallyVerified = value.gateState.engineeringBindingCandidatesMechanicallyVerified!;
+    const rationalesFrozen = value.gateState.engineeringRationalesFrozen!;
+    if (value.gateState.bindingRequired === null || mechanicallyVerified > value.gateState.bindingRequired) {
+      context.addIssue({
+        code: "custom",
+        path: ["gateState", "engineeringBindingCandidatesMechanicallyVerified"],
+        message: "工程候选机械核验数不能超过已登记 binding 总量"
+      });
+    }
+    if (rationalesFrozen > mechanicallyVerified) {
+      context.addIssue({
+        code: "custom",
+        path: ["gateState", "engineeringRationalesFrozen"],
+        message: "已冻结工程理由数不能超过机械核验候选数"
+      });
+    }
+  }
+  if (value.gateState.independentExpertReviewsVerified > value.gateState.independentExpertsRequired) {
+    context.addIssue({ code: "custom", path: ["gateState", "independentExpertReviewsVerified"], message: "已核专家意见数不能超过要求数" });
+  }
+
+  const sourceComplete = value.gateState.sourceBundleComplete
+    && value.gateState.bindingRequired !== null
+    && value.gateState.bindingFrozenVerified === value.gateState.bindingRequired;
+  const expertComplete = value.gateState.expertReviewBundleComplete
+    && value.gateState.independentExpertReviewsVerified >= value.gateState.independentExpertsRequired;
+  const substantiveComplete = sourceComplete
+    && value.gateState.rightsBundleComplete
+    && expertComplete
+    && value.gateState.highRiskPolicyBound;
+  const componentById = new Map(value.components.map((component) => [component.componentId, component] as const));
+
+  if (value.releaseGovernance.targetSchema === null && (
+    value.releaseGovernance.migrationId !== null
+    || value.releaseGovernance.publicDeploymentAuthorized
+    || value.releaseGovernance.expertClaimsAuthorized
+    || value.gateState.releaseEvidenceComplete
+    || value.releaseStatus !== "draft"
+  )) {
+    context.addIssue({
+      code: "custom",
+      path: ["releaseGovernance", "targetSchema"],
+      message: "尚无独立数据 Schema 的体系只能保持无迁移、无发布证据和无授权的 draft"
+    });
+  }
+
+  if ((componentById.get("source_bundle")?.status === "bound") !== value.gateState.sourceBundleComplete) {
+    context.addIssue({ code: "custom", path: ["gateState", "sourceBundleComplete"], message: "来源包组件状态必须与来源完成门一致" });
+  }
+  if ((componentById.get("rights_bundle")?.status === "bound") !== value.gateState.rightsBundleComplete) {
+    context.addIssue({ code: "custom", path: ["gateState", "rightsBundleComplete"], message: "权利包组件状态必须与权利完成门一致" });
+  }
+  if ((componentById.get("expert_review_bundle")?.status === "bound") !== value.gateState.expertReviewBundleComplete) {
+    context.addIssue({ code: "custom", path: ["gateState", "expertReviewBundleComplete"], message: "专家包组件状态必须与专家完成门一致" });
+  }
+  if ((componentById.get("high_risk_policy")?.status === "bound") !== value.gateState.highRiskPolicyBound) {
+    context.addIssue({ code: "custom", path: ["gateState", "highRiskPolicyBound"], message: "高风险政策组件状态必须与绑定门一致" });
+  }
+  if (value.evidenceLedger.contentTruth === "established_for_declared_scope" && !sourceComplete) {
+    context.addIssue({ code: "custom", path: ["evidenceLedger", "contentTruth"], message: "内容真值账不能早于完整来源与 binding 冻结" });
+  }
+  if (value.evidenceLedger.expertTruth === "independently_reviewed_for_declared_scope" && !expertComplete) {
+    context.addIssue({ code: "custom", path: ["evidenceLedger", "expertTruth"], message: "专家真值账不能早于独立专家包闭环" });
+  }
+  if (value.evidenceLedger.rightsLegalConclusion === "separately_established_for_declared_scope"
+    && !value.gateState.rightsBundleComplete) {
+    context.addIssue({ code: "custom", path: ["evidenceLedger", "rightsLegalConclusion"], message: "权利法律账不能早于权利包闭环" });
+  }
+  if (value.evidenceLedger.releaseReadiness === "ready"
+    && (!substantiveComplete || !value.gateState.releaseEvidenceComplete)) {
+    context.addIssue({ code: "custom", path: ["evidenceLedger", "releaseReadiness"], message: "发布就绪账必须另有完整实体门与 Release Evidence" });
+  }
+  if ((value.evidenceLedger.publicReleaseAuthorization === "authorized")
+    !== value.releaseGovernance.publicDeploymentAuthorized) {
+    context.addIssue({ code: "custom", path: ["evidenceLedger", "publicReleaseAuthorization"], message: "公开发布授权账必须与治理授权一致" });
+  }
+  if (value.releaseGovernance.expertClaimsAuthorized
+    && value.evidenceLedger.expertTruth !== "independently_reviewed_for_declared_scope") {
+    context.addIssue({ code: "custom", path: ["releaseGovernance", "expertClaimsAuthorized"], message: "专家主张授权不能早于独立专家真值账" });
+  }
+
+  if (value.releaseStatus === "engineering_candidate" && (
+    value.evidenceLedger.engineeringIdentity !== "component_digests_verified"
+    || componentById.get("execution_rules")?.status !== "bound"
+    || componentById.get("interpretation_rules")?.status !== "bound"
+    || componentById.get("input_policy")?.status !== "bound"
+    || componentById.get("fact_contract")?.status !== "bound"
+    || value.releaseGovernance.publicDeploymentAuthorized
+    || value.releaseGovernance.expertClaimsAuthorized
+    || value.evidenceLedger.contentTruth !== "not_established"
+    || value.evidenceLedger.expertTruth !== "not_established"
+    || value.evidenceLedger.rightsLegalConclusion !== "not_established"
+    || value.evidenceLedger.releaseReadiness !== "not_ready"
+    || value.evidenceLedger.publicReleaseAuthorization !== "not_authorized"
+  )) {
+    context.addIssue({ code: "custom", path: ["releaseStatus"], message: "工程候选不能越权声明内容、专家、法律、发布就绪或公开发布授权" });
+  }
+  if (["expert_reviewed", "release_candidate", "released"].includes(value.releaseStatus) && !substantiveComplete) {
+    context.addIssue({ code: "custom", path: ["releaseStatus"], message: "专家审定及以上状态必须先关闭来源、权利、专家和高风险表达门" });
+  }
+  if (["release_candidate", "released"].includes(value.releaseStatus)
+    && !value.gateState.releaseEvidenceComplete) {
+    context.addIssue({ code: "custom", path: ["releaseStatus"], message: "发布候选及以上状态必须具备独立 Release Evidence" });
+  }
+  if (value.releaseStatus === "released" && (
+    !value.releaseGovernance.publicDeploymentAuthorized
+    || !value.releaseGovernance.expertClaimsAuthorized
+    || value.evidenceLedger.releaseReadiness !== "ready"
+    || value.evidenceLedger.publicReleaseAuthorization !== "authorized"
+  )) {
+    context.addIssue({ code: "custom", path: ["releaseStatus"], message: "released 必须另有发布就绪与公开发布授权" });
+  }
+});
+
 export const evidenceSubjectIdSchema = z.string().regex(/^[a-z][A-Za-z0-9.-]{2,159}$/);
 
 export const citationTargetSchema = z.discriminatedUnion("kind", [
@@ -4962,6 +5338,9 @@ export type KnowledgeSection = z.infer<typeof knowledgeSectionSchema>;
 export type KnowledgeDocumentRecord = z.infer<typeof knowledgeDocumentRecordSchema>;
 export type KnowledgeDocumentV03Record = z.infer<typeof knowledgeDocumentV03RecordSchema>;
 export type SourceRightsRecord = z.infer<typeof sourceRightsRecordSchema>;
+export type SourceCarrierRecord = z.infer<typeof sourceCarrierRecordSchema>;
+export type SystemDomainReleaseComponent = z.infer<typeof systemDomainReleaseComponentSchema>;
+export type SystemDomainReleaseManifest = z.infer<typeof systemDomainReleaseManifestSchema>;
 export type ReviewAttestation = z.infer<typeof reviewAttestationSchema>;
 export type CitationTarget = z.infer<typeof citationTargetSchema>;
 export type CitationTargetV03 = z.infer<typeof citationTargetV03Schema>;

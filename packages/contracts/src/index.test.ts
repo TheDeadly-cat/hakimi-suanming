@@ -1,4 +1,7 @@
 import { describe, expect, it } from "vitest";
+import baziDomainReleaseManifest from "../../../content/domain-release/bazi.single-chart-report.v1.7.0.json";
+import westernDomainReleaseManifest from "../../../content/domain-release/western-astrology.engineering-draft.v0.1.0.json";
+import ziweiDomainReleaseManifest from "../../../content/domain-release/ziwei-doushu.engineering-draft.v0.1.0.json";
 import {
   FULL_BACKUP_FORMAT,
   FULL_BACKUP_FORMAT_VERSION,
@@ -85,6 +88,7 @@ import {
   savedViewFullBackupManifestSchema,
   savedViewFullBackupPayloadSchema,
   savedViewRecordSchema,
+  sourceCarrierRecordSchema,
   sourceRightsRecordSchema,
   storedBirthInputSchema,
   storedCandidateSetRecordSchema,
@@ -92,6 +96,7 @@ import {
   storedEventTimeContextSchema,
   storedEventTimeMigrationReceiptSchema,
   storedUnknownHourCandidateResultSchema,
+  systemDomainReleaseManifestSchema,
   tzdbMigrationReceiptSchema,
   tzdbMigrationFullBackupEnvelopeSchema,
   tzdbMigrationFullBackupManifestSchema,
@@ -842,6 +847,61 @@ describe("knowledge document and citation contracts", () => {
     }).success).toBe(false);
   });
 
+  it("binds public carrier storage to the exact text, explicit permissions, evidence and two reviewers", () => {
+    const carrier = {
+      schemaVersion: "1.0.0",
+      recordType: "knowledge_source_carrier",
+      carrierId: "22222222-2222-4222-8222-222222222222",
+      documentId: knowledgeDocumentFixture.id,
+      documentContentHash: knowledgeDocumentFixture.contentHash,
+      carrierType: "private_transcription",
+      provider: "项目",
+      sourceUrl: null,
+      acquiredAt: knowledgeDocumentFixture.createdAt,
+      accessMethod: "项目原创正文直接导出",
+      contentDigest: knowledgeDocumentFixture.contentHash,
+      imageDigest: null,
+      ocrDigest: null,
+      rights: {
+        status: "project_original_verified",
+        jurisdiction: "CN",
+        licenseId: null,
+        copyrightNotice: "项目原创",
+        reproductionAllowed: true,
+        quotationAllowed: true,
+        redistributionAllowed: true,
+        evidenceRefs: ["https://example.com/carrier-evidence"]
+      },
+      storagePolicy: "public_repo",
+      review: {
+        status: "double_reviewed",
+        attestations: [
+          { reviewerId: "carrier-a", reviewedAt: knowledgeDocumentFixture.createdAt, note: "正文" },
+          { reviewerId: "carrier-b", reviewedAt: knowledgeDocumentFixture.createdAt, note: "权利" }
+        ],
+        note: ""
+      },
+      editVersion: 1,
+      createdAt: knowledgeDocumentFixture.createdAt,
+      updatedAt: knowledgeDocumentFixture.updatedAt
+    } as const;
+    expect(sourceCarrierRecordSchema.safeParse(carrier).success).toBe(true);
+    expect(sourceCarrierRecordSchema.safeParse({
+      ...carrier,
+      contentDigest: `b${carrier.contentDigest.slice(1)}`
+    }).success).toBe(false);
+    expect(sourceCarrierRecordSchema.safeParse({
+      ...carrier,
+      rights: {
+        ...carrier.rights,
+        status: "unknown",
+        reproductionAllowed: false,
+        quotationAllowed: false,
+        redistributionAllowed: false
+      }
+    }).success).toBe(false);
+  });
+
   it("rejects non-normalized content, inconsistent line snapshots, and invalid section coverage", () => {
     expect(knowledgeDocumentRecordSchema.safeParse({
       ...knowledgeDocumentFixture,
@@ -893,6 +953,96 @@ describe("knowledge document and citation contracts", () => {
       }]
     }).success).toBe(false);
     expect(citationRecordSchema.safeParse({ ...citationFixture, quote: "甲".repeat(20_001) }).success).toBe(false);
+  });
+});
+
+describe("system domain release manifest contract", () => {
+  it("accepts the exact bazi v1.7 engineering identity without promoting missing truth or authorization", () => {
+    const parsed = systemDomainReleaseManifestSchema.parse(baziDomainReleaseManifest);
+    expect(parsed.systemId).toBe("bazi");
+    expect(parsed.surface).toEqual({
+      surfaceId: "single-chart-report",
+      surfaceVersion: "1.7.0",
+      versionMeaning: "product_surface_contract_not_database_schema_or_domain_authority"
+    });
+    expect(parsed.gateState).toMatchObject({
+      bindingRequired: 12,
+      engineeringBindingCandidatesMechanicallyVerified: 7,
+      engineeringRationalesFrozen: 0,
+      bindingFrozenVerified: 0,
+      independentExpertsRequired: 2,
+      independentExpertReviewsVerified: 0
+    });
+    expect(parsed.releaseStatus).toBe("engineering_candidate");
+    expect(parsed.releaseGovernance.publicDeploymentAuthorized).toBe(false);
+    expect(parsed.releaseGovernance.expertClaimsAuthorized).toBe(false);
+  });
+
+  it("rejects component omission and candidate-state truth or authorization promotion", () => {
+    const missingComponent = structuredClone(baziDomainReleaseManifest) as Record<string, unknown>;
+    (missingComponent.components as unknown[]).pop();
+    expect(systemDomainReleaseManifestSchema.safeParse(missingComponent).success).toBe(false);
+
+    const promoted = structuredClone(baziDomainReleaseManifest);
+    promoted.releaseGovernance.publicDeploymentAuthorized = true;
+    promoted.evidenceLedger.contentTruth = "established_for_declared_scope";
+    expect(systemDomainReleaseManifestSchema.safeParse(promoted).success).toBe(false);
+  });
+
+  it("keeps bazi engineering candidate counts paired, bounded and system-local", () => {
+    const missingRationaleCount = structuredClone(baziDomainReleaseManifest) as {
+      gateState: Record<string, unknown>;
+    };
+    delete missingRationaleCount.gateState.engineeringRationalesFrozen;
+    expect(systemDomainReleaseManifestSchema.safeParse(missingRationaleCount).success).toBe(false);
+
+    const tooManyCandidates = structuredClone(baziDomainReleaseManifest);
+    tooManyCandidates.gateState.engineeringBindingCandidatesMechanicallyVerified = 13;
+    expect(systemDomainReleaseManifestSchema.safeParse(tooManyCandidates).success).toBe(false);
+
+    const tooManyFrozenRationales = structuredClone(baziDomainReleaseManifest);
+    tooManyFrozenRationales.gateState.engineeringRationalesFrozen = 8;
+    expect(systemDomainReleaseManifestSchema.safeParse(tooManyFrozenRationales).success).toBe(false);
+
+    const inheritedCounts = structuredClone(ziweiDomainReleaseManifest) as {
+      gateState: Record<string, unknown>;
+    };
+    inheritedCounts.gateState.engineeringBindingCandidatesMechanicallyVerified = 0;
+    inheritedCounts.gateState.engineeringRationalesFrozen = 0;
+    expect(systemDomainReleaseManifestSchema.safeParse(inheritedCounts).success).toBe(false);
+  });
+
+  it("accepts schema-less Ziwei and Western engineering drafts with exact unbound source inventories", () => {
+    const expectedBindingCounts = new Map([
+      ["ziwei", 27],
+      ["western", 28]
+    ]);
+    for (const manifest of [ziweiDomainReleaseManifest, westernDomainReleaseManifest]) {
+      const parsed = systemDomainReleaseManifestSchema.parse(manifest);
+      expect(parsed.releaseStatus).toBe("draft");
+      expect(parsed.releaseGovernance.targetSchema).toBeNull();
+      expect(parsed.releaseGovernance.migrationId).toBeNull();
+      expect(parsed.gateState.bindingRequired).toBe(expectedBindingCounts.get(parsed.systemId));
+      expect(parsed.gateState.bindingFrozenVerified).toBe(0);
+      expect(parsed.gateState.sourceBundleComplete).toBe(false);
+      expect(parsed.gateState.independentExpertReviewsVerified).toBe(0);
+      expect(parsed.evidenceLedger.contentTruth).toBe("not_established");
+      expect(parsed.evidenceLedger.rightsLegalConclusion).toBe("not_established");
+    }
+  });
+
+  it("rejects schema-less draft promotion and fabricated binding completion", () => {
+    const promoted = structuredClone(ziweiDomainReleaseManifest);
+    promoted.releaseStatus = "engineering_candidate";
+    expect(systemDomainReleaseManifestSchema.safeParse(promoted).success).toBe(false);
+
+    const fabricatedBinding = structuredClone(westernDomainReleaseManifest);
+    fabricatedBinding.gateState.bindingFrozenVerified = fabricatedBinding.gateState.bindingRequired + 1;
+    expect(systemDomainReleaseManifestSchema.safeParse(fabricatedBinding).success).toBe(false);
+
+    const fabricatedSourceClosure = structuredClone(westernDomainReleaseManifest);
+    fabricatedSourceClosure.gateState.sourceBundleComplete = true;
+    expect(systemDomainReleaseManifestSchema.safeParse(fabricatedSourceClosure).success).toBe(false);
   });
 });
 

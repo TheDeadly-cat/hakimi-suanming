@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, test } from "node:test";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { loadConfigFromFile, resolveConfig } from "vite";
 import { verifySystemContractDraftBoundaries } from "./verify-system-contract-draft-boundaries.mjs";
 
@@ -12,6 +12,10 @@ const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
 const draftRegistry = JSON.parse(fs.readFileSync(path.join(
   workspaceRoot,
   "scripts/system-contract-draft-registry.json"
+), "utf8"));
+const downstreamDraftRegistry = JSON.parse(fs.readFileSync(path.join(
+  workspaceRoot,
+  "scripts/system-contract-downstream-draft-registry.json"
 ), "utf8"));
 const draftPackages = draftRegistry.drafts.filter((draft) => draft.presence === "required");
 const plannedFortelDraft = draftRegistry.drafts.find((draft) =>
@@ -25,6 +29,9 @@ const plannedZiweiWorkspaceDraft = draftRegistry.drafts.find((draft) =>
 );
 const plannedWesternRulesPreviewDraft = draftRegistry.drafts.find((draft) =>
   draft.packageName === "@hakimi/western-astrology-rules-preview-draft"
+);
+const vedicMutationEpochExperimentDraft = downstreamDraftRegistry.drafts.find((draft) =>
+  draft.packageName === "@hakimi/vedic-mutation-epoch-runtime-experiment-draft"
 );
 const frozenIztroClosure = JSON.parse(fs.readFileSync(path.join(
   workspaceRoot,
@@ -113,6 +120,7 @@ function createFixture() {
       write(root, `packages/${draft.directoryName}/src/browser-preview/browser-client.ts`, [
         "import sourceIdentity from \"./generated-browser-source-identity.ts\";",
         "import { requireVerifiedBrowserProbeResponse } from \"./main-response-gate.ts\";",
+        "export { highRiskEgressView } from \"./high-risk-expression-egress-view.ts\";",
         "export function browserClient() {",
         "  const worker = new Worker(new URL(\"./browser-worker.ts\", import.meta.url));",
         "  let messageCount = 0;",
@@ -133,6 +141,11 @@ function createFixture() {
       write(root, `packages/${draft.directoryName}/src/browser-preview/browser-artifact.ts`, "export type SourceIdentity = Readonly<Record<string, unknown>>;\n");
       write(root, `packages/${draft.directoryName}/src/browser-preview/browser-protocol.ts`, "export const protocol = true;\n");
       write(root, `packages/${draft.directoryName}/src/browser-preview/display-projection.ts`, "export const projection = true;\n");
+      write(root, `packages/${draft.directoryName}/src/browser-preview/high-risk-expression-egress-policy.ts`, "export const evaluateFixtureEgress = (value) => value;\n");
+      write(root, `packages/${draft.directoryName}/src/browser-preview/high-risk-expression-egress-view.ts`, [
+        "import { evaluateFixtureEgress } from \"./high-risk-expression-egress-policy.ts\";",
+        "export const highRiskEgressView = evaluateFixtureEgress;"
+      ].join("\n"));
       write(root, `packages/${draft.directoryName}/src/browser-preview/main-response-gate.ts`, "export const gate = true;\n");
       write(root, `packages/${draft.directoryName}/src/browser-preview/generated-rule-snapshot.ts`, "import type { Snapshot } from \"../contract-bridge.ts\";\nconst snapshot: Snapshot = null as never;\nexport default snapshot;\n");
       write(root, `packages/${draft.directoryName}/src/browser-preview/generated-browser-source-identity.ts`, [
@@ -142,7 +155,9 @@ function createFixture() {
         "export default identity;"
       ].join("\n"));
       write(root, `packages/${draft.directoryName}/browser-preview/emit-rule-snapshot.mjs`, "import snapshot from \"../src/index.ts\";\nprocess.stdout.write(JSON.stringify(snapshot));\n");
-      write(root, `packages/${draft.directoryName}/browser-preview/index.html`, "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'self'\"><script type=\"module\" src=\"../src/browser-preview/main.ts\"></script>\n");
+      write(root, `packages/${draft.directoryName}/licenses/iztro-2.5.8-LICENSE.txt`,
+        fs.readFileSync(path.join(workspaceRoot, "packages/ziwei-iztro-adapter-draft/licenses/iztro-2.5.8-LICENSE.txt"), "utf8"));
+      write(root, `packages/${draft.directoryName}/browser-preview/index.html`, "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'self'\"><link rel=\"license\" type=\"text/plain\" href=\"./licenses/iztro-2.5.8-LICENSE.txt\"><script type=\"module\" src=\"../src/browser-preview/main.ts\"></script>\n");
       write(root, `packages/${draft.directoryName}/vite.browser-preview.config.mjs`, [
         "import path from \"node:path\";",
         "import { createHash } from \"node:crypto\";",
@@ -152,12 +167,21 @@ function createFixture() {
         "const ruleSentinel = \"generated-rule-snapshot.ts\";",
         "const sourceSentinel = \"generated-browser-source-identity.ts\";",
         "const generatedSourceIdentityModule = \"\\0hakimi:ziwei-browser-preview-source-identity\";",
+        "const iztroLicenseAssetFile = \"licenses/iztro-2.5.8-LICENSE.txt\";",
+        "const buildInputAttestationAssetFile = \"build-attestations/ziwei-iztro-license-inputs.v1.json\";",
+        "const lockedLicense = { sha256: \"e6c7b6e313cbda3135b41bccc66c98be132cb8319d0d465903d17e669e748b36\" };",
+        "export function createIztroLicenseNoticePlugin(surfaceId) { let heldLicenseBytes; let heldAttestationBytes; return { name: \"hakimi-ziwei-iztro-top-level-license\", enforce: \"pre\", buildStart() { void surfaceId; heldLicenseBytes = Buffer.from('x'); heldAttestationBytes = Buffer.from('{}'); }, generateBundle() { this.emitFile({ fileName: iztroLicenseAssetFile, source: heldLicenseBytes }); this.emitFile({ fileName: buildInputAttestationAssetFile, source: heldAttestationBytes }); } }; }",
+        "function isolatedRuleSnapshotPlugin() { return {}; }",
+        "function isolatedBrowserSourceIdentityPlugin() { return {}; }",
+        "export function createZiweiBrowserPreviewMainPlugins() { return [isolatedRuleSnapshotPlugin(), isolatedBrowserSourceIdentityPlugin()]; }",
         "const browserSourcePaths = [",
         "  \"src/browser-preview/browser-artifact.ts\",",
         "  \"src/browser-preview/browser-client.ts\",",
         "  \"src/browser-preview/browser-protocol.ts\",",
         "  \"src/browser-preview/browser-worker.ts\",",
         "  \"src/browser-preview/display-projection.ts\",",
+        "  \"src/browser-preview/high-risk-expression-egress-policy.ts\",",
+        "  \"src/browser-preview/high-risk-expression-egress-view.ts\",",
         "  \"src/browser-preview/main-response-gate.ts\",",
         "  \"src/browser-preview/main.ts\",",
         "  \"src/contract-bridge.ts\",",
@@ -166,7 +190,8 @@ function createFixture() {
         "void path; void browserWorkerModule; void browserClientModule; void ruleSentinel; void sourceSentinel;",
         "void generatedSourceIdentityModule; void browserSourcePaths; void readFileSync;",
         "createHash(\"sha256\");",
-        "export default { plugins: [], worker: { plugins: () => [] } };"
+        "void lockedLicense;",
+        "export default { base: \"./\", plugins: [createIztroLicenseNoticePlugin(\"browser-preview\"), ...createZiweiBrowserPreviewMainPlugins()], worker: { plugins: () => [] } };"
       ].join("\n"));
       write(root, `packages/${draft.directoryName}/tsconfig.browser-preview.json`, json({
         compilerOptions: { paths: {} },
@@ -220,7 +245,101 @@ function createFixture() {
   ].join("\n"));
   write(root, "packages/storage/package.json", json({ name: "@fixture/storage", version: "1.0.0", private: true }));
   write(root, "packages/storage/src/index.ts", "export const stored = true;\n");
+  write(
+    root,
+    "packages/ziwei-iztro-adapter-draft/src/cross-system-engineering-fact-projection.ts",
+    "export const project = true;\n"
+  );
+  write(root, "scripts/bazi-domain-release-manifest-lib.mjs", "export const domain = true;\n");
+  write(root, "scripts/bazi-engineering-binding-candidate-lib.mjs", "export const candidate = true;\n");
+  write(root, "scripts/bazi-expert-review-packet-lib.mjs", [
+    "import './bazi-engineering-binding-candidate-lib.mjs';",
+    "export const packet = true;"
+  ].join("\n"));
+  write(root, "scripts/independent-domain-release-manifest-lib.mjs", "export const manifest = true;\n");
+  write(root, "scripts/ziwei-hko-calendar-source-evidence-lib.mjs", [
+    "import { createHash } from 'node:crypto';",
+    "import { readFile } from 'node:fs/promises';",
+    "import path from 'node:path';",
+    "export const evidence = [createHash, readFile, path];"
+  ].join("\n"));
+  write(root, "scripts/independent-source-binding-requirements-lib.mjs", [
+    "import './ziwei-hko-calendar-source-evidence-lib.mjs';",
+    "export const requirements = true;"
+  ].join("\n"));
+  write(root, "scripts/bazi-v17-manifest-drift-decision-lib.mjs", [
+    "import './bazi-domain-release-manifest-lib.mjs';",
+    "import './bazi-expert-review-packet-lib.mjs';",
+    "export const drift = true;"
+  ].join("\n"));
+  write(root, "scripts/system-admission-registry-lib.mjs", [
+    "import './bazi-domain-release-manifest-lib.mjs';",
+    "export const registry = true;"
+  ].join("\n"));
+  write(root, "scripts/cross-system-engineering-fact-receipt-lib.mjs", [
+    "import { parseExpression } from '@babel/parser';",
+    "import { createHash } from 'node:crypto';",
+    "import '../packages/cross-system-comparison-draft/src/index.ts';",
+    "import '../packages/ziwei-doushu-contracts-draft/src/index.ts';",
+    "import '../packages/ziwei-iztro-adapter-draft/src/index.ts';",
+    "import '../packages/ziwei-iztro-adapter-draft/src/cross-system-engineering-fact-projection.ts';",
+    "import './bazi-v17-manifest-drift-decision-lib.mjs';",
+    "import './independent-domain-release-manifest-lib.mjs';",
+    "import './independent-source-binding-requirements-lib.mjs';",
+    "import './system-admission-registry-lib.mjs';",
+    "void parseExpression; void createHash;"
+  ].join("\n"));
+  write(
+    root,
+    "scripts/verify-cross-system-engineering-fact-receipts.mjs",
+    "import './cross-system-engineering-fact-receipt-lib.mjs';\n"
+  );
+  write(
+    root,
+    "scripts/verify-cross-system-engineering-fact-receipts.test.mjs",
+    "import './cross-system-engineering-fact-receipt-lib.mjs';\n"
+  );
   return root;
+}
+
+function activateVedicMutationEpochExperiment(root) {
+  assert.ok(vedicMutationEpochExperimentDraft);
+  const registry = structuredClone(draftRegistry);
+  registry.drafts.push(structuredClone(vedicMutationEpochExperimentDraft));
+  const draft = vedicMutationEpochExperimentDraft;
+  write(root, `packages/${draft.directoryName}/package.json`, json({
+    name: draft.packageName,
+    version: "0.0.0-draft.0",
+    private: true,
+    type: "module",
+    exports: {},
+    "x-hakimi-isolated-draft": {
+      schemaVersion: 1,
+      kind: draft.kind,
+      systemId: draft.systemId,
+      productionImport: "forbidden",
+      allowedDraftDependencies: []
+    },
+    dependencies: {}
+  }));
+  write(root, `packages/${draft.directoryName}/src/runtime.ts`, "export const runtime = true;\n");
+  write(root, `packages/${draft.directoryName}/src/runtime.test.ts`, [
+    "import { IDBFactory } from \"fake-indexeddb\";",
+    "import { expect, test } from \"vitest\";",
+    "test(\"fixture\", () => expect(new IDBFactory()).toBeDefined());"
+  ].join("\n"));
+  const lockfilePath = path.join(root, "package-lock.json");
+  const lockfile = JSON.parse(fs.readFileSync(lockfilePath, "utf8"));
+  lockfile.packages[`packages/${draft.directoryName}`] = {
+    name: draft.packageName,
+    version: "0.0.0-draft.0"
+  };
+  lockfile.packages[`node_modules/${draft.packageName}`] = {
+    resolved: `packages/${draft.directoryName}`,
+    link: true
+  };
+  write(root, "package-lock.json", json(lockfile));
+  return registry;
 }
 
 function activatePlannedFortel(root, indexSource = [
@@ -414,9 +533,18 @@ function activateWesternRulesPreview(root) {
   const packageDirectory = path.join(root, "packages", directoryName);
   fs.mkdirSync(path.join(packageDirectory, "src", "browser-app"), { recursive: true });
   fs.mkdirSync(path.join(packageDirectory, "browser-app"), { recursive: true });
+  fs.mkdirSync(path.join(packageDirectory, "licenses"), { recursive: true });
   fs.copyFileSync(
     path.join(workspaceRoot, "packages", directoryName, "package.json"),
     path.join(packageDirectory, "package.json")
+  );
+  fs.copyFileSync(
+    path.join(workspaceRoot, "packages", directoryName, "vite.rules-preview.config.mjs"),
+    path.join(packageDirectory, "vite.rules-preview.config.mjs")
+  );
+  fs.copyFileSync(
+    path.join(workspaceRoot, "packages", directoryName, "licenses", "astronomy-engine-2.1.19-LICENSE.txt"),
+    path.join(packageDirectory, "licenses", "astronomy-engine-2.1.19-LICENSE.txt")
   );
   write(root, `packages/${directoryName}/src/rule-layer-bridge.ts`,
     "export const runWesternRuleLayer = () => ({ outcome: \"computed\" });\n");
@@ -439,6 +567,7 @@ function activateWesternRulesPreview(root) {
   write(root, `packages/${directoryName}/browser-app/index.html`, [
     "<!doctype html>",
     "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'\">",
+    "<link rel=\"license\" href=\"./licenses/astronomy-engine-2.1.19-LICENSE.txt\">",
     "<script type=\"module\" src=\"../src/browser-app/main.ts\"></script>"
   ].join("\n"));
   const manifest = JSON.parse(fs.readFileSync(path.join(packageDirectory, "package.json"), "utf8"));
@@ -463,14 +592,354 @@ function expectFailure(root, pattern) {
 
 test("accepts isolated drafts and ignores code, HTML, Vite, and tsconfig comments", () => {
   const root = createFixture();
+  write(root, "apps/web/src/asset.txt", "fixture asset\n");
   write(root, "apps/web/src/static-module-loads.ts", [
     "import '@fixture/storage';",
     "export const moduleUrl = import.meta.url;",
+    "export const assetUrl = new URL('./asset.txt', import.meta.url);",
     "export const inertText = 'require(variableName)';",
     "export const inertPattern = /import(variableName)/u;",
     "void import('./main');"
   ].join("\n"));
   assert.deepEqual(verifySystemContractDraftBoundaries(root), []);
+});
+
+test("records the known restricted source without inspecting its module imports", () => {
+  const root = createFixture();
+  write(
+    root,
+    "apps/web/src/lib/local-user-data-cleanup.ts",
+    "import '@hakimi/ziwei-doushu-contracts-draft';\n"
+  );
+  const failures = verifySystemContractDraftBoundaries(root).join("\n");
+  assert.match(
+    failures,
+    /apps\/web\/src\/lib\/local-user-data-cleanup\.ts is a known restricted source and was not inspected/u
+  );
+  assert.doesNotMatch(
+    failures,
+    /local-user-data-cleanup\.ts imports isolated draft/u
+  );
+});
+
+test("keeps the exact cross-system evidence tool offline and target-allowlisted", () => {
+  const root = createFixture();
+  assert.deepEqual(verifySystemContractDraftBoundaries(root), []);
+
+  write(root, "packages/ziwei-iztro-adapter-draft/src/unregistered-evidence-target.ts", "export const widened = true;\n");
+  write(root, "scripts/cross-system-engineering-fact-receipt-lib.mjs", [
+    "import '../packages/ziwei-iztro-adapter-draft/src/unregistered-evidence-target.ts';",
+    "export const widened = true;"
+  ].join("\n"));
+  assert.match(
+    verifySystemContractDraftBoundaries(root).join("\n"),
+    /cross-system-engineering-fact-receipt-lib\.mjs imports unregistered local target/u
+  );
+});
+
+test("rejects production or Browser reachability into evidence-only tool entrypoints", () => {
+  const toolRoot = createFixture();
+  write(
+    toolRoot,
+    "apps/web/src/evidence-tool-import.ts",
+    "import '../../../scripts/cross-system-engineering-fact-receipt-lib.mjs';\n"
+  );
+  assert.match(
+    verifySystemContractDraftBoundaries(toolRoot).join("\n"),
+    /apps\/web\/src\/evidence-tool-import\.ts imports evidence-only tool/u
+  );
+
+  const entrypointRoot = createFixture();
+  write(
+    entrypointRoot,
+    "apps/web/src/evidence-entrypoint-import.ts",
+    "import '../../../scripts/verify-cross-system-engineering-fact-receipts.mjs';\n"
+  );
+  assert.match(
+    verifySystemContractDraftBoundaries(entrypointRoot).join("\n"),
+    /apps\/web\/src\/evidence-entrypoint-import\.ts imports evidence-only entrypoint/u
+  );
+});
+
+test("rejects evidence-tool imports outside its exact bare and local allowlists", () => {
+  const bareRoot = createFixture();
+  write(
+    bareRoot,
+    "scripts/cross-system-engineering-fact-receipt-lib.mjs",
+    "import 'zod';\n"
+  );
+  assert.match(
+    verifySystemContractDraftBoundaries(bareRoot).join("\n"),
+    /cross-system-engineering-fact-receipt-lib\.mjs imports unregistered bare module zod/u
+  );
+
+  const localRoot = createFixture();
+  write(
+    localRoot,
+    "scripts/cross-system-engineering-fact-receipt-lib.mjs",
+    "import '../packages/storage/src/index.ts';\n"
+  );
+  assert.match(
+    verifySystemContractDraftBoundaries(localRoot).join("\n"),
+    /cross-system-engineering-fact-receipt-lib\.mjs imports unregistered local target packages\/storage\/src\/index\.ts/u
+  );
+});
+
+test("fails closed on malformed evidence-tool policy arrays without throwing", () => {
+  const malformedRegistry = structuredClone(draftRegistry);
+  malformedRegistry.evidenceTools[0].allowedDraftTargets = null;
+  assert.match(
+    verifySystemContractDraftBoundaries(createFixture(), malformedRegistry).join("\n"),
+    /cross-system-engineering-fact-receipt-lib\.mjs has invalid allowedDraftTargets/u
+  );
+});
+
+test("rejects non-canonical registry paths before they can alias an evidence tool", () => {
+  const malformedRegistry = structuredClone(draftRegistry);
+  malformedRegistry.evidenceTools[0].path =
+    "scripts/policy/../cross-system-engineering-fact-receipt-lib.mjs";
+  assert.match(
+    verifySystemContractDraftBoundaries(createFixture(), malformedRegistry).join("\n"),
+    /contains an invalid evidence tool path/u
+  );
+});
+
+test("enforces bare import allowlists throughout the evidence helper closure", () => {
+  const root = createFixture();
+  fs.appendFileSync(
+    path.join(root, "scripts/bazi-v17-manifest-drift-decision-lib.mjs"),
+    "\nimport 'node:child_process';\n",
+    "utf8"
+  );
+  assert.match(
+    verifySystemContractDraftBoundaries(root).join("\n"),
+    /bazi-v17-manifest-drift-decision-lib\.mjs imports unregistered bare module node:child_process/u
+  );
+});
+
+test("rejects file URL imports into the evidence-only tool", () => {
+  const root = createFixture();
+  const toolUrl = pathToFileURL(path.join(
+    root,
+    "scripts/cross-system-engineering-fact-receipt-lib.mjs"
+  )).href;
+  write(root, "apps/web/src/file-url-bypass.ts", `import ${JSON.stringify(toolUrl)};\n`);
+  assert.match(
+    verifySystemContractDraftBoundaries(root).join("\n"),
+    /apps\/web\/src\/file-url-bypass\.ts imports evidence-only tool/u
+  );
+});
+
+test("rejects case-insensitive FILE URL imports into the evidence-only tool", () => {
+  const root = createFixture();
+  const toolUrl = pathToFileURL(path.join(
+    root,
+    "scripts/cross-system-engineering-fact-receipt-lib.mjs"
+  )).href.replace(/^file:/u, "FILE:");
+  write(root, "apps/web/src/file-url-case-bypass.ts", `import ${JSON.stringify(toolUrl)};\n`);
+  assert.match(
+    verifySystemContractDraftBoundaries(root).join("\n"),
+    /apps\/web\/src\/file-url-case-bypass\.ts imports evidence-only tool/u
+  );
+});
+
+test("rejects static new URL module edges into an isolated draft", () => {
+  const root = createFixture();
+  write(root, "apps/web/src/url-worker-bypass.ts", [
+    "export const worker = new Worker(new URL(",
+    "  '../../../packages/ziwei-doushu-contracts-draft/src/index.ts',",
+    "  import.meta.url",
+    "));"
+  ].join("\n"));
+  assert.match(
+    verifySystemContractDraftBoundaries(root).join("\n"),
+    /apps\/web\/src\/url-worker-bypass\.ts resolves into isolated draft/u
+  );
+});
+
+test("rejects URL-encoded dot segments in static import-meta module edges", () => {
+  const root = createFixture();
+  write(root, "apps/web/src/url-encoded-worker-bypass.ts", [
+    "export const worker = new Worker(new URL(",
+    "  '%2e%2e/%2e%2e/%2e%2e/packages/ziwei-doushu-contracts-draft/src/index.ts',",
+    "  import.meta.url",
+    "));"
+  ].join("\n"));
+  assert.match(
+    verifySystemContractDraftBoundaries(root).join("\n"),
+    /apps\/web\/src\/url-encoded-worker-bypass\.ts resolves into isolated draft/u
+  );
+});
+
+test("rejects URL-encoded dot segments mixed with raw backslashes", () => {
+  const root = createFixture();
+  write(root, "apps/web/src/url-encoded-backslash-worker-bypass.ts", [
+    "export const worker = new Worker(new URL(",
+    "  '%2e%2e\\\\%2e%2e\\\\%2e%2e\\\\packages/ziwei-doushu-contracts-draft/src/index.ts',",
+    "  import.meta.url",
+    "));"
+  ].join("\n"));
+  assert.match(
+    verifySystemContractDraftBoundaries(root).join("\n"),
+    /apps\/web\/src\/url-encoded-backslash-worker-bypass\.ts resolves into isolated draft/u
+  );
+});
+
+test("rejects Vite aliases that point directly at an evidence audit surface", () => {
+  const root = createFixture();
+  write(root, "tools/vite.config.ts", [
+    "export default { resolve: { alias: {",
+    "  '#engineering-facts': '../scripts/cross-system-engineering-fact-receipt-lib.mjs'",
+    "} } };"
+  ].join("\n"));
+  assert.match(
+    verifySystemContractDraftBoundaries(root).join("\n"),
+    /tools\/vite\.config\.ts must not alias evidence audit surface/u
+  );
+});
+
+test("rejects Vite alias property shorthand that points at an evidence audit surface", () => {
+  const root = createFixture();
+  write(root, "tools/vite.config.ts", [
+    "const alias = { '#engineering-facts': '../scripts/cross-system-engineering-fact-receipt-lib.mjs' };",
+    "export default { resolve: { alias } };"
+  ].join("\n"));
+  assert.match(
+    verifySystemContractDraftBoundaries(root).join("\n"),
+    /tools\/vite\.config\.ts must not alias evidence audit surface/u
+  );
+});
+
+test("rejects Vite alias assignment expressions that point at an evidence audit surface", () => {
+  const root = createFixture();
+  write(root, "tools/vite.config.ts", [
+    "const config = { resolve: {} };",
+    "config.resolve.alias = {",
+    "  '#engineering-facts': '../scripts/cross-system-engineering-fact-receipt-lib.mjs'",
+    "};",
+    "export default config;"
+  ].join("\n"));
+  assert.match(
+    verifySystemContractDraftBoundaries(root).join("\n"),
+    /tools\/vite\.config\.ts must not alias evidence audit surface/u
+  );
+});
+
+test("rejects statically bound computed Vite alias assignment keys", () => {
+  const root = createFixture();
+  write(root, "tools/vite.config.ts", [
+    "const aliasKey = 'alias';",
+    "const config = { resolve: {} };",
+    "config.resolve[aliasKey] = {",
+    "  '#engineering-facts': '../scripts/cross-system-engineering-fact-receipt-lib.mjs'",
+    "};",
+    "export default config;"
+  ].join("\n"));
+  assert.match(
+    verifySystemContractDraftBoundaries(root).join("\n"),
+    /tools\/vite\.config\.ts must not alias evidence audit surface/u
+  );
+});
+
+test("keeps top-level Vite alias shorthand binding when an inner scope shadows its name", () => {
+  const root = createFixture();
+  write(root, "tools/vite.config.ts", [
+    "const alias = { '#engineering-facts': '../scripts/cross-system-engineering-fact-receipt-lib.mjs' };",
+    "function nested() {",
+    "  const alias = { '#safe': './safe.ts' };",
+    "  return alias;",
+    "}",
+    "void nested;",
+    "export default { resolve: { alias } };"
+  ].join("\n"));
+  assert.match(
+    verifySystemContractDraftBoundaries(root).join("\n"),
+    /tools\/vite\.config\.ts must not alias evidence audit surface/u
+  );
+});
+
+test("preserves lexical Vite alias bindings across inner scope shadowing", () => {
+  const root = createFixture();
+  write(root, "tools/vite.config.ts", [
+    "function makeConfig() {",
+    "  const alias = { '#engineering-facts': '../scripts/cross-system-engineering-fact-receipt-lib.mjs' };",
+    "  {",
+    "    const alias = { '#safe': './safe.ts' };",
+    "    void alias;",
+    "  }",
+    "  return { resolve: { alias } };",
+    "}",
+    "export default makeConfig();"
+  ].join("\n"));
+  assert.match(
+    verifySystemContractDraftBoundaries(root).join("\n"),
+    /tools\/vite\.config\.ts must not alias evidence audit surface/u
+  );
+});
+
+test("rejects statically computed Vite alias array replacement keys", () => {
+  const root = createFixture();
+  write(root, "tools/vite.config.ts", [
+    "const replacementKey = 'replacement';",
+    "const alias = [{",
+    "  find: '#engineering-facts',",
+    "  [replacementKey]: '../scripts/cross-system-engineering-fact-receipt-lib.mjs'",
+    "}];",
+    "export default { resolve: { alias } };"
+  ].join("\n"));
+  assert.match(
+    verifySystemContractDraftBoundaries(root).join("\n"),
+    /tools\/vite\.config\.ts must not alias evidence audit surface/u
+  );
+});
+
+test("does not treat a Vite alias array find pattern as its replacement target", () => {
+  const root = createFixture();
+  write(root, "tools/vite.config.ts", [
+    "const entry = {",
+    "  find: '../scripts/cross-system-engineering-fact-receipt-lib.mjs',",
+    "  replacement: './safe.ts'",
+    "};",
+    "const alias = [entry];",
+    "export default { resolve: { alias } };"
+  ].join("\n"));
+  assert.deepEqual(verifySystemContractDraftBoundaries(root), []);
+});
+
+test("does not treat a spread Vite alias array find pattern as its replacement target", () => {
+  const root = createFixture();
+  write(root, "tools/vite.config.ts", [
+    "const entry = {",
+    "  find: '../scripts/cross-system-engineering-fact-receipt-lib.mjs',",
+    "  replacement: './safe.ts'",
+    "};",
+    "const alias = [{ ...entry }];",
+    "export default { resolve: { alias } };"
+  ].join("\n"));
+  assert.deepEqual(verifySystemContractDraftBoundaries(root), []);
+});
+
+test("does not treat unrelated Vite literals as alias targets", () => {
+  const root = createFixture();
+  write(root, "tools/vite.config.ts", [
+    "const documentationOnly = '../scripts/cross-system-engineering-fact-receipt-lib.mjs';",
+    "export default { resolve: { alias: {} } };",
+    "void documentationOnly;"
+  ].join("\n"));
+  assert.deepEqual(verifySystemContractDraftBoundaries(root), []);
+});
+
+test("fails closed on workspace junctions instead of skipping their payload", () => {
+  const root = createFixture();
+  const payloadRoot = fs.mkdtempSync(path.join(os.tmpdir(), "hakimi-boundary-junction-payload-"));
+  temporaryRoots.push(payloadRoot);
+  write(payloadRoot, "draft-bypass.ts", "import '@hakimi/ziwei-doushu-contracts-draft';\n");
+  const junctionPath = path.join(root, "apps/web/src/junction-payload");
+  fs.symlinkSync(payloadRoot, junctionPath, process.platform === "win32" ? "junction" : "dir");
+  assert.match(
+    verifySystemContractDraftBoundaries(root).join("\n"),
+    /apps\/web\/src\/junction-payload is a forbidden workspace symbolic link or junction/u
+  );
 });
 
 test("activates the pre-registered Fortel draft only when its exact graph and closure are present", () => {
@@ -674,10 +1143,66 @@ test("rejects widening the Ziwei workspace Browser-safe registry policy", () => 
   );
 });
 
+test("rejects direct Ziwei workspace bridges to the high-risk policy or view", () => {
+  for (const target of [
+    "src/browser-preview/high-risk-expression-egress-policy.ts",
+    "src/browser-preview/high-risk-expression-egress-view.ts"
+  ]) {
+    const widenedRegistry = structuredClone(draftRegistry);
+    const workspace = widenedRegistry.drafts.find((draft) =>
+      draft.packageName === "@hakimi/ziwei-workspace-artifact-draft"
+    );
+    assert.ok(workspace);
+    workspace.crossDraftEdges.push({
+      from: "src/high-risk-expression-egress-bridge.ts",
+      toPackage: "@hakimi/ziwei-iztro-adapter-draft",
+      to: target
+    });
+    assert.ok(
+      verifySystemContractDraftBoundaries(createFixture(), widenedRegistry).includes(
+        "system-contract-draft-registry.json must keep the exact Ziwei workspace Browser bridge set"
+      )
+    );
+  }
+});
+
 test("accepts the exact isolated Western rules preview graph", () => {
   const root = createFixture();
   activateWesternRulesPreview(root);
   assert.deepEqual(verifySystemContractDraftBoundaries(root), []);
+});
+
+test("rejects a detached Western rules preview license emitter or license link", () => {
+  const viteRoot = createFixture();
+  activateWesternRulesPreview(viteRoot);
+  const vitePath = path.join(viteRoot, "packages/western-astrology-rules-preview-draft/vite.rules-preview.config.mjs");
+  const viteSource = fs.readFileSync(vitePath, "utf8");
+  fs.writeFileSync(vitePath, viteSource.replace(
+    "plugins: [emitAstronomyEngineLicensePlugin()]",
+    "plugins: []"
+  ), "utf8");
+  expectFailure(viteRoot, /must verify the locked engine and license bytes and emit the held standalone license asset/u);
+
+  const htmlRoot = createFixture();
+  activateWesternRulesPreview(htmlRoot);
+  const htmlPath = path.join(htmlRoot, "packages/western-astrology-rules-preview-draft/browser-app/index.html");
+  const htmlSource = fs.readFileSync(htmlPath, "utf8");
+  fs.writeFileSync(htmlPath, htmlSource.replace(
+    '<link rel="license" href="./licenses/astronomy-engine-2.1.19-LICENSE.txt">',
+    '<link rel="license" href="https://example.invalid/LICENSE">'
+  ), "utf8");
+  expectFailure(htmlRoot, /must expose exactly one same-origin Astronomy Engine 2\.1\.19 license link with no base redirect/u);
+
+  const workerPluginRoot = createFixture();
+  activateWesternRulesPreview(workerPluginRoot);
+  const workerPluginPath = path.join(workerPluginRoot, "packages/western-astrology-rules-preview-draft/vite.rules-preview.config.mjs");
+  const workerPluginSource = fs.readFileSync(workerPluginPath, "utf8");
+  assert.ok(workerPluginSource.includes("plugins: () => [isolatedHeldAstronomyEnginePlugin()]"));
+  fs.writeFileSync(workerPluginPath, workerPluginSource.replace(
+    "plugins: () => [isolatedHeldAstronomyEnginePlugin()]",
+    "plugins: () => []"
+  ), "utf8");
+  expectFailure(workerPluginRoot, /must verify the locked engine and license bytes and emit the held standalone license asset/u);
 });
 
 test("rejects a detached Worker or persistence in the Western rules preview", () => {
@@ -839,6 +1364,87 @@ test("rejects a detached browser Worker snapshot sentinel or Vite injection chai
   expectFailure(detachedSourceRoot, /must bind the injected Browser source identity in both reusable client and fresh Worker graphs/u);
 });
 
+test("rejects omitting the Ziwei high-risk policy or view from the fixed Browser source graph", () => {
+  for (const sourcePath of [
+    "src/browser-preview/high-risk-expression-egress-policy.ts",
+    "src/browser-preview/high-risk-expression-egress-view.ts"
+  ]) {
+    const root = createFixture();
+    const viteRelativePath = "packages/ziwei-iztro-adapter-draft/vite.browser-preview.config.mjs";
+    const vitePath = path.join(root, viteRelativePath);
+    const viteSource = fs.readFileSync(vitePath, "utf8");
+    const mutatedViteSource = viteSource.replace(`  \"${sourcePath}\",\n`, "");
+    assert.notEqual(mutatedViteSource, viteSource);
+    write(root, viteRelativePath, mutatedViteSource);
+    assert.ok(
+      verifySystemContractDraftBoundaries(root).includes(
+        `${viteRelativePath} Browser source graph omits ${sourcePath}`
+      )
+    );
+  }
+});
+
+test("rejects a detached Ziwei iztro top-level license emitter, copy or license link", () => {
+  const viteRoot = createFixture();
+  const vitePath = path.join(viteRoot, "packages/ziwei-iztro-adapter-draft/vite.browser-preview.config.mjs");
+  write(viteRoot, "packages/ziwei-iztro-adapter-draft/vite.browser-preview.config.mjs",
+    fs.readFileSync(vitePath, "utf8").replace(
+      'plugins: [createIztroLicenseNoticePlugin("browser-preview"), ...createZiweiBrowserPreviewMainPlugins()]',
+      "plugins: [...createZiweiBrowserPreviewMainPlugins()]"
+    ));
+  expectFailure(viteRoot, /must verify and emit the exact held iztro 2\.5\.8 top-level license/u);
+
+  const htmlRoot = createFixture();
+  write(htmlRoot, "packages/ziwei-iztro-adapter-draft/browser-preview/index.html",
+    "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'self'\"><script type=\"module\" src=\"../src/browser-preview/main.ts\"></script>\n");
+  expectFailure(htmlRoot, /must expose exactly one same-origin iztro 2\.5\.8 top-level license link/u);
+
+  const copyRoot = createFixture();
+  write(copyRoot, "packages/ziwei-iztro-adapter-draft/licenses/iztro-2.5.8-LICENSE.txt", "truncated\n");
+  expectFailure(copyRoot, /must keep the exact 1073-byte iztro 2\.5\.8 top-level license copy/u);
+
+  const equalLengthRoot = createFixture();
+  const equalLengthPath = path.join(
+    equalLengthRoot,
+    "packages/ziwei-iztro-adapter-draft/licenses/iztro-2.5.8-LICENSE.txt"
+  );
+  const equalLengthBytes = fs.readFileSync(equalLengthPath);
+  equalLengthBytes[0] ^= 0x01;
+  fs.writeFileSync(equalLengthPath, equalLengthBytes);
+  expectFailure(equalLengthRoot, /must keep the exact 1073-byte iztro 2\.5\.8 top-level license copy/u);
+});
+
+test("allows fixed Ziwei attestation path labels but still rejects a real alias from the audited Vite bridge", () => {
+  const root = createFixture();
+  const relativePath = "packages/ziwei-iztro-adapter-draft/vite.browser-preview.config.mjs";
+  const vitePath = path.join(root, relativePath);
+  const source = fs.readFileSync(vitePath, "utf8");
+  write(root, relativePath, source.replace(
+    "export default { base:",
+    'export default { resolve: { alias: { "#forbidden-draft": "../ziwei-doushu-contracts-draft/src/index.ts" } }, base:'
+  ));
+  expectFailure(root, /must not alias isolated draft @hakimi\/ziwei-doushu-contracts-draft/u);
+});
+
+test("pins LF checkout semantics for every byte-hashed Ziwei license evidence basis artifact", () => {
+  const attributeRules = new Set(fs.readFileSync(path.join(workspaceRoot, ".gitattributes"), "utf8")
+    .split(/\r?\n/u)
+    .filter(Boolean));
+  const basisPaths = [
+    "packages/ziwei-iztro-adapter-draft/package.json",
+    "packages/ziwei-iztro-adapter-draft/src/iztro-2.5.8-lock-closure.json",
+    "packages/ziwei-iztro-adapter-draft/licenses/iztro-2.5.8-LICENSE.txt",
+    "packages/ziwei-iztro-adapter-draft/vite.browser-preview.config.mjs",
+    "packages/ziwei-iztro-adapter-draft/browser-preview/index.html",
+    "packages/ziwei-workspace-artifact-draft/package.json",
+    "packages/ziwei-workspace-artifact-draft/vite.browser-app.config.mjs",
+    "packages/ziwei-workspace-artifact-draft/browser-app/index.html"
+  ];
+  for (const basisPath of basisPaths) {
+    assert.ok(attributeRules.has(`/${basisPath} text eol=lf`), basisPath);
+  }
+});
+
 test("rejects adapter tool scripts that import a wider Node, workspace, draft, or package graph", () => {
   const root = createFixture();
   write(root, "packages/ziwei-iztro-adapter-draft/scripts/escape.ts", [
@@ -942,6 +1548,17 @@ test("rejects a disconnected Western Vite reference plugin and a forged generate
   ), "utf8");
   expectFailure(viteRoot, /must replace the fail-closed generated reference only for the fixed main module/u);
 
+  const workerPluginRoot = createFixture();
+  const workerPluginPackage = activateWesternAstronomyParity(workerPluginRoot);
+  const workerPluginPath = path.join(workerPluginPackage, "vite.browser-parity.config.mjs");
+  const workerPluginSource = fs.readFileSync(workerPluginPath, "utf8");
+  assert.ok(workerPluginSource.includes("plugins: () => [isolatedHeldAstronomyEnginePlugin()]"));
+  fs.writeFileSync(workerPluginPath, workerPluginSource.replace(
+    "plugins: () => [isolatedHeldAstronomyEnginePlugin()]",
+    "plugins: () => []"
+  ), "utf8");
+  expectFailure(workerPluginRoot, /must replace the fail-closed generated reference only for the fixed main module/u);
+
   const sentinelRoot = createFixture();
   const sentinelPackage = activateWesternAstronomyParity(sentinelRoot);
   write(sentinelRoot, path.relative(sentinelRoot, path.join(
@@ -953,6 +1570,28 @@ test("rejects a disconnected Western Vite reference plugin and a forged generate
     "export default forged;"
   ].join("\n"));
   expectFailure(sentinelRoot, /must remain a typed fail-closed null sentinel with no embedded reference data/u);
+});
+
+test("rejects a detached Western Browser parity license emitter or license link", () => {
+  const viteRoot = createFixture();
+  const vitePackage = activateWesternAstronomyParity(viteRoot);
+  const vitePath = path.join(vitePackage, "vite.browser-parity.config.mjs");
+  const viteSource = fs.readFileSync(vitePath, "utf8");
+  fs.writeFileSync(vitePath, viteSource.replace(
+    "fileName: licenseAssetFile",
+    'fileName: "licenses/forged.txt"'
+  ), "utf8");
+  expectFailure(viteRoot, /must replace the fail-closed generated reference only for the fixed main module/u);
+
+  const htmlRoot = createFixture();
+  const htmlPackage = activateWesternAstronomyParity(htmlRoot);
+  const htmlPath = path.join(htmlPackage, "browser-parity/index.html");
+  const htmlSource = fs.readFileSync(htmlPath, "utf8");
+  fs.writeFileSync(htmlPath, htmlSource.replace(
+    '<link rel="license" type="text/plain" href="./licenses/astronomy-engine-2.1.19-LICENSE.txt" />',
+    '<base href="https://example.invalid/" /><link rel="license" type="text/plain" href="./licenses/astronomy-engine-2.1.19-LICENSE.txt" />'
+  ), "utf8");
+  expectFailure(htmlRoot, /must expose exactly one same-origin Astronomy Engine 2\.1\.19 license link with no base redirect/u);
 });
 
 test("rejects Western emitter, HTML, tsconfig, and browser-safe graph escapes", () => {
@@ -1123,6 +1762,51 @@ test("rejects drift in closure resolved URLs, requested edges, and root override
   rootManifest.overrides.dayjs = "1.11.20";
   write(overrideRoot, "package.json", json(rootManifest));
   expectFailure(overrideRoot, /root overrides must freeze dayjs@1\.11\.21/u);
+});
+
+test("allows fake-indexeddb only from Vedic mutation epoch test files", () => {
+  const root = createFixture();
+  const registry = activateVedicMutationEpochExperiment(root);
+  assert.deepEqual(verifySystemContractDraftBoundaries(root, registry), []);
+});
+
+test("rejects fake-indexeddb from Vedic mutation epoch runtime code", () => {
+  const root = createFixture();
+  const registry = activateVedicMutationEpochExperiment(root);
+  write(
+    root,
+    "packages/vedic-mutation-epoch-runtime-experiment-draft/src/runtime.ts",
+    "import { IDBFactory } from \"fake-indexeddb\";\nexport const runtime = new IDBFactory();\n"
+  );
+  assert.match(
+    verifySystemContractDraftBoundaries(root, registry).join("\n"),
+    /src\/runtime\.ts imports forbidden module fake-indexeddb/u
+  );
+});
+
+test("rejects detaching or widening the Vedic fake-indexeddb test-only policy", () => {
+  const detachedRoot = createFixture();
+  const detachedRegistry = activateVedicMutationEpochExperiment(detachedRoot);
+  const detachedDraft = detachedRegistry.drafts.find((draft) =>
+    draft.packageName === "@hakimi/vedic-mutation-epoch-runtime-experiment-draft"
+  );
+  assert.ok(detachedDraft);
+  detachedDraft.specialChecks = [];
+  const detachedFailures = verifySystemContractDraftBoundaries(detachedRoot, detachedRegistry).join("\n");
+  assert.match(detachedFailures, /must keep fake-indexeddb-test-only-v1 as the sole/u);
+  assert.match(detachedFailures, /src\/runtime\.test\.ts imports forbidden module fake-indexeddb/u);
+
+  const widenedRoot = createFixture();
+  const widenedRegistry = activateVedicMutationEpochExperiment(widenedRoot);
+  const widenedDraft = widenedRegistry.drafts.find((draft) =>
+    draft.packageName === "@hakimi/vedic-mutation-epoch-runtime-experiment-draft"
+  );
+  assert.ok(widenedDraft);
+  widenedDraft.allowedBareImports = ["fake-indexeddb"];
+  assert.match(
+    verifySystemContractDraftBoundaries(widenedRoot, widenedRegistry).join("\n"),
+    /must not grant package-wide bare imports/u
+  );
 });
 
 test("direct workspace Vite builds retain the gate and reject a resolved alias into a draft", async () => {
