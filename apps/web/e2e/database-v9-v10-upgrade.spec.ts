@@ -189,35 +189,37 @@ async function inspectDatabase(page: Page, includeNewPartitions = true) {
       request.onerror = () => reject(request.error ?? new Error("IndexedDB inspection open failed"));
       request.onblocked = () => reject(new Error("IndexedDB inspection was blocked"));
     });
-    const tableNames = [
-      ...userPartitions,
-      "birthFingerprints",
-      ...(includeNew ? newPartitions : [])
-    ];
-    const transaction = database.transaction(tableNames, "readonly");
-    const rows = Object.fromEntries(await Promise.all(userPartitions.map(async (tableName) => [
-      tableName,
-      await requestResult(transaction.objectStore(tableName).getAll())
-    ])));
-    const birthFingerprints = await requestResult(transaction.objectStore("birthFingerprints").getAll());
-    const newPartitionCounts = Object.fromEntries(await Promise.all((includeNew ? newPartitions : []).map(async (tableName) => [
-      tableName,
-      await requestResult(transaction.objectStore(tableName).count())
-    ])));
-    const newPartitionIndexes = Object.fromEntries((includeNew ? newPartitions : []).map((tableName) => [
-      tableName,
-      [...transaction.objectStore(tableName).indexNames].sort()
-    ]));
-    const result = {
-      nativeVersion: database.version,
-      stores: [...database.objectStoreNames].sort(),
-      rows,
-      birthFingerprints,
-      newPartitionCounts,
-      newPartitionIndexes
-    };
-    database.close();
-    return result;
+    try {
+      const tableNames = [
+        ...userPartitions,
+        "birthFingerprints",
+        ...(includeNew ? newPartitions : [])
+      ];
+      const transaction = database.transaction(tableNames, "readonly");
+      const rows = Object.fromEntries(await Promise.all(userPartitions.map(async (tableName) => [
+        tableName,
+        await requestResult(transaction.objectStore(tableName).getAll())
+      ])));
+      const birthFingerprints = await requestResult(transaction.objectStore("birthFingerprints").getAll());
+      const newPartitionCounts = Object.fromEntries(await Promise.all((includeNew ? newPartitions : []).map(async (tableName) => [
+        tableName,
+        await requestResult(transaction.objectStore(tableName).count())
+      ])));
+      const newPartitionIndexes = Object.fromEntries((includeNew ? newPartitions : []).map((tableName) => [
+        tableName,
+        [...transaction.objectStore(tableName).indexNames].sort()
+      ]));
+      return {
+        nativeVersion: database.version,
+        stores: [...database.objectStoreNames].sort(),
+        rows,
+        birthFingerprints,
+        newPartitionCounts,
+        newPartitionIndexes
+      };
+    } finally {
+      database.close();
+    }
   }, {
     databaseName: DATABASE_NAME,
     userPartitions: V9_USER_PARTITIONS,
@@ -235,7 +237,10 @@ test("真实浏览器将 v9 九个用户分区原文保留，并新增六个空�
   // Dexie v13. The sentinel rows are intentionally schema-minimal because this
   // migration must be a byte-for-byte structural upgrade, not a record rewrite.
   await page.goto("/__e2e__/trigger-v11-upgrade", { waitUntil: "domcontentloaded" });
-  await expect.poll(async () => (await inspectDatabase(page)).nativeVersion).toBe(NATIVE_V13_VERSION);
+  await expect.poll(() => page.evaluate(async (databaseName) => {
+    const metadata = await indexedDB.databases();
+    return metadata.find((entry) => entry.name === databaseName)?.version ?? null;
+  }, DATABASE_NAME)).toBe(NATIVE_V13_VERSION);
 
   const after = await inspectDatabase(page);
   expect(after.stores).toEqual([

@@ -7,8 +7,13 @@ import type {
   DatabaseGenerationReleaseState,
   ResearchDatabase
 } from "@hakimi/storage";
-import type { ReleaseDatabaseDescriptor } from "../../release-protocol";
+import {
+  isShadowDatabaseRelease,
+  parseReleaseDatabaseDescriptor,
+  type ReleaseDatabaseDescriptor
+} from "../../release-protocol";
 import { APP_VERSION } from "./app-version";
+import { ReleaseControllerTakeoverFrozenError } from "./release-controller-takeover-write-fence";
 import {
   createReleaseIntegrityContractVersion,
   verifyReleaseIntegrity,
@@ -33,6 +38,13 @@ export type ReleaseBootConfirmation = {
   state: DatabaseGenerationReleaseState;
   migrationReceiptDigest: string;
 };
+
+export class ReleaseForwardMigrationActivationFrozenError extends Error {
+  constructor() {
+    super("跨 Schema 向前迁移已冻结旧页面的发布控制写入；必须重新导航后启动。");
+    this.name = "ReleaseForwardMigrationActivationFrozenError";
+  }
+}
 
 type MigrationResolutionCommand =
   | "ABORT_DATABASE_MIGRATION"
@@ -252,6 +264,26 @@ function hasSameMigrationLineage(
   );
 }
 
+function sameReleaseDescriptor(
+  left: ReleaseDatabaseDescriptor,
+  right: ReleaseDatabaseDescriptor
+): boolean {
+  return left.protocolVersion === right.protocolVersion
+    && left.dbGeneration === right.dbGeneration
+    && left.databaseName === right.databaseName
+    && left.targetSchema === right.targetSchema
+    && left.minReadableSchema === right.minReadableSchema
+    && left.maxReadableSchema === right.maxReadableSchema
+    && left.migrationId === right.migrationId
+    && left.sourceGeneration === right.sourceGeneration
+    && left.sourceDatabaseName === right.sourceDatabaseName
+    && left.sourceSchema === right.sourceSchema
+    && left.acceptedCommittedMigrationIds.length === right.acceptedCommittedMigrationIds.length
+    && left.acceptedCommittedMigrationIds.every(
+      (migrationId, index) => migrationId === right.acceptedCommittedMigrationIds[index]
+    );
+}
+
 export class ReleaseDatabaseCoordinator {
   private readonly ownerId: string;
   private readonly controllerPromise: Promise<DatabaseGenerationController>;
@@ -263,6 +295,7 @@ export class ReleaseDatabaseCoordinator {
   private sourceSnapshot: VerifiedSnapshot | null = null;
   private migrationJournal: DatabaseGenerationMigrationJournal | null = null;
   private committedState: DatabaseGenerationReleaseState | null = null;
+  private bootCommitCompleted = false;
   private sourceClientsFrozen = false;
   private sourceFreezeRequestId: string | null = null;
   private sourceFreezeHeartbeatTimer: number | null = null;
@@ -274,6 +307,10 @@ export class ReleaseDatabaseCoordinator {
   private controllerTakeoverFrozen = false;
   private readonly activeControllerMutationPromises = new Set<Promise<unknown>>();
   private controllerTakeoverDrainPromise: Promise<void> | null = null;
+  private readonly activeLegacyControlOperations = new Set<Promise<unknown>>();
+  private forwardActivationTarget: ReleaseDatabaseDescriptor | null = null;
+  private forwardActivationDrainPromise: Promise<void> | null = null;
+  private forwardActivationFreezeCompleted = false;
   private cancellationFinalizationPromise: Promise<void> | null = null;
   private failureJournalTransitionPromise: Promise<MigrationResolutionCommand> | null = null;
   private failureFinalizationPromise: Promise<void> | null = null;
@@ -684,7 +721,7 @@ export class ReleaseDatabaseCoordinator {
     }
     this.preparePromise ??= this.trackControllerTakeoverMutation(
       () => this.runWithFailureFinalization(
-        () => this.prepareStorageOnce(),
+        () => this.trackLegacyControlOperation(() => this.prepareStorageOnce()),
         "数据库准备失败且失败收尾未能完整结束。"
       )
     );
@@ -698,12 +735,14 @@ export class ReleaseDatabaseCoordinator {
     this.targetDatabase = storage.caseRepository.database;
 
     if (this.descriptor.migrationId === null) {
+      this.assertForwardMigrationActivationOpen();
       await openExpectedDatabase(
         this.targetDatabase,
         this.descriptor.databaseName,
         this.descriptor.targetSchema,
         BRIDGE_DATABASE_OPEN_TIMEOUT_MS
       );
+      this.assertForwardMigrationActivationOpen();
       return;
     }
 
@@ -1166,12 +1205,15 @@ export class ReleaseDatabaseCoordinator {
   }
 
   private controllerTakeoverFrozenError(): Error {
-    const error = new Error("Service Worker 接管已冻结当前页面的发布控制写入。");
-    error.name = "ReleaseControllerTakeoverFrozenError";
-    return error;
+    return new ReleaseControllerTakeoverFrozenError();
+  }
+
+  private assertForwardMigrationActivationOpen(): void {
+    if (this.forwardActivationTarget) throw new ReleaseForwardMigrationActivationFrozenError();
   }
 
   private assertControllerTakeoverMutationOpen(): void {
+    this.assertForwardMigrationActivationOpen();
     if (this.controllerTakeoverFrozen) throw this.controllerTakeoverFrozenError();
   }
 
@@ -1205,6 +1247,127 @@ export class ReleaseDatabaseCoordinator {
     return mutation;
   }
 
+  private trackLegacyControlOperation<T>(operation: () => Promise<T>): Promise<T> {
+    // Shadow preparations retain the existing whole-operation drain. Only the
+    // legacy source has a read-only audit that may await worker activation.
+    if (this.descriptor.migrationId !== null) return operation();
+    this.assertForwardMigrationActivationOpen();
+    let resolveOperation!: (value: T | PromiseLike<T>) => void;
+    let rejectOperation!: (reason?: unknown) => void;
+    const admitted = new Promise<T>((resolve, reject) => {
+      resolveOperation = resolve;
+      rejectOperation = reject;
+    });
+    // Admission must precede the actual open/read/write call, including a
+    // synchronous freeze requested from inside a storage implementation.
+    this.activeLegacyControlOperations.add(admitted);
+    const remove = () => { this.activeLegacyControlOperations.delete(admitted); };
+    void admitted.then(remove, remove);
+    try {
+      void Promise.resolve(operation()).then(resolveOperation, rejectOperation);
+    } catch (cause) {
+      rejectOperation(cause);
+    }
+    return admitted;
+  }
+
+  private requireForwardActivationTarget(target: ReleaseDatabaseDescriptor): ReleaseDatabaseDescriptor {
+    const source = parseReleaseDatabaseDescriptor(this.descriptor);
+    const parsed = parseReleaseDatabaseDescriptor(target);
+    if (
+      source.dbGeneration !== "legacy-v13" || source.targetSchema !== 13
+      || source.minReadableSchema !== 13 || source.maxReadableSchema !== 13
+      || source.migrationId !== null || !Array.isArray(target.acceptedCommittedMigrationIds)
+      || !isShadowDatabaseRelease(parsed) || parsed.targetSchema !== 16
+      || parsed.minReadableSchema !== 16 || parsed.maxReadableSchema !== 16
+      || parsed.protocolVersion !== source.protocolVersion
+      || parsed.sourceGeneration !== source.dbGeneration
+      || parsed.sourceDatabaseName !== source.databaseName
+      || parsed.sourceSchema !== source.targetSchema
+      || parsed.dbGeneration === source.dbGeneration || parsed.databaseName === source.databaseName
+      || !acceptsCommittedMigration(parsed, parsed.migrationId)
+    ) {
+      throw new Error("向前激活只接受完整匹配 legacy-v13 来源的独立 Schema 16 迁移。");
+    }
+    return Object.freeze(parsed);
+  }
+
+  /**
+   * Close source writes and drain admitted legacy opens/control operations.
+   * The read-only backup audit remains in the original full takeover drain;
+   * it must settle normally, then fail its late commit on this frozen page.
+   */
+  freezeForForwardMigrationActivation(target: ReleaseDatabaseDescriptor): Promise<void> {
+    let parsed: ReleaseDatabaseDescriptor;
+    try {
+      parsed = this.requireForwardActivationTarget(target);
+      if (this.forwardActivationTarget) {
+        if (!sameReleaseDescriptor(this.forwardActivationTarget, parsed)) {
+          throw new Error("向前激活目标与本页已冻结的迁移描述符不一致。");
+        }
+        return this.forwardActivationDrainPromise!;
+      }
+      this.assertControllerTakeoverMutationOpen();
+    } catch (cause) {
+      return Promise.reject(cause);
+    }
+    this.forwardActivationTarget = parsed;
+    this.controllerTakeoverFrozen = true;
+    let resolveDrain!: () => void;
+    let rejectDrain!: (cause: unknown) => void;
+    const drain = new Promise<void>((resolve, reject) => {
+      resolveDrain = resolve;
+      rejectDrain = reject;
+    });
+    this.forwardActivationDrainPromise = drain;
+    void (async () => {
+      this.targetDatabase?.lockReleaseWrites();
+      while (this.activeLegacyControlOperations.size > 0) {
+        await Promise.allSettled(Array.from(this.activeLegacyControlOperations));
+      }
+      // This is an ordering barrier, not a claim that an admitted write passed.
+      // Its original caller retains failures; navigation reads the real receipt.
+      this.forwardActivationFreezeCompleted = true;
+    })().then(resolveDrain, rejectDrain);
+    return drain;
+  }
+
+  async verifyForwardMigrationActivationNavigationState(
+    target: ReleaseDatabaseDescriptor,
+    targetBuildVersion: string
+  ): Promise<void> {
+    const parsed = this.requireForwardActivationTarget(target);
+    const targetBuild = requireCanonicalBuildId(targetBuildVersion);
+    if (
+      !this.forwardActivationFreezeCompleted || !this.forwardActivationTarget
+      || !sameReleaseDescriptor(this.forwardActivationTarget, parsed)
+    ) {
+      throw new Error("向前激活导航要求同一目标的源写入冻结已经完成。");
+    }
+    const controller = await this.controllerPromise;
+    // A slow old page may never have opened its control connection before the
+    // audit. Use the formal receipt reader, without opening a business database
+    // or writing a pointer; do not authorize navigation from cached boot state.
+    const state = await controller.readCommittedGeneration();
+    const sourceStillCommitted = state
+      && samePhysicalGeneration(state, this.descriptor)
+      && state.committedBuild === this.buildId
+      && state.migrationId === this.descriptor.migrationId
+      && acceptsCommittedMigration(this.descriptor, state.migrationId);
+    const targetAlreadyCommitted = state
+      && samePhysicalGeneration(state, parsed)
+      && state.committedBuild === targetBuild
+      && state.migrationId === parsed.migrationId
+      && acceptsCommittedMigration(parsed, state.migrationId);
+    if (
+      !state || state.protocolVersion !== parsed.protocolVersion
+      || !isSha256Digest(state.receiptDigest)
+      || (!sourceStillCommitted && !targetAlreadyCommitted)
+    ) {
+      throw new Error("向前激活导航的当前控制回执既不是原来源，也不是精确目标提交。");
+    }
+  }
+
   private async drainControllerTakeoverMutations(): Promise<void> {
     while (this.activeControllerMutationPromises.size > 0) {
       const admitted = Array.from(this.activeControllerMutationPromises);
@@ -1223,6 +1386,40 @@ export class ReleaseDatabaseCoordinator {
     const drain = this.drainControllerTakeoverMutations();
     this.controllerTakeoverDrainPromise = drain;
     return drain;
+  }
+
+  /**
+   * Only a page with its own completed boot commit may navigate after first claim.
+   * An early peer claim without this page's completed commit fails before
+   * touching the control database. The subsequent read cannot reopen Dexie.
+   */
+  async verifyFirstControllerClaimNavigationState(): Promise<void> {
+    const legacyBridge = this.descriptor.dbGeneration === "legacy-v13"
+      && this.descriptor.targetSchema === 13
+      && this.descriptor.migrationId === null;
+    if (
+      !this.controllerTakeoverFrozen ||
+      (!legacyBridge && !isShadowDatabaseRelease(this.descriptor)) ||
+      !this.bootCommitCompleted ||
+      !this.committedState
+    ) {
+      throw new Error("首次 Service Worker 接管前本页尚未完成数据库正常提交；旧页保持写入锁定，请重新打开并核对。");
+    }
+    const controller = await this.controllerPromise;
+    // This formal read verifies the persisted receipt; the cached commit alone
+    // cannot authorize a navigation after a peer has changed the pointer.
+    const state = await controller.readCommittedGenerationFromOpenConnection();
+    if (
+      !state ||
+      state.protocolVersion !== this.descriptor.protocolVersion ||
+      !samePhysicalGeneration(state, this.descriptor) ||
+      state.committedBuild !== this.buildId ||
+      state.migrationId !== this.committedState.migrationId ||
+      !acceptsCommittedMigration(this.descriptor, state.migrationId) ||
+      state.receiptDigest !== this.committedState.receiptDigest
+    ) {
+      throw new Error("首次 Service Worker 接管的已提交数据库回执与本页不一致；旧页保持写入锁定，请重新打开并核对。");
+    }
   }
 
   async commitForBoot(): Promise<ReleaseBootConfirmation> {
@@ -1269,7 +1466,9 @@ export class ReleaseDatabaseCoordinator {
     if (!this.targetRepository) throw new Error("目标数据库尚未准备。");
     this.assertControllerTakeoverCommitOpen();
     const target = await this.verifiedTargetSnapshot();
-    let state = await controller.readCommittedGeneration();
+    this.assertForwardMigrationActivationOpen();
+    let state = await this.trackLegacyControlOperation(() => controller.readCommittedGeneration());
+    this.assertForwardMigrationActivationOpen();
     if (
       state &&
       samePhysicalGeneration(state, this.descriptor) &&
@@ -1289,23 +1488,23 @@ export class ReleaseDatabaseCoordinator {
       state = await controller.readCommittedGeneration();
     } else if (!state) {
       this.assertControllerTakeoverCommitOpen();
-      state = await controller.initializeCommittedGeneration({
+      state = await this.trackLegacyControlOperation(() => controller.initializeCommittedGeneration({
         generation: this.descriptor.dbGeneration,
         databaseName: this.descriptor.databaseName,
         schemaVersion: this.descriptor.targetSchema,
         buildId: this.buildId,
         digest: target.digest
-      });
+      }));
     } else if (samePhysicalGeneration(state, this.descriptor)) {
       if (state.committedBuild !== this.buildId) {
         this.assertControllerTakeoverCommitOpen();
-        state = await controller.commitCompatibleGenerationSnapshot({
+        state = await this.trackLegacyControlOperation(() => controller.commitCompatibleGenerationSnapshot({
           generation: this.descriptor.dbGeneration,
           databaseName: this.descriptor.databaseName,
           schemaVersion: this.descriptor.targetSchema,
           buildId: this.buildId,
           digest: target.digest
-        }, { ownerId: this.ownerId });
+        }, { ownerId: this.ownerId }));
       }
     } else {
       throw new Error("不能把当前页面提交到不匹配的数据库代际。");
@@ -1317,7 +1516,9 @@ export class ReleaseDatabaseCoordinator {
     if (!acceptsCommittedMigration(this.descriptor, state.migrationId)) {
       throw new Error("数据库代际提交 migrationId 与发布描述符不一致。");
     }
+    this.assertForwardMigrationActivationOpen();
     this.committedState = state;
+    this.bootCommitCompleted = true;
     document.documentElement.dataset.dbMigrationPhase = "committed";
     return { state, migrationReceiptDigest: state.receiptDigest };
   }
@@ -1334,6 +1535,7 @@ export class ReleaseDatabaseCoordinator {
 
   private async acknowledgeServiceWorkerCommitOnce(): Promise<void> {
     await this.notifySourceClients("FINISH_DATABASE_MIGRATION");
+    this.assertForwardMigrationActivationOpen();
     this.targetDatabase?.unlockReleaseWrites();
     document.documentElement.dataset.dbMigrationPhase = "committed";
     document.documentElement.dataset.swBootAck = "true";

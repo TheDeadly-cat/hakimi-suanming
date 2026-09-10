@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { link, mkdtemp, mkdir, readFile, symlink, writeFile } from "node:fs/promises";
+import { link, lstat, mkdtemp, mkdir, readFile, readdir, realpath, rm, symlink, unlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -12,6 +12,7 @@ import {
 import backupArtifactConfig from "../apps/web/playwright.release-backup-artifact.config.ts";
 import bootArtifactConfig from "../apps/web/playwright.release-boot-artifact.config.ts";
 import pwaCrossBrowserConfig from "../apps/web/playwright.release-pwa-artifact.config.ts";
+import crossSchemaConfig from "../apps/web/playwright.cross-schema-v13-v16.config.ts";
 import {
   DEFAULT_V13_RELEASE_BROWSER_IDENTITY,
   RELEASE_BROWSER_MATRIX,
@@ -21,14 +22,24 @@ import {
 import {
   assertStrictReleaseBrowserResultSummary,
   buildReleaseBrowserResultSummary,
+  CROSS_SCHEMA_V13_V16_RECEIPT_ID,
+  CROSS_SCHEMA_V13_V16_SPEC_PATH,
+  CROSS_SCHEMA_V13_V16_TEST_TITLES,
+  isReleaseBrowserCompletionReceiptId,
+  isReleaseBrowserReceiptId,
+  REQUIRED_RELEASE_BROWSER_COMPLETION_TESTS_PER_PROJECT,
   REQUIRED_RELEASE_BROWSER_RECEIPT_IDS,
   REQUIRED_RELEASE_BROWSER_TESTS_PER_PROJECT
 } from "../apps/web/playwright.release-browser-result.ts";
-import { isPlaywrightListOnlyInvocation } from "../apps/web/playwright.release-browser-strict-reporter.ts";
+import ReleaseBrowserStrictReporter, {
+  isPlaywrightListOnlyInvocation,
+  validateCrossSchemaV13V16CompletionConfig
+} from "../apps/web/playwright.release-browser-strict-reporter.ts";
 import webV1CrossBrowserConfig from "../apps/web/playwright.release-web-v1-artifact.config.ts";
 import { BRIDGE_RELEASE_DATABASE_DESCRIPTOR } from "../apps/web/release-protocol.ts";
 import {
   assertReleaseArtifactMutationBoundary,
+  buildReleaseArtifactReceiptBinding,
   buildReleaseArtifactMutationBoundary,
   RELEASE_ARTIFACT_MUTATION_BOUNDARY_RECEIPT_IDS,
   verifyReleaseArtifactIdentityLock,
@@ -43,17 +54,29 @@ import {
   canonicalJson,
   collectArtifactEntries,
   computeEvidenceId,
+  computeSourceTreeDigest,
   defaultV13ReleaseDescriptorMatches,
   npmVersion,
+  isReleaseLifecycleReceiptId,
+  verifyReleaseLifecyclePhaseReportBinding,
   readBuiltReleaseMetadata,
+  readGitState,
   readStableRegularFileSnapshot,
   releaseArtifactComponents,
   releaseCommandInvocation,
   releaseReceiptSetMatchesPolicy,
   relativePathWithin,
+  RELEASE_POLICY_PATHS,
   sha256
 } from "./release-evidence-lib.mjs";
 import { compileReleaseEvidenceSchema } from "./release-evidence-schema.mjs";
+import { verifyReleaseEvidenceFiles } from "./verify-release-evidence.mjs";
+import { verifyRollbackReleaseArtifactFiles } from "./rollback-evidence-lib.mjs";
+import {
+  computeDefaultLifecyclePlanDigest,
+  DEFAULT_LIFECYCLE_STAGE_COMMANDS,
+  resolveDefaultLifecyclePlan
+} from "./formal-npm-lifecycle-closure-lib.mjs";
 
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const releaseDecisions = JSON.parse(await readFile(
@@ -376,6 +399,237 @@ function exactPassingBrowserSummary(receiptId = "pwa") {
   });
 }
 
+function exactCrossCompletionObservations() {
+  return REQUIRED_RELEASE_BROWSER_MATRIX.flatMap((browser) =>
+    CROSS_SCHEMA_V13_V16_TEST_TITLES.map((title) => ({
+      projectName: browser.projectName,
+      title,
+      file: CROSS_SCHEMA_V13_V16_SPEC_PATH,
+      expectedStatus: "passed",
+      outcome: "expected",
+      resultStatuses: ["passed"],
+      retryIndexes: [0]
+    }))
+  );
+}
+
+function crossCompletionSummary(observations = exactCrossCompletionObservations()) {
+  return buildReleaseBrowserResultSummary({
+    receiptId: CROSS_SCHEMA_V13_V16_RECEIPT_ID,
+    fullResultStatus: "passed",
+    expectedTestsPerProject: 13,
+    observations
+  });
+}
+
+// Supply the resolved fields consumed by the reporter, retaining the checked-in
+// config's policy values. This does not discover or launch any browser tests.
+function resolvedCrossCompletionConfig() {
+  const testDir = path.join(workspaceRoot, "apps/web/e2e");
+  return {
+    ...crossSchemaConfig,
+    configFile: path.join(workspaceRoot, "apps/web/playwright.cross-schema-v13-v16.config.ts"),
+    rootDir: testDir,
+    maxFailures: crossSchemaConfig.maxFailures ?? 0,
+    shard: null,
+    grep: /.*/,
+    grepInvert: null,
+    projects: crossSchemaConfig.projects.map((project) => ({
+      ...project,
+      use: structuredClone(project.use),
+      testDir,
+      testMatch: [crossSchemaConfig.testMatch],
+      testIgnore: [],
+      retries: crossSchemaConfig.retries,
+      repeatEach: 1,
+      dependencies: [],
+      teardown: undefined,
+      grep: /.*/,
+      grepInvert: null
+    }))
+  };
+}
+
+async function observeCrossCompletionReporter(observations, options = {}) {
+  const root = await mkdtemp(path.join(os.tmpdir(), "hakimi-cross-completion-reporter-"));
+  const output = path.join(root, "synthetic-unit-summary.json");
+  const keys = ["HAKIMI_RELEASE_BROWSER_RECEIPT_ID", "HAKIMI_RELEASE_BROWSER_RESULT_OUTPUT"];
+  const previous = keys.map((key) => process.env[key]);
+  process.env[keys[0]] = CROSS_SCHEMA_V13_V16_RECEIPT_ID;
+  process.env[keys[1]] = output;
+  try {
+    const reporter = new ReleaseBrowserStrictReporter({
+      receiptId: CROSS_SCHEMA_V13_V16_RECEIPT_ID,
+      expectedTestsPerProject: 13
+    });
+    const tests = observations.map((entry) => ({
+      title: entry.title,
+      location: { file: path.join(workspaceRoot, entry.file ?? "missing-spec.ts"), line: 1, column: 1 },
+      parent: { project: () => ({ name: entry.projectName }) },
+      expectedStatus: entry.expectedStatus,
+      retries: entry.retries ?? 0,
+      repeatEachIndex: entry.repeatEachIndex ?? 0,
+      annotations: entry.annotations ?? [],
+      outcome: () => entry.outcome,
+      results: entry.resultStatuses.map((status, index) => ({
+        status,
+        retry: entry.retryIndexes?.[index]
+      }))
+    }));
+    reporter.onBegin(options.config ?? resolvedCrossCompletionConfig(), { allTests: () => tests });
+    if (options.error) reporter.onError({ message: options.error });
+    const result = await reporter.onEnd({ status: "passed" });
+    return { result, summary: JSON.parse(await readFile(output, "utf8")) };
+  } finally {
+    keys.forEach((key, index) => {
+      if (previous[index] === undefined) delete process.env[key];
+      else process.env[key] = previous[index];
+    });
+  }
+}
+
+test("cross completion keeps the original four artifact-bound receipt ids unchanged", async () => {
+  const originalCounts = { backup: 4, boot: 6, pwa: 1, "web-v1-flow": 1 };
+  assert.deepEqual(REQUIRED_RELEASE_BROWSER_TESTS_PER_PROJECT, originalCounts);
+  assert.deepEqual(REQUIRED_RELEASE_BROWSER_RECEIPT_IDS, Object.keys(originalCounts));
+  assert.deepEqual(REQUIRED_RELEASE_BROWSER_COMPLETION_TESTS_PER_PROJECT, {
+    ...originalCounts,
+    [CROSS_SCHEMA_V13_V16_RECEIPT_ID]: 13
+  });
+  for (const id of Object.keys(originalCounts)) {
+    assert.equal(isReleaseBrowserReceiptId(id), true);
+    assert.equal(isReleaseBrowserCompletionReceiptId(id), true);
+  }
+  assert.equal(isReleaseBrowserReceiptId(CROSS_SCHEMA_V13_V16_RECEIPT_ID), false);
+  assert.equal(isReleaseBrowserCompletionReceiptId(CROSS_SCHEMA_V13_V16_RECEIPT_ID), true);
+  for (const id of ["unit", "cross-schema", null, 13]) {
+    assert.equal(isReleaseBrowserReceiptId(id), false);
+    assert.equal(isReleaseBrowserCompletionReceiptId(id), false);
+  }
+  const spec = await readFile(path.join(workspaceRoot, CROSS_SCHEMA_V13_V16_SPEC_PATH), "utf8");
+  const declaredTitles = [...spec.matchAll(/^test\("([^"\n]+)",/gmu)].map((match) => match[1]);
+  assert.equal(declaredTitles.length, 13);
+  assert.deepEqual(CROSS_SCHEMA_V13_V16_TEST_TITLES, declaredTitles);
+});
+
+test("cross completion accepts all 26 exact original observations through the strict reporter", async () => {
+  const observations = exactCrossCompletionObservations();
+  assert.equal(observations.length, 26);
+  const summary = crossCompletionSummary(observations);
+  assert.equal(summary.strictGatePassed, true);
+  assert.doesNotThrow(() => assertStrictReleaseBrowserResultSummary(summary, CROSS_SCHEMA_V13_V16_RECEIPT_ID));
+  assert.deepEqual(summary.projects.map(({ projectName, discovered, passed, attempts }) =>
+    ({ projectName, discovered, passed, attempts })), [
+    { projectName: "msedge", discovered: 13, passed: 13, attempts: 13 },
+    { projectName: "chrome", discovered: 13, passed: 13, attempts: 13 }
+  ]);
+  const observed = await observeCrossCompletionReporter(observations);
+  assert.deepEqual(observed.result, { status: "passed" });
+  assert.deepEqual(observed.summary, summary);
+});
+
+for (const [label, mutate] of [
+  ["a missing title", (rows) => { rows.pop(); }],
+  ["a duplicate replacing another title at the same count", (rows) => { rows[1].title = rows[0].title; }],
+  ["an unrelated title", (rows) => { rows[0].title = "ordinary unrelated fixture"; }],
+  ["a missing title field", (rows) => { delete rows[0].title; }],
+  ["another spec file", (rows) => { rows[0].file = "apps/web/e2e/ordinary-other.spec.ts"; }],
+  ["a missing spec file", (rows) => { delete rows[0].file; }],
+  ["an unbranded project", (rows) => { rows[0].projectName = "chromium"; }],
+  ["a title assigned to the wrong branded project", (rows) => { rows[0].projectName = "chrome"; }],
+  ["skip", (rows) => { Object.assign(rows[0], { expectedStatus: "skipped", outcome: "skipped", resultStatuses: ["skipped"] }); }],
+  ["fixme", (rows) => { Object.assign(rows[0], { expectedStatus: "skipped", outcome: "skipped", resultStatuses: ["skipped"], annotations: [{ type: "fixme", description: "unit fixture" }] }); }],
+  ["expected failure", (rows) => { Object.assign(rows[0], { expectedStatus: "failed", resultStatuses: ["failed"] }); }],
+  ["no result", (rows) => { Object.assign(rows[0], { resultStatuses: [], retryIndexes: [] }); }],
+  ["a nonzero retry index on a single pass", (rows) => { rows[0].retryIndexes = [1]; }],
+  ["missing retry indexes", (rows) => { delete rows[0].retryIndexes; }],
+  ["multiple passing attempts", (rows) => { Object.assign(rows[0], { resultStatuses: ["passed", "passed"], retryIndexes: [0, 1] }); }],
+  ["flaky recovery", (rows) => { Object.assign(rows[0], { outcome: "flaky", resultStatuses: ["failed", "passed"], retryIndexes: [0, 1] }); }]
+]) {
+  test(`cross completion rejects ${label}`, async () => {
+    const observations = exactCrossCompletionObservations();
+    mutate(observations);
+    const summary = crossCompletionSummary(observations);
+    assert.equal(summary.strictGatePassed, false);
+    assert.throws(() => assertStrictReleaseBrowserResultSummary(summary, CROSS_SCHEMA_V13_V16_RECEIPT_ID), /strict matrix gate/u);
+    const observed = await observeCrossCompletionReporter(observations);
+    assert.deepEqual(observed.result, { status: "failed" });
+    assert.equal(observed.summary.strictGatePassed, false);
+  });
+}
+
+test("cross completion rejects reporter onError even when all 26 observations pass", async () => {
+  const error = "Ordinary setup failure fixture";
+  const observed = await observeCrossCompletionReporter(exactCrossCompletionObservations(), { error });
+  assert.deepEqual(observed.result, { status: "failed" });
+  assert.equal(observed.summary.strictGatePassed, false);
+  assert.deepEqual(observed.summary.errors, [error]);
+});
+
+test("cross completion rejects per-test retry and repeat configuration", async () => {
+  for (const drift of [{ retries: 1 }, { repeatEachIndex: 1 }]) {
+    const observations = exactCrossCompletionObservations();
+    Object.assign(observations[0], drift);
+    const observed = await observeCrossCompletionReporter(observations);
+    assert.deepEqual(observed.result, { status: "failed" });
+    assert.equal(observed.summary.strictGatePassed, false);
+    assert.ok(observed.summary.errors.length > 0);
+  }
+});
+
+test("cross completion requires the full unfiltered canonical execution configuration", async () => {
+  assert.deepEqual(validateCrossSchemaV13V16CompletionConfig(resolvedCrossCompletionConfig()), []);
+  for (const [label, mutate] of [
+    ["alternate config", (config) => { config.configFile = path.join(workspaceRoot, "other.config.ts"); }],
+    ["alternate root", (config) => { config.rootDir = workspaceRoot; }],
+    ["workers", (config) => { config.workers = 2; }],
+    ["parallel", (config) => { config.fullyParallel = true; }],
+    ["only allowed", (config) => { config.forbidOnly = false; }],
+    ["flaky allowed", (config) => { config.failOnFlakyTests = false; }],
+    ["early stop", (config) => { config.maxFailures = 1; }],
+    ["shard", (config) => { config.shard = { current: 1, total: 2 }; }],
+    ["title filter", (config) => { config.grep = /clean/; }],
+    ["grep flags", (config) => { config.grep = /.*/i; }],
+    ["inverse filter", (config) => { config.grepInvert = /clean/; }],
+    ["one project", (config) => { config.projects.pop(); }],
+    ["duplicate project", (config) => { config.projects[1] = config.projects[0]; }],
+    ["wrong channel", (config) => { config.projects[0].use.channel = "chrome"; }],
+    ["retry", (config) => { config.projects[0].retries = 1; }],
+    ["repeat", (config) => { config.projects[0].repeatEach = 2; }],
+    ["dependency", (config) => { config.projects[0].dependencies = ["setup"]; }],
+    ["teardown", (config) => { config.projects[0].teardown = "cleanup"; }],
+    ["test directory", (config) => { config.projects[0].testDir = workspaceRoot; }],
+    ["different spec", (config) => { config.projects[0].testMatch = ["other.spec.ts"]; }],
+    ["extra spec", (config) => { config.projects[0].testMatch.push("other.spec.ts"); }],
+    ["ignored spec", (config) => { config.projects[0].testIgnore = ["*.spec.ts"]; }],
+    ["project filter", (config) => { config.projects[0].grep = /clean/; }],
+    ["project inverse filter", (config) => { config.projects[0].grepInvert = /clean/; }]
+  ]) {
+    const config = resolvedCrossCompletionConfig();
+    mutate(config);
+    assert.ok(validateCrossSchemaV13V16CompletionConfig(config).length > 0, label);
+  }
+  const config = resolvedCrossCompletionConfig();
+  config.grep = /clean/;
+  const observed = await observeCrossCompletionReporter(exactCrossCompletionObservations(), { config });
+  assert.deepEqual(observed.result, { status: "failed" });
+  assert.ok(observed.summary.errors.some((error) => error.includes("title filters")));
+});
+
+test("cross completion rejects explicit CLI selection even if resolved config looks complete", () => {
+  for (const option of [
+    "--grep", "-g", "--grep-invert", "-G", "--project", "--shard", "--last-failed",
+    "--only-changed", "--test-list", "--test-list-invert", "--repeat-each"
+  ]) {
+    for (const argv of [[option, "ordinary-fixture"], [`${option}=ordinary-fixture`]]) {
+      assert.ok(validateCrossSchemaV13V16CompletionConfig(resolvedCrossCompletionConfig(), argv).length > 0, argv.join(" "));
+      const config = resolvedCrossCompletionConfig();
+      config.argv = argv;
+      assert.ok(validateCrossSchemaV13V16CompletionConfig(config, []).length > 0, argv.join(" "));
+    }
+  }
+});
+
 test("strict browser summaries accept each receipt's exact branded-project count", () => {
   for (const receiptId of REQUIRED_RELEASE_BROWSER_RECEIPT_IDS) {
     const summary = exactPassingBrowserSummary(receiptId);
@@ -462,6 +716,59 @@ test("bound browser result summary rejects byte tampering", async () => {
   );
 });
 
+test("cross completion binding accepts a strict summary without a dist artifact binding", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "hakimi-cross-completion-binding-"));
+  const receiptsDirectory = path.join(root, "receipts");
+  const summaryPath = path.join(receiptsDirectory, "browser-results", "synthetic-unit-summary.json");
+  await mkdir(path.dirname(summaryPath), { recursive: true });
+  const summary = crossCompletionSummary();
+  const bytes = Buffer.from(`${JSON.stringify(summary)}\n`, "utf8");
+  await writeFile(summaryPath, bytes);
+  const receipt = {
+    id: CROSS_SCHEMA_V13_V16_RECEIPT_ID,
+    browserResultSummaryError: null,
+    browserResultSummary: {
+      path: path.relative(root, summaryPath).replaceAll("\\", "/"),
+      sha256: sha256(bytes),
+      summary
+    },
+    artifactIdentityBinding: null,
+    artifactIdentityBindingError: null
+  };
+  const verify = (candidate) => verifyReleaseBrowserResultSummaryBinding({
+    cwd: root, receiptsDirectory, receipt: candidate
+  });
+  assert.deepEqual(await verify(receipt), receipt.browserResultSummary);
+  await assert.rejects(verify({ ...receipt, browserResultSummary: null }), /binding is malformed/u);
+  await assert.rejects(verify({ ...receipt, browserResultSummaryError: "Ordinary read error" }), /summary failed/u);
+  await assert.rejects(verify({
+    ...receipt,
+    browserResultSummary: { ...receipt.browserResultSummary, path: "receipts/browser-results/missing.json" }
+  }), /ENOENT/u);
+  await assert.rejects(verify({
+    ...receipt,
+    browserResultSummary: { ...receipt.browserResultSummary, sha256: "0".repeat(64) }
+  }), /digest mismatch/u);
+  await assert.rejects(verify({
+    ...receipt,
+    browserResultSummary: {
+      ...receipt.browserResultSummary,
+      summary: { ...summary, expectedTestsPerProject: 12 }
+    }
+  }), /embedded summary mismatch/u);
+  const invalidSummary = { ...summary, strictGatePassed: false };
+  const invalidBytes = Buffer.from(`${JSON.stringify(invalidSummary)}\n`);
+  await writeFile(summaryPath, invalidBytes);
+  await assert.rejects(verify({
+    ...receipt,
+    browserResultSummary: {
+      ...receipt.browserResultSummary,
+      sha256: sha256(invalidBytes),
+      summary: invalidSummary
+    }
+  }), /strict matrix gate/u);
+});
+
 test("bound browser result summary rejects a symlinked summary path", async (context) => {
   const root = await mkdtemp(path.join(os.tmpdir(), "hakimi-browser-summary-symlink-"));
   const receiptsDirectory = path.join(root, "receipts");
@@ -506,6 +813,93 @@ async function prepareReleaseReceiptRunnerArtifact(root, evidenceId) {
     createdAt: "2026-08-27T00:00:00.000Z"
   });
 }
+
+function unitBrowserSummaryWriter(bytes) {
+  return [
+    "const fs=require('node:fs');",
+    "const path=require('node:path');",
+    "const output=process.env.HAKIMI_RELEASE_BROWSER_RESULT_OUTPUT;",
+    "fs.mkdirSync(path.dirname(output),{recursive:true});",
+    `fs.writeFileSync(output,Buffer.from('${bytes.toString("base64")}','base64'));`
+  ].join("");
+}
+
+async function runSyntheticBrowserReceipt(receiptId, writer, evidenceId = null) {
+  // These are ordinary child-command unit fixtures in a fresh temp cwd. They
+  // never run Playwright or create evidence for an actual release candidate.
+  const root = await mkdtemp(path.join(os.tmpdir(), "hakimi-cross-completion-unit-runner-"));
+  const output = path.join(root, "receipts", `${receiptId}.json`);
+  const env = { ...process.env };
+  for (const key of Object.keys(env)) {
+    if (key.startsWith("HAKIMI_RELEASE_") || key.startsWith("HAKIMI_DB_")) delete env[key];
+  }
+  if (evidenceId !== null) env.HAKIMI_RELEASE_EVIDENCE_ID = evidenceId;
+  const result = spawnSync(process.execPath, [
+    path.join(workspaceRoot, "scripts/run-release-evidence-command.mjs"),
+    "--id", receiptId, "--output", output, "--", process.execPath, "-e", writer
+  ], { cwd: root, encoding: "utf8", windowsHide: true, env });
+  assert.equal(result.error, undefined);
+  return { root, result, receipt: JSON.parse(await readFile(output, "utf8")) };
+}
+
+test("cross completion runner binds all 26 unit results without default-v13 artifact files", async () => {
+  const summary = crossCompletionSummary();
+  const bytes = Buffer.from(`${JSON.stringify(summary)}\n`);
+  for (const evidenceId of [null, `hre1-${"9".repeat(32)}`]) {
+    const { root, result, receipt } = await runSyntheticBrowserReceipt(
+      CROSS_SCHEMA_V13_V16_RECEIPT_ID, unitBrowserSummaryWriter(bytes), evidenceId
+    );
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(receipt.status, "passed");
+    assert.equal(receipt.exitCode, 0);
+    assert.equal(receipt.evidenceId, evidenceId);
+    assert.equal(receipt.artifactIdentityBinding, null);
+    assert.equal(receipt.artifactIdentityBindingError, null);
+    assert.equal(receipt.browserResultSummaryError, null);
+    assert.equal(receipt.browserResultSummary.sha256, sha256(bytes));
+    assert.deepEqual(receipt.browserResultSummary.summary, summary);
+    assert.match(receipt.browserResultSummary.path, /^receipts\/browser-results\/cross-schema-v13-v16-/u);
+    await assert.rejects(readFile(path.join(root, "tmp/release-artifact-identity.json")), /ENOENT/u);
+    await assert.rejects(readFile(path.join(root, "dist/web/index.html")), /ENOENT/u);
+    await assert.doesNotReject(() => verifyReleaseBrowserResultSummaryBinding({
+      cwd: root, receiptsDirectory: path.join(root, "receipts"), receipt
+    }));
+  }
+});
+
+for (const [label, bytes, error] of [
+  ["missing summary", null, /ENOENT/u],
+  ["invalid JSON summary", Buffer.from("ordinary incomplete JSON"), /JSON|Unexpected/u],
+  ["incomplete matrix summary", Buffer.from(JSON.stringify(crossCompletionSummary(exactCrossCompletionObservations().slice(1)))), /strict matrix gate/u],
+  ["another receipt summary", Buffer.from(JSON.stringify(exactPassingBrowserSummary())), /strict matrix gate/u]
+]) {
+  test(`cross completion runner rejects exit zero with ${label}`, async () => {
+    const { result, receipt } = await runSyntheticBrowserReceipt(
+      CROSS_SCHEMA_V13_V16_RECEIPT_ID,
+      bytes === null ? "process.exit(0)" : unitBrowserSummaryWriter(bytes)
+    );
+    assert.equal(result.status, 1);
+    assert.equal(receipt.exitCode, 0);
+    assert.equal(receipt.status, "failed");
+    assert.equal(receipt.browserResultSummary, null);
+    assert.match(receipt.browserResultSummaryError, error);
+    assert.equal(receipt.artifactIdentityBinding, null);
+    assert.equal(receipt.artifactIdentityBindingError, null);
+  });
+}
+
+test("cross completion does not let the original four receipts omit artifact identity", async () => {
+  for (const id of REQUIRED_RELEASE_BROWSER_RECEIPT_IDS) {
+    const bytes = Buffer.from(JSON.stringify(exactPassingBrowserSummary(id)));
+    const { result, receipt } = await runSyntheticBrowserReceipt(id, unitBrowserSummaryWriter(bytes));
+    assert.equal(result.status, 1, id);
+    assert.equal(receipt.status, "failed", id);
+    assert.equal(receipt.exitCode, null, id);
+    assert.equal(receipt.artifactIdentityBinding, null, id);
+    assert.match(receipt.artifactIdentityBindingError, /require HAKIMI_RELEASE_EVIDENCE_ID/u, id);
+    assert.equal(receipt.browserResultSummary, null, id);
+  }
+});
 
 test("release receipt runner fails closed when a browser command exits zero without a strict summary", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "hakimi-browser-receipt-missing-"));
@@ -1130,6 +1524,24 @@ test("checked-in Release Evidence Schema compiles and accepts a complete closed 
   assert.doesNotThrow(() => validator.assert(nonBrowserFixture));
 });
 
+test("cross completion summary fits the closed evidence schema without extending the artifact boundary", () => {
+  const validator = compileReleaseEvidenceSchema(releaseEvidenceSchema);
+  const fixture = validReleaseEvidenceFixture();
+  fixture.release.requiredReceiptIds = [CROSS_SCHEMA_V13_V16_RECEIPT_ID];
+  const receipt = fixture.testReceipts[0];
+  receipt.id = CROSS_SCHEMA_V13_V16_RECEIPT_ID;
+  receipt.command = ["npm", "run", "test:e2e:cross-schema-v13-v16"];
+  receipt.browserResultSummary.summary = structuredClone(crossCompletionSummary());
+  validator.assert(fixture);
+  assert.deepEqual(fixture.artifacts.mutationBoundary.coveredReceiptIds, REQUIRED_RELEASE_BROWSER_RECEIPT_IDS);
+  const wrongCount = structuredClone(fixture);
+  wrongCount.testReceipts[0].browserResultSummary.summary.expectedTestsPerProject = 14;
+  assert.throws(() => validator.assert(wrongCount), /Release Evidence Schema validation failed/u);
+  const extraField = structuredClone(fixture);
+  extraField.testReceipts[0].browserResultSummary.summary.unrecordedClaims = true;
+  assert.throws(() => validator.assert(extraField), /Release Evidence Schema validation failed/u);
+});
+
 test("Release Evidence Schema rejects unknown fields at every formal binding layer", () => {
   const validator = compileReleaseEvidenceSchema(releaseEvidenceSchema);
   const injectionPaths = [
@@ -1416,13 +1828,12 @@ test("default-v13 receipt policy and local allowances remain fail-closed", () =>
   }
 });
 
-async function writeBoundDefaultV13Artifact(root, evidenceId) {
-  const descriptor = {
+async function writeBoundDefaultV13Artifact(root, evidenceId, descriptor = {
     dbGeneration: "legacy-v13",
     databaseName: "hakimi-bazi-research",
     targetSchema: 13,
     migrationId: null
-  };
+  }) {
   const manifest = JSON.stringify({ manifestVersion: 1, database: descriptor });
   const escapedManifest = manifest.replaceAll('"', "&quot;");
   await mkdir(root, { recursive: true });
@@ -1546,5 +1957,662 @@ test("built metadata rejects a v13 meta descriptor paired with a different manif
   await assert.rejects(
     readBuiltReleaseMetadata(root),
     /descriptor does not match the storage manifest database descriptor/u
+  );
+});
+
+async function lifecycleReceiptFixture(context, stage = "typecheck", ownedLayout = null) {
+  // Ordinary file/data fixture only: no lifecycle command or program is run.
+  const root = ownedLayout?.root ?? await mkdtemp(path.join(os.tmpdir(), "hakimi-lifecycle-receipt-unit-"));
+  if (ownedLayout === null) context.after(() => rm(root, { recursive: true, force: true }));
+  const contexts = [];
+  const packageIdentities = [];
+  for (const relativePath of ["package.json", "apps/web/package.json"]) {
+    const bytes = await readFile(path.join(workspaceRoot, relativePath));
+    const target = path.join(root, relativePath);
+    await mkdir(path.dirname(target), { recursive: true });
+    await writeFile(target, bytes);
+    contexts.push({ path: relativePath, packageJson: JSON.parse(bytes.toString("utf8")) });
+    packageIdentities.push({ path: relativePath, rawBytes: bytes.length, rawSha256: sha256(bytes) });
+  }
+  const plan = resolveDefaultLifecyclePlan(stage, { root: contexts[0], web: contexts[1] });
+  const runId = "11111111-1111-4111-8111-111111111111";
+  const report = {
+    schemaVersion: 1, recordType: "default_npm_lifecycle_phase_report",
+    stage, originalCommand: [...plan.originalCommand], runId, receiptId: plan.receiptId,
+    packageIdentities, planDigest: computeDefaultLifecyclePlanDigest(plan),
+    startedAt: "2026-09-07T00:00:01.000Z",
+    completedAt: "2026-09-07T00:00:09.000Z", terminal: true,
+    authorization: { status: "allowed", blockers: [] },
+    phases: plan.steps.map((step, index) => ({
+      id: step.id, required: step.required,
+      status: step.kind === "none" ? step.absentStatus : "passed",
+      started: step.kind !== "none", exitCode: step.kind === "none" ? null : 0,
+      signal: null, error: null,
+      startedAt: step.kind === "none" ? null : "2026-09-07T00:00:0" + (index + 2) + ".000Z",
+      completedAt: step.kind === "none" ? null : "2026-09-07T00:00:0" + (index + 2) + ".500Z"
+    })),
+    programStarted: true, aggregateExitCode: 0, status: "passed"
+  };
+  const receiptsDirectory = path.join(root, ownedLayout?.receiptsRelativePath ?? "receipts");
+  const reportPath = path.join(receiptsDirectory, ".lifecycle-" + plan.receiptId + "-" + runId, "terminal.json");
+  await mkdir(path.dirname(reportPath), { recursive: true });
+  const receipt = {
+    id: plan.receiptId, command: [...plan.originalCommand],
+    startedAt: "2026-09-07T00:00:00.000Z", completedAt: "2026-09-07T00:00:10.000Z",
+    status: "passed", exitCode: 0, signal: null, launchErrorCode: null,
+    lifecycleRunId: runId,
+    lifecyclePhaseReport: { path: relativePathWithin(root, reportPath, "Unit phase report"), sha256: "" },
+    lifecyclePhaseReportError: null, programStarted: true
+  };
+  const writeReport = async () => {
+    const bytes = Buffer.from(JSON.stringify(report) + "\n", "utf8");
+    await writeFile(reportPath, bytes);
+    receipt.lifecyclePhaseReport.sha256 = sha256(bytes);
+  };
+  await writeReport();
+  return {
+    root, receiptsDirectory, reportPath, plan, report, receipt, writeReport,
+    verify: () => verifyReleaseLifecyclePhaseReportBinding({ cwd: root, receiptsDirectory, receipt })
+  };
+}
+
+test("lifecycle receipts retain the original thirteen commands and require reports for exactly three ids", async () => {
+  const policy = releaseDecisions.releaseEvidence.defaultV13RequiredReceiptCommands;
+  assert.equal(Object.keys(policy).length, 13);
+  assert.deepEqual(Object.keys(policy).filter(isReleaseLifecycleReceiptId).sort(), ["build", "typecheck", "unit"]);
+  for (const identity of Object.values(DEFAULT_LIFECYCLE_STAGE_COMMANDS)) {
+    assert.deepEqual(policy[identity.receiptId], identity.originalCommand);
+  }
+  const otherIds = Object.keys(policy).filter((id) => !isReleaseLifecycleReceiptId(id));
+  assert.equal(otherIds.length, 10);
+  for (const id of otherIds) {
+    assert.equal(await verifyReleaseLifecyclePhaseReportBinding({ receipt: { id } }), null);
+    assert.equal(await verifyReleaseLifecyclePhaseReportBinding({ receipt: {
+      id, lifecycleRunId: null, lifecyclePhaseReport: null, lifecyclePhaseReportError: null,
+      programStarted: null
+    } }), null);
+    await assert.rejects(verifyReleaseLifecyclePhaseReportBinding({ receipt: {
+      id, lifecycleRunId: "11111111-1111-4111-8111-111111111111"
+    } }), /Non-lifecycle receipt contains lifecycle result data/u);
+  }
+});
+
+for (const stage of ["typecheck", "vitest", "build"]) {
+  test("lifecycle receipts bind the complete terminal " + stage + " report to actual package bytes", async (context) => {
+    const fixture = await lifecycleReceiptFixture(context, stage);
+    const verified = await fixture.verify();
+    assert.equal(verified.path, fixture.receipt.lifecyclePhaseReport.path);
+    assert.equal(verified.sha256, fixture.receipt.lifecyclePhaseReport.sha256);
+    assert.deepEqual(verified.report, fixture.report);
+    assert.equal(verified.report.programStarted, true);
+    assert.equal(verified.report.aggregateExitCode, 0);
+  });
+}
+
+test("lifecycle receipts preserve a program pass after governance failure as an aggregate failure", async (context) => {
+  const fixture = await lifecycleReceiptFixture(context);
+  Object.assign(fixture.report.phases[0], { status: "failed", exitCode: 1 });
+  Object.assign(fixture.report, { status: "failed", aggregateExitCode: 1 });
+  Object.assign(fixture.receipt, { status: "failed", exitCode: 1 });
+  await fixture.writeReport();
+  const verified = await fixture.verify();
+  assert.equal(verified.report.phases[0].status, "failed");
+  assert.equal(verified.report.phases[2].status, "passed");
+  assert.equal(verified.report.programStarted, true);
+  assert.equal(verified.report.status, "failed");
+});
+
+for (const started of [null, true, false]) {
+  test("lifecycle receipts retain an unknown program result with started " + started + " without promoting it", async (context) => {
+    const fixture = await lifecycleReceiptFixture(context);
+    Object.assign(fixture.report.phases[2], {
+      status: "unknown", started, exitCode: null, error: "Ordinary synthetic unknown execution result"
+    });
+    Object.assign(fixture.report, { status: "failed", aggregateExitCode: 1, programStarted: started });
+    Object.assign(fixture.receipt, { status: "failed", exitCode: 1, programStarted: started });
+    await fixture.writeReport();
+    const verified = await fixture.verify();
+    assert.equal(verified.report.programStarted, started);
+    assert.equal(verified.report.phases[2].status, "unknown");
+    assert.equal(verified.report.aggregateExitCode, 1);
+  });
+}
+
+test("lifecycle receipts distinguish an explicit launch failure from an unknown program result", async (context) => {
+  const fixture = await lifecycleReceiptFixture(context);
+  Object.assign(fixture.report.phases[2], {
+    status: "failed", started: false, exitCode: null, error: "Ordinary synthetic launch error"
+  });
+  Object.assign(fixture.report, { status: "failed", aggregateExitCode: 1, programStarted: false });
+  Object.assign(fixture.receipt, { status: "failed", exitCode: 1, programStarted: false });
+  await fixture.writeReport();
+  assert.equal((await fixture.verify()).report.phases[2].status, "failed");
+});
+
+test("lifecycle receipts retain a signaled program termination as a failed aggregate", async (context) => {
+  const fixture = await lifecycleReceiptFixture(context);
+  Object.assign(fixture.report.phases[2], { status: "failed", exitCode: null, signal: "SIGTERM" });
+  Object.assign(fixture.report, { status: "failed", aggregateExitCode: 1 });
+  Object.assign(fixture.receipt, { status: "failed", exitCode: 1 });
+  await fixture.writeReport();
+  assert.equal((await fixture.verify()).report.programStarted, true);
+});
+
+test("lifecycle receipts retain an authorized build precondition failure with a blocked program", async (context) => {
+  const fixture = await lifecycleReceiptFixture(context, "build");
+  Object.assign(fixture.report.phases[1], { status: "failed", exitCode: 1 });
+  Object.assign(fixture.report.phases[2], {
+    status: "blocked", started: false, exitCode: null, error: "Workspace prebuild did not pass",
+    startedAt: null, completedAt: null
+  });
+  Object.assign(fixture.report, { status: "failed", aggregateExitCode: 1, programStarted: false });
+  Object.assign(fixture.receipt, { status: "failed", exitCode: 1, programStarted: false });
+  await fixture.writeReport();
+  const verified = await fixture.verify();
+  assert.equal(verified.report.phases[2].status, "blocked");
+  assert.equal(verified.report.programStarted, false);
+});
+
+test("lifecycle receipts bind an explicit authorization block without claiming program execution", async (context) => {
+  const fixture = await lifecycleReceiptFixture(context);
+  fixture.report.authorization = { status: "blocked", blockers: [{ blockerId: "ordinary-unit-blocker" }] };
+  for (const phase of fixture.report.phases.filter((entry) => entry.required)) {
+    Object.assign(phase, {
+      status: "blocked", started: false, exitCode: null, error: "Authorization blocked",
+      startedAt: null, completedAt: null
+    });
+  }
+  Object.assign(fixture.report, { status: "blocked", aggregateExitCode: 2, programStarted: false });
+  Object.assign(fixture.receipt, { status: "failed", exitCode: 2, programStarted: false });
+  await fixture.writeReport();
+  assert.equal((await fixture.verify()).report.status, "blocked");
+});
+
+const lifecycleReportDrifts = [
+  ["old run", (f) => { f.report.runId = "22222222-2222-4222-8222-222222222222"; }, /run, stage or original command binding mismatch/u],
+  ["wrong receipt", (f) => { f.report.receiptId = "unit"; }, /run, stage or original command binding mismatch/u],
+  ["wrong stage", (f) => { f.report.stage = "vitest"; }, /run, stage or original command binding mismatch/u],
+  ["changed original command", (f) => { f.report.originalCommand.push("--if-present"); }, /run, stage or original command binding mismatch/u],
+  ["changed outer command", (f) => { f.receipt.command = ["npm", "run", "diagnose:typecheck"]; }, /run, stage or original command binding mismatch/u],
+  ["old plan", (f) => { f.report.planDigest = "0".repeat(64); }, /current fixed plan or package identities mismatch/u],
+  ["wrong root package identity", (f) => { f.report.packageIdentities[0].rawSha256 = "0".repeat(64); }, /current fixed plan or package identities mismatch/u],
+  ["wrong web package identity", (f) => { f.report.packageIdentities[1].rawBytes += 1; }, /current fixed plan or package identities mismatch/u],
+  ["missing phase", (f) => { f.report.phases.pop(); }, /complete fixed phase inventory is required/u],
+  ["duplicate phase", (f) => { f.report.phases[1] = structuredClone(f.report.phases[0]); }, /phase shape or fixed order is invalid/u],
+  ["weakened required phase", (f) => { f.report.phases[2].required = false; }, /phase shape or fixed order is invalid/u],
+  ["nonterminal report", (f) => { f.report.terminal = false; }, /terminal report shape is invalid/u],
+  ["missing terminal field", (f) => { delete f.report.completedAt; }, /terminal report shape is invalid/u],
+  ["phase outside run interval", (f) => { f.report.phases[2].completedAt = "2026-09-07T00:00:11.000Z"; }, /attempted phase time interval is invalid/u],
+  ["report outside receipt interval", (f) => { f.report.completedAt = "2026-09-07T00:00:11.000Z"; }, /terminal report time interval is invalid/u],
+  ["unstarted pass", (f) => { f.report.phases[2].started = false; }, /phase execution facts and status contradict/u],
+  ["unknown promoted to pass", (f) => { Object.assign(f.report.phases[2], { status: "unknown", started: null, exitCode: null }); }, /program, aggregate or outer receipt terminal state contradicts/u],
+  ["program start contradiction", (f) => { f.report.programStarted = false; }, /program, aggregate or outer receipt terminal state contradicts/u],
+  ["outer program start contradiction", (f) => { f.receipt.programStarted = false; }, /program, aggregate or outer receipt terminal state contradicts/u],
+  ["outer exit contradiction", (f) => { f.receipt.exitCode = 1; }, /program, aggregate or outer receipt terminal state contradicts/u],
+  ["outer status contradiction", (f) => { f.receipt.status = "failed"; }, /program, aggregate or outer receipt terminal state contradicts/u],
+  ["aggregate contradiction", (f) => { f.report.aggregateExitCode = 1; }, /program, aggregate or outer receipt terminal state contradicts/u],
+  ["authorization contradiction", (f) => { f.report.authorization.blockers.push({ blockerId: "unit" }); }, /authorization terminal state is invalid/u],
+  ["invented absent phase execution", (f) => { f.report.phases[3].started = true; }, /absent or blocked phase claims execution/u],
+  ["outer wrapper signal", (f) => { f.receipt.signal = "SIGTERM"; }, /program, aggregate or outer receipt terminal state contradicts/u]
+];
+for (const [label, mutate, expectedError] of lifecycleReportDrifts) {
+  test("lifecycle receipts reject " + label, async (context) => {
+    const fixture = await lifecycleReceiptFixture(context);
+    mutate(fixture);
+    await fixture.writeReport();
+    await assert.rejects(fixture.verify(), expectedError);
+  });
+}
+
+test("lifecycle receipts require a fresh stable report instead of inferring a missing program start", async (context) => {
+  const fixture = await lifecycleReceiptFixture(context);
+  fixture.receipt.lifecyclePhaseReport = null;
+  fixture.receipt.programStarted = null;
+  await assert.rejects(fixture.verify(), /phase report binding is malformed/u);
+  fixture.receipt.lifecyclePhaseReport = {
+    path: relativePathWithin(fixture.root, path.join(fixture.receiptsDirectory, "missing.json"), "Missing unit report"),
+    sha256: "0".repeat(64)
+  };
+  await assert.rejects(fixture.verify(), /ENOENT/u);
+});
+
+test("lifecycle receipts reject report errors and noncanonical run identities", async (context) => {
+  const fixture = await lifecycleReceiptFixture(context);
+  fixture.receipt.lifecyclePhaseReportError = "Ordinary synthetic report error";
+  await assert.rejects(fixture.verify(), /run id or report error state is invalid/u);
+  fixture.receipt.lifecyclePhaseReportError = null;
+  fixture.receipt.lifecycleRunId = "not-a-run-id";
+  await assert.rejects(fixture.verify(), /run id or report error state is invalid/u);
+});
+
+test("lifecycle receipts reject changed report bytes and a truncated JSON document", async (context) => {
+  const fixture = await lifecycleReceiptFixture(context);
+  await writeFile(fixture.reportPath, "{}\n");
+  await assert.rejects(fixture.verify(), /phase report digest mismatch/u);
+  const truncated = Buffer.from('{"terminal":', "utf8");
+  await writeFile(fixture.reportPath, truncated);
+  fixture.receipt.lifecyclePhaseReport.sha256 = sha256(truncated);
+  await assert.rejects(fixture.verify(), SyntaxError);
+});
+
+test("lifecycle receipts require canonical report containment without reading another directory", async (context) => {
+  const fixture = await lifecycleReceiptFixture(context);
+  fixture.receipt.lifecyclePhaseReport.path = "outside.json";
+  await assert.rejects(fixture.verify(), /escapes its required root/u);
+  fixture.receipt.lifecyclePhaseReport.path = "./" + relativePathWithin(fixture.root, fixture.reportPath, "Unit report");
+  await assert.rejects(fixture.verify(), /phase report path is not canonical/u);
+});
+
+for (const relativePath of ["package.json", "apps/web/package.json"]) {
+  test("lifecycle receipts reread actual " + relativePath + " bytes rather than accepting report identities", async (context) => {
+    const fixture = await lifecycleReceiptFixture(context);
+    const file = path.join(fixture.root, relativePath);
+    await writeFile(file, Buffer.concat([await readFile(file), Buffer.from("\n")]));
+    await assert.rejects(fixture.verify(), /current fixed plan or package identities mismatch/u);
+  });
+}
+
+test("lifecycle receipts reject unmodeled current package hooks even with recomputed raw identities", async (context) => {
+  const fixture = await lifecycleReceiptFixture(context);
+  const file = path.join(fixture.root, "package.json");
+  const packageJson = JSON.parse(await readFile(file, "utf8"));
+  packageJson.scripts.pretypecheck = "ordinary-unmodeled-hook";
+  const bytes = Buffer.from(JSON.stringify(packageJson) + "\n", "utf8");
+  await writeFile(file, bytes);
+  Object.assign(fixture.report.packageIdentities[0], { rawBytes: bytes.length, rawSha256: sha256(bytes) });
+  await fixture.writeReport();
+  await assert.rejects(fixture.verify(), /Default lifecycle command or root pre\/post hook changed/u);
+});
+
+// These are SYNTHETIC file-consumer contracts, not records of release commands,
+// browser execution, deployment, or rollback. Only the production generator and
+// file readers execute; their bound command/report inputs are ordinary test data.
+const replayInputPath = "dist/web/release-evidence.json";
+const replayReceiptsPath = "tmp/release-evidence-receipts";
+const replayLockPath = "tmp/release-artifact-identity.json";
+
+function replayChildEnvironment() {
+  const names = [
+    "SystemRoot", "WINDIR", "ComSpec", "PATH", "PATHEXT", "TEMP", "TMP",
+    "USERPROFILE", "APPDATA", "LOCALAPPDATA", "PROGRAMFILES", "PROGRAMFILES(X86)", "PROGRAMW6432"
+  ];
+  return Object.fromEntries(Object.entries(process.env).filter(([key]) =>
+    names.some((name) => name.toLowerCase() === key.toLowerCase())
+  ));
+}
+
+function replayCommand(cwd, executable, args) {
+  return spawnSync(executable, args, {
+    cwd, env: replayChildEnvironment(), encoding: "utf8", windowsHide: true,
+    timeout: 60_000, maxBuffer: 4 * 1024 * 1024
+  });
+}
+
+function requireReplayCommand(result) {
+  assert.equal(result.error, undefined, result.error?.message);
+  assert.equal(result.signal, null);
+  assert.equal(result.status, 0, result.stderr);
+  return result;
+}
+
+async function ownedReplayDirectory(context) {
+  const tempRoot = path.resolve(os.tmpdir());
+  const root = path.resolve(await mkdtemp(path.join(tempRoot, "hfr-")));
+  const owned = await lstat(root, { bigint: true });
+  const physicalRoot = await realpath(root);
+  const physicalTemp = await realpath(tempRoot);
+  assert.ok(relativePathWithin(tempRoot, root, "Replay fixture root"));
+  assert.ok(relativePathWithin(physicalTemp, physicalRoot, "Physical replay fixture root"));
+  assert.equal(owned.isDirectory(), true);
+  assert.equal(owned.isSymbolicLink(), false);
+  assert.notEqual(owned.ino, 0n);
+  context.after(async () => {
+    const current = await lstat(root, { bigint: true });
+    assert.ok(relativePathWithin(tempRoot, root, "Replay cleanup root"));
+    assert.equal(await realpath(root), physicalRoot);
+    assert.equal(current.isDirectory(), true);
+    assert.equal(current.isSymbolicLink(), false);
+    assert.equal(current.dev, owned.dev);
+    assert.equal(current.ino, owned.ino);
+    // Only remove this exact owned tree, after checking every remaining entry.
+    async function inspect(directory) {
+      for (const entry of await readdir(directory, { withFileTypes: true })) {
+        const file = path.join(directory, entry.name);
+        const stat = await lstat(file);
+        assert.equal(stat.isSymbolicLink(), false);
+        assert.ok(relativePathWithin(physicalRoot, await realpath(file), "Replay cleanup entry"));
+        if (stat.isDirectory()) await inspect(file);
+        else assert.equal(stat.isFile(), true);
+      }
+    }
+    await inspect(root);
+    await rm(root, { recursive: true, force: false });
+  });
+  return root;
+}
+
+async function writeReplayJson(file, value) {
+  const bytes = Buffer.from(JSON.stringify(value, null, 2) + "\n", "utf8");
+  await mkdir(path.dirname(file), { recursive: true });
+  await writeFile(file, bytes);
+  return bytes;
+}
+
+async function writeReplayEvidence(root, evidence) {
+  const bytes = await writeReplayJson(path.join(root, replayInputPath), evidence);
+  await writeFile(path.join(root, replayInputPath + ".sha256"),
+    sha256(bytes) + "  release-evidence.json\n", "utf8");
+}
+
+async function releaseFileReplayFixture(context, { dirty = false } = {}) {
+  const ownedRoot = await ownedReplayDirectory(context);
+  const sourceRoot = path.join(ownedRoot, "source");
+  const archiveRoots = [path.join(ownedRoot, "archive-a"), path.join(ownedRoot, "archive-b")];
+  await mkdir(sourceRoot);
+  const sourceFiles = ["package.json", "apps/web/package.json", "package-lock.json", ...RELEASE_POLICY_PATHS];
+  for (const relativePath of sourceFiles) {
+    const file = path.join(sourceRoot, relativePath);
+    await mkdir(path.dirname(file), { recursive: true });
+    await writeFile(file, await readFile(path.join(workspaceRoot, relativePath)), { flag: "wx" });
+  }
+  await writeFile(path.join(sourceRoot, "SYNTHETIC.txt"),
+    "SYNTHETIC file replay contract. No release commands or browsers ran.\n", { flag: "wx" });
+  const hooksRoot = path.join(ownedRoot, "empty-hooks");
+  await mkdir(hooksRoot);
+  requireReplayCommand(replayCommand(sourceRoot, "git", [
+    "-c", "init.templateDir=", "init", "--initial-branch=synthetic-file-contract"
+  ]));
+  requireReplayCommand(replayCommand(sourceRoot, "git", ["config", "--local", "core.autocrlf", "false"]));
+  requireReplayCommand(replayCommand(sourceRoot, "git", ["-c", "core.autocrlf=false", "add", "--", ...sourceFiles, "SYNTHETIC.txt"]));
+  requireReplayCommand(replayCommand(sourceRoot, "git", [
+    "-c", "user.name=SYNTHETIC Contract Fixture", "-c", "user.email=synthetic@invalid.example",
+    "-c", "commit.gpgSign=false", "-c", "core.hooksPath=" + hooksRoot,
+    "commit", "--no-verify", "-m", "SYNTHETIC local file-consumer fixture"
+  ]));
+  if (dirty) await writeFile(path.join(sourceRoot, "SYNTHETIC.txt"), "SYNTHETIC dirty diagnostic fixture.\n");
+  const git = readGitState(sourceRoot);
+  assert.equal(git.dirty, dirty);
+  const evidenceId = computeEvidenceId({
+    gitCommit: git.commit,
+    sourceTreeDigest: await computeSourceTreeDigest(sourceRoot),
+    lockfileDigest: sha256(await readFile(path.join(sourceRoot, "package-lock.json"))),
+    channel: "default-v13"
+  });
+  const dist = path.join(sourceRoot, "dist/web");
+  await writeBoundDefaultV13Artifact(dist, evidenceId, BRIDGE_RELEASE_DATABASE_DESCRIPTOR);
+  await writeReleaseArtifactIdentityLock({
+    cwd: sourceRoot, dist, lockPath: path.join(sourceRoot, replayLockPath),
+    channel: "default-v13", evidenceId, createdAt: "2026-09-07T00:00:00.000Z"
+  });
+  const artifactIdentity = await verifyReleaseArtifactIdentityLock({
+    cwd: sourceRoot, dist, lockPath: path.join(sourceRoot, replayLockPath), evidenceId
+  });
+  const endpointBinding = buildReleaseArtifactReceiptBinding({
+    beforeCommand: artifactIdentity, afterCommand: artifactIdentity
+  });
+  const rawReceipts = new Map();
+  const receiptPaths = [];
+  const phasePaths = [];
+  const summaryPaths = [];
+  const lifecycleStages = { typecheck: "typecheck", unit: "vitest", build: "build" };
+  for (const [id, command] of Object.entries(releaseDecisions.releaseEvidence.defaultV13RequiredReceiptCommands)) {
+    const raw = {
+      schemaVersion: 1, receiptType: "release_test_command", id, evidenceId,
+      command: [...command], status: "passed", exitCode: 0,
+      startedAt: "2026-09-07T00:00:00.000Z", completedAt: "2026-09-07T00:00:10.000Z",
+      durationMs: 10_000, signal: null, launchErrorCode: null,
+      lifecycleRunId: null, lifecyclePhaseReport: null, lifecyclePhaseReportError: null,
+      programStarted: null, browserResultSummary: null, browserResultSummaryError: null,
+      artifactIdentityBinding: null, artifactIdentityBindingError: null
+    };
+    if (isReleaseLifecycleReceiptId(id)) {
+      const lifecycle = await lifecycleReceiptFixture(context, lifecycleStages[id], {
+        root: sourceRoot, receiptsRelativePath: replayReceiptsPath
+      });
+      Object.assign(raw, lifecycle.receipt);
+      phasePaths.push(raw.lifecyclePhaseReport.path);
+    }
+    if (isReleaseBrowserCompletionReceiptId(id)) {
+      const summary = id === CROSS_SCHEMA_V13_V16_RECEIPT_ID
+        ? crossCompletionSummary() : exactPassingBrowserSummary(id);
+      const summaryPath = replayReceiptsPath + "/summaries/" + id + ".json";
+      const bytes = await writeReplayJson(path.join(sourceRoot, summaryPath), summary);
+      raw.browserResultSummary = { path: summaryPath, sha256: sha256(bytes), summary };
+      summaryPaths.push(summaryPath);
+    }
+    if (isReleaseBrowserReceiptId(id)) raw.artifactIdentityBinding = endpointBinding;
+    const receiptPath = replayReceiptsPath + "/" + id + ".json";
+    await writeReplayJson(path.join(sourceRoot, receiptPath), raw);
+    rawReceipts.set(id, raw);
+    receiptPaths.push(receiptPath);
+  }
+  const generated = requireReplayCommand(replayCommand(sourceRoot, process.execPath, [
+    path.join(workspaceRoot, "scripts/generate-release-evidence.mjs"),
+    "--release-label", "SYNTHETIC-file-consumer-contract",
+    ...(dirty ? ["--allow-dirty"] : [])
+  ]));
+  assert.equal(JSON.parse(generated.stdout).evidenceId, evidenceId);
+  const boundPaths = [
+    "dist/web/index.html", "dist/web/manifest.webmanifest", "dist/web/sw.js", "dist/web/_headers",
+    replayLockPath, ...receiptPaths, ...phasePaths, ...summaryPaths,
+    replayInputPath, replayInputPath + ".sha256"
+  ];
+  for (const archiveRoot of archiveRoots) {
+    await mkdir(archiveRoot);
+    for (const relativePath of boundPaths) {
+      const bytes = await readFile(path.join(sourceRoot, relativePath));
+      const file = path.join(archiveRoot, relativePath);
+      await mkdir(path.dirname(file), { recursive: true });
+      await writeFile(file, bytes, { flag: "wx" });
+    }
+  }
+  return {
+    sourceRoot, archiveRoots, boundPaths, receiptPaths, phasePaths, summaryPaths, rawReceipts,
+    evidence: JSON.parse(await readFile(path.join(sourceRoot, replayInputPath), "utf8")),
+    replay: (boundFilesRoot = archiveRoots[0], allowances = {}) => verifyReleaseEvidenceFiles({
+      sourceRoot, boundFilesRoot, inputRelativePath: replayInputPath,
+      receiptsRelativePath: replayReceiptsPath, allowDirty: false, allowUnbound: false, ...allowances
+    })
+  };
+}
+
+async function rewriteReplayRaw(root, evidence, id, raw) {
+  const projected = evidence.testReceipts.find((receipt) => receipt.id === id);
+  const bytes = await writeReplayJson(path.join(root, projected.path), raw);
+  projected.sha256 = sha256(bytes);
+  await writeReplayEvidence(root, evidence);
+}
+
+test("release file replay verifies 13 raw receipts, 3 phase reports, 5 browser summaries and 4 endpoints in two archives", async (context) => {
+  const fixture = await releaseFileReplayFixture(context);
+  assert.equal(fixture.receiptPaths.length, 13);
+  assert.equal(fixture.phasePaths.length, 3);
+  assert.equal(fixture.summaryPaths.length, 5);
+  assert.equal([...fixture.rawReceipts.values()].filter((raw) => raw.artifactIdentityBinding !== null).length, 4);
+  for (const archiveRoot of fixture.archiveRoots) {
+    const result = await fixture.replay(archiveRoot);
+    assert.equal(result.gates.engineeringGatePassed, true);
+    assert.deepEqual(result.evidence, fixture.evidence);
+    assert.equal(result.evidence.artifacts.root, "dist/web");
+    assert.equal(result.evidence.artifacts.identityLock.path, replayLockPath);
+    assert.equal(result.evidenceSha256, sha256(await readFile(path.join(fixture.sourceRoot, replayInputPath))));
+    assert.equal(result.verificationReceipt, null);
+    assert.equal(result.scope.historicalApplicabilityAssessed, false);
+    assert.deepEqual(result.evidence.artifacts.mutationBoundary, validArtifactMutationBoundary());
+    assert.equal(result.evidence.claims.publicReleaseAuthorized, false);
+    for (const relativePath of fixture.boundPaths) {
+      assert.deepEqual(await readFile(path.join(archiveRoot, relativePath)),
+        await readFile(path.join(fixture.sourceRoot, relativePath)), relativePath);
+    }
+  }
+});
+
+test("release file replay rejects every missing archive raw receipt despite an intact source-root copy", async (context) => {
+  const fixture = await releaseFileReplayFixture(context);
+  const archiveRoot = fixture.archiveRoots[0];
+  for (const relativePath of fixture.receiptPaths) {
+    const original = await readFile(path.join(fixture.sourceRoot, relativePath));
+    await unlink(path.join(archiveRoot, relativePath));
+    await assert.rejects(fixture.replay(), (error) => error.code === "ENOENT", relativePath);
+    assert.deepEqual(await readFile(path.join(fixture.sourceRoot, relativePath)), original);
+    await writeFile(path.join(archiveRoot, relativePath), original, { flag: "wx" });
+  }
+});
+
+test("release file replay rejects every missing archive phase report and browser summary", async (context) => {
+  const fixture = await releaseFileReplayFixture(context);
+  const archiveRoot = fixture.archiveRoots[0];
+  for (const relativePath of [...fixture.phasePaths, ...fixture.summaryPaths]) {
+    const original = await readFile(path.join(fixture.sourceRoot, relativePath));
+    await unlink(path.join(archiveRoot, relativePath));
+    await assert.rejects(fixture.replay(), (error) => error.code === "ENOENT", relativePath);
+    await writeFile(path.join(archiveRoot, relativePath), original, { flag: "wx" });
+  }
+});
+
+test("release file replay rejects a different clean source identity for unchanged archive bytes", async (context) => {
+  const fixture = await releaseFileReplayFixture(context);
+  await writeFile(path.join(fixture.sourceRoot, "SYNTHETIC.txt"), "SYNTHETIC different source revision.\n");
+  requireReplayCommand(replayCommand(fixture.sourceRoot, "git", ["add", "--", "SYNTHETIC.txt"]));
+  requireReplayCommand(replayCommand(fixture.sourceRoot, "git", [
+    "-c", "user.name=SYNTHETIC Contract Fixture", "-c", "user.email=synthetic@invalid.example",
+    "-c", "commit.gpgSign=false", "-c", "core.hooksPath=" + path.join(fixture.sourceRoot, "../empty-hooks"),
+    "commit", "--no-verify", "-m", "SYNTHETIC different source"
+  ]));
+  assert.equal(readGitState(fixture.sourceRoot).dirty, false);
+  await assert.rejects(fixture.replay(), /Evidence id mismatch/u);
+});
+
+test("release file replay binds lifecycle packages to the source root, not archive-local packages", async (context) => {
+  const fixture = await releaseFileReplayFixture(context);
+  const archiveRoot = fixture.archiveRoots[0];
+  const wrongPackageBytes = Buffer.from('{"name":"SYNTHETIC-wrong-package-domain"}\n');
+  await writeFile(path.join(archiveRoot, "package.json"), wrongPackageBytes, { flag: "wx" });
+  assert.equal((await fixture.replay()).gates.engineeringGatePassed, true);
+  const raw = structuredClone(fixture.rawReceipts.get("build"));
+  const reportPath = path.join(archiveRoot, raw.lifecyclePhaseReport.path);
+  const report = JSON.parse(await readFile(reportPath, "utf8"));
+  report.packageIdentities[0] = {
+    path: "package.json", rawBytes: wrongPackageBytes.length, rawSha256: sha256(wrongPackageBytes)
+  };
+  raw.lifecyclePhaseReport.sha256 = sha256(await writeReplayJson(reportPath, report));
+  await rewriteReplayRaw(archiveRoot, structuredClone(fixture.evidence), "build", raw);
+  await assert.rejects(fixture.replay(), /current fixed plan or package identities mismatch/u);
+});
+
+test("release file replay independently rejects a changed endpoint binding in each of the four artifact receipts", async (context) => {
+  const fixture = await releaseFileReplayFixture(context);
+  const archiveRoot = fixture.archiveRoots[0];
+  for (const id of RELEASE_ARTIFACT_MUTATION_BOUNDARY_RECEIPT_IDS) {
+    const raw = structuredClone(fixture.rawReceipts.get(id));
+    raw.artifactIdentityBinding.afterCommand.buildVersion = "abcdef012345";
+    await rewriteReplayRaw(archiveRoot, structuredClone(fixture.evidence), id, raw);
+    await assert.rejects(fixture.replay(), /Release artifact mutation boundary requires every canonical browser receipt endpoint snapshot/u, id);
+    await writeFile(path.join(archiveRoot, replayReceiptsPath, id + ".json"),
+      await readFile(path.join(fixture.sourceRoot, replayReceiptsPath, id + ".json")));
+    await writeReplayEvidence(archiveRoot, fixture.evidence);
+  }
+});
+
+test("release file replay retains dirty diagnostics without producing a formal pass", async (context) => {
+  const fixture = await releaseFileReplayFixture(context, { dirty: true });
+  await assert.rejects(fixture.replay(), /requires a clean source tree/u);
+  const result = await fixture.replay(fixture.sourceRoot, { allowDirty: true });
+  assert.equal(result.gates.engineeringGatePassed, false);
+  assert.equal(result.gates.sourceTreeClean, false);
+  assert.equal(result.verificationReceipt.status, "diagnostic_only");
+  assert.equal(result.verificationReceipt.formalReleaseEvidenceVerified, false);
+  assert.equal(result.verificationReceipt.claims.sourceAndArtifactCurrentVerified, false);
+  assert.equal((await fixture.replay(fixture.archiveRoots[0], { allowDirty: true })).verificationReceipt, null);
+  await assert.rejects(fixture.replay(fixture.sourceRoot, { allowDirty: "true" }), /explicit booleans/u);
+});
+
+test("release file replay keeps unbound diagnostics subject to the original artifact lock", async (context) => {
+  const fixture = await releaseFileReplayFixture(context);
+  const archiveRoot = fixture.archiveRoots[0];
+  const evidence = structuredClone(fixture.evidence);
+  const index = path.join(archiveRoot, "dist/web/index.html");
+  await writeFile(index, (await readFile(index, "utf8")).replace(evidence.evidenceId, "unbound-local-build"));
+  evidence.release.builtEvidenceId = "unbound-local-build";
+  evidence.release.evidenceIdBound = false;
+  evidence.gates.evidenceIdBound = false;
+  evidence.gates.engineeringGatePassed = false;
+  const artifacts = await collectArtifactEntries(path.join(archiveRoot, "dist/web"),
+    ["release-evidence.json", "release-evidence.json.sha256"], { containmentRoot: archiveRoot });
+  evidence.artifacts.files = artifacts;
+  evidence.artifacts.artifactSetDigest = sha256(canonicalJson(artifacts));
+  evidence.artifacts.components = releaseArtifactComponents(artifacts);
+  await writeReplayEvidence(archiveRoot, evidence);
+  await assert.rejects(fixture.replay(), /Built artifact is not bound/u);
+  await assert.rejects(fixture.replay(archiveRoot, { allowUnbound: true }),
+    /Release artifact identity does not match the evidence id embedded in the build/u);
+});
+
+test("release file replay preserves the same-root CLI receipt and exclusive output behavior", async (context) => {
+  const fixture = await releaseFileReplayFixture(context);
+  const direct = await fixture.replay(fixture.sourceRoot);
+  assert.equal(direct.verificationReceipt.receiptCount, 13);
+  assert.equal(direct.verificationReceipt.status, "passed");
+  assert.equal(direct.verificationReceipt.claims.browserRuntimeBeyondBoundReceiptsVerified, false);
+  const args = [path.join(workspaceRoot, "scripts/verify-release-evidence.mjs"), "--output", "tmp/synthetic-formal.json"];
+  const first = requireReplayCommand(replayCommand(fixture.sourceRoot, process.execPath, args));
+  const emitted = Buffer.from(first.stdout, "utf8");
+  assert.deepEqual(await readFile(path.join(fixture.sourceRoot, "tmp/synthetic-formal.json")), emitted);
+  const receipt = JSON.parse(first.stdout);
+  assert.equal(receipt.receiptType, "formal_release_evidence_verification");
+  assert.equal(receipt.releaseEvidence.path, replayInputPath);
+  assert.equal(receipt.receiptCount, 13);
+  const second = replayCommand(fixture.sourceRoot, process.execPath, args);
+  assert.equal(second.status, 1);
+  assert.match(second.stderr, /EEXIST/u);
+  assert.deepEqual(await readFile(path.join(fixture.sourceRoot, "tmp/synthetic-formal.json")), emitted);
+  const insideArtifact = replayCommand(fixture.sourceRoot, process.execPath, [args[0], "--output", "dist/web/formal.json"]);
+  assert.equal(insideArtifact.status, 1);
+  assert.match(insideArtifact.stderr, /outside the artifact root/u);
+});
+
+test("release file replay is invoked by the production rollback artifact wrapper before accepting one artifact", async (context) => {
+  const fixture = await releaseFileReplayFixture(context);
+  const replay = await fixture.replay(fixture.sourceRoot);
+  const formalReceipt = replay.verificationReceipt;
+  const formalPath = "tmp/synthetic-formal.json";
+  const formalBytes = await writeReplayJson(path.join(fixture.sourceRoot, formalPath), formalReceipt);
+  const evidenceBytes = await readFile(path.join(fixture.sourceRoot, replayInputPath));
+  const lockBytes = await readFile(path.join(fixture.sourceRoot, replayLockPath));
+  const identity = {
+    channel: "default-v13", descriptor: fixture.evidence.release.descriptor,
+    buildVersion: fixture.evidence.release.buildVersion, manifestDigest: fixture.evidence.release.manifestDigest,
+    artifactRoot: "dist/web", artifactSetDigest: fixture.evidence.artifacts.artifactSetDigest,
+    components: fixture.evidence.artifacts.components,
+    releaseEvidence: {
+      path: replayInputPath, size: evidenceBytes.length, sha256: sha256(evidenceBytes),
+      schemaVersion: 1, schemaId: "https://hakimi.invalid/schemas/release-evidence-v1.json",
+      evidenceType: "engineering_release_evidence", evidenceId: fixture.evidence.evidenceId,
+      sidecarPath: replayInputPath + ".sha256",
+      sidecarSha256: sha256(await readFile(path.join(fixture.sourceRoot, replayInputPath + ".sha256")))
+    },
+    identityLock: {
+      ...fixture.evidence.artifacts.identityLock, size: lockBytes.length, evidenceId: fixture.evidence.evidenceId
+    },
+    formalReceipt: {
+      path: formalPath, size: formalBytes.length, sha256: sha256(formalBytes),
+      schemaVersion: formalReceipt.schemaVersion, receiptType: formalReceipt.receiptType,
+      receiptId: formalReceipt.receiptId, releaseEvidenceId: formalReceipt.releaseEvidenceId,
+      status: formalReceipt.status, verifiedAt: formalReceipt.verifiedAt
+    }
+  };
+  const options = {
+    cwd: fixture.sourceRoot, role: "candidate", identity,
+    artifactRoot: path.join(fixture.sourceRoot, "dist/web"), receiptsRoot: path.join(fixture.sourceRoot, "tmp"),
+    releaseEvidenceValidator: compileReleaseEvidenceSchema(releaseEvidenceSchema)
+  };
+  const verified = await verifyRollbackReleaseArtifactFiles(options);
+  assert.deepEqual(verified.releaseEvidence, fixture.evidence);
+  assert.deepEqual(verified.formalReceipt, formalReceipt);
+  // A single component replay is not the four-root rollback entry or admission.
+  await unlink(path.join(fixture.sourceRoot, replayReceiptsPath, "unit.json"));
+  await assert.rejects(verifyRollbackReleaseArtifactFiles(options), (error) =>
+    error.code === "FORMAL_RELEASE_FILES_VERIFICATION_FAILED"
+      && error.stage === "formal_release_evidence"
   );
 });

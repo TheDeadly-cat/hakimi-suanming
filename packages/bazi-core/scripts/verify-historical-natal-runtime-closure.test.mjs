@@ -864,11 +864,98 @@ test("requires prehooks for every reviewed root and direct Web bundle script", (
   );
 
   const recursive = structuredClone(rootManifest);
-  recursive.scripts.prebuild = `${recursive.scripts.prebuild} && npm run build`;
+  recursive.scripts.build = "npm run build --workspace @hakimi/web";
+  recursive.scripts.prebuild = "npm run check:current-governance && npm run build";
   assert.throws(
     () => verifyBundleScriptGateContracts(recursive, webManifest),
     /must not recurse into build/u
   );
+});
+
+test("accepts the reviewed indirect npm chain and the direct attestation prehook", () => {
+  const rootManifest = JSON.parse(readFileSync(path.resolve(PRODUCT_WORKSPACE_ROOT, "package.json"), "utf8"));
+  const webManifest = JSON.parse(readFileSync(path.resolve(PRODUCT_WORKSPACE_ROOT, "apps/web/package.json"), "utf8"));
+  assert.ok(verifyBundleScriptGateContracts(rootManifest, webManifest).rootBundleScripts.includes("build"));
+  const direct = structuredClone(rootManifest);
+  direct.scripts.build = "npm run build --workspace @hakimi/web";
+  direct.scripts.prebuild = "npm run check:historical-natal-build-attestation";
+  assert.ok(verifyBundleScriptGateContracts(direct, webManifest).rootBundleScripts.includes("build"));
+  direct.scripts.prebuild = "npm run check:current-governance";
+  assert.ok(verifyBundleScriptGateContracts(direct, webManifest).rootBundleScripts.includes("build"));
+});
+
+test("requires attestation on the called chain rather than an unused script or its individual leaves", () => {
+  const rootManifest = JSON.parse(readFileSync(path.resolve(PRODUCT_WORKSPACE_ROOT, "package.json"), "utf8"));
+  const webManifest = JSON.parse(readFileSync(path.resolve(PRODUCT_WORKSPACE_ROOT, "apps/web/package.json"), "utf8"));
+  // This original contract continues to cover supported legacy root hooks.
+  // The coordinated default has a separate attestation-obligation assertion.
+  rootManifest.scripts.build = "npm run build --workspace @hakimi/web";
+  rootManifest.scripts.prebuild = "npm run check:current-governance";
+  const unused = structuredClone(rootManifest);
+  unused.scripts.prebuild = "npm run check:history-checkpoint";
+  unused.scripts["check:unused-attestation"] = "npm run check:historical-natal-build-attestation";
+  assert.throws(() => verifyBundleScriptGateContracts(unused, webManifest), /historical build-attestation prehook/u);
+  const missing = structuredClone(rootManifest);
+  missing.scripts["check:current-boundaries"] = missing.scripts["check:current-boundaries"]
+    .split(" && ").filter((part) => part !== "npm run check:historical-natal-build-attestation").join(" && ");
+  assert.throws(() => verifyBundleScriptGateContracts(missing, webManifest), /historical build-attestation prehook/u);
+});
+
+test("the coordinated default retains both governance and workspace attestation obligations", () => {
+  const rootManifest = JSON.parse(readFileSync(path.resolve(PRODUCT_WORKSPACE_ROOT, "package.json"), "utf8"));
+  const webManifest = JSON.parse(readFileSync(path.resolve(PRODUCT_WORKSPACE_ROOT, "apps/web/package.json"), "utf8"));
+  assert.equal(rootManifest.scripts.build, "node scripts/run-diagnostic-stage.mjs lifecycle build");
+  assert.ok(verifyBundleScriptGateContracts(rootManifest, webManifest).rootBundleScripts.includes("build"));
+  const missingGovernanceAttestation = structuredClone(rootManifest);
+  missingGovernanceAttestation.scripts["check:current-boundaries"] =
+    missingGovernanceAttestation.scripts["check:current-boundaries"].split(" && ")
+      .filter((part) => part !== "npm run check:historical-natal-build-attestation").join(" && ");
+  assert.throws(() => verifyBundleScriptGateContracts(missingGovernanceAttestation, webManifest), /historical build-attestation/u);
+  const missingWorkspaceAttestation = structuredClone(webManifest);
+  delete missingWorkspaceAttestation.scripts.prebuild;
+  assert.throws(() => verifyBundleScriptGateContracts(rootManifest, missingWorkspaceAttestation), /workspace build hooks/u);
+  for (const hook of ["precheck:current-governance", "postcheck:current-governance"]) {
+    const recursive = structuredClone(rootManifest);
+    recursive.scripts[hook] = "npm run build";
+    assert.throws(() => verifyBundleScriptGateContracts(recursive, webManifest), /must not recurse into build/u);
+  }
+});
+
+test("rejects cycles and build recursion through nested npm lifecycle hooks", () => {
+  const rootManifest = JSON.parse(readFileSync(path.resolve(PRODUCT_WORKSPACE_ROOT, "package.json"), "utf8"));
+  const webManifest = JSON.parse(readFileSync(path.resolve(PRODUCT_WORKSPACE_ROOT, "apps/web/package.json"), "utf8"));
+  const cyclic = structuredClone(rootManifest);
+  cyclic.scripts["check:current-boundaries"] += " && npm run check:current-governance";
+  assert.throws(() => verifyBundleScriptGateContracts(cyclic, webManifest), /cyclic npm prehook chain/u);
+  const prehookCycle = structuredClone(rootManifest);
+  prehookCycle.scripts["precheck:history-checkpoint"] = "npm run check:history-checkpoint";
+  assert.throws(() => verifyBundleScriptGateContracts(prehookCycle, webManifest), /cyclic npm prehook chain/u);
+  const posthookBuild = structuredClone(rootManifest);
+  posthookBuild.scripts["postcheck:history-checkpoint"] = "npm run build";
+  assert.throws(() => verifyBundleScriptGateContracts(posthookBuild, webManifest), /must not recurse into build/u);
+});
+
+test("rejects failure-masking shell, comment decoys, opaque wrappers and missing called scripts", () => {
+  const rootManifest = JSON.parse(readFileSync(path.resolve(PRODUCT_WORKSPACE_ROOT, "package.json"), "utf8"));
+  const webManifest = JSON.parse(readFileSync(path.resolve(PRODUCT_WORKSPACE_ROOT, "apps/web/package.json"), "utf8"));
+  for (const command of [
+    "npm run check:historical-natal-build-attestation || true",
+    "npm run check:history-checkpoint || npm run check:historical-natal-build-attestation",
+    "npm run check:history-checkpoint; npm run check:historical-natal-build-attestation",
+    "echo npm run check:historical-natal-build-attestation",
+    "node scripts/verify-history-checkpoint.mjs # npm run check:historical-natal-build-attestation",
+    "node -e 'require(\"child_process\").execSync(\"npm run check:historical-natal-build-attestation\")'"
+  ]) {
+    const changed = structuredClone(rootManifest);
+    changed.scripts["check:current-boundaries"] = command;
+    assert.throws(() => verifyBundleScriptGateContracts(changed, webManifest), /unsupported shell syntax or terminal command/u);
+  }
+  const missing = structuredClone(rootManifest);
+  missing.scripts["check:current-boundaries"] = "npm run check:missing && npm run check:historical-natal-build-attestation";
+  assert.throws(() => verifyBundleScriptGateContracts(missing, webManifest), /requires missing npm script/u);
+  const changedAttestation = structuredClone(rootManifest);
+  changedAttestation.scripts["check:historical-natal-build-attestation"] += " || true";
+  assert.throws(() => verifyBundleScriptGateContracts(changedAttestation, webManifest), /source-lock then runtime-closure check exactly/u);
 });
 
 test("rejects duplicate raw JSON keys before semantic sidecar validation", () => withFixture((fixture) => {

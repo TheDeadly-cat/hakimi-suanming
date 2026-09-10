@@ -4,6 +4,10 @@ import { constants as fsConstants, existsSync } from "node:fs";
 import { lstat, open, readFile, readdir, readlink, realpath } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import {
+  computeDefaultLifecyclePlanDigest,
+  resolveDefaultLifecyclePlan
+} from "./formal-npm-lifecycle-closure-lib.mjs";
 
 export const RELEASE_POLICY_PATHS = Object.freeze([
   "docs/release/web-v1-release-decisions.json",
@@ -322,6 +326,198 @@ export async function readStableRegularFileSnapshot(
     filePath,
     label
   });
+}
+
+
+const RELEASE_LIFECYCLE_STAGES = Object.freeze({
+  typecheck: "typecheck",
+  unit: "vitest",
+  build: "build"
+});
+const LIFECYCLE_RUN_ID = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/u;
+
+export function isReleaseLifecycleReceiptId(id) {
+  return typeof id === "string" && Object.hasOwn(RELEASE_LIFECYCLE_STAGES, id);
+}
+
+function lifecycleExactKeys(value, keys) {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    && canonicalJson(Object.keys(value).sort()) === canonicalJson([...keys].sort());
+}
+
+function lifecycleFailure(id, message) {
+  throw new Error("Release lifecycle " + id + ": " + message + ".");
+}
+
+function lifecycleUtc(value) {
+  if (typeof value !== "string"
+    || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(value)) return null;
+  const time = Date.parse(value);
+  return Number.isFinite(time) && new Date(time).toISOString() === value ? time : null;
+}
+
+async function readReleaseLifecycleInputs(cwd) {
+  const contexts = [];
+  const packageIdentities = [];
+  for (const relativePath of ["package.json", "apps/web/package.json"]) {
+    const snapshot = await readStableRegularFileSnapshot(path.resolve(cwd, relativePath), {
+      containmentRoot: cwd,
+      label: "Lifecycle package " + relativePath
+    });
+    if (snapshot.size === 0 || snapshot.size > 2_000_000) {
+      throw new Error("Lifecycle package input size is invalid: " + relativePath);
+    }
+    const packageJson = JSON.parse(snapshot.bytes.toString("utf8"));
+    contexts.push({ path: relativePath, packageJson });
+    packageIdentities.push({
+      path: relativePath, rawBytes: snapshot.size, rawSha256: snapshot.sha256
+    });
+  }
+  return { root: contexts[0], web: contexts[1], packageIdentities };
+}
+
+function assertReleaseLifecycleTerminalReport(report, receipt, plan, packageIdentities) {
+  const id = receipt.id;
+  if (!lifecycleExactKeys(report, [
+    "schemaVersion", "recordType", "stage", "originalCommand", "runId", "receiptId",
+    "packageIdentities", "planDigest", "startedAt", "completedAt", "terminal",
+    "authorization", "phases", "programStarted", "aggregateExitCode", "status"
+  ]) || report.schemaVersion !== 1
+    || report.recordType !== "default_npm_lifecycle_phase_report"
+    || report.terminal !== true) lifecycleFailure(id, "terminal report shape is invalid");
+  if (report.runId !== receipt.lifecycleRunId || report.receiptId !== id
+    || report.stage !== plan.stage
+    || canonicalJson(report.originalCommand) !== canonicalJson(plan.originalCommand)
+    || canonicalJson(receipt.command) !== canonicalJson(plan.originalCommand)) {
+    lifecycleFailure(id, "run, stage or original command binding mismatch");
+  }
+  if (report.planDigest !== computeDefaultLifecyclePlanDigest(plan)
+    || canonicalJson(report.packageIdentities) !== canonicalJson(packageIdentities)) {
+    lifecycleFailure(id, "current fixed plan or package identities mismatch");
+  }
+  const start = lifecycleUtc(report.startedAt);
+  const end = lifecycleUtc(report.completedAt);
+  const outerStart = lifecycleUtc(receipt.startedAt);
+  const outerEnd = lifecycleUtc(receipt.completedAt);
+  if (start === null || end === null || outerStart === null || outerEnd === null
+    || end < start || start < outerStart || end > outerEnd) {
+    lifecycleFailure(id, "terminal report time interval is invalid");
+  }
+  if (!lifecycleExactKeys(report.authorization, ["status", "blockers"])
+    || !["allowed", "blocked"].includes(report.authorization.status)
+    || !Array.isArray(report.authorization.blockers)
+    || (report.authorization.status === "allowed") !== (report.authorization.blockers.length === 0)) {
+    lifecycleFailure(id, "authorization terminal state is invalid");
+  }
+  if (!Array.isArray(report.phases) || report.phases.length !== plan.steps.length) {
+    lifecycleFailure(id, "complete fixed phase inventory is required");
+  }
+  let previousPhaseEnd = start;
+  for (let index = 0; index < plan.steps.length; index += 1) {
+    const step = plan.steps[index];
+    const phase = report.phases[index];
+    if (!lifecycleExactKeys(phase, [
+      "id", "required", "status", "started", "exitCode", "signal", "error",
+      "startedAt", "completedAt"
+    ]) || phase.id !== step.id || phase.required !== step.required
+      || ![true, false, null].includes(phase.started)
+      || !(phase.exitCode === null || (Number.isSafeInteger(phase.exitCode) && phase.exitCode >= 0))
+      || !(phase.signal === null || (typeof phase.signal === "string" && phase.signal.length > 0))
+      || !(phase.error === null || (typeof phase.error === "string" && phase.error.length > 0))) {
+      lifecycleFailure(id, "phase shape or fixed order is invalid");
+    }
+    const absent = step.kind === "none";
+    const blocked = !absent && (report.authorization.status === "blocked"
+      || (step.id === "program" && plan.stage === "build"
+        && report.phases[1].status !== "passed"));
+    if (absent || blocked) {
+      const expectedStatus = absent ? step.absentStatus : "blocked";
+      if (phase.status !== expectedStatus || phase.started !== false
+        || phase.exitCode !== null || phase.signal !== null
+        || phase.startedAt !== null || phase.completedAt !== null
+        || (absent && phase.error !== null)) {
+        lifecycleFailure(id, "absent or blocked phase claims execution");
+      }
+      continue;
+    }
+    const phaseStart = lifecycleUtc(phase.startedAt);
+    const phaseEnd = lifecycleUtc(phase.completedAt);
+    if (phaseStart === null || phaseEnd === null || phaseStart < previousPhaseEnd
+      || phaseEnd < phaseStart || phaseEnd > end) {
+      lifecycleFailure(id, "attempted phase time interval is invalid");
+    }
+    previousPhaseEnd = phaseEnd;
+    const passed = phase.status === "passed" && phase.started === true
+      && phase.exitCode === 0 && phase.signal === null && phase.error === null;
+    const failed = phase.status === "failed" && (
+      (phase.started === true && (
+        (Number.isSafeInteger(phase.exitCode) && phase.exitCode > 0 && phase.signal === null)
+        || (phase.signal !== null && phase.exitCode === null)
+      ))
+      || (phase.started === false && phase.exitCode === null
+        && phase.signal === null && phase.error !== null)
+    );
+    const unknown = phase.status === "unknown"
+      && phase.exitCode === null && phase.signal === null;
+    if (!passed && !failed && !unknown) {
+      lifecycleFailure(id, "phase execution facts and status contradict");
+    }
+  }
+  const program = report.phases[2];
+  const aggregateExitCode = report.authorization.status === "blocked" ? 2
+    : report.phases.every((phase) => !phase.required || phase.status === "passed") ? 0 : 1;
+  const status = report.authorization.status === "blocked" ? "blocked"
+    : aggregateExitCode === 0 ? "passed" : "failed";
+  if (report.programStarted !== program.started
+    || receipt.programStarted !== report.programStarted
+    || report.aggregateExitCode !== aggregateExitCode || report.status !== status
+    || receipt.exitCode !== aggregateExitCode
+    || receipt.status !== (status === "passed" ? "passed" : "failed")
+    || receipt.signal !== null || receipt.launchErrorCode !== null) {
+    lifecycleFailure(id, "program, aggregate or outer receipt terminal state contradicts");
+  }
+}
+
+export async function verifyReleaseLifecyclePhaseReportBinding({
+  cwd,
+  sourceRoot = cwd,
+  receiptsDirectory,
+  receipt
+}) {
+  if (!isReleaseLifecycleReceiptId(receipt?.id)) {
+    if (receipt?.lifecycleRunId != null || receipt?.lifecyclePhaseReport != null
+      || receipt?.lifecyclePhaseReportError != null || receipt?.programStarted != null) {
+      throw new Error("Non-lifecycle receipt contains lifecycle result data: " + receipt?.id);
+    }
+    return null;
+  }
+  const id = receipt.id;
+  if (typeof receipt.lifecycleRunId !== "string" || !LIFECYCLE_RUN_ID.test(receipt.lifecycleRunId)
+    || receipt.lifecyclePhaseReportError !== null) {
+    lifecycleFailure(id, "run id or report error state is invalid");
+  }
+  const binding = receipt.lifecyclePhaseReport;
+  if (!lifecycleExactKeys(binding, ["path", "sha256"])
+    || typeof binding.path !== "string" || binding.path.length === 0
+    || typeof binding.sha256 !== "string" || !/^[a-f0-9]{64}$/u.test(binding.sha256)) {
+    lifecycleFailure(id, "phase report binding is malformed");
+  }
+  const reportPath = path.resolve(cwd, binding.path);
+  relativePathWithin(cwd, receiptsDirectory, "Lifecycle receipt directory");
+  relativePathWithin(receiptsDirectory, reportPath, "Lifecycle phase report " + id);
+  if (binding.path !== relativePathWithin(cwd, reportPath, "Lifecycle phase report " + id)) {
+    lifecycleFailure(id, "phase report path is not canonical");
+  }
+  const snapshot = await readStableRegularFileSnapshot(reportPath, {
+    containmentRoot: receiptsDirectory,
+    label: "Lifecycle phase report " + id
+  });
+  if (snapshot.sha256 !== binding.sha256) lifecycleFailure(id, "phase report digest mismatch");
+  const report = JSON.parse(snapshot.bytes.toString("utf8"));
+  const inputs = await readReleaseLifecycleInputs(sourceRoot);
+  const plan = resolveDefaultLifecyclePlan(RELEASE_LIFECYCLE_STAGES[id], inputs);
+  assertReleaseLifecycleTerminalReport(report, receipt, plan, inputs.packageIdentities);
+  return Object.freeze({ path: binding.path, sha256: binding.sha256, report });
 }
 
 export async function sha256File(filePath) {

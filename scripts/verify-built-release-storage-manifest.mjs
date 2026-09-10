@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 function decodeHtmlAttribute(value) {
   return value
@@ -31,7 +32,10 @@ function readWorkerJsonConstant(worker, constantName) {
   return JSON.parse(JSON.parse(match[1]));
 }
 
-export async function verifyBuiltReleaseStorageManifest(outputDirectory) {
+export async function verifyBuiltReleaseStorageManifest(outputDirectory, { expectedChannel = "candidate" } = {}) {
+  if (expectedChannel !== "default-v13" && expectedChannel !== "candidate") {
+    throw new Error(`Unsupported built release expected channel: ${expectedChannel}.`);
+  }
   const [html, worker, hostingHeaders] = await Promise.all([
     readFile(path.resolve(outputDirectory, "index.html"), "utf8"),
     readFile(path.resolve(outputDirectory, "sw.js"), "utf8"),
@@ -46,6 +50,18 @@ export async function verifyBuiltReleaseStorageManifest(outputDirectory) {
   const evidenceId = readMeta(html, "hakimi-release-evidence-id");
   const workerDescriptor = readWorkerJsonConstant(worker, "RELEASE_DATABASE");
   const workerBridgeDescriptor = readWorkerJsonConstant(worker, "LEGACY_BRIDGE_DATABASE");
+
+  if (expectedChannel === "default-v13") {
+    for (const [field, expected] of Object.entries({
+      dbGeneration: "legacy-v13",
+      targetSchema: 13,
+      migrationId: null
+    })) {
+      if (descriptor?.[field] !== expected) {
+        throw new Error(`Default v13 build expected ${field}=${JSON.stringify(expected)}; received ${JSON.stringify(descriptor?.[field])}.`);
+      }
+    }
+  }
 
   if (manifest.manifestVersion !== 1) throw new Error("Built storage manifest version is not 1.");
   if (JSON.stringify(manifest.database) !== JSON.stringify(descriptor)) {
@@ -92,6 +108,7 @@ export async function verifyBuiltReleaseStorageManifest(outputDirectory) {
   }
 
   return Object.freeze({
+    expectedChannel,
     descriptor,
     manifestVersion: manifest.manifestVersion,
     requiredTableCount: manifest.requiredStorageTables.length,
@@ -104,6 +121,30 @@ export async function verifyBuiltReleaseStorageManifest(outputDirectory) {
   });
 }
 
-const outputDirectory = path.resolve(process.argv[2] ?? "dist/web");
-const result = await verifyBuiltReleaseStorageManifest(outputDirectory);
-process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+function parseArguments(args) {
+  let outputDirectory;
+  let expectedChannel;
+  for (let index = 0; index < args.length; index += 1) {
+    const argument = args[index];
+    if (argument === "--expected-channel") {
+      if (expectedChannel !== undefined || !args[index + 1] || args[index + 1].startsWith("--")) {
+        throw new Error("Expected exactly one --expected-channel value.");
+      }
+      expectedChannel = args[++index];
+    } else if (argument.startsWith("--") || outputDirectory !== undefined) {
+      throw new Error(`Unexpected built release verification argument: ${argument}.`);
+    } else {
+      outputDirectory = argument;
+    }
+  }
+  return {
+    outputDirectory: path.resolve(outputDirectory ?? "dist/web"),
+    expectedChannel: expectedChannel ?? "default-v13"
+  };
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  const { outputDirectory, expectedChannel } = parseArguments(process.argv.slice(2));
+  const result = await verifyBuiltReleaseStorageManifest(outputDirectory, { expectedChannel });
+  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+}

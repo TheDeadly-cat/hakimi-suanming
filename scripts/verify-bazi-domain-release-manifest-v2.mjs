@@ -6,18 +6,30 @@ import {
 } from "./bazi-domain-release-manifest-v2-lib.mjs";
 
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const operands = process.argv.slice(2);
+const historicalInputRequested = operands.length === 2
+  && operands[0] === "--historical-input-root"
+  && operands[1].trim().length > 0
+  && !operands[1].startsWith("-");
+const invocationValid = operands.length === 0 || historicalInputRequested;
 
-if (process.argv.length !== 2 || process.env.NODE_OPTIONS) {
+if (!invocationValid || process.env.NODE_OPTIONS) {
   console.error("BAZI_DOMAIN_RELEASE_MANIFEST_V2_MECHANICS_FAILED CLI_INVOCATION_REJECTED");
   process.exitCode = 1;
 } else {
   try {
-    const result = await loadBaziDomainReleaseManifestV2(workspaceRoot);
+    // Only the input root changes. The verifier code always comes from this
+    // repository, and neither input mode establishes a current release choice.
+    const inputRoot = historicalInputRequested ? path.resolve(operands[1]) : workspaceRoot;
+    const result = await loadBaziDomainReleaseManifestV2(inputRoot);
     if (!isVerifiedBaziDomainReleaseManifestV2(result)) {
       throw new Error("private result brand missing");
     }
     console.log(JSON.stringify({
       baziV17MachineIdentityManifestV2MechanicallyVerified: true,
+      verificationScope: historicalInputRequested ? "historical_input_root" : "repository_inputs",
+      currentApplicabilityAssessed: false,
+      ...(historicalInputRequested ? { historicalInputRoot: inputRoot } : {}),
       manifestId: result.manifestId,
       manifestDigest: result.manifestDigest,
       artifact: {

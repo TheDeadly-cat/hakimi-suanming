@@ -17,6 +17,7 @@ import {
   sha256
 } from "./release-evidence-lib.mjs";
 import { loadReleaseEvidenceSchemaValidator } from "./release-evidence-schema.mjs";
+import { verifyReleaseEvidenceFiles } from "./verify-release-evidence.mjs";
 import { loadRollbackEvidenceSchemaValidator } from "./rollback-evidence-schema.mjs";
 
 export const ROLLBACK_EVIDENCE_POLICY_PATH =
@@ -850,6 +851,7 @@ function assertFormalReceiptEnvelope({ receipt, binding, identity, releaseEviden
   requireCondition(
     Number.isInteger(receipt.receiptCount)
       && receipt.receiptCount > 0
+      && receipt.receiptCount === releaseEvidence.testReceipts.length
       && exactKeys(receipt.gates, formalGateKeys)
       && formalGateKeys.every((key) => receipt.gates[key] === true),
     "formal_release_evidence",
@@ -882,6 +884,8 @@ function assertFormalReceiptEnvelope({ receipt, binding, identity, releaseEviden
     "Formal receipt path is not canonical."
   );
 }
+
+export { assertFormalReceiptEnvelope as validateRollbackFormalReceiptProjectionForContract };
 
 async function verifyArtifactIdentity({
   cwd,
@@ -1031,8 +1035,43 @@ async function verifyArtifactIdentity({
     lockResult,
     cwd
   });
+  // Envelope booleans cannot replace reopening the original bound test files.
+  // The v1 CLI still uses its existing single workspace path domain; separate
+  // historical A/B layouts need an explicit future contract, not path rewriting.
+  let replay;
+  try {
+    replay = await verifyReleaseEvidenceFiles({
+      sourceRoot: cwd,
+      boundFilesRoot: cwd,
+      inputRelativePath: evidenceBinding.path,
+      receiptsRelativePath: relativePathWithin(cwd, receiptsRoot, `${role} receipts`),
+      allowDirty: false,
+      allowUnbound: false
+    });
+  } catch (error) {
+    fail(
+      "formal_release_evidence",
+      "FORMAL_RELEASE_FILES_VERIFICATION_FAILED",
+      `${role} original Release Evidence files did not pass the current supported contract.`,
+      error
+    );
+  }
+  const { verifiedAt: _recordedAt, ...recorded } = formalReceipt;
+  const { verifiedAt: _replayedAt, ...replayed } = replay.verificationReceipt;
+  requireCondition(
+    replay.evidenceSha256 === evidenceBinding.sha256
+      && exactJson(replay.evidence, releaseEvidence)
+      && replay.gates.engineeringGatePassed === true
+      && exactJson(recorded, replayed),
+    "formal_release_evidence",
+    "FORMAL_RELEASE_REPLAY_MISMATCH",
+    `${role} formal receipt does not match the recomputed source, artifact, and original test files.`
+  );
   return Object.freeze({ identity, releaseEvidence, formalReceipt, lockResult, components });
 }
+
+// Verifies one release's original files only; it does not admit a rollback run.
+export { verifyArtifactIdentity as verifyRollbackReleaseArtifactFiles };
 
 function assertArtifactPairDistinct(baseline, candidate) {
   requireCondition(

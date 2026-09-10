@@ -13,6 +13,13 @@ import { fileURLToPath } from "node:url";
 
 import { canonicalJson, computeEvidenceId, sha256 } from "./release-evidence-lib.mjs";
 import {
+  buildReleaseBrowserResultSummary,
+  CROSS_SCHEMA_V13_V16_RECEIPT_ID,
+  CROSS_SCHEMA_V13_V16_SPEC_PATH,
+  CROSS_SCHEMA_V13_V16_TEST_TITLES,
+  isReleaseBrowserCompletionReceiptId
+} from "../apps/web/playwright.release-browser-result.ts";
+import {
   computeSwAbUpdateCandidateArtifactIdentityDigest,
   computeSwAbUpdateCandidateAttachmentDigest,
   computeSwAbUpdateCandidateAttemptMarkerDigest,
@@ -75,6 +82,24 @@ export function artifactReference(artifact) {
 }
 
 function releaseBrowserSummary(receiptId) {
+  if (receiptId === CROSS_SCHEMA_V13_V16_RECEIPT_ID) {
+    return buildReleaseBrowserResultSummary({
+      receiptId,
+      fullResultStatus: "passed",
+      expectedTestsPerProject: 13,
+      observations: SW_AB_UPDATE_CANDIDATE_BROWSER_PROJECTS.flatMap((projectName) =>
+        CROSS_SCHEMA_V13_V16_TEST_TITLES.map((title) => ({
+          projectName,
+          title,
+          file: CROSS_SCHEMA_V13_V16_SPEC_PATH,
+          expectedStatus: "passed",
+          outcome: "expected",
+          resultStatuses: ["passed"],
+          retryIndexes: [0]
+        }))
+      )
+    });
+  }
   const expectedTestsPerProject = {
     backup: 4,
     boot: 6,
@@ -378,7 +403,7 @@ export async function createFixture(t) {
         startedAt: iso(1, receiptIndex + 1),
         completedAt: iso(2, receiptIndex + 1),
         durationMs: 1000,
-        browserResultSummary: ["backup", "boot", "pwa", "web-v1-flow"].includes(receiptId)
+        browserResultSummary: isReleaseBrowserCompletionReceiptId(receiptId)
           ? {
               path: `fixture/${lower}-${receiptId}-browser-summary.json`,
               sha256: digest(`browser-summary-${label}-${receiptId}`),

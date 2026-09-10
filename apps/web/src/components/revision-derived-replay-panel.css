@@ -448,6 +448,7 @@
 
   .derived-replay-panel .derived-replay-pipeline {
     grid-template-columns: 1fr;
+    grid-auto-flow: row;
   }
 }
 

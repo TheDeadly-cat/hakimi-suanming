@@ -689,12 +689,12 @@ export function RevisionDerivedReplayPanel({ revision, atInstant, routeManualDir
         <div><p className="eyebrow">Explicit executor derivation</p><h2 id={titleId}>显式版本派生投影</h2></div>
         <StatusPill tone={panelStatus.tone}>{panelStatus.label}</StatusPill>
       </div>
-      <p id={boundaryId} className="revision-replay-copy"><strong>派生边界：</strong>旧 Revision 没有保存当时的关系、起运和运限输出及执行器绑定，因此这里不会声称“与旧输出一致”。系统会先核对本命盘工程复演一致，再按当前显式 Profile 尝试生成零写入投影；实际执行器会在结果卡逐项登记，不可用时不会回退到其他算法。保存按钮的确认只代表上层回调返回状态，本面板不执行收据 readback。结果不代表命理专家金标或公开发布授权。<small className="derived-replay-release-baseline">legacy-v13 · Schema 13 · migration null · parent-coordinated mutation epoch · public release false</small></p>
+      <p id={boundaryId} className="revision-replay-copy"><strong>派生边界：</strong>旧 Revision 没有保存当时的关系、起运和运限输出及执行器绑定，因此这里不会声称“与旧输出一致”。系统会先核对本命盘工程复演一致，再按当前显式 Profile 尝试生成零写入投影；实际执行器会在结果卡逐项登记，不可用时不会回退到其他算法。保存按钮的确认只代表上层回调返回状态，本面板不执行收据 readback。结果不代表命理专家金标或公开发布授权。<small className="derived-replay-release-baseline">legacy-v13 · Schema 13 · migration null · 源修订只读 · public release false</small></p>
       <dl className="revision-receipt-binding-rail derived-replay-binding-rail" aria-label="显式版本派生输入身份">
         <div data-binding="revision"><dt>Source Revision</dt><dd><code title={safeVisibleText(revision.id, "")}>{requestIssue ? "绑定待修复" : shortHash(revision.id)}</code><span>R{revision.revisionNumber} · 只读源</span></dd></div>
         <div data-binding="snapshot"><dt>Natal result hash</dt><dd><code title={safeVisibleText(revision.manifest.resultHash, "")}>{requestIssue ? "绑定待修复" : shortHash(revision.manifest.resultHash)}</code><span>投影返回时必须一致</span></dd></div>
         <div data-binding="history"><dt>Luck rule binding</dt><dd><code title={revision.manifest.luckCycleRuleDigest ? safeVisibleText(revision.manifest.luckCycleRuleDigest, "") : undefined}>{requestIssue ? "绑定待修复" : revision.manifest.luckCycleRuleDigest ? shortHash(revision.manifest.luckCycleRuleDigest) : "legacy-inferred"}</code><span>{revision.manifest.luckCycleRuleDigest ? "冻结摘要已登记" : "旧记录未登记显式摘要"}</span></dd></div>
-        <div data-binding="replay"><dt>Write gate</dt><dd><strong>{onSaveSnapshot ? "父级受控保存回调可用" : "只读模式"}</strong><span>{saveLocked ? "同一请求已锁定" : onSaveSnapshot ? "mutation epoch 由父级协调" : "默认零写入"}</span></dd></div>
+        <div data-binding="replay"><dt>Write gate</dt><dd><strong>{onSaveSnapshot ? "父级受控保存回调可用" : "只读模式"}</strong><span>{saveLocked ? "同一请求已锁定" : onSaveSnapshot ? "显式保存后须重新读取核对" : "默认零写入"}</span></dd></div>
       </dl>
       <ol
         className="derived-replay-pipeline"

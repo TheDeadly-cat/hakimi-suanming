@@ -1,15 +1,19 @@
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {
   relativePathWithin,
   releaseCommandInvocation,
-  sha256
+  sha256,
+  isReleaseLifecycleReceiptId,
+  readStableRegularFileSnapshot,
+  verifyReleaseLifecyclePhaseReportBinding
 } from "./release-evidence-lib.mjs";
 import {
   assertStrictReleaseBrowserResultSummary,
+  isReleaseBrowserCompletionReceiptId,
   isReleaseBrowserReceiptId
 } from "../apps/web/playwright.release-browser-result.ts";
 import {
@@ -38,7 +42,17 @@ if (evidenceId !== null && !/^hre1-[a-f0-9]{32}$/u.test(evidenceId)) {
 }
 const output = path.resolve(option("--output"));
 relativePathWithin(process.cwd(), output, "Receipt output");
-const browserResultRequired = isReleaseBrowserReceiptId(id);
+const lifecycleReportRequired = isReleaseLifecycleReceiptId(id);
+let lifecycleContext = null;
+if (lifecycleReportRequired) {
+  await mkdir(path.dirname(output), { recursive: true });
+  const directory = await mkdtemp(path.join(path.dirname(output), `.lifecycle-${id}-`));
+  lifecycleContext = { runId: randomUUID(), directory, reportOutput: path.join(directory, "terminal.json") };
+}
+const browserResultRequired = isReleaseBrowserCompletionReceiptId(id);
+// Cross-Schema fixtures prove test completion using their own artifacts. Only
+// the original four browser receipts consume the locked default-v13 dist.
+const artifactIdentityRequired = isReleaseBrowserReceiptId(id);
 const browserResultOutput = browserResultRequired
   ? path.join(
     path.dirname(output),
@@ -55,7 +69,7 @@ const invocation = releaseCommandInvocation(command, commandArgs);
 let artifactIdentityBeforeCommand = null;
 let artifactIdentityBinding = null;
 let artifactIdentityBindingFailure = null;
-if (browserResultRequired) {
+if (artifactIdentityRequired) {
   try {
     if (evidenceId === null) {
       throw new Error("Formal release browser receipts require HAKIMI_RELEASE_EVIDENCE_ID.");
@@ -70,19 +84,24 @@ if (browserResultRequired) {
     artifactIdentityBindingFailure = error;
   }
 }
-const result = browserResultRequired && artifactIdentityBeforeCommand === null
+const result = artifactIdentityRequired && artifactIdentityBeforeCommand === null
   ? { exitCode: null, signal: null, launchError: artifactIdentityBindingFailure }
   : await (async () => {
   try {
     const child = spawn(invocation.executable, invocation.args, {
       cwd: process.cwd(),
-      env: browserResultOutput
-        ? {
-          ...process.env,
+      env: {
+        ...process.env,
+        ...(browserResultOutput ? {
           HAKIMI_RELEASE_BROWSER_RECEIPT_ID: id,
           HAKIMI_RELEASE_BROWSER_RESULT_OUTPUT: browserResultOutput
-        }
-        : process.env,
+        } : {}),
+        // Never inherit a prior run's phase-output context, including when the
+        // requested command belongs to a different kind of receipt.
+        HAKIMI_RELEASE_LIFECYCLE_RUN_ID: lifecycleContext?.runId ?? "",
+        HAKIMI_RELEASE_LIFECYCLE_RECEIPT_ID: lifecycleContext ? id : "",
+        HAKIMI_RELEASE_LIFECYCLE_REPORT_OUTPUT: lifecycleContext?.reportOutput ?? ""
+      },
       shell: false,
       stdio: "inherit",
       windowsHide: true
@@ -101,7 +120,7 @@ const result = browserResultRequired && artifactIdentityBeforeCommand === null
     return { exitCode: null, signal: null, launchError: error };
   }
 })();
-if (browserResultRequired && artifactIdentityBeforeCommand !== null) {
+if (artifactIdentityRequired && artifactIdentityBeforeCommand !== null) {
   try {
     const artifactIdentityAfterCommand = await verifyReleaseArtifactIdentityLock({
       cwd: process.cwd(),
@@ -133,10 +152,31 @@ if (browserResultOutput) {
     browserResultSummaryError = (error instanceof Error ? error.message : String(error)).slice(0, 500);
   }
 }
-const passed = result.exitCode === 0
+let lifecyclePhaseReport = null;
+let lifecyclePhaseReportError = null;
+let candidateProgramStarted = null;
+if (lifecycleContext) {
+  try {
+    const snapshot = await readStableRegularFileSnapshot(lifecycleContext.reportOutput, {
+      containmentRoot: lifecycleContext.directory,
+      label: "Current npm lifecycle phase report"
+    });
+    const candidate = JSON.parse(snapshot.bytes.toString("utf8"));
+    lifecyclePhaseReport = {
+      path: relativePathWithin(process.cwd(), lifecycleContext.reportOutput, "Lifecycle phase report"),
+      sha256: snapshot.sha256
+    };
+    // This value is only a candidate until the shared consumer checks the full
+    // report, fixed plan, package identities and outer process result below.
+    candidateProgramStarted = candidate.programStarted;
+  } catch (error) {
+    lifecyclePhaseReportError = (error instanceof Error ? error.message : String(error)).slice(0, 500);
+  }
+}
+let passed = result.exitCode === 0
   && result.launchError === null
-  && (!browserResultRequired
-    || (browserResultSummary !== null && artifactIdentityBinding !== null));
+  && (!browserResultRequired || browserResultSummary !== null)
+  && (!artifactIdentityRequired || artifactIdentityBinding !== null);
 const receipt = {
   schemaVersion: 1,
   receiptType: "release_test_command",
@@ -152,6 +192,12 @@ const receipt = {
   launchErrorCode: result.launchError && typeof result.launchError === "object" && "code" in result.launchError
     ? String(result.launchError.code)
     : null,
+  ...(lifecycleReportRequired ? {
+    lifecycleRunId: lifecycleContext.runId,
+    lifecyclePhaseReport,
+    lifecyclePhaseReportError,
+    programStarted: candidateProgramStarted
+  } : {}),
   browserResultSummary,
   browserResultSummaryError,
   artifactIdentityBinding,
@@ -168,6 +214,20 @@ const receipt = {
     ci: process.env.CI === "true"
   }
 };
+if (lifecycleReportRequired) {
+  try {
+    if (lifecyclePhaseReportError !== null) throw new Error(lifecyclePhaseReportError);
+    const verified = await verifyReleaseLifecyclePhaseReportBinding({
+      cwd: process.cwd(), receiptsDirectory: path.dirname(output), receipt
+    });
+    if (verified === null) throw new Error("Required npm lifecycle phase report was not verified.");
+  } catch (error) {
+    passed = false;
+    receipt.status = "failed";
+    receipt.programStarted = null;
+    receipt.lifecyclePhaseReportError = (error instanceof Error ? error.message : String(error)).slice(0, 500);
+  }
+}
 await mkdir(path.dirname(output), { recursive: true });
 await writeFile(output, `${JSON.stringify(receipt, null, 2)}\n`, "utf8");
 if (!passed) process.exitCode = result.exitCode && result.exitCode !== 0 ? result.exitCode : 1;

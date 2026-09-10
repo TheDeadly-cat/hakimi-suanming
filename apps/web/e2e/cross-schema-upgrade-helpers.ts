@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 import { createServer, type Server } from "node:http";
 import { readFile, readdir, stat } from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { promisify } from "node:util";
 import { expect, type BrowserContext, type Page } from "@playwright/test";
@@ -13,8 +14,32 @@ import { collectConsoleProblems, waitForAppReady, waitForServiceWorker } from ".
 
 const execFileAsync = promisify(execFile);
 const workspaceRoot = path.resolve(import.meta.dirname, "../../..");
-const viteBin = path.resolve(workspaceRoot, "node_modules/vite/bin/vite.js");
+const applicationPackagePath = path.resolve(workspaceRoot, "apps/web/package.json");
+const applicationRequire = createRequire(applicationPackagePath);
 const fixtureConfig = path.resolve(workspaceRoot, "apps/web/vite.cross-schema-upgrade.config.ts");
+
+async function resolveApplicationViteBin(): Promise<string> {
+  const applicationPackage = JSON.parse(await readFile(applicationPackagePath, "utf8"));
+  const declaredVersion = applicationPackage.devDependencies?.vite ?? applicationPackage.dependencies?.vite;
+  const vitePackagePath = applicationRequire.resolve("vite/package.json");
+  const vitePackage = JSON.parse(await readFile(vitePackagePath, "utf8"));
+  if (typeof declaredVersion !== "string" || vitePackage.name !== "vite" ||
+    vitePackage.version !== declaredVersion) {
+    throw new Error("Cross-Schema fixtures require the exact Vite version declared by apps/web/package.json.");
+  }
+  const declaredBin = typeof vitePackage.bin === "string" ? vitePackage.bin : vitePackage.bin?.vite;
+  if (typeof declaredBin !== "string" || declaredBin.length === 0 || path.isAbsolute(declaredBin)) {
+    throw new Error("The application Vite package does not declare a relative CLI bin.");
+  }
+  const packageRoot = path.dirname(vitePackagePath);
+  const viteBin = path.resolve(packageRoot, declaredBin);
+  const relativeBin = path.relative(packageRoot, viteBin);
+  if (relativeBin === ".." || relativeBin.startsWith(`..${path.sep}`) || path.isAbsolute(relativeBin) ||
+    !(await stat(viteBin)).isFile()) {
+    throw new Error("The declared application Vite CLI bin is not a package file.");
+  }
+  return viteBin;
+}
 
 export const RELEASE_CONTROL_DATABASE = "hakimi-bazi-release-control";
 export const SOURCE_DATABASE = BRIDGE_RELEASE_DATABASE_DESCRIPTOR.databaseName;
@@ -109,6 +134,21 @@ function descriptorEnvironment(descriptor: ReleaseDatabaseDescriptor): Record<st
   return environment;
 }
 
+function crossSchemaFixtureEnvironment(
+  parentEnvironment: Record<string, string | undefined>,
+  descriptor: ReleaseDatabaseDescriptor
+): Record<string, string | undefined> {
+  const environment = { ...parentEnvironment };
+  for (const key of Object.keys(environment)) {
+    const normalizedKey = key.toUpperCase();
+    if (normalizedKey === "HAKIMI_RELEASE_EVIDENCE_ID" || normalizedKey.startsWith("HAKIMI_DB_")) {
+      delete environment[key];
+    }
+  }
+  // Only this fixture's explicit descriptor may populate the database fields.
+  return { ...environment, ...descriptorEnvironment(descriptor) };
+}
+
 function parseReleaseMeta(index: string): ReleaseDatabaseDescriptor {
   const match = index.match(/<meta\s+name=["']hakimi-release-database["']\s+content=(['"])(.*?)\1\s*\/?>/iu);
   if (!match?.[2]) throw new Error("Cross-Schema fixture index is missing release metadata.");
@@ -127,11 +167,11 @@ export async function buildGeneration(
   fault: CrossSchemaFault = "none"
 ): Promise<GenerationFixture> {
   const directory = path.join(fixtureRoot, name);
-  const result = await execFileAsync(process.execPath, [viteBin, "build", "--config", fixtureConfig], {
+  const viteBin = await resolveApplicationViteBin();
+  const result = await execFileAsync(process.execPath, [viteBin, "build", "--configLoader", "runner", "--config", fixtureConfig], {
     cwd: workspaceRoot,
     env: {
-      ...process.env,
-      ...descriptorEnvironment(descriptor),
+      ...crossSchemaFixtureEnvironment(process.env, descriptor),
       HAKIMI_CROSS_SCHEMA_FIXTURE: name,
       HAKIMI_CROSS_SCHEMA_OUT_DIR: directory,
       HAKIMI_CROSS_SCHEMA_FAULT: fault
@@ -150,6 +190,10 @@ export async function buildGeneration(
   const version = index.match(/<meta name="hakimi-build-version" content="([^"]+)"/u)?.[1];
   const entryPath = index.match(/<script[^>]+src="([^"]+\.js)"/u)?.[1];
   const emittedDescriptor = parseReleaseMeta(index);
+  const evidenceId = index.match(/<meta name="hakimi-release-evidence-id" content="([^"]+)"/u)?.[1];
+  if (evidenceId !== "unbound-local-build") {
+    throw new Error(`Build ${name} must remain unbound to production release evidence.`);
+  }
   if (!version || !entryPath) throw new Error(`Build ${name} is missing its build version or entry script.`);
   if (JSON.stringify(emittedDescriptor) !== JSON.stringify(descriptor)) {
     throw new Error(`Build ${name} emitted a release descriptor different from its requested descriptor.`);

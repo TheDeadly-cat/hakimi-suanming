@@ -1,14 +1,10 @@
 #!/usr/bin/env node
 
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 const MODULE_PATH = fileURLToPath(import.meta.url);
 const WORKSPACE_ROOT = path.resolve(path.dirname(MODULE_PATH), "..");
-const LIBRARY_URL = pathToFileURL(path.join(
-  path.dirname(MODULE_PATH),
-  "ziwei-same-artifact-browser-observation-child-v1-1-lib.mjs"
-)).href;
 const OK_PREFIX = "ZIWEI_SAME_ARTIFACT_BROWSER_OBSERVATION_CHILD_V1_1_OK";
 const FAILED_PREFIX = "ZIWEI_SAME_ARTIFACT_BROWSER_OBSERVATION_CHILD_V1_1_FAILED";
 
@@ -56,7 +52,7 @@ export async function main() {
     getZiweiSameArtifactBrowserObservationChildV11Summary,
     isVerifiedZiweiSameArtifactBrowserObservationChildV11,
     loadZiweiSameArtifactBrowserObservationChildV11
-  } = await import(LIBRARY_URL);
+  } = await import("./ziwei-same-artifact-browser-observation-child-v1-1-lib.mjs");
   const child = await loadZiweiSameArtifactBrowserObservationChildV11(WORKSPACE_ROOT);
   if (!isVerifiedZiweiSameArtifactBrowserObservationChildV11(child)) {
     throw new Error("PRIVATE_CHILD_BRAND_REQUIRED");

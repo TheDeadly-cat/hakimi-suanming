@@ -1,0 +1,846 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "canonical_repository_current_index_v1",
+  "indexId": "hakimi.repository/current-index/1.0.0",
+  "projectReleaseGovernance": {
+    "activeLine": "legacy-v13",
+    "targetSchema": 13,
+    "migrationId": null
+  },
+  "historyCheckpoint": {
+    "path": "content/system-admission/history-checkpoint.v2.json",
+    "checkpointId": "hakimi.repository/history-checkpoint/2.0.0",
+    "rawBytes": 36579,
+    "rawSha256": "e1eba8f4d7a7ed7ffbe343cf8cc4c7dd2a453cba27a8d0b090da9b6cfb67c7ff",
+    "checkpointDigest": "4b245ecf7f3493edf7654e882eb9735116a2b5d8ea0fcdb289ed8271720187e7",
+    "familyCount": 25,
+    "memberCount": 78,
+    "familyInventoryDigest": "b62871655ccc771849e2ce35794411285157ef31be172690c3f7a6200ae30ddf",
+    "historyRootDigest": "aa4aa5ea9a1774202c6bc1064e26d37119ed1e2af5bc22c013bd0fc4404debb5"
+  },
+  "entries": [
+    {
+      "familyKey": "content/bazi-strength-source-binding-candidates",
+      "head": {
+        "version": "1.7.0",
+        "path": "content/bazi-strength-source-binding-candidates.v1.7.0.json",
+        "rawBytes": 58579,
+        "rawSha256": "03bc334a507e224d8658cd2af5fe5d5a11e1db0553fa7e54bf1287010147ccd2",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.strength.source-binding-candidates/1.7.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "e705ef32eb2dc0d6651f314a6020b71c18070ba5b6702c6965b628d01f1ef5d9"
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "1.7.0",
+        "path": "content/bazi-strength-source-binding-candidates.v1.7.0.json",
+        "rawBytes": 58579,
+        "rawSha256": "03bc334a507e224d8658cd2af5fe5d5a11e1db0553fa7e54bf1287010147ccd2",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.strength.source-binding-candidates/1.7.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "e705ef32eb2dc0d6651f314a6020b71c18070ba5b6702c6965b628d01f1ef5d9"
+      },
+      "supersedes": {
+        "version": "1.6.0",
+        "path": "content/bazi-strength-source-binding-candidates.v1.6.0.json",
+        "rawBytes": 50427,
+        "rawSha256": "62f6a68b99246a802bcf2055aa09a8ac8113df37a7ede1c55d8a2ea64deaea98",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.strength.source-binding-candidates/1.6.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "6f008058b282613fd131344206b27fccb1d80596bb49789f0554acdd69c1e44c"
+      }
+    },
+    {
+      "familyKey": "content/bazi-strength-source-rights-candidates",
+      "head": {
+        "version": "1.3.0",
+        "path": "content/bazi-strength-source-rights-candidates.v1.3.0.json",
+        "rawBytes": 25852,
+        "rawSha256": "8b26eea65e9ee3e7876298c3f720c46c43d5ec7d444ad4a4252116fc1dc21f17",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.strength.source-rights-candidates/1.3.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "4b1183a85f1d2aeee537544a6b3711510406d98856a921730879c8a9ca782db1"
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "1.3.0",
+        "path": "content/bazi-strength-source-rights-candidates.v1.3.0.json",
+        "rawBytes": 25852,
+        "rawSha256": "8b26eea65e9ee3e7876298c3f720c46c43d5ec7d444ad4a4252116fc1dc21f17",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.strength.source-rights-candidates/1.3.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "4b1183a85f1d2aeee537544a6b3711510406d98856a921730879c8a9ca782db1"
+      },
+      "supersedes": {
+        "version": "1.2.0",
+        "path": "content/bazi-strength-source-rights-candidates.v1.2.0.json",
+        "rawBytes": 23947,
+        "rawSha256": "678632a8875672f58bb5c9f1ec4a299a4f0c6e750b8ff4a02bfe4df889e1243a",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.strength.source-rights-candidates/1.2.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "300e092c4913885cff626221b8734786128639c7d6cfd7c2be7bea2acc6bbefc"
+      }
+    },
+    {
+      "familyKey": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest",
+      "head": {
+        "version": "2.3.0",
+        "path": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.3.0.json",
+        "rawBytes": 23376,
+        "rawSha256": "d155b4d3cf8693ca61a210091a8563aea8cdbe646689f11e09e946e2d1333578",
+        "artifactIdField": "manifestId",
+        "artifactId": "hakimi.bazi.single-chart-report.domain-release-manifest/2.3.0",
+        "semanticDigestField": "manifestDigest",
+        "semanticDigest": "98babe5a9e29ad20807961f1561991c8ddaa5bb068f6da37cd1b0978b509fa3f"
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "2.3.0",
+        "path": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.3.0.json",
+        "rawBytes": 23376,
+        "rawSha256": "d155b4d3cf8693ca61a210091a8563aea8cdbe646689f11e09e946e2d1333578",
+        "artifactIdField": "manifestId",
+        "artifactId": "hakimi.bazi.single-chart-report.domain-release-manifest/2.3.0",
+        "semanticDigestField": "manifestDigest",
+        "semanticDigest": "98babe5a9e29ad20807961f1561991c8ddaa5bb068f6da37cd1b0978b509fa3f"
+      },
+      "supersedes": {
+        "version": "2.2.0",
+        "path": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.2.0.json",
+        "rawBytes": 23399,
+        "rawSha256": "6481d5edfa9f9819af035ad9d208ea526fa7b29f12ccd6e072ad31f625e7f86d",
+        "artifactIdField": "manifestId",
+        "artifactId": "hakimi.bazi.single-chart-report.domain-release-manifest/2.2.0",
+        "semanticDigestField": "manifestDigest",
+        "semanticDigest": "a95e722674c0b09a2d564b4090396fbfc25fdfc2f5f2fff9aedc92aa2468f68e"
+      }
+    },
+    {
+      "familyKey": "content/domain-release/vedic-astrology.engineering-draft.v0.1.0.manifest",
+      "head": {
+        "version": "3.0.0",
+        "path": "content/domain-release/vedic-astrology.engineering-draft.v0.1.0.manifest.v3.json",
+        "rawBytes": 35325,
+        "rawSha256": "c3d35e24073e7be14be971dae4e6825758b9fbfc3efd4adbc372e91fb74bf278",
+        "artifactIdField": "manifestId",
+        "artifactId": "hakimi.vedic-astrology.five-allowlisted-authored-root-recursive-machine-identity-manifest/3.0.0",
+        "semanticDigestField": "manifestDigest",
+        "semanticDigest": "b466a83ada3c9f39721cfc4a54628eb1a9afa03ff4794f51461fb6b4100041b2"
+      },
+      "selectionState": "historical_head_current_unavailable",
+      "selectedCurrent": null,
+      "supersedes": {
+        "version": "2.0.0",
+        "path": "content/domain-release/vedic-astrology.engineering-draft.v0.1.0.manifest.v2.json",
+        "rawBytes": 47107,
+        "rawSha256": "ad69843f8e9ec9f1f3f5a446c2107389753100fe371fdbcef7202cbdb39639c4",
+        "artifactIdField": "manifestId",
+        "artifactId": "hakimi.vedic-astrology.parent-declared-selected-path-machine-identity-manifest/2.0.0",
+        "semanticDigestField": "manifestDigest",
+        "semanticDigest": "7d4fcf50e4fdfa513611ace4331abf2079b1faf433f0a1c58e60603a9584a347"
+      }
+    },
+    {
+      "familyKey": "content/domain-release/western-astrology.engineering-draft.v0.1.0.manifest",
+      "head": {
+        "version": "5.0.0",
+        "path": "content/domain-release/western-astrology.engineering-draft.v0.1.0.manifest.v5.json",
+        "rawBytes": 43571,
+        "rawSha256": "8dfe4a25fb4194d8e9e7b53f8d5b786813b11db9a7ed11e8a88c4f96aad41904",
+        "artifactIdField": "manifestId",
+        "artifactId": "hakimi.western-astrology.six-allowlisted-authored-root-recursive-machine-identity-manifest/5.0.0",
+        "semanticDigestField": "manifestDigest",
+        "semanticDigest": "3617e2bb812e64ea6a79c5a9c6660344e09ed85f5869ff1528415cab13f434b4"
+      },
+      "selectionState": "historical_head_current_unavailable",
+      "selectedCurrent": null,
+      "supersedes": {
+        "version": "4.0.0",
+        "path": "content/domain-release/western-astrology.engineering-draft.v0.1.0.manifest.v4.json",
+        "rawBytes": 54129,
+        "rawSha256": "05bc031267561e790b783bd0c06b10ecf0936af864a26a613800ffccfbe6854b",
+        "artifactIdField": "manifestId",
+        "artifactId": "hakimi.western-astrology.nonce-bound-browser-child-selected-path-manifest/4.0.0",
+        "semanticDigestField": "manifestDigest",
+        "semanticDigest": "e61566259493c888a2e0de77c0886710b720df6fa61551ca4a6a2747803b313b"
+      }
+    },
+    {
+      "familyKey": "content/domain-release/ziwei-doushu.engineering-draft.v0.1.0.manifest",
+      "head": {
+        "version": "4.0.0",
+        "path": "content/domain-release/ziwei-doushu.engineering-draft.v0.1.0.manifest.v4.json",
+        "rawBytes": 40230,
+        "rawSha256": "f1aa27896f589a3b1070ff6eb00b4c60fe3f77811365d760ee86b80b5e35ea3e",
+        "artifactIdField": "manifestId",
+        "artifactId": "hakimi.ziwei-doushu.four-package-authored-source-root-machine-identity-manifest/4.0.0",
+        "semanticDigestField": "manifestDigest",
+        "semanticDigest": "46c2784875462e1851d0e3c7e352163660fbe29916e6ad6abd4f50065db42170"
+      },
+      "selectionState": "historical_head_current_unavailable",
+      "selectedCurrent": null,
+      "supersedes": {
+        "version": "3.0.0",
+        "path": "content/domain-release/ziwei-doushu.engineering-draft.v0.1.0.manifest.v3.json",
+        "rawBytes": 68696,
+        "rawSha256": "6a95c2eca3524763c20b03d389c4d7d14d0639bafb6db31c361b384946430396",
+        "artifactIdField": "manifestId",
+        "artifactId": "hakimi.ziwei-doushu.definition-and-browser-child-selected-path-machine-identity-manifest/3.0.0",
+        "semanticDigestField": "manifestDigest",
+        "semanticDigest": "7018bf1df4bec8f6c753a11f72bcb2f3f2d63f3d46b194ef27fc2991dd06cb60"
+      }
+    },
+    {
+      "familyKey": "content/knowledge/manifest",
+      "head": {
+        "version": "2.0.0",
+        "path": "content/knowledge/manifest.v2.json",
+        "rawBytes": 48,
+        "rawSha256": "92e4d2c92aeb7f1e7898014be429f0fab92885dd52c36aee8eb1523941c55122",
+        "artifactIdField": "schemaVersion",
+        "artifactId": "2.0.0",
+        "semanticDigestField": null,
+        "semanticDigest": null
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "2.0.0",
+        "path": "content/knowledge/manifest.v2.json",
+        "rawBytes": 48,
+        "rawSha256": "92e4d2c92aeb7f1e7898014be429f0fab92885dd52c36aee8eb1523941c55122",
+        "artifactIdField": "schemaVersion",
+        "artifactId": "2.0.0",
+        "semanticDigestField": null,
+        "semanticDigest": null
+      },
+      "supersedes": {
+        "version": "1.0.0",
+        "path": "content/knowledge/manifest.v1.json",
+        "rawBytes": 48,
+        "rawSha256": "68cc21608704da4e28ff5a6a1ad76b4104868b91d711c1212be4af48aa9684f9",
+        "artifactIdField": "schemaVersion",
+        "artifactId": "1.0.0",
+        "semanticDigestField": null,
+        "semanticDigest": null
+      }
+    },
+    {
+      "familyKey": "content/system-admission/bazi-binding-freeze-requirements",
+      "head": {
+        "version": "1.9.0",
+        "path": "content/system-admission/bazi-binding-freeze-requirements.v1.9.0.json",
+        "rawBytes": 45551,
+        "rawSha256": "e20145b5f34b5dc04464e482cda5da990f82e520236679efbf568b322637f797",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.9.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "42930e63cb0960df969f5fe059617eb96a8ec9bd857c486cd4b33a28d37a8ae1"
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "1.9.0",
+        "path": "content/system-admission/bazi-binding-freeze-requirements.v1.9.0.json",
+        "rawBytes": 45551,
+        "rawSha256": "e20145b5f34b5dc04464e482cda5da990f82e520236679efbf568b322637f797",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.9.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "42930e63cb0960df969f5fe059617eb96a8ec9bd857c486cd4b33a28d37a8ae1"
+      },
+      "supersedes": {
+        "version": "1.8.0",
+        "path": "content/system-admission/bazi-binding-freeze-requirements.v1.8.0.json",
+        "rawBytes": 35616,
+        "rawSha256": "f612019e19255f47be03a569bb4cf3e61227146a924c4c63a2b75f1b28649ab3",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.8.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "6ed301be956d160e06126eed63a7155ab8182adbcbc7e0def2690e8271e50866"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/bazi-current-machine-identity-successor",
+      "head": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-current-machine-identity-successor.v1.1.0.json",
+        "rawBytes": 32806,
+        "rawSha256": "787c5cd5994923805ca37b096be5ae36a94cf5f809c6892ce854e9b193ddff7b",
+        "artifactIdField": "successorId",
+        "artifactId": "hakimi.bazi.current-machine-identity-successor/1.1.0",
+        "semanticDigestField": "receiptDigest",
+        "semanticDigest": "589e7157fb4cd4943ceea7b44d27ed2fc7b32cd6f21b788ca3b59b92973e54bf"
+      },
+      "selectionState": "historical_head_current_unavailable",
+      "selectedCurrent": null,
+      "supersedes": {
+        "version": "1.0.0",
+        "path": "content/system-admission/bazi-current-machine-identity-successor.v1.0.0.json",
+        "rawBytes": 30801,
+        "rawSha256": "9360655d17b23ea8c7c68e44af3177f8ccc72b350046d4f7dca5f8a8c83b717d",
+        "artifactIdField": "successorId",
+        "artifactId": "hakimi.bazi.current-machine-identity-successor/1.0.0",
+        "semanticDigestField": "receiptDigest",
+        "semanticDigest": "f7ae6009bea62156a82de86ee0be3c353b022035194881001a913066ed8c4b05"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/bazi-domain-release-manifest-version-aware-observation-candidate",
+      "head": {
+        "version": "1.2.0",
+        "path": "content/system-admission/bazi-domain-release-manifest-version-aware-observation-candidate.v1.2.0.json",
+        "rawBytes": 22454,
+        "rawSha256": "88ada4ca435228e7802b97eb0f19665392fb03445d7b065a36aac7a7efe18491",
+        "artifactIdField": "candidateId",
+        "artifactId": "hakimi.bazi.domain-release-manifest.version-aware-observation-candidate/1.2.0",
+        "semanticDigestField": "candidateDigest",
+        "semanticDigest": "8634c6dba6591014040107d53b0dd6bb38a98fc67cc977f022f234525b47e6a2"
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "1.2.0",
+        "path": "content/system-admission/bazi-domain-release-manifest-version-aware-observation-candidate.v1.2.0.json",
+        "rawBytes": 22454,
+        "rawSha256": "88ada4ca435228e7802b97eb0f19665392fb03445d7b065a36aac7a7efe18491",
+        "artifactIdField": "candidateId",
+        "artifactId": "hakimi.bazi.domain-release-manifest.version-aware-observation-candidate/1.2.0",
+        "semanticDigestField": "candidateDigest",
+        "semanticDigest": "8634c6dba6591014040107d53b0dd6bb38a98fc67cc977f022f234525b47e6a2"
+      },
+      "supersedes": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-domain-release-manifest-version-aware-observation-candidate.v1.1.0.json",
+        "rawBytes": 21859,
+        "rawSha256": "7768590bc117a229919bcd119a2bfada97d7e77712677947a2a650d6f518233d",
+        "artifactIdField": "candidateId",
+        "artifactId": "hakimi.bazi.domain-release-manifest.version-aware-observation-candidate/1.1.0",
+        "semanticDigestField": "candidateDigest",
+        "semanticDigest": "be41925d72904e8eb90eea2b77f7de553f7c743d87fd975ae33fa99040571dc2"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/bazi-dtt-notice-reconciliation",
+      "head": {
+        "version": "2.0.0",
+        "path": "content/system-admission/bazi-dtt-notice-reconciliation.v2.json",
+        "rawBytes": 8881,
+        "rawSha256": "e2656a19955db0ce908df88aa696cd40847e7536af58c79548ac1fbce9a7464b",
+        "artifactIdField": "reconciliationId",
+        "artifactId": "hakimi.bazi.dtt-notice-reconciliation/2.0.0",
+        "semanticDigestField": "reconciliationDigest",
+        "semanticDigest": "2a47fc6fe281a4362c36dfc67c2a6dee195b5b069065ffc0e86ac1afcd7aa8a0"
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "2.0.0",
+        "path": "content/system-admission/bazi-dtt-notice-reconciliation.v2.json",
+        "rawBytes": 8881,
+        "rawSha256": "e2656a19955db0ce908df88aa696cd40847e7536af58c79548ac1fbce9a7464b",
+        "artifactIdField": "reconciliationId",
+        "artifactId": "hakimi.bazi.dtt-notice-reconciliation/2.0.0",
+        "semanticDigestField": "reconciliationDigest",
+        "semanticDigest": "2a47fc6fe281a4362c36dfc67c2a6dee195b5b069065ffc0e86ac1afcd7aa8a0"
+      },
+      "supersedes": {
+        "version": "1.0.0",
+        "path": "content/system-admission/bazi-dtt-notice-reconciliation.v1.json",
+        "rawBytes": 8709,
+        "rawSha256": "e3f014e8f87457b09ae866b79fe2581f87553658829515db61f597c345f6ff68",
+        "artifactIdField": "reconciliationId",
+        "artifactId": "hakimi.bazi.dtt-notice-reconciliation/1.0.0",
+        "semanticDigestField": "reconciliationDigest",
+        "semanticDigest": "fabf96fddf7f3710b86f22b0d3f7aa7844087351f30c53fbb823780f3d81ba2f"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/bazi-engineering-binding-value-subject-gaps",
+      "head": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-engineering-binding-value-subject-gaps.v1.1.0.json",
+        "rawBytes": 71168,
+        "rawSha256": "f8ed780ce8e3fbaca59b295faff2f12b939a8b0c193bc0c20ce1198690528d4e",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.engineering_binding_value_subject_gaps.version-aware-candidate/1.1.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "d578b6e76c325bf79593b728b78035d3481ec60fa7fb99c815748d9f806a8330"
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-engineering-binding-value-subject-gaps.v1.1.0.json",
+        "rawBytes": 71168,
+        "rawSha256": "f8ed780ce8e3fbaca59b295faff2f12b939a8b0c193bc0c20ce1198690528d4e",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.engineering_binding_value_subject_gaps.version-aware-candidate/1.1.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "d578b6e76c325bf79593b728b78035d3481ec60fa7fb99c815748d9f806a8330"
+      },
+      "supersedes": {
+        "version": "1.0.0",
+        "path": "content/system-admission/bazi-engineering-binding-value-subject-gaps.v1.json",
+        "rawBytes": 52073,
+        "rawSha256": "5c7a999738200b55f5e3e79a3ff7b2c73f59d8af61846046d26ea1e31987c4c0",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.engineering_binding_value_subject_gaps/1.0.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "7a03874b6009928367bf8c5aa60a1312d519d0f8c4ee339c83bc7a40f0b8e81d"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/bazi-expert-current-line-zero-instance-observation-child",
+      "head": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-expert-current-line-zero-instance-observation-child.v1.1.0.json",
+        "rawBytes": 9765,
+        "rawSha256": "598b662c7c58913fe9326290d08a1559f46f91909e5d040f9e335ad23562f9e2",
+        "artifactIdField": "childId",
+        "artifactId": "hakimi.bazi.expert-current-line-zero-instance-observation-child/1.1.0",
+        "semanticDigestField": "childDigest",
+        "semanticDigest": "88044983de8b32fb68da7075224b5799528aa2ce63970d7c4eae0a0a92fae647"
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-expert-current-line-zero-instance-observation-child.v1.1.0.json",
+        "rawBytes": 9765,
+        "rawSha256": "598b662c7c58913fe9326290d08a1559f46f91909e5d040f9e335ad23562f9e2",
+        "artifactIdField": "childId",
+        "artifactId": "hakimi.bazi.expert-current-line-zero-instance-observation-child/1.1.0",
+        "semanticDigestField": "childDigest",
+        "semanticDigest": "88044983de8b32fb68da7075224b5799528aa2ce63970d7c4eae0a0a92fae647"
+      },
+      "supersedes": {
+        "version": "1.0.0",
+        "path": "content/system-admission/bazi-expert-current-line-zero-instance-observation-child.v1.0.0.json",
+        "rawBytes": 9122,
+        "rawSha256": "c21d07363701fa15ad57ccabf333f2dfcb5200b816c3772fbc3ae830c5c5e3ce",
+        "artifactIdField": "childId",
+        "artifactId": "hakimi.bazi.expert-current-line-zero-instance-observation-child/1.0.0",
+        "semanticDigestField": "childDigest",
+        "semanticDigest": "f7e7a4a6b3580e451e06de8af29cf8c3b834b05234f9f97ec343a5b8ab1641db"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/bazi-expert-review-intake-gap",
+      "head": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-expert-review-intake-gap.v1.1.0.json",
+        "rawBytes": 32579,
+        "rawSha256": "7a7088a3fdc660ccca3ef0d9765e36421563c7feee1c3dfa6bc4d7169d0f91df",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.expert-review-intake-gap.version-aware-candidate/1.1.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "5318b9543bad20c52e5129901e94aa2ca3d2dd68f342ba11ab9611f4f767d582"
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-expert-review-intake-gap.v1.1.0.json",
+        "rawBytes": 32579,
+        "rawSha256": "7a7088a3fdc660ccca3ef0d9765e36421563c7feee1c3dfa6bc4d7169d0f91df",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.expert-review-intake-gap.version-aware-candidate/1.1.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "5318b9543bad20c52e5129901e94aa2ca3d2dd68f342ba11ab9611f4f767d582"
+      },
+      "supersedes": {
+        "version": "1.0.0",
+        "path": "content/system-admission/bazi-expert-review-intake-gap.v1.json",
+        "rawBytes": 4309,
+        "rawSha256": "7d01f000358f6938675c34fbebf6379e55c3f56dadee12fab6a3d801b33ef6ac",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.expert-review-intake-gap/1.0.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "6cf349fda4c4fd2b8ddada22417e12741c37abc6fc884338dbf5c741e0fc1766"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/bazi-policy-weights-value-evidence-candidate",
+      "head": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-policy-weights-value-evidence-candidate.v1.1.0.json",
+        "rawBytes": 13295,
+        "rawSha256": "0b221bfc2669310298d9082711ad111b205c5881e419a90f92776229102f53c1",
+        "artifactIdField": "candidateId",
+        "artifactId": "hakimi.bazi/policy-weights-value-evidence.version-aware-candidate/1.1.0",
+        "semanticDigestField": "candidateDigest",
+        "semanticDigest": "95a1edb8d0228231229b561c97fd4960385e581cef87c3e1f2aa57e979c12c5b"
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-policy-weights-value-evidence-candidate.v1.1.0.json",
+        "rawBytes": 13295,
+        "rawSha256": "0b221bfc2669310298d9082711ad111b205c5881e419a90f92776229102f53c1",
+        "artifactIdField": "candidateId",
+        "artifactId": "hakimi.bazi/policy-weights-value-evidence.version-aware-candidate/1.1.0",
+        "semanticDigestField": "candidateDigest",
+        "semanticDigest": "95a1edb8d0228231229b561c97fd4960385e581cef87c3e1f2aa57e979c12c5b"
+      },
+      "supersedes": {
+        "version": "1.0.0",
+        "path": "content/system-admission/bazi-policy-weights-value-evidence-candidate.v1.json",
+        "rawBytes": 10397,
+        "rawSha256": "91a6c9f10e1b56da1292133c6e276c437c7fb8b2c6dbca9bed2b54bcfa9726e6",
+        "artifactIdField": "candidateId",
+        "artifactId": "hakimi.bazi/policy-weights-value-evidence-candidate/1.0.0",
+        "semanticDigestField": "candidateDigest",
+        "semanticDigest": "208ae39797d048b2fc869392528a3cf7d1858de232a8691bc0296366d6363088"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/bazi-pr10bc-scope-reconciliation",
+      "head": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-pr10bc-scope-reconciliation.v1.1.0.json",
+        "rawBytes": 38161,
+        "rawSha256": "edb367448f857972e50c735e86acc5252605a0b4d27a2f85c996fcd67d0ed2cc",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.pr10bc.version-aware-candidate-scope-reconciliation/1.1.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "24851de28a762c426e2630c9a52666786274c3c5477b9fc0463f9129e43d20d1"
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-pr10bc-scope-reconciliation.v1.1.0.json",
+        "rawBytes": 38161,
+        "rawSha256": "edb367448f857972e50c735e86acc5252605a0b4d27a2f85c996fcd67d0ed2cc",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.pr10bc.version-aware-candidate-scope-reconciliation/1.1.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "24851de28a762c426e2630c9a52666786274c3c5477b9fc0463f9129e43d20d1"
+      },
+      "supersedes": {
+        "version": "1.0.0",
+        "path": "content/system-admission/bazi-pr10bc-scope-reconciliation.v1.json",
+        "rawBytes": 31668,
+        "rawSha256": "0aa6dda66b5d3b47a69d1decb73220ae5811af7d779516858aeb32ef18a1abd6",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.pr10bc.scope-reconciliation/1.0.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "5e742a8a92a8ca4ebf2337f5eb0866be6c962e53801e3d259de4571b0cd65116"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/bazi-project-copy-materialization-requirements",
+      "head": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-project-copy-materialization-requirements.v1.1.0.json",
+        "rawBytes": 10887,
+        "rawSha256": "7e98e6042cd1ccb00a2cff749f0000a989baacd683271edffc3158a80ee02b83",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.project-copy-materialization-requirements.version-aware-candidate/1.1.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "d877ac00042d9e9635b0bf2cfe7b5f387f3aad82faa96c8a7214548299045d3f"
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-project-copy-materialization-requirements.v1.1.0.json",
+        "rawBytes": 10887,
+        "rawSha256": "7e98e6042cd1ccb00a2cff749f0000a989baacd683271edffc3158a80ee02b83",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.project-copy-materialization-requirements.version-aware-candidate/1.1.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "d877ac00042d9e9635b0bf2cfe7b5f387f3aad82faa96c8a7214548299045d3f"
+      },
+      "supersedes": {
+        "version": "1.0.0",
+        "path": "content/system-admission/bazi-project-copy-materialization-requirements.v1.json",
+        "rawBytes": 6168,
+        "rawSha256": "c63a95514063fb64752d449f6ccb1c844544110e5ed9f1192de2ef7723efd13b",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.project-copy-materialization-requirements/1.0.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "690320c5d9778bf61da5ca3e112aedc6f9e2760e27f628f4c992cb5b9a8af1cb"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/bazi-source-carrier-record-readiness",
+      "head": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-source-carrier-record-readiness.v1.1.0.json",
+        "rawBytes": 18654,
+        "rawSha256": "8a2ae3fcd2abc01d952159ab78cb98eeba5dd2ab06d205e478abf64574759377",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.source-carrier-record-readiness.version-aware-candidate/1.1.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "ca2734777002a2e56d82ec3702f0517668ae68b23b423c2cb31e65164c225531"
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "1.1.0",
+        "path": "content/system-admission/bazi-source-carrier-record-readiness.v1.1.0.json",
+        "rawBytes": 18654,
+        "rawSha256": "8a2ae3fcd2abc01d952159ab78cb98eeba5dd2ab06d205e478abf64574759377",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.source-carrier-record-readiness.version-aware-candidate/1.1.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "ca2734777002a2e56d82ec3702f0517668ae68b23b423c2cb31e65164c225531"
+      },
+      "supersedes": {
+        "version": "1.0.0",
+        "path": "content/system-admission/bazi-source-carrier-record-readiness.v1.json",
+        "rawBytes": 27322,
+        "rawSha256": "d5624c796f715b3e4a9846714a036621a8ccc66d8e3433a91e7bf69beba291e9",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.bazi.source-carrier-record-readiness/1.0.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "7b34f976c58b541895747177a2326af82241d76432acba3dbbd8fac2b68ad3c5"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/four-system-current-status-observation-child",
+      "head": {
+        "version": "2.14.0",
+        "path": "content/system-admission/four-system-current-status-observation-child.v2.14.0.json",
+        "rawBytes": 21317,
+        "rawSha256": "5aae5229c9e4cac8f15e31cfaa43f8f4bc6156fddedd74cbb206236dd29f954a",
+        "artifactIdField": "childId",
+        "artifactId": "hakimi.system-admission/four-system-current-status-observation-child/2.14.0",
+        "semanticDigestField": "childDigest",
+        "semanticDigest": "78e493c478737baca20b73338310f3077fd172e20e5d1546077c9514b6b16eee"
+      },
+      "selectionState": "historical_head_current_unavailable",
+      "selectedCurrent": null,
+      "supersedes": {
+        "version": "2.13.0",
+        "path": "content/system-admission/four-system-current-status-observation-child.v2.13.0.json",
+        "rawBytes": 20784,
+        "rawSha256": "5d8ecab2d59c8897ad27d9ba6226e1093231d33f874e58b49c9194b8166d74ff",
+        "artifactIdField": "childId",
+        "artifactId": "hakimi.system-admission/four-system-current-status-observation-child/2.13.0",
+        "semanticDigestField": "childDigest",
+        "semanticDigest": "5d1cbad8a5c49fe970e9bc6f30fbe949a3eb56947e08efc9099ce0077bc01864"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/vedic-source-binding-and-three-layer-rights-requirements",
+      "head": {
+        "version": "1.3.0",
+        "path": "content/system-admission/vedic-source-binding-and-three-layer-rights-requirements.v1.3.0.json",
+        "rawBytes": 12056,
+        "rawSha256": "52a86e9b6cac141b8914b5462b92e713a5029d82acb7b97d2f2a92621035920a",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.vedic.source-binding-and-three-layer-rights-requirements/1.3.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "a019f2a78e7631486f56cc75a1de0fe28b8f0d8651ed0b71ec7a5910767326bb"
+      },
+      "selectionState": "historical_head_current_unavailable",
+      "selectedCurrent": null,
+      "supersedes": {
+        "version": "1.2.0",
+        "path": "content/system-admission/vedic-source-binding-and-three-layer-rights-requirements.v1.2.0.json",
+        "rawBytes": 15738,
+        "rawSha256": "6d3a36f041801e7120a3d270695f94b34242a97fc1559000f8d4d2c0002a3239",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.vedic.source-binding-and-three-layer-rights-requirements/1.2.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "0decafbdc8c94dd9ae206fb453a8a64e8132eb02e5b4f50a1eb12797804b8ef2"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/western-civil-time-same-artifact-browser-observation-child",
+      "head": {
+        "version": "1.1.0",
+        "path": "content/system-admission/western-civil-time-same-artifact-browser-observation-child.v1.1.0.json",
+        "rawBytes": 34727,
+        "rawSha256": "7d93d446bdd15c5d639704d70820453bc38f2c6aafa0611f7e49b08a9b6d7c00",
+        "artifactIdField": "childId",
+        "artifactId": "hakimi.western.civil-time.same-artifact-edge-chrome-observation/1.1.0",
+        "semanticDigestField": "observationDigest",
+        "semanticDigest": "acc62365c0b03bc763b8ec09f04f92d87af750e277dcc091435b8c8487a9533e"
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "1.1.0",
+        "path": "content/system-admission/western-civil-time-same-artifact-browser-observation-child.v1.1.0.json",
+        "rawBytes": 34727,
+        "rawSha256": "7d93d446bdd15c5d639704d70820453bc38f2c6aafa0611f7e49b08a9b6d7c00",
+        "artifactIdField": "childId",
+        "artifactId": "hakimi.western.civil-time.same-artifact-edge-chrome-observation/1.1.0",
+        "semanticDigestField": "observationDigest",
+        "semanticDigest": "acc62365c0b03bc763b8ec09f04f92d87af750e277dcc091435b8c8487a9533e"
+      },
+      "supersedes": {
+        "version": "1.0.0",
+        "path": "content/system-admission/western-civil-time-same-artifact-browser-observation-child.v1.0.0.json",
+        "rawBytes": 40760,
+        "rawSha256": "0da9cd9bccfeb6d1d8234f5fac87b4f6d8999e7e6319aa4fce15a2050b3e7aca",
+        "artifactIdField": "childId",
+        "artifactId": "hakimi.western.civil-time.same-artifact-edge-chrome-observation/1.0.0",
+        "semanticDigestField": "observationDigest",
+        "semanticDigest": "c23522cd6eed4753efe12b9d4e9a5354afaa6e9df41d8b76f458706625715ded"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/western-source-and-manifest-identity-drift-receipt-candidate",
+      "head": {
+        "version": "2.0.0",
+        "path": "content/system-admission/western-source-and-manifest-identity-drift-receipt-candidate.v2.0.0.json",
+        "rawBytes": 18030,
+        "rawSha256": "e2f9daed6470c3965a3ce7d4088760687653e4ddf068022288e7be851ea35dd0",
+        "artifactIdField": "candidateId",
+        "artifactId": "hakimi.western.source-and-manifest-identity-drift-receipt-candidate/2.0.0",
+        "semanticDigestField": "receiptDigest",
+        "semanticDigest": "7e562d0fa00239f5ef5293d70f6e66f6742fde82ef107bfb0461309c15667b4c"
+      },
+      "selectionState": "current_observation_only_no_current_status",
+      "selectedCurrent": {
+        "version": "2.0.0",
+        "path": "content/system-admission/western-source-and-manifest-identity-drift-receipt-candidate.v2.0.0.json",
+        "rawBytes": 18030,
+        "rawSha256": "e2f9daed6470c3965a3ce7d4088760687653e4ddf068022288e7be851ea35dd0",
+        "artifactIdField": "candidateId",
+        "artifactId": "hakimi.western.source-and-manifest-identity-drift-receipt-candidate/2.0.0",
+        "semanticDigestField": "receiptDigest",
+        "semanticDigest": "7e562d0fa00239f5ef5293d70f6e66f6742fde82ef107bfb0461309c15667b4c"
+      },
+      "supersedes": {
+        "version": "1.0.0",
+        "path": "content/system-admission/western-source-and-manifest-identity-drift-receipt-candidate.v1.0.0.json",
+        "rawBytes": 12537,
+        "rawSha256": "09feb585528a6d390afda19a10d967ff2356714cbb00d4eef3462fe267d01c26",
+        "artifactIdField": "candidateId",
+        "artifactId": "hakimi.western.source-and-manifest-identity-drift-receipt-candidate/1.0.0",
+        "semanticDigestField": "receiptDigest",
+        "semanticDigest": "f422b6b1bd61e97631b5ce5719877d0e17525b18cdfd7cc7d1c3257e85884097"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/western-source-binding-requirements",
+      "head": {
+        "version": "1.4.0",
+        "path": "content/system-admission/western-source-binding-requirements.v1.4.0.json",
+        "rawBytes": 42349,
+        "rawSha256": "da755745c327b72aa617e40aed8d37a5e3f2c69aeb367dbfd9262dd5cece9f35",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.western-astrology.source-binding-requirements/1.4.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "d2e13b51abfc0a4247d6b083f8121f5681a925122edcc73ef31819d9e3d23243"
+      },
+      "selectionState": "historical_head_current_unavailable",
+      "selectedCurrent": null,
+      "supersedes": {
+        "version": "1.3.0",
+        "path": "content/system-admission/western-source-binding-requirements.v1.3.0.json",
+        "rawBytes": 37140,
+        "rawSha256": "08418368dfc668cc59f7814a88e2b629bfda5867b69c264a42483951b469eb67",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.western-astrology.source-binding-requirements/1.3.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "76ae1299965405f86f161473adb11dc87db66e5e02e4e7d0bbb9f60f85e9e2ac"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/ziwei-same-artifact-browser-observation-child",
+      "head": {
+        "version": "1.1.0",
+        "path": "content/system-admission/ziwei-same-artifact-browser-observation-child.v1.1.0.json",
+        "rawBytes": 57541,
+        "rawSha256": "da3c5da3b0e587e826235af9401df2b5b48618c7e37f89ede3d5a5deb7ed80c5",
+        "artifactIdField": "childId",
+        "artifactId": "hakimi.ziwei.same-artifact-browser-observation/1.1.0",
+        "semanticDigestField": "childDigest",
+        "semanticDigest": "08d717d62f84dc3146069d387904aa7e8626cca2f12594154b5e5002b2e355e7"
+      },
+      "selectionState": "selected_current_head",
+      "selectedCurrent": {
+        "version": "1.1.0",
+        "path": "content/system-admission/ziwei-same-artifact-browser-observation-child.v1.1.0.json",
+        "rawBytes": 57541,
+        "rawSha256": "da3c5da3b0e587e826235af9401df2b5b48618c7e37f89ede3d5a5deb7ed80c5",
+        "artifactIdField": "childId",
+        "artifactId": "hakimi.ziwei.same-artifact-browser-observation/1.1.0",
+        "semanticDigestField": "childDigest",
+        "semanticDigest": "08d717d62f84dc3146069d387904aa7e8626cca2f12594154b5e5002b2e355e7"
+      },
+      "supersedes": {
+        "version": "1.0.0",
+        "path": "content/system-admission/ziwei-same-artifact-browser-observation-child.v1.0.0.json",
+        "rawBytes": 37337,
+        "rawSha256": "7cd6365d6f6ad18f0460418e5b745da0f0e68761cea361886729e55563e4db16",
+        "artifactIdField": "childId",
+        "artifactId": "hakimi.ziwei.same-artifact-browser-observation/1.0.0",
+        "semanticDigestField": "observationDigest",
+        "semanticDigest": "792bba4b3c5307fe3bc08aed849eaeb092787eb9e171e09a9e82b3be4dd71a1b"
+      }
+    },
+    {
+      "familyKey": "content/system-admission/ziwei-source-binding-requirements",
+      "head": {
+        "version": "1.2.0",
+        "path": "content/system-admission/ziwei-source-binding-requirements.v1.2.0.json",
+        "rawBytes": 37570,
+        "rawSha256": "63c0b8776978432dbcaaaaf5b2638acbc5d28d755dc1387c59c7e3421865c9a1",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.ziwei-doushu.source-binding-requirements/1.2.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "0ea8fa98ac54926a019cb1aa428cdc8150e5a824400cc144b85bc1a645092624"
+      },
+      "selectionState": "historical_head_current_unavailable",
+      "selectedCurrent": null,
+      "supersedes": {
+        "version": "1.1.0",
+        "path": "content/system-admission/ziwei-source-binding-requirements.v1.1.0.json",
+        "rawBytes": 32889,
+        "rawSha256": "c7cecdb82e5a42788c3329fc63d5948115ad58252b092a2b2cc70a9649b2953e",
+        "artifactIdField": "ledgerId",
+        "artifactId": "hakimi.ziwei-doushu.source-binding-requirements/1.1.0",
+        "semanticDigestField": "ledgerDigest",
+        "semanticDigest": "26c8f7fe35cae35a47f575a272a578fbeeeff7713ab1545065bcb8d72f191388"
+      }
+    }
+  ],
+  "nonVersionedSelections": {
+    "baziExpertReviewPacket": {
+      "currentAvailable": true,
+      "selectedCurrent": {
+        "path": "content/bazi-strength-expert-review-packet.current.json",
+        "version": "1.6.0",
+        "rawBytes": 12692,
+        "rawSha256": "42c7541b9c1f84d5473bc91765cf599eb518abf2ebb656ba4360fbbd6ae37327",
+        "packetId": "hakimi.bazi.strength.expert-review-packet/1.6.0",
+        "packetDigest": "1b1e06439b4b3e44358b9e5b9feea2d44058933c8f66010d6a8940faa2da87e6"
+      },
+      "historicalAnchor": {
+        "path": "content/bazi-strength-expert-review-packet.v1.json",
+        "rawBytes": 12684,
+        "rawSha256": "ba28de1b95d57de4320913e7a0b00fe780630d15408c5b22b84311977ea29163",
+        "packetId": "hakimi.bazi.strength.expert-review-packet/1.5.0",
+        "packetDigest": "cfe554b60b4698e0acd0a42e14484f4683eb7663d4f6862b767cf70404d2cd5f"
+      },
+      "historicalAnchorVerifiedByCurrentLoad": false,
+      "driftReasons": []
+    }
+  },
+  "authorityBoundary": {
+    "formalAdmissionAuthorized": false,
+    "releaseReady": false,
+    "publicDeploymentAuthorized": false,
+    "publicReleaseAuthorized": false,
+    "expertClaimsAuthorized": false
+  },
+  "snapshotBoundary": {
+    "crossFileAtomicSnapshot": false,
+    "mutationEpochAvailableForSchema13": false,
+    "mutationEpochReceipt": null,
+    "intervalMutationExcludedAcrossFiles": false,
+    "abaExcluded": false,
+    "indexDigestIsDigitalSignature": false
+  },
+  "selectionBoundary": {
+    "familyHeadMeansHighestPersistedVersionOnly": true,
+    "selectedCurrentMeansRepositorySelectionOnly": true,
+    "selectedCurrentDoesNotEstablishFormalAdmission": true,
+    "latestVersionDoesNotImplyAuthority": true,
+    "automaticPromotionAllowed": false
+  },
+  "indexDigest": "63e71d0c36e2f216711ac6c0b8ae0051c7f3ccd98d5b4a55cfdce8560180520e"
+}

@@ -1,12 +1,15 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import Dexie from "dexie";
+import { sha256Hex } from "@hakimi/integrity";
 import {
   DatabaseGenerationController,
   DatabaseGenerationError,
+  buildDatabaseGenerationReceiptPayload,
   buildShadowGenerationDatabaseName,
   databaseGenerationPhaseRank,
   type DatabaseGenerationIdentity,
   type DatabaseGenerationMigrationCallbacks,
+  type DatabaseGenerationReleaseState,
   type DatabaseGenerationSnapshot
 } from "./database-generation";
 
@@ -31,6 +34,142 @@ const target: DatabaseGenerationIdentity = {
 
 const controllers: DatabaseGenerationController[] = [];
 const databaseNames = new Set<string>();
+
+function openConnectionReadHarness(storedState: unknown) {
+  // Pure native-handle contract: no IndexedDB factory, database creation, or
+  // deletion is involved in these closed/aborted-connection scenarios.
+  const request = {
+    result: storedState,
+    error: null as Error | null,
+    onsuccess: null as (() => void) | null,
+    onerror: null as (() => void) | null
+  };
+  const get = vi.fn(() => request);
+  const transaction = {
+    error: null as Error | null,
+    oncomplete: null as (() => void) | null,
+    onabort: null as (() => void) | null,
+    onerror: null as (() => void) | null,
+    objectStore: vi.fn(() => ({ get }))
+  };
+  const connection = { transaction: vi.fn(() => transaction) };
+  const database = {
+    backendDB: vi.fn((): unknown => connection),
+    isOpen: vi.fn(() => true),
+    open: vi.fn(),
+    releaseState: { get: vi.fn() }
+  };
+  const controller = new DatabaseGenerationController({ databaseName: "open-connection-contract-fixture" });
+  (controller as unknown as { database: unknown }).database = database;
+  return { controller, database, connection, transaction, request, get };
+}
+
+async function committedReadFixture(): Promise<DatabaseGenerationReleaseState> {
+  const unsigned: Omit<DatabaseGenerationReleaseState, "receiptDigest"> = {
+    id: "current",
+    protocolVersion: 1,
+    committedGeneration: "legacy-v13",
+    committedDatabaseName: "hakimi-bazi-research",
+    committedSchema: 13,
+    committedBuild: "bridge-read-fixture",
+    migrationId: null,
+    committedDigest: SOURCE_DIGEST,
+    committedAt: "2026-09-05T00:00:00.000Z",
+    updatedAt: "2026-09-05T00:00:00.000Z"
+  };
+  return { ...unsigned, receiptDigest: await sha256Hex(buildDatabaseGenerationReceiptPayload(unsigned)) };
+}
+
+describe("DatabaseGenerationController existing-connection read", () => {
+  it("uses only a native readonly transaction and verifies the receipt after transaction completion", async () => {
+    const state = await committedReadFixture();
+    const fixture = openConnectionReadHarness(state);
+    const read = fixture.controller.readCommittedGenerationFromOpenConnection();
+    const settled = vi.fn();
+    void read.then(settled);
+    expect(fixture.connection.transaction).toHaveBeenCalledExactlyOnceWith("releaseState", "readonly");
+    expect(fixture.get).toHaveBeenCalledExactlyOnceWith("current");
+    fixture.request.onsuccess?.();
+    await Promise.resolve();
+    expect(settled).not.toHaveBeenCalled();
+    fixture.transaction.oncomplete?.();
+    await expect(read).resolves.toEqual(state);
+    expect(fixture.database.open).not.toHaveBeenCalled();
+    expect(fixture.database.releaseState.get).not.toHaveBeenCalled();
+  });
+
+  it("returns an absent pointer without initializing a row", async () => {
+    const fixture = openConnectionReadHarness(undefined);
+    const read = fixture.controller.readCommittedGenerationFromOpenConnection();
+    fixture.request.onsuccess?.();
+    fixture.transaction.oncomplete?.();
+    await expect(read).resolves.toBeNull();
+    expect(fixture.database.open).not.toHaveBeenCalled();
+    expect(fixture.database.releaseState.get).not.toHaveBeenCalled();
+  });
+
+  it("reuses the full receipt-integrity verification", async () => {
+    const fixture = openConnectionReadHarness({ ...await committedReadFixture(), receiptDigest: OTHER_DIGEST });
+    const read = fixture.controller.readCommittedGenerationFromOpenConnection();
+    fixture.request.onsuccess?.();
+    fixture.transaction.oncomplete?.();
+    await expect(read).rejects.toMatchObject({ code: "CONTROL_STATE_CORRUPT" });
+    expect(fixture.database.open).not.toHaveBeenCalled();
+  });
+
+  it.each(["missing_handle", "closed_connection"] as const)("rejects %s without calling a Dexie read or open", async (status) => {
+    const fixture = openConnectionReadHarness(undefined);
+    if (status === "missing_handle") fixture.database.backendDB.mockReturnValue(null);
+    else fixture.database.isOpen.mockReturnValue(false);
+    await expect(fixture.controller.readCommittedGenerationFromOpenConnection()).rejects.toThrow("not open");
+    expect(fixture.connection.transaction).not.toHaveBeenCalled();
+    expect(fixture.database.open).not.toHaveBeenCalled();
+    expect(fixture.database.releaseState.get).not.toHaveBeenCalled();
+  });
+
+  it("rejects a closing handle's InvalidStateError without any retry or reopen", async () => {
+    const fixture = openConnectionReadHarness(undefined);
+    const failure = new DOMException("connection is closing", "InvalidStateError");
+    fixture.connection.transaction.mockImplementation(() => { throw failure; });
+    await expect(fixture.controller.readCommittedGenerationFromOpenConnection()).rejects.toBe(failure);
+    expect(fixture.connection.transaction).toHaveBeenCalledTimes(1);
+    expect(fixture.database.open).not.toHaveBeenCalled();
+    expect(fixture.database.releaseState.get).not.toHaveBeenCalled();
+  });
+
+  it("rejects an abort after a successful get instead of returning an uncommitted read", async () => {
+    const fixture = openConnectionReadHarness(await committedReadFixture());
+    const read = fixture.controller.readCommittedGenerationFromOpenConnection();
+    fixture.request.onsuccess?.();
+    fixture.transaction.onabort?.();
+    await expect(read).rejects.toThrow("aborted");
+    expect(fixture.database.open).not.toHaveBeenCalled();
+    expect(fixture.database.releaseState.get).not.toHaveBeenCalled();
+  });
+
+  it.each(["closed", "replaced"] as const)("rejects a handle that was %s during receipt verification", async (status) => {
+    const fixture = openConnectionReadHarness(await committedReadFixture());
+    const read = fixture.controller.readCommittedGenerationFromOpenConnection();
+    fixture.request.onsuccess?.();
+    fixture.transaction.oncomplete?.();
+    if (status === "closed") fixture.database.isOpen.mockReturnValue(false);
+    else fixture.database.backendDB.mockReturnValue({});
+    await expect(read).rejects.toThrow("connection changed");
+    expect(fixture.database.open).not.toHaveBeenCalled();
+    expect(fixture.database.releaseState.get).not.toHaveBeenCalled();
+  });
+
+  it("propagates request errors without opening a new connection", async () => {
+    const fixture = openConnectionReadHarness(undefined);
+    const failure = new Error("readonly get failed");
+    fixture.request.error = failure;
+    const read = fixture.controller.readCommittedGenerationFromOpenConnection();
+    fixture.request.onerror?.();
+    await expect(read).rejects.toBe(failure);
+    expect(fixture.database.open).not.toHaveBeenCalled();
+    expect(fixture.database.releaseState.get).not.toHaveBeenCalled();
+  });
+});
 
 function createClock() {
   let value = Date.parse("2026-08-03T00:00:00.000Z");

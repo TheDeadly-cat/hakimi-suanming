@@ -1,5 +1,6 @@
 import { createServer, type Server } from "node:http";
-import { stat } from "node:fs/promises";
+import { mkdtemp, stat } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import {
   chromium,
@@ -64,9 +65,24 @@ type ServerRequest = {
   artifactSetSha256: string;
 };
 
+type WorkerScriptGateObservation = {
+  generation: string;
+  heldRequests: number;
+  effectiveReleaseCount: number;
+};
+
+type WorkerScriptGate = {
+  generation: GenerationFixture;
+  wait: Promise<void>;
+  observation: WorkerScriptGateObservation;
+  release: () => void;
+};
+
 type SwitchServer = {
   origin: string;
   requests: ServerRequest[];
+  workerScriptGates: WorkerScriptGateObservation[];
+  holdWorkerScript: (generation: GenerationFixture) => () => void;
   setGeneration: (generation: GenerationFixture, failPaths?: readonly string[]) => void;
   close: () => Promise<void>;
 };
@@ -127,6 +143,8 @@ async function startSwitchServer(
     failPaths: new Set<string>()
   };
   const requests: ServerRequest[] = [];
+  const workerScriptGates: WorkerScriptGateObservation[] = [];
+  let workerScriptGate: WorkerScriptGate | null = null;
   const server: Server = createServer(async (request, response) => {
     const selected = active;
     const generation = selected.generation;
@@ -147,6 +165,12 @@ async function startSwitchServer(
         response.writeHead(400, { "cache-control": "no-store" });
         response.end(method === "HEAD" ? undefined : "Bad Request");
         return;
+      }
+      const gate = workerScriptGate;
+      if (pathname === "/sw.js" && gate?.generation === generation) {
+        gate.observation.heldRequests += 1;
+        await gate.wait;
+        if (response.destroyed || response.writableEnded) return;
       }
       if (selected.failPaths.has(artifactPath)) {
         const artifact = artifactFileIdentity(generation, artifactPath);
@@ -219,6 +243,38 @@ async function startSwitchServer(
   return {
     origin: `http://127.0.0.1:${address.port}`,
     requests,
+    workerScriptGates,
+    holdWorkerScript(generation) {
+      if (
+        workerScriptGate !== null
+        || !isSwTwoGenerationArtifactSnapshot(generation)
+        || !artifactSet.generations.includes(generation)
+        || generation === active.generation
+      ) {
+        throw new Error("SW fixture worker-script gate requires one different shared candidate generation.");
+      }
+      const observation: WorkerScriptGateObservation = {
+        generation: generation.name,
+        heldRequests: 0,
+        effectiveReleaseCount: 0
+      };
+      let resolveGate!: () => void;
+      const wait = new Promise<void>((resolve) => { resolveGate = resolve; });
+      const gate: WorkerScriptGate = {
+        generation,
+        wait,
+        observation,
+        release: () => {
+          if (observation.effectiveReleaseCount !== 0) return;
+          observation.effectiveReleaseCount += 1;
+          if (workerScriptGate === gate) workerScriptGate = null;
+          resolveGate();
+        }
+      };
+      workerScriptGate = gate;
+      workerScriptGates.push(observation);
+      return gate.release;
+    },
     setGeneration(generation, failPaths = []) {
       if (
         !isSwTwoGenerationArtifactSnapshot(generation)
@@ -241,6 +297,7 @@ async function startSwitchServer(
       };
     },
     close: () => new Promise<void>((resolve, reject) => {
+      workerScriptGate?.release();
       server.close((error) => error ? reject(error) : resolve());
     })
   };
@@ -404,8 +461,15 @@ async function requireFixtureBrowserRuntime(
 
 async function launchFixtureContext(testInfo: TestInfo, profileName: string) {
   const projectName = testInfo.project.name;
-  const profilePath = testInfo.outputPath(`${projectName}-${profileName}`);
+  // Keep Chromium's nested CacheStorage paths below Windows path limits.
+  // Each run retains a separate fresh profile alongside the failure evidence.
+  const profileRoot = await mkdtemp(path.join(tmpdir(), "hb-sw-"));
+  const profilePath = path.join(profileRoot, "profile");
   await requireFixtureProfileAbsent(profilePath);
+  await testInfo.attach("isolated-browser-profile", {
+    body: Buffer.from(JSON.stringify({ projectName, profileName, profilePath, freshProfileVerified: true, retained: true })),
+    contentType: "application/json"
+  });
   const context = await chromium.launchPersistentContext(
     profilePath,
     releasePersistentContextOptionsForProject(projectName)
@@ -475,6 +539,25 @@ async function openNaturalNavigation(context: BrowserContext, fixture: Generatio
   return { page, problems };
 }
 
+async function deployCandidateAndOpenNaturalNavigation(
+  context: BrowserContext,
+  fixture: GenerationFixture,
+  candidate: GenerationFixture,
+  failPaths: readonly string[] = []
+) {
+  // Establish the Given state before any asynchronous page creation: candidate
+  // HTML is deployed while the current worker still serves its confirmed shell.
+  // Only the candidate /sw.js response waits; HTML, assets and protocol messages
+  // continue normally. All original current-shell assertions run before release.
+  const releaseWorkerScript = switchServer.holdWorkerScript(candidate);
+  try {
+    switchServer.setGeneration(candidate, failPaths);
+    return await openNaturalNavigation(context, fixture);
+  } finally {
+    releaseWorkerScript();
+  }
+}
+
 test.beforeAll(async () => {
   const artifactRoot = process.env.HAKIMI_SW_TWO_GENERATION_ARTIFACT_ROOT;
   const expectedArtifactSetSha256 = process.env.HAKIMI_SW_TWO_GENERATION_ARTIFACT_SET_SHA256;
@@ -493,6 +576,13 @@ test.beforeAll(async () => {
   healthyB = sharedHealthyB;
   brokenB = sharedBrokenB;
   switchServer = await startSwitchServer(artifactSet);
+});
+
+test.afterEach(async ({}, testInfo) => {
+  await testInfo.attach("candidate-worker-script-gates", {
+    body: Buffer.from(JSON.stringify(switchServer?.workerScriptGates ?? [])),
+    contentType: "application/json"
+  });
 });
 
 test.afterAll(async () => {
@@ -531,8 +621,7 @@ test("已确认 A 不混入新 HTML，健康 B 受控接管并可离线冷启动
     });
 
     await startControllerChangeObserver(pageA);
-    switchServer.setGeneration(healthyB);
-    const natural = await openNaturalNavigation(context, stableA);
+    const natural = await deployCandidateAndOpenNaturalNavigation(context, stableA, healthyB);
     const resources = await natural.page.evaluate(() => performance.getEntriesByType("resource").map((entry) => new URL(entry.name).pathname));
     expect(resources).toContain(stableA.entryPath);
     expect(resources).not.toContain(healthyB.entryPath);
@@ -582,7 +671,7 @@ test("已确认 A 不混入新 HTML，健康 B 受控接管并可离线冷启动
     await expectConfirmed(pageB, stableA);
     await expect.poll(() => cacheGenerations(pageB).then((items) => items.length)).toBe(2);
     await pageB.getByRole("button", { name: "收藏案例 演示案例 · 辰时研究" }).click();
-    await expect(pageB.getByRole("status")).toContainText("已收藏案例“演示案例 · 辰时研究”");
+    await expect(pageB.locator('p.success-message[role="status"]')).toContainText("已收藏案例“演示案例 · 辰时研究”");
     const afterWritableB = await captureStorageV13NativeReadonlySnapshot(pageB, {
       captureId: "same-schema-takeover-after-writable-b",
       operationId: "edit",
@@ -630,8 +719,7 @@ test("B 已安装但研究路由启动失败时，第二次断网冷启动使用
     await createDemoCaseAtOrigin(pageA);
 
     await startControllerChangeObserver(pageA);
-    switchServer.setGeneration(brokenB);
-    const natural = await openNaturalNavigation(context, stableA);
+    const natural = await deployCandidateAndOpenNaturalNavigation(context, stableA, brokenB);
     await expectInstalledUnconfirmed(natural.page, brokenB);
     await expect.poll(() => controllerChangeCount(pageA)).toBeGreaterThan(0);
     await expect.poll(() => registrationWorkerStates(natural.page)).toEqual({
@@ -706,8 +794,7 @@ test("B 预缓存资源缺失时安装失败并清除残缺 cache，A 仍可离�
     const stable = await openStableA(context);
     const pageA = stable.page;
     baselineProblems = stable.problems;
-    switchServer.setGeneration(healthyB, [healthyB.markerPath]);
-    const natural = await openNaturalNavigation(context, stableA);
+    const natural = await deployCandidateAndOpenNaturalNavigation(context, stableA, healthyB, [healthyB.markerPath]);
 
     await expect.poll(() => switchServer.requests.filter((request) => (
       request.generation === healthyB.name

@@ -31,3 +31,83 @@ jobs:
       - run: npm run test:e2e:capacity
       - run: npm run test:e2e:p2-05-heavy-browser-gate
       - run: npm run test:e2e:schema-v16-clean-start-capacity
+
+  local-data-boundaries-diagnostic:
+    name: Local data boundaries diagnostic (not formal release evidence)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm install --global npm@11.13.0
+      - run: npm ci
+      - run: npx playwright install chrome msedge
+      - name: Compute source-bound diagnostic artifact identity
+        shell: pwsh
+        run: |
+          $taskEvidenceId = node scripts/compute-release-evidence-id.mjs --channel default-v13
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if ($taskEvidenceId -notmatch '^hre1-[a-f0-9]{32}$') { throw 'Invalid diagnostic evidence ID.' }
+          "HAKIMI_RELEASE_EVIDENCE_ID=$taskEvidenceId" >> $env:GITHUB_ENV
+      - name: Build the full default application graph for this diagnostic
+        run: npm run diagnose:build
+      - name: Require the default v13 artifact descriptor
+        run: node scripts/verify-built-release-storage-manifest.mjs dist/web --expected-channel default-v13
+      - name: Lock the diagnostic artifact before browser execution
+        id: artifact_lock
+        run: node scripts/release-artifact-identity.mjs --write --dist dist/web --lock tmp/release-artifact-identity.json
+      - name: Exercise all eighteen local data and research flow targets
+        shell: pwsh
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: ${{ runner.temp }}/hakimi-local-data-boundaries/results.json
+        run: |
+          $taskOutput = Join-Path $env:RUNNER_TEMP 'hakimi-local-data-boundaries'
+          New-Item -ItemType Directory -Path $taskOutput -Force | Out-Null
+          & npm.cmd run diagnose:e2e:local-data-boundaries -- --reporter=line,json --output "$taskOutput/test-results" 2>&1 | Tee-Object -FilePath (Join-Path $taskOutput 'browser.log')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Require eighteen successful single-attempt results from the standard JSON report
+        if: ${{ always() && steps.artifact_lock.outcome == 'success' }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $taskReportPath = Join-Path $env:RUNNER_TEMP 'hakimi-local-data-boundaries/results.json'
+          $taskReport = Get-Content -LiteralPath $taskReportPath -Raw | ConvertFrom-Json -Depth 100
+          function Get-LocalDataBoundaryTests($suite) {
+            foreach ($spec in $suite.specs) { foreach ($testCase in $spec.tests) { $testCase } }
+            foreach ($child in $suite.suites) { Get-LocalDataBoundaryTests $child }
+          }
+          $taskTests = @($taskReport.suites | ForEach-Object { Get-LocalDataBoundaryTests $_ })
+          if (@($taskReport.errors).Count -ne 0 -or $taskReport.stats.expected -ne 18 -or $taskReport.stats.skipped -ne 0 -or $taskReport.stats.unexpected -ne 0 -or $taskReport.stats.flaky -ne 0 -or $taskTests.Count -ne 18) {
+            throw 'The diagnostic requires exactly eighteen passed targets without report errors, skips, failures, or flaky results.'
+          }
+          if ((@($taskTests.projectName | Sort-Object -Unique) -join ',') -cne 'chrome,msedge' -or (@($taskReport.config.projects.name | Sort-Object) -join ',') -cne 'chrome,msedge') {
+            throw 'The diagnostic requires exactly Chrome and Edge.'
+          }
+          foreach ($projectName in @('msedge', 'chrome')) {
+            if (@($taskTests | Where-Object { $_.projectName -ceq $projectName }).Count -ne 9) { throw "Missing diagnostic targets for $projectName." }
+          }
+          foreach ($project in $taskReport.config.projects) {
+            if ($project.retries -ne 0 -or $project.repeatEach -ne 1) { throw 'Diagnostic retries and repeated runs are forbidden.' }
+          }
+          foreach ($testCase in $taskTests) {
+            if ($testCase.expectedStatus -cne 'passed' -or $testCase.status -cne 'expected' -or @($testCase.results).Count -ne 1 -or $testCase.results[0].status -cne 'passed' -or $testCase.results[0].retry -ne 0 -or @($testCase.results[0].errors).Count -ne 0) {
+              throw 'Every diagnostic target must pass on its sole attempt without errors.'
+            }
+          }
+          Write-Output 'Local data and research flow diagnostic: eighteen targets passed; formal release gates remain separate.'
+      - name: Verify the original artifact lock even when browser execution fails
+        if: ${{ always() && steps.artifact_lock.outcome == 'success' }}
+        run: node scripts/release-artifact-identity.mjs --verify --dist dist/web --lock tmp/release-artifact-identity.json
+      - name: Preserve diagnostic JSON, logs, traces, screenshots and the artifact lock
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: local-data-boundaries-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/hakimi-local-data-boundaries
+            tmp/release-artifact-identity.json
+          if-no-files-found: error
+          retention-days: 14

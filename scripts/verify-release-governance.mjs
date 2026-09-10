@@ -2,8 +2,10 @@ import { readFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { devices } from "@playwright/test";
 import backupArtifactConfig from "../apps/web/playwright.release-backup-artifact.config.ts";
 import bootArtifactConfig from "../apps/web/playwright.release-boot-artifact.config.ts";
+import crossSchemaV13V16Config from "../apps/web/playwright.cross-schema-v13-v16.config.ts";
 import pwaCrossBrowserConfig from "../apps/web/playwright.release-pwa-artifact.config.ts";
 import {
   DEFAULT_V13_RELEASE_BROWSER_IDENTITY,
@@ -11,7 +13,11 @@ import {
   releaseBrowserNativeDeviceOptions
 } from "../apps/web/playwright.release-browser-matrix.ts";
 import {
-  REQUIRED_RELEASE_BROWSER_RECEIPT_IDS
+  CROSS_SCHEMA_V13_V16_RECEIPT_ID,
+  CROSS_SCHEMA_V13_V16_SPEC_PATH,
+  CROSS_SCHEMA_V13_V16_TEST_TITLES,
+  REQUIRED_RELEASE_BROWSER_RECEIPT_IDS,
+  REQUIRED_RELEASE_BROWSER_COMPLETION_TESTS_PER_PROJECT
 } from "../apps/web/playwright.release-browser-result.ts";
 import swTwoGenerationFixtureConfig from "../apps/web/playwright.sw-upgrade.config.ts";
 import {
@@ -189,11 +195,13 @@ export const REQUIRED_MIGRATION_WORKFLOW_PATHS = Object.freeze([
   "package-lock.json",
   "apps/web/package.json",
   "apps/web/index.html",
+  "apps/web/pwa-build.ts",
   "apps/web/public/sw.js",
   "apps/web/release-protocol.ts",
   "apps/web/src/bootstrap.ts",
   "apps/web/src/recovery-main.tsx",
   "apps/web/src/main.tsx",
+  "apps/web/src/lib/app-boot-*",
   "apps/web/src/lib/app-version.ts",
   "apps/web/src/lib/current-release.ts",
   "apps/web/src/lib/full-backup-worker-client.ts",
@@ -206,11 +214,12 @@ export const REQUIRED_MIGRATION_WORKFLOW_PATHS = Object.freeze([
   "apps/web/src/lib/release-controller-takeover-write-fence.ts",
   "apps/web/src/lib/release-controller-takeover-write-fence.test.ts",
   "apps/web/src/lib/release-integrity-cache.ts",
-  "apps/web/src/lib/service-worker-boot-ack.ts",
+  "apps/web/src/lib/service-worker-*",
   "apps/web/src/lib/storage-capacity-gate.ts",
   "apps/web/src/pages/case-library-page.tsx",
   "apps/web/src/pages/case-library-page.test.tsx",
   "apps/web/src/pages/orphaned-v13-recovery-page.tsx",
+  "apps/web/src/pwa-build.test.ts",
   "apps/web/src/pwa-files.test.ts",
   "apps/web/src/sw-lifecycle.test.ts",
   "apps/web/playwright.sw-two-generation-fixture-result.ts",
@@ -218,6 +227,7 @@ export const REQUIRED_MIGRATION_WORKFLOW_PATHS = Object.freeze([
   "apps/web/sw-two-generation-artifact-identity.ts",
   "apps/web/sw-two-generation-fixture-source-identity.ts",
   "apps/web/e2e/**",
+  "apps/web/playwright.release-browser-*.ts",
   "apps/web/playwright*.config.ts",
   "apps/web/vite*.ts",
   "packages/backup/**",
@@ -241,7 +251,13 @@ export const REQUIRED_MIGRATION_WORKFLOW_PATHS = Object.freeze([
 ]);
 
 export const REQUIRED_QUICK_CI_JOBS = Object.freeze([
+  "ci-contracts",
+  "node-release-evidence",
+  "node-package-artifacts",
   "toolchain-and-boundaries",
+  "history-checkpoint-governance",
+  "current-index-governance",
+  "bazi-current-semantics",
   "full-typecheck",
   "full-vitest",
   "default-v13-web-build",
@@ -250,34 +266,57 @@ export const REQUIRED_QUICK_CI_JOBS = Object.freeze([
 ]);
 
 export const REQUIRED_QUICK_CI_INDEPENDENT_JOBS = Object.freeze([
+  "ci-contracts",
+  "node-release-evidence",
+  "node-package-artifacts",
   "toolchain-and-boundaries",
+  "history-checkpoint-governance",
+  "current-index-governance",
+  "bazi-current-semantics",
   "full-typecheck",
   "full-vitest",
   "default-v13-web-build"
 ]);
 
 export const REQUIRED_QUICK_CI_COMMANDS = Object.freeze({
+  "ci-contracts": Object.freeze(["npm run check:node-test-groups", "npm run test:ci-contracts"]),
+  "node-release-evidence": Object.freeze(["npm run test:node-release-evidence"]),
+  "node-package-artifacts": Object.freeze(["npm run test:node-package-artifacts"]),
+  "bazi-current-semantics": Object.freeze([
+    "npm run check:bazi-domain-release-manifest",
+    "npm run check:bazi-expert-review-packet"
+  ]),
   "toolchain-and-boundaries": Object.freeze([
     "npm run check:ziwei-iztro-isolated-build-license-notices",
     "npm run test:ziwei-iztro-isolated-build-license-notices",
     "npm run check:system-contract-draft-boundaries",
-    "npm run check:independent-source-binding-requirements",
-    "npm run check:independent-domain-release-manifests",
-    "npm run check:system-admission-registry",
+    "npm run check:independent-source-inventory",
+    "npm run check:bazi-engineering-binding-candidates",
+    "npm run check:bazi-binding-freeze-requirements",
+    "npm run check:independent-domain-inventory",
     "npm run check:web-storage-import-boundary",
     "npm run check:release-governance",
     "npm run check:historical-natal-source-lock",
     "npm run check:historical-natal-runtime-closure",
+    "npm run check:historical-natal-build-attestation",
     "npm run test:release-evidence"
   ]),
-  "full-typecheck": Object.freeze(["npm run typecheck"]),
-  "full-vitest": Object.freeze(["npm test"]),
-  "default-v13-web-build": Object.freeze(["npm run build"]),
+  "history-checkpoint-governance": Object.freeze([
+    "npm run check:history-checkpoint",
+    "npm run test:history-checkpoint"
+  ]),
+  "current-index-governance": Object.freeze([
+    "npm run check:current-index",
+    "npm run test:current-index"
+  ]),
+  "full-typecheck": Object.freeze(["npm run diagnose:typecheck"]),
+  "full-vitest": Object.freeze(["npm run diagnose:vitest"]),
+  "default-v13-web-build": Object.freeze(["npm run diagnose:build"]),
   "artifact-manifest-verification": Object.freeze(["npm run verify:built-release-storage-manifest"])
 });
-const REQUIRED_QUICK_CI_WORKFLOW_BYTES = 6820;
+const REQUIRED_QUICK_CI_WORKFLOW_BYTES = 13245;
 const REQUIRED_QUICK_CI_WORKFLOW_SHA256 =
-  "195343f5481b47d2a379500d750bf7e0ce23c2b55b9c8a34a44b28742a5f7a52";
+  "a3623c93a6ba36477303d09981dd06addbf35010b4234ea94500c8f8a1e2c437";
 
 export const REQUIRED_RELEASE_BROWSER_MATRIX = Object.freeze([
   Object.freeze({
@@ -400,9 +439,9 @@ export const REQUIRED_SW_TWO_GENERATION_FIXTURE_SCRIPTS = Object.freeze({
   "test:sw-two-generation-fixture-contract": "node --test scripts/sw-two-generation-fixture-contract.test.mjs"
 });
 export const REQUIRED_SW_TWO_GENERATION_CRITICAL_SOURCE_IDENTITY_MODULE_SHA256 =
-  "0544a958b2217ae47e8769bf126f5aaba7a2b6c8fcf327e85059bfc415920a77";
+  "79407697519884d04aa37016961744b12029161bf4da6f2b82663cd339ac6766";
 export const REQUIRED_SW_TWO_GENERATION_CRITICAL_SOURCE_SET_SHA256 =
-  "e5e7ced52540e761940b632291d25edbe989306a16add8e2c3a61fb3d8876a00";
+  "6781fb7d831a3c0185cfc58ccf4cc787b22b0c3ee04ca356ce3286abd73586ef";
 
 export const REQUIRED_STORAGE_V13_MATRIX_CANDIDATE_SCRIPTS = Object.freeze({
   "test:storage-v13-matrix-candidate":
@@ -469,7 +508,7 @@ export const REQUIRED_SW_AB_UPDATE_CANDIDATE_POLICY_CANONICAL_SHA256 =
 export const REQUIRED_SW_AB_UPDATE_CANDIDATE_SCHEMA_CANONICAL_SHA256 =
   "a09461d8d6efc6fcd8c7f2767ad625834ef0443e52ff2fb1be02c03d16411cea";
 export const REQUIRED_SW_AB_UPDATE_CANDIDATE_LIB_SOURCE_SHA256 =
-  "9e112f545eb16b6701344520525b2c68fa2e3128e5b3e4d2733c126dc1ca8203";
+  "feb9bc3ee034cfd5c34f20a0d1fe8f179b56e3ab367f9c62927d29f6581b0256";
 export const REQUIRED_SW_AB_UPDATE_CANDIDATE_SCHEMA_LOADER_SOURCE_SHA256 =
   "8db89a345a08bf5f7396ecff7a7431dcc5cd653412f16213d3c7bbfd293a9d60";
 export const REQUIRED_SW_AB_UPDATE_CANDIDATE_VERIFIER_SOURCE_SHA256 =
@@ -498,7 +537,7 @@ export const REQUIRED_SW_AB_UPDATE_RUNTIME_CLIENT_CAPTURE_LOADER_SOURCE_SHA256 =
 export const REQUIRED_SW_AB_RUNTIME_CHALLENGE_SOURCE_SHA256 =
   "87b53d749ee0fc64c4d4f9375edba4a0e72101db75445648859f687db0986fce";
 export const REQUIRED_SW_AB_RUNTIME_SERVICE_WORKER_SOURCE_SHA256 =
-  "623029c23b820a8c213ccea5be2a337b2ea7f6668dd561212a97a019c16ab82e";
+  "7de3e51d953c6618bed8f10394624acbd405a3de274f11500495357072da2699";
 
 export const REQUIRED_SW_AB_UPDATE_RUNTIME_API_TRANSCRIPT_SCRIPTS = Object.freeze({
   "test:sw-ab-update-runtime-api-transcript":
@@ -1209,7 +1248,7 @@ export const REQUIRED_DEFAULT_V13_RECEIPT_COMMANDS = Object.freeze({
   "web-v1-flow": Object.freeze(["npm", "run", "test:release:web-v1-artifact"])
 });
 export const REQUIRED_FORMAL_RECEIPT_NPM_LIFECYCLE_CLOSURE_CANONICAL_SHA256 =
-  "eaba293e79453b250ce1d3520989da0dad184843e40dd28a9231c296f2bc9092";
+  "011ab7a7220451856bc558ee73054a329268d4efb63bf921d2fa27b8d1d47cd1";
 
 function leadingSpaces(line) {
   return line.length - line.trimStart().length;
@@ -1606,6 +1645,7 @@ function workflowRunCommandCount(lines, command) {
 }
 
 export function verifyQuickCiGovernance(quickWorkflow, packageJson) {
+  const workflowLines = quickWorkflow.split(/\r?\n/u);
   const blocks = Object.fromEntries(
     REQUIRED_QUICK_CI_JOBS.map((jobId) => [jobId, workflowJobBlock(quickWorkflow, jobId)])
   );
@@ -1634,8 +1674,97 @@ export function verifyQuickCiGovernance(quickWorkflow, packageJson) {
       }
     }
   }
-  if (packageJson.scripts?.typecheck !== "tsc --noEmit -p tsconfig.json") {
+  const independentlyPinnedGovernanceJobs = [
+    "ci-contracts",
+    "node-release-evidence",
+    "node-package-artifacts",
+    "bazi-current-semantics",
+    "history-checkpoint-governance",
+    "current-index-governance"
+  ];
+  for (const jobId of independentlyPinnedGovernanceJobs) {
+    const block = blocks[jobId];
+    for (const exactLine of [
+      "uses: actions/checkout@v5",
+      "uses: actions/setup-node@v5",
+      "node-version-file: .node-version",
+      "cache: npm"
+    ]) {
+      if (exactTrimmedLineCount(block, exactLine) !== 1) {
+        throw new Error(
+          `Quick CI job ${jobId} must independently pin its setup exactly once: ${exactLine}.`
+        );
+      }
+    }
+    for (const setupCommand of ["npm install --global npm@11.13.0", "npm ci"]) {
+      if (workflowRunCommandCount(block, setupCommand) !== 1) {
+        throw new Error(
+          `Quick CI job ${jobId} must run its independent setup exactly once: ${setupCommand}.`
+        );
+      }
+    }
+    for (const command of REQUIRED_QUICK_CI_COMMANDS[jobId]) {
+      if (workflowRunCommandCount(workflowLines, command) !== 1
+        || workflowRunCommandCount(blocks["toolchain-and-boundaries"], command) !== 0) {
+        throw new Error(
+          `Quick CI governance evidence command must appear exactly once and only in ${jobId}: ${command}.`
+        );
+      }
+    }
+  }
+  if (packageJson.scripts?.typecheck !== "node scripts/run-diagnostic-stage.mjs lifecycle typecheck"
+    || packageJson.scripts?.pretypecheck !== undefined
+    || packageJson.scripts?.posttypecheck !== undefined) {
     throw new Error("Full workspace typecheck command must not exclude or suppress production files.");
+  }
+  const baziSemanticBlock = blocks["bazi-current-semantics"];
+  for (const [jobId, scriptName, group] of [
+    ["ci-contracts", "test:ci-contracts", "ci-contracts"],
+    ["node-release-evidence", "test:node-release-evidence", "release-evidence"],
+    ["node-package-artifacts", "test:node-package-artifacts", "package-artifacts"]
+  ]) {
+    if (packageJson.scripts?.[scriptName] !== `node scripts/run-node-test-group.mjs ${group}`
+      || packageJson.scripts?.[`pre${scriptName}`] || packageJson.scripts?.[`post${scriptName}`]) {
+      throw new Error(`Node group must execute its whole registered group without hidden lifecycle prerequisites: ${group}.`);
+    }
+    for (const line of ["if: ${{ always() }}", "uses: actions/upload-artifact@v4",
+      "path: test-results/node-groups/", "if-no-files-found: error"]) {
+      if (exactTrimmedLineCount(blocks[jobId], line) !== 1) {
+        throw new Error(`Node group ${group} must preserve execution identities and failures: ${line}.`);
+      }
+    }
+  }
+  if (exactTrimmedLineCount(baziSemanticBlock, "id: install") !== 1
+    || exactTrimmedLineCount(baziSemanticBlock,
+      "if: ${{ !cancelled() && steps.install.outcome == 'success' }}") !== 2) {
+    throw new Error("Both Bazi semantic checks must report after dependency setup even when the other check fails.");
+  }
+  // Default Bazi checks inventory identity; independent eligibility remains a separate strict command.
+  for (const [name, command] of [
+    ["check:independent-source-inventory", "node scripts/verify-current-independent-source-inventory.mjs"],
+    ["check:independent-domain-inventory", "node scripts/verify-current-independent-domain-inventory.mjs"],
+    ["check:independent-source-binding-requirements", "node scripts/verify-current-independent-source-requirements.mjs"],
+    ["check:independent-domain-release-manifests", "node scripts/verify-current-independent-domain-manifests.mjs"]
+  ]) {
+    if (packageJson.scripts?.[name] !== command
+      || packageJson.scripts?.[`pre${name}`] || packageJson.scripts?.[`post${name}`]) {
+      throw new Error(`Independent inventory and strict current commands must retain their separate fixed scopes: ${name}.`);
+    }
+  }
+  const boundaryCommands = packageJson.scripts?.["check:current-boundaries"]?.split(" && ");
+  const explicitCiCommands = new Set(Object.values(REQUIRED_QUICK_CI_COMMANDS).flat());
+  if (!boundaryCommands?.length || boundaryCommands.some((command) => !explicitCiCommands.has(command))) {
+    throw new Error("Quick CI must explicitly retain every current-boundaries obligation when program diagnostics are independent.");
+  }
+  for (const stage of ["typecheck", "vitest", "build"]) {
+    const name = `diagnose:${stage}`;
+    if (packageJson.scripts?.[name] !== `node scripts/run-diagnostic-stage.mjs ${stage}`
+      || packageJson.scripts?.[`pre${name}`] || packageJson.scripts?.[`post${name}`]) {
+      throw new Error(`Diagnostic stage must use its explicit restricted-graph guard without lifecycle coupling: ${name}.`);
+    }
+  }
+  if (quickWorkflow.includes("--ignore-scripts")) {
+    throw new Error("Quick CI must use explicit diagnostic stages, not disable lifecycle scripts.");
   }
 
   const artifactName = "quick-ci-default-v13-${{ github.run_id }}-${{ github.run_attempt }}";
@@ -1648,15 +1777,26 @@ export function verifyQuickCiGovernance(quickWorkflow, packageJson) {
     throw new Error("Quick CI must upload, download and verify the same default v13 artifact without rebuilding it.");
   }
 
-  const aggregate = blocks["release-gate-aggregate"].join("\n");
+  const aggregateBlock = blocks["release-gate-aggregate"];
+  const aggregate = aggregateBlock.join("\n");
   if (!aggregate.includes("    if: ${{ always() }}")
     || !aggregate.includes("if [ \"$gate_result\" != \"success\" ]; then")
     || !aggregate.includes("exit 1")) {
     throw new Error("Quick CI aggregate gate must run always and fail closed on every non-success result.");
   }
   for (const jobId of aggregateNeeds) {
-    if (!aggregate.includes(`\${{ needs.${jobId}.result }}`)) {
-      throw new Error(`Quick CI aggregate gate does not inspect ${jobId}.`);
+    const resultEnv = jobId.toUpperCase().replaceAll("-", "_");
+    const resultBinding = `${resultEnv}: \${{ needs.${jobId}.result }}`;
+    const loopEntry = `"${jobId}=$${resultEnv}"`;
+    const loopEntryCount = aggregateBlock.filter((line) => {
+      const trimmed = line.trim();
+      return trimmed === loopEntry || trimmed === `${loopEntry} \\`;
+    }).length;
+    if (exactTrimmedLineCount(aggregateBlock, resultBinding) !== 1) {
+      throw new Error(`Quick CI aggregate gate must bind the exact result environment for ${jobId}.`);
+    }
+    if (loopEntryCount !== 1) {
+      throw new Error(`Quick CI aggregate gate failure loop must inspect ${jobId}.`);
     }
   }
   const rawWorkflowBytes = Buffer.from(quickWorkflow, "utf8");
@@ -1689,18 +1829,28 @@ export function verifyKnownRestrictedBlockerRegistry(registry) {
   const blocker = registry.blockers[0];
   if (!exactKeys(blocker, [
     "blockerId", "status", "affectedGates", "aggregateImpact", "restrictedPaths",
-    "allowedActions", "forbiddenActions", "observation"
+    "previouslyRestrictedPaths", "authorization", "allowedActions", "forbiddenActions", "observation"
   ]) || blocker.blockerId !== "known-restricted-full-workspace-typecheck/1"
-    || blocker.status !== "blocked-known-restricted"
+    || blocker.status !== "source-access-authorized"
     || !sameJson(blocker.affectedGates, ["full-workspace-typecheck"])
     || !sameJson(blocker.aggregateImpact, ["default-legacy-v13-aggregate-gate"])
-    || !sameJson(blocker.restrictedPaths, ["apps/web/src/lib/local-user-data-cleanup.ts"])
-    || !sameJson(blocker.allowedActions, ["record_status", "improve_ci_observability"])
+    || !sameJson(blocker.restrictedPaths, [])
+    || !sameJson(blocker.previouslyRestrictedPaths, ["apps/web/src/lib/local-user-data-cleanup.ts"])
+    || !sameJson(blocker.allowedActions, [
+      "record_status", "improve_ci_observability", "read_source", "necessary_source_fix",
+      "full_typecheck", "full_vitest", "full_build", "isolated_browser_validation"
+    ])
     || !sameJson(blocker.forbiddenActions, [
-      "read_source", "modify_source", "exclude_from_typecheck", "suppress_error", "xfail", "infer_internal_bug"
+      "exclude_from_typecheck", "suppress_error", "xfail"
     ])) {
     throw new Error("Known restricted blocker boundary has drifted.");
   }
+  if (!sameJson(blocker.authorization, {
+    source: "explicit_user_instruction",
+    recordedAt: "2026-09-05T07:37:37.000Z",
+    scope: ["read_source", "necessary_source_fix", "full_typecheck", "full_vitest", "full_build", "isolated_browser_validation"],
+    doesNotAuthorize: ["expert_claims", "source_rights_admission", "public_deployment"]
+  })) throw new Error("Known source access authorization must retain the explicit user scope without granting release authority.");
   if (!sameJson(blocker.observation, {
     state: "prior_quick_ci_failure_reported_not_reverified_in_this_registry",
     source: "user_supplied_handoff_and_second_round_audit",
@@ -2636,7 +2786,8 @@ export function verifySwAbUpdateRuntimeClientCaptureGovernance({
     || !serviceWorkerSource.includes('message?.type === "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1"')
     || !serviceWorkerSource.includes('message?.type === "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1"')
     || !serviceWorkerSource.includes('message?.type === "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1"')
-    || !serviceWorkerSource.includes('type: "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_V1"')
+    || !serviceWorkerSource.includes('freeze: "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_V1"')
+    || !serviceWorkerSource.includes("type: session.protocol.freeze")
     || !serviceWorkerSource.includes("freezeAllControllerTakeoverClients")
     || !serviceWorkerSource.includes("controllerTakeoverHoldingResponse")
     || !serviceWorkerSource.includes("persistControllerTakeoverNavigationHold")
@@ -5916,7 +6067,7 @@ function buildSyntheticSwTwoGenerationArtifactSetIdentity() {
     return createSwTwoGenerationGenerationArtifactIdentity({
       generationName: generation.generationName,
       fault: generation.fault,
-      buildVersion: seeds.build.repeat(64),
+      buildVersion: seeds.build.repeat(12),
       releaseDescriptorSha256: "d".repeat(64),
       releaseStorageManifestSha256: "e".repeat(64),
       files: [
@@ -6091,6 +6242,9 @@ export function verifySwTwoGenerationFixtureGovernance(
     || !fixtureSource.includes('session.send("Browser.getVersion")')
     || !fixtureSource.includes("requireReleaseBrowserRuntimeProduct(projectName, version.product)")
     || !fixtureSource.includes("requireFixtureProfileAbsent(profilePath)")
+    || !fixtureSource.includes('const profileRoot = await mkdtemp(path.join(tmpdir(), "hb-sw-"));')
+    || !fixtureSource.includes('const profilePath = path.join(profileRoot, "profile");')
+    || !fixtureSource.includes('testInfo.attach("isolated-browser-profile"')
     || !fixtureSource.includes("SW_TWO_GENERATION_FIXTURE_ANNOTATIONS.runtimeProduct")
     || !fixtureSource.includes("SW_TWO_GENERATION_FIXTURE_ANNOTATIONS.freshProfileVerified")
     || !fixtureSource.includes(
@@ -6111,7 +6265,10 @@ export function verifySwTwoGenerationFixtureGovernance(
     || !fixtureSource.includes('response.end(method === "HEAD" ? undefined : bytes);')
     || (fixtureSource.match(/SW_TWO_GENERATION_FIXTURE_SCENARIO_IDS\[[0-2]\]/gu) ?? []).length !== 3
     || /channel:\s*["']msedge["']/u.test(fixtureSource)
-    || /\b(?:execFile|spawn|mkdtemp|rm)\s*\(/u.test(fixtureSource)
+    || /\b(?:execFile|spawn|mkdtemp|rm)\s*\(/u.test(fixtureSource.replace(
+      'const profileRoot = await mkdtemp(path.join(tmpdir(), "hb-sw-"));',
+      ""
+    ))
     || /\b(?:readFile|readFileSync|createReadStream)\s*\(/u.test(fixtureSource)
     || fixtureSource.includes("HAKIMI_SW_UPGRADE_OUT_DIR")
     || fixtureSource.includes("vite build")
@@ -6350,6 +6507,51 @@ function releaseBrowserTuple(browser) {
     channel: browser?.channel,
     deviceName: browser?.deviceName
   };
+}
+
+export function verifyCrossSchemaV13V16CompletionGovernance(config = crossSchemaV13V16Config) {
+  const receiptId = "cross-schema-v13-v16";
+  if (CROSS_SCHEMA_V13_V16_RECEIPT_ID !== receiptId
+    || CROSS_SCHEMA_V13_V16_SPEC_PATH !== "apps/web/e2e/service-worker-cross-schema-v13-v16.spec.ts"
+    || CROSS_SCHEMA_V13_V16_TEST_TITLES.length !== 13
+    || new Set(CROSS_SCHEMA_V13_V16_TEST_TITLES).size !== 13
+    || !sameJson(REQUIRED_RELEASE_BROWSER_COMPLETION_TESTS_PER_PROJECT, {
+      backup: 4, boot: 6, pwa: 1, "web-v1-flow": 1, [receiptId]: 13
+    })) {
+    throw new Error("Cross-Schema completion inventory does not match the full release test scope.");
+  }
+  if (!exactKeys(config, [
+    "testDir", "testMatch", "outputDir", "timeout", "expect", "fullyParallel",
+    "forbidOnly", "failOnFlakyTests", "retries", "workers", "reporter", "use", "projects"
+  ]) || config.testDir !== "./e2e"
+    || config.testMatch !== "service-worker-cross-schema-v13-v16.spec.ts"
+    || config.outputDir !== path.join(os.tmpdir(), "hakimi-bazi-cross-schema-v13-v16-results")
+    || config.timeout !== 300_000 || !sameJson(config.expect, { timeout: 25_000 })
+    || config.fullyParallel !== false || config.forbidOnly !== true
+    || config.failOnFlakyTests !== true || config.retries !== 0 || config.workers !== 1) {
+    throw new Error("Cross-Schema completion config must retain the full serial matrix without selectors.");
+  }
+  if (!sameJson(config.reporter, [
+    ["line"],
+    [path.join(moduleWorkspaceRoot, "apps/web/playwright.release-browser-strict-reporter.ts"), {
+      receiptId, expectedTestsPerProject: 13
+    }]
+  ])) {
+    throw new Error("Cross-Schema completion requires the existing strict reporter and thirteen tests per project.");
+  }
+  if (!sameJson(config.use, {
+    serviceWorkers: "allow", trace: "retain-on-failure", screenshot: "only-on-failure", video: "off"
+  }) || !Array.isArray(config.projects) || config.projects.length !== RELEASE_BROWSER_MATRIX.length) {
+    throw new Error("Cross-Schema completion context or browser matrix changed.");
+  }
+  for (let index = 0; index < RELEASE_BROWSER_MATRIX.length; index += 1) {
+    const browser = RELEASE_BROWSER_MATRIX[index];
+    const project = config.projects[index];
+    if (!exactKeys(project, ["name", "use"]) || project.name !== browser.projectName
+      || !sameJson(project.use, { ...devices[browser.deviceName], channel: browser.channel })) {
+      throw new Error(`Cross-Schema completion browser project changed: ${browser.projectName}.`);
+    }
+  }
 }
 
 export function verifyReleaseBrowserGovernance(
@@ -7072,6 +7274,7 @@ const swTwoGenerationFixtureGovernance = verifySwTwoGenerationFixtureGovernance(
   swTwoGenerationFixtureCriticalSourceIdentity
 );
 verifyReleaseBrowserGovernance(decisions, packageJson, RELEASE_BROWSER_MATRIX, undefined, webPackageJson);
+verifyCrossSchemaV13V16CompletionGovernance();
 const requiredReceiptCommands = decisions.releaseEvidence?.defaultV13RequiredReceiptCommands;
 if (!requiredReceiptCommands || typeof requiredReceiptCommands !== "object" || Array.isArray(requiredReceiptCommands)) {
   throw new Error("Default v13 release evidence receipt policy is missing.");
@@ -7363,7 +7566,7 @@ if (isDirectRun) {
     defaultRelease: decisions.defaultRelease,
     admittedMigrationSources: allowedSources.length,
     quickCiEvidenceJobs: REQUIRED_QUICK_CI_JOBS.length - 1,
-    knownRestrictedBlockers: restrictedBlockers.blockers.length,
+    knownRestrictedBlockers: restrictedBlockers.blockers.filter((blocker) => blocker.restrictedPaths.length > 0).length,
     releaseEvidenceSchemaValidated: releaseEvidenceSchemaValidator.schema.$id,
     rollbackEvidenceSchemaValidated: rollbackEvidenceSchemaValidator.schema.$id,
     deployedPwaEvidenceSchemaValidated: deployedPwaEvidenceSchemaValidator.schema.$id,

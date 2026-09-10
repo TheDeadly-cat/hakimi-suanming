@@ -6,10 +6,20 @@ import { fileURLToPath } from "node:url";
 import backupArtifactConfig from "../apps/web/playwright.release-backup-artifact.config.ts";
 import bootArtifactConfig from "../apps/web/playwright.release-boot-artifact.config.ts";
 import pwaCrossBrowserConfig from "../apps/web/playwright.release-pwa-artifact.config.ts";
+import crossSchemaV13V16Config from "../apps/web/playwright.cross-schema-v13-v16.config.ts";
 import { RELEASE_BROWSER_MATRIX } from "../apps/web/playwright.release-browser-matrix.ts";
+import {
+  isReleaseBrowserCompletionReceiptId,
+  isReleaseBrowserReceiptId,
+  REQUIRED_RELEASE_BROWSER_RECEIPT_IDS
+} from "../apps/web/playwright.release-browser-result.ts";
+import { RELEASE_ARTIFACT_MUTATION_BOUNDARY_RECEIPT_IDS } from "./release-artifact-identity-lib.mjs";
 import swTwoGenerationFixtureConfig from "../apps/web/playwright.sw-upgrade.config.ts";
 import webV1CrossBrowserConfig from "../apps/web/playwright.release-web-v1-artifact.config.ts";
 import { canonicalJson, sha256 } from "./release-evidence-lib.mjs";
+import {
+  FORMAL_NPM_STATIC_TERMINAL_COMMAND_COUNT
+} from "./formal-npm-lifecycle-closure-lib.mjs";
 import {
   AUDITED_HOSTING_PLATFORM_IDS,
   REQUIRED_DEPLOYED_PWA_CLAIM_NAMES,
@@ -129,6 +139,7 @@ import {
   verifyRollbackProviderSequenceCompositionGovernance,
   verifyReleaseBrowserInstallPrerequisite,
   verifyReleaseBrowserGovernance,
+  verifyCrossSchemaV13V16CompletionGovernance,
   verifyReleaseBrowserPlaywrightConfig,
   verifyReleaseReceiptMirror,
   verifySwTwoGenerationFixtureGovernance,
@@ -1177,7 +1188,13 @@ test("accepts the checked-in migration workflow trigger and command closure", ()
 test("accepts the split Quick CI evidence jobs and fail-closed aggregate", () => {
   assert.doesNotThrow(() => verifyQuickCiGovernance(quickWorkflow, packageJson));
   assert.deepEqual(REQUIRED_QUICK_CI_JOBS, [
+    "ci-contracts",
+    "node-release-evidence",
+    "node-package-artifacts",
     "toolchain-and-boundaries",
+    "history-checkpoint-governance",
+    "current-index-governance",
+    "bazi-current-semantics",
     "full-typecheck",
     "full-vitest",
     "default-v13-web-build",
@@ -1185,11 +1202,66 @@ test("accepts the split Quick CI evidence jobs and fail-closed aggregate", () =>
     "release-gate-aggregate"
   ]);
   assert.deepEqual(REQUIRED_QUICK_CI_INDEPENDENT_JOBS, [
+    "ci-contracts",
+    "node-release-evidence",
+    "node-package-artifacts",
     "toolchain-and-boundaries",
+    "history-checkpoint-governance",
+    "current-index-governance",
+    "bazi-current-semantics",
     "full-typecheck",
     "full-vitest",
     "default-v13-web-build"
   ]);
+});
+
+test("models the 30 scoped inventory and Bazi semantic terminals without retaining superseded verifiers", () => {
+  assert.equal(FORMAL_NPM_STATIC_TERMINAL_COMMAND_COUNT, 30);
+  assert.equal(
+    currentFormalNpmClosure.closureCanonicalSha256,
+    REQUIRED_FORMAL_RECEIPT_NPM_LIFECYCLE_CLOSURE_CANONICAL_SHA256
+  );
+  const reachableCommands = new Set(
+    currentFormalNpmClosure.reachableScriptTuples.map((entry) => entry.command)
+  );
+  for (const command of [
+    "node scripts/verify-history-checkpoint.mjs",
+    "node scripts/verify-current-independent-source-inventory.mjs",
+    "node scripts/verify-current-independent-domain-inventory.mjs",
+    "node scripts/resolve-bazi-current-domain-manifest.mjs",
+    "node scripts/resolve-bazi-current-expert-review-packet.mjs"
+  ]) {
+    assert.equal(reachableCommands.has(command), true, command);
+  }
+  for (const command of [
+    "node scripts/verify-independent-source-binding-requirements.mjs",
+    "node scripts/verify-independent-domain-release-manifests.mjs",
+    "node scripts/verify-bazi-domain-release-manifest.mjs",
+    "node scripts/verify-bazi-expert-review-packet.mjs"
+  ]) {
+    assert.equal(reachableCommands.has(command), false, command);
+  }
+
+  for (const [scriptName, supersededCommand] of [
+    [
+      "check:independent-source-inventory",
+      "node scripts/verify-independent-source-binding-requirements.mjs"
+    ],
+    [
+      "check:independent-domain-inventory",
+      "node scripts/verify-independent-domain-release-manifests.mjs"
+    ],
+    ["check:bazi-domain-release-manifest", "node scripts/verify-bazi-domain-release-manifest.mjs"],
+    ["check:bazi-expert-review-packet", "node scripts/verify-bazi-expert-review-packet.mjs"]
+  ]) {
+    const supersededPackage = structuredClone(packageJson);
+    supersededPackage.scripts[scriptName] = supersededCommand;
+    assert.throws(
+      () => formalNpmClosure(supersededPackage),
+      /refuses an opaque or dynamic terminal command/u,
+      supersededCommand
+    );
+  }
 });
 
 test("binds the Ziwei HKO live gate as a non-persisted independent pre-release obligation", () => {
@@ -1207,6 +1279,12 @@ test("binds the Ziwei HKO live gate as a non-persisted independent pre-release o
       "npm run check:ziwei-iztro-isolated-build-license-notices",
       "npm run test:ziwei-iztro-isolated-build-license-notices"
     ]
+  );
+  assert.equal(FORMAL_NPM_STATIC_TERMINAL_COMMAND_COUNT, 30);
+  assert.equal(
+    ziweiHkoRestrictedSourcePreReleasePolicy.parentBindingBoundary
+      .defaultV13FormalNpmClosureIsolation.allowedTerminalCommandCount,
+    30
   );
   assert.deepEqual(verifyCurrentZiweiHkoPreReleasePolicy(), {
     policyId: "hakimi.ziwei.hko-restricted-source-pre-release/1.0.0",
@@ -1501,9 +1579,8 @@ test("rejects missing, duplicated, reordered or fail-open Ziwei Quick CI gates",
     "npm run check:ziwei-iztro-isolated-build-license-notices",
     "npm run test:ziwei-iztro-isolated-build-license-notices",
     "npm run check:system-contract-draft-boundaries",
-    "npm run check:independent-source-binding-requirements",
-    "npm run check:independent-domain-release-manifests",
-    "npm run check:system-admission-registry",
+    "npm run check:independent-source-inventory",
+    "npm run check:independent-domain-inventory",
     "npm run check:release-governance"
   ];
   let blockScalarBypass = quickWorkflow;
@@ -1520,8 +1597,8 @@ test("rejects missing, duplicated, reordered or fail-open Ziwei Quick CI gates",
     ...blockScalarBypassCommands.map((command) => `          run: ${command}`)
   ].join("\n");
   blockScalarBypass = blockScalarBypass.replace(
-    "\n  full-typecheck:",
-    `\n${fakeRunText}\n\n  full-typecheck:`
+    "\n  current-index-governance:",
+    `\n${fakeRunText}\n\n  current-index-governance:`
   );
   const cases = [
     withoutExactLine(quickWorkflow, checkLine),
@@ -1545,7 +1622,7 @@ test("rejects missing, duplicated, reordered or fail-open Ziwei Quick CI gates",
   }
   assert.throws(
     () => verifyQuickCiGovernance(blockScalarBypass, packageJson),
-    /reviewed raw workflow identity drifted/u
+    /must run exactly once: npm run check:ziwei-iztro-isolated-build-license-notices/u
   );
 });
 
@@ -1881,36 +1958,156 @@ test("rejects Quick CI when typecheck regains control over independent evidence 
   );
 });
 
-test("rejects Quick CI when the four-system admission registry gate is omitted", () => {
-  const weakenedWorkflow = withoutExactLine(
-    quickWorkflow,
-    "        run: npm run check:system-admission-registry"
+test("keeps history-checkpoint and current-index governance independently runnable with pinned setup", () => {
+  for (const [jobId, jobName] of [
+    ["history-checkpoint-governance", "History checkpoint governance"],
+    ["current-index-governance", "Current index governance"]
+  ]) {
+    const dependentWorkflow = quickWorkflow.replace(
+      `  ${jobId}:\n    name: ${jobName}`,
+      `  ${jobId}:\n    needs: toolchain-and-boundaries\n    name: ${jobName}`
+    );
+    assert.notEqual(dependentWorkflow, quickWorkflow, jobId);
+    assert.throws(
+      () => verifyQuickCiGovernance(dependentWorkflow, packageJson),
+      new RegExp(`${jobId} must remain independently runnable`, "u")
+    );
+
+    const jobPrefix = [
+      `  ${jobId}:`,
+      `    name: ${jobName}`,
+      "    runs-on: ubuntu-latest",
+      "    timeout-minutes: 20",
+      "",
+      "    steps:",
+      "      - name: Check out repository",
+      "        uses: actions/checkout@v5",
+      "",
+      "      - name: Set up pinned Node.js",
+      "        uses: actions/setup-node@v5",
+      "        with:",
+      "          node-version-file: .node-version",
+      "          cache: npm",
+      "",
+      "      - name: Set up pinned npm",
+      "        run: npm install --global npm@11.13.0",
+      "",
+      "      - name: Install locked dependencies",
+      "        run: npm ci"
+    ].join("\n");
+    assert.equal(quickWorkflow.includes(jobPrefix), true, jobId);
+    for (const [required, replacement] of [
+      ["uses: actions/checkout@v5", "uses: actions/checkout@v4"],
+      ["uses: actions/setup-node@v5", "uses: actions/setup-node@v4"],
+      ["node-version-file: .node-version", "node-version: latest"],
+      ["cache: npm", "cache: yarn"],
+      ["run: npm install --global npm@11.13.0", "run: npm install --global npm@latest"],
+      ["run: npm ci", "run: npm install"]
+    ]) {
+      const weakenedPrefix = jobPrefix.replace(required, replacement);
+      assert.notEqual(weakenedPrefix, jobPrefix, required);
+      const weakenedWorkflow = quickWorkflow.replace(jobPrefix, weakenedPrefix);
+      assert.notEqual(weakenedWorkflow, quickWorkflow, required);
+      assert.throws(
+        () => verifyQuickCiGovernance(weakenedWorkflow, packageJson),
+        new RegExp(
+          `${jobId} must (?:independently pin its setup|run its independent setup) exactly once`,
+          "u"
+        ),
+        required
+      );
+    }
+  }
+});
+
+test("rejects Quick CI when either independent history-checkpoint command is omitted", () => {
+  for (const command of [
+    "npm run check:history-checkpoint",
+    "npm run test:history-checkpoint"
+  ]) {
+    const weakenedWorkflow = withoutExactLine(quickWorkflow, `        run: ${command}`);
+    assert.throws(
+      () => verifyQuickCiGovernance(weakenedWorkflow, packageJson),
+      new RegExp(`must run exactly once: ${command}`, "u"),
+      command
+    );
+  }
+});
+
+test("runs history-checkpoint evidence exactly once and only in its independent job", () => {
+  const duplicatedInToolchain = quickWorkflow.replace(
+    "      - name: Verify independent Ziwei and Western domain manifests",
+    "      - name: Duplicate history-checkpoint evidence outside its job\n"
+      + "        run: npm run check:history-checkpoint\n\n"
+      + "      - name: Verify independent Ziwei and Western domain manifests"
   );
+  assert.notEqual(duplicatedInToolchain, quickWorkflow);
   assert.throws(
-    () => verifyQuickCiGovernance(weakenedWorkflow, packageJson),
-    /must run exactly once: npm run check:system-admission-registry/u
+    () => verifyQuickCiGovernance(duplicatedInToolchain, packageJson),
+    /must appear exactly once and only in history-checkpoint-governance/u
   );
 });
 
-test("rejects Quick CI when independent domain manifests are omitted", () => {
+test("rejects Quick CI when the unique current-index gate is omitted", () => {
   const weakenedWorkflow = withoutExactLine(
     quickWorkflow,
-    "        run: npm run check:independent-domain-release-manifests"
+    "        run: npm run check:current-index"
   );
   assert.throws(
     () => verifyQuickCiGovernance(weakenedWorkflow, packageJson),
-    /must run exactly once: npm run check:independent-domain-release-manifests/u
+    /must run exactly once: npm run check:current-index/u
+  );
+});
+
+test("runs current-index evidence exactly once and only in its independent job", () => {
+  const duplicatedInToolchain = quickWorkflow.replace(
+    "      - name: Verify independent Ziwei and Western domain manifests",
+    "      - name: Duplicate current-index evidence outside its job\n"
+      + "        run: npm run check:current-index\n\n"
+      + "      - name: Verify independent Ziwei and Western domain manifests"
+  );
+  assert.notEqual(duplicatedInToolchain, quickWorkflow);
+  assert.throws(
+    () => verifyQuickCiGovernance(duplicatedInToolchain, packageJson),
+    /must appear exactly once and only in current-index-governance/u
+  );
+});
+
+test("rejects Quick CI when current-index tests or current Bazi semantic gates are omitted", () => {
+  for (const command of [
+    "npm run test:current-index",
+    "npm run check:bazi-engineering-binding-candidates",
+    "npm run check:bazi-binding-freeze-requirements"
+  ]) {
+    const weakenedWorkflow = withoutExactLine(quickWorkflow, `        run: ${command}`);
+    assert.throws(
+      () => verifyQuickCiGovernance(weakenedWorkflow, packageJson),
+      (error) => error instanceof Error
+        && error.message.includes(`must run exactly once: ${command}.`),
+      command
+    );
+  }
+});
+
+test("rejects Quick CI when independent domain inventories are omitted", () => {
+  const weakenedWorkflow = withoutExactLine(
+    quickWorkflow,
+    "        run: npm run check:independent-domain-inventory"
+  );
+  assert.throws(
+    () => verifyQuickCiGovernance(weakenedWorkflow, packageJson),
+    /must run exactly once: npm run check:independent-domain-inventory/u
   );
 });
 
 test("rejects Quick CI when independent source-binding requirement inventories are omitted", () => {
   const weakenedWorkflow = withoutExactLine(
     quickWorkflow,
-    "        run: npm run check:independent-source-binding-requirements"
+    "        run: npm run check:independent-source-inventory"
   );
   assert.throws(
     () => verifyQuickCiGovernance(weakenedWorkflow, packageJson),
-    /must run exactly once: npm run check:independent-source-binding-requirements/u
+    /must run exactly once: npm run check:independent-source-inventory/u
   );
 });
 
@@ -1932,6 +2129,54 @@ test("rejects Quick CI continue-on-error and aggregate omissions", () => {
   );
 });
 
+test("aggregate explicitly binds and failure-checks both history and current governance", () => {
+  for (const [jobId, resultEnv] of [
+    ["history-checkpoint-governance", "HISTORY_CHECKPOINT_GOVERNANCE"],
+    ["current-index-governance", "CURRENT_INDEX_GOVERNANCE"]
+  ]) {
+    const missingNeed = withoutExactLine(quickWorkflow, `      - ${jobId}`);
+    assert.throws(
+      () => verifyQuickCiGovernance(missingNeed, packageJson),
+      /must require every evidence job/u
+    );
+
+    const missingResultBinding = withoutExactLine(
+      quickWorkflow,
+      `          ${resultEnv}: \${{ needs.${jobId}.result }}`
+    );
+    assert.throws(
+      () => verifyQuickCiGovernance(missingResultBinding, packageJson),
+      new RegExp(`must bind the exact result environment for ${jobId}`, "u")
+    );
+
+    const missingFailureLoopEntry = withoutExactLine(
+      quickWorkflow,
+      `            \"${jobId}=$${resultEnv}\" \\`
+    );
+    assert.throws(
+      () => verifyQuickCiGovernance(missingFailureLoopEntry, packageJson),
+      new RegExp(`failure loop must inspect ${jobId}`, "u")
+    );
+  }
+});
+
+test("requires independent Quick CI heavy jobs to use explicit diagnostic stages", () => {
+  for (const [required, weakened] of [
+    ["npm run diagnose:typecheck", "npm run typecheck"],
+    ["npm run diagnose:vitest", "npm test"],
+    ["npm run diagnose:build", "npm run build"]
+  ]) {
+    const weakenedWorkflow = quickWorkflow.replace(`        run: ${required}`, `        run: ${weakened}`);
+    assert.notEqual(weakenedWorkflow, quickWorkflow, required);
+    assert.throws(
+      () => verifyQuickCiGovernance(weakenedWorkflow, packageJson),
+      (error) => error instanceof Error
+        && error.message.includes(`must run exactly once: ${required}.`),
+      required
+    );
+  }
+});
+
 test("rejects rebuilding inside artifact verification or weakening full typecheck scope", () => {
   const rebuild = quickWorkflow.replace(
     "      - name: Verify built release storage manifest",
@@ -1948,12 +2193,64 @@ test("rejects rebuilding inside artifact verification or weakening full typechec
   );
 });
 
-test("accepts the known restricted blocker registry without inventing current results", () => {
+test("the default typecheck coordinator cannot acquire a hidden root pre or post hook", () => {
+  assert.equal(packageJson.scripts.typecheck, "node scripts/run-diagnostic-stage.mjs lifecycle typecheck");
+  verifyQuickCiGovernance(quickWorkflow, packageJson);
+  for (const hook of ["pretypecheck", "posttypecheck"]) {
+    const changed = structuredClone(packageJson);
+    changed.scripts[hook] = "npm run check:current-governance";
+    assert.throws(() => verifyQuickCiGovernance(quickWorkflow, changed), /must not exclude or suppress/u);
+  }
+});
+
+test("diagnostic stages cannot acquire hidden prerequisites or lose their permission guard", () => {
+  for (const stage of ["typecheck", "vitest", "build"]) {
+    for (const change of ["pre", "post", "body"]) {
+      const changed = structuredClone(packageJson);
+      const script = `diagnose:${stage}`;
+      if (change === "body") changed.scripts[script] = "node arbitrary-runner.mjs";
+      else changed.scripts[`${change}${script}`] = "npm run check:current-governance";
+      assert.throws(() => verifyQuickCiGovernance(quickWorkflow, changed), /restricted-graph guard/);
+    }
+  }
+});
+
+test("independent program diagnostics retain both Bazi semantic obligations in the aggregate", () => {
+  for (const command of ["npm run check:bazi-domain-release-manifest", "npm run check:bazi-expert-review-packet"]) {
+    const changed = quickWorkflow.replace(`        run: ${command}`, "        run: echo omitted");
+    assert.throws(() => verifyQuickCiGovernance(changed, packageJson), /must run exactly once/);
+  }
+  const hidden = structuredClone(packageJson);
+  hidden.scripts["check:current-boundaries"] += " && npm run check:new-obligation";
+  assert.throws(() => verifyQuickCiGovernance(quickWorkflow, hidden), /retain every current-boundaries obligation/);
+});
+
+test("a Bazi semantic failure cannot hide the other semantic result", () => {
+  const changed = quickWorkflow.replace(
+    "        if: ${{ !cancelled() && steps.install.outcome == 'success' }}",
+    "        if: ${{ success() }}"
+  );
+  assert.throws(() => verifyQuickCiGovernance(changed, packageJson), /Both Bazi semantic checks/);
+});
+
+test("complete Node group execution and retained failure reports cannot be silently reduced", () => {
+  const changed = structuredClone(packageJson);
+  changed.scripts["test:node-release-evidence"] = "node --test scripts/release-evidence.test.mjs";
+  assert.throws(() => verifyQuickCiGovernance(quickWorkflow, changed), /whole registered group/);
+  const omittedReport = quickWorkflow.replace("          path: test-results/node-groups/", "          path: dist/web");
+  assert.throws(() => verifyQuickCiGovernance(omittedReport, packageJson), /preserve execution identities/);
+});
+
+test("accepts explicit source access authorization while preserving the prior failure and unobserved results", () => {
   assert.doesNotThrow(() => verifyKnownRestrictedBlockerRegistry(restrictedBlockers));
+  assert.deepEqual(restrictedBlockers.blockers[0].restrictedPaths, []);
+  assert.deepEqual(restrictedBlockers.blockers[0].previouslyRestrictedPaths, ["apps/web/src/lib/local-user-data-cleanup.ts"]);
+  assert.equal(restrictedBlockers.blockers[0].authorization.source, "explicit_user_instruction");
+  assert.equal(restrictedBlockers.blockers[0].observation.state, "prior_quick_ci_failure_reported_not_reverified_in_this_registry");
   assert.equal(restrictedBlockers.currentEvidenceLedger.currentCommitDefaultBuild, "not_established_by_this_registry");
 });
 
-test("rejects weakening the restricted-path boundary or promoting unobserved gates", () => {
+test("rejects removing the retained no-suppression boundary or promoting unobserved gates", () => {
   const pathWeakened = structuredClone(restrictedBlockers);
   pathWeakened.blockers[0].forbiddenActions = pathWeakened.blockers[0].forbiddenActions.filter(
     (action) => action !== "exclude_from_typecheck"
@@ -1963,6 +2260,21 @@ test("rejects weakening the restricted-path boundary or promoting unobserved gat
   const promoted = structuredClone(restrictedBlockers);
   promoted.currentEvidenceLedger.currentCommitDefaultBuild = "passed";
   assert.throws(() => verifyKnownRestrictedBlockerRegistry(promoted), /cannot promote unobserved gates/u);
+});
+
+test("source access requires the recorded user scope and grants no expert, rights or deployment authority", () => {
+  for (const mutate of [
+    (record) => { record.blockers[0].authorization.source = "model_inference"; },
+    (record) => { record.blockers[0].authorization.doesNotAuthorize = []; },
+    (record) => { delete record.blockers[0].authorization; }
+  ]) {
+    const changed = structuredClone(restrictedBlockers);
+    mutate(changed);
+    assert.throws(() => verifyKnownRestrictedBlockerRegistry(changed), /authorization|boundary has drifted/u);
+  }
+  const promoted = structuredClone(restrictedBlockers);
+  promoted.releaseGovernance.publicDeploymentAuthorized = true;
+  assert.throws(() => verifyKnownRestrictedBlockerRegistry(promoted), /cannot change release governance/u);
 });
 
 for (const command of REQUIRED_MIGRATION_WORKFLOW_COMMANDS) {
@@ -2104,6 +2416,70 @@ test("accepts the exact release browser configs and install prerequisites", () =
     releaseRunbook,
     "Release runbook"
   ));
+});
+
+test("cross-schema completion governance accepts the complete checked-in config", () => {
+  assert.doesNotThrow(() => verifyCrossSchemaV13V16CompletionGovernance());
+  assert.doesNotThrow(() => verifyCrossSchemaV13V16CompletionGovernance(crossSchemaV13V16Config));
+});
+
+test("cross-schema completion governance rejects missing reporter or reduced count", () => {
+  for (const mutate of [
+    (config) => { config.reporter = [["line"]]; },
+    (config) => { config.reporter[1][1].expectedTestsPerProject = 12; }
+  ]) {
+    const config = structuredClone(crossSchemaV13V16Config);
+    mutate(config);
+    assert.throws(
+      () => verifyCrossSchemaV13V16CompletionGovernance(config),
+      /Cross-Schema completion requires the existing strict reporter/u
+    );
+  }
+});
+
+test("cross-schema completion governance rejects selectors and repetition fields", () => {
+  for (const [key, value] of [
+    ["grep", /only-one-title/u],
+    ["grepInvert", /omit-one-title/u],
+    ["shard", { current: 1, total: 2 }],
+    ["repeatEach", 2]
+  ]) {
+    const config = { ...structuredClone(crossSchemaV13V16Config), [key]: value };
+    assert.throws(
+      () => verifyCrossSchemaV13V16CompletionGovernance(config),
+      /Cross-Schema completion config must retain the full serial matrix/u,
+      key
+    );
+  }
+});
+
+test("cross-schema completion governance rejects brand project and execution-policy drift", () => {
+  for (const [label, mutate] of [
+    ["brand", (config) => { config.projects[0].use.channel = "chrome"; }],
+    ["project name", (config) => { config.projects[0].name = "chromium"; }],
+    ["missing project", (config) => { config.projects.pop(); }],
+    ["project order", (config) => { config.projects.reverse(); }],
+    ["retries", (config) => { config.retries = 1; }],
+    ["per-project retries", (config) => { config.projects[0].retries = 1; }],
+    ["forbidOnly", (config) => { config.forbidOnly = false; }],
+    ["failOnFlakyTests", (config) => { config.failOnFlakyTests = false; }]
+  ]) {
+    const config = structuredClone(crossSchemaV13V16Config);
+    mutate(config);
+    assert.throws(
+      () => verifyCrossSchemaV13V16CompletionGovernance(config),
+      /Cross-Schema completion/u,
+      label
+    );
+  }
+});
+
+test("cross-schema completion governance preserves the four artifact-bound receipt ids", () => {
+  const artifactReceiptIds = ["backup", "boot", "pwa", "web-v1-flow"];
+  assert.deepEqual(REQUIRED_RELEASE_BROWSER_RECEIPT_IDS, artifactReceiptIds);
+  assert.deepEqual(RELEASE_ARTIFACT_MUTATION_BOUNDARY_RECEIPT_IDS, artifactReceiptIds);
+  assert.equal(isReleaseBrowserReceiptId("cross-schema-v13-v16"), false);
+  assert.equal(isReleaseBrowserCompletionReceiptId("cross-schema-v13-v16"), true);
 });
 
 test("release browser evidence verifies and previews the locked dist/web without rebuilding", () => {
@@ -3094,6 +3470,20 @@ test("rejects SW fixture shared-artifact ownership or byte-snapshot weakening", 
     /without building or reading response bytes from disk/u
   );
 
+  for (const fixtureSource of [
+    `${swTwoGenerationFixtureSource}\nmkdtemp(artifactRoot);`,
+    swTwoGenerationFixtureSource.replace(
+      'const profileRoot = await mkdtemp(path.join(tmpdir(), "hb-sw-"));',
+      'const profileRoot = await mkdtemp(path.join(artifactRoot, "hb-sw-"));'
+    )
+  ]) {
+    assert.notEqual(fixtureSource, swTwoGenerationFixtureSource);
+    assert.throws(
+      () => swTwoGenerationFixtureGovernance({ fixtureSource }),
+      /without building or reading response bytes from disk/u
+    );
+  }
+
   const specReadsResponseFromDisk = swTwoGenerationFixtureSource.replace(
     "let bytes = readSwTwoGenerationArtifactSnapshot(generation, artifactPath);",
     "let bytes = readFile(artifactPath);"
@@ -3602,7 +3992,7 @@ test("accepts the isolated storage-v13 matrix candidate governance and full form
     dedicatedTypecheckIncluded: true
   });
   const closure = formalNpmClosure();
-  assert.equal(closure.reachableScriptCount, 32);
+  assert.equal(closure.reachableScriptCount, 35);
   assert.equal(
     closure.closureCanonicalSha256,
     REQUIRED_FORMAL_RECEIPT_NPM_LIFECYCLE_CLOSURE_CANONICAL_SHA256
@@ -4686,8 +5076,8 @@ test("accepts and freezes the standalone runtime derived-evidence producer bridg
     "docs/release/PR6运行时派生证据生产桥接候选边界-v1-2026-08-28.md"
   ]) assert.ok(REQUIRED_MIGRATION_WORKFLOW_PATHS.includes(filePath), filePath);
   const closure = formalNpmClosure();
-  assert.equal(closure.reachableScriptCount, 32);
-  assert.equal(closure.visitedScripts.length, 84);
+  assert.equal(closure.reachableScriptCount, 35);
+  assert.equal(closure.visitedScripts.length, 93);
   assert.equal(
     closure.closureCanonicalSha256,
     REQUIRED_FORMAL_RECEIPT_NPM_LIFECYCLE_CLOSURE_CANONICAL_SHA256
@@ -5076,8 +5466,8 @@ test("accepts and freezes the standalone producer-bridge four-chain composition 
     "producer_bridge_absent"
   );
   const closure = formalNpmClosure();
-  assert.equal(closure.reachableScriptCount, 32);
-  assert.equal(closure.visitedScripts.length, 84);
+  assert.equal(closure.reachableScriptCount, 35);
+  assert.equal(closure.visitedScripts.length, 93);
   assert.equal(
     closure.closureCanonicalSha256,
     REQUIRED_FORMAL_RECEIPT_NPM_LIFECYCLE_CLOSURE_CANONICAL_SHA256
@@ -6233,4 +6623,24 @@ test("storage-v13 candidate collector rejects build/server/formal-reporter coupl
     }),
     /browser collector is not strictly isolated/u
   );
+});
+
+test("default Bazi inventory obligations cannot replace strict independent eligibility commands", () => {
+  const pairs = [
+    ["check:independent-source-inventory", "check:independent-source-binding-requirements"],
+    ["check:independent-domain-inventory", "check:independent-domain-release-manifests"]
+  ];
+  const reachable = new Set(currentFormalNpmClosure.reachableScriptTuples.map((entry) => entry.command));
+  for (const [inventory, strict] of pairs) {
+    assert.equal(reachable.has(packageJson.scripts[inventory]), true);
+    assert.equal(reachable.has(packageJson.scripts[strict]), false);
+    for (const [target, replacement] of [[inventory, strict], [strict, inventory]]) {
+      const changed = structuredClone(packageJson);
+      changed.scripts[target] = changed.scripts[replacement];
+      assert.throws(() => verifyQuickCiGovernance(quickWorkflow, changed), /separate fixed scopes/);
+    }
+    const coupled = structuredClone(packageJson);
+    coupled.scripts[`pre${inventory}`] = `npm run ${strict}`;
+    assert.throws(() => verifyQuickCiGovernance(quickWorkflow, coupled), /separate fixed scopes/);
+  }
 });

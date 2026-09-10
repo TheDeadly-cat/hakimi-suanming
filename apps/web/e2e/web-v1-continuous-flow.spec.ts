@@ -279,22 +279,36 @@ function exactComparisonItems(url: string): string[] {
 }
 
 async function expectFourChartProjection(page: Page, items: readonly FormalComparisonItem[]): Promise<string> {
+  expect(items).toHaveLength(4);
   await expect(page.getByRole("heading", { name: "正式命盘对照台" })).toBeVisible();
-  await expect(page.getByText("4 盘 · A 基准", { exact: true })).toBeVisible();
+  await expect(page.locator(".comparison-summary").getByText("4盘 · A 基准", { exact: true })).toBeVisible();
 
   const matrix = page.getByRole("region", { name: "正式命盘字段对照表" });
   await expect(matrix).toBeVisible();
+  await expect(matrix).toHaveAttribute("data-column-count", "4");
+  const baseline = matrix.getByRole("group", { name: "当前活动对照列绑定", exact: true })
+    .locator('[data-role="baseline"]');
+  await expect(baseline).toContainText("A · 基准事实列");
+  await expect(baseline.locator("strong")).toHaveText(items[0].alias);
+  await expect(page.getByRole("combobox", { name: "对照位 A 案例", exact: true })).toHaveValue(items[0].caseId);
+  await expect(page.getByRole("combobox", { name: "对照位 A 修订", exact: true })).toHaveValue(items[0].revisionId);
   await expect(matrix.getByRole("columnheader")).toHaveCount(5);
+  await expect(matrix.getByRole("columnheader").nth(1)).toHaveAttribute("data-column-role", "baseline");
   const rows = matrix.locator("tbody tr[data-field-id]");
   await expect(rows).toHaveCount(96);
   expect(await rows.evaluateAll((elements) => elements.every((row) => row.querySelectorAll("td").length === 4)))
     .toBe(true);
   for (const [index, item] of items.entries()) {
-    await expect(matrix.getByRole("columnheader").nth(index + 1)).toContainText(item.alias);
+    const column = matrix.getByRole("columnheader").nth(index + 1);
+    await expect(column).toContainText(item.alias);
+    await expect(column).toHaveAttribute("data-column-index", String(index));
+    await expect(column.locator("code").nth(0)).toHaveAttribute("title", item.caseId);
+    await expect(column.locator("code").nth(1)).toHaveAttribute("title", item.revisionId);
   }
 
   const transit = page.getByRole("region", { name: "同一瞬时点六层运限对照" });
   await expect(transit).toBeVisible();
+  await expect(transit).toHaveAttribute("data-column-count", "4");
   await expect(transit.locator("tbody tr[data-field-id]")).toHaveCount(7);
   expect(await transit.locator("tbody tr[data-field-id]").evaluateAll(
     (elements) => elements.every((row) => row.querySelectorAll("td").length === 4)
@@ -338,7 +352,7 @@ async function createFourChartComparison(
 
   const matrix = page.getByRole("region", { name: "正式命盘字段对照表" });
   const allRowCount = await matrix.locator("tbody tr[data-field-id]").count();
-  const differencesOnly = page.getByRole("checkbox", { name: "只看任一比较盘相对 A 变化的字段" });
+  const differencesOnly = page.getByRole("checkbox", { name: "只看任一比较盘相对 A 存在差异的字段", exact: true });
   await differencesOnly.check();
   await expect.poll(() => matrix.locator("tbody tr[data-field-id]").count()).toBeLessThan(allRowCount);
   expect(await matrix.locator("tbody tr[data-field-id]").count()).toBeGreaterThan(0);
@@ -361,7 +375,9 @@ async function createFourChartComparison(
   await expect(switcher).toContainText(
     `A · ${items[0].alias} · R${items[0].revisionNumber} ↔ 当前 B · ${items[1].alias} · R${items[1].revisionNumber}`
   );
-  const cButton = switcher.getByRole("button", { name: `C · ${items[2].alias}`, exact: true });
+  const cButton = switcher.getByRole("button", {
+    name: `切换到比较盘 C：${items[2].alias} · Revision ${items[2].revisionNumber}`, exact: true
+  });
   await cButton.click();
   await expect(cButton).toHaveAttribute("aria-pressed", "true");
   await expect.poll(() => new URL(page.url()).searchParams.get("focus")).toBe("C");
@@ -388,7 +404,7 @@ async function createFourChartComparison(
   }).toBe(`${items[2].pathname}?view=research`);
   await expect(page.getByRole("heading", { name: items[2].alias, exact: true })).toBeVisible();
   await expect(page.getByRole("combobox", { name: "历史 Revision" })).toHaveValue(items[2].revisionId);
-  await expect(page.getByRole("button", { name: "导出单盘 Markdown", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^准备单盘 Markdown/u })).toBeVisible();
   await page.goBack();
   await waitForAppReady(page);
   await expect.poll(() => {
@@ -399,9 +415,11 @@ async function createFourChartComparison(
   await expect.poll(() => page.locator(".comparison-evidence-footer code").textContent()).toBe(initialResultHash);
   await expect(page.getByRole("heading", { name: /^A ↔ C：\d+ 个字段不同$/ })).toBeVisible();
   const sexRow = matrix.locator('[data-field-id="input.sex"]');
-  await expect(sexRow.locator("th")).toContainText("相同");
+  await expect(sexRow).toHaveAttribute("data-row-status", "same");
+  await expect(sexRow).toHaveAttribute("data-row-different", "false");
+  await expect(sexRow.locator("th small")).toHaveText("各列值一致");
   expect(await sexRow.locator(".comparison-cell-value:visible").allTextContents()).toEqual(["男", "男"]);
-  const mobileDifferencesOnly = page.getByRole("checkbox", { name: "只看当前 A–C 变化的字段" });
+  const mobileDifferencesOnly = page.getByRole("checkbox", { name: "只看当前 A–C 存在差异的字段", exact: true });
   await mobileDifferencesOnly.check();
   await expect(sexRow).toHaveCount(0);
   await mobileDifferencesOnly.uncheck();
@@ -437,23 +455,39 @@ async function createFourChartComparison(
     }).map((id) => `${cell.parentElement?.getAttribute("data-field-id") ?? "unknown"}:${id}`);
   }))).toEqual([]);
   await expect(matrix.locator("tbody")).toHaveCount(6);
+  const sexCellHeaders = await Promise.all([
+    matrix.locator('tbody[data-category="input"] .comparison-section-row th').getAttribute("id"),
+    sexRow.locator("th").getAttribute("id"),
+    matrix.locator('thead th[data-column-index="2"]').getAttribute("id")
+  ]);
+  expect(sexCellHeaders.every((id) => typeof id === "string" && id.length > 0)).toBe(true);
+  expect(new Set(sexCellHeaders).size).toBe(3);
   await expect(matrix.locator('[data-field-id="input.sex"] td').nth(2)).toHaveAttribute(
     "headers",
-    /formal-comparison-section-input formal-comparison-row-input\.sex formal-comparison-column-2/
+    sexCellHeaders.join(" ")
   );
   await matrix.locator("tbody tr[data-field-id]").last().scrollIntoViewIfNeeded();
   expect(await switcher.evaluate((element) => getComputedStyle(element).position)).toBe("sticky");
-  const switcherTop = await switcher.evaluate((element) => element.getBoundingClientRect().top);
-  expect(switcherTop).toBeGreaterThanOrEqual(56);
-  expect(switcherTop).toBeLessThanOrEqual(59);
-  const dButton = switcher.getByRole("button", { name: `D · ${items[3].alias}`, exact: true });
+  const switcherGeometry = await switcher.evaluate((element) => ({
+    top: element.getBoundingClientRect().top,
+    stickyOffset: Number.parseFloat(getComputedStyle(element).top),
+    topbarBottom: document.querySelector(".mobile-topbar")?.getBoundingClientRect().bottom ?? 0
+  }));
+  expect(Number.isFinite(switcherGeometry.stickyOffset)).toBe(true);
+  expect(Math.abs(switcherGeometry.top - switcherGeometry.stickyOffset)).toBeLessThanOrEqual(1);
+  expect(switcherGeometry.top).toBeGreaterThanOrEqual(switcherGeometry.topbarBottom - 1);
+  const dButton = switcher.getByRole("button", {
+    name: `切换到比较盘 D：${items[3].alias} · Revision ${items[3].revisionNumber}`, exact: true
+  });
   await cButton.focus();
   await page.keyboard.press("Tab");
   await expect(dButton).toBeFocused();
   await dButton.click();
   await expect(dButton).toHaveAttribute("aria-pressed", "true");
   await expect.poll(() => new URL(page.url()).searchParams.get("focus")).toBe("D");
-  await expect(matrix.locator('[data-field-id="input.sex"] th')).toContainText("变化");
+  await expect(sexRow).toHaveAttribute("data-row-status", "changed");
+  await expect(sexRow).toHaveAttribute("data-row-different", "true");
+  await expect(sexRow.locator("th small")).toHaveText("字段值不同");
   await expect(matrix.getByRole("columnheader").filter({ hasText: items[0].alias })).toBeVisible();
   await expect(matrix.getByRole("columnheader").filter({ hasText: items[3].alias })).toBeVisible();
   await expect(matrix.getByRole("columnheader").filter({ hasText: items[1].alias })).toBeHidden();
@@ -511,13 +545,14 @@ async function createFourChartComparison(
   await page.setViewportSize({ width: 390, height: 844 });
 
   await page.getByLabel(/^目标瞬时点（UTC）/).fill("2030-01-02T03:04");
-  await page.getByRole("button", { name: "同步运限", exact: true }).click();
-  await expect(page.getByText("2030-01-02T03:04:00.000Z", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "应用并重新计算", exact: true }).click();
+  await expect(page.locator('code[aria-label="当前已提交的 UTC 瞬时点"]')).toHaveText("2030-01-02T03:04:00.000Z");
   await expect.poll(() => new URL(page.url()).searchParams.get("at")).toBe("2030-01-02T03:04:00.000Z");
   await expect.poll(() => page.locator(".comparison-evidence-footer code").textContent())
     .not.toBe(initialResultHash);
   await expect.poll(() => new URL(page.url()).hash).toBe("#compare-section-pillar_fact");
   const transit = page.getByRole("region", { name: "同一瞬时点六层运限对照" });
+  await expect(transit).toHaveAttribute("data-target-instant", "2030-01-02T03:04:00.000Z");
   await expect(transit.locator('[data-field-id="transit.day"] td:visible')).toHaveCount(2);
   await expect(transit.getByRole("columnheader").filter({ hasText: items[3].alias })).toBeVisible();
   await expect(transit.getByRole("columnheader").filter({ hasText: items[1].alias })).toBeHidden();
@@ -692,14 +727,14 @@ async function createSameCaseFourRevisionComparison(
 
   await expectSameCaseRevisionOrder(page, items);
   await page.getByLabel(/^目标瞬时点（UTC）/).fill("2031-05-06T07:08");
-  await page.getByRole("button", { name: "同步运限", exact: true }).click();
+  await page.getByRole("button", { name: "应用并重新计算", exact: true }).click();
   await expect.poll(() => new URL(page.url()).searchParams.get("at")).toBe("2031-05-06T07:08:00.000Z");
   const beforeReorderHash = await page.locator(".comparison-evidence-footer code").textContent();
   expect(beforeReorderHash).toMatch(/^[a-f0-9]{64}$/);
 
   const cards = page.getByRole("group", { name: "正式命盘对照位" }).locator("article.comparison-slot-card");
   await cards.nth(2).getByRole("button", { name: "设为 A 基准", exact: true }).click();
-  await expect(page.getByRole("status").filter({ hasText: "已将所选修订设为 A 基准盘" })).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "槽位顺序已更新，A 基准已重新绑定；全部差异将按新基准重新计算。" })).toBeVisible();
   const orderedItems = [items[2], items[0], items[1], items[3]];
   await expect.poll(() => exactComparisonItems(page.url())).toEqual(
     orderedItems.map((item) => `revision:${item.caseId}:${item.revisionId}`)
@@ -752,8 +787,13 @@ async function expectPartitionCounts(
 async function importMixedCsv(page: Page) {
   await page.goto("/cases", { waitUntil: "domcontentloaded" });
   await waitForAppReady(page);
+  const importDrawer = page.locator("details.library-import-drawer");
+  await importDrawer.locator("summary").filter({ hasText: "CSV 批量导入" }).click();
+  await expect(importDrawer).toHaveAttribute("open", "");
+  const chooseCsv = importDrawer.getByRole("button", { name: "选择 CSV", exact: true });
+  await expect(chooseCsv).toBeVisible();
   const chooserPromise = page.waitForEvent("filechooser");
-  await page.getByRole("button", { name: "选择 CSV", exact: true }).click();
+  await chooseCsv.click();
   const chooser = await chooserPromise;
   await chooser.setFiles({
     name: "web-v1-continuous-flow.csv",
@@ -829,9 +869,9 @@ async function trashAndRestoreExactCase(page: Page) {
 async function createRevisionEvent(page: Page, researchPath: string): Promise<string> {
   await page.goto(researchPath, { waitUntil: "domcontentloaded" });
   await waitForAppReady(page);
-  await expect(page.getByRole("button", { name: "导出单盘 Markdown", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^准备单盘 Markdown/u })).toBeVisible();
   const editor = page.locator("section.research-editor-section").filter({
-    has: page.getByRole("heading", { name: "记录真实事件" })
+    has: page.getByRole("heading", { name: "记录研究事件" })
   });
   await expect(editor).toHaveCount(1);
   await editor.getByLabel(/事件标题/).fill(EVENT_TITLE);
@@ -895,6 +935,8 @@ async function createResearchEvidenceChain(page: Page, researchPath: string): Pr
   await page.getByLabel("来源备注", { exact: true }).fill("仅用于本机研究闭环验收");
   await page.getByLabel("出版者", { exact: true }).fill("个人整理");
   await page.getByLabel("出版年份", { exact: true }).fill("2026");
+  // This declaration covers only the synthetic private fixture supplied above.
+  await page.getByRole("checkbox", { name: /^确认私有使用边界/u }).check();
   await page.getByRole("button", { name: "确认导入", exact: true }).click();
   await expect.poll(() => new URL(page.url()).searchParams.get("document")).toMatch(/^[0-9a-f-]{36}$/i);
   const documentId = new URL(page.url()).searchParams.get("document");
@@ -910,7 +952,8 @@ async function createResearchEvidenceChain(page: Page, researchPath: string): Pr
   await expect(page.getByRole("heading", { name: "1 条引用" })).toBeVisible();
   await expect(page.getByRole("blockquote").filter({ hasText: KNOWLEDGE_QUOTE })).toBeVisible();
 
-  await page.getByRole("link", { name: "来源台账", exact: true }).click();
+  await page.getByRole("navigation", { name: "知识与来源审计", exact: true })
+    .getByRole("link", { name: /^来源台账/u }).click();
   await waitForAppReady(page);
   const rightsRecord = page.locator(".rights-record-list article").filter({ hasText: KNOWLEDGE_TITLE });
   await expect(rightsRecord).toHaveCount(1);
@@ -965,7 +1008,7 @@ async function createResearchEvidenceChain(page: Page, researchPath: string): Pr
   await expectCandidateOnlyCoverage(page, 0);
   const subjectRow = page.locator(".coverage-row-list article").filter({ hasText: DAY_GANZHI_SUBJECT_ID });
   await expect(subjectRow).toHaveCount(1);
-  await subjectRow.getByRole("link", { name: "去资料库添加主题来源", exact: true }).click();
+  await subjectRow.getByRole("link", { name: "查看或补充主题来源", exact: true }).click();
   await page.waitForURL((url) => (
     url.pathname === "/knowledge"
     && url.searchParams.get("target") === "evidence_subject"
@@ -996,8 +1039,8 @@ async function expectCandidateOnlyCoverage(page: Page, structuredLinkCount: 0 | 
   await expect(page.getByRole("heading", { name: "依据覆盖审计" })).toBeVisible();
   const coverage = page.getByRole("group", { name: "依据覆盖率" });
   await expect(coverage).toContainText(`结构化链接 · ${structuredLinkCount}/36`);
-  await expect(coverage).toContainText("双人核验 · 0/36");
-  await expect(coverage).toContainText("可分发来源 · 0/36");
+  await expect(coverage).toContainText("双人结构核验 · 0/36");
+  await expect(coverage).toContainText("工程权利门禁来源 · 0/36");
 }
 
 async function saveEventResearchQuery(page: Page, eventId: string): Promise<string> {
@@ -1006,8 +1049,8 @@ async function saveEventResearchQuery(page: Page, eventId: string): Promise<stri
   await eventCard.getByRole("button", { name: `按此事件条件检索：${EVENT_TITLE}`, exact: true }).click();
   await page.waitForURL(/\/cases\/research\?draft=[0-9a-f-]{36}$/i);
   expect([...new URL(page.url()).searchParams.keys()]).toEqual(["draft"]);
-  await expect(page.getByRole("heading", { name: "真实事件 · 1 条结果" })).toBeVisible();
-  await expect(page.getByRole("article", { name: `研究结果 ${EVENT_TITLE}` })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "事件记录 · 1 条结果" })).toBeVisible();
+  await expect(page.getByRole("article", { name: `研究结果 1/1：${EVENT_TITLE}；序号为稳定检索顺序，不是概率排名`, exact: true })).toBeVisible();
   if (process.env.HAKIMI_QA_SCREENSHOT_DIR) {
     await page.screenshot({
       path: path.join(
@@ -1037,7 +1080,7 @@ async function verifyBaselineReceiptResearchQuery(page: Page, releaseSchema: num
   await page.waitForURL(/\/cases\/research\?draft=[0-9a-f-]{36}$/i);
   await expect(page.getByRole("heading", { name: "正式命盘 · 1 条结果" })).toBeVisible();
 
-  const result = page.getByRole("article", { name: `研究结果 ${EXACT_ALIAS}` });
+  const result = page.getByRole("article", { name: `研究结果 1/1：${EXACT_ALIAS}；序号为稳定检索顺序，不是概率排名`, exact: true });
   const storedReceiptExpected = releaseSchema >= 15;
   const sourceLabel = storedReceiptExpected ? "已保存计算收据" : "当前版本即时投影";
   const source = result.getByLabel(`计算来源：${sourceLabel}`);
@@ -1058,9 +1101,15 @@ async function verifyBaselineReceiptResearchQuery(page: Page, releaseSchema: num
     await expect(source.getByText("当前发布代可用", { exact: true })).toBeVisible();
   }
 
+  await page.getByRole("button", { name: "准备查询快照", exact: true }).click();
+  const dialog = page.locator('.prepared-delivery-dialog[role="dialog"]');
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toHaveAccessibleName("待交付文件已在本机生成");
+  await expect(dialog).toHaveAttribute("data-share-policy", "blocked_sensitive");
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "导出查询快照", exact: true }).click();
+  await dialog.getByRole("button", { name: /^下载文件/u }).click();
   const download = await downloadPromise;
+  expect(await download.failure()).toBeNull();
   const downloadPath = await download.path();
   if (!downloadPath) throw new Error("连续流程查询快照下载路径不可用");
   const exported = JSON.parse(await readFile(downloadPath, "utf8")) as {
@@ -1075,6 +1124,10 @@ async function verifyBaselineReceiptResearchQuery(page: Page, releaseSchema: num
     source: storedReceiptExpected ? "stored_receipt" : "explicit_projection",
     comparisonStatus: storedReceiptExpected ? "matched" : "not_applicable"
   });
+  await expect(dialog).toHaveAttribute("data-delivery-outcome", "requested");
+  await dialog.getByRole("button", { name: "已核对，允许再次下载", exact: true }).click();
+  await dialog.getByRole("button", { name: "关闭", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
 }
 
 async function bindCurrentRendererToOffline(context: BrowserContext, page: Page) {
@@ -1091,14 +1144,15 @@ async function bindCurrentRendererToOffline(context: BrowserContext, page: Page)
 }
 
 async function exportAnonymousMarkdownOffline(page: Page, caseId: string, revisionId: string) {
-  await expect(page.getByText(/当前离线/)).toBeVisible();
+  await expect(page.locator('.global-status[role="note"]').getByText("浏览器报告当前离线", { exact: true })).toBeVisible();
   const anonymous = page.getByRole("checkbox", { name: /匿名导出/ });
   await expect(anonymous).toBeChecked();
-  await page.getByRole("button", { name: "导出单盘 Markdown", exact: true }).click();
-  const dialog = page.getByRole("dialog", { name: "文件已在本机生成" });
+  await page.getByRole("button", { name: /^准备单盘 Markdown/u }).click();
+  const dialog = page.locator('.prepared-delivery-dialog[role="dialog"]');
   await expect(dialog).toBeVisible();
+  await expect(dialog).toHaveAccessibleName("待交付文件已在本机生成");
   const downloadPromise = page.waitForEvent("download");
-  await dialog.getByRole("button", { name: "下载文件", exact: true }).click();
+  await dialog.getByRole("button", { name: /^下载文件/u }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe("hakimi-chart-r2-anonymous.md");
   expect(await download.failure()).toBeNull();
@@ -1110,8 +1164,10 @@ async function exportAnonymousMarkdownOffline(page: Page, caseId: string, revisi
   for (const sensitive of [EXACT_ALIAS, EVENT_TITLE, caseId, revisionId]) {
     expect(markdown).not.toContain(sensitive);
   }
+  await expect(dialog).toHaveAttribute("data-delivery-outcome", "requested");
   await dialog.getByRole("button", { name: "已核对，允许再次下载", exact: true }).click();
-  await dialog.getByRole("button", { name: "关闭文件交付", exact: true }).click();
+  await dialog.getByRole("button", { name: "关闭", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
 }
 
 test("同一批 CSV 数据连续贯穿修订、正式四盘对照、证据链、生命周期、事件、检索、离线导出与 v1.2 十六分区恢复", async ({
@@ -1208,7 +1264,11 @@ test("同一批 CSV 数据连续贯穿修订、正式四盘对照、证据链、
   const r3 = await deriveRevision(page, r1Href, { civilTime: "23:30", dayBoundary: "midnight" });
   const r4 = await deriveRevision(page, r1Href, { civilTime: "15:30", dayBoundary: "zi_start_23" });
   expect(new Set([r1.revisionId, r2.revisionId, r3.revisionId, r4.revisionId]).size).toBe(4);
-  await expect(page.getByRole("combobox", { name: "历史 Revision" }).locator("option")).toHaveText([/R1/, /R2/, /R3/, /R4/]);
+  const revisionOptions = page.getByRole("combobox", { name: "历史 Revision" }).locator("option");
+  await expect(revisionOptions).toHaveText([/^R4 · /u, /^R3 · /u, /^R2 · /u, /^R1 · /u]);
+  for (const [index, revisionId] of [r4.revisionId, r3.revisionId, r2.revisionId, r1.revisionId].entries()) {
+    await expect(revisionOptions.nth(index)).toHaveAttribute("value", revisionId);
+  }
   await trashAndRestoreExactCase(page);
 
   const formalComparisonItems: FormalComparisonItem[] = [
@@ -1253,7 +1313,7 @@ test("同一批 CSV 数据连续贯穿修订、正式四盘对照、证据链、
 
   await openDataManagement(page);
   await bindCurrentRendererToOffline(context, page);
-  await expect(page.getByText(/当前离线/)).toBeVisible();
+  await expect(page.locator('.global-status[role="note"]').getByText("浏览器报告当前离线", { exact: true })).toBeVisible();
   await expectPartitionCounts(page, expectedCounts);
   const { bytes: backupBytes } = await exportFullBackupZip(page);
   const sourceBackup = await preflightFullBackupFile(backupBytes);
@@ -1519,7 +1579,9 @@ test("同一批 CSV 数据连续贯穿修订、正式四盘对照、证据链、
     expect(new URL(restorePage.url()).searchParams.get("focus")).toBe("D");
     await restorePage.setViewportSize({ width: 390, height: 844 });
     const restoredSwitcher = restorePage.getByRole("group", { name: "选择当前比较盘" });
-    await expect(restoredSwitcher.getByRole("button", { name: `D · ${formalComparisonItems[3].alias}`, exact: true }))
+    await expect(restoredSwitcher.getByRole("button", {
+      name: `切换到比较盘 D：${formalComparisonItems[3].alias} · Revision ${formalComparisonItems[3].revisionNumber}`, exact: true
+    }))
       .toHaveAttribute("aria-pressed", "true");
     await expect(restoredSwitcher).toContainText(
       `A · ${formalComparisonItems[0].alias} · R${formalComparisonItems[0].revisionNumber}`
@@ -1539,7 +1601,11 @@ test("同一批 CSV 数据连续贯穿修订、正式四盘对照、证据链、
     await restorePage.goto(r2.pathname, { waitUntil: "domcontentloaded" });
     await waitForAppReady(restorePage);
     await expect(restorePage.getByRole("heading", { name: EXACT_ALIAS })).toBeVisible();
-    await expect(restorePage.getByRole("combobox", { name: "历史 Revision" }).locator("option")).toHaveText([/R1/, /R2/, /R3/, /R4/]);
+    const restoredRevisionOptions = restorePage.getByRole("combobox", { name: "历史 Revision" }).locator("option");
+    await expect(restoredRevisionOptions).toHaveText([/^R4 · /u, /^R3 · /u, /^R2 · /u, /^R1 · /u]);
+    for (const [index, revisionId] of [r4.revisionId, r3.revisionId, r2.revisionId, r1.revisionId].entries()) {
+      await expect(restoredRevisionOptions.nth(index)).toHaveAttribute("value", revisionId);
+    }
     await expect(restorePage.getByText("案例已在回收站", { exact: true })).toHaveCount(0);
     await expect(restorePage.getByRole("link", { name: "由此修订派生新版", exact: true })).toBeVisible();
     await restorePage.getByRole("button", { name: /^日柱天干：/ }).click();
@@ -1558,8 +1624,8 @@ test("同一批 CSV 数据连续贯穿修订、正式四盘对照、证据链、
 
     await restorePage.goto(`/cases/research?view=${savedViewId}`, { waitUntil: "domcontentloaded" });
     await waitForAppReady(restorePage);
-    await expect(restorePage.getByRole("heading", { name: "真实事件 · 1 条结果" })).toBeVisible();
-    await expect(restorePage.getByRole("article", { name: `研究结果 ${EVENT_TITLE}` })).toBeVisible();
+    await expect(restorePage.getByRole("heading", { name: "事件记录 · 1 条结果" })).toBeVisible();
+    await expect(restorePage.getByRole("article", { name: `研究结果 1/1：${EVENT_TITLE}；序号为稳定检索顺序，不是概率排名`, exact: true })).toBeVisible();
 
     await restorePage.goto(
       `/knowledge?citation=${evidenceChain.noteCitationId}&target=research_note&note=${evidenceChain.noteId}`,

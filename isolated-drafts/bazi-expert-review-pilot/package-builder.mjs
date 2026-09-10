@@ -17,11 +17,6 @@ const COMMON_SOURCE_FILES = Object.freeze([
   "return-verifier.mjs"
 ]);
 
-const CONFIG_MODULE_BY_SEAT = Object.freeze({
-  A: "./package-builder/seat-a.config.mjs",
-  B: "./package-builder/seat-b.config.mjs"
-});
-
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
 }
@@ -38,9 +33,10 @@ function assertOutsideSourceRoot(outputRoot) {
 }
 
 async function loadSeatConfig(seatId) {
-  const modulePath = CONFIG_MODULE_BY_SEAT[seatId];
-  if (!modulePath) throw new Error("--seat 只能是 A 或 B");
-  const module = await import(modulePath);
+  if (seatId !== "A" && seatId !== "B") throw new Error("--seat 只能是 A 或 B");
+  const module = seatId === "A"
+    ? await import("./package-builder/seat-a.config.mjs")
+    : await import("./package-builder/seat-b.config.mjs");
   const config = module.SEAT_PACKAGE_CONFIG;
   if (!config || config.seatId !== seatId || !/^seat-[ab]\.html$/u.test(config.entry)
     || !Array.isArray(config.order) || config.order.length !== 5 || new Set(config.order).size !== 5) {

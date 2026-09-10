@@ -328,13 +328,13 @@ test("真实浏览器遇到损坏 v8 SavedView 时回滚整个 v9 事务并保�
   const recoveryNav = page.getByRole("navigation", { name: "启动恢复导航" });
   await expect(recoveryNav.getByRole("link", { name: "启动诊断" })).toHaveAttribute("href", "/settings");
   await expect(recoveryNav.getByRole("link", { name: "只读安全备份" })).toHaveAttribute("href", "/settings/data");
-  await expect(page.getByRole("button", { name: "导出启动诊断 JSON" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "生成启动诊断 JSON" })).toBeVisible();
   await expect.poll(() => page.evaluate(() => document.documentElement.dataset.appBootReady)).toBe("false");
   await expect(page.locator("vite-error-overlay, #vite-error-overlay")).toHaveCount(0);
 
   await recoveryNav.getByRole("link", { name: "只读安全备份" }).click();
   await expect(page).toHaveTitle("只读安全备份 · 哈基米八字研究台");
-  await expect(page.getByRole("button", { name: "导出只读完整备份 ZIP" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "生成只读完整备份 ZIP" })).toBeDisabled();
   await expect(page.getByRole("heading", { name: "专业研究检索" })).toHaveCount(0);
 
   const inspection = await inspectDatabase(page, [VALID_VIEW_ID, INVALID_VIEW_ID]);
@@ -378,7 +378,7 @@ test("真实浏览器提示旧 v8 标签页占用，并在关闭旧连接后重�
   await expect.poll(() => page.evaluate(() => document.documentElement.dataset.appBootReady)).toBe("false");
 
   await page.reload({ waitUntil: "domcontentloaded" });
-  await expect.poll(() => page.evaluate(() => document.documentElement.dataset.appBootReady)).toBe("true");
+  await expect(page.locator("html")).toHaveAttribute("data-app-boot-ready", "true");
   await expect(page.getByRole("alert").filter({ hasText: "启动完整性检查未通过" })).toHaveCount(0);
   await expect(page).toHaveTitle("专业研究检索 · 哈基米八字研究台");
   await expect(page.getByRole("heading", { name: "专业研究检索" })).toBeVisible();

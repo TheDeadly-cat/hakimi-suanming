@@ -71,7 +71,7 @@ test("390px 首次打开数据页时可全程离线导出、清空并恢复完�
   // event after a service-worker navigation. Dispatch the real event only after
   // proving navigator.onLine is false, so the UI hook observes the verified state.
   await page.evaluate(() => window.dispatchEvent(new Event("offline")));
-  await expect(page.getByText(/当前离线/)).toBeVisible();
+  await expect(page.getByText("浏览器报告当前离线", { exact: true })).toBeVisible();
   await expectMobileNoOverflow(page);
 
   await seedPortableData(page, fixture);

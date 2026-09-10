@@ -2,6 +2,40 @@
   "schemaVersion": 1,
   "registryClass": "downstream-isolated-drafts-not-bound-into-upstream-readiness",
   "upstreamRegistryPath": "scripts/system-contract-draft-registry.json",
+  "evidenceDependencyPolicyAmendments": [
+    {
+      "toolPath": "scripts/cross-system-engineering-fact-receipt-lib.mjs",
+      "dependencyPath": "scripts/bazi-expert-review-packet-lib.mjs",
+      "addBareImports": [
+        "@babel/parser",
+        "node:fs",
+        "node:url",
+        "node:util"
+      ],
+      "addLocalTargets": [
+        "scripts/bazi-source-binding-candidate-lib.mjs",
+        "scripts/bazi-source-rights-candidate-lib.mjs"
+      ],
+      "newDependencyPolicies": [
+        {
+          "path": "scripts/bazi-source-binding-candidate-lib.mjs",
+          "allowedBareImports": [
+            "node:crypto"
+          ],
+          "allowedLocalTargets": []
+        },
+        {
+          "path": "scripts/bazi-source-rights-candidate-lib.mjs",
+          "allowedBareImports": [
+            "node:crypto"
+          ],
+          "allowedLocalTargets": [
+            "scripts/bazi-source-binding-candidate-lib.mjs"
+          ]
+        }
+      ]
+    }
+  ],
   "drafts": [
     {
       "directoryName": "vedic-input-admission-kernel-draft",

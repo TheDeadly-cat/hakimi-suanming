@@ -380,7 +380,7 @@
 
 .deepseek-submit-readiness {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px 12px;
   align-items: center;
   padding: 11px 13px;
@@ -409,7 +409,7 @@
   font-size: 0.73rem;
   font-weight: 700;
   line-height: 1.4;
-  text-align: right;
+  text-align: left;
 }
 
 .deepseek-submit-readiness[data-state="ready"] {

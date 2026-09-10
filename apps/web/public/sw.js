@@ -16,6 +16,31 @@ const CLIENT_DRAFT_CLEANUP_TIMEOUT_MS = 5_000;
 const CONTROLLER_TAKEOVER_CLIENT_TIMEOUT_MS = 15_000;
 const CONTROLLER_TAKEOVER_PREPARATION_TIMEOUT_MS = 60_000;
 const CONTROLLER_TAKEOVER_MAX_CLIENT_PASSES = 32;
+const SAME_DESCRIPTOR_ACTIVATION_PROTOCOL = Object.freeze({
+  mode: "same_descriptor",
+  request: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+  requestAck: "REQUEST_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+  prepare: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+  prepareAck: "PREPARE_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+  commit: "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1",
+  commitAck: "COMMIT_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+  abort: "ABORT_INSTALLED_GENERATION_ACTIVATION_V1",
+  freeze: "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_V1",
+  freezeAck: "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_ACK_V1"
+});
+const FORWARD_MIGRATION_ACTIVATION_PROTOCOL = Object.freeze({
+  mode: "legacy_v13_to_shadow_v16",
+  request: "REQUEST_INSTALLED_FORWARD_MIGRATION_ACTIVATION_V1",
+  requestAck: "REQUEST_INSTALLED_FORWARD_MIGRATION_ACTIVATION_ACK_V1",
+  prepare: "PREPARE_INSTALLED_FORWARD_MIGRATION_ACTIVATION_V1",
+  prepareAck: "PREPARE_INSTALLED_FORWARD_MIGRATION_ACTIVATION_ACK_V1",
+  commit: "COMMIT_INSTALLED_FORWARD_MIGRATION_ACTIVATION_V1",
+  commitAck: "COMMIT_INSTALLED_FORWARD_MIGRATION_ACTIVATION_ACK_V1",
+  abort: "ABORT_INSTALLED_FORWARD_MIGRATION_ACTIVATION_V1",
+  abortAck: "ABORT_INSTALLED_FORWARD_MIGRATION_ACTIVATION_ACK_V1",
+  freeze: "FREEZE_RELEASE_FORWARD_MIGRATION_ACTIVATION_WRITES_V1",
+  freezeAck: "FREEZE_RELEASE_FORWARD_MIGRATION_ACTIVATION_WRITES_ACK_V1"
+});
 const CONTROLLER_TAKEOVER_ACK_REASON_CODES = new Set([
   "PROTOCOL_MISMATCH",
   "TAKEOVER_SESSION_BUSY",
@@ -230,6 +255,36 @@ function releaseTransitionCanTakeOver(source, target) {
   // Controller takeover is deliberately same-Schema and same-descriptor.
   // Cross-Schema releases have a separate migration freeze/commit protocol.
   return descriptorsEqual(source, target);
+}
+
+function releaseTransitionCanActivateForwardMigration(source, target) {
+  if (!normalizeExactReleaseDescriptor(source) || !normalizeExactReleaseDescriptor(target)) return false;
+  return isLegacyBridgeDescriptor(source) &&
+    source.dbGeneration === "legacy-v13" &&
+    source.targetSchema === 13 &&
+    source.minReadableSchema === 13 &&
+    source.maxReadableSchema === 13 &&
+    source.migrationId === null &&
+    target.protocolVersion === source.protocolVersion &&
+    target.targetSchema === 16 &&
+    target.minReadableSchema === 16 &&
+    target.maxReadableSchema === 16 &&
+    isNonEmptyString(target.migrationId) &&
+    target.acceptedCommittedMigrationIds.includes(target.migrationId) &&
+    target.dbGeneration !== source.dbGeneration &&
+    target.databaseName !== source.databaseName &&
+    target.databaseName !== RELEASE_CONTROL_DATABASE &&
+    target.sourceGeneration === source.dbGeneration &&
+    target.sourceDatabaseName === source.databaseName &&
+    target.sourceSchema === source.targetSchema;
+}
+
+function activationProtocolAllowsTransition(protocol, source, target) {
+  if (protocol === SAME_DESCRIPTOR_ACTIVATION_PROTOCOL) {
+    return releaseTransitionCanTakeOver(source, target);
+  }
+  return protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL &&
+    releaseTransitionCanActivateForwardMigration(source, target);
 }
 
 function isServiceWorkerMessageSource(source) {
@@ -1544,9 +1599,9 @@ function clearPendingInstalledGenerationActivation(pending) {
   pending?.resolveLifetime?.();
 }
 
-function postInstalledGenerationPreparationAck(port, message, result) {
+function postInstalledGenerationPreparationAck(port, message, result, protocol) {
   port.postMessage({
-    type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+    type: protocol.prepareAck,
     requestId: message?.requestId,
     sourceBuildVersion: message?.sourceBuildVersion,
     targetBuildVersion: CACHE_VERSION,
@@ -1555,19 +1610,27 @@ function postInstalledGenerationPreparationAck(port, message, result) {
   });
 }
 
-function prepareInstalledGenerationActivation(event, message) {
+function prepareInstalledGenerationActivation(event, message, protocol = SAME_DESCRIPTOR_ACTIVATION_PROTOCOL) {
   const responsePort = messagePort(event);
   const sourceWorker = event.source;
   const sourceRelease = normalizeExactReleaseDescriptor(message?.sourceRelease);
   if (
     !responsePort ||
+    message?.type !== protocol.prepare ||
     !isServiceWorkerMessageSource(sourceWorker) ||
     !isControllerTakeoverRequestId(message?.requestId) ||
     !isNonEmptyString(message?.sourceBuildVersion) ||
     message.sourceBuildVersion.length > 256 ||
     message.sourceBuildVersion === CACHE_VERSION ||
     !sourceRelease ||
-    !releaseTransitionCanTakeOver(sourceRelease, CURRENT_RELEASE_DATABASE) ||
+    !activationProtocolAllowsTransition(protocol, sourceRelease, CURRENT_RELEASE_DATABASE) ||
+    (protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL && (
+      sourceWorker !== self.registration?.active ||
+      sourceWorker.state !== "activated" ||
+      self.registration?.waiting?.state !== "installed" ||
+      message.targetBuildVersion !== CACHE_VERSION ||
+      !descriptorsEqual(normalizeExactReleaseDescriptor(message.targetRelease), CURRENT_RELEASE_DATABASE)
+    )) ||
     activationStarted ||
     pendingInstalledGenerationActivation !== null
   ) {
@@ -1575,7 +1638,7 @@ function prepareInstalledGenerationActivation(event, message) {
       accepted: false,
       reason: "PROTOCOL_MISMATCH",
       challengeNonce: null
-    });
+    }, protocol);
     return Promise.resolve();
   }
 
@@ -1584,6 +1647,7 @@ function prepareInstalledGenerationActivation(event, message) {
     resolveLifetime = resolve;
   });
   const pending = {
+    protocol,
     requestId: message.requestId,
     sourceBuildVersion: message.sourceBuildVersion,
     sourceRelease,
@@ -1603,11 +1667,11 @@ function prepareInstalledGenerationActivation(event, message) {
     accepted: true,
     reason: "CHALLENGE_ISSUED",
     challengeNonce: pending.challengeNonce
-  });
+  }, protocol);
   return pending.lifetimePromise;
 }
 
-function abortInstalledGenerationActivation(event, message) {
+function abortInstalledGenerationActivation(event, message, protocol = SAME_DESCRIPTOR_ACTIVATION_PROTOCOL) {
   const pending = pendingInstalledGenerationActivation;
   const authenticatedChallengeAbort =
     message?.targetBuildVersion === CACHE_VERSION &&
@@ -1618,30 +1682,58 @@ function abortInstalledGenerationActivation(event, message) {
     message?.reason === "PREPARATION_ACK_NOT_OBSERVED";
   if (
     !pending ||
+    pending.protocol !== protocol ||
+    message?.type !== protocol.abort ||
     event.source !== pending.sourceWorker ||
     message?.requestId !== pending.requestId ||
     message?.sourceBuildVersion !== pending.sourceBuildVersion ||
     (!authenticatedChallengeAbort && !authenticatedUnobservedPreparationAbort)
-  ) return;
+  ) {
+    if (protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL) messagePort(event)?.postMessage({
+      type: protocol.abortAck,
+      requestId: message?.requestId,
+      sourceBuildVersion: message?.sourceBuildVersion,
+      targetBuildVersion: CACHE_VERSION,
+      accepted: false,
+      reason: "PROTOCOL_MISMATCH"
+    });
+    return;
+  }
   clearPendingInstalledGenerationActivation(pending);
+  if (protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL) messagePort(event)?.postMessage({
+    type: protocol.abortAck,
+    requestId: pending.requestId,
+    sourceBuildVersion: pending.sourceBuildVersion,
+    targetBuildVersion: CACHE_VERSION,
+    accepted: true,
+    reason: "PREPARATION_ABORTED"
+  });
 }
 
-async function commitInstalledGenerationActivation(event, message) {
+function commitInstalledGenerationActivation(event, message, protocol = SAME_DESCRIPTOR_ACTIVATION_PROTOCOL) {
   const responsePort = messagePort(event);
   const pending = pendingInstalledGenerationActivation;
   if (
     !responsePort ||
     !pending ||
+    pending.protocol !== protocol ||
+    message?.type !== protocol.commit ||
     event.source !== pending.sourceWorker ||
     message?.requestId !== pending.requestId ||
     message?.sourceBuildVersion !== pending.sourceBuildVersion ||
     message?.targetBuildVersion !== CACHE_VERSION ||
     message?.challengeNonce !== pending.challengeNonce ||
     !isControllerTakeoverChallengeNonce(message?.challengeNonce) ||
+    (protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL && (
+      event.source !== self.registration?.active ||
+      event.source.state !== "activated" ||
+      self.registration?.waiting?.state !== "installed" ||
+      !activationProtocolAllowsTransition(protocol, pending.sourceRelease, CURRENT_RELEASE_DATABASE)
+    )) ||
     activationStarted
   ) {
     responsePort?.postMessage({
-      type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+      type: protocol.commitAck,
       requestId: message?.requestId,
       sourceBuildVersion: message?.sourceBuildVersion,
       targetBuildVersion: CACHE_VERSION,
@@ -1653,13 +1745,14 @@ async function commitInstalledGenerationActivation(event, message) {
 
   clearPendingInstalledGenerationActivation(pending);
   activationStarted = true;
+  let activationRequest;
   try {
-    await self.skipWaiting();
+    activationRequest = self.skipWaiting();
   } catch {
     activationStarted = false;
     try {
       responsePort.postMessage({
-        type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+        type: protocol.commitAck,
         requestId: pending.requestId,
         sourceBuildVersion: pending.sourceBuildVersion,
         targetBuildVersion: CACHE_VERSION,
@@ -1672,9 +1765,16 @@ async function commitInstalledGenerationActivation(event, message) {
     }
     return;
   }
+  // This receipt proves the authenticated call was made, not that B activated.
+  // Its Promise may wait for A's outstanding events, including A's wait for
+  // this receipt. Neither this COMMIT event nor PREPARE may wait for it.
+  void activationRequest.catch(() => {
+    // A returned request is outcome-unknown on asynchronous rejection. Do not
+    // reset activationStarted, emit a late known-rejected ACK, or retry it.
+  });
   try {
     responsePort.postMessage({
-      type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+      type: protocol.commitAck,
       requestId: pending.requestId,
       sourceBuildVersion: pending.sourceBuildVersion,
       targetBuildVersion: CACHE_VERSION,
@@ -1682,7 +1782,7 @@ async function commitInstalledGenerationActivation(event, message) {
       reason: "SKIP_WAITING_REQUESTED"
     });
   } catch {
-    // skipWaiting already succeeded. Never reset activationStarted or emit a
+    // skipWaiting already returned. Never reset activationStarted or emit a
     // known-rejected NACK: the active worker must time out and retain its hold.
   }
 }
@@ -1703,7 +1803,7 @@ function requestWaitingActivationPreparation(waitingWorker, session) {
       const response = event.data;
       const targetRelease = normalizeExactReleaseDescriptor(response?.targetRelease);
       if (
-        response?.type !== "PREPARE_INSTALLED_GENERATION_ACTIVATION_ACK_V1" ||
+        response?.type !== session.protocol.prepareAck ||
         response?.requestId !== session.requestId ||
         response?.sourceBuildVersion !== CACHE_VERSION ||
         !isNonEmptyString(response?.targetBuildVersion) ||
@@ -1713,7 +1813,11 @@ function requestWaitingActivationPreparation(waitingWorker, session) {
         response?.reason !== "CHALLENGE_ISSUED" ||
         !isControllerTakeoverChallengeNonce(response?.challengeNonce) ||
         !targetRelease ||
-        !releaseTransitionCanTakeOver(CURRENT_RELEASE_DATABASE, targetRelease)
+        !activationProtocolAllowsTransition(session.protocol, CURRENT_RELEASE_DATABASE, targetRelease) ||
+        (session.protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL && (
+          response.targetBuildVersion !== session.targetBuildVersion ||
+          !descriptorsEqual(targetRelease, session.targetRelease)
+        ))
       ) {
         finish(() => reject(new Error("WAITING_PREPARATION_REJECTED")));
         return;
@@ -1726,10 +1830,14 @@ function requestWaitingActivationPreparation(waitingWorker, session) {
     };
     try {
       waitingWorker.postMessage({
-        type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+        type: session.protocol.prepare,
         requestId: session.requestId,
         sourceBuildVersion: CACHE_VERSION,
-        sourceRelease: releaseDescriptorFields(CURRENT_RELEASE_DATABASE)
+        sourceRelease: releaseDescriptorFields(CURRENT_RELEASE_DATABASE),
+        ...(session.protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL ? {
+          targetBuildVersion: session.targetBuildVersion,
+          targetRelease: releaseDescriptorFields(session.targetRelease)
+        } : {})
       }, [channel.port2]);
     } catch {
       finish(() => reject(new Error("WAITING_PREPARATION_POST_FAILED")));
@@ -1754,7 +1862,7 @@ function requestClientControllerTakeoverFreeze(client, session) {
     channel.port1.onmessage = (event) => {
       const response = event.data;
       const accepted =
-        response?.type === "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_ACK_V1" &&
+        response?.type === session.protocol.freezeAck &&
         response?.requestId === session.requestId &&
         response?.sourceBuildVersion === CACHE_VERSION &&
         response?.targetBuildVersion === session.targetBuildVersion &&
@@ -1768,7 +1876,7 @@ function requestClientControllerTakeoverFreeze(client, session) {
     };
     try {
       client.postMessage({
-        type: "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_V1",
+        type: session.protocol.freeze,
         requestId: session.requestId,
         sourceBuildVersion: CACHE_VERSION,
         targetBuildVersion: session.targetBuildVersion,
@@ -1832,7 +1940,7 @@ function commitWaitingActivation(waitingWorker, session) {
     channel.port1.onmessage = (event) => {
       const response = event.data;
       const identityMatches =
-        response?.type === "COMMIT_INSTALLED_GENERATION_ACTIVATION_ACK_V1" &&
+        response?.type === session.protocol.commitAck &&
         response?.requestId === session.requestId &&
         response?.sourceBuildVersion === CACHE_VERSION &&
         response?.targetBuildVersion === session.targetBuildVersion;
@@ -1858,7 +1966,7 @@ function commitWaitingActivation(waitingWorker, session) {
     };
     try {
       waitingWorker.postMessage({
-        type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1",
+        type: session.protocol.commit,
         requestId: session.requestId,
         sourceBuildVersion: CACHE_VERSION,
         targetBuildVersion: session.targetBuildVersion,
@@ -1875,7 +1983,7 @@ function abortWaitingActivationPreparation(waitingWorker, session) {
   const challengeObserved = Boolean(session.challengeNonce && session.targetBuildVersion);
   try {
     waitingWorker.postMessage({
-      type: "ABORT_INSTALLED_GENERATION_ACTIVATION_V1",
+      type: session.protocol.abort,
       requestId: session.requestId,
       sourceBuildVersion: CACHE_VERSION,
       targetBuildVersion: challengeObserved ? session.targetBuildVersion : null,
@@ -1899,6 +2007,11 @@ async function persistControllerTakeoverNavigationHold(session) {
       new Response(
         JSON.stringify({
           kind: "controller_takeover_navigation_hold_v1",
+          ...(session.protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL ? {
+            activationMode: session.protocol.mode,
+            sourceRelease: releaseDescriptorFields(CURRENT_RELEASE_DATABASE),
+            targetRelease: releaseDescriptorFields(session.targetRelease)
+          } : {}),
           requestId: session.requestId,
           sourceBuildVersion: CACHE_VERSION,
           targetBuildVersion: session.targetBuildVersion
@@ -1986,13 +2099,13 @@ function clearControllerTakeoverSession(session) {
   if (activeControllerTakeoverSession === session) activeControllerTakeoverSession = null;
 }
 
-function postControllerTakeoverRequestAck(port, message, result) {
+function postControllerTakeoverRequestAck(port, message, result, protocol = SAME_DESCRIPTOR_ACTIVATION_PROTOCOL) {
   const reason = CONTROLLER_TAKEOVER_ACK_REASON_CODES.has(result?.reason)
     ? result.reason
     : "TAKEOVER_PREPARATION_FAILED";
   const accepted = result?.accepted === true && reason === "ALL_CLIENTS_DRAINED_BEFORE_SKIP_WAITING";
   port.postMessage({
-    type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+    type: protocol.requestAck,
     requestId: message?.requestId,
     sourceBuildVersion: CACHE_VERSION,
     ...result,
@@ -2011,19 +2124,56 @@ function fixedControllerTakeoverFailureReason(reason) {
   return "TAKEOVER_PREPARATION_FAILED";
 }
 
-async function prepareControllerTakeoverAndActivateWaiting(event, message) {
+function assertForwardMigrationWaitingWorker(session) {
+  if (
+    self.registration?.waiting !== session.waitingWorker ||
+    session.waitingWorker?.state !== "installed"
+  ) throw new Error("WAITING_WORKER_NOT_INSTALLED");
+}
+
+async function assertForwardMigrationSourceCommitted(session) {
+  const committed = await readCommittedReleaseState();
+  if (
+    committed.status !== "ready" ||
+    !committedStateExactlyMatchesDescriptor(committed.state, CURRENT_RELEASE_DATABASE) ||
+    committed.state.committedSchema !== CURRENT_RELEASE_DATABASE.targetSchema ||
+    committed.state.committedBuild !== CACHE_VERSION ||
+    committed.state.migrationId !== CURRENT_RELEASE_DATABASE.migrationId ||
+    (session.sourceCommittedReceiptDigest !== null &&
+      session.sourceCommittedReceiptDigest !== committed.state.receiptDigest)
+  ) throw new Error("PROTOCOL_MISMATCH");
+  session.sourceCommittedReceiptDigest = committed.state.receiptDigest;
+  if (activeControllerTakeoverSession !== session || session.abortPromise !== null) {
+    throw new Error("TAKEOVER_SESSION_CANCELLED");
+  }
+  assertForwardMigrationWaitingWorker(session);
+}
+
+async function prepareControllerTakeoverAndActivateWaiting(event, message, protocol = SAME_DESCRIPTOR_ACTIVATION_PROTOCOL) {
   const responsePort = messagePort(event);
   const sourceClientId = typeof event.source?.id === "string" ? event.source.id : "";
   const sourceRelease = normalizeExactReleaseDescriptor(message?.sourceRelease);
+  const targetRelease = protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL
+    ? normalizeExactReleaseDescriptor(message?.targetRelease)
+    : null;
+  const postRequestAck = (result) => postControllerTakeoverRequestAck(responsePort, message, result, protocol);
   if (
     !responsePort ||
+    message?.type !== protocol.request ||
     !sourceClientId ||
     !isControllerTakeoverRequestId(message?.requestId) ||
     message?.sourceBuildVersion !== CACHE_VERSION ||
     !sourceRelease ||
-    !descriptorsEqual(sourceRelease, CURRENT_RELEASE_DATABASE)
+    !descriptorsEqual(sourceRelease, CURRENT_RELEASE_DATABASE) ||
+    (protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL && (
+      !targetRelease ||
+      !isNonEmptyString(message.targetBuildVersion) ||
+      message.targetBuildVersion.length > 256 ||
+      message.targetBuildVersion === CACHE_VERSION ||
+      !activationProtocolAllowsTransition(protocol, sourceRelease, targetRelease)
+    ))
   ) {
-    if (responsePort) postControllerTakeoverRequestAck(responsePort, message, {
+    if (responsePort) postRequestAck({
       targetBuildVersion: null,
       targetRelease: null,
       accepted: false,
@@ -2036,7 +2186,7 @@ async function prepareControllerTakeoverAndActivateWaiting(event, message) {
   }
 
   if (activeControllerTakeoverSession !== null || activeClientFreezeSession !== null) {
-    postControllerTakeoverRequestAck(responsePort, message, {
+    postRequestAck({
       targetBuildVersion: null,
       targetRelease: null,
       accepted: false,
@@ -2063,7 +2213,7 @@ async function prepareControllerTakeoverAndActivateWaiting(event, message) {
       : persistentTakeoverHoldStatus === "present"
         ? "TAKEOVER_HOLD_PRESENT"
         : "TAKEOVER_HOLD_STATUS_UNKNOWN";
-    postControllerTakeoverRequestAck(responsePort, message, {
+    postRequestAck({
       targetBuildVersion: null,
       targetRelease: null,
       accepted: false,
@@ -2077,7 +2227,7 @@ async function prepareControllerTakeoverAndActivateWaiting(event, message) {
 
   const waitingWorker = self.registration?.waiting;
   if (!waitingWorker || waitingWorker.state !== "installed") {
-    postControllerTakeoverRequestAck(responsePort, message, {
+    postRequestAck({
       targetBuildVersion: null,
       targetRelease: null,
       accepted: false,
@@ -2090,11 +2240,13 @@ async function prepareControllerTakeoverAndActivateWaiting(event, message) {
   }
 
   const session = {
+    protocol,
     requestId: message.requestId,
     initiatorClientId: sourceClientId,
     waitingWorker,
-    targetBuildVersion: null,
-    targetRelease: null,
+    targetBuildVersion: protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL ? message.targetBuildVersion : null,
+    targetRelease,
+    sourceCommittedReceiptDigest: null,
     challengeNonce: null,
     frozenClientIds: new Set(),
     rejectedClientIds: [],
@@ -2113,8 +2265,12 @@ async function prepareControllerTakeoverAndActivateWaiting(event, message) {
   session.timer = timeout;
 
   try {
+    if (protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL) {
+      await assertForwardMigrationSourceCommitted(session);
+    }
     const preparation = await requestWaitingActivationPreparation(waitingWorker, session);
     if (activeControllerTakeoverSession !== session) throw new Error("TAKEOVER_SESSION_CANCELLED");
+    if (protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL) assertForwardMigrationWaitingWorker(session);
     session.targetBuildVersion = preparation.targetBuildVersion;
     session.targetRelease = preparation.targetRelease;
     session.challengeNonce = preparation.challengeNonce;
@@ -2134,6 +2290,9 @@ async function prepareControllerTakeoverAndActivateWaiting(event, message) {
     ) throw new Error("TAKEOVER_SESSION_CANCELLED");
     // Persisting the restart-safe hold yielded. Re-enumerate and re-freeze so
     // every client created during that await is included in the final census.
+    if (protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL) {
+      await assertForwardMigrationSourceCommitted(session);
+    }
     session.state = "refreezing_clients_after_hold";
     closure = await freezeAllControllerTakeoverClients(session);
     if (
@@ -2143,11 +2302,12 @@ async function prepareControllerTakeoverAndActivateWaiting(event, message) {
     session.state = "clients_frozen_after_hold";
     // No await occurs between the final stable matchAll result and this
     // synchronous postMessage. Navigation fetch tasks remain held by A.
+    if (protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL) assertForwardMigrationWaitingWorker(session);
     const activation = commitWaitingActivation(waitingWorker, session);
     session.state = "activation_dispatched";
     await activation;
     if (session.timer !== null) clearTimeout(session.timer);
-    postControllerTakeoverRequestAck(responsePort, message, {
+    postRequestAck({
       targetBuildVersion: session.targetBuildVersion,
       targetRelease: releaseDescriptorFields(session.targetRelease),
       accepted: true,
@@ -2172,7 +2332,7 @@ async function prepareControllerTakeoverAndActivateWaiting(event, message) {
       const released = await abortControllerTakeoverBeforeCommit(waitingWorker, session);
       if (!released) failureReason = "TAKEOVER_HOLD_CLEAR_FAILED";
     }
-    postControllerTakeoverRequestAck(responsePort, message, {
+    postRequestAck({
       targetBuildVersion: session.targetBuildVersion,
       targetRelease: session.targetRelease ? releaseDescriptorFields(session.targetRelease) : null,
       accepted: false,
@@ -2186,6 +2346,22 @@ async function prepareControllerTakeoverAndActivateWaiting(event, message) {
 
 self.addEventListener("message", (event) => {
   const message = event.data;
+  if (message?.type === FORWARD_MIGRATION_ACTIVATION_PROTOCOL.request) {
+    event.waitUntil(prepareControllerTakeoverAndActivateWaiting(event, message, FORWARD_MIGRATION_ACTIVATION_PROTOCOL));
+    return;
+  }
+  if (message?.type === FORWARD_MIGRATION_ACTIVATION_PROTOCOL.prepare) {
+    event.waitUntil(prepareInstalledGenerationActivation(event, message, FORWARD_MIGRATION_ACTIVATION_PROTOCOL));
+    return;
+  }
+  if (message?.type === FORWARD_MIGRATION_ACTIVATION_PROTOCOL.abort) {
+    abortInstalledGenerationActivation(event, message, FORWARD_MIGRATION_ACTIVATION_PROTOCOL);
+    return;
+  }
+  if (message?.type === FORWARD_MIGRATION_ACTIVATION_PROTOCOL.commit) {
+    commitInstalledGenerationActivation(event, message, FORWARD_MIGRATION_ACTIVATION_PROTOCOL);
+    return;
+  }
   if (message?.type === "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1") {
     event.waitUntil(prepareControllerTakeoverAndActivateWaiting(event, message));
     return;
@@ -2199,7 +2375,7 @@ self.addEventListener("message", (event) => {
     return;
   }
   if (message?.type === "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1") {
-    event.waitUntil(commitInstalledGenerationActivation(event, message));
+    commitInstalledGenerationActivation(event, message);
     return;
   }
   if (message?.type === "CLEAR_RESEARCH_QUERY_SESSION_DRAFTS_ACROSS_CLIENTS") {
@@ -2233,6 +2409,19 @@ self.addEventListener("message", (event) => {
       type: "BUILD_VERSION",
       buildVersion: CACHE_VERSION,
       ...releaseDescriptorFields(CURRENT_RELEASE_DATABASE)
+    });
+    return;
+  }
+  if (message?.type === "GET_INSTALLED_GENERATION_RELEASE_IDENTITY_V1") {
+    const responsePort = messagePort(event);
+    if (!responsePort || !isNonEmptyString(message.requestId) || message.requestId.length > 256) return;
+    // Metadata only: the caller still needs the independently authenticated
+    // challenge, exact waiting-worker identity and all-client drain protocol.
+    responsePort.postMessage({
+      type: "GET_INSTALLED_GENERATION_RELEASE_IDENTITY_ACK_V1",
+      requestId: message.requestId,
+      buildVersion: CACHE_VERSION,
+      release: releaseDescriptorFields(CURRENT_RELEASE_DATABASE)
     });
     return;
   }
@@ -2375,18 +2564,31 @@ function controllerTakeoverHoldingResponse() {
   const expectedRelease = JSON.stringify(releaseDescriptorFields(CURRENT_RELEASE_DATABASE));
   const inlineExpectedRelease = JSON.stringify(expectedRelease).replaceAll("<", "\\u003c");
   const inlineSourceBuildVersion = JSON.stringify(CACHE_VERSION).replaceAll("<", "\\u003c");
+  const forwardSession = activeControllerTakeoverSession?.protocol === FORWARD_MIGRATION_ACTIVATION_PROTOCOL
+    ? activeControllerTakeoverSession
+    : null;
+  const inlineForwardIdentity = JSON.stringify(forwardSession ? {
+    requestId: forwardSession.requestId,
+    targetBuildVersion: forwardSession.targetBuildVersion,
+    targetRelease: JSON.stringify(releaseDescriptorFields(forwardSession.targetRelease))
+  } : null).replaceAll("<", "\\u003c");
   const holdingScript =
     "(() => {" +
     `const sourceBuildVersion=${inlineSourceBuildVersion};` +
     `const expectedRelease=${inlineExpectedRelease};` +
+    `const forwardIdentity=${inlineForwardIdentity};` +
     "const requestIdPattern=/^takeover-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;" +
     "const exactRelease=(value)=>{try{return JSON.stringify(value)===expectedRelease;}catch{return false;}};" +
     "navigator.serviceWorker.addEventListener('message',(event)=>{" +
     "const message=event.data;const controller=navigator.serviceWorker.controller;" +
     "if(!controller||event.source!==controller||!requestIdPattern.test(message?.requestId)||message?.sourceBuildVersion!==sourceBuildVersion)return;" +
+    "if(message?.type==='FREEZE_RELEASE_FORWARD_MIGRATION_ACTIVATION_WRITES_V1'){" +
+    "const port=event.ports?.[0];" +
+    "if(!forwardIdentity||!port||message.requestId!==forwardIdentity.requestId||message.targetBuildVersion!==forwardIdentity.targetBuildVersion||!exactRelease(message.sourceRelease)||JSON.stringify(message.targetRelease)!==forwardIdentity.targetRelease)return;" +
+    "port.postMessage({type:'FREEZE_RELEASE_FORWARD_MIGRATION_ACTIVATION_WRITES_ACK_V1',requestId:message.requestId,sourceBuildVersion,targetBuildVersion:message.targetBuildVersion,accepted:true,reason:'WRITES_DRAINED'});return;}" +
     "if(message?.type==='FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_V1'){" +
     "const port=event.ports?.[0];" +
-    "if(!port||typeof message.targetBuildVersion!=='string'||message.targetBuildVersion.length===0||message.targetBuildVersion.length>256||message.targetBuildVersion===sourceBuildVersion||!exactRelease(message.sourceRelease)||!exactRelease(message.targetRelease))return;" +
+    "if(forwardIdentity||!port||typeof message.targetBuildVersion!=='string'||message.targetBuildVersion.length===0||message.targetBuildVersion.length>256||message.targetBuildVersion===sourceBuildVersion||!exactRelease(message.sourceRelease)||!exactRelease(message.targetRelease))return;" +
     "port.postMessage({type:'FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_ACK_V1',requestId:message.requestId,sourceBuildVersion,targetBuildVersion:message.targetBuildVersion,accepted:true,reason:'WRITES_DRAINED'});return;}" +
     "if(message?.type==='RELEASE_CONTROLLER_TAKEOVER_HOLDING_DOCUMENT_V1')window.location.reload();" +
     "});" +

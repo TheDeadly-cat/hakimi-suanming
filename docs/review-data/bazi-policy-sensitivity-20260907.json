@@ -1,0 +1,5537 @@
+{
+  "scope": "Local engineering review of existing weights, thresholds and month duplication. No empirical truth, school judgement, reviewer qualification, freeze or release authority.",
+  "bindingIds": [
+    "binding:policy:weights",
+    "binding:policy:thresholds",
+    "binding:policy:month-duplication"
+  ],
+  "parameters": {
+    "weights": {
+      "monthCommand": 4,
+      "visibleStem": 2,
+      "firstHiddenStem": 2,
+      "otherHiddenStem": 1
+    },
+    "thresholds": {
+      "veryWeakUpperExclusive": 0.25,
+      "weakUpperExclusive": 0.43,
+      "balancedUpperInclusive": 0.57,
+      "strongUpperInclusive": 0.75
+    }
+  },
+  "syntheticDemoInput": {
+    "schemaVersion": "1.0.0",
+    "calendarType": "gregorian",
+    "date": "1995-08-18",
+    "time": "08:26",
+    "timePrecision": "exact_minute",
+    "timeZone": "Asia/Shanghai",
+    "sex": "male",
+    "lunarLeapMonth": false,
+    "location": {
+      "label": "演示地点",
+      "latitude": null,
+      "longitude": null,
+      "precision": "city"
+    },
+    "sourceNote": "来源 A"
+  },
+  "ruleProfile": {
+    "schemaVersion": "1.0.0",
+    "profileId": "ziping-working-default",
+    "profileVersion": "0.1.0",
+    "status": "working_default",
+    "label": "传统子平工作默认",
+    "notice": "工程工作默认，不代表唯一正确流派；1900—2100 仅为声明支持范围，不代表已强验证，当前尚未通过 360 例金标准发布门。",
+    "sourceRefs": [],
+    "supportedRange": {
+      "stronglyVerifiedFrom": "1900-01-01",
+      "stronglyVerifiedTo": "2100-12-31",
+      "outsideRangePolicy": "experimental_with_warning"
+    },
+    "calendar": {
+      "yearBoundary": "lichun_exact",
+      "monthBoundary": "jie_exact",
+      "dayBoundary": "zi_start_23",
+      "ziHourDayStemBasis": "after_day_change",
+      "hourBasis": "civil_time",
+      "timezoneSource": "iana",
+      "dstAmbiguity": "require_user",
+      "locationPrecision": "city"
+    },
+    "solarTime": {
+      "enabled": false,
+      "showComparison": true,
+      "longitudeSource": "location",
+      "equationOfTimeModel": null
+    },
+    "luckCycle": {
+      "directionRule": "year_stem_yinyang_and_gender",
+      "unknownValuePolicy": "require_manual_direction",
+      "anchor": "directional_jie",
+      "startAgeMethod": "three_days_one_year_exact_duration",
+      "rounding": "retain_duration"
+    },
+    "layers": {
+      "hiddenStems": true,
+      "tenGods": true,
+      "nayin": true,
+      "voidBranches": true,
+      "twelveGrowth": true,
+      "stemBranchRelations": true,
+      "shensha": false
+    },
+    "interpretation": {
+      "strengthRulePack": null,
+      "structureRulePack": null,
+      "climateRulePack": null,
+      "usefulGodRulePack": null
+    }
+  },
+  "caseCount": 3,
+  "modeCount": 2,
+  "scenarioRows": 36,
+  "rows": [
+    {
+      "caseName": "weakFacts",
+      "provenance": "packages/bazi-interpretation/src/index.test.ts",
+      "includeHour": true,
+      "pillars": {
+        "year": "庚申",
+        "month": "辛酉",
+        "day": "甲午",
+        "hour": "戊辰"
+      },
+      "factors": [
+        {
+          "id": "month-command:酉:辛",
+          "group": "month_command",
+          "position": "month",
+          "label": "月令 酉 主气 辛",
+          "tenGod": "正官",
+          "direction": "demand",
+          "weight": 4,
+          "detail": "月令主气在本候选规则中权重最高。官杀克制日主，计入压力侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "visible:year:庚",
+          "group": "visible_stem",
+          "position": "year",
+          "label": "年柱透干 庚",
+          "tenGod": "七杀",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "官杀克制日主，计入压力侧。",
+          "sourceRefIds": [
+            "smt-ten-gods",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "hidden:year:庚:0",
+          "group": "hidden_stem",
+          "position": "year",
+          "label": "年柱申藏庚（主气）",
+          "tenGod": "七杀",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "官杀克制日主，计入压力侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:year:壬:1",
+          "group": "hidden_stem",
+          "position": "year",
+          "label": "年柱申藏壬",
+          "tenGod": "偏印",
+          "direction": "support",
+          "weight": 1,
+          "detail": "印星生助日主，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:year:戊:2",
+          "group": "hidden_stem",
+          "position": "year",
+          "label": "年柱申藏戊",
+          "tenGod": "偏财",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "visible:month:辛",
+          "group": "visible_stem",
+          "position": "month",
+          "label": "月柱透干 辛",
+          "tenGod": "正官",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "官杀克制日主，计入压力侧。",
+          "sourceRefIds": [
+            "smt-ten-gods",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "hidden:month:辛:0",
+          "group": "hidden_stem",
+          "position": "month",
+          "label": "月柱酉藏辛（主气）",
+          "tenGod": "正官",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "官杀克制日主，计入压力侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:丁:0",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱午藏丁（主气）",
+          "tenGod": "伤官",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "食伤由日主所生，计入泄身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:己:1",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱午藏己",
+          "tenGod": "正财",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "visible:hour:戊",
+          "group": "visible_stem",
+          "position": "hour",
+          "label": "时柱透干 戊",
+          "tenGod": "偏财",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "smt-ten-gods",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "hidden:hour:戊:0",
+          "group": "hidden_stem",
+          "position": "hour",
+          "label": "时柱辰藏戊（主气）",
+          "tenGod": "偏财",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:hour:乙:1",
+          "group": "hidden_stem",
+          "position": "hour",
+          "label": "时柱辰藏乙",
+          "tenGod": "劫财",
+          "direction": "support",
+          "weight": 1,
+          "detail": "比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:hour:癸:2",
+          "group": "hidden_stem",
+          "position": "hour",
+          "label": "时柱辰藏癸",
+          "tenGod": "正印",
+          "direction": "support",
+          "weight": 1,
+          "detail": "印星生助日主，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        }
+      ],
+      "baseline": {
+        "supportWeight": 3,
+        "demandWeight": 20,
+        "band": "very_weak"
+      },
+      "review": {
+        "profile": {
+          "projectionVersion": "hakimi.bazi.strength_sensitivity_review/0.1.0",
+          "evidenceClass": "derived_engineering_sensitivity_audit",
+          "reviewStatus": "candidate_pending_expert_review",
+          "mutationPolicy": "read_only_projection"
+        },
+        "baselineRulePackId": "hakimi-bazi-strength-ten-god-candidate",
+        "baselineRuleVersion": "0.1.0",
+        "baselineBand": "very_weak",
+        "baselineDirection": "demand_leading",
+        "duplicateMonthMain": {
+          "detected": true,
+          "monthCommandFactorId": "month-command:酉:辛",
+          "monthHiddenMainFactorId": "hidden:month:辛:0",
+          "combinedSourceWeight": 6,
+          "directSummary": "当前候选把同一月支主气分别计入月令项 4 权重和首位藏干项 2 权重；去重场景用于观察这项假设是否改变结论。"
+        },
+        "scenarios": [
+          {
+            "id": "baseline_current_candidate",
+            "label": "当前 0.1.0 候选",
+            "purpose": "原样复现当前“月令 4、透干 2、首位藏干 2、其余藏干 1”权重与阈值，作为比较基线；不因此升级为专家定论。",
+            "role": "current_candidate_baseline",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:酉:辛",
+              "visible:year:庚",
+              "hidden:year:庚:0",
+              "hidden:year:壬:1",
+              "hidden:year:戊:2",
+              "visible:month:辛",
+              "hidden:month:辛:0",
+              "hidden:day:丁:0",
+              "hidden:day:己:1",
+              "visible:hour:戊",
+              "hidden:hour:戊:0",
+              "hidden:hour:乙:1",
+              "hidden:hour:癸:2"
+            ],
+            "excludedFactorIds": [],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:酉:辛",
+                "label": "月令 酉 主气 辛",
+                "group": "month_command",
+                "direction": "demand",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:庚",
+                "label": "年柱透干 庚",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:庚:0",
+                "label": "年柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:壬:1",
+                "label": "年柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:戊:2",
+                "label": "年柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:辛",
+                "label": "月柱透干 辛",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:辛:0",
+                "label": "月柱酉藏辛（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丁:0",
+                "label": "日柱午藏丁（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:己:1",
+                "label": "日柱午藏己",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:hour:戊",
+                "label": "时柱透干 戊",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:戊:0",
+                "label": "时柱辰藏戊（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:乙:1",
+                "label": "时柱辰藏乙",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:癸:2",
+                "label": "时柱辰藏癸",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 3,
+            "demandWeight": 20,
+            "supportRatio": 0.13043478260869565,
+            "band": "very_weak",
+            "bandLabel": "很弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "deduplicate_month_main",
+            "label": "月支主气去重",
+            "purpose": "保留月令主气 4 权重，但移除同一月支首位藏干的再次计权，观察重复计权影响。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:酉:辛",
+              "visible:year:庚",
+              "hidden:year:庚:0",
+              "hidden:year:壬:1",
+              "hidden:year:戊:2",
+              "visible:month:辛",
+              "hidden:day:丁:0",
+              "hidden:day:己:1",
+              "visible:hour:戊",
+              "hidden:hour:戊:0",
+              "hidden:hour:乙:1",
+              "hidden:hour:癸:2"
+            ],
+            "excludedFactorIds": [
+              "hidden:month:辛:0"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:酉:辛",
+                "label": "月令 酉 主气 辛",
+                "group": "month_command",
+                "direction": "demand",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:庚",
+                "label": "年柱透干 庚",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:庚:0",
+                "label": "年柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:壬:1",
+                "label": "年柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:戊:2",
+                "label": "年柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:辛",
+                "label": "月柱透干 辛",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丁:0",
+                "label": "日柱午藏丁（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:己:1",
+                "label": "日柱午藏己",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:hour:戊",
+                "label": "时柱透干 戊",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:戊:0",
+                "label": "时柱辰藏戊（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:乙:1",
+                "label": "时柱辰藏乙",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:癸:2",
+                "label": "时柱辰藏癸",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 3,
+            "demandWeight": 18,
+            "supportRatio": 0.14285714285714285,
+            "band": "very_weak",
+            "bandLabel": "很弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "equal_presence_deduplicated",
+            "label": "去重后等权出现",
+            "purpose": "月支主气去重后，将每个剩余因素都按 1 计，仅观察因素数量方向。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:酉:辛",
+              "visible:year:庚",
+              "hidden:year:庚:0",
+              "hidden:year:壬:1",
+              "hidden:year:戊:2",
+              "visible:month:辛",
+              "hidden:day:丁:0",
+              "hidden:day:己:1",
+              "visible:hour:戊",
+              "hidden:hour:戊:0",
+              "hidden:hour:乙:1",
+              "hidden:hour:癸:2"
+            ],
+            "excludedFactorIds": [
+              "hidden:month:辛:0"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:酉:辛",
+                "label": "月令 酉 主气 辛",
+                "group": "month_command",
+                "direction": "demand",
+                "sourceWeight": 4,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:year:庚",
+                "label": "年柱透干 庚",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:庚:0",
+                "label": "年柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:壬:1",
+                "label": "年柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:戊:2",
+                "label": "年柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:辛",
+                "label": "月柱透干 辛",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:丁:0",
+                "label": "日柱午藏丁（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:己:1",
+                "label": "日柱午藏己",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:hour:戊",
+                "label": "时柱透干 戊",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:戊:0",
+                "label": "时柱辰藏戊（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:乙:1",
+                "label": "时柱辰藏乙",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:癸:2",
+                "label": "时柱辰藏癸",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 3,
+            "demandWeight": 9,
+            "supportRatio": 0.25,
+            "band": "weak",
+            "bandLabel": "偏弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": false,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_month_command_bonus",
+            "label": "不计月令加权项",
+            "purpose": "移除独立的月令 4 权重项，但保留月支首位藏干的一般出现，观察月令加权影响。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "visible:year:庚",
+              "hidden:year:庚:0",
+              "hidden:year:壬:1",
+              "hidden:year:戊:2",
+              "visible:month:辛",
+              "hidden:month:辛:0",
+              "hidden:day:丁:0",
+              "hidden:day:己:1",
+              "visible:hour:戊",
+              "hidden:hour:戊:0",
+              "hidden:hour:乙:1",
+              "hidden:hour:癸:2"
+            ],
+            "excludedFactorIds": [
+              "month-command:酉:辛"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "visible:year:庚",
+                "label": "年柱透干 庚",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:庚:0",
+                "label": "年柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:壬:1",
+                "label": "年柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:戊:2",
+                "label": "年柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:辛",
+                "label": "月柱透干 辛",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:辛:0",
+                "label": "月柱酉藏辛（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丁:0",
+                "label": "日柱午藏丁（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:己:1",
+                "label": "日柱午藏己",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:hour:戊",
+                "label": "时柱透干 戊",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:戊:0",
+                "label": "时柱辰藏戊（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:乙:1",
+                "label": "时柱辰藏乙",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:癸:2",
+                "label": "时柱辰藏癸",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 3,
+            "demandWeight": 16,
+            "supportRatio": 0.15789473684210525,
+            "band": "very_weak",
+            "bandLabel": "很弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_visible_stems",
+            "label": "省略透干",
+            "purpose": "暂时省略所有透干因素，检验结论是否过度依赖天干显性出现。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:酉:辛",
+              "hidden:year:庚:0",
+              "hidden:year:壬:1",
+              "hidden:year:戊:2",
+              "hidden:month:辛:0",
+              "hidden:day:丁:0",
+              "hidden:day:己:1",
+              "hidden:hour:戊:0",
+              "hidden:hour:乙:1",
+              "hidden:hour:癸:2"
+            ],
+            "excludedFactorIds": [
+              "visible:year:庚",
+              "visible:month:辛",
+              "visible:hour:戊"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:酉:辛",
+                "label": "月令 酉 主气 辛",
+                "group": "month_command",
+                "direction": "demand",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "hidden:year:庚:0",
+                "label": "年柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:壬:1",
+                "label": "年柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:戊:2",
+                "label": "年柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:辛:0",
+                "label": "月柱酉藏辛（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丁:0",
+                "label": "日柱午藏丁（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:己:1",
+                "label": "日柱午藏己",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:戊:0",
+                "label": "时柱辰藏戊（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:乙:1",
+                "label": "时柱辰藏乙",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:癸:2",
+                "label": "时柱辰藏癸",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 3,
+            "demandWeight": 14,
+            "supportRatio": 0.17647058823529413,
+            "band": "very_weak",
+            "bandLabel": "很弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_hidden_stems",
+            "label": "省略一般藏干",
+            "purpose": "暂时省略所有一般藏干因素，但保留独立月令项，检验结论是否过度依赖藏干累计。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:酉:辛",
+              "visible:year:庚",
+              "visible:month:辛",
+              "visible:hour:戊"
+            ],
+            "excludedFactorIds": [
+              "hidden:year:庚:0",
+              "hidden:year:壬:1",
+              "hidden:year:戊:2",
+              "hidden:month:辛:0",
+              "hidden:day:丁:0",
+              "hidden:day:己:1",
+              "hidden:hour:戊:0",
+              "hidden:hour:乙:1",
+              "hidden:hour:癸:2"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:酉:辛",
+                "label": "月令 酉 主气 辛",
+                "group": "month_command",
+                "direction": "demand",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:庚",
+                "label": "年柱透干 庚",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "visible:month:辛",
+                "label": "月柱透干 辛",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "visible:hour:戊",
+                "label": "时柱透干 戊",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              }
+            ],
+            "supportWeight": 0,
+            "demandWeight": 10,
+            "supportRatio": 0,
+            "band": "very_weak",
+            "bandLabel": "很弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          }
+        ],
+        "distinctBands": [
+          "very_weak",
+          "weak"
+        ],
+        "distinctDirections": [
+          "demand_leading"
+        ],
+        "stability": "band_sensitive",
+        "stabilityLabel": "分档对工程假设敏感",
+        "directSummary": "当前候选为“很弱”。六个工程审计场景得到 2 种分档、1 种支持/泄耗方向，结论为“分档对工程假设敏感”；这只说明模型对工程假设的敏感程度，不签发命理真值。",
+        "expertReviewQuestions": [
+          "月令主气与同一月支首位藏干是否应同时计权；若同时计权，边界依据是什么？",
+          "透干、首位藏干、其余藏干与月令之间应采用怎样的相对权重，哪些反例会推翻当前“月令 4、透干 2、首位藏干 2、其余藏干 1”候选？",
+          "0.25、0.43、0.57、0.75 分档阈值是否有可复核案例集支持？",
+          "从格、专旺、化气、合化、刑冲、调候等结构应在何时使基础旺衰结论失效或改写？"
+        ],
+        "knownBoundaries": [
+          "六个场景是工程扰动，不对应也不冒充任何命理门派。",
+          "审计只复用当前候选已经采集的因素，不能判断从格、专旺、化气、调候、大运流年等缺口。",
+          "分档稳定不等于规则正确，分档变化也不自动证明某个替代场景正确。",
+          "本投影只读，不回写命盘、修订、存储或 mutation epoch。"
+        ],
+        "sourceRefIds": [
+          "dtt-strength",
+          "smt-position",
+          "yhzp-hidden-stems"
+        ],
+        "selectedOfficialScenarioId": null,
+        "expertStrengthVerdict": null,
+        "overallGoodBad": null,
+        "result": null
+      }
+    },
+    {
+      "caseName": "weakFacts",
+      "provenance": "packages/bazi-interpretation/src/index.test.ts",
+      "includeHour": false,
+      "pillars": {
+        "year": "庚申",
+        "month": "辛酉",
+        "day": "甲午",
+        "hour": "戊辰"
+      },
+      "factors": [
+        {
+          "id": "month-command:酉:辛",
+          "group": "month_command",
+          "position": "month",
+          "label": "月令 酉 主气 辛",
+          "tenGod": "正官",
+          "direction": "demand",
+          "weight": 4,
+          "detail": "月令主气在本候选规则中权重最高。官杀克制日主，计入压力侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "visible:year:庚",
+          "group": "visible_stem",
+          "position": "year",
+          "label": "年柱透干 庚",
+          "tenGod": "七杀",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "官杀克制日主，计入压力侧。",
+          "sourceRefIds": [
+            "smt-ten-gods",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "hidden:year:庚:0",
+          "group": "hidden_stem",
+          "position": "year",
+          "label": "年柱申藏庚（主气）",
+          "tenGod": "七杀",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "官杀克制日主，计入压力侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:year:壬:1",
+          "group": "hidden_stem",
+          "position": "year",
+          "label": "年柱申藏壬",
+          "tenGod": "偏印",
+          "direction": "support",
+          "weight": 1,
+          "detail": "印星生助日主，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:year:戊:2",
+          "group": "hidden_stem",
+          "position": "year",
+          "label": "年柱申藏戊",
+          "tenGod": "偏财",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "visible:month:辛",
+          "group": "visible_stem",
+          "position": "month",
+          "label": "月柱透干 辛",
+          "tenGod": "正官",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "官杀克制日主，计入压力侧。",
+          "sourceRefIds": [
+            "smt-ten-gods",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "hidden:month:辛:0",
+          "group": "hidden_stem",
+          "position": "month",
+          "label": "月柱酉藏辛（主气）",
+          "tenGod": "正官",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "官杀克制日主，计入压力侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:丁:0",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱午藏丁（主气）",
+          "tenGod": "伤官",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "食伤由日主所生，计入泄身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:己:1",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱午藏己",
+          "tenGod": "正财",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        }
+      ],
+      "baseline": {
+        "supportWeight": 1,
+        "demandWeight": 16,
+        "band": "very_weak"
+      },
+      "review": {
+        "profile": {
+          "projectionVersion": "hakimi.bazi.strength_sensitivity_review/0.1.0",
+          "evidenceClass": "derived_engineering_sensitivity_audit",
+          "reviewStatus": "candidate_pending_expert_review",
+          "mutationPolicy": "read_only_projection"
+        },
+        "baselineRulePackId": "hakimi-bazi-strength-ten-god-candidate",
+        "baselineRuleVersion": "0.1.0",
+        "baselineBand": "very_weak",
+        "baselineDirection": "demand_leading",
+        "duplicateMonthMain": {
+          "detected": true,
+          "monthCommandFactorId": "month-command:酉:辛",
+          "monthHiddenMainFactorId": "hidden:month:辛:0",
+          "combinedSourceWeight": 6,
+          "directSummary": "当前候选把同一月支主气分别计入月令项 4 权重和首位藏干项 2 权重；去重场景用于观察这项假设是否改变结论。"
+        },
+        "scenarios": [
+          {
+            "id": "baseline_current_candidate",
+            "label": "当前 0.1.0 候选",
+            "purpose": "原样复现当前“月令 4、透干 2、首位藏干 2、其余藏干 1”权重与阈值，作为比较基线；不因此升级为专家定论。",
+            "role": "current_candidate_baseline",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:酉:辛",
+              "visible:year:庚",
+              "hidden:year:庚:0",
+              "hidden:year:壬:1",
+              "hidden:year:戊:2",
+              "visible:month:辛",
+              "hidden:month:辛:0",
+              "hidden:day:丁:0",
+              "hidden:day:己:1"
+            ],
+            "excludedFactorIds": [],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:酉:辛",
+                "label": "月令 酉 主气 辛",
+                "group": "month_command",
+                "direction": "demand",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:庚",
+                "label": "年柱透干 庚",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:庚:0",
+                "label": "年柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:壬:1",
+                "label": "年柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:戊:2",
+                "label": "年柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:辛",
+                "label": "月柱透干 辛",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:辛:0",
+                "label": "月柱酉藏辛（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丁:0",
+                "label": "日柱午藏丁（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:己:1",
+                "label": "日柱午藏己",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 1,
+            "demandWeight": 16,
+            "supportRatio": 0.058823529411764705,
+            "band": "very_weak",
+            "bandLabel": "很弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "deduplicate_month_main",
+            "label": "月支主气去重",
+            "purpose": "保留月令主气 4 权重，但移除同一月支首位藏干的再次计权，观察重复计权影响。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:酉:辛",
+              "visible:year:庚",
+              "hidden:year:庚:0",
+              "hidden:year:壬:1",
+              "hidden:year:戊:2",
+              "visible:month:辛",
+              "hidden:day:丁:0",
+              "hidden:day:己:1"
+            ],
+            "excludedFactorIds": [
+              "hidden:month:辛:0"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:酉:辛",
+                "label": "月令 酉 主气 辛",
+                "group": "month_command",
+                "direction": "demand",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:庚",
+                "label": "年柱透干 庚",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:庚:0",
+                "label": "年柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:壬:1",
+                "label": "年柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:戊:2",
+                "label": "年柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:辛",
+                "label": "月柱透干 辛",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丁:0",
+                "label": "日柱午藏丁（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:己:1",
+                "label": "日柱午藏己",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 1,
+            "demandWeight": 14,
+            "supportRatio": 0.06666666666666667,
+            "band": "very_weak",
+            "bandLabel": "很弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "equal_presence_deduplicated",
+            "label": "去重后等权出现",
+            "purpose": "月支主气去重后，将每个剩余因素都按 1 计，仅观察因素数量方向。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:酉:辛",
+              "visible:year:庚",
+              "hidden:year:庚:0",
+              "hidden:year:壬:1",
+              "hidden:year:戊:2",
+              "visible:month:辛",
+              "hidden:day:丁:0",
+              "hidden:day:己:1"
+            ],
+            "excludedFactorIds": [
+              "hidden:month:辛:0"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:酉:辛",
+                "label": "月令 酉 主气 辛",
+                "group": "month_command",
+                "direction": "demand",
+                "sourceWeight": 4,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:year:庚",
+                "label": "年柱透干 庚",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:庚:0",
+                "label": "年柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:壬:1",
+                "label": "年柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:戊:2",
+                "label": "年柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:辛",
+                "label": "月柱透干 辛",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:丁:0",
+                "label": "日柱午藏丁（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:己:1",
+                "label": "日柱午藏己",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 1,
+            "demandWeight": 7,
+            "supportRatio": 0.125,
+            "band": "very_weak",
+            "bandLabel": "很弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_month_command_bonus",
+            "label": "不计月令加权项",
+            "purpose": "移除独立的月令 4 权重项，但保留月支首位藏干的一般出现，观察月令加权影响。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "visible:year:庚",
+              "hidden:year:庚:0",
+              "hidden:year:壬:1",
+              "hidden:year:戊:2",
+              "visible:month:辛",
+              "hidden:month:辛:0",
+              "hidden:day:丁:0",
+              "hidden:day:己:1"
+            ],
+            "excludedFactorIds": [
+              "month-command:酉:辛"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "visible:year:庚",
+                "label": "年柱透干 庚",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:庚:0",
+                "label": "年柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:壬:1",
+                "label": "年柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:戊:2",
+                "label": "年柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:辛",
+                "label": "月柱透干 辛",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:辛:0",
+                "label": "月柱酉藏辛（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丁:0",
+                "label": "日柱午藏丁（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:己:1",
+                "label": "日柱午藏己",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 1,
+            "demandWeight": 12,
+            "supportRatio": 0.07692307692307693,
+            "band": "very_weak",
+            "bandLabel": "很弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_visible_stems",
+            "label": "省略透干",
+            "purpose": "暂时省略所有透干因素，检验结论是否过度依赖天干显性出现。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:酉:辛",
+              "hidden:year:庚:0",
+              "hidden:year:壬:1",
+              "hidden:year:戊:2",
+              "hidden:month:辛:0",
+              "hidden:day:丁:0",
+              "hidden:day:己:1"
+            ],
+            "excludedFactorIds": [
+              "visible:year:庚",
+              "visible:month:辛"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:酉:辛",
+                "label": "月令 酉 主气 辛",
+                "group": "month_command",
+                "direction": "demand",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "hidden:year:庚:0",
+                "label": "年柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:壬:1",
+                "label": "年柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:戊:2",
+                "label": "年柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:辛:0",
+                "label": "月柱酉藏辛（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丁:0",
+                "label": "日柱午藏丁（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:己:1",
+                "label": "日柱午藏己",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 1,
+            "demandWeight": 12,
+            "supportRatio": 0.07692307692307693,
+            "band": "very_weak",
+            "bandLabel": "很弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_hidden_stems",
+            "label": "省略一般藏干",
+            "purpose": "暂时省略所有一般藏干因素，但保留独立月令项，检验结论是否过度依赖藏干累计。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:酉:辛",
+              "visible:year:庚",
+              "visible:month:辛"
+            ],
+            "excludedFactorIds": [
+              "hidden:year:庚:0",
+              "hidden:year:壬:1",
+              "hidden:year:戊:2",
+              "hidden:month:辛:0",
+              "hidden:day:丁:0",
+              "hidden:day:己:1"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:酉:辛",
+                "label": "月令 酉 主气 辛",
+                "group": "month_command",
+                "direction": "demand",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:庚",
+                "label": "年柱透干 庚",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "visible:month:辛",
+                "label": "月柱透干 辛",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              }
+            ],
+            "supportWeight": 0,
+            "demandWeight": 8,
+            "supportRatio": 0,
+            "band": "very_weak",
+            "bandLabel": "很弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          }
+        ],
+        "distinctBands": [
+          "very_weak"
+        ],
+        "distinctDirections": [
+          "demand_leading"
+        ],
+        "stability": "stable_across_engineering_scenarios",
+        "stabilityLabel": "工程扰动下稳定",
+        "directSummary": "当前候选为“很弱”。六个工程审计场景得到 1 种分档、1 种支持/泄耗方向，结论为“工程扰动下稳定”；这只说明模型对工程假设的敏感程度，不签发命理真值。",
+        "expertReviewQuestions": [
+          "月令主气与同一月支首位藏干是否应同时计权；若同时计权，边界依据是什么？",
+          "透干、首位藏干、其余藏干与月令之间应采用怎样的相对权重，哪些反例会推翻当前“月令 4、透干 2、首位藏干 2、其余藏干 1”候选？",
+          "0.25、0.43、0.57、0.75 分档阈值是否有可复核案例集支持？",
+          "从格、专旺、化气、合化、刑冲、调候等结构应在何时使基础旺衰结论失效或改写？"
+        ],
+        "knownBoundaries": [
+          "六个场景是工程扰动，不对应也不冒充任何命理门派。",
+          "审计只复用当前候选已经采集的因素，不能判断从格、专旺、化气、调候、大运流年等缺口。",
+          "分档稳定不等于规则正确，分档变化也不自动证明某个替代场景正确。",
+          "本投影只读，不回写命盘、修订、存储或 mutation epoch。"
+        ],
+        "sourceRefIds": [
+          "dtt-strength",
+          "smt-position",
+          "yhzp-hidden-stems"
+        ],
+        "selectedOfficialScenarioId": null,
+        "expertStrengthVerdict": null,
+        "overallGoodBad": null,
+        "result": null
+      }
+    },
+    {
+      "caseName": "strongFacts",
+      "provenance": "packages/bazi-interpretation/src/index.test.ts",
+      "includeHour": true,
+      "pillars": {
+        "year": "壬子",
+        "month": "甲寅",
+        "day": "甲寅",
+        "hour": "乙亥"
+      },
+      "factors": [
+        {
+          "id": "month-command:寅:甲",
+          "group": "month_command",
+          "position": "month",
+          "label": "月令 寅 主气 甲",
+          "tenGod": "比肩",
+          "direction": "support",
+          "weight": 4,
+          "detail": "月令主气在本候选规则中权重最高。比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "visible:year:壬",
+          "group": "visible_stem",
+          "position": "year",
+          "label": "年柱透干 壬",
+          "tenGod": "偏印",
+          "direction": "support",
+          "weight": 2,
+          "detail": "印星生助日主，计入支持侧。",
+          "sourceRefIds": [
+            "smt-ten-gods",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "hidden:year:癸:0",
+          "group": "hidden_stem",
+          "position": "year",
+          "label": "年柱子藏癸（主气）",
+          "tenGod": "正印",
+          "direction": "support",
+          "weight": 2,
+          "detail": "印星生助日主，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "visible:month:甲",
+          "group": "visible_stem",
+          "position": "month",
+          "label": "月柱透干 甲",
+          "tenGod": "比肩",
+          "direction": "support",
+          "weight": 2,
+          "detail": "比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "smt-ten-gods",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "hidden:month:甲:0",
+          "group": "hidden_stem",
+          "position": "month",
+          "label": "月柱寅藏甲（主气）",
+          "tenGod": "比肩",
+          "direction": "support",
+          "weight": 2,
+          "detail": "比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:month:丙:1",
+          "group": "hidden_stem",
+          "position": "month",
+          "label": "月柱寅藏丙",
+          "tenGod": "食神",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "食伤由日主所生，计入泄身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:month:戊:2",
+          "group": "hidden_stem",
+          "position": "month",
+          "label": "月柱寅藏戊",
+          "tenGod": "偏财",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:甲:0",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱寅藏甲（主气）",
+          "tenGod": "比肩",
+          "direction": "support",
+          "weight": 2,
+          "detail": "比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:丙:1",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱寅藏丙",
+          "tenGod": "食神",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "食伤由日主所生，计入泄身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:戊:2",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱寅藏戊",
+          "tenGod": "偏财",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "visible:hour:乙",
+          "group": "visible_stem",
+          "position": "hour",
+          "label": "时柱透干 乙",
+          "tenGod": "劫财",
+          "direction": "support",
+          "weight": 2,
+          "detail": "比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "smt-ten-gods",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "hidden:hour:壬:0",
+          "group": "hidden_stem",
+          "position": "hour",
+          "label": "时柱亥藏壬（主气）",
+          "tenGod": "偏印",
+          "direction": "support",
+          "weight": 2,
+          "detail": "印星生助日主，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:hour:甲:1",
+          "group": "hidden_stem",
+          "position": "hour",
+          "label": "时柱亥藏甲",
+          "tenGod": "比肩",
+          "direction": "support",
+          "weight": 1,
+          "detail": "比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        }
+      ],
+      "baseline": {
+        "supportWeight": 19,
+        "demandWeight": 4,
+        "band": "very_strong"
+      },
+      "review": {
+        "profile": {
+          "projectionVersion": "hakimi.bazi.strength_sensitivity_review/0.1.0",
+          "evidenceClass": "derived_engineering_sensitivity_audit",
+          "reviewStatus": "candidate_pending_expert_review",
+          "mutationPolicy": "read_only_projection"
+        },
+        "baselineRulePackId": "hakimi-bazi-strength-ten-god-candidate",
+        "baselineRuleVersion": "0.1.0",
+        "baselineBand": "very_strong",
+        "baselineDirection": "support_leading",
+        "duplicateMonthMain": {
+          "detected": true,
+          "monthCommandFactorId": "month-command:寅:甲",
+          "monthHiddenMainFactorId": "hidden:month:甲:0",
+          "combinedSourceWeight": 6,
+          "directSummary": "当前候选把同一月支主气分别计入月令项 4 权重和首位藏干项 2 权重；去重场景用于观察这项假设是否改变结论。"
+        },
+        "scenarios": [
+          {
+            "id": "baseline_current_candidate",
+            "label": "当前 0.1.0 候选",
+            "purpose": "原样复现当前“月令 4、透干 2、首位藏干 2、其余藏干 1”权重与阈值，作为比较基线；不因此升级为专家定论。",
+            "role": "current_candidate_baseline",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:寅:甲",
+              "visible:year:壬",
+              "hidden:year:癸:0",
+              "visible:month:甲",
+              "hidden:month:甲:0",
+              "hidden:month:丙:1",
+              "hidden:month:戊:2",
+              "hidden:day:甲:0",
+              "hidden:day:丙:1",
+              "hidden:day:戊:2",
+              "visible:hour:乙",
+              "hidden:hour:壬:0",
+              "hidden:hour:甲:1"
+            ],
+            "excludedFactorIds": [],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:寅:甲",
+                "label": "月令 寅 主气 甲",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:壬",
+                "label": "年柱透干 壬",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:癸:0",
+                "label": "年柱子藏癸（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:甲:0",
+                "label": "月柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:丙:1",
+                "label": "月柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:甲:0",
+                "label": "日柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丙:1",
+                "label": "日柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:hour:乙",
+                "label": "时柱透干 乙",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:壬:0",
+                "label": "时柱亥藏壬（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:甲:1",
+                "label": "时柱亥藏甲",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 19,
+            "demandWeight": 4,
+            "supportRatio": 0.8260869565217391,
+            "band": "very_strong",
+            "bandLabel": "很强",
+            "broadDirection": "support_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "deduplicate_month_main",
+            "label": "月支主气去重",
+            "purpose": "保留月令主气 4 权重，但移除同一月支首位藏干的再次计权，观察重复计权影响。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:寅:甲",
+              "visible:year:壬",
+              "hidden:year:癸:0",
+              "visible:month:甲",
+              "hidden:month:丙:1",
+              "hidden:month:戊:2",
+              "hidden:day:甲:0",
+              "hidden:day:丙:1",
+              "hidden:day:戊:2",
+              "visible:hour:乙",
+              "hidden:hour:壬:0",
+              "hidden:hour:甲:1"
+            ],
+            "excludedFactorIds": [
+              "hidden:month:甲:0"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:寅:甲",
+                "label": "月令 寅 主气 甲",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:壬",
+                "label": "年柱透干 壬",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:癸:0",
+                "label": "年柱子藏癸（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:丙:1",
+                "label": "月柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:甲:0",
+                "label": "日柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丙:1",
+                "label": "日柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:hour:乙",
+                "label": "时柱透干 乙",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:壬:0",
+                "label": "时柱亥藏壬（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:甲:1",
+                "label": "时柱亥藏甲",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 17,
+            "demandWeight": 4,
+            "supportRatio": 0.8095238095238095,
+            "band": "very_strong",
+            "bandLabel": "很强",
+            "broadDirection": "support_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "equal_presence_deduplicated",
+            "label": "去重后等权出现",
+            "purpose": "月支主气去重后，将每个剩余因素都按 1 计，仅观察因素数量方向。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:寅:甲",
+              "visible:year:壬",
+              "hidden:year:癸:0",
+              "visible:month:甲",
+              "hidden:month:丙:1",
+              "hidden:month:戊:2",
+              "hidden:day:甲:0",
+              "hidden:day:丙:1",
+              "hidden:day:戊:2",
+              "visible:hour:乙",
+              "hidden:hour:壬:0",
+              "hidden:hour:甲:1"
+            ],
+            "excludedFactorIds": [
+              "hidden:month:甲:0"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:寅:甲",
+                "label": "月令 寅 主气 甲",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:year:壬",
+                "label": "年柱透干 壬",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:癸:0",
+                "label": "年柱子藏癸（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:丙:1",
+                "label": "月柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:甲:0",
+                "label": "日柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:丙:1",
+                "label": "日柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:hour:乙",
+                "label": "时柱透干 乙",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:壬:0",
+                "label": "时柱亥藏壬（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:甲:1",
+                "label": "时柱亥藏甲",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 8,
+            "demandWeight": 4,
+            "supportRatio": 0.6666666666666666,
+            "band": "strong",
+            "bandLabel": "偏强",
+            "broadDirection": "support_leading",
+            "agreesWithBaselineBand": false,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_month_command_bonus",
+            "label": "不计月令加权项",
+            "purpose": "移除独立的月令 4 权重项，但保留月支首位藏干的一般出现，观察月令加权影响。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "visible:year:壬",
+              "hidden:year:癸:0",
+              "visible:month:甲",
+              "hidden:month:甲:0",
+              "hidden:month:丙:1",
+              "hidden:month:戊:2",
+              "hidden:day:甲:0",
+              "hidden:day:丙:1",
+              "hidden:day:戊:2",
+              "visible:hour:乙",
+              "hidden:hour:壬:0",
+              "hidden:hour:甲:1"
+            ],
+            "excludedFactorIds": [
+              "month-command:寅:甲"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "visible:year:壬",
+                "label": "年柱透干 壬",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:癸:0",
+                "label": "年柱子藏癸（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:甲:0",
+                "label": "月柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:丙:1",
+                "label": "月柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:甲:0",
+                "label": "日柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丙:1",
+                "label": "日柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:hour:乙",
+                "label": "时柱透干 乙",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:壬:0",
+                "label": "时柱亥藏壬（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:甲:1",
+                "label": "时柱亥藏甲",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 15,
+            "demandWeight": 4,
+            "supportRatio": 0.7894736842105263,
+            "band": "very_strong",
+            "bandLabel": "很强",
+            "broadDirection": "support_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_visible_stems",
+            "label": "省略透干",
+            "purpose": "暂时省略所有透干因素，检验结论是否过度依赖天干显性出现。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:寅:甲",
+              "hidden:year:癸:0",
+              "hidden:month:甲:0",
+              "hidden:month:丙:1",
+              "hidden:month:戊:2",
+              "hidden:day:甲:0",
+              "hidden:day:丙:1",
+              "hidden:day:戊:2",
+              "hidden:hour:壬:0",
+              "hidden:hour:甲:1"
+            ],
+            "excludedFactorIds": [
+              "visible:year:壬",
+              "visible:month:甲",
+              "visible:hour:乙"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:寅:甲",
+                "label": "月令 寅 主气 甲",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "hidden:year:癸:0",
+                "label": "年柱子藏癸（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:甲:0",
+                "label": "月柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:丙:1",
+                "label": "月柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:甲:0",
+                "label": "日柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丙:1",
+                "label": "日柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:壬:0",
+                "label": "时柱亥藏壬（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:甲:1",
+                "label": "时柱亥藏甲",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 13,
+            "demandWeight": 4,
+            "supportRatio": 0.7647058823529411,
+            "band": "very_strong",
+            "bandLabel": "很强",
+            "broadDirection": "support_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_hidden_stems",
+            "label": "省略一般藏干",
+            "purpose": "暂时省略所有一般藏干因素，但保留独立月令项，检验结论是否过度依赖藏干累计。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:寅:甲",
+              "visible:year:壬",
+              "visible:month:甲",
+              "visible:hour:乙"
+            ],
+            "excludedFactorIds": [
+              "hidden:year:癸:0",
+              "hidden:month:甲:0",
+              "hidden:month:丙:1",
+              "hidden:month:戊:2",
+              "hidden:day:甲:0",
+              "hidden:day:丙:1",
+              "hidden:day:戊:2",
+              "hidden:hour:壬:0",
+              "hidden:hour:甲:1"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:寅:甲",
+                "label": "月令 寅 主气 甲",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:壬",
+                "label": "年柱透干 壬",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "visible:hour:乙",
+                "label": "时柱透干 乙",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              }
+            ],
+            "supportWeight": 10,
+            "demandWeight": 0,
+            "supportRatio": 1,
+            "band": "very_strong",
+            "bandLabel": "很强",
+            "broadDirection": "support_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          }
+        ],
+        "distinctBands": [
+          "very_strong",
+          "strong"
+        ],
+        "distinctDirections": [
+          "support_leading"
+        ],
+        "stability": "band_sensitive",
+        "stabilityLabel": "分档对工程假设敏感",
+        "directSummary": "当前候选为“很强”。六个工程审计场景得到 2 种分档、1 种支持/泄耗方向，结论为“分档对工程假设敏感”；这只说明模型对工程假设的敏感程度，不签发命理真值。",
+        "expertReviewQuestions": [
+          "月令主气与同一月支首位藏干是否应同时计权；若同时计权，边界依据是什么？",
+          "透干、首位藏干、其余藏干与月令之间应采用怎样的相对权重，哪些反例会推翻当前“月令 4、透干 2、首位藏干 2、其余藏干 1”候选？",
+          "0.25、0.43、0.57、0.75 分档阈值是否有可复核案例集支持？",
+          "从格、专旺、化气、合化、刑冲、调候等结构应在何时使基础旺衰结论失效或改写？"
+        ],
+        "knownBoundaries": [
+          "六个场景是工程扰动，不对应也不冒充任何命理门派。",
+          "审计只复用当前候选已经采集的因素，不能判断从格、专旺、化气、调候、大运流年等缺口。",
+          "分档稳定不等于规则正确，分档变化也不自动证明某个替代场景正确。",
+          "本投影只读，不回写命盘、修订、存储或 mutation epoch。"
+        ],
+        "sourceRefIds": [
+          "dtt-strength",
+          "smt-position",
+          "yhzp-hidden-stems"
+        ],
+        "selectedOfficialScenarioId": null,
+        "expertStrengthVerdict": null,
+        "overallGoodBad": null,
+        "result": null
+      }
+    },
+    {
+      "caseName": "strongFacts",
+      "provenance": "packages/bazi-interpretation/src/index.test.ts",
+      "includeHour": false,
+      "pillars": {
+        "year": "壬子",
+        "month": "甲寅",
+        "day": "甲寅",
+        "hour": "乙亥"
+      },
+      "factors": [
+        {
+          "id": "month-command:寅:甲",
+          "group": "month_command",
+          "position": "month",
+          "label": "月令 寅 主气 甲",
+          "tenGod": "比肩",
+          "direction": "support",
+          "weight": 4,
+          "detail": "月令主气在本候选规则中权重最高。比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "visible:year:壬",
+          "group": "visible_stem",
+          "position": "year",
+          "label": "年柱透干 壬",
+          "tenGod": "偏印",
+          "direction": "support",
+          "weight": 2,
+          "detail": "印星生助日主，计入支持侧。",
+          "sourceRefIds": [
+            "smt-ten-gods",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "hidden:year:癸:0",
+          "group": "hidden_stem",
+          "position": "year",
+          "label": "年柱子藏癸（主气）",
+          "tenGod": "正印",
+          "direction": "support",
+          "weight": 2,
+          "detail": "印星生助日主，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "visible:month:甲",
+          "group": "visible_stem",
+          "position": "month",
+          "label": "月柱透干 甲",
+          "tenGod": "比肩",
+          "direction": "support",
+          "weight": 2,
+          "detail": "比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "smt-ten-gods",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "hidden:month:甲:0",
+          "group": "hidden_stem",
+          "position": "month",
+          "label": "月柱寅藏甲（主气）",
+          "tenGod": "比肩",
+          "direction": "support",
+          "weight": 2,
+          "detail": "比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:month:丙:1",
+          "group": "hidden_stem",
+          "position": "month",
+          "label": "月柱寅藏丙",
+          "tenGod": "食神",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "食伤由日主所生，计入泄身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:month:戊:2",
+          "group": "hidden_stem",
+          "position": "month",
+          "label": "月柱寅藏戊",
+          "tenGod": "偏财",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:甲:0",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱寅藏甲（主气）",
+          "tenGod": "比肩",
+          "direction": "support",
+          "weight": 2,
+          "detail": "比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:丙:1",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱寅藏丙",
+          "tenGod": "食神",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "食伤由日主所生，计入泄身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:戊:2",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱寅藏戊",
+          "tenGod": "偏财",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        }
+      ],
+      "baseline": {
+        "supportWeight": 14,
+        "demandWeight": 4,
+        "band": "very_strong"
+      },
+      "review": {
+        "profile": {
+          "projectionVersion": "hakimi.bazi.strength_sensitivity_review/0.1.0",
+          "evidenceClass": "derived_engineering_sensitivity_audit",
+          "reviewStatus": "candidate_pending_expert_review",
+          "mutationPolicy": "read_only_projection"
+        },
+        "baselineRulePackId": "hakimi-bazi-strength-ten-god-candidate",
+        "baselineRuleVersion": "0.1.0",
+        "baselineBand": "very_strong",
+        "baselineDirection": "support_leading",
+        "duplicateMonthMain": {
+          "detected": true,
+          "monthCommandFactorId": "month-command:寅:甲",
+          "monthHiddenMainFactorId": "hidden:month:甲:0",
+          "combinedSourceWeight": 6,
+          "directSummary": "当前候选把同一月支主气分别计入月令项 4 权重和首位藏干项 2 权重；去重场景用于观察这项假设是否改变结论。"
+        },
+        "scenarios": [
+          {
+            "id": "baseline_current_candidate",
+            "label": "当前 0.1.0 候选",
+            "purpose": "原样复现当前“月令 4、透干 2、首位藏干 2、其余藏干 1”权重与阈值，作为比较基线；不因此升级为专家定论。",
+            "role": "current_candidate_baseline",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:寅:甲",
+              "visible:year:壬",
+              "hidden:year:癸:0",
+              "visible:month:甲",
+              "hidden:month:甲:0",
+              "hidden:month:丙:1",
+              "hidden:month:戊:2",
+              "hidden:day:甲:0",
+              "hidden:day:丙:1",
+              "hidden:day:戊:2"
+            ],
+            "excludedFactorIds": [],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:寅:甲",
+                "label": "月令 寅 主气 甲",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:壬",
+                "label": "年柱透干 壬",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:癸:0",
+                "label": "年柱子藏癸（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:甲:0",
+                "label": "月柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:丙:1",
+                "label": "月柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:甲:0",
+                "label": "日柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丙:1",
+                "label": "日柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 14,
+            "demandWeight": 4,
+            "supportRatio": 0.7777777777777778,
+            "band": "very_strong",
+            "bandLabel": "很强",
+            "broadDirection": "support_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "deduplicate_month_main",
+            "label": "月支主气去重",
+            "purpose": "保留月令主气 4 权重，但移除同一月支首位藏干的再次计权，观察重复计权影响。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:寅:甲",
+              "visible:year:壬",
+              "hidden:year:癸:0",
+              "visible:month:甲",
+              "hidden:month:丙:1",
+              "hidden:month:戊:2",
+              "hidden:day:甲:0",
+              "hidden:day:丙:1",
+              "hidden:day:戊:2"
+            ],
+            "excludedFactorIds": [
+              "hidden:month:甲:0"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:寅:甲",
+                "label": "月令 寅 主气 甲",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:壬",
+                "label": "年柱透干 壬",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:癸:0",
+                "label": "年柱子藏癸（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:丙:1",
+                "label": "月柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:甲:0",
+                "label": "日柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丙:1",
+                "label": "日柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 12,
+            "demandWeight": 4,
+            "supportRatio": 0.75,
+            "band": "strong",
+            "bandLabel": "偏强",
+            "broadDirection": "support_leading",
+            "agreesWithBaselineBand": false,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "equal_presence_deduplicated",
+            "label": "去重后等权出现",
+            "purpose": "月支主气去重后，将每个剩余因素都按 1 计，仅观察因素数量方向。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:寅:甲",
+              "visible:year:壬",
+              "hidden:year:癸:0",
+              "visible:month:甲",
+              "hidden:month:丙:1",
+              "hidden:month:戊:2",
+              "hidden:day:甲:0",
+              "hidden:day:丙:1",
+              "hidden:day:戊:2"
+            ],
+            "excludedFactorIds": [
+              "hidden:month:甲:0"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:寅:甲",
+                "label": "月令 寅 主气 甲",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:year:壬",
+                "label": "年柱透干 壬",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:癸:0",
+                "label": "年柱子藏癸（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:丙:1",
+                "label": "月柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:甲:0",
+                "label": "日柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:丙:1",
+                "label": "日柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 5,
+            "demandWeight": 4,
+            "supportRatio": 0.5555555555555556,
+            "band": "balanced",
+            "bandLabel": "相对中和",
+            "broadDirection": "support_leading",
+            "agreesWithBaselineBand": false,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_month_command_bonus",
+            "label": "不计月令加权项",
+            "purpose": "移除独立的月令 4 权重项，但保留月支首位藏干的一般出现，观察月令加权影响。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "visible:year:壬",
+              "hidden:year:癸:0",
+              "visible:month:甲",
+              "hidden:month:甲:0",
+              "hidden:month:丙:1",
+              "hidden:month:戊:2",
+              "hidden:day:甲:0",
+              "hidden:day:丙:1",
+              "hidden:day:戊:2"
+            ],
+            "excludedFactorIds": [
+              "month-command:寅:甲"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "visible:year:壬",
+                "label": "年柱透干 壬",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:癸:0",
+                "label": "年柱子藏癸（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:甲:0",
+                "label": "月柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:丙:1",
+                "label": "月柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:甲:0",
+                "label": "日柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丙:1",
+                "label": "日柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 10,
+            "demandWeight": 4,
+            "supportRatio": 0.7142857142857143,
+            "band": "strong",
+            "bandLabel": "偏强",
+            "broadDirection": "support_leading",
+            "agreesWithBaselineBand": false,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_visible_stems",
+            "label": "省略透干",
+            "purpose": "暂时省略所有透干因素，检验结论是否过度依赖天干显性出现。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:寅:甲",
+              "hidden:year:癸:0",
+              "hidden:month:甲:0",
+              "hidden:month:丙:1",
+              "hidden:month:戊:2",
+              "hidden:day:甲:0",
+              "hidden:day:丙:1",
+              "hidden:day:戊:2"
+            ],
+            "excludedFactorIds": [
+              "visible:year:壬",
+              "visible:month:甲"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:寅:甲",
+                "label": "月令 寅 主气 甲",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "hidden:year:癸:0",
+                "label": "年柱子藏癸（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:甲:0",
+                "label": "月柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:丙:1",
+                "label": "月柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:甲:0",
+                "label": "日柱寅藏甲（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:丙:1",
+                "label": "日柱寅藏丙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱寅藏戊",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 10,
+            "demandWeight": 4,
+            "supportRatio": 0.7142857142857143,
+            "band": "strong",
+            "bandLabel": "偏强",
+            "broadDirection": "support_leading",
+            "agreesWithBaselineBand": false,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_hidden_stems",
+            "label": "省略一般藏干",
+            "purpose": "暂时省略所有一般藏干因素，但保留独立月令项，检验结论是否过度依赖藏干累计。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:寅:甲",
+              "visible:year:壬",
+              "visible:month:甲"
+            ],
+            "excludedFactorIds": [
+              "hidden:year:癸:0",
+              "hidden:month:甲:0",
+              "hidden:month:丙:1",
+              "hidden:month:戊:2",
+              "hidden:day:甲:0",
+              "hidden:day:丙:1",
+              "hidden:day:戊:2"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:寅:甲",
+                "label": "月令 寅 主气 甲",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:壬",
+                "label": "年柱透干 壬",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              }
+            ],
+            "supportWeight": 8,
+            "demandWeight": 0,
+            "supportRatio": 1,
+            "band": "very_strong",
+            "bandLabel": "很强",
+            "broadDirection": "support_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          }
+        ],
+        "distinctBands": [
+          "very_strong",
+          "strong",
+          "balanced"
+        ],
+        "distinctDirections": [
+          "support_leading"
+        ],
+        "stability": "band_sensitive",
+        "stabilityLabel": "分档对工程假设敏感",
+        "directSummary": "当前候选为“很强”。六个工程审计场景得到 3 种分档、1 种支持/泄耗方向，结论为“分档对工程假设敏感”；这只说明模型对工程假设的敏感程度，不签发命理真值。",
+        "expertReviewQuestions": [
+          "月令主气与同一月支首位藏干是否应同时计权；若同时计权，边界依据是什么？",
+          "透干、首位藏干、其余藏干与月令之间应采用怎样的相对权重，哪些反例会推翻当前“月令 4、透干 2、首位藏干 2、其余藏干 1”候选？",
+          "0.25、0.43、0.57、0.75 分档阈值是否有可复核案例集支持？",
+          "从格、专旺、化气、合化、刑冲、调候等结构应在何时使基础旺衰结论失效或改写？"
+        ],
+        "knownBoundaries": [
+          "六个场景是工程扰动，不对应也不冒充任何命理门派。",
+          "审计只复用当前候选已经采集的因素，不能判断从格、专旺、化气、调候、大运流年等缺口。",
+          "分档稳定不等于规则正确，分档变化也不自动证明某个替代场景正确。",
+          "本投影只读，不回写命盘、修订、存储或 mutation epoch。"
+        ],
+        "sourceRefIds": [
+          "dtt-strength",
+          "smt-position",
+          "yhzp-hidden-stems"
+        ],
+        "selectedOfficialScenarioId": null,
+        "expertStrengthVerdict": null,
+        "overallGoodBad": null,
+        "result": null
+      }
+    },
+    {
+      "caseName": "fixedDemoBirthInput",
+      "provenance": "packages/bazi-core/src/index.test.ts",
+      "includeHour": true,
+      "pillars": {
+        "year": "乙亥",
+        "month": "甲申",
+        "day": "辛巳",
+        "hour": "壬辰"
+      },
+      "factors": [
+        {
+          "id": "month-command:申:庚",
+          "group": "month_command",
+          "position": "month",
+          "label": "月令 申 主气 庚",
+          "tenGod": "劫财",
+          "direction": "support",
+          "weight": 4,
+          "detail": "月令主气在本候选规则中权重最高。比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "visible:year:乙",
+          "group": "visible_stem",
+          "position": "year",
+          "label": "年柱透干 乙",
+          "tenGod": "偏财",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "smt-ten-gods",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "hidden:year:壬:0",
+          "group": "hidden_stem",
+          "position": "year",
+          "label": "年柱亥藏壬（主气）",
+          "tenGod": "伤官",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "食伤由日主所生，计入泄身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:year:甲:1",
+          "group": "hidden_stem",
+          "position": "year",
+          "label": "年柱亥藏甲",
+          "tenGod": "正财",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "visible:month:甲",
+          "group": "visible_stem",
+          "position": "month",
+          "label": "月柱透干 甲",
+          "tenGod": "正财",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "smt-ten-gods",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "hidden:month:庚:0",
+          "group": "hidden_stem",
+          "position": "month",
+          "label": "月柱申藏庚（主气）",
+          "tenGod": "劫财",
+          "direction": "support",
+          "weight": 2,
+          "detail": "比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:month:壬:1",
+          "group": "hidden_stem",
+          "position": "month",
+          "label": "月柱申藏壬",
+          "tenGod": "伤官",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "食伤由日主所生，计入泄身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:month:戊:2",
+          "group": "hidden_stem",
+          "position": "month",
+          "label": "月柱申藏戊",
+          "tenGod": "正印",
+          "direction": "support",
+          "weight": 1,
+          "detail": "印星生助日主，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:丙:0",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱巳藏丙（主气）",
+          "tenGod": "正官",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "官杀克制日主，计入压力侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:庚:1",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱巳藏庚",
+          "tenGod": "劫财",
+          "direction": "support",
+          "weight": 1,
+          "detail": "比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:戊:2",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱巳藏戊",
+          "tenGod": "正印",
+          "direction": "support",
+          "weight": 1,
+          "detail": "印星生助日主，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "visible:hour:壬",
+          "group": "visible_stem",
+          "position": "hour",
+          "label": "时柱透干 壬",
+          "tenGod": "伤官",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "食伤由日主所生，计入泄身侧。",
+          "sourceRefIds": [
+            "smt-ten-gods",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "hidden:hour:戊:0",
+          "group": "hidden_stem",
+          "position": "hour",
+          "label": "时柱辰藏戊（主气）",
+          "tenGod": "正印",
+          "direction": "support",
+          "weight": 2,
+          "detail": "印星生助日主，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:hour:乙:1",
+          "group": "hidden_stem",
+          "position": "hour",
+          "label": "时柱辰藏乙",
+          "tenGod": "偏财",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:hour:癸:2",
+          "group": "hidden_stem",
+          "position": "hour",
+          "label": "时柱辰藏癸",
+          "tenGod": "食神",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "食伤由日主所生，计入泄身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        }
+      ],
+      "baseline": {
+        "supportWeight": 11,
+        "demandWeight": 14,
+        "band": "balanced"
+      },
+      "review": {
+        "profile": {
+          "projectionVersion": "hakimi.bazi.strength_sensitivity_review/0.1.0",
+          "evidenceClass": "derived_engineering_sensitivity_audit",
+          "reviewStatus": "candidate_pending_expert_review",
+          "mutationPolicy": "read_only_projection"
+        },
+        "baselineRulePackId": "hakimi-bazi-strength-ten-god-candidate",
+        "baselineRuleVersion": "0.1.0",
+        "baselineBand": "balanced",
+        "baselineDirection": "demand_leading",
+        "duplicateMonthMain": {
+          "detected": true,
+          "monthCommandFactorId": "month-command:申:庚",
+          "monthHiddenMainFactorId": "hidden:month:庚:0",
+          "combinedSourceWeight": 6,
+          "directSummary": "当前候选把同一月支主气分别计入月令项 4 权重和首位藏干项 2 权重；去重场景用于观察这项假设是否改变结论。"
+        },
+        "scenarios": [
+          {
+            "id": "baseline_current_candidate",
+            "label": "当前 0.1.0 候选",
+            "purpose": "原样复现当前“月令 4、透干 2、首位藏干 2、其余藏干 1”权重与阈值，作为比较基线；不因此升级为专家定论。",
+            "role": "current_candidate_baseline",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:申:庚",
+              "visible:year:乙",
+              "hidden:year:壬:0",
+              "hidden:year:甲:1",
+              "visible:month:甲",
+              "hidden:month:庚:0",
+              "hidden:month:壬:1",
+              "hidden:month:戊:2",
+              "hidden:day:丙:0",
+              "hidden:day:庚:1",
+              "hidden:day:戊:2",
+              "visible:hour:壬",
+              "hidden:hour:戊:0",
+              "hidden:hour:乙:1",
+              "hidden:hour:癸:2"
+            ],
+            "excludedFactorIds": [],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:申:庚",
+                "label": "月令 申 主气 庚",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:乙",
+                "label": "年柱透干 乙",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:壬:0",
+                "label": "年柱亥藏壬（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:甲:1",
+                "label": "年柱亥藏甲",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:庚:0",
+                "label": "月柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:壬:1",
+                "label": "月柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:丙:0",
+                "label": "日柱巳藏丙（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:庚:1",
+                "label": "日柱巳藏庚",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱巳藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:hour:壬",
+                "label": "时柱透干 壬",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:戊:0",
+                "label": "时柱辰藏戊（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:乙:1",
+                "label": "时柱辰藏乙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:癸:2",
+                "label": "时柱辰藏癸",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 11,
+            "demandWeight": 14,
+            "supportRatio": 0.44,
+            "band": "balanced",
+            "bandLabel": "相对中和",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "deduplicate_month_main",
+            "label": "月支主气去重",
+            "purpose": "保留月令主气 4 权重，但移除同一月支首位藏干的再次计权，观察重复计权影响。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:申:庚",
+              "visible:year:乙",
+              "hidden:year:壬:0",
+              "hidden:year:甲:1",
+              "visible:month:甲",
+              "hidden:month:壬:1",
+              "hidden:month:戊:2",
+              "hidden:day:丙:0",
+              "hidden:day:庚:1",
+              "hidden:day:戊:2",
+              "visible:hour:壬",
+              "hidden:hour:戊:0",
+              "hidden:hour:乙:1",
+              "hidden:hour:癸:2"
+            ],
+            "excludedFactorIds": [
+              "hidden:month:庚:0"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:申:庚",
+                "label": "月令 申 主气 庚",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:乙",
+                "label": "年柱透干 乙",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:壬:0",
+                "label": "年柱亥藏壬（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:甲:1",
+                "label": "年柱亥藏甲",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:壬:1",
+                "label": "月柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:丙:0",
+                "label": "日柱巳藏丙（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:庚:1",
+                "label": "日柱巳藏庚",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱巳藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:hour:壬",
+                "label": "时柱透干 壬",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:戊:0",
+                "label": "时柱辰藏戊（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:乙:1",
+                "label": "时柱辰藏乙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:癸:2",
+                "label": "时柱辰藏癸",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 9,
+            "demandWeight": 14,
+            "supportRatio": 0.391304347826087,
+            "band": "weak",
+            "bandLabel": "偏弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": false,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "equal_presence_deduplicated",
+            "label": "去重后等权出现",
+            "purpose": "月支主气去重后，将每个剩余因素都按 1 计，仅观察因素数量方向。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:申:庚",
+              "visible:year:乙",
+              "hidden:year:壬:0",
+              "hidden:year:甲:1",
+              "visible:month:甲",
+              "hidden:month:壬:1",
+              "hidden:month:戊:2",
+              "hidden:day:丙:0",
+              "hidden:day:庚:1",
+              "hidden:day:戊:2",
+              "visible:hour:壬",
+              "hidden:hour:戊:0",
+              "hidden:hour:乙:1",
+              "hidden:hour:癸:2"
+            ],
+            "excludedFactorIds": [
+              "hidden:month:庚:0"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:申:庚",
+                "label": "月令 申 主气 庚",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:year:乙",
+                "label": "年柱透干 乙",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:壬:0",
+                "label": "年柱亥藏壬（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:甲:1",
+                "label": "年柱亥藏甲",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:壬:1",
+                "label": "月柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:丙:0",
+                "label": "日柱巳藏丙（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:庚:1",
+                "label": "日柱巳藏庚",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱巳藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:hour:壬",
+                "label": "时柱透干 壬",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:戊:0",
+                "label": "时柱辰藏戊（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:乙:1",
+                "label": "时柱辰藏乙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:癸:2",
+                "label": "时柱辰藏癸",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 5,
+            "demandWeight": 9,
+            "supportRatio": 0.35714285714285715,
+            "band": "weak",
+            "bandLabel": "偏弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": false,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_month_command_bonus",
+            "label": "不计月令加权项",
+            "purpose": "移除独立的月令 4 权重项，但保留月支首位藏干的一般出现，观察月令加权影响。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "visible:year:乙",
+              "hidden:year:壬:0",
+              "hidden:year:甲:1",
+              "visible:month:甲",
+              "hidden:month:庚:0",
+              "hidden:month:壬:1",
+              "hidden:month:戊:2",
+              "hidden:day:丙:0",
+              "hidden:day:庚:1",
+              "hidden:day:戊:2",
+              "visible:hour:壬",
+              "hidden:hour:戊:0",
+              "hidden:hour:乙:1",
+              "hidden:hour:癸:2"
+            ],
+            "excludedFactorIds": [
+              "month-command:申:庚"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "visible:year:乙",
+                "label": "年柱透干 乙",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:壬:0",
+                "label": "年柱亥藏壬（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:甲:1",
+                "label": "年柱亥藏甲",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:庚:0",
+                "label": "月柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:壬:1",
+                "label": "月柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:丙:0",
+                "label": "日柱巳藏丙（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:庚:1",
+                "label": "日柱巳藏庚",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱巳藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:hour:壬",
+                "label": "时柱透干 壬",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:戊:0",
+                "label": "时柱辰藏戊（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:乙:1",
+                "label": "时柱辰藏乙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:癸:2",
+                "label": "时柱辰藏癸",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 7,
+            "demandWeight": 14,
+            "supportRatio": 0.3333333333333333,
+            "band": "weak",
+            "bandLabel": "偏弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": false,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_visible_stems",
+            "label": "省略透干",
+            "purpose": "暂时省略所有透干因素，检验结论是否过度依赖天干显性出现。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:申:庚",
+              "hidden:year:壬:0",
+              "hidden:year:甲:1",
+              "hidden:month:庚:0",
+              "hidden:month:壬:1",
+              "hidden:month:戊:2",
+              "hidden:day:丙:0",
+              "hidden:day:庚:1",
+              "hidden:day:戊:2",
+              "hidden:hour:戊:0",
+              "hidden:hour:乙:1",
+              "hidden:hour:癸:2"
+            ],
+            "excludedFactorIds": [
+              "visible:year:乙",
+              "visible:month:甲",
+              "visible:hour:壬"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:申:庚",
+                "label": "月令 申 主气 庚",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "hidden:year:壬:0",
+                "label": "年柱亥藏壬（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:甲:1",
+                "label": "年柱亥藏甲",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:庚:0",
+                "label": "月柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:壬:1",
+                "label": "月柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:丙:0",
+                "label": "日柱巳藏丙（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:庚:1",
+                "label": "日柱巳藏庚",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱巳藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:戊:0",
+                "label": "时柱辰藏戊（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:hour:乙:1",
+                "label": "时柱辰藏乙",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:hour:癸:2",
+                "label": "时柱辰藏癸",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 11,
+            "demandWeight": 8,
+            "supportRatio": 0.5789473684210527,
+            "band": "strong",
+            "bandLabel": "偏强",
+            "broadDirection": "support_leading",
+            "agreesWithBaselineBand": false,
+            "agreesWithBaselineDirection": false
+          },
+          {
+            "id": "without_hidden_stems",
+            "label": "省略一般藏干",
+            "purpose": "暂时省略所有一般藏干因素，但保留独立月令项，检验结论是否过度依赖藏干累计。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:申:庚",
+              "visible:year:乙",
+              "visible:month:甲",
+              "visible:hour:壬"
+            ],
+            "excludedFactorIds": [
+              "hidden:year:壬:0",
+              "hidden:year:甲:1",
+              "hidden:month:庚:0",
+              "hidden:month:壬:1",
+              "hidden:month:戊:2",
+              "hidden:day:丙:0",
+              "hidden:day:庚:1",
+              "hidden:day:戊:2",
+              "hidden:hour:戊:0",
+              "hidden:hour:乙:1",
+              "hidden:hour:癸:2"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:申:庚",
+                "label": "月令 申 主气 庚",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:乙",
+                "label": "年柱透干 乙",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "visible:hour:壬",
+                "label": "时柱透干 壬",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              }
+            ],
+            "supportWeight": 4,
+            "demandWeight": 6,
+            "supportRatio": 0.4,
+            "band": "weak",
+            "bandLabel": "偏弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": false,
+            "agreesWithBaselineDirection": true
+          }
+        ],
+        "distinctBands": [
+          "balanced",
+          "weak",
+          "strong"
+        ],
+        "distinctDirections": [
+          "demand_leading",
+          "support_leading"
+        ],
+        "stability": "direction_sensitive",
+        "stabilityLabel": "支持/泄耗方向对工程假设敏感",
+        "directSummary": "当前候选为“相对中和”。六个工程审计场景得到 3 种分档、2 种支持/泄耗方向，结论为“支持/泄耗方向对工程假设敏感”；这只说明模型对工程假设的敏感程度，不签发命理真值。",
+        "expertReviewQuestions": [
+          "月令主气与同一月支首位藏干是否应同时计权；若同时计权，边界依据是什么？",
+          "透干、首位藏干、其余藏干与月令之间应采用怎样的相对权重，哪些反例会推翻当前“月令 4、透干 2、首位藏干 2、其余藏干 1”候选？",
+          "0.25、0.43、0.57、0.75 分档阈值是否有可复核案例集支持？",
+          "从格、专旺、化气、合化、刑冲、调候等结构应在何时使基础旺衰结论失效或改写？"
+        ],
+        "knownBoundaries": [
+          "六个场景是工程扰动，不对应也不冒充任何命理门派。",
+          "审计只复用当前候选已经采集的因素，不能判断从格、专旺、化气、调候、大运流年等缺口。",
+          "分档稳定不等于规则正确，分档变化也不自动证明某个替代场景正确。",
+          "本投影只读，不回写命盘、修订、存储或 mutation epoch。"
+        ],
+        "sourceRefIds": [
+          "dtt-strength",
+          "smt-position",
+          "yhzp-hidden-stems"
+        ],
+        "selectedOfficialScenarioId": null,
+        "expertStrengthVerdict": null,
+        "overallGoodBad": null,
+        "result": null
+      }
+    },
+    {
+      "caseName": "fixedDemoBirthInput",
+      "provenance": "packages/bazi-core/src/index.test.ts",
+      "includeHour": false,
+      "pillars": {
+        "year": "乙亥",
+        "month": "甲申",
+        "day": "辛巳",
+        "hour": "壬辰"
+      },
+      "factors": [
+        {
+          "id": "month-command:申:庚",
+          "group": "month_command",
+          "position": "month",
+          "label": "月令 申 主气 庚",
+          "tenGod": "劫财",
+          "direction": "support",
+          "weight": 4,
+          "detail": "月令主气在本候选规则中权重最高。比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "visible:year:乙",
+          "group": "visible_stem",
+          "position": "year",
+          "label": "年柱透干 乙",
+          "tenGod": "偏财",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "smt-ten-gods",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "hidden:year:壬:0",
+          "group": "hidden_stem",
+          "position": "year",
+          "label": "年柱亥藏壬（主气）",
+          "tenGod": "伤官",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "食伤由日主所生，计入泄身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:year:甲:1",
+          "group": "hidden_stem",
+          "position": "year",
+          "label": "年柱亥藏甲",
+          "tenGod": "正财",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "visible:month:甲",
+          "group": "visible_stem",
+          "position": "month",
+          "label": "月柱透干 甲",
+          "tenGod": "正财",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "财星由日主所克，计入耗身侧。",
+          "sourceRefIds": [
+            "smt-ten-gods",
+            "smt-position"
+          ]
+        },
+        {
+          "id": "hidden:month:庚:0",
+          "group": "hidden_stem",
+          "position": "month",
+          "label": "月柱申藏庚（主气）",
+          "tenGod": "劫财",
+          "direction": "support",
+          "weight": 2,
+          "detail": "比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:month:壬:1",
+          "group": "hidden_stem",
+          "position": "month",
+          "label": "月柱申藏壬",
+          "tenGod": "伤官",
+          "direction": "demand",
+          "weight": 1,
+          "detail": "食伤由日主所生，计入泄身侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:month:戊:2",
+          "group": "hidden_stem",
+          "position": "month",
+          "label": "月柱申藏戊",
+          "tenGod": "正印",
+          "direction": "support",
+          "weight": 1,
+          "detail": "印星生助日主，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:丙:0",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱巳藏丙（主气）",
+          "tenGod": "正官",
+          "direction": "demand",
+          "weight": 2,
+          "detail": "官杀克制日主，计入压力侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:庚:1",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱巳藏庚",
+          "tenGod": "劫财",
+          "direction": "support",
+          "weight": 1,
+          "detail": "比劫与日主同类，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        },
+        {
+          "id": "hidden:day:戊:2",
+          "group": "hidden_stem",
+          "position": "day",
+          "label": "日柱巳藏戊",
+          "tenGod": "正印",
+          "direction": "support",
+          "weight": 1,
+          "detail": "印星生助日主，计入支持侧。",
+          "sourceRefIds": [
+            "dtt-strength",
+            "smt-ten-gods"
+          ]
+        }
+      ],
+      "baseline": {
+        "supportWeight": 9,
+        "demandWeight": 10,
+        "band": "balanced"
+      },
+      "review": {
+        "profile": {
+          "projectionVersion": "hakimi.bazi.strength_sensitivity_review/0.1.0",
+          "evidenceClass": "derived_engineering_sensitivity_audit",
+          "reviewStatus": "candidate_pending_expert_review",
+          "mutationPolicy": "read_only_projection"
+        },
+        "baselineRulePackId": "hakimi-bazi-strength-ten-god-candidate",
+        "baselineRuleVersion": "0.1.0",
+        "baselineBand": "balanced",
+        "baselineDirection": "demand_leading",
+        "duplicateMonthMain": {
+          "detected": true,
+          "monthCommandFactorId": "month-command:申:庚",
+          "monthHiddenMainFactorId": "hidden:month:庚:0",
+          "combinedSourceWeight": 6,
+          "directSummary": "当前候选把同一月支主气分别计入月令项 4 权重和首位藏干项 2 权重；去重场景用于观察这项假设是否改变结论。"
+        },
+        "scenarios": [
+          {
+            "id": "baseline_current_candidate",
+            "label": "当前 0.1.0 候选",
+            "purpose": "原样复现当前“月令 4、透干 2、首位藏干 2、其余藏干 1”权重与阈值，作为比较基线；不因此升级为专家定论。",
+            "role": "current_candidate_baseline",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:申:庚",
+              "visible:year:乙",
+              "hidden:year:壬:0",
+              "hidden:year:甲:1",
+              "visible:month:甲",
+              "hidden:month:庚:0",
+              "hidden:month:壬:1",
+              "hidden:month:戊:2",
+              "hidden:day:丙:0",
+              "hidden:day:庚:1",
+              "hidden:day:戊:2"
+            ],
+            "excludedFactorIds": [],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:申:庚",
+                "label": "月令 申 主气 庚",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:乙",
+                "label": "年柱透干 乙",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:壬:0",
+                "label": "年柱亥藏壬（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:甲:1",
+                "label": "年柱亥藏甲",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:庚:0",
+                "label": "月柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:壬:1",
+                "label": "月柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:丙:0",
+                "label": "日柱巳藏丙（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:庚:1",
+                "label": "日柱巳藏庚",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱巳藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 9,
+            "demandWeight": 10,
+            "supportRatio": 0.47368421052631576,
+            "band": "balanced",
+            "bandLabel": "相对中和",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "deduplicate_month_main",
+            "label": "月支主气去重",
+            "purpose": "保留月令主气 4 权重，但移除同一月支首位藏干的再次计权，观察重复计权影响。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:申:庚",
+              "visible:year:乙",
+              "hidden:year:壬:0",
+              "hidden:year:甲:1",
+              "visible:month:甲",
+              "hidden:month:壬:1",
+              "hidden:month:戊:2",
+              "hidden:day:丙:0",
+              "hidden:day:庚:1",
+              "hidden:day:戊:2"
+            ],
+            "excludedFactorIds": [
+              "hidden:month:庚:0"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:申:庚",
+                "label": "月令 申 主气 庚",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:乙",
+                "label": "年柱透干 乙",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:壬:0",
+                "label": "年柱亥藏壬（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:甲:1",
+                "label": "年柱亥藏甲",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:壬:1",
+                "label": "月柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:丙:0",
+                "label": "日柱巳藏丙（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:庚:1",
+                "label": "日柱巳藏庚",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱巳藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 7,
+            "demandWeight": 10,
+            "supportRatio": 0.4117647058823529,
+            "band": "weak",
+            "bandLabel": "偏弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": false,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "equal_presence_deduplicated",
+            "label": "去重后等权出现",
+            "purpose": "月支主气去重后，将每个剩余因素都按 1 计，仅观察因素数量方向。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:申:庚",
+              "visible:year:乙",
+              "hidden:year:壬:0",
+              "hidden:year:甲:1",
+              "visible:month:甲",
+              "hidden:month:壬:1",
+              "hidden:month:戊:2",
+              "hidden:day:丙:0",
+              "hidden:day:庚:1",
+              "hidden:day:戊:2"
+            ],
+            "excludedFactorIds": [
+              "hidden:month:庚:0"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:申:庚",
+                "label": "月令 申 主气 庚",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:year:乙",
+                "label": "年柱透干 乙",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:壬:0",
+                "label": "年柱亥藏壬（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:year:甲:1",
+                "label": "年柱亥藏甲",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:壬:1",
+                "label": "月柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:丙:0",
+                "label": "日柱巳藏丙（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:庚:1",
+                "label": "日柱巳藏庚",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱巳藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 4,
+            "demandWeight": 6,
+            "supportRatio": 0.4,
+            "band": "weak",
+            "bandLabel": "偏弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": false,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_month_command_bonus",
+            "label": "不计月令加权项",
+            "purpose": "移除独立的月令 4 权重项，但保留月支首位藏干的一般出现，观察月令加权影响。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "visible:year:乙",
+              "hidden:year:壬:0",
+              "hidden:year:甲:1",
+              "visible:month:甲",
+              "hidden:month:庚:0",
+              "hidden:month:壬:1",
+              "hidden:month:戊:2",
+              "hidden:day:丙:0",
+              "hidden:day:庚:1",
+              "hidden:day:戊:2"
+            ],
+            "excludedFactorIds": [
+              "month-command:申:庚"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "visible:year:乙",
+                "label": "年柱透干 乙",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:壬:0",
+                "label": "年柱亥藏壬（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:甲:1",
+                "label": "年柱亥藏甲",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:庚:0",
+                "label": "月柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:壬:1",
+                "label": "月柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:丙:0",
+                "label": "日柱巳藏丙（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:庚:1",
+                "label": "日柱巳藏庚",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱巳藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 5,
+            "demandWeight": 10,
+            "supportRatio": 0.3333333333333333,
+            "band": "weak",
+            "bandLabel": "偏弱",
+            "broadDirection": "demand_leading",
+            "agreesWithBaselineBand": false,
+            "agreesWithBaselineDirection": true
+          },
+          {
+            "id": "without_visible_stems",
+            "label": "省略透干",
+            "purpose": "暂时省略所有透干因素，检验结论是否过度依赖天干显性出现。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:申:庚",
+              "hidden:year:壬:0",
+              "hidden:year:甲:1",
+              "hidden:month:庚:0",
+              "hidden:month:壬:1",
+              "hidden:month:戊:2",
+              "hidden:day:丙:0",
+              "hidden:day:庚:1",
+              "hidden:day:戊:2"
+            ],
+            "excludedFactorIds": [
+              "visible:year:乙",
+              "visible:month:甲"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:申:庚",
+                "label": "月令 申 主气 庚",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "hidden:year:壬:0",
+                "label": "年柱亥藏壬（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:year:甲:1",
+                "label": "年柱亥藏甲",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:庚:0",
+                "label": "月柱申藏庚（主气）",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:month:壬:1",
+                "label": "月柱申藏壬",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:month:戊:2",
+                "label": "月柱申藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:丙:0",
+                "label": "日柱巳藏丙（主气）",
+                "group": "hidden_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "hidden:day:庚:1",
+                "label": "日柱巳藏庚",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              },
+              {
+                "factorId": "hidden:day:戊:2",
+                "label": "日柱巳藏戊",
+                "group": "hidden_stem",
+                "direction": "support",
+                "sourceWeight": 1,
+                "appliedWeight": 1
+              }
+            ],
+            "supportWeight": 9,
+            "demandWeight": 6,
+            "supportRatio": 0.6,
+            "band": "strong",
+            "bandLabel": "偏强",
+            "broadDirection": "support_leading",
+            "agreesWithBaselineBand": false,
+            "agreesWithBaselineDirection": false
+          },
+          {
+            "id": "without_hidden_stems",
+            "label": "省略一般藏干",
+            "purpose": "暂时省略所有一般藏干因素，但保留独立月令项，检验结论是否过度依赖藏干累计。",
+            "role": "sensitivity_only",
+            "officialRuleCandidate": false,
+            "includedFactorIds": [
+              "month-command:申:庚",
+              "visible:year:乙",
+              "visible:month:甲"
+            ],
+            "excludedFactorIds": [
+              "hidden:year:壬:0",
+              "hidden:year:甲:1",
+              "hidden:month:庚:0",
+              "hidden:month:壬:1",
+              "hidden:month:戊:2",
+              "hidden:day:丙:0",
+              "hidden:day:庚:1",
+              "hidden:day:戊:2"
+            ],
+            "appliedFactors": [
+              {
+                "factorId": "month-command:申:庚",
+                "label": "月令 申 主气 庚",
+                "group": "month_command",
+                "direction": "support",
+                "sourceWeight": 4,
+                "appliedWeight": 4
+              },
+              {
+                "factorId": "visible:year:乙",
+                "label": "年柱透干 乙",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              },
+              {
+                "factorId": "visible:month:甲",
+                "label": "月柱透干 甲",
+                "group": "visible_stem",
+                "direction": "demand",
+                "sourceWeight": 2,
+                "appliedWeight": 2
+              }
+            ],
+            "supportWeight": 4,
+            "demandWeight": 4,
+            "supportRatio": 0.5,
+            "band": "balanced",
+            "bandLabel": "相对中和",
+            "broadDirection": "balanced",
+            "agreesWithBaselineBand": true,
+            "agreesWithBaselineDirection": false
+          }
+        ],
+        "distinctBands": [
+          "balanced",
+          "weak",
+          "strong"
+        ],
+        "distinctDirections": [
+          "demand_leading",
+          "support_leading",
+          "balanced"
+        ],
+        "stability": "direction_sensitive",
+        "stabilityLabel": "支持/泄耗方向对工程假设敏感",
+        "directSummary": "当前候选为“相对中和”。六个工程审计场景得到 3 种分档、3 种支持/泄耗方向，结论为“支持/泄耗方向对工程假设敏感”；这只说明模型对工程假设的敏感程度，不签发命理真值。",
+        "expertReviewQuestions": [
+          "月令主气与同一月支首位藏干是否应同时计权；若同时计权，边界依据是什么？",
+          "透干、首位藏干、其余藏干与月令之间应采用怎样的相对权重，哪些反例会推翻当前“月令 4、透干 2、首位藏干 2、其余藏干 1”候选？",
+          "0.25、0.43、0.57、0.75 分档阈值是否有可复核案例集支持？",
+          "从格、专旺、化气、合化、刑冲、调候等结构应在何时使基础旺衰结论失效或改写？"
+        ],
+        "knownBoundaries": [
+          "六个场景是工程扰动，不对应也不冒充任何命理门派。",
+          "审计只复用当前候选已经采集的因素，不能判断从格、专旺、化气、调候、大运流年等缺口。",
+          "分档稳定不等于规则正确，分档变化也不自动证明某个替代场景正确。",
+          "本投影只读，不回写命盘、修订、存储或 mutation epoch。"
+        ],
+        "sourceRefIds": [
+          "dtt-strength",
+          "smt-position",
+          "yhzp-hidden-stems"
+        ],
+        "selectedOfficialScenarioId": null,
+        "expertStrengthVerdict": null,
+        "overallGoodBad": null,
+        "result": null
+      }
+    }
+  ],
+  "thresholds": [
+    {
+      "support": 24,
+      "demand": 76,
+      "ratio": 0.24,
+      "band": "very_weak"
+    },
+    {
+      "support": 25,
+      "demand": 75,
+      "ratio": 0.25,
+      "band": "weak"
+    },
+    {
+      "support": 42,
+      "demand": 58,
+      "ratio": 0.42,
+      "band": "weak"
+    },
+    {
+      "support": 43,
+      "demand": 57,
+      "ratio": 0.43,
+      "band": "balanced"
+    },
+    {
+      "support": 57,
+      "demand": 43,
+      "ratio": 0.57,
+      "band": "balanced"
+    },
+    {
+      "support": 58,
+      "demand": 42,
+      "ratio": 0.58,
+      "band": "strong"
+    },
+    {
+      "support": 75,
+      "demand": 25,
+      "ratio": 0.75,
+      "band": "strong"
+    },
+    {
+      "support": 76,
+      "demand": 24,
+      "ratio": 0.76,
+      "band": "very_strong"
+    },
+    {
+      "support": 0,
+      "demand": 0,
+      "ratio": null,
+      "band": "undetermined"
+    }
+  ],
+  "byHour": [
+    {
+      "includeHour": true,
+      "caseCount": 3,
+      "counts": {
+        "stable_across_engineering_scenarios": 0,
+        "band_sensitive": 2,
+        "direction_sensitive": 1,
+        "insufficient": 0
+      },
+      "nonStableCases": 3,
+      "denominatorMeaning": "three named pre-existing synthetic engineering cases, not a population sample"
+    },
+    {
+      "includeHour": false,
+      "caseCount": 3,
+      "counts": {
+        "stable_across_engineering_scenarios": 1,
+        "band_sensitive": 1,
+        "direction_sensitive": 1,
+        "insufficient": 0
+      },
+      "nonStableCases": 2,
+      "denominatorMeaning": "three named pre-existing synthetic engineering cases, not a population sample"
+    }
+  ],
+  "unresolvedStructures": [
+    "从格",
+    "专旺",
+    "化气",
+    "合化",
+    "刑冲",
+    "调候",
+    "大运流年"
+  ],
+  "structuralInapplicabilityRate": null,
+  "structuralInapplicabilityReason": "The existing API exposes known gaps but does not classify case-specific applicability. Unknown cannot be counted as zero.",
+  "humanExpertOpinionsReceived": 0,
+  "selectedAlternative": null,
+  "changedRuntimeParameters": false,
+  "inputMutationObserved": false,
+  "runtime": {
+    "node": "v24.16.0",
+    "icu": "78.3",
+    "tz": "2026b"
+  }
+}

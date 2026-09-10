@@ -1,7 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 const appRoot = fileURLToPath(new URL(".", import.meta.url));
 const workspaceRoot = path.resolve(appRoot, "../..");
@@ -70,9 +70,36 @@ export default defineConfig({
     }
   },
   test: {
+    // Bound concurrent jsdom workers so full runs retain reliable timing.
+    maxWorkers: 2,
     environment: "jsdom",
     setupFiles: [path.resolve(appRoot, "src/test/setup.ts")],
     include: ["packages/**/*.test.ts", "apps/web/src/**/*.test.{ts,tsx}"],
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "workspace",
+          // These packages run below with their existing environment and schema
+          // configuration. Keep every test in the aggregate exactly once.
+          exclude: [
+            ...configDefaults.exclude,
+            "packages/vedic-input-admission-kernel-draft/**",
+            "packages/vedic-input-preflight-draft/**"
+          ]
+        }
+      },
+      {
+        extends: path.resolve(workspaceRoot, "packages/vedic-input-admission-kernel-draft/vitest.config.ts"),
+        root: path.resolve(workspaceRoot, "packages/vedic-input-admission-kernel-draft"),
+        test: { name: "vedic-input-admission-kernel-draft" }
+      },
+      {
+        extends: path.resolve(workspaceRoot, "packages/vedic-input-preflight-draft/vitest.config.ts"),
+        root: path.resolve(workspaceRoot, "packages/vedic-input-preflight-draft"),
+        test: { name: "vedic-input-preflight-draft" }
+      }
+    ],
     coverage: { reporter: ["text", "html"] }
   }
 });

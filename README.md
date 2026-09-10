@@ -4,13 +4,15 @@
 
 > **当前基线已更新：** 产品已转向面向简体中文八字学习者与研究者的专业研究工具；Web/PWA 先行，先分别完成八字、紫微斗数和西洋占星的 Web 功能与独立质量门，再进入 Android；iOS 与付费暂缓。详见 [产品方向更新 v0.2](./docs/产品方向更新-v0.2-专业研究版.md)。旧文档中的年轻消费用户、付费报告和双产品近期开发安排均视为历史方案。
 
-项目后续工作的统一入口是 [项目完善总纲与实施指引 v0.1](./docs/项目完善总纲与实施指引-v0.1.md)。它集中说明当前基线、产品与领域边界、工程发布门、体验路线、多术数准入、Must/Should/Later、停止线和待确认决定；字段级语义仍以各专项协议为准。
+项目路线与工作编排参考 [项目完善总纲与实施指引 v0.1](./docs/项目完善总纲与实施指引-v0.1.md)。它集中说明历史基线、产品与领域边界、工程发布门、体验路线、多术数准入、Must/Should/Later、停止线和待确认决定；它不是机器 current 源，字段级语义仍以各专项协议为准。
 
-## 当前权威发布状态
+<!-- CURRENT_STATUS_ENTRYPOINT_V1_BEGIN -->
+## 当前发布状态入口
 
 普通 Web/PWA 构建固定为 `legacy-v13 / targetSchema 13 / migrationId null`。Schema 16 仅是独立输出目录中的工程候选，不是默认版本，也没有公开发布授权。当前产品定位是本地优先研究工具和工程预览；工程哈希、迁移矩阵或 Release Evidence 均不代表命理专家真值。
 
-权威边界见 [当前发布状态](./docs/status/current-release-status.md)、[Web v1 发布章程](./docs/Web-v1发布章程与兼容范围-v0.1-2026-08-21.md)、[发布代际台账](./docs/release/release-generation-history.json) 和 [发布回滚手册](./docs/release/web-v1-release-and-rollback-runbook.md)。在所有者确认许可证策略前，本项目明确保留全部权利，不声称是开源项目。
+唯一机器 current 源是 [canonical current-index](./content/system-admission/current-index.v1.json)，人工可读入口是由它精确生成的 [current-index 状态投影](./docs/status/current-index-summary.md)。完整的多版本历史由独立的 [history checkpoint](./content/system-admission/history-checkpoint.v2.json) 校验；普通 current 读取只绑定该检查点身份、版本族名称清单和每族当前端点，不把更旧历史字节装入 current 结果。[当前发布状态历史长账](./docs/status/current-release-status.md) 仅保留历史叙述，不再构成 current 或授权来源；发布边界另见 [Web v1 发布章程](./docs/Web-v1发布章程与兼容范围-v0.1-2026-08-21.md)、[发布代际台账](./docs/release/release-generation-history.json) 和 [发布回滚手册](./docs/release/web-v1-release-and-rollback-runbook.md)。在所有者确认许可证策略前，本项目明确保留全部权利，不声称是开源项目。
+<!-- CURRENT_STATUS_ENTRYPOINT_V1_END -->
 
 由 DeepSeek 接续开发时，先阅读 [DeepSeek 后续工作启动指引](./docs/DeepSeek后续工作启动指引-2026-08-10.md)。该指引记录 2026-08-10 用户确认的本地保存、内容、Android 顺序、Git 基线授权和部署历史未知等决定，以及第一批安全工作包。
 
@@ -102,7 +104,7 @@ npm run preview
 
 此前 Dexie v12 / full v1.0 的离线、数据库升级、Chrome→Edge 恢复与 CandidateSet 非空回执门只保留为上一代契约证据。普通 `npm run build` 仍固定输出安全的 `legacy-v13`，`dist/web` 也继续保持 v13；v14 与两条 v15 路线只保留为非默认历史候选。当前唯一继续维护的公开升级候选是隔离的 `npm run build:production-v13-to-v16:candidate`，输出到独立 `tmp/release-config-production-v13-to-v16`，不会覆盖默认产物或把 v16 提升为默认版本。v16 在十六个用户备份分区和派生 `birthFingerprints` 之外新增内部 `mutationState`；该运行元数据不进入 full v1.2 payload 或摘要。完整备份的快照规范化、摘要、ZIP/JSON 生成、解压、严格 UTF-8、JSON 解析、旧版迁移和只读预检由版本化一次性 Worker 完成；恢复与影子物化继续执行双次容量准入、并发 CAS 与事务回滚核对。依赖审计固定生成 CycloneDX SBOM 与第三方声明。
 
-最近一次整仓全量回归基线为 Vitest **147 个文件 / 1541 项**全部通过（2026-08-11 在 `--maxWorkers=2` 下复跑 191 秒；默认并行在本机长期高负载期间出现随机超时，单独重跑失败文件全部通过，判定为环境负载抖动而非代码回归）。隔离 v13→v16 发布矩阵 2026-08-11 在 Microsoft Edge 通过 **13/13（约 5.3 分钟）**、在 Google Chrome 通过 **13/13（约 5.1 分钟）**，共 **26/26**；`test:e2e:web-v1-flow:v13-to-v16` 在 2026-08-10 于两浏览器各通过 1/1、共 **2/2（约 2.5 分钟）**（2026-08-11 因本机持续高负载未能在 45 分钟内完成单浏览器复跑，保留历史证据）。存储回归明确覆盖单条删除只推进一次 epoch、显式 throw/abort 时业务行与 epoch 同事务回滚、mutation marker 不进入用户 payload 或摘要，以及迁移写权限只绑定获授权的 Dexie 事务、不会泄漏给同连接上的无关并发写。普通 `npm run build` 仍是收尾默认发布门，并已保持 `legacy-v13 / targetSchema 13`（2026-08-11 构建 hash `e69c67ad256c`）；这些结果只证明当前工程与浏览器协议，不是命理专家真值，也不等于 Firefox、固定 Android、Web v1 或 APK 已完成。
+最新结果及其源码、产物范围见[当前交付状态](docs/status/delivery-status.md)。以下保留 2026-08-11 的历史整仓回归基线：Vitest **147 个文件 / 1541 项**全部通过（2026-08-11 在 `--maxWorkers=2` 下复跑 191 秒；默认并行在本机长期高负载期间出现随机超时，单独重跑失败文件全部通过，判定为环境负载抖动而非代码回归）。隔离 v13→v16 发布矩阵 2026-08-11 在 Microsoft Edge 通过 **13/13（约 5.3 分钟）**、在 Google Chrome 通过 **13/13（约 5.1 分钟）**，共 **26/26**；`test:e2e:web-v1-flow:v13-to-v16` 在 2026-08-10 于两浏览器各通过 1/1、共 **2/2（约 2.5 分钟）**（2026-08-11 因本机持续高负载未能在 45 分钟内完成单浏览器复跑，保留历史证据）。存储回归明确覆盖单条删除只推进一次 epoch、显式 throw/abort 时业务行与 epoch 同事务回滚、mutation marker 不进入用户 payload 或摘要，以及迁移写权限只绑定获授权的 Dexie 事务、不会泄漏给同连接上的无关并发写。普通 `npm run build` 仍是收尾默认发布门，并已保持 `legacy-v13 / targetSchema 13`（2026-08-11 构建 hash `e69c67ad256c`）；这些历史结果只证明当时的工程与浏览器协议，不是命理专家真值，也不等于 Firefox、固定 Android、Web v1 或 APK 已完成。
 
 `test:e2e:capacity` 在固定 Edge 工作站以精确 10,000 Case（9,912 active、88 trash、104 active favorites、0 CandidateSet）验证 50 条 keyset 分页、精确总数、检索、筛选与打开；默认 v13 仍需阻塞式全审计，不能把内容渲染冒充真正可交互。隔离 v13→v16 clean-start 门 2026-08-10 首记 Edge 首次 migration + `full_audit` **37.692 s**、第二次 clean 启动 **1.072 s**，Chrome 首次 **35.498 s**、第二次 **1.066 s**；2026-08-11 在当前源码复验为 Edge **82.496 s / 1.300 s**、Chrome **74.638 s / 1.213 s**（本机负载更高导致首次变慢，clean 交互仍低于 5 秒预算）；两浏览器首次均为 `epoch = verifiedEpoch = 1`，第二次均命中 `cache_hit`。专业 ResearchQuery 现可由用户主动取消：取消信号会中止正在读取全量快照的只读事务，并继续传入协作式执行器，取消后不保存半成品或改写视图。2026-08-11 新增 `test:e2e:p2-05-heavy-browser-gate`（Edge + Chrome 各 4/4、共 8/8）：真实浏览器经生产 full v1.2 恢复 60 候选组 + 40 条 6000+ 字符长备注，候选组文本查询 60 命中且两次 `resultDigest` 稳定，多关键词“候选组 重载”60 命中且摘要稳定，负向查询 0 命中，正式命盘文本查询 1 命中，组合条件（月令/干支关系/规则快照/运限/事件绑定）双跑摘要稳定并显示“专家验证案例为 0”边界；另构造真实正向案例（申月+地支三合+壬日主+流年乙巳伤官+事件绑定运限节点）经生产恢复后组合查询精确命中 1 且摘要稳定（真实规则摘要 `de6ff266…` 与高级夹具一致）；资源探针记录存储/堆/long task；同一门内 10,000 条数据真实浏览器导出完整 ZIP 时可取消且无下载、无写入、计数不变，5,000 行 / 4.7 MB CSV 真实浏览器预检可取消且零写入；另新增统一批量取消契约单测（备份产物/导入准备/CSV 解析/ResearchQuery 预中止全部失败关闭）。这关闭的是 v16 clean 数据安全快速启动子门、ResearchQuery 取消与重数据集/导出取消/组合条件查询（含正向命中）/CSV 预检取消双浏览器子门，不提升默认代；P2-05 总体仍为部分完成，更极端大库与固定 Android 仍未完成，完整边界见 [P2-05 案例库容量基线](./docs/P2-05案例库容量基线-2026-08-04.md)。
 

@@ -1,7 +1,7 @@
 import path from "node:path";
 import {
   assertStrictReleaseBrowserResultSummary,
-  isReleaseBrowserReceiptId
+  isReleaseBrowserCompletionReceiptId
 } from "../apps/web/playwright.release-browser-result.ts";
 import {
   canonicalJson,
@@ -21,7 +21,7 @@ export async function verifyReleaseBrowserResultSummaryBinding({
   receiptsDirectory,
   receipt
 }) {
-  const required = isReleaseBrowserReceiptId(receipt.id);
+  const required = isReleaseBrowserCompletionReceiptId(receipt.id);
   if (!required) {
     if (receipt.browserResultSummary !== null || receipt.browserResultSummaryError !== null) {
       throw new Error(`Non-browser receipt contains browser result data: ${receipt.id}`);

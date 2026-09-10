@@ -55,8 +55,8 @@
     {
       "path": "packages/bazi-core/src/index.ts",
       "packageManifestPath": "packages/bazi-core/package.json",
-      "lfUtf8Sha256": "73e0be8dbb2f40132158ee5dba26e493e18b686f9c888552c3e596c713301b2f",
-      "byteLength": 46483,
+      "lfUtf8Sha256": "4c9b7fc5a16cbd3e3f5ca0bed90cd950b8ef3750f204427a332a6c1a1b4e7e7f",
+      "byteLength": 46847,
       "edges": [
         {
           "kind": "static-export",
@@ -410,8 +410,8 @@
     "configFiles": [
       {
         "path": "apps/web/vite.config.ts",
-        "lfUtf8Sha256": "96ed96d3fedc7c5efd4810ee844f6b6c0c749cc179820cdc1f4a55a04dbfc9e8",
-        "byteLength": 16930,
+        "lfUtf8Sha256": "1229622d77eb9f1c7cd1168f92be7d6bcf0025ae84b9ad0bc5b0c2ff715dd759",
+        "byteLength": 17010,
         "baseBinding": "defines-createWebViteConfig"
       },
       {
@@ -503,8 +503,8 @@
       },
       {
         "path": "package.json",
-        "lfUtf8Sha256": "b8d8a31c3c4ae3669e196f0398288bf44284fdc1093ccbf6e510f8fcde0ca62c",
-        "byteLength": 20716
+        "lfUtf8Sha256": "ec1138dbde036d84a214a4f0aa45e891f141fdd3c0953c5cec1066dc4186a815",
+        "byteLength": 32319
       }
     ],
     "rootBundleScripts": [
@@ -650,5 +650,5 @@
       }
     }
   ],
-  "overallSha256": "06cb9615e1934d51d397507107879335a5595ad6180a1c91a95d2324f0bb920f"
+  "overallSha256": "4854298d8f7cd5d2f6d7f424606886733112e005e978345008110110f7a0d4c9"
 }

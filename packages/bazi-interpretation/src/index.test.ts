@@ -18,6 +18,7 @@ import {
   SHENSHA_POSITION_CONTENT_VERSION,
   SHENSHA_POSITION_EDITORIAL,
   TEN_GOD_POSITION_EDITORIAL,
+  type BaziInterpretationResult,
   type ShenshaPositionEditorialEntry,
   buildBaziPositionSynthesisReview,
   buildBaziFirstReadReview,
@@ -33,6 +34,7 @@ import {
   interpretBaziChart,
   serializeBaziContentReviewQueue
 } from "./index";
+import { BAZI_INTERPRETATION_SOURCE_REFS } from "./source-refs";
 
 function pillar(input: Pick<PillarFact, "name" | "label" | "ganZhi" | "stem" | "branch" | "hiddenStems" | "stemTenGod" | "branchTenGods" | "wuXing">): PillarFact {
   return {
@@ -330,6 +332,61 @@ describe("buildStrengthSensitivityReview", () => {
       overallGoodBad: null,
       result: null
     });
+    expect(interpretation).toEqual(before);
+  });
+
+  it("keeps a synthetic zero-factor API contract insufficient without selecting conclusions", () => {
+    // Synthetic zero-factor API contract, not a real chart or a domain-valid case.
+    const interpretation: BaziInterpretationResult = {
+      profile: BAZI_INTERPRETATION_RULE_PROFILE,
+      sourceRefs: BAZI_INTERPRETATION_SOURCE_REFS,
+      strength: {
+        band: "undetermined",
+        label: "未定",
+        dayMaster: { stem: "甲", element: "wood", elementLabel: "木" },
+        supportWeight: 0,
+        demandWeight: 0,
+        supportRatio: null,
+        directSummary: "Synthetic zero-factor API contract; no chart conclusion.",
+        factors: [],
+        knownGaps: ["Synthetic API input with no strength factors."]
+      },
+      pillars: []
+    };
+    const before = structuredClone(interpretation);
+    const review = buildStrengthSensitivityReview(interpretation);
+
+    expect(review.scenarios).toHaveLength(6);
+    expect(review).toMatchObject({
+      baselineBand: "undetermined",
+      baselineDirection: "undetermined",
+      distinctBands: ["undetermined"],
+      distinctDirections: ["undetermined"],
+      stability: "insufficient",
+      selectedOfficialScenarioId: null,
+      expertStrengthVerdict: null,
+      overallGoodBad: null,
+      result: null
+    });
+    expect(review.duplicateMonthMain).toMatchObject({
+      detected: false,
+      monthCommandFactorId: null,
+      monthHiddenMainFactorId: null,
+      combinedSourceWeight: null
+    });
+    for (const scenario of review.scenarios) {
+      expect(scenario).toMatchObject({
+        includedFactorIds: [],
+        excludedFactorIds: [],
+        appliedFactors: [],
+        supportWeight: 0,
+        demandWeight: 0,
+        supportRatio: null,
+        band: "undetermined",
+        broadDirection: "undetermined",
+        officialRuleCandidate: false
+      });
+    }
     expect(interpretation).toEqual(before);
   });
 

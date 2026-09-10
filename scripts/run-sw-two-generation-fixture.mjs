@@ -6,6 +6,7 @@ import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
+import { DIAGNOSTIC_STAGES, resolveDiagnosticProgram } from "./run-diagnostic-stage.mjs";
 
 import {
   assertStrictSwTwoGenerationFixtureSummary
@@ -24,12 +25,23 @@ const execFileAsync = promisify(execFile);
 const workspaceRoot = path.resolve(import.meta.dirname, "..");
 const playwrightCli = path.resolve(workspaceRoot, "node_modules/@playwright/test/cli.js");
 const fixtureConfig = path.resolve(workspaceRoot, "apps/web/playwright.sw-upgrade.config.ts");
-const viteCli = path.resolve(workspaceRoot, "node_modules/vite/bin/vite.js");
 const viteFixtureConfig = path.resolve(workspaceRoot, "apps/web/vite.sw-upgrade.config.ts");
 const expectedPlaywrightOutputDir = path.resolve(
   os.tmpdir(),
   "hakimi-bazi-sw-upgrade-results"
 );
+
+function sameSchemaFixtureEnvironment(parentEnvironment) {
+  const childEnvironment = { ...parentEnvironment };
+  for (const key of Object.keys(childEnvironment)) {
+    // Match the existing ABA boundary: unbound fixtures reject database overrides.
+    if (key.toUpperCase() === "HAKIMI_RELEASE_EVIDENCE_ID") delete childEnvironment[key];
+    if (key.toUpperCase().startsWith("HAKIMI_DB_")) {
+      throw new Error("Same-Schema SW fixtures do not accept HAKIMI_DB_* overrides.");
+    }
+  }
+  return childEnvironment;
+}
 
 function assertCanonicalPlaywrightOutputDir() {
   const configuredOutputDir = path.resolve(String(swUpgradeConfig.outputDir ?? ""));
@@ -39,15 +51,16 @@ function assertCanonicalPlaywrightOutputDir() {
 }
 
 async function buildSharedArtifactSet(artifactRoot) {
+  const viteCli = await resolveDiagnosticProgram(DIAGNOSTIC_STAGES.build, workspaceRoot);
   await mkdir(artifactRoot, { mode: 0o700 });
   for (const generation of SW_TWO_GENERATION_ARTIFACT_GENERATIONS) {
     const result = await execFileAsync(
       process.execPath,
-      [viteCli, "build", "--config", viteFixtureConfig],
+      [viteCli, "build", "--configLoader", "runner", "--config", viteFixtureConfig],
       {
         cwd: workspaceRoot,
         env: {
-          ...process.env,
+          ...sameSchemaFixtureEnvironment(process.env),
           HAKIMI_SW_UPGRADE_GENERATION: generation.generationName,
           HAKIMI_SW_UPGRADE_OUT_DIR: path.join(artifactRoot, generation.generationName),
           HAKIMI_SW_UPGRADE_FAULT: generation.fault
@@ -73,7 +86,7 @@ function runCanonicalPlaywright(resultPath, attemptId, artifactRoot, artifactSet
       {
         cwd: workspaceRoot,
         env: {
-          ...process.env,
+          ...sameSchemaFixtureEnvironment(process.env),
           HAKIMI_SW_TWO_GENERATION_FIXTURE_RESULT_OUTPUT: resultPath,
           HAKIMI_SW_TWO_GENERATION_FIXTURE_ATTEMPT_ID: attemptId,
           HAKIMI_SW_TWO_GENERATION_ARTIFACT_ROOT: artifactRoot,

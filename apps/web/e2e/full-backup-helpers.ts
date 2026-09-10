@@ -1,5 +1,6 @@
 ﻿import { readFile } from "node:fs/promises";
 import { expect, type BrowserContext, type Download, type Page } from "@playwright/test";
+import { preflightFullBackupFile } from "@hakimi/backup";
 import {
   createWorkingDefaultRulePackEnvelope,
   serializeRulePackEnvelope
@@ -60,10 +61,16 @@ export function collectConsoleProblems(page: Page): string[] {
 export async function waitForAppReady(page: Page) {
   await expect(page.locator("#main-content")).toBeVisible();
   await expect(page.locator(".route-loading, .table-skeleton, .chart-loading, .research-loading, .transit-loading")).toHaveCount(0);
-  await expect.poll(() => page.evaluate(() => document.documentElement.dataset.appBootReady)).toBe("true");
+  await expect(page.locator("html")).toHaveAttribute("data-app-boot-ready", "true");
 }
 
 export async function waitForServiceWorker(page: Page) {
+  const documentElement = page.locator("html");
+  // First claim replaces the frozen old document before it can send BOOT_OK.
+  // Locator assertions survive that navigation; evaluate only the ready page.
+  await expect(documentElement).toHaveAttribute("data-sw-boot-signal-sent", "true");
+  await expect(documentElement).toHaveAttribute("data-sw-ready", "true");
+  await expect(documentElement).toHaveAttribute("data-app-boot-ready", "true");
   await expect.poll(() => page.evaluate(() => ({
     ready: document.documentElement.dataset.swReady,
     controlled: Boolean(navigator.serviceWorker.controller),
@@ -234,24 +241,45 @@ export async function expectPartitionCount(page: Page, partitionLabel: string, c
   await expect(row.locator("dd")).toHaveText(String(count));
 }
 
-export async function exportFullBackupZip(page: Page): Promise<{ download: Download; bytes: Buffer }> {
+export async function downloadPreparedBackupZip(page: Page): Promise<{ download: Download; bytes: Buffer }> {
+  const dialog = page.locator('.prepared-delivery-dialog[role="dialog"]');
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toHaveAccessibleName("待交付文件已在本机生成");
+  await expect(dialog).toHaveAttribute("data-share-policy", "blocked_sensitive");
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "导出完整 ZIP", exact: true }).click();
+  await dialog.getByRole("button", { name: /^下载文件/u }).click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toMatch(/^hakimi-full-backup-\d{4}-\d{2}-\d{2}\.zip$/);
   expect(await download.failure()).toBeNull();
   const downloadPath = await download.path();
   if (!downloadPath) throw new Error("完整 ZIP 下载路径不可用");
   const bytes = await readFile(downloadPath);
   expect([...bytes.subarray(0, 4)]).toEqual([0x50, 0x4b, 0x03, 0x04]);
-  await expect(page.getByRole("status").filter({ hasText: "完整 ZIP 已生成并请求下载" })).toBeVisible();
+  await preflightFullBackupFile(new Uint8Array(bytes));
+  await expect(dialog).toHaveAttribute("data-delivery-outcome", "requested");
+  await dialog.getByRole("button", { name: "已核对，允许再次下载", exact: true }).click();
+  await dialog.getByRole("button", { name: "关闭", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  return { download, bytes };
+}
+
+export async function exportFullBackupZip(page: Page): Promise<{ download: Download; bytes: Buffer }> {
+  await page.getByRole("button", { name: "准备完整 ZIP", exact: true }).click();
+  const { download, bytes } = await downloadPreparedBackupZip(page);
+  expect(download.suggestedFilename()).toMatch(/^hakimi-full-backup-\d{4}-\d{2}-\d{2}\.zip$/);
+  await expect(page.getByRole("status").filter({ hasText: "完整 ZIP已生成并请求下载" })).toBeVisible();
   return { download, bytes };
 }
 
 export async function clearAllLocalData(page: Page) {
+  // Verify a fresh, actually downloaded archive before making the UI's backup declaration.
+  await exportFullBackupZip(page);
   await page.getByRole("button", { name: "开始完整清空", exact: true }).click();
-  const confirmation = page.getByRole("group", { name: /输入“删除全部本地数据”以解锁/ });
-  await confirmation.getByLabel("确认文字").fill("删除全部本地数据");
+  const confirmation = page.getByRole("group", { name: "先核对恢复保障，再输入确认文字", exact: true });
+  const confirmationText = confirmation.getByLabel("确认文字：输入“删除全部本地数据”", { exact: true });
+  await expect(confirmationText).toBeDisabled();
+  await expect(confirmation.getByRole("button", { name: "永久删除全部数据", exact: true })).toBeDisabled();
+  await confirmation.getByRole("radio", { name: /^我已人工核对一份可用的完整 ZIP/u }).check();
+  await confirmationText.fill("删除全部本地数据");
   await confirmation.getByRole("button", { name: "永久删除全部数据", exact: true }).click();
   await expect(page.getByRole("status").filter({
     hasText: "十六个本地数据分区与临时检索草稿已全部清除"
@@ -268,9 +296,8 @@ export async function preflightBackupZip(page: Page, bytes: Buffer, name = "port
 }
 
 export async function completeRestoreSafetyGate(page: Page) {
-  const safetyDownloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "先下载当前安全备份", exact: true }).click();
-  const safetyDownload = await safetyDownloadPromise;
+  await page.getByRole("button", { name: "先准备当前安全备份", exact: true }).click();
+  const { download: safetyDownload } = await downloadPreparedBackupZip(page);
   expect(safetyDownload.suggestedFilename()).toMatch(/^hakimi-before-restore-\d{4}-\d{2}-\d{2}\.zip$/);
   expect(await safetyDownload.failure()).toBeNull();
 

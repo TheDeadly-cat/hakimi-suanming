@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
-import { test } from "node:test";
+import { lstat, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { after, before, test } from "node:test";
+import { createRequire } from "node:module";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -13,10 +15,49 @@ import {
 } from "./independent-source-binding-requirements-lib.mjs";
 import { verifyZiweiHkoCalendarSourceEvidence } from "./ziwei-hko-calendar-source-evidence-lib.mjs";
 
-const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const { unzipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+let workspaceRoot;
 const HKO_SUBJECT_ID = "ziwei.engineering.official-calendar-differential";
 const HKO_CANDIDATE_ID =
   "hakimi.ziwei.source-candidate/hko-calendar-boundary-replay-2023-2028/1.0.0";
+
+// The v1 ledgers bind historical source bytes. Keep verifier code in the current
+// repository and use the original input closure only for these historical tests.
+async function removeHistoricalRequirementsFixture(temporaryRoot) {
+  assert.equal(path.isAbsolute(temporaryRoot), true);
+  assert.equal(path.dirname(temporaryRoot), path.resolve(os.tmpdir()));
+  assert.match(path.basename(temporaryRoot), /^hakimi-independent-requirements-history-[a-z0-9]{6}$/iu);
+  const metadata = await lstat(temporaryRoot);
+  assert.equal(metadata.isDirectory(), true);
+  assert.equal(metadata.isSymbolicLink(), false);
+  assert.equal(await realpath(temporaryRoot), temporaryRoot);
+  await rm(temporaryRoot, { recursive: true, force: true });
+}
+
+before(async () => {
+  const archive = await readFile(path.join(
+    repositoryRoot, "scripts/fixtures/independent-source-requirements-v1-original-inputs.zip"
+  ));
+  assert.equal(createHash("sha256").update(archive).digest("hex"),
+    "01d97b68ce0ca1380feb72e72a2375e6e25507051301c4972c489639349833d2");
+  const entries = Object.entries(unzipSync(archive));
+  assert.equal(entries.length, 12);
+  workspaceRoot = await mkdtemp(path.join(os.tmpdir(), "hakimi-independent-requirements-history-"));
+  for (const [relativePath, bytes] of entries) {
+    assert.equal(path.isAbsolute(relativePath), false);
+    assert.equal(relativePath.includes("\\"), false);
+    assert.equal(relativePath.split("/").some((part) => part === "" || part === "." || part === ".."), false);
+    const target = path.resolve(workspaceRoot, relativePath);
+    assert.equal(path.relative(workspaceRoot, target).startsWith(".."), false);
+    await mkdir(path.dirname(target), { recursive: true });
+    await writeFile(target, bytes, { flag: "wx" });
+  }
+});
+
+after(async () => {
+  if (workspaceRoot) await removeHistoricalRequirementsFixture(workspaceRoot);
+});
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -29,7 +70,7 @@ async function expectMismatch(definitionInput, candidate) {
   );
 }
 
-test("Ziwei and Western requirement ledgers exactly bind their current subject inventories", async () => {
+test("Ziwei and Western requirement ledgers exactly bind their original subject inventories", async () => {
   for (const definitionInput of INDEPENDENT_SOURCE_REQUIREMENT_DEFINITIONS) {
     const ledger = await readIndependentSourceRequirements(workspaceRoot, definitionInput);
     const expected = await buildCurrentIndependentSourceRequirements(workspaceRoot, definitionInput, {

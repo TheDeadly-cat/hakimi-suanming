@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 const OK_PREFIX =
   "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_5_OK";
@@ -82,17 +82,11 @@ export async function main() {
   assertNarrowInvocation();
   const modulePath = modulePathAfterPreloadCheck();
   const projectRoot = path.resolve(path.dirname(modulePath), "..");
-  const libraryUrl = pathToFileURL(
-    path.join(
-      path.dirname(modulePath),
-      "four-system-current-status-observation-child-v2-5-lib.mjs"
-    )
-  ).href;
   const {
     getFourSystemCurrentStatusObservationChildV25Summary,
     isVerifiedFourSystemCurrentStatusObservationChildV25,
     loadFourSystemCurrentStatusObservationChildV25
-  } = await import(libraryUrl);
+  } = await import("./four-system-current-status-observation-child-v2-5-lib.mjs");
   const result =
     await loadFourSystemCurrentStatusObservationChildV25(projectRoot);
   if (!isVerifiedFourSystemCurrentStatusObservationChildV25(result)) {

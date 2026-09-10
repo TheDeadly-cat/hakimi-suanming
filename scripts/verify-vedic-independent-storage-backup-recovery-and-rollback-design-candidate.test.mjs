@@ -309,7 +309,7 @@ test("fixed loader uniquely mints a narrow private sequential endpoint-observati
   assert.equal("candidateCeilingObservations" in loaded, false);
 
   const isolated = await import(
-    pathToFileURL(libraryAbsolutePath).href + "?brand-isolation=" + Date.now()
+    "./vedic-independent-storage-backup-recovery-and-rollback-design-candidate-lib.mjs?brand-isolation-test"
   );
   assert.equal(
     isolated.isVerifiedVedicIndependentStorageBackupRecoveryRollbackDesignCandidate(

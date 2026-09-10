@@ -18,10 +18,14 @@ import {
   releaseToolchain,
   relativePathWithin,
   sha256,
-  sha256File
+  sha256File,
+  verifyReleaseLifecyclePhaseReportBinding
 } from "./release-evidence-lib.mjs";
 import { BRIDGE_RELEASE_DATABASE_DESCRIPTOR } from "../apps/web/release-protocol.ts";
-import { isReleaseBrowserReceiptId } from "../apps/web/playwright.release-browser-result.ts";
+import {
+  isReleaseBrowserCompletionReceiptId,
+  isReleaseBrowserReceiptId
+} from "../apps/web/playwright.release-browser-result.ts";
 import { verifyReleaseBrowserResultSummaryBinding } from "./release-browser-result-evidence.mjs";
 import {
   assertReleaseArtifactReceiptBinding,
@@ -126,6 +130,7 @@ for (const name of receiptNames) {
   }
   if (testReceipts.some((entry) => entry.id === receipt.id)) throw new Error(`Duplicate receipt id: ${receipt.id}`);
   rawReceiptsById.set(receipt.id, receipt);
+  await verifyReleaseLifecyclePhaseReportBinding({ cwd, receiptsDirectory, receipt });
   const browserResultSummary = await verifyReleaseBrowserResultSummaryBinding({
     cwd,
     receiptsDirectory,
@@ -203,7 +208,7 @@ const policyReceiptCommandsMatched = policyReceiptIds.every((id) => {
   return receipt && canonicalJson(receipt.command) === canonicalJson(policyReceiptCommands[id]);
 });
 const browserResultSummariesMatched = policyReceiptIds
-  .filter(isReleaseBrowserReceiptId)
+  .filter(isReleaseBrowserCompletionReceiptId)
   .every((id) => testReceipts.some((receipt) =>
     receipt.id === id && receipt.browserResultSummary !== null
   ));

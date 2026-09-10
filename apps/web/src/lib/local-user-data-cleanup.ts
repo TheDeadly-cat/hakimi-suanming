@@ -72,8 +72,9 @@ function cleanupTimeout(timeoutMs: unknown): number {
 function freezeControlledWindowResult(
   result: ControlledWindowDraftCleanupResult,
 ): ControlledWindowDraftCleanupResult {
-  const failedClients = Object.freeze(result.failedClients.map((failure) => Object.freeze({ ...failure })))
-    as unknown as ControlledWindowDraftCleanupFailure[];
+  const failedClients = Object.freeze(
+    result.failedClients.map((failure) => Object.freeze({ ...failure })),
+  ) as unknown as ControlledWindowDraftCleanupFailure[];
   return Object.freeze({
     ...result,
     failedClients,

@@ -5,11 +5,32 @@ import path from "node:path";
 import { afterEach, test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { loadConfigFromFile, resolveConfig } from "vite";
-import { verifySystemContractDraftBoundaries } from "./verify-system-contract-draft-boundaries.mjs";
+import {
+  composeSystemContractDraftRegistries,
+  verifyOrdinaryWebBuild,
+  verifySystemContractDraftBoundaries
+} from "./verify-system-contract-draft-boundaries.mjs";
 
 const temporaryRoots = [];
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const draftRegistry = JSON.parse(fs.readFileSync(path.join(
+
+test("ordinary Web build accepts the fixed coordinator and rejects an isolated application target", () => {
+  const root = JSON.parse(fs.readFileSync(path.join(workspaceRoot, "package.json"), "utf8"));
+  const web = JSON.parse(fs.readFileSync(path.join(workspaceRoot, "apps/web/package.json"), "utf8"));
+  assert.doesNotThrow(() => verifyOrdinaryWebBuild(root, web));
+  const legacy = structuredClone(root);
+  legacy.scripts.build = "npm run build --workspace @hakimi/web";
+  assert.doesNotThrow(() => verifyOrdinaryWebBuild(legacy, null));
+  const isolated = structuredClone(root);
+  isolated.scripts.build = "npm run build:ziwei-browser-workspace";
+  assert.throws(() => verifyOrdinaryWebBuild(isolated, web), /Default lifecycle/u);
+  const redirectedWeb = structuredClone(web);
+  redirectedWeb.scripts.build = "vite build --config ../../packages/ziwei-workspace-artifact-draft/vite.browser-app.config.mjs";
+  assert.throws(() => verifyOrdinaryWebBuild(root, redirectedWeb), /workspace build hooks/u);
+});
+const sourceAccessRegistryPath = "docs/release/known-restricted-blockers.v1.json";
+const sourceAccessRegistry = JSON.parse(fs.readFileSync(path.join(workspaceRoot, sourceAccessRegistryPath), "utf8"));
+const primaryDraftRegistry = JSON.parse(fs.readFileSync(path.join(
   workspaceRoot,
   "scripts/system-contract-draft-registry.json"
 ), "utf8"));
@@ -17,6 +38,14 @@ const downstreamDraftRegistry = JSON.parse(fs.readFileSync(path.join(
   workspaceRoot,
   "scripts/system-contract-downstream-draft-registry.json"
 ), "utf8"));
+const composedDraftRegistry = composeSystemContractDraftRegistries(primaryDraftRegistry, downstreamDraftRegistry);
+assert.deepEqual(composedDraftRegistry.failures, []);
+// Fixtures activate optional downstream drafts individually, but every explicit
+// registry uses the same effective evidence dependency closure as the default.
+const draftRegistry = {
+  ...primaryDraftRegistry,
+  evidenceTools: composedDraftRegistry.registry.evidenceTools
+};
 const draftPackages = draftRegistry.drafts.filter((draft) => draft.presence === "required");
 const plannedFortelDraft = draftRegistry.drafts.find((draft) =>
   draft.packageName === "@hakimi/ziwei-fortel-differential-draft"
@@ -65,6 +94,7 @@ function allowedDraftDependencies(draft) {
 function createFixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "hakimi-draft-boundary-"));
   temporaryRoots.push(root);
+  write(root, sourceAccessRegistryPath, json(sourceAccessRegistry));
   write(root, "package.json", json({
     name: "boundary-fixture",
     version: "1.0.0",
@@ -252,8 +282,12 @@ function createFixture() {
   );
   write(root, "scripts/bazi-domain-release-manifest-lib.mjs", "export const domain = true;\n");
   write(root, "scripts/bazi-engineering-binding-candidate-lib.mjs", "export const candidate = true;\n");
+  write(root, "scripts/bazi-source-binding-candidate-lib.mjs", "import 'node:crypto';\nexport const binding = true;\n");
+  write(root, "scripts/bazi-source-rights-candidate-lib.mjs", "import 'node:crypto';\nimport './bazi-source-binding-candidate-lib.mjs';\nexport const rights = true;\n");
   write(root, "scripts/bazi-expert-review-packet-lib.mjs", [
     "import './bazi-engineering-binding-candidate-lib.mjs';",
+    "import './bazi-source-binding-candidate-lib.mjs';",
+    "import './bazi-source-rights-candidate-lib.mjs';",
     "export const packet = true;"
   ].join("\n"));
   write(root, "scripts/independent-domain-release-manifest-lib.mjs", "export const manifest = true;\n");
@@ -590,6 +624,95 @@ function expectFailure(root, pattern) {
   assert.match(failures.join("\n"), pattern);
 }
 
+test("downstream composition adds only the reviewed offline evidence dependencies without mutating historical inputs", () => {
+  const primary = structuredClone(primaryDraftRegistry);
+  const downstream = structuredClone(downstreamDraftRegistry);
+  const beforePrimary = structuredClone(primary);
+  const beforeDownstream = structuredClone(downstream);
+  const result = composeSystemContractDraftRegistries(primary, downstream);
+  assert.deepEqual(result.failures, []);
+  assert.deepEqual(primary, beforePrimary);
+  assert.deepEqual(downstream, beforeDownstream);
+  const amendment = downstream.evidenceDependencyPolicyAmendments[0];
+  const originalTool = primary.evidenceTools.find((tool) => tool.path === amendment.toolPath);
+  const tool = result.registry.evidenceTools.find((entry) => entry.path === amendment.toolPath);
+  const originalDependency = originalTool.scriptDependencyPolicies.find((entry) => entry.path === amendment.dependencyPath);
+  const dependency = tool.scriptDependencyPolicies.find((entry) => entry.path === amendment.dependencyPath);
+  assert.deepEqual(dependency.allowedBareImports, [...originalDependency.allowedBareImports, ...amendment.addBareImports]);
+  assert.deepEqual(dependency.allowedLocalTargets, [...originalDependency.allowedLocalTargets, ...amendment.addLocalTargets]);
+  assert.deepEqual(tool.scriptDependencyPolicies.slice(-2), amendment.newDependencyPolicies);
+  assert.deepEqual(
+    { ...tool, scriptDependencyPolicies: undefined },
+    { ...originalTool, scriptDependencyPolicies: undefined }
+  );
+  assert.deepEqual(result.registry.drafts, [...primary.drafts, ...downstream.drafts]);
+  dependency.allowedBareImports.push("node:assert");
+  assert.deepEqual(primary, beforePrimary);
+  assert.deepEqual(downstream, beforeDownstream);
+});
+
+test("downstream composition rejects unknown shapes, targets, imports, and duplicate amendments atomically", () => {
+  const mutations = [
+    (registry) => { registry.unknown = true; },
+    (registry) => { registry.registryClass = "upstream"; },
+    (registry) => { delete registry.evidenceDependencyPolicyAmendments; },
+    (registry) => { registry.evidenceDependencyPolicyAmendments = null; },
+    (registry) => { registry.evidenceDependencyPolicyAmendments.push(structuredClone(registry.evidenceDependencyPolicyAmendments[0])); },
+    (registry) => { registry.evidenceDependencyPolicyAmendments[0].productionImport = "allowed"; },
+    (registry) => { registry.evidenceDependencyPolicyAmendments[0].toolPath = "scripts/unknown-tool.mjs"; },
+    (registry) => { registry.evidenceDependencyPolicyAmendments[0].dependencyPath = "scripts/unknown-dependency.mjs"; },
+    (registry) => { registry.evidenceDependencyPolicyAmendments[0].addBareImports.push("node:child_process"); },
+    (registry) => { registry.evidenceDependencyPolicyAmendments[0].addBareImports.push("node:fs"); },
+    (registry) => { registry.evidenceDependencyPolicyAmendments[0].addLocalTargets.push("scripts/unknown-target.mjs"); },
+    (registry) => { registry.evidenceDependencyPolicyAmendments[0].newDependencyPolicies[0].allowedLocalTargets.push("scripts/unknown-target.mjs"); }
+  ];
+  for (const mutate of mutations) {
+    const downstream = structuredClone(downstreamDraftRegistry);
+    mutate(downstream);
+    const result = composeSystemContractDraftRegistries(primaryDraftRegistry, downstream);
+    assert.notEqual(result.failures.length, 0);
+    assert.strictEqual(result.registry, primaryDraftRegistry);
+  }
+});
+
+test("downstream composition rejects absent, duplicate, or already amended upstream dependencies", () => {
+  const amendment = downstreamDraftRegistry.evidenceDependencyPolicyAmendments[0];
+  const mutations = [
+    (primary) => { primary.evidenceTools = []; },
+    (primary) => { primary.evidenceTools.push(structuredClone(primary.evidenceTools[0])); },
+    (primary) => { primary.evidenceTools[0].scriptDependencyPolicies = []; },
+    (primary) => {
+      const tool = primary.evidenceTools[0];
+      tool.scriptDependencyPolicies.push(structuredClone(tool.scriptDependencyPolicies.find((entry) => entry.path === amendment.dependencyPath)));
+    },
+    (primary) => { primary.evidenceTools[0].scriptDependencyPolicies.push(structuredClone(amendment.newDependencyPolicies[0])); },
+    (primary) => {
+      primary.evidenceTools[0].scriptDependencyPolicies.find((entry) => entry.path === amendment.dependencyPath).allowedBareImports.push("node:fs");
+    }
+  ];
+  for (const mutate of mutations) {
+    const primary = structuredClone(primaryDraftRegistry);
+    mutate(primary);
+    const result = composeSystemContractDraftRegistries(primary, downstreamDraftRegistry);
+    assert.notEqual(result.failures.length, 0);
+    assert.strictEqual(result.registry, primary);
+  }
+});
+
+test("downstream composition preserves explicit fixture registry closure and existing dependency restrictions", () => {
+  const root = createFixture();
+  const amendment = downstreamDraftRegistry.evidenceDependencyPolicyAmendments[0];
+  write(root, amendment.dependencyPath, [
+    ...amendment.addBareImports.map((specifier) => `import '${specifier}';`),
+    "import './bazi-source-binding-candidate-lib.mjs';",
+    "import './bazi-source-rights-candidate-lib.mjs';"
+  ].join("\n"));
+  assert.deepEqual(verifySystemContractDraftBoundaries(root, draftRegistry), []);
+  assert.deepEqual(verifySystemContractDraftBoundaries(root), []);
+  write(root, "scripts/bazi-source-binding-candidate-lib.mjs", "import 'node:fs';\n");
+  assert.match(verifySystemContractDraftBoundaries(root, draftRegistry).join("\n"), /bazi-source-binding-candidate-lib.*node:fs/u);
+});
+
 test("accepts isolated drafts and ignores code, HTML, Vite, and tsconfig comments", () => {
   const root = createFixture();
   write(root, "apps/web/src/asset.txt", "fixture asset\n");
@@ -606,6 +729,10 @@ test("accepts isolated drafts and ignores code, HTML, Vite, and tsconfig comment
 
 test("records the known restricted source without inspecting its module imports", () => {
   const root = createFixture();
+  const restricted = structuredClone(sourceAccessRegistry);
+  restricted.blockers[0].restrictedPaths = [...restricted.blockers[0].previouslyRestrictedPaths];
+  restricted.blockers[0].forbiddenActions.push("read_source");
+  write(root, sourceAccessRegistryPath, json(restricted));
   write(
     root,
     "apps/web/src/lib/local-user-data-cleanup.ts",
@@ -620,6 +747,26 @@ test("records the known restricted source without inspecting its module imports"
     failures,
     /local-user-data-cleanup\.ts imports isolated draft/u
   );
+});
+
+test("explicit source access authorization inspects the former restricted source and still rejects isolated imports", () => {
+  const root = createFixture();
+  write(root, "apps/web/src/lib/local-user-data-cleanup.ts", "import '@hakimi/ziwei-doushu-contracts-draft';\n");
+  const failures = verifySystemContractDraftBoundaries(root).join("\n");
+  assert.match(failures, /local-user-data-cleanup\.ts imports isolated draft/u);
+  assert.doesNotMatch(failures, /is a known restricted source and was not inspected/u);
+});
+
+test("missing or malformed source access registry stops before production source inspection", () => {
+  for (const malformed of [null, { recordType: "known_restricted_blocker_registry", blockers: [{}] }]) {
+    const root = createFixture();
+    write(root, "apps/web/src/lib/local-user-data-cleanup.ts", "import '@hakimi/ziwei-doushu-contracts-draft';\n");
+    if (malformed === null) fs.unlinkSync(path.join(root, sourceAccessRegistryPath));
+    else write(root, sourceAccessRegistryPath, json(malformed));
+    const failures = verifySystemContractDraftBoundaries(root).join("\n");
+    assert.match(failures, /must provide a valid source access registry before inspecting source/u);
+    assert.doesNotMatch(failures, /local-user-data-cleanup\.ts imports isolated draft/u);
+  }
 });
 
 test("keeps the exact cross-system evidence tool offline and target-allowlisted", () => {
@@ -927,6 +1074,74 @@ test("does not treat unrelated Vite literals as alias targets", () => {
     "void documentationOnly;"
   ].join("\n"));
   assert.deepEqual(verifySystemContractDraftBoundaries(root), []);
+});
+
+test("allows the exact reviewed Vitest project registration while preserving alias checks", () => {
+  const root = createFixture();
+  const configPath = "apps/web/vitest.config.ts";
+  write(root, configPath, fs.readFileSync(path.join(workspaceRoot, configPath), "utf8"));
+  assert.deepEqual(verifySystemContractDraftBoundaries(root), []);
+});
+
+test("rejects Vitest project registration source drift or reuse at another path", () => {
+  const configPath = "apps/web/vitest.config.ts";
+  const reviewedSource = fs.readFileSync(path.join(workspaceRoot, configPath), "utf8");
+  for (const [fixturePath, fixtureSource] of [
+    [configPath, `${reviewedSource}\n// changed since review\n`],
+    ["tools/vitest.config.ts", reviewedSource]
+  ]) {
+    const root = createFixture();
+    write(root, fixturePath, fixtureSource);
+    expectFailure(root, /must not alias isolated draft @hakimi\/vedic-input-/u);
+  }
+});
+
+test("retains conservative draft checks for wrapped and reassigned alias expressions", () => {
+  for (const source of [
+    "export default { resolve: { alias: Object.freeze({ '@hakimi/ziwei-doushu-contracts-draft': './safe.ts' }) } };",
+    "let target = './safe.ts'; target = '../packages/ziwei-doushu-contracts-draft/src/index.ts'; export default { resolve: { alias: { '#draft': target } } };",
+    "let name = '#safe'; name = '@hakimi/ziwei-doushu-contracts-draft'; export default { resolve: { alias: [{ find: name, replacement: './safe.ts' }] } };"
+  ]) {
+    const root = createFixture();
+    write(root, "tools/vite.config.ts", source);
+    expectFailure(root, /must not alias isolated draft @hakimi\/ziwei-doushu-contracts-draft/u);
+  }
+});
+
+test("rejects draft alias names even when replacement is outside the draft", () => {
+  const root = createFixture();
+  for (const alias of [
+    "{ '@hakimi/ziwei-doushu-contracts-draft': './safe.ts' }",
+    "[{ find: '@hakimi/ziwei-doushu-contracts-draft', replacement: './safe.ts' }]"
+  ]) {
+    write(root, "tools/vite.config.ts", `export default { resolve: { alias: ${alias} } };`);
+    expectFailure(root, /must not alias isolated draft @hakimi\/ziwei-doushu-contracts-draft/u);
+  }
+});
+
+test("generated-module test classification requires the reviewed whole source identity", () => {
+  const root = createFixture();
+  const testPath = "scripts/verify-bazi-private-exact-quote-material.test.mjs";
+  const reviewedSource = fs.readFileSync(path.join(workspaceRoot, testPath), "utf8");
+  write(root, testPath, reviewedSource);
+  assert.deepEqual(verifySystemContractDraftBoundaries(root), []);
+  write(root, testPath, `${reviewedSource}\n// changed since review\n`);
+  expectFailure(root, /uses non-literal dynamic import module loading/u);
+});
+
+test("reviewed generated-module tests remain unreachable from application code", () => {
+  const root = createFixture();
+  const testPath = "scripts/verify-bazi-private-exact-quote-material.test.mjs";
+  write(root, testPath, fs.readFileSync(path.join(workspaceRoot, testPath), "utf8"));
+  write(root, "apps/web/src/test-entry.ts", `import '../../../${testPath}';\n`);
+  expectFailure(root, /imports a generated-module test surface/u);
+  write(root, "scripts/test-proxy.mjs", "import './verify-bazi-private-exact-quote-material.test.mjs';\n");
+  write(root, "apps/web/src/test-entry.ts", "import '../../../scripts/test-proxy.mjs';\n");
+  expectFailure(root, /scripts\/test-proxy\.mjs imports a generated-module test surface/u);
+  write(root, "scripts/test-proxy.mjs", "export {};\n");
+  write(root, "apps/web/src/test-entry.ts", "export {};\n");
+  write(root, "tools/vite.config.ts", `export default { resolve: { alias: { '#test': '../${testPath}' } } };\n`);
+  expectFailure(root, /must not alias evidence audit surface/u);
 });
 
 test("fails closed on workspace junctions instead of skipping their payload", () => {

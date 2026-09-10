@@ -1,4 +1,7 @@
 ﻿import { expect, test } from "@playwright/test";
+import { mkdtemp } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import type { Page, Response } from "@playwright/test";
 import { BRIDGE_RELEASE_DATABASE_DESCRIPTOR } from "../release-protocol";
@@ -124,16 +127,30 @@ test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可
   test.setTimeout(120_000);
   if (!baseURL) throw new Error("Playwright baseURL 未配置");
   // Playwright 的默认隔离 context 会被 Chromium 固定判为 in-incognito，无法证明
-  // 产品自身的安装资格。这里使用测试输出目录中的一次性持久 profile，仍不接触
+  // 产品自身的安装资格。这里使用系统临时目录中的一次性持久 profile，仍不接触
   // 用户真实浏览器资料，同时让 Page.getInstallabilityErrors 审计产品本身。
+  // profile 不嵌套测试标题与报告目录；关闭浏览器后保留它供失败诊断。
+  const userDataDir = await mkdtemp(path.join(os.tmpdir(), "hpwa-"));
+  testInfo.annotations.push({ type: "persistent-profile", description: userDataDir });
+  await testInfo.attach("persistent-profile", {
+    body: Buffer.from(JSON.stringify({
+      projectName: testInfo.project.name,
+      userDataDir,
+      outputDir: testInfo.outputDir,
+      retainedForDiagnostics: true,
+      separateFromTestOutput: true
+    }, null, 2)),
+    contentType: "application/json"
+  });
   const context = await launchReleasePersistentContext({
     projectName: testInfo.project.name,
-    userDataDir: testInfo.outputPath(`${testInfo.project.name}-pwa-profile`)
+    userDataDir
   });
-  const page = context.pages()[0] ?? await context.newPage();
-  await page.setViewportSize(MOBILE_VIEWPORT);
-  const onlineProblems = collectConsoleProblems(page);
+  let onlineProblems: string[] = [];
   try {
+    const page = context.pages()[0] ?? await context.newPage();
+    await page.setViewportSize(MOBILE_VIEWPORT);
+    onlineProblems = collectConsoleProblems(page);
     await page.goto(`${baseURL}/`, { waitUntil: "domcontentloaded" });
     await waitForAppReady(page);
     await waitForServiceWorker(page);
@@ -191,15 +208,28 @@ test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可
       const iconResponse = await fetch(icon.src, { cache: "no-store" });
       if (!iconResponse.ok) throw new Error(`${icon.src} HTTP ${iconResponse.status}`);
       const blob = await iconResponse.blob();
-      const bitmap = await createImageBitmap(blob);
-      const result = {
-        ...icon,
-        contentType: iconResponse.headers.get("content-type"),
-        width: bitmap.width,
-        height: bitmap.height
-      };
-      bitmap.close();
-      return result;
+      const contentType = iconResponse.headers.get("content-type");
+      try {
+        if (icon.type === "image/svg+xml") {
+          const objectUrl = URL.createObjectURL(blob);
+          try {
+            const image = new Image();
+            image.src = objectUrl;
+            await image.decode();
+            return { ...icon, contentType, width: image.naturalWidth, height: image.naturalHeight };
+          } finally {
+            URL.revokeObjectURL(objectUrl);
+          }
+        }
+        const bitmap = await createImageBitmap(blob);
+        try {
+          return { ...icon, contentType, width: bitmap.width, height: bitmap.height };
+        } finally {
+          bitmap.close();
+        }
+      } catch (reason) {
+        throw new Error(`${icon.src} decode failed (${contentType}, ${blob.size} bytes): ${String(reason)}`);
+      }
     }));
     return { manifest, icons };
     });
@@ -212,8 +242,13 @@ test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可
     expect(manifestAudit.icons).toEqual(expect.arrayContaining([
     expect.objectContaining({ sizes: "192x192", contentType: "image/png", width: 192, height: 192 }),
     expect.objectContaining({ sizes: "512x512", contentType: "image/png", width: 512, height: 512 }),
+    expect.objectContaining({ src: "/brand-mark.svg", sizes: "any", contentType: "image/svg+xml" }),
     expect.objectContaining({ sizes: "512x512", purpose: "maskable", width: 512, height: 512 })
     ]));
+    for (const icon of manifestAudit.icons) {
+      expect(icon.width, `${icon.src} must decode to a nonempty image`).toBeGreaterThan(0);
+      expect(icon.height, `${icon.src} must decode to a nonempty image`).toBeGreaterThan(0);
+    }
 
     const defaultPrevented = await page.evaluate(() => {
     document.documentElement.dataset.e2eInstallPromptCount = "0";
@@ -235,8 +270,8 @@ test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可
     expect(defaultPrevented).toBe(true);
 
     const installBanner = page.locator(".pwa-install-banner");
-    await expect(installBanner).toContainText("把研究台安装为 Web 应用");
-    await expect(installBanner).toContainText("不会把数据同步到其他设备");
+    await expect(installBanner).toContainText("请求创建研究台应用入口");
+    await expect(installBanner).toContainText("创建入口不会自动迁移、复制或同步资料");
     const axe = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22a", "wcag22aa"])
       .analyze();
@@ -245,17 +280,21 @@ test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可
       impact: violation.impact,
       targets: violation.nodes.flatMap((node) => node.target)
     })), "390×844 PWA 安装提示存在 WCAG A/AA 错误").toEqual([]);
-    await installBanner.getByRole("button", { name: "安装 Web 应用", exact: true }).click();
+    await installBanner.getByRole("button", { name: "打开系统安装面板", exact: true }).click();
     await expect.poll(() => page.locator("html").getAttribute("data-e2e-install-prompt-count")).toBe("1");
-    await expect(installBanner).toContainText("浏览器已接受安装请求；是否完成以系统安装结果为准");
-    await expect(installBanner).not.toContainText("浏览器已报告安装完成");
+    await expect(installBanner).toContainText("浏览器已接受本次安装选择；是否创建完成仍以系统入口或随后出现的安装完成事件为准");
+    await expect(installBanner).not.toContainText("浏览器已发出安装完成事件");
+    await expect(installBanner).toHaveAttribute("data-install-result-evidence", "user_choice_accepted");
+    await expect(installBanner).toHaveAttribute("data-install-entry-confirmed", "false");
     await expect(installBanner.getByRole("status")).toBeFocused();
 
     await page.evaluate(() => window.dispatchEvent(new Event("appinstalled")));
-    await expect(installBanner).toContainText("Web 应用安装完成");
-    await expect(installBanner).toContainText("浏览器已报告安装完成");
+    await expect(installBanner).toContainText("系统已报告应用入口创建完成");
+    await expect(installBanner).toContainText("浏览器已发出安装完成事件");
+    await expect(installBanner).toHaveAttribute("data-install-result-evidence", "browser_event_received");
+    await expect(installBanner).toHaveAttribute("data-install-entry-confirmed", "true");
     await expectMobileNoOverflow(page);
-    await installBanner.getByRole("button", { name: "关闭安装提示", exact: true }).click();
+    await installBanner.getByRole("button", { name: "关闭提示：系统已报告应用入口创建完成", exact: true }).click();
     await expect(installBanner).toHaveCount(0);
 
     await createDemoCase(page);
@@ -395,8 +434,11 @@ test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可
     });
     expect(offlineHelpProblems).toEqual([]);
   } finally {
-    if (context.pages().length > 0) await context.setOffline(false);
-    await context.close();
+    try {
+      if (context.pages().length > 0) await context.setOffline(false);
+    } finally {
+      await context.close();
+    }
   }
 
   expect(onlineProblems).toEqual([]);

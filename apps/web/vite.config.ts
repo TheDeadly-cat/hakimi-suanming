@@ -6,7 +6,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
-import { computeOfflineCacheVersion, type OfflineBundleEntry } from "./pwa-build";
+import {
+  bindReleaseIdentityAttributes,
+  computeOfflineCacheVersion,
+  type OfflineBundleEntry
+} from "./pwa-build";
 import { auditBundledKnowledgeDirectory } from "./bundled-knowledge-audit";
 import {
   BRIDGE_RELEASE_DATABASE_DESCRIPTOR,
@@ -260,7 +264,7 @@ function offlineBundlePlugin(
       const template = await readFile(templatePath, "utf8");
       const builtIndex = await readFile(indexPath, "utf8");
       if (!builtIndex.includes("</head>")) throw new Error("PWA 构建无法注入数据库代际描述符");
-      const releaseAwareIndex = builtIndex.replace(
+      const releaseAwareIndex = bindReleaseIdentityAttributes(builtIndex, descriptor).replace(
         "</head>",
         `  ${releaseStorageManifestMeta(manifest, releaseEvidenceId)}\n  </head>`
       );

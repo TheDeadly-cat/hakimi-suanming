@@ -1,5 +1,6 @@
 ﻿import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { FullBackupError } from "@hakimi/backup";
 import {
   LOCAL_APP_SETTINGS_ID,
   LOCAL_APP_SETTINGS_RECORD_VERSION,
@@ -59,9 +60,10 @@ vi.mock("@hakimi/storage", () => ({
   }
 }));
 
-vi.mock("@hakimi/backup", () => ({
+vi.mock("@hakimi/backup", async (importOriginal) => ({
   DEFAULT_MAX_FULL_BACKUP_ARCHIVE_BYTES: 120 * 1024 * 1024,
   DEFAULT_MAX_FULL_BACKUP_JSON_BYTES: 160 * 1024 * 1024,
+  FullBackupError: (await importOriginal<typeof import("@hakimi/backup")>()).FullBackupError,
   applyVerifiedFullBackup: mocks.applyVerifiedFullBackup,
   preflightCoreBackup: mocks.preflightCoreBackup
 }));
@@ -359,6 +361,26 @@ async function openDeleteAllConfirmation(
   return confirmation as HTMLInputElement;
 }
 
+async function submitConfirmedRestore(): Promise<void> {
+  mocks.pickFile.mockResolvedValue({
+    name: "incoming.json",
+    size: 4096,
+    type: "application/json",
+    blob: new Blob(["{}"], { type: "application/json" })
+  });
+  const choose = await screen.findByRole("button", { name: "选择 ZIP / JSON 预检" });
+  await waitFor(() => expect(choose).toHaveProperty("disabled", false));
+  fireEvent.click(choose);
+  await screen.findByRole("heading", { name: "预检通过，尚未写入" });
+  fireEvent.click(screen.getByRole("button", { name: "先准备当前安全备份" }));
+  await deliverPreparedFile();
+  fireEvent.click(screen.getByLabelText(/我已确认安全备份文件保存成功并可以打开/));
+  fireEvent.click(screen.getByLabelText(/我理解恢复会替换此浏览器中的全部十六个用户数据分区/));
+  const restore = screen.getByRole("button", { name: "确认替换并恢复" });
+  await waitFor(() => expect(restore).toHaveProperty("disabled", false));
+  fireEvent.click(restore);
+}
+
 async function enterDeleteAllText(confirmation: HTMLInputElement): Promise<HTMLButtonElement> {
   fireEvent.change(confirmation, { target: { value: "删除全部本地数据" } });
   const deleteButton = screen.getByRole<HTMLButtonElement>("button", { name: "永久删除全部数据" });
@@ -561,6 +583,65 @@ describe("DataManagementPage", () => {
     expect(replacement).toHaveProperty("checked", false);
     expect(mocks.verifyPreparedFullBackupOffMainThread).not.toHaveBeenCalled();
     expect(mocks.applyVerifiedFullBackup).not.toHaveBeenCalled();
+  });
+
+  it("真实 CURRENT_DATA_CHANGED 冲突撤销旧预检与确认，重新准备使用变化后的当前数据", async () => {
+    const changedSnapshot = { ...snapshot, cases: [{ id: "case-created-after-preflight" }] };
+    mocks.applyVerifiedFullBackup.mockImplementationOnce(async () => {
+      mocks.readFullDataSnapshot.mockResolvedValue(changedSnapshot);
+      throw new FullBackupError("CURRENT_DATA_CHANGED", "Current data changed after preparation.");
+    });
+    const view = render(<DataManagementPage />);
+    await submitConfirmedRestore();
+
+    expect(await screen.findByText("恢复预检已过期")).toBeTruthy();
+    expect(screen.getByText(/本次恢复未替换现有数据.*重新选择 ZIP \/ JSON 文件.*重新创建、保存和确认当前安全备份/)).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "预检通过，尚未写入" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "确认替换并恢复" })).toBeNull();
+    expect(screen.queryByText("完整恢复成功")).toBeNull();
+    expect(view.container.querySelector("[data-write-mode]")?.getAttribute("data-write-mode")).toBe("available");
+    expect(screen.getByRole("button", { name: "开始完整清空" })).toHaveProperty("disabled", false);
+    expect(mocks.inspectFullBackupSnapshotOffMainThread).not.toHaveBeenCalled();
+    expect(mocks.clearAll).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "选择 ZIP / JSON 预检" }));
+    await screen.findByRole("heading", { name: "预检通过，尚未写入" });
+    expect(mocks.prepareFullBackupImportOffMainThread).toHaveBeenLastCalledWith(
+      expect.any(Blob), changedSnapshot, expect.objectContaining({ appVersion: expect.any(String) })
+    );
+    expect(screen.getByRole("button", { name: "先准备当前安全备份" })).toBeTruthy();
+    expect(screen.getByLabelText(/我已确认安全备份文件保存成功并可以打开/)).toHaveProperty("checked", false);
+    expect(screen.getByLabelText(/我理解恢复会替换此浏览器中的全部十六个用户数据分区/)).toHaveProperty("checked", false);
+    expect(screen.getByRole("button", { name: "确认替换并恢复" })).toHaveProperty("disabled", true);
+    expect(mocks.applyVerifiedFullBackup).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    new Error("Restore outcome unavailable"),
+    Object.assign(new Error("Unclassified conflict"), { code: "CURRENT_DATA_CHANGED" })
+  ])("未知恢复异常仍锁写和清空入口，只读导出及重新核对可用：%s", async (reason) => {
+    mocks.applyVerifiedFullBackup.mockRejectedValueOnce(reason);
+    const view = render(<DataManagementPage />);
+    await submitConfirmedRestore();
+
+    expect(await screen.findByRole("heading", { name: "恢复存储调用异常，提交结果未知" })).toBeTruthy();
+    expect(view.container.querySelector("[data-write-mode]")?.getAttribute("data-write-mode")).toBe("reconciliation_required");
+    expect(screen.queryByText("恢复预检已过期")).toBeNull();
+    expect(screen.queryByText("完整恢复成功")).toBeNull();
+    for (const name of ["保存研究者资料", "保存本机偏好", "选择并保存附件", "选择 ZIP / JSON 预检", "开始完整清空"]) {
+      expect(screen.getByRole("button", { name })).toHaveProperty("disabled", true);
+    }
+    fireEvent.click(screen.getByRole("button", { name: "开始完整清空" }));
+    expect(screen.queryByRole("group", { name: "先核对恢复保障，再输入确认文字" })).toBeNull();
+    expect(screen.getByRole("button", { name: "重新打开并核对" })).toHaveProperty("disabled", false);
+    const exportButton = screen.getByRole("button", { name: "准备完整 ZIP" });
+    expect(exportButton).toHaveProperty("disabled", false);
+    fireEvent.click(exportButton);
+    await deliverPreparedFile();
+    expect(mocks.createFullBackupArtifactOffMainThread).toHaveBeenCalledTimes(1);
+    expect(mocks.applyVerifiedFullBackup).toHaveBeenCalledTimes(1);
+    expect(mocks.clearAll).not.toHaveBeenCalled();
+    expect(view.container.querySelector("[data-write-mode]")?.getAttribute("data-write-mode")).toBe("reconciliation_required");
   });
 
   it("实际写入仍遇到 QuotaExceeded 时核对回滚摘要并保持待恢复状态", async () => {
@@ -1047,6 +1128,10 @@ describe("DataManagementPage", () => {
     expect(within(receipt as HTMLElement).getByText("72 条 · 17 个附件（已列 16 条元数据）")).toBeTruthy();
     expect(mocks.clearAll).toHaveBeenCalledTimes(1);
     expect(screen.queryByText("完整清空未完成")).toBeNull();
+    const trigger = screen.getByRole("button", { name: "开始完整清空" });
+    expect(trigger).toHaveProperty("disabled", true);
+    fireEvent.click(trigger);
+    expect(screen.queryByRole("group", { name: "先核对恢复保障，再输入确认文字" })).toBeNull();
   });
 
   it("研究者资料已提交但后置读取失败时不误报未保存", async () => {

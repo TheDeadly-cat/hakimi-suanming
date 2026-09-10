@@ -389,6 +389,7 @@ export function ComparePage() {
   const ruleVariantInFlightRef = useRef(false);
   const ruleVariantMutationLockedRef = useRef(false);
   const sessionEpochRef = useRef(0);
+  const comparisonSwitcherRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -1179,12 +1180,23 @@ export function ComparePage() {
                       event.preventDefault();
                       const target = document.getElementById(targetId);
                       if (!target) return;
+                      // Read the current wrapped identity area before navigating;
+                      // its height changes with the selected columns and viewport.
+                      const switcher = comparisonSwitcherRef.current;
+                      const switcherStyle = switcher ? getComputedStyle(switcher) : null;
+                      const switcherHeight = switcher?.getBoundingClientRect().height ?? 0;
+                      const stickyInset = Number.parseFloat(switcherStyle?.top ?? "");
+                      if (switcherStyle?.position === "sticky" && switcherHeight > 0 && Number.isFinite(stickyInset)) {
+                        target.style.scrollMarginTop = `${Math.ceil(Math.max(0, stickyInset) + switcherHeight)}px`;
+                      } else {
+                        target.style.removeProperty("scroll-margin-top");
+                      }
                       if (window.location.hash !== `#${targetId}`) {
                         window.history.pushState(window.history.state, "", `#${targetId}`);
-                       }
-                       target.scrollIntoView?.({ block: "start" });
-                       target.focus({ preventScroll: true });
-                     }}
+                      }
+                      target.scrollIntoView?.({ block: "start" });
+                      target.focus({ preventScroll: true });
+                    }}
                   >
                     <span>{CATEGORY_SHORT_LABELS[section.category]}</span>
                     <strong>{section.differenceCount}</strong>
@@ -1198,7 +1210,7 @@ export function ComparePage() {
           </section>
 
           {projection.matrix.items.length > 1 ? (
-            <div className="comparison-mobile-switcher" data-difference-state={comparisonDisplay.differenceCount ? "changed" : "same"} role="group" aria-label="选择当前比较盘">
+            <div ref={comparisonSwitcherRef} className="comparison-mobile-switcher" data-difference-state={comparisonDisplay.differenceCount ? "changed" : "same"} role="group" aria-label="选择当前比较盘">
               <span className="comparison-mobile-identity">
                 <strong aria-live="polite" aria-atomic="true">A · {comparisonCaseAlias(projection.matrix.items[0].caseAlias)} · R{projection.matrix.items[0].revision.revisionNumber} ↔ 当前 {slotLabel(displayActiveCompareIndex)} · {comparisonCaseAlias(projection.matrix.items[displayActiveCompareIndex].caseAlias)} · R{projection.matrix.items[displayActiveCompareIndex].revision.revisionNumber}</strong>
                 <small>A {comparisonRuleProfileIdentity(projection.matrix.items[0].revision)} · {slotLabel(displayActiveCompareIndex)} {comparisonRuleProfileIdentity(projection.matrix.items[displayActiveCompareIndex].revision)}</small>

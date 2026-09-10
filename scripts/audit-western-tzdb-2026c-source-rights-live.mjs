@@ -5,10 +5,6 @@ import { gunzipSync } from "node:zlib";
 
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const WORKSPACE_ROOT = path.resolve(path.dirname(SCRIPT_PATH), "..");
-const BUSINESS_DEPENDENCY_URL = new URL(
-  "./western-tzdb-2026c-source-rights-evidence-lib.mjs",
-  import.meta.url
-);
 const ANNOUNCEMENT_SEMANTIC_DOMAIN =
   "hakimi-western-tzdb-2026c-live-announcement-semantics-v1\0";
 const MAX_ANNOUNCEMENT_BYTES = 1_000_000;
@@ -458,7 +454,7 @@ function validateBusinessDependency(dependency) {
 async function loadBusinessDependency() {
   let dependency;
   try {
-    dependency = await import(BUSINESS_DEPENDENCY_URL.href);
+    dependency = await import("./western-tzdb-2026c-source-rights-evidence-lib.mjs");
   } catch (cause) {
     fail("BUSINESS_DEPENDENCY_IMPORT_FAILED", "固定 child evidence dependency 加载失败。", cause);
   }

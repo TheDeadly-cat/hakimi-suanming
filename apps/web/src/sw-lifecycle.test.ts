@@ -4,6 +4,7 @@ import path from "node:path";
 import { runInNewContext } from "node:vm";
 import { IDBFactory } from "fake-indexeddb";
 import { describe, expect, it, vi } from "vitest";
+import { PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR } from "../release-protocol";
 import {
   controllerTakeoverFailureFromNack,
   createControllerTakeoverScheduler,
@@ -53,7 +54,17 @@ const REPUBLISHED_TARGET_DESCRIPTOR = {
 type ReleaseDescriptor =
   | typeof BRIDGE_DESCRIPTOR
   | typeof TARGET_DESCRIPTOR
-  | typeof REPUBLISHED_TARGET_DESCRIPTOR;
+  | typeof REPUBLISHED_TARGET_DESCRIPTOR
+  | typeof PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR;
+
+type FakeWorkerEndpoint = {
+  state: string;
+  scriptURL: string;
+  postMessage: (message: Record<string, unknown>, ports?: FakeMessagePort[]) => void;
+};
+
+const FORWARD_TARGET_VERSION = "forward-v16-build";
+const FORWARD_REQUEST_ID = "takeover-00000000-0000-4000-8000-000000000091";
 
 function encodedDescriptor(descriptor: ReleaseDescriptor) {
   return JSON.stringify(descriptor).replaceAll('"', '\\"');
@@ -231,12 +242,9 @@ async function createWorkerHarness(
     throw new Error("offline");
   });
   const registration: {
-    waiting: {
-      state: string;
-      scriptURL: string;
-      postMessage: (message: Record<string, unknown>, ports?: FakeMessagePort[]) => void;
-    } | null;
-  } = { waiting: null };
+    waiting: FakeWorkerEndpoint | null;
+    active: FakeWorkerEndpoint | null;
+  } = { waiting: null, active: null };
   const caches = {
     async open(cacheName: string) {
       let cache = cacheStore.get(cacheName);
@@ -366,6 +374,9 @@ async function createWorkerHarness(
   const setWaitingWorker = (waiting: typeof registration.waiting) => {
     registration.waiting = waiting;
   };
+  const setActiveWorker = (active: typeof registration.active) => {
+    registration.active = active;
+  };
 
   return {
     cacheStore,
@@ -383,6 +394,7 @@ async function createWorkerHarness(
     seedResource,
     seedShell,
     setCommittedState,
+    setActiveWorker,
     setWaitingWorker,
     skipWaiting,
     windowClients
@@ -2829,9 +2841,53 @@ describe("Service Worker upgrade safety", () => {
     await retryLifetime;
   });
 
-  it("waiting B 的 skipWaiting 明确失败会复位 activationStarted 并允许全新请求", async () => {
+  it("waiting B 的 skipWaiting 请求 Promise 未完成时 COMMIT 与 PREPARE 生命周期仍结束", async () => {
     const harness = await createWorkerHarness();
-    harness.skipWaiting.mockRejectedValueOnce(new Error("synthetic skipWaiting rejection"));
+    harness.skipWaiting.mockReturnValueOnce(new Promise<undefined>(() => undefined));
+    const activeWorker = {
+      scriptURL: `${ORIGIN}/sw.js`,
+      state: "activated",
+      postMessage: vi.fn()
+    };
+    const requestId = "takeover-00000000-0000-4000-8000-000000000023";
+    const preparationAcks: Array<Record<string, unknown>> = [];
+    const preparationLifetime = harness.dispatch("message", {
+      data: {
+        type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId,
+        sourceBuildVersion: "previous-build",
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: activeWorker,
+      ports: [{ postMessage: (message) => preparationAcks.push(message as Record<string, unknown>) }]
+    });
+    const commitAcks: Array<Record<string, unknown>> = [];
+    const commitLifetime = harness.dispatch("message", {
+      data: {
+        type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId,
+        sourceBuildVersion: "previous-build",
+        targetBuildVersion: CURRENT_VERSION,
+        challengeNonce: preparationAcks[0]?.challengeNonce
+      },
+      source: activeWorker,
+      ports: [{ postMessage: (message) => commitAcks.push(message as Record<string, unknown>) }]
+    });
+    await Promise.all([preparationLifetime, commitLifetime]);
+    expect(harness.skipWaiting).toHaveBeenCalledOnce();
+    expect(commitAcks).toEqual([expect.objectContaining({
+      accepted: true,
+      reason: "SKIP_WAITING_REQUESTED"
+    })]);
+    expect(harness.claim).not.toHaveBeenCalled();
+    expect(harness.cacheStore.size).toBe(0);
+  });
+
+  it("waiting B 的 skipWaiting 同步抛错会复位 activationStarted 并允许全新请求", async () => {
+    const harness = await createWorkerHarness();
+    harness.skipWaiting.mockImplementationOnce(() => {
+      throw new Error("synthetic synchronous skipWaiting failure");
+    });
     const activeWorker = {
       scriptURL: `${ORIGIN}/sw.js`,
       state: "activated",
@@ -2900,7 +2956,69 @@ describe("Service Worker upgrade safety", () => {
     })]);
   });
 
-  it("waiting B 的 skipWaiting 成功后即使 ACK 发送失败也绝不复位或伪造 known rejection", async () => {
+  it("waiting B 的 skipWaiting 异步拒绝不复位、不补发 NACK 且不重复请求", async () => {
+    const harness = await createWorkerHarness();
+    let rejectActivation!: (reason: Error) => void;
+    harness.skipWaiting.mockReturnValueOnce(new Promise<undefined>((_resolve, reject) => {
+      rejectActivation = reject;
+    }));
+    const activeWorker = {
+      scriptURL: `${ORIGIN}/sw.js`,
+      state: "activated",
+      postMessage: vi.fn()
+    };
+    const requestId = "takeover-00000000-0000-4000-8000-000000000024";
+    const preparationAcks: Array<Record<string, unknown>> = [];
+    const preparationLifetime = harness.dispatch("message", {
+      data: {
+        type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1",
+        requestId,
+        sourceBuildVersion: "previous-build",
+        sourceRelease: BRIDGE_DESCRIPTOR
+      },
+      source: activeWorker,
+      ports: [{ postMessage: (message) => preparationAcks.push(message as Record<string, unknown>) }]
+    });
+    const commitAcks: Array<Record<string, unknown>> = [];
+    const commit = {
+      type: "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1",
+      requestId,
+      sourceBuildVersion: "previous-build",
+      targetBuildVersion: CURRENT_VERSION,
+      challengeNonce: preparationAcks[0]?.challengeNonce
+    };
+    await harness.dispatch("message", {
+      data: commit,
+      source: activeWorker,
+      ports: [{ postMessage: (message) => commitAcks.push(message as Record<string, unknown>) }]
+    });
+    await preparationLifetime;
+    rejectActivation(new Error("synthetic asynchronous skipWaiting rejection"));
+    await Promise.resolve();
+    expect(commitAcks).toEqual([expect.objectContaining({
+      accepted: true,
+      reason: "SKIP_WAITING_REQUESTED"
+    })]);
+    const retryAcks: Array<Record<string, unknown>> = [];
+    await harness.dispatch("message", {
+      data: { ...commit, type: "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1", sourceRelease: BRIDGE_DESCRIPTOR },
+      source: activeWorker,
+      ports: [{ postMessage: (message) => retryAcks.push(message as Record<string, unknown>) }]
+    });
+    await harness.dispatch("message", {
+      data: commit,
+      source: activeWorker,
+      ports: [{ postMessage: (message) => retryAcks.push(message as Record<string, unknown>) }]
+    });
+    expect(retryAcks).toHaveLength(2);
+    expect(retryAcks.every((ack) => ack.accepted === false && ack.reason === "PROTOCOL_MISMATCH")).toBe(true);
+    expect(commitAcks).toHaveLength(1);
+    expect(harness.skipWaiting).toHaveBeenCalledOnce();
+    expect(harness.claim).not.toHaveBeenCalled();
+    expect(harness.cacheStore.size).toBe(0);
+  });
+
+  it("waiting B 的 skipWaiting 返回后即使 ACK 发送失败也绝不复位或伪造 known rejection", async () => {
     const harness = await createWorkerHarness();
     const activeWorker = {
       scriptURL: `${ORIGIN}/sw.js`,
@@ -3872,5 +3990,172 @@ describe("Service Worker upgrade safety", () => {
     expect(response.status).toBe(503);
     expect(response.body).toContain("正在安全切换离线版本");
     expect(response.body).not.toContain("late A network shell");
+  });
+});
+
+async function connectedForwardMigrationWorkers(options: {
+  committed?: boolean;
+  secondClientAccepts?: boolean;
+  target?: ReleaseDescriptor;
+} = {}) {
+  const targetDescriptor = options.target ?? PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR;
+  const source = await createWorkerHarness(BRIDGE_DESCRIPTOR);
+  const target = await createWorkerHarness(targetDescriptor, {
+    buildVersion: FORWARD_TARGET_VERSION,
+    cacheStore: source.cacheStore,
+    indexedDB: source.indexedDB
+  });
+  const deliveries: Promise<unknown>[] = [];
+  const activeWorker = {
+    state: "activated",
+    scriptURL: `${ORIGIN}/sw.js`,
+    postMessage: vi.fn<(message: unknown, ports?: FakeMessagePort[]) => void>()
+  };
+  const waitingWorker: FakeWorkerEndpoint = {
+    state: "installed",
+    scriptURL: `${ORIGIN}/sw.js`,
+    postMessage: (data, ports) => {
+      const delivery = target.dispatch("message", { data, ports, source: activeWorker });
+      deliveries.push(delivery);
+      void delivery.catch(() => undefined);
+    }
+  };
+  source.setActiveWorker(activeWorker);
+  source.setWaitingWorker(waitingWorker);
+  target.setActiveWorker(activeWorker);
+  target.setWaitingWorker(waitingWorker);
+  const freezeTypes: string[] = [];
+  for (const id of ["forward-source-one", "forward-source-two"]) {
+    source.addWindowClient(id, (message, port) => {
+      if (message.type !== "FREEZE_RELEASE_FORWARD_MIGRATION_ACTIVATION_WRITES_V1") return;
+      freezeTypes.push(String(message.type));
+      const accepted = id !== "forward-source-two" || options.secondClientAccepts !== false;
+      port?.postMessage({
+        type: "FREEZE_RELEASE_FORWARD_MIGRATION_ACTIVATION_WRITES_ACK_V1",
+        requestId: message.requestId,
+        sourceBuildVersion: message.sourceBuildVersion,
+        targetBuildVersion: message.targetBuildVersion,
+        accepted,
+        reason: accepted ? "WRITES_DRAINED" : "WRITE_DRAIN_FAILED"
+      });
+    });
+  }
+  if (options.committed !== false) await source.setCommittedState(committedState(BRIDGE_DESCRIPTOR, CURRENT_VERSION));
+  const request = {
+    type: "REQUEST_INSTALLED_FORWARD_MIGRATION_ACTIVATION_V1",
+    requestId: FORWARD_REQUEST_ID,
+    sourceBuildVersion: CURRENT_VERSION,
+    sourceRelease: BRIDGE_DESCRIPTOR,
+    targetBuildVersion: FORWARD_TARGET_VERSION,
+    targetRelease: targetDescriptor
+  };
+  return { source, target, request, deliveries, freezeTypes };
+}
+
+describe("forward migration activation ordinary contracts", () => {
+  it("reads waiting release identity without activating or changing storage", async () => {
+    const harness = await createWorkerHarness(PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR, {
+      buildVersion: FORWARD_TARGET_VERSION
+    });
+    const replies: unknown[] = [];
+    await harness.dispatch("message", {
+      data: { type: "GET_INSTALLED_GENERATION_RELEASE_IDENTITY_V1", requestId: FORWARD_REQUEST_ID },
+      source: { id: "ordinary-page" },
+      ports: [{ postMessage: value => replies.push(value) }]
+    });
+    expect(replies).toEqual([{
+      type: "GET_INSTALLED_GENERATION_RELEASE_IDENTITY_ACK_V1",
+      requestId: FORWARD_REQUEST_ID,
+      buildVersion: FORWARD_TARGET_VERSION,
+      release: PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR
+    }]);
+    expect(harness.skipWaiting).not.toHaveBeenCalled();
+    expect(harness.claim).not.toHaveBeenCalled();
+    expect(harness.cacheStore.size).toBe(0);
+  });
+
+  it("activates a distinct v16 worker only after committed v13 and both source write drains", async () => {
+    const connected = await connectedForwardMigrationWorkers();
+    const replies: Array<Record<string, unknown>> = [];
+    await connected.source.dispatch("message", {
+      data: connected.request,
+      source: { id: "forward-source-one" },
+      ports: [{ postMessage: value => replies.push(value as Record<string, unknown>) }]
+    });
+    await Promise.all(connected.deliveries);
+    expect(replies).toEqual([expect.objectContaining({
+      type: "REQUEST_INSTALLED_FORWARD_MIGRATION_ACTIVATION_ACK_V1",
+      accepted: true,
+      reason: "ALL_CLIENTS_DRAINED_BEFORE_SKIP_WAITING",
+      targetBuildVersion: FORWARD_TARGET_VERSION,
+      targetRelease: PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR,
+      clientCount: 2,
+      frozenClientCount: 2
+    })]);
+    // An acknowledged page stays write-frozen. A later census discovers new
+    // pages without requiring the existing pages to repeat that same drain.
+    expect(connected.freezeTypes).toHaveLength(2);
+    expect(connected.source.matchAllClients.mock.calls.length).toBeGreaterThanOrEqual(3);
+    expect(connected.target.skipWaiting).toHaveBeenCalledOnce();
+    expect(connected.source.skipWaiting).not.toHaveBeenCalled();
+  });
+
+  it("keeps the same-descriptor namespace closed to a v13 to v16 transition", async () => {
+    const connected = await connectedForwardMigrationWorkers();
+    const replies: Array<Record<string, unknown>> = [];
+    await connected.source.dispatch("message", {
+      data: { ...connected.request, type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1" },
+      source: { id: "forward-source-one" },
+      ports: [{ postMessage: value => replies.push(value as Record<string, unknown>) }]
+    });
+    await Promise.all(connected.deliveries);
+    expect(replies).toEqual([expect.objectContaining({
+      type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_ACK_V1",
+      accepted: false
+    })]);
+    expect(connected.freezeTypes).toEqual([]);
+    expect(connected.target.skipWaiting).not.toHaveBeenCalled();
+  });
+
+  it("requires the actual source commit before requesting any forward client freeze", async () => {
+    const connected = await connectedForwardMigrationWorkers({ committed: false });
+    const replies: Array<Record<string, unknown>> = [];
+    await connected.source.dispatch("message", {
+      data: connected.request,
+      source: { id: "forward-source-one" },
+      ports: [{ postMessage: value => replies.push(value as Record<string, unknown>) }]
+    });
+    await Promise.all(connected.deliveries);
+    expect(replies).toEqual([expect.objectContaining({ accepted: false })]);
+    expect(connected.freezeTypes).toEqual([]);
+    expect(connected.target.skipWaiting).not.toHaveBeenCalled();
+  });
+
+  it("retains waiting v16 when one source page cannot drain its writes", async () => {
+    const connected = await connectedForwardMigrationWorkers({ secondClientAccepts: false });
+    const replies: Array<Record<string, unknown>> = [];
+    await connected.source.dispatch("message", {
+      data: connected.request,
+      source: { id: "forward-source-one" },
+      ports: [{ postMessage: value => replies.push(value as Record<string, unknown>) }]
+    });
+    await Promise.all(connected.deliveries);
+    expect(replies).toEqual([expect.objectContaining({ accepted: false })]);
+    expect(connected.freezeTypes.length).toBeGreaterThanOrEqual(2);
+    expect(connected.target.skipWaiting).not.toHaveBeenCalled();
+  });
+
+  it("does not admit a schema14 target through the explicit v16 forward route", async () => {
+    const connected = await connectedForwardMigrationWorkers({ target: TARGET_DESCRIPTOR });
+    const replies: Array<Record<string, unknown>> = [];
+    await connected.source.dispatch("message", {
+      data: connected.request,
+      source: { id: "forward-source-one" },
+      ports: [{ postMessage: value => replies.push(value as Record<string, unknown>) }]
+    });
+    await Promise.all(connected.deliveries);
+    expect(replies).toEqual([expect.objectContaining({ accepted: false })]);
+    expect(connected.freezeTypes).toEqual([]);
+    expect(connected.target.skipWaiting).not.toHaveBeenCalled();
   });
 });

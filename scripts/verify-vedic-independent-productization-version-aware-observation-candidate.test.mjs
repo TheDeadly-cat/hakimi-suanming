@@ -206,7 +206,7 @@ test("fixed loader uniquely mints the private current observation brand", async 
   assert.equal("currentObservationOverlays" in loaded, false);
 
   const isolated = await import(
-    pathToFileURL(libraryAbsolutePath).href + "?brand-isolation=" + Date.now()
+    "./vedic-independent-productization-version-aware-observation-candidate-lib.mjs?brand-isolation-test"
   );
   assert.equal(
     isolated.isVerifiedVedicProductizationVersionAwareObservationCandidate(

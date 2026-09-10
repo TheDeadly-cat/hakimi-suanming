@@ -10,6 +10,10 @@
 
 ## 候选生成
 
+类型检查、单元测试和构建的默认入口现在分别记录治理、工作区前置及程序主体。治理失败后，已获准的程序仍可产生自己的诊断结果；任何必需阶段失败、被阻塞或结果未知，整条命令仍返回非零。构建保留工作区的 historical-natal attestation 前置，前置失败时不会启动 Vite。
+
+这三类正式回执为每次调用分配独立阶段报告和 runId，记录当前两份 package 原字节、固定执行计划及真实 programStarted。命令封装、证据生成和最终验证均核对该报告。缺失、过期、未完成或互相矛盾的报告不能作为通过证据；缺报告时程序执行状态为未知，不能据此断言程序没有运行。过去的真实回执保持原字节，不补写新的阶段报告。
+
 ```powershell
 npm ci
 npx playwright install chrome msedge
@@ -99,7 +103,7 @@ node scripts/verify-rollback-evidence.mjs --input private/rollback/run-001-priva
 
 四个 root 必须是工作区内 realpath 互异且彼此不嵌套的同级目录；Evidence input 与 sidecar 必须位于 `private-root` 内，artifact、receipt 和私有数据域不得共用 junction、symlink 或父子目录。
 
-verifier 只复核既有 A→B→A 证据，不部署、不触发回滚、不读取密钥明文，也不生成现实演员或数据所有者同意。当前 checked-in hosting policy 仍为 `unselected / canonicalOrigin null`，actor registry 为零受信演员；独立复核还确认 formal 语义重放、原始 host/CDP/provider receipt、HMAC 重算、actor registry 治理根签名、逐阶段冻结和离线回滚观察均未实现，因此 policy 的 `executionAdmission` 也固定关闭。即使临时填入主机或演员，CLI 仍必须以 `ROLLBACK_EXECUTION_ADMISSION_CLOSED` 失败，不能生成 `passed` 的现实回滚结论。Schema 13 没有 mutation epoch 能力，证据必须写作 `absent_schema13` 和空 epoch；不得伪造 epoch 0。详见 [独立 v13 真实回滚证据机械门](./独立v13真实回滚证据机械门-v1-2026-08-26.md)。
+verifier 只复核既有 A→B→A 证据，不部署、不触发回滚、不读取密钥明文，也不生成现实演员或数据所有者同意。当前 checked-in hosting policy 仍为 `unselected / canonicalOrigin null`，actor registry 为零受信演员；当前支持合同下的单产物 formal 原文件复验已接通；历史 A/B 各自源码与原 dist/web、tmp 布局，以及真实 host/CDP/provider receipt、HMAC 重算、actor registry 治理根签名、逐阶段冻结和离线回滚观察仍未完整接通，因此 policy 的 `executionAdmission` 也固定关闭。即使临时填入主机或演员，CLI 仍必须以 `ROLLBACK_EXECUTION_ADMISSION_CLOSED` 失败，不能生成 `passed` 的现实回滚结论。Schema 13 没有 mutation epoch 能力，证据必须写作 `absent_schema13` 和空 epoch；不得伪造 epoch 0。详见 [独立 v13 真实回滚证据机械门](./独立v13真实回滚证据机械门-v1-2026-08-26.md)。
 
 另有一条独立的 rollback/provider **投影组合候选**：它只消费已持久化 provider sequence 的独立 verifier，并在其 overlapping checkpoint 内持有 rollback evidence、sidecar、两张 deployment receipt 与当前 policy sources；两张 receipt 的语义校验与 formal rollback 共用同一个纯 helper。该候选只接受自身已经 `failed`、有 failure 且 20 个 formal gates 全为 false 的 rollback 输入，输出固定 `untrusted_candidate_composition / not_admitted / usableForAdmission=false`，CLI 固定退出 `1`。当前 provider v1 要求 `unselected/null` policy，而 formal rollback 要求 selected canonical HTTPS host，二者同一 policy epoch 明确不可同时成功；候选不得把这一互斥或 `ROLLBACK_EXECUTION_ADMISSION_CLOSED` 解释成正式回滚通过。详见 [B 阶段 rollback 与 provider 序列投影组合边界](./B阶段rollback与provider序列投影组合边界-v1-2026-08-27.md)。
 

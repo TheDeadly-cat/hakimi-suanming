@@ -16,9 +16,9 @@ export const ZIWEI_HKO_LIVE_CHECK_COMMAND =
   "npm run check:ziwei-iztro-isolated-build-license-notices";
 export const ZIWEI_HKO_LIVE_TEST_COMMAND =
   "npm run test:ziwei-iztro-isolated-build-license-notices";
-export const ZIWEI_HKO_QUICK_CI_JOB_BLOCK_BYTES = 2300;
+export const ZIWEI_HKO_QUICK_CI_JOB_BLOCK_BYTES = 2435;
 export const ZIWEI_HKO_QUICK_CI_JOB_BLOCK_SHA256 =
-  "c11c430b0642e9bb7f593df4eef220a2ede751e721cb7e7fb969c6ec5afaa73e";
+  "a7391001d65519721671dbd53d241468571e32905ddcc3246c3ec19f48cd0fe0";
 
 const POLICY_DIGEST_DOMAIN =
   "hakimi.ziwei.hko-restricted-source-pre-release-policy/1\0";
@@ -61,8 +61,8 @@ export const ZIWEI_HKO_RESTRICTED_SOURCE_IMPLEMENTATION_SPECS = Object.freeze([
   Object.freeze({
     role: "formal_npm_lifecycle_closure_resolver",
     path: "scripts/formal-npm-lifecycle-closure-lib.mjs",
-    bytes: 11589,
-    sha256: "7cc1c4d8e31861636bc4f18e5817f6ff3ffed9b60f8092f630e422678d97ebc9"
+    bytes: 19013,
+    sha256: "7a2cbdc59357b4c84cc866384f7df67eeab67e089bb1527b43cf061dcbccbfd8"
   })
 ]);
 
@@ -108,9 +108,8 @@ const LIFECYCLE_BINDINGS = Object.freeze([
 
 const QUICK_CI_BEFORE_COMMANDS = Object.freeze([
   "npm run check:system-contract-draft-boundaries",
-  "npm run check:independent-source-binding-requirements",
-  "npm run check:independent-domain-release-manifests",
-  "npm run check:system-admission-registry",
+  "npm run check:independent-source-inventory",
+  "npm run check:independent-domain-inventory",
   "npm run check:release-governance"
 ]);
 export const ZIWEI_HKO_PARENT_ISOLATION_ARTIFACT_PATHS = Object.freeze([

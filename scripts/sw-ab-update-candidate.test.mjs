@@ -6,6 +6,11 @@ import test from "node:test";
 
 import { canonicalJson, sha256 } from "./release-evidence-lib.mjs";
 import {
+  assertStrictReleaseBrowserResultSummary,
+  CROSS_SCHEMA_V13_V16_RECEIPT_ID,
+  REQUIRED_RELEASE_BROWSER_RECEIPT_IDS
+} from "../apps/web/playwright.release-browser-result.ts";
+import {
   computeSwAbUpdateCandidateArtifactIdentityDigest,
   computeSwAbUpdateCandidateAttachmentDigest,
   computeSwAbUpdateCandidateAttemptMarkerDigest,
@@ -367,6 +372,95 @@ test("nested Release Evidence claims must satisfy the checked formal Schema", as
     document.claims.hiddenAuthority = true;
   });
   await expectCode(fixture.verify(), "SW_AB_UPDATE_RELEASE_EVIDENCE_SCHEMA_INVALID");
+});
+
+test("nested Release Evidence accepts cross completion while retaining four artifact receipts and no admission", async (t) => {
+  const fixture = await createFixture(t);
+  for (const label of ["A", "B"]) {
+    const relative = fixture.evidence.artifacts[label].releaseEvidence.path;
+    const envelope = JSON.parse(await readFile(path.join(fixture.attachmentsRoot, relative), "utf8"));
+    const document = envelope.payload.document;
+    const cross = document.testReceipts.find((receipt) => receipt.id === CROSS_SCHEMA_V13_V16_RECEIPT_ID);
+    assert.ok(cross);
+    assertStrictReleaseBrowserResultSummary(cross.browserResultSummary.summary, CROSS_SCHEMA_V13_V16_RECEIPT_ID);
+    assert.deepEqual(cross.browserResultSummary.summary.projects.map(({ projectName, passed, attempts }) =>
+      ({ projectName, passed, attempts })), [
+      { projectName: "msedge", passed: 13, attempts: 13 },
+      { projectName: "chrome", passed: 13, attempts: 13 }
+    ]);
+    // Release Evidence contains projected receipts; raw command artifact
+    // bindings are not part of this closed projection.
+    assert.equal(Object.hasOwn(cross, "artifactIdentityBinding"), false);
+    assert.deepEqual(document.artifacts.mutationBoundary.coveredReceiptIds, REQUIRED_RELEASE_BROWSER_RECEIPT_IDS);
+    for (const id of REQUIRED_RELEASE_BROWSER_RECEIPT_IDS) {
+      const receipt = document.testReceipts.find((entry) => entry.id === id);
+      assertStrictReleaseBrowserResultSummary(receipt.browserResultSummary.summary, id);
+    }
+  }
+  const result = await fixture.verify();
+  assert.equal(result.internalConsistencyVerified, true);
+  assert.equal(result.status, "not_admitted");
+  assert.equal(result.strictGatePassed, false);
+  assert.equal(result.usableForAdmission, false);
+  assert.ok(Object.values(result.authority).every((value) => value === false));
+});
+
+test("nested Release Evidence rejects a missing cross completion summary", async (t) => {
+  const fixture = await createFixture(t);
+  await mutateReleaseEvidenceAttachment(fixture, "A", (document) => {
+    document.testReceipts.find((receipt) => receipt.id === CROSS_SCHEMA_V13_V16_RECEIPT_ID)
+      .browserResultSummary = null;
+  });
+  await expectCode(fixture.verify(), "SW_AB_UPDATE_RELEASE_EVIDENCE_DOCUMENT_INVALID");
+});
+
+test("nested Release Evidence rejects a cross completion summary for another receipt", async (t) => {
+  const fixture = await createFixture(t);
+  await mutateReleaseEvidenceAttachment(fixture, "A", (document) => {
+    document.testReceipts.find((receipt) => receipt.id === CROSS_SCHEMA_V13_V16_RECEIPT_ID)
+      .browserResultSummary = structuredClone(document.testReceipts.find((receipt) => receipt.id === "pwa").browserResultSummary);
+  });
+  await expectCode(fixture.verify(), "SW_AB_UPDATE_RELEASE_EVIDENCE_DOCUMENT_INVALID");
+});
+
+test("nested Release Evidence keeps original four summaries required and non-browser summaries absent", async (t) => {
+  for (const id of [...REQUIRED_RELEASE_BROWSER_RECEIPT_IDS, "unit"]) {
+    const fixture = await createFixture(t);
+    await mutateReleaseEvidenceAttachment(fixture, "A", (document) => {
+      const receipt = document.testReceipts.find((entry) => entry.id === id);
+      assert.ok(receipt, id);
+      receipt.browserResultSummary = id === "unit"
+        ? structuredClone(document.testReceipts.find((entry) => entry.id === "pwa").browserResultSummary)
+        : null;
+    });
+    await expectCode(fixture.verify(), "SW_AB_UPDATE_RELEASE_EVIDENCE_DOCUMENT_INVALID");
+  }
+});
+
+test("nested Release Evidence rejects same-id incomplete cross completion counts", async (t) => {
+  const fixture = await createFixture(t);
+  await mutateReleaseEvidenceAttachment(fixture, "A", (document) => {
+    const summary = document.testReceipts.find((receipt) => receipt.id === CROSS_SCHEMA_V13_V16_RECEIPT_ID)
+      .browserResultSummary.summary;
+    Object.assign(summary.projects[0], { discovered: 12, passed: 12, attempts: 12 });
+  });
+  await expectCode(fixture.verify(), "SW_AB_UPDATE_RELEASE_EVIDENCE_SCHEMA_INVALID");
+});
+
+test("nested Release Evidence rejects same-id incomplete original four completion counts", async (t) => {
+  for (const id of REQUIRED_RELEASE_BROWSER_RECEIPT_IDS) {
+    const fixture = await createFixture(t);
+    await mutateReleaseEvidenceAttachment(fixture, "A", (document) => {
+      const summary = document.testReceipts.find((receipt) => receipt.id === id).browserResultSummary.summary;
+      const incompleteCount = summary.expectedTestsPerProject - 1;
+      Object.assign(summary.projects[0], {
+        discovered: incompleteCount,
+        passed: incompleteCount,
+        attempts: incompleteCount
+      });
+    });
+    await expectCode(fixture.verify(), "SW_AB_UPDATE_RELEASE_EVIDENCE_SCHEMA_INVALID");
+  }
 });
 
 test("nested Release Evidence cannot elevate owner-controlled gates", async (t) => {

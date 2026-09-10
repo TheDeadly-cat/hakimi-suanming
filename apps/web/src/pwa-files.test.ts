@@ -76,7 +76,9 @@ describe("PWA static contract", () => {
     expect(worker).toContain('message?.type === "ACTIVATE_INSTALLED_GENERATION"');
     expect(worker).toContain('message?.type === "PREPARE_INSTALLED_GENERATION_ACTIVATION_V1"');
     expect(worker).toContain('message?.type === "COMMIT_INSTALLED_GENERATION_ACTIVATION_V1"');
-    expect(worker).toContain('type: "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_V1"');
+    expect(worker).toContain('freeze: "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_V1"');
+    expect(worker).toContain('freeze: "FREEZE_RELEASE_FORWARD_MIGRATION_ACTIVATION_WRITES_V1"');
+    expect(worker).toContain("type: session.protocol.freeze");
     expect(worker).toContain("freezeAllControllerTakeoverClients");
     expect(worker).toContain("controllerTakeoverHoldingResponse");
     expect(worker).toContain("CONTROLLER_TAKEOVER_HOLD_URL");
@@ -123,12 +125,17 @@ describe("PWA static contract", () => {
     expect(entry).toContain('.register("/sw.js", { updateViaCache: "none" })');
     expect(entry).toContain('document.readyState === "complete"');
     expect(entry).toContain("startServiceWorkerLifecycle();");
-    expect(entry).toContain('window.addEventListener("load", startServiceWorkerLifecycle, { once: true })');
+    expect(entry).toContain('window.addEventListener("load", () => resolve(), { once: true })');
+    const registrationGateStart = entry.indexOf("void registerServiceWorkerAfterBootCommit({");
+    expect(registrationGateStart).toBeGreaterThan(-1);
     expect(entry).toContain("registration.update()");
     expect(entry).toContain("activationWindowDeadline");
     expect(entry).toContain("const promoteWaiting = () =>");
     expect(entry).toContain('installing.addEventListener("statechange", promoteWhenInstalled)');
-    expect(entry).toContain('type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1"');
+    expect(entry).toContain("const requestType = forwardMigration");
+    expect(entry).toContain('? "REQUEST_INSTALLED_FORWARD_MIGRATION_ACTIVATION_V1"');
+    expect(entry).toContain(': "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1";');
+    expect(entry).toContain("type: requestType,");
     expect(entry).toContain('message?.type === "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_V1"');
     expect(entry).toContain("drainControllerTakeoverWrites");
     expect(entry).toContain("controllerTakeoverWriteFence: releaseControllerTakeoverWriteLatch.facade");
@@ -290,6 +297,7 @@ describe("PWA static contract", () => {
     expect(controllerChangeClose).toBeLessThan(controllerChangeLatch);
     expect(controllerChangeLatch).toBeGreaterThan(controllerChangeStart);
     expect(controllerChangeConfirmation).toBeGreaterThan(controllerChangeLatch);
+    expect(registrationGateStart).toBeGreaterThan(controllerChangeConfirmation);
     expect(promotionWindowClear).toBeGreaterThan(promotionCloseStart);
     expect(promotionSchedulerClose).toBeGreaterThan(promotionWindowClear);
     expect(entry).toContain("Date.now() + 10_000");

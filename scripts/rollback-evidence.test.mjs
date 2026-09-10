@@ -19,11 +19,16 @@ import {
   computeRollbackEvidenceId,
   validateRollbackActorRegistryForContract,
   validateRollbackDeploymentReceiptProjectionForContract,
+  validateRollbackFormalReceiptProjectionForContract,
   validateRollbackPhaseReceiptProjectionForContract,
   verifyRollbackEvidence
 } from "./rollback-evidence-lib.mjs";
 import { compileRollbackEvidenceSchema } from "./rollback-evidence-schema.mjs";
 import { canonicalJson, sha256 } from "./release-evidence-lib.mjs";
+import {
+  buildReleaseArtifactMutationBoundary,
+  RELEASE_ARTIFACT_MUTATION_BOUNDARY_RECEIPT_IDS
+} from "./release-artifact-identity-lib.mjs";
 
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const schema = JSON.parse(await readFile(
@@ -169,6 +174,83 @@ function deploymentReceiptContractFixture() {
     document: { runId, scope: { origin } },
     hostingPolicy: { deploymentPlatform: provider }
   };
+}
+
+function formalReceiptContractFixture(receiptCount) {
+  const identity = sampleFromSchema(definitions.artifactIdentity);
+  identity.releaseEvidence.path = "test-results/rollback-fixture/release-evidence.json";
+  const mutationBoundary = buildReleaseArtifactMutationBoundary({
+    coveredReceiptIds: RELEASE_ARTIFACT_MUTATION_BOUNDARY_RECEIPT_IDS,
+    endpointSnapshotsMatched: true
+  });
+  const releaseEvidence = {
+    generatedAt: "2026-08-26T00:00:00.000Z",
+    release: { manifestVersion: 1 },
+    artifacts: { count: 3, mutationBoundary },
+    testReceipts: Array.from({ length: receiptCount }, (_, index) => ({
+      receiptId: `fixture-receipt-${index}`
+    }))
+  };
+  const lockResult = {
+    lockPath: identity.identityLock.path,
+    lockFileSha256: identity.identityLock.sha256,
+    lock: { lockDigest: identity.identityLock.lockDigest },
+    artifactSetDigest: identity.artifactSetDigest
+  };
+  const receipt = {
+    schemaVersion: 1,
+    receiptType: "formal_release_evidence_verification",
+    receiptId: `formal-${identity.releaseEvidence.evidenceId}`,
+    summaryType: "formal_release_evidence_verification_v1",
+    verificationKind: "formal-current-source-and-artifact",
+    releaseEvidenceId: identity.releaseEvidence.evidenceId,
+    status: "passed",
+    verifiedAt: "2026-08-26T00:01:00.000Z",
+    evidenceId: identity.releaseEvidence.evidenceId,
+    releaseEvidence: {
+      path: identity.releaseEvidence.path,
+      sha256: identity.releaseEvidence.sha256
+    },
+    release: {
+      descriptor: identity.descriptor,
+      manifestVersion: releaseEvidence.release.manifestVersion,
+      manifestDigest: identity.manifestDigest,
+      buildVersion: identity.buildVersion
+    },
+    artifacts: {
+      root: identity.artifactRoot,
+      count: releaseEvidence.artifacts.count,
+      artifactSetDigest: identity.artifactSetDigest,
+      identityLock: {
+        path: lockResult.lockPath,
+        sha256: lockResult.lockFileSha256,
+        lockDigest: lockResult.lock.lockDigest,
+        artifactSetDigest: lockResult.artifactSetDigest
+      },
+      mutationBoundary
+    },
+    receiptCount,
+    gates: Object.fromEntries([
+      "sourceTreeClean", "evidenceIdBound", "defaultReleaseDescriptorMatched",
+      "requiredReceiptsPresent", "allRecordedReceiptsPassed",
+      "policyReceiptSetMatched", "recordedReceiptSetMatched",
+      "policyReceiptCommandsMatched", "browserResultSummariesMatched",
+      "artifactIdentityStable", "requiredArtifactComponentsPresent",
+      "engineeringGatePassed"
+    ].map((key) => [key, true])),
+    formalReleaseEvidenceVerified: true,
+    claims: {
+      engineeringEvidenceOnly: true,
+      sourceAndArtifactCurrentVerified: true,
+      codeSignature: false,
+      browserRuntimeBeyondBoundReceiptsVerified: false,
+      publicReleaseAuthorized: false
+    }
+  };
+  const binding = Object.fromEntries([
+    "schemaVersion", "receiptType", "receiptId", "releaseEvidenceId", "status", "verifiedAt"
+  ].map((key) => [key, receipt[key]]));
+  return { receipt, binding, identity, releaseEvidence, lockResult, cwd: workspaceRoot };
 }
 
 function phaseReceiptContractFixture(
@@ -677,6 +759,31 @@ test("failure ledger zeroes every gate and cannot authorize adjacent ledgers", (
   });
   assert.equal(Object.hasOwn(failure, "message"), false);
   assert.match(failure.messageDigest, /^[a-f0-9]{64}$/u);
+});
+
+test("formal receipt projection accepts the exact bound receipt count without a fixed policy count", () => {
+  for (const count of [2, 13]) {
+    const fixture = formalReceiptContractFixture(count);
+    assert.doesNotThrow(() => validateRollbackFormalReceiptProjectionForContract(fixture));
+  }
+});
+
+test("formal receipt projection rejects an understated bound receipt count", () => {
+  const fixture = formalReceiptContractFixture(2);
+  fixture.receipt.receiptCount = 1;
+  assert.throws(
+    () => validateRollbackFormalReceiptProjectionForContract(fixture),
+    rollbackError("FORMAL_GATE_NOT_PASSED")
+  );
+});
+
+test("formal receipt projection rejects an overstated bound receipt count", () => {
+  const fixture = formalReceiptContractFixture(2);
+  fixture.receipt.receiptCount = 3;
+  assert.throws(
+    () => validateRollbackFormalReceiptProjectionForContract(fixture),
+    rollbackError("FORMAL_GATE_NOT_PASSED")
+  );
 });
 
 test("deployment receipt contract returns a detached recursively immutable minimal projection", () => {

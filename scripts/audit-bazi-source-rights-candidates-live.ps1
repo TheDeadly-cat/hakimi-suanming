@@ -2,8 +2,32 @@ $ErrorActionPreference = "Stop"
 
 $scriptDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
 $workspaceRoot = Split-Path -Parent $scriptDirectory
-$rightsLedgerPath = Join-Path $workspaceRoot "content\bazi-strength-source-rights-candidates.v1.json"
-$sourceLedgerPath = Join-Path $workspaceRoot "content\bazi-strength-source-binding-candidates.v1.json"
+$rightsSelectorPath = Join-Path $scriptDirectory "resolve-bazi-current-source-rights.mjs"
+$sourceSelectorPath = Join-Path $scriptDirectory "resolve-bazi-current-source-binding.mjs"
+$rightsSelectorOutput = @(& node $rightsSelectorPath)
+if ($LASTEXITCODE -ne 0 -or $rightsSelectorOutput.Count -ne 1) {
+  throw "Live Bazi source-rights candidate audit failed: canonical rights current selection unavailable."
+}
+$sourceSelectorOutput = @(& node $sourceSelectorPath)
+if ($LASTEXITCODE -ne 0 -or $sourceSelectorOutput.Count -ne 1) {
+  throw "Live Bazi source-rights candidate audit failed: canonical source current selection unavailable."
+}
+$rightsSelection = $rightsSelectorOutput[0] | ConvertFrom-Json
+$sourceSelection = $sourceSelectorOutput[0] | ConvertFrom-Json
+if ([string]$rightsSelection.purpose -cne "bazi_source_rights" `
+  -or [bool]$rightsSelection.currentAvailable -ne $true `
+  -or [string]$rightsSelection.selection.familyKey -cne "content/bazi-strength-source-rights-candidates" `
+  -or [string]$sourceSelection.purpose -cne "bazi_source_binding" `
+  -or [bool]$sourceSelection.currentAvailable -ne $true `
+  -or [string]$sourceSelection.selection.familyKey -cne "content/bazi-strength-source-binding-candidates") {
+  throw "Live Bazi source-rights candidate audit failed: canonical current selection shape drifted."
+}
+$rightsLedgerPath = [string]$rightsSelection.artifact.absolutePath
+$sourceLedgerPath = [string]$sourceSelection.artifact.absolutePath
+if (-not (Test-Path -LiteralPath $rightsLedgerPath -PathType Leaf) `
+  -or -not (Test-Path -LiteralPath $sourceLedgerPath -PathType Leaf)) {
+  throw "Live Bazi source-rights candidate audit failed: selected ledger path is unavailable."
+}
 $rightsLedger = Get-Content -LiteralPath $rightsLedgerPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $sourceLedger = Get-Content -LiteralPath $sourceLedgerPath -Raw -Encoding UTF8 | ConvertFrom-Json
 

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import Dexie from "dexie";
 import type { LocalAttachmentRecord } from "@hakimi/contracts";
 import {
@@ -211,12 +211,20 @@ afterEach(async () => {
 });
 
 describe("local unverified transit review inbox", () => {
+  let reviewBundleRaw: string;
+
+  beforeAll(async () => {
+    // Generate the shared input once; each projection still replays the current
+    // fixture through its production preflight and receives independent bytes.
+    reviewBundleRaw = serializeTransitQueryReviewBundle(await createTransitQueryReviewBundle({
+      generatedAt: "2026-08-03T00:00:00.000Z"
+    }));
+  });
+
   it("按原始字节幂等保存、刷新重预检、进入附件快照并用摘要 CAS 删除", async () => {
     const repository = createRepository();
-    const bundle = await createTransitQueryReviewBundle({
-      generatedAt: "2026-08-03T00:00:00.000Z"
-    });
-    const raw = `\uFEFF${serializeTransitQueryReviewBundle(bundle).replace(/\n/g, "\r\n")}`;
+    const bundle: Awaited<ReturnType<typeof createTransitQueryReviewBundle>> = JSON.parse(reviewBundleRaw);
+    const raw = `\uFEFF${reviewBundleRaw.replace(/\n/g, "\r\n")}`;
     const bytes = new TextEncoder().encode(raw);
 
     const first = await importTransitReviewInboxArtifact({
@@ -405,10 +413,7 @@ describe("local unverified transit review inbox", () => {
 
   it("purpose snapshot 返回后篡改原回执不会改变正在进行的投影", async () => {
     const repository = createRepository();
-    const bundle = await createTransitQueryReviewBundle({
-      generatedAt: "2026-08-03T00:00:00.000Z"
-    });
-    const bytes = new TextEncoder().encode(serializeTransitQueryReviewBundle(bundle));
+    const bytes = new TextEncoder().encode(reviewBundleRaw);
     const stored = await importTransitReviewInboxArtifact({
       fileName: "mutable-snapshot.json",
       bytes

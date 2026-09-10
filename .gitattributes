@@ -154,3 +154,15 @@
 /scripts/verify-vedic-independent-storage-backup-recovery-and-rollback-design-candidate.mjs text eol=lf
 /scripts/verify-vedic-independent-storage-backup-recovery-and-rollback-design-candidate.test.mjs text eol=lf
 /docs/吠陀独立存储备份恢复回滚设计候选-v0.1-2026-08-30.md text eol=lf
+/scripts/fixtures/bazi-domain-manifest-v2-original-inputs.zip -text
+/scripts/fixtures/independent-source-requirements-v1-original-inputs.zip -text
+/scripts/fixtures/bazi-expert-intake-readiness-1.5.original.json -text
+
+# Preserve the recorded mixed-newline source and validation snapshots on sync.
+/README.md -text
+/apps/web/e2e/service-worker-same-schema-aba.spec.ts -text
+/apps/web/src/components/revision-derived-replay-panel.css -text
+/docs/status/delivery-command-map.md -text
+/docs/status/delivery-status.md -text
+/docs/status/delivery-validation-20260906-history-and-product-closure.md -text
+/docs/status/delivery-validation-archive.md -text

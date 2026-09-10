@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import { stripTypeScriptTypes } from "node:module";
 import {
   mkdir,
   mkdtemp,
@@ -12,7 +13,18 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { runInNewContext } from "node:vm";
+import { parse } from "@babel/parser";
+import {
+  BRIDGE_RELEASE_DATABASE_DESCRIPTOR,
+  PRODUCTION_V14_RELEASE_DATABASE_DESCRIPTOR,
+  PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR,
+  PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
+  PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR,
+  releaseDatabaseDescriptorFromEnvironment
+} from "../apps/web/release-protocol.ts";
 import swUpgradeConfig from "../apps/web/playwright.sw-upgrade.config.ts";
+import { computeOfflineCacheVersion } from "../apps/web/pwa-build.ts";
 import {
   validateEffectiveSwTwoGenerationFixtureConfig
 } from "../apps/web/playwright.sw-two-generation-fixture-reporter.ts";
@@ -42,6 +54,7 @@ import {
   createSwTwoGenerationGenerationArtifactIdentity,
   isCanonicalSwTwoGenerationArtifactPath,
   isExactSwTwoGenerationArtifactSetIdentity,
+  isExactSwTwoGenerationGenerationArtifactIdentity,
   readSwTwoGenerationArtifactSnapshot,
   snapshotSwTwoGenerationArtifactDirectory,
   snapshotSwTwoGenerationArtifactSetDirectory,
@@ -60,6 +73,14 @@ const reporterSource = await readFile(
 );
 const runnerSource = await readFile(
   path.join(workspaceRoot, "scripts/run-sw-two-generation-fixture.mjs"),
+  "utf8"
+);
+const crossSchemaHelperSource = await readFile(
+  path.join(workspaceRoot, "apps/web/e2e/cross-schema-upgrade-helpers.ts"),
+  "utf8"
+);
+const abaRunnerSource = await readFile(
+  path.join(workspaceRoot, "scripts/run-sw-same-schema-aba-fixture.mjs"),
   "utf8"
 );
 const decisions = JSON.parse(await readFile(
@@ -97,7 +118,7 @@ function syntheticGenerationArtifactIdentity(generationName, overrides = {}) {
   return createSwTwoGenerationGenerationArtifactIdentity({
     generationName,
     fault: generation.fault,
-    buildVersion: repeatedSha256(seeds.build),
+    buildVersion: seeds.build.repeat(12),
     releaseDescriptorSha256: repeatedSha256("0"),
     releaseStorageManifestSha256: repeatedSha256("1"),
     files: [
@@ -145,7 +166,7 @@ async function writeSyntheticArtifactGeneration(sharedRoot, generationName) {
   assert.ok(seeds);
   const directory = path.join(sharedRoot, generationName);
   const assetsDirectory = path.join(directory, "assets");
-  const buildVersion = repeatedSha256(seeds.build);
+  const buildVersion = seeds.build.repeat(12);
   const serializedDescriptor = JSON.stringify(SW_TWO_GENERATION_FIXED_RELEASE_IDENTITY);
   const serializedManifest = JSON.stringify({
     database: SW_TWO_GENERATION_FIXED_RELEASE_IDENTITY
@@ -371,6 +392,25 @@ test("artifact path and read APIs reject forged snapshots and expose unknown fai
   assert.ok(readSwTwoGenerationArtifactSnapshot(snapshot, "sw.js"));
 });
 
+test("artifact build versions match the producer while all SHA256 identities remain full length", () => {
+  const version = computeOfflineCacheVersion({
+    bundle: {}, publicAssets: {}, workerTemplate: "synthetic worker", htmlDocument: "synthetic page"
+  });
+  assert.match(version, /^[a-f0-9]{12}$/u);
+  const generation = { ...syntheticGenerationArtifactIdentities[0], buildVersion: version };
+  assert.equal(isExactSwTwoGenerationGenerationArtifactIdentity(generation), true);
+  for (const invalid of ["", "a".repeat(11), "a".repeat(13), "a".repeat(64), "A".repeat(12), "g".repeat(12)]) {
+    assert.equal(isExactSwTwoGenerationGenerationArtifactIdentity({ ...generation, buildVersion: invalid }), false);
+  }
+  for (const field of ["releaseDescriptorSha256", "releaseStorageManifestSha256", "indexHtmlSha256", "serviceWorkerSha256", "artifactInventorySha256"]) {
+    assert.match(generation[field], /^[a-f0-9]{64}$/u);
+    assert.equal(isExactSwTwoGenerationGenerationArtifactIdentity({ ...generation, [field]: "a".repeat(12) }), false);
+  }
+  const shortFileHash = structuredClone(generation);
+  shortFileHash.files[0].sha256 = "a".repeat(12);
+  assert.equal(isExactSwTwoGenerationGenerationArtifactIdentity(shortFileHash), false);
+});
+
 test("artifact-set identity rejects worker aliasing, missing fault differentiation, role swaps, and digest tampering", () => {
   const [stable, healthy, broken] = syntheticGenerationArtifactIdentities;
   assert.ok(stable);
@@ -484,6 +524,46 @@ test("critical-source policy is canonical, collision-free, and spans harness plu
       "packages/storage/src/index.ts"
     ]
   );
+});
+
+test("the previous reviewed source identity cannot stand in for the current fixture scope", () => {
+  // Complete historical metadata from Git 550977d; current source bytes must
+  // never supply the unchanged-looking rows of this previous identity.
+  const previous = {
+    algorithm: "sha256",
+    domain: "hakimi-sw-two-generation-critical-source-set-v1",
+    files: [
+      { role: "harness_helper", path: "apps/web/e2e/full-backup-helpers.ts", size: 16322, rawSha256: "959f7c3c18798ab8bdd1a724f19222955cfdae25cce6d8c31d2b7886732dcc58", normalizedSha256: "959f7c3c18798ab8bdd1a724f19222955cfdae25cce6d8c31d2b7886732dcc58" },
+      { role: "harness_browser_context", path: "apps/web/e2e/release-browser-persistent-context.ts", size: 1808, rawSha256: "df4074e6f8cdc795192d7c6db4d7ab0e0451eb422e503e00bfa3a517efc8c491", normalizedSha256: "df4074e6f8cdc795192d7c6db4d7ab0e0451eb422e503e00bfa3a517efc8c491" },
+      { role: "harness_spec", path: "apps/web/e2e/service-worker-two-generation.spec.ts", size: 32251, rawSha256: "798ca1951d6479e4441357abfc2ff9cd074c4a8c1c4da79adce38dcfc2f2baa9", normalizedSha256: "798ca1951d6479e4441357abfc2ff9cd074c4a8c1c4da79adce38dcfc2f2baa9" },
+      { role: "harness_storage_reader", path: "apps/web/e2e/storage-v13-native-readonly.ts", size: 23244, rawSha256: "9852404a24f107ee73e0edf36ed658ec07f008e27dd02d9df981f352e777f861", normalizedSha256: "9852404a24f107ee73e0edf36ed658ec07f008e27dd02d9df981f352e777f861" },
+      { role: "harness_browser_matrix", path: "apps/web/playwright.release-browser-matrix.ts", size: 2683, rawSha256: "dd17289df1c7007318d36a158e52abab49534828c2cc1d4598ae424526afa5a3", normalizedSha256: "dd17289df1c7007318d36a158e52abab49534828c2cc1d4598ae424526afa5a3" },
+      { role: "harness_reporter", path: "apps/web/playwright.sw-two-generation-fixture-reporter.ts", size: 11769, rawSha256: "c6c587f2c81ebcf9883db8288998df2bfa060adfb35c18b5b56777e2cc59a1d0", normalizedSha256: "c6c587f2c81ebcf9883db8288998df2bfa060adfb35c18b5b56777e2cc59a1d0" },
+      { role: "harness_result_contract", path: "apps/web/playwright.sw-two-generation-fixture-result.ts", size: 15268, rawSha256: "d64bacd90a1d8f937c8b2bce10173d5c93ab460e123a4f8abef6b5cd8d5bcf1e", normalizedSha256: "d64bacd90a1d8f937c8b2bce10173d5c93ab460e123a4f8abef6b5cd8d5bcf1e" },
+      { role: "harness_playwright_config", path: "apps/web/playwright.sw-upgrade.config.ts", size: 1399, rawSha256: "7a4a540a5d9ea0174b4fb6ecab0e2d8abe391ccfc7daf43b950db17e3a98a803", normalizedSha256: "7a4a540a5d9ea0174b4fb6ecab0e2d8abe391ccfc7daf43b950db17e3a98a803" },
+      { role: "product_service_worker", path: "apps/web/public/sw.js", size: 93807, rawSha256: "623029c23b820a8c213ccea5be2a337b2ea7f6668dd561212a97a019c16ab82e", normalizedSha256: "623029c23b820a8c213ccea5be2a337b2ea7f6668dd561212a97a019c16ab82e" },
+      { role: "product_release_protocol", path: "apps/web/release-protocol.ts", size: 17710, rawSha256: "6dc9a7b59b9bc31bb04b4c084d9cdc893e7593f0d94261244efa3c3f8df061f1", normalizedSha256: "6dc9a7b59b9bc31bb04b4c084d9cdc893e7593f0d94261244efa3c3f8df061f1" },
+      { role: "product_write_fence", path: "apps/web/src/lib/release-controller-takeover-write-fence.ts", size: 1356, rawSha256: "0df30d157c04a9658eb992d2ca51bd4271e06176da193399ca2b7fa98dad0ab1", normalizedSha256: "0df30d157c04a9658eb992d2ca51bd4271e06176da193399ca2b7fa98dad0ab1" },
+      { role: "product_database_coordinator", path: "apps/web/src/lib/release-database-coordinator.ts", size: 54248, rawSha256: "c57bb717e38b8fed863c6098758c3dd80f385a1525f02c455ecae7e08f9fac95", normalizedSha256: "c57bb717e38b8fed863c6098758c3dd80f385a1525f02c455ecae7e08f9fac95" },
+      { role: "product_takeover_retry_scheduler", path: "apps/web/src/lib/service-worker-takeover-retry.ts", size: 16694, rawSha256: "846f6de1a4b82fa360bba444749f2e1c80d8354a88a0c4f319765e6030f9a5c2", normalizedSha256: "846f6de1a4b82fa360bba444749f2e1c80d8354a88a0c4f319765e6030f9a5c2" },
+      { role: "product_bootstrap_wiring", path: "apps/web/src/main.tsx", size: 50303, rawSha256: "2a65a4171ec608f24917c0f7d345a9cdc2a823e928629b43f61a6444a0223dcd", normalizedSha256: "2a65a4171ec608f24917c0f7d345a9cdc2a823e928629b43f61a6444a0223dcd" },
+      { role: "product_mutation_ui", path: "apps/web/src/pages/case-library-page.tsx", size: 78051, rawSha256: "26e908fe7ff930f6640fee018784976276387ff88cbbe691eb71747778bfec83", normalizedSha256: "26e908fe7ff930f6640fee018784976276387ff88cbbe691eb71747778bfec83" },
+      { role: "harness_artifact_identity", path: "apps/web/sw-two-generation-artifact-identity.ts", size: 26306, rawSha256: "9062d55c299550c8c3293184eac32c077cd13a9866466a84ba0a5092f19da38c", normalizedSha256: "9062d55c299550c8c3293184eac32c077cd13a9866466a84ba0a5092f19da38c" },
+      { role: "product_build_config", path: "apps/web/vite.config.ts", size: 16930, rawSha256: "96ed96d3fedc7c5efd4810ee844f6b6c0c749cc179820cdc1f4a55a04dbfc9e8", normalizedSha256: "96ed96d3fedc7c5efd4810ee844f6b6c0c749cc179820cdc1f4a55a04dbfc9e8" },
+      { role: "harness_build_config", path: "apps/web/vite.sw-upgrade.config.ts", size: 2417, rawSha256: "a032c5703221f42973a745807b7e7f370b13f9ae2c694df2b4ece27ee3f63b81", normalizedSha256: "a032c5703221f42973a745807b7e7f370b13f9ae2c694df2b4ece27ee3f63b81" },
+      { role: "product_storage_runtime", path: "packages/storage/src/index.ts", size: 378803, rawSha256: "4ff7d34c204297f4b4a5cbcdb5e150be79b32853e70b07c428a58944e551ee65", normalizedSha256: "4ff7d34c204297f4b4a5cbcdb5e150be79b32853e70b07c428a58944e551ee65" },
+      { role: "harness_runner", path: "scripts/run-sw-two-generation-fixture.mjs", size: 6357, rawSha256: "5a9735d8b042f279d87d2664541dc24160079e741c0879f10f1dee07a52c7451", normalizedSha256: "5a9735d8b042f279d87d2664541dc24160079e741c0879f10f1dee07a52c7451" },
+      { role: "harness_contract_test", path: "scripts/sw-two-generation-fixture-contract.test.mjs", size: 31080, rawSha256: "1d184e3183f73cd594267f931b485c48d576034bd88ec179c444c6c963929046", normalizedSha256: "1d184e3183f73cd594267f931b485c48d576034bd88ec179c444c6c963929046" }
+    ],
+    canonicalSha256: "e5e7ced52540e761940b632291d25edbe989306a16add8e2c3a61fb3d8876a00"
+  };
+  const recomputedPreviousSha256 = createHash("sha256")
+    .update(`${previous.domain}\0${JSON.stringify(previous.files)}`)
+    .digest("hex");
+  assert.equal(recomputedPreviousSha256, previous.canonicalSha256);
+  assert.equal(previous.canonicalSha256, "e5e7ced52540e761940b632291d25edbe989306a16add8e2c3a61fb3d8876a00");
+  assert.throws(() => assertSwTwoGenerationFixtureCriticalSourceIdentity(previous), /critical source identity drifted/u);
+  assert.doesNotThrow(() => assertSwTwoGenerationFixtureCriticalSourceIdentity(criticalSourceIdentity));
 });
 
 test("fixture summary rejects spec-byte or product critical-source rebinding", () => {
@@ -688,6 +768,10 @@ test("fixture reporter validates effective config and writes an exclusive failur
 });
 
 test("canonical wrapper owns Playwright arguments and independently validates the summary", () => {
+  assert.match(runnerSource, /resolveDiagnosticProgram\(DIAGNOSTIC_STAGES\.build, workspaceRoot\)/u);
+  assert.doesNotMatch(runnerSource, /path\.resolve\(workspaceRoot, "node_modules\/vite\/bin\/vite\.js"\)/u);
+  assert.match(runnerSource, /\[viteCli, "build", "--configLoader", "runner", "--config", viteFixtureConfig\]/u);
+  assert.match(crossSchemaHelperSource, /\[viteBin, "build", "--configLoader", "runner", "--config", fixtureConfig\]/u);
   assert.match(runnerSource, /process\.argv\.length !== 2/u);
   assert.match(runnerSource, /assertCanonicalPlaywrightOutputDir\(\)/u);
   assert.match(runnerSource, /swUpgradeConfig\.outputDir/u);
@@ -720,4 +804,172 @@ test("fixture contract remains outside formal browser receipts and default v13 R
     packageJson.scripts["test:e2e:sw-upgrade"],
     "node scripts/run-sw-two-generation-fixture.mjs"
   );
+});
+
+function fixtureFunctionNode(source, name) {
+  const nodes = parse(source, { sourceType: "module", plugins: ["typescript"] }).program.body
+    .map((node) => node.type === "ExportNamedDeclaration" ? node.declaration : node)
+    .filter((node) => node?.type === "FunctionDeclaration" && node.id?.name === name);
+  assert.equal(nodes.length, 1, `Expected one fixture function: ${name}`);
+  return nodes[0];
+}
+
+function visitFixtureSyntax(node, visit) {
+  if (!node || typeof node !== "object") return;
+  if (typeof node.type === "string") visit(node);
+  for (const [key, value] of Object.entries(node)) {
+    if (["loc", "comments", "tokens", "errors"].includes(key)) continue;
+    if (Array.isArray(value)) {
+      for (const child of value) visitFixtureSyntax(child, visit);
+    } else if (value && typeof value === "object") visitFixtureSyntax(value, visit);
+  }
+}
+
+function evaluateFixtureSlice(code, parentEnvironment, bindings) {
+  // Run only selected environment expressions/pure helpers. The source CLI and
+  // its build, browser, cleanup and top-level main statements are never loaded.
+  const result = runInNewContext(stripTypeScriptTypes(code, { mode: "strip" }), {
+    ...bindings,
+    process: Object.freeze({ env: parentEnvironment }),
+    path: Object.freeze({ join: path.join })
+  }, { timeout: 1_000, contextCodeGeneration: { strings: false, wasm: false } });
+  return structuredClone(result);
+}
+
+function fixtureEnvironmentEvaluator(source, owner, sanitizer, dependencies) {
+  const environmentNodes = [];
+  visitFixtureSyntax(fixtureFunctionNode(source, owner), (node) => {
+    if (node.type === "ObjectProperty" && node.key?.name === "env") environmentNodes.push(node.value);
+  });
+  assert.equal(environmentNodes.length, 1, `${owner} must have one explicit child environment.`);
+  const environment = environmentNodes[0];
+  assert.equal(environment.type, "ObjectExpression");
+  const firstSpread = environment.properties[0];
+  assert.equal(firstSpread.type, "SpreadElement");
+  const call = firstSpread.argument;
+  assert.equal(call.type, "CallExpression");
+  assert.equal(call.callee.type, "Identifier");
+  assert.equal(call.callee.name, sanitizer, `${owner} must actually call its sanitizer.`);
+  assert.equal(call.arguments[0]?.type, "MemberExpression");
+  assert.equal(call.arguments[0].object.name, "process");
+  assert.equal(call.arguments[0].property.name, "env");
+  if (sanitizer === "crossSchemaFixtureEnvironment") {
+    assert.equal(call.arguments.length, 2);
+    assert.equal(call.arguments[1].name, "descriptor");
+  } else assert.equal(call.arguments.length, 1);
+  const definitions = dependencies.map((name) => {
+    const node = fixtureFunctionNode(source, name);
+    return source.slice(node.start, node.end);
+  }).join("\n");
+  const code = `${definitions}\n(${source.slice(environment.start, environment.end)});`;
+  return (parentEnvironment, bindings) => evaluateFixtureSlice(code, parentEnvironment, bindings);
+}
+
+function fixtureParentSentinels() {
+  return Object.freeze({
+    PATH: "SYNTHETIC_PATH", TEMP: "C:/synthetic-temp", UNRELATED: "synthetic-keep",
+    HAKIMI_RELEASE_EVIDENCE_ID: `hre1-${"a".repeat(32)}`,
+    hakimi_release_evidence_id: "synthetic-evidence-alias",
+    HAKIMI_DB_GENERATION: "synthetic-parent-generation", HAKIMI_DB_NAME: "synthetic-parent-db",
+    HAKIMI_DB_TARGET_SCHEMA: "99", HAKIMI_DB_MIN_READABLE_SCHEMA: "99", HAKIMI_DB_MAX_READABLE_SCHEMA: "99",
+    HAKIMI_DB_MIGRATION_ID: "synthetic-parent-migration", HAKIMI_DB_SOURCE_GENERATION: "synthetic-source",
+    HAKIMI_DB_SOURCE_NAME: "synthetic-source-db", HAKIMI_DB_SOURCE_SCHEMA: "99",
+    HAKIMI_DB_ACCEPTED_COMMITTED_MIGRATION_IDS: '["synthetic-parent-migration"]',
+    hakimi_db_name: "synthetic-db-alias", HAKIMI_DB_UNUSED: "synthetic-unknown",
+    HAKIMI_CROSS_SCHEMA_FIXTURE: "synthetic-parent-fixture",
+    HAKIMI_CROSS_SCHEMA_OUT_DIR: "C:/synthetic-parent-out", HAKIMI_CROSS_SCHEMA_FAULT: "synthetic-parent-fault"
+  });
+}
+
+function inheritedFixtureIdentityKeys(environment) {
+  return Object.keys(environment).filter((key) =>
+    key.toUpperCase() === "HAKIMI_RELEASE_EVIDENCE_ID" || key.toUpperCase().startsWith("HAKIMI_DB_")
+  );
+}
+
+test("cross-Schema child environment discards parent identity and preserves explicit descriptor lineage", () => {
+  const evaluate = fixtureEnvironmentEvaluator(crossSchemaHelperSource, "buildGeneration",
+    "crossSchemaFixtureEnvironment", ["descriptorEnvironment", "crossSchemaFixtureEnvironment"]);
+  const parent = fixtureParentSentinels();
+  const parentBefore = structuredClone(parent);
+  const v16 = PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR;
+  const descriptors = [
+    BRIDGE_RELEASE_DATABASE_DESCRIPTOR, PRODUCTION_V14_RELEASE_DATABASE_DESCRIPTOR,
+    PRODUCTION_V15_RELEASE_DATABASE_DESCRIPTOR, PRODUCTION_V13_TO_V15_RELEASE_DATABASE_DESCRIPTOR,
+    v16, Object.freeze({ ...v16, migrationId: "synthetic-republish",
+      acceptedCommittedMigrationIds: Object.freeze([v16.migrationId, "synthetic-republish"]) })
+  ];
+  for (const descriptor of descriptors) {
+    const environment = evaluate(parent, { descriptor, name: "synthetic-owned-fixture",
+      directory: "C:/synthetic-owned-output", fault: "none" });
+    assert.deepEqual(releaseDatabaseDescriptorFromEnvironment(environment), descriptor);
+    assert.deepEqual(JSON.parse(environment.HAKIMI_DB_ACCEPTED_COMMITTED_MIGRATION_IDS), descriptor.acceptedCommittedMigrationIds);
+    assert.ok(!Object.keys(environment).some((key) => key.toUpperCase() === "HAKIMI_RELEASE_EVIDENCE_ID"));
+    for (const key of ["hakimi_db_name", "HAKIMI_DB_UNUSED"]) assert.equal(Object.hasOwn(environment, key), false);
+    if (descriptor.migrationId === null) {
+      for (const key of ["HAKIMI_DB_MIGRATION_ID", "HAKIMI_DB_SOURCE_GENERATION", "HAKIMI_DB_SOURCE_NAME", "HAKIMI_DB_SOURCE_SCHEMA"]) {
+        assert.equal(Object.hasOwn(environment, key), false);
+      }
+    }
+    assert.equal(environment.HAKIMI_CROSS_SCHEMA_FIXTURE, "synthetic-owned-fixture");
+    assert.equal(environment.HAKIMI_CROSS_SCHEMA_OUT_DIR, "C:/synthetic-owned-output");
+    assert.equal(environment.HAKIMI_CROSS_SCHEMA_FAULT, "none");
+    for (const key of ["PATH", "TEMP", "UNRELATED"]) assert.equal(environment[key], parent[key]);
+  }
+  assert.deepEqual(parent, parentBefore);
+});
+
+test("canonical build and browser child environments retain the ABA unbound and DB rejection boundary", () => {
+  const build = fixtureEnvironmentEvaluator(runnerSource, "buildSharedArtifactSet",
+    "sameSchemaFixtureEnvironment", ["sameSchemaFixtureEnvironment"]);
+  const browser = fixtureEnvironmentEvaluator(runnerSource, "runCanonicalPlaywright",
+    "sameSchemaFixtureEnvironment", ["sameSchemaFixtureEnvironment"]);
+  const abaStatements = fixtureFunctionNode(abaRunnerSource, "execute").body.body.slice(0, 2);
+  assert.equal(abaStatements[0].type, "VariableDeclaration");
+  assert.equal(abaStatements[0].declarations[0].id.name, "childEnvironment");
+  assert.equal(abaStatements[1].type, "ForOfStatement");
+  const abaCode = `${abaRunnerSource.slice(abaStatements[0].start, abaStatements[1].end)}\nchildEnvironment;`;
+  const parent = Object.freeze(Object.fromEntries(Object.entries(fixtureParentSentinels())
+    .filter(([key]) => !key.toUpperCase().startsWith("HAKIMI_DB_"))));
+  const parentBefore = structuredClone(parent);
+  const buildBindings = { generation: { generationName: "stable-a", fault: "none" }, artifactRoot: "C:/synthetic-artifacts" };
+  const browserBindings = { resultPath: "C:/synthetic-summary.json", attemptId: "synthetic-attempt",
+    artifactRoot: "C:/synthetic-artifacts", artifactSetSha256: "b".repeat(64) };
+  const buildEnvironment = build(parent, buildBindings);
+  const browserEnvironment = browser(parent, browserBindings);
+  const abaEnvironment = evaluateFixtureSlice(abaCode, parent, { env: {
+    HAKIMI_RELEASE_EVIDENCE_ID: `hre1-${"b".repeat(32)}`, OWNED_FIXTURE: "synthetic-owned"
+  } });
+  for (const environment of [buildEnvironment, browserEnvironment, abaEnvironment]) {
+    assert.deepEqual(inheritedFixtureIdentityKeys(environment), []);
+    for (const key of ["PATH", "TEMP", "UNRELATED"]) assert.equal(environment[key], parent[key]);
+  }
+  assert.equal(buildEnvironment.HAKIMI_SW_UPGRADE_OUT_DIR, path.join(buildBindings.artifactRoot, "stable-a"));
+  assert.equal(browserEnvironment.HAKIMI_SW_TWO_GENERATION_FIXTURE_RESULT_OUTPUT, browserBindings.resultPath);
+  assert.equal(browserEnvironment.HAKIMI_SW_TWO_GENERATION_FIXTURE_ATTEMPT_ID, browserBindings.attemptId);
+  assert.equal(browserEnvironment.HAKIMI_SW_TWO_GENERATION_ARTIFACT_SET_SHA256, browserBindings.artifactSetSha256);
+  assert.equal(abaEnvironment.OWNED_FIXTURE, "synthetic-owned");
+  for (const key of ["HAKIMI_DB_NAME", "hakimi_db_name", "HaKiMi_Db_Name", "HAKIMI_DB_UNUSED"]) {
+    for (const value of ["synthetic-db", "", undefined]) {
+      const withDatabase = Object.freeze({ ...parent, [key]: value });
+      assert.throws(() => build(withDatabase, buildBindings), /do not accept HAKIMI_DB_\*/u);
+      assert.throws(() => browser(withDatabase, browserBindings), /do not accept HAKIMI_DB_\*/u);
+      assert.throws(() => evaluateFixtureSlice(abaCode, withDatabase, { env: {} }), /do not accept HAKIMI_DB_\*/u);
+    }
+  }
+  assert.deepEqual(parent, parentBefore);
+});
+
+test("cross-Schema generated HTML must satisfy the actual unbound evidence guard", () => {
+  const statements = fixtureFunctionNode(crossSchemaHelperSource, "buildGeneration").body.body;
+  const position = statements.findIndex((node) => node.type === "VariableDeclaration"
+    && node.declarations[0]?.id.name === "evidenceId");
+  assert.ok(position >= 0);
+  assert.equal(statements[position + 1]?.type, "IfStatement");
+  const code = `${crossSchemaHelperSource.slice(statements[position].start, statements[position + 1].end)}\nevidenceId;`;
+  const evaluate = (index) => evaluateFixtureSlice(code, Object.freeze({}), { index, name: "synthetic-fixture" });
+  const html = (id) => `<meta name="hakimi-release-evidence-id" content="${id}" />`;
+  assert.equal(evaluate(html("unbound-local-build")), "unbound-local-build");
+  assert.throws(() => evaluate(html(`hre1-${"a".repeat(32)}`)), /must remain unbound/u);
+  assert.throws(() => evaluate("<html></html>"), /must remain unbound/u);
 });

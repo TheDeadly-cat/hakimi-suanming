@@ -930,6 +930,10 @@
   min-width: 0;
 }
 
+.chart-page .research-view {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .chart-page .relations-panel,
 .chart-page .luck-cycle-panel,
 .chart-page .process-track,

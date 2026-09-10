@@ -15,6 +15,7 @@ import {
 } from "./lib/current-release";
 import {
   ReleaseDatabaseCoordinator,
+  ReleaseForwardMigrationActivationFrozenError,
   type ReleaseBootConfirmation
 } from "./lib/release-database-coordinator";
 import { installControlledWindowDraftCleanupHandler } from "./lib/local-user-data-cleanup";
@@ -30,7 +31,11 @@ import {
   serializeReleaseStorageManifest,
   type ReleaseDatabaseDescriptor
 } from "../release-protocol";
-import { ReleaseControllerTakeoverWriteLatch } from "./lib/release-controller-takeover-write-fence";
+import {
+  createFirstControllerClaimHandoff,
+  registerServiceWorkerAfterBootCommit,
+  ReleaseControllerTakeoverWriteLatch
+} from "./lib/release-controller-takeover-write-fence";
 import {
   controllerTakeoverFailureFromNack,
   createControllerTakeoverScheduler,
@@ -41,6 +46,9 @@ import "./styles.css";
 
 const pageBuildVersion = document.querySelector<HTMLMetaElement>('meta[name="hakimi-build-version"]')?.content;
 const shadowDatabaseRelease = isShadowDatabaseRelease(CURRENT_RELEASE_DATABASE);
+const defaultLegacyDatabaseRelease = CURRENT_RELEASE_DATABASE.dbGeneration === "legacy-v13"
+  && CURRENT_RELEASE_DATABASE.targetSchema === 13
+  && CURRENT_RELEASE_DATABASE.migrationId === null;
 const releaseControllerTakeoverWriteLatch = new ReleaseControllerTakeoverWriteLatch();
 globalThis.__HAKIMI_RESEARCH_DATABASE_RUNTIME__ = {
   databaseName: CURRENT_RELEASE_DATABASE.databaseName,
@@ -74,6 +82,18 @@ const bootRouteKey = `${window.location.pathname}${window.location.search}`;
 let bootFailed = false;
 let appBootConfirmed = false;
 let bootConfirmationSent = false;
+type ForwardMigrationActivationFreeze = {
+  requestId: string;
+  sourceBuildVersion: string;
+  targetBuildVersion: string;
+  sourceController: ServiceWorker;
+  targetRelease: ReleaseDatabaseDescriptor;
+  wasBootConfirmed: boolean;
+  drain: Promise<void>;
+  failed: boolean;
+  navigation: Promise<void> | null;
+};
+let activeForwardMigrationActivationFreeze: ForwardMigrationActivationFreeze | null = null;
 const bootFailureLatch = new AppBootFailureLatch();
 const runtimeFailureLatch = new AppBootFailureLatch();
 let resolveRouteReady: ((routeKey: string) => void) | undefined;
@@ -243,6 +263,146 @@ function releaseControllerTakeoverMatchesCurrentPage(target: ReleaseDatabaseDesc
   return releaseDatabaseDescriptorsEqual(target, CURRENT_RELEASE_DATABASE);
 }
 
+function forwardMigrationActivationMatchesCurrentPage(target: ReleaseDatabaseDescriptor): boolean {
+  return defaultLegacyDatabaseRelease
+    && isShadowDatabaseRelease(target)
+    && target.protocolVersion === CURRENT_RELEASE_DATABASE.protocolVersion
+    && target.targetSchema === 16
+    && target.minReadableSchema === 16
+    && target.maxReadableSchema === 16
+    && target.sourceGeneration === CURRENT_RELEASE_DATABASE.dbGeneration
+    && target.sourceDatabaseName === CURRENT_RELEASE_DATABASE.databaseName
+    && target.sourceSchema === CURRENT_RELEASE_DATABASE.targetSchema
+    && target.dbGeneration !== CURRENT_RELEASE_DATABASE.dbGeneration
+    && target.databaseName !== CURRENT_RELEASE_DATABASE.databaseName;
+}
+
+function isExpectedForwardMigrationBootStop(reason: unknown): boolean {
+  return reason instanceof ReleaseForwardMigrationActivationFrozenError
+    && activeForwardMigrationActivationFreeze !== null
+    && !activeForwardMigrationActivationFreeze.failed
+    && releaseControllerTakeoverWriteLatch.locked;
+}
+
+class InstalledGenerationIdentityQueryTimeoutError extends Error {
+  constructor() { super("Service Worker 代际身份查询超时。"); }
+}
+
+type InstalledGenerationIdentityQueryKind = "installed_identity_v1" | "legacy_same_descriptor";
+
+async function readInstalledGenerationReleaseIdentity(
+  worker: ServiceWorker,
+  allowLegacySameDescriptorFallback = false
+): Promise<{
+  buildVersion: string;
+  release: ReleaseDatabaseDescriptor;
+  queryKind: InstalledGenerationIdentityQueryKind;
+}> {
+  const query = (queryKind: InstalledGenerationIdentityQueryKind): Promise<{
+    buildVersion: string;
+    release: ReleaseDatabaseDescriptor;
+    queryKind: InstalledGenerationIdentityQueryKind;
+  }> => new Promise((resolve, reject) => {
+    const requestId = `takeover-${crypto.randomUUID()}`;
+    const channel = new MessageChannel();
+    const fail = (reason: unknown) => {
+      window.clearTimeout(timeout);
+      channel.port1.close();
+      channel.port2.close();
+      reject(reason);
+    };
+    const timeout = window.setTimeout(() => {
+      fail(new InstalledGenerationIdentityQueryTimeoutError());
+    }, 5_000);
+    channel.port1.onmessageerror = () => fail(new Error("Service Worker 代际身份回执无法解码。"));
+    channel.port1.onmessage = (event: MessageEvent<unknown>) => {
+      try {
+        if (event.data === null || typeof event.data !== "object" || Array.isArray(event.data)) {
+          throw new Error("Service Worker 代际身份查询回执无效。");
+        }
+        const response = event.data as Record<string, unknown>;
+        if (
+          !isBoundedProtocolString(response.buildVersion, 256)
+          || (queryKind === "installed_identity_v1"
+            ? response.type !== "GET_INSTALLED_GENERATION_RELEASE_IDENTITY_ACK_V1"
+              || response.requestId !== requestId
+            : response.type !== "BUILD_VERSION")
+        ) throw new Error("Service Worker 代际身份查询回执无效。");
+        let release: ReleaseDatabaseDescriptor;
+        if (queryKind === "legacy_same_descriptor") {
+          // Old workers return the complete descriptor as flattened fields.
+          // Every remaining key is checked; missing or extra fields are rejected.
+          const { type: _type, buildVersion: _buildVersion, ...descriptor } = response;
+          release = parseExactReleaseDatabaseDescriptor(descriptor);
+          if (!releaseControllerTakeoverMatchesCurrentPage(release)) {
+            throw new Error("旧版身份查询仅能确认完全相同的数据库描述符。");
+          }
+        } else {
+          release = parseExactReleaseDatabaseDescriptor(response.release);
+        }
+        window.clearTimeout(timeout);
+        channel.port1.close();
+        channel.port2.close();
+        resolve({ buildVersion: response.buildVersion, release, queryKind });
+      } catch (reason) { fail(reason); }
+    };
+    try {
+      worker.postMessage(queryKind === "legacy_same_descriptor"
+        ? { type: "GET_BUILD_VERSION" }
+        : { type: "GET_INSTALLED_GENERATION_RELEASE_IDENTITY_V1", requestId }, [channel.port2]);
+    } catch (reason) { fail(reason); }
+  });
+  try { return await query("installed_identity_v1"); }
+  catch (reason) {
+    // A malformed response or transport failure never enables compatibility.
+    // The fresh channel remains bound to the same captured worker object.
+    if (!allowLegacySameDescriptorFallback || !(reason instanceof InstalledGenerationIdentityQueryTimeoutError)) {
+      throw reason;
+    }
+    return query("legacy_same_descriptor");
+  }
+}
+
+function scheduleForwardMigrationActivationNavigation(
+  session: ForwardMigrationActivationFreeze,
+  controller: ServiceWorker
+): void {
+  if (session.wasBootConfirmed || session.navigation !== null || session.failed) return;
+  const assertCurrent = () => {
+    if (
+      activeForwardMigrationActivationFreeze !== session
+      || session.failed
+      || navigator.serviceWorker.controller !== controller
+      || !releaseControllerTakeoverWriteLatch.locked
+      || !forwardMigrationActivationMatchesCurrentPage(session.targetRelease)
+    ) throw new Error("前向迁移导航的控制器或冻结身份已经变化；旧页保持锁定。");
+  };
+  session.navigation = (async () => {
+    await session.drain;
+    // Preserve the real read-only audit's lifetime. The source must never mark
+    // its cancelled boot as successful merely to start the target's trial.
+    const result = await appBootReadinessResult;
+    assertCurrent();
+    if (!result.ready && !isExpectedForwardMigrationBootStop(result.error)) throw result.error;
+    const identity = await readInstalledGenerationReleaseIdentity(controller);
+    assertCurrent();
+    if (
+      identity.buildVersion !== session.targetBuildVersion
+      || !releaseDatabaseDescriptorsEqual(identity.release, session.targetRelease)
+    ) throw new Error("前向迁移导航的实际目标 Service Worker 身份不匹配。");
+    await releaseDatabaseCoordinator.verifyForwardMigrationActivationNavigationState(
+      session.targetRelease, session.targetBuildVersion
+    );
+    assertCurrent();
+    document.documentElement.dataset.swGenerationConvergence = "forward_migration_reload";
+    window.location.reload();
+  })().catch((reason: unknown) => {
+    session.failed = true;
+    document.documentElement.dataset.dbForwardMigrationActivation = "navigation_failed_closed";
+    reportBootFailure("storage", reason);
+  });
+}
+
 function isControllerTakeoverRequestId(value: unknown): value is string {
   return typeof value === "string" &&
     /^takeover-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(value);
@@ -331,16 +491,41 @@ const baseAppBootReadinessResult = runAppBootReadiness({
   timeoutMs: shadowDatabaseRelease ? SHADOW_DATABASE_BOOT_TIMEOUT_MS : undefined
 });
 
+const firstControllerClaimHandoff = createFirstControllerClaimHandoff<ServiceWorker>({
+  getController: () => navigator.serviceWorker.controller,
+  drainDatabaseWrites: async () => {
+    const { caseRepository } = await import("@hakimi/storage");
+    await caseRepository.database.drainControllerTakeoverWrites();
+  },
+  waitForBootPreflight: async () => {
+    const result = await baseAppBootReadinessResult;
+    if (!result.ready) throw result.error;
+  },
+  verifyCommittedNavigationState: () => releaseDatabaseCoordinator.verifyFirstControllerClaimNavigationState(),
+  assertNavigationAllowed: () => {
+    if (bootFailureLatch.current) throw bootFailureLatch.current.error;
+  },
+  reload: () => {
+    document.documentElement.dataset.swGenerationConvergence = "first_control_reload";
+    window.location.reload();
+  },
+  onFailure: (reason) => { reportBootFailure("storage", reason); }
+});
+
 const appBootReadinessResult = baseAppBootReadinessResult.then(async (result): Promise<AppBootReadinessResult> => {
   if (!result.ready) {
-    releaseDatabaseCoordinator.cancelPreparation(result.error);
+    if (isExpectedForwardMigrationBootStop(result.error)) return result;
+    firstControllerClaimHandoff.cancel(result.error);
+    if (!firstControllerClaimHandoff.started) releaseDatabaseCoordinator.cancelPreparation(result.error);
     return result;
   }
   try {
     // Cache Storage and IndexedDB cannot share one browser transaction. Persist
     // the verified DB pointer first; the worker will independently re-read it
     // before acknowledging and confirming this application shell.
-    releaseBootConfirmation = await releaseDatabaseCoordinator.commitForBoot();
+    releaseBootConfirmation = await firstControllerClaimHandoff.runBootCommit(
+      () => releaseDatabaseCoordinator.commitForBoot()
+    );
     return result;
   } catch (reason) {
     await releaseDatabaseCoordinator.failPreparedMigration(reason).catch(() => undefined);
@@ -354,6 +539,11 @@ const appBootReadinessResult = baseAppBootReadinessResult.then(async (result): P
 });
 
 const appBootReadiness = appBootReadinessResult.then((result) => {
+  if (!result.ready && isExpectedForwardMigrationBootStop(result.error)) {
+    appBootConfirmed = false;
+    setAppBootReadyState(false);
+    return false;
+  }
   if (!result.ready) {
     reportBootFailure(result.source, result.error);
     console.error("应用启动自检失败", result.error);
@@ -405,6 +595,7 @@ function RootApp({
       if (!active) return;
       storageReadyRef.current = result.storageReady;
       if (!result.ready) {
+        if (isExpectedForwardMigrationBootStop(result.error)) return;
         setBootPending(false);
         const failure = reportBootFailure(result.source, result.error);
         setBootFailure((current) => ({
@@ -481,7 +672,7 @@ if ("serviceWorker" in navigator) {
 }
 
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
-  let frozenMigration: {
+  type SourceMigrationFreeze = {
     requestId: string;
     migrationId: string;
     sourceGeneration: string;
@@ -491,55 +682,119 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
     targetDatabaseName: string;
     targetSchema: number;
     sourceController: ServiceWorker;
+    phase: "pending" | "closed" | "resolving" | "committed";
+    closePromise: Promise<void>;
+    resolutionPromise: Promise<void> | null;
+    sourceWritesLocked: boolean;
     timer: number | null;
-  } | null = null;
+    recoveryEpoch: number;
+  };
+  let frozenMigration: SourceMigrationFreeze | null = null;
 
-  const reopenSourceDatabase = async () => {
+  const ownsFrozenMigration = (session: SourceMigrationFreeze) =>
+    frozenMigration === session && navigator.serviceWorker.controller === session.sourceController;
+
+  const stopFrozenMigrationRecovery = (session: SourceMigrationFreeze) => {
+    session.recoveryEpoch += 1;
+    if (session.timer !== null) window.clearTimeout(session.timer);
+    session.timer = null;
+  };
+
+  const reopenSourceDatabase = async (session: SourceMigrationFreeze) => {
+    if (!ownsFrozenMigration(session) || session.phase !== "resolving") return;
     const { caseRepository } = await import("@hakimi/storage");
-    caseRepository.database.unlockReleaseWrites();
+    if (!ownsFrozenMigration(session) || session.phase !== "resolving" || !session.sourceWritesLocked) return;
+    // Reopen while the release lock is still closed. A COMMIT or controller
+    // change during open must not be followed by an old asynchronous unlock.
     if (!caseRepository.database.isOpen()) await caseRepository.database.open();
+    if (!ownsFrozenMigration(session) || session.phase !== "resolving") return;
+    caseRepository.database.unlockReleaseWrites();
+    session.sourceWritesLocked = false;
     document.documentElement.dataset.dbSourceWriteFrozen = "false";
   };
 
-  const scheduleFrozenMigrationRecovery = () => {
-    if (!frozenMigration) return;
-    if (frozenMigration.timer !== null) window.clearTimeout(frozenMigration.timer);
-    frozenMigration.timer = window.setTimeout(async () => {
-      const current = frozenMigration;
-      if (!current) return;
+  const commitFrozenMigration = (session: SourceMigrationFreeze) => {
+    if (!ownsFrozenMigration(session) || session.phase === "committed") return;
+    session.phase = "committed";
+    stopFrozenMigrationRecovery(session);
+    // Retain the terminal slot and every write fence until the document leaves.
+    // An older ABORT/open continuation cannot reopen this committed source.
+    window.location.reload();
+  };
+
+  const abortFrozenMigration = (session: SourceMigrationFreeze): Promise<void> => {
+    if (!ownsFrozenMigration(session) || session.phase === "committed") return Promise.resolve();
+    if (session.resolutionPromise) return session.resolutionPromise;
+    session.phase = "resolving";
+    stopFrozenMigrationRecovery(session);
+    const resolution = (async () => {
+      await session.closePromise.catch(() => undefined);
+      if (!ownsFrozenMigration(session) || session.phase !== "resolving") return;
+      if (session.sourceWritesLocked) await reopenSourceDatabase(session);
+      if (!ownsFrozenMigration(session) || session.phase !== "resolving" || session.sourceWritesLocked) return;
+      // Keep ownership through the entire unlock/open sequence. A new request
+      // can enter only after this exact cancellation has finished.
+      frozenMigration = null;
+    })();
+    session.resolutionPromise = resolution;
+    void resolution.catch(() => {
+      if (!ownsFrozenMigration(session) || session.phase !== "resolving") return;
+      session.resolutionPromise = null;
+      scheduleFrozenMigrationRecovery(session);
+    });
+    return resolution;
+  };
+
+  const scheduleFrozenMigrationRecovery = (current: SourceMigrationFreeze) => {
+    if (!ownsFrozenMigration(current) || current.phase === "pending" || current.phase === "committed") return;
+    stopFrozenMigrationRecovery(current);
+    const recoveryEpoch = current.recoveryEpoch;
+    const recoveryIsCurrent = () => ownsFrozenMigration(current)
+      && current.recoveryEpoch === recoveryEpoch
+      && current.phase !== "pending" && current.phase !== "committed";
+    current.timer = window.setTimeout(async () => {
+      if (!recoveryIsCurrent()) return;
+      current.timer = null;
       try {
         const { DatabaseGenerationController } = await import("@hakimi/storage");
+        if (!recoveryIsCurrent()) return;
         const controller = new DatabaseGenerationController();
+        let verifiedAbort = false;
         try {
           const [state, journal] = await Promise.all([
             controller.readCommittedGeneration(),
             controller.readMigration(current.migrationId)
           ]);
+          if (!recoveryIsCurrent()) return;
           if (
-            state?.committedGeneration === current.targetGeneration &&
+            state?.protocolVersion === CURRENT_RELEASE_DATABASE.protocolVersion &&
+            state.committedGeneration === current.targetGeneration &&
             state.committedDatabaseName === current.targetDatabaseName &&
-            state.committedSchema === current.targetSchema
+            state.committedSchema === current.targetSchema &&
+            state.migrationId === current.migrationId
           ) {
-            window.location.reload();
+            commitFrozenMigration(current);
             return;
           }
-          const journalAge = journal ? Date.now() - Date.parse(journal.updatedAt) : Number.POSITIVE_INFINITY;
-          if (
-            journal &&
-            !["failed", "committed"].includes(journal.phase) &&
-            Number.isFinite(journalAge) &&
-            journalAge < 5 * 60_000
-          ) {
-            scheduleFrozenMigrationRecovery();
+          const sourceStillCommitted = state?.protocolVersion === CURRENT_RELEASE_DATABASE.protocolVersion
+            && state.committedGeneration === current.sourceGeneration
+            && state.committedDatabaseName === current.sourceDatabaseName
+            && state.committedSchema === current.sourceSchema
+            && CURRENT_RELEASE_DATABASE.acceptedCommittedMigrationIds.includes(state.migrationId);
+          // Elapsed time or an unknown/in-progress journal cannot prove ABORT.
+          // The formal reader must still identify the source, with no active
+          // journal or an explicit failed journal, before any release unlock.
+          if (!sourceStillCommitted || (journal !== null && journal.phase !== "failed")) {
+            scheduleFrozenMigrationRecovery(current);
             return;
           }
+          verifiedAbort = true;
         } finally {
           controller.close();
         }
-        frozenMigration = null;
-        await reopenSourceDatabase();
+        if (verifiedAbort && recoveryIsCurrent()) await abortFrozenMigration(current);
       } catch {
-        scheduleFrozenMigrationRecovery();
+        if (recoveryIsCurrent()) scheduleFrozenMigrationRecovery(current);
       }
     }, 30_000);
   };
@@ -568,11 +823,103 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
     targetSchema?: unknown;
   }>) => {
     const message = event.data;
+    if (message?.type === "FREEZE_RELEASE_FORWARD_MIGRATION_ACTIVATION_WRITES_V1") {
+      const wasBootConfirmed = bootConfirmationSent && appBootConfirmed;
+      releaseControllerTakeoverWriteLatch.latch("pre_activation_freeze");
+      document.getElementById("root")?.setAttribute("inert", "");
+      appBootConfirmed = false;
+      setAppBootReadyState(false);
+      document.documentElement.dataset.dbControllerTakeoverWriteFrozen = "true";
+      document.documentElement.dataset.dbForwardMigrationActivation = "draining";
+      const responsePort = event.ports[0];
+      if (!responsePort) return;
+      const respond = (accepted: boolean, reason: string) => {
+        try {
+          responsePort.postMessage({
+            type: "FREEZE_RELEASE_FORWARD_MIGRATION_ACTIVATION_WRITES_ACK_V1",
+            requestId: message.requestId,
+            sourceBuildVersion: message.sourceBuildVersion,
+            targetBuildVersion: message.targetBuildVersion,
+            accepted, reason
+          });
+        } catch { /* The active source worker retains its fail-closed timeout. */ }
+      };
+      void (async () => {
+        let requestedSession: ForwardMigrationActivationFreeze | null = null;
+        try {
+          const sourceController = navigator.serviceWorker.controller;
+          if (
+            sourceController === null || event.source !== sourceController
+            || !isControllerTakeoverRequestId(message.requestId)
+            || !isBoundedProtocolString(pageBuildVersion, 256)
+            || message.sourceBuildVersion !== pageBuildVersion
+            || !isBoundedProtocolString(message.targetBuildVersion, 256)
+            || message.targetBuildVersion === pageBuildVersion
+          ) throw new Error("前向迁移激活冻结消息身份无效。");
+          const sourceRelease = parseExactReleaseDatabaseDescriptor(message.sourceRelease);
+          const targetRelease = parseExactReleaseDatabaseDescriptor(message.targetRelease);
+          if (
+            !releaseDatabaseDescriptorsEqual(sourceRelease, CURRENT_RELEASE_DATABASE)
+            || !forwardMigrationActivationMatchesCurrentPage(targetRelease)
+          ) throw new Error("前向迁移激活冻结的源与目标谱系不匹配。");
+          const existing = activeForwardMigrationActivationFreeze;
+          if (existing && (
+            existing.failed
+            || existing.sourceController !== sourceController
+            || existing.sourceBuildVersion !== pageBuildVersion
+            || existing.targetBuildVersion !== message.targetBuildVersion
+            || !releaseDatabaseDescriptorsEqual(existing.targetRelease, targetRelease)
+          )) throw new Error("旧页已绑定另一项前向迁移激活身份。");
+          if (firstControllerClaimHandoff.started) {
+            throw new Error("首次控制器接管尚未结束，不能开始前向迁移激活。");
+          }
+          const session: ForwardMigrationActivationFreeze = existing?.requestId === message.requestId
+            ? existing
+            : {
+              requestId: message.requestId,
+              sourceBuildVersion: pageBuildVersion,
+              targetBuildVersion: message.targetBuildVersion,
+              sourceController, targetRelease,
+              wasBootConfirmed: existing?.wasBootConfirmed ?? wasBootConfirmed,
+              drain: Promise.resolve(), failed: false, navigation: null
+            };
+          requestedSession = session;
+          if (session !== existing) {
+            activeForwardMigrationActivationFreeze = session;
+            session.drain = (async () => {
+              await releaseDatabaseCoordinator.freezeForForwardMigrationActivation(targetRelease);
+              const { caseRepository } = await import("@hakimi/storage");
+              await caseRepository.database.drainControllerTakeoverWrites();
+            })();
+          }
+          await session.drain;
+          if (
+            activeForwardMigrationActivationFreeze !== session || session.failed
+            || navigator.serviceWorker.controller !== sourceController
+            || session.sourceBuildVersion !== pageBuildVersion
+            || session.targetBuildVersion !== message.targetBuildVersion
+            || !releaseDatabaseDescriptorsEqual(session.targetRelease, targetRelease)
+            || !releaseDatabaseDescriptorsEqual(sourceRelease, CURRENT_RELEASE_DATABASE)
+            || !releaseControllerTakeoverWriteLatch.locked
+          ) throw new Error("前向迁移激活排空期间身份已变化；旧页保持锁定。");
+          document.documentElement.dataset.dbForwardMigrationActivation = "drained";
+          respond(true, "WRITES_DRAINED");
+        } catch (reason) {
+          if (requestedSession) requestedSession.failed = true;
+          document.documentElement.dataset.dbForwardMigrationActivation = "freeze_failed_closed";
+          respond(false, reason instanceof Error ? reason.name : "FREEZE_FAILED");
+        }
+      })();
+      return;
+    }
     if (message?.type === "FREEZE_RELEASE_CONTROLLER_TAKEOVER_WRITES_V1") {
       // This is deliberately the first state mutation in the handler. Parsing,
       // dynamic imports and transaction draining may all yield; the page must
       // already be unable to start another production write before they do.
       releaseControllerTakeoverWriteLatch.latch("pre_activation_freeze");
+      if (firstControllerClaimHandoff.started) {
+        firstControllerClaimHandoff.cancel(new Error("首次 Service Worker 接管期间收到代际接管冻结；旧页保持写入锁定。"));
+      }
       document.documentElement.dataset.dbControllerTakeoverWriteFrozen = "true";
       document.documentElement.dataset.dbControllerTakeoverWriteFreezePhase = "draining";
       const responsePort = event.ports[0];
@@ -672,7 +1019,7 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
         }
       };
       void (async () => {
-        let sourceWritesLocked = false;
+        let requestedSession: SourceMigrationFreeze | null = null;
         try {
           if (
             sourceController === null ||
@@ -703,6 +1050,9 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
             });
             return;
           }
+          if (firstControllerClaimHandoff.started) {
+            firstControllerClaimHandoff.cancel(new Error("首次 Service Worker 接管期间收到数据库迁移冻结；旧页保持写入锁定。"));
+          }
           if (frozenMigration) {
             const matchesExistingFreeze =
               frozenMigration.sourceController === sourceController &&
@@ -717,37 +1067,52 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
             if (!matchesExistingFreeze) {
               throw new Error("旧标签页已绑定另一项数据库迁移冻结请求。");
             }
-            scheduleFrozenMigrationRecovery();
-            respond({
-              type: "DATABASE_WRITES_FROZEN",
+            if (frozenMigration.phase !== "pending" && frozenMigration.phase !== "closed") {
+              throw new Error("这项迁移冻结请求已经进入精确收尾，不能再次确认冻结。");
+            }
+            requestedSession = frozenMigration;
+          } else {
+            const session: SourceMigrationFreeze = {
               requestId: message.requestId,
-              accepted: true,
-              reason: "SOURCE_CLOSED"
-            });
-            return;
+              migrationId: message.migrationId,
+              sourceGeneration: message.sourceGeneration,
+              sourceDatabaseName: message.sourceDatabaseName,
+              sourceSchema: Number(message.sourceSchema),
+              targetGeneration: message.targetGeneration,
+              targetDatabaseName: message.targetDatabaseName,
+              targetSchema: Number(message.targetSchema),
+              sourceController,
+              phase: "pending",
+              closePromise: Promise.resolve(),
+              resolutionPromise: null,
+              sourceWritesLocked: false,
+              timer: null,
+              recoveryEpoch: 0
+            };
+            // Publish exact ownership before import yields. A queued matching
+            // ABORT/COMMIT can now cancel this preparation before it closes DB.
+            frozenMigration = session;
+            requestedSession = session;
+            session.closePromise = (async () => {
+              const { caseRepository } = await import("@hakimi/storage");
+              if (!ownsFrozenMigration(session) || session.phase !== "pending") {
+                throw new Error("迁移冻结准备已被精确取消；不能迟到地关闭来源数据库。");
+              }
+              session.sourceWritesLocked = true;
+              caseRepository.database.lockReleaseWrites();
+              // Preserve auto-open so repository writes still fail at the
+              // explicit release lock, not merely a closed-connection error.
+              caseRepository.database.close({ disableAutoOpen: false });
+              session.phase = "closed";
+              document.documentElement.dataset.dbSourceWriteFrozen = "true";
+            })();
           }
-          const { caseRepository } = await import("@hakimi/storage");
-          caseRepository.database.lockReleaseWrites();
-          sourceWritesLocked = true;
-          // Close the current connection to create a clean snapshot boundary,
-          // but keep Dexie's auto-open path enabled. Any later repository write
-          // reaches the DBCore release lock and fails with the explicit
-          // ReleaseDatabaseWriteLockedError instead of a generic closed-DB error.
-          caseRepository.database.close({ disableAutoOpen: false });
-          frozenMigration = {
-            requestId: message.requestId,
-            migrationId: message.migrationId,
-            sourceGeneration: message.sourceGeneration,
-            sourceDatabaseName: message.sourceDatabaseName,
-            sourceSchema: Number(message.sourceSchema),
-            targetGeneration: message.targetGeneration,
-            targetDatabaseName: message.targetDatabaseName,
-            targetSchema: Number(message.targetSchema),
-            sourceController,
-            timer: null
-          };
-          document.documentElement.dataset.dbSourceWriteFrozen = "true";
-          scheduleFrozenMigrationRecovery();
+          const session = requestedSession;
+          await session.closePromise;
+          if (!ownsFrozenMigration(session) || session.phase !== "closed" || !session.sourceWritesLocked) {
+            throw new Error("迁移冻结已取消或归属已变化；不能发送迟到的 SOURCE_CLOSED。");
+          }
+          scheduleFrozenMigrationRecovery(session);
           respond({
             type: "DATABASE_WRITES_FROZEN",
             requestId: message.requestId,
@@ -755,11 +1120,9 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
             reason: "SOURCE_CLOSED"
           });
         } catch (reason) {
-          if (sourceWritesLocked) {
-            if (frozenMigration?.timer != null) window.clearTimeout(frozenMigration.timer);
-            frozenMigration = null;
-            await reopenSourceDatabase().catch(() => window.location.reload());
-          }
+          // A rejected or delayed FREEZE is not an ABORT receipt. Only the
+          // exact worker resolution (or verified recovery) can release its slot.
+          // In particular, this catch must never unlock a newer request.
           respond({
             type: "DATABASE_WRITES_FROZEN",
             requestId: message.requestId,
@@ -786,24 +1149,30 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
     })();
     if (
       message?.type === "DATABASE_MIGRATION_ABORTED" &&
-      resolutionMatchesFrozenMigration
+      resolutionMatchesFrozenMigration &&
+      frozenMigration !== null
     ) {
-      if (frozenMigration.timer !== null) window.clearTimeout(frozenMigration.timer);
-      frozenMigration = null;
-      void reopenSourceDatabase().catch(() => window.location.reload());
+      void abortFrozenMigration(frozenMigration).catch(() => undefined);
       return;
     }
     if (
       message?.type === "DATABASE_MIGRATION_COMMITTED" &&
-      resolutionMatchesFrozenMigration
+      resolutionMatchesFrozenMigration &&
+      frozenMigration !== null
     ) {
-      if (frozenMigration.timer !== null) window.clearTimeout(frozenMigration.timer);
-      window.location.reload();
+      commitFrozenMigration(frozenMigration);
     }
   });
 
   const startServiceWorkerLifecycle = () => {
     const controllerPresentAtLifecycleStart = Boolean(navigator.serviceWorker.controller);
+    // A fresh shadow install can commit its empty source without a worker.
+    // Delay registration so first claim cannot freeze that admitted commit.
+    // The coordinator still independently checks source absence and admission.
+    const initialCommitBeforeRegistration = defaultLegacyDatabaseRelease
+      || (shadowDatabaseRelease
+        && !controllerPresentAtLifecycleStart
+        && document.documentElement.dataset.prebootRecoveryReason === "FRESH_INSTALL");
     const updateControlState = () => {
       document.documentElement.dataset.swControlled = String(Boolean(navigator.serviceWorker.controller));
     };
@@ -877,6 +1246,12 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
 
     const confirmActiveWorkerBoot = (): Promise<void> => {
       updateControlState();
+      if (activeForwardMigrationActivationFreeze !== null) return Promise.resolve();
+      // The uncontrolled first document only hands off by navigation. It must
+      // never race its controllerchange event by acknowledging on a frozen writer.
+      if (initialCommitBeforeRegistration && !controllerPresentAtLifecycleStart) {
+        return Promise.resolve();
+      }
       if (bootFailed || !appBootConfirmed || !pageBuildVersion || !releaseBootConfirmation) {
         return Promise.resolve();
       }
@@ -886,11 +1261,19 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
       if (!controller) return Promise.resolve();
       activeBootConfirmation = postBootConfirmation(controller, releaseBootConfirmation)
         .then(async () => {
+          if (activeForwardMigrationActivationFreeze !== null) {
+            throw new ReleaseForwardMigrationActivationFrozenError();
+          }
           bootConfirmationSent = true;
           await releaseDatabaseCoordinator.acknowledgeServiceWorkerCommit();
           resolveReleaseInteraction?.();
         })
         .catch((reason: unknown) => {
+          if (isExpectedForwardMigrationBootStop(reason)) {
+            appBootConfirmed = false;
+            setAppBootReadyState(false);
+            return;
+          }
           rejectReleaseInteraction?.(reason);
           reportBootFailure("storage", reason);
           throw reason;
@@ -901,9 +1284,41 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
       return activeBootConfirmation;
     };
 
-    const requestInstalledGenerationActivation = (controller: ServiceWorker): Promise<void> =>
-      new Promise((resolve, reject) => {
-        if (!pageBuildVersion || navigator.serviceWorker.controller !== controller) {
+    const requestInstalledGenerationActivation = async (
+      controller: ServiceWorker,
+      waitingWorker: ServiceWorker,
+      registration: ServiceWorkerRegistration
+    ): Promise<void> => {
+      const sourceAndWaitingStillMatch = () => Boolean(
+        pageBuildVersion
+        && navigator.serviceWorker.controller === controller
+        && registration.waiting === waitingWorker
+        && waitingWorker.state === "installed"
+      );
+      if (!sourceAndWaitingStillMatch()) {
+        throw new ControllerTakeoverRequestError("SOURCE_CONTROLLER_CHANGED", "known_not_committed");
+      }
+      let identity: Awaited<ReturnType<typeof readInstalledGenerationReleaseIdentity>>;
+      try { identity = await readInstalledGenerationReleaseIdentity(waitingWorker, true); }
+      catch {
+        throw new ControllerTakeoverRequestError("WAITING_IDENTITY_QUERY_FAILED", "known_not_committed");
+      }
+      const sameDescriptor = releaseControllerTakeoverMatchesCurrentPage(identity.release);
+      const forwardMigration = identity.queryKind === "installed_identity_v1"
+        && !sameDescriptor && forwardMigrationActivationMatchesCurrentPage(identity.release);
+      if ((!sameDescriptor && !forwardMigration) || identity.buildVersion === pageBuildVersion) {
+        throw new ControllerTakeoverRequestError("TARGET_RELEASE_MISMATCH", "known_not_committed");
+      }
+      const requestType = forwardMigration
+        ? "REQUEST_INSTALLED_FORWARD_MIGRATION_ACTIVATION_V1"
+        : "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1";
+      const acknowledgementType = forwardMigration
+        ? "REQUEST_INSTALLED_FORWARD_MIGRATION_ACTIVATION_ACK_V1"
+        : "REQUEST_INSTALLED_GENERATION_ACTIVATION_ACK_V1";
+      return new Promise((resolve, reject) => {
+        // The identity query is read-only. Recheck both real browser objects
+        // immediately before dispatching the request that may activate B.
+        if (!sourceAndWaitingStillMatch()) {
           reject(new ControllerTakeoverRequestError(
             "SOURCE_CONTROLLER_CHANGED",
             "known_not_committed"
@@ -937,7 +1352,7 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
           try {
             const acknowledgement = event.data;
             if (
-              acknowledgement?.type !== "REQUEST_INSTALLED_GENERATION_ACTIVATION_ACK_V1" ||
+              acknowledgement?.type !== acknowledgementType ||
               acknowledgement.requestId !== requestId ||
               acknowledgement.sourceBuildVersion !== pageBuildVersion
             ) {
@@ -970,7 +1385,13 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
               );
             }
             const targetRelease = parseExactReleaseDatabaseDescriptor(acknowledgement.targetRelease);
-            if (!releaseControllerTakeoverMatchesCurrentPage(targetRelease)) {
+            if (
+              acknowledgement.targetBuildVersion !== identity.buildVersion
+              || !releaseDatabaseDescriptorsEqual(targetRelease, identity.release)
+              || (forwardMigration
+                ? !forwardMigrationActivationMatchesCurrentPage(targetRelease)
+                : !releaseControllerTakeoverMatchesCurrentPage(targetRelease))
+            ) {
               throw new ControllerTakeoverRequestError(
                 "TARGET_RELEASE_MISMATCH",
                 "commit_outcome_unknown"
@@ -989,10 +1410,14 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
         };
         try {
           controller.postMessage({
-            type: "REQUEST_INSTALLED_GENERATION_ACTIVATION_V1",
+            type: requestType,
             requestId,
             sourceBuildVersion: pageBuildVersion,
-            sourceRelease: CURRENT_RELEASE_DATABASE
+            sourceRelease: CURRENT_RELEASE_DATABASE,
+            ...(forwardMigration ? {
+              targetBuildVersion: identity.buildVersion,
+              targetRelease: identity.release
+            } : {})
           }, [channel.port2]);
         } catch {
           window.clearTimeout(timeout);
@@ -1015,23 +1440,79 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
           // until the authenticated acknowledgement settles it.
         }
       });
+    };
 
     let controllerTakeoverPromotionClosed = false;
     let closeControllerTakeoverPromotion: ((reasonCode: string) => void) | null = null;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
+      const claimedController = navigator.serviceWorker.controller;
+      const firstCommittedClaim = initialCommitBeforeRegistration
+        && !controllerPresentAtLifecycleStart
+        && !controllerTakeoverPromotionClosed
+        && !releaseControllerTakeoverWriteLatch.locked
+        && frozenMigration === null
+        && claimedController !== null;
       // This document belongs to the controller epoch that just ended. It may
       // confirm the new worker only through the normal navigation/boot path;
       // it must never promote another waiting worker in place.
       controllerTakeoverPromotionClosed = true;
       closeControllerTakeoverPromotion?.("CONTROLLER_CHANGED_AFTER_DISPATCH");
       releaseControllerTakeoverWriteLatch.latch("controller_changed");
-      void releaseDatabaseCoordinator.freezeForControllerTakeover().catch(() => undefined);
+      const forwardSession = activeForwardMigrationActivationFreeze;
+      const coordinatorDrained = forwardSession?.drain
+        ?? releaseDatabaseCoordinator.freezeForControllerTakeover();
+      void coordinatorDrained.catch(() => undefined);
       document.documentElement.dataset.dbControllerTakeoverWriteFrozen = "true";
       document.documentElement.dataset.dbControllerTakeoverWriteFreezePhase = "controller_changed";
+      if (forwardSession) {
+        document.getElementById("root")?.setAttribute("inert", "");
+        setAppBootReadyState(false);
+        if (claimedController === null) {
+          forwardSession.failed = true;
+          document.documentElement.dataset.dbForwardMigrationActivation = "controller_missing";
+          return;
+        }
+        document.documentElement.dataset.dbForwardMigrationActivation = "controller_changed";
+        // Confirmed source pages must remain present for B's actual migration
+        // freeze and commit resolution. Only an unfinished old boot navigates
+        // after its real read-only audit settles and B's identity is verified.
+        scheduleForwardMigrationActivationNavigation(forwardSession, claimedController);
+        return;
+      }
+      if (firstControllerClaimHandoff.started) {
+        firstControllerClaimHandoff.cancel(new Error("首次 Service Worker 接管期间再次发生控制器变化；旧页保持写入锁定。"));
+        return;
+      }
+      if (firstCommittedClaim) {
+        // This old document cannot commit after its writer is frozen. Drain it,
+        // re-verify its completed commit, then navigate. An early peer claim
+        // without that normal commit remains in read-only recovery.
+        appBootConfirmed = false;
+        setAppBootReadyState(false);
+        firstControllerClaimHandoff.schedule(claimedController, coordinatorDrained);
+        return;
+      }
       void confirmActiveWorkerBoot().catch(() => undefined);
     });
-    navigator.serviceWorker
-      .register("/sw.js", { updateViaCache: "none" })
+    void registerServiceWorkerAfterBootCommit({
+      waitForDocumentLoad: () => document.readyState === "complete"
+        ? Promise.resolve()
+        : new Promise<void>((resolve) => window.addEventListener("load", () => resolve(), { once: true })),
+      waitForBootCommit: initialCommitBeforeRegistration ? async () => {
+        const result = await appBootReadinessResult;
+        if (!result.ready) throw result.error;
+        if (!releaseBootConfirmation) throw new Error("本页数据库尚无正常提交回执，不能注册 Service Worker。");
+      } : undefined,
+      assertRegistrationAllowed: () => {
+        if (initialCommitBeforeRegistration) {
+          if (bootFailureLatch.current) throw bootFailureLatch.current.error;
+          if (releaseControllerTakeoverWriteLatch.locked || controllerTakeoverPromotionClosed) {
+            throw new Error("当前页面已发生 Service Worker 接管冻结，不能再注册或初始化控制器。");
+          }
+        }
+      },
+      register: () => navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" })
+    })
       .then(async (registration) => {
         document.documentElement.dataset.swRegistered = "true";
         const observedInstallers = new WeakSet<ServiceWorker>();
@@ -1050,7 +1531,7 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
           getWaitingWorker: () => registration.waiting,
           getController: () => navigator.serviceWorker.controller,
           isWaitingWorkerReady: (worker) => worker.state === "installed",
-          requestActivation: (controller) => requestInstalledGenerationActivation(controller),
+          requestActivation: (controller, worker) => requestInstalledGenerationActivation(controller, worker, registration),
           classifyFailure: controllerTakeoverFailure,
           onTransition: (transition) => {
             document.documentElement.dataset.swTakeoverPreparation =
@@ -1139,6 +1620,7 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
           return;
         }
         if (
+          shadowDatabaseRelease &&
           !controllerPresentAtLifecycleStart &&
           releaseControllerTakeoverWriteLatch.reason === "controller_changed"
         ) {
@@ -1182,6 +1664,7 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
         document.documentElement.dataset.swHasChart = String(cachedPaths.some((pathname) => pathname.includes("/assets/chart-page-")));
       })
       .catch((error: unknown) => {
+        if (isExpectedForwardMigrationBootStop(error)) return;
         document.documentElement.dataset.swRegistered = "false";
         if (shadowDatabaseRelease) {
           rejectReleaseInteraction?.(
@@ -1192,11 +1675,8 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
       });
   };
 
-  // bootstrap.ts performs an asynchronous inventory check before importing
-  // this module. The browser load event may therefore have fired already.
-  if (document.readyState === "complete") {
-    startServiceWorkerLifecycle();
-  } else {
-    window.addEventListener("load", startServiceWorkerLifecycle, { once: true });
-  }
+  // Install controllerchange before yielding to load or the boot commit. A peer
+  // can claim this page independently of this document's registration promise.
+  // Registration itself still waits for load, including late bootstrap imports.
+  startServiceWorkerLifecycle();
 }

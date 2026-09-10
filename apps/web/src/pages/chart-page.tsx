@@ -810,7 +810,7 @@ export function ChartPage({ caseId, revisionId }: { caseId: string; revisionId: 
   }, [appBootReady, location.pathname, route.transit, view]);
 
   useEffect(() => {
-    if (!revision || (view !== "transit" && view !== "research") || !route.transit.atInstant) {
+    if (!revision || !transitContextActive || !route.transit.atInstant) {
       setTransitSnapshot(null);
       setTransitLoading(false);
       setTransitError(null);
@@ -836,7 +836,7 @@ export function ChartPage({ caseId, revisionId }: { caseId: string; revisionId: 
       if (active) setTransitLoading(false);
     });
     return () => { active = false; };
-  }, [revision, route.transit.atInstant, route.transit.manualDirection, view]);
+  }, [revision, route.transit.atInstant, route.transit.manualDirection, transitContextActive]);
 
   useEffect(() => {
     if (!transitEventContextReady || !bundle) {

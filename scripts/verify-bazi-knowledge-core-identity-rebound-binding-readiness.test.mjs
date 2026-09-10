@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { open, readFile } from "node:fs/promises";
+import { copyFile, lstat, mkdtemp, open, readFile, realpath, rm } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import test from "node:test";
@@ -419,8 +420,23 @@ test("persisted artifact is the exact deterministic builder serialization", asyn
     serializeBaziKnowledgeCoreIdentityReboundBindingReadiness(built));
 });
 
-test("exclusive wx semantics cannot overwrite the persisted artifact", async () => {
-  await assert.rejects(open(artifactPath, "wx"), (error) => error?.code === "EEXIST");
+test("exclusive wx semantics cannot overwrite a temporary copy of the persisted artifact", async (t) => {
+  const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), "hakimi-bazi-readiness-wx-"));
+  t.after(async () => {
+    assert.equal(path.isAbsolute(temporaryRoot), true);
+    assert.equal(path.dirname(temporaryRoot), path.resolve(os.tmpdir()));
+    assert.match(path.basename(temporaryRoot), /^hakimi-bazi-readiness-wx-[a-z0-9]{6}$/iu);
+    const metadata = await lstat(temporaryRoot);
+    assert.equal(metadata.isDirectory(), true);
+    assert.equal(metadata.isSymbolicLink(), false);
+    assert.equal(await realpath(temporaryRoot), temporaryRoot);
+    await rm(temporaryRoot, { recursive: true, force: true });
+  });
+  const target = path.join(temporaryRoot, "readiness.json");
+  await copyFile(artifactPath, target);
+  const expectedBytes = await readFile(target);
+  await assert.rejects(open(target, "wx"), (error) => error?.code === "EEXIST");
+  assert.deepEqual(await readFile(target), expectedBytes);
   const { result } = await fixturePromise;
   assert.equal(result.artifact.sha256,
     "e20145b5f34b5dc04464e482cda5da990f82e520236679efbf568b322637f797");

@@ -76,7 +76,7 @@ export type SwTwoGenerationArtifactSetSnapshot = Readonly<{
 }>;
 
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
-const BUILD_VERSION_PATTERN = /^[a-f0-9]{64}$/u;
+const BUILD_VERSION_PATTERN = /^[a-f0-9]{12}$/u;
 const ARTIFACT_PATH_PATTERN = /^[A-Za-z0-9._/-]+$/u;
 const GENERATION_KEYS = Object.freeze([
   "generationName",

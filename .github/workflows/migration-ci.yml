@@ -9,11 +9,13 @@ on:
       - "package-lock.json"
       - "apps/web/package.json"
       - "apps/web/index.html"
+      - "apps/web/pwa-build.ts"
       - "apps/web/public/sw.js"
       - "apps/web/release-protocol.ts"
       - "apps/web/src/bootstrap.ts"
       - "apps/web/src/recovery-main.tsx"
       - "apps/web/src/main.tsx"
+      - "apps/web/src/lib/app-boot-*"
       - "apps/web/src/lib/app-version.ts"
       - "apps/web/src/lib/current-release.ts"
       - "apps/web/src/lib/full-backup-worker-client.ts"
@@ -26,11 +28,12 @@ on:
       - "apps/web/src/lib/release-controller-takeover-write-fence.ts"
       - "apps/web/src/lib/release-controller-takeover-write-fence.test.ts"
       - "apps/web/src/lib/release-integrity-cache.ts"
-      - "apps/web/src/lib/service-worker-boot-ack.ts"
+      - "apps/web/src/lib/service-worker-*"
       - "apps/web/src/lib/storage-capacity-gate.ts"
       - "apps/web/src/pages/case-library-page.tsx"
       - "apps/web/src/pages/case-library-page.test.tsx"
       - "apps/web/src/pages/orphaned-v13-recovery-page.tsx"
+      - "apps/web/src/pwa-build.test.ts"
       - "apps/web/src/pwa-files.test.ts"
       - "apps/web/src/sw-lifecycle.test.ts"
       - "apps/web/playwright.sw-two-generation-fixture-result.ts"
@@ -38,6 +41,7 @@ on:
       - "apps/web/sw-two-generation-artifact-identity.ts"
       - "apps/web/sw-two-generation-fixture-source-identity.ts"
       - "apps/web/e2e/**"
+      - "apps/web/playwright.release-browser-*.ts"
       - "apps/web/playwright*.config.ts"
       - "apps/web/vite*.ts"
       - "packages/backup/**"
@@ -83,7 +87,7 @@ jobs:
       - run: npm run check:release-governance
       - run: node --test scripts/verify-release-governance.test.mjs
       - run: npm run build:production-v13-to-v16:candidate
-      - run: node scripts/verify-built-release-storage-manifest.mjs tmp/release-config-production-v13-to-v16
+      - run: node scripts/verify-built-release-storage-manifest.mjs tmp/release-config-production-v13-to-v16 --expected-channel candidate
       - run: npm run test:e2e:cross-schema-upgrade
       - run: npm run test:e2e:cross-schema-v13-v15
       - run: npm run test:e2e:cross-schema-v14-v15

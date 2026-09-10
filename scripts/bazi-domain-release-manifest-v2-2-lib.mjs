@@ -103,6 +103,7 @@ const EXPECTED_PERSISTED = OBJECT_FREEZE({
   manifestDigest: "a95e722674c0b09a2d564b4090396fbfc25fdfc2f5f2fff9aedc92aa2468f68e"
 });
 const VERIFIED_RESULTS = new NATIVE_WEAK_SET();
+const VERIFIED_HISTORICAL_BASES = new NATIVE_WEAK_SET();
 
 export class BaziDomainReleaseManifestV22Error extends Error {
   constructor(code, message) {
@@ -893,6 +894,48 @@ export function getBaziDomainReleaseManifestV22Summary(value) {
   }
   return summaryFrom(value);
 }
+
+// A successor may consume the exact historical construction without treating
+// its old component pins as current. This deliberately does not issue the
+// full-loader brand used by loadBaziDomainReleaseManifestV22.
+export async function loadBaziDomainReleaseManifestV22HistoricalBasis(
+  workspaceRoot = REFLECT_APPLY(PROCESS_CWD, process, [])
+) {
+  const inputs = await loadVerifiedInputs(workspaceRoot);
+  const expected = buildFromVerifiedInputs(inputs);
+  const snapshot = await readBaziDttStableWorkspaceArtifact(
+    workspaceRoot, BAZI_DOMAIN_RELEASE_MANIFEST_V2_2_RELATIVE_PATH
+  );
+  const manifest = parseBaziDttStrictJsonArtifact(snapshot);
+  assertPersistedIdentity(snapshot, manifest);
+  assertPersistedSemantic(manifest, expected);
+  const basis = deepFreeze({
+    manifest,
+    artifact: {
+      path: snapshot.path,
+      bytes: snapshot.rawBytes,
+      sha256: snapshot.rawSha256
+    },
+    historicalConstructionVerified: true,
+    currentComponentIdentitiesVerified: false,
+    historicalManifestBrandCurrent: false
+  });
+  REFLECT_APPLY(WEAK_SET_ADD, VERIFIED_HISTORICAL_BASES, [basis]);
+  return basis;
+}
+
+export function isVerifiedBaziDomainReleaseManifestV22HistoricalBasis(value) {
+  return value !== null && typeof value === "object"
+    && REFLECT_APPLY(WEAK_SET_HAS, VERIFIED_HISTORICAL_BASES, [value]);
+}
+
+// Production reuse of the existing passive JSON and component identity rules.
+export {
+  canonicalValue as copyBaziDomainReleaseManifestData,
+  deepFreeze as freezeBaziDomainReleaseManifestData,
+  componentDigest as computeBaziDomainReleaseManifestComponentDigest,
+  verifyComponentFileIdentities as verifyBaziDomainReleaseManifestComponentFileIdentities
+};
 
 export const baziDomainReleaseManifestV22TestOnly = OBJECT_FREEZE({
   READINESS_V19,

@@ -31,6 +31,47 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+test("production module loader config disables listeners, watching, environment files and public inventory", async () => {
+  let capturedConfig;
+  let closed = 0;
+  await baziPr10aLocalPrivateImportPreflightTestOnly.loadProductionKnowledgeCoreRuntimeOnce(async (config) => {
+    capturedConfig = config;
+    return {
+      config: { configFile: false },
+      moduleGraph: { idToModuleMap: new Map() },
+      async ssrLoadModule(entry) {
+        assert.equal(entry, "/packages/knowledge-core/src/index.ts");
+        return {
+          normalizeKnowledgeContent() {},
+          async buildKnowledgeContentSnapshot() {},
+          extractKnowledgeQuote() {}
+        };
+      },
+      async close() { closed += 1; }
+    };
+  });
+  const { cacheDir, plugins, ...settings } = capturedConfig;
+  assert.deepEqual(settings, {
+    root: path.resolve(SCRIPTS_ROOT, ".."),
+    configFile: false,
+    envFile: false,
+    publicDir: false,
+    logLevel: "silent",
+    clearScreen: false,
+    appType: "custom",
+    server: { middlewareMode: true, ws: false, hmr: false, watch: null },
+    optimizeDeps: { noDiscovery: true, include: [] }
+  });
+  assert.equal(path.dirname(cacheDir), path.resolve(os.tmpdir()));
+  assert.match(path.basename(cacheDir), /^hakimi-pr10a-knowledge-core-ssr-[a-f0-9-]{36}$/u);
+  assert.equal(plugins.length, 1);
+  assert.equal(plugins[0].name, "hakimi-pr10a-production-knowledge-core-read-boundary");
+  assert.equal(plugins[0].enforce, "pre");
+  assert.equal(typeof plugins[0].resolveId, "function");
+  assert.equal(typeof plugins[0].load, "function");
+  assert.equal(closed, 1);
+});
+
 test("reuses the three production knowledge-core exports without workspace Vite configuration", async () => {
   const before = (await readdir(os.tmpdir())).filter((name) => name.startsWith("hakimi-pr10a-knowledge-core-ssr-"));
   const runtime = await baziPr10aLocalPrivateImportPreflightTestOnly.loadProductionKnowledgeCoreRuntime();

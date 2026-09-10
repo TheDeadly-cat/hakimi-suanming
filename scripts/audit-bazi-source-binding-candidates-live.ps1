@@ -2,7 +2,21 @@ $ErrorActionPreference = "Stop"
 
 $scriptDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
 $workspaceRoot = Split-Path -Parent $scriptDirectory
-$ledgerPath = Join-Path $workspaceRoot "content\bazi-strength-source-binding-candidates.v1.json"
+$selectorPath = Join-Path $scriptDirectory "resolve-bazi-current-source-binding.mjs"
+$selectorOutput = @(& node $selectorPath)
+if ($LASTEXITCODE -ne 0 -or $selectorOutput.Count -ne 1) {
+  throw "Live Bazi source-binding candidate audit failed: canonical current selection unavailable."
+}
+$selection = $selectorOutput[0] | ConvertFrom-Json
+if ([string]$selection.purpose -cne "bazi_source_binding" `
+  -or [bool]$selection.currentAvailable -ne $true `
+  -or [string]$selection.selection.familyKey -cne "content/bazi-strength-source-binding-candidates") {
+  throw "Live Bazi source-binding candidate audit failed: canonical current selection shape drifted."
+}
+$ledgerPath = [string]$selection.artifact.absolutePath
+if (-not (Test-Path -LiteralPath $ledgerPath -PathType Leaf)) {
+  throw "Live Bazi source-binding candidate audit failed: selected ledger path is unavailable."
+}
 $ledger = Get-Content -LiteralPath $ledgerPath -Raw -Encoding UTF8 | ConvertFrom-Json
 
 if ($ledger.accessBoundary.apiEndpoint -ne "https://zh.wikisource.org/w/api.php") {

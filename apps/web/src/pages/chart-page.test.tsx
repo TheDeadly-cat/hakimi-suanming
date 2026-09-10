@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   eventRecordSchema,
@@ -11,6 +11,7 @@ import {
 import { calculateChart, digestRuleProfile } from "@hakimi/bazi-core";
 import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
 import { calculatePillarRelations } from "@hakimi/relations-core";
+import * as transitCore from "@hakimi/transit-core";
 import {
   RESEARCH_JOURNAL_SNAPSHOT_PROFILE,
   caseRepository,
@@ -20,6 +21,7 @@ import {
 import { ChartPage, LuckCyclePanel, PillarRelationsPanel } from "./chart-page";
 import { shortHash } from "../lib/format";
 import { EXPERT_MODE_KEY } from "../lib/expert-mode";
+import { navigate } from "../lib/router";
 import { clearBootGovernanceFixture, installLegacyV13BootGovernance } from "../test/boot-governance-fixture";
 
 beforeEach(() => {
@@ -300,6 +302,7 @@ describe("ChartPage transit route", () => {
   }, 15_000);
 
   it("刷新可恢复运限视图，并把所选节点带到研读事件表单", async () => {
+    const calculateTransit = vi.spyOn(transitCore, "calculateTransitSnapshot");
     const revision = await revisionFor(input);
     const caseRecord: CaseRecord = {
       schemaVersion: "1.0.0",
@@ -332,12 +335,66 @@ describe("ChartPage transit route", () => {
     fireEvent.click(within(yearSection!).getAllByRole("button")[0]);
     await waitFor(() => expect(window.location.search).toContain("node=year%3A"));
 
-    fireEvent.click(await screen.findByRole("button", { name: "到研读页记录事件" }, { timeout: 10_000 }));
+    const openResearch = await screen.findByRole("button", { name: "到研读页记录事件" }, { timeout: 10_000 });
+    // Selecting the year moved the observation instant to that node's start.
+    expect(calculateTransit).toHaveBeenCalledTimes(2);
+    fireEvent.click(openResearch);
     expect(await screen.findByText(/绑定所选year节点/)).toBeTruthy();
+    expect(calculateTransit).toHaveBeenCalledTimes(2);
     const researchParams = new URLSearchParams(window.location.search);
     expect(researchParams.get("scale")).toBe("day");
     expect(researchParams.getAll("track")).toEqual(["year", "month"]);
 
+  });
+
+  it("观察时刻、人工方向或 Revision 变化仍触发运限重算，离开上下文后重新进入也重算", async () => {
+    const first = await revisionFor(input);
+    const second: RevisionRecord = {
+      ...first,
+      id: "33333333-3333-4333-8333-333333333333",
+      revisionNumber: 2
+    };
+    const caseRecord: CaseRecord = {
+      schemaVersion: "1.0.0",
+      id: first.caseId,
+      alias: "运限计算依赖案例",
+      tags: [],
+      notes: "",
+      createdAt: first.createdAt,
+      updatedAt: second.createdAt,
+      latestRevisionId: second.id,
+      revisionCount: 2,
+      recordVersion: 2,
+      favorite: false,
+      deletedAt: null
+    };
+    vi.spyOn(caseRepository, "getCase").mockResolvedValue({ caseRecord, revisions: [first, second] });
+    vi.spyOn(researchRepository, "listEventsByCase").mockResolvedValue([]);
+    // This fixture checks when calculation is requested; the route test above
+    // retains the real calculator and verifies the selected node's UI binding.
+    const calculateTransit = vi.spyOn(transitCore, "calculateTransitSnapshot")
+      .mockRejectedValue(new Error("fixture calculation unavailable"));
+    const pathname = `/cases/${caseRecord.id}/revisions/${first.id}`;
+    window.history.replaceState({}, "", `${pathname}?view=transit&at=2026-08-01T12%3A00%3A00Z`);
+    const page = render(<ChartPage caseId={caseRecord.id} revisionId={first.id} />);
+    await waitFor(() => expect(calculateTransit).toHaveBeenCalledTimes(1));
+
+    await act(async () => { navigate(`${pathname}?view=transit&at=2026-08-02T12%3A00%3A00Z`, { scroll: false }); });
+    expect(calculateTransit).toHaveBeenCalledTimes(2);
+    expect(calculateTransit).toHaveBeenLastCalledWith({ revision: first, atInstant: "2026-08-02T12:00:00Z" });
+
+    await act(async () => { navigate(`${pathname}?view=transit&at=2026-08-02T12%3A00%3A00Z&dir=forward`, { scroll: false }); });
+    expect(calculateTransit).toHaveBeenCalledTimes(3);
+    expect(calculateTransit).toHaveBeenLastCalledWith({ revision: first, atInstant: "2026-08-02T12:00:00Z", manualDirection: "forward" });
+
+    page.rerender(<ChartPage caseId={caseRecord.id} revisionId={second.id} />);
+    await waitFor(() => expect(calculateTransit).toHaveBeenCalledTimes(4));
+    expect(calculateTransit).toHaveBeenLastCalledWith({ revision: second, atInstant: "2026-08-02T12:00:00Z", manualDirection: "forward" });
+
+    await act(async () => { navigate(`${pathname}?view=structure`, { scroll: false }); });
+    expect(calculateTransit).toHaveBeenCalledTimes(4);
+    await act(async () => { navigate(`${pathname}?view=transit&at=2026-08-02T12%3A00%3A00Z&dir=forward`, { scroll: false }); });
+    expect(calculateTransit).toHaveBeenCalledTimes(5);
   });
 
   it("切换历史 Revision 时保留 view、at、scale 与 tracks，并清除 node、dir 和未知 query", async () => {

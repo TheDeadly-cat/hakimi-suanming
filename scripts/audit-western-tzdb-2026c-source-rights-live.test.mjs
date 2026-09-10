@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 
 import {
@@ -168,7 +168,7 @@ test("module import is inert and does not invoke fetch", async () => {
     throw new Error("offline test must not fetch");
   };
   try {
-    await import(`${pathToFileURL(SCRIPT_PATH).href}?offline-inert=${Date.now()}`);
+    await import("./audit-western-tzdb-2026c-source-rights-live.mjs?offline-inert-test");
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -179,7 +179,7 @@ test("auditor source has no filesystem writer or child-process execution path", 
   const source = await readFile(SCRIPT_PATH, "utf8");
   assert.doesNotMatch(source, /node:fs|writeFile|appendFile|createWriteStream|child_process|spawn|execFile/u);
   assert.doesNotMatch(source, /from "\.\/western-tzdb-2026c-source-rights-evidence-lib\.mjs"/u);
-  assert.match(source, /await import\(BUSINESS_DEPENDENCY_URL\.href\)/u);
+  assert.match(source, /await import\("\.\/western-tzdb-2026c-source-rights-evidence-lib\.mjs"\)/u);
   assert.match(source, /scope: "this_audit_process_only"/u);
   assert.match(source, /workspaceWideAbsenceMechanicallyVerified: false/u);
   assert.doesNotMatch(source, /\bremoteResponseBodiesPersisted:/u);

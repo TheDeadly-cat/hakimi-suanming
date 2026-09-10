@@ -18,6 +18,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DEFAULT_MAX_FULL_BACKUP_ARCHIVE_BYTES,
   DEFAULT_MAX_FULL_BACKUP_JSON_BYTES,
+  FullBackupError,
   applyVerifiedFullBackup,
   preflightCoreBackup,
   type FullBackupImportPreparation
@@ -1084,6 +1085,15 @@ export function DataManagementPage() {
         });
         return;
       }
+      if (reason instanceof FullBackupError && reason.code === "CURRENT_DATA_CHANGED") {
+        setPendingRestore(null);
+        setBackupFeedback({
+          tone: "error",
+          title: "恢复预检已过期",
+          message: "当前数据在预检后发生变化，本次恢复未替换现有数据。旧预检和确认已失效；请重新选择 ZIP / JSON 文件进行预检，并重新创建、保存和确认当前安全备份后再恢复。"
+        });
+        return;
+      }
       if (reason instanceof StorageAdmissionError) {
         setPendingRestore((current) => isSameRestoreTarget(current, restoreTarget) ? {
           ...current,
@@ -1645,7 +1655,7 @@ export function DataManagementPage() {
         >
           <header>
             <AlertTriangle aria-hidden="true" />
-            <div><p className="eyebrow">Mutation epoch hold</p><h2 id="data-destructive-commit-title">{destructiveCommitIssue.title}</h2></div>
+            <div><p className="eyebrow">写入暂停，等待核对</p><h2 id="data-destructive-commit-title">{destructiveCommitIssue.title}</h2></div>
             <StatusPill tone="warning">结果待核对</StatusPill>
           </header>
           <p>{destructiveCommitIssue.message}</p>
@@ -1981,7 +1991,7 @@ export function DataManagementPage() {
           </div>
         </header>
         {!deleteAllOpen ? (
-          <button ref={deleteTriggerRef} type="button" className="danger-action" disabled={busy || !localStateReadable || pendingRestore !== null} onClick={() => { setAttachmentDeleteTarget(null); setDeleteFeedback(null); setDeleteAllText(""); setDeleteBackupDecision(null); setDeleteAllOpen(true); }}>
+          <button ref={deleteTriggerRef} type="button" className="danger-action" disabled={dataMutationLocked} onClick={() => { setAttachmentDeleteTarget(null); setDeleteFeedback(null); setDeleteAllText(""); setDeleteBackupDecision(null); setDeleteAllOpen(true); }}>
             <Trash2 aria-hidden="true" />开始完整清空
           </button>
         ) : (
@@ -1996,7 +2006,7 @@ export function DataManagementPage() {
               <div><dt>附件原始字节</dt><dd><span>{counts.attachments} 个；已列元数据声明 {formatBytes(attachmentBytes)}</span><small>总字节未全量读取；删除事务覆盖全部附件</small></dd></div>
               <div data-state={lastFullBackupExportedAt ? "recorded" : "missing"}><dt>完整导出提醒</dt><dd><span title={lastFullBackupExportedAt ?? undefined}>{lastFullBackupExportedAt ? formatDateTime(lastFullBackupExportedAt) : "未记录"}</span><small>提醒标记，不是文件证据</small></dd></div>
             </dl>
-            <fieldset className="delete-backup-choice" disabled={busy}>
+            <fieldset className="delete-backup-choice" disabled={busy || destructiveCommitIssue !== null}>
               <legend>选择一项恢复保障声明</legend>
               <label data-state={deleteBackupDecision === "verified_backup" ? "selected" : "idle"}>
                 <input ref={deleteBackupChoiceRef} type="radio" name="delete-backup-decision" checked={deleteBackupDecision === "verified_backup"} onChange={() => setDeleteBackupDecision("verified_backup")} />
@@ -2008,9 +2018,9 @@ export function DataManagementPage() {
               </label>
             </fieldset>
             {deleteBackupDecision === "accept_without_backup" ? <div className="delete-no-backup-warning" role="alert"><AlertTriangle aria-hidden="true" /><p><strong>已选择无备份继续</strong><span>确认文字只证明本次操作是明确选择，不会降低数据丢失后果。</span></p></div> : null}
-            <label className="field"><span>确认文字：输入“{DELETE_CONFIRMATION}”</span><input autoComplete="off" disabled={busy || deleteBackupDecision === null} value={deleteAllText} onChange={(event) => setDeleteAllText(event.target.value)} /></label>
+            <label className="field"><span>确认文字：输入“{DELETE_CONFIRMATION}”</span><input autoComplete="off" disabled={busy || destructiveCommitIssue !== null || deleteBackupDecision === null} value={deleteAllText} onChange={(event) => setDeleteAllText(event.target.value)} /></label>
             <div className="data-action-row">
-              <button type="button" className="danger-action" disabled={busy || deleteBackupDecision === null || deleteAllText !== DELETE_CONFIRMATION} aria-busy={activeOperation === "delete_all"} onClick={() => void deleteAllData()}>{activeOperation === "delete_all" ? "正在删除十六分区" : "永久删除全部数据"}</button>
+              <button type="button" className="danger-action" disabled={busy || destructiveCommitIssue !== null || deleteBackupDecision === null || deleteAllText !== DELETE_CONFIRMATION} aria-busy={activeOperation === "delete_all"} onClick={() => void deleteAllData()}>{activeOperation === "delete_all" ? "正在删除十六分区" : "永久删除全部数据"}</button>
               <button type="button" className="secondary-action" disabled={busy} onClick={closeDeleteAll}>取消</button>
             </div>
           </div>

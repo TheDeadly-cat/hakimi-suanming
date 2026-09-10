@@ -1,10 +1,131 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
+import { open } from "node:fs/promises";
 
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 function isRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function freezePlan(value) {
+  if (value && typeof value === "object") {
+    for (const child of Object.values(value)) freezePlan(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+export const DEFAULT_LIFECYCLE_STAGE_COMMANDS = freezePlan({
+  typecheck: {
+    receiptId: "typecheck", originalCommand: ["npm", "run", "typecheck"],
+    coordinatorCommand: "node scripts/run-diagnostic-stage.mjs lifecycle typecheck"
+  },
+  vitest: {
+    receiptId: "unit", originalCommand: ["npm", "test"],
+    coordinatorCommand: "node scripts/run-diagnostic-stage.mjs lifecycle vitest"
+  },
+  build: {
+    receiptId: "build", originalCommand: ["npm", "run", "build"],
+    coordinatorCommand: "node scripts/run-diagnostic-stage.mjs lifecycle build"
+  }
+});
+
+const DEFAULT_PROGRAMS = freezePlan({
+  typecheck: { command: "tsc --noEmit -p tsconfig.json", spec: {
+    package: "typescript", binary: "tsc", args: ["--noEmit", "-p", "tsconfig.json"], cwd: "."
+  } },
+  vitest: { command: "vitest run --config apps/web/vitest.config.ts", spec: {
+    package: "vitest", binary: "vitest", args: ["run", "--config", "apps/web/vitest.config.ts"], cwd: "."
+  } },
+  build: { command: "vite build --configLoader runner", spec: {
+    package: "vite", binary: "vite", args: ["build", "--configLoader", "runner"], cwd: "apps/web"
+  } }
+});
+const WEB_PREBUILD_COMMAND = "npm --prefix ../.. run check:historical-natal-build-attestation";
+
+// Only these three migrated root lifecycles are coordinated. Unknown hooks are
+// rejected rather than omitted or executed twice by npm and the coordinator.
+export function resolveDefaultLifecyclePlan(stage, { root, web }) {
+  if (!Object.hasOwn(DEFAULT_LIFECYCLE_STAGE_COMMANDS, stage)
+    || root?.path !== "package.json" || web?.path !== "apps/web/package.json"
+    || !isRecord(root.packageJson?.scripts) || !isRecord(web.packageJson?.scripts)
+    || web.packageJson.name !== "@hakimi/web") {
+    throw new Error("Default lifecycle requires a fixed stage and root/web package contexts.");
+  }
+  const rootScripts = root.packageJson.scripts;
+  for (const [key, scriptName] of [["typecheck", "typecheck"], ["vitest", "test"], ["build", "build"]]) {
+    if (rootScripts[scriptName] !== DEFAULT_LIFECYCLE_STAGE_COMMANDS[key].coordinatorCommand
+      || Object.hasOwn(rootScripts, `pre${scriptName}`)
+      || Object.hasOwn(rootScripts, `post${scriptName}`)) {
+      throw new Error(`Default lifecycle command or root pre/post hook changed: ${scriptName}.`);
+    }
+  }
+  if (rootScripts["check:current-governance"] !== "npm run check:current-boundaries && npm run check:release-governance"
+    || web.packageJson.scripts.prebuild !== WEB_PREBUILD_COMMAND
+    || web.packageJson.scripts.build !== DEFAULT_PROGRAMS.build.command
+    || Object.hasOwn(web.packageJson.scripts, "postbuild")) {
+    throw new Error("Default lifecycle governance or workspace build hooks changed.");
+  }
+  const identity = DEFAULT_LIFECYCLE_STAGE_COMMANDS[stage];
+  const program = DEFAULT_PROGRAMS[stage];
+  return freezePlan({
+    schemaVersion: 1, stage, ...identity,
+    steps: [
+      { id: "governance", required: true, kind: "npm", cwd: ".",
+        command: "npm run check:current-governance", argv: ["run", "check:current-governance"] },
+      stage === "build"
+        ? { id: "workspace-prebuild", required: true, kind: "npm", cwd: "apps/web",
+          command: WEB_PREBUILD_COMMAND, argv: ["--prefix", "../..", "run", "check:historical-natal-build-attestation"] }
+        : { id: "workspace-prebuild", required: false, kind: "none", cwd: "apps/web",
+          command: null, absentStatus: "not-applicable" },
+      { id: "program", required: true, kind: "program", cwd: program.spec.cwd,
+        command: program.command, spec: program.spec },
+      { id: "workspace-postbuild", required: false, kind: "none", cwd: "apps/web",
+        command: null, absentStatus: "not-configured" },
+      { id: "root-post", required: false, kind: "none", cwd: ".",
+        command: null, absentStatus: "not-configured" }
+    ]
+  });
+}
+
+export function computeDefaultLifecyclePlanDigest(plan) {
+  function ordered(value) {
+    if (Array.isArray(value)) return value.map(ordered);
+    if (isRecord(value)) return Object.fromEntries(Object.keys(value).sort().map((key) => [key, ordered(value[key])]));
+    return value;
+  }
+  return createHash("sha256").update(JSON.stringify(ordered(plan)), "utf8").digest("hex");
+}
+
+export async function loadDefaultLifecycleInputs(rootDirectory = workspaceRoot) {
+  const directory = path.resolve(rootDirectory);
+  const contexts = [];
+  const packageIdentities = [];
+  for (const relativePath of ["package.json", "apps/web/package.json"]) {
+    const handle = await open(path.resolve(directory, relativePath), "r");
+    let bytes;
+    try {
+      const before = await handle.stat({ bigint: true });
+      if (!before.isFile() || before.size <= 0n || before.size > 2_000_000n) {
+        throw new Error(`Default lifecycle package input is not a bounded regular file: ${relativePath}.`);
+      }
+      bytes = await handle.readFile();
+      const after = await handle.stat({ bigint: true });
+      if (before.dev !== after.dev || before.ino !== after.ino || before.size !== after.size
+        || before.mtimeNs !== after.mtimeNs || before.ctimeNs !== after.ctimeNs
+        || BigInt(bytes.length) !== after.size) {
+        throw new Error(`Default lifecycle package input changed while reading: ${relativePath}.`);
+      }
+    } finally { await handle.close(); }
+    const packageJson = JSON.parse(bytes.toString("utf8"));
+    if (!isRecord(packageJson)) throw new Error(`Invalid package object: ${relativePath}.`);
+    contexts.push({ path: relativePath, packageJson });
+    packageIdentities.push({ path: relativePath, rawBytes: bytes.length,
+      rawSha256: createHash("sha256").update(bytes).digest("hex") });
+  }
+  return { root: contexts[0], web: contexts[1], packageIdentities };
 }
 
 function splitReachableShellSegments(commandText, label) {
@@ -99,17 +220,19 @@ const STATIC_TERMINAL_COMMAND_ALLOWLIST = new Set([
   "node scripts/release-artifact-identity.mjs --verify --dist dist/web --lock tmp/release-artifact-identity.json",
   "node packages/bazi-core/scripts/verify-historical-natal-runtime-closure.mjs --check",
   "node packages/bazi-core/scripts/verify-historical-natal-source-lock.mjs",
-  "node scripts/verify-bazi-binding-freeze-requirements.mjs",
-  "node scripts/verify-bazi-domain-release-manifest.mjs",
+  "node scripts/verify-history-checkpoint.mjs",
+  "node scripts/verify-current-index.mjs",
+  "node scripts/verify-current-index-status.mjs",
+  "node scripts/verify-bazi-knowledge-core-identity-rebound-binding-readiness.mjs",
   "node scripts/verify-bazi-engineering-binding-candidates.mjs",
-  "node scripts/verify-bazi-expert-review-packet.mjs",
+  "node scripts/resolve-bazi-current-domain-manifest.mjs",
+  "node scripts/resolve-bazi-current-expert-review-packet.mjs",
   "node scripts/verify-bazi-source-binding-candidates.mjs",
   "node scripts/verify-bazi-source-rights-candidates.mjs",
   "node scripts/verify-built-release-storage-manifest.mjs dist/web",
-  "node scripts/verify-independent-domain-release-manifests.mjs",
-  "node scripts/verify-independent-source-binding-requirements.mjs",
+  "node scripts/verify-current-independent-domain-inventory.mjs",
+  "node scripts/verify-current-independent-source-inventory.mjs",
   "node scripts/verify-release-governance.mjs",
-  "node scripts/verify-system-admission-registry.mjs",
   "node scripts/verify-system-contract-draft-boundaries.mjs",
   "node scripts/verify-web-storage-import-boundary.mjs",
   "playwright test --config apps/web/e2e/playwright.orphaned-v13-recovery.config.ts",
@@ -201,6 +324,28 @@ export function resolveFormalNpmLifecycleClosure(
   const scanCommand = (commandText, context, label) => {
     observe("command", label, commandText);
     for (const [index, segment] of splitReachableShellSegments(commandText, label).entries()) {
+      const coordinated = Object.entries(DEFAULT_LIFECYCLE_STAGE_COMMANDS).find(
+        ([, identity]) => segment.trim() === identity.coordinatorCommand
+      );
+      if (coordinated) {
+        if (context.path !== "package.json") throw new Error("Default lifecycle coordinator must run in the root package.");
+        const plan = resolveDefaultLifecyclePlan(coordinated[0], { root, web });
+        observe("coordinator-plan", label, computeDefaultLifecyclePlanDigest(plan));
+        for (const step of plan.steps) {
+          if (step.kind === "none") continue;
+          const stepContext = contexts.find((entry) => entry.path === (step.cwd === "." ? "package.json" : "apps/web/package.json"));
+          if (step.id === "workspace-prebuild") {
+            // This is npm's prebuild script body, not a new invocation of the
+            // prebuild script with invented preprebuild/postprebuild hooks.
+            scanScript(stepContext, "prebuild", `${label} -> coordinator ${step.id}`, true);
+          } else if (step.id === "program" && plan.stage === "build") {
+            scanScript(stepContext, "build", `${label} -> coordinator ${step.id}`, true);
+          } else {
+            scanCommand(step.command, stepContext, `${label} -> coordinator ${step.id}`);
+          }
+        }
+        continue;
+      }
       const invocation = parseReachableNpmInvocation(segment, `${label} segment ${index + 1}`);
       if (!invocation) {
         if (!isReachableTerminalCommandModeled(segment)) {

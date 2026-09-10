@@ -1,14 +1,19 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type {
   FullConfig,
   FullResult,
   Reporter,
   Suite,
-  TestCase
+  TestCase,
+  TestError
 } from "@playwright/test/reporter";
 import {
   buildReleaseBrowserResultSummary,
+  CROSS_SCHEMA_V13_V16_RECEIPT_ID,
+  CROSS_SCHEMA_V13_V16_SPEC_PATH,
+  REQUIRED_RELEASE_BROWSER_PROJECT_NAMES,
   type ReleaseBrowserTestObservation
 } from "./playwright.release-browser-result.ts";
 
@@ -16,6 +21,59 @@ type StrictReporterOptions = Readonly<{
   receiptId: string;
   expectedTestsPerProject: number;
 }>;
+
+const workspaceRoot = fileURLToPath(new URL("../../", import.meta.url));
+const crossSchemaConfigPath = path.join(workspaceRoot, "apps/web/playwright.cross-schema-v13-v16.config.ts");
+const crossSchemaTestDirectory = path.dirname(path.join(workspaceRoot, CROSS_SCHEMA_V13_V16_SPEC_PATH));
+const crossSchemaSpecName = path.basename(CROSS_SCHEMA_V13_V16_SPEC_PATH);
+
+function isUnfilteredGrep(value: FullConfig["grep"]): boolean {
+  return value instanceof RegExp && value.source === ".*" && value.flags === "";
+}
+
+export function validateCrossSchemaV13V16CompletionConfig(
+  config: FullConfig,
+  argv: readonly string[] = process.argv
+): string[] {
+  const errors: string[] = [];
+  if (path.resolve(config.configFile ?? "") !== path.resolve(crossSchemaConfigPath)
+    || path.resolve(config.rootDir) !== path.resolve(crossSchemaTestDirectory)) {
+    errors.push("Cross-schema completion requires the original config and test directory.");
+  }
+  if (config.workers !== 1 || config.fullyParallel !== false
+    || config.forbidOnly !== true || config.failOnFlakyTests !== true
+    || config.maxFailures !== 0) {
+    errors.push("Cross-schema completion requires the complete serial fail-on-flaky execution policy.");
+  }
+  if (config.shard !== null || !isUnfilteredGrep(config.grep) || config.grepInvert !== null) {
+    errors.push("Cross-schema completion does not admit sharding or title filters.");
+  }
+  if ([...(config.argv ?? []), ...argv].some((argument) =>
+    /^(?:--(?:grep|grep-invert|project|shard|last-failed|only-changed|test-list|test-list-invert|repeat-each))(?:=|$)/u.test(argument)
+    || /^-[gG]/u.test(argument)
+  )) {
+    errors.push("Cross-schema completion does not admit a filtered or repeated CLI invocation.");
+  }
+  if (JSON.stringify(config.projects.map((project) => project.name))
+    !== JSON.stringify(REQUIRED_RELEASE_BROWSER_PROJECT_NAMES)) {
+    errors.push("Cross-schema completion projects must be exactly msedge and chrome.");
+  }
+  for (const project of config.projects) {
+    const matches = Array.isArray(project.testMatch) ? project.testMatch : [project.testMatch];
+    if (project.use.channel !== project.name
+      || project.retries !== 0 || project.repeatEach !== 1
+      || project.dependencies.length !== 0 || project.teardown !== undefined) {
+      errors.push(`Cross-schema completion brand or attempt policy changed: ${project.name}.`);
+    }
+    if (path.resolve(project.testDir) !== path.resolve(crossSchemaTestDirectory)
+      || matches.length !== 1 || matches[0] !== crossSchemaSpecName
+      || !Array.isArray(project.testIgnore) || project.testIgnore.length !== 0
+      || !isUnfilteredGrep(project.grep) || project.grepInvert !== null) {
+      errors.push(`Cross-schema completion spec selection changed: ${project.name}.`);
+    }
+  }
+  return errors;
+}
 
 export function isPlaywrightListOnlyInvocation(
   argv: readonly string[] = process.argv
@@ -26,13 +84,26 @@ export function isPlaywrightListOnlyInvocation(
 export default class ReleaseBrowserStrictReporter implements Reporter {
   private readonly options: StrictReporterOptions;
   private tests: TestCase[] = [];
+  private configErrors: string[] = [];
+  private reportedErrors: string[] = [];
 
   constructor(options: StrictReporterOptions) {
     this.options = options;
   }
 
-  onBegin(_config: FullConfig, suite: Suite): void {
+  onBegin(config: FullConfig, suite: Suite): void {
     this.tests = suite.allTests();
+    this.configErrors = this.options.receiptId === CROSS_SCHEMA_V13_V16_RECEIPT_ID
+      ? validateCrossSchemaV13V16CompletionConfig(config)
+      : [];
+    if (this.options.receiptId === CROSS_SCHEMA_V13_V16_RECEIPT_ID
+      && this.tests.some((test) => test.retries !== 0 || test.repeatEachIndex !== 0)) {
+      this.configErrors.push("Cross-schema completion does not admit per-test retries or repetition.");
+    }
+  }
+
+  onError(error: TestError): void {
+    this.reportedErrors.push(error.message ?? error.value ?? "Playwright reported an error.");
   }
 
   async onEnd(result: FullResult): Promise<{ status?: FullResult["status"] }> {
@@ -47,7 +118,7 @@ export default class ReleaseBrowserStrictReporter implements Reporter {
 
     const configuredReceiptId = this.options.receiptId;
     const environmentReceiptId = process.env.HAKIMI_RELEASE_BROWSER_RECEIPT_ID;
-    const errors: string[] = [];
+    const errors: string[] = [...this.configErrors, ...this.reportedErrors];
     if (environmentReceiptId && environmentReceiptId !== configuredReceiptId) {
       errors.push(
         `Reporter receipt id mismatch: expected ${configuredReceiptId}, got ${environmentReceiptId}.`
@@ -58,7 +129,12 @@ export default class ReleaseBrowserStrictReporter implements Reporter {
       projectName: test.parent.project()?.name ?? "unknown-project",
       expectedStatus: test.expectedStatus,
       outcome: test.outcome(),
-      resultStatuses: test.results.map((testResult) => testResult.status)
+      resultStatuses: test.results.map((testResult) => testResult.status),
+      ...(configuredReceiptId === CROSS_SCHEMA_V13_V16_RECEIPT_ID ? {
+        title: test.title,
+        file: path.relative(workspaceRoot, test.location.file).replaceAll("\\", "/"),
+        retryIndexes: test.results.map((testResult) => testResult.retry)
+      } : {})
     }));
     const summary = buildReleaseBrowserResultSummary({
       receiptId: configuredReceiptId,

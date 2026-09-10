@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "github_sync_local_validation",
+  "date": "2026-09-10",
+  "baseCommit": "b7216a301a74bea0591b364b4dba32aa34409378",
+  "branch": "codex/legacy-v13-governance-sync-20260904",
+  "sourceScope": "Local development tree prepared for synchronization; existing artifact receipts retain their original identities.",
+  "typecheck": {
+    "command": "node scripts/run-diagnostic-stage.mjs typecheck",
+    "status": "passed",
+    "exitCode": 0
+  },
+  "vitest": {
+    "command": "node scripts/run-diagnostic-stage.mjs vitest",
+    "status": "passed",
+    "exitCode": 0,
+    "files": 213,
+    "tests": 2825
+  },
+  "nodeGroups": {
+    "ci-contracts": {
+      "status": "passed",
+      "files": 5,
+      "summary": {
+        "counts": {
+          "tests": 56,
+          "failed": 0,
+          "passed": 56,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "topLevel": 56,
+          "suites": 0
+        },
+        "success": true,
+        "duration_ms": 3069.4334
+      },
+      "failuresByFile": {},
+      "rawResultSha256": "ae7211e1abc0c4ff4922f1611972354af0ecd5fa40189a7e18e44172d722ef23"
+    },
+    "current-governance": {
+      "status": "failed",
+      "files": 27,
+      "summary": {
+        "counts": {
+          "tests": 726,
+          "failed": 269,
+          "passed": 457,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "topLevel": 726,
+          "suites": 0
+        },
+        "success": false,
+        "duration_ms": 134529.5584
+      },
+      "failuresByFile": {
+        "scripts/verify-cross-system-engineering-fact-receipts.test.mjs": 7,
+        "scripts/verify-four-system-current-observation-registry-v2.test.mjs": 13,
+        "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs": 15,
+        "scripts/verify-four-system-current-status-observation-child-v2-10.test.mjs": 4,
+        "scripts/verify-four-system-current-status-observation-child-v2-11.test.mjs": 2,
+        "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs": 12,
+        "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs": 12,
+        "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs": 14,
+        "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs": 17,
+        "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs": 13,
+        "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs": 16,
+        "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs": 19,
+        "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs": 24,
+        "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs": 25,
+        "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs": 19,
+        "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs": 19,
+        "scripts/verify-independent-domain-release-manifests.test.mjs": 10,
+        "scripts/verify-release-governance.test.mjs": 20,
+        "scripts/verify-system-admission-registry.test.mjs": 8
+      },
+      "rawResultSha256": "8ad11fed21e79b7b2a1e24308f075dfb85ef41df6e41e84ab7d23aac1f768a47"
+    },
+    "release-evidence": {
+      "status": "failed",
+      "files": 26,
+      "summary": {
+        "counts": {
+          "tests": 700,
+          "failed": 1,
+          "passed": 699,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "topLevel": 651,
+          "suites": 0
+        },
+        "success": false,
+        "duration_ms": 161107.9477
+      },
+      "failuresByFile": {
+        "scripts/release-evidence.test.mjs": 1
+      },
+      "rawResultSha256": "2c514753c5c348b4dfa64f984486c8bd66a070ef38eec322dab343fd903b70df"
+    }
+  },
+  "allChecksPassed": false,
+  "remoteCiRunClaimed": false,
+  "buildRepeated": false,
+  "browserValidationRepeated": false,
+  "productionDeploymentPerformed": false,
+  "rawLocalEvidencePublished": false
+}

@@ -209,12 +209,15 @@ async function loadProductionKnowledgeCoreRuntimeOnce(
     server = await selectedServerFactory({
       root: FIXED_WORKSPACE_ROOT,
       configFile: false,
+      envFile: false,
+      publicDir: false,
       cacheDir: cacheDirectory,
       logLevel: "silent",
       clearScreen: false,
       appType: "custom",
       server: {
         middlewareMode: true,
+        ws: false,
         hmr: false,
         watch: null
       },

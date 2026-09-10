@@ -13,6 +13,8 @@ export const BAZI_EXPERT_REVIEW_PACKET_RELATIVE_PATH =
   "content/bazi-strength-expert-review-packet.v1.json";
 export const BAZI_EXPERT_REVIEW_INTAKE_GAP_RELATIVE_PATH =
   "content/system-admission/bazi-expert-review-intake-gap.v1.json";
+export const BAZI_EXPERT_REVIEW_INTAKE_READINESS_BASIS_RELATIVE_PATH =
+  "scripts/fixtures/bazi-expert-intake-readiness-1.5.original.json";
 
 const BAZI_EXPERT_REVIEW_READINESS_LEDGER_RELATIVE_PATH =
   "content/system-admission/bazi-binding-freeze-requirements.v1.json";
@@ -280,6 +282,11 @@ function capturePassiveJsonSnapshot(value) {
   }, 0);
 }
 
+// Detached passive data only; this does not issue an intake or private-file brand.
+export function copyBaziExpertPassiveJsonData(value) {
+  return capturePassiveJsonSnapshot(value);
+}
+
 function deepFreezeJson(value) {
   if (value === null || typeof value !== "object" || Object.isFrozen(value)) return value;
   for (const child of Object.values(value)) deepFreezeJson(child);
@@ -304,11 +311,7 @@ function walkAst(root, visitor) {
   }
 }
 
-export function parseBaziExpertReviewJsonBytes(
-  bytes,
-  label = "专家审阅 JSON",
-  maxBytes = MAX_ARTIFACT_BYTES
-) {
+function parseBaziExpertJsonBytesByExpectedType(bytes, label, maxBytes, expectedType) {
   if (!(bytes instanceof Uint8Array)) fail("JSON_INVALID", `${label} 必须是字节。`);
   if (!Number.isSafeInteger(maxBytes) || maxBytes <= 0 || bytes.length > maxBytes) {
     fail("JSON_TOO_LARGE", `${label} 超过输入上限。`);
@@ -347,7 +350,9 @@ export function parseBaziExpertReviewJsonBytes(
   });
   try {
     const parsed = JSON.parse(source);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    if (expectedType === "array") {
+      if (!Array.isArray(parsed)) fail("JSON_INVALID", `${label} 必须是 JSON 数组。`);
+    } else if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
       fail("JSON_INVALID", `${label} 必须是 JSON 对象。`);
     }
     return parsed;
@@ -355,6 +360,18 @@ export function parseBaziExpertReviewJsonBytes(
     if (cause instanceof BaziExpertReviewPacketError) throw cause;
     throw new BaziExpertReviewPacketError("JSON_INVALID", `${label} 不是有效 JSON。`, { cause });
   }
+}
+
+export function parseBaziExpertReviewJsonBytes(
+  bytes,
+  label = "专家审阅 JSON",
+  maxBytes = MAX_ARTIFACT_BYTES
+) {
+  return parseBaziExpertJsonBytesByExpectedType(bytes, label, maxBytes, "object");
+}
+
+export function parseBaziExpertPrivateIntakeRequestJsonBytes(bytes) {
+  return parseBaziExpertJsonBytesByExpectedType(bytes, "专家私有收件请求 JSON", MAX_ARTIFACT_BYTES, "array");
 }
 
 function canonicalValue(value) {
@@ -833,6 +850,26 @@ async function readStablePrivateArtifactFile(root, relativePath, maxBytes, domai
   }
 }
 
+// The caller receives the held buffer for immediate structural checks. Only its
+// own verified consumer may issue a context; this reader issues no such brand.
+export async function readBaziExpertPrivateArtifact(options) {
+  try {
+    if (arguments.length !== 1) {
+      fail("PRIVATE_EXPERT_ARTIFACT_REQUEST_INVALID", "仓外专家材料读取只接受固定请求。");
+    }
+    const request = capturePassiveJsonSnapshot(options);
+    assertBoundaryExactKeys(request, ["workspaceRoot", "privateRoot", "relativePath"],
+      "PRIVATE_EXPERT_ARTIFACT_REQUEST_INVALID", "仓外专家材料请求");
+    const domain = Object.freeze({ codePrefix: "PRIVATE_EXPERT_ARTIFACT", label: "仓外专家材料" });
+    const root = await resolvePrivateArtifactRoot(request.workspaceRoot, request.privateRoot, domain);
+    const file = await readStablePrivateArtifactFile(root, request.relativePath, MAX_ARTIFACT_BYTES, domain);
+    return Object.freeze({ bytes: file.bytes, sha256: file.sha256, byteLength: file.bytes.byteLength });
+  } catch (cause) {
+    const code = cause instanceof BaziExpertReviewPacketError ? cause.code : "PRIVATE_EXPERT_ARTIFACT_FILE_INVALID";
+    throw new BaziExpertReviewPacketError(code, "仓外专家材料未通过固定根、路径或稳定字节读取检查。");
+  }
+}
+
 async function readArtifactSnapshots(workspaceRoot) {
   const entries = await Promise.all(EXPECTED_ARTIFACTS.map(async ([, relativePath]) => [
     relativePath,
@@ -999,7 +1036,7 @@ export async function verifyBaziExpertReviewIntakeGapLedger(workspaceRoot, packe
     ),
     readStableWorkspaceFile(
       workspaceRoot,
-      BAZI_EXPERT_REVIEW_READINESS_LEDGER_RELATIVE_PATH,
+      BAZI_EXPERT_REVIEW_INTAKE_READINESS_BASIS_RELATIVE_PATH,
       MAX_ARTIFACT_BYTES,
       { missingCode: "INTAKE_GAP_INVALID", invalidCode: "INTAKE_GAP_INVALID", label: "专家审阅 binding readiness 账" }
     )
@@ -1026,6 +1063,8 @@ export async function verifyBaziExpertReviewIntakeGapLedger(workspaceRoot, packe
   return Object.freeze({
     ledger: deepFreezeJson(capturePassiveJsonSnapshot(gap)),
     ledgerDigest: gap.ledgerDigest,
+    verificationScope: "historical_intake_gap_snapshot",
+    currentApplicabilityAssessed: false,
     currentRecordInstances: 0,
     candidateFeedbackCollectionReady: false,
     releaseClosureReviewReady: false,
@@ -1428,11 +1467,34 @@ function rejectPrivateIntakeKeys(value, label = "intake record") {
   }
 }
 
-function verifyIntakeSessionBinding(binding) {
+function verifyIntakeSessionBinding(binding, expectedSessionBinding = undefined) {
   intakeKeys(binding, [
     "systemId", "surfaceId", "surfaceVersion", "packetId", "packetDigest", "packetRawSha256", "readinessLedgerId",
     "readinessLedgerDigest", "reviewQuestionIds", "independenceFactorIds"
   ], "sessionBinding");
+  if (expectedSessionBinding !== undefined) {
+    intakeKeys(expectedSessionBinding, [
+      "systemId", "surfaceId", "surfaceVersion", "packetId", "packetDigest", "packetRawSha256",
+      "readinessLedgerId", "readinessLedgerDigest", "reviewQuestionIds", "independenceFactorIds"
+    ], "expectedSessionBinding");
+    if (expectedSessionBinding.systemId !== "bazi"
+      || expectedSessionBinding.surfaceId !== "single-chart-report"
+      || expectedSessionBinding.surfaceVersion !== "1.7.0") {
+      intakeFail("expectedSessionBinding 必须保留八字 single-chart-report 1.7 范围。");
+    }
+    intakeId(expectedSessionBinding.packetId, "expectedSessionBinding.packetId");
+    intakeId(expectedSessionBinding.readinessLedgerId, "expectedSessionBinding.readinessLedgerId");
+    for (const key of ["packetDigest", "packetRawSha256", "readinessLedgerDigest"]) {
+      intakeSha(expectedSessionBinding[key], `expectedSessionBinding.${key}`);
+    }
+    assertBoundaryExactArray(expectedSessionBinding.reviewQuestionIds, EXPECTED_REVIEW_QUESTION_IDS,
+      "INTAKE_RECORD_INVALID", "expectedSessionBinding.reviewQuestionIds");
+    assertBoundaryExactArray(expectedSessionBinding.independenceFactorIds, EXPECTED_INDEPENDENCE_CHECKLIST,
+      "INTAKE_RECORD_INVALID", "expectedSessionBinding.independenceFactorIds");
+    assertBoundaryCanonicalEqual(binding, expectedSessionBinding, "INTAKE_RECORD_INVALID",
+      "sessionBinding 必须与给定的完整结构契约一致");
+    return;
+  }
   if (binding.systemId !== "bazi"
     || binding.surfaceId !== "single-chart-report"
     || binding.surfaceVersion !== "1.7.0"
@@ -2002,7 +2064,7 @@ const INTAKE_PAYLOAD_VERIFIERS = Object.freeze({
   bazi_expert_review_bundle_v1: verifyBundlePayload
 });
 
-function preflightBaziExpertReviewIntakeRecordInternal(record, allowBundleAssembly) {
+function preflightBaziExpertReviewIntakeRecordInternal(record, allowBundleAssembly, expectedSessionBinding = undefined) {
   const snapshot = capturePassiveJsonSnapshot(record);
   intakeKeys(snapshot, [
     "schemaVersion", "recordType", "recordId", "recordVersion", "createdAt",
@@ -2015,7 +2077,7 @@ function preflightBaziExpertReviewIntakeRecordInternal(record, allowBundleAssemb
   intakeId(snapshot.recordId, "recordId");
   intakeUtc(snapshot.createdAt, "createdAt");
   intakeEnum(snapshot.reviewPurpose, ALLOWED_REVIEW_PURPOSES, "reviewPurpose");
-  verifyIntakeSessionBinding(snapshot.sessionBinding);
+  verifyIntakeSessionBinding(snapshot.sessionBinding, expectedSessionBinding);
   rejectPrivateIntakeKeys(snapshot);
   const verifier = INTAKE_PAYLOAD_VERIFIERS[snapshot.recordType];
   if (typeof verifier !== "function") intakeFail("intake recordType 没有批准 preflight。");
@@ -2066,6 +2128,23 @@ function preflightBaziExpertReviewIntakeRecordInternal(record, allowBundleAssemb
 
 export function preflightBaziExpertReviewIntakeRecord(record) {
   return preflightBaziExpertReviewIntakeRecordInternal(record, false);
+}
+
+// This public helper checks data against a supplied structural contract only.
+// It neither establishes that the contract is current nor issues any private
+// context brand. Current consumers must derive their own canonical session.
+export function preflightBaziExpertPrivateIntakeRecordAgainstSession(record, expectedSessionBinding) {
+  if (arguments.length !== 2) intakeFail("结构会话预检必须提供记录与完整会话契约。");
+  const snapshot = capturePassiveJsonSnapshot(record);
+  const expected = capturePassiveJsonSnapshot(expectedSessionBinding);
+  if (![
+    "bazi_expert_public_identity_binding_v1",
+    "bazi_expert_original_opinion_v1",
+    "bazi_expert_private_opinion_seal_receipt_v1"
+  ].includes(snapshot?.recordType)) {
+    intakeFail("结构会话预检只接受身份绑定、原始意见或封存回执格式。");
+  }
+  return preflightBaziExpertReviewIntakeRecordInternal(snapshot, false, expected);
 }
 
 export function preflightBaziExpertReviewIntakeJsonBytes(bytes) {

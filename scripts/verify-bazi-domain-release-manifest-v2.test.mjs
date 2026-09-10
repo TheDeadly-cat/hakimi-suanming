@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
+import os from "node:os";
 import { spawnSync } from "node:child_process";
-import { test } from "node:test";
+import { after, before, test } from "node:test";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   BAZI_DOMAIN_RELEASE_MANIFEST_V2_RELATIVE_PATH,
   BAZI_V17_FROZEN_GOLDEN_SHA256,
@@ -20,8 +22,46 @@ import {
   readBaziDttStableWorkspaceArtifact,
   parseBaziDttStrictJsonArtifact
 } from "./bazi-dtt-versioned-parent-supersession-lib.mjs";
+import { writeBaziDomainReleaseManifestV2File } from "./write-bazi-domain-release-manifest-v2.mjs";
 
-const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const { unzipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+let historicalInputRoot;
+
+async function removeTemporaryManifestFixture(temporaryRoot) {
+  assert.equal(path.isAbsolute(temporaryRoot), true);
+  assert.equal(path.dirname(temporaryRoot), path.resolve(os.tmpdir()));
+  assert.match(path.basename(temporaryRoot), /^hakimi-bazi-manifest-v2-(?:writer|history)-[a-z0-9]{6}$/iu);
+  const metadata = await lstat(temporaryRoot);
+  assert.equal(metadata.isDirectory(), true);
+  assert.equal(metadata.isSymbolicLink(), false);
+  assert.equal(await realpath(temporaryRoot), temporaryRoot);
+  await rm(temporaryRoot, { recursive: true, force: true });
+}
+
+before(async () => {
+  const archive = await readFile(path.join(
+    repositoryRoot, "scripts/fixtures/bazi-domain-manifest-v2-original-inputs.zip"
+  ));
+  assert.equal(createHash("sha256").update(archive).digest("hex"),
+    "0d9659b5eb8f652c0803305cbc4372c97cfc46f7d711ceeb5c7dfae98bec71be");
+  const entries = Object.entries(unzipSync(archive));
+  assert.equal(entries.length, 37);
+  historicalInputRoot = await mkdtemp(path.join(os.tmpdir(), "hakimi-bazi-manifest-v2-history-"));
+  for (const [relativePath, bytes] of entries) {
+    assert.equal(path.isAbsolute(relativePath), false);
+    assert.equal(relativePath.includes("\\"), false);
+    assert.equal(relativePath.split("/").some((part) => part === "" || part === "." || part === ".."), false);
+    const target = path.resolve(historicalInputRoot, relativePath);
+    assert.equal(path.relative(historicalInputRoot, target).startsWith(".."), false);
+    await mkdir(path.dirname(target), { recursive: true });
+    await writeFile(target, bytes, { flag: "wx" });
+  }
+});
+
+after(async () => {
+  if (historicalInputRoot) await removeTemporaryManifestFixture(historicalInputRoot);
+});
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -35,7 +75,7 @@ function assertDeepFrozen(value, seen = new WeakSet()) {
 }
 
 test("loads the persisted v2 machine identity with exact bytes and a private brand", async () => {
-  const result = await loadBaziDomainReleaseManifestV2(workspaceRoot);
+  const result = await loadBaziDomainReleaseManifestV2(historicalInputRoot);
   assert.equal(isVerifiedBaziDomainReleaseManifestV2(result), true);
   assert.equal(result.manifestId, "hakimi.bazi.single-chart-report.domain-release-manifest/2.0.0");
   assert.equal(result.rawBytes, 16743);
@@ -47,7 +87,7 @@ test("loads the persisted v2 machine identity with exact bytes and a private bra
 });
 
 test("maps product 1.7 to exact rules input fact source rights expert policy and report digests", async () => {
-  const { manifest } = await loadBaziDomainReleaseManifestV2(workspaceRoot);
+  const { manifest } = await loadBaziDomainReleaseManifestV2(historicalInputRoot);
   assert.equal(manifest.surface.productVersion, "1.7");
   assert.equal(manifest.surface.surfaceVersion, "1.7.0");
   assert.equal(manifest.domainIdentity.productVersion, "1.7");
@@ -64,7 +104,7 @@ test("maps product 1.7 to exact rules input fact source rights expert policy and
 });
 
 test("holds every authority gate red while preserving legacy-v13 and the epoch boundary", async () => {
-  const { manifest } = await loadBaziDomainReleaseManifestV2(workspaceRoot);
+  const { manifest } = await loadBaziDomainReleaseManifestV2(historicalInputRoot);
   assert.deepEqual(manifest.releaseGovernance, {
     releaseIdentity: "legacy-v13",
     targetSchema: 13,
@@ -92,8 +132,8 @@ test("holds every authority gate red while preserving legacy-v13 and the epoch b
   assert.equal(manifest.authorityBoundary.expertClaimsAuthorized, false);
 });
 
-test("binds the latest SMT source-rights pair plus carrier and vacant expert private contexts", async () => {
-  const { manifest } = await loadBaziDomainReleaseManifestV2(workspaceRoot);
+test("binds the historical SMT source-rights pair plus carrier and vacant expert private contexts", async () => {
+  const { manifest } = await loadBaziDomainReleaseManifestV2(historicalInputRoot);
   assert.deepEqual(
     manifest.verifiedMechanicalContexts.map((entry) => entry.contextId),
     [
@@ -114,17 +154,17 @@ test("binds the latest SMT source-rights pair plus carrier and vacant expert pri
 
 test("preserves the stale predecessor byte-for-byte and does not silently integrate central consumers", async () => {
   const predecessor = await readBaziDttStableWorkspaceArtifact(
-    workspaceRoot,
+    historicalInputRoot,
     baziDomainReleaseManifestV2TestOnly.PREDECESSOR.path
   );
   assert.equal(predecessor.rawBytes, baziDomainReleaseManifestV2TestOnly.PREDECESSOR.rawBytes);
   assert.equal(predecessor.rawSha256, baziDomainReleaseManifestV2TestOnly.PREDECESSOR.rawSha256);
   const registrySource = await readFile(
-    path.resolve(workspaceRoot, "scripts/system-admission-registry-lib.mjs"),
+    path.resolve(repositoryRoot, "scripts/system-admission-registry-lib.mjs"),
     "utf8"
   );
   assert.equal(registrySource.includes(BAZI_DOMAIN_RELEASE_MANIFEST_V2_RELATIVE_PATH), false);
-  const { manifest } = await loadBaziDomainReleaseManifestV2(workspaceRoot);
+  const { manifest } = await loadBaziDomainReleaseManifestV2(historicalInputRoot);
   assert.equal(manifest.lineage.predecessorPreservedUnmodified, true);
   assert.equal(manifest.lineage.predecessorCurrent, false);
   assert.equal(manifest.lineage.centralSystemAdmissionRegistryIntegrated, false);
@@ -132,9 +172,9 @@ test("preserves the stale predecessor byte-for-byte and does not silently integr
 });
 
 test("persisted bytes are exact pretty JSON with one terminal LF and a valid digest", async () => {
-  const expected = await buildCurrentBaziDomainReleaseManifestV2(workspaceRoot);
+  const expected = await buildCurrentBaziDomainReleaseManifestV2(historicalInputRoot);
   const text = await readFile(
-    path.resolve(workspaceRoot, ...BAZI_DOMAIN_RELEASE_MANIFEST_V2_RELATIVE_PATH.split("/")),
+    path.resolve(historicalInputRoot, ...BAZI_DOMAIN_RELEASE_MANIFEST_V2_RELATIVE_PATH.split("/")),
     "utf8"
   );
   assert.equal(text, serializeBaziDomainReleaseManifestV2(expected));
@@ -147,9 +187,9 @@ test("persisted bytes are exact pretty JSON with one terminal LF and a valid dig
 });
 
 test("self-resealed authority promotions and unknown fields cannot pass the fixed persisted identity", async () => {
-  const expected = await buildCurrentBaziDomainReleaseManifestV2(workspaceRoot);
+  const expected = await buildCurrentBaziDomainReleaseManifestV2(historicalInputRoot);
   const snapshot = await readBaziDttStableWorkspaceArtifact(
-    workspaceRoot,
+    historicalInputRoot,
     BAZI_DOMAIN_RELEASE_MANIFEST_V2_RELATIVE_PATH
   );
   const cases = [
@@ -173,9 +213,9 @@ test("self-resealed authority promotions and unknown fields cannot pass the fixe
 });
 
 test("raw drift and duplicate JSON keys fail before any candidate can be branded", async () => {
-  const expected = await buildCurrentBaziDomainReleaseManifestV2(workspaceRoot);
+  const expected = await buildCurrentBaziDomainReleaseManifestV2(historicalInputRoot);
   const persistedSnapshot = await readBaziDttStableWorkspaceArtifact(
-    workspaceRoot,
+    historicalInputRoot,
     BAZI_DOMAIN_RELEASE_MANIFEST_V2_RELATIVE_PATH
   );
   const persisted = parseBaziDttStrictJsonArtifact(persistedSnapshot);
@@ -230,7 +270,7 @@ test("canonical digest input rejects accessors without invoking their getter", (
 test("captured manifest primordials survive post-import Array WeakSet freeze descriptor and hash poisoning", () => {
   const source = `
     const lib = await import('./scripts/bazi-domain-release-manifest-v2-lib.mjs');
-    const result = await lib.loadBaziDomainReleaseManifestV2(process.cwd());
+    const result = await lib.loadBaziDomainReleaseManifestV2(process.argv[1]);
     const clone = JSON.parse(JSON.stringify(result.manifest));
     Array.prototype.push = function () { throw new Error('push poisoned'); };
     Array.prototype.sort = function () { throw new Error('sort poisoned'); };
@@ -249,8 +289,8 @@ test("captured manifest primordials survive post-import Array WeakSet freeze des
     if (!Object.isFrozen(clone.components[0].files[0])) process.exit(95);
     process.stdout.write('ok');
   `;
-  const child = spawnSync(process.execPath, ["--input-type=module", "-e", source], {
-    cwd: workspaceRoot,
+  const child = spawnSync(process.execPath, ["--input-type=module", "-e", source, historicalInputRoot], {
+    cwd: repositoryRoot,
     encoding: "utf8",
     env: { ...process.env, NODE_OPTIONS: "" }
   });
@@ -259,14 +299,19 @@ test("captured manifest primordials survive post-import Array WeakSet freeze des
 });
 
 test("CLI emits only the narrow machine identity and rejects argv or NODE_OPTIONS", () => {
-  const cli = spawnSync(process.execPath, ["scripts/verify-bazi-domain-release-manifest-v2.mjs"], {
-    cwd: workspaceRoot,
+  const cli = spawnSync(process.execPath, [
+    "scripts/verify-bazi-domain-release-manifest-v2.mjs", "--historical-input-root", historicalInputRoot
+  ], {
+    cwd: repositoryRoot,
     encoding: "utf8",
     env: { ...process.env, NODE_OPTIONS: "" }
   });
   assert.equal(cli.status, 0, cli.stderr);
   const result = JSON.parse(cli.stdout);
   assert.equal(result.baziV17MachineIdentityManifestV2MechanicallyVerified, true);
+  assert.equal(result.verificationScope, "historical_input_root");
+  assert.equal(result.currentApplicabilityAssessed, false);
+  assert.equal(result.historicalInputRoot, historicalInputRoot);
   assert.equal(result.bindingFrozenVerified, 0);
   assert.equal(result.independentExpertReviewsVerified, 0);
   assert.equal(result.releaseReady, false);
@@ -275,7 +320,7 @@ test("CLI emits only the narrow machine identity and rejects argv or NODE_OPTION
 
   const argv = spawnSync(process.execPath,
     ["scripts/verify-bazi-domain-release-manifest-v2.mjs", "unexpected"], {
-      cwd: workspaceRoot,
+      cwd: repositoryRoot,
       encoding: "utf8",
       env: { ...process.env, NODE_OPTIONS: "" }
     });
@@ -284,27 +329,82 @@ test("CLI emits only the narrow machine identity and rejects argv or NODE_OPTION
 
   const options = spawnSync(process.execPath,
     ["scripts/verify-bazi-domain-release-manifest-v2.mjs"], {
-      cwd: workspaceRoot,
+      cwd: repositoryRoot,
       encoding: "utf8",
       env: { ...process.env, NODE_OPTIONS: "--no-warnings" }
     });
   assert.equal(options.status, 1);
   assert.match(options.stderr, /CLI_INVOCATION_REJECTED/u);
+
+  for (const operands of [
+    ["--historical-input-root"],
+    ["--historical-input-root", ""],
+    ["--historical-input-root", "--unknown"],
+    ["--historical-input-root", historicalInputRoot, "extra"],
+    ["--historical-input-root", historicalInputRoot, "--historical-input-root", historicalInputRoot],
+    [`--historical-input-root=${historicalInputRoot}`]
+  ]) {
+    const invalid = spawnSync(process.execPath, ["scripts/verify-bazi-domain-release-manifest-v2.mjs", ...operands], {
+      cwd: repositoryRoot, encoding: "utf8", windowsHide: true,
+      env: { ...process.env, NODE_OPTIONS: "" }
+    });
+    assert.equal(invalid.status, 1, invalid.stderr);
+    assert.equal(invalid.stdout, "");
+    assert.match(invalid.stderr, /CLI_INVOCATION_REJECTED/u);
+  }
 });
 
-test("exclusive writer refuses to overwrite the persisted machine identity", () => {
-  const writer = spawnSync(process.execPath, ["scripts/write-bazi-domain-release-manifest-v2.mjs"], {
-    cwd: workspaceRoot,
-    encoding: "utf8",
+test("exclusive writer serializes persisted JSON into a temporary file without granting manifest authority", async (t) => {
+  const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), "hakimi-bazi-manifest-v2-writer-"));
+  t.after(() => removeTemporaryManifestFixture(temporaryRoot));
+  const target = path.join(temporaryRoot, "manifest.json");
+  // This covers the actual writer and serializer only. The builder and loader
+  // cases above retain their historical-input identity checks. The current
+  // checkout is independently rejected below instead of borrowing this fixture.
+  const manifest = JSON.parse(await readFile(
+    path.join(repositoryRoot, BAZI_DOMAIN_RELEASE_MANIFEST_V2_RELATIVE_PATH), "utf8"
+  ));
+  const expectedBytes = Buffer.from(serializeBaziDomainReleaseManifestV2(manifest), "utf8");
+  await writeBaziDomainReleaseManifestV2File(target, manifest);
+  assert.deepEqual(await readFile(target), expectedBytes);
+  await assert.rejects(
+    writeBaziDomainReleaseManifestV2File(target, { fixtureOnly: "must not replace existing bytes" }),
+    (error) => error?.code === "EEXIST"
+  );
+  assert.deepEqual(await readFile(target), expectedBytes);
+});
+
+test("writer CLI rejects an operand when launched through a temporary symlink", async (t) => {
+  const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), "hakimi-bazi-manifest-v2-writer-"));
+  t.after(() => removeTemporaryManifestFixture(temporaryRoot));
+  const linkedCli = path.join(temporaryRoot, "writer.mjs");
+  await symlink(path.join(repositoryRoot, "scripts/write-bazi-domain-release-manifest-v2.mjs"), linkedCli, "file");
+  const child = spawnSync(process.execPath, [linkedCli, "unexpected"], {
+    cwd: temporaryRoot, encoding: "utf8", windowsHide: true,
     env: { ...process.env, NODE_OPTIONS: "" }
   });
-  assert.equal(writer.status, 1);
-  assert.match(writer.stderr, /EEXIST/u);
+  assert.equal(child.status, 1, child.stderr);
+  assert.equal(child.stdout, "");
+  assert.equal(child.stderr.trim(), "BAZI_DOMAIN_RELEASE_MANIFEST_V2_WRITE_FAILED CLI_INVOCATION_REJECTED");
+});
+
+test("importing the writer is silent and leaves persisted bytes unchanged", async () => {
+  const artifact = path.join(repositoryRoot, BAZI_DOMAIN_RELEASE_MANIFEST_V2_RELATIVE_PATH);
+  const before = await readFile(artifact);
+  const writerUrl = pathToFileURL(path.join(repositoryRoot, "scripts/write-bazi-domain-release-manifest-v2.mjs")).href;
+  const child = spawnSync(process.execPath, ["--input-type=module", "-e", `await import(${JSON.stringify(writerUrl)});`], {
+    cwd: os.tmpdir(), encoding: "utf8", windowsHide: true,
+    env: { ...process.env, NODE_OPTIONS: "" }
+  });
+  assert.equal(child.status, 0, child.stderr);
+  assert.equal(child.stdout, "");
+  assert.equal(child.stderr, "");
+  assert.deepEqual(await readFile(artifact), before);
 });
 
 test("the historical formal manifest stays expected-red instead of borrowing v2 authority", () => {
   const old = spawnSync(process.execPath, ["scripts/verify-bazi-domain-release-manifest.mjs"], {
-    cwd: workspaceRoot,
+    cwd: repositoryRoot,
     encoding: "utf8",
     env: { ...process.env, NODE_OPTIONS: "" }
   });
@@ -312,11 +412,39 @@ test("the historical formal manifest stays expected-red instead of borrowing v2 
   assert.match(`${old.stdout}\n${old.stderr}`, /manifest|MANIFEST/u);
 });
 
-test("canonical rendering is deterministic for the current manifest", async () => {
-  const expected = await buildCurrentBaziDomainReleaseManifestV2(workspaceRoot);
-  const rebuilt = await buildCurrentBaziDomainReleaseManifestV2(workspaceRoot);
+test("canonical rendering is deterministic for the historical manifest", async () => {
+  const expected = await buildCurrentBaziDomainReleaseManifestV2(historicalInputRoot);
+  const rebuilt = await buildCurrentBaziDomainReleaseManifestV2(historicalInputRoot);
   assert.equal(
     canonicalStringifyBaziDomainReleaseManifestV2(expected),
     canonicalStringifyBaziDomainReleaseManifestV2(rebuilt)
   );
+});
+
+test("the current checkout still rejects the missing historical basis without archive fallback", async () => {
+  await assert.rejects(loadBaziDomainReleaseManifestV2(repositoryRoot),
+    (error) => error?.code === "BOUND_READINESS_BASIS_DRIFT");
+  const current = spawnSync(process.execPath, ["scripts/verify-bazi-domain-release-manifest-v2.mjs"], {
+    cwd: repositoryRoot, encoding: "utf8", windowsHide: true,
+    env: { ...process.env, NODE_OPTIONS: "" }
+  });
+  assert.equal(current.status, 1);
+  assert.equal(current.stdout, "");
+  assert.match(current.stderr, /BOUND_READINESS_BASIS_DRIFT/u);
+});
+
+test("verified historical inputs do not select a current domain manifest", async () => {
+  const historical = await loadBaziDomainReleaseManifestV2(historicalInputRoot);
+  assert.equal(isVerifiedBaziDomainReleaseManifestV2(historical), true);
+  const currentIndexPath = path.join(repositoryRoot, "content/system-admission/current-index.v1.json");
+  const indexBefore = await readFile(currentIndexPath);
+  const index = JSON.parse(indexBefore);
+  const domain = index.entries.find((entry) =>
+    entry.familyKey === "content/domain-release/bazi.single-chart-report.v1.7.0.manifest");
+  assert.equal(domain.selectionState, "historical_head_current_unavailable");
+  assert.equal(domain.selectedCurrent, null);
+  const { loadBaziCurrentDomainManifest } = await import("./bazi-scoped-current-lib.mjs");
+  await assert.rejects(loadBaziCurrentDomainManifest(repositoryRoot),
+    (error) => error?.code === "CURRENT_UNAVAILABLE");
+  assert.deepEqual(await readFile(currentIndexPath), indexBefore);
 });

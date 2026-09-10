@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { copyFile, link, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { copyFile, link, lstat, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import {
   BAZI_EXPERT_REVIEW_INDEPENDENCE_FACTOR_IDS,
   BAZI_EXPERT_REVIEW_INTAKE_GAP_RELATIVE_PATH,
+  BAZI_EXPERT_REVIEW_INTAKE_READINESS_BASIS_RELATIVE_PATH,
   BAZI_EXPERT_REVIEW_PACKET_RELATIVE_PATH,
   BAZI_EXPERT_REVIEW_QUESTION_IDS,
   canonicalStringifyExpertReviewPacket,
@@ -43,6 +44,38 @@ const readinessRelativePath = intakeGap.readinessLedgerBinding.path;
 const SHA_A = "1".repeat(64);
 const SHA_B = "2".repeat(64);
 const SHA_C = "3".repeat(64);
+
+async function makeHistoricalGapWorkspace(t, { includeBasis = true, includeCurrentAlias = false } = {}) {
+  const temporaryParent = await realpath(os.tmpdir());
+  const temporaryRoot = await mkdtemp(path.join(temporaryParent, "hbeg-"));
+  const ownedReal = await realpath(temporaryRoot);
+  const owned = await lstat(temporaryRoot, { bigint: true });
+  assert.equal(ownedReal, temporaryRoot);
+  assert.equal(path.dirname(ownedReal), temporaryParent);
+  assert.equal(owned.isDirectory(), true);
+  assert.equal(owned.isSymbolicLink(), false);
+  assert.notEqual(owned.ino, 0n);
+  t.after(async () => {
+    const current = await lstat(temporaryRoot, { bigint: true });
+    assert.equal(current.isDirectory(), true);
+    assert.equal(current.isSymbolicLink(), false);
+    assert.equal(current.dev, owned.dev);
+    assert.equal(current.ino, owned.ino);
+    assert.equal(await realpath(temporaryRoot), ownedReal);
+    assert.equal(path.dirname(ownedReal), temporaryParent);
+    await rm(ownedReal, { recursive: true, force: false });
+  });
+  const inputs = [BAZI_EXPERT_REVIEW_PACKET_RELATIVE_PATH, BAZI_EXPERT_REVIEW_INTAKE_GAP_RELATIVE_PATH];
+  if (includeBasis) inputs.push(BAZI_EXPERT_REVIEW_INTAKE_READINESS_BASIS_RELATIVE_PATH);
+  if (includeCurrentAlias) inputs.push(readinessRelativePath);
+  for (const relativePath of inputs) {
+    const target = path.resolve(temporaryRoot, ...relativePath.split("/"));
+    assert.equal(path.relative(temporaryRoot, target).startsWith(".."), false);
+    await mkdir(path.dirname(target), { recursive: true });
+    await copyFile(path.join(workspaceRoot, ...relativePath.split("/")), target);
+  }
+  return temporaryRoot;
+}
 
 function refreshedPacket(mutator) {
   const candidate = structuredClone(packet);
@@ -735,6 +768,9 @@ test("malformed packet containers return stable domain errors rather than native
 
 test("approved zero-instance intake gap returns a detached deeply frozen fail-closed ledger", async () => {
   const result = await verifyBaziExpertReviewIntakeGapLedger(workspaceRoot, structuredClone(packet));
+  assert.equal(result.verificationScope, "historical_intake_gap_snapshot");
+  assert.equal(result.currentApplicabilityAssessed, false);
+  assert.equal(result.ledger.readinessLedgerBinding.path, readinessRelativePath);
   assert.notEqual(result.ledger, intakeGap);
   assert.equal(Object.isFrozen(result.ledger), true);
   assert.equal(Object.isFrozen(result.ledger.currentInstances), true);
@@ -786,34 +822,79 @@ test("packet reader rejects a workspace-internal junction in its directory chain
   }
 });
 
-test("intake gap raw identity and caller packet binding fail closed", async () => {
-  const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), "hakimi-bazi-expert-gap-"));
-  try {
-    for (const relativePath of [
-      BAZI_EXPERT_REVIEW_PACKET_RELATIVE_PATH,
-      BAZI_EXPERT_REVIEW_INTAKE_GAP_RELATIVE_PATH,
-      readinessRelativePath
-    ]) {
-      const target = path.join(temporaryRoot, ...relativePath.split("/"));
-      await mkdir(path.dirname(target), { recursive: true });
-      await copyFile(path.join(workspaceRoot, ...relativePath.split("/")), target);
+test("intake gap raw identity and caller packet binding fail closed", async (t) => {
+  const temporaryRoot = await makeHistoricalGapWorkspace(t, { includeCurrentAlias: true });
+  const gapPath = path.join(temporaryRoot, ...BAZI_EXPERT_REVIEW_INTAKE_GAP_RELATIVE_PATH.split("/"));
+  const originalBytes = await readFile(gapPath);
+  await writeFile(gapPath, Buffer.concat([originalBytes, Buffer.from(" ", "utf8")]));
+  await assert.rejects(
+    verifyBaziExpertReviewIntakeGapLedger(temporaryRoot, structuredClone(packet)),
+    (error) => error?.code === "INTAKE_GAP_INVALID"
+  );
+  await writeFile(gapPath, originalBytes);
+  const selfResigned = refreshedPacket((value) => { value.gateSummary.releaseReady = true; });
+  await assert.rejects(
+    verifyBaziExpertReviewIntakeGapLedger(temporaryRoot, selfResigned),
+    (error) => error?.code === "PACKET_APPROVAL_BINDING_MISMATCH"
+  );
+});
+
+test("historical intake gap rejects a missing readiness archive without alias fallback", async (t) => {
+  const temporaryRoot = await makeHistoricalGapWorkspace(t, { includeBasis: false, includeCurrentAlias: true });
+  await assert.rejects(
+    verifyBaziExpertReviewIntakeGapLedger(temporaryRoot, structuredClone(packet)),
+    (error) => error?.code === "INTAKE_GAP_INVALID"
+  );
+});
+
+test("historical intake gap rejects corrupted readiness archive bytes", async (t) => {
+  const temporaryRoot = await makeHistoricalGapWorkspace(t);
+  const basisPath = path.join(temporaryRoot, ...BAZI_EXPERT_REVIEW_INTAKE_READINESS_BASIS_RELATIVE_PATH.split("/"));
+  const bytes = await readFile(basisPath);
+  assert.equal(bytes.length, 26_038);
+  assert.equal(createHash("sha256").update(bytes).digest("hex"), "662c91e6269d5e860a0d207185680ea7c7b752f24e313859c0d987cb5b446201");
+  await writeFile(basisPath, Buffer.concat([bytes, Buffer.from(" ", "utf8")]));
+  await assert.rejects(
+    verifyBaziExpertReviewIntakeGapLedger(temporaryRoot, structuredClone(packet)),
+    (error) => error?.code === "INTAKE_GAP_BINDING_DRIFT"
+  );
+});
+
+test("historical intake gap uses the original basis with an absent or current 1.6 readiness alias", async (t) => {
+  for (const includeCurrentAlias of [false, true]) {
+    const temporaryRoot = await makeHistoricalGapWorkspace(t, { includeCurrentAlias });
+    const aliasPath = path.join(temporaryRoot, ...readinessRelativePath.split("/"));
+    if (includeCurrentAlias) {
+      const alias = JSON.parse(await readFile(aliasPath, "utf8"));
+      assert.equal(alias.ledgerId, "hakimi.bazi.strength.binding-freeze-readiness/1.6.0");
+    } else {
+      await assert.rejects(readFile(aliasPath), (error) => error?.code === "ENOENT");
     }
-    const gapPath = path.join(temporaryRoot, ...BAZI_EXPERT_REVIEW_INTAKE_GAP_RELATIVE_PATH.split("/"));
-    const originalBytes = await readFile(gapPath);
-    await writeFile(gapPath, Buffer.concat([originalBytes, Buffer.from(" ", "utf8")]));
-    await assert.rejects(
-      verifyBaziExpertReviewIntakeGapLedger(temporaryRoot, structuredClone(packet)),
-      (error) => error?.code === "INTAKE_GAP_INVALID"
-    );
-    await writeFile(gapPath, originalBytes);
-    const selfResigned = refreshedPacket((value) => { value.gateSummary.releaseReady = true; });
-    await assert.rejects(
-      verifyBaziExpertReviewIntakeGapLedger(temporaryRoot, selfResigned),
-      (error) => error?.code === "PACKET_APPROVAL_BINDING_MISMATCH"
-    );
-  } finally {
-    await rm(temporaryRoot, { recursive: true, force: true });
+    const result = await verifyBaziExpertReviewIntakeGapLedger(temporaryRoot, structuredClone(packet));
+    assert.equal(result.verificationScope, "historical_intake_gap_snapshot");
+    assert.equal(result.currentApplicabilityAssessed, false);
+    assert.equal(result.currentRecordInstances, 0);
+    assert.equal(result.independentExpertReviewsVerified, 0);
+    assert.equal(result.expertReviewBundleComplete, false);
+    assert.equal(result.candidateFeedbackCollectionReady, false);
+    assert.equal(result.releaseClosureReviewReady, false);
+    assert.ok(Object.values(result.ledger.currentInstances.counts).every((value) => value === 0));
+    assert.equal(result.ledger.readinessLedgerBinding.path, "content/system-admission/bazi-binding-freeze-requirements.v1.json");
+    assert.equal(result.ledger.readinessLedgerBinding.rawBytes, 26_038);
+    assert.equal(result.ledger.readinessLedgerBinding.rawSha256, "662c91e6269d5e860a0d207185680ea7c7b752f24e313859c0d987cb5b446201");
+    assert.equal(result.ledger.readinessLedgerBinding.ledgerId, "hakimi.bazi.strength.binding-freeze-readiness/1.5.0");
   }
+});
+
+test("the current 1.6 expert packet cannot replace the historical 1.5 gap packet", async (t) => {
+  const temporaryRoot = await makeHistoricalGapWorkspace(t);
+  const currentPacket = JSON.parse(await readFile(path.join(workspaceRoot,
+    "content", "bazi-strength-expert-review-packet.current.json"), "utf8"));
+  assert.equal(currentPacket.packetId, "hakimi.bazi.strength.expert-review-packet/1.6.0");
+  await assert.rejects(
+    verifyBaziExpertReviewIntakeGapLedger(temporaryRoot, currentPacket),
+    (error) => error?.code === "PACKET_APPROVAL_BINDING_MISMATCH"
+  );
 });
 
 test("expert packet directly verifies the complete source and three-layer rights candidate trust chain", async () => {

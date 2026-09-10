@@ -594,6 +594,9 @@ describe("Ziwei role-aware high-risk expression egress decision map", () => {
         counterexamples: item.counterexamples,
         revisionRequest: item.revisionRequest
       } as const;
+      if (entry.sourceField === "selectedTradition") {
+        throw new Error("Natal transformation feedback must not expose selectedTradition");
+      }
       expect(entry.displayText).toBe(rawByField[entry.sourceField]);
     }
   });

@@ -19,6 +19,7 @@ import {
 } from "./release-integrity-cache";
 import {
   ReleaseDatabaseCoordinator,
+  ReleaseForwardMigrationActivationFrozenError,
   isPeerMigrationContention
 } from "./release-database-coordinator";
 
@@ -1397,6 +1398,239 @@ describe("ReleaseDatabaseCoordinator controller takeover freeze", () => {
   });
 });
 
+describe("first controller claim navigation state", () => {
+  function navigationHarness() {
+    const state = releaseState(BRIDGE_RELEASE_DATABASE_DESCRIPTOR, "build-v13-first-claim");
+    const controller = {
+      readCommittedGeneration: vi.fn().mockResolvedValue(state),
+      readCommittedGenerationFromOpenConnection: vi.fn().mockResolvedValue(state),
+      initializeCommittedGeneration: vi.fn(),
+      commitCompatibleGenerationSnapshot: vi.fn(),
+      commitMigration: vi.fn()
+    };
+    const { coordinator, testable } = bootCommitHarness(
+      BRIDGE_RELEASE_DATABASE_DESCRIPTOR, state.committedBuild, controller
+    );
+    return { coordinator, controller, testable, state };
+  }
+
+  it("fails an early peer claim before any control read, initialization, or mutation", async () => {
+    const { coordinator, controller, testable } = navigationHarness();
+    await coordinator.freezeForControllerTakeover();
+    await expect(coordinator.verifyFirstControllerClaimNavigationState()).rejects.toThrow("尚未完成");
+    expect(testable.controllerTakeoverFrozen).toBe(true);
+    expect(controller.readCommittedGeneration).not.toHaveBeenCalled();
+    expect(controller.readCommittedGenerationFromOpenConnection).not.toHaveBeenCalled();
+    expect(controller.initializeCommittedGeneration).not.toHaveBeenCalled();
+    expect(controller.commitCompatibleGenerationSnapshot).not.toHaveBeenCalled();
+    expect(controller.commitMigration).not.toHaveBeenCalled();
+  });
+
+  it("re-reads the formal persisted receipt after a normal commit while keeping all mutations frozen", async () => {
+    const { coordinator, controller, testable, state } = navigationHarness();
+    await coordinator.commitForBoot();
+    await coordinator.freezeForControllerTakeover();
+    await expect(coordinator.verifyFirstControllerClaimNavigationState()).resolves.toBeUndefined();
+    expect(controller.readCommittedGeneration).toHaveBeenCalledTimes(1);
+    expect(controller.readCommittedGenerationFromOpenConnection).toHaveBeenCalledTimes(1);
+    expect(testable.committedState).toBe(state);
+    expect(testable.controllerTakeoverFrozen).toBe(true);
+    expect(controller.initializeCommittedGeneration).not.toHaveBeenCalled();
+    expect(controller.commitCompatibleGenerationSnapshot).not.toHaveBeenCalled();
+    expect(controller.commitMigration).not.toHaveBeenCalled();
+    await expect(coordinator.commitForBoot()).rejects.toMatchObject({ name: "ReleaseControllerTakeoverFrozenError" });
+  });
+
+  it.each(["absent", "build", "generation", "database", "schema", "migration", "receipt"] as const)(
+    "rejects a changed persisted pointer after a normal commit: %s", async (change) => {
+      const { coordinator, controller, testable, state } = navigationHarness();
+      await coordinator.commitForBoot();
+      await coordinator.freezeForControllerTakeover();
+      const next = change === "absent" ? null : {
+        ...state,
+        ...(change === "build" ? { committedBuild: "peer-build" } : {}),
+        ...(change === "generation" ? { committedGeneration: "v16" } : {}),
+        ...(change === "database" ? { committedDatabaseName: "other-database" } : {}),
+        ...(change === "schema" ? { committedSchema: 16 } : {}),
+        ...(change === "migration" ? { migrationId: "peer-migration" } : {}),
+        ...(change === "receipt" ? { receiptDigest: "a".repeat(64) } : {})
+      };
+      controller.readCommittedGenerationFromOpenConnection.mockResolvedValue(next);
+      await expect(coordinator.verifyFirstControllerClaimNavigationState()).rejects.toThrow("回执与本页不一致");
+      expect(controller.readCommittedGeneration).toHaveBeenCalledTimes(1);
+      expect(controller.readCommittedGenerationFromOpenConnection).toHaveBeenCalledTimes(1);
+      expect(testable.committedState).toBe(state);
+      expect(testable.controllerTakeoverFrozen).toBe(true);
+      expect(controller.initializeCommittedGeneration).not.toHaveBeenCalled();
+      expect(controller.commitCompatibleGenerationSnapshot).not.toHaveBeenCalled();
+      expect(controller.commitMigration).not.toHaveBeenCalled();
+    }
+  );
+
+  it("propagates formal receipt-integrity rejection instead of trusting the cached commit", async () => {
+    const { coordinator, controller, testable } = navigationHarness();
+    await coordinator.commitForBoot();
+    await coordinator.freezeForControllerTakeover();
+    const failure = new DatabaseGenerationError("CONTROL_STATE_CORRUPT", "receipt verification failed");
+    controller.readCommittedGenerationFromOpenConnection.mockRejectedValue(failure);
+    await expect(coordinator.verifyFirstControllerClaimNavigationState()).rejects.toBe(failure);
+    expect(controller.readCommittedGeneration).toHaveBeenCalledTimes(1);
+    expect(controller.readCommittedGenerationFromOpenConnection).toHaveBeenCalledTimes(1);
+    expect(testable.controllerTakeoverFrozen).toBe(true);
+    expect(controller.initializeCommittedGeneration).not.toHaveBeenCalled();
+    expect(controller.commitCompatibleGenerationSnapshot).not.toHaveBeenCalled();
+    expect(controller.commitMigration).not.toHaveBeenCalled();
+  });
+
+  it("requires the page writer to be frozen before re-reading a committed pointer", async () => {
+    const { coordinator, controller } = navigationHarness();
+    await coordinator.commitForBoot();
+    await expect(coordinator.verifyFirstControllerClaimNavigationState()).rejects.toThrow("尚未完成");
+    expect(controller.readCommittedGeneration).toHaveBeenCalledTimes(1);
+    expect(controller.readCommittedGenerationFromOpenConnection).not.toHaveBeenCalled();
+  });
+});
+
+describe("committed shadow first controller claim navigation state", () => {
+  async function shadowNavigationHarness(
+    descriptor: ReleaseDatabaseDescriptor = PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR
+  ) {
+    const state = releaseState(descriptor, "build-v16-first-claim");
+    const verifiedContractVersion = await createReleaseIntegrityContractVersion(descriptor, state.committedBuild);
+    const repository = {
+      readMutationState: vi.fn().mockResolvedValue({
+        ...dirtyMutationState(0),
+        verifiedEpoch: 0,
+        verifiedPayloadDigest: digest,
+        verifiedContractVersion,
+        verifiedAt: "2026-08-27T00:00:00.000Z"
+      }),
+      readFullDataSnapshotWithMutationState: vi.fn(),
+      markMutationStateVerified: vi.fn()
+    };
+    const database = {
+      open: vi.fn(),
+      unlockReleaseWrites: vi.fn(),
+      withReleaseMigrationWriteAccess: vi.fn()
+    };
+    const controller = {
+      readCommittedGeneration: vi.fn().mockResolvedValue(state),
+      readCommittedGenerationFromOpenConnection: vi.fn().mockResolvedValue(state),
+      initializeCommittedGeneration: vi.fn(),
+      commitCompatibleGenerationSnapshot: vi.fn(),
+      commitMigration: vi.fn()
+    };
+    const coordinator = new ReleaseDatabaseCoordinator(descriptor, state.committedBuild);
+    const testable = testableCoordinator(coordinator, repository, database);
+    testable.preparePromise = Promise.resolve();
+    testable.controllerPromise = Promise.resolve(controller as unknown as DatabaseGenerationController);
+    return { coordinator, testable, controller, repository, database, state };
+  }
+
+  function expectNoNavigationWrites(harness: Awaited<ReturnType<typeof shadowNavigationHarness>>) {
+    expect(harness.testable.controllerTakeoverFrozen).toBe(true);
+    expect(harness.controller.initializeCommittedGeneration).not.toHaveBeenCalled();
+    expect(harness.controller.commitCompatibleGenerationSnapshot).not.toHaveBeenCalled();
+    expect(harness.controller.commitMigration).not.toHaveBeenCalled();
+    expect(harness.database.open).not.toHaveBeenCalled();
+    expect(harness.database.unlockReleaseWrites).not.toHaveBeenCalled();
+    expect(harness.database.withReleaseMigrationWriteAccess).not.toHaveBeenCalled();
+    expect(harness.repository.markMutationStateVerified).not.toHaveBeenCalled();
+    expect(harness.repository.readFullDataSnapshotWithMutationState).not.toHaveBeenCalled();
+  }
+
+  it("re-reads a normally committed shadow receipt while keeping the old page frozen", async () => {
+    const harness = await shadowNavigationHarness();
+    const { coordinator, controller, testable, state } = harness;
+    // This calls the real coordinator commit path against a clean Schema 16
+    // target fixture; it does not claim to materialize a real shadow database.
+    await expect(coordinator.commitForBoot()).resolves.toEqual({
+      state,
+      migrationReceiptDigest: state.receiptDigest
+    });
+    await coordinator.freezeForControllerTakeover();
+    await expect(coordinator.verifyFirstControllerClaimNavigationState()).resolves.toBeUndefined();
+    expect(controller.readCommittedGeneration).toHaveBeenCalledTimes(1);
+    expect(controller.readCommittedGenerationFromOpenConnection).toHaveBeenCalledTimes(1);
+    expect(testable.committedState).toBe(state);
+    expectNoNavigationWrites(harness);
+    await expect(coordinator.commitForBoot()).rejects.toMatchObject({ name: "ReleaseControllerTakeoverFrozenError" });
+  });
+
+  it.each(["uncommitted", "cached pointer only"] as const)(
+    "rejects a shadow page without its own completed boot commit: %s", async (preparation) => {
+      const harness = await shadowNavigationHarness();
+      const { coordinator, controller, testable, state } = harness;
+      if (preparation === "cached pointer only") testable.committedState = state;
+      await coordinator.freezeForControllerTakeover();
+      await expect(coordinator.verifyFirstControllerClaimNavigationState()).rejects.toThrow("尚未完成");
+      expect(controller.readCommittedGeneration).not.toHaveBeenCalled();
+      expect(controller.readCommittedGenerationFromOpenConnection).not.toHaveBeenCalled();
+      expectNoNavigationWrites(harness);
+    }
+  );
+
+  it.each(["protocolVersion", "receiptDigest"] as const)(
+    "rejects shadow persisted receipt drift after the page completed its normal commit: %s", async (change) => {
+      const harness = await shadowNavigationHarness();
+      const { coordinator, controller, testable, state } = harness;
+      await coordinator.commitForBoot();
+      await coordinator.freezeForControllerTakeover();
+      controller.readCommittedGenerationFromOpenConnection.mockResolvedValue({
+        ...state,
+        ...(change === "protocolVersion" ? { protocolVersion: 2 } : { receiptDigest: "a".repeat(64) })
+      });
+      await expect(coordinator.verifyFirstControllerClaimNavigationState()).rejects.toThrow("回执与本页不一致");
+      expect(controller.readCommittedGeneration).toHaveBeenCalledTimes(1);
+      expect(controller.readCommittedGenerationFromOpenConnection).toHaveBeenCalledTimes(1);
+      expect(testable.committedState).toBe(state);
+      expectNoNavigationWrites(harness);
+    }
+  );
+
+  it("rejects another accepted shadow migration when it differs from this page's completed commit", async () => {
+    const otherMigrationId = "other-accepted-shadow-migration";
+    const descriptor: ReleaseDatabaseDescriptor = {
+      ...PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR,
+      acceptedCommittedMigrationIds: [PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR.migrationId, otherMigrationId]
+    };
+    const harness = await shadowNavigationHarness(descriptor);
+    const { coordinator, controller, state } = harness;
+    await coordinator.commitForBoot();
+    await coordinator.freezeForControllerTakeover();
+    controller.readCommittedGenerationFromOpenConnection.mockResolvedValue({ ...state, migrationId: otherMigrationId });
+    await expect(coordinator.verifyFirstControllerClaimNavigationState()).rejects.toThrow("回执与本页不一致");
+    expect(controller.readCommittedGeneration).toHaveBeenCalledTimes(1);
+    expect(controller.readCommittedGenerationFromOpenConnection).toHaveBeenCalledTimes(1);
+    expectNoNavigationWrites(harness);
+  });
+
+  it("rejects unaccepted shadow lineage even when cached and persisted pointers agree", async () => {
+    const harness = await shadowNavigationHarness();
+    const { coordinator, controller, state } = harness;
+    await coordinator.commitForBoot();
+    await coordinator.freezeForControllerTakeover();
+    // A negative data-corruption fixture distinguishes accepted lineage from
+    // mere equality with the cached object. No completion flag is fabricated.
+    state.migrationId = "unaccepted-shadow-migration";
+    await expect(coordinator.verifyFirstControllerClaimNavigationState()).rejects.toThrow("回执与本页不一致");
+    expect(controller.readCommittedGeneration).toHaveBeenCalledTimes(1);
+    expect(controller.readCommittedGenerationFromOpenConnection).toHaveBeenCalledTimes(1);
+    expectNoNavigationWrites(harness);
+  });
+
+  it("requires a normally committed shadow page to freeze before its navigation read", async () => {
+    const harness = await shadowNavigationHarness();
+    const { coordinator, controller } = harness;
+    await coordinator.commitForBoot();
+    await expect(coordinator.verifyFirstControllerClaimNavigationState()).rejects.toThrow("尚未完成");
+    expect(controller.readCommittedGeneration).toHaveBeenCalledTimes(1);
+    expect(controller.readCommittedGenerationFromOpenConnection).not.toHaveBeenCalled();
+    await coordinator.freezeForControllerTakeover();
+    expectNoNavigationWrites(harness);
+  });
+});
+
 describe("isPeerMigrationContention", () => {
   it("accepts a live lease held by the peer migration owner", () => {
     expect(isPeerMigrationContention(new DatabaseGenerationError(
@@ -1429,5 +1663,233 @@ describe("isPeerMigrationContention", () => {
     expect(isPeerMigrationContention(new Error("影子数据库物化后摘要发生变化。"))).toBe(false);
     expect(isPeerMigrationContention(null)).toBe(false);
     expect(isPeerMigrationContention(undefined)).toBe(false);
+  });
+});
+
+describe("ReleaseDatabaseCoordinator forward migration activation", () => {
+  const source = BRIDGE_RELEASE_DATABASE_DESCRIPTOR;
+  const target = PRODUCTION_V13_TO_V16_RELEASE_DATABASE_DESCRIPTOR;
+  const sourceBuild = "build-forward-source-v13";
+  const targetBuild = "build-forward-target-v16";
+
+  function forwardHarness(controller: unknown) {
+    const harness = bootCommitHarness(source, sourceBuild, controller);
+    const database = { lockReleaseWrites: vi.fn(), unlockReleaseWrites: vi.fn() };
+    harness.testable.targetDatabase = database;
+    return { ...harness, database };
+  }
+
+  it("freezes before a slow read-only audit settles while the original full drain still waits", async () => {
+    const audit = deferred<{ payloadDigest: string; canonicalJsonByteLength: number }>();
+    workerMocks.inspectSnapshot.mockReturnValueOnce(audit.promise);
+    const controller = {
+      readCommittedGeneration: vi.fn(),
+      initializeCommittedGeneration: vi.fn(),
+      commitCompatibleGenerationSnapshot: vi.fn()
+    };
+    const { coordinator, testable, database } = forwardHarness(controller);
+    const commit = coordinator.commitForBoot();
+    const rejectedCommit = expect(commit).rejects.toBeInstanceOf(ReleaseForwardMigrationActivationFrozenError);
+    await waitForCall(() => workerMocks.inspectSnapshot.mock.calls.length, 1);
+
+    const forwardFreeze = coordinator.freezeForForwardMigrationActivation(target);
+    expect(coordinator.freezeForForwardMigrationActivation({ ...target })).toBe(forwardFreeze);
+    await forwardFreeze;
+    expect(database.lockReleaseWrites).toHaveBeenCalledTimes(1);
+    expect(testable.controllerTakeoverFrozen).toBe(true);
+    let fullDrainSettled = false;
+    const fullDrain = coordinator.freezeForControllerTakeover().then(() => { fullDrainSettled = true; });
+    await waitForMacrotask();
+    expect(fullDrainSettled).toBe(false);
+    await expect(coordinator.commitForBoot()).rejects.toBeInstanceOf(ReleaseForwardMigrationActivationFrozenError);
+
+    audit.resolve({ payloadDigest: digest, canonicalJsonByteLength: 2048 });
+    await rejectedCommit;
+    await fullDrain;
+    expect(controller.readCommittedGeneration).not.toHaveBeenCalled();
+    expect(controller.initializeCommittedGeneration).not.toHaveBeenCalled();
+    expect(controller.commitCompatibleGenerationSnapshot).not.toHaveBeenCalled();
+    expect(testable.committedState).toBeNull();
+    expect(database.unlockReleaseWrites).not.toHaveBeenCalled();
+  });
+
+  it.each(["initializeCommittedGeneration", "commitCompatibleGenerationSnapshot"] as const)(
+    "drains the admitted %s write but rejects the late old-page boot completion",
+    async (method) => {
+      const write = deferred<DatabaseGenerationReleaseState>();
+      const state = releaseState(source, sourceBuild);
+      const controller = {
+        readCommittedGeneration: vi.fn().mockResolvedValue(
+          method === "initializeCommittedGeneration" ? null : releaseState(source, "previous-source-build")
+        ),
+        initializeCommittedGeneration: vi.fn(() => write.promise),
+        commitCompatibleGenerationSnapshot: vi.fn(() => write.promise)
+      };
+      const { coordinator, testable, database } = forwardHarness(controller);
+      const commit = coordinator.commitForBoot();
+      const rejectedCommit = expect(commit).rejects.toBeInstanceOf(ReleaseForwardMigrationActivationFrozenError);
+      await waitForCall(() => controller[method].mock.calls.length, 1);
+      let settled = false;
+      const freeze = coordinator.freezeForForwardMigrationActivation(target).then(() => { settled = true; });
+      await waitForMacrotask();
+      expect(settled).toBe(false);
+      write.resolve(state);
+      await rejectedCommit;
+      await freeze;
+      expect(settled).toBe(true);
+      expect(controller[method]).toHaveBeenCalledTimes(1);
+      expect(testable.committedState).toBeNull();
+      expect(database.unlockReleaseWrites).not.toHaveBeenCalled();
+    }
+  );
+
+  it("registers an actual control write before a synchronous forward-freeze re-entry", async () => {
+    const write = deferred<DatabaseGenerationReleaseState>();
+    let freeze: Promise<void> | null = null;
+    let settled = false;
+    let coordinator!: ReleaseDatabaseCoordinator;
+    const controller = {
+      readCommittedGeneration: vi.fn().mockResolvedValue(null),
+      initializeCommittedGeneration: vi.fn(() => {
+        freeze = coordinator.freezeForForwardMigrationActivation(target).then(() => { settled = true; });
+        return write.promise;
+      })
+    };
+    ({ coordinator } = forwardHarness(controller));
+    const commit = coordinator.commitForBoot();
+    const rejectedCommit = expect(commit).rejects.toBeInstanceOf(ReleaseForwardMigrationActivationFrozenError);
+    await waitForCall(() => controller.initializeCommittedGeneration.mock.calls.length, 1);
+    await waitForMacrotask();
+    expect(settled).toBe(false);
+    expect(freeze).not.toBeNull();
+    write.resolve(releaseState(source, sourceBuild));
+    await rejectedCommit;
+    await freeze;
+    expect(settled).toBe(true);
+  });
+
+  it("drains an admitted control read and prevents the following initialization", async () => {
+    const read = deferred<DatabaseGenerationReleaseState | null>();
+    const controller = {
+      readCommittedGeneration: vi.fn(() => read.promise),
+      initializeCommittedGeneration: vi.fn()
+    };
+    const { coordinator } = forwardHarness(controller);
+    const commit = coordinator.commitForBoot();
+    const rejectedCommit = expect(commit).rejects.toBeInstanceOf(ReleaseForwardMigrationActivationFrozenError);
+    await waitForCall(() => controller.readCommittedGeneration.mock.calls.length, 1);
+    let settled = false;
+    const freeze = coordinator.freezeForForwardMigrationActivation(target).then(() => { settled = true; });
+    await waitForMacrotask();
+    expect(settled).toBe(false);
+    await expect(coordinator.verifyForwardMigrationActivationNavigationState(target, targetBuild)).rejects.toThrow(
+      "源写入冻结已经完成"
+    );
+    expect(controller.readCommittedGeneration).toHaveBeenCalledTimes(1);
+    read.resolve(null);
+    await rejectedCommit;
+    await freeze;
+    expect(controller.initializeCommittedGeneration).not.toHaveBeenCalled();
+  });
+
+  it("waits for admitted legacy opening and its failure cleanup before finishing the forward drain", async () => {
+    const opening = deferred<void>();
+    const failure = new Error("ordinary source open failure");
+    const coordinator = new ReleaseDatabaseCoordinator(source, sourceBuild);
+    const database = {
+      name: source.databaseName,
+      verno: source.targetSchema,
+      open: vi.fn(() => opening.promise),
+      close: vi.fn(),
+      lockReleaseWrites: vi.fn(),
+      unlockReleaseWrites: vi.fn()
+    };
+    const testable = testableCoordinator(coordinator, null, null);
+    testable.storageModule = { caseRepository: { database } };
+    const prepare = coordinator.prepareStorage();
+    const rejectedPrepare = expect(prepare).rejects.toBe(failure);
+    await waitForCall(() => database.open.mock.calls.length, 1);
+    let settled = false;
+    const freeze = coordinator.freezeForForwardMigrationActivation(target).then(() => { settled = true; });
+    await waitForMacrotask();
+    expect(settled).toBe(false);
+    opening.reject(failure);
+    await rejectedPrepare;
+    await freeze;
+    expect(database.close).toHaveBeenCalledWith({ disableAutoOpen: true });
+    expect(database.lockReleaseWrites).toHaveBeenCalledTimes(1);
+    expect(database.unlockReleaseWrites).not.toHaveBeenCalled();
+  });
+
+  it("rejects other source lineages and target ranges without closing an eligible source", async () => {
+    const { coordinator, testable, database } = forwardHarness({});
+    await expect(coordinator.freezeForForwardMigrationActivation({ ...target, sourceSchema: 14 })).rejects.toThrow();
+    await expect(coordinator.freezeForForwardMigrationActivation({ ...target, minReadableSchema: 13 })).rejects.toThrow();
+    await expect(coordinator.freezeForForwardMigrationActivation({ ...target, databaseName: source.databaseName })).rejects.toThrow();
+    await expect(coordinator.freezeForForwardMigrationActivation({ ...target, acceptedCommittedMigrationIds: [] })).rejects.toThrow();
+    expect(testable.controllerTakeoverFrozen).toBe(false);
+    expect(database.lockReleaseWrites).not.toHaveBeenCalled();
+    const shadow = new ReleaseDatabaseCoordinator(target, targetBuild);
+    await expect(shadow.freezeForForwardMigrationActivation(target)).rejects.toThrow();
+    await coordinator.freezeForForwardMigrationActivation(target);
+    await expect(coordinator.freezeForForwardMigrationActivation({ ...target, migrationId: "another-migration", acceptedCommittedMigrationIds: ["another-migration"] })).rejects.toThrow(
+      "已冻结的迁移描述符不一致"
+    );
+  });
+
+  it.each(["source", "target"] as const)(
+    "verifies the persisted %s receipt for navigation without requiring a cached boot commit",
+    async (generation) => {
+      const state = generation === "source" ? releaseState(source, sourceBuild) : releaseState(target, targetBuild);
+      const controller = {
+        readCommittedGeneration: vi.fn().mockResolvedValue(state),
+        initializeCommittedGeneration: vi.fn(),
+        commitCompatibleGenerationSnapshot: vi.fn(),
+        commitMigration: vi.fn()
+      };
+      const { coordinator, testable, repository, database } = forwardHarness(controller);
+      await expect(coordinator.verifyForwardMigrationActivationNavigationState(target, targetBuild)).rejects.toThrow();
+      expect(controller.readCommittedGeneration).not.toHaveBeenCalled();
+      await coordinator.freezeForForwardMigrationActivation(target);
+      await expect(coordinator.verifyForwardMigrationActivationNavigationState(target, targetBuild)).resolves.toBeUndefined();
+      expect(testable.committedState).toBeNull();
+      expect(controller.readCommittedGeneration).toHaveBeenCalledTimes(1);
+      expect(controller.initializeCommittedGeneration).not.toHaveBeenCalled();
+      expect(controller.commitCompatibleGenerationSnapshot).not.toHaveBeenCalled();
+      expect(controller.commitMigration).not.toHaveBeenCalled();
+      expect(repository.readFullDataSnapshot).not.toHaveBeenCalled();
+      expect(database.unlockReleaseWrites).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(["missing", "source-build", "target-build", "target-migration", "protocol"] as const)(
+    "rejects a %s persisted receipt mismatch during forward navigation",
+    async (mismatch) => {
+      const state = mismatch === "missing" ? null
+        : mismatch === "source-build" ? releaseState(source, "another-source-build")
+        : { ...releaseState(target, targetBuild),
+            ...(mismatch === "target-build" ? { committedBuild: "another-target-build" } : {}),
+            ...(mismatch === "target-migration" ? { migrationId: "another-migration" } : {}),
+            ...(mismatch === "protocol" ? { protocolVersion: 2 } : {}) };
+      const controller = { readCommittedGeneration: vi.fn().mockResolvedValue(state) };
+      const { coordinator, database } = forwardHarness(controller);
+      await coordinator.freezeForForwardMigrationActivation(target);
+      await expect(coordinator.verifyForwardMigrationActivationNavigationState(target, targetBuild)).rejects.toThrow(
+        "既不是原来源，也不是精确目标提交"
+      );
+      expect(database.unlockReleaseWrites).not.toHaveBeenCalled();
+    }
+  );
+
+  it("retains formal receipt-integrity rejection and blocks a late old-page acknowledgement", async () => {
+    const failure = new Error("ordinary persisted receipt digest mismatch");
+    const controller = { readCommittedGeneration: vi.fn().mockRejectedValue(failure) };
+    const { coordinator, database } = forwardHarness(controller);
+    const acknowledgement = coordinator.acknowledgeServiceWorkerCommit();
+    const rejectedAcknowledgement = expect(acknowledgement).rejects.toBeInstanceOf(ReleaseForwardMigrationActivationFrozenError);
+    await coordinator.freezeForForwardMigrationActivation(target);
+    await rejectedAcknowledgement;
+    await expect(coordinator.verifyForwardMigrationActivationNavigationState(target, targetBuild)).rejects.toBe(failure);
+    expect(database.unlockReleaseWrites).not.toHaveBeenCalled();
   });
 });

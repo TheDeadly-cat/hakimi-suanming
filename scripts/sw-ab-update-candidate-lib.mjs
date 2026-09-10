@@ -14,8 +14,10 @@ import {
   compileReleaseEvidenceSchema,
   RELEASE_EVIDENCE_SCHEMA_PATH
 } from "./release-evidence-schema.mjs";
-import { isReleaseBrowserReceiptId } from
-  "../apps/web/playwright.release-browser-result.ts";
+import {
+  assertStrictReleaseBrowserResultSummary,
+  isReleaseBrowserCompletionReceiptId
+} from "../apps/web/playwright.release-browser-result.ts";
 import {
   compileSwAbUpdateCandidateSchema,
   SW_AB_UPDATE_CANDIDATE_SCHEMA_PATH
@@ -1547,6 +1549,15 @@ function validateSharedArtifactPayloads(
     const release = releaseEnvelope.payload.document;
     try {
       releaseEvidenceSchemaValidator.assert(release);
+      for (const receipt of release.testReceipts) {
+        const summary = receipt.browserResultSummary?.summary;
+        // Missing or mismatched summaries remain rejected by receiptCommandsMatch
+        // below with the existing document error classification.
+        if (isReleaseBrowserCompletionReceiptId(receipt.id)
+          && summary && summary.receiptId === receipt.id) {
+          assertStrictReleaseBrowserResultSummary(summary, receipt.id);
+        }
+      }
     } catch (error) {
       fail(
         "attachment",
@@ -1564,7 +1575,7 @@ function validateSharedArtifactPayloads(
         && exactJson(receipt.command, policyReceiptCommands[receipt.id])
         && !receipt.id.includes("sw-ab")
         && !receipt.command.some((token) => token.includes("sw-ab-update"))
-        && (isReleaseBrowserReceiptId(receipt.id)
+        && (isReleaseBrowserCompletionReceiptId(receipt.id)
           ? receipt.browserResultSummary?.summary?.receiptId === receipt.id
           : receipt.browserResultSummary === null)
     );

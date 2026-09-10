@@ -15,6 +15,96 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  ci-contracts:
+    name: CI commands and test inventory
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Set up pinned npm
+        run: npm install --global npm@11.13.0
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify all Node test files have an explicit group
+        run: npm run check:node-test-groups
+
+      - name: Test CI execution and artifact contracts
+        run: npm run test:ci-contracts
+
+      - name: Preserve CI contract execution identities and failures
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-ci-contracts-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/node-groups/
+          if-no-files-found: error
+          retention-days: 14
+
+  node-release-evidence:
+    name: Node release evidence tools
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Set up pinned npm
+        run: npm install --global npm@11.13.0
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Execute the complete registered release evidence test group
+        run: npm run test:node-release-evidence
+      - name: Preserve release tool test identities and failures
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-release-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/node-groups/
+          if-no-files-found: error
+          retention-days: 14
+
+  node-package-artifacts:
+    name: Node package artifact tools
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Set up pinned npm
+        run: npm install --global npm@11.13.0
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Execute the complete registered package artifact test group
+        run: npm run test:node-package-artifacts
+      - name: Preserve package artifact test identities and failures
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-package-artifacts-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/node-groups/
+          if-no-files-found: error
+          retention-days: 14
+
   toolchain-and-boundaries:
     name: Toolchain and boundaries
     runs-on: ubuntu-latest
@@ -56,17 +146,17 @@ jobs:
       - name: Verify system-contract draft boundaries
         run: npm run check:system-contract-draft-boundaries
 
-      - name: Verify independent Ziwei and Western source-binding requirement inventories
-        run: npm run check:independent-source-binding-requirements
+      - name: Verify independent source inventory identities without granting current eligibility
+        run: npm run check:independent-source-inventory
 
-      - name: Verify all 12 Bazi binding freeze-readiness requirements
+      - name: Verify Bazi engineering binding candidates
+        run: npm run check:bazi-engineering-binding-candidates
+
+      - name: Verify the selected current Bazi binding readiness
         run: npm run check:bazi-binding-freeze-requirements
 
-      - name: Verify independent Ziwei and Western domain manifests
-        run: npm run check:independent-domain-release-manifests
-
-      - name: Verify four-system independent admission registry
-        run: npm run check:system-admission-registry
+      - name: Verify independent domain inventory identities without granting current eligibility
+        run: npm run check:independent-domain-inventory
 
       - name: Verify Web storage import boundary
         run: npm run check:web-storage-import-boundary
@@ -80,8 +170,95 @@ jobs:
       - name: Verify historical natal runtime closure
         run: npm run check:historical-natal-runtime-closure
 
+      - name: Verify historical natal build attestation
+        run: npm run check:historical-natal-build-attestation
+
       - name: Test release evidence tooling
         run: npm run test:release-evidence
+
+  history-checkpoint-governance:
+    name: History checkpoint governance
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Set up pinned npm
+        run: npm install --global npm@11.13.0
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify the complete immutable history checkpoint
+        run: npm run check:history-checkpoint
+
+      - name: Test history checkpoint rejection paths
+        run: npm run test:history-checkpoint
+
+  current-index-governance:
+    name: Current index governance
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Set up pinned npm
+        run: npm install --global npm@11.13.0
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify the unique current endpoint index and status
+        run: npm run check:current-index
+
+      - name: Test current endpoint index and status rejection paths
+        run: npm run test:current-index
+
+  bazi-current-semantics:
+    name: Bazi current manifest and expert packet
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Set up pinned npm
+        run: npm install --global npm@11.13.0
+
+      - name: Install locked dependencies
+        id: install
+        run: npm ci
+
+      - name: Require an available current Bazi domain manifest
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run check:bazi-domain-release-manifest
+
+      - name: Require an available current Bazi expert packet
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run check:bazi-expert-review-packet
 
   full-typecheck:
     name: Full workspace typecheck
@@ -105,7 +282,7 @@ jobs:
         run: npm ci
 
       - name: Typecheck default application graph
-        run: npm run typecheck
+        run: npm run diagnose:typecheck
 
   full-vitest:
     name: Full Vitest suite
@@ -129,7 +306,7 @@ jobs:
         run: npm ci
 
       - name: Run Vitest suite
-        run: npm test
+        run: npm run diagnose:vitest
 
   default-v13-web-build:
     name: Default legacy-v13 Web build
@@ -153,7 +330,7 @@ jobs:
         run: npm ci
 
       - name: Build default legacy-v13 release
-        run: npm run build
+        run: npm run diagnose:build
 
       - name: Upload the exact default v13 build
         uses: actions/upload-artifact@v4
@@ -194,7 +371,13 @@ jobs:
     name: Default legacy-v13 aggregate gate
     if: ${{ always() }}
     needs:
+      - ci-contracts
+      - node-release-evidence
+      - node-package-artifacts
       - toolchain-and-boundaries
+      - history-checkpoint-governance
+      - current-index-governance
+      - bazi-current-semantics
       - full-typecheck
       - full-vitest
       - default-v13-web-build
@@ -206,7 +389,13 @@ jobs:
       - name: Require every evidence job to succeed
         shell: bash
         env:
+          CI_CONTRACTS: ${{ needs.ci-contracts.result }}
+          NODE_RELEASE_EVIDENCE: ${{ needs.node-release-evidence.result }}
+          NODE_PACKAGE_ARTIFACTS: ${{ needs.node-package-artifacts.result }}
           TOOLCHAIN_AND_BOUNDARIES: ${{ needs.toolchain-and-boundaries.result }}
+          HISTORY_CHECKPOINT_GOVERNANCE: ${{ needs.history-checkpoint-governance.result }}
+          CURRENT_INDEX_GOVERNANCE: ${{ needs.current-index-governance.result }}
+          BAZI_CURRENT_SEMANTICS: ${{ needs.bazi-current-semantics.result }}
           FULL_TYPECHECK: ${{ needs.full-typecheck.result }}
           FULL_VITEST: ${{ needs.full-vitest.result }}
           DEFAULT_V13_WEB_BUILD: ${{ needs.default-v13-web-build.result }}
@@ -214,7 +403,13 @@ jobs:
         run: |
           failures=0
           for gate in \
+            "ci-contracts=$CI_CONTRACTS" \
+            "node-release-evidence=$NODE_RELEASE_EVIDENCE" \
+            "node-package-artifacts=$NODE_PACKAGE_ARTIFACTS" \
             "toolchain-and-boundaries=$TOOLCHAIN_AND_BOUNDARIES" \
+            "history-checkpoint-governance=$HISTORY_CHECKPOINT_GOVERNANCE" \
+            "current-index-governance=$CURRENT_INDEX_GOVERNANCE" \
+            "bazi-current-semantics=$BAZI_CURRENT_SEMANTICS" \
             "full-typecheck=$FULL_TYPECHECK" \
             "full-vitest=$FULL_VITEST" \
             "default-v13-web-build=$DEFAULT_V13_WEB_BUILD" \

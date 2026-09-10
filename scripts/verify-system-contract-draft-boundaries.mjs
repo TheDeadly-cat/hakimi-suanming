@@ -4,6 +4,7 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parse } from "@babel/parser";
+import { resolveDefaultLifecyclePlan } from "./formal-npm-lifecycle-closure-lib.mjs";
 import {
   WESTERN_CIVIL_TIME_FACT_BROWSER_DRAFT,
   verifyWesternCivilTimeFactBrowserObservation
@@ -18,35 +19,81 @@ const downstreamDraftRegistryPath = path.resolve(
 );
 const primaryDraftRegistry = JSON.parse(fs.readFileSync(draftRegistryPath, "utf8"));
 const downstreamDraftRegistry = JSON.parse(fs.readFileSync(downstreamDraftRegistryPath, "utf8"));
-const defaultRegistryCompositionFailures = [];
-const downstreamRegistryKeys = Object.keys(downstreamDraftRegistry).sort();
-if (JSON.stringify(downstreamRegistryKeys) !== JSON.stringify([
-  "drafts",
-  "registryClass",
-  "schemaVersion",
-  "upstreamRegistryPath"
-])) {
-  defaultRegistryCompositionFailures.push(
-    "system-contract-downstream-draft-registry.json must keep its exact top-level shape"
-  );
+// The upstream registry bytes are historical evidence. This one reviewed
+// downstream amendment adds offline parsing dependencies without rewriting it.
+// Callers, entrypoints, draft targets, and production/browser policy cannot be
+// amended here. The normal evidence-tool validator still checks the full graph.
+export function composeSystemContractDraftRegistries(primary, downstream) {
+  const failures = [];
+  const fail = (message) => failures.push(`system-contract-downstream-draft-registry.json ${message}`);
+  const expectedAmendment = {
+    toolPath: "scripts/cross-system-engineering-fact-receipt-lib.mjs",
+    dependencyPath: "scripts/bazi-expert-review-packet-lib.mjs",
+    addBareImports: ["@babel/parser", "node:fs", "node:url", "node:util"],
+    addLocalTargets: [
+      "scripts/bazi-source-binding-candidate-lib.mjs",
+      "scripts/bazi-source-rights-candidate-lib.mjs"
+    ],
+    newDependencyPolicies: [
+      {
+        path: "scripts/bazi-source-binding-candidate-lib.mjs",
+        allowedBareImports: ["node:crypto"],
+        allowedLocalTargets: []
+      },
+      {
+        path: "scripts/bazi-source-rights-candidate-lib.mjs",
+        allowedBareImports: ["node:crypto"],
+        allowedLocalTargets: ["scripts/bazi-source-binding-candidate-lib.mjs"]
+      }
+    ]
+  };
+  if (!downstream || typeof downstream !== "object" || Array.isArray(downstream)
+    || canonicalJson(Object.keys(downstream).sort()) !== canonicalJson([
+      "drafts", "evidenceDependencyPolicyAmendments", "registryClass", "schemaVersion", "upstreamRegistryPath"
+    ])) {
+    fail("must keep its exact top-level shape");
+  }
+  if (downstream?.schemaVersion !== 1
+    || downstream?.registryClass !== "downstream-isolated-drafts-not-bound-into-upstream-readiness"
+    || downstream?.upstreamRegistryPath !== "scripts/system-contract-draft-registry.json"
+    || !Array.isArray(downstream?.drafts)) {
+    fail("has an invalid downstream registry identity");
+  }
+  if (canonicalJson(downstream?.evidenceDependencyPolicyAmendments) !== canonicalJson([expectedAmendment])) {
+    fail("must keep the one exact reviewed evidence dependency amendment without unknown fields or duplicates");
+  }
+  const tools = Array.isArray(primary?.evidenceTools)
+    ? primary.evidenceTools.filter((tool) => tool?.path === expectedAmendment.toolPath) : [];
+  const policies = Array.isArray(tools[0]?.scriptDependencyPolicies)
+    ? tools[0].scriptDependencyPolicies : [];
+  const dependencies = policies.filter((policy) => policy?.path === expectedAmendment.dependencyPath);
+  if (!Array.isArray(primary?.drafts) || tools.length !== 1 || dependencies.length !== 1
+    || !Array.isArray(dependencies[0]?.allowedBareImports)
+    || !Array.isArray(dependencies[0]?.allowedLocalTargets)) {
+    fail("must amend exactly one existing upstream evidence tool dependency");
+  } else if (expectedAmendment.addBareImports.some((entry) => dependencies[0].allowedBareImports.includes(entry))
+    || expectedAmendment.addLocalTargets.some((entry) => dependencies[0].allowedLocalTargets.includes(entry))
+    || expectedAmendment.newDependencyPolicies.some((added) => policies.some((policy) => policy?.path === added.path))) {
+    fail("must not duplicate or replace an upstream evidence dependency policy");
+  }
+  if (failures.length > 0) return { registry: primary, failures };
+
+  const registry = structuredClone(primary);
+  const amendment = structuredClone(downstream.evidenceDependencyPolicyAmendments[0]);
+  const tool = registry.evidenceTools.find((entry) => entry.path === amendment.toolPath);
+  const dependency = tool.scriptDependencyPolicies.find((entry) => entry.path === amendment.dependencyPath);
+  dependency.allowedBareImports.push(...amendment.addBareImports);
+  dependency.allowedLocalTargets.push(...amendment.addLocalTargets);
+  tool.scriptDependencyPolicies.push(...amendment.newDependencyPolicies);
+  registry.drafts.push(...structuredClone(downstream.drafts));
+  Object.freeze(registry.drafts);
+  return { registry: Object.freeze(registry), failures };
 }
-if (downstreamDraftRegistry.schemaVersion !== 1
-  || downstreamDraftRegistry.registryClass
-    !== "downstream-isolated-drafts-not-bound-into-upstream-readiness"
-  || downstreamDraftRegistry.upstreamRegistryPath
-    !== "scripts/system-contract-draft-registry.json"
-  || !Array.isArray(downstreamDraftRegistry.drafts)) {
-  defaultRegistryCompositionFailures.push(
-    "system-contract-downstream-draft-registry.json has an invalid downstream registry identity"
-  );
-}
-const defaultDraftRegistry = Object.freeze({
-  ...primaryDraftRegistry,
-  drafts: Object.freeze([
-    ...primaryDraftRegistry.drafts,
-    ...(Array.isArray(downstreamDraftRegistry.drafts) ? downstreamDraftRegistry.drafts : [])
-  ])
-});
+
+const {
+  registry: defaultDraftRegistry,
+  failures: defaultRegistryCompositionFailures
+} = composeSystemContractDraftRegistries(primaryDraftRegistry, downstreamDraftRegistry);
 const supportedDraftKinds = new Set(["contract", "adapter", "differential", "workspace"]);
 const supportedDraftPresence = new Set(["required", "when-present"]);
 const supportedSpecialChecks = new Set([
@@ -62,14 +109,35 @@ const supportedSpecialChecks = new Set([
 ]);
 const generatedWorkspaceDirectories = new Set([".vite", "dist", "tmp"]);
 const verifierTestPath = path.resolve(path.dirname(verifierPath), "verify-system-contract-draft-boundaries.test.mjs");
-const knownRestrictedSourcePaths = new Set([
-  "apps/web/src/lib/local-user-data-cleanup.ts"
-]);
+const sourceAccessRegistryPath = "docs/release/known-restricted-blockers.v1.json";
 const verifierFiles = new Set([
   verifierPath,
   ...(fs.existsSync(verifierTestPath) ? [fs.realpathSync(verifierTestPath)] : [])
 ]);
 const codeFilePattern = /\.(?:[cm]?[jt]sx?)$/u;
+
+// This exact configuration registers isolated Vitest projects without adding
+// production aliases. Only its reviewed source may skip the conservative text
+// fallback; alias names and targets are still inspected below.
+const reviewedVitestProjectRegistration = Object.freeze({
+  path: "apps/web/vitest.config.ts",
+  normalizedSha256: "2bdc0ebfe4dbcc7b18b6800d3e079df082a84cdb76b2d5af9bf7bde00851af72"
+});
+
+// These reviewed test files load locally generated test modules. This only
+// classifies their existing source during static scanning; it never runs them.
+// Any source edit requires another review. All static imports remain checked,
+// and application code cannot import either test.
+const reviewedGeneratedModuleTests = new Map([
+  ["scripts/verify-bazi-private-exact-quote-material.test.mjs", {
+    normalizedSha256: "a77f5bd10eee80bb0c656d2713471109fec0a77227a8d1026008e2360b60b9df",
+    dynamicImportCount: 2
+  }],
+  ["isolated-drafts/bazi-expert-review-pilot/test/server-and-package.test.mjs", {
+    normalizedSha256: "075a21f6072318de9e0d993982fcffae9fca31731951c5f25f3aa964391be8c2",
+    dynamicImportCount: 3
+  }]
+]);
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -1445,7 +1513,7 @@ function collectStaticStringsFromAliasArrayEntry(
   });
 }
 
-function extractViteAliasTargetLiterals(source) {
+function extractViteAliasLiterals(source) {
   const ast = parse(source, {
     sourceType: "unambiguous",
     errorRecovery: false,
@@ -1453,6 +1521,37 @@ function extractViteAliasTargetLiterals(source) {
   });
   const { nodeScopes, rootScope } = buildLexicalScopeIndex(ast);
   const literals = [];
+  const names = [];
+  const collectNames = (candidate, scope, arrayEntry = false, seenBindings = new Set()) => {
+    visitResolvedStaticNodes(candidate, scope, nodeScopes, seenBindings, (resolved, resolvedScope, nextSeen) => {
+      if (resolved.type === "ArrayExpression") {
+        for (const entry of resolved.elements ?? []) {
+          collectNames(entry?.type === "SpreadElement" ? entry.argument : entry,
+            nodeScopes.get(entry) ?? resolvedScope, true, nextSeen);
+        }
+      } else if (resolved.type === "ObjectExpression") {
+        for (const property of resolved.properties ?? []) {
+          const propertyScope = nodeScopes.get(property) ?? resolvedScope;
+          if (property.type === "SpreadElement") {
+            collectNames(property.argument, propertyScope, arrayEntry, nextSeen);
+          } else if (property.type === "ObjectProperty") {
+            const keys = staticPropertyNames(property, propertyScope, nodeScopes);
+            if (!arrayEntry) names.push(...keys);
+            else if (keys.includes("find")) {
+              visitResolvedStaticNodes(property.value, propertyScope, nodeScopes, nextSeen, (value) => {
+                if (value.type === "RegExpLiteral") names.push(value.pattern);
+                else names.push(...staticStringValues(value, nodeScopes.get(value) ?? propertyScope, nodeScopes));
+              });
+            }
+          }
+        }
+      }
+    });
+  };
+  const collectAlias = (candidate, scope, seenBindings) => {
+    collectNames(candidate, scope, false, seenBindings);
+    collectStaticStringsFromAliasValue(candidate, scope, nodeScopes, literals, seenBindings);
+  };
   const visit = (node, callback) => {
     if (!node || typeof node !== "object") return;
     callback(node, nodeScopes.get(node) ?? rootScope);
@@ -1481,13 +1580,7 @@ function extractViteAliasTargetLiterals(source) {
         const propertyScope = nodeScopes.get(property) ?? resolvedScope;
         if (property?.type === "ObjectProperty"
           && staticPropertyNames(property, propertyScope, nodeScopes).includes("alias")) {
-          collectStaticStringsFromAliasValue(
-            property.value,
-            propertyScope,
-            nodeScopes,
-            literals,
-            nextSeen
-          );
+          collectAlias(property.value, propertyScope, nextSeen);
         } else if (property?.type === "SpreadElement") {
           collectAliasPropertyFromObject(property.argument, propertyScope, nextSeen);
         }
@@ -1504,13 +1597,13 @@ function extractViteAliasTargetLiterals(source) {
     const assignmentPaths = memberPaths(node.left, scope);
     for (const assignmentPath of assignmentPaths) {
       if (assignmentPath.slice(-2).join(".") === "resolve.alias") {
-        collectStaticStringsFromAliasValue(node.right, scope, nodeScopes, literals);
+        collectAlias(node.right, scope);
       } else if (assignmentPath.at(-1) === "resolve") {
         collectAliasPropertyFromObject(node.right, scope);
       }
     }
   });
-  return [...new Set(literals)];
+  return { targets: [...new Set(literals)], names: [...new Set(names)] };
 }
 
 function aliasLiteralReachesEvidenceSurface(
@@ -1981,8 +2074,24 @@ function inspectZiweiWorkspaceBrowserAppBoundary(
   }
 
   const rootManifest = readJson(path.join(workspaceRoot, "package.json"));
-  if (rootManifest.scripts?.build !== "npm run build --workspace @hakimi/web") {
-    record("package.json ordinary build must remain the legacy Web workspace build, not the isolated Ziwei Browser app");
+  try {
+    const webManifest = rootManifest.scripts?.build === "npm run build --workspace @hakimi/web"
+      ? null : readJson(path.join(workspaceRoot, "apps/web/package.json"));
+    verifyOrdinaryWebBuild(rootManifest, webManifest);
+  } catch {
+    record("package.json ordinary build must retain the fixed Web workspace target and must not select an isolated draft app");
+  }
+}
+
+export function verifyOrdinaryWebBuild(rootManifest, webManifest) {
+  if (rootManifest?.scripts?.build === "npm run build --workspace @hakimi/web") return;
+  const plan = resolveDefaultLifecyclePlan("build", {
+    root: { path: "package.json", packageJson: rootManifest },
+    web: { path: "apps/web/package.json", packageJson: webManifest }
+  });
+  const program = plan.steps.find((step) => step.id === "program");
+  if (program?.cwd !== "apps/web" || program.command !== "vite build --configLoader runner") {
+    throw new Error("Ordinary build must use the fixed Web program from the default lifecycle plan.");
   }
 }
 
@@ -2779,6 +2888,23 @@ export function verifySystemContractDraftBoundaries(
     record("workspace root must not be a symbolic link or junction");
   }
   const workspaceRoot = fs.realpathSync(requestedWorkspaceRoot);
+  let knownRestrictedSourcePaths;
+  try {
+    const sourceAccessRegistry = readJson(path.join(workspaceRoot, sourceAccessRegistryPath));
+    if (sourceAccessRegistry?.recordType !== "known_restricted_blocker_registry"
+      || !Array.isArray(sourceAccessRegistry.blockers)
+      || sourceAccessRegistry.blockers.some((blocker) => !Array.isArray(blocker.restrictedPaths)
+        || !blocker.restrictedPaths.every(isSafeRegistryRelativePath)
+        || !Array.isArray(blocker.forbiddenActions))) {
+      throw new Error("invalid source access registry");
+    }
+    knownRestrictedSourcePaths = new Set(sourceAccessRegistry.blockers
+      .filter((blocker) => blocker.forbiddenActions.includes("read_source"))
+      .flatMap((blocker) => blocker.restrictedPaths));
+  } catch (cause) {
+    record(`${sourceAccessRegistryPath} must provide a valid source access registry before inspecting source: ${cause.message}`);
+    return Object.freeze(failures);
+  }
   inspectWorkspaceLinks(workspaceRoot, workspaceRoot, record);
   for (const restrictedPath of knownRestrictedSourcePaths) {
     const absoluteRestrictedPath = path.resolve(workspaceRoot, ...restrictedPath.split("/"));
@@ -2865,6 +2991,14 @@ export function verifySystemContractDraftBoundaries(
       if (tool.allowedCallers?.includes(evidencePath)) {
         evidenceEntrypointOwnerByRealPath.set(realEvidencePath, tool.path);
       }
+    }
+  }
+  for (const testPath of reviewedGeneratedModuleTests.keys()) {
+    evidenceSurfacePaths.add(testPath);
+    const realTestPath = realPathIfExisting(path.join(workspaceRoot, testPath));
+    if (realTestPath) {
+      evidenceSurfaceRealPaths.add(realTestPath);
+      evidenceSurfacePathByRealPath.set(realTestPath, testPath);
     }
   }
   const packageDirectories = draftPackages.map((draft) => path.join(workspaceRoot, "packages", draft.directoryName));
@@ -3057,7 +3191,15 @@ export function verifySystemContractDraftBoundaries(
       || sourceRelativePath.startsWith("packages/");
     const isHtml = path.extname(sourceFile).toLowerCase() === ".html";
     const moduleLoads = isHtml ? scanHtmlModuleLoadCalls(source) : scanModuleLoadCalls(source);
-    for (const moduleLoad of moduleLoads.filter((entry) => entry.nonLiteral)) {
+    const nonLiteralLoads = moduleLoads.filter((entry) => entry.nonLiteral);
+    const generatedModuleTest = reviewedGeneratedModuleTests.get(sourceRelativePath);
+    const reviewedGeneratedLoads = generatedModuleTest !== undefined
+      && !isRuntimeSource
+      && createHash("sha256").update(source.replaceAll("\r\n", "\n")).digest("hex")
+        === generatedModuleTest.normalizedSha256
+      && nonLiteralLoads.length === generatedModuleTest.dynamicImportCount
+      && nonLiteralLoads.every((entry) => entry.kind === "dynamic import");
+    for (const moduleLoad of reviewedGeneratedLoads ? [] : nonLiteralLoads) {
       record(`${relative(workspaceRoot, sourceFile)} uses non-literal ${moduleLoad.kind} module loading`);
     }
     const extractedSpecifiers = isHtml
@@ -3082,6 +3224,10 @@ export function verifySystemContractDraftBoundaries(
       if (localSpecifier) {
         const resolved = resolveWorkspaceModule(workspaceRoot, sourceFile, specifier);
         const resolvedRelativePath = resolved ? relative(workspaceRoot, resolved) : null;
+        if (reviewedGeneratedModuleTests.has(resolvedRelativePath)) {
+          record(`${sourceRelativePath} imports a generated-module test surface ${resolvedRelativePath}`);
+          continue;
+        }
         const referencedEvidenceTool = resolved
           ? evidenceToolByRealPath.get(resolved)
           : resolvedRelativePath
@@ -3171,8 +3317,13 @@ export function verifySystemContractDraftBoundaries(
     ))
   ].filter(Boolean));
   for (const aliasFile of executableAliasFiles) {
-    const sourceWithoutComments = maskJavaScriptComments(fs.readFileSync(aliasFile, "utf8"));
-    if (!allowedIsolatedViteBridges.has(fs.realpathSync(aliasFile))) {
+    const aliasSource = fs.readFileSync(aliasFile, "utf8");
+    const reviewedProjectRegistration = relative(workspaceRoot, aliasFile)
+      === reviewedVitestProjectRegistration.path
+      && createHash("sha256").update(aliasSource.replaceAll("\r\n", "\n")).digest("hex")
+        === reviewedVitestProjectRegistration.normalizedSha256;
+    if (!reviewedProjectRegistration && !allowedIsolatedViteBridges.has(fs.realpathSync(aliasFile))) {
+      const sourceWithoutComments = maskJavaScriptComments(aliasSource);
       for (const draft of draftPackages) {
         if (sourceWithoutComments.includes(draft.packageName) || sourceWithoutComments.includes(draft.directoryName)) {
           record(`${relative(workspaceRoot, aliasFile)} must not alias isolated draft ${draft.packageName}`);
@@ -3181,7 +3332,15 @@ export function verifySystemContractDraftBoundaries(
     }
     let aliasTargetLiterals = [];
     try {
-      aliasTargetLiterals = extractViteAliasTargetLiterals(fs.readFileSync(aliasFile, "utf8"));
+      const aliases = extractViteAliasLiterals(aliasSource);
+      aliasTargetLiterals = aliases.targets;
+      if (!allowedIsolatedViteBridges.has(fs.realpathSync(aliasFile))) {
+        for (const draft of draftPackages) {
+          if (aliases.names.some((name) => name.includes(draft.packageName) || name.includes(draft.directoryName))) {
+            record(`${relative(workspaceRoot, aliasFile)} must not alias isolated draft ${draft.packageName}`);
+          }
+        }
+      }
     } catch (cause) {
       record(`${relative(workspaceRoot, aliasFile)} cannot be statically parsed for Vite alias governance: ${cause instanceof Error ? cause.message : String(cause)}`);
     }

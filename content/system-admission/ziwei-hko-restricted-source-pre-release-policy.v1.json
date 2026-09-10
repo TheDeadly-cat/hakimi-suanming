@@ -81,8 +81,8 @@
     "quickCi": {
       "workflowPath": ".github/workflows/quick-ci.yml",
       "jobId": "toolchain-and-boundaries",
-      "jobBlockBytes": 2300,
-      "jobBlockSha256": "c11c430b0642e9bb7f593df4eef220a2ede751e721cb7e7fb969c6ec5afaa73e",
+      "jobBlockBytes": 2435,
+      "jobBlockSha256": "a7391001d65519721671dbd53d241468571e32905ddcc3246c3ec19f48cd0fe0",
       "checkCommand": "npm run check:ziwei-iztro-isolated-build-license-notices",
       "testCommand": "npm run test:ziwei-iztro-isolated-build-license-notices",
       "checkExactCount": 1,
@@ -90,9 +90,8 @@
       "checkBeforeTest": true,
       "bothBeforeCommands": [
         "npm run check:system-contract-draft-boundaries",
-        "npm run check:independent-source-binding-requirements",
-        "npm run check:independent-domain-release-manifests",
-        "npm run check:system-admission-registry",
+        "npm run check:independent-source-inventory",
+        "npm run check:independent-domain-inventory",
         "npm run check:release-governance"
       ]
     },
@@ -121,8 +120,8 @@
     {
       "role": "formal_npm_lifecycle_closure_resolver",
       "path": "scripts/formal-npm-lifecycle-closure-lib.mjs",
-      "bytes": 11589,
-      "sha256": "7cc1c4d8e31861636bc4f18e5817f6ff3ffed9b60f8092f630e422678d97ebc9"
+      "bytes": 19013,
+      "sha256": "7a2cbdc59357b4c84cc866384f7df67eeab67e089bb1527b43cf061dcbccbfd8"
     }
   ],
   "persistenceBoundary": {
@@ -169,7 +168,7 @@
       "independentlyRecomputedFromReceiptAndPackageInputs": true,
       "exactParentClosureIdentityPersisted": false,
       "terminalCommandGrammar": "exact_static_release_terminal_allowlist_v1",
-      "allowedTerminalCommandCount": 28,
+      "allowedTerminalCommandCount": 30,
       "opaqueOrDynamicTerminalCommandsAcceptedByStaticModel": false,
       "modeledStaticHkoReferenceCount": 0,
       "effectiveNpmRuntimeClosureEstablished": false,
@@ -205,5 +204,5 @@
     "pre_or_post_lifecycle_execution_cannot_be_skipped",
     "transitive_module_config_or_wrapper_execution_absence"
   ],
-  "policyDigest": "19c562326ee4da68f767025adb192b2e92190645862c9c357e9f5af29630d6b0"
+  "policyDigest": "f655e72102ff0b7616fca868c89deb6f1fac1828529a78dccf391655b25fbf11"
 }

@@ -534,6 +534,48 @@ export class DatabaseGenerationController {
     return state;
   }
 
+  /** Reads through this controller's existing native handle without opening or reopening a database. */
+  async readCommittedGenerationFromOpenConnection(): Promise<DatabaseGenerationReleaseState | null> {
+    const connection = this.database.backendDB();
+    if (!connection || !this.database.isOpen()) {
+      throw new DatabaseGenerationError("CONTROL_STATE_CONFLICT", "release control connection is not open");
+    }
+    const state = await new Promise<DatabaseGenerationReleaseState | null>((resolve, reject) => {
+      // No await or Dexie table operation between acquiring the handle and
+      // creating this readonly transaction. A closing handle throws; it must
+      // never trigger Dexie's automatic open or InvalidState reopen retry.
+      try {
+        const transaction = connection.transaction(DATABASE_GENERATION_RELEASE_STATE_STORE, "readonly");
+        const request = transaction.objectStore(DATABASE_GENERATION_RELEASE_STATE_STORE).get(CURRENT_RELEASE_STATE_ID);
+        let received = false;
+        let result: DatabaseGenerationReleaseState | null = null;
+        request.onsuccess = () => {
+          result = request.result ?? null;
+          received = true;
+        };
+        request.onerror = () => reject(request.error ?? new DatabaseGenerationError(
+          "CONTROL_STATE_CONFLICT", "release control readonly request failed"
+        ));
+        transaction.onabort = () => reject(transaction.error ?? new DatabaseGenerationError(
+          "CONTROL_STATE_CONFLICT", "release control readonly transaction aborted"
+        ));
+        transaction.onerror = () => reject(transaction.error ?? new DatabaseGenerationError(
+          "CONTROL_STATE_CONFLICT", "release control readonly transaction failed"
+        ));
+        transaction.oncomplete = () => received
+          ? resolve(result)
+          : reject(new DatabaseGenerationError("CONTROL_STATE_CONFLICT", "release control readonly request did not complete"));
+      } catch (failure) {
+        reject(failure);
+      }
+    });
+    if (state) await this.assertReleaseStateIntegrity(state);
+    if (!this.database.isOpen() || this.database.backendDB() !== connection) {
+      throw new DatabaseGenerationError("CONTROL_STATE_CONFLICT", "release control connection changed during readonly verification");
+    }
+    return state;
+  }
+
   /**
    * Commits a fresh digest/build receipt without changing the physical database
    * generation or schema. Callers use this after freezing writes in a compatible

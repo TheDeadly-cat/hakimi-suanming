@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "ai_assisted_review_validation_summary",
+  "asOf": "2026-09-10",
+  "sourceLabels": [
+    "ChatGPT",
+    "豆包"
+  ],
+  "doubaoDraftsAndErrataSameSource": true,
+  "humanExpertOpinionsAdded": 0,
+  "formalAdmissionChanged": false,
+  "runtimeParametersChangedByAiReview": false,
+  "fixedInput": {
+    "repoPath": "docs/review-data/bazi-policy-sensitivity-20260907.json",
+    "bytes": 193129,
+    "sha256": "82546a53e9d0cd73d50b8cad2ba829231d44a53a92935cf8dacdf5ae2894cf54"
+  },
+  "verifiedArithmetic": {
+    "inputs": 3,
+    "hourModes": 2,
+    "scenarioRows": 36,
+    "boundaryRows": 9,
+    "sourceFactorRecords": 71,
+    "appliedFactorRecords": 343,
+    "countsOverlap": true
+  },
+  "doubaoV2": {
+    "registeredChecks": 164,
+    "registeredFailures": 0,
+    "returnedOutputReproduced": true,
+    "fiveTargetedNegativeBusinessChecksObserved": true,
+    "emptyMaterialManifestIncorrectSuccessReproduced": true,
+    "scope": "fixed inputs with separately verified full material manifest; not a general acceptance validator"
+  },
+  "newObservations": [
+    "CADAL003 年爲本 vs Gujin028 月為本; preferred reading unresolved",
+    "CADAL004 須|要 vs Gujin028 地|支 column boundary",
+    "AI upstream manifest resolves to B-distribution manifest",
+    "claimed intake hash mismatch refuted; original hashes match"
+  ],
+  "offlineEvidence": [
+    {
+      "label": "initial_intake",
+      "fileName": "收件清单.json",
+      "bytes": 1860,
+      "sha256": "34f1829f156809f32d5e8cf985f845267c573d5c80c1c1c5a8e34e7a255d173c"
+    },
+    {
+      "label": "initial_audit_manifest",
+      "fileName": "核验交付清单.json",
+      "bytes": 17365,
+      "sha256": "f444304698f4d02611f0c25656f2e2e9c1e810b4009d2f13327ac94528e36d59"
+    },
+    {
+      "label": "errata_audit_manifest",
+      "fileName": "核验交付清单.json",
+      "bytes": 8871,
+      "sha256": "c4ddbbab465be18090b071a5dbd18ede610b444500d56b4a5ea3677d7d22212a"
+    },
+    {
+      "label": "errata_replay",
+      "fileName": "复跑与负例汇总.json",
+      "bytes": 14164,
+      "sha256": "2c88666a2d1e1e3eef5d4b867738dd890c7a397ab4fab0078259b3049d4c9736"
+    }
+  ],
+  "rawReturnsAndCarriersPublished": false,
+  "limitations": [
+    "No human expert qualification or independence attestation",
+    "No empirical calibration or predictive validity",
+    "No reconstruction of calendar or hidden-stem authority",
+    "Historical model-session execution not authenticated",
+    "No full application UI verification in AI review",
+    "No edition-lineage or whole-book collation acceptance"
+  ]
+}

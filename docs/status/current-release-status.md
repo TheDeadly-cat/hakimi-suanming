@@ -1,8 +1,8 @@
-# 当前发布状态
+# 当前发布状态（历史长账）
 
-更新时间：2026-09-01
+更新时间：2026-09-04
 
-本页是当前发布身份的人工权威入口；机器权威来自构建 HTML 中的发布清单和 Release Evidence。历史交接文档保留作证据，不代表当前发布授权。
+本页已降格为人工历史长账，不再是当前机器权威入口。唯一机器源是 [current-index.v1.json](../../content/system-admission/current-index.v1.json)；便于人工阅读的生成投影是 [current-index-summary.md](./current-index-summary.md)。本页后续内容保留作历史证据，不代表当前发布授权。
 
 ## 当前默认
 

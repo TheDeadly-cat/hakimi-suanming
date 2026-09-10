@@ -735,6 +735,38 @@
   }
 }
 
+/* The narrow formal view has exactly three visible columns: field, A and the
+   active comparison. Fixed desktop widths leave empty tracks for hidden slots
+   and force horizontal scrolling even though the other slots are switched. */
+@media (max-width: 1099px) {
+  .comparison-matrix-scroll[data-display-mode="formal"][data-difference-scope="active_pair"] .comparison-matrix {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  .comparison-matrix-scroll[data-display-mode="formal"][data-difference-scope="active_pair"] .comparison-matrix thead th {
+    position: static;
+    min-width: 0;
+    padding: 9px 7px;
+  }
+
+  .comparison-matrix-scroll[data-display-mode="formal"][data-difference-scope="active_pair"] .comparison-matrix thead th:first-child,
+  .comparison-matrix-scroll[data-display-mode="formal"][data-difference-scope="active_pair"] tbody tr:not(.comparison-section-row) > th {
+    position: static;
+    width: 30%;
+  }
+
+  .comparison-matrix-scroll[data-display-mode="formal"][data-difference-scope="active_pair"] .comparison-matrix thead th:not(:first-child) {
+    width: 35%;
+  }
+
+  .comparison-matrix-scroll[data-display-mode="formal"][data-difference-scope="active_pair"] .comparison-matrix tbody tr:not(.comparison-section-row) > :is(th, td) {
+    min-width: 0;
+    padding: 9px 7px;
+  }
+}
+
 @media print {
   .comparison-matrix-scroll[data-display-mode] {
     overflow: visible;
@@ -777,6 +809,7 @@
   .comparison-active-binding,
   .comparison-active-binding__item,
   .comparison-evidence-boundary,
+  .comparison-matrix-scroll[data-display-mode] .comparison-cell-status,
   .comparison-matrix-scroll[data-display-mode] .comparison-cell-empty,
   .comparison-binding-error {
     border-color: CanvasText;

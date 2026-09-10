@@ -46,8 +46,8 @@ test("启动预检期间地址发生变化时拒绝用旧路由替新路由确�
 test("BOOT_OK 后的未捕获错误进入独立运行故障态，不篡改已完成的启动确认", async ({ page }) => {
   page.on("pageerror", () => undefined);
   await page.goto("/cases/research", { waitUntil: "domcontentloaded" });
-  await expect.poll(() => page.evaluate(() => document.documentElement.dataset.appBootReady)).toBe("true");
-  await expect.poll(() => page.evaluate(() => document.documentElement.dataset.swBootSignalSent)).toBe("true");
+  await expect(page.locator("html")).toHaveAttribute("data-app-boot-ready", "true");
+  await expect(page.locator("html")).toHaveAttribute("data-sw-boot-signal-sent", "true");
   await expect(page.getByRole("heading", { name: "专业研究检索" })).toBeVisible();
 
   await page.evaluate(() => {

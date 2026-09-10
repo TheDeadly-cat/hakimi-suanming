@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { CURRENT_RELEASE_ENGINEERING_IDENTITY } from "./current-release";
 
 const APP_BOOT_READY_EVENT = "hakimi:app-boot-ready";
 const APP_BOOT_READY_ATTRIBUTES = [
@@ -14,19 +15,20 @@ const APP_BOOT_READY_ATTRIBUTES = [
   "data-mutation-epoch-bypassed"
 ] as const;
 
-function ensureFixedReleaseIdentity(root: HTMLElement): void {
-  root.dataset.releaseContract ??= "legacy-v13";
-  root.dataset.targetSchema ??= "13";
-  root.dataset.migrationId ??= "null";
+function ensureDevelopmentReleaseIdentity(root: HTMLElement): void {
+  if (import.meta.env.PROD) return;
+  root.dataset.releaseContract ??= CURRENT_RELEASE_ENGINEERING_IDENTITY.dbGeneration;
+  root.dataset.targetSchema ??= String(CURRENT_RELEASE_ENGINEERING_IDENTITY.targetSchema);
+  root.dataset.migrationId ??= CURRENT_RELEASE_ENGINEERING_IDENTITY.migrationId ?? "null";
 }
 
-function hasFixedBootGovernance(root: HTMLElement): boolean {
+function hasCurrentBootGovernance(root: HTMLElement): boolean {
   const dataset = root.dataset;
-  return dataset.dbGeneration === "legacy-v13"
-    && dataset.dbSchema === "13"
-    && dataset.releaseContract === "legacy-v13"
-    && dataset.targetSchema === "13"
-    && dataset.migrationId === "null"
+  return dataset.dbGeneration === CURRENT_RELEASE_ENGINEERING_IDENTITY.dbGeneration
+    && dataset.dbSchema === String(CURRENT_RELEASE_ENGINEERING_IDENTITY.targetSchema)
+    && dataset.releaseContract === CURRENT_RELEASE_ENGINEERING_IDENTITY.dbGeneration
+    && dataset.targetSchema === String(CURRENT_RELEASE_ENGINEERING_IDENTITY.targetSchema)
+    && dataset.migrationId === (CURRENT_RELEASE_ENGINEERING_IDENTITY.migrationId ?? "null")
     && dataset.engineeringEvidenceOnly === "true"
     && dataset.publicReleaseAuthorized === "false"
     && dataset.expertTruthClaimed === "false"
@@ -37,7 +39,7 @@ export function isAppBootReady(): boolean {
   if (typeof document === "undefined") return false;
   try {
     const root = document.documentElement;
-    return root.dataset.appBootReady === "true" && hasFixedBootGovernance(root);
+    return root.dataset.appBootReady === "true" && hasCurrentBootGovernance(root);
   } catch {
     return false;
   }
@@ -46,9 +48,9 @@ export function isAppBootReady(): boolean {
 export function setAppBootReadyState(ready: boolean): void {
   if (typeof document === "undefined" || typeof window === "undefined") return;
   const root = document.documentElement;
-  ensureFixedReleaseIdentity(root);
+  ensureDevelopmentReleaseIdentity(root);
   const requestedReady = ready === true;
-  const nextReady = requestedReady && hasFixedBootGovernance(root);
+  const nextReady = requestedReady && hasCurrentBootGovernance(root);
   if (requestedReady && !nextReady) {
     root.dataset.appBootReadyRejection = "RELEASE_GOVERNANCE_MISMATCH";
   } else {

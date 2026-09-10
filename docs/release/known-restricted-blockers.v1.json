@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "recordType": "known_restricted_blocker_registry",
-  "updatedAt": "2026-08-26T00:00:00.000Z",
+  "updatedAt": "2026-09-05T07:37:37.000Z",
   "releaseGovernance": {
     "releaseIdentity": "legacy-v13",
     "targetSchema": 13,
@@ -13,27 +13,48 @@
   "blockers": [
     {
       "blockerId": "known-restricted-full-workspace-typecheck/1",
-      "status": "blocked-known-restricted",
+      "status": "source-access-authorized",
       "affectedGates": [
         "full-workspace-typecheck"
       ],
       "aggregateImpact": [
         "default-legacy-v13-aggregate-gate"
       ],
-      "restrictedPaths": [
+      "restrictedPaths": [],
+      "previouslyRestrictedPaths": [
         "apps/web/src/lib/local-user-data-cleanup.ts"
       ],
+      "authorization": {
+        "source": "explicit_user_instruction",
+        "recordedAt": "2026-09-05T07:37:37.000Z",
+        "scope": [
+          "read_source",
+          "necessary_source_fix",
+          "full_typecheck",
+          "full_vitest",
+          "full_build",
+          "isolated_browser_validation"
+        ],
+        "doesNotAuthorize": [
+          "expert_claims",
+          "source_rights_admission",
+          "public_deployment"
+        ]
+      },
       "allowedActions": [
         "record_status",
-        "improve_ci_observability"
+        "improve_ci_observability",
+        "read_source",
+        "necessary_source_fix",
+        "full_typecheck",
+        "full_vitest",
+        "full_build",
+        "isolated_browser_validation"
       ],
       "forbiddenActions": [
-        "read_source",
-        "modify_source",
         "exclude_from_typecheck",
         "suppress_error",
-        "xfail",
-        "infer_internal_bug"
+        "xfail"
       ],
       "observation": {
         "state": "prior_quick_ci_failure_reported_not_reverified_in_this_registry",
@@ -47,7 +68,13 @@
   "quickCiObservability": {
     "workflow": ".github/workflows/quick-ci.yml",
     "parallelEvidenceJobs": [
+      "ci-contracts",
+      "node-release-evidence",
+      "node-package-artifacts",
       "toolchain-and-boundaries",
+      "history-checkpoint-governance",
+      "current-index-governance",
+      "bazi-current-semantics",
       "full-typecheck",
       "full-vitest",
       "default-v13-web-build"

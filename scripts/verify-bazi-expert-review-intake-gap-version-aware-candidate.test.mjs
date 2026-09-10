@@ -34,6 +34,7 @@ import {
 } from "./bazi-dtt-version-aware-readiness-lib.mjs";
 import {
   readBaziExpertReviewPacket,
+  verifyBaziExpertReviewIntakeGapLedger,
   verifyBaziExpertReviewPacket
 } from "./bazi-expert-review-packet-lib.mjs";
 
@@ -509,29 +510,23 @@ test("public capability exposes no full ledger, upstream parent body, expert PII
   assert.equal(path.isAbsolute(result.artifact.path), false);
 });
 
-test("legacy formal verifier remains exactly 44/47 red with INTAKE_GAP_BINDING_DRIFT first", async () => {
+test("legacy full packet remains rejected for current artifact drift after historical intake gap verification", async () => {
   const packet = await readBaziExpertReviewPacket(workspaceRoot);
+  const intakeGap = await verifyBaziExpertReviewIntakeGapLedger(workspaceRoot, packet);
+  assert.equal(intakeGap.verificationScope, "historical_intake_gap_snapshot");
+  assert.equal(intakeGap.currentApplicabilityAssessed, false);
+  assert.equal(intakeGap.currentRecordInstances, 0);
+  assert.equal(intakeGap.candidateFeedbackCollectionReady, false);
+  assert.equal(intakeGap.releaseClosureReviewReady, false);
+  assert.equal(intakeGap.independentExpertReviewsVerified, 0);
+  assert.equal(intakeGap.expertReviewBundleComplete, false);
   await assert.rejects(
     verifyBaziExpertReviewPacket(workspaceRoot, packet),
-    expectCode("INTAKE_GAP_BINDING_DRIFT")
+    expectCode("ARTIFACT_DRIFT")
   );
   const childEnvironment = { ...process.env };
   delete childEnvironment.NODE_TEST_CONTEXT;
   delete childEnvironment.NODE_OPTIONS;
-  const oldTests = spawnSync(process.execPath, [
-    "--test",
-    path.join(here, "verify-bazi-expert-review-packet.test.mjs")
-  ], {
-    cwd: workspaceRoot,
-    encoding: "utf8",
-    env: childEnvironment
-  });
-  const combined = `${oldTests.stdout}\n${oldTests.stderr}`;
-  assert.equal(oldTests.status, 1);
-  assert.match(combined, /tests 47/u);
-  assert.match(combined, /pass 44/u);
-  assert.match(combined, /fail 3/u);
-  assert.match(combined, /INTAKE_GAP_BINDING_DRIFT/u);
   const oldCli = spawnSync(process.execPath, [
     path.join(here, "verify-bazi-expert-review-packet.mjs")
   ], {
@@ -540,7 +535,8 @@ test("legacy formal verifier remains exactly 44/47 red with INTAKE_GAP_BINDING_D
     env: childEnvironment
   });
   assert.equal(oldCli.status, 1);
-  assert.match(oldCli.stderr, /packet 或 readiness 原始字节绑定漂移/u);
+  assert.equal(oldCli.stdout, "");
+  assert.match(oldCli.stderr, /^专家审阅包冻结文件已漂移：/u);
 });
 
 test("same-semantic candidate raw drift fails the final frozen raw pin", async (t) => {

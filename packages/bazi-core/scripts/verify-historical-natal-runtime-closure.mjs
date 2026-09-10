@@ -9,6 +9,7 @@ import {
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parse, parseExpression } from "@babel/parser";
+import { resolveDefaultLifecyclePlan } from "../../../scripts/formal-npm-lifecycle-closure-lib.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultWorkspaceRoot = path.resolve(scriptDirectory, "../../..");
@@ -665,6 +666,67 @@ const BUILD_ATTESTATION_SCRIPT =
 const ROOT_BUILD_PREHOOK_COMMAND = "npm run check:historical-natal-build-attestation";
 const WEB_BUILD_PREHOOK_COMMAND = "npm --prefix ../.. run check:historical-natal-build-attestation";
 
+// These are the existing terminal checks in the current-governance chain. This
+// static inspection never loads or runs them, and does not accept opaque shell.
+const REVIEWED_ROOT_PREHOOK_TERMINALS = new Set([
+  "node scripts/verify-history-checkpoint.mjs",
+  "node scripts/verify-current-index.mjs",
+  "node scripts/verify-current-index-status.mjs",
+  "node scripts/verify-system-contract-draft-boundaries.mjs",
+  "node scripts/verify-current-independent-source-requirements.mjs",
+  "node scripts/verify-current-independent-source-inventory.mjs",
+  "node scripts/verify-bazi-engineering-binding-candidates.mjs",
+  "node scripts/verify-bazi-knowledge-core-identity-rebound-binding-readiness.mjs",
+  "node scripts/resolve-bazi-current-domain-manifest.mjs",
+  "node scripts/resolve-bazi-current-expert-review-packet.mjs",
+  "node scripts/verify-current-independent-domain-manifests.mjs",
+  "node scripts/verify-current-independent-domain-inventory.mjs",
+  "node scripts/verify-web-storage-import-boundary.mjs",
+  "node packages/bazi-core/scripts/verify-historical-natal-source-lock.mjs",
+  "node packages/bazi-core/scripts/verify-historical-natal-runtime-closure.mjs --check",
+  "node scripts/verify-release-governance.mjs"
+]);
+
+function rootPrehookRequiresHistoricalAttestation(rootScripts, prehookName, entryIsInvocation = false) {
+  const active = [];
+  let requiresAttestation = false;
+  function visitScript(name, required) {
+    const command = rootScripts[name];
+    if (command === undefined && !required) return;
+    if (typeof command !== "string" || command.trim().length === 0) {
+      fail(`root ${prehookName} requires missing npm script ${name}`);
+    }
+    if (active.includes(name)) {
+      fail(`root ${prehookName} has a cyclic npm prehook chain: ${[...active, name].join(" -> ")}`);
+    }
+    if (/[\r\n]/u.test(command)) fail(`root ${name} prehook chain contains unsupported shell syntax`);
+    active.push(name);
+    try {
+      for (const segment of command.split(/\s*&&\s*/u)) {
+        const invocation = /^npm run ([a-z0-9][a-z0-9:_-]*)$/u.exec(segment.trim());
+        if (invocation) {
+          const target = invocation[1];
+          if (/^build(?:$|:)/u.test(target)) fail(`root ${prehookName} must not recurse into ${target}`);
+          // Explicit npm run invokes the target's pre/body/post lifecycle. Every
+          // accepted edge is an && edge, so success cannot hide a failed check.
+          visitScript(`pre${target}`, false);
+          visitScript(target, true);
+          visitScript(`post${target}`, false);
+        } else if (!REVIEWED_ROOT_PREHOOK_TERMINALS.has(segment.trim())) {
+          fail(`root ${name} prehook chain contains unsupported shell syntax or terminal command`);
+        }
+      }
+      if (name === "check:historical-natal-build-attestation") requiresAttestation = true;
+    } finally {
+      active.pop();
+    }
+  }
+  if (entryIsInvocation) visitScript(`pre${prehookName}`, false);
+  visitScript(prehookName, true);
+  if (entryIsInvocation) visitScript(`post${prehookName}`, false);
+  return requiresAttestation;
+}
+
 export function verifyBundleScriptGateContracts(rootManifest, webManifest) {
   if (!rootManifest || typeof rootManifest !== "object" || Array.isArray(rootManifest)) {
     fail("root package manifest must be an object for bundle script verification");
@@ -678,8 +740,9 @@ export function verifyBundleScriptGateContracts(rootManifest, webManifest) {
     fail("root historical natal build attestation script must run source-lock then runtime-closure check exactly");
   }
   const actualRootBundleScripts = Object.entries(rootScripts)
-    .filter(([, command]) =>
-      command.includes("--workspace @hakimi/web") && /(?:^|\s)npm run build(?:\s|:)/u.test(command)
+    .filter(([name, command]) =>
+      (command.includes("--workspace @hakimi/web") && /(?:^|\s)npm run build(?:\s|:)/u.test(command))
+      || (name === "build" && command === "node scripts/run-diagnostic-stage.mjs lifecycle build")
     )
     .map(([name]) => name)
     .sort(compareText);
@@ -691,12 +754,24 @@ export function verifyBundleScriptGateContracts(rootManifest, webManifest) {
   exactSortedSet(actualWebBundleScripts, EXPECTED_WEB_VITE_BUNDLE_SCRIPTS, "direct Web Vite bundle scripts");
 
   for (const scriptName of EXPECTED_ROOT_WEB_BUNDLE_SCRIPTS) {
+    if (scriptName === "build"
+      && rootScripts.build === "node scripts/run-diagnostic-stage.mjs lifecycle build") {
+      // The default coordinator moves the governance obligation out of npm's
+      // short-circuiting pre hook. Its fixed plan retains the Web prebuild, and
+      // the full governance chain must still include the attestation command.
+      resolveDefaultLifecyclePlan("build", {
+        root: { path: "package.json", packageJson: rootManifest },
+        web: { path: "apps/web/package.json", packageJson: webManifest }
+      });
+      if (!rootPrehookRequiresHistoricalAttestation(rootScripts, "check:current-governance", true)) {
+        fail("root build coordinator must retain the historical build-attestation obligation");
+      }
+      continue;
+    }
     const prehookName = `pre${scriptName}`;
-    const command = rootScripts[prehookName];
-    if (typeof command !== "string" || !command.split(" && ").includes(ROOT_BUILD_PREHOOK_COMMAND)) {
+    if (!rootPrehookRequiresHistoricalAttestation(rootScripts, prehookName)) {
       fail(`root ${scriptName} must have a non-recursive ${prehookName} historical build-attestation prehook`);
     }
-    if (command.includes(`npm run ${scriptName}`)) fail(`root ${prehookName} must not recurse into ${scriptName}`);
   }
   for (const scriptName of EXPECTED_WEB_VITE_BUNDLE_SCRIPTS) {
     const prehookName = `pre${scriptName}`;
