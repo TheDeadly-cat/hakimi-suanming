@@ -1,10 +1,18 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import os from "node:os";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 import test from "node:test";
+import {
+  assertSwTwoGenerationFixtureCriticalSourceIdentity,
+  loadSwTwoGenerationFixtureCriticalSourceIdentity,
+  SW_TWO_GENERATION_FIXTURE_EXPECTED_CRITICAL_SOURCES
+} from "../apps/web/sw-two-generation-fixture-source-identity.ts";
 
-// These contracts read configuration and spec declarations only. They do not
-// load application modules, execute browser bodies, or rebuild an artifact.
+// These contracts read configuration, source identities and spec declarations.
+// They do not execute application/browser bodies or rebuild an artifact.
 const workflow = await readFile(new URL("../.github/workflows/migration-ci.yml", import.meta.url), "utf8");
 const lines = workflow.split(/\r?\n/u);
 const start = lines.findIndex((line) => line === "  pull_request:");
@@ -40,6 +48,7 @@ test("SW safety responsibility is covered without enumerating every new module",
 
 test("existing migration responsibilities and their path-contract test remain triggers", () => {
   for (const changedPath of [
+    ".gitattributes",
     "apps/web/src/bootstrap.ts",
     "apps/web/src/lib/release-controller-takeover-write-fence.test.ts",
     "apps/web/public/sw.js",
@@ -48,6 +57,72 @@ test("existing migration responsibilities and their path-contract test remain tr
     "scripts/verify-migration-ci-paths.test.mjs",
     ".github/workflows/migration-ci.yml"
   ]) assert(triggersFor(changedPath), changedPath);
+});
+
+test("Git Windows checkout preserves raw SW source identities and retained mixed-newline files", async (t) => {
+  const repositoryRoot = fileURLToPath(new URL("../", import.meta.url));
+  const parent = await realpath(os.tmpdir());
+  const temporaryRoot = await mkdtemp(path.join(parent, "hakimi-checkout-bytes-"));
+  const owned = await lstat(temporaryRoot, { bigint: true });
+  t.after(async () => {
+    assert.equal(path.dirname(temporaryRoot), parent);
+    assert.match(path.basename(temporaryRoot), /^hakimi-checkout-bytes-[a-z0-9]{6}$/iu);
+    assert.equal(await realpath(temporaryRoot), temporaryRoot);
+    const current = await lstat(temporaryRoot, { bigint: true });
+    assert(current.isDirectory() && !current.isSymbolicLink());
+    assert.equal(current.dev, owned.dev);
+    assert.equal(current.ino, owned.ino);
+    await rm(temporaryRoot, { recursive: true, force: true });
+  });
+  const inputRoot = path.join(temporaryRoot, "input");
+  await mkdir(inputRoot);
+  const emptyConfig = path.join(temporaryRoot, "empty-config");
+  await writeFile(emptyConfig, "", { flag: "wx" });
+  const environment = {};
+  for (const name of ["PATH", "Path", "SystemRoot", "SYSTEMROOT", "ComSpec", "COMSPEC", "TEMP", "TMP", "HOME", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "LANG", "LC_ALL"]) {
+    if (process.env[name] !== undefined) environment[name] = process.env[name];
+  }
+  environment.GIT_CONFIG_NOSYSTEM = "1";
+  environment.GIT_CONFIG_GLOBAL = emptyConfig;
+  function git(autoCrlf, ...args) {
+    const result = spawnSync("git", ["-c", `core.autocrlf=${autoCrlf}`, "-c", "core.safecrlf=false",
+      "-c", `core.attributesFile=${emptyConfig}`, ...args], {
+      cwd: inputRoot, env: environment, encoding: "utf8", windowsHide: true, timeout: 30_000
+    });
+    assert.equal(result.status, 0, `${args[0]}: ${result.stderr}`);
+  }
+  const modulePath = "apps/web/sw-two-generation-fixture-source-identity.ts";
+  const retained = ["README.md", "apps/web/e2e/service-worker-same-schema-aba.spec.ts"];
+  const paths = [".gitattributes", ...SW_TWO_GENERATION_FIXTURE_EXPECTED_CRITICAL_SOURCES.map((entry) => entry.path), modulePath, ...retained];
+  const originalBytes = new Map();
+  for (const relativePath of paths) {
+    const bytes = await readFile(path.join(repositoryRoot, relativePath));
+    originalBytes.set(relativePath, bytes);
+    const target = path.join(inputRoot, relativePath);
+    await mkdir(path.dirname(target), { recursive: true });
+    await writeFile(target, bytes, { flag: "wx" });
+  }
+  git("false", "init", "--quiet");
+  git("false", "add", "--", ...paths);
+  async function checkout(label) {
+    const outputRoot = path.join(temporaryRoot, label);
+    await mkdir(outputRoot);
+    git("true", "checkout-index", "--all", `--prefix=${outputRoot.split(path.sep).join("/")}/`);
+    return outputRoot;
+  }
+  const protectedRoot = await checkout("protected");
+  const protectedIdentity = loadSwTwoGenerationFixtureCriticalSourceIdentity(protectedRoot);
+  assertSwTwoGenerationFixtureCriticalSourceIdentity(protectedIdentity);
+  for (const relativePath of [modulePath, ...retained]) {
+    assert.deepEqual(await readFile(path.join(protectedRoot, relativePath)), originalBytes.get(relativePath), relativePath);
+  }
+  // The same actual Git checkout without attributes must reproduce raw drift.
+  await writeFile(path.join(inputRoot, ".gitattributes"), "# intentionally absent policy for the negative control\n");
+  git("false", "add", "--", ".gitattributes");
+  const unprotected = loadSwTwoGenerationFixtureCriticalSourceIdentity(await checkout("unprotected"));
+  assert.throws(() => assertSwTwoGenerationFixtureCriticalSourceIdentity(unprotected), /critical source identity drifted/u);
+  assert(unprotected.files.some((file, index) => file.rawSha256 !== protectedIdentity.files[index].rawSha256));
+  assert.deepEqual(unprotected.files.map((file) => file.normalizedSha256), protectedIdentity.files.map((file) => file.normalizedSha256));
 });
 
 test("application boot responsibility and build identity tests independently trigger Migration CI", () => {

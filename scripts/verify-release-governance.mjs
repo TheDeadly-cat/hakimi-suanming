@@ -189,6 +189,7 @@ export const REQUIRED_MIGRATION_WORKFLOW_COMMANDS = Object.freeze([
 ]);
 
 export const REQUIRED_MIGRATION_WORKFLOW_PATHS = Object.freeze([
+  ".gitattributes",
   ".node-version",
   ".npmrc",
   "package.json",

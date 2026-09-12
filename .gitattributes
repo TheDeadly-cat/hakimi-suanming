@@ -166,3 +166,25 @@
 /docs/status/delivery-status.md -text
 /docs/status/delivery-validation-20260906-history-and-product-closure.md -text
 /docs/status/delivery-validation-archive.md -text
+
+# Raw-hash SW fixture inputs must retain their reviewed LF bytes on Windows.
+/apps/web/e2e/full-backup-helpers.ts text eol=lf
+/apps/web/e2e/release-browser-persistent-context.ts text eol=lf
+/apps/web/e2e/service-worker-two-generation.spec.ts text eol=lf
+/apps/web/e2e/storage-v13-native-readonly.ts text eol=lf
+/apps/web/playwright.release-browser-matrix.ts text eol=lf
+/apps/web/playwright.sw-two-generation-fixture-reporter.ts text eol=lf
+/apps/web/playwright.sw-two-generation-fixture-result.ts text eol=lf
+/apps/web/playwright.sw-upgrade.config.ts text eol=lf
+/apps/web/public/sw.js text eol=lf
+/apps/web/release-protocol.ts text eol=lf
+/apps/web/src/lib/release-controller-takeover-write-fence.ts text eol=lf
+/apps/web/src/lib/release-database-coordinator.ts text eol=lf
+/apps/web/src/lib/service-worker-takeover-retry.ts text eol=lf
+/apps/web/src/main.tsx text eol=lf
+/apps/web/src/pages/case-library-page.tsx text eol=lf
+/apps/web/sw-two-generation-artifact-identity.ts text eol=lf
+/apps/web/sw-two-generation-fixture-source-identity.ts text eol=lf
+/packages/storage/src/index.ts text eol=lf
+/scripts/run-sw-two-generation-fixture.mjs text eol=lf
+/scripts/sw-two-generation-fixture-contract.test.mjs text eol=lf
