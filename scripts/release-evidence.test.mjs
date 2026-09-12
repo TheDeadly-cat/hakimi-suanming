@@ -2232,15 +2232,29 @@ const replayInputPath = "dist/web/release-evidence.json";
 const replayReceiptsPath = "tmp/release-evidence-receipts";
 const replayLockPath = "tmp/release-artifact-identity.json";
 
-function replayChildEnvironment() {
+function replayChildEnvironment(environment = process.env) {
   const names = [
     "SystemRoot", "WINDIR", "ComSpec", "PATH", "PATHEXT", "TEMP", "TMP",
+    "HOME", "TMPDIR", "XDG_CONFIG_HOME", "XDG_DATA_HOME", "XDG_CACHE_HOME",
     "USERPROFILE", "APPDATA", "LOCALAPPDATA", "PROGRAMFILES", "PROGRAMFILES(X86)", "PROGRAMW6432"
   ];
-  return Object.fromEntries(Object.entries(process.env).filter(([key]) =>
+  return Object.fromEntries(Object.entries(environment).filter(([key]) =>
     names.some((name) => name.toLowerCase() === key.toLowerCase())
   ));
 }
+
+test("replay child preserves platform directory context while excluding preload and credentials", () => {
+  const platformDirectories = {
+    PATH: "/usr/bin", HOME: "/synthetic/home", TMPDIR: "/synthetic/tmp",
+    XDG_CONFIG_HOME: "/synthetic/config", XDG_DATA_HOME: "/synthetic/data",
+    XDG_CACHE_HOME: "/synthetic/cache", LOCALAPPDATA: "C:\\synthetic\\local"
+  };
+  assert.deepEqual(replayChildEnvironment({
+    ...platformDirectories, NODE_OPTIONS: "--require unwanted-loader.cjs",
+    NPM_TOKEN: "synthetic-secret", GITHUB_TOKEN: "synthetic-secret",
+    HAKIMI_RELEASE_EVIDENCE_ID: "inherited-evidence-is-not-a-fixture-binding"
+  }), platformDirectories);
+});
 
 function replayCommand(cwd, executable, args) {
   return spawnSync(executable, args, {

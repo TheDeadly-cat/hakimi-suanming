@@ -12,7 +12,7 @@
 
 | 执行 | 实际结果 | 边界 |
 | --- | --- | --- |
-| 完整 `node scripts/run-node-test-group.mjs release-evidence` | **27文件、712/712；0跳过、取消、遗漏** | 原700项加12项保护测试；最终源码在增加浏览器运行时附件后再次全量通过 |
+| 完整 `node scripts/run-node-test-group.mjs release-evidence` | **27文件、713/713；0跳过、取消、遗漏** | 原700项加12项目录保护与1项子进程环境检查；712项阶段和后续713项阶段分别留档，不累加覆盖 |
 | 完整 `node scripts/run-node-test-group.mjs ci-contracts` | **56/56；0跳过、取消** | 夜间工作流合同读取兼容LF/CRLF，未修改工作流行为 |
 | `node scripts/run-diagnostic-stage.mjs typecheck` | `programStarted:true`、退出0 | 完整类型检查正文，不代表正式npm聚合准入 |
 | 原完整PWA测试文件、两个浏览器 | **2/2；各一次，0跳过/重试/不稳定** | 保留原严格reporter，另外保存JSON；固定c15ef产物，没有重新构建 |
@@ -38,6 +38,7 @@
 | 证据文件 | SHA-256 |
 | --- | --- |
 | `release-evidence-final/results.json` | `287c476d29166750e087bbd1db114b40aa25858e48138d6acf5b8c6db58a38f8` |
+| `replay-environment-fix/node-results/results.json`（后续713项） | `51ee4338b1543c209d93c2f8666c889eb505ceea018b6dfb026c5d313b517eaa` |
 | `ci-contracts-final/results.json` | `5cc673de18e0fc3d63d8794a39eaf4e86c1039051750983a6cf773fd527551f8` |
 | `final-node-checks/typecheck.stdout.log` | `51a7ece5fd0044cad8757f1bcfa994d622848fdd3b9d21c69106fd812fc3ad16` |
 | `browser-v2/results.json` | `9040ffd85d3fe5a3aba599d4c687a3966dabe19ce6c308abdb3c1b174f76a941` |
@@ -55,3 +56,11 @@
 两次运行的完整原始日志分别为`remote-ci-baseline/34710918460.log`（`8626958d687350e13f590ec1da88aff344d079c9b80049143fe30930915be33f`）和`34710918485.log`（`68f84c99fffb57ed5488b959eed13b1db102191f83f31ef3fafe85012d2f9d28`）。安装分支的当前清单修复留在该分支，不混入PWA补丁。
 
 完整交付目标仍未完成：专家结构/进度/正式准入职责拆分、269项治理失败逐组归因修复、远端剩余失败处理、下一份独立候选及同产物矩阵、另一台Windows安装和本人真实研究反馈、真实来源校勘与专家原始材料。PWA工程验证不增加专家人数，也不授权替换现用版本或合并main。
+
+## PWA分支首次远端回放差异
+
+`f450e2d1f85c5ed3776684d8ac4fb83d91985405`的[Quick CI 34712315244](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/34712315244)已终态failure。新增12项目录保护测试全部通过；完整发布证据组为703通过/9失败，9项均位于原归档回放测试。完整类型检查、构建及产物清单验证通过，不能将其他失败隐去。
+
+首个实际错误是生成端记录的Chrome/Edge版本包含`mkdir: cannot create directory '/.local': Permission denied`，而父进程核验端记录正常版本。归档生成子进程的环境白名单原先只有Windows目录变量，没有继承HOME和XDG目录上下文；Linux浏览器启动包装脚本在`--version`路径上因此访问错误的目录。后续回放负例也先被这一工具链不匹配阻断。
+
+修复只在测试子进程中保留已有HOME、TMPDIR和三项XDG目录变量，继续排除NODE_OPTIONS、凭据和继承的证据ID。没有改生产版本检测器来删掉stderr，也没有重写已生成回执；每轮重新生成各自的合成回放材料。新增环境白名单负例后，本机完整组为713/713，零跳过/取消/遗漏。原远端结果位于`remote-p2-first/`；最新本机结果位于`replay-environment-fix/node-results/results.json`。Linux修复是否通过必须由后续head的远端结果确认，不能从本机通过推断。
