@@ -50,4 +50,16 @@ Windows脚本验证使用 `-NoShortcut`、`-NoBrowser`、`-NoDialogs`；只在�
 | `checks/ci-contracts-before-install/results.json` | `b5009cc9f2457391e5ddf10af6eb448e2b00c0d80c49e6c0b4b67a5ba4887ad9` |
 | `checks/ci-contracts-after-install/results.json` | `98b0e409562d6715e88e420008231efeef5cc34f5b2f4a5344cfb7f7b41961d5` |
 
-本次未重新执行完整TypeScript、Vitest、应用构建或浏览器矩阵；09-10的2825项Vitest通过、269项治理失败和1项发布证据失败仍属于原记录。正式专家材料、另一台Windows实测和完整交付目标仍待完成。源码推送不表示主分支合并、远端CI通过或替换本人固定安装。
+初次`cdb8457`同步未重新执行完整TypeScript、Vitest、应用构建或浏览器矩阵；09-10的2825项Vitest通过、269项治理失败和1项发布证据失败仍属于原记录。后续远端及修复结果单列如下。正式专家材料、另一台Windows实测和完整交付目标仍待完成。源码推送不表示主分支合并、远端CI通过或替换本人固定安装。
+
+## Draft PR 远端基线与当前构建清单修复
+
+[Draft PR #1](https://github.com/TheDeadly-cat/hakimi-suanming/pull/1)以既有开发分支为base，未合并main。`cdb845782c88491ce511e4027f7a8c73ef0f02d8`的[Quick CI 34710918460](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/34710918460)和[Migration CI 34710918485](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/34710918485)均已完成，终态failure。
+
+Quick CI的类型检查、CI合同、包产物工具、current索引和历史checkpoint通过；Vitest为2824通过/1失败（birth-time-perturbation-panel焦点断言）。专家资格加载与原始意见仍缺失，正式门继续拒绝。另有西洋构建告示观察不匹配、旧PWA合同失败；Windows迁移在raw源码身份检查处停止。这些初次失败没有被抹去或冒充通过。
+
+安装分支引入的构建失败已复现并修复：`package.json`更换两个桌面命令后为32306字节，当前运行时清单仍记录旧32319字节。使用仓库现有`verify-historical-natal-runtime-closure.mjs --write`重建当前清单，再以`--check`核验；差异严格只有`package.json`的大小、摘要和清单总摘要三个字段，所有运行时源文件和依赖记录不变。该清单声明的范围是`current_checkout_runtime_closure_not_historical_binary_or_expert_attestation`，不属于历史缺失原件或专家意见。
+
+修复后完整包产物工具组**38/38，0跳过/取消**；`node scripts/run-diagnostic-stage.mjs build`实际启动并退出0。输出仅在隔离源码目录，用于检查这项构建修复，未作为下一候选准入、未安装、未覆盖c15ef。原v4安装包和137文件产物锁不变。
+
+原始日志保存在`Z:/HakimiBaziBackups/LocalDelivery/2026-09-13/pwa-profile-contract/p1-build-binding-fix/`：`build.stdout.log` SHA-256为`0e91b93a31a5b9201f6a2edcf18b0b1f0b29db69734b2e5c4dbe1ce285e44312`；`package-artifacts.stdout.log`为`fcf0c2f63e95200acf64b7c8f950430a5bdb047be373a6a331ad9b2a873ea74a`。补丁前清单另存`runtime-closure-before.json`。上述远端结果只属于cdb8457；后续提交必须取得自己的CI结果。
