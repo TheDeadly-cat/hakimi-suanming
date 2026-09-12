@@ -159,6 +159,7 @@
 /scripts/verify-vedic-independent-storage-backup-recovery-and-rollback-design-candidate.test.mjs text eol=lf
 /docs/吠陀独立存储备份恢复回滚设计候选-v0.1-2026-08-30.md text eol=lf
 /scripts/fixtures/bazi-domain-manifest-v2-original-inputs.zip -text
+/scripts/fixtures/bazi-v17-domain-original-inputs.zip -text
 /scripts/fixtures/independent-source-requirements-v1-original-inputs.zip -text
 /scripts/fixtures/bazi-expert-intake-readiness-1.5.original.json -text
 
