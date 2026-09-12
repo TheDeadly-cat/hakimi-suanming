@@ -231,7 +231,7 @@ jobs:
         run: npm run test:current-index
 
   bazi-current-semantics:
-    name: Bazi current manifest and expert packet
+    name: Bazi current manifest and expert structure
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -256,9 +256,43 @@ jobs:
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run check:bazi-domain-release-manifest
 
-      - name: Require an available current Bazi expert packet
+      - name: Verify current Bazi expert packet structure
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        run: npm run check:bazi-expert-review-packet
+        run: npm run check:bazi-expert-packet-structure
+
+      - name: Report current Bazi expert progress without granting admission
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run report:bazi-expert-review-progress
+
+      - name: Verify expert command role boundaries
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run test:bazi-expert-command-roles
+
+  bazi-expert-admission:
+    name: Bazi formal expert admission
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Set up pinned npm
+        run: npm install --global npm@11.13.0
+
+      - name: Install locked dependencies
+        id: install
+        run: npm ci
+
+      - name: Require actual qualified independent expert opinions
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run check:bazi-expert-admission
 
   full-typecheck:
     name: Full workspace typecheck
@@ -367,8 +401,8 @@ jobs:
       - name: Verify built release storage manifest
         run: npm run verify:built-release-storage-manifest
 
-  release-gate-aggregate:
-    name: Default legacy-v13 aggregate gate
+  engineering-gate-aggregate:
+    name: Default legacy-v13 engineering aggregate
     if: ${{ always() }}
     needs:
       - ci-contracts
@@ -386,7 +420,7 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: Require every evidence job to succeed
+      - name: Require every engineering evidence job to succeed
         shell: bash
         env:
           CI_CONTRACTS: ${{ needs.ci-contracts.result }}
@@ -414,6 +448,72 @@ jobs:
             "full-vitest=$FULL_VITEST" \
             "default-v13-web-build=$DEFAULT_V13_WEB_BUILD" \
             "artifact-manifest-verification=$ARTIFACT_MANIFEST_VERIFICATION"
+          do
+            gate_name="${gate%%=*}"
+            gate_result="${gate#*=}"
+            printf '%s: %s\n' "$gate_name" "$gate_result"
+            if [ "$gate_result" != "success" ]; then
+              failures=$((failures + 1))
+            fi
+          done
+          if [ "$failures" -ne 0 ]; then
+            printf 'Default legacy-v13 engineering aggregate failed closed: %s evidence job(s) did not succeed.\n' "$failures"
+            exit 1
+          fi
+
+  release-gate-aggregate:
+    name: Default legacy-v13 formal aggregate
+    if: ${{ always() }}
+    needs:
+      - ci-contracts
+      - node-release-evidence
+      - node-package-artifacts
+      - toolchain-and-boundaries
+      - history-checkpoint-governance
+      - current-index-governance
+      - bazi-current-semantics
+      - bazi-expert-admission
+      - full-typecheck
+      - full-vitest
+      - default-v13-web-build
+      - artifact-manifest-verification
+      - engineering-gate-aggregate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Require every evidence job to succeed
+        shell: bash
+        env:
+          CI_CONTRACTS: ${{ needs.ci-contracts.result }}
+          NODE_RELEASE_EVIDENCE: ${{ needs.node-release-evidence.result }}
+          NODE_PACKAGE_ARTIFACTS: ${{ needs.node-package-artifacts.result }}
+          TOOLCHAIN_AND_BOUNDARIES: ${{ needs.toolchain-and-boundaries.result }}
+          HISTORY_CHECKPOINT_GOVERNANCE: ${{ needs.history-checkpoint-governance.result }}
+          CURRENT_INDEX_GOVERNANCE: ${{ needs.current-index-governance.result }}
+          BAZI_CURRENT_SEMANTICS: ${{ needs.bazi-current-semantics.result }}
+          BAZI_EXPERT_ADMISSION: ${{ needs.bazi-expert-admission.result }}
+          FULL_TYPECHECK: ${{ needs.full-typecheck.result }}
+          FULL_VITEST: ${{ needs.full-vitest.result }}
+          DEFAULT_V13_WEB_BUILD: ${{ needs.default-v13-web-build.result }}
+          ARTIFACT_MANIFEST_VERIFICATION: ${{ needs.artifact-manifest-verification.result }}
+          ENGINEERING_GATE_AGGREGATE: ${{ needs.engineering-gate-aggregate.result }}
+        run: |
+          failures=0
+          for gate in \
+            "ci-contracts=$CI_CONTRACTS" \
+            "node-release-evidence=$NODE_RELEASE_EVIDENCE" \
+            "node-package-artifacts=$NODE_PACKAGE_ARTIFACTS" \
+            "toolchain-and-boundaries=$TOOLCHAIN_AND_BOUNDARIES" \
+            "history-checkpoint-governance=$HISTORY_CHECKPOINT_GOVERNANCE" \
+            "current-index-governance=$CURRENT_INDEX_GOVERNANCE" \
+            "bazi-current-semantics=$BAZI_CURRENT_SEMANTICS" \
+            "bazi-expert-admission=$BAZI_EXPERT_ADMISSION" \
+            "full-typecheck=$FULL_TYPECHECK" \
+            "full-vitest=$FULL_VITEST" \
+            "default-v13-web-build=$DEFAULT_V13_WEB_BUILD" \
+            "artifact-manifest-verification=$ARTIFACT_MANIFEST_VERIFICATION" \
+            "engineering-gate-aggregate=$ENGINEERING_GATE_AGGREGATE"
           do
             gate_name="${gate%%=*}"
             gate_result="${gate#*=}"

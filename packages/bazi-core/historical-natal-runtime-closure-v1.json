@@ -503,8 +503,8 @@
       },
       {
         "path": "package.json",
-        "lfUtf8Sha256": "5af8f3be8a7a5f8b3afdc478728e929c435a3c8f750adca94933621d85321306",
-        "byteLength": 32306
+        "lfUtf8Sha256": "e1baefcc532feb421c71202ea368bb0b77c916a1b0187e892591407a09ab9c29",
+        "byteLength": 32720
       }
     ],
     "rootBundleScripts": [
@@ -650,5 +650,5 @@
       }
     }
   ],
-  "overallSha256": "d09612fbdad8fd2d190e2492ba8eb91809fdd2001f4097c91a120306c9696026"
+  "overallSha256": "dd4beaaa15da24c0a6882996f894d4e8a2c8ecd9cd8fb27547ebea832c888c22"
 }

@@ -259,10 +259,12 @@ export const REQUIRED_QUICK_CI_JOBS = Object.freeze([
   "history-checkpoint-governance",
   "current-index-governance",
   "bazi-current-semantics",
+  "bazi-expert-admission",
   "full-typecheck",
   "full-vitest",
   "default-v13-web-build",
   "artifact-manifest-verification",
+  "engineering-gate-aggregate",
   "release-gate-aggregate"
 ]);
 
@@ -274,6 +276,7 @@ export const REQUIRED_QUICK_CI_INDEPENDENT_JOBS = Object.freeze([
   "history-checkpoint-governance",
   "current-index-governance",
   "bazi-current-semantics",
+  "bazi-expert-admission",
   "full-typecheck",
   "full-vitest",
   "default-v13-web-build"
@@ -285,8 +288,11 @@ export const REQUIRED_QUICK_CI_COMMANDS = Object.freeze({
   "node-package-artifacts": Object.freeze(["npm run test:node-package-artifacts"]),
   "bazi-current-semantics": Object.freeze([
     "npm run check:bazi-domain-release-manifest",
-    "npm run check:bazi-expert-review-packet"
+    "npm run check:bazi-expert-packet-structure",
+    "npm run report:bazi-expert-review-progress",
+    "npm run test:bazi-expert-command-roles"
   ]),
+  "bazi-expert-admission": Object.freeze(["npm run check:bazi-expert-admission"]),
   "toolchain-and-boundaries": Object.freeze([
     "npm run check:ziwei-iztro-isolated-build-license-notices",
     "npm run test:ziwei-iztro-isolated-build-license-notices",
@@ -315,9 +321,9 @@ export const REQUIRED_QUICK_CI_COMMANDS = Object.freeze({
   "default-v13-web-build": Object.freeze(["npm run diagnose:build"]),
   "artifact-manifest-verification": Object.freeze(["npm run verify:built-release-storage-manifest"])
 });
-const REQUIRED_QUICK_CI_WORKFLOW_BYTES = 13245;
+const REQUIRED_QUICK_CI_WORKFLOW_BYTES = 17305;
 const REQUIRED_QUICK_CI_WORKFLOW_SHA256 =
-  "a3623c93a6ba36477303d09981dd06addbf35010b4234ea94500c8f8a1e2c437";
+  "aace45b7fa6e28c35035ef49f097bf1dbaca64b8ff7500e9438d628093162a33";
 
 export const REQUIRED_RELEASE_BROWSER_MATRIX = Object.freeze([
   Object.freeze({
@@ -1680,6 +1686,7 @@ export function verifyQuickCiGovernance(quickWorkflow, packageJson) {
     "node-release-evidence",
     "node-package-artifacts",
     "bazi-current-semantics",
+    "bazi-expert-admission",
     "history-checkpoint-governance",
     "current-index-governance"
   ];
@@ -1719,6 +1726,22 @@ export function verifyQuickCiGovernance(quickWorkflow, packageJson) {
     throw new Error("Full workspace typecheck command must not exclude or suppress production files.");
   }
   const baziSemanticBlock = blocks["bazi-current-semantics"];
+  const expertCommands = {
+    "check:bazi-expert-packet-structure": "node scripts/inspect-bazi-current-expert-review.mjs --structure",
+    "report:bazi-expert-review-progress": "node scripts/inspect-bazi-current-expert-review.mjs --progress",
+    "check:bazi-expert-admission": "node scripts/resolve-bazi-current-expert-review-packet.mjs",
+    "check:bazi-expert-review-packet": "node scripts/resolve-bazi-current-expert-review-packet.mjs",
+    "test:bazi-expert-command-roles": "node --test scripts/verify-bazi-expert-inspection.test.mjs"
+  };
+  for (const [name, command] of Object.entries(expertCommands)) {
+    if (packageJson.scripts?.[name] !== command || packageJson.scripts?.[`pre${name}`]
+      || packageJson.scripts?.[`post${name}`]) throw new Error(`Expert command role drifted: ${name}.`);
+  }
+  if (workflowRunCommandCount(baziSemanticBlock, "npm run check:bazi-expert-review-packet") !== 0
+    || workflowRunCommandCount(baziSemanticBlock, "npm run check:bazi-expert-admission") !== 0) {
+    throw new Error("Expert admission cannot be substituted for the engineering structure/progress lane.");
+  }
+
   for (const [jobId, scriptName, group] of [
     ["ci-contracts", "test:ci-contracts", "ci-contracts"],
     ["node-release-evidence", "test:node-release-evidence", "release-evidence"],
@@ -1737,8 +1760,8 @@ export function verifyQuickCiGovernance(quickWorkflow, packageJson) {
   }
   if (exactTrimmedLineCount(baziSemanticBlock, "id: install") !== 1
     || exactTrimmedLineCount(baziSemanticBlock,
-      "if: ${{ !cancelled() && steps.install.outcome == 'success' }}") !== 2) {
-    throw new Error("Both Bazi semantic checks must report after dependency setup even when the other check fails.");
+      "if: ${{ !cancelled() && steps.install.outcome == 'success' }}") !== 4) {
+    throw new Error("All Bazi engineering checks must report after dependency setup even when another check fails.");
   }
   // Default Bazi checks inventory identity; independent eligibility remains a separate strict command.
   for (const [name, command] of [
@@ -1754,7 +1777,11 @@ export function verifyQuickCiGovernance(quickWorkflow, packageJson) {
   }
   const boundaryCommands = packageJson.scripts?.["check:current-boundaries"]?.split(" && ");
   const explicitCiCommands = new Set(Object.values(REQUIRED_QUICK_CI_COMMANDS).flat());
-  if (!boundaryCommands?.length || boundaryCommands.some((command) => !explicitCiCommands.has(command))) {
+  // The legacy formal expert name and its explicit admission alias were checked
+  // above to resolve to the same unchanged strict entrypoint.
+  if (!boundaryCommands?.length || boundaryCommands.some((command) => !explicitCiCommands.has(
+    command === "npm run check:bazi-expert-review-packet" ? "npm run check:bazi-expert-admission" : command
+  ))) {
     throw new Error("Quick CI must explicitly retain every current-boundaries obligation when program diagnostics are independent.");
   }
   for (const stage of ["typecheck", "vitest", "build"]) {
@@ -1778,26 +1805,32 @@ export function verifyQuickCiGovernance(quickWorkflow, packageJson) {
     throw new Error("Quick CI must upload, download and verify the same default v13 artifact without rebuilding it.");
   }
 
-  const aggregateBlock = blocks["release-gate-aggregate"];
-  const aggregate = aggregateBlock.join("\n");
-  if (!aggregate.includes("    if: ${{ always() }}")
-    || !aggregate.includes("if [ \"$gate_result\" != \"success\" ]; then")
-    || !aggregate.includes("exit 1")) {
-    throw new Error("Quick CI aggregate gate must run always and fail closed on every non-success result.");
+  const engineeringNeeds = aggregateNeeds.filter((id) => id !== "bazi-expert-admission" && id !== "engineering-gate-aggregate");
+  if (!sameJson(workflowJobNeeds(blocks["engineering-gate-aggregate"]), engineeringNeeds)) {
+    throw new Error("Engineering aggregate must require all engineering evidence and exclude expert admission.");
   }
-  for (const jobId of aggregateNeeds) {
-    const resultEnv = jobId.toUpperCase().replaceAll("-", "_");
-    const resultBinding = `${resultEnv}: \${{ needs.${jobId}.result }}`;
-    const loopEntry = `"${jobId}=$${resultEnv}"`;
-    const loopEntryCount = aggregateBlock.filter((line) => {
-      const trimmed = line.trim();
-      return trimmed === loopEntry || trimmed === `${loopEntry} \\`;
-    }).length;
-    if (exactTrimmedLineCount(aggregateBlock, resultBinding) !== 1) {
-      throw new Error(`Quick CI aggregate gate must bind the exact result environment for ${jobId}.`);
+  for (const [aggregateId, expectedNeeds] of [["engineering-gate-aggregate", engineeringNeeds], ["release-gate-aggregate", aggregateNeeds]]) {
+    const aggregateBlock = blocks[aggregateId];
+    const aggregate = aggregateBlock.join("\n");
+    if (!aggregate.includes("    if: ${{ always() }}")
+      || !aggregate.includes("if [ \"$gate_result\" != \"success\" ]; then")
+      || !aggregate.includes("exit 1")) {
+      throw new Error("Quick CI aggregate gate must run always and fail closed on every non-success result.");
     }
-    if (loopEntryCount !== 1) {
-      throw new Error(`Quick CI aggregate gate failure loop must inspect ${jobId}.`);
+    for (const jobId of expectedNeeds) {
+      const resultEnv = jobId.toUpperCase().replaceAll("-", "_");
+      const resultBinding = `${resultEnv}: \${{ needs.${jobId}.result }}`;
+      const loopEntry = `"${jobId}=$${resultEnv}"`;
+      const loopEntryCount = aggregateBlock.filter((line) => {
+        const trimmed = line.trim();
+        return trimmed === loopEntry || trimmed === `${loopEntry} \\`;
+      }).length;
+      if (exactTrimmedLineCount(aggregateBlock, resultBinding) !== 1) {
+        throw new Error(`Quick CI aggregate gate must bind the exact result environment for ${jobId}.`);
+      }
+      if (loopEntryCount !== 1) {
+        throw new Error(`Quick CI aggregate gate failure loop must inspect ${jobId}.`);
+      }
     }
   }
   const rawWorkflowBytes = Buffer.from(quickWorkflow, "utf8");

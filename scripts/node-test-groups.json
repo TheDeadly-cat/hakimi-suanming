@@ -15,6 +15,7 @@
     {
       "id": "current-governance",
       "tests": [
+        "scripts/verify-bazi-expert-inspection.test.mjs",
         "scripts/verify-cross-system-engineering-fact-receipts.test.mjs",
         "scripts/verify-current-history-boundary.test.mjs",
         "scripts/verify-current-independent-scoped.test.mjs",

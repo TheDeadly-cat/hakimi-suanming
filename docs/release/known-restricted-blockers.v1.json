@@ -75,6 +75,7 @@
       "history-checkpoint-governance",
       "current-index-governance",
       "bazi-current-semantics",
+      "bazi-expert-admission",
       "full-typecheck",
       "full-vitest",
       "default-v13-web-build"

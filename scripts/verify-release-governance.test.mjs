@@ -1159,6 +1159,16 @@ function expectedRootHookRejection(hookName, candidateError) {
     : candidateError;
 }
 
+function withoutExactJobLine(source, jobId, exactLine) {
+  const lines = source.split(/\r?\n/u);
+  const start = lines.indexOf(`  ${jobId}:`);
+  assert.notEqual(start, -1, `Fixture job is missing: ${jobId}`);
+  let end = start + 1;
+  while (end < lines.length && !/^  [a-z][a-z0-9-]*:$/u.test(lines[end])) end += 1;
+  const block = lines.slice(start, end).join("\n");
+  return [...lines.slice(0, start), ...withoutExactLine(block, exactLine).split("\n"), ...lines.slice(end)].join("\n");
+}
+
 function receiptLine(document, id) {
   const line = document.split(/\r?\n/u).find((candidate) => candidate.includes(`--id ${id} `));
   assert.ok(line, `Receipt fixture is missing: ${id}`);
@@ -1217,10 +1227,12 @@ test("accepts the split Quick CI evidence jobs and fail-closed aggregate", () =>
     "history-checkpoint-governance",
     "current-index-governance",
     "bazi-current-semantics",
+    "bazi-expert-admission",
     "full-typecheck",
     "full-vitest",
     "default-v13-web-build",
     "artifact-manifest-verification",
+    "engineering-gate-aggregate",
     "release-gate-aggregate"
   ]);
   assert.deepEqual(REQUIRED_QUICK_CI_INDEPENDENT_JOBS, [
@@ -1231,6 +1243,7 @@ test("accepts the split Quick CI evidence jobs and fail-closed aggregate", () =>
     "history-checkpoint-governance",
     "current-index-governance",
     "bazi-current-semantics",
+    "bazi-expert-admission",
     "full-typecheck",
     "full-vitest",
     "default-v13-web-build"
@@ -2131,44 +2144,50 @@ test("rejects Quick CI continue-on-error and aggregate omissions", () => {
   assert.notEqual(continueOnError, quickWorkflow);
   assert.throws(() => verifyQuickCiGovernance(continueOnError, packageJson), /cannot continue on error/u);
 
-  const missingAggregateNeed = withoutExactLine(
-    quickWorkflow,
-    "      - full-typecheck"
-  );
-  assert.throws(
-    () => verifyQuickCiGovernance(missingAggregateNeed, packageJson),
-    /must require every evidence job/u
-  );
+  for (const [aggregateId, expectedError] of [
+    ["engineering-gate-aggregate", /Engineering aggregate must require all engineering evidence/u],
+    ["release-gate-aggregate", /must require every evidence job/u]
+  ]) {
+    const missingAggregateNeed = withoutExactJobLine(quickWorkflow, aggregateId, "      - full-typecheck");
+    assert.throws(() => verifyQuickCiGovernance(missingAggregateNeed, packageJson), expectedError);
+  }
 });
 
 test("aggregate explicitly binds and failure-checks both history and current governance", () => {
-  for (const [jobId, resultEnv] of [
-    ["history-checkpoint-governance", "HISTORY_CHECKPOINT_GOVERNANCE"],
-    ["current-index-governance", "CURRENT_INDEX_GOVERNANCE"]
+  for (const [aggregateId, expectedNeedError] of [
+    ["engineering-gate-aggregate", /Engineering aggregate must require all engineering evidence/u],
+    ["release-gate-aggregate", /must require every evidence job/u]
   ]) {
-    const missingNeed = withoutExactLine(quickWorkflow, `      - ${jobId}`);
-    assert.throws(
-      () => verifyQuickCiGovernance(missingNeed, packageJson),
-      /must require every evidence job/u
-    );
+    for (const [jobId, resultEnv] of [
+      ["history-checkpoint-governance", "HISTORY_CHECKPOINT_GOVERNANCE"],
+      ["current-index-governance", "CURRENT_INDEX_GOVERNANCE"]
+    ]) {
+      const missingNeed = withoutExactJobLine(quickWorkflow, aggregateId, `      - ${jobId}`);
+      assert.throws(
+        () => verifyQuickCiGovernance(missingNeed, packageJson),
+        expectedNeedError
+      );
 
-    const missingResultBinding = withoutExactLine(
-      quickWorkflow,
-      `          ${resultEnv}: \${{ needs.${jobId}.result }}`
-    );
-    assert.throws(
-      () => verifyQuickCiGovernance(missingResultBinding, packageJson),
-      new RegExp(`must bind the exact result environment for ${jobId}`, "u")
-    );
+      const missingResultBinding = withoutExactJobLine(
+        quickWorkflow,
+        aggregateId,
+        `          ${resultEnv}: \${{ needs.${jobId}.result }}`
+      );
+      assert.throws(
+        () => verifyQuickCiGovernance(missingResultBinding, packageJson),
+        new RegExp(`must bind the exact result environment for ${jobId}`, "u")
+      );
 
-    const missingFailureLoopEntry = withoutExactLine(
-      quickWorkflow,
-      `            \"${jobId}=$${resultEnv}\" \\`
-    );
-    assert.throws(
-      () => verifyQuickCiGovernance(missingFailureLoopEntry, packageJson),
-      new RegExp(`failure loop must inspect ${jobId}`, "u")
-    );
+      const missingFailureLoopEntry = withoutExactJobLine(
+        quickWorkflow,
+        aggregateId,
+        `            \"${jobId}=$${resultEnv}\" \\`
+      );
+      assert.throws(
+        () => verifyQuickCiGovernance(missingFailureLoopEntry, packageJson),
+        new RegExp(`failure loop must inspect ${jobId}`, "u")
+      );
+    }
   }
 });
 
@@ -2227,8 +2246,9 @@ test("diagnostic stages cannot acquire hidden prerequisites or lose their permis
   }
 });
 
-test("independent program diagnostics retain both Bazi semantic obligations in the aggregate", () => {
-  for (const command of ["npm run check:bazi-domain-release-manifest", "npm run check:bazi-expert-review-packet"]) {
+test("independent diagnostics retain Bazi structure, progress and separate formal admission", () => {
+  for (const command of ["npm run check:bazi-domain-release-manifest", "npm run check:bazi-expert-packet-structure",
+    "npm run report:bazi-expert-review-progress", "npm run check:bazi-expert-admission"]) {
     const changed = quickWorkflow.replace(`        run: ${command}`, "        run: echo omitted");
     assert.throws(() => verifyQuickCiGovernance(changed, packageJson), /must run exactly once/);
   }
@@ -2242,7 +2262,7 @@ test("a Bazi semantic failure cannot hide the other semantic result", () => {
     "        if: ${{ !cancelled() && steps.install.outcome == 'success' }}",
     "        if: ${{ success() }}"
   );
-  assert.throws(() => verifyQuickCiGovernance(changed, packageJson), /Both Bazi semantic checks/);
+  assert.throws(() => verifyQuickCiGovernance(changed, packageJson), /All Bazi engineering checks/);
 });
 
 test("complete Node group execution and retained failure reports cannot be silently reduced", () => {
