@@ -153,6 +153,11 @@ test("案例生命周期与历史 Revision 派生形成连续可恢复闭环", a
   await expect(confirmation).toContainText("此操作不可恢复");
   await expect(confirmation.getByRole("button", { name: "取消", exact: true })).toBeFocused();
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await confirmation.evaluate(async (dialog) => {
+    const backdrop = dialog.parentElement;
+    if (!backdrop) throw new Error("Delete confirmation backdrop is missing.");
+    await Promise.all(backdrop.getAnimations({ subtree: true }).map((animation) => animation.finished));
+  });
   await auditCurrentPage(page, "390px 回收站永久删除确认");
   await testInfo.attach("mobile-delete-confirmation", {
     body: await page.screenshot({ fullPage: false }), contentType: "image/png"
