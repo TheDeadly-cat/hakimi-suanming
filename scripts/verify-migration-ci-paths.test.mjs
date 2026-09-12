@@ -94,6 +94,12 @@ test("Git Windows checkout preserves raw SW and governance identities plus retai
   const modulePath = "apps/web/sw-two-generation-fixture-source-identity.ts";
   const retained = ["README.md", "apps/web/e2e/service-worker-same-schema-aba.spec.ts"];
   const rawGovernanceInputs = [
+    "apps/web/bundled-knowledge-audit.ts",
+    "packages/bazi-interpretation/src/current-chart-review-snapshot.ts",
+    "packages/bazi-interpretation/src/index.ts",
+    "packages/bazi-interpretation/src/strength-evidence-narrative.ts",
+    "packages/research-export/src/golden/single-chart-report.contract.v1.7.json",
+    "packages/rule-profiles/src/index.ts",
     "content/bazi-strength-expert-review-packet.current.json",
     "docs/status/current-index-summary.md",
     "content/system-admission/history-checkpoint.v2.json",

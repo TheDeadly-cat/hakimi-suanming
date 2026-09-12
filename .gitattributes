@@ -218,3 +218,11 @@
 
 # The HKO policy pins the lifecycle implementation as exact raw bytes.
 /scripts/formal-npm-lifecycle-closure-lib.mjs text eol=lf
+
+# Current Bazi manifest and expert task inputs retain their sealed source bytes.
+/apps/web/bundled-knowledge-audit.ts text eol=lf
+/packages/bazi-interpretation/src/current-chart-review-snapshot.ts text eol=lf
+/packages/bazi-interpretation/src/index.ts text eol=lf
+/packages/bazi-interpretation/src/strength-evidence-narrative.ts text eol=lf
+/packages/research-export/src/golden/single-chart-report.contract.v1.7.json text eol=lf
+/packages/rule-profiles/src/index.ts text eol=lf
