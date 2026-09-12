@@ -47,3 +47,15 @@
 最小回归：`node --test --test-reporter=tap scripts/verify-release-governance.test.mjs`。完整回归：`node scripts/run-node-test-group.mjs current-governance`。下一步每组先以独立真实输入复现，再运行映射中对应测试文件，最终仍须重跑完整组。
 
 日志、逐字段差异、Git 原件探针及结果摘要保存在 `Z:/HakimiBaziBackups/LocalDelivery/2026-09-13/governance-failure-triage/`。本次是测试/适用范围修复，不构建或安装新的日常版本，不提高来源、专家、权利或公开发布资格。PR #1–#3 仍为独立草稿；不同分支的测试结果不能拼成统一候选通过。
+
+## 历史八字输入与 current 副作用回归
+
+后续恢复进展与 Windows 原字节检查见 `windows-checkout-identity-20260913.md`：本批 24 个历史工程身份已取得 23 个；缺失的 Western 旧 README 和另行缺失的 20351 字节文档仍未补齐。
+
+`cc31de9` 将旧 Bazi v1.7 manifest 的 34 个原组件输入及 manifest 本身保存为 35 项历史 ZIP，测试用当前验证器读取原字节，恢复原正例和所有篡改负例。新归档不参与默认 current 选择，也不执行归档源码。该文件 4/4 通过。
+
+相邻 v2 历史文件首次回归为 17/18，其最后一项仍把“验证历史输入不能改变 current”写成“current 必须为空”。在未修改的 `7674862` 检出上复现相同失败；实际上 current 索引已明确选择 v2.3。修复改为先保存实际 current 解析结果和索引原字节，再验证历史 v2，最后逐项确认 current 解析结果与索引字节均不变，并明确选中路径不是历史 v2。原历史 CLI 在当前输入上拒绝的测试继续保留。
+
+最小及相邻回归命令：`node --test scripts/verify-bazi-domain-release-manifest.test.mjs scripts/verify-bazi-domain-release-manifest-v2.test.mjs scripts/verify-bazi-scoped-current.test.mjs`。结果为 3 个文件、59/59 通过，无跳过或取消（4 项 v1.7、18 项历史 v2、37 项当前消费检查）。没有重写当前索引、manifest 或资格数据。
+
+这两份历史文件属于 `bazi-evidence`，不能从原 `current-governance` 剩余 249 项中扣减，也不能据此宣称整个八字证据组通过。首次失败、旧提交复现和修复日志均保存在上述 Z 盘父目录的 `bazi-v17-history-fixture-v1/`。
