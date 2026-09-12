@@ -166,3 +166,11 @@
 /docs/status/delivery-status.md -text
 /docs/status/delivery-validation-20260906-history-and-product-closure.md -text
 /docs/status/delivery-validation-archive.md -text
+
+# Keep the fixed local installer source bytes reproducible on Windows checkouts.
+/LOCAL-RESEARCH-INSTALL.txt text eol=lf
+/scripts/local-research.mjs text eol=lf
+/scripts/local-research-package-lib.mjs text eol=lf
+/scripts/install-local-research.ps1 text eol=lf
+/scripts/launch-local-research.ps1 text eol=lf
+/scripts/validate-local-installation.mjs text eol=lf

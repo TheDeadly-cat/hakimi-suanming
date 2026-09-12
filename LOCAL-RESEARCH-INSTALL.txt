@@ -1,0 +1,30 @@
+哈基米八字研究台：固定本地安装包
+
+用途：本人本地研究。固定版本 c15ef05bb165 / legacy-v13 / Schema 13。
+日常地址：http://127.0.0.1:5188/
+
+新 Windows 机器需先安装 Node.js 24.16.0，使用系统 PowerShell 5.1。
+本包无需项目源码、npm依赖或旧的用户目录。不会自动下载运行时。
+
+在本包解压目录打开 PowerShell，执行：
+  node --version
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-local-research.ps1
+
+Node不在PATH时可加：-NodeExecutable "D:\Runtime\node.exe"
+自选安装位置可加：-InstallRoot "D:\HakimiBaziWorkbench"
+仅验证安装、不创建桌面快捷方式可加：-NoShortcut
+
+默认复制到：%LOCALAPPDATA%\HakimiBaziWorkbench\packages\c15ef05bb165
+新快捷方式：哈基米八字研究台 (5188)
+相同包重复安装会复用；不同内容或其他同名快捷方式会报冲突，不覆盖。
+若复制中断，未完成目录保留作诊断且不能启动，请保留错误信息联系维护者。
+
+启动只校验并服务原产物，不构建、不换端口、不终止未知服务，不清理或迁移浏览器数据。
+看到空案例库时先确认地址仍为5188；5173开发环境、旧4173预览和测试地址是不同的数据空间。
+需要转移资料时在来源地址导出完整备份，并在目标地址预检后恢复。
+
+用户现有 local-research-c15ef05bb165 目录和“本地自用”旧快捷方式保持原样。
+日志：%LOCALAPPDATA%\HakimiBaziWorkbench\local-launch-logs，每次启动单独保存。
+
+材料身份：local-package-files.json列出完整非空文件集合；tmp\release-artifact-identity.json为原137文件产物锁。
+请先核对提供者交付的ZIP哈希。文件一致性不等于来源权利、领域真值或正式专家准入。
