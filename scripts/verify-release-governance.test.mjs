@@ -1137,6 +1137,28 @@ function withoutExactLine(source, exactLine) {
   return lines.join("\n");
 }
 
+// Mutate a named CI job, independent of changing human-readable step labels.
+function withAdditionalJobCommand(source, jobId, command) {
+  const lines = source.split(/\r?\n/u);
+  const start = lines.indexOf(`  ${jobId}:`);
+  assert.notEqual(start, -1, `Fixture job is missing: ${jobId}`);
+  let end = start + 1;
+  while (end < lines.length && !/^  [a-z][a-z0-9-]*:$/u.test(lines[end])) end += 1;
+  const steps = lines.indexOf("    steps:", start);
+  assert(steps > start && steps < end, `Fixture steps are missing: ${jobId}`);
+  lines.splice(steps + 1, 0, "      - name: Inject a duplicate evidence command", `        run: ${command}`);
+  return lines.join("\n");
+}
+
+// Coordinated root hooks are forbidden before closure traversal begins. Auxiliary
+// hooks below still exercise actual traversal and candidate-specific rejection.
+function expectedRootHookRejection(hookName, candidateError) {
+  const coordinated = /^(?:pre|post)(typecheck|test|build)$/u.exec(hookName);
+  return coordinated
+    ? { message: `Default lifecycle command or root pre/post hook changed: ${coordinated[1]}.` }
+    : candidateError;
+}
+
 function receiptLine(document, id) {
   const line = document.split(/\r?\n/u).find((candidate) => candidate.includes(`--id ${id} `));
   assert.ok(line, `Receipt fixture is missing: ${id}`);
@@ -2035,12 +2057,7 @@ test("rejects Quick CI when either independent history-checkpoint command is omi
 });
 
 test("runs history-checkpoint evidence exactly once and only in its independent job", () => {
-  const duplicatedInToolchain = quickWorkflow.replace(
-    "      - name: Verify independent Ziwei and Western domain manifests",
-    "      - name: Duplicate history-checkpoint evidence outside its job\n"
-      + "        run: npm run check:history-checkpoint\n\n"
-      + "      - name: Verify independent Ziwei and Western domain manifests"
-  );
+  const duplicatedInToolchain = withAdditionalJobCommand(quickWorkflow, "toolchain-and-boundaries", "npm run check:history-checkpoint");
   assert.notEqual(duplicatedInToolchain, quickWorkflow);
   assert.throws(
     () => verifyQuickCiGovernance(duplicatedInToolchain, packageJson),
@@ -2060,12 +2077,7 @@ test("rejects Quick CI when the unique current-index gate is omitted", () => {
 });
 
 test("runs current-index evidence exactly once and only in its independent job", () => {
-  const duplicatedInToolchain = quickWorkflow.replace(
-    "      - name: Verify independent Ziwei and Western domain manifests",
-    "      - name: Duplicate current-index evidence outside its job\n"
-      + "        run: npm run check:current-index\n\n"
-      + "      - name: Verify independent Ziwei and Western domain manifests"
-  );
+  const duplicatedInToolchain = withAdditionalJobCommand(quickWorkflow, "toolchain-and-boundaries", "npm run check:current-index");
   assert.notEqual(duplicatedInToolchain, quickWorkflow);
   assert.throws(
     () => verifyQuickCiGovernance(duplicatedInToolchain, packageJson),
@@ -3992,7 +4004,7 @@ test("accepts the isolated storage-v13 matrix candidate governance and full form
     dedicatedTypecheckIncluded: true
   });
   const closure = formalNpmClosure();
-  assert.equal(closure.reachableScriptCount, 35);
+  assert.equal(closure.reachableScriptCount, 32);
   assert.equal(
     closure.closureCanonicalSha256,
     REQUIRED_FORMAL_RECEIPT_NPM_LIFECYCLE_CLOSURE_CANONICAL_SHA256
@@ -4933,7 +4945,7 @@ test("SW four-chain composition governance rejects promotion, aliases, formal re
 
 test("formal npm closure rejects direct and multihop SW four-chain composition injection", () => {
   const direct = structuredClone(packageJson);
-  direct.scripts.posttypecheck =
+  direct.scripts["postcheck:release-governance"] =
     "npm run test:sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition";
   assert.throws(
     () => formalNpmClosure(direct),
@@ -4941,7 +4953,7 @@ test("formal npm closure rejects direct and multihop SW four-chain composition i
   );
 
   const multihop = structuredClone(packageJson);
-  multihop.scripts.postbuild = "npm run neutral-four-chain-bridge-a";
+  multihop.scripts["postcheck:release-governance"] = "npm run neutral-four-chain-bridge-a";
   multihop.scripts["neutral-four-chain-bridge-a"] = "npm run neutral-four-chain-bridge-b";
   multihop.scripts["neutral-four-chain-bridge-b"] =
     "npm run verify:sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition";
@@ -4952,7 +4964,7 @@ test("formal npm closure rejects direct and multihop SW four-chain composition i
 
   const workspaceRootPackage = structuredClone(packageJson);
   const workspaceWebPackage = structuredClone(webPackageJson);
-  workspaceWebPackage.scripts.postbuild = "npm --prefix ../.. run neutral-four-chain-workspace-bridge";
+  workspaceWebPackage.scripts["postpreview:release-artifact"] = "npm --prefix ../.. run neutral-four-chain-workspace-bridge";
   workspaceRootPackage.scripts["neutral-four-chain-workspace-bridge"] =
     "npm run verify:sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition";
   assert.throws(
@@ -5076,8 +5088,8 @@ test("accepts and freezes the standalone runtime derived-evidence producer bridg
     "docs/release/PR6运行时派生证据生产桥接候选边界-v1-2026-08-28.md"
   ]) assert.ok(REQUIRED_MIGRATION_WORKFLOW_PATHS.includes(filePath), filePath);
   const closure = formalNpmClosure();
-  assert.equal(closure.reachableScriptCount, 35);
-  assert.equal(closure.visitedScripts.length, 93);
+  assert.equal(closure.reachableScriptCount, 32);
+  assert.equal(closure.visitedScripts.length, 92);
   assert.equal(
     closure.closureCanonicalSha256,
     REQUIRED_FORMAL_RECEIPT_NPM_LIFECYCLE_CLOSURE_CANONICAL_SHA256
@@ -5304,7 +5316,7 @@ test("formal receipts and every root lifecycle reject producer bridge reachabili
       "npm run verify:sw-ab-update-runtime-derived-evidence-producer-bridge";
     assert.throws(
       () => formalNpmClosure(injected),
-      /SW A-to-B update candidate tooling must remain outside/u,
+      expectedRootHookRejection(`pre${rootScript}`, /SW A-to-B update candidate tooling must remain outside/u),
       rootScript
     );
   }
@@ -5312,14 +5324,14 @@ test("formal receipts and every root lifecycle reject producer bridge reachabili
 
 test("formal closure rejects direct, multihop, workspace, prefix, workspace flag, and npm.cmd bridge injection", () => {
   const direct = structuredClone(packageJson);
-  direct.scripts.posttypecheck =
+  direct.scripts["postcheck:release-governance"] =
     "npm run test:sw-ab-update-runtime-derived-evidence-producer-bridge";
   assert.throws(
     () => formalNpmClosure(direct),
     /SW A-to-B update candidate tooling must remain outside/u
   );
   const multihop = structuredClone(packageJson);
-  multihop.scripts.postbuild = "npm run neutral-producer-hop-a";
+  multihop.scripts["postcheck:release-governance"] = "npm run neutral-producer-hop-a";
   multihop.scripts["neutral-producer-hop-a"] = "npm run neutral-producer-hop-b";
   multihop.scripts["neutral-producer-hop-b"] =
     "npm run verify:sw-ab-update-runtime-derived-evidence-producer-bridge";
@@ -5329,7 +5341,7 @@ test("formal closure rejects direct, multihop, workspace, prefix, workspace flag
   );
   const prefixRoot = structuredClone(packageJson);
   const prefixWeb = structuredClone(webPackageJson);
-  prefixWeb.scripts.postbuild = "npm --prefix ../.. run neutral-producer-prefix";
+  prefixWeb.scripts["postpreview:release-artifact"] = "npm --prefix ../.. run neutral-producer-prefix";
   prefixRoot.scripts["neutral-producer-prefix"] =
     "npm run verify:sw-ab-update-runtime-derived-evidence-producer-bridge";
   assert.throws(
@@ -5338,7 +5350,7 @@ test("formal closure rejects direct, multihop, workspace, prefix, workspace flag
   );
   const workspaceRootPackage = structuredClone(packageJson);
   const workspaceWebPackage = structuredClone(webPackageJson);
-  workspaceRootPackage.scripts.postbuild =
+  workspaceRootPackage.scripts["postcheck:release-governance"] =
     "npm run neutral-producer-workspace --workspace @hakimi/web";
   workspaceWebPackage.scripts["neutral-producer-workspace"] =
     "npm.cmd --prefix ../.. run verify:sw-ab-update-runtime-derived-evidence-producer-bridge";
@@ -5347,7 +5359,7 @@ test("formal closure rejects direct, multihop, workspace, prefix, workspace flag
     /SW A-to-B update candidate tooling must remain outside/u
   );
   const npmCmd = structuredClone(packageJson);
-  npmCmd.scripts.postbuild =
+  npmCmd.scripts["postcheck:release-governance"] =
     "npm.cmd run verify:sw-ab-update-runtime-derived-evidence-producer-bridge";
   assert.throws(
     () => formalNpmClosure(npmCmd),
@@ -5369,7 +5381,7 @@ test("formal closure rejects embedded shell, direct Node, node -e, split dynamic
     );
   }
   const cyclic = structuredClone(packageJson);
-  cyclic.scripts.postbuild = "npm run producer-cycle-a";
+  cyclic.scripts["postcheck:release-governance"] = "npm run producer-cycle-a";
   cyclic.scripts["producer-cycle-a"] = "npm run producer-cycle-b";
   cyclic.scripts["producer-cycle-b"] =
     "npm run producer-cycle-a && node -e \"import('./scripts/' + ['sw','ab','update','runtime','derived','evidence','producer','bridge','lib.mjs'].join('-'))\"";
@@ -5466,8 +5478,8 @@ test("accepts and freezes the standalone producer-bridge four-chain composition 
     "producer_bridge_absent"
   );
   const closure = formalNpmClosure();
-  assert.equal(closure.reachableScriptCount, 35);
-  assert.equal(closure.visitedScripts.length, 93);
+  assert.equal(closure.reachableScriptCount, 32);
+  assert.equal(closure.visitedScripts.length, 92);
   assert.equal(
     closure.closureCanonicalSha256,
     REQUIRED_FORMAL_RECEIPT_NPM_LIFECYCLE_CLOSURE_CANONICAL_SHA256
@@ -5727,7 +5739,7 @@ test("formal receipts and every root lifecycle reject producer-bridge compositio
       "npm run verify:sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition";
     assert.throws(
       () => formalNpmClosure(injected),
-      /SW A-to-B update candidate tooling must remain outside/u,
+      expectedRootHookRejection(`pre${rootScript}`, /SW A-to-B update candidate tooling must remain outside/u),
       rootScript
     );
   }
@@ -5735,14 +5747,14 @@ test("formal receipts and every root lifecycle reject producer-bridge compositio
 
 test("formal closure rejects direct, multihop, prefix, workspace, npm.cmd, and run-script v2 injection", () => {
   const direct = structuredClone(packageJson);
-  direct.scripts.posttypecheck =
+  direct.scripts["postcheck:release-governance"] =
     "npm run test:sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition";
   assert.throws(
     () => formalNpmClosure(direct),
     /SW A-to-B update candidate tooling must remain outside/u
   );
   const multihop = structuredClone(packageJson);
-  multihop.scripts.postbuild = "npm run neutral-v2-hop-a";
+  multihop.scripts["postcheck:release-governance"] = "npm run neutral-v2-hop-a";
   multihop.scripts["neutral-v2-hop-a"] = "npm run neutral-v2-hop-b";
   multihop.scripts["neutral-v2-hop-b"] =
     "npm run verify:sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition";
@@ -5753,7 +5765,7 @@ test("formal closure rejects direct, multihop, prefix, workspace, npm.cmd, and r
   for (const prefixFlag of ["--prefix ../..", "--prefix=../.."]) {
     const prefixRoot = structuredClone(packageJson);
     const prefixWeb = structuredClone(webPackageJson);
-    prefixWeb.scripts.postbuild = `npm ${prefixFlag} run neutral-v2-prefix`;
+    prefixWeb.scripts["postpreview:release-artifact"] = `npm ${prefixFlag} run neutral-v2-prefix`;
     prefixRoot.scripts["neutral-v2-prefix"] =
       "npm run-script verify:sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition";
     assert.throws(
@@ -5769,7 +5781,7 @@ test("formal closure rejects direct, multihop, prefix, workspace, npm.cmd, and r
   ]) {
     const workspaceRootPackage = structuredClone(packageJson);
     const workspaceWebPackage = structuredClone(webPackageJson);
-    workspaceRootPackage.scripts.postbuild = `npm run neutral-v2-workspace ${workspaceFlag}`;
+    workspaceRootPackage.scripts["postcheck:release-governance"] = `npm run neutral-v2-workspace ${workspaceFlag}`;
     workspaceWebPackage.scripts["neutral-v2-workspace"] =
       "npm.cmd --prefix ../.. run verify:sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition";
     assert.throws(
@@ -5779,7 +5791,7 @@ test("formal closure rejects direct, multihop, prefix, workspace, npm.cmd, and r
     );
   }
   const npmCmd = structuredClone(packageJson);
-  npmCmd.scripts.postbuild =
+  npmCmd.scripts["postcheck:release-governance"] =
     "npm.cmd run verify:sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition";
   assert.throws(
     () => formalNpmClosure(npmCmd),
@@ -5804,7 +5816,7 @@ test("formal closure rejects embedded shell, direct Node, node -e, split identit
     );
   }
   const cyclic = structuredClone(packageJson);
-  cyclic.scripts.postbuild = "npm run v2-cycle-a";
+  cyclic.scripts["postcheck:release-governance"] = "npm run v2-cycle-a";
   cyclic.scripts["v2-cycle-a"] = "npm run v2-cycle-b";
   cyclic.scripts["v2-cycle-b"] =
     "npm run v2-cycle-a && node -e \"import('./scripts/' + ['sw','ab','producer','bridge','composition','lib.mjs'].join('-'))\"";
@@ -6159,14 +6171,14 @@ test("formal npm closure isolates provider sequences and rollback/provider compo
   );
 
   const lifecycle = structuredClone(packageJson);
-  lifecycle.scripts.posttypecheck = "npm run test:provider-deployment-candidate-sequence";
+  lifecycle.scripts["postcheck:release-governance"] = "npm run test:provider-deployment-candidate-sequence";
   assert.throws(
     () => formalNpmClosure(lifecycle),
     /Provider sequence and rollback\/provider composition candidate tooling must remain outside/u
   );
 
   const multihop = structuredClone(packageJson);
-  multihop.scripts.posttypecheck = "npm run rollback-provider-bridge-a";
+  multihop.scripts["postcheck:release-governance"] = "npm run rollback-provider-bridge-a";
   multihop.scripts["rollback-provider-bridge-a"] = "npm run rollback-provider-bridge-b";
   multihop.scripts["rollback-provider-bridge-b"] =
     "node scripts/verify-rollback-provider-sequence-composition.mjs";
@@ -6177,7 +6189,7 @@ test("formal npm closure isolates provider sequences and rollback/provider compo
 
   const workspaceRootPackage = structuredClone(packageJson);
   const workspaceWebPackage = structuredClone(webPackageJson);
-  workspaceWebPackage.scripts.postbuild = "npm --prefix ../.. run provider-sequence-bridge";
+  workspaceWebPackage.scripts["postpreview:release-artifact"] = "npm --prefix ../.. run provider-sequence-bridge";
   workspaceRootPackage.scripts["provider-sequence-bridge"] =
     "node scripts/provider-deployment-candidate-sequence-verifier.mjs";
   assert.throws(
@@ -6231,12 +6243,12 @@ test("formal allowlist and complete npm closure reject SW A-to-B candidate injec
     injectedPackage.scripts[scriptName] = "npm run test:sw-ab-update-candidate";
     assert.throws(
       () => formalNpmClosure(injectedPackage),
-      /SW A-to-B update candidate tooling must remain outside/u,
+      expectedRootHookRejection(scriptName, /SW A-to-B update candidate tooling must remain outside/u),
       scriptName
     );
   }
   const compositionInjectedPackage = structuredClone(packageJson);
-  compositionInjectedPackage.scripts.pretest =
+  compositionInjectedPackage.scripts["postcheck:release-governance"] =
     "npm run test:sw-ab-update-candidate-runtime-client-capture-composition";
   assert.throws(
     () => formalNpmClosure(compositionInjectedPackage),
@@ -6301,7 +6313,7 @@ test("formal allowlist and complete npm closure reject deployed PWA host/provide
       "npm run test:deployed-pwa-host-provider-composition-candidate";
     assert.throws(
       () => formalNpmClosure(injectedPackage),
-      /Deployed-PWA host\/provider composition candidate tooling must remain outside/u,
+      expectedRootHookRejection(scriptName, /Deployed-PWA host\/provider composition candidate tooling must remain outside/u),
       scriptName
     );
   }
@@ -6314,7 +6326,7 @@ test("formal allowlist and complete npm closure reject deployed PWA host/provide
 
 test("formal npm closure follows aliases, workspace prefixes, and embedded composition commands", () => {
   const multihop = structuredClone(packageJson);
-  multihop.scripts.posttypecheck = "npm run composition-bridge-a";
+  multihop.scripts["postcheck:release-governance"] = "npm run composition-bridge-a";
   multihop.scripts["composition-bridge-a"] = "npm run composition-bridge-b";
   multihop.scripts["composition-bridge-b"] =
     "node scripts/deployed-pwa-host-provider-composition.mjs";
@@ -6325,7 +6337,7 @@ test("formal npm closure follows aliases, workspace prefixes, and embedded compo
 
   const workspaceBridge = structuredClone(packageJson);
   const workspaceWeb = structuredClone(webPackageJson);
-  workspaceWeb.scripts.postbuild = "npm --prefix ../.. run composition-bridge";
+  workspaceWeb.scripts["postpreview:release-artifact"] = "npm --prefix ../.. run composition-bridge";
   workspaceBridge.scripts["composition-bridge"] =
     "node scripts/deployed-pwa-host-provider-composition.mjs";
   assert.throws(
@@ -6356,7 +6368,7 @@ test("formal npm closure rejects candidate injection through every root lifecycl
     weakened.scripts[scriptName] = "npm run test:storage-v13-matrix-candidate";
     assert.throws(
       () => formalNpmClosure(weakened),
-      /Storage-v13 matrix candidate tooling must remain outside/u,
+      expectedRootHookRejection(scriptName, /Storage-v13 matrix candidate tooling must remain outside/u),
       scriptName
     );
   }
@@ -6369,7 +6381,7 @@ test("formal npm closure follows multihop cycles without scanning unreachable ca
   assert.doesNotThrow(() => formalNpmClosure(unreachable));
 
   const cyclic = structuredClone(packageJson);
-  cyclic.scripts.posttypecheck = "npm run closure-a";
+  cyclic.scripts["postcheck:release-governance"] = "npm run closure-a";
   cyclic.scripts["closure-a"] = "npm run closure-b";
   cyclic.scripts["closure-b"] = "npm run closure-a";
   assert.throws(
@@ -6408,7 +6420,7 @@ test("formal npm closure rejects neutral root and workspace lifecycle wrappers",
 test("formal npm closure follows workspace, prefix, and embedded Playwright lifecycle roots", () => {
   const workspaceBridge = structuredClone(packageJson);
   const workspaceWeb = structuredClone(webPackageJson);
-  workspaceWeb.scripts.postbuild = "npm --prefix ../.. run closure-bridge";
+  workspaceWeb.scripts["postpreview:release-artifact"] = "npm --prefix ../.. run closure-bridge";
   workspaceBridge.scripts["closure-bridge"] =
     "node scripts/storage-v13-matrix-candidate-runtime.mjs";
   assert.throws(
@@ -6434,7 +6446,7 @@ test("formal npm closure parses npm.cmd flags and rejects unknown selectors or g
   const receipts = structuredClone(decisions.releaseEvidence.defaultV13RequiredReceiptCommands);
   receipts.unit = ["npm.cmd", "--silent", "test"];
   const weakened = structuredClone(packageJson);
-  weakened.scripts.posttest = "node scripts/storage-v13-matrix-candidate-runtime.mjs";
+  weakened.scripts["postcheck:release-governance"] = "node scripts/storage-v13-matrix-candidate-runtime.mjs";
   assert.throws(
     () => verifyFormalReceiptNpmLifecycleClosure(receipts, {
       root: { path: "package.json", packageJson: weakened },
