@@ -439,9 +439,9 @@ export const REQUIRED_SW_TWO_GENERATION_FIXTURE_SCRIPTS = Object.freeze({
   "test:sw-two-generation-fixture-contract": "node --test scripts/sw-two-generation-fixture-contract.test.mjs"
 });
 export const REQUIRED_SW_TWO_GENERATION_CRITICAL_SOURCE_IDENTITY_MODULE_SHA256 =
-  "79407697519884d04aa37016961744b12029161bf4da6f2b82663cd339ac6766";
+  "069f5809d3b9df1e5c9e83c5879c98de69c9d2d062ab72ce89c4453fca9c612b";
 export const REQUIRED_SW_TWO_GENERATION_CRITICAL_SOURCE_SET_SHA256 =
-  "6781fb7d831a3c0185cfc58ccf4cc787b22b0c3ee04ca356ce3286abd73586ef";
+  "8582c897eb6c95e40f2209ef80cd575440910b0d30163344c7272bd5063572c6";
 
 export const REQUIRED_STORAGE_V13_MATRIX_CANDIDATE_SCRIPTS = Object.freeze({
   "test:storage-v13-matrix-candidate":

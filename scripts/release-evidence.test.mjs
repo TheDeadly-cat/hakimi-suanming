@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import childProcess, { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import { syncBuiltinESMExports } from "node:module";
 import { link, lstat, mkdtemp, mkdir, readFile, readdir, realpath, rm, symlink, unlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -56,6 +58,7 @@ import {
   computeEvidenceId,
   computeSourceTreeDigest,
   defaultV13ReleaseDescriptorMatches,
+  detectBrowserVersions,
   npmVersion,
   isReleaseLifecycleReceiptId,
   verifyReleaseLifecyclePhaseReportBinding,
@@ -160,6 +163,69 @@ test("release command execution is shell-free and routes Windows npm through nod
 
 test("npm toolchain version is collected without invoking a Windows command shim", () => {
   assert.match(npmVersion(process.cwd()), /^\d+\.\d+\.\d+/u);
+});
+
+test("browser discovery distinguishes absent executables from failed installed probes", (context) => {
+  let result = { status: null, signal: null, error: { code: "ENOENT" }, stdout: "", stderr: "" };
+  context.mock.method(fs, "existsSync", () => false);
+  context.mock.method(childProcess, "spawnSync", () => result);
+  syncBuiltinESMExports();
+  try {
+    assert.deepEqual(detectBrowserVersions(), { edge: "not-detected", chrome: "not-detected" });
+    for (const failure of [
+      { status: null, signal: "SIGTERM", error: { code: "ETIMEDOUT" } },
+      { status: null, signal: null, error: { code: "EACCES" } },
+      { status: 1, signal: null },
+      { status: null, signal: "SIGKILL" },
+      { status: 0, signal: null },
+      { status: 0, signal: null, stderr: "Microsoft Edge 999.0.0.0" }
+    ]) {
+      result = { stdout: "", stderr: "", ...failure };
+      assert.throws(() => detectBrowserVersions(), (error) => {
+        assert.equal(error.code, "RELEASE_BROWSER_VERSION_PROBE_FAILED");
+        assert.equal(error.details.browser, "edge");
+        assert.equal(error.details.exitCode, failure.status);
+        assert.equal(error.details.signal, failure.signal);
+        assert.equal(error.details.errorCode, failure.error?.code ?? null);
+        assert.ok(Number.isFinite(error.details.elapsedMs));
+        return true;
+      });
+    }
+  } finally {
+    context.mock.restoreAll();
+    syncBuiltinESMExports();
+  }
+});
+
+test("browser discovery reads stdout afresh and does not replace a failed preferred binary with an alias", (context) => {
+  let version = "152.0.0.1";
+  let failPreferred = false;
+  const candidates = [];
+  context.mock.method(fs, "existsSync", () => false);
+  context.mock.method(childProcess, "spawnSync", (executable) => {
+    candidates.push(executable);
+    if (failPreferred) return { status: 1, signal: null, stdout: "", stderr: "synthetic probe failure" };
+    return { status: 0, signal: null,
+      stdout: `${executable.includes("edge") ? "Microsoft Edge" : "Google Chrome"} ${version}\n`,
+      stderr: "synthetic diagnostic, not version metadata" };
+  });
+  syncBuiltinESMExports();
+  try {
+    assert.deepEqual(detectBrowserVersions(), {
+      edge: "Microsoft Edge 152.0.0.1", chrome: "Google Chrome 152.0.0.1"
+    });
+    version = "153.0.0.2";
+    assert.deepEqual(detectBrowserVersions(), {
+      edge: "Microsoft Edge 153.0.0.2", chrome: "Google Chrome 153.0.0.2"
+    });
+    candidates.length = 0;
+    failPreferred = true;
+    assert.throws(() => detectBrowserVersions(), { code: "RELEASE_BROWSER_VERSION_PROBE_FAILED" });
+    assert.equal(candidates.length, 1);
+  } finally {
+    context.mock.restoreAll();
+    syncBuiltinESMExports();
+  }
 });
 
 test("release evidence policy and Playwright configs share the exact Chrome and Edge matrix", () => {
@@ -329,7 +395,8 @@ test("PWA release spec can launch persistent browsers only through the policy he
   );
   assert.doesNotMatch(pwaSpecSource, /\bchromium\b/u);
   assert.match(pwaSpecSource, /projectName:\s*testInfo\.project\.name/u);
-  assert.match(pwaSpecSource, /userDataDir:\s*testInfo\.outputPath/u);
+  // Directory ownership, uniqueness and refusal paths are exercised by the
+  // registered release-persistent-profile behavior tests, independent of syntax.
   assert.doesNotMatch(pwaSpecSource, /\.\s*launchPersistentContext\s*\(/u);
   assert.doesNotMatch(pwaSpecSource, /\blaunchPersistentContext\s*\(/u);
   assert.match(pwaSpecSource, /devtools\.send\("Browser\.getVersion"\)/u);
@@ -2231,15 +2298,29 @@ const replayInputPath = "dist/web/release-evidence.json";
 const replayReceiptsPath = "tmp/release-evidence-receipts";
 const replayLockPath = "tmp/release-artifact-identity.json";
 
-function replayChildEnvironment() {
+function replayChildEnvironment(environment = process.env) {
   const names = [
     "SystemRoot", "WINDIR", "ComSpec", "PATH", "PATHEXT", "TEMP", "TMP",
+    "HOME", "TMPDIR", "XDG_CONFIG_HOME", "XDG_DATA_HOME", "XDG_CACHE_HOME",
     "USERPROFILE", "APPDATA", "LOCALAPPDATA", "PROGRAMFILES", "PROGRAMFILES(X86)", "PROGRAMW6432"
   ];
-  return Object.fromEntries(Object.entries(process.env).filter(([key]) =>
+  return Object.fromEntries(Object.entries(environment).filter(([key]) =>
     names.some((name) => name.toLowerCase() === key.toLowerCase())
   ));
 }
+
+test("replay child preserves platform directory context while excluding preload and credentials", () => {
+  const platformDirectories = {
+    PATH: "/usr/bin", HOME: "/synthetic/home", TMPDIR: "/synthetic/tmp",
+    XDG_CONFIG_HOME: "/synthetic/config", XDG_DATA_HOME: "/synthetic/data",
+    XDG_CACHE_HOME: "/synthetic/cache", LOCALAPPDATA: "C:\\synthetic\\local"
+  };
+  assert.deepEqual(replayChildEnvironment({
+    ...platformDirectories, NODE_OPTIONS: "--require unwanted-loader.cjs",
+    NPM_TOKEN: "synthetic-secret", GITHUB_TOKEN: "synthetic-secret",
+    HAKIMI_RELEASE_EVIDENCE_ID: "inherited-evidence-is-not-a-fixture-binding"
+  }), platformDirectories);
+});
 
 function replayCommand(cwd, executable, args) {
   return spawnSync(executable, args, {

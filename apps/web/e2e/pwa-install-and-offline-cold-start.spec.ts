@@ -1,7 +1,4 @@
 ﻿import { expect, test } from "@playwright/test";
-import { mkdtemp } from "node:fs/promises";
-import os from "node:os";
-import path from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import type { Page, Response } from "@playwright/test";
 import { BRIDGE_RELEASE_DATABASE_DESCRIPTOR } from "../release-protocol";
@@ -16,6 +13,7 @@ import {
   waitForServiceWorker
 } from "./full-backup-helpers";
 import {
+  createReleasePersistentProfile,
   launchReleasePersistentContext,
   requireReleaseBrowserRuntimeProduct
 } from "./release-browser-persistent-context.ts";
@@ -130,7 +128,7 @@ test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可
   // 产品自身的安装资格。这里使用系统临时目录中的一次性持久 profile，仍不接触
   // 用户真实浏览器资料，同时让 Page.getInstallabilityErrors 审计产品本身。
   // profile 不嵌套测试标题与报告目录；关闭浏览器后保留它供失败诊断。
-  const userDataDir = await mkdtemp(path.join(os.tmpdir(), "hpwa-"));
+  const userDataDir = await createReleasePersistentProfile();
   testInfo.annotations.push({ type: "persistent-profile", description: userDataDir });
   await testInfo.attach("persistent-profile", {
     body: Buffer.from(JSON.stringify({
@@ -182,6 +180,11 @@ test("生产 PWA 通过可安装性检查，区分安装请求与完成，并可
     const devtools = await context.newCDPSession(page);
     await devtools.send("Page.enable");
     const runtimeBrowserVersion = await devtools.send("Browser.getVersion");
+    testInfo.annotations.push({ type: "runtimeProduct", description: runtimeBrowserVersion.product });
+    await testInfo.attach("browser-runtime", {
+      body: Buffer.from(JSON.stringify(runtimeBrowserVersion, null, 2)),
+      contentType: "application/json"
+    });
     requireReleaseBrowserRuntimeProduct(
       testInfo.project.name,
       runtimeBrowserVersion.product

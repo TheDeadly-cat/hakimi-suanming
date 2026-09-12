@@ -26,6 +26,7 @@ import {
   waitForServiceWorker
 } from "./full-backup-helpers.ts";
 import {
+  createReleasePersistentProfile,
   launchReleasePersistentContext,
   requireReleaseBrowserRuntimeProduct
 } from "./release-browser-persistent-context.ts";
@@ -615,7 +616,7 @@ test("公网 HTTPS PWA 只采集未受信 v3 浏览器候选回执", async ({ ba
     artifactRoot: candidate.artifactRoot,
     projectName
   });
-  const userDataDir = testInfo.outputPath(`${projectName}-fresh-profile`);
+  const userDataDir = await createReleasePersistentProfile();
   await assertFreshProfileDirectory(userDataDir);
   const profileBindingDigest = deployedPwaCandidateProfileBindingDigest({
     projectName,

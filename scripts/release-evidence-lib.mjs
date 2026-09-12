@@ -784,10 +784,31 @@ function browserCandidates(name) {
   ];
 }
 
+function browserProbeVersion(name, executable, result, startedAt) {
+  const version = String(result.stdout ?? "").trim();
+  if (!result.error && result.status === 0 && !result.signal && version) return version;
+  // Only a missing executable is absence. A timeout, failed wrapper, signal or
+  // empty response cannot be sealed as "not-detected" in release evidence.
+  const details = Object.freeze({
+    browser: name,
+    executable: path.basename(executable),
+    exitCode: result.status ?? null,
+    signal: result.signal ?? null,
+    errorCode: result.error?.code ?? null,
+    emptyStdout: version.length === 0,
+    elapsedMs: Date.now() - startedAt
+  });
+  const error = new Error(`Release browser version probe failed: ${JSON.stringify(details)}`);
+  error.code = "RELEASE_BROWSER_VERSION_PROBE_FAILED";
+  error.details = details;
+  throw error;
+}
+
 function detectBrowser(name) {
   for (const executable of browserCandidates(name)) {
     if (process.platform === "win32" && path.isAbsolute(executable)) {
       if (!existsSync(executable)) continue;
+      const startedAt = Date.now();
       const result = spawnSync("powershell.exe", [
         "-NoLogo",
         "-NoProfile",
@@ -800,21 +821,17 @@ function detectBrowser(name) {
         timeout: 5_000,
         env: { ...process.env, HAKIMI_BROWSER_VERSION_PATH: executable }
       });
-      if (result.status === 0) {
-        const version = `${result.stdout ?? ""}${result.stderr ?? ""}`.trim();
-        if (version) return `${name === "edge" ? "Microsoft Edge" : "Google Chrome"} ${version}`;
-      }
-      continue;
+      const version = browserProbeVersion(name, executable, result, startedAt);
+      return `${name === "edge" ? "Microsoft Edge" : "Google Chrome"} ${version}`;
     }
+    const startedAt = Date.now();
     const result = spawnSync(executable, ["--version"], {
       encoding: "utf8",
       windowsHide: true,
       timeout: 5_000
     });
-    if (result.status === 0) {
-      const version = `${result.stdout ?? ""}${result.stderr ?? ""}`.trim();
-      if (version) return version;
-    }
+    if (result.error?.code === "ENOENT") continue;
+    return browserProbeVersion(name, executable, result, startedAt);
   }
   return "not-detected";
 }

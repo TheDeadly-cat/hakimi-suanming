@@ -194,6 +194,7 @@
         "scripts/provider-deployment-candidate-runtime.test.mjs",
         "scripts/provider-deployment-candidate-sequence-loader.test.mjs",
         "scripts/release-evidence.test.mjs",
+        "scripts/release-persistent-profile.test.mjs",
         "scripts/rollback-evidence.test.mjs",
         "scripts/rollback-provider-sequence-composition.test.mjs",
         "scripts/storage-v13-matrix-candidate-reporter.test.mjs",

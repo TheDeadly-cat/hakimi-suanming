@@ -22,7 +22,7 @@ type ExpectedCriticalSource = Readonly<{
 export const SW_TWO_GENERATION_FIXTURE_EXPECTED_CRITICAL_SOURCES:
 readonly ExpectedCriticalSource[] = Object.freeze([
   { role: "harness_helper", path: "apps/web/e2e/full-backup-helpers.ts", size: 18187, rawSha256: "18670023bcf0fe862084bf9bc81ca3af0c48f79c878e3c54acc217ed9743dd74", normalizedSha256: "18670023bcf0fe862084bf9bc81ca3af0c48f79c878e3c54acc217ed9743dd74" },
-  { role: "harness_browser_context", path: "apps/web/e2e/release-browser-persistent-context.ts", size: 1808, rawSha256: "df4074e6f8cdc795192d7c6db4d7ab0e0451eb422e503e00bfa3a517efc8c491", normalizedSha256: "df4074e6f8cdc795192d7c6db4d7ab0e0451eb422e503e00bfa3a517efc8c491" },
+  { role: "harness_browser_context", path: "apps/web/e2e/release-browser-persistent-context.ts", size: 4101, rawSha256: "729def903b21aa961bb9d0e87fe07ae4073576645a4a698a4435c3ecb8666edc", normalizedSha256: "729def903b21aa961bb9d0e87fe07ae4073576645a4a698a4435c3ecb8666edc" },
   { role: "harness_spec", path: "apps/web/e2e/service-worker-two-generation.spec.ts", size: 35587, rawSha256: "afb10d7c6f64828b41f6255487a0483ecac76424c2e59d3e93d3843b2ab97a08", normalizedSha256: "afb10d7c6f64828b41f6255487a0483ecac76424c2e59d3e93d3843b2ab97a08" },
   { role: "harness_storage_reader", path: "apps/web/e2e/storage-v13-native-readonly.ts", size: 23244, rawSha256: "9852404a24f107ee73e0edf36ed658ec07f008e27dd02d9df981f352e777f861", normalizedSha256: "9852404a24f107ee73e0edf36ed658ec07f008e27dd02d9df981f352e777f861" },
   { role: "harness_browser_matrix", path: "apps/web/playwright.release-browser-matrix.ts", size: 2683, rawSha256: "dd17289df1c7007318d36a158e52abab49534828c2cc1d4598ae424526afa5a3", normalizedSha256: "dd17289df1c7007318d36a158e52abab49534828c2cc1d4598ae424526afa5a3" },
@@ -45,7 +45,7 @@ readonly ExpectedCriticalSource[] = Object.freeze([
 ].map((entry) => Object.freeze(entry)));
 
 export const SW_TWO_GENERATION_FIXTURE_EXPECTED_CRITICAL_SOURCE_SET_SHA256 =
-  "6781fb7d831a3c0185cfc58ccf4cc787b22b0c3ee04ca356ce3286abd73586ef" as const;
+  "8582c897eb6c95e40f2209ef80cd575440910b0d30163344c7272bd5063572c6" as const;
 
 export type SwTwoGenerationFixtureCriticalSourceIdentity = Readonly<{
   algorithm: typeof SW_TWO_GENERATION_FIXTURE_CRITICAL_SOURCE_ALGORITHM;
