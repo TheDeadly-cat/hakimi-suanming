@@ -30,7 +30,7 @@ async function advanceAndSaveChart(page: Page, saveButtonName: "保存并打开"
   await page.waitForURL(/\/cases\/[0-9a-f-]+\/revisions\/[0-9a-f-]+$/i);
 }
 
-test("案例生命周期与历史 Revision 派生形成连续可恢复闭环", async ({ page }) => {
+test("案例生命周期与历史 Revision 派生形成连续可恢复闭环", async ({ page }, testInfo) => {
   const consoleProblems: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "error" || message.type() === "warning") {
@@ -87,6 +87,9 @@ test("案例生命周期与历史 Revision 派生形成连续可恢复闭环", a
   await caseRow.getByRole("button", { name: "移入回收站案例 P1-03 生命周期实测", exact: true }).click();
   await expect(page.getByText(/已将案例“P1-03 生命周期实测”移入回收站/)).toBeVisible();
   await expect(page.getByRole("button", { name: "收藏", exact: true })).toBeFocused();
+  await testInfo.attach("focus-after-trash", {
+    body: await page.screenshot({ fullPage: false }), contentType: "image/png"
+  });
   await page.getByRole("button", { name: "回收站", exact: true }).click();
   await page.getByLabel("搜索案例与研究笔记").fill("Edge 复验");
   caseRow = page.getByRole("row").filter({ hasText: caseId.slice(0, 8) });
@@ -106,6 +109,9 @@ test("案例生命周期与历史 Revision 派生形成连续可恢复闭环", a
   await caseRow.getByRole("button", { name: "恢复案例 P1-03 生命周期实测", exact: true }).click();
   await expect(page.getByText(/已恢复案例“P1-03 生命周期实测”/)).toBeVisible();
   await expect(trashScope).toBeFocused();
+  await testInfo.attach("focus-after-restore", {
+    body: await page.screenshot({ fullPage: false }), contentType: "image/png"
+  });
   await page.getByRole("button", { name: "全部", exact: true }).click();
   caseRow = page.getByRole("row").filter({ hasText: caseId.slice(0, 8) });
   await expect(caseRow).toContainText("P1-03、Edge 复验");
@@ -118,11 +124,14 @@ test("案例生命周期与历史 Revision 派生形成连续可恢复闭环", a
   await trashScope.click();
   caseRow = page.getByRole("row").filter({ hasText: caseId.slice(0, 8) });
   await caseRow.getByRole("button", { name: "永久删除案例 P1-03 生命周期实测", exact: true }).click();
-  const confirmation = page.getByRole("group", { name: "永久删除“P1-03 生命周期实测”？" });
+  const confirmation = page.getByRole("alertdialog", { name: "永久删除“P1-03 生命周期实测”？" });
   await expect(confirmation).toContainText("此操作不可恢复");
-  await expect(confirmation.getByRole("button", { name: "永久删除案例", exact: true })).toBeFocused();
+  await expect(confirmation.getByRole("button", { name: "取消", exact: true })).toBeFocused();
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await auditCurrentPage(page, "390px 回收站永久删除确认");
+  await testInfo.attach("mobile-delete-confirmation", {
+    body: await page.screenshot({ fullPage: false }), contentType: "image/png"
+  });
   await confirmation.getByRole("button", { name: "永久删除案例", exact: true }).click();
   await expect(page.getByText(/已永久删除案例“P1-03 生命周期实测”/)).toBeVisible();
   await expect(page.getByRole("row").filter({ hasText: caseId.slice(0, 8) })).toHaveCount(0);
