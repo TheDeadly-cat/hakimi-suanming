@@ -1,3 +1,7 @@
+# Versioned content metadata is already stored and verified as canonical LF JSON.
+/content/**/*.json text eol=lf
+/docs/status/current-index-summary.md text eol=lf
+
 /packages/bazi-core/src/historical-natal-chart-executor-0.4.0.ts text eol=lf
 /packages/bazi-core/src/unsupported-calculation-error.ts text eol=lf
 /packages/bazi-core/src/index.ts text eol=lf

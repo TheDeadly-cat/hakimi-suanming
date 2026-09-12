@@ -1961,7 +1961,7 @@ test("hosting _headers source rejects duplicate and substring-only cache evidenc
   );
   assert.throws(
     () => verifyHostingHeadersSource(hostingPolicy, hostingHeaders.replace(
-      "/sw.js\n  Cache-Control: no-cache, no-store, must-revalidate",
+      /\/sw\.js\r?\n  Cache-Control: no-cache, no-store, must-revalidate/u,
       "/sw.js\n  X-Note: Cache-Control: no-cache, no-store, must-revalidate"
     )),
     /exactly implement cache rule \/sw\.js/u
@@ -3609,24 +3609,27 @@ test("rejects rollback policy promotion, actor invention, script drift, and pre-
 });
 
 test("freezes the authority-free rollback phase hash-chain helper behind formal admission", () => {
+  const rollbackMutationSource = rollbackEvidenceLibSource.replace(/\r\n?/gu, "\n");
   const inputs = {
-    rollbackLibSource: rollbackEvidenceLibSource,
+    rollbackLibSource: rollbackMutationSource,
     rollbackVerifierSource: rollbackEvidenceVerifierSource,
     rollbackProviderSequenceCompositionLibSource,
     packageJson
   };
-  assert.deepEqual(verifyRollbackPhaseContractSourceGovernance(inputs), {
-    status: "contract_only_no_admission",
-    formalAdmissionBeforeDownstream: true,
-    authorityFreeProjection: true,
-    candidateCompositionReachable: false
-  });
+  for (const source of [rollbackMutationSource, rollbackMutationSource.replace(/\n/gu, "\r\n")]) {
+    assert.deepEqual(verifyRollbackPhaseContractSourceGovernance({ ...inputs, rollbackLibSource: source }), {
+      status: "contract_only_no_admission",
+      formalAdmissionBeforeDownstream: true,
+      authorityFreeProjection: true,
+      candidateCompositionReachable: false
+    });
+  }
 
-  const admissionRemoved = rollbackEvidenceLibSource.replace(
+  const admissionRemoved = rollbackMutationSource.replace(
     "  assertRollbackExecutionAdmission(policyResult.rollbackPolicy);\n",
     ""
   );
-  assert.notEqual(admissionRemoved, rollbackEvidenceLibSource);
+  assert.notEqual(admissionRemoved, rollbackMutationSource);
   assert.throws(
     () => verifyRollbackPhaseContractSourceGovernance({
       ...inputs,
@@ -3635,11 +3638,11 @@ test("freezes the authority-free rollback phase hash-chain helper behind formal 
     /admission must remain unique and precede/u
   );
 
-  const wrapperDetached = rollbackEvidenceLibSource.replace(
+  const wrapperDetached = rollbackMutationSource.replace(
     "  return validateRollbackPhaseReceiptProjectionForContract({\n",
     "  return Object.freeze({\n"
   );
-  assert.notEqual(wrapperDetached, rollbackEvidenceLibSource);
+  assert.notEqual(wrapperDetached, rollbackMutationSource);
   assert.throws(
     () => verifyRollbackPhaseContractSourceGovernance({
       ...inputs,
@@ -3648,17 +3651,17 @@ test("freezes the authority-free rollback phase hash-chain helper behind formal 
     /wrapper no longer derives/u
   );
 
-  const helperStart = rollbackEvidenceLibSource.indexOf(
+  const helperStart = rollbackMutationSource.indexOf(
     "export function validateRollbackPhaseReceiptProjectionForContract({"
   );
   assert.ok(helperStart >= 0);
-  const authorityInjected = `${rollbackEvidenceLibSource.slice(0, helperStart)}${
-    rollbackEvidenceLibSource.slice(helperStart).replace(
+  const authorityInjected = `${rollbackMutationSource.slice(0, helperStart)}${
+    rollbackMutationSource.slice(helperStart).replace(
       "    status: envelope.status,\n",
       "    status: envelope.status,\n    publicDeploymentAuthorized: false,\n"
     )
   }`;
-  assert.notEqual(authorityInjected, rollbackEvidenceLibSource);
+  assert.notEqual(authorityInjected, rollbackMutationSource);
   assert.throws(
     () => verifyRollbackPhaseContractSourceGovernance({
       ...inputs,
