@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { BirthInput } from "@hakimi/contracts";
 import { calculateChart, calculateUnknownHourCandidates } from "@hakimi/bazi-core";
@@ -280,6 +280,44 @@ describe("CaseLibraryPage", () => {
     await waitFor(() => expect(screen.queryByText("待恢复案例")).toBeNull());
     await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("button", { name: "回收站" })));
     expect((await caseRepository.getCase(target.caseRecord.id))?.caseRecord.deletedAt).toBeNull();
+  });
+
+  it.each(["trash", "restore"] as const)("%s 在列表刷新已完成而 React 尚未提交可交互状态时保留焦点恢复请求", async (action) => {
+    const target = await createFormalCase("受控焦点案例");
+    if (action === "restore") await caseRepository.trashCase(target.caseRecord.id);
+    render(<CaseLibraryPage />);
+    if (action === "restore") {
+      await screen.findByText("案例库还是空的");
+      fireEvent.click(screen.getByRole("button", { name: "回收站" }));
+    }
+    await screen.findByText("受控焦点案例");
+    const scopeButton = screen.getByRole("button", { name: action === "trash" ? "全部" : "回收站" }) as HTMLButtonElement;
+    const readPage = caseRepository.listResearchSubjectsPage.bind(caseRepository);
+    let releaseRefresh: (() => void) | undefined;
+    vi.spyOn(caseRepository, "listResearchSubjectsPage").mockImplementationOnce(async (options) => {
+      const page = await readPage(options);
+      return new Promise((resolve) => { releaseRefresh = () => resolve(page); });
+    });
+    const trigger = screen.getByRole("button", {
+      name: `${action === "trash" ? "移入回收站" : "恢复"}案例 受控焦点案例`
+    });
+    trigger.focus();
+    fireEvent.click(trigger);
+    await waitFor(() => expect(releaseRefresh).toBeTypeOf("function"));
+    expect(scopeButton.disabled).toBe(true);
+
+    await act(async () => {
+      releaseRefresh!();
+      // Let zero-delay callbacks run while React still batches the completed
+      // refresh and mutation state. The real stored snapshot is unchanged.
+      await new Promise((resolve) => window.setTimeout(resolve, 0));
+      await new Promise((resolve) => window.setTimeout(resolve, 0));
+    });
+
+    expect(scopeButton.disabled).toBe(false);
+    expect(screen.queryByText("受控焦点案例")).toBeNull();
+    expect(document.activeElement).toBe(scopeButton);
+    expect(Boolean((await caseRepository.getCase(target.caseRecord.id))?.caseRecord.deletedAt)).toBe(action === "trash");
   });
 
   it("永久删除只从回收站发起，先聚焦明确的不可恢复确认，并分别级联两类记录", async () => {
