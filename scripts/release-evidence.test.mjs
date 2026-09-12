@@ -329,7 +329,8 @@ test("PWA release spec can launch persistent browsers only through the policy he
   );
   assert.doesNotMatch(pwaSpecSource, /\bchromium\b/u);
   assert.match(pwaSpecSource, /projectName:\s*testInfo\.project\.name/u);
-  assert.match(pwaSpecSource, /userDataDir:\s*testInfo\.outputPath/u);
+  // Directory ownership, uniqueness and refusal paths are exercised by the
+  // registered release-persistent-profile behavior tests, independent of syntax.
   assert.doesNotMatch(pwaSpecSource, /\.\s*launchPersistentContext\s*\(/u);
   assert.doesNotMatch(pwaSpecSource, /\blaunchPersistentContext\s*\(/u);
   assert.match(pwaSpecSource, /devtools\.send\("Browser\.getVersion"\)/u);

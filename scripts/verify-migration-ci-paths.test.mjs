@@ -146,7 +146,8 @@ test("the local data diagnostic selects all eighteen branded targets without npm
 });
 
 test("nightly local data diagnostics preserve the existing heavy suite and require locked single-attempt JSON evidence", async () => {
-  const nightly = await readFile(new URL("../.github/workflows/nightly-heavy.yml", import.meta.url), "utf8");
+  const nightly = (await readFile(new URL("../.github/workflows/nightly-heavy.yml", import.meta.url), "utf8"))
+    .replace(/\r\n?/gu, "\n");
   const marker = "  local-data-boundaries-diagnostic:\n";
   assert.equal(nightly.split(marker).length, 2);
   const [existing, diagnostic] = nightly.split(marker);
