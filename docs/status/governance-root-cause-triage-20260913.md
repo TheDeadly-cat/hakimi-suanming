@@ -59,3 +59,16 @@
 最小及相邻回归命令：`node --test scripts/verify-bazi-domain-release-manifest.test.mjs scripts/verify-bazi-domain-release-manifest-v2.test.mjs scripts/verify-bazi-scoped-current.test.mjs`。结果为 3 个文件、59/59 通过，无跳过或取消（4 项 v1.7、18 项历史 v2、37 项当前消费检查）。没有重写当前索引、manifest 或资格数据。
 
 这两份历史文件属于 `bazi-evidence`，不能从原 `current-governance` 剩余 249 项中扣减，也不能据此宣称整个八字证据组通过。首次失败、旧提交复现和修复日志均保存在上述 Z 盘父目录的 `bazi-v17-history-fixture-v1/`。
+
+完整八字组后续使用 `node scripts/run-node-test-group.mjs bazi-evidence` 重跑，并与独立 LF 检出的父提交比较：
+
+| 源码 | 注册文件 | 组报告测试数 | 通过 | 失败 | 缺失文件结果 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `cc31de9`，独立 LF 父版本 | 53 | 1167 | 749 | 418 | 2 |
+| `3e5ecac`，修复 current 副作用断言 | 53 | 1167 | 750 | 417 | 2 |
+
+两侧没有跳过或取消；记录中的文件、层级、测试编号和名称出现次数一致（仅显式重命名这一项），未新增失败，恰好关闭上文 v2 的一项旧断言。嵌套测试存在重名，对照保留出现次数，不能用去重名称集合冒充完整覆盖。
+
+`verify-bazi-expert-privacy-formal-intake-reconciliation.test.mjs` 和 `verify-bazi-source-carrier-record-readiness-version-aware-candidate.test.mjs` 均在顶层历史材料加载时停止，缺少文件级测试摘要；后者已记录 `BOUND_READINESS_BASIS_DRIFT`，前者涉及旧专家 helper。417 项失败及这两处初始化阻断仍未解决，整组不合格。此次完整组不增加准入或真实专家证据。
+
+另一次 `7674862` Windows CRLF 检出报告为 1141 项、668 通过/473 失败，仍缺同两份文件结果；它同时包含较早测试版本及检出字节差异，不能把与 LF 的差额算成本次修复收益，也不能把先前 current-governance 的平台一致性扩大为全部八字历史组的平台一致性。三轮原报告、事件及逐文件首错保存在 `bazi-v17-history-fixture-v1/full-bazi-regression/`；用于本次因果对照的是前表两轮 LF 输入。
