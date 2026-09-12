@@ -188,3 +188,14 @@
 /packages/storage/src/index.ts text eol=lf
 /scripts/run-sw-two-generation-fixture.mjs text eol=lf
 /scripts/sw-two-generation-fixture-contract.test.mjs text eol=lf
+
+# Preserve existing raw policy/schema and Quick CI identities across checkouts.
+/.github/workflows/quick-ci.yml text eol=lf
+/docs/release/storage-v13-matrix-browser-receipt-candidate-v1.schema.json text eol=lf
+/docs/release/storage-v13-matrix-candidate-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition-v1.schema.json text eol=lf
+/docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition-policy.v2.json text eol=lf
+/docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition-v2.schema.json text eol=lf
+/docs/release/sw-ab-update-runtime-derived-evidence-producer-bridge-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-runtime-derived-evidence-producer-bridge-v1.schema.json text eol=lf

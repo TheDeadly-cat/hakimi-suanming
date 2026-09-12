@@ -59,7 +59,7 @@ test("existing migration responsibilities and their path-contract test remain tr
   ]) assert(triggersFor(changedPath), changedPath);
 });
 
-test("Git Windows checkout preserves raw SW source identities and retained mixed-newline files", async (t) => {
+test("Git Windows checkout preserves raw SW and governance identities plus retained mixed-newline files", async (t) => {
   const repositoryRoot = fileURLToPath(new URL("../", import.meta.url));
   const parent = await realpath(os.tmpdir());
   const temporaryRoot = await mkdtemp(path.join(parent, "hakimi-checkout-bytes-"));
@@ -93,7 +93,18 @@ test("Git Windows checkout preserves raw SW source identities and retained mixed
   }
   const modulePath = "apps/web/sw-two-generation-fixture-source-identity.ts";
   const retained = ["README.md", "apps/web/e2e/service-worker-same-schema-aba.spec.ts"];
-  const paths = [".gitattributes", ...SW_TWO_GENERATION_FIXTURE_EXPECTED_CRITICAL_SOURCES.map((entry) => entry.path), modulePath, ...retained];
+  const rawGovernanceInputs = [
+    ".github/workflows/quick-ci.yml",
+    "docs/release/storage-v13-matrix-browser-receipt-candidate-v1.schema.json",
+    "docs/release/storage-v13-matrix-candidate-policy.v1.json",
+    "docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition-policy.v1.json",
+    "docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition-v1.schema.json",
+    "docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition-policy.v2.json",
+    "docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition-v2.schema.json",
+    "docs/release/sw-ab-update-runtime-derived-evidence-producer-bridge-policy.v1.json",
+    "docs/release/sw-ab-update-runtime-derived-evidence-producer-bridge-v1.schema.json"
+  ];
+  const paths = [".gitattributes", ...SW_TWO_GENERATION_FIXTURE_EXPECTED_CRITICAL_SOURCES.map((entry) => entry.path), modulePath, ...rawGovernanceInputs, ...retained];
   const originalBytes = new Map();
   for (const relativePath of paths) {
     const bytes = await readFile(path.join(repositoryRoot, relativePath));
@@ -113,7 +124,7 @@ test("Git Windows checkout preserves raw SW source identities and retained mixed
   const protectedRoot = await checkout("protected");
   const protectedIdentity = loadSwTwoGenerationFixtureCriticalSourceIdentity(protectedRoot);
   assertSwTwoGenerationFixtureCriticalSourceIdentity(protectedIdentity);
-  for (const relativePath of [modulePath, ...retained]) {
+  for (const relativePath of [modulePath, ...rawGovernanceInputs, ...retained]) {
     assert.deepEqual(await readFile(path.join(protectedRoot, relativePath)), originalBytes.get(relativePath), relativePath);
   }
   // The same actual Git checkout without attributes must reproduce raw drift.
@@ -221,7 +232,8 @@ test("the local data diagnostic selects all eighteen branded targets without npm
 });
 
 test("nightly local data diagnostics preserve the existing heavy suite and require locked single-attempt JSON evidence", async () => {
-  const nightly = await readFile(new URL("../.github/workflows/nightly-heavy.yml", import.meta.url), "utf8");
+  const nightly = (await readFile(new URL("../.github/workflows/nightly-heavy.yml", import.meta.url), "utf8"))
+    .replace(/\r\n?/gu, "\n");
   const marker = "  local-data-boundaries-diagnostic:\n";
   assert.equal(nightly.split(marker).length, 2);
   const [existing, diagnostic] = nightly.split(marker);
