@@ -239,7 +239,11 @@
     "test:audit:p0-03:calendar-windows": "node packages/gold-standard/scripts/audit-calendar-divergence-windows.mjs --self-test",
     "update:p0-03:differential": "node packages/gold-standard/scripts/run-p0-03-differential.mjs --write",
     "test:watch": "vitest --config apps/web/vitest.config.ts",
-    "typecheck": "node scripts/run-diagnostic-stage.mjs lifecycle typecheck"
+    "typecheck": "node scripts/run-diagnostic-stage.mjs lifecycle typecheck",
+    "check:bazi-expert-packet-structure": "node scripts/inspect-bazi-current-expert-review.mjs --structure",
+    "report:bazi-expert-review-progress": "node scripts/inspect-bazi-current-expert-review.mjs --progress",
+    "check:bazi-expert-admission": "node scripts/resolve-bazi-current-expert-review-packet.mjs",
+    "test:bazi-expert-command-roles": "node --test scripts/verify-bazi-expert-inspection.test.mjs"
   },
   "overrides": {
     "@babel/runtime": "7.29.7",
