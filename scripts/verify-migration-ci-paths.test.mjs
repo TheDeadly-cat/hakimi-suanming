@@ -94,6 +94,17 @@ test("Git Windows checkout preserves raw SW and governance identities plus retai
   const modulePath = "apps/web/sw-two-generation-fixture-source-identity.ts";
   const retained = ["README.md", "apps/web/e2e/service-worker-same-schema-aba.spec.ts"];
   const rawGovernanceInputs = [
+    "scripts/formal-npm-lifecycle-closure-lib.mjs",
+    "docs/release/sw-ab-update-candidate-policy.v1.json",
+    "docs/release/sw-ab-update-candidate-runtime-client-capture-composition-policy.v1.json",
+    "docs/release/sw-ab-update-candidate-runtime-client-capture-composition-v1.schema.json",
+    "docs/release/sw-ab-update-candidate-v1.schema.json",
+    "docs/release/sw-ab-update-runtime-api-transcript-candidate-policy.v1.json",
+    "docs/release/sw-ab-update-runtime-api-transcript-candidate-v1.schema.json",
+    "docs/release/sw-ab-update-runtime-client-capture-policy.v1.json",
+    "docs/release/sw-ab-update-runtime-client-capture-v1.schema.json",
+    "docs/release/sw-ab-update-runtime-collector-issuance-candidate-policy.v1.json",
+    "docs/release/sw-ab-update-runtime-collector-issuance-candidate-v1.schema.json",
     ".github/workflows/quick-ci.yml",
     "docs/release/storage-v13-matrix-browser-receipt-candidate-v1.schema.json",
     "docs/release/storage-v13-matrix-candidate-policy.v1.json",

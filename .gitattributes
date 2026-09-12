@@ -199,3 +199,18 @@
 /docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition-v2.schema.json text eol=lf
 /docs/release/sw-ab-update-runtime-derived-evidence-producer-bridge-policy.v1.json text eol=lf
 /docs/release/sw-ab-update-runtime-derived-evidence-producer-bridge-v1.schema.json text eol=lf
+
+# Upstream policy/schema inputs carry their own fixed raw identities.
+/docs/release/sw-ab-update-candidate-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-candidate-runtime-client-capture-composition-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-candidate-runtime-client-capture-composition-v1.schema.json text eol=lf
+/docs/release/sw-ab-update-candidate-v1.schema.json text eol=lf
+/docs/release/sw-ab-update-runtime-api-transcript-candidate-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-runtime-api-transcript-candidate-v1.schema.json text eol=lf
+/docs/release/sw-ab-update-runtime-client-capture-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-runtime-client-capture-v1.schema.json text eol=lf
+/docs/release/sw-ab-update-runtime-collector-issuance-candidate-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-runtime-collector-issuance-candidate-v1.schema.json text eol=lf
+
+# The HKO policy pins the lifecycle implementation as exact raw bytes.
+/scripts/formal-npm-lifecycle-closure-lib.mjs text eol=lf
