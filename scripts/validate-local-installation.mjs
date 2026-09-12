@@ -2,13 +2,18 @@ import assert from "node:assert/strict";
 import { createServer, request as httpRequest } from "node:http";
 import { cp, link, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { installLocalPackage, probeLocalPackage, startLocalPackageServer, verifyLocalPackage } from "./local-research-package-lib.mjs";
+import { createHash } from "node:crypto";
+import { LOCAL_RESEARCH_CANDIDATE, LOCAL_RESEARCH_RELEASE, createLocalPackageTools } from "./local-research-package-lib.mjs";
 
 // Integration validation requires a real, explicitly selected package. It never
 // synthesizes the fixed c15ef identity or opens a daily browser profile.
 const args = process.argv.slice(2);
+const isCandidate = args[0] === "--candidate";
+if (isCandidate) args.shift();
+const selection = isCandidate ? LOCAL_RESEARCH_CANDIDATE : LOCAL_RESEARCH_RELEASE;
+const { installLocalPackage, probeLocalPackage, startLocalPackageServer, verifyLocalPackage } = createLocalPackageTools(selection);
 if (args.length !== 4 || args[0] !== "--package-root" || args[2] !== "--output") {
-  throw new Error("Usage: node scripts/validate-local-installation.mjs --package-root REAL_PACKAGE --output NEW_QA_DIRECTORY");
+  throw new Error("Usage: node scripts/validate-local-installation.mjs [--candidate] --package-root REAL_PACKAGE --output NEW_QA_DIRECTORY");
 }
 const input = path.resolve(args[1]);
 const output = path.resolve(args[3]);
@@ -35,7 +40,37 @@ async function listen(server) {
 }
 async function close(server) { server.closeAllConnections(); await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve())); }
 
-await check("complete fixed package verifies", async () => ({ manifestSha256: original.manifestSha256, files: original.manifest.files.length + 1 }));
+await check("complete selected package verifies", async () => ({ manifestSha256: original.manifestSha256, files: original.manifest.files.length + 1 }));
+await check("arbitrary selections and the other pinned artifact are rejected", async () => {
+  assert.throws(() => createLocalPackageTools({ ...selection }), /arbitrary/u);
+  const other = createLocalPackageTools(isCandidate ? LOCAL_RESEARCH_RELEASE : LOCAL_RESEARCH_CANDIDATE);
+  await assert.rejects(other.verifyLocalPackage(input));
+});
+if (isCandidate) {
+  await check("candidate refuses the daily 5188 origin before opening any listener", async () => {
+    await assert.rejects(startLocalPackageServer(input, { port: 5188 }), /daily 5188/u);
+    for (const port of ["5188", "05188", NaN, -1, 65536]) {
+      await assert.rejects(startLocalPackageServer(input, { port }), /explicit integer/u);
+    }
+    await assert.rejects(probeLocalPackage(input, { origin: "http://127.0.0.1:5188/" }), /daily 5188/u);
+  });
+  await check("rewriting a receipt and its package entry cannot transfer the original evidence", async () => {
+    const root = await fixture("tampered-browser-receipt");
+    const manifestPath = path.join(root, "local-package-files.json");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    const entry = manifest.files.find((item) => item.path.endsWith("/pwa.json"));
+    assert.ok(entry);
+    const target = path.join(root, entry.path);
+    const receipt = JSON.parse(await readFile(target, "utf8"));
+    receipt.evidenceId = "hre1-wrong-artifact";
+    const bytes = Buffer.from(JSON.stringify(receipt));
+    await writeFile(target, bytes);
+    entry.size = bytes.length;
+    entry.sha256 = createHash("sha256").update(bytes).digest("hex");
+    await writeFile(manifestPath, JSON.stringify(manifest));
+    await assert.rejects(verifyLocalPackage(root), /browser receipt identity/u);
+  });
+}
 await check("empty file manifest is rejected", async () => {
   const root = await fixture("empty-manifest");
   const manifest = JSON.parse(await readFile(path.join(root, "local-package-files.json"), "utf8"));
@@ -68,7 +103,7 @@ await check("extra files and hardlink aliases are rejected", async () => {
 });
 let installed;
 await check("new installation verifies and repeat installation is read-only reuse", async () => {
-  const destination = path.join(output, "new-user/install/c15ef05bb165");
+  const destination = path.join(output, "new-user/install", selection.buildVersion);
   const first = await installLocalPackage({ packageRoot: input, destination });
   const second = await installLocalPackage({ packageRoot: input, destination });
   assert.equal(first.reused, false); assert.equal(second.reused, true);
@@ -89,6 +124,16 @@ await check("loopback serving preserves bytes, SPA routing, headers and fixed-po
     const response = await fetch(origin);
     assert.deepEqual(Buffer.from(await response.arrayBuffer()), await readFile(path.join(input, "dist/web/index.html")));
     assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+    const rawHeaders = await readFile(path.join(input, "dist/web/_headers"), "utf8");
+    const reportOnly = /^\s+Content-Security-Policy-Report-Only:\s*(.+)$/mu.exec(rawHeaders)?.[1].trim();
+    assert.ok(reportOnly);
+    const expectedReportOnly = isCandidate
+      ? reportOnly.split(";").map((part) => part.trim())
+        .filter((part) => !/^upgrade-insecure-requests(?:\s|$)/iu.test(part)).join("; ")
+      : reportOnly;
+    assert.equal(response.headers.get("content-security-policy-report-only"), expectedReportOnly);
+    assert.equal(response.headers.get("x-frame-options"), "DENY");
+    assert.equal(response.headers.get("referrer-policy"), "no-referrer");
     assert.equal((await probeLocalPackage(installed, { origin })).state, "matching");
     assert.equal((await fetch(`${origin}cases`, { headers: { Accept: "text/html" } })).status, 200);
     assert.equal((await fetch(`${origin}absent.js`, { headers: { Accept: "text/html" } })).status, 404);
@@ -124,7 +169,7 @@ await check("original package remains byte-identical", async () => {
 });
 const report = { executedAt: new Date().toISOString(), packageRoot: input, manifestSha256: original.manifestSha256,
   checks, passed: checks.filter((item) => item.status === "passed").length, failed: checks.filter((item) => item.status === "failed").length,
-  dailyBrowserOpened: false, fixed5188ListenerChanged: false, otherWindowsMachineVerified: false, scope: "Real fixed-package Node integration in new local directories; Windows launcher and clean-machine acceptance are separate." };
+  dailyBrowserOpened: false, fixed5188ListenerChanged: false, otherWindowsMachineVerified: false, selection, scope: "Real selected-package Node integration in new local directories; Windows launcher and clean-machine acceptance are separate." };
 await writeFile(path.join(output, "results.json"), `${JSON.stringify(report, null, 2)}\n`, { flag: "wx" });
 process.stdout.write(`${JSON.stringify({ passed: report.passed, failed: report.failed, output })}\n`);
 process.exitCode = report.failed ? 1 : 0;

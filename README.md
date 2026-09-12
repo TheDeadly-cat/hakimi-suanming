@@ -23,6 +23,7 @@
 | 入口 | 用途 |
 | --- | --- |
 | `127.0.0.1:5188` | 固定产物的本人日常使用；重复启动复用，身份不符停止 |
+| `127.0.0.1:5189` | 明确选择的 `9057371baf85` 本地工程候选；拥有独立案例数据空间 |
 | `127.0.0.1:5173` | 开发源码调试，不是日常案例库 |
 | 隔离测试配置指定的地址 | 自动测试与故障注入，使用独立浏览器资料目录 |
 | 旧 `4173` 说明/快捷方式 | 历史开发预览，不能当作当前日常入口；本项目新桌面命令不再自动构建到该端口 |
@@ -47,6 +48,18 @@ npm run desktop:launch
 ```
 
 打包原固定产物、指定安装目录、日志和失败处理见 [固定本地产物安装说明](./docs/固定本地产物安装说明-2026-09-13.md)。本轮不会自动替换用户现有的 `local-research-c15ef05bb165` 目录及其旧快捷方式。
+
+### 独立候选版（5189）
+
+下一份本地工程候选为 `9057371baf85`，安装包修订 `4`，仍使用 Schema 13。它不会替换 `c15ef`；只有明确运行候选安装器才会建立带 `Candidate (5189)` 标记的新快捷方式。完整解压候选 ZIP 后运行：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-local-candidate.ps1
+```
+
+候选默认安装在 `%USERPROFILE%\HakimiBaziWorkbenchCandidates\packages\9057371baf85-package-v4`。这与日常安装目录分开，也避免当前桌面应用进程对新 AppData 路径的重定向。安装不下载依赖、不构建、不迁移案例；默认 `desktop:install` / `desktop:launch` 仍选择原日常产物。
+
+产物、安装包摘要、实际验证与未完成项见 [9057371baf85 候选交付记录](./docs/status/local-candidate-9057371baf85-20260913.md)，操作说明见 [候选包安装说明](./LOCAL-CANDIDATE-INSTALL.txt)。整体 CI、真实专家和领域来源门仍独立判断。
 
 ## 开发源码
 

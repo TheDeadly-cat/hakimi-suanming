@@ -234,3 +234,10 @@
 /scripts/install-local-research.ps1 text eol=lf
 /scripts/launch-local-research.ps1 text eol=lf
 /scripts/validate-local-installation.mjs text eol=lf
+
+# Explicit local engineering candidate package
+/LOCAL-CANDIDATE-INSTALL.txt text eol=lf
+/scripts/local-research-candidate.mjs text eol=lf
+/scripts/install-local-candidate.ps1 text eol=lf
+/scripts/launch-local-candidate.ps1 text eol=lf
+/docs/status/local-candidate-9057371baf85-20260913.md text eol=lf
