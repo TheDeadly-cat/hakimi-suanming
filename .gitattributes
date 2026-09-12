@@ -1,3 +1,7 @@
+# Versioned content metadata is already stored and verified as canonical LF JSON.
+/content/**/*.json text eol=lf
+/docs/status/current-index-summary.md text eol=lf
+
 /packages/bazi-core/src/historical-natal-chart-executor-0.4.0.ts text eol=lf
 /packages/bazi-core/src/unsupported-calculation-error.ts text eol=lf
 /packages/bazi-core/src/index.ts text eol=lf
@@ -155,6 +159,7 @@
 /scripts/verify-vedic-independent-storage-backup-recovery-and-rollback-design-candidate.test.mjs text eol=lf
 /docs/吠陀独立存储备份恢复回滚设计候选-v0.1-2026-08-30.md text eol=lf
 /scripts/fixtures/bazi-domain-manifest-v2-original-inputs.zip -text
+/scripts/fixtures/bazi-v17-domain-original-inputs.zip -text
 /scripts/fixtures/independent-source-requirements-v1-original-inputs.zip -text
 /scripts/fixtures/bazi-expert-intake-readiness-1.5.original.json -text
 
@@ -166,3 +171,59 @@
 /docs/status/delivery-status.md -text
 /docs/status/delivery-validation-20260906-history-and-product-closure.md -text
 /docs/status/delivery-validation-archive.md -text
+
+# Raw-hash SW fixture inputs must retain their reviewed LF bytes on Windows.
+/apps/web/e2e/full-backup-helpers.ts text eol=lf
+/apps/web/e2e/release-browser-persistent-context.ts text eol=lf
+/apps/web/e2e/service-worker-two-generation.spec.ts text eol=lf
+/apps/web/e2e/storage-v13-native-readonly.ts text eol=lf
+/apps/web/playwright.release-browser-matrix.ts text eol=lf
+/apps/web/playwright.sw-two-generation-fixture-reporter.ts text eol=lf
+/apps/web/playwright.sw-two-generation-fixture-result.ts text eol=lf
+/apps/web/playwright.sw-upgrade.config.ts text eol=lf
+/apps/web/public/sw.js text eol=lf
+/apps/web/release-protocol.ts text eol=lf
+/apps/web/src/lib/release-controller-takeover-write-fence.ts text eol=lf
+/apps/web/src/lib/release-database-coordinator.ts text eol=lf
+/apps/web/src/lib/service-worker-takeover-retry.ts text eol=lf
+/apps/web/src/main.tsx text eol=lf
+/apps/web/src/pages/case-library-page.tsx text eol=lf
+/apps/web/sw-two-generation-artifact-identity.ts text eol=lf
+/apps/web/sw-two-generation-fixture-source-identity.ts text eol=lf
+/packages/storage/src/index.ts text eol=lf
+/scripts/run-sw-two-generation-fixture.mjs text eol=lf
+/scripts/sw-two-generation-fixture-contract.test.mjs text eol=lf
+
+# Preserve existing raw policy/schema and Quick CI identities across checkouts.
+/.github/workflows/quick-ci.yml text eol=lf
+/docs/release/storage-v13-matrix-browser-receipt-candidate-v1.schema.json text eol=lf
+/docs/release/storage-v13-matrix-candidate-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition-v1.schema.json text eol=lf
+/docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition-policy.v2.json text eol=lf
+/docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition-v2.schema.json text eol=lf
+/docs/release/sw-ab-update-runtime-derived-evidence-producer-bridge-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-runtime-derived-evidence-producer-bridge-v1.schema.json text eol=lf
+
+# Upstream policy/schema inputs carry their own fixed raw identities.
+/docs/release/sw-ab-update-candidate-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-candidate-runtime-client-capture-composition-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-candidate-runtime-client-capture-composition-v1.schema.json text eol=lf
+/docs/release/sw-ab-update-candidate-v1.schema.json text eol=lf
+/docs/release/sw-ab-update-runtime-api-transcript-candidate-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-runtime-api-transcript-candidate-v1.schema.json text eol=lf
+/docs/release/sw-ab-update-runtime-client-capture-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-runtime-client-capture-v1.schema.json text eol=lf
+/docs/release/sw-ab-update-runtime-collector-issuance-candidate-policy.v1.json text eol=lf
+/docs/release/sw-ab-update-runtime-collector-issuance-candidate-v1.schema.json text eol=lf
+
+# The HKO policy pins the lifecycle implementation as exact raw bytes.
+/scripts/formal-npm-lifecycle-closure-lib.mjs text eol=lf
+
+# Current Bazi manifest and expert task inputs retain their sealed source bytes.
+/apps/web/bundled-knowledge-audit.ts text eol=lf
+/packages/bazi-interpretation/src/current-chart-review-snapshot.ts text eol=lf
+/packages/bazi-interpretation/src/index.ts text eol=lf
+/packages/bazi-interpretation/src/strength-evidence-narrative.ts text eol=lf
+/packages/research-export/src/golden/single-chart-report.contract.v1.7.json text eol=lf
+/packages/rule-profiles/src/index.ts text eol=lf

@@ -3,6 +3,7 @@ name: Migration CI
 on:
   pull_request:
     paths:
+      - ".gitattributes"
       - ".node-version"
       - ".npmrc"
       - "package.json"
