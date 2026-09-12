@@ -1,11 +1,11 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { waitForAppReady, waitForServiceWorker } from "./full-backup-helpers";
 
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22a", "wcag22aa"] as const;
 
 async function waitForReady(page: Page) {
-  await expect(page.locator("#main-content")).toBeVisible();
-  await expect(page.locator(".route-loading, .table-skeleton, .chart-loading")).toHaveCount(0);
+  await waitForAppReady(page);
 }
 
 async function auditCurrentPage(page: Page, label: string) {
@@ -30,8 +30,16 @@ async function advanceAndSaveChart(page: Page, saveButtonName: "保存并打开"
   await page.waitForURL(/\/cases\/[0-9a-f-]+\/revisions\/[0-9a-f-]+$/i);
 }
 
-test("案例生命周期与历史 Revision 派生形成连续可恢复闭环", async ({ page }) => {
+test("案例生命周期与历史 Revision 派生形成连续可恢复闭环", async ({ page }, testInfo) => {
   const consoleProblems: string[] = [];
+  const externalRequests: string[] = [];
+  const expectedOrigin = new URL(String(testInfo.project.use.baseURL)).origin;
+  page.context().on("request", (request) => {
+    const url = new URL(request.url());
+    if (["http:", "https:"].includes(url.protocol) && url.origin !== expectedOrigin) {
+      externalRequests.push(request.url());
+    }
+  });
   page.on("console", (message) => {
     if (message.type() === "error" || message.type() === "warning") {
       consoleProblems.push(`${message.type()}: ${message.text()}`);
@@ -41,6 +49,7 @@ test("案例生命周期与历史 Revision 派生形成连续可恢复闭环", a
 
   await page.goto("/new?demo=1", { waitUntil: "domcontentloaded" });
   await waitForReady(page);
+  await waitForServiceWorker(page);
   await advanceAndSaveChart(page, "保存并打开");
   const r1Url = page.url();
   const r1Path = new URL(r1Url).pathname;
@@ -62,10 +71,26 @@ test("案例生命周期与历史 Revision 派生形成连续可恢复闭环", a
   expect(r3Url).not.toBe(r1Url);
   expect(r3Url).not.toBe(r2Url);
   await expect(page.getByRole("combobox", { name: "历史 Revision" }).locator("option"))
-    .toHaveText([/R1/, /R2/, /R3/]);
+    .toHaveText([/R3/, /R2/, /R1/]);
 
   await page.goto("/cases", { waitUntil: "domcontentloaded" });
   await waitForReady(page);
+  await expect(page).toHaveTitle("案例库 · 哈基米八字研究台");
+  await expect(page.locator("vite-error-overlay")).toHaveCount(0);
+  const browserSession = await page.context().newCDPSession(page);
+  await testInfo.attach("rendered-app-identity", {
+    body: Buffer.from(JSON.stringify({
+      url: page.url(), title: await page.title(), viewport: page.viewportSize(),
+      browser: await browserSession.send("Browser.getVersion"),
+      artifact: await page.evaluate(() => ({
+        buildVersion: document.querySelector<HTMLMetaElement>('meta[name="hakimi-build-version"]')?.content,
+        evidenceId: document.querySelector<HTMLMetaElement>('meta[name="hakimi-release-evidence-id"]')?.content,
+        release: JSON.parse(document.querySelector<HTMLMetaElement>('meta[name="hakimi-release-database"]')?.content ?? "null")
+      }))
+    }, null, 2)),
+    contentType: "application/json"
+  });
+  await browserSession.detach();
   let caseRow = page.getByRole("row").filter({ hasText: caseId.slice(0, 8) });
   await expect(caseRow).toContainText("3 次修订");
   await caseRow.getByRole("button", { name: "收藏案例 演示案例 · 辰时研究", exact: true }).click();
@@ -87,6 +112,9 @@ test("案例生命周期与历史 Revision 派生形成连续可恢复闭环", a
   await caseRow.getByRole("button", { name: "移入回收站案例 P1-03 生命周期实测", exact: true }).click();
   await expect(page.getByText(/已将案例“P1-03 生命周期实测”移入回收站/)).toBeVisible();
   await expect(page.getByRole("button", { name: "收藏", exact: true })).toBeFocused();
+  await testInfo.attach("focus-after-trash", {
+    body: await page.screenshot({ fullPage: false }), contentType: "image/png"
+  });
   await page.getByRole("button", { name: "回收站", exact: true }).click();
   await page.getByLabel("搜索案例与研究笔记").fill("Edge 复验");
   caseRow = page.getByRole("row").filter({ hasText: caseId.slice(0, 8) });
@@ -96,7 +124,7 @@ test("案例生命周期与历史 Revision 派生形成连续可恢复闭环", a
   await expect(page.getByText("案例已在回收站", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "由此修订派生新版", exact: true })).toBeDisabled();
   await expect(page.getByRole("combobox", { name: "历史 Revision" }).locator("option"))
-    .toHaveText([/R1/, /R2/, /R3/]);
+    .toHaveText([/R3/, /R2/, /R1/]);
 
   await page.goto("/cases", { waitUntil: "domcontentloaded" });
   await waitForReady(page);
@@ -106,6 +134,9 @@ test("案例生命周期与历史 Revision 派生形成连续可恢复闭环", a
   await caseRow.getByRole("button", { name: "恢复案例 P1-03 生命周期实测", exact: true }).click();
   await expect(page.getByText(/已恢复案例“P1-03 生命周期实测”/)).toBeVisible();
   await expect(trashScope).toBeFocused();
+  await testInfo.attach("focus-after-restore", {
+    body: await page.screenshot({ fullPage: false }), contentType: "image/png"
+  });
   await page.getByRole("button", { name: "全部", exact: true }).click();
   caseRow = page.getByRole("row").filter({ hasText: caseId.slice(0, 8) });
   await expect(caseRow).toContainText("P1-03、Edge 复验");
@@ -118,11 +149,19 @@ test("案例生命周期与历史 Revision 派生形成连续可恢复闭环", a
   await trashScope.click();
   caseRow = page.getByRole("row").filter({ hasText: caseId.slice(0, 8) });
   await caseRow.getByRole("button", { name: "永久删除案例 P1-03 生命周期实测", exact: true }).click();
-  const confirmation = page.getByRole("group", { name: "永久删除“P1-03 生命周期实测”？" });
+  const confirmation = page.getByRole("alertdialog", { name: "永久删除“P1-03 生命周期实测”？" });
   await expect(confirmation).toContainText("此操作不可恢复");
-  await expect(confirmation.getByRole("button", { name: "永久删除案例", exact: true })).toBeFocused();
+  await expect(confirmation.getByRole("button", { name: "取消", exact: true })).toBeFocused();
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await confirmation.evaluate(async (dialog) => {
+    const backdrop = dialog.parentElement;
+    if (!backdrop) throw new Error("Delete confirmation backdrop is missing.");
+    await Promise.all(backdrop.getAnimations({ subtree: true }).map((animation) => animation.finished));
+  });
   await auditCurrentPage(page, "390px 回收站永久删除确认");
+  await testInfo.attach("mobile-delete-confirmation", {
+    body: await page.screenshot({ fullPage: false }), contentType: "image/png"
+  });
   await confirmation.getByRole("button", { name: "永久删除案例", exact: true }).click();
   await expect(page.getByText(/已永久删除案例“P1-03 生命周期实测”/)).toBeVisible();
   await expect(page.getByRole("row").filter({ hasText: caseId.slice(0, 8) })).toHaveCount(0);
@@ -131,4 +170,5 @@ test("案例生命周期与历史 Revision 派生形成连续可恢复闭环", a
   await page.goto(r3Url, { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("alert")).toContainText("案例不存在或已经从此浏览器删除");
   expect(consoleProblems).toEqual([]);
+  expect(externalRequests).toEqual([]);
 });
