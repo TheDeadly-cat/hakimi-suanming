@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import childProcess, { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import { syncBuiltinESMExports } from "node:module";
 import { link, lstat, mkdtemp, mkdir, readFile, readdir, realpath, rm, symlink, unlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -56,6 +58,7 @@ import {
   computeEvidenceId,
   computeSourceTreeDigest,
   defaultV13ReleaseDescriptorMatches,
+  detectBrowserVersions,
   npmVersion,
   isReleaseLifecycleReceiptId,
   verifyReleaseLifecyclePhaseReportBinding,
@@ -160,6 +163,69 @@ test("release command execution is shell-free and routes Windows npm through nod
 
 test("npm toolchain version is collected without invoking a Windows command shim", () => {
   assert.match(npmVersion(process.cwd()), /^\d+\.\d+\.\d+/u);
+});
+
+test("browser discovery distinguishes absent executables from failed installed probes", (context) => {
+  let result = { status: null, signal: null, error: { code: "ENOENT" }, stdout: "", stderr: "" };
+  context.mock.method(fs, "existsSync", () => false);
+  context.mock.method(childProcess, "spawnSync", () => result);
+  syncBuiltinESMExports();
+  try {
+    assert.deepEqual(detectBrowserVersions(), { edge: "not-detected", chrome: "not-detected" });
+    for (const failure of [
+      { status: null, signal: "SIGTERM", error: { code: "ETIMEDOUT" } },
+      { status: null, signal: null, error: { code: "EACCES" } },
+      { status: 1, signal: null },
+      { status: null, signal: "SIGKILL" },
+      { status: 0, signal: null },
+      { status: 0, signal: null, stderr: "Microsoft Edge 999.0.0.0" }
+    ]) {
+      result = { stdout: "", stderr: "", ...failure };
+      assert.throws(() => detectBrowserVersions(), (error) => {
+        assert.equal(error.code, "RELEASE_BROWSER_VERSION_PROBE_FAILED");
+        assert.equal(error.details.browser, "edge");
+        assert.equal(error.details.exitCode, failure.status);
+        assert.equal(error.details.signal, failure.signal);
+        assert.equal(error.details.errorCode, failure.error?.code ?? null);
+        assert.ok(Number.isFinite(error.details.elapsedMs));
+        return true;
+      });
+    }
+  } finally {
+    context.mock.restoreAll();
+    syncBuiltinESMExports();
+  }
+});
+
+test("browser discovery reads stdout afresh and does not replace a failed preferred binary with an alias", (context) => {
+  let version = "152.0.0.1";
+  let failPreferred = false;
+  const candidates = [];
+  context.mock.method(fs, "existsSync", () => false);
+  context.mock.method(childProcess, "spawnSync", (executable) => {
+    candidates.push(executable);
+    if (failPreferred) return { status: 1, signal: null, stdout: "", stderr: "synthetic probe failure" };
+    return { status: 0, signal: null,
+      stdout: `${executable.includes("edge") ? "Microsoft Edge" : "Google Chrome"} ${version}\n`,
+      stderr: "synthetic diagnostic, not version metadata" };
+  });
+  syncBuiltinESMExports();
+  try {
+    assert.deepEqual(detectBrowserVersions(), {
+      edge: "Microsoft Edge 152.0.0.1", chrome: "Google Chrome 152.0.0.1"
+    });
+    version = "153.0.0.2";
+    assert.deepEqual(detectBrowserVersions(), {
+      edge: "Microsoft Edge 153.0.0.2", chrome: "Google Chrome 153.0.0.2"
+    });
+    candidates.length = 0;
+    failPreferred = true;
+    assert.throws(() => detectBrowserVersions(), { code: "RELEASE_BROWSER_VERSION_PROBE_FAILED" });
+    assert.equal(candidates.length, 1);
+  } finally {
+    context.mock.restoreAll();
+    syncBuiltinESMExports();
+  }
 });
 
 test("release evidence policy and Playwright configs share the exact Chrome and Edge matrix", () => {
