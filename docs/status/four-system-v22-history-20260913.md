@@ -52,3 +52,7 @@ node scripts/verify-release-governance.mjs
 v2.3 及后续加载器在 v2.2 通过后仍发现 Western 历史输入变化。已找回 78206 字节的旧 main.ts，并从原项目取得 20999 字节、`3a8e38d3…` 的原文档；这些只保存到外部诊断副本。该文档与仍缺失的 **20351 字节、518116de…** 原件身份不同，后者没有找回。Western manifest 还要求旧 rules-preview README `74d1faf8…`，仍无候选原件，后续链不能宣布通过。未将 109 项共享上游失败整体计为修复。
 
 生产验证器、旧 JSON/摘要、参数、current 选择、专家意见与资格计数均未修改；专家仍须真实原件。现有 5188/5189 安装、浏览器资料和候选产物未替换。原始诊断保存在 `Z:\HakimiBaziBackups\LocalDelivery\2026-09-13\ziwei-drift-history-v1`；本批回归、输入恢复与后续提交验证材料保存在相邻 `four-system-v22-history-v1`。
+
+## 后续：CLI 正例的输入范围
+
+以上结果保留为 `2fcc67a` 阶段记录。后续将当前 CLI 原文及明确导入当前库的测试转接模块放入独立输入目录，原 CLI 断言不变；另测实际源码入口不能通过历史 cwd 继承成功。v2.2 完整文件现为 24 项全部通过，连同 v2.1 的完整对照见 [四体系历史输入与 CLI 合同回归](four-system-history-cli-20260913.md)。未改变实际入口的默认定位或原 JSON 身份。

@@ -3,7 +3,7 @@ import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { test } from "node:test";
+import { after, before, test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 
@@ -16,6 +16,18 @@ import {
   serializeFourSystemCurrentStatusObservationChildV21,
   fourSystemCurrentStatusObservationChildV21TestOnly as testOnly
 } from "./four-system-current-status-observation-child-v2-1-lib.mjs";
+import {
+  attachCurrentFourSystemCli,
+  createFourSystemV22HistoricalInputs
+} from "./four-system-v22-history.test-fixture.mjs";
+import {
+  createFourSystemV21HistoricalInputs,
+  ORIGINAL_ZIWEI_CONTRACT_ARCHIVE_URL,
+  readOriginalZiweiContract
+} from "./four-system-v21-history.test-fixture.mjs";
+import {
+  loadFourSystemCurrentStatusObservationChildV22
+} from "./four-system-current-status-observation-child-v2-2-lib.mjs";
 
 const execFileAsync = promisify(execFile);
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -23,7 +35,7 @@ const persistedPath = path.resolve(
   workspaceRoot,
   ...FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_1_RELATIVE_PATH.split("/")
 );
-const cliPath = path.join(
+const actualCliPath = path.join(
   workspaceRoot,
   "scripts",
   "verify-four-system-current-status-observation-child-v2-1.mjs"
@@ -33,8 +45,46 @@ const oldRegistryCliPath = path.join(
   "scripts",
   "verify-four-system-current-observation-registry-v2.mjs"
 );
-const builtPromise = buildCurrentFourSystemCurrentStatusObservationChildV21(workspaceRoot);
-const loadedPromise = loadFourSystemCurrentStatusObservationChildV21(workspaceRoot);
+let historicalInputs;
+let cliPath;
+let builtPromise;
+let loadedPromise;
+before(async () => {
+  historicalInputs = await createFourSystemV21HistoricalInputs();
+  cliPath = await attachCurrentFourSystemCli(historicalInputs, 1);
+  builtPromise = buildCurrentFourSystemCurrentStatusObservationChildV21(historicalInputs.root);
+  loadedPromise = loadFourSystemCurrentStatusObservationChildV21(historicalInputs.root);
+  await Promise.all([builtPromise, loadedPromise]);
+});
+after(async () => { await historicalInputs?.cleanup(); });
+
+test("v2.1 restoration requires the exact original Ziwei contract archive", async () => {
+  const original = await readFile(ORIGINAL_ZIWEI_CONTRACT_ARCHIVE_URL);
+  const changed = Buffer.from(original);
+  changed[Math.floor(changed.length / 2)] ^= 1;
+  for (const bytes of [changed, original.subarray(0, -1), Buffer.alloc(0)]) {
+    assert.throws(() => readOriginalZiweiContract(bytes), /original Ziwei contract archive identity changed/u);
+  }
+});
+
+test("v2.1 and v2.2 loaders cannot substitute each other's input context", async () => {
+  const later = await createFourSystemV22HistoricalInputs();
+  try {
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV21(later.root),
+      { code: "MANIFEST_MISMATCH" });
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV22(historicalInputs.root),
+      { code: "CONTRACT_SOURCE_DRIFT" });
+  } finally {
+    await later.cleanup();
+  }
+});
+
+test("actual v2.1 CLI stays anchored to its checkout even with a valid historical working directory", async () => {
+  await assert.rejects(execFileAsync(process.execPath, [actualCliPath], {
+    cwd: historicalInputs.root, env: sanitizedEnvironment(), encoding: "utf8", windowsHide: true
+  }), (error) => error?.code === 1 && error.stdout === ""
+    && error.stderr.trim() === "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_1_MECHANICS_FAILED UNEXPECTED_ERROR");
+});
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));

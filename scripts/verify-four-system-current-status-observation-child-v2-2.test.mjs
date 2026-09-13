@@ -18,6 +18,7 @@ import {
 } from "./four-system-current-status-observation-child-v2-2-lib.mjs";
 import {
   FOUR_SYSTEM_V22_INPUT_ARCHIVE_URL,
+  attachCurrentFourSystemCli,
   createFourSystemV22HistoricalInputs,
   parseFourSystemV22InputArchive
 } from "./four-system-v22-history.test-fixture.mjs";
@@ -28,7 +29,7 @@ const persistedPath = path.resolve(
   workspaceRoot,
   ...FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_2_RELATIVE_PATH.split("/")
 );
-const cliPath = path.join(
+const actualCliPath = path.join(
   workspaceRoot,
   "scripts",
   "verify-four-system-current-status-observation-child-v2-2.mjs"
@@ -44,18 +45,26 @@ const predecessorV21CliPath = path.join(
   "verify-four-system-current-status-observation-child-v2-1.mjs"
 );
 let historicalInputs;
+let cliPath;
 let builtPromise;
 let loadedPromise;
 before(async () => {
   historicalInputs = await createFourSystemV22HistoricalInputs();
-  // The persisted v2.2 object contracts use their explicit input context. The
-  // current-checkout negative and every real CLI test below still use the actual
-  // workspace; they cannot inherit a historical fixture's successful result.
+  cliPath = await attachCurrentFourSystemCli(historicalInputs, 2);
+  // Persisted object and CLI positive contracts use their explicit input
+  // context with current code. Current-checkout negatives remain separate.
   builtPromise = buildCurrentFourSystemCurrentStatusObservationChildV22(historicalInputs.root);
   loadedPromise = loadFourSystemCurrentStatusObservationChildV22(historicalInputs.root);
   await Promise.all([builtPromise, loadedPromise]);
 });
 after(async () => { await historicalInputs?.cleanup(); });
+
+test("actual v2.2 CLI stays anchored to its checkout even with a valid historical working directory", async () => {
+  await assert.rejects(execFileAsync(process.execPath, [actualCliPath], {
+    cwd: historicalInputs.root, env: sanitizedEnvironment(), encoding: "utf8", windowsHide: true
+  }), (error) => error?.code === 1 && error.stdout === ""
+    && error.stderr.trim() === "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_2_MECHANICS_FAILED UNEXPECTED_ERROR");
+});
 
 test("v2.2 archived input context rejects corruption, truncation and an empty archive", async () => {
   const original = await readFile(FOUR_SYSTEM_V22_INPUT_ARCHIVE_URL);

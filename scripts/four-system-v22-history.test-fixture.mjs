@@ -79,3 +79,23 @@ export async function createFourSystemV22HistoricalInputs() {
     throw error;
   }
 }
+
+// Exercise the current CLI byte-for-byte against a declared input context.
+// Its import.meta.url still determines its root, and its argv/preload guards
+// run normally. Only this test bridge imports the current library by URL;
+// source code archived as an input never becomes an executable module.
+export async function attachCurrentFourSystemCli(inputs, minorVersion) {
+  assert.ok(minorVersion === 1 || minorVersion === 2);
+  const stem = `four-system-current-status-observation-child-v2-${minorVersion}`;
+  const cliName = `verify-${stem}.mjs`;
+  const libraryName = `${stem}-lib.mjs`;
+  const cliSource = await readFile(new URL(cliName, import.meta.url));
+  const libraryUrl = new URL(libraryName, import.meta.url);
+  const cliPath = path.join(inputs.root, "scripts", cliName);
+  await writeFile(cliPath, cliSource, { flag: "wx" });
+  await writeFile(path.join(inputs.root, "scripts", libraryName),
+    `// Test bridge to the actual current verifier, not archived code.\nexport * from ${JSON.stringify(libraryUrl.href)};\n`,
+    { flag: "wx" });
+  assert.deepEqual(await readFile(cliPath), cliSource);
+  return cliPath;
+}
