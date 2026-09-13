@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { linkSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { linkSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -13,11 +14,13 @@ import {
   buildWesternLicenseNoticeEvidence,
   computeWesternLicenseNoticeEvidenceDigest,
   parseWesternLicenseNoticeEvidenceJsonBytes,
+  parseWesternHistoricalNoticeArchive,
   runWesternIsolatedBuildLicenseNoticeVerification,
   verifyWesternCanonicalLicenseInputs,
   verifyWesternIsolatedBuildLicenseNotices,
   verifyWesternIsolatedBuildLicenseSurface,
-  verifyWesternLicenseNoticeEvidence
+  verifyWesternLicenseNoticeEvidence,
+  withWesternHistoricalNoticeReplay
 } from "./western-isolated-build-license-notice-lib.mjs";
 
 const testPath = fileURLToPath(import.meta.url);
@@ -149,8 +152,8 @@ test("rejects duplicate keys before the frozen child can collapse to an authorit
   }
 });
 
-test("keeps the one-way evidence child exact, unbound, Schema-null, and authority-red", () => {
-  const receipt = runWesternIsolatedBuildLicenseNoticeVerification({ evidenceMode: "none" });
+test("keeps the historical one-way evidence child exact, unbound, Schema-null, and authority-red", () =>
+  withWesternHistoricalNoticeReplay(({ receipt, workspaceRoot }) => {
   const expected = buildWesternLicenseNoticeEvidence(receipt, workspaceRoot);
   assert.equal(expected.systemIdentity.releaseIdentity, null);
   assert.equal(expected.systemIdentity.targetSchema, null);
@@ -225,7 +228,7 @@ test("keeps the one-way evidence child exact, unbound, Schema-null, and authorit
       label
     );
   }
-});
+}));
 
 test("rejects missing, truncated, BOM-prefixed, CRLF, and equal-length modified license bytes", async (t) => {
   const cases = [
@@ -352,6 +355,11 @@ test("rejects symlinked output endpoints when the platform permits creating them
 test("runs both fixed Vite builds in an owned temporary root and returns a bounded receipt", () => {
   const temporaryPrefix = "hakimi-western-license-verification-";
   const before = new Set(readdirSync(os.tmpdir()).filter((entry) => entry.startsWith(temporaryPrefix)));
+  const sourceParent = path.join(workspaceRoot, "scripts/fixtures/western-notice-replay-work");
+  const sourceBefore = new Set(readdirSync(sourceParent));
+  const rootBefore = lstatSync(workspaceRoot, { bigint: true });
+  const originalHtml = readFileSync(path.join(workspaceRoot, "packages/western-astrology-rules-preview-draft/browser-app/index.html"));
+  const originalEvidence = readFileSync(path.join(workspaceRoot, WESTERN_LICENSE_NOTICE_EVIDENCE_PATH));
   const stdout = execFileSync(process.execPath, [cliPath], {
     cwd: workspaceRoot,
     encoding: "utf8",
@@ -359,6 +367,15 @@ test("runs both fixed Vite builds in an owned temporary root and returns a bound
     maxBuffer: 32 * 1024 * 1024
   });
   const receipt = JSON.parse(stdout);
+  assert.equal(receipt.scope, "current_dual_build_with_separate_historical_notice_replay");
+  assert.equal(Object.hasOwn(receipt, "evidenceChild"), false);
+  assert.equal(receipt.historicalEvidence.scope, "historical_v1_exact_basis_notice_replay");
+  assert.equal(receipt.historicalEvidence.currentSourceApplicabilityEstablished, false);
+  assert.equal(receipt.historicalEvidence.fullHistoricalSourceCommitRecovered, false);
+  assert.equal(receipt.historicalEvidence.evidenceDigest, JSON.parse(originalEvidence).evidenceDigest);
+  const htmlBasis = receipt.currentBasisArtifacts.find((entry) => entry.role === "rules_preview_source_html");
+  assert.equal(htmlBasis.sha256, createHash("sha256").update(originalHtml).digest("hex"));
+  assert.notEqual(htmlBasis.sha256, JSON.parse(originalEvidence).basisArtifacts.find((entry) => entry.role === "rules_preview_source_html").sha256);
   assert.deepEqual(receipt.surfaces.map((surface) => surface.surfaceId), ["browser-parity", "rules-preview"]);
   assert.ok(receipt.surfaces.every((surface) =>
     surface.licenseAsset.bytes === 1095
@@ -370,4 +387,25 @@ test("runs both fixed Vite builds in an owned temporary root and returns a bound
   assert.equal(receipt.authorityBoundary.releaseReady, false);
   const after = new Set(readdirSync(os.tmpdir()).filter((entry) => entry.startsWith(temporaryPrefix)));
   assert.deepEqual(after, before);
+  assert.deepEqual(new Set(readdirSync(sourceParent)), sourceBefore);
+  const rootAfter = lstatSync(workspaceRoot, { bigint: true });
+  assert.equal(rootAfter.mtimeNs, rootBefore.mtimeNs);
+  assert.equal(rootAfter.ctimeNs, rootBefore.ctimeNs);
+  assert.deepEqual(readFileSync(path.join(workspaceRoot, "packages/western-astrology-rules-preview-draft/browser-app/index.html")), originalHtml);
+  assert.deepEqual(readFileSync(path.join(workspaceRoot, WESTERN_LICENSE_NOTICE_EVIDENCE_PATH)), originalEvidence);
+});
+
+test("rejects changed or truncated historical archive bytes before materializing source", () => {
+  const original = readFileSync(path.join(workspaceRoot, "scripts/fixtures/western-notice-v1-original-inputs.zip"));
+  const entries = parseWesternHistoricalNoticeArchive(original);
+  assert.equal(Object.keys(entries).length, 10);
+  const changed = Buffer.from(original); changed[Math.floor(changed.length / 2)] ^= 1;
+  for (const bytes of [changed, original.subarray(0, -1), Buffer.alloc(0)]) {
+    assert.throws(() => parseWesternHistoricalNoticeArchive(bytes), /historical notice archive exact byte identity drifted/u);
+  }
+});
+
+test("the original frozen-input API still rejects substituting current source for historical evidence", () => {
+  assert.throws(() => runWesternIsolatedBuildLicenseNoticeVerification(),
+    /one-way evidence child no longer matches the fixed dependency and build observations/u);
 });
