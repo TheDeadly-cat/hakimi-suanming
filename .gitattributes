@@ -244,3 +244,13 @@
 
 # First controller interaction regression inputs
 /apps/web/e2e/first-controller-interaction.spec.ts text eol=lf
+
+# Current boot evidence contracts use their Git LF bytes on Windows too.
+/apps/web/playwright.release-boot-artifact.config.ts text eol=lf
+/apps/web/playwright.release-browser-result.ts text eol=lf
+/docs/release/release-evidence.schema.json text eol=lf
+/scripts/release-evidence.test.mjs text eol=lf
+/scripts/sw-ab-update-candidate-fixture.mjs text eol=lf
+/scripts/verify-migration-ci-paths.test.mjs text eol=lf
+/scripts/verify-release-governance.mjs text eol=lf
+/scripts/verify-release-governance.test.mjs text eol=lf
