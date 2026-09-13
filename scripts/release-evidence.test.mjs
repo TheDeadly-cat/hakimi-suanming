@@ -264,10 +264,10 @@ test("release evidence policy and Playwright configs share the exact Chrome and 
   });
   verifyReleaseBrowserPlaywrightConfig(bootArtifactConfig, {
     receiptId: "boot",
-    testMatch: ["boot-fail-closed.spec.ts", "database-v8-v9-upgrade.spec.ts"],
+    testMatch: ["boot-fail-closed.spec.ts", "database-v8-v9-upgrade.spec.ts", "first-controller-interaction.spec.ts"],
     outputDirectoryName: "hakimi-bazi-boot-cross-browser-results",
     timeout: 120_000,
-    expectedTestsPerProject: 6
+    expectedTestsPerProject: 8
   });
   verifyReleaseBrowserPlaywrightConfig(pwaCrossBrowserConfig, {
     receiptId: "pwa",
@@ -556,14 +556,14 @@ async function observeCrossCompletionReporter(observations, options = {}) {
 }
 
 test("cross completion keeps the original four artifact-bound receipt ids unchanged", async () => {
-  const originalCounts = { backup: 4, boot: 6, pwa: 1, "web-v1-flow": 1 };
-  assert.deepEqual(REQUIRED_RELEASE_BROWSER_TESTS_PER_PROJECT, originalCounts);
-  assert.deepEqual(REQUIRED_RELEASE_BROWSER_RECEIPT_IDS, Object.keys(originalCounts));
+  const defaultCounts = { backup: 4, boot: 8, pwa: 1, "web-v1-flow": 1 };
+  assert.deepEqual(REQUIRED_RELEASE_BROWSER_TESTS_PER_PROJECT, defaultCounts);
+  assert.deepEqual(REQUIRED_RELEASE_BROWSER_RECEIPT_IDS, Object.keys(defaultCounts));
   assert.deepEqual(REQUIRED_RELEASE_BROWSER_COMPLETION_TESTS_PER_PROJECT, {
-    ...originalCounts,
+    ...defaultCounts,
     [CROSS_SCHEMA_V13_V16_RECEIPT_ID]: 13
   });
-  for (const id of Object.keys(originalCounts)) {
+  for (const id of Object.keys(defaultCounts)) {
     assert.equal(isReleaseBrowserReceiptId(id), true);
     assert.equal(isReleaseBrowserCompletionReceiptId(id), true);
   }
@@ -577,6 +577,22 @@ test("cross completion keeps the original four artifact-bound receipt ids unchan
   const declaredTitles = [...spec.matchAll(/^test\("([^"\n]+)",/gmu)].map((match) => match[1]);
   assert.equal(declaredTitles.length, 13);
   assert.deepEqual(CROSS_SCHEMA_V13_V16_TEST_TITLES, declaredTitles);
+});
+
+test("boot completion requires eight cases per browser and cannot reuse a six-case receipt", () => {
+  for (const count of [6, 8]) {
+    const summary = buildReleaseBrowserResultSummary({
+      receiptId: "boot",
+      fullResultStatus: "passed",
+      expectedTestsPerProject: count,
+      observations: ["msedge", "chrome"].flatMap((projectName) => Array.from({ length: count }, () => ({
+        projectName, expectedStatus: "passed", outcome: "expected", resultStatuses: ["passed"]
+      })))
+    });
+    assert.equal(summary.strictGatePassed, count === 8);
+    if (count === 6) assert.throws(() => assertStrictReleaseBrowserResultSummary(summary, "boot"));
+    else assert.doesNotThrow(() => assertStrictReleaseBrowserResultSummary(summary, "boot"));
+  }
 });
 
 test("cross completion accepts all 26 exact original observations through the strict reporter", async () => {

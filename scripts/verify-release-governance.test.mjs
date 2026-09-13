@@ -2424,10 +2424,10 @@ test("accepts the exact release browser configs and install prerequisites", () =
     bootArtifactConfig,
     {
       receiptId: "boot",
-      testMatch: ["boot-fail-closed.spec.ts", "database-v8-v9-upgrade.spec.ts"],
+      testMatch: ["boot-fail-closed.spec.ts", "database-v8-v9-upgrade.spec.ts", "first-controller-interaction.spec.ts"],
       outputDirectoryName: "hakimi-bazi-boot-cross-browser-results",
       timeout: 120_000,
-      expectedTestsPerProject: 6
+      expectedTestsPerProject: 8
     }
   ));
   assert.doesNotThrow(() => verifyReleaseBrowserPlaywrightConfig(

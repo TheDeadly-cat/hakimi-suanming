@@ -1032,6 +1032,7 @@ export const REQUIRED_RELEASE_FILES = Object.freeze([
   "apps/web/e2e/cross-schema-upgrade-helpers.ts",
   "apps/web/e2e/boot-fail-closed.spec.ts",
   "apps/web/e2e/database-v8-v9-upgrade.spec.ts",
+  "apps/web/e2e/first-controller-interaction.spec.ts",
   "apps/web/e2e/database-v9-v10-upgrade.spec.ts",
   "apps/web/e2e/database-v10-v11-upgrade.spec.ts",
   "apps/web/e2e/offline-full-backup.spec.ts",
@@ -6550,7 +6551,7 @@ export function verifyCrossSchemaV13V16CompletionGovernance(config = crossSchema
     || CROSS_SCHEMA_V13_V16_TEST_TITLES.length !== 13
     || new Set(CROSS_SCHEMA_V13_V16_TEST_TITLES).size !== 13
     || !sameJson(REQUIRED_RELEASE_BROWSER_COMPLETION_TESTS_PER_PROJECT, {
-      backup: 4, boot: 6, pwa: 1, "web-v1-flow": 1, [receiptId]: 13
+      backup: 4, boot: 8, pwa: 1, "web-v1-flow": 1, [receiptId]: 13
     })) {
     throw new Error("Cross-Schema completion inventory does not match the full release test scope.");
   }
@@ -6662,11 +6663,12 @@ export function verifyReleaseBrowserGovernance(
     receiptId: "boot",
     testMatch: [
       "boot-fail-closed.spec.ts",
-      "database-v8-v9-upgrade.spec.ts"
+      "database-v8-v9-upgrade.spec.ts",
+      "first-controller-interaction.spec.ts"
     ],
     outputDirectoryName: "hakimi-bazi-boot-cross-browser-results",
     timeout: 120_000,
-    expectedTestsPerProject: 6
+    expectedTestsPerProject: 8
   });
   verifyReleaseBrowserPlaywrightConfig(browserConfigs.pwa, {
     receiptId: "pwa",

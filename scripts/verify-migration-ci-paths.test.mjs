@@ -312,11 +312,11 @@ test("the diagnostic does not replace or reduce formal backup and boot matrices"
   assert.equal(scripts["test:release:boot-artifact"], "playwright test --config apps/web/playwright.release-boot-artifact.config.ts");
   const selectedSpecs = (source) => JSON.parse(`[${source.match(/testMatch:\s*\[([^\]]+)\]/u)?.[1]}]`);
   assert.deepEqual(selectedSpecs(backup), ["database-v9-v10-upgrade.spec.ts", "database-v10-v11-upgrade.spec.ts", "offline-full-backup.spec.ts", "full-backup-worker-capacity.spec.ts"]);
-  assert.deepEqual(selectedSpecs(boot), ["boot-fail-closed.spec.ts", "database-v8-v9-upgrade.spec.ts"]);
+  assert.deepEqual(selectedSpecs(boot), ["boot-fail-closed.spec.ts", "database-v8-v9-upgrade.spec.ts", "first-controller-interaction.spec.ts"]);
   assert.match(backup, /receiptId: "backup", expectedTestsPerProject: 4/u);
-  assert.match(boot, /receiptId: "boot", expectedTestsPerProject: 6/u);
+  assert.match(boot, /receiptId: "boot", expectedTestsPerProject: 8/u);
   assert.match(result, /backup: 4,/u);
-  assert.match(result, /boot: 6,/u);
+  assert.match(result, /boot: 8,/u);
   for (const source of [backup, boot, result]) assert.doesNotMatch(source, /local-data-boundaries|local-data-recovery|local-data-readonly/u);
 });
 

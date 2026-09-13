@@ -102,7 +102,7 @@ function releaseBrowserSummary(receiptId) {
   }
   const expectedTestsPerProject = {
     backup: 4,
-    boot: 6,
+    boot: 8,
     pwa: 1,
     "web-v1-flow": 1
   }[receiptId];

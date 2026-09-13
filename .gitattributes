@@ -244,4 +244,3 @@
 
 # First controller interaction regression inputs
 /apps/web/e2e/first-controller-interaction.spec.ts text eol=lf
-/apps/web/playwright.first-controller-interaction.config.ts text eol=lf

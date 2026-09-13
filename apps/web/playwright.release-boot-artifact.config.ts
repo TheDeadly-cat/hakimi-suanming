@@ -17,12 +17,13 @@ export default defineConfig({
   ...baseConfig,
   testMatch: [
     "boot-fail-closed.spec.ts",
-    "database-v8-v9-upgrade.spec.ts"
+    "database-v8-v9-upgrade.spec.ts",
+    "first-controller-interaction.spec.ts"
   ],
   outputDir: path.join(os.tmpdir(), "hakimi-bazi-boot-cross-browser-results"),
   reporter: [
     ["line"],
-    [strictReporter, { receiptId: "boot", expectedTestsPerProject: 6 }]
+    [strictReporter, { receiptId: "boot", expectedTestsPerProject: 8 }]
   ],
   webServer: {
     command: "npm run preview:release-artifact --workspace @hakimi/web",
