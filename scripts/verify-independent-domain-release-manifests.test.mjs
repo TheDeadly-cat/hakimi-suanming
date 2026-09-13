@@ -37,16 +37,36 @@ import {
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const execFileAsync = promisify(execFile);
 const ziweiDefinition = INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0];
+const westernDefinition = INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[1];
+const westernArchivePath = "scripts/fixtures/western-v1-original-changed-inputs.zip";
+const westernArchiveSha256 = "1ca40a99339474eb5d076a150097a15904e2a3b2c1d617a5082b3a7edf6499ba";
+const sharedOriginalArchivePath = "scripts/fixtures/four-system-v1-additional-original-inputs.zip";
+const sharedOriginalArchiveSha256 = "27c0e45907802bfd27bd7ecf691613598106bf5dac12a155daef04c8d221ebf3";
+const westernOriginalChangedPaths = [
+  westernDefinition.manifestPath,
+  "packages/western-astrology-rules-preview-draft/README.md",
+  "packages/western-astrology-rules-preview-draft/src/browser-app/content-layer.ts",
+  "packages/western-astrology-rules-preview-draft/src/browser-app/main.ts",
+  "packages/western-astronomy-engine-adapter-draft/README.md",
+  "packages/western-astronomy-engine-adapter-draft/src/rule-layer/houses.ts",
+  "packages/western-astronomy-engine-adapter-draft/src/rule-layer/index.ts",
+  "packages/western-astronomy-engine-adapter-draft/src/rule-layer/zodiac.ts"
+];
+const westernReusedOriginalPaths = [
+  "packages/western-astrology-contracts-draft/src/index.ts",
+  "packages/western-astrology-rules-preview-draft/src/rule-layer-bridge.ts"
+];
 const originalArchiveSha256 = "684b64b2e70b1eb11b5d58ecee631b64e9c54a7b28874c23f49dd21063ef6cf0";
 const originalChangedPaths = [
   "content/system-admission/ziwei-hko-restricted-source-pre-release-policy.v1.json",
   "packages/ziwei-doushu-contracts-draft/src/index.ts",
   "scripts/ziwei-hko-restricted-source-pre-release-policy-lib.mjs"
 ];
-let ziweiHistoricalRoot;
+let independentHistoricalRoot;
 let temporaryParent;
 let ownedHistoricalRoot;
 let originalUnchangedInputs;
+let historicalCliPath;
 
 function parseOriginalArchive(bytes) {
   assert.equal(createHash("sha256").update(bytes).digest("hex"), originalArchiveSha256,
@@ -59,9 +79,29 @@ function parseOriginalArchive(bytes) {
   return entries;
 }
 
-// The archived source files are data, never imported. Verification always uses
-// the current implementation above. Western's missing historical README remains
-// an explicit unresolved input; no synthetic replacement is supplied for it.
+function parseWesternOriginalArchive(bytes) {
+  assert.equal(createHash("sha256").update(bytes).digest("hex"), westernArchiveSha256,
+    "Western v1 original archive identity changed");
+  const { unzipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+  const entries = unzipSync(bytes);
+  assert.deepEqual(Object.keys(entries).sort(), [...westernOriginalChangedPaths].sort());
+  return entries;
+}
+
+function parseSharedOriginalArchive(bytes) {
+  assert.equal(createHash("sha256").update(bytes).digest("hex"), sharedOriginalArchiveSha256,
+    "Shared v1 original archive identity changed");
+  const { unzipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+  const entries = unzipSync(bytes);
+  assert.equal(Object.keys(entries).length, 18);
+  return Object.fromEntries(westernReusedOriginalPaths.map((relativePath) => {
+    assert.ok(entries[relativePath]);
+    return [relativePath, entries[relativePath]];
+  }));
+}
+
+// Historical inputs are data. Both manifests use one coherent original-input
+// context; verifier imports and the verbatim CLI always come from current code.
 before(async () => {
   const entries = parseOriginalArchive(await readFile(path.join(workspaceRoot,
     "scripts/fixtures/ziwei-v2-manifest-original-changed-inputs.zip")));
@@ -82,8 +122,8 @@ before(async () => {
   originalUnchangedInputs = [...expected].filter(([relativePath]) => entries[relativePath] === undefined);
   assert.equal(originalUnchangedInputs.length, 43);
   temporaryParent = await realpath(os.tmpdir());
-  ziweiHistoricalRoot = await mkdtemp(path.join(temporaryParent, "hakimi-ziwei-v2-history-"));
-  ownedHistoricalRoot = await lstat(ziweiHistoricalRoot, { bigint: true });
+  independentHistoricalRoot = await mkdtemp(path.join(temporaryParent, "hakimi-independent-originals-"));
+  ownedHistoricalRoot = await lstat(independentHistoricalRoot, { bigint: true });
   for (const [relativePath, expectedSha256] of expected) {
     assert.equal(path.isAbsolute(relativePath), false);
     assert.equal(relativePath.includes("\\") || relativePath.includes(":"), false);
@@ -91,25 +131,73 @@ before(async () => {
     const bytes = entries[relativePath] === undefined
       ? await readFile(path.join(workspaceRoot, relativePath)) : Buffer.from(entries[relativePath]);
     assert.equal(createHash("sha256").update(bytes).digest("hex"), expectedSha256, relativePath);
-    const target = path.join(ziweiHistoricalRoot, relativePath);
+    const target = path.join(independentHistoricalRoot, relativePath);
     await mkdir(path.dirname(target), { recursive: true });
     await writeFile(target, bytes, { flag: "wx" });
   }
+  const westernEntries = parseWesternOriginalArchive(await readFile(path.join(workspaceRoot, westernArchivePath)));
+  const sharedEntries = parseSharedOriginalArchive(await readFile(path.join(workspaceRoot, sharedOriginalArchivePath)));
+  const manifestBytes = Buffer.from(westernEntries[westernDefinition.manifestPath]);
+  const manifestSha256 = "c138220098346a3ff9857c1e8034914205277bdbe8cf5563e80b58687745a398";
+  assert.equal(createHash("sha256").update(manifestBytes).digest("hex"), manifestSha256);
+  const westernManifest = parseIndependentDomainManifestJsonBytes(manifestBytes);
+  const westernExpected = new Map([[westernDefinition.manifestPath, manifestSha256]]);
+  for (const component of westernManifest.components) {
+    for (const file of component.files) {
+      if (westernExpected.has(file.path)) assert.equal(westernExpected.get(file.path), file.sha256);
+      westernExpected.set(file.path, file.sha256);
+    }
+  }
+  assert.equal(westernExpected.size, 27);
+  assert.equal(Object.keys(westernEntries).some((relativePath) => sharedEntries[relativePath] !== undefined), false);
+  const readmeBytes = Buffer.from(westernEntries["packages/western-astrology-rules-preview-draft/README.md"]);
+  assert.equal(readmeBytes.length, 18037);
+  assert.equal(createHash("sha256").update(readmeBytes).digest("hex"),
+    "74d1faf827c0acf301a644af51d1435d3f6ba522b58af20f8f4002f09ade6aa2");
+  for (const [relativePath, digest] of westernExpected) {
+    assert.equal(path.isAbsolute(relativePath), false);
+    assert.equal(relativePath.includes("\\") || relativePath.includes(":"), false);
+    assert.equal(relativePath.split("/").some((segment) => ["", ".", ".."].includes(segment)), false);
+    const original = westernEntries[relativePath] ?? sharedEntries[relativePath];
+    const bytes = original === undefined
+      ? await readFile(path.join(workspaceRoot, relativePath)) : Buffer.from(original);
+    assert.equal(createHash("sha256").update(bytes).digest("hex"), digest, relativePath);
+    if (expected.has(relativePath)) {
+      assert.equal(expected.get(relativePath), digest, "Original contexts conflict");
+      continue;
+    }
+    if (original === undefined) originalUnchangedInputs.push([relativePath, digest]);
+    const target = path.join(independentHistoricalRoot, relativePath);
+    await mkdir(path.dirname(target), { recursive: true });
+    await writeFile(target, bytes, { flag: "wx" });
+    expected.set(relativePath, digest);
+  }
+  assert.equal(expected.size, 73);
+  assert.equal(originalUnchangedInputs.length, 58);
+  historicalCliPath = path.join(independentHistoricalRoot, "scripts", "verify-independent-domain-release-manifests.mjs");
+  const cliBytes = await readFile(path.join(workspaceRoot, "scripts", "verify-independent-domain-release-manifests.mjs"));
+  await mkdir(path.dirname(historicalCliPath), { recursive: true });
+  await writeFile(historicalCliPath, cliBytes, { flag: "wx" });
+  assert.deepEqual(await readFile(historicalCliPath), cliBytes);
+  await writeFile(path.join(independentHistoricalRoot, "scripts", "independent-domain-release-manifest-lib.mjs"),
+    `export * from ${JSON.stringify(new URL("./independent-domain-release-manifest-lib.mjs", import.meta.url).href)};\n`,
+    { flag: "wx" });
 });
 
 after(async () => {
-  if (!ziweiHistoricalRoot || !ownedHistoricalRoot) return;
-  const final = await lstat(ziweiHistoricalRoot, { bigint: true });
+  if (!independentHistoricalRoot || !ownedHistoricalRoot) return;
+  const final = await lstat(independentHistoricalRoot, { bigint: true });
   assert.equal(final.isDirectory() && !final.isSymbolicLink(), true);
   assert.equal(final.dev, ownedHistoricalRoot.dev);
   assert.equal(final.ino, ownedHistoricalRoot.ino);
-  assert.equal(path.dirname(await realpath(ziweiHistoricalRoot)), temporaryParent);
-  assert.equal(path.basename(ziweiHistoricalRoot).startsWith("hakimi-ziwei-v2-history-"), true);
-  await rm(ziweiHistoricalRoot, { recursive: true, force: true });
+  assert.equal(path.dirname(await realpath(independentHistoricalRoot)), temporaryParent);
+  assert.equal(path.basename(independentHistoricalRoot).startsWith("hakimi-independent-originals-"), true);
+  await rm(independentHistoricalRoot, { recursive: true, force: true });
 });
 
 function basisRootFor(definitionInput) {
-  return definitionInput === ziweiDefinition ? ziweiHistoricalRoot : workspaceRoot;
+  assert.ok(INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS.includes(definitionInput));
+  return independentHistoricalRoot;
 }
 
 test("original Ziwei fixture rejects archive truncation and changed bytes", async () => {
@@ -125,6 +213,53 @@ test("original Ziwei fixture rejects archive truncation and changed bytes", asyn
 test("current checkout still rejects the frozen Ziwei manifest instead of inheriting historical success", async () => {
   await assert.rejects(loadIndependentDomainManifest(workspaceRoot, ziweiDefinition),
     { code: "MANIFEST_MISMATCH" });
+});
+
+test("Western historical input archives reject tampering, truncation and empty ZIPs", async () => {
+  const { zipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+  for (const [relativePath, parse, count] of [
+    [westernArchivePath, parseWesternOriginalArchive, 8],
+    [sharedOriginalArchivePath, parseSharedOriginalArchive, 2]
+  ]) {
+    const original = await readFile(path.join(workspaceRoot, relativePath));
+    assert.equal(Object.keys(parse(original)).length, count);
+    const changed = Buffer.from(original); changed[Math.floor(changed.length / 2)] ^= 1;
+    for (const bytes of [changed, original.subarray(0, -1), zipSync({})]) {
+      assert.throws(() => parse(bytes), /original archive identity changed/u);
+    }
+  }
+});
+
+test("current Western loader and source CLI cannot inherit the historical fixture success", async () => {
+  await assert.rejects(loadIndependentDomainManifest(workspaceRoot, westernDefinition),
+    { code: "MANIFEST_MISMATCH" });
+  await assert.rejects(execFileAsync(process.execPath,
+    [path.join(workspaceRoot, "scripts", "verify-independent-domain-release-manifests.mjs")],
+    { cwd: independentHistoricalRoot, windowsHide: true }), (error) => {
+    assert.equal(error.code, 1);
+    assert.equal(JSON.parse(error.stderr).errorCode, "MANIFEST_MISMATCH");
+    return true;
+  });
+});
+
+test("recovered Western README is required byte for byte by the original manifest", async () => {
+  await withTemporaryWorkspace(async (temporaryRoot) => {
+    await copyDefinitionFixture(temporaryRoot, westernDefinition);
+    const target = path.join(temporaryRoot, "packages/western-astrology-rules-preview-draft/README.md");
+    const original = await readFile(target);
+    const changed = Buffer.from(original); changed[0] ^= 1;
+    await writeFile(target, changed);
+    await assert.rejects(loadIndependentDomainManifest(temporaryRoot, westernDefinition),
+      { code: "MANIFEST_MISMATCH" });
+    await rm(target);
+    await assert.rejects(loadIndependentDomainManifest(temporaryRoot, westernDefinition),
+      (error) => {
+        assert.equal(error.code, "COMPONENT_FILE_MISSING");
+        assert.equal(error.cause?.code, "ENOENT");
+        assert.equal(path.resolve(error.cause.path), target);
+        return true;
+      });
+  });
 });
 
 test("Windows checkout preserves original fixture inputs and missing attributes change their raw identity", async () => {
@@ -789,7 +924,7 @@ test("full-load APIs return only detached recursively frozen WeakSet-branded sna
   assert.notStrictEqual(loaded.manifest, persisted);
   assertRecursivelyFrozen(loaded);
 
-  const all = await verifyAllIndependentDomainManifests(workspaceRoot);
+  const all = await verifyAllIndependentDomainManifests(independentHistoricalRoot);
   assert.equal(Object.isFrozen(all), true);
   assert.equal(all.length, 2);
   for (const result of all) {
@@ -1248,8 +1383,8 @@ test("held-handle reader rejects a linked directory chain", async (t) => {
 test("CLI emits calibrated offline draft closure and explicit all-false authority and observation boundaries", async () => {
   const { stdout, stderr } = await execFileAsync(
     process.execPath,
-    [path.join(workspaceRoot, "scripts", "verify-independent-domain-release-manifests.mjs")],
-    { cwd: workspaceRoot, windowsHide: true }
+    [historicalCliPath],
+    { cwd: independentHistoricalRoot, windowsHide: true }
   );
   assert.equal(stderr, "");
   const output = JSON.parse(stdout);

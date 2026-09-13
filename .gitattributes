@@ -295,3 +295,14 @@
 # Current Ziwei source identities used by the historical drift loader.
 /packages/ziwei-doushu-contracts-draft/src/index.ts text eol=lf
 /packages/ziwei-doushu-contracts-draft/src/index.test.ts text eol=lf
+
+# Unchanged Western v1 original inputs must retain their locked LF bytes.
+/packages/western-astronomy-engine-adapter-draft/src/astronomy-worker-entry.mjs text eol=lf
+/packages/western-astronomy-engine-adapter-draft/src/index.ts text eol=lf
+/packages/western-astronomy-engine-adapter-draft/src/rule-layer/aspects.ts text eol=lf
+/packages/western-astronomy-engine-adapter-draft/src/rule-layer/canonical.ts text eol=lf
+/packages/western-astronomy-engine-adapter-draft/src/contract-bridge.ts text eol=lf
+/packages/western-astronomy-engine-adapter-draft/src/cross-system-engineering-fact-projection.ts text eol=lf
+/packages/western-astrology-contracts-draft/README.md text eol=lf
+/packages/western-astrology-contracts-draft/package.json text eol=lf
+/packages/western-astronomy-engine-adapter-draft/src/strict-receipt-draft.ts text eol=lf
