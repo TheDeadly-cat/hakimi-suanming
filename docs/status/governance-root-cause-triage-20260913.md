@@ -72,3 +72,7 @@
 `verify-bazi-expert-privacy-formal-intake-reconciliation.test.mjs` 和 `verify-bazi-source-carrier-record-readiness-version-aware-candidate.test.mjs` 均在顶层历史材料加载时停止，缺少文件级测试摘要；后者已记录 `BOUND_READINESS_BASIS_DRIFT`，前者涉及旧专家 helper。417 项失败及这两处初始化阻断仍未解决，整组不合格。此次完整组不增加准入或真实专家证据。
 
 另一次 `7674862` Windows CRLF 检出报告为 1141 项、668 通过/473 失败，仍缺同两份文件结果；它同时包含较早测试版本及检出字节差异，不能把与 LF 的差额算成本次修复收益，也不能把先前 current-governance 的平台一致性扩大为全部八字历史组的平台一致性。三轮原报告、事件及逐文件首错保存在 `bazi-v17-history-fixture-v1/full-bazi-regression/`；用于本次因果对照的是前表两轮 LF 输入。
+
+## 紫微 v2 历史夹具的后续关闭
+
+后续以 `35358d3` 为基线恢复完整 48 项紫微 v2 历史输入，保留当前拒绝、原篡改负例和未完成的全体系正例。完整 current-governance 重跑为 743 项：501 通过、242 失败，无跳过、取消或缺失结果；本批关闭原有 7 项失败，新增 3 项测试通过，其余结果身份未变。原 269 项累计关闭 27 项，仍有 242 项。逐项范围、原件来源与 Windows 检出验证见 [紫微 v2 历史输入记录](./ziwei-manifest-history-20260913.md)。

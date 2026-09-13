@@ -1,19 +1,22 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
+import { createRequire } from "node:module";
 import {
   copyFile,
   link,
+  lstat,
   mkdir,
   mkdtemp,
   readFile,
+  realpath,
   rename,
   rm,
   symlink,
   writeFile
 } from "node:fs/promises";
 import os from "node:os";
-import { test } from "node:test";
+import { after, before, test } from "node:test";
 import path from "node:path";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
@@ -33,18 +36,147 @@ import {
 
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const execFileAsync = promisify(execFile);
+const ziweiDefinition = INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0];
+const originalArchiveSha256 = "684b64b2e70b1eb11b5d58ecee631b64e9c54a7b28874c23f49dd21063ef6cf0";
+const originalChangedPaths = [
+  "content/system-admission/ziwei-hko-restricted-source-pre-release-policy.v1.json",
+  "packages/ziwei-doushu-contracts-draft/src/index.ts",
+  "scripts/ziwei-hko-restricted-source-pre-release-policy-lib.mjs"
+];
+let ziweiHistoricalRoot;
+let temporaryParent;
+let ownedHistoricalRoot;
+let originalUnchangedInputs;
+
+function parseOriginalArchive(bytes) {
+  assert.equal(createHash("sha256").update(bytes).digest("hex"), originalArchiveSha256,
+    "Ziwei v2 original archive identity changed");
+  const { unzipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+  const entries = unzipSync(bytes);
+  assert.deepEqual(Object.keys(entries).sort(), [
+    ...originalChangedPaths, ziweiDefinition.manifestPath, ziweiDefinition.predecessor.path
+  ].sort());
+  return entries;
+}
+
+// The archived source files are data, never imported. Verification always uses
+// the current implementation above. Western's missing historical README remains
+// an explicit unresolved input; no synthetic replacement is supplied for it.
+before(async () => {
+  const entries = parseOriginalArchive(await readFile(path.join(workspaceRoot,
+    "scripts/fixtures/ziwei-v2-manifest-original-changed-inputs.zip")));
+  const originalManifestBytes = Buffer.from(entries[ziweiDefinition.manifestPath]);
+  const originalManifest = parseIndependentDomainManifestJsonBytes(originalManifestBytes);
+  assert.equal(createHash("sha256").update(originalManifestBytes).digest("hex"),
+    ziweiDefinition.persistedRawIdentity.rawSha256);
+  const expected = new Map();
+  for (const component of originalManifest.components) {
+    for (const file of component.files) {
+      if (expected.has(file.path)) assert.equal(expected.get(file.path), file.sha256);
+      expected.set(file.path, file.sha256);
+    }
+  }
+  expected.set(ziweiDefinition.manifestPath, ziweiDefinition.persistedRawIdentity.rawSha256);
+  expected.set(ziweiDefinition.predecessor.path, ziweiDefinition.predecessor.rawSha256);
+  assert.equal(expected.size, 48);
+  originalUnchangedInputs = [...expected].filter(([relativePath]) => entries[relativePath] === undefined);
+  assert.equal(originalUnchangedInputs.length, 43);
+  temporaryParent = await realpath(os.tmpdir());
+  ziweiHistoricalRoot = await mkdtemp(path.join(temporaryParent, "hakimi-ziwei-v2-history-"));
+  ownedHistoricalRoot = await lstat(ziweiHistoricalRoot, { bigint: true });
+  for (const [relativePath, expectedSha256] of expected) {
+    assert.equal(path.isAbsolute(relativePath), false);
+    assert.equal(relativePath.includes("\\") || relativePath.includes(":"), false);
+    assert.equal(relativePath.split("/").some((segment) => ["", ".", ".."].includes(segment)), false);
+    const bytes = entries[relativePath] === undefined
+      ? await readFile(path.join(workspaceRoot, relativePath)) : Buffer.from(entries[relativePath]);
+    assert.equal(createHash("sha256").update(bytes).digest("hex"), expectedSha256, relativePath);
+    const target = path.join(ziweiHistoricalRoot, relativePath);
+    await mkdir(path.dirname(target), { recursive: true });
+    await writeFile(target, bytes, { flag: "wx" });
+  }
+});
+
+after(async () => {
+  if (!ziweiHistoricalRoot || !ownedHistoricalRoot) return;
+  const final = await lstat(ziweiHistoricalRoot, { bigint: true });
+  assert.equal(final.isDirectory() && !final.isSymbolicLink(), true);
+  assert.equal(final.dev, ownedHistoricalRoot.dev);
+  assert.equal(final.ino, ownedHistoricalRoot.ino);
+  assert.equal(path.dirname(await realpath(ziweiHistoricalRoot)), temporaryParent);
+  assert.equal(path.basename(ziweiHistoricalRoot).startsWith("hakimi-ziwei-v2-history-"), true);
+  await rm(ziweiHistoricalRoot, { recursive: true, force: true });
+});
+
+function basisRootFor(definitionInput) {
+  return definitionInput === ziweiDefinition ? ziweiHistoricalRoot : workspaceRoot;
+}
+
+test("original Ziwei fixture rejects archive truncation and changed bytes", async () => {
+  const original = await readFile(path.join(workspaceRoot,
+    "scripts/fixtures/ziwei-v2-manifest-original-changed-inputs.zip"));
+  assert.equal(Object.keys(parseOriginalArchive(original)).length, 5);
+  const changed = Buffer.from(original); changed[Math.floor(changed.length / 2)] ^= 1;
+  for (const bytes of [changed, original.subarray(0, -1), Buffer.alloc(0)]) {
+    assert.throws(() => parseOriginalArchive(bytes), /Ziwei v2 original archive identity changed/u);
+  }
+});
+
+test("current checkout still rejects the frozen Ziwei manifest instead of inheriting historical success", async () => {
+  await assert.rejects(loadIndependentDomainManifest(workspaceRoot, ziweiDefinition),
+    { code: "MANIFEST_MISMATCH" });
+});
+
+test("Windows checkout preserves original fixture inputs and missing attributes change their raw identity", async () => {
+  await withTemporaryWorkspace(async (temporaryRoot) => {
+    const gitRoot = path.join(temporaryRoot, "git-source");
+    const emptyAttributes = path.join(temporaryRoot, "empty-global-attributes");
+    await mkdir(gitRoot);
+    await writeFile(emptyAttributes, "");
+    const git = (args) => execFileAsync("git", ["-c", `core.attributesFile=${emptyAttributes}`, ...args],
+      { cwd: gitRoot, windowsHide: true });
+    await git(["init", "--quiet"]);
+    const paths = originalUnchangedInputs.map(([relativePath]) => relativePath);
+    for (const relativePath of paths) {
+      const target = path.join(gitRoot, relativePath);
+      await mkdir(path.dirname(target), { recursive: true });
+      await copyFile(path.join(workspaceRoot, relativePath), target);
+    }
+    await copyFile(path.join(workspaceRoot, ".gitattributes"), path.join(gitRoot, ".gitattributes"));
+    await git(["-c", "core.autocrlf=false", "add", "--", ".gitattributes", ...paths]);
+    const positive = path.join(temporaryRoot, "windows-with-rules");
+    await mkdir(positive);
+    await git(["-c", "core.autocrlf=true", "checkout-index", "--all",
+      `--prefix=${positive.replaceAll("\\", "/")}/`]);
+    for (const [relativePath, digest] of originalUnchangedInputs) {
+      assert.equal(createHash("sha256").update(await readFile(path.join(positive, relativePath))).digest("hex"),
+        digest, relativePath);
+    }
+    await writeFile(path.join(gitRoot, ".gitattributes"), "");
+    await git(["-c", "core.autocrlf=false", "add", "--", ".gitattributes"]);
+    const negative = path.join(temporaryRoot, "windows-without-rules");
+    await mkdir(negative);
+    await git(["-c", "core.autocrlf=true", "checkout-index", "--all",
+      `--prefix=${negative.replaceAll("\\", "/")}/`]);
+    const sample = "packages/ziwei-iztro-adapter-draft/fixtures/hko-data-gov-hk-calendar-boundaries-2023-2028.json";
+    const changed = await readFile(path.join(negative, sample));
+    const original = await readFile(path.join(positive, sample));
+    assert.notDeepEqual(changed, original);
+    assert.equal(changed.toString("utf8").replaceAll("\r\n", "\n"), original.toString("utf8"));
+  });
+});
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
 async function current(definitionInput) {
-  return readIndependentDomainManifest(workspaceRoot, definitionInput);
+  return readIndependentDomainManifest(basisRootFor(definitionInput), definitionInput);
 }
 
 async function expectMismatch(definitionInput, candidate) {
   await assert.rejects(
-    verifyIndependentDomainManifest(workspaceRoot, definitionInput, candidate),
+    verifyIndependentDomainManifest(basisRootFor(definitionInput), definitionInput, candidate),
     /manifest 与当前隔离工程闭包或失败关闭账不一致/u
   );
 }
@@ -82,6 +214,7 @@ async function withTemporaryWorkspace(callback) {
 }
 
 async function copyDefinitionFixture(temporaryRoot, definitionInput) {
+  const sourceRoot = basisRootFor(definitionInput);
   const copied = new Set();
   for (const component of definitionInput.components) {
     for (const relativePath of component.files) {
@@ -89,7 +222,7 @@ async function copyDefinitionFixture(temporaryRoot, definitionInput) {
       copied.add(relativePath);
       const destination = path.join(temporaryRoot, ...relativePath.split("/"));
       await mkdir(path.dirname(destination), { recursive: true });
-      await copyFile(path.join(workspaceRoot, ...relativePath.split("/")), destination);
+      await copyFile(path.join(sourceRoot, ...relativePath.split("/")), destination);
     }
   }
   const manifestDestination = path.join(
@@ -98,7 +231,7 @@ async function copyDefinitionFixture(temporaryRoot, definitionInput) {
   );
   await mkdir(path.dirname(manifestDestination), { recursive: true });
   await copyFile(
-    path.join(workspaceRoot, ...definitionInput.manifestPath.split("/")),
+    path.join(sourceRoot, ...definitionInput.manifestPath.split("/")),
     manifestDestination
   );
   if (definitionInput.predecessor !== undefined) {
@@ -108,7 +241,7 @@ async function copyDefinitionFixture(temporaryRoot, definitionInput) {
     );
     await mkdir(path.dirname(predecessorDestination), { recursive: true });
     await copyFile(
-      path.join(workspaceRoot, ...definitionInput.predecessor.path.split("/")),
+      path.join(sourceRoot, ...definitionInput.predecessor.path.split("/")),
       predecessorDestination
     );
   }
@@ -157,21 +290,21 @@ function installTargetedArrayIteratorRedirects(redirections, counters) {
   };
 }
 
-test("ziwei and western manifests exactly bind their separate current engineering closures", async () => {
+test("persisted Ziwei and Western manifests bind their declared engineering source contexts", async () => {
   assert.deepEqual(
     INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS.map((entry) => entry.productSystemId),
     ["ziwei-doushu", "western-astrology"]
   );
   for (const definitionInput of INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS) {
     const manifest = await current(definitionInput);
-    const expected = await buildCurrentIndependentDomainManifest(workspaceRoot, definitionInput, {
+    const expected = await buildCurrentIndependentDomainManifest(basisRootFor(definitionInput), definitionInput, {
       createdAt: manifest.createdAt
     });
     assert.equal(
       canonicalStringifyIndependentDomainManifest(manifest),
       canonicalStringifyIndependentDomainManifest(expected)
     );
-    await verifyIndependentDomainManifest(workspaceRoot, definitionInput, manifest);
+    await verifyIndependentDomainManifest(basisRootFor(definitionInput), definitionInput, manifest);
   }
 });
 
@@ -521,11 +654,11 @@ test("createdAt requires a real canonical millisecond UTC instant", async () => 
     candidate.createdAt = invalidCreatedAt;
     candidate.manifestDigest = computeIndependentDomainManifestDigest(candidate);
     await expectCode(
-      verifyIndependentDomainManifest(workspaceRoot, definitionInput, candidate),
+      verifyIndependentDomainManifest(basisRootFor(definitionInput), definitionInput, candidate),
       "MANIFEST_INVALID"
     );
     await expectCode(
-      buildCurrentIndependentDomainManifest(workspaceRoot, definitionInput, {
+      buildCurrentIndependentDomainManifest(basisRootFor(definitionInput), definitionInput, {
         createdAt: invalidCreatedAt
       }),
       "BUILD_OPTIONS_INVALID"
@@ -547,7 +680,7 @@ test("object verification rejects an accessor without invoking it", async () => 
     }
   });
   await expectCode(
-    verifyIndependentDomainManifest(workspaceRoot, definitionInput, candidate),
+    verifyIndependentDomainManifest(basisRootFor(definitionInput), definitionInput, candidate),
     "INPUT_ACCESSOR_FORBIDDEN"
   );
   assert.equal(getterCalls, 0);
@@ -576,7 +709,7 @@ test("object verification rejects Proxy without invoking traps", async () => {
     }
   });
   await expectCode(
-    verifyIndependentDomainManifest(workspaceRoot, definitionInput, proxy),
+    verifyIndependentDomainManifest(basisRootFor(definitionInput), definitionInput, proxy),
     "INPUT_PROXY_FORBIDDEN"
   );
   assert.equal(trapCalls, 0);
@@ -589,35 +722,35 @@ test("object verification rejects Symbol sparse cycle alias and negative zero in
   const withSymbol = clone(manifest);
   withSymbol[Symbol("authority")] = true;
   await expectCode(
-    verifyIndependentDomainManifest(workspaceRoot, definitionInput, withSymbol),
+    verifyIndependentDomainManifest(basisRootFor(definitionInput), definitionInput, withSymbol),
     "INPUT_SYMBOL_FORBIDDEN"
   );
 
   const sparse = clone(manifest);
   sparse.components = new Array(sparse.components.length);
   await expectCode(
-    verifyIndependentDomainManifest(workspaceRoot, definitionInput, sparse),
+    verifyIndependentDomainManifest(basisRootFor(definitionInput), definitionInput, sparse),
     "INPUT_ARRAY_INVALID"
   );
 
   const cyclic = clone(manifest);
   cyclic.self = cyclic;
   await expectCode(
-    verifyIndependentDomainManifest(workspaceRoot, definitionInput, cyclic),
+    verifyIndependentDomainManifest(basisRootFor(definitionInput), definitionInput, cyclic),
     "INPUT_CYCLE_FORBIDDEN"
   );
 
   const aliased = clone(manifest);
   aliased.alias = aliased.releaseGovernance;
   await expectCode(
-    verifyIndependentDomainManifest(workspaceRoot, definitionInput, aliased),
+    verifyIndependentDomainManifest(basisRootFor(definitionInput), definitionInput, aliased),
     "INPUT_ALIAS_FORBIDDEN"
   );
 
   const negativeZero = clone(manifest);
   negativeZero.gateState.bindingFrozenVerified = -0;
   await expectCode(
-    verifyIndependentDomainManifest(workspaceRoot, definitionInput, negativeZero),
+    verifyIndependentDomainManifest(basisRootFor(definitionInput), definitionInput, negativeZero),
     "INPUT_VALUE_INVALID"
   );
 });
@@ -625,7 +758,7 @@ test("object verification rejects Symbol sparse cycle alias and negative zero in
 test("pure verification returns a detached recursively frozen but unbranded snapshot", async () => {
   const definitionInput = INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0];
   const caller = clone(await current(definitionInput));
-  const result = await verifyIndependentDomainManifest(workspaceRoot, definitionInput, caller);
+  const result = await verifyIndependentDomainManifest(basisRootFor(definitionInput), definitionInput, caller);
 
   assert.notStrictEqual(result.manifest, caller);
   assert.notStrictEqual(result.manifest.releaseGovernance, caller.releaseGovernance);
@@ -650,7 +783,7 @@ test("pure verification returns a detached recursively frozen but unbranded snap
 test("full-load APIs return only detached recursively frozen WeakSet-branded snapshots", async () => {
   const definitionInput = INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0];
   const persisted = await current(definitionInput);
-  const loaded = await loadIndependentDomainManifest(workspaceRoot, definitionInput);
+  const loaded = await loadIndependentDomainManifest(basisRootFor(definitionInput), definitionInput);
   assert.equal(loaded.offlineIndependentDraftClosureMechanicallyVerified, true);
   assert.equal(isVerifiedIndependentDomainManifestFullLoad(loaded), true);
   assert.notStrictEqual(loaded.manifest, persisted);
@@ -673,7 +806,7 @@ test("full-load stays truly recursively frozen when Object.freeze is replaced af
   try {
     Object.freeze = (value) => value;
     loaded = await loadIndependentDomainManifest(
-      workspaceRoot,
+      basisRootFor(INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0]),
       INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0]
     );
     assert.equal(isVerifiedIndependentDomainManifestFullLoad(loaded), true);
@@ -709,7 +842,7 @@ test("default createdAt resists Date global and toISOString replacement after mo
       }
     });
     const built = await buildCurrentIndependentDomainManifest(
-      workspaceRoot,
+      basisRootFor(INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0]),
       INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0]
     );
     assert.match(built.createdAt, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u);
@@ -736,7 +869,7 @@ test("full-load brand resists WeakSet prototype add and has poisoning after modu
       }
     });
     const loaded = await loadIndependentDomainManifest(
-      workspaceRoot,
+      basisRootFor(INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0]),
       INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0]
     );
     assert.equal(isVerifiedIndependentDomainManifestFullLoad(loaded), true);
@@ -786,7 +919,7 @@ test("canonical comparison resists Array sort replacement after module load", as
       }
     });
     const loaded = await loadIndependentDomainManifest(
-      workspaceRoot,
+      basisRootFor(INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0]),
       INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0]
     );
     assert.equal(isVerifiedIndependentDomainManifestFullLoad(loaded), true);
@@ -817,7 +950,7 @@ test("canonical comparison resists Array iterator replacement after module load"
       }
     });
     const loaded = await loadIndependentDomainManifest(
-      workspaceRoot,
+      basisRootFor(INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0]),
       INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0]
     );
     assert.equal(isVerifiedIndependentDomainManifestFullLoad(loaded), true);
@@ -851,7 +984,7 @@ test("canonical comparison isolates inherited Object and Array toJSON hooks", as
       writable: true
     });
     const loaded = await loadIndependentDomainManifest(
-      workspaceRoot,
+      basisRootFor(INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0]),
       INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS[0]
     );
     assert.equal(isVerifiedIndependentDomainManifestFullLoad(loaded), true);
