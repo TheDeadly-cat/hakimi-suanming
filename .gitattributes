@@ -241,3 +241,7 @@
 /scripts/install-local-candidate.ps1 text eol=lf
 /scripts/launch-local-candidate.ps1 text eol=lf
 /docs/status/local-candidate-9057371baf85-20260913.md text eol=lf
+
+# First controller interaction regression inputs
+/apps/web/e2e/first-controller-interaction.spec.ts text eol=lf
+/apps/web/playwright.first-controller-interaction.config.ts text eol=lf

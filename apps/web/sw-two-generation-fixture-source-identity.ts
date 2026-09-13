@@ -34,7 +34,7 @@ readonly ExpectedCriticalSource[] = Object.freeze([
   { role: "product_write_fence", path: "apps/web/src/lib/release-controller-takeover-write-fence.ts", size: 5682, rawSha256: "c461e6d1ee50964797c3e8dedbee19f7aad7dc64f4b16d59ea54a1c51e46b195", normalizedSha256: "c461e6d1ee50964797c3e8dedbee19f7aad7dc64f4b16d59ea54a1c51e46b195" },
   { role: "product_database_coordinator", path: "apps/web/src/lib/release-database-coordinator.ts", size: 63874, rawSha256: "285a4dfd1222e6448c74aed5f099b42dbdc3111bee32bc4c29e4ce4486bfea6b", normalizedSha256: "285a4dfd1222e6448c74aed5f099b42dbdc3111bee32bc4c29e4ce4486bfea6b" },
   { role: "product_takeover_retry_scheduler", path: "apps/web/src/lib/service-worker-takeover-retry.ts", size: 16694, rawSha256: "846f6de1a4b82fa360bba444749f2e1c80d8354a88a0c4f319765e6030f9a5c2", normalizedSha256: "846f6de1a4b82fa360bba444749f2e1c80d8354a88a0c4f319765e6030f9a5c2" },
-  { role: "product_bootstrap_wiring", path: "apps/web/src/main.tsx", size: 75287, rawSha256: "11880d492ab110c50a2f8794d5d829b2ea71330d71def87679af0d420a3284e0", normalizedSha256: "11880d492ab110c50a2f8794d5d829b2ea71330d71def87679af0d420a3284e0" },
+  { role: "product_bootstrap_wiring", path: "apps/web/src/main.tsx", size: 75800, rawSha256: "25446002b6d2f591eeead5d7d3c40e0d2f1f758d250bd59d162841e8f901b125", normalizedSha256: "25446002b6d2f591eeead5d7d3c40e0d2f1f758d250bd59d162841e8f901b125" },
   { role: "product_mutation_ui", path: "apps/web/src/pages/case-library-page.tsx", size: 78583, rawSha256: "ffbc6e5c495c41d1788c097cc9671ea2149f2e02aae5275869da45963b4a83a9", normalizedSha256: "ffbc6e5c495c41d1788c097cc9671ea2149f2e02aae5275869da45963b4a83a9" },
   { role: "harness_artifact_identity", path: "apps/web/sw-two-generation-artifact-identity.ts", size: 26306, rawSha256: "410051869e28b8f741736d0cae98cb93517be16196fe27fb99e97bcacc09a4fe", normalizedSha256: "410051869e28b8f741736d0cae98cb93517be16196fe27fb99e97bcacc09a4fe" },
   { role: "product_build_config", path: "apps/web/vite.config.ts", size: 17010, rawSha256: "1229622d77eb9f1c7cd1168f92be7d6bcf0025ae84b9ad0bc5b0c2ff715dd759", normalizedSha256: "1229622d77eb9f1c7cd1168f92be7d6bcf0025ae84b9ad0bc5b0c2ff715dd759" },
@@ -45,7 +45,7 @@ readonly ExpectedCriticalSource[] = Object.freeze([
 ].map((entry) => Object.freeze(entry)));
 
 export const SW_TWO_GENERATION_FIXTURE_EXPECTED_CRITICAL_SOURCE_SET_SHA256 =
-  "2d62ba0f8fe0ac5a6ae2d0c28d0581d3b00e2383c8e7f0190ab11f9c772d9a57" as const;
+  "9d88c5949a8777a6277b989bd002e176be117180201dd872855de746532f9706" as const;
 
 export type SwTwoGenerationFixtureCriticalSourceIdentity = Readonly<{
   algorithm: typeof SW_TWO_GENERATION_FIXTURE_CRITICAL_SOURCE_ALGORITHM;
