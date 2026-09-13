@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import test from "node:test";
+import { after, before, test } from "node:test";
 
 import {
   FourSystemCurrentStatusObservationChildV28Error,
@@ -22,10 +23,16 @@ import {
 import {
   loadZiweiIndependentEngineeringManifestV3
 } from "./ziwei-independent-engineering-manifest-v3-lib.mjs";
+import { attachCurrentFourSystemCli } from "./four-system-v22-history.test-fixture.mjs";
+import {
+  FOUR_SYSTEM_V28_ADDITIONAL_ARCHIVE_URL,
+  createFourSystemV28HistoricalInputs,
+  parseFourSystemV28AdditionalArchive
+} from "./four-system-v28-history.test-fixture.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, "..");
-const CLI = path.join(
+const ACTUAL_CLI = path.join(
   HERE,
   "verify-four-system-current-status-observation-child-v2-8.mjs"
 );
@@ -38,16 +45,66 @@ const ARTIFACT = path.join(
 const PRELOAD_FAILURE =
   "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_8_FAILED"
   + " VISIBLE_PRELOAD_OPTIONS_REJECTED\n";
+let historicalInputs;
+let CLI;
+before(async () => {
+  historicalInputs = await createFourSystemV28HistoricalInputs();
+  CLI = await attachCurrentFourSystemCli(historicalInputs, 8);
+  assert.deepEqual(await readFile(ARTIFACT), await readFile(path.join(historicalInputs.root,
+    "content/system-admission/four-system-current-status-observation-child.v2.8.0.json")));
+});
+after(async () => { await historicalInputs?.cleanup(); });
+
+test("current v2.8 loader and source CLI cannot inherit historical input success", async () => {
+  await assert.rejects(loadFourSystemCurrentStatusObservationChildV28(ROOT),
+    { code: "MANIFEST_IDENTITY_DRIFT" });
+  const run = spawnSync(process.execPath, [ACTUAL_CLI], {
+    cwd: historicalInputs.root, encoding: "utf8", env: cleanEnv(), windowsHide: true
+  });
+  assert.equal(run.status, 1);
+  assert.equal(run.stdout, "");
+  assert.equal(run.stderr, "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_8_FAILED VERIFICATION_FAILED\n");
+});
+
+test("v2.8 supplemental archive rejects tampering, truncation and a valid empty ZIP", async () => {
+  const original = await readFile(FOUR_SYSTEM_V28_ADDITIONAL_ARCHIVE_URL);
+  assert.equal(parseFourSystemV28AdditionalArchive(original).manifest.files.length, 2);
+  const changed = Buffer.from(original); changed[Math.floor(changed.length / 2)] ^= 1;
+  const { zipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+  for (const bytes of [changed, original.subarray(0, -1), zipSync({})]) {
+    assert.throws(() => parseFourSystemV28AdditionalArchive(bytes), /v2.8 additional archive identity changed/u);
+  }
+});
+
+test("v2.8 refuses altered or missing Ziwei manifest bytes", async () => {
+  const inputs = await createFourSystemV28HistoricalInputs();
+  const relativePath = "content/domain-release/ziwei-doushu.engineering-draft.v0.1.0.manifest.v3.json";
+  try {
+    const target = path.join(inputs.root, relativePath);
+    const changed = Buffer.from(await readFile(target));
+    assert.equal(changed.at(-1), 0x0a);
+    changed[changed.length - 1] = 0x20;
+    await writeFile(target, changed);
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV28(inputs.root),
+      { code: "MANIFEST_MATERIALIZATION_MISMATCH" });
+    await rm(target);
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV28(inputs.root), (error) =>
+      error.code === "COMPONENT_FILE_MISSING" && error.cause?.code === "ENOENT"
+        && error.message.includes(relativePath));
+  } finally {
+    await inputs.cleanup();
+  }
+});
 
 let fixturePromise;
 
 function fixture() {
   if (!fixturePromise) {
     fixturePromise = Promise.all([
-      loadFourSystemCurrentStatusObservationChildV28(ROOT),
-      loadFourSystemCurrentStatusObservationChildV27(ROOT),
-      loadZiweiIndependentEngineeringManifestV3(ROOT),
-      buildCurrentFourSystemCurrentStatusObservationChildV28(ROOT)
+      loadFourSystemCurrentStatusObservationChildV28(historicalInputs.root),
+      loadFourSystemCurrentStatusObservationChildV27(historicalInputs.root),
+      loadZiweiIndependentEngineeringManifestV3(historicalInputs.root),
+      buildCurrentFourSystemCurrentStatusObservationChildV28(historicalInputs.root)
     ]).then(([loaded, parent, ziweiManifest, built]) => ({
       loaded,
       parent,
