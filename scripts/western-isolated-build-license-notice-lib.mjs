@@ -5,13 +5,16 @@ import {
   constants as fsConstants,
   fstatSync,
   lstatSync,
+  mkdirSync,
   mkdtempSync,
   openSync,
   readFileSync,
   readdirSync,
   realpathSync,
-  rmSync
+  rmSync,
+  writeFileSync
 } from "node:fs";
+import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -66,6 +69,10 @@ const BASIS_ARTIFACTS = Object.freeze([
   Object.freeze({ role: "rules_preview_build_config", path: "packages/western-astrology-rules-preview-draft/vite.rules-preview.config.mjs" }),
   Object.freeze({ role: "rules_preview_source_html", path: "packages/western-astrology-rules-preview-draft/browser-app/index.html" })
 ]);
+const HISTORICAL_ARCHIVE_PATH = "scripts/fixtures/western-notice-v1-original-inputs.zip";
+const HISTORICAL_ARCHIVE_SHA256 = "f33a182d6d304c422fd826d19f6abcb37cc2b1cf4b3f01ace4d3e176ac97fa4f";
+const HISTORICAL_HTML_PATH = "packages/western-astrology-rules-preview-draft/browser-app/index.html";
+const HISTORICAL_SOURCE_PREFIX = ".western-notice-history-";
 const CONTROLLED_RECEIPT_CONTEXTS = new WeakMap();
 const WEAK_MAP_GET = WeakMap.prototype.get;
 const WEAK_MAP_SET = WeakMap.prototype.set;
@@ -460,13 +467,13 @@ export function verifyWesternIsolatedBuildLicenseNotices({
   return receipt;
 }
 
-function runFixedWesternBuild(configPath, outputRoot) {
+function runFixedWesternBuild(configPath, outputRoot, workspaceRoot = defaultWorkspaceRoot) {
   const vitePath = path.join(defaultWorkspaceRoot, "apps", "web", "node_modules", "vite", "bin", "vite.js");
   execFileSync(process.execPath, [
     vitePath,
     "build",
     "--config",
-    path.join(defaultWorkspaceRoot, configPath),
+    path.join(workspaceRoot, configPath),
     "--configLoader",
     "runner",
     "--outDir",
@@ -475,12 +482,24 @@ function runFixedWesternBuild(configPath, outputRoot) {
     "--logLevel",
     "warn"
   ], {
-    cwd: defaultWorkspaceRoot,
+    cwd: workspaceRoot,
     env: { ...process.env, NO_COLOR: "1" },
     stdio: ["ignore", "pipe", "pipe"],
     windowsHide: true,
     maxBuffer: 32 * 1024 * 1024
   });
+}
+
+function runControlledWesternBuildReceipt(workspaceRoot, temporaryRoot) {
+  const browserParityOutputRoot = path.join(temporaryRoot, "browser-parity");
+  const rulesPreviewOutputRoot = path.join(temporaryRoot, "rules-preview");
+  runFixedWesternBuild("packages/western-astronomy-engine-adapter-draft/vite.browser-parity.config.mjs",
+    browserParityOutputRoot, workspaceRoot);
+  runFixedWesternBuild("packages/western-astrology-rules-preview-draft/vite.rules-preview.config.mjs",
+    rulesPreviewOutputRoot, workspaceRoot);
+  return brandControlledBuildReceipt(verifyWesternIsolatedBuildLicenseNotices({
+    browserParityOutputRoot, rulesPreviewOutputRoot, workspaceRoot
+  }), workspaceRoot);
 }
 
 function removeOwnedWesternBuildRoot(temporaryRoot) {
@@ -500,21 +519,7 @@ export function runWesternIsolatedBuildLicenseNoticeVerification({ evidenceMode 
   }
   const temporaryRoot = mkdtempSync(path.join(os.tmpdir(), CONTROLLED_BUILD_TEMPORARY_PREFIX));
   try {
-    const browserParityOutputRoot = path.join(temporaryRoot, "browser-parity");
-    const rulesPreviewOutputRoot = path.join(temporaryRoot, "rules-preview");
-    runFixedWesternBuild(
-      "packages/western-astronomy-engine-adapter-draft/vite.browser-parity.config.mjs",
-      browserParityOutputRoot
-    );
-    runFixedWesternBuild(
-      "packages/western-astrology-rules-preview-draft/vite.rules-preview.config.mjs",
-      rulesPreviewOutputRoot
-    );
-    const receipt = brandControlledBuildReceipt(verifyWesternIsolatedBuildLicenseNotices({
-      browserParityOutputRoot,
-      rulesPreviewOutputRoot,
-      workspaceRoot: defaultWorkspaceRoot
-    }), defaultWorkspaceRoot);
+    const receipt = runControlledWesternBuildReceipt(defaultWorkspaceRoot, temporaryRoot);
     if (evidenceMode === "template") {
       return buildWesternLicenseNoticeEvidence(receipt, defaultWorkspaceRoot);
     }
@@ -526,6 +531,114 @@ export function runWesternIsolatedBuildLicenseNoticeVerification({ evidenceMode 
   } finally {
     removeOwnedWesternBuildRoot(temporaryRoot);
   }
+}
+
+export function parseWesternHistoricalNoticeArchive(bytes) {
+  if (!(bytes instanceof Uint8Array) || sha256(bytes) !== HISTORICAL_ARCHIVE_SHA256) {
+    fail("historical notice archive exact byte identity drifted");
+  }
+  const { unzipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+  const entries = unzipSync(bytes);
+  const expectedPaths = [...BASIS_ARTIFACTS.map((entry) => entry.path), WESTERN_LICENSE_NOTICE_EVIDENCE_PATH].sort();
+  if (canonicalJson(Object.keys(entries).sort()) !== canonicalJson(expectedPaths)) {
+    fail("historical notice archive must contain exactly the nine basis files and original record");
+  }
+  const evidence = parseWesternLicenseNoticeEvidenceJsonBytes(Buffer.from(entries[WESTERN_LICENSE_NOTICE_EVIDENCE_PATH]));
+  for (const expected of evidence.basisArtifacts) {
+    const original = entries[expected.path];
+    if (!original || original.byteLength !== expected.bytes || sha256(original) !== expected.sha256) {
+      fail("historical notice archive basis identity drifted");
+    }
+  }
+  return entries;
+}
+
+function readNoticeBasis(workspaceRoot) {
+  return BASIS_ARTIFACTS.map((artifact) => {
+    const observed = readHeldRegularFile(resolveContainedWorkspaceFile(workspaceRoot, artifact.path, artifact.role), artifact.role);
+    return Object.freeze({ role: artifact.role, path: artifact.path, bytes: observed.byteLength, sha256: observed.sha256 });
+  });
+}
+
+// Only the changed HTML is taken from history. Build configs, licenses and
+// dependency locks must still equal their original bytes. Auxiliary source is
+// copied from the current checkout; this replays the record's bounded notice
+// observations, not a complete historical source commit or application build.
+export function withWesternHistoricalNoticeReplay(run) {
+  const archive = readHeldRegularFile(resolveContainedWorkspaceFile(defaultWorkspaceRoot, HISTORICAL_ARCHIVE_PATH,
+    "historical notice archive"), "historical notice archive");
+  const entries = parseWesternHistoricalNoticeArchive(archive.bytes);
+  const sourceBefore = readNoticeBasis(defaultWorkspaceRoot);
+  for (const artifact of BASIS_ARTIFACTS) {
+    if (artifact.path === HISTORICAL_HTML_PATH) continue;
+    const current = sourceBefore.find((entry) => entry.path === artifact.path);
+    if (current.sha256 !== sha256(entries[artifact.path])) fail("historical notice replay requires unchanged fixed build basis");
+  }
+  // The parent exists in the checkout. Creating a child here does not change
+  // the project root metadata observed by concurrent stable-input readers.
+  const sourceParent = resolveContainedWorkspaceFile(defaultWorkspaceRoot,
+    "scripts/fixtures/western-notice-replay-work", "historical notice work parent");
+  const sourceRoot = mkdtempSync(path.join(sourceParent, HISTORICAL_SOURCE_PREFIX));
+  const owned = lstatSync(sourceRoot, { bigint: true });
+  const outputRoot = mkdtempSync(path.join(os.tmpdir(), CONTROLLED_BUILD_TEMPORARY_PREFIX));
+  function copySource(relativePath) {
+    const source = resolveContainedWorkspaceFile(defaultWorkspaceRoot, relativePath, "notice replay auxiliary source");
+    const target = path.join(sourceRoot, relativePath);
+    const stat = lstatSync(source);
+    if (stat.isDirectory()) {
+      mkdirSync(target, { recursive: true });
+      for (const name of readdirSync(source).sort()) copySource(`${relativePath}/${name}`);
+    } else {
+      const held = readHeldRegularFile(source, "notice replay auxiliary source");
+      mkdirSync(path.dirname(target), { recursive: true });
+      writeFileSync(target, held.bytes, { flag: "wx" });
+    }
+  }
+  try {
+    for (const relativePath of [
+      "packages/western-astrology-contracts-draft/src",
+      "packages/western-astronomy-engine-adapter-draft/src",
+      "packages/western-astronomy-engine-adapter-draft/browser-parity",
+      "packages/western-astrology-rules-preview-draft/src",
+      "packages/western-astrology-rules-preview-draft/browser-app"
+    ]) copySource(relativePath);
+    for (const [relativePath, bytes] of Object.entries(entries)) {
+      const target = path.join(sourceRoot, relativePath);
+      mkdirSync(path.dirname(target), { recursive: true });
+      writeFileSync(target, bytes);
+    }
+    const receipt = runControlledWesternBuildReceipt(sourceRoot, outputRoot);
+    const evidenceChild = loadAndVerifyWesternLicenseNoticeEvidence(receipt, sourceRoot);
+    const result = run({ receipt, evidenceChild, workspaceRoot: sourceRoot });
+    if (result && typeof result.then === "function") fail("historical notice replay callback must be synchronous");
+    if (canonicalJson(sourceBefore) !== canonicalJson(readNoticeBasis(defaultWorkspaceRoot))) {
+      fail("current notice source basis changed during historical replay");
+    }
+    return result;
+  } finally {
+    removeOwnedWesternBuildRoot(outputRoot);
+    const now = lstatSync(sourceRoot, { bigint: true });
+    if (!now.isDirectory() || now.isSymbolicLink() || now.dev !== owned.dev || now.ino !== owned.ino
+      || realpathSync.native(path.dirname(sourceRoot)) !== realpathSync.native(sourceParent)
+      || !path.basename(sourceRoot).startsWith(HISTORICAL_SOURCE_PREFIX)) {
+      fail("refusing to remove a replaced historical notice source directory");
+    }
+    rmSync(sourceRoot, { recursive: true, force: true });
+  }
+}
+
+export function runWesternCurrentAndHistoricalNoticeVerification() {
+  const current = runWesternIsolatedBuildLicenseNoticeVerification({ evidenceMode: "none" });
+  const currentBasisArtifacts = readNoticeBasis(defaultWorkspaceRoot);
+  const historicalEvidence = withWesternHistoricalNoticeReplay(({ evidenceChild }) => Object.freeze({
+    ...evidenceChild,
+    scope: "historical_v1_exact_basis_notice_replay",
+    currentSourceApplicabilityEstablished: false,
+    fullHistoricalSourceCommitRecovered: false,
+    archiveSha256: HISTORICAL_ARCHIVE_SHA256
+  }));
+  return Object.freeze({ ...current, currentBasisArtifacts, historicalEvidence,
+    scope: "current_dual_build_with_separate_historical_notice_replay" });
 }
 
 export function computeWesternLicenseNoticeEvidenceDigest(evidence) {
@@ -542,18 +655,7 @@ export function buildWesternLicenseNoticeEvidence(receipt, workspaceRoot = defau
     fail("cannot build evidence from an invalid isolated build receipt");
   }
   const absoluteWorkspaceRoot = path.resolve(workspaceRoot);
-  const basisArtifacts = BASIS_ARTIFACTS.map((artifact) => {
-    const observed = readHeldRegularFile(
-      resolveContainedWorkspaceFile(absoluteWorkspaceRoot, artifact.path, artifact.role),
-      artifact.role
-    );
-    return Object.freeze({
-      role: artifact.role,
-      path: artifact.path,
-      bytes: observed.byteLength,
-      sha256: observed.sha256
-    });
-  });
+  const basisArtifacts = readNoticeBasis(absoluteWorkspaceRoot);
   const licenseArtifact = basisArtifacts.find((artifact) => artifact.role === "adapter_local_license_copy");
   const licenseBytes = readHeldRegularFile(
     resolveContainedWorkspaceFile(
