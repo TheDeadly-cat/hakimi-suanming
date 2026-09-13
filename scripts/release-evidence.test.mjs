@@ -75,6 +75,7 @@ import {
 import { compileReleaseEvidenceSchema } from "./release-evidence-schema.mjs";
 import { verifyReleaseEvidenceFiles } from "./verify-release-evidence.mjs";
 import { verifyRollbackReleaseArtifactFiles } from "./rollback-evidence-lib.mjs";
+import { syntheticReplayBrowserSpawn } from "./release-file-replay-browser.test-fixture.mjs";
 import {
   computeDefaultLifecyclePlanDigest,
   DEFAULT_LIFECYCLE_STAGE_COMMANDS,
@@ -2313,6 +2314,7 @@ test("lifecycle receipts reject unmodeled current package hooks even with recomp
 const replayInputPath = "dist/web/release-evidence.json";
 const replayReceiptsPath = "tmp/release-evidence-receipts";
 const replayLockPath = "tmp/release-artifact-identity.json";
+const replayBrowserFixtureUrl = new URL("./release-file-replay-browser.test-fixture.mjs", import.meta.url).href;
 
 function replayChildEnvironment(environment = process.env) {
   const names = [
@@ -2339,7 +2341,11 @@ test("replay child preserves platform directory context while excluding preload 
 });
 
 function replayCommand(cwd, executable, args) {
-  return spawnSync(executable, args, {
+  const entryPoints = ["generate-release-evidence.mjs", "verify-release-evidence.mjs"]
+    .map((file) => path.join(workspaceRoot, "scripts", file));
+  const childArgs = executable === process.execPath && entryPoints.includes(args[0])
+    ? ["--import", replayBrowserFixtureUrl, ...args] : args;
+  return spawnSync(executable, childArgs, {
     cwd, env: replayChildEnvironment(), encoding: "utf8", windowsHide: true,
     timeout: 60_000, maxBuffer: 4 * 1024 * 1024
   });
@@ -2351,6 +2357,22 @@ function requireReplayCommand(result) {
   assert.equal(result.status, 0, result.stderr);
   return result;
 }
+
+test("synthetic replay browser fixture cannot activate for arbitrary code or an ordinary source root", () => {
+  for (const args of [
+    ["--eval", "process.exitCode = 0"],
+    [path.join(workspaceRoot, "scripts/generate-release-evidence.mjs"),
+      "--release-label", "SYNTHETIC-file-consumer-contract"]
+  ]) {
+    const result = replayCommand(workspaceRoot, process.execPath,
+      ["--import", replayBrowserFixtureUrl, ...args]);
+    assert.equal(result.error, undefined);
+    assert.equal(result.signal, null);
+    assert.equal(result.status, 1);
+    assert.equal(result.stdout, "");
+    assert.match(result.stderr, /Synthetic replay browser fixture requires/u);
+  }
+});
 
 async function ownedReplayDirectory(context) {
   const tempRoot = path.resolve(os.tmpdir());
@@ -2402,6 +2424,12 @@ async function writeReplayEvidence(root, evidence) {
 }
 
 async function releaseFileReplayFixture(context, { dirty = false } = {}) {
+  context.mock.method(childProcess, "spawnSync", syntheticReplayBrowserSpawn(childProcess.spawnSync));
+  syncBuiltinESMExports();
+  context.after(() => {
+    context.mock.restoreAll();
+    syncBuiltinESMExports();
+  });
   const ownedRoot = await ownedReplayDirectory(context);
   const sourceRoot = path.join(ownedRoot, "source");
   const archiveRoots = [path.join(ownedRoot, "archive-a"), path.join(ownedRoot, "archive-b")];
@@ -2489,6 +2517,13 @@ async function releaseFileReplayFixture(context, { dirty = false } = {}) {
     ...(dirty ? ["--allow-dirty"] : [])
   ]));
   assert.equal(JSON.parse(generated.stdout).evidenceId, evidenceId);
+  const browserProbes = JSON.parse(await readFile(
+    path.join(sourceRoot, "tmp/synthetic-browser-probes.json"), "utf8"));
+  assert.deepEqual(browserProbes.map((probe) => probe.browser), ["edge", "chrome"]);
+  const evidence = JSON.parse(await readFile(path.join(sourceRoot, replayInputPath), "utf8"));
+  assert.deepEqual(evidence.toolchain.browsers, {
+    edge: "Microsoft Edge SYNTHETIC-file-replay", chrome: "Google Chrome SYNTHETIC-file-replay"
+  });
   const boundPaths = [
     "dist/web/index.html", "dist/web/manifest.webmanifest", "dist/web/sw.js", "dist/web/_headers",
     replayLockPath, ...receiptPaths, ...phasePaths, ...summaryPaths,
@@ -2505,7 +2540,7 @@ async function releaseFileReplayFixture(context, { dirty = false } = {}) {
   }
   return {
     sourceRoot, archiveRoots, boundPaths, receiptPaths, phasePaths, summaryPaths, rawReceipts,
-    evidence: JSON.parse(await readFile(path.join(sourceRoot, replayInputPath), "utf8")),
+    evidence,
     replay: (boundFilesRoot = archiveRoots[0], allowances = {}) => verifyReleaseEvidenceFiles({
       sourceRoot, boundFilesRoot, inputRelativePath: replayInputPath,
       receiptsRelativePath: replayReceiptsPath, allowDirty: false, allowUnbound: false, ...allowances
@@ -2542,6 +2577,14 @@ test("release file replay verifies 13 raw receipts, 3 phase reports, 5 browser s
         await readFile(path.join(fixture.sourceRoot, relativePath)), relativePath);
     }
   }
+});
+
+test("synthetic browser isolation preserves the production toolchain mismatch rejection", async (context) => {
+  const fixture = await releaseFileReplayFixture(context);
+  const evidence = structuredClone(fixture.evidence);
+  evidence.toolchain.browsers.edge = "Microsoft Edge SYNTHETIC-different-version";
+  await writeReplayEvidence(fixture.archiveRoots[0], evidence);
+  await assert.rejects(fixture.replay(), /Release toolchain mismatch/u);
 });
 
 test("release file replay rejects every missing archive raw receipt despite an intact source-root copy", async (context) => {
