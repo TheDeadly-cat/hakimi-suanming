@@ -85,7 +85,7 @@ export async function createFourSystemV22HistoricalInputs() {
 // run normally. Only this test bridge imports the current library by URL;
 // source code archived as an input never becomes an executable module.
 export async function attachCurrentFourSystemCli(inputs, minorVersion) {
-  assert.ok(minorVersion === 1 || minorVersion === 2 || minorVersion === 3 || minorVersion === 4);
+  assert.ok(minorVersion === 1 || minorVersion === 2 || minorVersion === 3 || minorVersion === 4 || minorVersion === 5);
   const stem = `four-system-current-status-observation-child-v2-${minorVersion}`;
   const cliName = `verify-${stem}.mjs`;
   const libraryName = `${stem}-lib.mjs`;
