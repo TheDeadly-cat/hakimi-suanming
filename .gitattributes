@@ -291,3 +291,7 @@
 /scripts/ziwei-high-risk-expression-policy-draft-lib.mjs text eol=lf
 /scripts/ziwei-hko-calendar-public-endpoint-observation-lib.mjs text eol=lf
 /scripts/ziwei-hko-calendar-source-evidence-lib.mjs text eol=lf
+
+# Current Ziwei source identities used by the historical drift loader.
+/packages/ziwei-doushu-contracts-draft/src/index.ts text eol=lf
+/packages/ziwei-doushu-contracts-draft/src/index.test.ts text eol=lf
