@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import test from "node:test";
+import { after, before, test } from "node:test";
 
 import {
   FourSystemCurrentStatusObservationChildV24Error,
@@ -22,20 +23,76 @@ import {
 import {
   loadBaziCurrentMachineIdentitySuccessor
 } from "./bazi-current-machine-identity-successor-lib.mjs";
+import { attachCurrentFourSystemCli } from "./four-system-v22-history.test-fixture.mjs";
+import {
+  FOUR_SYSTEM_V24_ADDITIONAL_ARCHIVE_URL,
+  createFourSystemV24HistoricalInputs,
+  parseFourSystemV24AdditionalArchive
+} from "./four-system-v24-history.test-fixture.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, "..");
-const CLI = path.join(HERE, "verify-four-system-current-status-observation-child-v2-4.mjs");
+const ACTUAL_CLI = path.join(HERE, "verify-four-system-current-status-observation-child-v2-4.mjs");
 const ARTIFACT = path.join(ROOT, "content", "system-admission", "four-system-current-status-observation-child.v2.4.0.json");
+let historicalInputs;
+let CLI;
+before(async () => {
+  historicalInputs = await createFourSystemV24HistoricalInputs();
+  CLI = await attachCurrentFourSystemCli(historicalInputs, 4);
+  assert.deepEqual(await readFile(ARTIFACT), await readFile(path.join(historicalInputs.root,
+    "content/system-admission/four-system-current-status-observation-child.v2.4.0.json")));
+});
+after(async () => { await historicalInputs?.cleanup(); });
+
+test("current v2.4 loader and source CLI cannot inherit a historical working directory", async () => {
+  await assert.rejects(loadFourSystemCurrentStatusObservationChildV24(ROOT),
+    { code: "MANIFEST_IDENTITY_DRIFT" });
+  const run = spawnSync(process.execPath, [ACTUAL_CLI], {
+    cwd: historicalInputs.root, encoding: "utf8", env: { ...process.env, NODE_OPTIONS: "" }, windowsHide: true
+  });
+  assert.equal(run.status, 1);
+  assert.equal(run.stdout, "");
+  assert.equal(run.stderr, "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_4_FAILED VERIFICATION_FAILED\n");
+});
+
+test("v2.4 input supplement rejects tampering, truncation and a valid empty ZIP", async () => {
+  const original = await readFile(FOUR_SYSTEM_V24_ADDITIONAL_ARCHIVE_URL);
+  assert.equal(parseFourSystemV24AdditionalArchive(original).manifest.files.length, 44);
+  const changed = Buffer.from(original); changed[Math.floor(changed.length / 2)] ^= 1;
+  const { zipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+  for (const bytes of [changed, original.subarray(0, -1), zipSync({})]) {
+    assert.throws(() => parseFourSystemV24AdditionalArchive(bytes), /v2.4 additional archive identity changed/u);
+  }
+});
+
+test("v2.4 requires the historical formal verifier bytes without executing them", async () => {
+  const inputs = await createFourSystemV24HistoricalInputs();
+  try {
+    const relativePath = "scripts/bazi-expert-review-packet-lib.mjs";
+    const target = path.join(inputs.root, relativePath);
+    const original = await readFile(target);
+    const changed = Buffer.from(original); changed[0] ^= 1;
+    for (const bytes of [changed, await readFile(path.join(ROOT, relativePath))]) {
+      await writeFile(target, bytes);
+      await assert.rejects(loadFourSystemCurrentStatusObservationChildV24(inputs.root),
+        { code: "PARENT_IDENTITY_MISMATCH" });
+    }
+    await rm(target);
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV24(inputs.root),
+      { code: "FORMAL_VERIFIER_MISSING" });
+  } finally {
+    await inputs.cleanup();
+  }
+});
 
 let fixturePromise;
 function fixture() {
   if (!fixturePromise) {
     fixturePromise = (async () => {
-      const loaded = await loadFourSystemCurrentStatusObservationChildV24(ROOT);
-      const parent = await loadFourSystemCurrentStatusObservationChildV23(ROOT);
-      const successor = await loadBaziCurrentMachineIdentitySuccessor(ROOT);
-      const built = await buildCurrentFourSystemCurrentStatusObservationChildV24(ROOT);
+      const loaded = await loadFourSystemCurrentStatusObservationChildV24(historicalInputs.root);
+      const parent = await loadFourSystemCurrentStatusObservationChildV23(historicalInputs.root);
+      const successor = await loadBaziCurrentMachineIdentitySuccessor(historicalInputs.root);
+      const built = await buildCurrentFourSystemCurrentStatusObservationChildV24(historicalInputs.root);
       return { loaded, parent, successor, built };
     })();
   }
@@ -260,7 +317,7 @@ test("post-import Object.isFrozen poison still yields an actually deep-frozen br
   let loaded;
   try {
     Object.isFrozen = () => true;
-    loaded = await loadFourSystemCurrentStatusObservationChildV24(ROOT);
+    loaded = await loadFourSystemCurrentStatusObservationChildV24(historicalInputs.root);
   } finally {
     Object.isFrozen = nativeIsFrozen;
   }
