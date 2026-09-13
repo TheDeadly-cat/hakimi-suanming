@@ -1,13 +1,13 @@
-哈基米本地研究候选版 9057371baf85 / 安装包修订 4（独立入口 5189）
+哈基米本地研究候选版 4de42e9db980 / 安装包修订 1（独立入口 5189）
 
-应用源码：3a44f360dd62345a67f6b5e7e38d63a3082b5e66。
-此包保存已完成 Edge/Chrome PWA 和连续用户流程验证的同一份产物及原始回执。
+应用源码：d3ff1bdcc64d0917dcc604f753ac896eb62a9c1e。
+此包保存已完成 Edge/Chrome 16 条启动检查、PWA 和连续用户流程验证的同一份产物及原始回执。
 它是本地工程候选。真实专家准入、来源校勘和整体 CI 尚未全部完成。
 
 需要已安装 Node.js 24.16.0。安装和启动不会运行 npm、重新构建或自动下载运行时。
 先完整解压到新文件夹，在 PowerShell 中运行：
   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-local-candidate.ps1
-默认安装在当前用户 USERPROFILE\HakimiBaziWorkbenchCandidates\packages\9057371baf85-package-v4，
+默认安装在当前用户 USERPROFILE\HakimiBaziWorkbenchCandidates\packages\4de42e9db980-package-v1，
 建立名称含 Candidate (5189) 的独立快捷方式。已有不同包或快捷方式会被保留并拒绝覆盖。
 不建立快捷方式：增加 -NoShortcut。
 自选全新安装根目录：增加 -InstallRoot "D:\HakimiCandidate"。
@@ -22,3 +22,7 @@
 
 当前验证范围：同一 Windows 主机上的两个真实浏览器；另一台干净 Windows 和本人真实研究周期尚待验收。
 原始日志和截图保存在维护者 Z 盘备份。包内原始回执只证明其明确列出的测试与产物，不能证明正式发布许可。
+
+已有 5189 候选安装的本机：先用 -NoShortcut 安装到新目录。现有快捷方式和监听服务不会被替换。
+本包修复首次控制器确认前允许输入、接管刷新后输入丢失的问题。切换已有 5189 入口前需另行明确决定，并先保存当前研究资料。
+第一份 9057371baf85 候选及 c15ef 日常包继续保留原始身份。

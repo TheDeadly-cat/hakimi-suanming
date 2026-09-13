@@ -51,15 +51,19 @@ npm run desktop:launch
 
 ### 独立候选版（5189）
 
-下一份本地工程候选为 `9057371baf85`，安装包修订 `4`，仍使用 Schema 13。它不会替换 `c15ef`；只有明确运行候选安装器才会建立带 `Candidate (5189)` 标记的新快捷方式。完整解压候选 ZIP 后运行：
+本机现有候选入口仍对应 `9057371baf85` / 安装包修订 `4`。本分支另备好了首次启动输入保护修复包 `4de42e9db980` / 修订 `1`，仍为 Schema 13。源码同步和准备新包不会切换现有服务或快捷方式。
+
+完整解压修复 ZIP 后，已有 5189 安装的用户先安装到独立新目录，不建立或替换快捷方式：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-local-candidate.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-local-candidate.ps1 -NoShortcut
 ```
 
-候选默认安装在 `%USERPROFILE%\HakimiBaziWorkbenchCandidates\packages\9057371baf85-package-v4`。这与日常安装目录分开，也避免当前桌面应用进程对新 AppData 路径的重定向。安装不下载依赖、不构建、不迁移案例；默认 `desktop:install` / `desktop:launch` 仍选择原日常产物。
+修复包默认安装在 `%USERPROFILE%\HakimiBaziWorkbenchCandidates\packages\4de42e9db980-package-v1`。首次安装且没有旧候选入口时，可省略 `-NoShortcut`；同名其他快捷方式会被保留并报告冲突。已有 5189 服务与资料的版本切换须先保存完整备份，再另行决定，不从这条安装命令自动执行。
 
-产物、安装包摘要、实际验证与未完成项见 [9057371baf85 候选交付记录](./docs/status/local-candidate-9057371baf85-20260913.md)，操作说明见 [候选包安装说明](./LOCAL-CANDIDATE-INSTALL.txt)。整体 CI、真实专家和领域来源门仍独立判断。
+安装不下载依赖、不构建、不迁移案例；默认 `desktop:install` / `desktop:launch` 仍选择原 c15ef 日常产物。新修复包的独立安装已通过，安装副本的浏览器复验、第二台 Windows 和本人研究反馈仍待完成。
+
+产物、安装包摘要、验证与未完成项见 [4de42e9db980 修复候选记录](./docs/status/local-candidate-4de42e9db980-20260913.md)；[9057371baf85 交付记录](./docs/status/local-candidate-9057371baf85-20260913.md)继续保留原版本结果。操作说明见 [候选包安装说明](./LOCAL-CANDIDATE-INSTALL.txt)。整体 CI、真实专家和领域来源门仍独立判断。
 
 ## 开发源码
 
