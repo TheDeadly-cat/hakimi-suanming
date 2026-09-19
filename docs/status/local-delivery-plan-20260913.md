@@ -2,7 +2,7 @@
 
 ## 当前交付摘要 · 2026-09-20
 
-本节更新 09-13 的原台账，旧表保留为历史快照。当前审阅分支为 `codex/local-delivery-integration-20260920`；功能与工具头为 `0983bc7c8846c37c45fe65fa01071bb3d19372e0`（历史接入 `547a30b`、安装工具修订 `60ee63d`、独立历史工作流 `0983bc7`）。最终 Draft PR 的实际 head、检查与终态以该 PR 为准；中间提交结果不转签。
+本节更新 09-13 的原台账，旧表保留为历史快照。当前审阅分支为 `codex/local-delivery-integration-20260920`；功能与工具头为 `0983bc7c8846c37c45fe65fa01071bb3d19372e0`（历史接入 `547a30b`、安装工具修订 `60ee63d`、独立历史工作流 `0983bc7`）。[最终整合 Draft PR #7](https://github.com/TheDeadly-cat/hakimi-suanming/pull/7) 的 [实际检查](https://github.com/TheDeadly-cat/hakimi-suanming/pull/7/checks) 提供当前 head 与远端状态；下表保留按提交确认的回执，中间提交结果不转签。
 
 | 当前对象 | 已核对状态 |
 | --- | --- |
