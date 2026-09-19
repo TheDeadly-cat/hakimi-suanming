@@ -306,3 +306,9 @@
 /packages/western-astrology-contracts-draft/README.md text eol=lf
 /packages/western-astrology-contracts-draft/package.json text eol=lf
 /packages/western-astronomy-engine-adapter-draft/src/strict-receipt-draft.ts text eol=lf
+
+# Historical input ZIPs are exact byte artifacts.
+/scripts/fixtures/four-system-v212-additional-inputs.zip -text
+/scripts/fixtures/four-system-v213-additional-inputs.zip -text
+/scripts/fixtures/four-system-v214-additional-inputs.zip -text
+/scripts/fixtures/four-system-observation-registry-v2-original-inputs.zip -text

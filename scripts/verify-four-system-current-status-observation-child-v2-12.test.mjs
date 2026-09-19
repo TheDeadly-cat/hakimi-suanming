@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import test from "node:test";
+import { after, before, test } from "node:test";
+import { createRequire } from "node:module";
 
 import {
   FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_12_RELATIVE_PATH,
@@ -19,16 +20,29 @@ import {
   loadFourSystemCurrentStatusObservationChildV211
 } from "./four-system-current-status-observation-child-v2-11-lib.mjs";
 
-const ROOT = path.resolve(import.meta.dirname, "..");
-const CLI = path.join(
-  ROOT,
-  "scripts",
-  "verify-four-system-current-status-observation-child-v2-12.mjs"
-);
+import {
+  FOUR_SYSTEM_V212_ADDITIONAL_ARCHIVE_URL,
+  createFourSystemV212HistoricalInputs,
+  parseFourSystemV212AdditionalArchive
+} from "./four-system-v212-history.test-fixture.mjs";
+import { attachCurrentFourSystemCli } from "./four-system-v22-history.test-fixture.mjs";
 
-const loadedPromise = loadFourSystemCurrentStatusObservationChildV212(ROOT);
-const builtPromise = buildCurrentFourSystemCurrentStatusObservationChildV212(ROOT);
-const parentPromise = loadFourSystemCurrentStatusObservationChildV211(ROOT);
+const actualWorkspaceRoot = path.resolve(import.meta.dirname, "..");
+let historicalInputs, ROOT, CLI, loadedPromise, builtPromise, parentPromise;
+before(async () => {
+  historicalInputs = await createFourSystemV212HistoricalInputs();
+  ROOT = historicalInputs.root;
+  const relativePath = FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_12_RELATIVE_PATH;
+  assert.deepEqual(await readFile(path.join(ROOT, relativePath)),
+    await readFile(path.join(actualWorkspaceRoot, relativePath)));
+  CLI = await attachCurrentFourSystemCli(historicalInputs, 12);
+  // Attach all rejection handlers in this hook before yielding to any test.
+  loadedPromise = loadFourSystemCurrentStatusObservationChildV212(ROOT);
+  builtPromise = buildCurrentFourSystemCurrentStatusObservationChildV212(ROOT);
+  parentPromise = loadFourSystemCurrentStatusObservationChildV211(ROOT);
+  await Promise.all([loadedPromise, builtPromise, parentPromise]);
+});
+after(async () => { await historicalInputs?.cleanup(); });
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -221,4 +235,40 @@ test("CLI succeeds normally and rejects arguments or visible preload state", () 
   });
   assert.notEqual(preloadRejected.status, 0);
   assert.match(preloadRejected.stderr, /PRELOAD_ENVIRONMENT_FORBIDDEN/u);
+});
+
+test("current v2.12 loader and source CLI cannot inherit historical input success", async () => {
+  await assert.rejects(loadFourSystemCurrentStatusObservationChildV212(actualWorkspaceRoot),
+    { code: "PARENT_REVERIFICATION_FAILED" });
+  const env = { ...process.env }; delete env.NODE_OPTIONS; delete env.NODE_PATH;
+  const run = spawnSync(process.execPath,
+    [path.join(actualWorkspaceRoot, "scripts/verify-four-system-current-status-observation-child-v2-12.mjs")],
+    { cwd: ROOT, encoding: "utf8", env, windowsHide: true, timeout: 120_000 });
+  assert.equal(run.status, 1);
+  assert.equal(run.stdout, "");
+  assert.equal(run.stderr, "FOUR_SYSTEM_CURRENT_STATUS_V2_12_FAILED PARENT_REVERIFICATION_FAILED\n");
+});
+
+test("v2.12 supplemental archive rejects tampering, truncation and a valid empty ZIP", async () => {
+  const original = await readFile(FOUR_SYSTEM_V212_ADDITIONAL_ARCHIVE_URL);
+  assert.equal(parseFourSystemV212AdditionalArchive(original).manifest.files.length, 12);
+  const changed = Buffer.from(original); changed[Math.floor(changed.length / 2)] ^= 1;
+  const { zipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+  for (const bytes of [changed, original.subarray(0, -1), zipSync({})]) {
+    assert.throws(() => parseFourSystemV212AdditionalArchive(bytes), /v2\.12 additional archive identity changed/u);
+  }
+});
+
+test("v2.12 refuses altered or missing Vedic recursive authored-root input bytes", async () => {
+  const inputs = await createFourSystemV212HistoricalInputs();
+  try {
+    const target = path.join(inputs.root, "isolated-drafts/vedic-civil-time-fact-browser-draft/src/input-contract.test.ts");
+    const changed = Buffer.from(await readFile(target)); changed[changed.length - 1] ^= 1;
+    await writeFile(target, changed);
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV212(inputs.root), (error) =>
+      error.code === "VEDIC_MANIFEST_REVERIFICATION_FAILED" && error.cause?.code === "CURRENT_MANIFEST_MISMATCH");
+    await rm(target);
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV212(inputs.root), (error) =>
+      error.code === "VEDIC_MANIFEST_REVERIFICATION_FAILED" && error.cause?.code === "ROOT_FILE_SET_DRIFT");
+  } finally { await inputs.cleanup(); }
 });
