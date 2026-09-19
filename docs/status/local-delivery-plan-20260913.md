@@ -2,13 +2,14 @@
 
 ## 当前交付摘要 · 2026-09-20
 
-本节更新 09-13 的原台账，旧表保留为历史快照。当前审阅分支为 `codex/local-delivery-integration-20260920`；功能与工具头为 `0983bc7c8846c37c45fe65fa01071bb3d19372e0`（历史接入 `547a30b`、安装工具修订 `60ee63d`、独立历史工作流 `0983bc7`）。[最终整合 Draft PR #7](https://github.com/TheDeadly-cat/hakimi-suanming/pull/7) 的 [实际检查](https://github.com/TheDeadly-cat/hakimi-suanming/pull/7/checks) 提供当前 head 与远端状态；下表保留按提交确认的回执，中间提交结果不转签。
+本节更新 09-13 的原台账，旧表保留为历史快照。当前审阅分支为 `codex/local-delivery-integration-20260920`；已取得下列完整远端结果的整合提交是 `12f6cbcaf748a49a546ea2df2839345d494f82e9`（历史接入 `547a30b`、安装工具修订 `60ee63d`、独立历史工作流 `0983bc7`）。本页后续文字更新与该检查输入分别记录。[最终整合 Draft PR #7](https://github.com/TheDeadly-cat/hakimi-suanming/pull/7) 的 [实际检查](https://github.com/TheDeadly-cat/hakimi-suanming/pull/7/checks) 提供实时 head 与远端状态；中间提交结果不转签。
 
 | 当前对象 | 已核对状态 |
 | --- | --- |
-| 最新已取得的远端工程终态 | `547a30bfffcf5449dbd45fa00574b6a46918b3c2` 的 [Quick CI 35469783327](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/35469783327)：工程聚合通过；正式专家及正式聚合失败，首错 `EXPERT_QUALIFICATION_RECEIPT_LOADER_UNAVAILABLE`。类型检查、构建、Vitest 2827 项、发布工具 718 项通过。本次最终整合 PR 的新结果须另行取得。 |
+| 已确认的远端工程回执 | `12f6cbc…` 的 PR 事件 [Quick CI 35472925161](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/35472925161) 已结束：工程聚合通过；正式专家及正式聚合失败，首错 `EXPERT_QUALIFICATION_RECEIPT_LOADER_UNAVAILABLE`。完整类型检查、构建、Vitest 213 文件 / 2827 项、发布工具 718/718、安装工具 44/44、CI 合同 57/57 通过。先前 `547a30b` 的 [运行 35469783327](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/35469783327) 保留原提交归属。 |
 | 最新完整历史组 | 28 文件、795 项：788 通过 / 7 失败，0 跳过、取消或缺失；原 58 项关闭 51，原 269 项累计关闭 262。原 53 个测试函数体与冻结摘要不变，新增 12 个拒绝测试；[逐项归属与剩余责任](four-system-history-contexts-20260920.md)。最终 JSON SHA-256 `f6c89957887fb1351a5494c42c2601f10b9eb8f40eca7a38fc7c26424adf7cd4`。 |
-| 历史 PR 独立验证 | 新增仅针对历史 fixture、loader、manifest/current 等相关变更触发的 `Historical governance` 工作流；完整执行 current-governance 并保留失败。不会挂回普通页面构建前。最终 PR 的实际执行待取得，不能用 history checkpoint 成功替代。 |
+| 历史 PR 独立验证 | `12f6cbc…` 的 [Historical governance 35472925156](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/35472925156) 已完整执行：28 文件 / 795 项，788 通过、7 失败、0 跳过/取消/缺失。按 file/name/同名次序与本地逐项比较，新增、删除、结果变化均为 0。远端 JSON SHA-256 `6f40e4021b4a7b3487f73c4afad77e56b4a0adb2c44dff89b76b3a2814fba150`。工作流仅针对历史相关 PR 触发，独立于普通页面构建；history checkpoint 不替代完整组。 |
+| 迁移 CI 的独立缺口 | `12f6cbc…` 的 [Migration CI 35472925162](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/35472925162) 已结束为 failure：v13→v14 浏览器组 0/8；后续 v13→v15、v14→v15、v13→v16 及 orphaned-v13-recovery 四组未执行。这八项不与历史七项混算，也不构成默认 Schema 13 已启用候选的升级验收。 |
 | 日常入口 5188 | 仍为 `c15ef05bb165`；固定产物锁、全部 137 个应用文件和原日常快捷方式均按切换前身份复验。 |
 | 候选入口 5189 | 用户明确选择后已启用 `4de42e9db980 / package-v2`；实际桌面 Candidate (5189) 快捷方式已切换，固定监听身份匹配，冷启动及实际快捷方式复用通过。安装器重复运行复用一致目录和入口。 |
 | 旧候选与退路 | `9057371baf85-package-v4` 原安装目录保留；旧包和三个相关快捷方式已复制并核验到外部新备份目录。用户明确答复无待保留真实研究资料；未迁移、清空或读取日常浏览器资料。 |
@@ -16,6 +17,8 @@
 | 本轮安装与浏览器验收 | 实际安装副本在 Edge/Chrome：完整 boot 16/16、PWA 2/2、完整研究/十六分区备份恢复 2/2；随机端口 `50752` 已关闭。固定 5189 的补充验收 2/2：保存、关闭页面重开、全量资料一致及隔离恢复；使用独立测试浏览器数据，未使用日常 profile。桌面 1280×800 / 手机 390×844 页面身份、非空、错误层、控制台和交互检查通过。 |
 
 修订 2 ZIP SHA-256：`9856e3e94a635c9ddbf49809bb81d1b180475f3636c600e9b4f670c94d23b1f9`；安装清单 SHA-256：`034e68da64f6d7aa4a6c07fc6b6be52af5f189c435c003dea2782e78752262f3`。新证据目录：`Z:/HakimiBaziBackups/LocalDelivery/2026-09-20/local-delivery-integration-v1/`；09-13 及本日早先的历史证据目录保持原样。大响应探测采用长度预检、流式计数和超限取消，保留原 2 秒超时、禁止重定向和摘要验证；定向响应测试 6/6、安装工具完整组 44/44、真实包集成检查 18/18、CI 合同 57/57。首次超时异常名及沙箱符号链接跳过记录均保留，不把初次失败抹去。启用脚本首次读回误把 Windows 路径斜杠形式当成不同入口，规范化后通过；固定地址补充测试首次误比较含导出时间的 envelope 摘要，数据 payload 已一致，改为完整预检、十六分区与 payload 摘要核对后 2/2。两次脚本失败原文保留，未改应用字节。
+
+迁移失败的已知责任范围：一项在已报告 `dbMigrationPhase=committed`、`swBootAck=true` 的新 v14 页面上仍要求文档临时字段 `dbStorageAdmission=admitted`，实际为 null；这不足以证明持久迁移失败或容量门被绕过。另七项等待 v14 worker 自动激活，但当前页面和 worker 的自动前向接管合同明确仅接受 `legacy-v13 → Schema 16`。这两个限制函数与旧开发基线 `3a6fa1e3…` 字节相同；须先对齐旧迁移矩阵与支持范围，不能以放宽接管权限或 CDP 强制 skipWaiting 代替真实协议验收。远端只上传了运行日志，截图/trace 仅有已失效的 runner 本地路径，不能声称已审过这些界面证据。
 
 ### 最终整合的专题归属
 
@@ -34,8 +37,8 @@
 
 ### 接下来的三项工作
 
-1. 在最终整合 Draft PR 上取得工程与完整历史组实际结果，按真实失败身份审阅剩余七项事实回执的历史消费者版本合同；不全局退回旧 manifest、不执行旧归档模块、不重签旧回执。
-2. 用户在已选 5189 修订 2 完成真实研究周期反馈；另在第二台干净 Windows 验证安装、桌面入口及备份恢复。同机隔离浏览器与临时 checkout 不计为这两项完成。
+1. 按已取得的真实失败身份审阅七项事实回执的历史消费者合同，以及迁移矩阵八项失败的独立适用范围；不全局退回旧 manifest、不执行旧归档模块、不重签旧回执，保留未执行迁移组状态。
+2. 用户在已选 5189 修订 2 完成真实研究周期反馈；另在第二台干净 Windows 验证安装、桌面入口及备份恢复。用户已确认两项目前均未具备；同机隔离浏览器与临时 checkout 不计为完成。
 3. 来源校勘、权利依据及两份合格独立专家原始意见继续凭实际材料推进；0/2 进度可读、工程绿灯和 AI 回件不替代正式准入。
 
 ## 09-13 起点台账（历史快照）
