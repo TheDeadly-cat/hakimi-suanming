@@ -1,4 +1,5 @@
 import { createServer } from "node:http";
+import { createHash } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -30,6 +31,38 @@ const FIXED_RUNTIME_FILES = Object.freeze([
 ]);
 const SOURCE_ROOT = fileURLToPath(new URL("../", import.meta.url));
 
+// The caller supplies an entry from the already verified artifact lock. Hash
+// chunks as they arrive; never accumulate an unknown listener's complete body.
+export async function matchesLocalProbeResponse(response, expected) {
+  if (!Number.isSafeInteger(expected?.size) || expected.size < 0
+    || !/^[a-f0-9]{64}$/u.test(expected.sha256 ?? "")) {
+    throw new Error("Probe requires a bounded artifact file identity.");
+  }
+  const reader = response.body?.getReader();
+  if (!reader) return false;
+  let completed = false;
+  try {
+    const length = response.headers.get("content-length");
+    if (response.status !== 200 || (length !== null
+      && (!/^(0|[1-9][0-9]*)$/u.test(length) || Number(length) !== expected.size))) return false;
+    const digest = createHash("sha256");
+    let received = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        completed = true;
+        return received === expected.size && digest.digest("hex") === expected.sha256;
+      }
+      if (value.byteLength > expected.size - received) return false;
+      received += value.byteLength;
+      digest.update(value);
+    }
+  } finally {
+    if (!completed) await reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
+}
+
 function requireOutside(source, destination) {
   const relative = path.relative(path.resolve(source), path.resolve(destination));
   if (relative === "" || (!relative.startsWith(`..${path.sep}`) && relative !== ".." && !path.isAbsolute(relative))) {
@@ -53,7 +86,7 @@ export const LOCAL_RESEARCH_CANDIDATE = Object.freeze({
   fileCount: 137,
   origin: "http://127.0.0.1:5189/",
   nodeVersion: "24.16.0",
-  packageRevision: "1",
+  packageRevision: "2",
   localEngineeringCandidate: true,
   formalAdmissionAuthorized: false,
   expertClaimsAuthorized: false,
@@ -266,7 +299,7 @@ export function createLocalPackageTools(release) {
         const response = await fetch(new URL(name === "index.html" ? "" : name, url), {
           redirect: "error", signal: AbortSignal.timeout(2000), headers: { "Cache-Control": "no-cache", "Accept-Encoding": "identity" }
         });
-        if (response.status !== 200 || sha256(Buffer.from(await response.arrayBuffer())) !== expected.sha256) return { state: "foreign", origin, reason: `${name} identity mismatch` };
+        if (!await matchesLocalProbeResponse(response, expected)) return { state: "foreign", origin, reason: `${name} identity mismatch` };
       } catch (error) {
         if (name === "index.html" && error.cause?.code === "ECONNREFUSED") return { state: "stopped", origin };
         return { state: "foreign", origin, reason: "Listener did not return the exact fixed artifact." };

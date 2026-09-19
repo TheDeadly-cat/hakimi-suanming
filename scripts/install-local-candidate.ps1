@@ -11,7 +11,7 @@ if ([string]::IsNullOrWhiteSpace($InstallRoot)) { $InstallRoot = Join-Path $env:
 if ([string]::IsNullOrWhiteSpace($NodeExecutable)) { $NodeExecutable = (Get-Command node.exe -ErrorAction Stop).Source }
 $localNodePath = (Resolve-Path -LiteralPath $NodeExecutable).ProviderPath
 $sourceRoot = (Resolve-Path -LiteralPath $PackageRoot).ProviderPath
-$targetRoot = Join-Path ([IO.Path]::GetFullPath($InstallRoot)) "packages\4de42e9db980-package-v1"
+$targetRoot = Join-Path ([IO.Path]::GetFullPath($InstallRoot)) "packages\4de42e9db980-package-v2"
 $cliPath = Join-Path $sourceRoot "scripts\local-research-candidate.mjs"
 if (-not (Test-Path -LiteralPath $cliPath -PathType Leaf)) { throw "Extract the local engineering candidate package first and pass -PackageRoot. Source checkout installation does not build an artifact." }
 $result = & $localNodePath $cliPath install --package-root $sourceRoot --destination $targetRoot

@@ -219,7 +219,8 @@
       "tests": [
         "packages/bazi-core/scripts/verify-historical-natal-runtime-closure.test.mjs",
         "packages/bazi-core/scripts/verify-historical-natal-source-lock.test.mjs",
-        "packages/tzdb-core/scripts/verify-artifact.test.mjs"
+        "packages/tzdb-core/scripts/verify-artifact.test.mjs",
+        "scripts/local-research-probe.test.mjs"
       ]
     }
   ]

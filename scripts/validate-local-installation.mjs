@@ -161,6 +161,43 @@ await check("a foreign listener is detected and left running", async () => {
   } finally { await close(server); }
   assert.equal((await probeLocalPackage(input, { origin })).state, "stopped");
 });
+for (const scenario of ["oversized declared length", "oversized chunked body", "truncated chunked body"]) {
+  await check(`probe rejects ${scenario} without stopping the listener`, async () => {
+    const index = original.artifact.lock.files.find((entry) => entry.path === "index.html");
+    const server = createServer((_request, response) => {
+      if (scenario === "oversized declared length") {
+        response.writeHead(200, { "Content-Length": index.size + 100_000_000 });
+        response.flushHeaders();
+      } else {
+        response.writeHead(200);
+        response.write(Buffer.alloc(scenario === "oversized chunked body" ? index.size + 1 : index.size - 1));
+        if (scenario === "truncated chunked body") response.end();
+      }
+    });
+    const origin = await listen(server);
+    try {
+      const result = await probeLocalPackage(input, { origin });
+      assert.equal(result.state, "foreign");
+      // The two open-ended responses must be rejected by identity/size checks,
+      // rather than waiting for the existing fetch deadline to expire.
+      assert.equal(result.reason, "index.html identity mismatch");
+      assert.equal(server.listening, true);
+    } finally { await close(server); }
+  });
+}
+await check("exact chunked index and worker responses still identify the selected package", async () => {
+  const index = await readFile(path.join(input, "dist/web/index.html"));
+  const worker = await readFile(path.join(input, "dist/web/sw.js"));
+  const server = createServer((request, response) => {
+    const bytes = request.url === "/sw.js" ? worker : index;
+    response.writeHead(200);
+    response.write(bytes.subarray(0, 1));
+    response.end(bytes.subarray(1));
+  });
+  const origin = await listen(server);
+  try { assert.equal((await probeLocalPackage(input, { origin })).state, "matching"); }
+  finally { await close(server); }
+});
 await check("no incomplete package can start a listener", async () => {
   await assert.rejects(startLocalPackageServer(path.join(output, "empty-manifest"), { port: 0 }));
 });
