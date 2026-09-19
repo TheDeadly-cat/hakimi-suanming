@@ -1,5 +1,45 @@
 # 本地交付目标与验收台账
 
+## 当前交付摘要 · 2026-09-20
+
+本节更新 09-13 的原台账，旧表保留为历史快照。当前审阅分支为 `codex/local-delivery-integration-20260920`；功能与工具头为 `0983bc7c8846c37c45fe65fa01071bb3d19372e0`（历史接入 `547a30b`、安装工具修订 `60ee63d`、独立历史工作流 `0983bc7`）。最终 Draft PR 的实际 head、检查与终态以该 PR 为准；中间提交结果不转签。
+
+| 当前对象 | 已核对状态 |
+| --- | --- |
+| 最新已取得的远端工程终态 | `547a30bfffcf5449dbd45fa00574b6a46918b3c2` 的 [Quick CI 35469783327](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/35469783327)：工程聚合通过；正式专家及正式聚合失败，首错 `EXPERT_QUALIFICATION_RECEIPT_LOADER_UNAVAILABLE`。类型检查、构建、Vitest 2827 项、发布工具 718 项通过。本次最终整合 PR 的新结果须另行取得。 |
+| 最新完整历史组 | 28 文件、795 项：788 通过 / 7 失败，0 跳过、取消或缺失；原 58 项关闭 51，原 269 项累计关闭 262。原 53 个测试函数体与冻结摘要不变，新增 12 个拒绝测试；[逐项归属与剩余责任](four-system-history-contexts-20260920.md)。最终 JSON SHA-256 `f6c89957887fb1351a5494c42c2601f10b9eb8f40eca7a38fc7c26424adf7cd4`。 |
+| 历史 PR 独立验证 | 新增仅针对历史 fixture、loader、manifest/current 等相关变更触发的 `Historical governance` 工作流；完整执行 current-governance 并保留失败。不会挂回普通页面构建前。最终 PR 的实际执行待取得，不能用 history checkpoint 成功替代。 |
+| 日常入口 5188 | 仍为 `c15ef05bb165`；固定产物锁、全部 137 个应用文件和原日常快捷方式均按切换前身份复验。 |
+| 候选入口 5189 | 用户明确选择后已启用 `4de42e9db980 / package-v2`；实际桌面 Candidate (5189) 快捷方式已切换，固定监听身份匹配，冷启动及实际快捷方式复用通过。安装器重复运行复用一致目录和入口。 |
+| 旧候选与退路 | `9057371baf85-package-v4` 原安装目录保留；旧包和三个相关快捷方式已复制并核验到外部新备份目录。用户明确答复无待保留真实研究资料；未迁移、清空或读取日常浏览器资料。 |
+| 修订 2 的范围 | 应用仍为 `4de42e9db980`，应用源码 `d3ff1bdcc64d0917dcc604f753ac896eb62a9c1e`；安装工具源码 `60ee63d6bdb1e334690fb4f14ec792d49f28c298`。137 个应用文件、原锁及 6 份原浏览器回执/结果共 144 文件与修订 1 字节相同。原回执未重签。 |
+| 本轮安装与浏览器验收 | 实际安装副本在 Edge/Chrome：完整 boot 16/16、PWA 2/2、完整研究/十六分区备份恢复 2/2；随机端口 `50752` 已关闭。固定 5189 的补充验收 2/2：保存、关闭页面重开、全量资料一致及隔离恢复；使用独立测试浏览器数据，未使用日常 profile。桌面 1280×800 / 手机 390×844 页面身份、非空、错误层、控制台和交互检查通过。 |
+
+修订 2 ZIP SHA-256：`9856e3e94a635c9ddbf49809bb81d1b180475f3636c600e9b4f670c94d23b1f9`；安装清单 SHA-256：`034e68da64f6d7aa4a6c07fc6b6be52af5f189c435c003dea2782e78752262f3`。新证据目录：`Z:/HakimiBaziBackups/LocalDelivery/2026-09-20/local-delivery-integration-v1/`；09-13 及本日早先的历史证据目录保持原样。大响应探测采用长度预检、流式计数和超限取消，保留原 2 秒超时、禁止重定向和摘要验证；定向响应测试 6/6、安装工具完整组 44/44、真实包集成检查 18/18、CI 合同 57/57。首次超时异常名及沙箱符号链接跳过记录均保留，不把初次失败抹去。启用脚本首次读回误把 Windows 路径斜杠形式当成不同入口，规范化后通过；固定地址补充测试首次误比较含导出时间的 envelope 摘要，数据 payload 已一致，改为完整预检、十六分区与 payload 摘要核对后 2/2。两次脚本失败原文保留，未改应用字节。
+
+### 最终整合的专题归属
+
+以下六个 Draft PR 的 head 均为本整合分支的祖先；保留原 PR，未合并或重写 main。最终 Draft PR 采用共同开发基线 `codex/legacy-v13-governance-sync-20260904`（`3a6fa1e3…`），汇总审查这批后续改动。
+
+| 专题 | 原 PR / head |
+| --- | --- |
+| 固定本地安装 | [#1](https://github.com/TheDeadly-cat/hakimi-suanming/pull/1) / `3361efb77511c3aedd03a223642dcba5c77ceeb5` |
+| PWA 资料目录合同 | [#2](https://github.com/TheDeadly-cat/hakimi-suanming/pull/2) / `ef13e3661708c7551967054815e595e783688a07` |
+| 专家职责拆分 | [#3](https://github.com/TheDeadly-cat/hakimi-suanming/pull/3) / `e4690753c24abb4a8d81da51f667bd9ce56b9846` |
+| Windows 检出与历史输入 | [#4](https://github.com/TheDeadly-cat/hakimi-suanming/pull/4) / `3eb280d5f835283fd24ed807ac3d291a45bf77f5` |
+| 案例库焦点和对比度 | [#5](https://github.com/TheDeadly-cat/hakimi-suanming/pull/5) / `c085b75e20de0e781f1568474be53d75ae5f5ad0` |
+| 当前/历史许可检查 | [#6](https://github.com/TheDeadly-cat/hakimi-suanming/pull/6) / `35358d35528c2c782b2ded7af142c42364ebe4d4`；原基线为首次控制器打包分支 |
+
+相对旧开发基线，应用运行时修改限于首次控制器确认输入门、案例库操作后焦点和筛选对比度；其余包括安装/许可验证工具、专家职责、CI、历史输入/测试及文档。相对修复应用源码 `d3ff1bd…`，`apps/web`、`packages`、`content`、依赖清单/锁与 tsconfig 范围仅三个组件测试文件不同，没有应用运行时变更，故沿用原修复应用。测试源码使用 `0983bc7…`；后续状态文档提交不冒充新的应用构建身份。
+
+### 接下来的三项工作
+
+1. 在最终整合 Draft PR 上取得工程与完整历史组实际结果，按真实失败身份审阅剩余七项事实回执的历史消费者版本合同；不全局退回旧 manifest、不执行旧归档模块、不重签旧回执。
+2. 用户在已选 5189 修订 2 完成真实研究周期反馈；另在第二台干净 Windows 验证安装、桌面入口及备份恢复。同机隔离浏览器与临时 checkout 不计为这两项完成。
+3. 来源校勘、权利依据及两份合格独立专家原始意见继续凭实际材料推进；0/2 进度可读、工程绿灯和 AI 回件不替代正式准入。
+
+## 09-13 起点台账（历史快照）
+
 目标输入：本任务附件 `854f937f-745e-4524-a381-a0e02c995991/pasted-text-1.txt`。起点：`3a6fa1e3dd7edad26dde203205bf98eaf34e4956`。本地使用优先，保留来源权利、真实专家及未来公开发布门。
 
 本页跟踪完整目标，不以单项测试通过代替整体完成。09-10 的源码同步是上一个已完成动作；09-13 新建独立 checkout 开始后续交付，原实施目录与固定 c15ef 安装不变。
