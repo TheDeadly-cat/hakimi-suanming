@@ -3,6 +3,11 @@ name: Historical governance
 on:
   pull_request:
     paths:
+      - ".gitattributes"
+      - ".node-version"
+      - ".npmrc"
+      - "package.json"
+      - "package-lock.json"
       - ".github/workflows/history-governance.yml"
       - "scripts/node-test-groups.json"
       - "scripts/run-node-test-group.mjs"
