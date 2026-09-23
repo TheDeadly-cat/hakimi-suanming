@@ -2348,6 +2348,8 @@ for (const [label, before, after] of [
   ["whole temporary disk upload", "path: ${{ env.HAKIMI_MIGRATION_EVIDENCE_DIR }}/", "path: ${{ runner.temp }}/"],
   ["missing checkout identity", "actualCheckout = (git rev-parse HEAD)", "actualCheckout = $env:REQUESTED_HEAD"],
   ["missing shallow merge parents", "fetch-depth: 2", "fetch-depth: 1"],
+  ["noncanonical Windows TEMP", "TEMP: ${{ runner.temp }}", "TEMP: C:/Users/RUNNER~1/AppData/Local/Temp"],
+  ["noncanonical Windows TMP", "TMP: ${{ runner.temp }}", "TMP: C:/Users/RUNNER~1/AppData/Local/Temp"],
   ["unavailable runner context at job scope", "    steps:\n      - uses: actions/checkout@v5", "    env:\n      BAD_PATH: ${{ runner.temp }}\n    steps:\n      - uses: actions/checkout@v5"],
   ["diagnostic directory not passed to later steps", "Add-Content -LiteralPath $env:GITHUB_ENV", "Add-Content -LiteralPath local-only.txt"],
   ["aggregate masking", 'run: test "$MIGRATION_RESULT" = success', 'run: echo "$MIGRATION_RESULT"'],

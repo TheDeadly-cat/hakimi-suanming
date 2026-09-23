@@ -136,6 +136,11 @@ jobs:
         run: npm run test:e2e:cross-schema-v14-v15
       - if: ${{ matrix.suite == 'cross-schema-v13-v16' }}
         run: npm run test:e2e:cross-schema-v13-v16
+        env:
+          # GitHub Windows TEMP can use RUNNER~1; this suite deliberately
+          # requires a canonical plain parent before creating owned fixtures.
+          TEMP: ${{ runner.temp }}
+          TMP: ${{ runner.temp }}
       - if: ${{ matrix.suite == 'orphaned-v13-recovery' }}
         run: npm run test:e2e:orphaned-v13-recovery
       - name: Preserve this isolated suite including failure diagnostics
