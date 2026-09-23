@@ -1,10 +1,11 @@
 import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
 import { createServer, type Server } from "node:http";
-import { readFile, readdir, stat } from "node:fs/promises";
+import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { promisify } from "node:util";
-import { expect, type BrowserContext, type Page } from "@playwright/test";
+import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 import {
   BRIDGE_RELEASE_DATABASE_DESCRIPTOR,
   PRODUCTION_V14_RELEASE_DATABASE_DESCRIPTOR,
@@ -204,6 +205,19 @@ export async function buildGeneration(
   if (worker.includes("__RELEASE_DATABASE_DESCRIPTOR__")) {
     throw new Error(`Build ${name} left the Service Worker release descriptor placeholder unresolved.`);
   }
+
+  // Preserve identities outside the disposable build directory and browser profiles.
+  const identityDirectory = path.join(test.info().project.outputDir, "artifact-identities", path.basename(fixtureRoot));
+  await mkdir(identityDirectory, { recursive: true });
+  await writeFile(path.join(identityDirectory, `${name}.json`), JSON.stringify({
+    name, buildVersion: version, descriptor: emittedDescriptor, fault, evidenceId,
+    indexSha256: createHash("sha256").update(index).digest("hex"),
+    workerSha256: createHash("sha256").update(worker).digest("hex"),
+    entryPath,
+    entrySha256: createHash("sha256").update(await readFile(path.join(directory, entryPath.replace(/^\//u, "")))).digest("hex"),
+    evidenceClass: "isolated-synthetic-migration-diagnostic",
+    formalReleaseAuthorized: false
+  }, null, 2), { flag: "wx" });
 
   return {
     name,

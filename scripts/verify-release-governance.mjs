@@ -229,6 +229,7 @@ export const REQUIRED_MIGRATION_WORKFLOW_PATHS = Object.freeze([
   "apps/web/sw-two-generation-fixture-source-identity.ts",
   "apps/web/e2e/**",
   "apps/web/playwright.release-browser-*.ts",
+  "apps/web/playwright.migration-diagnostics.ts",
   "apps/web/playwright*.config.ts",
   "apps/web/vite*.ts",
   "packages/backup/**",
@@ -1608,6 +1609,42 @@ export function verifyMigrationWorkflowGovernance(migrationWorkflow) {
     if (!pullRequestPaths.has(requiredPath)) {
       throw new Error(`Migration CI pull_request.paths is missing ${requiredPath}.`);
     }
+  }
+
+  const scenarios = workflowJobBlock(migrationWorkflow, "migration-scenarios").join("\n");
+  const aggregate = workflowJobBlock(migrationWorkflow, "migration-aggregate").join("\n");
+  const suites = REQUIRED_MIGRATION_WORKFLOW_COMMANDS.slice(1).map((command) =>
+    command.replace("npm run test:e2e:", "")
+  );
+  const selected = [...scenarios.matchAll(/^          - ([a-z0-9-]+)$/gmu)].map((match) => match[1]);
+  if (JSON.stringify(selected) !== JSON.stringify(suites)
+    || !scenarios.includes("      fail-fast: false")
+    || !scenarios.includes("      max-parallel: 2")
+    || scenarios.split("    steps:")[0].includes("${{ runner.")
+    || /continue-on-error|^    needs:/mu.test(scenarios)) {
+    throw new Error("Migration CI must independently execute all five bounded, fail-fast-disabled suites.");
+  }
+  for (const suite of suites) {
+    if (!scenarios.includes(`      - if: \${{ matrix.suite == '${suite}' }}\n        run: npm run test:e2e:${suite}`)) {
+      throw new Error(`Migration CI must execute the canonical command for ${suite}.`);
+    }
+  }
+  for (const fragment of [
+    "HAKIMI_MIGRATION_EVIDENCE_DIR: ${{ runner.temp }}/hakimi-migration-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.suite }}",
+    'Add-Content -LiteralPath $env:GITHUB_ENV -Value "HAKIMI_MIGRATION_EVIDENCE_DIR=$env:HAKIMI_MIGRATION_EVIDENCE_DIR" -Encoding utf8NoBOM',
+    "requestedHead = $env:REQUESTED_HEAD", "requestedBase = $env:REQUESTED_BASE",
+    "actualCheckout = (git rev-parse HEAD)", "checkoutParents = (git log -1 --format=%P)",
+    "if: ${{ always() }}\n        uses: actions/upload-artifact@v4",
+    "path: ${{ env.HAKIMI_MIGRATION_EVIDENCE_DIR }}/", "if-no-files-found: error"
+  ]) if (!scenarios.includes(fragment)) {
+    throw new Error(`Migration CI diagnostic preservation is missing ${fragment}.`);
+  }
+  if (!aggregate.includes("    if: ${{ always() }}")
+    || !aggregate.includes("    needs: migration-scenarios")
+    || !aggregate.includes("MIGRATION_RESULT: ${{ needs.migration-scenarios.result }}")
+    || !aggregate.includes('run: test "$MIGRATION_RESULT" = success')
+    || aggregate.includes("continue-on-error")) {
+    throw new Error("Migration CI must fail its aggregate when any suite is unsuccessful or unexecuted.");
   }
 }
 
@@ -6560,7 +6597,8 @@ export function verifyCrossSchemaV13V16CompletionGovernance(config = crossSchema
     "forbidOnly", "failOnFlakyTests", "retries", "workers", "reporter", "use", "projects"
   ]) || config.testDir !== "./e2e"
     || config.testMatch !== "service-worker-cross-schema-v13-v16.spec.ts"
-    || config.outputDir !== path.join(os.tmpdir(), "hakimi-bazi-cross-schema-v13-v16-results")
+    || config.outputDir !== crossSchemaV13V16Config.outputDir
+    || !path.isAbsolute(config.outputDir) || path.basename(config.outputDir) !== "test-results"
     || config.timeout !== 300_000 || !sameJson(config.expect, { timeout: 25_000 })
     || config.fullyParallel !== false || config.forbidOnly !== true
     || config.failOnFlakyTests !== true || config.retries !== 0 || config.workers !== 1) {
@@ -6570,7 +6608,8 @@ export function verifyCrossSchemaV13V16CompletionGovernance(config = crossSchema
     ["line"],
     [path.join(moduleWorkspaceRoot, "apps/web/playwright.release-browser-strict-reporter.ts"), {
       receiptId, expectedTestsPerProject: 13
-    }]
+    }],
+    ["json", { outputFile: path.join(path.dirname(config.outputDir), "results.json") }]
   ])) {
     throw new Error("Cross-Schema completion requires the existing strict reporter and thirteen tests per project.");
   }

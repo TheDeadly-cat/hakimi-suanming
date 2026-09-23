@@ -2311,7 +2311,11 @@ test("source access requires the recorded user scope and grants no expert, right
 
 for (const command of REQUIRED_MIGRATION_WORKFLOW_COMMANDS) {
   test(`rejects migration workflow when command is missing: ${command}`, () => {
-    const weakenedWorkflow = withoutExactLine(workflow, `      - run: ${command}`);
+    const runLine = workflow.split(/\r?\n/u).find((line) =>
+      line.trim().replace(/^-\s+/u, "") === `run: ${command}`
+    );
+    assert.ok(runLine, `Canonical command must be an executable step: ${command}`);
+    const weakenedWorkflow = withoutExactLine(workflow, runLine);
     assert.throws(
       () => verifyMigrationWorkflowGovernance(weakenedWorkflow),
       (error) => error instanceof Error && error.message === `Migration CI is missing ${command}.`
@@ -2333,6 +2337,26 @@ for (const requiredPath of REQUIRED_MIGRATION_WORKFLOW_PATHS) {
 test("accepts the checked-in Chrome and Edge release evidence matrix", () => {
   assert.doesNotThrow(() => verifyReleaseBrowserGovernance(decisions, packageJson));
 });
+
+for (const [label, before, after] of [
+  ["fail-fast cancellation", "fail-fast: false", "fail-fast: true"],
+  ["unbounded parallelism", "max-parallel: 2", "max-parallel: 5"],
+  ["missing recovery suite", "          - orphaned-v13-recovery", "          - omitted-recovery"],
+  ["failure masking", "    strategy:", "    continue-on-error: true\n    strategy:"],
+  ["wrong suite dispatch", "matrix.suite == 'cross-schema-v13-v16' }}\n        run: npm run test:e2e:cross-schema-v13-v16", "matrix.suite == 'cross-schema-upgrade' }}\n        run: npm run test:e2e:cross-schema-v13-v16"],
+  ["success-only diagnostics", "if: ${{ always() }}\n        uses: actions/upload-artifact@v4", "if: ${{ success() }}\n        uses: actions/upload-artifact@v4"],
+  ["whole temporary disk upload", "path: ${{ env.HAKIMI_MIGRATION_EVIDENCE_DIR }}/", "path: ${{ runner.temp }}/"],
+  ["missing checkout identity", "actualCheckout = (git rev-parse HEAD)", "actualCheckout = $env:REQUESTED_HEAD"],
+  ["unavailable runner context at job scope", "    steps:\n      - uses: actions/checkout@v5", "    env:\n      BAD_PATH: ${{ runner.temp }}\n    steps:\n      - uses: actions/checkout@v5"],
+  ["diagnostic directory not passed to later steps", "Add-Content -LiteralPath $env:GITHUB_ENV", "Add-Content -LiteralPath local-only.txt"],
+  ["aggregate masking", 'run: test "$MIGRATION_RESULT" = success', 'run: echo "$MIGRATION_RESULT"'],
+  ["aggregate skipped on failure", "    if: ${{ always() }}\n    needs: migration-scenarios", "    if: ${{ success() }}\n    needs: migration-scenarios"]
+]) {
+  test(`migration matrix rejects ${label}`, () => {
+    assert.ok(workflow.includes(before), label);
+    assert.throws(() => verifyMigrationWorkflowGovernance(workflow.replace(before, after)));
+  });
+}
 
 test("required release files include the browser result and evidence command closure", () => {
   for (const requiredFile of [
