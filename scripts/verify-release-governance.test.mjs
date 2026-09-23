@@ -2353,8 +2353,13 @@ for (const [label, before, after] of [
   ["aggregate skipped on failure", "    if: ${{ always() }}\n    needs: migration-scenarios", "    if: ${{ success() }}\n    needs: migration-scenarios"]
 ]) {
   test(`migration matrix rejects ${label}`, () => {
-    assert.ok(workflow.includes(before), label);
-    assert.throws(() => verifyMigrationWorkflowGovernance(workflow.replace(before, after)));
+    for (const newline of ["\n", "\r\n"]) {
+      const source = workflow.replace(/\r\n?/gu, "\n").replace(/\n/gu, newline);
+      const original = before.replace(/\n/gu, newline);
+      const replacement = after.replace(/\n/gu, newline);
+      assert.ok(source.includes(original), `${label}: ${JSON.stringify(newline)}`);
+      assert.throws(() => verifyMigrationWorkflowGovernance(source.replace(original, replacement)));
+    }
   });
 }
 
