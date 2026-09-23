@@ -12,7 +12,7 @@ import {
 } from "./cross-system-engineering-fact-receipt-lib.mjs";
 
 import { createFactReceiptV1HistoricalInputs } from "./cross-system-fact-receipt-v1-history.test-fixture.mjs";
-import { FACT_RECEIPT_V1_INPUT_ARCHIVE_URL, parseFactReceiptV1InputArchive } from "./cross-system-engineering-fact-v1-inputs.mjs";
+import { FACT_RECEIPT_V1_INPUT_ARCHIVE_URL, parseFactReceiptV1InputArchive } from "./cross-system-fact-receipt-v1-history.test-fixture.mjs";
 
 // Preserve all nine original callbacks, including exact tamper rejection codes.
 // "current" in their historical titles means current at this original v1 scope.
