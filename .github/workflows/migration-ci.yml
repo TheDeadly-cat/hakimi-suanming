@@ -90,6 +90,8 @@ jobs:
           - orphaned-v13-recovery
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
       - name: Record the actual checkout and requested PR identity
         shell: pwsh
         env:

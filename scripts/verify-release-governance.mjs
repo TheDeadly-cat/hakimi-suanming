@@ -1634,6 +1634,7 @@ export function verifyMigrationWorkflowGovernance(migrationWorkflow) {
     'Add-Content -LiteralPath $env:GITHUB_ENV -Value "HAKIMI_MIGRATION_EVIDENCE_DIR=$env:HAKIMI_MIGRATION_EVIDENCE_DIR" -Encoding utf8NoBOM',
     "requestedHead = $env:REQUESTED_HEAD", "requestedBase = $env:REQUESTED_BASE",
     "actualCheckout = (git rev-parse HEAD)", "checkoutParents = (git log -1 --format=%P)",
+    "fetch-depth: 2",
     "if: ${{ always() }}\n        uses: actions/upload-artifact@v4",
     "path: ${{ env.HAKIMI_MIGRATION_EVIDENCE_DIR }}/", "if-no-files-found: error"
   ]) if (!scenarios.includes(fragment)) {
