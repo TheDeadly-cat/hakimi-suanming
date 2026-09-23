@@ -5,7 +5,7 @@ const diagnostics = migrationDiagnosticOutput("cross-schema-upgrade");
 
 export default defineConfig({
   testDir: "./e2e",
-  testMatch: "service-worker-cross-schema-upgrade.spec.ts",
+  testMatch: "historical-v13-v14-boundary.spec.ts",
   outputDir: diagnostics.testResults,
   timeout: 300_000,
   expect: { timeout: 25_000 },
