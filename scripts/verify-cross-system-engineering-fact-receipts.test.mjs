@@ -1,14 +1,24 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { readFile, writeFile, unlink } from "node:fs/promises";
+import path from "node:path";
+import { after, test } from "node:test";
 import {
   computeCrossSystemEngineeringFactReceiptDigest,
   computeCrossSystemEngineeringFactReceiptRegistryDigest,
   parseCrossSystemEngineeringFactReceiptJsonBytes,
   readCrossSystemEngineeringFactReceiptRegistry,
-  verifyCrossSystemEngineeringFactReceiptRegistry
+  verifyHistoricalV1CrossSystemEngineeringFactReceiptRegistry as verifyCrossSystemEngineeringFactReceiptRegistry,
+  verifyCrossSystemEngineeringFactReceiptRegistry as verifyActualCurrentRegistry
 } from "./cross-system-engineering-fact-receipt-lib.mjs";
 
-const workspaceRoot = process.cwd();
+import { createFactReceiptV1HistoricalInputs } from "./cross-system-fact-receipt-v1-history.test-fixture.mjs";
+import { FACT_RECEIPT_V1_INPUT_ARCHIVE_URL, parseFactReceiptV1InputArchive } from "./cross-system-engineering-fact-v1-inputs.mjs";
+
+// Preserve all nine original callbacks, including exact tamper rejection codes.
+// "current" in their historical titles means current at this original v1 scope.
+const historicalInputs = await createFactReceiptV1HistoricalInputs();
+after(() => historicalInputs.cleanup());
+const workspaceRoot = historicalInputs.root;
 
 async function currentRegistry() {
   return (await readCrossSystemEngineeringFactReceiptRegistry(workspaceRoot)).registry;
@@ -178,4 +188,47 @@ test("successful object verification returns a detached recursively frozen regis
   const before = result.registry.systems[1].receipt.projectedFacts[0].value;
   input.systems[1].receipt.projectedFacts[0].value = "after-verification";
   assert.equal(result.registry.systems[1].receipt.projectedFacts[0].value, before);
+});
+
+test("historical-v1 result explicitly excludes current verification and current selection changes", async () => {
+  const result = await verifyCrossSystemEngineeringFactReceiptRegistry(workspaceRoot, await currentRegistry());
+  assert.equal(result.consumerContract, "historical-v1");
+  assert.equal(result.currentProducerVerification, false);
+  assert.equal(result.currentSelectionChanged, false);
+  assert.equal(result.archivedModulesExecuted, false);
+  assert.equal(result.registry.registryDigest, "27630244f1ec8bc90a3a1ad5ebd3b1fa97d0a1d09d497f747d88a27d1872e263");
+});
+
+test("actual-current consumer does not inherit historical success or mutate the selected head", async () => {
+  const selectedPath = path.join(process.cwd(), "content/system-admission/current-index.v1.json");
+  const before = await readFile(selectedPath);
+  const saved = await readCrossSystemEngineeringFactReceiptRegistry(process.cwd());
+  await assert.rejects(verifyActualCurrentRegistry(process.cwd(), saved.registry), { code: "LEDGER_MISMATCH" });
+  assert.deepEqual(await readFile(selectedPath), before);
+  assert.deepEqual((await readCrossSystemEngineeringFactReceiptRegistry(process.cwd())).snapshot.bytes, saved.snapshot.bytes);
+});
+
+test("supplying historical data to the current consumer cannot select the v1 contract", async () => {
+  await assert.rejects(verifyActualCurrentRegistry(workspaceRoot, await currentRegistry()), { code: "COMPONENT_FILE_MISSING" });
+});
+
+test("historical consumer rejects changed projector bytes before replay", async (t) => {
+  const inputs = await createFactReceiptV1HistoricalInputs();
+  t.after(() => inputs.cleanup());
+  const target = path.join(inputs.root, "packages/ziwei-iztro-adapter-draft/src/cross-system-engineering-fact-projection.ts");
+  await writeFile(target, Buffer.concat([await readFile(target), Buffer.from("\n// changed\n")]));
+  await assert.rejects(verifyCrossSystemEngineeringFactReceiptRegistry(inputs.root, await currentRegistry()), { code: "HISTORICAL_V1_INPUT_MISMATCH" });
+});
+
+test("historical consumer rejects a missing original D0 record", async (t) => {
+  const inputs = await createFactReceiptV1HistoricalInputs();
+  t.after(() => inputs.cleanup());
+  await unlink(path.join(inputs.root, "content/system-admission/bazi-v17-manifest-drift-decisions.v1.json"));
+  await assert.rejects(verifyCrossSystemEngineeringFactReceiptRegistry(inputs.root, await currentRegistry()), { code: "BOUND_FILE_MISSING" });
+});
+
+test("historical input archive cannot be replaced with another self-described inventory", async () => {
+  const bytes = Buffer.from(await readFile(FACT_RECEIPT_V1_INPUT_ARCHIVE_URL));
+  bytes[30] ^= 1;
+  assert.throws(() => parseFactReceiptV1InputArchive(bytes), { code: "HISTORICAL_V1_INPUT_MISMATCH" });
 });
