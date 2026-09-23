@@ -1,6 +1,26 @@
 # 本地交付目标与验收台账
 
-## 当前交付摘要 · 2026-09-20
+## 当前交付摘要 · 2026-09-24
+
+本轮按 09-23 审阅拆为三个小型 Draft PR，均从 [整合 PR #7](https://github.com/TheDeadly-cat/hakimi-suanming/pull/7) 的 `93f91d4624c34321fd5aba34b5fc0b0fde3ee75a` 出发，目标分支均为 `codex/local-delivery-integration-20260920`。它们尚未相互合并，也未并入 #7；#7 继续保持 Draft，main 仍为 `c2d18ca453971d3087abe53e21872cd707ea7d42`。
+
+| 本轮专题 | 已提交范围 | 验证归属 |
+| --- | --- | --- |
+| [A：迁移验证与失败材料 #9](https://github.com/TheDeadly-cat/hakimi-suanming/pull/9) | `139a8ef…`；五组独立执行、有限并行、隔离上传和实际检出身份；历史拒绝／自然激活／新页面路径及恢复页修复 | 本地合同 253/253、类型检查正文通过、历史边界 3/3 + 6/6 + 6/6、只读恢复 4/4。v16 完整本地诊断 24/26，两浏览器万条慢审计收敛仍失败。最终远端状态看 [#9 checks](https://github.com/TheDeadly-cat/hakimi-suanming/pull/9/checks) |
+| [B：事实回执历史／当前合同 #10](https://github.com/TheDeadly-cat/hakimi-suanming/pull/10) | `b4e24d6…`；98 个固定原输入、维护中的验证器与生产者重放、明确的 historical-v1 入口 | 原九个回调逐字节保留，七项原失败已在定向检查关闭；原 9 + 新 6 = 15/15。完整历史组及与原 795 项的对照以本 PR 的 [实际检查](https://github.com/TheDeadly-cat/hakimi-suanming/pull/10/checks) 为准；实际 current 入口仍拒绝历史成功 |
+| [C：历史 CI 触发与本交付入口 #8](https://github.com/TheDeadly-cat/hakimi-suanming/pull/8) | 检出规则、Node/npm 配置和依赖清单／锁单独修改也触发完整历史组；无关页面文案不触发 | 本地路径合同 14/14。本分支未包含 B，其历史组不能借用 B 的通过结果；最终 head 与检查见 [#8 checks](https://github.com/TheDeadly-cat/hakimi-suanming/pull/8/checks) |
+
+### 三种身份分别读取
+
+1. **请求审查的 PR head**：A/B/C 的 source head 分别记录在各 PR；历史工作流明确检出请求的 head。#7 原 `93f91d4` 的 [历史运行 35474203805](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/35474203805) 仍是 795 项、788 通过／7 失败，不因 B 的新结果被改写。
+2. **实际检出的合并预览**：迁移 CI 保留默认 PR checkout；A 的每组 `checkout.json` 保存 requested head/base、workflow SHA、实际 checkout 和 parents，构建身份及全量结果也在同组产物里。请求 head 与合并预览不是同一个身份；修改目标分支后必须重新验证。A 的 [运行 35890688236](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/35890688236) 是本轮独立矩阵入口。
+3. **实际已安装产物**：本轮没有重新构建或替换安装。5189 继续按 `4de42e9db980 / package-v2` 原启用记录归属，5188 按 `c15ef05bb165` 原记录归属；应用源码、安装工具源码、ZIP、原浏览器回执及备份位置见下方 09-20 快照。A 中恢复页 CSS 修复是待审查源码，并未自动进入现有安装。
+
+默认发布仍为 Schema 13。原旧 v14/v15 自动接管数字保留历史范围；新 boundary 套件通过不能改称旧 8/20/18 项通过。原容量、事务、并发、失败恢复与当前 v16 的逐项映射，以及 v15 独有而未重跑的组合，集中在[迁移支持表](https://github.com/TheDeadly-cat/hakimi-suanming/blob/139a8efce13ce5ccc5794cc9c25046fcb3bee5a5/docs/跨Schema数据库与ServiceWorker发布协议-v0.1.md)。普通 `typecheck` 的正式专家前置门仍拒绝；类型检查正文通过不能改称整个生命周期通过。
+
+下一步先审查 A/B/C 及各自的真实 CI 状态，再决定整合；继续定位 v16 万条慢审计收敛失败。用户已确认暂时没有真实研究反馈或第二台 Windows，这两项继续待完成。来源、权利和现实专家材料仍按实际收到的内容验收。无需重复启用修订 2，也不新增 current-index 或 observation child。
+
+## 2026-09-20 交付快照（保留原时间和输入）
 
 本节更新 09-13 的原台账，旧表保留为历史快照。当前审阅分支为 `codex/local-delivery-integration-20260920`；已取得下列完整远端结果的整合提交是 `12f6cbcaf748a49a546ea2df2839345d494f82e9`（历史接入 `547a30b`、安装工具修订 `60ee63d`、独立历史工作流 `0983bc7`）。本页后续文字更新与该检查输入分别记录。[最终整合 Draft PR #7](https://github.com/TheDeadly-cat/hakimi-suanming/pull/7) 的 [实际检查](https://github.com/TheDeadly-cat/hakimi-suanming/pull/7/checks) 提供实时 head 与远端状态；中间提交结果不转签。
 
