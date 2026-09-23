@@ -364,7 +364,9 @@ test(`仅遗留精确 v13 数据库且无旧壳时，${target.label} 只读救�
     expect(downloadedBackup.payload).toEqual(expectedSourceBackup.payload);
     await expect(targetPage.locator(".orphaned-v13-receipt__digest code"))
       .toHaveText(downloadedBackup.digests.payload);
-    await expect(targetPage.getByRole("status")).toBeVisible();
+    await expect(targetPage.getByRole("status").filter({
+      has: targetPage.getByText("只读完整备份已请求下载", { exact: true })
+    })).toBeVisible();
 
     await expectNoReleaseSideEffects(targetPage, sourceBefore, cacheBefore);
     expect(targetRequestPaths).not.toContain("/sw.js");

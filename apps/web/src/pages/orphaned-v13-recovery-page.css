@@ -630,6 +630,10 @@
 }
 
 @media (max-width: 767px) {
+  .page--orphaned-v13::before {
+    inset-inline: 0;
+  }
+
   .page--orphaned-v13 .orphaned-v13-context-guard {
     grid-template-columns: minmax(0, 1fr);
     padding: 14px 12px;
