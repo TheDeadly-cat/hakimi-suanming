@@ -31,6 +31,40 @@ assert(filters.length > 0, "Migration CI path filters must not be empty");
 assert(filters.every((filter) => !filter.startsWith("!")), "Negative filters need an explicit trigger-contract review");
 const triggersFor = (changedPath) => filters.some((filter) => path.posix.matchesGlob(changedPath, filter));
 
+const historyWorkflow = await readFile(new URL("../.github/workflows/history-governance.yml", import.meta.url), "utf8");
+const historyLines = historyWorkflow.split(/\r?\n/u);
+const historyStart = historyLines.indexOf("  pull_request:");
+assert.notEqual(historyStart, -1, "Historical governance must retain its PR trigger");
+const historyEnd = historyLines.findIndex((line, index) => index > historyStart && /^  \S/u.test(line));
+const historyPaths = historyLines.slice(historyStart + 1, historyEnd < 0 ? undefined : historyEnd)
+  .filter((line) => /^      - /u.test(line))
+  .map((line) => {
+    assert.match(line, /^      - "[^"\r\n]+"$/u);
+    return JSON.parse(line.slice(8));
+  });
+assert(historyPaths.length > 0 && historyPaths.every((filter) => !filter.startsWith("!")));
+const historyTriggersFor = (changedPath) => historyPaths.some((filter) => path.posix.matchesGlob(changedPath, filter));
+
+test("each checkout, runtime or dependency input independently triggers complete historical governance", () => {
+  for (const changedPath of [".gitattributes", ".node-version", ".npmrc", "package.json", "package-lock.json"]) {
+    assert(historyTriggersFor(changedPath), changedPath);
+  }
+});
+
+test("historical scripts, original fixtures and receipt consumers still trigger the history group", () => {
+  for (const changedPath of [
+    ".github/workflows/history-governance.yml", "scripts/fixtures/four-system-v214-additional-inputs.zip",
+    "scripts/cross-system-engineering-fact-receipt-lib.mjs", "scripts/four-system-v214-history.test-fixture.mjs",
+    "content/domain-release/ziwei-doushu.engineering-draft.v0.1.0.manifest.v2.json"
+  ]) assert(historyTriggersFor(changedPath), changedPath);
+});
+
+test("unrelated page wording and research notes do not independently trigger historical governance", () => {
+  for (const changedPath of ["apps/web/src/pages/case-library-page.tsx", "README.md", "docs/research/notes.md"]) {
+    assert.equal(historyTriggersFor(changedPath), false, changedPath);
+  }
+});
+
 test("SW takeover retry implementation or test independently triggers Migration CI", () => {
   for (const changedPath of [
     "apps/web/src/lib/service-worker-takeover-retry.ts",
