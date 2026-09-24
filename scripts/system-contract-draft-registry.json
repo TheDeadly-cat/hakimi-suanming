@@ -23,6 +23,7 @@
       ],
       "allowedScriptTargets": [
         "scripts/bazi-v17-manifest-drift-decision-lib.mjs",
+        "scripts/cross-system-engineering-fact-v1-inputs.mjs",
         "scripts/independent-domain-release-manifest-lib.mjs",
         "scripts/independent-source-binding-requirements-lib.mjs",
         "scripts/system-admission-registry-lib.mjs"
@@ -70,6 +71,16 @@
           "allowedLocalTargets": [
             "scripts/bazi-domain-release-manifest-lib.mjs",
             "scripts/bazi-expert-review-packet-lib.mjs"
+          ]
+        },
+        {
+          "path": "scripts/cross-system-engineering-fact-v1-inputs.mjs",
+          "allowedBareImports": [],
+          "allowedLocalTargets": [
+            "scripts/bazi-domain-release-manifest-lib.mjs",
+            "scripts/bazi-v17-manifest-drift-decision-lib.mjs",
+            "scripts/independent-domain-release-manifest-lib.mjs",
+            "scripts/independent-source-binding-requirements-lib.mjs"
           ]
         },
         {
