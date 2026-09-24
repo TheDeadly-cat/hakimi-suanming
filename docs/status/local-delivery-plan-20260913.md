@@ -1,6 +1,31 @@
 # 本地交付目标与验收台账
 
-## 当前交付摘要 · 2026-09-24
+## 当前交付摘要 · 2026-09-25
+
+### 整合头 dc15e1d 的联合结果
+
+已推送的工程源码基线为 `dc15e1d47e743bcfd008cf8e31c597c6d14a59d2`。以下结果属于这一源码身份，不能自动转移到后续修复：
+
+| 联合检查 | 实际结果与身份 |
+| --- | --- |
+| [Quick CI 36021692429](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/36021692429) | 工程聚合通过；完整类型检查正文、213 文件 / 2827 项 Vitest、默认 v13 构建及产物检查通过。CI 合同 74/74、包产物 44/44、发布证据工具 718/718。正式专家及正式聚合独立失败。实际 checkout `d493b5d918f83aac8df7a428e6783332ff6d637b` 与 source 的 tree 同为 `9c1c4855263f82ef776fc8d481e58c35f85d659f`，逐路径差异为空 |
+| [完整 current-governance 36021692439](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/36021692439) | 精确 source head 上 28 文件、819/819，失败／跳过／取消／缺失均为 0；保留 B 的 801 项，新增 18 项发布治理合同，删除和结果退化均为 0。本地与远端 819 项身份及结果相同 |
+| [五组迁移与恢复 36021692431](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/36021692431) | **43 通过 / 2 失败 / 45 已执行**。历史边界 3/3 + 6/6 + 6/6、只读恢复 4/4；v16 为 24/26，两个浏览器的首项万条慢审计均未收敛。严格报告器、完整性检查和聚合保持失败 |
+| 本地工程与安装合同 | 同源码的类型检查正文、Vitest 2827/2827、默认 v13 构建及产物检查通过，默认构建 `d6bea35f4c1d`；上述 CI／包／证据工具合同亦通过。对固定包副本做隔离安装检查 18/18；原包及已安装应用没有替换 |
+
+完整联合迁移验收尚未完成。远端 v16 日志已经核对，76 MB 失败产物下载因连接 EOF 未完整取得，不能声称已审过该产物中的全部控制日志。四个成功组的产物已下载核对。
+
+### 09-25 慢审计定位进展（修复尚未验收）
+
+dc15e1d 的单次本地双浏览器诊断为 Edge 通过、Chrome 失败，源／目标构建均为 `6ee914c98c54` / `b40fb1c9fece`。随后在隔离 Chrome 中增加临时观察，已直接记录到同一页面、requestId 和 migrationId 的续租时序：最后成功 ACK 的租期截止于 `1790267613053`；页面从 `1790267589576.6` 起出现 26,303 ms 长任务；下一次续租在 `1790267615887` 才发出，晚于已确认截止时间 **2,834 ms**，随后收到 `PROTOCOL_MISMATCH`。这证实了该次本地失败中的页面长任务与续租逾期，不能据此补写其他旧失败缺失的消息时序。
+
+原始观察保存在本机 `C:/Temp/hakimi-v16-lease-observer-20260925/lease-observations.json`，SHA-256 为 `e6cb084104711411db3f28adbad7397c1572067599d81cff233b370c9c78b459`。观察没有改变原万条种子、故障注入、180 秒收敛断言、30 秒冻结租约、8 秒续租间隔或零重试。
+
+当前本地修复尝试把完整快照捕获后的修订验证分批执行，并在取得迁移写权限前完成预校验。定向合同覆盖让出页面任务、调用方后改数据不可混入、验证失败不改目标、原写锁和提交时 CAS；但小型真实 IndexedDB 页面通过不等于原升级场景通过。原场景的临时阶段观察已确认预校验和万条目标写入完成，随后仍停在目标完整性核验，故修复尚未提交为已验收版本。临时诊断代码和未通过的运行时补丁不作为工程通过或安装交付依据。
+
+进一步的阶段观察中，预校验约 30.5 秒、目标写入约 9.9 秒、原子快照读取约 2.7 秒；后台核验未在原收敛时限内返回。单次 Chrome 原场景仍失败，journal 为 materializing、attemptCount 1、failure=null，尚未发送 BOOT_OK。该记录不能归因为先前另一补丁的 TransactionInactiveError，也不能证明后台核验永久挂起。对应本机结果为 `C:/Temp/hakimi-v16-integrity-stages-20260925/results.json`，SHA-256 `56e856d4bec6f7191d64119cce68a32dca14dfea965b15a27dafdc86b5cdf40f`；临时日志代码已移除，运行时修复仍保留为本地未提交项。
+
+### 已整合专题及保留边界
 
 按新一轮审阅授权，三个已审查的精确头已依次纳入 [整合 PR #7](https://github.com/TheDeadly-cat/hakimi-suanming/pull/7) 的 `codex/local-delivery-integration-20260920`：B `879039ac1256106e3f4d4af9bfefe0017d36c273` → C `0cdcb50c3a3ab6d9b7babd1aaeb4adfe549685ad` → A `ae3b44cdfc6c4ff8c89a6d83bbbe8b711a2e2c2b`。三个合并提交分别为 `86c3e91`、`3e45497`、`5c7a0e0`，没有冲突。#7 继续保持 Draft，main 保持 `c2d18ca453971d3087abe53e21872cd707ea7d42`。
 
@@ -30,8 +55,8 @@
 
 - 两次运行均为 Playwright 1.62.1。Edge 均为 `153.0.4234.48`；Chrome 本地为 `154.0.8037.57`、远端为 `.58`。Edge 版本相同仍有不同结果，不能用 Chrome 补丁差异解释全部失败。
 - 原本地失败 trace 保存的 v16 测试、跨代 helper、备份 helper、容量种子 helper，与整合前对应文件在统一换行后完全相同。万条种子为案例／修订／指纹各 10,000，候选集 0；故障注入是扣留旧 v13 审计结果，待 controllerchange 后 500ms 释放，不是 CPU 限速。原断言和 180 秒收敛上限不变。
-- 原本地源／目标构建为 `715aa1ed03ca`／`3f5a93194838`。其精确完整源码快照未记录；A 远端检出 `ecca08297b38326fd3c8677b25e43b3cbbab7619`，成功 trace 未保留，不能从另一步候选构建的版本号推定浏览器 fixture 的构建身份。已核对 `93f91d4` 到 A 再到整合头的生产 worker、迁移 coordinator 字节未变。
-- 本地 Chrome 在 prepared → materializing 后约 39.3 秒记录 `旧标签页写锁续租被拒绝：PROTOCOL_MISMATCH`，随后 failed，目标隔离 complete，attemptCount 1；Edge 留下 pending、journal=null，不能假定两者同根因。续租拒绝可由会话不存在／非 prepared、发起页身份或 requestId/migrationId 不符导致；旧记录未保存完整消息顺序，30 秒冻结租约与 8 秒心跳只构成调查线索，不能据此宣称租约到期已证实。
+- 原本地源／目标构建为 `715aa1ed03ca`／`3f5a93194838`。其精确完整源码快照未记录；A 远端检出 `ecca08297b38326fd3c8677b25e43b3cbbab7619`，成功 trace 未保留，不能从另一步候选构建的版本号推定浏览器 fixture 的构建身份。已核对 `93f91d4` 到 A 再到 `dc15e1d` 的生产 worker、迁移 coordinator 字节未变；该结论不覆盖上方尚未提交的运行时修复尝试。
+- 旧本地 Chrome 在 prepared → materializing 后约 39.3 秒记录 `旧标签页写锁续租被拒绝：PROTOCOL_MISMATCH`，随后 failed，目标隔离 complete，attemptCount 1；Edge 留下 pending、journal=null，不能假定两者同根因。续租拒绝可由会话不存在／非 prepared、发起页身份或 requestId/migrationId 不符导致；这些旧记录未保存完整消息顺序，当时的 30 秒租约和 8 秒心跳只是线索。上方 09-25 新观察直接确认了新一次运行中的续租逾期，但没有补齐旧运行证据。
 - 复用 `attachForwardMigrationFailureState()`：原失败附件保持；第一项慢场景成功断言全部完成后也保存同样的页面、构建及 journal 信息，以便比较成功与失败。没有加入运行中 worker 轮询、消息拦截、重试或放宽接管。本轮原矩阵仍逐项验证旧页写保护、源库保留、唯一目标、未知提交后不盲目重放及失败恢复。
 
 该风险限于隔离的 v13→v16 候选慢审计接管，尚无证据将其定为“本机太慢”或已修复；即使新的联合运行成功，也仅是新的成功观测。默认仍为 v13，v16 不因此取得默认启用资格。工程联合结果完成后本轮结项；真实研究、干净 Windows 与独立内容线按现有待办保留。
