@@ -1636,6 +1636,8 @@ export function verifyMigrationWorkflowGovernance(migrationWorkflow) {
     "actualCheckout = (git rev-parse HEAD)", "checkoutParents = (git log -1 --format=%P)",
     "fetch-depth: 2",
     "TEMP: ${{ runner.temp }}", "TMP: ${{ runner.temp }}",
+    "      - name: Require the reviewed browser and test identity set\n        if: ${{ always() }}",
+    "run: node scripts/verify-migration-scenario-result.mjs $env:MIGRATION_SUITE (Join-Path $env:HAKIMI_MIGRATION_EVIDENCE_DIR 'results.json')",
     "if: ${{ always() }}\n        uses: actions/upload-artifact@v4",
     "path: ${{ env.HAKIMI_MIGRATION_EVIDENCE_DIR }}/", "if-no-files-found: error"
   ]) if (!scenarios.includes(fragment)) {

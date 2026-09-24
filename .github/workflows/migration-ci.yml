@@ -143,6 +143,12 @@ jobs:
           TMP: ${{ runner.temp }}
       - if: ${{ matrix.suite == 'orphaned-v13-recovery' }}
         run: npm run test:e2e:orphaned-v13-recovery
+      - name: Require the reviewed browser and test identity set
+        if: ${{ always() }}
+        shell: pwsh
+        env:
+          MIGRATION_SUITE: ${{ matrix.suite }}
+        run: node scripts/verify-migration-scenario-result.mjs $env:MIGRATION_SUITE (Join-Path $env:HAKIMI_MIGRATION_EVIDENCE_DIR 'results.json')
       - name: Preserve this isolated suite including failure diagnostics
         if: ${{ always() }}
         uses: actions/upload-artifact@v4

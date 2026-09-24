@@ -2,7 +2,11 @@
 
 ## 当前交付摘要 · 2026-09-24
 
-本轮按 09-23 审阅拆为三个小型 Draft PR，均从 [整合 PR #7](https://github.com/TheDeadly-cat/hakimi-suanming/pull/7) 的 `93f91d4624c34321fd5aba34b5fc0b0fde3ee75a` 出发，目标分支均为 `codex/local-delivery-integration-20260920`。它们尚未相互合并，也未并入 #7；#7 继续保持 Draft，main 仍为 `c2d18ca453971d3087abe53e21872cd707ea7d42`。
+按新一轮审阅授权，三个已审查的精确头已依次纳入 [整合 PR #7](https://github.com/TheDeadly-cat/hakimi-suanming/pull/7) 的 `codex/local-delivery-integration-20260920`：B `879039ac1256106e3f4d4af9bfefe0017d36c273` → C `0cdcb50c3a3ab6d9b7babd1aaeb4adfe549685ad` → A `ae3b44cdfc6c4ff8c89a6d83bbbe8b711a2e2c2b`。三个合并提交分别为 `86c3e91`、`3e45497`、`5c7a0e0`，没有冲突。#7 继续保持 Draft，main 保持 `c2d18ca453971d3087abe53e21872cd707ea7d42`。
+
+本轮联合验收归属 #7 的同一整合头：完整默认图类型检查、完整 Vitest、默认 v13 构建与产物检查、完整 current-governance、五组迁移／恢复及安装与 CI 合同。实际检出、逐项统计和原始产物以 [#7 检查](https://github.com/TheDeadly-cat/hakimi-suanming/pull/7/checks)及 PR 描述中的固定运行链接为准；下表为整合前专题证据，不能相加代替联合验收，也不把历史总数固定为 801。
+
+五组迁移现在共同执行小型 JSON 完整性检查：核对预期浏览器和逐项测试标题，拒绝缺项、替换、重复、跳过、取消、异常、重试及减少执行数量。检查在浏览器失败时仍执行，原 v16 严格报告器及零重试保持不变。
 
 | 本轮专题 | 已提交范围 | 验证归属 |
 | --- | --- | --- |
@@ -14,13 +18,23 @@
 
 1. **请求审查的 PR head**：A/B/C 的 source head 分别记录在各 PR；历史工作流明确检出请求的 head。#7 原 `93f91d4` 的 [历史运行 35474203805](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/35474203805) 仍是 795 项、788 通过／7 失败，不因 B 的新结果被改写。
 2. **实际检出的合并预览**：迁移 CI 保留默认 PR checkout；A 的每组 `checkout.json` 保存 requested head/base、workflow SHA、实际 checkout 和 parents，构建身份及全量结果也在同组产物里。请求 head 与合并预览不是同一个身份；修改目标分支后必须重新验证。A 的 [运行 35893945050](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/35893945050) 已完整通过；五组实际检出均为 `ecca08297b38326fd3c8677b25e43b3cbbab7619`，两个父提交为请求 base `93f91d4…` 和请求 head `ae3b44c…`。
-3. **实际已安装产物**：本轮没有重新构建或替换安装。5189 继续按 `4de42e9db980 / package-v2` 原启用记录归属，5188 按 `c15ef05bb165` 原记录归属；应用源码、安装工具源码、ZIP、原浏览器回执及备份位置见下方 09-20 快照。A 中恢复页 CSS 修复是待审查源码，并未自动进入现有安装。
+3. **实际已安装产物**：本轮没有重新打包或替换已安装应用。5189 继续按 `4de42e9db980 / package-v2` 原启用记录归属，5188 按 `c15ef05bb165` 原记录归属；应用源码、安装工具源码、ZIP、原浏览器回执及备份位置见下方 09-20 快照。A 中恢复页 CSS 修复已纳入整合源码，并未自动进入现有安装。
 
 默认发布仍为 Schema 13。原旧 v14/v15 自动接管数字保留历史范围；新 boundary 套件通过不能改称旧 8/20/18 项通过。原容量、事务、并发、失败恢复与当前 v16 的逐项映射，以及 v15 独有而未重跑的组合，集中在[迁移支持表](https://github.com/TheDeadly-cat/hakimi-suanming/blob/139a8efce13ce5ccc5794cc9c25046fcb3bee5a5/docs/跨Schema数据库与ServiceWorker发布协议-v0.1.md)。普通 `typecheck` 的正式专家前置门仍拒绝；类型检查正文通过不能改称整个生命周期通过。
 
-下一步审查 A/B/C，再决定整合。保留本地早先 v16 24/26 的两项慢审计失败、远端首轮 LF/CRLF 变异测试问题、浅检出父提交缺失及短路径准备失败，不把它们改写成成功；最终远端 26/26 不证明本地慢审计问题的根因已修复。用户已确认暂时没有真实研究反馈或第二台 Windows，这两项继续待完成。来源、权利和现实专家材料仍按实际收到的内容验收。无需重复启用修订 2，也不新增 current-index 或 observation child。
+保留本地早先 v16 24/26 的两项慢审计失败、远端首轮 LF/CRLF 变异测试问题、浅检出父提交缺失及短路径准备失败，不把它们改写成成功；远端 26/26 不证明本地慢审计问题的根因已修复。用户已确认暂时没有真实研究反馈或第二台 Windows，这两项继续待完成。来源、权利和现实专家材料仍按实际收到的内容验收。无需重复启用修订 2，也不新增 current-index 或 observation child。
 
-最终 B 远端 JSON SHA-256：`39d2ec711a244576d61cee3df041c03f2c7b32d57741a3b0759f4753f556cd1d`；最终 A 的 v16 JSON：`1fe6420eded662e0705c2161ac1ee260760ceb91ae764423694eca0b9b4a7286`。A/B 的最终工程聚合通过，正式专家与正式聚合仍失败；本轮不授予正式发布或专家声明。C 未整合 A/B，其完整历史组仍保留原七项失败归属。
+最终 B 远端 JSON SHA-256：`39d2ec711a244576d61cee3df041c03f2c7b32d57741a3b0759f4753f556cd1d`；最终 A 的 v16 JSON：`1fe6420eded662e0705c2161ac1ee260760ceb91ae764423694eca0b9b4a7286`。A/B 的最终工程聚合通过，正式专家与正式聚合仍失败；本轮不授予正式发布或专家声明。C 专题原运行未整合 A/B，其旧七项失败归属不变。
+
+### 慢审计差异的证据与限制
+
+- 两次运行均为 Playwright 1.62.1。Edge 均为 `153.0.4234.48`；Chrome 本地为 `154.0.8037.57`、远端为 `.58`。Edge 版本相同仍有不同结果，不能用 Chrome 补丁差异解释全部失败。
+- 原本地失败 trace 保存的 v16 测试、跨代 helper、备份 helper、容量种子 helper，与整合前对应文件在统一换行后完全相同。万条种子为案例／修订／指纹各 10,000，候选集 0；故障注入是扣留旧 v13 审计结果，待 controllerchange 后 500ms 释放，不是 CPU 限速。原断言和 180 秒收敛上限不变。
+- 原本地源／目标构建为 `715aa1ed03ca`／`3f5a93194838`。其精确完整源码快照未记录；A 远端检出 `ecca08297b38326fd3c8677b25e43b3cbbab7619`，成功 trace 未保留，不能从另一步候选构建的版本号推定浏览器 fixture 的构建身份。已核对 `93f91d4` 到 A 再到整合头的生产 worker、迁移 coordinator 字节未变。
+- 本地 Chrome 在 prepared → materializing 后约 39.3 秒记录 `旧标签页写锁续租被拒绝：PROTOCOL_MISMATCH`，随后 failed，目标隔离 complete，attemptCount 1；Edge 留下 pending、journal=null，不能假定两者同根因。续租拒绝可由会话不存在／非 prepared、发起页身份或 requestId/migrationId 不符导致；旧记录未保存完整消息顺序，30 秒冻结租约与 8 秒心跳只构成调查线索，不能据此宣称租约到期已证实。
+- 复用 `attachForwardMigrationFailureState()`：原失败附件保持；第一项慢场景成功断言全部完成后也保存同样的页面、构建及 journal 信息，以便比较成功与失败。没有加入运行中 worker 轮询、消息拦截、重试或放宽接管。本轮原矩阵仍逐项验证旧页写保护、源库保留、唯一目标、未知提交后不盲目重放及失败恢复。
+
+该风险限于隔离的 v13→v16 候选慢审计接管，尚无证据将其定为“本机太慢”或已修复；即使新的联合运行成功，也仅是新的成功观测。默认仍为 v13，v16 不因此取得默认启用资格。工程联合结果完成后本轮结项；真实研究、干净 Windows 与独立内容线按现有待办保留。
 
 ## 2026-09-20 交付快照（保留原时间和输入）
 

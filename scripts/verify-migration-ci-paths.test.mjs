@@ -5,6 +5,7 @@ import os from "node:os";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import test from "node:test";
+import { MIGRATION_SCENARIOS, verifyMigrationScenarioResult } from "./verify-migration-scenario-result.mjs";
 import {
   assertSwTwoGenerationFixtureCriticalSourceIdentity,
   loadSwTwoGenerationFixtureCriticalSourceIdentity,
@@ -30,6 +31,49 @@ const filters = pullRequest
 assert(filters.length > 0, "Migration CI path filters must not be empty");
 assert(filters.every((filter) => !filter.startsWith("!")), "Negative filters need an explicit trigger-contract review");
 const triggersFor = (changedPath) => filters.some((filter) => path.posix.matchesGlob(changedPath, filter));
+
+function completeMigrationResult(suite) {
+  const scenario = MIGRATION_SCENARIOS[suite];
+  return {
+    errors: [], config: { forbidOnly: true, projects: scenario.projects.map(name => ({ name, retries: 0, repeatEach: 1 })) },
+    stats: { expected: scenario.projects.length * scenario.titles.length, unexpected: 0, skipped: 0, flaky: 0 },
+    suites: [{ specs: scenario.titles.map(title => ({ title, tests: scenario.projects.map(projectName => ({
+      projectName, expectedStatus: "passed", status: "expected", results: [{ status: "passed", retry: 0, errors: [] }]
+    })) })) }]
+  };
+}
+
+test("each migration suite requires its reviewed complete identity set", () => {
+  for (const suite of Object.keys(MIGRATION_SCENARIOS)) {
+    assert.equal(verifyMigrationScenarioResult(suite, completeMigrationResult(suite)).complete, true);
+  }
+  assert(triggersFor("scripts/verify-migration-scenario-result.mjs"));
+});
+
+for (const [label, mutate] of [
+  ["removed test", report => { report.suites[0].specs.pop(); report.stats.expected -= 1; }],
+  ["same-count renamed test", report => { report.suites[0].specs[0].title = "unreviewed replacement"; }],
+  ["duplicate identity", report => { report.suites[0].specs[1].title = report.suites[0].specs[0].title; }],
+  ["skipped test with forged aggregate", report => { report.suites[0].specs[0].tests[0].results[0].status = "skipped"; }],
+  ["cancelled attempt", report => { report.suites[0].specs[0].tests[0].results[0].status = "interrupted"; }],
+  ["expected failure", report => { report.suites[0].specs[0].tests[0].expectedStatus = "failed"; }],
+  ["retry after failure", report => { report.suites[0].specs[0].tests[0].results.unshift({ status: "failed", retry: 0, errors: [] }); }],
+  ["nonzero retry ordinal", report => { report.suites[0].specs[0].tests[0].results[0].retry = 1; }],
+  ["wrong browser", report => { report.suites[0].specs[0].tests[0].projectName = "chromium"; }],
+  ["missing configured browser", report => { report.config.projects = []; }],
+  ["run error despite passing tests", report => { report.errors.push({ message: "setup failed" }); }],
+  ["flaky result", report => { report.stats.flaky = 1; }]
+]) test(`migration completeness rejects ${label}`, () => {
+  const report = completeMigrationResult("cross-schema-upgrade");
+  mutate(report);
+  assert.throws(() => verifyMigrationScenarioResult("cross-schema-upgrade", report));
+});
+
+test("v15 completeness cannot inherit one browser's success twice", () => {
+  const report = completeMigrationResult("cross-schema-v13-v15");
+  for (const spec of report.suites[0].specs) spec.tests[1].projectName = "msedge";
+  assert.throws(() => verifyMigrationScenarioResult("cross-schema-v13-v15", report));
+});
 
 const historyWorkflow = await readFile(new URL("../.github/workflows/history-governance.yml", import.meta.url), "utf8");
 const historyLines = historyWorkflow.split(/\r?\n/u);

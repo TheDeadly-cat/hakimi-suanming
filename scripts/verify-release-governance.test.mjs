@@ -2350,6 +2350,8 @@ for (const [label, before, after] of [
   ["missing shallow merge parents", "fetch-depth: 2", "fetch-depth: 1"],
   ["noncanonical Windows TEMP", "TEMP: ${{ runner.temp }}", "TEMP: C:/Users/RUNNER~1/AppData/Local/Temp"],
   ["noncanonical Windows TMP", "TMP: ${{ runner.temp }}", "TMP: C:/Users/RUNNER~1/AppData/Local/Temp"],
+  ["missing scenario result completeness gate", "run: node scripts/verify-migration-scenario-result.mjs", "run: node scripts/ignored-result.mjs"],
+  ["skipped completeness check on browser failure", "name: Require the reviewed browser and test identity set\n        if: ${{ always() }}", "name: Require the reviewed browser and test identity set\n        if: ${{ success() }}"],
   ["unavailable runner context at job scope", "    steps:\n      - uses: actions/checkout@v5", "    env:\n      BAD_PATH: ${{ runner.temp }}\n    steps:\n      - uses: actions/checkout@v5"],
   ["diagnostic directory not passed to later steps", "Add-Content -LiteralPath $env:GITHUB_ENV", "Add-Content -LiteralPath local-only.txt"],
   ["aggregate masking", 'run: test "$MIGRATION_RESULT" = success', 'run: echo "$MIGRATION_RESULT"'],
