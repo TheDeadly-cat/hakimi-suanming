@@ -1,10 +1,19 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import os from "node:os";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 import test from "node:test";
+import { MIGRATION_SCENARIOS, verifyMigrationScenarioResult } from "./verify-migration-scenario-result.mjs";
+import {
+  assertSwTwoGenerationFixtureCriticalSourceIdentity,
+  loadSwTwoGenerationFixtureCriticalSourceIdentity,
+  SW_TWO_GENERATION_FIXTURE_EXPECTED_CRITICAL_SOURCES
+} from "../apps/web/sw-two-generation-fixture-source-identity.ts";
 
-// These contracts read configuration and spec declarations only. They do not
-// load application modules, execute browser bodies, or rebuild an artifact.
+// These contracts read configuration, source identities and spec declarations.
+// They do not execute application/browser bodies or rebuild an artifact.
 const workflow = await readFile(new URL("../.github/workflows/migration-ci.yml", import.meta.url), "utf8");
 const lines = workflow.split(/\r?\n/u);
 const start = lines.findIndex((line) => line === "  pull_request:");
@@ -23,6 +32,83 @@ assert(filters.length > 0, "Migration CI path filters must not be empty");
 assert(filters.every((filter) => !filter.startsWith("!")), "Negative filters need an explicit trigger-contract review");
 const triggersFor = (changedPath) => filters.some((filter) => path.posix.matchesGlob(changedPath, filter));
 
+function completeMigrationResult(suite) {
+  const scenario = MIGRATION_SCENARIOS[suite];
+  return {
+    errors: [], config: { forbidOnly: true, projects: scenario.projects.map(name => ({ name, retries: 0, repeatEach: 1 })) },
+    stats: { expected: scenario.projects.length * scenario.titles.length, unexpected: 0, skipped: 0, flaky: 0 },
+    suites: [{ specs: scenario.titles.map(title => ({ title, tests: scenario.projects.map(projectName => ({
+      projectName, expectedStatus: "passed", status: "expected", results: [{ status: "passed", retry: 0, errors: [] }]
+    })) })) }]
+  };
+}
+
+test("each migration suite requires its reviewed complete identity set", () => {
+  for (const suite of Object.keys(MIGRATION_SCENARIOS)) {
+    assert.equal(verifyMigrationScenarioResult(suite, completeMigrationResult(suite)).complete, true);
+  }
+  assert(triggersFor("scripts/verify-migration-scenario-result.mjs"));
+});
+
+for (const [label, mutate] of [
+  ["removed test", report => { report.suites[0].specs.pop(); report.stats.expected -= 1; }],
+  ["same-count renamed test", report => { report.suites[0].specs[0].title = "unreviewed replacement"; }],
+  ["duplicate identity", report => { report.suites[0].specs[1].title = report.suites[0].specs[0].title; }],
+  ["skipped test with forged aggregate", report => { report.suites[0].specs[0].tests[0].results[0].status = "skipped"; }],
+  ["cancelled attempt", report => { report.suites[0].specs[0].tests[0].results[0].status = "interrupted"; }],
+  ["expected failure", report => { report.suites[0].specs[0].tests[0].expectedStatus = "failed"; }],
+  ["retry after failure", report => { report.suites[0].specs[0].tests[0].results.unshift({ status: "failed", retry: 0, errors: [] }); }],
+  ["nonzero retry ordinal", report => { report.suites[0].specs[0].tests[0].results[0].retry = 1; }],
+  ["wrong browser", report => { report.suites[0].specs[0].tests[0].projectName = "chromium"; }],
+  ["missing configured browser", report => { report.config.projects = []; }],
+  ["run error despite passing tests", report => { report.errors.push({ message: "setup failed" }); }],
+  ["flaky result", report => { report.stats.flaky = 1; }]
+]) test(`migration completeness rejects ${label}`, () => {
+  const report = completeMigrationResult("cross-schema-upgrade");
+  mutate(report);
+  assert.throws(() => verifyMigrationScenarioResult("cross-schema-upgrade", report));
+});
+
+test("v15 completeness cannot inherit one browser's success twice", () => {
+  const report = completeMigrationResult("cross-schema-v13-v15");
+  for (const spec of report.suites[0].specs) spec.tests[1].projectName = "msedge";
+  assert.throws(() => verifyMigrationScenarioResult("cross-schema-v13-v15", report));
+});
+
+const historyWorkflow = await readFile(new URL("../.github/workflows/history-governance.yml", import.meta.url), "utf8");
+const historyLines = historyWorkflow.split(/\r?\n/u);
+const historyStart = historyLines.indexOf("  pull_request:");
+assert.notEqual(historyStart, -1, "Historical governance must retain its PR trigger");
+const historyEnd = historyLines.findIndex((line, index) => index > historyStart && /^  \S/u.test(line));
+const historyPaths = historyLines.slice(historyStart + 1, historyEnd < 0 ? undefined : historyEnd)
+  .filter((line) => /^      - /u.test(line))
+  .map((line) => {
+    assert.match(line, /^      - "[^"\r\n]+"$/u);
+    return JSON.parse(line.slice(8));
+  });
+assert(historyPaths.length > 0 && historyPaths.every((filter) => !filter.startsWith("!")));
+const historyTriggersFor = (changedPath) => historyPaths.some((filter) => path.posix.matchesGlob(changedPath, filter));
+
+test("each checkout, runtime or dependency input independently triggers complete historical governance", () => {
+  for (const changedPath of [".gitattributes", ".node-version", ".npmrc", "package.json", "package-lock.json"]) {
+    assert(historyTriggersFor(changedPath), changedPath);
+  }
+});
+
+test("historical scripts, original fixtures and receipt consumers still trigger the history group", () => {
+  for (const changedPath of [
+    ".github/workflows/history-governance.yml", "scripts/fixtures/four-system-v214-additional-inputs.zip",
+    "scripts/cross-system-engineering-fact-receipt-lib.mjs", "scripts/four-system-v214-history.test-fixture.mjs",
+    "content/domain-release/ziwei-doushu.engineering-draft.v0.1.0.manifest.v2.json"
+  ]) assert(historyTriggersFor(changedPath), changedPath);
+});
+
+test("unrelated page wording and research notes do not independently trigger historical governance", () => {
+  for (const changedPath of ["apps/web/src/pages/case-library-page.tsx", "README.md", "docs/research/notes.md"]) {
+    assert.equal(historyTriggersFor(changedPath), false, changedPath);
+  }
+});
+
 test("SW takeover retry implementation or test independently triggers Migration CI", () => {
   for (const changedPath of [
     "apps/web/src/lib/service-worker-takeover-retry.ts",
@@ -40,6 +126,7 @@ test("SW safety responsibility is covered without enumerating every new module",
 
 test("existing migration responsibilities and their path-contract test remain triggers", () => {
   for (const changedPath of [
+    ".gitattributes",
     "apps/web/src/bootstrap.ts",
     "apps/web/src/lib/release-controller-takeover-write-fence.test.ts",
     "apps/web/public/sw.js",
@@ -48,6 +135,105 @@ test("existing migration responsibilities and their path-contract test remain tr
     "scripts/verify-migration-ci-paths.test.mjs",
     ".github/workflows/migration-ci.yml"
   ]) assert(triggersFor(changedPath), changedPath);
+});
+
+test("Git Windows checkout preserves raw SW and governance identities plus retained mixed-newline files", async (t) => {
+  const repositoryRoot = fileURLToPath(new URL("../", import.meta.url));
+  const parent = await realpath(os.tmpdir());
+  const temporaryRoot = await mkdtemp(path.join(parent, "hakimi-checkout-bytes-"));
+  const owned = await lstat(temporaryRoot, { bigint: true });
+  t.after(async () => {
+    assert.equal(path.dirname(temporaryRoot), parent);
+    assert.match(path.basename(temporaryRoot), /^hakimi-checkout-bytes-[a-z0-9]{6}$/iu);
+    assert.equal(await realpath(temporaryRoot), temporaryRoot);
+    const current = await lstat(temporaryRoot, { bigint: true });
+    assert(current.isDirectory() && !current.isSymbolicLink());
+    assert.equal(current.dev, owned.dev);
+    assert.equal(current.ino, owned.ino);
+    await rm(temporaryRoot, { recursive: true, force: true });
+  });
+  const inputRoot = path.join(temporaryRoot, "input");
+  await mkdir(inputRoot);
+  const emptyConfig = path.join(temporaryRoot, "empty-config");
+  await writeFile(emptyConfig, "", { flag: "wx" });
+  const environment = {};
+  for (const name of ["PATH", "Path", "SystemRoot", "SYSTEMROOT", "ComSpec", "COMSPEC", "TEMP", "TMP", "HOME", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "LANG", "LC_ALL"]) {
+    if (process.env[name] !== undefined) environment[name] = process.env[name];
+  }
+  environment.GIT_CONFIG_NOSYSTEM = "1";
+  environment.GIT_CONFIG_GLOBAL = emptyConfig;
+  function git(autoCrlf, ...args) {
+    const result = spawnSync("git", ["-c", `core.autocrlf=${autoCrlf}`, "-c", "core.safecrlf=false",
+      "-c", `core.attributesFile=${emptyConfig}`, ...args], {
+      cwd: inputRoot, env: environment, encoding: "utf8", windowsHide: true, timeout: 30_000
+    });
+    assert.equal(result.status, 0, `${args[0]}: ${result.stderr}`);
+  }
+  const modulePath = "apps/web/sw-two-generation-fixture-source-identity.ts";
+  const retained = ["README.md", "apps/web/e2e/service-worker-same-schema-aba.spec.ts"];
+  const rawGovernanceInputs = [
+    "apps/web/bundled-knowledge-audit.ts",
+    "packages/bazi-interpretation/src/current-chart-review-snapshot.ts",
+    "packages/bazi-interpretation/src/index.ts",
+    "packages/bazi-interpretation/src/strength-evidence-narrative.ts",
+    "packages/research-export/src/golden/single-chart-report.contract.v1.7.json",
+    "packages/rule-profiles/src/index.ts",
+    "content/bazi-strength-expert-review-packet.current.json",
+    "docs/status/current-index-summary.md",
+    "content/system-admission/history-checkpoint.v2.json",
+    "content/system-admission/current-index.v1.json",
+    "content/domain-release/ziwei-doushu.engineering-draft.v0.1.0.manifest.v2.json",
+    "scripts/formal-npm-lifecycle-closure-lib.mjs",
+    "docs/release/sw-ab-update-candidate-policy.v1.json",
+    "docs/release/sw-ab-update-candidate-runtime-client-capture-composition-policy.v1.json",
+    "docs/release/sw-ab-update-candidate-runtime-client-capture-composition-v1.schema.json",
+    "docs/release/sw-ab-update-candidate-v1.schema.json",
+    "docs/release/sw-ab-update-runtime-api-transcript-candidate-policy.v1.json",
+    "docs/release/sw-ab-update-runtime-api-transcript-candidate-v1.schema.json",
+    "docs/release/sw-ab-update-runtime-client-capture-policy.v1.json",
+    "docs/release/sw-ab-update-runtime-client-capture-v1.schema.json",
+    "docs/release/sw-ab-update-runtime-collector-issuance-candidate-policy.v1.json",
+    "docs/release/sw-ab-update-runtime-collector-issuance-candidate-v1.schema.json",
+    ".github/workflows/quick-ci.yml",
+    "docs/release/storage-v13-matrix-browser-receipt-candidate-v1.schema.json",
+    "docs/release/storage-v13-matrix-candidate-policy.v1.json",
+    "docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition-policy.v1.json",
+    "docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition-v1.schema.json",
+    "docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition-policy.v2.json",
+    "docs/release/sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition-v2.schema.json",
+    "docs/release/sw-ab-update-runtime-derived-evidence-producer-bridge-policy.v1.json",
+    "docs/release/sw-ab-update-runtime-derived-evidence-producer-bridge-v1.schema.json"
+  ];
+  const paths = [".gitattributes", ...SW_TWO_GENERATION_FIXTURE_EXPECTED_CRITICAL_SOURCES.map((entry) => entry.path), modulePath, ...rawGovernanceInputs, ...retained];
+  const originalBytes = new Map();
+  for (const relativePath of paths) {
+    const bytes = await readFile(path.join(repositoryRoot, relativePath));
+    originalBytes.set(relativePath, bytes);
+    const target = path.join(inputRoot, relativePath);
+    await mkdir(path.dirname(target), { recursive: true });
+    await writeFile(target, bytes, { flag: "wx" });
+  }
+  git("false", "init", "--quiet");
+  git("false", "add", "--", ...paths);
+  async function checkout(label) {
+    const outputRoot = path.join(temporaryRoot, label);
+    await mkdir(outputRoot);
+    git("true", "checkout-index", "--all", `--prefix=${outputRoot.split(path.sep).join("/")}/`);
+    return outputRoot;
+  }
+  const protectedRoot = await checkout("protected");
+  const protectedIdentity = loadSwTwoGenerationFixtureCriticalSourceIdentity(protectedRoot);
+  assertSwTwoGenerationFixtureCriticalSourceIdentity(protectedIdentity);
+  for (const relativePath of [modulePath, ...rawGovernanceInputs, ...retained]) {
+    assert.deepEqual(await readFile(path.join(protectedRoot, relativePath)), originalBytes.get(relativePath), relativePath);
+  }
+  // The same actual Git checkout without attributes must reproduce raw drift.
+  await writeFile(path.join(inputRoot, ".gitattributes"), "# intentionally absent policy for the negative control\n");
+  git("false", "add", "--", ".gitattributes");
+  const unprotected = loadSwTwoGenerationFixtureCriticalSourceIdentity(await checkout("unprotected"));
+  assert.throws(() => assertSwTwoGenerationFixtureCriticalSourceIdentity(unprotected), /critical source identity drifted/u);
+  assert(unprotected.files.some((file, index) => file.rawSha256 !== protectedIdentity.files[index].rawSha256));
+  assert.deepEqual(unprotected.files.map((file) => file.normalizedSha256), protectedIdentity.files.map((file) => file.normalizedSha256));
 });
 
 test("application boot responsibility and build identity tests independently trigger Migration CI", () => {
@@ -146,7 +332,8 @@ test("the local data diagnostic selects all eighteen branded targets without npm
 });
 
 test("nightly local data diagnostics preserve the existing heavy suite and require locked single-attempt JSON evidence", async () => {
-  const nightly = await readFile(new URL("../.github/workflows/nightly-heavy.yml", import.meta.url), "utf8");
+  const nightly = (await readFile(new URL("../.github/workflows/nightly-heavy.yml", import.meta.url), "utf8"))
+    .replace(/\r\n?/gu, "\n");
   const marker = "  local-data-boundaries-diagnostic:\n";
   assert.equal(nightly.split(marker).length, 2);
   const [existing, diagnostic] = nightly.split(marker);
@@ -203,11 +390,11 @@ test("the diagnostic does not replace or reduce formal backup and boot matrices"
   assert.equal(scripts["test:release:boot-artifact"], "playwright test --config apps/web/playwright.release-boot-artifact.config.ts");
   const selectedSpecs = (source) => JSON.parse(`[${source.match(/testMatch:\s*\[([^\]]+)\]/u)?.[1]}]`);
   assert.deepEqual(selectedSpecs(backup), ["database-v9-v10-upgrade.spec.ts", "database-v10-v11-upgrade.spec.ts", "offline-full-backup.spec.ts", "full-backup-worker-capacity.spec.ts"]);
-  assert.deepEqual(selectedSpecs(boot), ["boot-fail-closed.spec.ts", "database-v8-v9-upgrade.spec.ts"]);
+  assert.deepEqual(selectedSpecs(boot), ["boot-fail-closed.spec.ts", "database-v8-v9-upgrade.spec.ts", "first-controller-interaction.spec.ts"]);
   assert.match(backup, /receiptId: "backup", expectedTestsPerProject: 4/u);
-  assert.match(boot, /receiptId: "boot", expectedTestsPerProject: 6/u);
+  assert.match(boot, /receiptId: "boot", expectedTestsPerProject: 8/u);
   assert.match(result, /backup: 4,/u);
-  assert.match(result, /boot: 6,/u);
+  assert.match(result, /boot: 8,/u);
   for (const source of [backup, boot, result]) assert.doesNotMatch(source, /local-data-boundaries|local-data-recovery|local-data-readonly/u);
 });
 

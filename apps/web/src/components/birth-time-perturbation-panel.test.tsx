@@ -205,7 +205,7 @@ describe("BirthTimePerturbationPanel", () => {
     const result = await screen.findByRole("region", { name: "七点扰动报告" });
     expect(buildReport).toHaveBeenCalledTimes(1);
     expect(buildReport).toHaveBeenCalledWith(stableRevision);
-    expect(document.activeElement).toBe(result);
+    await waitFor(() => expect(document.activeElement).toBe(result));
     expect(screen.getAllByText("七个列出样本的四柱投影未变化")).toHaveLength(2);
     expect(Array.from(container.querySelectorAll<HTMLElement>("[data-offset-minutes]"))
       .map((element) => Number(element.dataset.offsetMinutes)))

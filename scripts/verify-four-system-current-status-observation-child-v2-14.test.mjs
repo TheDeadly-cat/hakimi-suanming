@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import test from "node:test";
+import { after, before, test } from "node:test";
+import { createRequire } from "node:module";
 
 import {
   FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_14_RELATIVE_PATH,
@@ -19,15 +20,29 @@ import {
   loadFourSystemCurrentStatusObservationChildV213
 } from "./four-system-current-status-observation-child-v2-13-lib.mjs";
 
-const ROOT = path.resolve(import.meta.dirname, "..");
-const CLI = path.join(
-  ROOT,
-  "scripts",
-  "verify-four-system-current-status-observation-child-v2-14.mjs"
-);
-const loadedPromise = loadFourSystemCurrentStatusObservationChildV214(ROOT);
-const builtPromise = buildCurrentFourSystemCurrentStatusObservationChildV214(ROOT);
-const parentPromise = loadFourSystemCurrentStatusObservationChildV213(ROOT);
+import {
+  FOUR_SYSTEM_V214_ADDITIONAL_ARCHIVE_URL,
+  createFourSystemV214HistoricalInputs,
+  parseFourSystemV214AdditionalArchive
+} from "./four-system-v214-history.test-fixture.mjs";
+import { attachCurrentFourSystemCli } from "./four-system-v22-history.test-fixture.mjs";
+
+const actualWorkspaceRoot = path.resolve(import.meta.dirname, "..");
+let historicalInputs, ROOT, CLI, loadedPromise, builtPromise, parentPromise;
+before(async () => {
+  historicalInputs = await createFourSystemV214HistoricalInputs();
+  ROOT = historicalInputs.root;
+  const relativePath = FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_14_RELATIVE_PATH;
+  assert.deepEqual(await readFile(path.join(ROOT, relativePath)),
+    await readFile(path.join(actualWorkspaceRoot, relativePath)));
+  CLI = await attachCurrentFourSystemCli(historicalInputs, 14);
+  // Attach all rejection handlers in this hook before yielding to any test.
+  loadedPromise = loadFourSystemCurrentStatusObservationChildV214(ROOT);
+  builtPromise = buildCurrentFourSystemCurrentStatusObservationChildV214(ROOT);
+  parentPromise = loadFourSystemCurrentStatusObservationChildV213(ROOT);
+  await Promise.all([loadedPromise, builtPromise, parentPromise]);
+});
+after(async () => { await historicalInputs?.cleanup(); });
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -239,4 +254,40 @@ test("CLI succeeds normally and rejects arguments or visible preload state", () 
   });
   assert.notEqual(preload.status, 0);
   assert.match(preload.stderr, /PRELOAD_ENVIRONMENT_FORBIDDEN/u);
+});
+
+test("current v2.14 loader and source CLI cannot inherit historical input success", async () => {
+  await assert.rejects(loadFourSystemCurrentStatusObservationChildV214(actualWorkspaceRoot),
+    { code: "PARENT_REVERIFICATION_FAILED" });
+  const env = { ...process.env }; delete env.NODE_OPTIONS; delete env.NODE_PATH;
+  const run = spawnSync(process.execPath,
+    [path.join(actualWorkspaceRoot, "scripts/verify-four-system-current-status-observation-child-v2-14.mjs")],
+    { cwd: ROOT, encoding: "utf8", env, windowsHide: true, timeout: 120_000 });
+  assert.equal(run.status, 1);
+  assert.equal(run.stdout, "");
+  assert.equal(run.stderr, "FOUR_SYSTEM_CURRENT_STATUS_V2_14_FAILED PARENT_REVERIFICATION_FAILED\n");
+});
+
+test("v2.14 supplemental archive rejects tampering, truncation and a valid empty ZIP", async () => {
+  const original = await readFile(FOUR_SYSTEM_V214_ADDITIONAL_ARCHIVE_URL);
+  assert.equal(parseFourSystemV214AdditionalArchive(original).manifest.files.length, 7);
+  const changed = Buffer.from(original); changed[Math.floor(changed.length / 2)] ^= 1;
+  const { zipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+  for (const bytes of [changed, original.subarray(0, -1), zipSync({})]) {
+    assert.throws(() => parseFourSystemV214AdditionalArchive(bytes), /v2\.14 additional archive identity changed/u);
+  }
+});
+
+test("v2.14 refuses altered or missing Western recursive authored-root input bytes", async () => {
+  const inputs = await createFourSystemV214HistoricalInputs();
+  try {
+    const target = path.join(inputs.root, "packages/western-civil-time-input-adapter-draft/src/index.test.ts");
+    const changed = Buffer.from(await readFile(target)); changed[changed.length - 1] ^= 1;
+    await writeFile(target, changed);
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV214(inputs.root), (error) =>
+      error.code === "WESTERN_V5_REVERIFICATION_FAILED" && error.cause?.code === "CURRENT_MANIFEST_MISMATCH");
+    await rm(target);
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV214(inputs.root), (error) =>
+      error.code === "WESTERN_V5_REVERIFICATION_FAILED" && error.cause?.code === "ROOT_FILE_SET_DRIFT");
+  } finally { await inputs.cleanup(); }
 });

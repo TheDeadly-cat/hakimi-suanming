@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import childProcess, { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import { syncBuiltinESMExports } from "node:module";
 import { link, lstat, mkdtemp, mkdir, readFile, readdir, realpath, rm, symlink, unlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -56,6 +58,7 @@ import {
   computeEvidenceId,
   computeSourceTreeDigest,
   defaultV13ReleaseDescriptorMatches,
+  detectBrowserVersions,
   npmVersion,
   isReleaseLifecycleReceiptId,
   verifyReleaseLifecyclePhaseReportBinding,
@@ -72,6 +75,7 @@ import {
 import { compileReleaseEvidenceSchema } from "./release-evidence-schema.mjs";
 import { verifyReleaseEvidenceFiles } from "./verify-release-evidence.mjs";
 import { verifyRollbackReleaseArtifactFiles } from "./rollback-evidence-lib.mjs";
+import { syntheticReplayBrowserSpawn } from "./release-file-replay-browser.test-fixture.mjs";
 import {
   computeDefaultLifecyclePlanDigest,
   DEFAULT_LIFECYCLE_STAGE_COMMANDS,
@@ -162,6 +166,69 @@ test("npm toolchain version is collected without invoking a Windows command shim
   assert.match(npmVersion(process.cwd()), /^\d+\.\d+\.\d+/u);
 });
 
+test("browser discovery distinguishes absent executables from failed installed probes", (context) => {
+  let result = { status: null, signal: null, error: { code: "ENOENT" }, stdout: "", stderr: "" };
+  context.mock.method(fs, "existsSync", () => false);
+  context.mock.method(childProcess, "spawnSync", () => result);
+  syncBuiltinESMExports();
+  try {
+    assert.deepEqual(detectBrowserVersions(), { edge: "not-detected", chrome: "not-detected" });
+    for (const failure of [
+      { status: null, signal: "SIGTERM", error: { code: "ETIMEDOUT" } },
+      { status: null, signal: null, error: { code: "EACCES" } },
+      { status: 1, signal: null },
+      { status: null, signal: "SIGKILL" },
+      { status: 0, signal: null },
+      { status: 0, signal: null, stderr: "Microsoft Edge 999.0.0.0" }
+    ]) {
+      result = { stdout: "", stderr: "", ...failure };
+      assert.throws(() => detectBrowserVersions(), (error) => {
+        assert.equal(error.code, "RELEASE_BROWSER_VERSION_PROBE_FAILED");
+        assert.equal(error.details.browser, "edge");
+        assert.equal(error.details.exitCode, failure.status);
+        assert.equal(error.details.signal, failure.signal);
+        assert.equal(error.details.errorCode, failure.error?.code ?? null);
+        assert.ok(Number.isFinite(error.details.elapsedMs));
+        return true;
+      });
+    }
+  } finally {
+    context.mock.restoreAll();
+    syncBuiltinESMExports();
+  }
+});
+
+test("browser discovery reads stdout afresh and does not replace a failed preferred binary with an alias", (context) => {
+  let version = "152.0.0.1";
+  let failPreferred = false;
+  const candidates = [];
+  context.mock.method(fs, "existsSync", () => false);
+  context.mock.method(childProcess, "spawnSync", (executable) => {
+    candidates.push(executable);
+    if (failPreferred) return { status: 1, signal: null, stdout: "", stderr: "synthetic probe failure" };
+    return { status: 0, signal: null,
+      stdout: `${executable.includes("edge") ? "Microsoft Edge" : "Google Chrome"} ${version}\n`,
+      stderr: "synthetic diagnostic, not version metadata" };
+  });
+  syncBuiltinESMExports();
+  try {
+    assert.deepEqual(detectBrowserVersions(), {
+      edge: "Microsoft Edge 152.0.0.1", chrome: "Google Chrome 152.0.0.1"
+    });
+    version = "153.0.0.2";
+    assert.deepEqual(detectBrowserVersions(), {
+      edge: "Microsoft Edge 153.0.0.2", chrome: "Google Chrome 153.0.0.2"
+    });
+    candidates.length = 0;
+    failPreferred = true;
+    assert.throws(() => detectBrowserVersions(), { code: "RELEASE_BROWSER_VERSION_PROBE_FAILED" });
+    assert.equal(candidates.length, 1);
+  } finally {
+    context.mock.restoreAll();
+    syncBuiltinESMExports();
+  }
+});
+
 test("release evidence policy and Playwright configs share the exact Chrome and Edge matrix", () => {
   const expectedProjects = REQUIRED_RELEASE_BROWSER_MATRIX.map((browser) => ({
     policyId: browser.policyId,
@@ -198,10 +265,10 @@ test("release evidence policy and Playwright configs share the exact Chrome and 
   });
   verifyReleaseBrowserPlaywrightConfig(bootArtifactConfig, {
     receiptId: "boot",
-    testMatch: ["boot-fail-closed.spec.ts", "database-v8-v9-upgrade.spec.ts"],
+    testMatch: ["boot-fail-closed.spec.ts", "database-v8-v9-upgrade.spec.ts", "first-controller-interaction.spec.ts"],
     outputDirectoryName: "hakimi-bazi-boot-cross-browser-results",
     timeout: 120_000,
-    expectedTestsPerProject: 6
+    expectedTestsPerProject: 8
   });
   verifyReleaseBrowserPlaywrightConfig(pwaCrossBrowserConfig, {
     receiptId: "pwa",
@@ -329,7 +396,8 @@ test("PWA release spec can launch persistent browsers only through the policy he
   );
   assert.doesNotMatch(pwaSpecSource, /\bchromium\b/u);
   assert.match(pwaSpecSource, /projectName:\s*testInfo\.project\.name/u);
-  assert.match(pwaSpecSource, /userDataDir:\s*testInfo\.outputPath/u);
+  // Directory ownership, uniqueness and refusal paths are exercised by the
+  // registered release-persistent-profile behavior tests, independent of syntax.
   assert.doesNotMatch(pwaSpecSource, /\.\s*launchPersistentContext\s*\(/u);
   assert.doesNotMatch(pwaSpecSource, /\blaunchPersistentContext\s*\(/u);
   assert.match(pwaSpecSource, /devtools\.send\("Browser\.getVersion"\)/u);
@@ -489,14 +557,14 @@ async function observeCrossCompletionReporter(observations, options = {}) {
 }
 
 test("cross completion keeps the original four artifact-bound receipt ids unchanged", async () => {
-  const originalCounts = { backup: 4, boot: 6, pwa: 1, "web-v1-flow": 1 };
-  assert.deepEqual(REQUIRED_RELEASE_BROWSER_TESTS_PER_PROJECT, originalCounts);
-  assert.deepEqual(REQUIRED_RELEASE_BROWSER_RECEIPT_IDS, Object.keys(originalCounts));
+  const defaultCounts = { backup: 4, boot: 8, pwa: 1, "web-v1-flow": 1 };
+  assert.deepEqual(REQUIRED_RELEASE_BROWSER_TESTS_PER_PROJECT, defaultCounts);
+  assert.deepEqual(REQUIRED_RELEASE_BROWSER_RECEIPT_IDS, Object.keys(defaultCounts));
   assert.deepEqual(REQUIRED_RELEASE_BROWSER_COMPLETION_TESTS_PER_PROJECT, {
-    ...originalCounts,
+    ...defaultCounts,
     [CROSS_SCHEMA_V13_V16_RECEIPT_ID]: 13
   });
-  for (const id of Object.keys(originalCounts)) {
+  for (const id of Object.keys(defaultCounts)) {
     assert.equal(isReleaseBrowserReceiptId(id), true);
     assert.equal(isReleaseBrowserCompletionReceiptId(id), true);
   }
@@ -510,6 +578,22 @@ test("cross completion keeps the original four artifact-bound receipt ids unchan
   const declaredTitles = [...spec.matchAll(/^test\("([^"\n]+)",/gmu)].map((match) => match[1]);
   assert.equal(declaredTitles.length, 13);
   assert.deepEqual(CROSS_SCHEMA_V13_V16_TEST_TITLES, declaredTitles);
+});
+
+test("boot completion requires eight cases per browser and cannot reuse a six-case receipt", () => {
+  for (const count of [6, 8]) {
+    const summary = buildReleaseBrowserResultSummary({
+      receiptId: "boot",
+      fullResultStatus: "passed",
+      expectedTestsPerProject: count,
+      observations: ["msedge", "chrome"].flatMap((projectName) => Array.from({ length: count }, () => ({
+        projectName, expectedStatus: "passed", outcome: "expected", resultStatuses: ["passed"]
+      })))
+    });
+    assert.equal(summary.strictGatePassed, count === 8);
+    if (count === 6) assert.throws(() => assertStrictReleaseBrowserResultSummary(summary, "boot"));
+    else assert.doesNotThrow(() => assertStrictReleaseBrowserResultSummary(summary, "boot"));
+  }
 });
 
 test("cross completion accepts all 26 exact original observations through the strict reporter", async () => {
@@ -2230,19 +2314,38 @@ test("lifecycle receipts reject unmodeled current package hooks even with recomp
 const replayInputPath = "dist/web/release-evidence.json";
 const replayReceiptsPath = "tmp/release-evidence-receipts";
 const replayLockPath = "tmp/release-artifact-identity.json";
+const replayBrowserFixtureUrl = new URL("./release-file-replay-browser.test-fixture.mjs", import.meta.url).href;
 
-function replayChildEnvironment() {
+function replayChildEnvironment(environment = process.env) {
   const names = [
     "SystemRoot", "WINDIR", "ComSpec", "PATH", "PATHEXT", "TEMP", "TMP",
+    "HOME", "TMPDIR", "XDG_CONFIG_HOME", "XDG_DATA_HOME", "XDG_CACHE_HOME",
     "USERPROFILE", "APPDATA", "LOCALAPPDATA", "PROGRAMFILES", "PROGRAMFILES(X86)", "PROGRAMW6432"
   ];
-  return Object.fromEntries(Object.entries(process.env).filter(([key]) =>
+  return Object.fromEntries(Object.entries(environment).filter(([key]) =>
     names.some((name) => name.toLowerCase() === key.toLowerCase())
   ));
 }
 
+test("replay child preserves platform directory context while excluding preload and credentials", () => {
+  const platformDirectories = {
+    PATH: "/usr/bin", HOME: "/synthetic/home", TMPDIR: "/synthetic/tmp",
+    XDG_CONFIG_HOME: "/synthetic/config", XDG_DATA_HOME: "/synthetic/data",
+    XDG_CACHE_HOME: "/synthetic/cache", LOCALAPPDATA: "C:\\synthetic\\local"
+  };
+  assert.deepEqual(replayChildEnvironment({
+    ...platformDirectories, NODE_OPTIONS: "--require unwanted-loader.cjs",
+    NPM_TOKEN: "synthetic-secret", GITHUB_TOKEN: "synthetic-secret",
+    HAKIMI_RELEASE_EVIDENCE_ID: "inherited-evidence-is-not-a-fixture-binding"
+  }), platformDirectories);
+});
+
 function replayCommand(cwd, executable, args) {
-  return spawnSync(executable, args, {
+  const entryPoints = ["generate-release-evidence.mjs", "verify-release-evidence.mjs"]
+    .map((file) => path.join(workspaceRoot, "scripts", file));
+  const childArgs = executable === process.execPath && entryPoints.includes(args[0])
+    ? ["--import", replayBrowserFixtureUrl, ...args] : args;
+  return spawnSync(executable, childArgs, {
     cwd, env: replayChildEnvironment(), encoding: "utf8", windowsHide: true,
     timeout: 60_000, maxBuffer: 4 * 1024 * 1024
   });
@@ -2254,6 +2357,22 @@ function requireReplayCommand(result) {
   assert.equal(result.status, 0, result.stderr);
   return result;
 }
+
+test("synthetic replay browser fixture cannot activate for arbitrary code or an ordinary source root", () => {
+  for (const args of [
+    ["--eval", "process.exitCode = 0"],
+    [path.join(workspaceRoot, "scripts/generate-release-evidence.mjs"),
+      "--release-label", "SYNTHETIC-file-consumer-contract"]
+  ]) {
+    const result = replayCommand(workspaceRoot, process.execPath,
+      ["--import", replayBrowserFixtureUrl, ...args]);
+    assert.equal(result.error, undefined);
+    assert.equal(result.signal, null);
+    assert.equal(result.status, 1);
+    assert.equal(result.stdout, "");
+    assert.match(result.stderr, /Synthetic replay browser fixture requires/u);
+  }
+});
 
 async function ownedReplayDirectory(context) {
   const tempRoot = path.resolve(os.tmpdir());
@@ -2305,6 +2424,12 @@ async function writeReplayEvidence(root, evidence) {
 }
 
 async function releaseFileReplayFixture(context, { dirty = false } = {}) {
+  context.mock.method(childProcess, "spawnSync", syntheticReplayBrowserSpawn(childProcess.spawnSync));
+  syncBuiltinESMExports();
+  context.after(() => {
+    context.mock.restoreAll();
+    syncBuiltinESMExports();
+  });
   const ownedRoot = await ownedReplayDirectory(context);
   const sourceRoot = path.join(ownedRoot, "source");
   const archiveRoots = [path.join(ownedRoot, "archive-a"), path.join(ownedRoot, "archive-b")];
@@ -2392,6 +2517,13 @@ async function releaseFileReplayFixture(context, { dirty = false } = {}) {
     ...(dirty ? ["--allow-dirty"] : [])
   ]));
   assert.equal(JSON.parse(generated.stdout).evidenceId, evidenceId);
+  const browserProbes = JSON.parse(await readFile(
+    path.join(sourceRoot, "tmp/synthetic-browser-probes.json"), "utf8"));
+  assert.deepEqual(browserProbes.map((probe) => probe.browser), ["edge", "chrome"]);
+  const evidence = JSON.parse(await readFile(path.join(sourceRoot, replayInputPath), "utf8"));
+  assert.deepEqual(evidence.toolchain.browsers, {
+    edge: "Microsoft Edge SYNTHETIC-file-replay", chrome: "Google Chrome SYNTHETIC-file-replay"
+  });
   const boundPaths = [
     "dist/web/index.html", "dist/web/manifest.webmanifest", "dist/web/sw.js", "dist/web/_headers",
     replayLockPath, ...receiptPaths, ...phasePaths, ...summaryPaths,
@@ -2408,7 +2540,7 @@ async function releaseFileReplayFixture(context, { dirty = false } = {}) {
   }
   return {
     sourceRoot, archiveRoots, boundPaths, receiptPaths, phasePaths, summaryPaths, rawReceipts,
-    evidence: JSON.parse(await readFile(path.join(sourceRoot, replayInputPath), "utf8")),
+    evidence,
     replay: (boundFilesRoot = archiveRoots[0], allowances = {}) => verifyReleaseEvidenceFiles({
       sourceRoot, boundFilesRoot, inputRelativePath: replayInputPath,
       receiptsRelativePath: replayReceiptsPath, allowDirty: false, allowUnbound: false, ...allowances
@@ -2445,6 +2577,14 @@ test("release file replay verifies 13 raw receipts, 3 phase reports, 5 browser s
         await readFile(path.join(fixture.sourceRoot, relativePath)), relativePath);
     }
   }
+});
+
+test("synthetic browser isolation preserves the production toolchain mismatch rejection", async (context) => {
+  const fixture = await releaseFileReplayFixture(context);
+  const evidence = structuredClone(fixture.evidence);
+  evidence.toolchain.browsers.edge = "Microsoft Edge SYNTHETIC-different-version";
+  await writeReplayEvidence(fixture.archiveRoots[0], evidence);
+  await assert.rejects(fixture.replay(), /Release toolchain mismatch/u);
 });
 
 test("release file replay rejects every missing archive raw receipt despite an intact source-root copy", async (context) => {

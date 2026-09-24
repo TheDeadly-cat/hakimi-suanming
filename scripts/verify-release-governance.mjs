@@ -189,6 +189,7 @@ export const REQUIRED_MIGRATION_WORKFLOW_COMMANDS = Object.freeze([
 ]);
 
 export const REQUIRED_MIGRATION_WORKFLOW_PATHS = Object.freeze([
+  ".gitattributes",
   ".node-version",
   ".npmrc",
   "package.json",
@@ -228,6 +229,7 @@ export const REQUIRED_MIGRATION_WORKFLOW_PATHS = Object.freeze([
   "apps/web/sw-two-generation-fixture-source-identity.ts",
   "apps/web/e2e/**",
   "apps/web/playwright.release-browser-*.ts",
+  "apps/web/playwright.migration-diagnostics.ts",
   "apps/web/playwright*.config.ts",
   "apps/web/vite*.ts",
   "packages/backup/**",
@@ -258,10 +260,12 @@ export const REQUIRED_QUICK_CI_JOBS = Object.freeze([
   "history-checkpoint-governance",
   "current-index-governance",
   "bazi-current-semantics",
+  "bazi-expert-admission",
   "full-typecheck",
   "full-vitest",
   "default-v13-web-build",
   "artifact-manifest-verification",
+  "engineering-gate-aggregate",
   "release-gate-aggregate"
 ]);
 
@@ -273,6 +277,7 @@ export const REQUIRED_QUICK_CI_INDEPENDENT_JOBS = Object.freeze([
   "history-checkpoint-governance",
   "current-index-governance",
   "bazi-current-semantics",
+  "bazi-expert-admission",
   "full-typecheck",
   "full-vitest",
   "default-v13-web-build"
@@ -284,8 +289,11 @@ export const REQUIRED_QUICK_CI_COMMANDS = Object.freeze({
   "node-package-artifacts": Object.freeze(["npm run test:node-package-artifacts"]),
   "bazi-current-semantics": Object.freeze([
     "npm run check:bazi-domain-release-manifest",
-    "npm run check:bazi-expert-review-packet"
+    "npm run check:bazi-expert-packet-structure",
+    "npm run report:bazi-expert-review-progress",
+    "npm run test:bazi-expert-command-roles"
   ]),
+  "bazi-expert-admission": Object.freeze(["npm run check:bazi-expert-admission"]),
   "toolchain-and-boundaries": Object.freeze([
     "npm run check:ziwei-iztro-isolated-build-license-notices",
     "npm run test:ziwei-iztro-isolated-build-license-notices",
@@ -314,9 +322,9 @@ export const REQUIRED_QUICK_CI_COMMANDS = Object.freeze({
   "default-v13-web-build": Object.freeze(["npm run diagnose:build"]),
   "artifact-manifest-verification": Object.freeze(["npm run verify:built-release-storage-manifest"])
 });
-const REQUIRED_QUICK_CI_WORKFLOW_BYTES = 13245;
+const REQUIRED_QUICK_CI_WORKFLOW_BYTES = 17305;
 const REQUIRED_QUICK_CI_WORKFLOW_SHA256 =
-  "a3623c93a6ba36477303d09981dd06addbf35010b4234ea94500c8f8a1e2c437";
+  "aace45b7fa6e28c35035ef49f097bf1dbaca64b8ff7500e9438d628093162a33";
 
 export const REQUIRED_RELEASE_BROWSER_MATRIX = Object.freeze([
   Object.freeze({
@@ -439,9 +447,9 @@ export const REQUIRED_SW_TWO_GENERATION_FIXTURE_SCRIPTS = Object.freeze({
   "test:sw-two-generation-fixture-contract": "node --test scripts/sw-two-generation-fixture-contract.test.mjs"
 });
 export const REQUIRED_SW_TWO_GENERATION_CRITICAL_SOURCE_IDENTITY_MODULE_SHA256 =
-  "79407697519884d04aa37016961744b12029161bf4da6f2b82663cd339ac6766";
+  "b33a8170885a69f36b520ab6008b8c0de4c1a34cbc1b94748807364218b5b76f";
 export const REQUIRED_SW_TWO_GENERATION_CRITICAL_SOURCE_SET_SHA256 =
-  "6781fb7d831a3c0185cfc58ccf4cc787b22b0c3ee04ca356ce3286abd73586ef";
+  "a34ddb48e7112f489a227260f0d7e1dd000b2711c6d27450f8426ebd40ef3282";
 
 export const REQUIRED_STORAGE_V13_MATRIX_CANDIDATE_SCRIPTS = Object.freeze({
   "test:storage-v13-matrix-candidate":
@@ -1025,6 +1033,7 @@ export const REQUIRED_RELEASE_FILES = Object.freeze([
   "apps/web/e2e/cross-schema-upgrade-helpers.ts",
   "apps/web/e2e/boot-fail-closed.spec.ts",
   "apps/web/e2e/database-v8-v9-upgrade.spec.ts",
+  "apps/web/e2e/first-controller-interaction.spec.ts",
   "apps/web/e2e/database-v9-v10-upgrade.spec.ts",
   "apps/web/e2e/database-v10-v11-upgrade.spec.ts",
   "apps/web/e2e/offline-full-backup.spec.ts",
@@ -1601,6 +1610,46 @@ export function verifyMigrationWorkflowGovernance(migrationWorkflow) {
       throw new Error(`Migration CI pull_request.paths is missing ${requiredPath}.`);
     }
   }
+
+  const scenarios = workflowJobBlock(migrationWorkflow, "migration-scenarios").join("\n");
+  const aggregate = workflowJobBlock(migrationWorkflow, "migration-aggregate").join("\n");
+  const suites = REQUIRED_MIGRATION_WORKFLOW_COMMANDS.slice(1).map((command) =>
+    command.replace("npm run test:e2e:", "")
+  );
+  const selected = [...scenarios.matchAll(/^          - ([a-z0-9-]+)$/gmu)].map((match) => match[1]);
+  if (JSON.stringify(selected) !== JSON.stringify(suites)
+    || !scenarios.includes("      fail-fast: false")
+    || !scenarios.includes("      max-parallel: 2")
+    || scenarios.split("    steps:")[0].includes("${{ runner.")
+    || /continue-on-error|^    needs:/mu.test(scenarios)) {
+    throw new Error("Migration CI must independently execute all five bounded, fail-fast-disabled suites.");
+  }
+  for (const suite of suites) {
+    if (!scenarios.includes(`      - if: \${{ matrix.suite == '${suite}' }}\n        run: npm run test:e2e:${suite}`)) {
+      throw new Error(`Migration CI must execute the canonical command for ${suite}.`);
+    }
+  }
+  for (const fragment of [
+    "HAKIMI_MIGRATION_EVIDENCE_DIR: ${{ runner.temp }}/hakimi-migration-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.suite }}",
+    'Add-Content -LiteralPath $env:GITHUB_ENV -Value "HAKIMI_MIGRATION_EVIDENCE_DIR=$env:HAKIMI_MIGRATION_EVIDENCE_DIR" -Encoding utf8NoBOM',
+    "requestedHead = $env:REQUESTED_HEAD", "requestedBase = $env:REQUESTED_BASE",
+    "actualCheckout = (git rev-parse HEAD)", "checkoutParents = (git log -1 --format=%P)",
+    "fetch-depth: 2",
+    "TEMP: ${{ runner.temp }}", "TMP: ${{ runner.temp }}",
+    "      - name: Require the reviewed browser and test identity set\n        if: ${{ always() }}",
+    "run: node scripts/verify-migration-scenario-result.mjs $env:MIGRATION_SUITE (Join-Path $env:HAKIMI_MIGRATION_EVIDENCE_DIR 'results.json')",
+    "if: ${{ always() }}\n        uses: actions/upload-artifact@v4",
+    "path: ${{ env.HAKIMI_MIGRATION_EVIDENCE_DIR }}/", "if-no-files-found: error"
+  ]) if (!scenarios.includes(fragment)) {
+    throw new Error(`Migration CI diagnostic preservation is missing ${fragment}.`);
+  }
+  if (!aggregate.includes("    if: ${{ always() }}")
+    || !aggregate.includes("    needs: migration-scenarios")
+    || !aggregate.includes("MIGRATION_RESULT: ${{ needs.migration-scenarios.result }}")
+    || !aggregate.includes('run: test "$MIGRATION_RESULT" = success')
+    || aggregate.includes("continue-on-error")) {
+    throw new Error("Migration CI must fail its aggregate when any suite is unsuccessful or unexecuted.");
+  }
 }
 
 function workflowJobBlock(workflow, jobId) {
@@ -1679,6 +1728,7 @@ export function verifyQuickCiGovernance(quickWorkflow, packageJson) {
     "node-release-evidence",
     "node-package-artifacts",
     "bazi-current-semantics",
+    "bazi-expert-admission",
     "history-checkpoint-governance",
     "current-index-governance"
   ];
@@ -1718,6 +1768,22 @@ export function verifyQuickCiGovernance(quickWorkflow, packageJson) {
     throw new Error("Full workspace typecheck command must not exclude or suppress production files.");
   }
   const baziSemanticBlock = blocks["bazi-current-semantics"];
+  const expertCommands = {
+    "check:bazi-expert-packet-structure": "node scripts/inspect-bazi-current-expert-review.mjs --structure",
+    "report:bazi-expert-review-progress": "node scripts/inspect-bazi-current-expert-review.mjs --progress",
+    "check:bazi-expert-admission": "node scripts/resolve-bazi-current-expert-review-packet.mjs",
+    "check:bazi-expert-review-packet": "node scripts/resolve-bazi-current-expert-review-packet.mjs",
+    "test:bazi-expert-command-roles": "node --test scripts/verify-bazi-expert-inspection.test.mjs"
+  };
+  for (const [name, command] of Object.entries(expertCommands)) {
+    if (packageJson.scripts?.[name] !== command || packageJson.scripts?.[`pre${name}`]
+      || packageJson.scripts?.[`post${name}`]) throw new Error(`Expert command role drifted: ${name}.`);
+  }
+  if (workflowRunCommandCount(baziSemanticBlock, "npm run check:bazi-expert-review-packet") !== 0
+    || workflowRunCommandCount(baziSemanticBlock, "npm run check:bazi-expert-admission") !== 0) {
+    throw new Error("Expert admission cannot be substituted for the engineering structure/progress lane.");
+  }
+
   for (const [jobId, scriptName, group] of [
     ["ci-contracts", "test:ci-contracts", "ci-contracts"],
     ["node-release-evidence", "test:node-release-evidence", "release-evidence"],
@@ -1736,8 +1802,8 @@ export function verifyQuickCiGovernance(quickWorkflow, packageJson) {
   }
   if (exactTrimmedLineCount(baziSemanticBlock, "id: install") !== 1
     || exactTrimmedLineCount(baziSemanticBlock,
-      "if: ${{ !cancelled() && steps.install.outcome == 'success' }}") !== 2) {
-    throw new Error("Both Bazi semantic checks must report after dependency setup even when the other check fails.");
+      "if: ${{ !cancelled() && steps.install.outcome == 'success' }}") !== 4) {
+    throw new Error("All Bazi engineering checks must report after dependency setup even when another check fails.");
   }
   // Default Bazi checks inventory identity; independent eligibility remains a separate strict command.
   for (const [name, command] of [
@@ -1753,7 +1819,11 @@ export function verifyQuickCiGovernance(quickWorkflow, packageJson) {
   }
   const boundaryCommands = packageJson.scripts?.["check:current-boundaries"]?.split(" && ");
   const explicitCiCommands = new Set(Object.values(REQUIRED_QUICK_CI_COMMANDS).flat());
-  if (!boundaryCommands?.length || boundaryCommands.some((command) => !explicitCiCommands.has(command))) {
+  // The legacy formal expert name and its explicit admission alias were checked
+  // above to resolve to the same unchanged strict entrypoint.
+  if (!boundaryCommands?.length || boundaryCommands.some((command) => !explicitCiCommands.has(
+    command === "npm run check:bazi-expert-review-packet" ? "npm run check:bazi-expert-admission" : command
+  ))) {
     throw new Error("Quick CI must explicitly retain every current-boundaries obligation when program diagnostics are independent.");
   }
   for (const stage of ["typecheck", "vitest", "build"]) {
@@ -1777,26 +1847,32 @@ export function verifyQuickCiGovernance(quickWorkflow, packageJson) {
     throw new Error("Quick CI must upload, download and verify the same default v13 artifact without rebuilding it.");
   }
 
-  const aggregateBlock = blocks["release-gate-aggregate"];
-  const aggregate = aggregateBlock.join("\n");
-  if (!aggregate.includes("    if: ${{ always() }}")
-    || !aggregate.includes("if [ \"$gate_result\" != \"success\" ]; then")
-    || !aggregate.includes("exit 1")) {
-    throw new Error("Quick CI aggregate gate must run always and fail closed on every non-success result.");
+  const engineeringNeeds = aggregateNeeds.filter((id) => id !== "bazi-expert-admission" && id !== "engineering-gate-aggregate");
+  if (!sameJson(workflowJobNeeds(blocks["engineering-gate-aggregate"]), engineeringNeeds)) {
+    throw new Error("Engineering aggregate must require all engineering evidence and exclude expert admission.");
   }
-  for (const jobId of aggregateNeeds) {
-    const resultEnv = jobId.toUpperCase().replaceAll("-", "_");
-    const resultBinding = `${resultEnv}: \${{ needs.${jobId}.result }}`;
-    const loopEntry = `"${jobId}=$${resultEnv}"`;
-    const loopEntryCount = aggregateBlock.filter((line) => {
-      const trimmed = line.trim();
-      return trimmed === loopEntry || trimmed === `${loopEntry} \\`;
-    }).length;
-    if (exactTrimmedLineCount(aggregateBlock, resultBinding) !== 1) {
-      throw new Error(`Quick CI aggregate gate must bind the exact result environment for ${jobId}.`);
+  for (const [aggregateId, expectedNeeds] of [["engineering-gate-aggregate", engineeringNeeds], ["release-gate-aggregate", aggregateNeeds]]) {
+    const aggregateBlock = blocks[aggregateId];
+    const aggregate = aggregateBlock.join("\n");
+    if (!aggregate.includes("    if: ${{ always() }}")
+      || !aggregate.includes("if [ \"$gate_result\" != \"success\" ]; then")
+      || !aggregate.includes("exit 1")) {
+      throw new Error("Quick CI aggregate gate must run always and fail closed on every non-success result.");
     }
-    if (loopEntryCount !== 1) {
-      throw new Error(`Quick CI aggregate gate failure loop must inspect ${jobId}.`);
+    for (const jobId of expectedNeeds) {
+      const resultEnv = jobId.toUpperCase().replaceAll("-", "_");
+      const resultBinding = `${resultEnv}: \${{ needs.${jobId}.result }}`;
+      const loopEntry = `"${jobId}=$${resultEnv}"`;
+      const loopEntryCount = aggregateBlock.filter((line) => {
+        const trimmed = line.trim();
+        return trimmed === loopEntry || trimmed === `${loopEntry} \\`;
+      }).length;
+      if (exactTrimmedLineCount(aggregateBlock, resultBinding) !== 1) {
+        throw new Error(`Quick CI aggregate gate must bind the exact result environment for ${jobId}.`);
+      }
+      if (loopEntryCount !== 1) {
+        throw new Error(`Quick CI aggregate gate failure loop must inspect ${jobId}.`);
+      }
     }
   }
   const rawWorkflowBytes = Buffer.from(quickWorkflow, "utf8");
@@ -6516,7 +6592,7 @@ export function verifyCrossSchemaV13V16CompletionGovernance(config = crossSchema
     || CROSS_SCHEMA_V13_V16_TEST_TITLES.length !== 13
     || new Set(CROSS_SCHEMA_V13_V16_TEST_TITLES).size !== 13
     || !sameJson(REQUIRED_RELEASE_BROWSER_COMPLETION_TESTS_PER_PROJECT, {
-      backup: 4, boot: 6, pwa: 1, "web-v1-flow": 1, [receiptId]: 13
+      backup: 4, boot: 8, pwa: 1, "web-v1-flow": 1, [receiptId]: 13
     })) {
     throw new Error("Cross-Schema completion inventory does not match the full release test scope.");
   }
@@ -6525,7 +6601,8 @@ export function verifyCrossSchemaV13V16CompletionGovernance(config = crossSchema
     "forbidOnly", "failOnFlakyTests", "retries", "workers", "reporter", "use", "projects"
   ]) || config.testDir !== "./e2e"
     || config.testMatch !== "service-worker-cross-schema-v13-v16.spec.ts"
-    || config.outputDir !== path.join(os.tmpdir(), "hakimi-bazi-cross-schema-v13-v16-results")
+    || config.outputDir !== crossSchemaV13V16Config.outputDir
+    || !path.isAbsolute(config.outputDir) || path.basename(config.outputDir) !== "test-results"
     || config.timeout !== 300_000 || !sameJson(config.expect, { timeout: 25_000 })
     || config.fullyParallel !== false || config.forbidOnly !== true
     || config.failOnFlakyTests !== true || config.retries !== 0 || config.workers !== 1) {
@@ -6535,7 +6612,8 @@ export function verifyCrossSchemaV13V16CompletionGovernance(config = crossSchema
     ["line"],
     [path.join(moduleWorkspaceRoot, "apps/web/playwright.release-browser-strict-reporter.ts"), {
       receiptId, expectedTestsPerProject: 13
-    }]
+    }],
+    ["json", { outputFile: path.join(path.dirname(config.outputDir), "results.json") }]
   ])) {
     throw new Error("Cross-Schema completion requires the existing strict reporter and thirteen tests per project.");
   }
@@ -6628,11 +6706,12 @@ export function verifyReleaseBrowserGovernance(
     receiptId: "boot",
     testMatch: [
       "boot-fail-closed.spec.ts",
-      "database-v8-v9-upgrade.spec.ts"
+      "database-v8-v9-upgrade.spec.ts",
+      "first-controller-interaction.spec.ts"
     ],
     outputDirectoryName: "hakimi-bazi-boot-cross-browser-results",
     timeout: 120_000,
-    expectedTestsPerProject: 6
+    expectedTestsPerProject: 8
   });
   verifyReleaseBrowserPlaywrightConfig(browserConfigs.pwa, {
     receiptId: "pwa",

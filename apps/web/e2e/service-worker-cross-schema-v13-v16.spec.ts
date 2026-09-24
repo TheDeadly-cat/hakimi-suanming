@@ -180,7 +180,10 @@ async function launchFixtureContext(): Promise<BrowserContext> {
   return context;
 }
 
-async function attachForwardMigrationFailureState(context: BrowserContext): Promise<void> {
+async function attachForwardMigrationFailureState(
+  context: BrowserContext,
+  attachmentName = "forward-migration-failure-control-state"
+): Promise<void> {
   // Capture the real control journal before the isolated synthetic profiles
   // close. Startup recovery deliberately normalizes aggregate errors for UI.
   const observations = await Promise.all(context.pages().map(async (page) => {
@@ -200,7 +203,7 @@ async function attachForwardMigrationFailureState(context: BrowserContext): Prom
       return { url: page.url(), observationError: error instanceof Error ? error.message : String(error) };
     }
   }));
-  await test.info().attach("forward-migration-failure-control-state", {
+  await test.info().attach(attachmentName, {
     body: Buffer.from(JSON.stringify(observations, null, 2)),
     contentType: "application/json"
   });
@@ -1187,6 +1190,9 @@ test("双旧 v13 页中一页已确认、另一页仍在万条慢审计时，新
     expect(slowProblems).toEqual([]);
     expect(stable.problems).toEqual([]);
     expect(externalRequests).toEqual([]);
+    // Read only after convergence assertions, so successful runs retain the
+    // same journal/build observations without changing the takeover timing.
+    await attachForwardMigrationFailureState(context, "forward-migration-success-control-state");
     const screenshotPath = test.info().outputPath("forward-v16-converged.png");
     await slowPage.screenshot({ path: screenshotPath, fullPage: false });
     await test.info().attach("Forward migration converged after the original slow audit", {

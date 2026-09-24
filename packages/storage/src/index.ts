@@ -5695,6 +5695,20 @@ export class CaseRepository {
     callerOwnedSnapshot: FullBackupPayload,
     options: { expectedCurrentPayloadDigest?: string } = {}
   ): Promise<void> {
+    const replace = await this.prepareFullDataSnapshotReplacement(callerOwnedSnapshot, options);
+    await replace();
+  }
+
+  /**
+   * Capture and verify outside the migration write transaction. The returned
+   * closure owns its validated data and performs the same atomic replacement;
+   * it grants no write access and still checks CAS at commit time.
+   */
+  async prepareFullDataSnapshotReplacement(
+    callerOwnedSnapshot: FullBackupPayload,
+    options: { expectedCurrentPayloadDigest?: string } = {}
+  ): Promise<() => Promise<void>> {
+    const canYieldToPage = Dexie.currentTransaction === null;
     const snapshot = captureDeclarativeFullDataSnapshot(callerOwnedSnapshot);
     const expectedCurrentPayloadDigest = captureExpectedCurrentPayloadDigest(options);
     if (
@@ -5717,7 +5731,23 @@ export class CaseRepository {
       );
     const ruleRegistry = parseAndValidateRuleRegistryRecords(snapshot.ruleRegistry);
     const cases = snapshot.cases.map((record) => caseRecordSchema.parse(record));
-    const revisions = await Promise.all(snapshot.revisions.map((record) => verifyRevisionRecordIntegrity(record)));
+    // The caller-owned graph has already been captured synchronously above.
+    // A single Promise.all over a capacity snapshot can monopolize the page's
+    // microtask queue long enough to miss the migration freeze heartbeat.
+    // Yield a task between bounded validation batches before replacement
+    // writes. Every record still receives the same verifier.
+    const revisions: RevisionRecord[] = [];
+    const revisionBatchSize = 250;
+    for (let start = 0; start < snapshot.revisions.length; start += revisionBatchSize) {
+      revisions.push(...await Promise.all(snapshot.revisions
+        .slice(start, start + revisionBatchSize)
+        .map((record) => verifyRevisionRecordIntegrity(record))));
+      if (canYieldToPage && start + revisionBatchSize < snapshot.revisions.length) {
+        // An existing transaction must retain its IndexedDB task lifetime.
+        // Migration callers prepare here before acquiring write access.
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      }
+    }
     const receiptRevisionById = new Map(revisions.map((record) => [record.id, record]));
     const revisionCalculationReceipts = this.database.targetSchemaVersion >= 15
       ? await Promise.all(snapshot.revisionCalculationReceipts.map((receipt) => {
@@ -5873,7 +5903,7 @@ export class CaseRepository {
       ...candidateSets.map((candidateSet) => candidateFingerprintRecord(candidateSet))
     ]);
 
-    await this.database.transaction(
+    return () => this.database.transaction(
       "rw",
       [
         this.database.cases,

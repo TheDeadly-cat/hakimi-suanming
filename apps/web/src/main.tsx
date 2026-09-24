@@ -49,6 +49,12 @@ const shadowDatabaseRelease = isShadowDatabaseRelease(CURRENT_RELEASE_DATABASE);
 const defaultLegacyDatabaseRelease = CURRENT_RELEASE_DATABASE.dbGeneration === "legacy-v13"
   && CURRENT_RELEASE_DATABASE.targetSchema === 13
   && CURRENT_RELEASE_DATABASE.migrationId === null;
+// An uncontrolled production document will navigate when its first worker
+// claims it. Keep the existing interaction gate closed until the controlled
+// document completes BOOT_OK, so no unsaved input is accepted before that reload.
+// The database boot still commits independently, allowing registration to start.
+const requiresReleaseInteractionConfirmation = shadowDatabaseRelease
+  || (defaultLegacyDatabaseRelease && import.meta.env.PROD && "serviceWorker" in navigator);
 const releaseControllerTakeoverWriteLatch = new ReleaseControllerTakeoverWriteLatch();
 globalThis.__HAKIMI_RESEARCH_DATABASE_RUNTIME__ = {
   databaseName: CURRENT_RELEASE_DATABASE.databaseName,
@@ -658,7 +664,7 @@ createRoot(root).render(
     <RootApp
       preflightReady={bootPreflightReady}
       readiness={appBootReadinessResult}
-      releaseConfirmationReady={shadowDatabaseRelease ? releaseInteractionReady : undefined}
+      releaseConfirmationReady={requiresReleaseInteractionConfirmation ? releaseInteractionReady : undefined}
     />
   </StrictMode>
 );
@@ -1666,7 +1672,7 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
       .catch((error: unknown) => {
         if (isExpectedForwardMigrationBootStop(error)) return;
         document.documentElement.dataset.swRegistered = "false";
-        if (shadowDatabaseRelease) {
+        if (requiresReleaseInteractionConfirmation) {
           rejectReleaseInteraction?.(
             error instanceof Error ? error : new Error("Service Worker 生命周期未能完成数据库代际确认。")
           );

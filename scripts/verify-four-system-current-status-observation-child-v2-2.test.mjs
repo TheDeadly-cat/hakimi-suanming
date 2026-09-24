@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { test } from "node:test";
+import { after, before, test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 
@@ -16,6 +16,12 @@ import {
   serializeFourSystemCurrentStatusObservationChildV22,
   fourSystemCurrentStatusObservationChildV22TestOnly as testOnly
 } from "./four-system-current-status-observation-child-v2-2-lib.mjs";
+import {
+  FOUR_SYSTEM_V22_INPUT_ARCHIVE_URL,
+  attachCurrentFourSystemCli,
+  createFourSystemV22HistoricalInputs,
+  parseFourSystemV22InputArchive
+} from "./four-system-v22-history.test-fixture.mjs";
 
 const execFileAsync = promisify(execFile);
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -23,7 +29,7 @@ const persistedPath = path.resolve(
   workspaceRoot,
   ...FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_2_RELATIVE_PATH.split("/")
 );
-const cliPath = path.join(
+const actualCliPath = path.join(
   workspaceRoot,
   "scripts",
   "verify-four-system-current-status-observation-child-v2-2.mjs"
@@ -38,8 +44,58 @@ const predecessorV21CliPath = path.join(
   "scripts",
   "verify-four-system-current-status-observation-child-v2-1.mjs"
 );
-const builtPromise = buildCurrentFourSystemCurrentStatusObservationChildV22(workspaceRoot);
-const loadedPromise = loadFourSystemCurrentStatusObservationChildV22(workspaceRoot);
+let historicalInputs;
+let cliPath;
+let builtPromise;
+let loadedPromise;
+before(async () => {
+  historicalInputs = await createFourSystemV22HistoricalInputs();
+  cliPath = await attachCurrentFourSystemCli(historicalInputs, 2);
+  // Persisted object and CLI positive contracts use their explicit input
+  // context with current code. Current-checkout negatives remain separate.
+  builtPromise = buildCurrentFourSystemCurrentStatusObservationChildV22(historicalInputs.root);
+  loadedPromise = loadFourSystemCurrentStatusObservationChildV22(historicalInputs.root);
+  await Promise.all([builtPromise, loadedPromise]);
+});
+after(async () => { await historicalInputs?.cleanup(); });
+
+test("actual v2.2 CLI stays anchored to its checkout even with a valid historical working directory", async () => {
+  await assert.rejects(execFileAsync(process.execPath, [actualCliPath], {
+    cwd: historicalInputs.root, env: sanitizedEnvironment(), encoding: "utf8", windowsHide: true
+  }), (error) => error?.code === 1 && error.stdout === ""
+    && error.stderr.trim() === "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_2_MECHANICS_FAILED UNEXPECTED_ERROR");
+});
+
+test("v2.2 archived input context rejects corruption, truncation and an empty archive", async () => {
+  const original = await readFile(FOUR_SYSTEM_V22_INPUT_ARCHIVE_URL);
+  const changed = Buffer.from(original);
+  changed[Math.floor(changed.length / 2)] ^= 1;
+  for (const bytes of [changed, original.subarray(0, -1), Buffer.alloc(0)]) {
+    assert.throws(() => parseFourSystemV22InputArchive(bytes), /v2.2 input archive identity changed/u);
+  }
+});
+
+test("actual current checkout cannot inherit the archived v2.2 input context's private brand", async () => {
+  await assert.rejects(loadFourSystemCurrentStatusObservationChildV22(workspaceRoot),
+    { code: "MANIFEST_IDENTITY_DRIFT" });
+});
+
+test("v2.2 input context rejects replacement of restored lock and test-configuration inputs", async () => {
+  for (const [relativePath, expectedCode] of [
+    ["package-lock.json", "LOCAL_RAW_IDENTITY_DRIFT"],
+    ["apps/web/vitest.config.ts", "PRODUCTION_IMPORT_LEAKAGE"]
+  ]) {
+    const inputs = await createFourSystemV22HistoricalInputs();
+    try {
+      await writeFile(path.join(inputs.root, relativePath),
+        await readFile(path.join(workspaceRoot, relativePath)));
+      await assert.rejects(loadFourSystemCurrentStatusObservationChildV22(inputs.root),
+        { code: expectedCode });
+    } finally {
+      await inputs.cleanup();
+    }
+  }
+});
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));

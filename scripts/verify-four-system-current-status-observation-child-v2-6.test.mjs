@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import test from "node:test";
+import { after, before, test } from "node:test";
 
 import {
   FourSystemCurrentStatusObservationChildV26Error,
@@ -22,10 +23,16 @@ import {
 import {
   loadWesternIndependentEngineeringManifestV2
 } from "./western-independent-engineering-manifest-v2-lib.mjs";
+import { attachCurrentFourSystemCli } from "./four-system-v22-history.test-fixture.mjs";
+import {
+  FOUR_SYSTEM_V26_ADDITIONAL_ARCHIVE_URL,
+  createFourSystemV26HistoricalInputs,
+  parseFourSystemV26AdditionalArchive
+} from "./four-system-v26-history.test-fixture.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, "..");
-const CLI = path.join(
+const ACTUAL_CLI = path.join(
   HERE,
   "verify-four-system-current-status-observation-child-v2-6.mjs"
 );
@@ -38,16 +45,69 @@ const ARTIFACT = path.join(
 const PRELOAD_FAILURE =
   "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_6_FAILED"
   + " VISIBLE_PRELOAD_OPTIONS_REJECTED\n";
+let historicalInputs;
+let CLI;
+before(async () => {
+  historicalInputs = await createFourSystemV26HistoricalInputs();
+  CLI = await attachCurrentFourSystemCli(historicalInputs, 6);
+  assert.deepEqual(await readFile(ARTIFACT), await readFile(path.join(historicalInputs.root,
+    "content/system-admission/four-system-current-status-observation-child.v2.6.0.json")));
+});
+after(async () => { await historicalInputs?.cleanup(); });
+
+test("current v2.6 loaders and source CLI cannot inherit historical Western closure success", async () => {
+  await assert.rejects(loadFourSystemCurrentStatusObservationChildV26(ROOT),
+    { code: "MANIFEST_IDENTITY_DRIFT" });
+  await assert.rejects(loadWesternIndependentEngineeringManifestV2(ROOT),
+    { code: "CURRENT_SOURCE_DRIFT" });
+  const run = spawnSync(process.execPath, [ACTUAL_CLI], {
+    cwd: historicalInputs.root, encoding: "utf8", env: cleanEnv(), windowsHide: true
+  });
+  assert.equal(run.status, 1);
+  assert.equal(run.stdout, "");
+  assert.equal(run.stderr, "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_6_FAILED VERIFICATION_FAILED\n");
+});
+
+test("v2.6 supplemental archive rejects tampering, truncation and a valid empty ZIP", async () => {
+  const original = await readFile(FOUR_SYSTEM_V26_ADDITIONAL_ARCHIVE_URL);
+  assert.equal(parseFourSystemV26AdditionalArchive(original).manifest.files.length, 46);
+  const changed = Buffer.from(original); changed[Math.floor(changed.length / 2)] ^= 1;
+  const { zipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+  for (const bytes of [changed, original.subarray(0, -1), zipSync({})]) {
+    assert.throws(() => parseFourSystemV26AdditionalArchive(bytes), /v2.6 additional archive identity changed/u);
+  }
+});
+
+test("v2.6 refuses altered, missing and extra authored Western package inputs", async () => {
+  const inputs = await createFourSystemV26HistoricalInputs();
+  try {
+    const target = path.join(inputs.root, "packages/western-astrology-rules-preview-draft/src/browser-client.ts");
+    const original = await readFile(target);
+    const changed = Buffer.from(original); changed[0] ^= 1;
+    await writeFile(target, changed);
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV26(inputs.root),
+      { code: "CURRENT_MANIFEST_MISMATCH" });
+    await rm(target);
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV26(inputs.root),
+      { code: "AUTHORED_CLOSURE_PATH_SET_MISMATCH" });
+    await writeFile(target, original, { flag: "wx" });
+    await writeFile(path.join(path.dirname(target), "synthetic-extra-source.ts"), "export {};\n", { flag: "wx" });
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV26(inputs.root),
+      { code: "AUTHORED_CLOSURE_PATH_SET_MISMATCH" });
+  } finally {
+    await inputs.cleanup();
+  }
+});
 
 let fixturePromise;
 
 function fixture() {
   if (!fixturePromise) {
     fixturePromise = Promise.all([
-      loadFourSystemCurrentStatusObservationChildV26(ROOT),
-      loadFourSystemCurrentStatusObservationChildV25(ROOT),
-      loadWesternIndependentEngineeringManifestV2(ROOT),
-      buildCurrentFourSystemCurrentStatusObservationChildV26(ROOT)
+      loadFourSystemCurrentStatusObservationChildV26(historicalInputs.root),
+      loadFourSystemCurrentStatusObservationChildV25(historicalInputs.root),
+      loadWesternIndependentEngineeringManifestV2(historicalInputs.root),
+      buildCurrentFourSystemCurrentStatusObservationChildV26(historicalInputs.root)
     ]).then(([loaded, parent, westernManifest, built]) => ({
       loaded,
       parent,

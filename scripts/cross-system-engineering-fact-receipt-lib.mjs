@@ -43,6 +43,7 @@ import {
   readSystemAdmissionRegistry,
   verifySystemAdmissionRegistry
 } from "./system-admission-registry-lib.mjs";
+import { verifyFactReceiptV1Inputs } from "./cross-system-engineering-fact-v1-inputs.mjs";
 
 export const CROSS_SYSTEM_ENGINEERING_FACT_RECEIPT_REGISTRY_RELATIVE_PATH =
   "packages/cross-system-comparison-draft/src/generated-engineering-fact-receipts.v1.json";
@@ -637,6 +638,10 @@ async function observeStaleSystemRegistryArtifactLocks(workspaceRoot, registry) 
 }
 
 export async function buildCurrentCrossSystemEngineeringFactReceiptRegistry(workspaceRoot) {
+  return buildReceiptRegistryForInputs(workspaceRoot, false);
+}
+
+async function buildReceiptRegistryForInputs(workspaceRoot, historicalV1) {
   const [
     ziweiProjectorSnapshot,
     westernProjectorSnapshot,
@@ -652,13 +657,16 @@ export async function buildCurrentCrossSystemEngineeringFactReceiptRegistry(work
       readWorkspaceSnapshot(workspaceRoot, VEDIC_BOUNDARY_ADR_RELATIVE_PATH)
     ]);
 
+  const historical = historicalV1
+    ? await verifyFactReceiptV1Inputs(workspaceRoot, readWorkspaceSnapshot, parseCrossSystemEngineeringFactReceiptJsonBytes)
+    : null;
   const [verifiedManifests, verifiedSourceRequirements, d0Ledger, savedSystemRegistry] = await Promise.all([
-    verifyAllIndependentDomainManifests(workspaceRoot),
-    verifyAllIndependentSourceRequirements(workspaceRoot),
-    readBaziV17ManifestDriftDecisionLedger(workspaceRoot),
+    historical?.verifiedManifests ?? verifyAllIndependentDomainManifests(workspaceRoot),
+    historical?.verifiedSourceRequirements ?? verifyAllIndependentSourceRequirements(workspaceRoot),
+    historical?.verifiedD0.ledger ?? readBaziV17ManifestDriftDecisionLedger(workspaceRoot),
     readSystemAdmissionRegistry(workspaceRoot)
   ]);
-  const verifiedD0 = await verifyBaziV17ManifestDriftDecisionLedger(workspaceRoot, d0Ledger);
+  const verifiedD0 = historical?.verifiedD0 ?? await verifyBaziV17ManifestDriftDecisionLedger(workspaceRoot, d0Ledger);
   const { registryDigest: _savedRegistryDigest, ...unsignedSavedSystemRegistry } = savedSystemRegistry;
   if (computeSystemAdmissionRegistryDigest(unsignedSavedSystemRegistry) !== savedSystemRegistry.registryDigest) {
     fail("SYSTEM_REGISTRY_DIGEST_INVALID", "保存的四体系 registry 自身语义摘要无效。");
@@ -681,7 +689,8 @@ export async function buildCurrentCrossSystemEngineeringFactReceiptRegistry(work
   const requirementsById = new Map(
     verifiedSourceRequirements.map((entry) => [entry.productSystemId, entry])
   );
-  const definitionsById = new Map(INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS.map((entry) => [entry.productSystemId, entry]));
+  const definitionsById = new Map((historical?.definitions ?? INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS)
+    .map((entry) => [entry.productSystemId, entry]));
   const ziweiVerified = manifestsById.get("ziwei-doushu");
   const westernVerified = manifestsById.get("western-astrology");
   const ziweiRequirements = requirementsById.get("ziwei-doushu");
@@ -877,6 +886,18 @@ export async function readCrossSystemEngineeringFactReceiptRegistry(workspaceRoo
 }
 
 export async function verifyCrossSystemEngineeringFactReceiptRegistry(workspaceRoot, registryInput) {
+  return verifyReceiptRegistryForInputs(workspaceRoot, registryInput, false);
+}
+
+// Explicit historical entry only. It does not change current selection, mint a
+// receipt, or treat labels such as "current" inside the original as current now.
+export async function verifyHistoricalV1CrossSystemEngineeringFactReceiptRegistry(workspaceRoot, registryInput) {
+  const result = await verifyReceiptRegistryForInputs(workspaceRoot, registryInput, true);
+  return Object.freeze({ ...result, consumerContract: "historical-v1", currentProducerVerification: false,
+    currentSelectionChanged: false, archivedModulesExecuted: false });
+}
+
+async function verifyReceiptRegistryForInputs(workspaceRoot, registryInput, historicalV1) {
   const registry = capturePassiveJsonSnapshot(registryInput);
   if (registry.registryDigest !== computeCrossSystemEngineeringFactReceiptRegistryDigest(registry)) {
     fail("REGISTRY_DIGEST_INVALID", "跨体系工程事实回执注册表摘要无效。");
@@ -887,7 +908,7 @@ export async function verifyCrossSystemEngineeringFactReceiptRegistry(workspaceR
       fail("RECEIPT_DIGEST_INVALID", `跨体系工程事实回执摘要无效：${String(entry.systemId)}`);
     }
   }
-  const expected = await buildCurrentCrossSystemEngineeringFactReceiptRegistry(workspaceRoot);
+  const expected = await buildReceiptRegistryForInputs(workspaceRoot, historicalV1);
   if (canonicalStringifyCrossSystemEngineeringFactReceipt(registry)
     !== canonicalStringifyCrossSystemEngineeringFactReceipt(expected)) {
     fail("REGISTRY_MISMATCH", "跨体系工程事实回执注册表与当前 manifest、producer 重放或 projector 投影不一致。");

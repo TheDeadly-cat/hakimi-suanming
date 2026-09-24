@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import test from "node:test";
+import { after, before, test } from "node:test";
 
 import {
   FourSystemCurrentStatusObservationChildV25Error,
@@ -22,10 +23,16 @@ import {
 import {
   loadZiweiSameArtifactBrowserObservationChildV11
 } from "./ziwei-same-artifact-browser-observation-child-v1-1-lib.mjs";
+import { attachCurrentFourSystemCli } from "./four-system-v22-history.test-fixture.mjs";
+import {
+  FOUR_SYSTEM_V25_ADDITIONAL_ARCHIVE_URL,
+  createFourSystemV25HistoricalInputs,
+  parseFourSystemV25AdditionalArchive
+} from "./four-system-v25-history.test-fixture.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, "..");
-const CLI = path.join(
+const ACTUAL_CLI = path.join(
   HERE,
   "verify-four-system-current-status-observation-child-v2-5.mjs"
 );
@@ -38,16 +45,62 @@ const ARTIFACT = path.join(
 const PRELOAD_FAILURE =
   "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_5_FAILED"
   + " VISIBLE_PRELOAD_OPTIONS_REJECTED\n";
+let historicalInputs;
+let CLI;
+before(async () => {
+  historicalInputs = await createFourSystemV25HistoricalInputs();
+  CLI = await attachCurrentFourSystemCli(historicalInputs, 5);
+  assert.deepEqual(await readFile(ARTIFACT), await readFile(path.join(historicalInputs.root,
+    "content/system-admission/four-system-current-status-observation-child.v2.5.0.json")));
+});
+after(async () => { await historicalInputs?.cleanup(); });
+
+test("current v2.5 loader and source CLI cannot inherit historical browser-input success", async () => {
+  await assert.rejects(loadFourSystemCurrentStatusObservationChildV25(ROOT),
+    { code: "MANIFEST_IDENTITY_DRIFT" });
+  const run = spawnSync(process.execPath, [ACTUAL_CLI], {
+    cwd: historicalInputs.root, encoding: "utf8", env: cleanEnv(), windowsHide: true
+  });
+  assert.equal(run.status, 1);
+  assert.equal(run.stdout, "");
+  assert.equal(run.stderr, "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_5_FAILED VERIFICATION_FAILED\n");
+});
+
+test("v2.5 supplemental archive rejects tampering, truncation and a valid empty ZIP", async () => {
+  const original = await readFile(FOUR_SYSTEM_V25_ADDITIONAL_ARCHIVE_URL);
+  assert.equal(parseFourSystemV25AdditionalArchive(original).manifest.files.length, 38);
+  const changed = Buffer.from(original); changed[Math.floor(changed.length / 2)] ^= 1;
+  const { zipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+  for (const bytes of [changed, original.subarray(0, -1), zipSync({})]) {
+    assert.throws(() => parseFourSystemV25AdditionalArchive(bytes), /v2.5 additional archive identity changed/u);
+  }
+});
+
+test("v2.5 refuses the old browser observation when a bound source-graph input changes or disappears", async () => {
+  const inputs = await createFourSystemV25HistoricalInputs();
+  try {
+    const target = path.join(inputs.root, "packages/ziwei-doushu-contracts-draft/tsconfig.json");
+    const changed = Buffer.from(await readFile(target)); changed[0] ^= 1;
+    await writeFile(target, changed);
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV25(inputs.root),
+      { code: "CURRENT_BASE_REBUILD_FAILED" });
+    await rm(target);
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV25(inputs.root),
+      { code: "CURRENT_BASE_REBUILD_FAILED" });
+  } finally {
+    await inputs.cleanup();
+  }
+});
 
 let fixturePromise;
 
 function fixture() {
   if (!fixturePromise) {
     fixturePromise = Promise.all([
-      loadFourSystemCurrentStatusObservationChildV25(ROOT),
-      loadFourSystemCurrentStatusObservationChildV24(ROOT),
-      loadZiweiSameArtifactBrowserObservationChildV11(ROOT),
-      buildCurrentFourSystemCurrentStatusObservationChildV25(ROOT)
+      loadFourSystemCurrentStatusObservationChildV25(historicalInputs.root),
+      loadFourSystemCurrentStatusObservationChildV24(historicalInputs.root),
+      loadZiweiSameArtifactBrowserObservationChildV11(historicalInputs.root),
+      buildCurrentFourSystemCurrentStatusObservationChildV25(historicalInputs.root)
     ]).then(([loaded, parent, browserChild, built]) => ({
       loaded,
       parent,

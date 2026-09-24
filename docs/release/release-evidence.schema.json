@@ -67,8 +67,8 @@
       ],
       "properties": {
         "projectName": { "enum": ["msedge", "chrome"] },
-        "discovered": { "enum": [1, 4, 6, 13] },
-        "passed": { "enum": [1, 4, 6, 13] },
+        "discovered": { "enum": [1, 4, 6, 8, 13] },
+        "passed": { "enum": [1, 4, 6, 8, 13] },
         "skipped": { "const": 0 },
         "failed": { "const": 0 },
         "timedOut": { "const": 0 },
@@ -76,7 +76,7 @@
         "unexpected": { "const": 0 },
         "flaky": { "const": 0 },
         "nonPassedExpectedStatus": { "const": 0 },
-        "attempts": { "enum": [1, 4, 6, 13] }
+        "attempts": { "enum": [1, 4, 6, 8, 13] }
       }
     },
     "releaseBrowserResultSummary": {
@@ -98,7 +98,7 @@
         "schemaVersion": { "const": 1 },
         "summaryType": { "const": "release_browser_test_summary" },
         "receiptId": { "enum": ["backup", "boot", "pwa", "web-v1-flow", "cross-schema-v13-v16"] },
-        "expectedTestsPerProject": { "enum": [1, 4, 6, 13] },
+        "expectedTestsPerProject": { "enum": [1, 4, 6, 8, 13] },
         "expectedProjectNames": {
           "type": "array",
           "minItems": 2,

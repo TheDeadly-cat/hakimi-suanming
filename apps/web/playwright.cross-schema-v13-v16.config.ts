@@ -1,7 +1,8 @@
-import os from "node:os";
-import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, devices } from "@playwright/test";
+import { migrationDiagnosticOutput } from "./playwright.migration-diagnostics.ts";
+
+const diagnostics = migrationDiagnosticOutput("cross-schema-v13-v16");
 
 const strictReporter = fileURLToPath(new URL(
   "./playwright.release-browser-strict-reporter.ts",
@@ -12,7 +13,7 @@ const strictReporter = fileURLToPath(new URL(
 export default defineConfig({
   testDir: "./e2e",
   testMatch: "service-worker-cross-schema-v13-v16.spec.ts",
-  outputDir: path.join(os.tmpdir(), "hakimi-bazi-cross-schema-v13-v16-results"),
+  outputDir: diagnostics.testResults,
   timeout: 300_000,
   expect: { timeout: 25_000 },
   fullyParallel: false,
@@ -22,7 +23,8 @@ export default defineConfig({
   workers: 1,
   reporter: [
     ["line"],
-    [strictReporter, { receiptId: "cross-schema-v13-v16", expectedTestsPerProject: 13 }]
+    [strictReporter, { receiptId: "cross-schema-v13-v16", expectedTestsPerProject: 13 }],
+    ["json", { outputFile: diagnostics.jsonReport }]
   ],
   use: {
     serviceWorkers: "allow",

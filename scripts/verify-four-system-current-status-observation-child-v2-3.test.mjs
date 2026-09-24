@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { test } from "node:test";
+import { after, before, test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import {
@@ -23,20 +24,74 @@ import {
   loadWesternSourceAndManifestIdentityDriftReceiptCandidate,
   isVerifiedWesternSourceAndManifestIdentityDriftReceiptCandidate
 } from "./western-source-and-manifest-identity-drift-receipt-candidate-lib.mjs";
+import { attachCurrentFourSystemCli } from "./four-system-v22-history.test-fixture.mjs";
+import {
+  FOUR_SYSTEM_V23_ADDITIONAL_ARCHIVE_URL,
+  createFourSystemV23HistoricalInputs,
+  parseFourSystemV23AdditionalArchive
+} from "./four-system-v23-history.test-fixture.mjs";
 
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const persistedPath = path.resolve(
   workspaceRoot,
   ...FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_3_RELATIVE_PATH.split("/")
 );
-const cliPath = path.join(
+const actualCliPath = path.join(
   workspaceRoot,
   "scripts",
   "verify-four-system-current-status-observation-child-v2-3.mjs"
 );
-const cliUrl = pathToFileURL(cliPath).href;
+let historicalInputs;
+let cliPath;
+let cliUrl;
+before(async () => {
+  historicalInputs = await createFourSystemV23HistoricalInputs();
+  cliPath = await attachCurrentFourSystemCli(historicalInputs, 3);
+  cliUrl = pathToFileURL(cliPath).href;
+  assert.deepEqual(await readFile(persistedPath), await readFile(path.join(
+    historicalInputs.root, FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_3_RELATIVE_PATH)));
+});
+after(async () => { await historicalInputs?.cleanup(); });
 const FAILED_PREFIX =
   "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_3_MECHANICS_FAILED";
+
+test("current checkout and source v2.3 CLI cannot inherit a historical input context", async () => {
+  await assert.rejects(loadFourSystemCurrentStatusObservationChildV23(workspaceRoot),
+    { code: "MANIFEST_IDENTITY_DRIFT" });
+  const run = spawnSync(process.execPath, [actualCliPath], {
+    cwd: historicalInputs.root, env: sanitizedEnvironment(), encoding: "utf8", windowsHide: true
+  });
+  assert.equal(run.status, 1);
+  assert.equal(run.stdout, "");
+  assert.equal(run.stderr, `${FAILED_PREFIX} UNEXPECTED_ERROR\n`);
+});
+
+test("v2.3 supplemental input archive rejects tampering, truncation and valid empty ZIPs", async () => {
+  const original = await readFile(FOUR_SYSTEM_V23_ADDITIONAL_ARCHIVE_URL);
+  assert.equal(Object.keys(parseFourSystemV23AdditionalArchive(original)).length, 29);
+  const changed = Buffer.from(original); changed[Math.floor(changed.length / 2)] ^= 1;
+  const { zipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+  for (const bytes of [changed, original.subarray(0, -1), zipSync({})]) {
+    assert.throws(() => parseFourSystemV23AdditionalArchive(bytes), /v2.3 additional archive identity changed/u);
+  }
+});
+
+test("v2.3 rechecks the Western page input and rejects the current page or same-length corruption", async () => {
+  const inputs = await createFourSystemV23HistoricalInputs();
+  try {
+    const relativePath = "packages/western-astrology-rules-preview-draft/src/browser-app/main.ts";
+    const target = path.join(inputs.root, relativePath);
+    const original = await readFile(target);
+    const changed = Buffer.from(original); changed[0] ^= 1;
+    for (const bytes of [changed, await readFile(path.join(workspaceRoot, relativePath))]) {
+      await writeFile(target, bytes);
+      await assert.rejects(loadFourSystemCurrentStatusObservationChildV23(inputs.root),
+        { code: "CURRENT_SOURCE_DRIFT" });
+    }
+  } finally {
+    await inputs.cleanup();
+  }
+});
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -59,8 +114,8 @@ function assertDeepFrozen(value, seen = new WeakSet()) {
 }
 
 test("v2.3 has one fixed canonical persisted identity and only its loader grants the private brand", async () => {
-  const built = await buildCurrentFourSystemCurrentStatusObservationChildV23(workspaceRoot);
-  const loaded = await loadFourSystemCurrentStatusObservationChildV23(workspaceRoot);
+  const built = await buildCurrentFourSystemCurrentStatusObservationChildV23(historicalInputs.root);
+  const loaded = await loadFourSystemCurrentStatusObservationChildV23(historicalInputs.root);
   const bytes = await readFile(persistedPath);
   assert.equal(bytes.length, testOnly.EXPECTED_PERSISTED.rawBytes);
   assert.equal(
@@ -79,10 +134,10 @@ test("v2.3 has one fixed canonical persisted identity and only its loader grants
 });
 
 test("v2.3 directly consumes exactly the branded current v2.2 parent and Western receipt", async () => {
-  const child = await buildCurrentFourSystemCurrentStatusObservationChildV23(workspaceRoot);
-  const parent = await loadFourSystemCurrentStatusObservationChildV22(workspaceRoot);
+  const child = await buildCurrentFourSystemCurrentStatusObservationChildV23(historicalInputs.root);
+  const parent = await loadFourSystemCurrentStatusObservationChildV22(historicalInputs.root);
   const receipt = await loadWesternSourceAndManifestIdentityDriftReceiptCandidate(
-    workspaceRoot
+    historicalInputs.root
   );
   assert.equal(isVerifiedFourSystemCurrentStatusObservationChildV22(parent), true);
   assert.equal(isVerifiedWesternSourceAndManifestIdentityDriftReceiptCandidate(receipt), true);
@@ -113,9 +168,9 @@ test("v2.3 directly consumes exactly the branded current v2.2 parent and Western
 });
 
 test("private brands cannot be forged by cloning either direct input", async () => {
-  const parent = await loadFourSystemCurrentStatusObservationChildV22(workspaceRoot);
+  const parent = await loadFourSystemCurrentStatusObservationChildV22(historicalInputs.root);
   const receipt = await loadWesternSourceAndManifestIdentityDriftReceiptCandidate(
-    workspaceRoot
+    historicalInputs.root
   );
   assert.doesNotThrow(() => testOnly.assertUpstreams(parent, receipt));
   assert.throws(
@@ -148,8 +203,8 @@ test("fixed parent and receipt raw identity drift fails closed", () => {
 });
 
 test("lineage binds v2.2, preserves its Ziwei reason, and appends only the Western receipt reason", async () => {
-  const child = await buildCurrentFourSystemCurrentStatusObservationChildV23(workspaceRoot);
-  const parent = await loadFourSystemCurrentStatusObservationChildV22(workspaceRoot);
+  const child = await buildCurrentFourSystemCurrentStatusObservationChildV23(historicalInputs.root);
+  const parent = await loadFourSystemCurrentStatusObservationChildV22(historicalInputs.root);
   assert.deepEqual(child.lineage.parent, child.artifactBindings[0]);
   assert.equal(child.lineage.parentPreservedUnmodified, true);
   assert.equal(child.lineage.parentMechanicallyCurrent, true);
@@ -170,7 +225,7 @@ test("lineage binds v2.2, preserves its Ziwei reason, and appends only the Weste
 
 test("Western retains v1.1 and appends the current drift receipt while every gate remains red", async () => {
   const western = (await buildCurrentFourSystemCurrentStatusObservationChildV23(
-    workspaceRoot
+    historicalInputs.root
   )).systems[2];
   assert.equal(western.currentStatus, testOnly.WESTERN_CURRENT_STATUS);
   assert.deepEqual(
@@ -192,8 +247,8 @@ test("Western retains v1.1 and appends the current drift receipt while every gat
 });
 
 test("Bazi, Ziwei, Vedic, summary, cross-system policy and governance remain byte-for-byte JSON-equal to v2.2", async () => {
-  const child = await buildCurrentFourSystemCurrentStatusObservationChildV23(workspaceRoot);
-  const parent = await loadFourSystemCurrentStatusObservationChildV22(workspaceRoot);
+  const child = await buildCurrentFourSystemCurrentStatusObservationChildV23(historicalInputs.root);
+  const parent = await loadFourSystemCurrentStatusObservationChildV22(historicalInputs.root);
   assert.deepEqual(child.systems[0], parent.systems[0]);
   assert.deepEqual(child.systems[1], parent.systems[1]);
   assert.deepEqual(child.systems[3], parent.systems[3]);
@@ -209,7 +264,7 @@ test("Bazi, Ziwei, Vedic, summary, cross-system policy and governance remain byt
 
 test("authority, Western manifest/browser/status and cross-system promotions are rejected after re-digest", async () => {
   const expected = await buildCurrentFourSystemCurrentStatusObservationChildV23(
-    workspaceRoot
+    historicalInputs.root
   );
   const mutations = [
     (value) => { value.authorityBoundary.releaseReady = true; },
@@ -235,7 +290,7 @@ test("authority, Western manifest/browser/status and cross-system promotions are
 
 test("changes to any non-Western system or the unchanged summary fail exact parent projection", async () => {
   const expected = await buildCurrentFourSystemCurrentStatusObservationChildV23(
-    workspaceRoot
+    historicalInputs.root
   );
   const mutations = [
     (value) => { value.systems[0].currentStatus = "changed"; },
@@ -253,7 +308,7 @@ test("changes to any non-Western system or the unchanged summary fail exact pare
 
 test("unknown top-level keys, own __proto__ fields and invalid digests fail closed", async () => {
   const expected = await buildCurrentFourSystemCurrentStatusObservationChildV23(
-    workspaceRoot
+    historicalInputs.root
   );
   const unknown = clone(expected);
   unknown.unexpected = false;
@@ -306,7 +361,7 @@ test("canonical capture rejects accessors, proxies, aliases and cycles without i
 
 test("canonical capture, digest, exact comparison and key checks resist Array numeric setters and global String replacement", async () => {
   const child = clone(await buildCurrentFourSystemCurrentStatusObservationChildV23(
-    workspaceRoot
+    historicalInputs.root
   ));
   const originalDescriptor = Object.getOwnPropertyDescriptor(Array.prototype, "0");
   const originalString = globalThis.String;
@@ -350,9 +405,9 @@ test("canonical capture, digest, exact comparison and key checks resist Array nu
 });
 
 test("local branded projection survives global Promise replacement without hiding the recursive parent-loader boundary", async () => {
-  const parent = await loadFourSystemCurrentStatusObservationChildV22(workspaceRoot);
+  const parent = await loadFourSystemCurrentStatusObservationChildV22(historicalInputs.root);
   const receipt = await loadWesternSourceAndManifestIdentityDriftReceiptCandidate(
-    workspaceRoot
+    historicalInputs.root
   );
   const originalPromise = globalThis.Promise;
   class ForbiddenPromise {
@@ -378,7 +433,7 @@ test("local branded projection survives global Promise replacement without hidin
 
 test("raw and semantic persisted identity drift fails before private brand grant", async () => {
   const persisted = await buildCurrentFourSystemCurrentStatusObservationChildV23(
-    workspaceRoot
+    historicalInputs.root
   );
   assert.throws(
     () => testOnly.assertPersistedIdentity({

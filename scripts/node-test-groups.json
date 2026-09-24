@@ -15,6 +15,7 @@
     {
       "id": "current-governance",
       "tests": [
+        "scripts/verify-bazi-expert-inspection.test.mjs",
         "scripts/verify-cross-system-engineering-fact-receipts.test.mjs",
         "scripts/verify-current-history-boundary.test.mjs",
         "scripts/verify-current-independent-scoped.test.mjs",
@@ -194,6 +195,7 @@
         "scripts/provider-deployment-candidate-runtime.test.mjs",
         "scripts/provider-deployment-candidate-sequence-loader.test.mjs",
         "scripts/release-evidence.test.mjs",
+        "scripts/release-persistent-profile.test.mjs",
         "scripts/rollback-evidence.test.mjs",
         "scripts/rollback-provider-sequence-composition.test.mjs",
         "scripts/storage-v13-matrix-candidate-reporter.test.mjs",
@@ -217,7 +219,8 @@
       "tests": [
         "packages/bazi-core/scripts/verify-historical-natal-runtime-closure.test.mjs",
         "packages/bazi-core/scripts/verify-historical-natal-source-lock.test.mjs",
-        "packages/tzdb-core/scripts/verify-artifact.test.mjs"
+        "packages/tzdb-core/scripts/verify-artifact.test.mjs",
+        "scripts/local-research-probe.test.mjs"
       ]
     }
   ]

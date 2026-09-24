@@ -433,18 +433,19 @@ test("the current checkout still rejects the missing historical basis without ar
   assert.match(current.stderr, /BOUND_READINESS_BASIS_DRIFT/u);
 });
 
-test("verified historical inputs do not select a current domain manifest", async () => {
-  const historical = await loadBaziDomainReleaseManifestV2(historicalInputRoot);
-  assert.equal(isVerifiedBaziDomainReleaseManifestV2(historical), true);
+test("verified historical inputs preserve the selected current domain manifest", async () => {
   const currentIndexPath = path.join(repositoryRoot, "content/system-admission/current-index.v1.json");
   const indexBefore = await readFile(currentIndexPath);
   const index = JSON.parse(indexBefore);
   const domain = index.entries.find((entry) =>
     entry.familyKey === "content/domain-release/bazi.single-chart-report.v1.7.0.manifest");
-  assert.equal(domain.selectionState, "historical_head_current_unavailable");
-  assert.equal(domain.selectedCurrent, null);
   const { loadBaziCurrentDomainManifest } = await import("./bazi-scoped-current-lib.mjs");
-  await assert.rejects(loadBaziCurrentDomainManifest(repositoryRoot),
-    (error) => error?.code === "CURRENT_UNAVAILABLE");
+  const currentBefore = await loadBaziCurrentDomainManifest(repositoryRoot);
+  assert.equal(currentBefore.artifact.path, domain.selectedCurrent.path);
+  assert.notEqual(currentBefore.artifact.path, BAZI_DOMAIN_RELEASE_MANIFEST_V2_RELATIVE_PATH);
+
+  const historical = await loadBaziDomainReleaseManifestV2(historicalInputRoot);
+  assert.equal(isVerifiedBaziDomainReleaseManifestV2(historical), true);
+  assert.deepEqual(await loadBaziCurrentDomainManifest(repositoryRoot), currentBefore);
   assert.deepEqual(await readFile(currentIndexPath), indexBefore);
 });

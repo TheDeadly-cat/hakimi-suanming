@@ -140,6 +140,9 @@ describe("first controller claim handoff", () => {
   it("keeps an early peer claim without a normal local commit in recovery without reading or reloading", async () => {
     const fixture = handoffFixture();
     const coordinator = new ReleaseDatabaseCoordinator(BRIDGE_RELEASE_DATABASE_DESCRIPTOR, "early-peer-claim");
+    // The real constructor starts a dynamic storage import. Settle it before
+    // replacing the controller so it cannot outlive this test environment.
+    await (coordinator as unknown as { controllerPromise: Promise<unknown> }).controllerPromise;
     const readCommittedGeneration = vi.fn();
     const readCommittedGenerationFromOpenConnection = vi.fn();
     (coordinator as unknown as { controllerPromise: Promise<unknown> }).controllerPromise = Promise.resolve({ readCommittedGeneration, readCommittedGenerationFromOpenConnection });
@@ -237,6 +240,7 @@ describe("first controller claim handoff", () => {
     const fixture = handoffFixture();
     const admitted = deferred<void>();
     const coordinator = new ReleaseDatabaseCoordinator(BRIDGE_RELEASE_DATABASE_DESCRIPTOR, "first-claim-fixture");
+    await (coordinator as unknown as { controllerPromise: Promise<unknown> }).controllerPromise;
     const testable = coordinator as unknown as {
       commitForBootUntilSettled: () => Promise<ReleaseBootConfirmation>;
       ensureFailureFinalized: (reason: unknown) => Promise<void>;

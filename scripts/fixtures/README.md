@@ -26,3 +26,21 @@ Two historical contract sources were recovered from local Git blobs and matched 
 | packages/western-astrology-contracts-draft/src/index.ts | 41394 | bfe3662fa37bd4e273d298c30a4c9a6ed7b44d65 | 3568cbe0568382354ed59c6bb9bacd0cf4c4d3c52490c1a80a614f2e9db60515 |
 
 The historical test imports verifier modules from the current repository and reads only data from its guarded temporary archive extraction. The archived TypeScript is hashed as data and never imported. This is a separate historical time slice from registry v1 and manifest v2; their existing inputs and pins remain unchanged. The default current commands still resolve the canonical current index without an archive fallback.
+
+## Historical Bazi surface v1.7 domain inputs
+
+`bazi-v17-domain-original-inputs.zip` contains the original v1.7 manifest plus its 34 distinct component inputs. ZIP bytes: 227915. SHA-256: `b00795e335c132350204baabb7e92519dd94f614c789e44211d4b65f9e4908f5`.
+
+Every input matches the original manifest's unchanged file SHA-256. The existing readiness fixture `bazi-expert-intake-readiness-1.5.original.json` supplies the 26038-byte original of `content/system-admission/bazi-binding-freeze-requirements.v1.json`, SHA-256 `662c91e6269d5e860a0d207185680ea7c7b752f24e313859c0d987cb5b446201`. Other changed inputs were recovered as exact Git blobs; no old opinion or digest was rewritten.
+
+The current verifier reproduces manifest digest `60711da42ebc71e1f23ec300dffd5ed44f418c9bcc83ee394bf106f7354dc932` using this complete historical input root. Tests retain all authorization/count/status and component tampering controls, and separately require the historical verifier to reject today's checkout without borrowing this archive.
+
+The archived JavaScript, TypeScript and package file are input data only. Do not execute their modules or install their dependencies. This is a different historical input slice from manifest v2 and the four-system registry; it cannot supply the latter's missing 20351-byte Western document or grant current/expert/release authority. Original-byte recovery and execution logs remain on Z drive under `governance-failure-triage/bazi-v17-history-fixture-v1/`.
+
+## Later four-system history input contexts (2026-09-20)
+
+The v2.12, v2.13 and v2.14 additional ZIPs extend the existing v2.11 data context from 795 to 807, 838 and 845 files. Their exact bytes are the previously prepared archives; each test helper pins the ZIP and its complete manifest before exclusive extraction.
+
+`four-system-observation-registry-v2-original-inputs.zip` is a separate 574-file context, not a fallback for current commands or a universal history root. Its SHA-256 is `6948d3c4e592ea9a397d689e557db2d203eff83fce81220ebb533aa5b4dcfde3`; the 3016397-byte ZIP contains 12318499 data bytes plus its test manifest. All 574 file identities trace to baseline `9dff75f` or existing exact historical archives. Current modules and byte-identical current CLI copies execute against these data; archived code is never executed.
+
+The original observation digest, authority boundaries and expected-red legacy CLI assertions remain unchanged. Recovery provenance, the retained incomplete first context, rejection tests and full-governance comparisons are documented in `docs/status/four-system-history-contexts-20260920.md`. Earlier notes above describe their original recovery stage; the 20351-byte Western document was subsequently recovered without replacing today's file.

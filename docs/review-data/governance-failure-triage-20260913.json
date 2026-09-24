@@ -1,0 +1,2969 @@
+{
+  "recordType": "maintenance_test_failure_triage_not_admission_evidence",
+  "baseCommit": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956",
+  "scope": "All 269 reproduced failures classified by verified first blocker; deep root closure for remaining failures is not claimed.",
+  "before": {
+    "tests": 726,
+    "failed": 269,
+    "passed": 457,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "topLevel": 726,
+    "suites": 0
+  },
+  "after": {
+    "tests": 726,
+    "failed": 249,
+    "passed": 477,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "topLevel": 726,
+    "suites": 0
+  },
+  "filesRun": 27,
+  "closedFailureCount": 20,
+  "remainingFailureCount": 249,
+  "newFailures": [],
+  "inputRoot": "C:\\Temp\\hakimi-governance-root-causes-20260913",
+  "evidence": [
+    {
+      "path": "Z:\\HakimiBaziBackups\\LocalDelivery\\2026-09-13\\governance-failure-triage\\baseline-3a6fa1e\\results.json",
+      "bytes": 976847,
+      "sha256": "5827e050076e60b0613b4a5b57e2256c1fbd0b3329df77174ecdf0595f06e2ed"
+    },
+    {
+      "path": "Z:\\HakimiBaziBackups\\LocalDelivery\\2026-09-13\\governance-failure-triage\\after-lifecycle-fix\\results.json",
+      "bytes": 934969,
+      "sha256": "76b5d1ee9a7ba9cdd6dfd5aa81d60e642aa12a913c1b4b51d72bc12aff5dd51f"
+    },
+    {
+      "path": "Z:\\HakimiBaziBackups\\LocalDelivery\\2026-09-13\\governance-failure-triage\\current-versus-persisted-field-diffs.json",
+      "bytes": 18195,
+      "sha256": "9be59339b7885040fcffef2fea72f8e166f352c323754b393415fcc6ab66d4b6"
+    },
+    {
+      "path": "Z:\\HakimiBaziBackups\\LocalDelivery\\2026-09-13\\governance-failure-triage\\historical-source-git-probe.json",
+      "bytes": 11272,
+      "sha256": "f2b0242a83569a046e79a9f99b5fb7254e7df05c751d271049e956b34df03a23"
+    }
+  ],
+  "groups": {
+    "CI_STEP_ANCHOR": {
+      "owner": "CI 测试",
+      "cause": "两项故障注入依赖已改名的步骤标题，replace 未修改任何字符，未抵达治理验证器。",
+      "throwSite": "scripts/verify-release-governance.test.mjs:2044 (baseline)",
+      "repair": "按具体 job 定位 steps 后注入重复命令，继续验证命令只运行一次。",
+      "status": "fixed_and_full_group_replayed",
+      "affectedCount": 2,
+      "affectedFiles": [
+        "scripts/verify-release-governance.test.mjs"
+      ],
+      "minimalRerun": [
+        "node",
+        "--test",
+        "scripts/verify-release-governance.test.mjs"
+      ],
+      "fullRerun": [
+        "node",
+        "scripts/run-node-test-group.mjs",
+        "current-governance"
+      ],
+      "inputVersion": "base commit 3a6fa1e3dd7edad26dde203205bf98eaf34e4956; versioned persisted paths and original loader pins retained",
+      "firstFailure": {
+        "file": "scripts/verify-release-governance.test.mjs",
+        "name": "runs history-checkpoint evidence exactly once and only in its independent job",
+        "error": "Expected \"actual\" to be strictly unequal to:\n\n'name: Quick CI\\n' +\n  '\\n' +\n  'on:\\n' +\n  '  pull_request:\\n' +\n  '  push:\\n' +\n  '    branches:\\n' +\n  '      - main\\n' +\n  '  workflow_dispatch:\\n' +\n  '\\n' +\n  'permissions:\\n' +\n  '  contents: read\\n' +\n  '\\n' +\n  'concurrency:\\n' +\n  '  group: qui"
+      },
+      "expectedValidationPurpose": "Each history/current evidence command must appear exactly once in its independent CI job.",
+      "testInputs": [
+        {
+          "path": "scripts/verify-release-governance.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        }
+      ]
+    },
+    "LIFECYCLE_COUNTS": {
+      "owner": "npm 生命周期测试",
+      "cause": "三个旧断言仍期待 35 个可达脚本，另两处期待 93 个已访问条目；现行协调器闭包实际为 32/92，固定 canonical digest 已验证。",
+      "throwSite": "scripts/verify-release-governance.test.mjs:3995 (baseline)",
+      "repair": "更新测试中的现行图计数，保留原固定闭包摘要及候选不可达检查。",
+      "status": "fixed_and_full_group_replayed",
+      "affectedCount": 3,
+      "affectedFiles": [
+        "scripts/verify-release-governance.test.mjs"
+      ],
+      "minimalRerun": [
+        "node",
+        "--test",
+        "scripts/verify-release-governance.test.mjs"
+      ],
+      "fullRerun": [
+        "node",
+        "scripts/run-node-test-group.mjs",
+        "current-governance"
+      ],
+      "inputVersion": "base commit 3a6fa1e3dd7edad26dde203205bf98eaf34e4956; versioned persisted paths and original loader pins retained",
+      "firstFailure": {
+        "file": "scripts/verify-release-governance.test.mjs",
+        "name": "accepts the isolated storage-v13 matrix candidate governance and full formal npm closure",
+        "error": "Expected values to be strictly equal:\n\n32 !== 35\n"
+      },
+      "expectedValidationPurpose": "Verify the complete current formal npm graph and reject unregistered candidate reachability.",
+      "testInputs": [
+        {
+          "path": "scripts/verify-release-governance.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        }
+      ]
+    },
+    "LIFECYCLE_INJECTION": {
+      "owner": "npm 生命周期测试",
+      "cause": "15 项测试向现已禁止的 typecheck/test/build 根 hook 或 Web build hook 注入，协调器先拒绝 hook，旧断言却要求后续候选语义错误。",
+      "throwSite": "scripts/formal-npm-lifecycle-closure-lib.mjs:62,69",
+      "repair": "保留全部根 hook 拒绝用例并精确断言更早错误；将实际遍历、别名、prefix/workspace、循环及候选识别用例放入可达辅助 hook。生产解析器不变。",
+      "status": "fixed_and_full_group_replayed",
+      "affectedCount": 15,
+      "affectedFiles": [
+        "scripts/verify-release-governance.test.mjs"
+      ],
+      "minimalRerun": [
+        "node",
+        "--test",
+        "scripts/verify-release-governance.test.mjs"
+      ],
+      "fullRerun": [
+        "node",
+        "scripts/run-node-test-group.mjs",
+        "current-governance"
+      ],
+      "inputVersion": "base commit 3a6fa1e3dd7edad26dde203205bf98eaf34e4956; versioned persisted paths and original loader pins retained",
+      "firstFailure": {
+        "file": "scripts/verify-release-governance.test.mjs",
+        "name": "formal npm closure rejects direct and multihop SW four-chain composition injection",
+        "error": "The input did not match the regular expression /SW A-to-B update candidate tooling must remain outside/u. Input:\n\n'Error: Default lifecycle command or root pre/post hook changed: typecheck.'\n"
+      },
+      "expectedValidationPurpose": "Reject forbidden lifecycle hooks and candidate paths through actual alias/workspace/prefix/cycle traversal.",
+      "testInputs": [
+        {
+          "path": "scripts/verify-release-governance.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        }
+      ]
+    },
+    "ZIWEI_REQUIREMENT_INPUT": {
+      "owner": "来源清单与历史测试",
+      "cause": "Ziwei v1 requirements 绑定的合同源为 45329 字节/0474abe…，当前实际为 46181 字节/2a9555d…；生成器逐字段对照仅该输入 bytes/hash 及 ledgerDigest 不同。",
+      "throwSite": "scripts/independent-source-binding-requirements-lib.mjs:434",
+      "repair": "从精确旧输入构造可验证历史夹具，保留当前读取拒绝过期清单；不重写旧 ledger。",
+      "status": "first_blocker_verified_not_repaired",
+      "affectedCount": 7,
+      "affectedFiles": [
+        "scripts/verify-cross-system-engineering-fact-receipts.test.mjs"
+      ],
+      "minimalRerun": [
+        "node",
+        "--test",
+        "scripts/verify-cross-system-engineering-fact-receipts.test.mjs"
+      ],
+      "fullRerun": [
+        "node",
+        "scripts/run-node-test-group.mjs",
+        "current-governance"
+      ],
+      "inputVersion": "base commit 3a6fa1e3dd7edad26dde203205bf98eaf34e4956; versioned persisted paths and original loader pins retained",
+      "firstFailure": {
+        "file": "scripts/verify-cross-system-engineering-fact-receipts.test.mjs",
+        "name": "current registry replays two independent producers through system-owned projectors",
+        "error": "ziwei-doushu requirements 与当前依据、精确 subject inventory 或失败关闭账不一致。"
+      },
+      "expectedValidationPurpose": "Replay independent producers only after validating their exact source requirement ledger and system-owned projectors.",
+      "testInputs": [
+        {
+          "path": "scripts/verify-cross-system-engineering-fact-receipts.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        }
+      ]
+    },
+    "DOMAIN_MANIFEST_INPUTS": {
+      "owner": "独立体系 manifest 与历史测试",
+      "cause": "Ziwei 历史 v2 manifest 与当前生成结果有 16 个字段差异，含合同源和 HKO policy/helper；Western v0.1 清单有 23 个字段差异。旧持久对象不能作为当前闭包。",
+      "throwSite": "scripts/independent-domain-release-manifest-lib.mjs:1463 (verifier entry)",
+      "repair": "按各自已冻结版本恢复真实完整输入夹具；当前入口与旧快照验证分别复验。尚未用历史恢复数据跑原有负例。",
+      "status": "first_blocker_verified_not_repaired",
+      "affectedCount": 10,
+      "affectedFiles": [
+        "scripts/verify-independent-domain-release-manifests.test.mjs"
+      ],
+      "minimalRerun": [
+        "node",
+        "--test",
+        "scripts/verify-independent-domain-release-manifests.test.mjs"
+      ],
+      "fullRerun": [
+        "node",
+        "scripts/run-node-test-group.mjs",
+        "current-governance"
+      ],
+      "inputVersion": "base commit 3a6fa1e3dd7edad26dde203205bf98eaf34e4956; versioned persisted paths and original loader pins retained",
+      "firstFailure": {
+        "file": "scripts/verify-independent-domain-release-manifests.test.mjs",
+        "name": "ziwei and western manifests exactly bind their separate current engineering closures",
+        "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ '{\"authorityBoundary\":{\"contentTruthEstablished\":false,\"domainAuthorityAuthorized\":false,\"expertClaimsAuthorized\":false,\"expertTruthEstablished\":false,\"formalAdmissionAuthorized\":false,\"publicDeploymentAuthorized\":false,\"publicReleaseAutho"
+      },
+      "expectedValidationPurpose": "Bind each system manifest to the exact intended engineering inputs while rejecting forged admission and malformed inputs.",
+      "testInputs": [
+        {
+          "path": "scripts/verify-independent-domain-release-manifests.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        }
+      ]
+    },
+    "BAZI_REGISTRY_INPUT": {
+      "owner": "体系登记与历史测试",
+      "cause": "旧四体系登记先要求 bazi.single-chart-report.v1.7.0 与当前图相等；逐字段复算有 21 个差异，先抛 MANIFEST_MISMATCH，七个登记篡改测试未到目标断言。",
+      "throwSite": "scripts/bazi-domain-release-manifest-lib.mjs:303",
+      "repair": "保持 v1.7 原件及其绑定，定位完整历史输入后再跑登记正例与全部篡改负例；当前资格继续由显式 current 消费者判断。",
+      "status": "first_blocker_verified_not_repaired",
+      "affectedCount": 8,
+      "affectedFiles": [
+        "scripts/verify-system-admission-registry.test.mjs"
+      ],
+      "minimalRerun": [
+        "node",
+        "--test",
+        "scripts/verify-system-admission-registry.test.mjs"
+      ],
+      "fullRerun": [
+        "node",
+        "scripts/run-node-test-group.mjs",
+        "current-governance"
+      ],
+      "inputVersion": "base commit 3a6fa1e3dd7edad26dde203205bf98eaf34e4956; versioned persisted paths and original loader pins retained",
+      "firstFailure": {
+        "file": "scripts/verify-system-admission-registry.test.mjs",
+        "name": "current registry binds four independent systems and their selected evidence closure",
+        "error": "八字体系 manifest 与当前组件、失败关闭门或证据分账不一致。"
+      },
+      "expectedValidationPurpose": "Bind all four systems to their selected evidence closure and reject inherited or self-granted authority.",
+      "testInputs": [
+        {
+          "path": "scripts/verify-system-admission-registry.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        }
+      ]
+    },
+    "WESTERN_NOTICE_SNAPSHOT": {
+      "owner": "西洋历史浏览器观察",
+      "cause": "v2 观察登记调用旧 Western observation loader，载体的 browser-app/index.html 与观察条目固定 bytes/SHA 不同。",
+      "throwSite": "scripts/western-independent-productization-version-aware-observation-candidate-lib.mjs:683",
+      "repair": "取得该观察条目的原页面与工具输入集后历史重放；当前源码不可冒充旧浏览器回执。",
+      "status": "first_blocker_verified_not_repaired",
+      "affectedCount": 13,
+      "affectedFiles": [
+        "scripts/verify-four-system-current-observation-registry-v2.test.mjs"
+      ],
+      "minimalRerun": [
+        "node",
+        "--test",
+        "scripts/verify-four-system-current-observation-registry-v2.test.mjs"
+      ],
+      "fullRerun": [
+        "node",
+        "scripts/run-node-test-group.mjs",
+        "current-governance"
+      ],
+      "inputVersion": "base commit 3a6fa1e3dd7edad26dde203205bf98eaf34e4956; versioned persisted paths and original loader pins retained",
+      "firstFailure": {
+        "file": "scripts/verify-four-system-current-observation-registry-v2.test.mjs",
+        "name": "registry v2 has one exact canonical persisted identity and a private verified result",
+        "error": "ARTIFACT_DRIFT: packages/western-astrology-rules-preview-draft/browser-app/index.html 的当前 bytes/SHA-256 与观察候选不一致。"
+      },
+      "expectedValidationPurpose": "Validate exact historical observation identity, source notices, private verification brand and tampering controls.",
+      "testInputs": [
+        {
+          "path": "scripts/verify-four-system-current-observation-registry-v2.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        }
+      ]
+    },
+    "VEDIC_BROWSER_GRAPH": {
+      "owner": "吠陀同产物观察",
+      "cause": "v2.1 依赖的旧浏览器观察 source/tool/locked 输入图摘要不等于当前扫描图，CURRENT_GRAPH_BINDING_INVALID。",
+      "throwSite": "scripts/vedic-civil-time-same-artifact-browser-observation-lib.mjs:999",
+      "repair": "分别核对旧观察的三个图与原字节；历史验证和新产物浏览器验证不得互相转签。尚未完成逐路径恢复。",
+      "status": "first_blocker_verified_not_repaired",
+      "affectedCount": 15,
+      "affectedFiles": [
+        "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs"
+      ],
+      "minimalRerun": [
+        "node",
+        "--test",
+        "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs"
+      ],
+      "fullRerun": [
+        "node",
+        "scripts/run-node-test-group.mjs",
+        "current-governance"
+      ],
+      "inputVersion": "base commit 3a6fa1e3dd7edad26dde203205bf98eaf34e4956; versioned persisted paths and original loader pins retained",
+      "firstFailure": {
+        "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+        "name": "v2.1 child has one exact canonical persisted identity and only the loader grants its private brand",
+        "error": "CURRENT_GRAPH_BINDING_INVALID"
+      },
+      "expectedValidationPurpose": "Bind the historical dual-browser observation to its actual single build and source/tool/lock inputs.",
+      "testInputs": [
+        {
+          "path": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        }
+      ]
+    },
+    "ZIWEI_FIXED_DRIFT_ANCESTRY": {
+      "owner": "紫微固定漂移记录及四体系父链",
+      "cause": "旧 Ziwei drift receipt 只允许一份合同源变化，当前 manifest 还含 HKO policy/helper 等变更，固定 currentCandidateManifestDigest 不符；v2.2 起的指定子版本复验父链时传播失败。",
+      "throwSite": "scripts/ziwei-expert-promotion-boundary-identity-drift-receipt-candidate-lib.mjs:414",
+      "repair": "为各版本复原其精确输入集并重放父链；新图不符合旧单点漂移范围，不能直接重签旧 receipt。父链深层其他失败仍未排除。",
+      "status": "first_blocker_verified_not_repaired",
+      "affectedCount": 109,
+      "affectedFiles": [
+        "scripts/verify-four-system-current-status-observation-child-v2-10.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-11.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs"
+      ],
+      "minimalRerun": [
+        "node",
+        "--test",
+        "scripts/verify-four-system-current-status-observation-child-v2-10.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-11.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+        "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs"
+      ],
+      "fullRerun": [
+        "node",
+        "scripts/run-node-test-group.mjs",
+        "current-governance"
+      ],
+      "inputVersion": "base commit 3a6fa1e3dd7edad26dde203205bf98eaf34e4956; versioned persisted paths and original loader pins retained",
+      "firstFailure": {
+        "file": "scripts/verify-four-system-current-status-observation-child-v2-10.test.mjs",
+        "name": "v2.10 changes only Western current endpoints and browser evidence",
+        "error": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。"
+      },
+      "expectedValidationPurpose": "Verify each versioned child against its fixed parent and explicitly bounded source change without authority promotion.",
+      "testInputs": [
+        {
+          "path": "scripts/verify-four-system-current-status-observation-child-v2-10.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        },
+        {
+          "path": "scripts/verify-four-system-current-status-observation-child-v2-11.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        },
+        {
+          "path": "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        },
+        {
+          "path": "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        },
+        {
+          "path": "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        },
+        {
+          "path": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        },
+        {
+          "path": "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        },
+        {
+          "path": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        },
+        {
+          "path": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        }
+      ]
+    },
+    "WESTERN_SOURCE_SNAPSHOT": {
+      "owner": "西洋源身份与四体系 v2.6",
+      "cause": "v2.6 所用 Western manifest/观察闭包要求旧 src/browser-app/main.ts 身份，当前字节被 CURRENT_SOURCE_DRIFT 拒绝。",
+      "throwSite": "scripts/four-system-current-status-observation-child-v2-6-lib.mjs (upstream current source verification)",
+      "repair": "定位清单要求的 main.ts 与完整声明源集；旧验证器保留漂移拒绝，新当前状态单独验证。",
+      "status": "first_blocker_verified_not_repaired",
+      "affectedCount": 24,
+      "affectedFiles": [
+        "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs"
+      ],
+      "minimalRerun": [
+        "node",
+        "--test",
+        "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs"
+      ],
+      "fullRerun": [
+        "node",
+        "scripts/run-node-test-group.mjs",
+        "current-governance"
+      ],
+      "inputVersion": "base commit 3a6fa1e3dd7edad26dde203205bf98eaf34e4956; versioned persisted paths and original loader pins retained",
+      "firstFailure": {
+        "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+        "name": "exact persisted loader grants the v2.6 private brand and builder does not",
+        "error": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。"
+      },
+      "expectedValidationPurpose": "Verify the declared Western source identity before deriving the v2.6 four-system observation.",
+      "testInputs": [
+        {
+          "path": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        }
+      ]
+    },
+    "VEDIC_REGISTRY_SNAPSHOT": {
+      "owner": "吠陀父清单与四体系 v2.7",
+      "cause": "v2.7 的吠陀父链检查 scripts/system-contract-downstream-draft-registry.json 固定原字节失败，RAW_IDENTITY_MISMATCH。",
+      "throwSite": "scripts/vedic-independent-engineering-manifest-v2-lib.mjs (v1 fixed parent revalidation)",
+      "repair": "核对该登记的真实旧字节和所属父版本；不能将新登记摘要写入原父记录。",
+      "status": "first_blocker_verified_not_repaired",
+      "affectedCount": 25,
+      "affectedFiles": [
+        "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs"
+      ],
+      "minimalRerun": [
+        "node",
+        "--test",
+        "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs"
+      ],
+      "fullRerun": [
+        "node",
+        "scripts/run-node-test-group.mjs",
+        "current-governance"
+      ],
+      "inputVersion": "base commit 3a6fa1e3dd7edad26dde203205bf98eaf34e4956; versioned persisted paths and original loader pins retained",
+      "firstFailure": {
+        "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+        "name": "exact persisted loader grants the v2.7 private brand and builder does not",
+        "error": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json"
+      },
+      "expectedValidationPurpose": "Verify fixed parent and selected input identities before deriving the v2.7 observation.",
+      "testInputs": [
+        {
+          "path": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        }
+      ]
+    },
+    "ZIWEI_OLD_SCHEMA_PROJECTION": {
+      "owner": "紫微 manifest v3 与四体系 v2.8",
+      "cause": "v3 固定 old-schema projection 要求一处物理合同源扇出，当前还有 HKO 等字段变化，CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH。",
+      "throwSite": "scripts/ziwei-independent-engineering-manifest-v3-lib.mjs:460",
+      "repair": "恢复 v3 当时的真实输入集，完整重跑单源扇出及无权威提升负例；不把当前多处变化说成原单点。",
+      "status": "first_blocker_verified_not_repaired",
+      "affectedCount": 19,
+      "affectedFiles": [
+        "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs"
+      ],
+      "minimalRerun": [
+        "node",
+        "--test",
+        "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs"
+      ],
+      "fullRerun": [
+        "node",
+        "scripts/run-node-test-group.mjs",
+        "current-governance"
+      ],
+      "inputVersion": "base commit 3a6fa1e3dd7edad26dde203205bf98eaf34e4956; versioned persisted paths and original loader pins retained",
+      "firstFailure": {
+        "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+        "name": "exact persisted loader grants the v2.8 private brand and builder does not",
+        "error": "Ziwei current old-schema projection 不符合固定漂移账。"
+      },
+      "expectedValidationPurpose": "Verify the fixed old-schema projection and single-physical-source fanout before deriving v2.8.",
+      "testInputs": [
+        {
+          "path": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        }
+      ]
+    },
+    "BAZI_EXPERT_HELPER_SNAPSHOT": {
+      "owner": "八字专家历史辅助检查与四体系 v2.9",
+      "cause": "v2.9 上游明确绑定 bazi-expert-review-packet-lib.mjs 139453 字节/76046086…，当前 helper 不同而触发 PARENT_IDENTITY_MISMATCH。",
+      "throwSite": "scripts/bazi-expert-authority-material-precheck-lib.mjs:714",
+      "repair": "本次已在可达 Git 对象找到 76046086… 精确旧字节；下一步放入隔离历史输入集并复验完整父链，不覆盖现行 helper。",
+      "status": "first_blocker_verified_not_repaired",
+      "affectedCount": 19,
+      "affectedFiles": [
+        "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs"
+      ],
+      "minimalRerun": [
+        "node",
+        "--test",
+        "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs"
+      ],
+      "fullRerun": [
+        "node",
+        "scripts/run-node-test-group.mjs",
+        "current-governance"
+      ],
+      "inputVersion": "base commit 3a6fa1e3dd7edad26dde203205bf98eaf34e4956; versioned persisted paths and original loader pins retained",
+      "firstFailure": {
+        "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+        "name": "exact persisted loader grants the v2.9 private brand and builder does not",
+        "error": "历史 formal expert verifier helper原始字节身份漂移。"
+      },
+      "expectedValidationPurpose": "Bind the historical expert material precheck to its original helper identity before deriving v2.9.",
+      "testInputs": [
+        {
+          "path": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+          "baseVersion": "3a6fa1e3dd7edad26dde203205bf98eaf34e4956"
+        }
+      ]
+    }
+  },
+  "failures": [
+    {
+      "file": "scripts/verify-cross-system-engineering-fact-receipts.test.mjs",
+      "name": "current registry replays two independent producers through system-owned projectors",
+      "firstFailureLine": 28,
+      "observedErrorCode": "LEDGER_MISMATCH",
+      "observedError": "ziwei-doushu requirements 与当前依据、精确 subject inventory 或失败关闭账不一致。",
+      "group": "ZIWEI_REQUIREMENT_INPUT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-cross-system-engineering-fact-receipts.test.mjs",
+      "name": "receipt scope binds current draft manifests and still records zero frozen sources",
+      "firstFailureLine": 75,
+      "observedErrorCode": "LEDGER_MISMATCH",
+      "observedError": "ziwei-doushu requirements 与当前依据、精确 subject inventory 或失败关闭账不一致。",
+      "group": "ZIWEI_REQUIREMENT_INPUT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-cross-system-engineering-fact-receipts.test.mjs",
+      "name": "changed projected fact is rejected even after receipt and registry are resigned",
+      "firstFailureLine": 98,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  Comparison {\n+   code: 'LEDGER_MISMATCH'\n-   code: 'REGISTRY_MISMATCH'\n  }\n",
+      "group": "ZIWEI_REQUIREMENT_INPUT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-cross-system-engineering-fact-receipts.test.mjs",
+      "name": "copied legitimate receipt identity cannot authorize a contradictory system",
+      "firstFailureLine": 108,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  Comparison {\n+   code: 'LEDGER_MISMATCH'\n-   code: 'REGISTRY_MISMATCH'\n  }\n",
+      "group": "ZIWEI_REQUIREMENT_INPUT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-cross-system-engineering-fact-receipts.test.mjs",
+      "name": "manifest component projector and producer digest promotion cannot be fabricated",
+      "firstFailureLine": 118,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  Comparison {\n+   code: 'LEDGER_MISMATCH'\n-   code: 'REGISTRY_MISMATCH'\n  }\n",
+      "group": "ZIWEI_REQUIREMENT_INPUT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-cross-system-engineering-fact-receipts.test.mjs",
+      "name": "Bazi receipt Vedic completion authority and mutation epoch cannot be fabricated",
+      "firstFailureLine": 134,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  Comparison {\n+   code: 'LEDGER_MISMATCH'\n-   code: 'REGISTRY_MISMATCH'\n  }\n",
+      "group": "ZIWEI_REQUIREMENT_INPUT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-cross-system-engineering-fact-receipts.test.mjs",
+      "name": "successful object verification returns a detached recursively frozen registry",
+      "firstFailureLine": 172,
+      "observedErrorCode": "LEDGER_MISMATCH",
+      "observedError": "ziwei-doushu requirements 与当前依据、精确 subject inventory 或失败关闭账不一致。",
+      "group": "ZIWEI_REQUIREMENT_INPUT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-observation-registry-v2.test.mjs",
+      "name": "registry v2 has one exact canonical persisted identity and a private verified result",
+      "firstFailureLine": 69,
+      "observedErrorCode": "ARTIFACT_DRIFT",
+      "observedError": "ARTIFACT_DRIFT: packages/western-astrology-rules-preview-draft/browser-app/index.html 的当前 bytes/SHA-256 与观察候选不一致。",
+      "group": "WESTERN_NOTICE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-observation-registry-v2.test.mjs",
+      "name": "the registry observes Bazi, Ziwei, Western and Vedic in fixed order and pins their current identities",
+      "firstFailureLine": 91,
+      "observedErrorCode": "ARTIFACT_DRIFT",
+      "observedError": "ARTIFACT_DRIFT: packages/western-astrology-rules-preview-draft/browser-app/index.html 的当前 bytes/SHA-256 与观察候选不一致。",
+      "group": "WESTERN_NOTICE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-observation-registry-v2.test.mjs",
+      "name": "all 32 admission gates remain false with exact 0/N binding and 0/2 expert ledgers",
+      "firstFailureLine": 112,
+      "observedErrorCode": "ARTIFACT_DRIFT",
+      "observedError": "ARTIFACT_DRIFT: packages/western-astrology-rules-preview-draft/browser-app/index.html 的当前 bytes/SHA-256 与观察候选不一致。",
+      "group": "WESTERN_NOTICE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-observation-registry-v2.test.mjs",
+      "name": "project legacy-v13 governance is context only and is not inherited by the three independent systems",
+      "firstFailureLine": 133,
+      "observedErrorCode": "ARTIFACT_DRIFT",
+      "observedError": "ARTIFACT_DRIFT: packages/western-astrology-rules-preview-draft/browser-app/index.html 的当前 bytes/SHA-256 与观察候选不一致。",
+      "group": "WESTERN_NOTICE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-observation-registry-v2.test.mjs",
+      "name": "Vedic remains a research observation without manifest, product identity or comparison support",
+      "firstFailureLine": 153,
+      "observedErrorCode": "ARTIFACT_DRIFT",
+      "observedError": "ARTIFACT_DRIFT: packages/western-astrology-rules-preview-draft/browser-app/index.html 的当前 bytes/SHA-256 与观察候选不一致。",
+      "group": "WESTERN_NOTICE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-observation-registry-v2.test.mjs",
+      "name": "cross-system arbitration, equivalence, merging and authority inheritance are all prohibited",
+      "firstFailureLine": 167,
+      "observedErrorCode": "ARTIFACT_DRIFT",
+      "observedError": "ARTIFACT_DRIFT: packages/western-astrology-rules-preview-draft/browser-app/index.html 的当前 bytes/SHA-256 与观察候选不一致。",
+      "group": "WESTERN_NOTICE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-observation-registry-v2.test.mjs",
+      "name": "legacy central registry and receipt registry are preserved but explicitly stale for formal use",
+      "firstFailureLine": 187,
+      "observedErrorCode": "ARTIFACT_DRIFT",
+      "observedError": "ARTIFACT_DRIFT: packages/western-astrology-rules-preview-draft/browser-app/index.html 的当前 bytes/SHA-256 与观察候选不一致。",
+      "group": "WESTERN_NOTICE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-observation-registry-v2.test.mjs",
+      "name": "snapshot claims stop at held-handle endpoints and do not claim epoch, interval or ABA closure",
+      "firstFailureLine": 204,
+      "observedErrorCode": "ARTIFACT_DRIFT",
+      "observedError": "ARTIFACT_DRIFT: packages/western-astrology-rules-preview-draft/browser-app/index.html 的当前 bytes/SHA-256 与观察候选不一致。",
+      "group": "WESTERN_NOTICE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-observation-registry-v2.test.mjs",
+      "name": "re-signed authority, expert, binding, comparison and epoch promotions remain rejected",
+      "firstFailureLine": 215,
+      "observedErrorCode": "ARTIFACT_DRIFT",
+      "observedError": "ARTIFACT_DRIFT: packages/western-astrology-rules-preview-draft/browser-app/index.html 的当前 bytes/SHA-256 与观察候选不一致。",
+      "group": "WESTERN_NOTICE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-observation-registry-v2.test.mjs",
+      "name": "raw identity drift and an unre-signed semantic change fail closed",
+      "firstFailureLine": 235,
+      "observedErrorCode": "ARTIFACT_DRIFT",
+      "observedError": "ARTIFACT_DRIFT: packages/western-astrology-rules-preview-draft/browser-app/index.html 的当前 bytes/SHA-256 与观察候选不一致。",
+      "group": "WESTERN_NOTICE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-observation-registry-v2.test.mjs",
+      "name": "CLI exposes only the calibrated current-observation claims and rejects caller operands",
+      "firstFailureLine": 302,
+      "observedErrorCode": 1,
+      "observedError": "Command failed: C:\\Program Files\\nodejs\\node.exe C:\\Temp\\hakimi-governance-root-causes-20260913\\scripts\\verify-four-system-current-observation-registry-v2.mjs\nFOUR_SYSTEM_CURRENT_OBSERVATION_REGISTRY_V2_MECHANICS_FAILED ARTIFACT_DRIFT\n",
+      "group": "WESTERN_NOTICE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-observation-registry-v2.test.mjs",
+      "name": "exclusive writer cannot overwrite the frozen registry v2 materialization",
+      "firstFailureLine": 331,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The validation function is expected to return \"true\". Received false\n\nCaught error:\n\nError: Command failed: C:\\Program Files\\nodejs\\node.exe C:\\Temp\\hakimi-governance-root-causes-20260913\\scripts\\write-four-system-current-observation-registry-v2.mjs\nfile:///C:/Temp/hakimi-governance-root-causes-2026",
+      "group": "WESTERN_NOTICE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-observation-registry-v2.test.mjs",
+      "name": "legacy central and receipt verifiers remain expected-red instead of being re-signed",
+      "firstFailureLine": 343,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The validation function is expected to return \"true\". Received false\n\nCaught error:\n\nError: Command failed: C:\\Program Files\\nodejs\\node.exe C:\\Temp\\hakimi-governance-root-causes-20260913\\scripts\\verify-cross-system-engineering-fact-receipts.mjs\nziwei-doushu requirements 与当前依据、精确 subject inventory 或",
+      "group": "WESTERN_NOTICE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+      "name": "v2.1 child has one exact canonical persisted identity and only the loader grants its private brand",
+      "firstFailureLine": 56,
+      "observedErrorCode": "CURRENT_GRAPH_BINDING_INVALID",
+      "observedError": "CURRENT_GRAPH_BINDING_INVALID",
+      "group": "VEDIC_BROWSER_GRAPH",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+      "name": "the append-only child preserves stale registry v2 and records three exact staleness reasons",
+      "firstFailureLine": 78,
+      "observedErrorCode": "CURRENT_GRAPH_BINDING_INVALID",
+      "observedError": "CURRENT_GRAPH_BINDING_INVALID",
+      "group": "VEDIC_BROWSER_GRAPH",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+      "name": "each system keeps an independent current or drift status without claiming four current full manifests",
+      "firstFailureLine": 98,
+      "observedErrorCode": "CURRENT_GRAPH_BINDING_INVALID",
+      "observedError": "CURRENT_GRAPH_BINDING_INVALID",
+      "group": "VEDIC_BROWSER_GRAPH",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+      "name": "Vedic binds observation, engineering manifest and isolated Edge/Chrome fact child without product-runtime promotion",
+      "firstFailureLine": 117,
+      "observedErrorCode": "CURRENT_GRAPH_BINDING_INVALID",
+      "observedError": "CURRENT_GRAPH_BINDING_INVALID",
+      "group": "VEDIC_BROWSER_GRAPH",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+      "name": "all 32 admission gates, source bindings, expert reviews and authority ledgers stay red",
+      "firstFailureLine": 137,
+      "observedErrorCode": "CURRENT_GRAPH_BINDING_INVALID",
+      "observedError": "CURRENT_GRAPH_BINDING_INVALID",
+      "group": "VEDIC_BROWSER_GRAPH",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+      "name": "legacy-v13 / 13 / null remains project context and is not inherited by independent systems",
+      "firstFailureLine": 157,
+      "observedErrorCode": "CURRENT_GRAPH_BINDING_INVALID",
+      "observedError": "CURRENT_GRAPH_BINDING_INVALID",
+      "group": "VEDIC_BROWSER_GRAPH",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+      "name": "cross-system scoring, weighting, voting, averaging, model arbitration, merging and equivalence remain forbidden",
+      "firstFailureLine": 178,
+      "observedErrorCode": "CURRENT_GRAPH_BINDING_INVALID",
+      "observedError": "CURRENT_GRAPH_BINDING_INVALID",
+      "group": "VEDIC_BROWSER_GRAPH",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+      "name": "the child keeps seven evidence accounts separate and no digest or endpoint is a signature",
+      "firstFailureLine": 194,
+      "observedErrorCode": "CURRENT_GRAPH_BINDING_INVALID",
+      "observedError": "CURRENT_GRAPH_BINDING_INVALID",
+      "group": "VEDIC_BROWSER_GRAPH",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+      "name": "snapshot claims stop at per-file held buffers and do not claim atomicity, epoch, interval or ABA closure",
+      "firstFailureLine": 210,
+      "observedErrorCode": "CURRENT_GRAPH_BINDING_INVALID",
+      "observedError": "CURRENT_GRAPH_BINDING_INVALID",
+      "group": "VEDIC_BROWSER_GRAPH",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+      "name": "re-digested authority, manifest, gate, comparison and epoch promotions are rejected",
+      "firstFailureLine": 221,
+      "observedErrorCode": "CURRENT_GRAPH_BINDING_INVALID",
+      "observedError": "CURRENT_GRAPH_BINDING_INVALID",
+      "group": "VEDIC_BROWSER_GRAPH",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+      "name": "raw and semantic persisted identity drift fail before any private brand can be granted",
+      "firstFailureLine": 241,
+      "observedErrorCode": "CURRENT_GRAPH_BINDING_INVALID",
+      "observedError": "CURRENT_GRAPH_BINDING_INVALID",
+      "group": "VEDIC_BROWSER_GRAPH",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+      "name": "semantic digest binds an own __proto__ JSON field and the boundary rejects it as unknown",
+      "firstFailureLine": 283,
+      "observedErrorCode": "CURRENT_GRAPH_BINDING_INVALID",
+      "observedError": "CURRENT_GRAPH_BINDING_INVALID",
+      "group": "VEDIC_BROWSER_GRAPH",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+      "name": "captured brand primitives resist post-load WeakSet and Object.isFrozen poisoning",
+      "firstFailureLine": 307,
+      "observedErrorCode": "CURRENT_GRAPH_BINDING_INVALID",
+      "observedError": "CURRENT_GRAPH_BINDING_INVALID",
+      "group": "VEDIC_BROWSER_GRAPH",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+      "name": "CLI reports only calibrated current-status claims and rejects operands",
+      "firstFailureLine": 321,
+      "observedErrorCode": 1,
+      "observedError": "Command failed: C:\\Program Files\\nodejs\\node.exe C:\\Temp\\hakimi-governance-root-causes-20260913\\scripts\\verify-four-system-current-status-observation-child-v2-1.mjs\nFOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_1_MECHANICS_FAILED UNEXPECTED_ERROR\n",
+      "group": "VEDIC_BROWSER_GRAPH",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-1.test.mjs",
+      "name": "CLI anchors to its own workspace, rejects preload environments and imports without side effects",
+      "firstFailureLine": 353,
+      "observedErrorCode": 1,
+      "observedError": "Command failed: C:\\Program Files\\nodejs\\node.exe C:\\Temp\\hakimi-governance-root-causes-20260913\\scripts\\verify-four-system-current-status-observation-child-v2-1.mjs\nFOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_1_MECHANICS_FAILED UNEXPECTED_ERROR\n",
+      "group": "VEDIC_BROWSER_GRAPH",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-10.test.mjs",
+      "name": "v2.10 changes only Western current endpoints and browser evidence",
+      "firstFailureLine": 29,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-10.test.mjs",
+      "name": "current projection exactly equals persisted canonical projection",
+      "firstFailureLine": 49,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-10.test.mjs",
+      "name": "authority promotion and non-Western drift fail closed",
+      "firstFailureLine": 58,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-10.test.mjs",
+      "name": "CLI accepts no operands and rejects operands or Node loader environment",
+      "firstFailureLine": 81,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "FOUR_SYSTEM_CURRENT_STATUS_V2_10_INTERNAL_FAILURE\n\n\n1 !== 0\n",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-11.test.mjs",
+      "name": "v2.11 changes only Western endpoints/status while preserving 0/32 and all authority false",
+      "firstFailureLine": 12,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-11.test.mjs",
+      "name": "persisted v2.11 equals current projection and rejects authority promotion",
+      "firstFailureLine": 30,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs",
+      "name": "fixed-path v2.12 loader verifies its exact persisted child",
+      "firstFailureLine": 42,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs",
+      "name": "fresh projection is byte-for-byte the canonical persisted v2.12",
+      "firstFailureLine": 50,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs",
+      "name": "Bazi, Ziwei, and Western remain canonical exact parent copies",
+      "firstFailureLine": 64,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs",
+      "name": "Vedic v2 endpoint is replaced exactly once by current recursive v3",
+      "firstFailureLine": 74,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs",
+      "name": "aggregate remains 0/32 and Vedic remains 0/38 and 0/2",
+      "firstFailureLine": 96,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs",
+      "name": "aggregate keeps legacy-v13 context and all mutation epoch boundaries red",
+      "firstFailureLine": 111,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs",
+      "name": "aggregate and all systems preserve false authority ledgers",
+      "firstFailureLine": 123,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs",
+      "name": "boundary rejects recomputed gate, authority, product, and mutation promotions",
+      "firstFailureLine": 131,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs",
+      "name": "boundary rejects drift in every non-Vedic system copy",
+      "firstFailureLine": 161,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs",
+      "name": "summary is branded and does not promote Vedic",
+      "firstFailureLine": 174,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs",
+      "name": "unbranded build cannot be consumed as a verified v2.12 child",
+      "firstFailureLine": 189,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-12.test.mjs",
+      "name": "CLI succeeds normally and rejects arguments or visible preload state",
+      "firstFailureLine": 198,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "FOUR_SYSTEM_CURRENT_STATUS_V2_12_FAILED PARENT_REVERIFICATION_FAILED\n\n\n1 !== 0\n",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs",
+      "name": "fixed-path v2.13 loader verifies its exact persisted child",
+      "firstFailureLine": 42,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.11 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs",
+      "name": "fresh projection is byte-for-byte the canonical persisted v2.13",
+      "firstFailureLine": 50,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.11 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs",
+      "name": "Bazi, Western, and Vedic remain canonical exact v2.12 copies",
+      "firstFailureLine": 64,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.11 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs",
+      "name": "Ziwei v3 endpoint is replaced exactly once by current authored-root v4",
+      "firstFailureLine": 74,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.11 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs",
+      "name": "aggregate remains 0/32 and Ziwei remains 0/27 and 0/2",
+      "firstFailureLine": 96,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.11 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs",
+      "name": "aggregate keeps legacy-v13 context and all mutation epoch boundaries red",
+      "firstFailureLine": 111,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.11 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs",
+      "name": "aggregate and all systems preserve false authority ledgers",
+      "firstFailureLine": 123,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.11 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs",
+      "name": "boundary rejects recomputed gate, authority, product, and mutation promotions",
+      "firstFailureLine": 131,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.11 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs",
+      "name": "boundary rejects drift in every non-Ziwei system copy",
+      "firstFailureLine": 161,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.11 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs",
+      "name": "summary is branded and does not promote Ziwei",
+      "firstFailureLine": 174,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.11 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs",
+      "name": "unbranded build cannot be consumed as a verified v2.13 child",
+      "firstFailureLine": 189,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.11 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-13.test.mjs",
+      "name": "CLI succeeds normally and rejects arguments or visible preload state",
+      "firstFailureLine": 198,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "FOUR_SYSTEM_CURRENT_STATUS_V2_13_FAILED PARENT_REVERIFICATION_FAILED\n\n\n1 !== 0\n",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+      "name": "fixed-path v2.14 loader verifies the exact persisted child and private brand",
+      "firstFailureLine": 41,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.12 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+      "name": "fresh projection exactly matches canonical persisted v2.14 bytes",
+      "firstFailureLine": 49,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.12 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+      "name": "Bazi, Ziwei, and Vedic are canonical exact v2.13 copies",
+      "firstFailureLine": 62,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.12 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+      "name": "Western v4 endpoint is replaced exactly once by recursive-root v5",
+      "firstFailureLine": 72,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.12 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+      "name": "Western browser evidence is byte-identical to v2.13 and was not rerun",
+      "firstFailureLine": 90,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.12 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+      "name": "aggregate remains 0/32 and Western remains 0/28 and 0/2",
+      "firstFailureLine": 101,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.12 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+      "name": "legacy-v13 context and all mutation epoch boundaries remain red",
+      "firstFailureLine": 117,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.12 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+      "name": "aggregate and all four systems preserve false authority ledgers",
+      "firstFailureLine": 129,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.12 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+      "name": "boundary rejects recomputed aggregate, Western, product, authority, and epoch promotions",
+      "firstFailureLine": 137,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.12 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+      "name": "boundary rejects any drift in Bazi, Ziwei, or Vedic canonical copies",
+      "firstFailureLine": 169,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.12 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+      "name": "boundary rejects drift in cross-system policy or aggregate summary",
+      "firstFailureLine": 180,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.12 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+      "name": "branded summary exposes no admission or publication promotion",
+      "firstFailureLine": 194,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.12 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+      "name": "unbranded build cannot be consumed as a verified v2.14 child",
+      "firstFailureLine": 209,
+      "observedErrorCode": "PARENT_REVERIFICATION_FAILED",
+      "observedError": "PARENT_REVERIFICATION_FAILED: four-system v2.12 复验失败。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-14.test.mjs",
+      "name": "CLI succeeds normally and rejects arguments or visible preload state",
+      "firstFailureLine": 216,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "FOUR_SYSTEM_CURRENT_STATUS_V2_14_FAILED PARENT_REVERIFICATION_FAILED\n\n\n1 !== 0\n",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "v2.2 child has one exact canonical persisted identity and only the loader grants its private brand",
+      "firstFailureLine": 61,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "the append-only child preserves stale v2.1 predecessor and records only the new Ziwei staleness relation",
+      "firstFailureLine": 83,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "each system keeps an independent current or drift status without claiming four current full manifests",
+      "firstFailureLine": 104,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "Ziwei consumes only the new private drift receipt and records no current manifest or browser evidence",
+      "firstFailureLine": 123,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "Vedic binds observation, engineering manifest and isolated Edge/Chrome fact child without product-runtime promotion",
+      "firstFailureLine": 150,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "all 32 admission gates, source bindings, expert reviews and authority ledgers stay red",
+      "firstFailureLine": 170,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "legacy-v13 / 13 / null remains project context and is not inherited by independent systems",
+      "firstFailureLine": 190,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "cross-system scoring, weighting, voting, averaging, model arbitration, merging and equivalence remain forbidden",
+      "firstFailureLine": 211,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "the child keeps seven evidence accounts separate and no digest or endpoint is a signature",
+      "firstFailureLine": 227,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "snapshot claims stop at per-file held buffers and do not claim atomicity, epoch, interval or ABA closure",
+      "firstFailureLine": 243,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "re-digested authority, manifest, browser, gate, comparison, epoch, lineage and version promotions are rejected",
+      "firstFailureLine": 254,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "raw and semantic persisted identity drift fail before any private brand can be granted",
+      "firstFailureLine": 278,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "local canonical capture and exact-key checks resist Array index setters and global String replacement",
+      "firstFailureLine": 320,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "semantic digest binds an own __proto__ JSON field and the boundary rejects it as unknown",
+      "firstFailureLine": 364,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "captured brand primitives resist post-load WeakSet and Object.isFrozen poisoning",
+      "firstFailureLine": 388,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "CLI reports only calibrated current-status claims and rejects operands",
+      "firstFailureLine": 402,
+      "observedErrorCode": 1,
+      "observedError": "Command failed: C:\\Program Files\\nodejs\\node.exe C:\\Temp\\hakimi-governance-root-causes-20260913\\scripts\\verify-four-system-current-status-observation-child-v2-2.mjs\nFOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_2_MECHANICS_FAILED UNEXPECTED_ERROR\n",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-2.test.mjs",
+      "name": "CLI anchors to its own workspace, rejects preload environments and imports without side effects",
+      "firstFailureLine": 446,
+      "observedErrorCode": 1,
+      "observedError": "Command failed: C:\\Program Files\\nodejs\\node.exe C:\\Temp\\hakimi-governance-root-causes-20260913\\scripts\\verify-four-system-current-status-observation-child-v2-2.mjs\nFOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_2_MECHANICS_FAILED UNEXPECTED_ERROR\n",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+      "name": "v2.3 has one fixed canonical persisted identity and only its loader grants the private brand",
+      "firstFailureLine": 61,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+      "name": "v2.3 directly consumes exactly the branded current v2.2 parent and Western receipt",
+      "firstFailureLine": 81,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+      "name": "private brands cannot be forged by cloning either direct input",
+      "firstFailureLine": 115,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+      "name": "lineage binds v2.2, preserves its Ziwei reason, and appends only the Western receipt reason",
+      "firstFailureLine": 150,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+      "name": "Western retains v1.1 and appends the current drift receipt while every gate remains red",
+      "firstFailureLine": 171,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+      "name": "Bazi, Ziwei, Vedic, summary, cross-system policy and governance remain byte-for-byte JSON-equal to v2.2",
+      "firstFailureLine": 194,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+      "name": "authority, Western manifest/browser/status and cross-system promotions are rejected after re-digest",
+      "firstFailureLine": 210,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+      "name": "changes to any non-Western system or the unchanged summary fail exact parent projection",
+      "firstFailureLine": 236,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+      "name": "unknown top-level keys, own __proto__ fields and invalid digests fail closed",
+      "firstFailureLine": 254,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+      "name": "canonical capture, digest, exact comparison and key checks resist Array numeric setters and global String replacement",
+      "firstFailureLine": 307,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+      "name": "local branded projection survives global Promise replacement without hiding the recursive parent-loader boundary",
+      "firstFailureLine": 352,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+      "name": "raw and semantic persisted identity drift fails before private brand grant",
+      "firstFailureLine": 379,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-3.test.mjs",
+      "name": "CLI reports calibrated v2.3 claims from its own workspace",
+      "firstFailureLine": 403,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "Expected values to be strictly equal:\n\n1 !== 0\n",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "exact persisted loader grants the v2.4 private brand and builder does not",
+      "firstFailureLine": 76,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "createdAt is canonical UTC and does not exceed the fixed build upper bound",
+      "firstFailureLine": 94,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "v2.3 and Bazi successor are exact full-loader private brands with fixed raw+self bindings",
+      "firstFailureLine": 104,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "only Bazi endpoint and status differ from v2.3",
+      "firstFailureLine": 130,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "Ziwei, Western and Vedic are canonical exact copies of v2.3",
+      "firstFailureLine": 148,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "formal full Manifest remains false and all four systems keep zero gates and authority",
+      "firstFailureLine": 156,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "v2.3 non-Bazi projection mutation is rejected even after v2.4 self resealing",
+      "firstFailureLine": 173,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "Bazi projection mutation beyond endpoint/status is rejected after self resealing",
+      "firstFailureLine": 187,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "clone and exact-content reseal never gain the v2.4 private brand",
+      "firstFailureLine": 195,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "authority, registry and owner promotion are rejected after self resealing",
+      "firstFailureLine": 206,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "non-atomic, epoch, interval and ABA promotions are rejected",
+      "firstFailureLine": 222,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "project remains legacy-v13 / targetSchema 13 / migrationId null without inheritance",
+      "firstFailureLine": 233,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "captured WeakSet intrinsics resist post-import brand poisoning",
+      "firstFailureLine": 243,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "post-import Object.isFrozen poison still yields an actually deep-frozen brand",
+      "firstFailureLine": 258,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "captured canonical and summary paths ignore poisoned array map and iterator",
+      "firstFailureLine": 273,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-4.test.mjs",
+      "name": "CLI emits one narrow calibrated summary",
+      "firstFailureLine": 292,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_4_FAILED VERIFICATION_FAILED\n\n\n1 !== 0\n",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "exact persisted loader grants the v2.5 private brand and builder does not",
+      "firstFailureLine": 116,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "createdAt is one canonical fixed UTC instant",
+      "firstFailureLine": 155,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "v2.4 parent and Ziwei v1.1 are exact fixed-path full-loader private brands",
+      "firstFailureLine": 167,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "top-level delta is limited to v2.5 identity, bindings, lineage, disclaimer and digest",
+      "firstFailureLine": 190,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "Bazi, Western and Vedic are canonical-exact v2.4 copies",
+      "firstFailureLine": 219,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "Ziwei changes exactly status, browserRuntimeEvidence and two endpoints",
+      "firstFailureLine": 236,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "Ziwei disclaimer replacement is exact and preserves order/count",
+      "firstFailureLine": 260,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "summary, governance, authority, epoch, atomic and ABA stay canonical-exact/all-red",
+      "firstFailureLine": 289,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "formal full Domain Manifest, gates, expert receipts and authority remain red",
+      "firstFailureLine": 330,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "non-Ziwei projection mutation is rejected after v2.5 resealing",
+      "firstFailureLine": 388,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "Ziwei mutations beyond the three allowed fields are rejected after resealing",
+      "firstFailureLine": 420,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "Ziwei expert/browser endpoint identity drift is rejected after resealing",
+      "firstFailureLine": 463,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "summary, governance, authority and non-atomic promotions are rejected",
+      "firstFailureLine": 500,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "lineage and disclaimer forgery are rejected by exact current projection",
+      "firstFailureLine": 547,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "clone and exact-content reseal never gain the v2.5 private brand",
+      "firstFailureLine": 577,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "captured WeakSet intrinsics resist post-import brand poisoning",
+      "firstFailureLine": 606,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "captured Object.isFrozen resists post-import brand poisoning",
+      "firstFailureLine": 632,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "captured canonical and summary paths ignore poisoned array map and iterator",
+      "firstFailureLine": 654,
+      "observedErrorCode": "MANIFEST_IDENTITY_DRIFT",
+      "observedError": "MANIFEST_IDENTITY_DRIFT: Ziwei persisted/current candidate manifest 身份漂移。",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-5.test.mjs",
+      "name": "CLI emits one narrow calibrated all-red summary",
+      "firstFailureLine": 686,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_5_FAILED VERIFICATION_FAILED\n\n\n1 !== 0\n",
+      "group": "ZIWEI_FIXED_DRIFT_ANCESTRY",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "exact persisted loader grants the v2.6 private brand and builder does not",
+      "firstFailureLine": 116,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "createdAt is one canonical fixed UTC instant",
+      "firstFailureLine": 155,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "v2.5 parent and Western Manifest v2 require exact fixed loader brands",
+      "firstFailureLine": 168,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "top-level delta is limited to v2.6 identity bindings lineage digest and Western",
+      "firstFailureLine": 191,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "Bazi Ziwei and Vedic are canonical exact v2.5 copies",
+      "firstFailureLine": 214,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "Western appends exactly one selected-roots manifest endpoint",
+      "firstFailureLine": 221,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "Western engineering currentness means only three exact selected package roots",
+      "firstFailureLine": 240,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "path-name component routing is not laundered into semantic or domain truth",
+      "firstFailureLine": 286,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "all 32 admission gates and authority ledgers remain red",
+      "firstFailureLine": 302,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "legacy v13 remains project context only",
+      "firstFailureLine": 327,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "epoch atomic interval and ABA remain explicitly unavailable",
+      "firstFailureLine": 352,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "lineage names the exact narrow Western transition",
+      "firstFailureLine": 368,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "Western engineering flag cannot be rolled back after resealing",
+      "firstFailureLine": 394,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "Western full-domain flag cannot be promoted after resealing",
+      "firstFailureLine": 411,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "Western browser evidence cannot be invented after resealing",
+      "firstFailureLine": 428,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "Western endpoint substitution cannot pass after resealing",
+      "firstFailureLine": 445,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "non-Western system drift cannot pass after resealing",
+      "firstFailureLine": 462,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "gate or authority promotion cannot pass after resealing",
+      "firstFailureLine": 478,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "epoch atomic and ABA promotion cannot pass after resealing",
+      "firstFailureLine": 509,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "product release and schema inheritance cannot pass",
+      "firstFailureLine": 532,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "unknown fields cannot pass exact current projection",
+      "firstFailureLine": 562,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "child digest tamper fails before any authority interpretation",
+      "firstFailureLine": 578,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "summary requires the exact persisted private brand",
+      "firstFailureLine": 593,
+      "observedErrorCode": "CURRENT_SOURCE_DRIFT",
+      "observedError": "CURRENT_SOURCE_DRIFT: packages/western-astrology-rules-preview-draft/src/browser-app/main.ts raw identity 漂移。",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-6.test.mjs",
+      "name": "CLI emits one narrow calibrated all-red summary",
+      "firstFailureLine": 615,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_6_FAILED VERIFICATION_FAILED\n\n\n1 !== 0\n",
+      "group": "WESTERN_SOURCE_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "exact persisted loader grants the v2.7 private brand and builder does not",
+      "firstFailureLine": 116,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "createdAt is one canonical fixed UTC instant",
+      "firstFailureLine": 155,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "v2.6 parent and Vedic Manifest v2 require exact fixed loader brands",
+      "firstFailureLine": 168,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "top-level delta is limited to v2.6 identity bindings lineage digest and Vedic",
+      "firstFailureLine": 191,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "Bazi Ziwei and Western are canonical exact v2.6 copies",
+      "firstFailureLine": 214,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "Vedic replaces only manifest endpoint index one and preserves endpoint order",
+      "firstFailureLine": 221,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "Vedic engineering true remains true only for the selected parent-declared 57 paths",
+      "firstFailureLine": 249,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "path-name component routing is not laundered into semantic or domain truth",
+      "firstFailureLine": 335,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "all 32 admission gates and authority ledgers remain red",
+      "firstFailureLine": 362,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "legacy v13 remains project context only",
+      "firstFailureLine": 387,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "epoch atomic interval and ABA remain explicitly unavailable",
+      "firstFailureLine": 412,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "lineage names the exact narrow Vedic transition",
+      "firstFailureLine": 428,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "Vedic engineering flag cannot be rolled back after resealing",
+      "firstFailureLine": 455,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "Vedic full-domain flag cannot be promoted after resealing",
+      "firstFailureLine": 472,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "Vedic browser evidence cannot be invented after resealing",
+      "firstFailureLine": 489,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "Vedic endpoint substitution cannot pass after resealing",
+      "firstFailureLine": 506,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "Vedic v2 cannot be appended beside the retained v1 endpoint",
+      "firstFailureLine": 523,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "non-Vedic system drift cannot pass after resealing",
+      "firstFailureLine": 540,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "gate or authority promotion cannot pass after resealing",
+      "firstFailureLine": 556,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "epoch atomic and ABA promotion cannot pass after resealing",
+      "firstFailureLine": 587,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "product release and schema inheritance cannot pass",
+      "firstFailureLine": 610,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "unknown fields cannot pass exact current projection",
+      "firstFailureLine": 640,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "child digest tamper fails before any authority interpretation",
+      "firstFailureLine": 656,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "summary requires the exact persisted private brand",
+      "firstFailureLine": 671,
+      "observedErrorCode": "RAW_IDENTITY_MISMATCH",
+      "observedError": "Fixed raw identity mismatch: scripts/system-contract-downstream-draft-registry.json",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-7.test.mjs",
+      "name": "CLI emits one narrow calibrated all-red summary",
+      "firstFailureLine": 702,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_7_FAILED VERIFICATION_FAILED\n\n\n1 !== 0\n",
+      "group": "VEDIC_REGISTRY_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "exact persisted loader grants the v2.8 private brand and builder does not",
+      "firstFailureLine": 116,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "createdAt is one fixed canonical UTC instant",
+      "firstFailureLine": 155,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "v2.7 parent and Ziwei v3 require exact private brands",
+      "firstFailureLine": 168,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "top-level delta is limited to v2.7 identity lineage digest and Ziwei projection",
+      "firstFailureLine": 188,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "Bazi Western and Vedic are canonical exact v2.7 copies",
+      "firstFailureLine": 211,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "Ziwei preserves receipt and browser endpoints then appends v3 exactly",
+      "firstFailureLine": 218,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "Ziwei v3 remains selected-path only and all domain gates stay red",
+      "firstFailureLine": 254,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "all 32 admission gates and authority ledgers remain red",
+      "firstFailureLine": 288,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "legacy v13 epoch atomic interval and ABA boundaries are exact copies",
+      "firstFailureLine": 313,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "lineage names the exact append-only Ziwei transition",
+      "firstFailureLine": 330,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "Ziwei engineering flag rollback cannot pass after resealing",
+      "firstFailureLine": 356,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "Ziwei full-domain or browser promotion cannot pass",
+      "firstFailureLine": 368,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "Ziwei endpoint deletion reorder or substitution cannot pass",
+      "firstFailureLine": 390,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "non-Ziwei system drift cannot pass after resealing",
+      "firstFailureLine": 409,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "gate authority product and epoch promotion cannot pass",
+      "firstFailureLine": 420,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "unknown fields cannot pass the exact current projection",
+      "firstFailureLine": 445,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "child digest tamper fails before authority interpretation",
+      "firstFailureLine": 461,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "summary is narrow and requires the persisted private brand",
+      "firstFailureLine": 471,
+      "observedErrorCode": "CURRENT_OLD_SCHEMA_PROJECTION_MISMATCH",
+      "observedError": "Ziwei current old-schema projection 不符合固定漂移账。",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-8.test.mjs",
+      "name": "CLI emits one calibrated all-red summary",
+      "firstFailureLine": 494,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_8_FAILED VERIFICATION_FAILED\n\n\n1 !== 0\n",
+      "group": "ZIWEI_OLD_SCHEMA_PROJECTION",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "exact persisted loader grants the v2.9 private brand and builder does not",
+      "firstFailureLine": 114,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "createdAt is canonical but remains an untrusted clock label",
+      "firstFailureLine": 150,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "v2.8 parent and Bazi v1.1 require exact private brands",
+      "firstFailureLine": 165,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "top-level delta is limited to v2.8 identity lineage digest and Bazi projection",
+      "firstFailureLine": 183,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "Ziwei Western and Vedic are canonical exact v2.8 copies",
+      "firstFailureLine": 206,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "Bazi changes only endpoint zero and currentStatus",
+      "firstFailureLine": 213,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "Bazi v1.1 identity time and zero-gate boundaries are exact",
+      "firstFailureLine": 234,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "all 32 admission gates and authority ledgers remain red",
+      "firstFailureLine": 262,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "legacy v13 epoch atomic interval and ABA boundaries are exact copies",
+      "firstFailureLine": 287,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "lineage names only the append-only Bazi v1.1 transition",
+      "firstFailureLine": 304,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "old double missing or substituted Bazi endpoints cannot pass",
+      "firstFailureLine": 325,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "Bazi status and non-endpoint drift cannot pass after resealing",
+      "firstFailureLine": 349,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "non-Bazi system drift cannot pass after resealing",
+      "firstFailureLine": 370,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "time order gate authority epoch registry and manifest promotion cannot pass",
+      "firstFailureLine": 383,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "unknown fields cannot pass the exact current projection",
+      "firstFailureLine": 408,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "child digest tamper fails before authority interpretation",
+      "firstFailureLine": 424,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "captured brand intrinsics resist post-import WeakSet poisoning",
+      "firstFailureLine": 445,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "summary is narrow and requires the persisted private brand",
+      "firstFailureLine": 460,
+      "observedErrorCode": "PARENT_IDENTITY_MISMATCH",
+      "observedError": "历史 formal expert verifier helper原始字节身份漂移。",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-four-system-current-status-observation-child-v2-9.test.mjs",
+      "name": "CLI emits one calibrated all-red summary",
+      "firstFailureLine": 480,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_9_FAILED VERIFICATION_FAILED\n\n\n1 !== 0\n",
+      "group": "BAZI_EXPERT_HELPER_SNAPSHOT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-independent-domain-release-manifests.test.mjs",
+      "name": "ziwei and western manifests exactly bind their separate current engineering closures",
+      "firstFailureLine": 160,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "Expected values to be strictly equal:\n+ actual - expected\n\n+ '{\"authorityBoundary\":{\"contentTruthEstablished\":false,\"domainAuthorityAuthorized\":false,\"expertClaimsAuthorized\":false,\"expertTruthEstablished\":false,\"formalAdmissionAuthorized\":false,\"publicDeploymentAuthorized\":false,\"publicReleaseAutho",
+      "group": "DOMAIN_MANIFEST_INPUTS",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-independent-domain-release-manifests.test.mjs",
+      "name": "pure verification returns a detached recursively frozen but unbranded snapshot",
+      "firstFailureLine": 625,
+      "observedErrorCode": "MANIFEST_MISMATCH",
+      "observedError": "ziwei-doushu manifest 与当前隔离工程闭包或失败关闭账不一致。",
+      "group": "DOMAIN_MANIFEST_INPUTS",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-independent-domain-release-manifests.test.mjs",
+      "name": "full-load APIs return only detached recursively frozen WeakSet-branded snapshots",
+      "firstFailureLine": 650,
+      "observedErrorCode": "MANIFEST_MISMATCH",
+      "observedError": "ziwei-doushu manifest 与当前隔离工程闭包或失败关闭账不一致。",
+      "group": "DOMAIN_MANIFEST_INPUTS",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-independent-domain-release-manifests.test.mjs",
+      "name": "full-load stays truly recursively frozen when Object.freeze is replaced after module load",
+      "firstFailureLine": 670,
+      "observedErrorCode": "MANIFEST_MISMATCH",
+      "observedError": "ziwei-doushu manifest 与当前隔离工程闭包或失败关闭账不一致。",
+      "group": "DOMAIN_MANIFEST_INPUTS",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-independent-domain-release-manifests.test.mjs",
+      "name": "full-load brand resists WeakSet prototype add and has poisoning after module load",
+      "firstFailureLine": 723,
+      "observedErrorCode": "MANIFEST_MISMATCH",
+      "observedError": "ziwei-doushu manifest 与当前隔离工程闭包或失败关闭账不一致。",
+      "group": "DOMAIN_MANIFEST_INPUTS",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-independent-domain-release-manifests.test.mjs",
+      "name": "canonical comparison resists Array sort replacement after module load",
+      "firstFailureLine": 771,
+      "observedErrorCode": "MANIFEST_MISMATCH",
+      "observedError": "ziwei-doushu manifest 与当前隔离工程闭包或失败关闭账不一致。",
+      "group": "DOMAIN_MANIFEST_INPUTS",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-independent-domain-release-manifests.test.mjs",
+      "name": "canonical comparison resists Array iterator replacement after module load",
+      "firstFailureLine": 799,
+      "observedErrorCode": "MANIFEST_MISMATCH",
+      "observedError": "ziwei-doushu manifest 与当前隔离工程闭包或失败关闭账不一致。",
+      "group": "DOMAIN_MANIFEST_INPUTS",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-independent-domain-release-manifests.test.mjs",
+      "name": "canonical comparison isolates inherited Object and Array toJSON hooks",
+      "firstFailureLine": 830,
+      "observedErrorCode": "MANIFEST_MISMATCH",
+      "observedError": "ziwei-doushu manifest 与当前隔离工程闭包或失败关闭账不一致。",
+      "group": "DOMAIN_MANIFEST_INPUTS",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-independent-domain-release-manifests.test.mjs",
+      "name": "full-load cannot brand a manifest and component closure redirected by Array iterator",
+      "firstFailureLine": 966,
+      "observedErrorCode": "MANIFEST_MISMATCH",
+      "observedError": "ziwei-doushu manifest 与当前隔离工程闭包或失败关闭账不一致。",
+      "group": "DOMAIN_MANIFEST_INPUTS",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-independent-domain-release-manifests.test.mjs",
+      "name": "CLI emits calibrated offline draft closure and explicit all-false authority and observation boundaries",
+      "firstFailureLine": 1115,
+      "observedErrorCode": 1,
+      "observedError": "Command failed: C:\\Program Files\\nodejs\\node.exe C:\\Temp\\hakimi-governance-root-causes-20260913\\scripts\\verify-independent-domain-release-manifests.mjs\n{\"offlineIndependentDraftClosureMechanicallyVerified\":false,\"errorCode\":\"MANIFEST_MISMATCH\",\"message\":\"ziwei-doushu manifest 与当前隔离工程闭包或失败关闭账不一致。\"}\n",
+      "group": "DOMAIN_MANIFEST_INPUTS",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "runs history-checkpoint evidence exactly once and only in its independent job",
+      "firstFailureLine": 2037,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "Expected \"actual\" to be strictly unequal to:\n\n'name: Quick CI\\n' +\n  '\\n' +\n  'on:\\n' +\n  '  pull_request:\\n' +\n  '  push:\\n' +\n  '    branches:\\n' +\n  '      - main\\n' +\n  '  workflow_dispatch:\\n' +\n  '\\n' +\n  'permissions:\\n' +\n  '  contents: read\\n' +\n  '\\n' +\n  'concurrency:\\n' +\n  '  group: qui",
+      "group": "CI_STEP_ANCHOR",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "runs current-index evidence exactly once and only in its independent job",
+      "firstFailureLine": 2062,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "Expected \"actual\" to be strictly unequal to:\n\n'name: Quick CI\\n' +\n  '\\n' +\n  'on:\\n' +\n  '  pull_request:\\n' +\n  '  push:\\n' +\n  '    branches:\\n' +\n  '      - main\\n' +\n  '  workflow_dispatch:\\n' +\n  '\\n' +\n  'permissions:\\n' +\n  '  contents: read\\n' +\n  '\\n' +\n  'concurrency:\\n' +\n  '  group: qui",
+      "group": "CI_STEP_ANCHOR",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "accepts the isolated storage-v13 matrix candidate governance and full formal npm closure",
+      "firstFailureLine": 3983,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "Expected values to be strictly equal:\n\n32 !== 35\n",
+      "group": "LIFECYCLE_COUNTS",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "formal npm closure rejects direct and multihop SW four-chain composition injection",
+      "firstFailureLine": 4934,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /SW A-to-B update candidate tooling must remain outside/u. Input:\n\n'Error: Default lifecycle command or root pre/post hook changed: typecheck.'\n",
+      "group": "LIFECYCLE_INJECTION",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "accepts and freezes the standalone runtime derived-evidence producer bridge family",
+      "firstFailureLine": 4975,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "Expected values to be strictly equal:\n\n32 !== 35\n",
+      "group": "LIFECYCLE_COUNTS",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "formal receipts and every root lifecycle reject producer bridge reachability",
+      "firstFailureLine": 5251,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "typecheck",
+      "group": "LIFECYCLE_INJECTION",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "formal closure rejects direct, multihop, workspace, prefix, workspace flag, and npm.cmd bridge injection",
+      "firstFailureLine": 5313,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /SW A-to-B update candidate tooling must remain outside/u. Input:\n\n'Error: Default lifecycle command or root pre/post hook changed: typecheck.'\n",
+      "group": "LIFECYCLE_INJECTION",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "formal closure rejects embedded shell, direct Node, node -e, split dynamic import, and cycles",
+      "firstFailureLine": 5358,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /SW A-to-B update candidate tooling must remain outside|Formal npm closure refuses an opaque or dynamic terminal command/u. Input:\n\n'Error: Default lifecycle command or root pre/post hook changed: build.'\n",
+      "group": "LIFECYCLE_INJECTION",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "accepts and freezes the standalone producer-bridge four-chain composition v2 family",
+      "firstFailureLine": 5382,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "Expected values to be strictly equal:\n\n32 !== 35\n",
+      "group": "LIFECYCLE_COUNTS",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "formal receipts and every root lifecycle reject producer-bridge composition v2",
+      "firstFailureLine": 5674,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "typecheck",
+      "group": "LIFECYCLE_INJECTION",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "formal closure rejects direct, multihop, prefix, workspace, npm.cmd, and run-script v2 injection",
+      "firstFailureLine": 5736,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /SW A-to-B update candidate tooling must remain outside/u. Input:\n\n'Error: Default lifecycle command or root pre/post hook changed: typecheck.'\n",
+      "group": "LIFECYCLE_INJECTION",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "formal closure rejects embedded shell, direct Node, node -e, split identities, and v2 cycles",
+      "firstFailureLine": 5790,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /SW A-to-B update candidate tooling must remain outside|Formal npm closure refuses an opaque or dynamic terminal command/u. Input:\n\n'Error: Default lifecycle command or root pre/post hook changed: build.'\n",
+      "group": "LIFECYCLE_INJECTION",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "formal npm closure isolates provider sequences and rollback/provider compositions on every reachable path",
+      "firstFailureLine": 6143,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /Provider sequence and rollback\\/provider composition candidate tooling must remain outside/u. Input:\n\n'Error: Default lifecycle command or root pre/post hook changed: typecheck.'\n",
+      "group": "LIFECYCLE_INJECTION",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "formal allowlist and complete npm closure reject SW A-to-B candidate injection",
+      "firstFailureLine": 6203,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "pretest",
+      "group": "LIFECYCLE_INJECTION",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "formal allowlist and complete npm closure reject deployed PWA host/provider composition injection",
+      "firstFailureLine": 6259,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "pretest",
+      "group": "LIFECYCLE_INJECTION",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "formal npm closure follows aliases, workspace prefixes, and embedded composition commands",
+      "firstFailureLine": 6315,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /Deployed-PWA host\\/provider composition candidate tooling must remain outside/u. Input:\n\n'Error: Default lifecycle command or root pre/post hook changed: typecheck.'\n",
+      "group": "LIFECYCLE_INJECTION",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "formal npm closure rejects candidate injection through every root lifecycle",
+      "firstFailureLine": 6344,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "pretest",
+      "group": "LIFECYCLE_INJECTION",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "formal npm closure follows multihop cycles without scanning unreachable candidate scripts",
+      "firstFailureLine": 6365,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /Formal npm\\/lifecycle\\/workspace closure canonical digest drifted/u. Input:\n\n'Error: Default lifecycle command or root pre/post hook changed: typecheck.'\n",
+      "group": "LIFECYCLE_INJECTION",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "formal npm closure follows workspace, prefix, and embedded Playwright lifecycle roots",
+      "firstFailureLine": 6408,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /Storage-v13 matrix candidate tooling must remain outside/u. Input:\n\n'Error: Default lifecycle governance or workspace build hooks changed.'\n",
+      "group": "LIFECYCLE_INJECTION",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-release-governance.test.mjs",
+      "name": "formal npm closure parses npm.cmd flags and rejects unknown selectors or grammar",
+      "firstFailureLine": 6433,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /Storage-v13 matrix candidate tooling must remain outside/u. Input:\n\n'Error: Default lifecycle command or root pre/post hook changed: test.'\n",
+      "group": "LIFECYCLE_INJECTION",
+      "closedByFullGroupReplay": true
+    },
+    {
+      "file": "scripts/verify-system-admission-registry.test.mjs",
+      "name": "current registry binds four independent systems and their selected evidence closure",
+      "firstFailureLine": 25,
+      "observedErrorCode": "MANIFEST_MISMATCH",
+      "observedError": "八字体系 manifest 与当前组件、失败关闭门或证据分账不一致。",
+      "group": "BAZI_REGISTRY_INPUT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-system-admission-registry.test.mjs",
+      "name": "legacy-v13 governance and mutation epoch cannot be widened by the registry",
+      "firstFailureLine": 55,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /准入登记与当前证据闭包、独立准入门或失败关闭边界不一致/u. Input:\n\n'BaziDomainReleaseManifestError: 八字体系 manifest 与当前组件、失败关闭门或证据分账不一致。'\n",
+      "group": "BAZI_REGISTRY_INPUT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-system-admission-registry.test.mjs",
+      "name": "no system can inherit bazi authority or self-promote to formal admission",
+      "firstFailureLine": 70,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /准入登记与当前证据闭包、独立准入门或失败关闭边界不一致/u. Input:\n\n'BaziDomainReleaseManifestError: 八字体系 manifest 与当前组件、失败关闭门或证据分账不一致。'\n",
+      "group": "BAZI_REGISTRY_INPUT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-system-admission-registry.test.mjs",
+      "name": "draft packages and research-only ADR cannot be renamed as production products",
+      "firstFailureLine": 86,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /准入登记与当前证据闭包、独立准入门或失败关闭边界不一致/u. Input:\n\n'BaziDomainReleaseManifestError: 八字体系 manifest 与当前组件、失败关闭门或证据分账不一致。'\n",
+      "group": "BAZI_REGISTRY_INPUT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-system-admission-registry.test.mjs",
+      "name": "all eight admission gates remain exact and fail closed",
+      "firstFailureLine": 95,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /准入登记与当前证据闭包、独立准入门或失败关闭边界不一致/u. Input:\n\n'BaziDomainReleaseManifestError: 八字体系 manifest 与当前组件、失败关闭门或证据分账不一致。'\n",
+      "group": "BAZI_REGISTRY_INPUT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-system-admission-registry.test.mjs",
+      "name": "cross-system scoring, weighting, voting, model arbitration and concept equivalence stay prohibited",
+      "firstFailureLine": 144,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /准入登记与当前证据闭包、独立准入门或失败关闭边界不一致/u. Input:\n\n'BaziDomainReleaseManifestError: 八字体系 manifest 与当前组件、失败关闭门或证据分账不一致。'\n",
+      "group": "BAZI_REGISTRY_INPUT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-system-admission-registry.test.mjs",
+      "name": "vedic astrology cannot enter the comparison draft before independent admission",
+      "firstFailureLine": 161,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /准入登记与当前证据闭包、独立准入门或失败关闭边界不一致/u. Input:\n\n'BaziDomainReleaseManifestError: 八字体系 manifest 与当前组件、失败关闭门或证据分账不一致。'\n",
+      "group": "BAZI_REGISTRY_INPUT",
+      "closedByFullGroupReplay": false
+    },
+    {
+      "file": "scripts/verify-system-admission-registry.test.mjs",
+      "name": "artifact digest drift and unknown authorization fields fail closed",
+      "firstFailureLine": 169,
+      "observedErrorCode": "ERR_ASSERTION",
+      "observedError": "The input did not match the regular expression /准入登记与当前证据闭包、独立准入门或失败关闭边界不一致/u. Input:\n\n'BaziDomainReleaseManifestError: 八字体系 manifest 与当前组件、失败关闭门或证据分账不一致。'\n",
+      "group": "BAZI_REGISTRY_INPUT",
+      "closedByFullGroupReplay": false
+    }
+  ],
+  "authorityPromoted": false,
+  "all726TestIdentitiesUnchanged": true
+}

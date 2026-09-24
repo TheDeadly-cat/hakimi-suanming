@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import test from "node:test";
+import { after, before, test } from "node:test";
 
 import {
   FourSystemCurrentStatusObservationChildV27Error,
@@ -22,10 +23,16 @@ import {
 import {
   loadVedicIndependentEngineeringManifestV2
 } from "./vedic-independent-engineering-manifest-v2-lib.mjs";
+import { attachCurrentFourSystemCli } from "./four-system-v22-history.test-fixture.mjs";
+import {
+  FOUR_SYSTEM_V27_ADDITIONAL_ARCHIVE_URL,
+  createFourSystemV27HistoricalInputs,
+  parseFourSystemV27AdditionalArchive
+} from "./four-system-v27-history.test-fixture.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, "..");
-const CLI = path.join(
+const ACTUAL_CLI = path.join(
   HERE,
   "verify-four-system-current-status-observation-child-v2-7.mjs"
 );
@@ -38,16 +45,64 @@ const ARTIFACT = path.join(
 const PRELOAD_FAILURE =
   "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_7_FAILED"
   + " VISIBLE_PRELOAD_OPTIONS_REJECTED\n";
+let historicalInputs;
+let CLI;
+before(async () => {
+  historicalInputs = await createFourSystemV27HistoricalInputs();
+  CLI = await attachCurrentFourSystemCli(historicalInputs, 7);
+  assert.deepEqual(await readFile(ARTIFACT), await readFile(path.join(historicalInputs.root,
+    "content/system-admission/four-system-current-status-observation-child.v2.7.0.json")));
+});
+after(async () => { await historicalInputs?.cleanup(); });
+
+test("current v2.7 loader and source CLI cannot inherit historical Vedic input success", async () => {
+  await assert.rejects(loadFourSystemCurrentStatusObservationChildV27(ROOT),
+    { code: "MANIFEST_IDENTITY_DRIFT" });
+  const run = spawnSync(process.execPath, [ACTUAL_CLI], {
+    cwd: historicalInputs.root, encoding: "utf8", env: cleanEnv(), windowsHide: true
+  });
+  assert.equal(run.status, 1);
+  assert.equal(run.stdout, "");
+  assert.equal(run.stderr, "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_7_FAILED VERIFICATION_FAILED\n");
+});
+
+test("v2.7 supplemental archive rejects tampering, truncation and a valid empty ZIP", async () => {
+  const original = await readFile(FOUR_SYSTEM_V27_ADDITIONAL_ARCHIVE_URL);
+  assert.equal(parseFourSystemV27AdditionalArchive(original).manifest.files.length, 2);
+  const changed = Buffer.from(original); changed[Math.floor(changed.length / 2)] ^= 1;
+  const { zipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+  for (const bytes of [changed, original.subarray(0, -1), zipSync({})]) {
+    assert.throws(() => parseFourSystemV27AdditionalArchive(bytes), /v2.7 additional archive identity changed/u);
+  }
+});
+
+test("v2.7 refuses changed selected Vedic source inputs and a missing manifest", async () => {
+  const inputs = await createFourSystemV27HistoricalInputs();
+  try {
+    const target = path.join(inputs.root, "isolated-drafts/vedic-civil-time-fact-browser-draft/src/main.ts");
+    const original = await readFile(target);
+    const changed = Buffer.from(original); changed[0] ^= 1;
+    await writeFile(target, changed);
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV27(inputs.root),
+      { code: "CURRENT_GRAPH_BINDING_INVALID" });
+    await writeFile(target, original);
+    await rm(path.join(inputs.root, "content/domain-release/vedic-astrology.engineering-draft.v0.1.0.manifest.v2.json"));
+    await assert.rejects(loadFourSystemCurrentStatusObservationChildV27(inputs.root),
+      { code: "MANIFEST_MISSING" });
+  } finally {
+    await inputs.cleanup();
+  }
+});
 
 let fixturePromise;
 
 function fixture() {
   if (!fixturePromise) {
     fixturePromise = Promise.all([
-      loadFourSystemCurrentStatusObservationChildV27(ROOT),
-      loadFourSystemCurrentStatusObservationChildV26(ROOT),
-      loadVedicIndependentEngineeringManifestV2(ROOT),
-      buildCurrentFourSystemCurrentStatusObservationChildV27(ROOT)
+      loadFourSystemCurrentStatusObservationChildV27(historicalInputs.root),
+      loadFourSystemCurrentStatusObservationChildV26(historicalInputs.root),
+      loadVedicIndependentEngineeringManifestV2(historicalInputs.root),
+      buildCurrentFourSystemCurrentStatusObservationChildV27(historicalInputs.root)
     ]).then(([loaded, parent, vedicManifest, built]) => ({
       loaded,
       parent,

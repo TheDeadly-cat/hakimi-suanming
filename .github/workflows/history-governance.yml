@@ -1,0 +1,63 @@
+name: Historical governance
+
+on:
+  pull_request:
+    paths:
+      - ".gitattributes"
+      - ".node-version"
+      - ".npmrc"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/history-governance.yml"
+      - "scripts/node-test-groups.json"
+      - "scripts/run-node-test-group.mjs"
+      - "scripts/verify-node-test-groups.mjs"
+      - "scripts/fixtures/**"
+      - "scripts/*history*.mjs"
+      - "scripts/four-system*.mjs"
+      - "scripts/verify-four-system*.mjs"
+      - "scripts/*domain*manifest*.mjs"
+      - "scripts/*source*requirements*.mjs"
+      - "scripts/*scoped-current*.mjs"
+      - "scripts/*current-index*.mjs"
+      - "scripts/*cross-system-engineering-fact*.mjs"
+      - "content/domain-release/**"
+      - "content/system-admission/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: historical-governance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  current-governance:
+    name: Complete current-governance history group
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the exact requested head
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Set up pinned npm
+        run: npm install --global npm@11.13.0
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Run every registered current-governance test
+        run: node scripts/run-node-test-group.mjs current-governance
+      - name: Preserve every outcome including failures and missing results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-governance-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/node-groups/current-governance-*/
+          if-no-files-found: error
+          retention-days: 14

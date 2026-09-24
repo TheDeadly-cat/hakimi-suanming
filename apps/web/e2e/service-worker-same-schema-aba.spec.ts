@@ -1,6 +1,5 @@
 import { createServer, type Server } from "node:http";
-import { mkdtemp, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 import {
@@ -14,6 +13,7 @@ import {
   type SwTwoGenerationArtifactSnapshot
 } from "../sw-two-generation-artifact-identity";
 import {
+  createReleasePersistentProfile,
   launchReleasePersistentContext,
   requireReleaseBrowserRuntimeProduct
 } from "./release-browser-persistent-context";
@@ -487,7 +487,7 @@ test("current source same-Schema worker A to B to A", async ({}, testInfo) => {
   let profilePath: string;
   let context: BrowserContext;
   try {
-    profilePath = await mkdtemp(path.join(tmpdir(), "hb-aba-"));
+    profilePath = await createReleasePersistentProfile();
     context = await launchReleasePersistentContext({ projectName: testInfo.project.name, userDataDir: profilePath });
   } catch (error) {
     await switchServer.close();

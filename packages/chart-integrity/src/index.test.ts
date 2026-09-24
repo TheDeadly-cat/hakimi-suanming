@@ -21,6 +21,7 @@ import {
 import { sha256Hex } from "@hakimi/integrity";
 import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
 import { RETAINED_TIME_ZONE_DATABASE_2025B } from "@hakimi/tzdb-core";
+import * as timeCore from "@hakimi/time-core";
 import {
   CalculatedChartIntegrityError,
   classifyRevisionNatalReplay,
@@ -163,6 +164,45 @@ describe("versioned chart integrity", () => {
 });
 
 describe("Revision natal read-only replay", () => {
+  it("rechecks current and retained records after their validation rules have been warmed", async () => {
+    const revisions = [
+      revisionFromChart(await calculateChart(birth, WORKING_DEFAULT_RULE_PROFILE)),
+      revisionFromChart(await calculateChartForBundledSnapshot(
+        birth, WORKING_DEFAULT_RULE_PROFILE, RETAINED_TIME_ZONE_DATABASE_2025B.snapshotId
+      ))
+    ];
+    for (const revision of revisions) {
+      await expect(verifyRevisionRecordIntegrity(revision)).resolves.toEqual(revision);
+      const changed = structuredClone(revision);
+      changed.manifest.resultHash = "0".repeat(64);
+      await expect(verifyRevisionRecordIntegrity(changed)).rejects.toMatchObject({
+        code: "CALCULATED_CHART_INTEGRITY_MISMATCH", mismatch: "result"
+      });
+      await expect(verifyRevisionRecordIntegrity(revision)).resolves.toEqual(revision);
+    }
+  });
+
+  it("does not reuse another resolver's timezone predicate after validation rules are warmed", async () => {
+    const revision = revisionFromChart(await calculateChart(birth, WORKING_DEFAULT_RULE_PROFILE));
+    const descriptor = revision.manifest.timeZoneDatabase!;
+    const context = await timeCore.loadBundledTimeZoneCalculationContext(descriptor.snapshotId, descriptor);
+    await verifyRevisionRecordIntegrity(revision);
+    const resolverLoad = vi.spyOn(timeCore, "loadBundledTimeZoneCalculationContext")
+      .mockResolvedValueOnce({
+        ...context,
+        resolver: {
+          ...context.resolver,
+          isTimeZoneName: (zone: string) => zone !== birth.timeZone && context.resolver.isTimeZoneName(zone)
+        }
+      });
+    try {
+      await expect(verifyRevisionRecordIntegrity(revision)).rejects.toThrow();
+    } finally {
+      resolverLoad.mockRestore();
+    }
+    await expect(verifyRevisionRecordIntegrity(revision)).resolves.toEqual(revision);
+  });
+
   it("classifies and exactly replays the current 2026c executor and artifact", async () => {
     const revision = revisionFromChart(await calculateChart(birth, WORKING_DEFAULT_RULE_PROFILE));
 

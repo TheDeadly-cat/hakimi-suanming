@@ -1205,7 +1205,8 @@ describe("LocalSourceAwareReviewPanel", () => {
         expectedSnapshotSha256: stableSnapshot.storageSnapshot.snapshotSha256
       }]
     ]);
-    expect(document.activeElement).toBe(result);
+    // Finding the committed region does not guarantee its focus effect ran yet.
+    await waitFor(() => expect(document.activeElement).toBe(result));
     expect(container.textContent).not.toContain(FIRST_CAPTURE_SENTINEL);
     expect(within(result).getByText(MALICIOUS_QUOTE)).toBeTruthy();
     expect(within(result).getByText("第二次复核后的本机资料")).toBeTruthy();

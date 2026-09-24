@@ -1,16 +1,20 @@
-import os from "node:os";
-import path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
+import { migrationDiagnosticOutput } from "../playwright.migration-diagnostics.ts";
+
+const diagnostics = migrationDiagnosticOutput("orphaned-v13-recovery");
 
 export default defineConfig({
   testDir: ".",
   testMatch: "orphaned-v13-recovery.spec.ts",
-  outputDir: path.join(os.tmpdir(), "hakimi-bazi-orphaned-v13-recovery-results"),
+  outputDir: diagnostics.testResults,
   timeout: 420_000,
   expect: { timeout: 25_000 },
   fullyParallel: false,
   workers: 1,
-  reporter: "line",
+  forbidOnly: true,
+  retries: 0,
+  failOnFlakyTests: true,
+  reporter: [["line"], ["json", { outputFile: diagnostics.jsonReport }]],
   use: {
     serviceWorkers: "allow",
     trace: "retain-on-failure",

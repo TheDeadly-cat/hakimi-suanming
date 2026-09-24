@@ -1137,6 +1137,38 @@ function withoutExactLine(source, exactLine) {
   return lines.join("\n");
 }
 
+// Mutate a named CI job, independent of changing human-readable step labels.
+function withAdditionalJobCommand(source, jobId, command) {
+  const lines = source.split(/\r?\n/u);
+  const start = lines.indexOf(`  ${jobId}:`);
+  assert.notEqual(start, -1, `Fixture job is missing: ${jobId}`);
+  let end = start + 1;
+  while (end < lines.length && !/^  [a-z][a-z0-9-]*:$/u.test(lines[end])) end += 1;
+  const steps = lines.indexOf("    steps:", start);
+  assert(steps > start && steps < end, `Fixture steps are missing: ${jobId}`);
+  lines.splice(steps + 1, 0, "      - name: Inject a duplicate evidence command", `        run: ${command}`);
+  return lines.join("\n");
+}
+
+// Coordinated root hooks are forbidden before closure traversal begins. Auxiliary
+// hooks below still exercise actual traversal and candidate-specific rejection.
+function expectedRootHookRejection(hookName, candidateError) {
+  const coordinated = /^(?:pre|post)(typecheck|test|build)$/u.exec(hookName);
+  return coordinated
+    ? { message: `Default lifecycle command or root pre/post hook changed: ${coordinated[1]}.` }
+    : candidateError;
+}
+
+function withoutExactJobLine(source, jobId, exactLine) {
+  const lines = source.split(/\r?\n/u);
+  const start = lines.indexOf(`  ${jobId}:`);
+  assert.notEqual(start, -1, `Fixture job is missing: ${jobId}`);
+  let end = start + 1;
+  while (end < lines.length && !/^  [a-z][a-z0-9-]*:$/u.test(lines[end])) end += 1;
+  const block = lines.slice(start, end).join("\n");
+  return [...lines.slice(0, start), ...withoutExactLine(block, exactLine).split("\n"), ...lines.slice(end)].join("\n");
+}
+
 function receiptLine(document, id) {
   const line = document.split(/\r?\n/u).find((candidate) => candidate.includes(`--id ${id} `));
   assert.ok(line, `Receipt fixture is missing: ${id}`);
@@ -1195,10 +1227,12 @@ test("accepts the split Quick CI evidence jobs and fail-closed aggregate", () =>
     "history-checkpoint-governance",
     "current-index-governance",
     "bazi-current-semantics",
+    "bazi-expert-admission",
     "full-typecheck",
     "full-vitest",
     "default-v13-web-build",
     "artifact-manifest-verification",
+    "engineering-gate-aggregate",
     "release-gate-aggregate"
   ]);
   assert.deepEqual(REQUIRED_QUICK_CI_INDEPENDENT_JOBS, [
@@ -1209,6 +1243,7 @@ test("accepts the split Quick CI evidence jobs and fail-closed aggregate", () =>
     "history-checkpoint-governance",
     "current-index-governance",
     "bazi-current-semantics",
+    "bazi-expert-admission",
     "full-typecheck",
     "full-vitest",
     "default-v13-web-build"
@@ -1939,7 +1974,7 @@ test("hosting _headers source rejects duplicate and substring-only cache evidenc
   );
   assert.throws(
     () => verifyHostingHeadersSource(hostingPolicy, hostingHeaders.replace(
-      "/sw.js\n  Cache-Control: no-cache, no-store, must-revalidate",
+      /\/sw\.js\r?\n  Cache-Control: no-cache, no-store, must-revalidate/u,
       "/sw.js\n  X-Note: Cache-Control: no-cache, no-store, must-revalidate"
     )),
     /exactly implement cache rule \/sw\.js/u
@@ -2035,12 +2070,7 @@ test("rejects Quick CI when either independent history-checkpoint command is omi
 });
 
 test("runs history-checkpoint evidence exactly once and only in its independent job", () => {
-  const duplicatedInToolchain = quickWorkflow.replace(
-    "      - name: Verify independent Ziwei and Western domain manifests",
-    "      - name: Duplicate history-checkpoint evidence outside its job\n"
-      + "        run: npm run check:history-checkpoint\n\n"
-      + "      - name: Verify independent Ziwei and Western domain manifests"
-  );
+  const duplicatedInToolchain = withAdditionalJobCommand(quickWorkflow, "toolchain-and-boundaries", "npm run check:history-checkpoint");
   assert.notEqual(duplicatedInToolchain, quickWorkflow);
   assert.throws(
     () => verifyQuickCiGovernance(duplicatedInToolchain, packageJson),
@@ -2060,12 +2090,7 @@ test("rejects Quick CI when the unique current-index gate is omitted", () => {
 });
 
 test("runs current-index evidence exactly once and only in its independent job", () => {
-  const duplicatedInToolchain = quickWorkflow.replace(
-    "      - name: Verify independent Ziwei and Western domain manifests",
-    "      - name: Duplicate current-index evidence outside its job\n"
-      + "        run: npm run check:current-index\n\n"
-      + "      - name: Verify independent Ziwei and Western domain manifests"
-  );
+  const duplicatedInToolchain = withAdditionalJobCommand(quickWorkflow, "toolchain-and-boundaries", "npm run check:current-index");
   assert.notEqual(duplicatedInToolchain, quickWorkflow);
   assert.throws(
     () => verifyQuickCiGovernance(duplicatedInToolchain, packageJson),
@@ -2119,44 +2144,50 @@ test("rejects Quick CI continue-on-error and aggregate omissions", () => {
   assert.notEqual(continueOnError, quickWorkflow);
   assert.throws(() => verifyQuickCiGovernance(continueOnError, packageJson), /cannot continue on error/u);
 
-  const missingAggregateNeed = withoutExactLine(
-    quickWorkflow,
-    "      - full-typecheck"
-  );
-  assert.throws(
-    () => verifyQuickCiGovernance(missingAggregateNeed, packageJson),
-    /must require every evidence job/u
-  );
+  for (const [aggregateId, expectedError] of [
+    ["engineering-gate-aggregate", /Engineering aggregate must require all engineering evidence/u],
+    ["release-gate-aggregate", /must require every evidence job/u]
+  ]) {
+    const missingAggregateNeed = withoutExactJobLine(quickWorkflow, aggregateId, "      - full-typecheck");
+    assert.throws(() => verifyQuickCiGovernance(missingAggregateNeed, packageJson), expectedError);
+  }
 });
 
 test("aggregate explicitly binds and failure-checks both history and current governance", () => {
-  for (const [jobId, resultEnv] of [
-    ["history-checkpoint-governance", "HISTORY_CHECKPOINT_GOVERNANCE"],
-    ["current-index-governance", "CURRENT_INDEX_GOVERNANCE"]
+  for (const [aggregateId, expectedNeedError] of [
+    ["engineering-gate-aggregate", /Engineering aggregate must require all engineering evidence/u],
+    ["release-gate-aggregate", /must require every evidence job/u]
   ]) {
-    const missingNeed = withoutExactLine(quickWorkflow, `      - ${jobId}`);
-    assert.throws(
-      () => verifyQuickCiGovernance(missingNeed, packageJson),
-      /must require every evidence job/u
-    );
+    for (const [jobId, resultEnv] of [
+      ["history-checkpoint-governance", "HISTORY_CHECKPOINT_GOVERNANCE"],
+      ["current-index-governance", "CURRENT_INDEX_GOVERNANCE"]
+    ]) {
+      const missingNeed = withoutExactJobLine(quickWorkflow, aggregateId, `      - ${jobId}`);
+      assert.throws(
+        () => verifyQuickCiGovernance(missingNeed, packageJson),
+        expectedNeedError
+      );
 
-    const missingResultBinding = withoutExactLine(
-      quickWorkflow,
-      `          ${resultEnv}: \${{ needs.${jobId}.result }}`
-    );
-    assert.throws(
-      () => verifyQuickCiGovernance(missingResultBinding, packageJson),
-      new RegExp(`must bind the exact result environment for ${jobId}`, "u")
-    );
+      const missingResultBinding = withoutExactJobLine(
+        quickWorkflow,
+        aggregateId,
+        `          ${resultEnv}: \${{ needs.${jobId}.result }}`
+      );
+      assert.throws(
+        () => verifyQuickCiGovernance(missingResultBinding, packageJson),
+        new RegExp(`must bind the exact result environment for ${jobId}`, "u")
+      );
 
-    const missingFailureLoopEntry = withoutExactLine(
-      quickWorkflow,
-      `            \"${jobId}=$${resultEnv}\" \\`
-    );
-    assert.throws(
-      () => verifyQuickCiGovernance(missingFailureLoopEntry, packageJson),
-      new RegExp(`failure loop must inspect ${jobId}`, "u")
-    );
+      const missingFailureLoopEntry = withoutExactJobLine(
+        quickWorkflow,
+        aggregateId,
+        `            \"${jobId}=$${resultEnv}\" \\`
+      );
+      assert.throws(
+        () => verifyQuickCiGovernance(missingFailureLoopEntry, packageJson),
+        new RegExp(`failure loop must inspect ${jobId}`, "u")
+      );
+    }
   }
 });
 
@@ -2215,8 +2246,9 @@ test("diagnostic stages cannot acquire hidden prerequisites or lose their permis
   }
 });
 
-test("independent program diagnostics retain both Bazi semantic obligations in the aggregate", () => {
-  for (const command of ["npm run check:bazi-domain-release-manifest", "npm run check:bazi-expert-review-packet"]) {
+test("independent diagnostics retain Bazi structure, progress and separate formal admission", () => {
+  for (const command of ["npm run check:bazi-domain-release-manifest", "npm run check:bazi-expert-packet-structure",
+    "npm run report:bazi-expert-review-progress", "npm run check:bazi-expert-admission"]) {
     const changed = quickWorkflow.replace(`        run: ${command}`, "        run: echo omitted");
     assert.throws(() => verifyQuickCiGovernance(changed, packageJson), /must run exactly once/);
   }
@@ -2230,7 +2262,7 @@ test("a Bazi semantic failure cannot hide the other semantic result", () => {
     "        if: ${{ !cancelled() && steps.install.outcome == 'success' }}",
     "        if: ${{ success() }}"
   );
-  assert.throws(() => verifyQuickCiGovernance(changed, packageJson), /Both Bazi semantic checks/);
+  assert.throws(() => verifyQuickCiGovernance(changed, packageJson), /All Bazi engineering checks/);
 });
 
 test("complete Node group execution and retained failure reports cannot be silently reduced", () => {
@@ -2279,7 +2311,11 @@ test("source access requires the recorded user scope and grants no expert, right
 
 for (const command of REQUIRED_MIGRATION_WORKFLOW_COMMANDS) {
   test(`rejects migration workflow when command is missing: ${command}`, () => {
-    const weakenedWorkflow = withoutExactLine(workflow, `      - run: ${command}`);
+    const runLine = workflow.split(/\r?\n/u).find((line) =>
+      line.trim().replace(/^-\s+/u, "") === `run: ${command}`
+    );
+    assert.ok(runLine, `Canonical command must be an executable step: ${command}`);
+    const weakenedWorkflow = withoutExactLine(workflow, runLine);
     assert.throws(
       () => verifyMigrationWorkflowGovernance(weakenedWorkflow),
       (error) => error instanceof Error && error.message === `Migration CI is missing ${command}.`
@@ -2301,6 +2337,36 @@ for (const requiredPath of REQUIRED_MIGRATION_WORKFLOW_PATHS) {
 test("accepts the checked-in Chrome and Edge release evidence matrix", () => {
   assert.doesNotThrow(() => verifyReleaseBrowserGovernance(decisions, packageJson));
 });
+
+for (const [label, before, after] of [
+  ["fail-fast cancellation", "fail-fast: false", "fail-fast: true"],
+  ["unbounded parallelism", "max-parallel: 2", "max-parallel: 5"],
+  ["missing recovery suite", "          - orphaned-v13-recovery", "          - omitted-recovery"],
+  ["failure masking", "    strategy:", "    continue-on-error: true\n    strategy:"],
+  ["wrong suite dispatch", "matrix.suite == 'cross-schema-v13-v16' }}\n        run: npm run test:e2e:cross-schema-v13-v16", "matrix.suite == 'cross-schema-upgrade' }}\n        run: npm run test:e2e:cross-schema-v13-v16"],
+  ["success-only diagnostics", "if: ${{ always() }}\n        uses: actions/upload-artifact@v4", "if: ${{ success() }}\n        uses: actions/upload-artifact@v4"],
+  ["whole temporary disk upload", "path: ${{ env.HAKIMI_MIGRATION_EVIDENCE_DIR }}/", "path: ${{ runner.temp }}/"],
+  ["missing checkout identity", "actualCheckout = (git rev-parse HEAD)", "actualCheckout = $env:REQUESTED_HEAD"],
+  ["missing shallow merge parents", "fetch-depth: 2", "fetch-depth: 1"],
+  ["noncanonical Windows TEMP", "TEMP: ${{ runner.temp }}", "TEMP: C:/Users/RUNNER~1/AppData/Local/Temp"],
+  ["noncanonical Windows TMP", "TMP: ${{ runner.temp }}", "TMP: C:/Users/RUNNER~1/AppData/Local/Temp"],
+  ["missing scenario result completeness gate", "run: node scripts/verify-migration-scenario-result.mjs", "run: node scripts/ignored-result.mjs"],
+  ["skipped completeness check on browser failure", "name: Require the reviewed browser and test identity set\n        if: ${{ always() }}", "name: Require the reviewed browser and test identity set\n        if: ${{ success() }}"],
+  ["unavailable runner context at job scope", "    steps:\n      - uses: actions/checkout@v5", "    env:\n      BAD_PATH: ${{ runner.temp }}\n    steps:\n      - uses: actions/checkout@v5"],
+  ["diagnostic directory not passed to later steps", "Add-Content -LiteralPath $env:GITHUB_ENV", "Add-Content -LiteralPath local-only.txt"],
+  ["aggregate masking", 'run: test "$MIGRATION_RESULT" = success', 'run: echo "$MIGRATION_RESULT"'],
+  ["aggregate skipped on failure", "    if: ${{ always() }}\n    needs: migration-scenarios", "    if: ${{ success() }}\n    needs: migration-scenarios"]
+]) {
+  test(`migration matrix rejects ${label}`, () => {
+    for (const newline of ["\n", "\r\n"]) {
+      const source = workflow.replace(/\r\n?/gu, "\n").replace(/\n/gu, newline);
+      const original = before.replace(/\n/gu, newline);
+      const replacement = after.replace(/\n/gu, newline);
+      assert.ok(source.includes(original), `${label}: ${JSON.stringify(newline)}`);
+      assert.throws(() => verifyMigrationWorkflowGovernance(source.replace(original, replacement)));
+    }
+  });
+}
 
 test("required release files include the browser result and evidence command closure", () => {
   for (const requiredFile of [
@@ -2392,10 +2458,10 @@ test("accepts the exact release browser configs and install prerequisites", () =
     bootArtifactConfig,
     {
       receiptId: "boot",
-      testMatch: ["boot-fail-closed.spec.ts", "database-v8-v9-upgrade.spec.ts"],
+      testMatch: ["boot-fail-closed.spec.ts", "database-v8-v9-upgrade.spec.ts", "first-controller-interaction.spec.ts"],
       outputDirectoryName: "hakimi-bazi-boot-cross-browser-results",
       timeout: 120_000,
-      expectedTestsPerProject: 6
+      expectedTestsPerProject: 8
     }
   ));
   assert.doesNotThrow(() => verifyReleaseBrowserPlaywrightConfig(
@@ -3597,24 +3663,27 @@ test("rejects rollback policy promotion, actor invention, script drift, and pre-
 });
 
 test("freezes the authority-free rollback phase hash-chain helper behind formal admission", () => {
+  const rollbackMutationSource = rollbackEvidenceLibSource.replace(/\r\n?/gu, "\n");
   const inputs = {
-    rollbackLibSource: rollbackEvidenceLibSource,
+    rollbackLibSource: rollbackMutationSource,
     rollbackVerifierSource: rollbackEvidenceVerifierSource,
     rollbackProviderSequenceCompositionLibSource,
     packageJson
   };
-  assert.deepEqual(verifyRollbackPhaseContractSourceGovernance(inputs), {
-    status: "contract_only_no_admission",
-    formalAdmissionBeforeDownstream: true,
-    authorityFreeProjection: true,
-    candidateCompositionReachable: false
-  });
+  for (const source of [rollbackMutationSource, rollbackMutationSource.replace(/\n/gu, "\r\n")]) {
+    assert.deepEqual(verifyRollbackPhaseContractSourceGovernance({ ...inputs, rollbackLibSource: source }), {
+      status: "contract_only_no_admission",
+      formalAdmissionBeforeDownstream: true,
+      authorityFreeProjection: true,
+      candidateCompositionReachable: false
+    });
+  }
 
-  const admissionRemoved = rollbackEvidenceLibSource.replace(
+  const admissionRemoved = rollbackMutationSource.replace(
     "  assertRollbackExecutionAdmission(policyResult.rollbackPolicy);\n",
     ""
   );
-  assert.notEqual(admissionRemoved, rollbackEvidenceLibSource);
+  assert.notEqual(admissionRemoved, rollbackMutationSource);
   assert.throws(
     () => verifyRollbackPhaseContractSourceGovernance({
       ...inputs,
@@ -3623,11 +3692,11 @@ test("freezes the authority-free rollback phase hash-chain helper behind formal 
     /admission must remain unique and precede/u
   );
 
-  const wrapperDetached = rollbackEvidenceLibSource.replace(
+  const wrapperDetached = rollbackMutationSource.replace(
     "  return validateRollbackPhaseReceiptProjectionForContract({\n",
     "  return Object.freeze({\n"
   );
-  assert.notEqual(wrapperDetached, rollbackEvidenceLibSource);
+  assert.notEqual(wrapperDetached, rollbackMutationSource);
   assert.throws(
     () => verifyRollbackPhaseContractSourceGovernance({
       ...inputs,
@@ -3636,17 +3705,17 @@ test("freezes the authority-free rollback phase hash-chain helper behind formal 
     /wrapper no longer derives/u
   );
 
-  const helperStart = rollbackEvidenceLibSource.indexOf(
+  const helperStart = rollbackMutationSource.indexOf(
     "export function validateRollbackPhaseReceiptProjectionForContract({"
   );
   assert.ok(helperStart >= 0);
-  const authorityInjected = `${rollbackEvidenceLibSource.slice(0, helperStart)}${
-    rollbackEvidenceLibSource.slice(helperStart).replace(
+  const authorityInjected = `${rollbackMutationSource.slice(0, helperStart)}${
+    rollbackMutationSource.slice(helperStart).replace(
       "    status: envelope.status,\n",
       "    status: envelope.status,\n    publicDeploymentAuthorized: false,\n"
     )
   }`;
-  assert.notEqual(authorityInjected, rollbackEvidenceLibSource);
+  assert.notEqual(authorityInjected, rollbackMutationSource);
   assert.throws(
     () => verifyRollbackPhaseContractSourceGovernance({
       ...inputs,
@@ -3992,7 +4061,7 @@ test("accepts the isolated storage-v13 matrix candidate governance and full form
     dedicatedTypecheckIncluded: true
   });
   const closure = formalNpmClosure();
-  assert.equal(closure.reachableScriptCount, 35);
+  assert.equal(closure.reachableScriptCount, 32);
   assert.equal(
     closure.closureCanonicalSha256,
     REQUIRED_FORMAL_RECEIPT_NPM_LIFECYCLE_CLOSURE_CANONICAL_SHA256
@@ -4933,7 +5002,7 @@ test("SW four-chain composition governance rejects promotion, aliases, formal re
 
 test("formal npm closure rejects direct and multihop SW four-chain composition injection", () => {
   const direct = structuredClone(packageJson);
-  direct.scripts.posttypecheck =
+  direct.scripts["postcheck:release-governance"] =
     "npm run test:sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition";
   assert.throws(
     () => formalNpmClosure(direct),
@@ -4941,7 +5010,7 @@ test("formal npm closure rejects direct and multihop SW four-chain composition i
   );
 
   const multihop = structuredClone(packageJson);
-  multihop.scripts.postbuild = "npm run neutral-four-chain-bridge-a";
+  multihop.scripts["postcheck:release-governance"] = "npm run neutral-four-chain-bridge-a";
   multihop.scripts["neutral-four-chain-bridge-a"] = "npm run neutral-four-chain-bridge-b";
   multihop.scripts["neutral-four-chain-bridge-b"] =
     "npm run verify:sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition";
@@ -4952,7 +5021,7 @@ test("formal npm closure rejects direct and multihop SW four-chain composition i
 
   const workspaceRootPackage = structuredClone(packageJson);
   const workspaceWebPackage = structuredClone(webPackageJson);
-  workspaceWebPackage.scripts.postbuild = "npm --prefix ../.. run neutral-four-chain-workspace-bridge";
+  workspaceWebPackage.scripts["postpreview:release-artifact"] = "npm --prefix ../.. run neutral-four-chain-workspace-bridge";
   workspaceRootPackage.scripts["neutral-four-chain-workspace-bridge"] =
     "npm run verify:sw-ab-update-candidate-runtime-client-capture-collector-issuance-composition";
   assert.throws(
@@ -5076,8 +5145,8 @@ test("accepts and freezes the standalone runtime derived-evidence producer bridg
     "docs/release/PR6运行时派生证据生产桥接候选边界-v1-2026-08-28.md"
   ]) assert.ok(REQUIRED_MIGRATION_WORKFLOW_PATHS.includes(filePath), filePath);
   const closure = formalNpmClosure();
-  assert.equal(closure.reachableScriptCount, 35);
-  assert.equal(closure.visitedScripts.length, 93);
+  assert.equal(closure.reachableScriptCount, 32);
+  assert.equal(closure.visitedScripts.length, 92);
   assert.equal(
     closure.closureCanonicalSha256,
     REQUIRED_FORMAL_RECEIPT_NPM_LIFECYCLE_CLOSURE_CANONICAL_SHA256
@@ -5304,7 +5373,7 @@ test("formal receipts and every root lifecycle reject producer bridge reachabili
       "npm run verify:sw-ab-update-runtime-derived-evidence-producer-bridge";
     assert.throws(
       () => formalNpmClosure(injected),
-      /SW A-to-B update candidate tooling must remain outside/u,
+      expectedRootHookRejection(`pre${rootScript}`, /SW A-to-B update candidate tooling must remain outside/u),
       rootScript
     );
   }
@@ -5312,14 +5381,14 @@ test("formal receipts and every root lifecycle reject producer bridge reachabili
 
 test("formal closure rejects direct, multihop, workspace, prefix, workspace flag, and npm.cmd bridge injection", () => {
   const direct = structuredClone(packageJson);
-  direct.scripts.posttypecheck =
+  direct.scripts["postcheck:release-governance"] =
     "npm run test:sw-ab-update-runtime-derived-evidence-producer-bridge";
   assert.throws(
     () => formalNpmClosure(direct),
     /SW A-to-B update candidate tooling must remain outside/u
   );
   const multihop = structuredClone(packageJson);
-  multihop.scripts.postbuild = "npm run neutral-producer-hop-a";
+  multihop.scripts["postcheck:release-governance"] = "npm run neutral-producer-hop-a";
   multihop.scripts["neutral-producer-hop-a"] = "npm run neutral-producer-hop-b";
   multihop.scripts["neutral-producer-hop-b"] =
     "npm run verify:sw-ab-update-runtime-derived-evidence-producer-bridge";
@@ -5329,7 +5398,7 @@ test("formal closure rejects direct, multihop, workspace, prefix, workspace flag
   );
   const prefixRoot = structuredClone(packageJson);
   const prefixWeb = structuredClone(webPackageJson);
-  prefixWeb.scripts.postbuild = "npm --prefix ../.. run neutral-producer-prefix";
+  prefixWeb.scripts["postpreview:release-artifact"] = "npm --prefix ../.. run neutral-producer-prefix";
   prefixRoot.scripts["neutral-producer-prefix"] =
     "npm run verify:sw-ab-update-runtime-derived-evidence-producer-bridge";
   assert.throws(
@@ -5338,7 +5407,7 @@ test("formal closure rejects direct, multihop, workspace, prefix, workspace flag
   );
   const workspaceRootPackage = structuredClone(packageJson);
   const workspaceWebPackage = structuredClone(webPackageJson);
-  workspaceRootPackage.scripts.postbuild =
+  workspaceRootPackage.scripts["postcheck:release-governance"] =
     "npm run neutral-producer-workspace --workspace @hakimi/web";
   workspaceWebPackage.scripts["neutral-producer-workspace"] =
     "npm.cmd --prefix ../.. run verify:sw-ab-update-runtime-derived-evidence-producer-bridge";
@@ -5347,7 +5416,7 @@ test("formal closure rejects direct, multihop, workspace, prefix, workspace flag
     /SW A-to-B update candidate tooling must remain outside/u
   );
   const npmCmd = structuredClone(packageJson);
-  npmCmd.scripts.postbuild =
+  npmCmd.scripts["postcheck:release-governance"] =
     "npm.cmd run verify:sw-ab-update-runtime-derived-evidence-producer-bridge";
   assert.throws(
     () => formalNpmClosure(npmCmd),
@@ -5369,7 +5438,7 @@ test("formal closure rejects embedded shell, direct Node, node -e, split dynamic
     );
   }
   const cyclic = structuredClone(packageJson);
-  cyclic.scripts.postbuild = "npm run producer-cycle-a";
+  cyclic.scripts["postcheck:release-governance"] = "npm run producer-cycle-a";
   cyclic.scripts["producer-cycle-a"] = "npm run producer-cycle-b";
   cyclic.scripts["producer-cycle-b"] =
     "npm run producer-cycle-a && node -e \"import('./scripts/' + ['sw','ab','update','runtime','derived','evidence','producer','bridge','lib.mjs'].join('-'))\"";
@@ -5466,8 +5535,8 @@ test("accepts and freezes the standalone producer-bridge four-chain composition 
     "producer_bridge_absent"
   );
   const closure = formalNpmClosure();
-  assert.equal(closure.reachableScriptCount, 35);
-  assert.equal(closure.visitedScripts.length, 93);
+  assert.equal(closure.reachableScriptCount, 32);
+  assert.equal(closure.visitedScripts.length, 92);
   assert.equal(
     closure.closureCanonicalSha256,
     REQUIRED_FORMAL_RECEIPT_NPM_LIFECYCLE_CLOSURE_CANONICAL_SHA256
@@ -5727,7 +5796,7 @@ test("formal receipts and every root lifecycle reject producer-bridge compositio
       "npm run verify:sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition";
     assert.throws(
       () => formalNpmClosure(injected),
-      /SW A-to-B update candidate tooling must remain outside/u,
+      expectedRootHookRejection(`pre${rootScript}`, /SW A-to-B update candidate tooling must remain outside/u),
       rootScript
     );
   }
@@ -5735,14 +5804,14 @@ test("formal receipts and every root lifecycle reject producer-bridge compositio
 
 test("formal closure rejects direct, multihop, prefix, workspace, npm.cmd, and run-script v2 injection", () => {
   const direct = structuredClone(packageJson);
-  direct.scripts.posttypecheck =
+  direct.scripts["postcheck:release-governance"] =
     "npm run test:sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition";
   assert.throws(
     () => formalNpmClosure(direct),
     /SW A-to-B update candidate tooling must remain outside/u
   );
   const multihop = structuredClone(packageJson);
-  multihop.scripts.postbuild = "npm run neutral-v2-hop-a";
+  multihop.scripts["postcheck:release-governance"] = "npm run neutral-v2-hop-a";
   multihop.scripts["neutral-v2-hop-a"] = "npm run neutral-v2-hop-b";
   multihop.scripts["neutral-v2-hop-b"] =
     "npm run verify:sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition";
@@ -5753,7 +5822,7 @@ test("formal closure rejects direct, multihop, prefix, workspace, npm.cmd, and r
   for (const prefixFlag of ["--prefix ../..", "--prefix=../.."]) {
     const prefixRoot = structuredClone(packageJson);
     const prefixWeb = structuredClone(webPackageJson);
-    prefixWeb.scripts.postbuild = `npm ${prefixFlag} run neutral-v2-prefix`;
+    prefixWeb.scripts["postpreview:release-artifact"] = `npm ${prefixFlag} run neutral-v2-prefix`;
     prefixRoot.scripts["neutral-v2-prefix"] =
       "npm run-script verify:sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition";
     assert.throws(
@@ -5769,7 +5838,7 @@ test("formal closure rejects direct, multihop, prefix, workspace, npm.cmd, and r
   ]) {
     const workspaceRootPackage = structuredClone(packageJson);
     const workspaceWebPackage = structuredClone(webPackageJson);
-    workspaceRootPackage.scripts.postbuild = `npm run neutral-v2-workspace ${workspaceFlag}`;
+    workspaceRootPackage.scripts["postcheck:release-governance"] = `npm run neutral-v2-workspace ${workspaceFlag}`;
     workspaceWebPackage.scripts["neutral-v2-workspace"] =
       "npm.cmd --prefix ../.. run verify:sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition";
     assert.throws(
@@ -5779,7 +5848,7 @@ test("formal closure rejects direct, multihop, prefix, workspace, npm.cmd, and r
     );
   }
   const npmCmd = structuredClone(packageJson);
-  npmCmd.scripts.postbuild =
+  npmCmd.scripts["postcheck:release-governance"] =
     "npm.cmd run verify:sw-ab-update-candidate-runtime-client-capture-collector-issuance-producer-bridge-composition";
   assert.throws(
     () => formalNpmClosure(npmCmd),
@@ -5804,7 +5873,7 @@ test("formal closure rejects embedded shell, direct Node, node -e, split identit
     );
   }
   const cyclic = structuredClone(packageJson);
-  cyclic.scripts.postbuild = "npm run v2-cycle-a";
+  cyclic.scripts["postcheck:release-governance"] = "npm run v2-cycle-a";
   cyclic.scripts["v2-cycle-a"] = "npm run v2-cycle-b";
   cyclic.scripts["v2-cycle-b"] =
     "npm run v2-cycle-a && node -e \"import('./scripts/' + ['sw','ab','producer','bridge','composition','lib.mjs'].join('-'))\"";
@@ -6159,14 +6228,14 @@ test("formal npm closure isolates provider sequences and rollback/provider compo
   );
 
   const lifecycle = structuredClone(packageJson);
-  lifecycle.scripts.posttypecheck = "npm run test:provider-deployment-candidate-sequence";
+  lifecycle.scripts["postcheck:release-governance"] = "npm run test:provider-deployment-candidate-sequence";
   assert.throws(
     () => formalNpmClosure(lifecycle),
     /Provider sequence and rollback\/provider composition candidate tooling must remain outside/u
   );
 
   const multihop = structuredClone(packageJson);
-  multihop.scripts.posttypecheck = "npm run rollback-provider-bridge-a";
+  multihop.scripts["postcheck:release-governance"] = "npm run rollback-provider-bridge-a";
   multihop.scripts["rollback-provider-bridge-a"] = "npm run rollback-provider-bridge-b";
   multihop.scripts["rollback-provider-bridge-b"] =
     "node scripts/verify-rollback-provider-sequence-composition.mjs";
@@ -6177,7 +6246,7 @@ test("formal npm closure isolates provider sequences and rollback/provider compo
 
   const workspaceRootPackage = structuredClone(packageJson);
   const workspaceWebPackage = structuredClone(webPackageJson);
-  workspaceWebPackage.scripts.postbuild = "npm --prefix ../.. run provider-sequence-bridge";
+  workspaceWebPackage.scripts["postpreview:release-artifact"] = "npm --prefix ../.. run provider-sequence-bridge";
   workspaceRootPackage.scripts["provider-sequence-bridge"] =
     "node scripts/provider-deployment-candidate-sequence-verifier.mjs";
   assert.throws(
@@ -6231,12 +6300,12 @@ test("formal allowlist and complete npm closure reject SW A-to-B candidate injec
     injectedPackage.scripts[scriptName] = "npm run test:sw-ab-update-candidate";
     assert.throws(
       () => formalNpmClosure(injectedPackage),
-      /SW A-to-B update candidate tooling must remain outside/u,
+      expectedRootHookRejection(scriptName, /SW A-to-B update candidate tooling must remain outside/u),
       scriptName
     );
   }
   const compositionInjectedPackage = structuredClone(packageJson);
-  compositionInjectedPackage.scripts.pretest =
+  compositionInjectedPackage.scripts["postcheck:release-governance"] =
     "npm run test:sw-ab-update-candidate-runtime-client-capture-composition";
   assert.throws(
     () => formalNpmClosure(compositionInjectedPackage),
@@ -6301,7 +6370,7 @@ test("formal allowlist and complete npm closure reject deployed PWA host/provide
       "npm run test:deployed-pwa-host-provider-composition-candidate";
     assert.throws(
       () => formalNpmClosure(injectedPackage),
-      /Deployed-PWA host\/provider composition candidate tooling must remain outside/u,
+      expectedRootHookRejection(scriptName, /Deployed-PWA host\/provider composition candidate tooling must remain outside/u),
       scriptName
     );
   }
@@ -6314,7 +6383,7 @@ test("formal allowlist and complete npm closure reject deployed PWA host/provide
 
 test("formal npm closure follows aliases, workspace prefixes, and embedded composition commands", () => {
   const multihop = structuredClone(packageJson);
-  multihop.scripts.posttypecheck = "npm run composition-bridge-a";
+  multihop.scripts["postcheck:release-governance"] = "npm run composition-bridge-a";
   multihop.scripts["composition-bridge-a"] = "npm run composition-bridge-b";
   multihop.scripts["composition-bridge-b"] =
     "node scripts/deployed-pwa-host-provider-composition.mjs";
@@ -6325,7 +6394,7 @@ test("formal npm closure follows aliases, workspace prefixes, and embedded compo
 
   const workspaceBridge = structuredClone(packageJson);
   const workspaceWeb = structuredClone(webPackageJson);
-  workspaceWeb.scripts.postbuild = "npm --prefix ../.. run composition-bridge";
+  workspaceWeb.scripts["postpreview:release-artifact"] = "npm --prefix ../.. run composition-bridge";
   workspaceBridge.scripts["composition-bridge"] =
     "node scripts/deployed-pwa-host-provider-composition.mjs";
   assert.throws(
@@ -6356,7 +6425,7 @@ test("formal npm closure rejects candidate injection through every root lifecycl
     weakened.scripts[scriptName] = "npm run test:storage-v13-matrix-candidate";
     assert.throws(
       () => formalNpmClosure(weakened),
-      /Storage-v13 matrix candidate tooling must remain outside/u,
+      expectedRootHookRejection(scriptName, /Storage-v13 matrix candidate tooling must remain outside/u),
       scriptName
     );
   }
@@ -6369,7 +6438,7 @@ test("formal npm closure follows multihop cycles without scanning unreachable ca
   assert.doesNotThrow(() => formalNpmClosure(unreachable));
 
   const cyclic = structuredClone(packageJson);
-  cyclic.scripts.posttypecheck = "npm run closure-a";
+  cyclic.scripts["postcheck:release-governance"] = "npm run closure-a";
   cyclic.scripts["closure-a"] = "npm run closure-b";
   cyclic.scripts["closure-b"] = "npm run closure-a";
   assert.throws(
@@ -6408,7 +6477,7 @@ test("formal npm closure rejects neutral root and workspace lifecycle wrappers",
 test("formal npm closure follows workspace, prefix, and embedded Playwright lifecycle roots", () => {
   const workspaceBridge = structuredClone(packageJson);
   const workspaceWeb = structuredClone(webPackageJson);
-  workspaceWeb.scripts.postbuild = "npm --prefix ../.. run closure-bridge";
+  workspaceWeb.scripts["postpreview:release-artifact"] = "npm --prefix ../.. run closure-bridge";
   workspaceBridge.scripts["closure-bridge"] =
     "node scripts/storage-v13-matrix-candidate-runtime.mjs";
   assert.throws(
@@ -6434,7 +6503,7 @@ test("formal npm closure parses npm.cmd flags and rejects unknown selectors or g
   const receipts = structuredClone(decisions.releaseEvidence.defaultV13RequiredReceiptCommands);
   receipts.unit = ["npm.cmd", "--silent", "test"];
   const weakened = structuredClone(packageJson);
-  weakened.scripts.posttest = "node scripts/storage-v13-matrix-candidate-runtime.mjs";
+  weakened.scripts["postcheck:release-governance"] = "node scripts/storage-v13-matrix-candidate-runtime.mjs";
   assert.throws(
     () => verifyFormalReceiptNpmLifecycleClosure(receipts, {
       root: { path: "package.json", packageJson: weakened },

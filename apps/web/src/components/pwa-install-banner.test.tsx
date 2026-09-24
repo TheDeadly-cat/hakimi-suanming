@@ -44,7 +44,7 @@ describe("PwaInstallBanner", () => {
     await waitFor(() => expect(prompt).toHaveBeenCalledTimes(1));
     const accepted = await screen.findByText(/浏览器已接受本次安装选择/);
     expect(accepted).toBeTruthy();
-    expect(document.activeElement).toBe(accepted);
+    await waitFor(() => expect(document.activeElement).toBe(accepted));
     expect(screen.getByText("安装请求已交给浏览器")).toBeTruthy();
     expect(screen.getByText("未收到")).toBeTruthy();
     expect(screen.queryByText("系统已报告应用入口创建完成")).toBeNull();
@@ -64,7 +64,7 @@ describe("PwaInstallBanner", () => {
     await waitFor(() => expect(prompt).toHaveBeenCalledTimes(1));
     const dismissed = await screen.findByText(/你取消了本次安装/);
     expect(dismissed).toBeTruthy();
-    expect(document.activeElement).toBe(dismissed);
+    await waitFor(() => expect(document.activeElement).toBe(dismissed));
     expect(screen.queryByText("Web 应用安装完成")).toBeNull();
   });
 
@@ -76,7 +76,7 @@ describe("PwaInstallBanner", () => {
     await user.click(screen.getByRole("button", { name: "打开系统安装面板" }));
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain("浏览器安装流程没有返回可核对结果");
-    expect(document.activeElement).toBe(alert);
+    await waitFor(() => expect(document.activeElement).toBe(alert));
     expect(screen.queryByText("系统已报告应用入口创建完成")).toBeNull();
   });
 

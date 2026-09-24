@@ -310,6 +310,13 @@ function createFixture() {
     "import './bazi-domain-release-manifest-lib.mjs';",
     "export const registry = true;"
   ].join("\n"));
+  write(root, "scripts/cross-system-engineering-fact-v1-inputs.mjs", [
+    "import './bazi-domain-release-manifest-lib.mjs';",
+    "import './bazi-v17-manifest-drift-decision-lib.mjs';",
+    "import './independent-domain-release-manifest-lib.mjs';",
+    "import './independent-source-binding-requirements-lib.mjs';",
+    "export const historicalInputs = true;"
+  ].join("\n"));
   write(root, "scripts/cross-system-engineering-fact-receipt-lib.mjs", [
     "import { parseExpression } from '@babel/parser';",
     "import { createHash } from 'node:crypto';",
@@ -321,6 +328,7 @@ function createFixture() {
     "import './independent-domain-release-manifest-lib.mjs';",
     "import './independent-source-binding-requirements-lib.mjs';",
     "import './system-admission-registry-lib.mjs';",
+    "import './cross-system-engineering-fact-v1-inputs.mjs';",
     "void parseExpression; void createHash;"
   ].join("\n"));
   write(

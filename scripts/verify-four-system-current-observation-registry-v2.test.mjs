@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { test } from "node:test";
+import { after, before, test } from "node:test";
+import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
@@ -21,24 +22,46 @@ import {
   parseBaziDttStrictJsonArtifact
 } from "./bazi-dtt-versioned-parent-supersession-lib.mjs";
 
+import {
+  FOUR_SYSTEM_OBSERVATION_V2_INPUT_ARCHIVE_URL,
+  createFourSystemObservationV2HistoricalInputs,
+  parseFourSystemObservationV2InputArchive
+} from "./four-system-observation-v2-history.test-fixture.mjs";
+
 const execFileAsync = promisify(execFile);
-const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const cliPath = path.join(
-  workspaceRoot,
-  "scripts",
-  "verify-four-system-current-observation-registry-v2.mjs"
-);
-const writerPath = path.join(
-  workspaceRoot,
-  "scripts",
-  "write-four-system-current-observation-registry-v2.mjs"
-);
-const persistedPath = path.resolve(
-  workspaceRoot,
-  ...FOUR_SYSTEM_CURRENT_OBSERVATION_REGISTRY_V2_RELATIVE_PATH.split("/")
-);
-const builtPromise = buildCurrentFourSystemObservationRegistryV2(workspaceRoot);
-const loadedPromise = loadFourSystemCurrentObservationRegistryV2(workspaceRoot);
+const actualWorkspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+let historicalInputs, workspaceRoot, cliPath, writerPath, persistedPath, builtPromise, loadedPromise;
+before(async () => {
+  historicalInputs = await createFourSystemObservationV2HistoricalInputs();
+  workspaceRoot = historicalInputs.root;
+  persistedPath = path.join(workspaceRoot, FOUR_SYSTEM_CURRENT_OBSERVATION_REGISTRY_V2_RELATIVE_PATH);
+  assert.deepEqual(await readFile(persistedPath), await readFile(path.join(actualWorkspaceRoot,
+    FOUR_SYSTEM_CURRENT_OBSERVATION_REGISTRY_V2_RELATIVE_PATH)));
+  const bridges = new Set();
+  for (const [cli, library] of [
+    ["verify-four-system-current-observation-registry-v2.mjs", "four-system-current-observation-registry-v2-lib.mjs"],
+    ["write-four-system-current-observation-registry-v2.mjs", "four-system-current-observation-registry-v2-lib.mjs"],
+    ["verify-system-admission-registry.mjs", "system-admission-registry-lib.mjs"],
+    ["verify-cross-system-engineering-fact-receipts.mjs", "cross-system-engineering-fact-receipt-lib.mjs"]
+  ]) {
+    const currentBytes = await readFile(new URL(cli, import.meta.url));
+    const target = path.join(workspaceRoot, "scripts", cli);
+    await writeFile(target, currentBytes, { flag: "wx" });
+    assert.deepEqual(await readFile(target), currentBytes);
+    if (!bridges.has(library)) {
+      await writeFile(path.join(workspaceRoot, "scripts", library),
+        "// Test bridge to current code, never archived modules.\nexport * from "
+          + JSON.stringify(new URL(library, import.meta.url).href) + ";\n", { flag: "wx" });
+      bridges.add(library);
+    }
+  }
+  cliPath = path.join(workspaceRoot, "scripts/verify-four-system-current-observation-registry-v2.mjs");
+  writerPath = path.join(workspaceRoot, "scripts/write-four-system-current-observation-registry-v2.mjs");
+  builtPromise = buildCurrentFourSystemObservationRegistryV2(workspaceRoot);
+  loadedPromise = loadFourSystemCurrentObservationRegistryV2(workspaceRoot);
+  await Promise.all([builtPromise, loadedPromise]);
+});
+after(async () => { await historicalInputs?.cleanup(); });
 
 function sanitizedEnvironment(extra = {}) {
   const environment = { ...process.env, ...extra };
@@ -356,4 +379,36 @@ test("legacy central and receipt verifiers remain expected-red instead of being 
         && `${error.stdout}${error.stderr}`.includes(expectedText)
     );
   }
+});
+
+test("current observation registry and source CLI cannot inherit historical input success", async () => {
+  await assert.rejects(loadFourSystemCurrentObservationRegistryV2(actualWorkspaceRoot),
+    { code: "ARTIFACT_DRIFT" });
+  await assert.rejects(execFileAsync(process.execPath,
+    [path.join(actualWorkspaceRoot, "scripts/verify-four-system-current-observation-registry-v2.mjs")],
+    { cwd: workspaceRoot, encoding: "utf8", env: sanitizedEnvironment(), windowsHide: true }),
+  (error) => error.code === 1 && error.stdout === ""
+    && error.stderr.includes("FOUR_SYSTEM_CURRENT_OBSERVATION_REGISTRY_V2_MECHANICS_FAILED ARTIFACT_DRIFT"));
+});
+
+test("observation v2 input archive rejects tampering, truncation and a valid empty ZIP", async () => {
+  const original = await readFile(FOUR_SYSTEM_OBSERVATION_V2_INPUT_ARCHIVE_URL);
+  assert.equal(parseFourSystemObservationV2InputArchive(original).manifest.files.length, 574);
+  const changed = Buffer.from(original); changed[Math.floor(changed.length / 2)] ^= 1;
+  const { zipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+  for (const bytes of [changed, original.subarray(0, -1), zipSync({})]) {
+    assert.throws(() => parseFourSystemObservationV2InputArchive(bytes), /observation v2 input archive identity changed/u);
+  }
+});
+
+test("observation v2 refuses altered or missing recovered Western source bytes", async () => {
+  const inputs = await createFourSystemObservationV2HistoricalInputs();
+  try {
+    const target = path.join(inputs.root, "packages/western-astrology-rules-preview-draft/src/rule-layer-bridge.ts");
+    const changed = Buffer.from(await readFile(target)); changed[changed.length - 1] ^= 1;
+    await writeFile(target, changed);
+    await assert.rejects(loadFourSystemCurrentObservationRegistryV2(inputs.root), { code: "ARTIFACT_DRIFT" });
+    await rm(target);
+    await assert.rejects(loadFourSystemCurrentObservationRegistryV2(inputs.root), { code: "ENOENT", path: target });
+  } finally { await inputs.cleanup(); }
 });

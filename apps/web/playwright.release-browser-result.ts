@@ -9,7 +9,7 @@ export const REQUIRED_RELEASE_BROWSER_RECEIPT_IDS = Object.freeze([
 ] as const);
 export const REQUIRED_RELEASE_BROWSER_TESTS_PER_PROJECT = Object.freeze({
   backup: 4,
-  boot: 6,
+  boot: 8,
   pwa: 1,
   "web-v1-flow": 1
 } as const);

@@ -503,6 +503,7 @@ function libraryTagsCaption(values: readonly string[]): string {
 
 export function CaseLibraryPage() {
   const [scope, setScope] = useState<LibraryScope>("all");
+  const [scopeFocusRequest, setScopeFocusRequest] = useState<LibraryScope | null>(null);
   const [subjectKind, setSubjectKind] = useState<SubjectKind>("all");
   const lifecycle = scope === "trash" ? "trashed" : "active";
   const favoritesOnly = scope === "favorites";
@@ -695,6 +696,15 @@ export function CaseLibraryPage() {
   const pendingDeleteIsCandidate = pendingDelete ? isCandidateSetRecord(pendingDelete) : false;
   const busy = mutation !== null || pendingDelete !== null || caseImportInFlight;
   const interactionBusy = busy || viewMutation !== null;
+  useEffect(() => {
+    if (scopeFocusRequest === null || interactionBusy || listBusy) return;
+    const button = scopeButtonRefs.current.get(scopeFocusRequest);
+    if (!button || button.disabled || !button.isConnected) return;
+    // Wait for the committed DOM to enable the destination. A timer can run
+    // before React commits the completed refresh and silently lose focus.
+    button.focus();
+    setScopeFocusRequest(null);
+  }, [scopeFocusRequest, interactionBusy, listBusy]);
   const writeReconciliationRequired = subjectMutationReconciliationRequiredRef.current || viewMutationReconciliationRequired;
   const hasPreviousPage = pageIndex > 0;
   const activeScope = libraryScopes.find((item) => item.id === scope);
@@ -923,7 +933,7 @@ export function CaseLibraryPage() {
   };
 
   const returnFocusToScopeButton = (targetScope: LibraryScope) => {
-    window.setTimeout(() => scopeButtonRefs.current.get(targetScope)?.focus(), 0);
+    setScopeFocusRequest(targetScope);
   };
 
   const cancelMetadataEdit = () => {
