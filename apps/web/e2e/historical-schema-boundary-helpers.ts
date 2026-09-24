@@ -198,6 +198,9 @@ export function defineHistoricalSchemaBoundaryTests(
   test(`${label} 新页面直接启动验证真实容量准入、索引和持久提交`, async () => {
     const browser = await context();
     const external = collectExternalRequests(browser, server.origin);
+    let page: Page | undefined;
+    let browserProduct: string | null = null;
+    const workerLifecycle: { at: number; kind: string; value: unknown }[] = [];
     try {
       await browser.addInitScript(() => {
         const observe = () => {
@@ -209,7 +212,16 @@ export function defineHistoricalSchemaBoundaryTests(
         observe();
       });
       server.setGeneration(target);
-      const page = await browser.newPage();
+      page = await browser.newPage();
+      // A boot timeout alone cannot distinguish installation from activation or
+      // the controlled-page acknowledgement. Observe the browser's real state;
+      // do not intercept requests, trigger activation, or alter the boot budget.
+      const session = await browser.newCDPSession(page);
+      browserProduct = (await session.send("Browser.getVersion")).product;
+      for (const event of ["ServiceWorker.workerRegistrationUpdated", "ServiceWorker.workerVersionUpdated", "ServiceWorker.workerErrorReported"] as const) {
+        session.on(event, value => workerLifecycle.push({ at: Date.now(), kind: event, value }));
+      }
+      await session.send("ServiceWorker.enable");
       const problems = collectConsoleProblems(page);
       await openTarget(browser, page);
       expect(await page.evaluate(() => sessionStorage.getItem("e2e-historical-capacity-admitted"))).toBe("true");
@@ -223,6 +235,28 @@ export function defineHistoricalSchemaBoundaryTests(
       expect(await readNativeDatabase(page, sourceName)).toEqual(before);
       expect(problems).toEqual([]);
       expect(external).toEqual([]);
-    } finally { await browser.close(); }
+    } finally {
+      try {
+        let closingState: unknown;
+        try {
+          closingState = page ? await page.evaluate(async () => ({
+            url: location.href,
+            dataset: { ...document.documentElement.dataset },
+            registrations: (await navigator.serviceWorker.getRegistrations()).map(registration => ({
+              scope: registration.scope,
+              installing: registration.installing?.state ?? null,
+              waiting: registration.waiting?.state ?? null,
+              active: registration.active?.state ?? null
+            }))
+          })) : null;
+        } catch (error) {
+          closingState = { observationError: error instanceof Error ? error.message : String(error) };
+        }
+        await test.info().attach("historical-fresh-boot-lifecycle", {
+          body: Buffer.from(JSON.stringify({ browserProduct, targetBuild: target.version, workerLifecycle, closingState }, null, 2)),
+          contentType: "application/json"
+        });
+      } finally { await browser.close(); }
+    }
   });
 }
