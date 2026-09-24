@@ -206,7 +206,7 @@ function prepareStorageHarness(controller: unknown) {
   const targetRepository = {
     database: targetDatabase,
     readFullDataSnapshot: vi.fn().mockResolvedValue(payload),
-    replaceFullDataSnapshot: vi.fn().mockResolvedValue(undefined)
+    prepareFullDataSnapshotReplacement: vi.fn().mockResolvedValue(vi.fn().mockResolvedValue(undefined))
   };
   const sourceRepository = {
     database: sourceDatabase,
@@ -524,6 +524,43 @@ describe("ReleaseDatabaseCoordinator controller takeover freeze", () => {
     await mutation;
     await freeze;
     expect(freezeSettled).toBe(true);
+  });
+
+  it("finishes snapshot preparation before opening or granting writes to the shadow target", async () => {
+    const validation = deferred<() => Promise<void>>();
+    const controller = {
+      readCommittedGeneration: vi.fn().mockResolvedValue(null),
+      listMigrations: vi.fn().mockResolvedValue([]),
+      retryFailedTargetIsolation: vi.fn(),
+      readMigration: vi.fn().mockResolvedValue(null),
+      initializeCommittedGeneration: vi.fn(),
+      commitCompatibleGenerationSnapshot: vi.fn(),
+      prepareMigration: vi.fn(),
+      resumeMigrationToReady: vi.fn(),
+      failMigration: vi.fn(),
+      commitMigration: vi.fn()
+    };
+    const { coordinator, descriptor, testable, targetDatabase, targetRepository } = prepareStorageHarness(controller);
+    controller.initializeCommittedGeneration.mockResolvedValue(sourceReleaseState(descriptor));
+    controller.prepareMigration.mockResolvedValue(migrationJournal(descriptor, "prepared", testable.ownerId));
+    controller.resumeMigrationToReady.mockImplementation(async (_id, callbacks) => {
+      await callbacks.materializeTarget();
+      return migrationJournal(descriptor, "ready", testable.ownerId);
+    });
+    targetRepository.prepareFullDataSnapshotReplacement.mockImplementation(() => validation.promise);
+
+    const preparation = coordinator.prepareStorage();
+    await waitForCall(() => targetRepository.prepareFullDataSnapshotReplacement.mock.calls.length, 1);
+    expect(targetRepository.prepareFullDataSnapshotReplacement).toHaveBeenCalledWith(payload);
+    expect(targetDatabase.open).not.toHaveBeenCalled();
+    expect(targetDatabase.withReleaseMigrationWriteAccess).not.toHaveBeenCalled();
+    const materialize = vi.fn().mockResolvedValue(undefined);
+    validation.resolve(materialize);
+    await expect(preparation).resolves.toBeUndefined();
+    expect(targetDatabase.withReleaseMigrationWriteAccess).toHaveBeenCalledWith(materialize);
+    expect(materialize).toHaveBeenCalledTimes(1);
+    expect(targetDatabase.open.mock.invocationCallOrder[0])
+      .toBeLessThan(targetDatabase.withReleaseMigrationWriteAccess.mock.invocationCallOrder[0]!);
   });
 
   it("drains a prep-only deferred controller writer and monotonically rejects every later mutation API", async () => {

@@ -935,6 +935,10 @@ export class ReleaseDatabaseCoordinator {
         if (!this.targetDatabase || !this.targetRepository || !this.sourceSnapshot) {
           throw new Error("影子数据库物化上下文不完整。");
         }
+        const materialize = await this.targetRepository.prepareFullDataSnapshotReplacement(
+          this.sourceSnapshot.payload
+        );
+        this.assertSourceFreezeHealthy();
         // The preflight estimate is only a negative gate, not a reservation.
         // Recheck immediately before opening the destructive target transaction.
         await this.requireShadowStorageAdmission();
@@ -945,9 +949,7 @@ export class ReleaseDatabaseCoordinator {
           this.descriptor.targetSchema
         );
         try {
-          await this.targetDatabase.withReleaseMigrationWriteAccess(() =>
-            this.targetRepository!.replaceFullDataSnapshot(this.sourceSnapshot!.payload)
-          );
+          await this.targetDatabase.withReleaseMigrationWriteAccess(materialize);
         } catch (cause) {
           if (!isStorageQuotaExceededError(cause)) throw cause;
           const error = new Error(

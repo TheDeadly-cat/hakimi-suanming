@@ -269,6 +269,28 @@ type VerifiedRevisionRecordContext = {
   timeZoneContext: BundledTimeZoneCalculationContext | null;
 };
 
+type RevisionVerificationSchemas = {
+  revision: ReturnType<typeof createRevisionRecordSchemaForTimeZoneName>;
+  chart: ReturnType<typeof createCalculatedChartSchemaForTimeZoneName>;
+};
+
+// Reuse only parser definitions, never parsed records or verification results.
+// Exact resolver identity keeps current and retained timezone rules separate;
+// the descriptor and every record are still checked on every invocation.
+const revisionVerificationSchemas = new WeakMap<TimeZoneNamePredicate, RevisionVerificationSchemas>();
+
+function schemasForRevisionResolver(isTimeZoneName: TimeZoneNamePredicate): RevisionVerificationSchemas {
+  let schemas = revisionVerificationSchemas.get(isTimeZoneName);
+  if (!schemas) {
+    schemas = {
+      revision: createRevisionRecordSchemaForTimeZoneName(isTimeZoneName),
+      chart: createCalculatedChartSchemaForTimeZoneName(isTimeZoneName)
+    };
+    revisionVerificationSchemas.set(isTimeZoneName, schemas);
+  }
+  return schemas;
+}
+
 async function verifyRevisionRecordIntegrityWithContext(
   raw: unknown
 ): Promise<VerifiedRevisionRecordContext> {
@@ -287,12 +309,9 @@ async function verifyRevisionRecordIntegrityWithContext(
       manifest.timeZoneDatabase.snapshotId,
       manifest.timeZoneDatabase
     );
-    revision = createRevisionRecordSchemaForTimeZoneName(
-      timeZoneContext.resolver.isTimeZoneName
-    ).parse(snapshot);
-    chartSchema = createCalculatedChartSchemaForTimeZoneName(
-      timeZoneContext.resolver.isTimeZoneName
-    );
+    const schemas = schemasForRevisionResolver(timeZoneContext.resolver.isTimeZoneName);
+    revision = schemas.revision.parse(snapshot);
+    chartSchema = schemas.chart;
   } else {
     revision = storedRevisionRecordSchema.parse(snapshot);
   }
