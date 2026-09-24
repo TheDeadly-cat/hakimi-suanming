@@ -6,6 +6,13 @@ const baseURL = "http://127.0.0.1:4197";
 
 export default defineConfig({
   testDir: "./e2e",
+  // Retained historical assertions describe the former activation policy.
+  // Current legacy boundaries run through the three dedicated migration configs.
+  testIgnore: [
+    "**/service-worker-cross-schema-upgrade.spec.ts",
+    "**/service-worker-cross-schema-v13-v15.spec.ts",
+    "**/service-worker-cross-schema-v14-v15.spec.ts"
+  ],
   outputDir: path.join(os.tmpdir(), "hakimi-bazi-playwright-results"),
   timeout: 120_000,
   expect: { timeout: 15_000 },

@@ -43,6 +43,7 @@ on:
       - "apps/web/sw-two-generation-fixture-source-identity.ts"
       - "apps/web/e2e/**"
       - "apps/web/playwright.release-browser-*.ts"
+      - "apps/web/playwright.migration-diagnostics.ts"
       - "apps/web/playwright*.config.ts"
       - "apps/web/vite*.ts"
       - "packages/backup/**"
@@ -73,11 +74,47 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  v13-to-v16:
+  migration-scenarios:
+    name: Migration / ${{ matrix.suite }}
     runs-on: windows-latest
     timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        suite:
+          - cross-schema-upgrade
+          - cross-schema-v13-v15
+          - cross-schema-v14-v15
+          - cross-schema-v13-v16
+          - orphaned-v13-recovery
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+      - name: Record the actual checkout and requested PR identity
+        shell: pwsh
+        env:
+          HAKIMI_MIGRATION_EVIDENCE_DIR: ${{ runner.temp }}/hakimi-migration-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.suite }}
+          REQUESTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+          REQUESTED_BASE: ${{ github.event.pull_request.base.sha }}
+          WORKFLOW_SHA: ${{ github.sha }}
+          MIGRATION_SUITE: ${{ matrix.suite }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Path $env:HAKIMI_MIGRATION_EVIDENCE_DIR | Out-Null
+          Add-Content -LiteralPath $env:GITHUB_ENV -Value "HAKIMI_MIGRATION_EVIDENCE_DIR=$env:HAKIMI_MIGRATION_EVIDENCE_DIR" -Encoding utf8NoBOM
+          $checkoutIdentity = @{
+            requestedHead = $env:REQUESTED_HEAD
+            requestedBase = $env:REQUESTED_BASE
+            workflowSha = $env:WORKFLOW_SHA
+            actualCheckout = (git rev-parse HEAD)
+            checkoutParents = (git log -1 --format=%P)
+            suite = $env:MIGRATION_SUITE
+            evidenceClass = 'isolated-synthetic-migration-diagnostic'
+            formalReleaseAuthorized = $false
+          }
+          $checkoutIdentity | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:HAKIMI_MIGRATION_EVIDENCE_DIR 'checkout.json') -Encoding utf8NoBOM
       - uses: actions/setup-node@v5
         with:
           node-version-file: .node-version
@@ -87,10 +124,42 @@ jobs:
       - run: npx playwright install chrome msedge
       - run: npm run check:release-governance
       - run: node --test scripts/verify-release-governance.test.mjs
-      - run: npm run build:production-v13-to-v16:candidate
-      - run: node scripts/verify-built-release-storage-manifest.mjs tmp/release-config-production-v13-to-v16 --expected-channel candidate
-      - run: npm run test:e2e:cross-schema-upgrade
-      - run: npm run test:e2e:cross-schema-v13-v15
-      - run: npm run test:e2e:cross-schema-v14-v15
-      - run: npm run test:e2e:cross-schema-v13-v16
-      - run: npm run test:e2e:orphaned-v13-recovery
+      - if: ${{ matrix.suite == 'cross-schema-v13-v16' }}
+        run: npm run build:production-v13-to-v16:candidate
+      - if: ${{ matrix.suite == 'cross-schema-v13-v16' }}
+        run: node scripts/verify-built-release-storage-manifest.mjs tmp/release-config-production-v13-to-v16 --expected-channel candidate
+      - if: ${{ matrix.suite == 'cross-schema-upgrade' }}
+        run: npm run test:e2e:cross-schema-upgrade
+      - if: ${{ matrix.suite == 'cross-schema-v13-v15' }}
+        run: npm run test:e2e:cross-schema-v13-v15
+      - if: ${{ matrix.suite == 'cross-schema-v14-v15' }}
+        run: npm run test:e2e:cross-schema-v14-v15
+      - if: ${{ matrix.suite == 'cross-schema-v13-v16' }}
+        run: npm run test:e2e:cross-schema-v13-v16
+        env:
+          # GitHub Windows TEMP can use RUNNER~1; this suite deliberately
+          # requires a canonical plain parent before creating owned fixtures.
+          TEMP: ${{ runner.temp }}
+          TMP: ${{ runner.temp }}
+      - if: ${{ matrix.suite == 'orphaned-v13-recovery' }}
+        run: npm run test:e2e:orphaned-v13-recovery
+      - name: Preserve this isolated suite including failure diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-${{ matrix.suite }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.HAKIMI_MIGRATION_EVIDENCE_DIR }}/
+          if-no-files-found: error
+          retention-days: 14
+
+  migration-aggregate:
+    name: Complete migration matrix
+    if: ${{ always() }}
+    needs: migration-scenarios
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every independent suite to succeed
+        env:
+          MIGRATION_RESULT: ${{ needs.migration-scenarios.result }}
+        run: test "$MIGRATION_RESULT" = success
