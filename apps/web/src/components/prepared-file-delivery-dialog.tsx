@@ -245,6 +245,9 @@ function deliveryReceiptIssue(
     if (record.method !== "native" && record.method !== "file_system_access") {
       return "保存回执包含不可识别的写入方法。";
     }
+    if (record.method === "native" && record.filename !== expectedFilename) {
+      return "原生保存回执尚不支持确认实际文件名变更。";
+    }
     if (record.method === "file_system_access") {
       if (!chosenLocationReceipt) return "指定位置保存回执与本次用户意图不一致。";
       if (!Number.isSafeInteger(record.bytesWritten) || record.bytesWritten !== expectedBytes) {

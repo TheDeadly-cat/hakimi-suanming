@@ -92,6 +92,7 @@ describe("PreparedFileDeliveryDialog", () => {
     ["different suggested name", { requestedFilename: "other-artifact.md" }],
     ["missing operation", { requestId: undefined }],
     ["invalid actual name", { filename: "../other.md" }],
+    ["native method has no renamed-save contract", { method: "native" }],
     ["different byte size", { bytesWritten: artifact.blob.size + 1 }]
   ] as const)("keeps an invalid renamed receipt behind manual reconciliation: %s", async (_label, patch) => {
     const user = userEvent.setup();
