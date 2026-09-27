@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
+import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { zipSync, unzipSync } from "fflate";
@@ -123,16 +124,29 @@ test("minimal fixed ZIP download verifies completion and survival across profile
   const pipeProfile = pipeDiagnostic ? await fs.mkdtemp(path.join(os.tmpdir(), "hbd-pipe-diagnostic-")) : null;
   const payload = Uint8Array.from({ length: 256 * 1_024 }, (_, index) => (index * 31 + (index >> 8)) & 255);
   const zip = zipSync({ "synthetic.bin": payload });
+  // Match the application's real loopback origin. about:blank/setContent is a
+  // separate browser download edge case, retained in the diagnostic record.
+  const server = http.createServer((_request, response) => {
+    response.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+    response.end('<title>Isolated ZIP delivery</title><button id="download">Download synthetic ZIP</button>');
+  });
+  await new Promise<void>((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", resolve);
+  });
+  const address = server.address();
+  if (!address || typeof address === "string") throw new Error("Synthetic server has no loopback port.");
   try {
     for (let round = 0; round < 2; round++) {
       const pipeContext = pipeProfile ? await chromium.launchPersistentContext(pipeProfile, {
         channel: browserId, headless, acceptDownloads: true
       }) : null;
       const session = pipeContext ? { context: pipeContext, close: () => pipeContext.close() } : await owner.launch();
+      let operationError: unknown;
       try {
         const page = await session.context.newPage();
         await page.setViewportSize({ width: 1280, height: 800 });
-        await page.setContent('<title>Isolated ZIP delivery</title><button id="download">Download synthetic ZIP</button>');
+        await page.goto("http://127.0.0.1:" + address.port);
         await page.evaluate(bytes => {
           const blob = new Blob([new Uint8Array(bytes)], { type: "application/zip" });
           document.getElementById("download")!.onclick = () => {
@@ -154,9 +168,22 @@ test("minimal fixed ZIP download verifies completion and survival across profile
         await expect(page.locator("#download")).toBeEnabled();
         await attach(info, "minimal-delivery-" + round, { round, bytes: bytes.length,
           sha256: digest(bytes), transport: pipeDiagnostic ? "pipe-diagnostic" : "loopback-cdp-port" });
-      } finally { await session.close(); }
+      } catch (error) {
+        operationError = error;
+        await attach(info, "minimal-operation-error-" + round, { error: String(error) });
+        throw error;
+      } finally {
+        try { await session.close(); }
+        catch (cleanupError) {
+          if (operationError) throw new AggregateError([operationError, cleanupError], "Download operation and cleanup both failed.");
+          throw cleanupError;
+        }
+      }
     }
-  } finally { await attach(info, "minimal-lifecycle", lifecycle); }
+  } finally {
+    await attach(info, "minimal-lifecycle", lifecycle);
+    await new Promise<void>(resolve => server.close(() => resolve()));
+  }
 });
 
 test("locked v13 thousand-case backup survives full browser reopen and repeated verified delivery", async ({ page }, info) => {
@@ -167,6 +194,7 @@ test("locked v13 thousand-case backup survives full browser reopen and repeated 
   const headless = info.project.use.headless !== false;
   const owner = await createReusableReleaseBrowser(browserId, { headless, observe: event => lifecycle.push(event) });
   let session: Awaited<ReturnType<typeof owner.launch>> | undefined;
+  let operationError: unknown;
   const targetProblems: string[] = [];
   try {
     await createDemoCase(page);
@@ -212,7 +240,12 @@ test("locked v13 thousand-case backup survives full browser reopen and repeated 
     await expect(target.getByRole("heading", { name: "隔离下载验收-0000", exact: true })).toBeVisible();
     await target.screenshot({ path: info.outputPath("reopened-case-desktop.png"), fullPage: false });
     await target.setViewportSize({ width: 390, height: 844 });
-    expect(await target.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+    const mobileWidth = await target.evaluate(() => ({
+      viewport: innerWidth, content: document.documentElement.scrollWidth,
+      available: document.documentElement.clientWidth
+    }));
+    expect(mobileWidth.viewport).toBe(390);
+    expect(mobileWidth.content).toBe(mobileWidth.available);
     await target.screenshot({ path: info.outputPath("reopened-case-mobile.png"), fullPage: false });
     await target.setViewportSize({ width: 1280, height: 800 });
     await openDataManagement(target, origin);
@@ -230,9 +263,16 @@ test("locked v13 thousand-case backup survives full browser reopen and repeated 
     await session.close();
     session = undefined;
     await verifyLockedDefaultV13Artifact(artifact);
+  } catch (error) {
+    operationError = error;
+    await attach(info, "application-operation-error", { error: String(error) });
+    throw error;
   } finally {
     await attach(info, "lifecycle-before-final-cleanup", lifecycle);
-    if (session) await session.close();
-    await attach(info, "lifecycle-after-final-cleanup", lifecycle);
+    try { if (session) await session.close(); }
+    catch (cleanupError) {
+      if (operationError) throw new AggregateError([operationError, cleanupError], "Application operation and cleanup both failed.");
+      throw cleanupError;
+    } finally { await attach(info, "lifecycle-after-final-cleanup", lifecycle); }
   }
 });
