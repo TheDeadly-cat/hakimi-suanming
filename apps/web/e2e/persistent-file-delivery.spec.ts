@@ -17,6 +17,15 @@ import { createReusableReleaseBrowser } from "./reusable-release-browser";
 
 const origin = "http://127.0.0.1:4197";
 const digest = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
+// CDP's default context has no baseURL. Keep its absolute navigation local to
+// this regression instead of changing the historical shared fixture's bytes.
+async function openOwnedDataManagement(page: Page) {
+  await page.goto(origin + "/settings/data", { waitUntil: "domcontentloaded" });
+  await expect(page).toHaveTitle("数据管理与完整备份 · 哈基米八字研究台");
+  await expect(page.getByRole("heading", { name: "数据管理与完整备份" })).toBeVisible();
+  await waitForAppReady(page);
+  await expect(page.getByRole("region", { name: "此浏览器中的十六个用户数据分区" })).not.toHaveAttribute("aria-busy", "true");
+}
 async function attach(info: TestInfo, name: string, value: unknown) {
   await info.attach(name, { body: Buffer.from(JSON.stringify(value, null, 2)), contentType: "application/json" });
 }
@@ -214,7 +223,7 @@ test("locked v13 thousand-case backup survives full browser reopen and repeated 
     let target = await session.context.newPage();
     await target.setViewportSize({ width: 1280, height: 800 });
     const firstProblems = collectConsoleProblems(target);
-    await openDataManagement(target, origin);
+    await openOwnedDataManagement(target);
     await bound(target, artifact);
     await preflightBackupZip(target, backup.bytes, "synthetic-thousand.zip");
     await completeRestoreSafetyGate(target);
@@ -229,7 +238,7 @@ test("locked v13 thousand-case backup survives full browser reopen and repeated 
     target = await session.context.newPage();
     await target.setViewportSize({ width: 1280, height: 800 });
     const reopenedProblems = collectConsoleProblems(target);
-    await openDataManagement(target, origin);
+    await openOwnedDataManagement(target);
     await bound(target, artifact);
     const reopened = await snapshot(target, "reopened-before-export");
     expect(reopened.stores).toEqual(source.stores);
@@ -248,7 +257,7 @@ test("locked v13 thousand-case backup survives full browser reopen and repeated 
     expect(mobileWidth.content).toBe(mobileWidth.available);
     await target.screenshot({ path: info.outputPath("reopened-case-mobile.png"), fullPage: false });
     await target.setViewportSize({ width: 1280, height: 800 });
-    await openDataManagement(target, origin);
+    await openOwnedDataManagement(target);
     const after = await snapshot(target, "after-repeated-export");
     expect(after.stores).toEqual(source.stores);
     await target.screenshot({ path: info.outputPath("reopened-delivery.png"), fullPage: false });
