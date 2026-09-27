@@ -191,6 +191,7 @@
     "preview": "vite preview --config apps/web/vite.config.ts --host 127.0.0.1",
     "test": "node scripts/run-diagnostic-stage.mjs lifecycle vitest",
     "test:e2e": "playwright test --config apps/web/playwright.config.ts",
+    "test:e2e:persistent-delivery": "playwright test --config apps/web/playwright.persistent-file-delivery.config.ts",
     "test:e2e:db-upgrade": "playwright test --config apps/web/playwright.config.ts database-v8-v9-upgrade.spec.ts database-v9-v10-upgrade.spec.ts database-v10-v11-upgrade.spec.ts",
     "test:e2e:backup": "playwright test --config apps/web/playwright.config.ts database-v9-v10-upgrade.spec.ts database-v10-v11-upgrade.spec.ts offline-full-backup.spec.ts full-backup-worker-capacity.spec.ts full-backup-cross-browser.spec.ts",
     "test:release:backup-artifact": "playwright test --config apps/web/playwright.release-backup-artifact.config.ts",

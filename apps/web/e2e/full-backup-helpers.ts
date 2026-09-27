@@ -78,16 +78,16 @@ export async function waitForServiceWorker(page: Page) {
   }))).toEqual({ ready: "true", controlled: true, bootSignalSent: "true" });
 }
 
-export async function openDataManagement(page: Page) {
-  await page.goto("/settings/data", { waitUntil: "domcontentloaded" });
+export async function openDataManagement(page: Page, origin?: string) {
+  await page.goto(origin ? new URL("/settings/data", origin).href : "/settings/data", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveTitle("数据管理与完整备份 · 哈基米八字研究台");
   await expect(page.getByRole("heading", { name: "数据管理与完整备份" })).toBeVisible();
   await waitForAppReady(page);
   await expect(page.getByRole("region", { name: "此浏览器中的十六个用户数据分区" })).not.toHaveAttribute("aria-busy", "true");
 }
 
-export async function createDemoCase(page: Page) {
-  await page.goto("/new?demo=1", { waitUntil: "domcontentloaded" });
+export async function createDemoCase(page: Page, origin?: string) {
+  await page.goto(origin ? new URL("/new?demo=1", origin).href : "/new?demo=1", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "新建排盘" })).toBeVisible();
   for (let step = 0; step < 3; step += 1) {
     await page.getByRole("button", { name: "下一步", exact: true }).click();
