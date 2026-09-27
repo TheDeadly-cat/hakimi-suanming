@@ -3,6 +3,7 @@ import { spawn, type ChildProcess } from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { closeOwnedBrowser } from "./owned-browser-shutdown";
 import {
   releasePersistentContextOptionsForProject,
   requireReleaseBrowserRuntimeProduct
@@ -161,23 +162,24 @@ export async function createReusableReleaseBrowser(projectName: string, options:
           closed = true;
           closeRequested = true;
           emit("close-requested");
-          let timeout: ReturnType<typeof setTimeout> | undefined;
           try {
-            if (!terminated) await control.send("Browser.close").catch(error =>
-              emit("close-protocol-result", { message: String(error) }));
-            await Promise.race([nativeExit, new Promise<never>((_, reject) => {
-              timeout = setTimeout(() => reject(new Error("Owned browser did not exit after Browser.close.")), 10_000);
-            })]);
-            if (unexpectedExit || exitResult?.code !== 0) {
-              throw new Error("Browser exit was unexpected or nonzero: " + JSON.stringify({ unexpectedExit, ...exitResult }));
-            }
+            await closeOwnedBrowser({
+              requestClose: () => control.send("Browser.close"),
+              nativeExit: nativeExit!,
+              isTerminated: () => terminated,
+              killOwnedProcess: () => { ownedChild.kill(); },
+              disconnect: () => browser!.close(),
+              protocolResult: error => emit("close-protocol-result", { message: String(error) }),
+              verifyExit: () => {
+                if (unexpectedExit || exitResult?.code !== 0) {
+                  throw new Error("Browser exit was unexpected or nonzero: " + JSON.stringify({ unexpectedExit, ...exitResult }));
+                }
+              }
+            });
           } catch (error) {
             unusable = true;
-            if (!terminated) { ownedChild.kill(); await nativeExit; }
             throw error;
           } finally {
-            if (timeout) clearTimeout(timeout);
-            await browser!.close().catch(() => undefined);
             active = false;
             emit("close-finished", { exit: exitResult, unusable });
           }
@@ -186,9 +188,18 @@ export async function createReusableReleaseBrowser(projectName: string, options:
     } catch (error) {
       unusable = true;
       closeRequested = true;
-      await browser?.close().catch(() => undefined);
-      if (child && !terminated) { child.kill(); await nativeExit; }
-      active = false;
+      try {
+        await closeOwnedBrowser({
+          requestClose: async () => { if (child && !terminated) child.kill(); },
+          nativeExit: nativeExit ?? Promise.resolve(),
+          isTerminated: () => !child || terminated,
+          killOwnedProcess: () => { child?.kill(); },
+          disconnect: async () => { await browser?.close(); },
+          verifyExit: () => undefined
+        });
+      } catch (cleanupError) {
+        throw new AggregateError([error, cleanupError], "Browser launch and cleanup failed.");
+      } finally { active = false; }
       throw error;
     }
   }

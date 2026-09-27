@@ -1,5 +1,6 @@
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "@playwright/test";
 import baseConfig from "./playwright.local-data-boundaries.config";
 
@@ -12,7 +13,11 @@ export default defineConfig({
   outputDir,
   timeout: 360_000,
   expect: { timeout: 30_000 },
-  reporter: [["line"], ["json", { outputFile: path.join(outputDir, "results.json") }]],
+  reporter: [
+    ["line"], ["json", { outputFile: path.join(outputDir, "results.json") }],
+    [fileURLToPath(new URL("./playwright.persistent-file-delivery-reporter.ts", import.meta.url)),
+      { outputFile: path.join(outputDir, "completion.json") }]
+  ],
   projects: baseConfig.projects!.flatMap(project => [true, false].map(headless => ({
     ...project,
     name: project.name + (headless ? "-headless" : "-headed"),
