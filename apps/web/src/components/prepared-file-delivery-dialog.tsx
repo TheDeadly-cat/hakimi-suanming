@@ -1,6 +1,7 @@
 import { Download, Fingerprint, LoaderCircle, Save, Share2, Shield, X } from "lucide-react";
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { FileDeliveryResult, FileTransferCapabilities, ReportExportPort } from "@hakimi/platform";
+import { validateTransferFilename } from "@hakimi/platform";
 import {
   resolveFileDelivery,
   safeFileTransferText,
@@ -202,7 +203,8 @@ function deliveryReceiptIssue(
   result: FileDeliveryResult,
   intent: DeliveryIntent,
   expectedFilename: string,
-  expectedBytes: number
+  expectedBytes: number,
+  expectedRequestId: string
 ): string | null {
   if (!result || typeof result !== "object") {
     return "文件交付适配器没有返回结构化回执。";
@@ -210,10 +212,25 @@ function deliveryReceiptIssue(
   const record = result as unknown as Record<string, unknown>;
   const status = record.status;
   const resultFilename = normalizedArtifactText(record.filename);
-  if (!resultFilename || resultFilename.length > 240) {
+  if (!resultFilename) {
     return "文件交付回执缺少可识别的文件名。";
   }
-  if (record.filename !== expectedFilename) {
+  try {
+    validateTransferFilename(record.filename as string);
+  } catch {
+    return "文件交付回执的实际文件名无效。";
+  }
+  const chosenLocationReceipt = intent === "chosen_location"
+    && record.requestId === expectedRequestId
+    && record.requestedFilename === expectedFilename;
+  const needsChosenBinding = intent === "chosen_location" && (
+    record.method === "file_system_access" || record.filename !== expectedFilename
+    || record.requestId !== undefined || record.requestedFilename !== undefined
+  );
+  if (needsChosenBinding && !chosenLocationReceipt) {
+    return "指定位置保存回执与本次交付操作或建议文件名不一致。";
+  }
+  if (!chosenLocationReceipt && record.filename !== expectedFilename) {
     return "文件交付回执的文件名与当前冻结工件不一致。";
   }
 
@@ -229,6 +246,7 @@ function deliveryReceiptIssue(
       return "保存回执包含不可识别的写入方法。";
     }
     if (record.method === "file_system_access") {
+      if (!chosenLocationReceipt) return "指定位置保存回执与本次用户意图不一致。";
       if (!Number.isSafeInteger(record.bytesWritten) || record.bytesWritten !== expectedBytes) {
         return "指定位置保存回执的写入字节数与冻结工件不一致。";
       }
@@ -548,6 +566,7 @@ export function PreparedFileDeliveryDialog({
       artifactDescriptor: operationDescriptor
     });
     if (!deliveryOperation) return;
+    const requestId = String(deliveryOperation.token);
     const isCurrentLocalView = () => {
       const activeArtifact = activeArtifactRef.current;
       return generation === deliveryGenerationRef.current
@@ -560,7 +579,7 @@ export function PreparedFileDeliveryDialog({
     setError(null);
     try {
       const result = intent === "chosen_location"
-        ? await operationExportPort.saveFileToChosenLocation(operationArtifact.blob, operationArtifact.filename)
+        ? await operationExportPort.saveFileToChosenLocation(operationArtifact.blob, operationArtifact.filename, requestId)
         : intent === "share"
           ? await operationExportPort.shareFile(
               operationArtifact.blob,
@@ -573,7 +592,8 @@ export function PreparedFileDeliveryDialog({
         result,
         intent,
         operationArtifact.filename,
-        operationArtifact.blob.size
+        operationArtifact.blob.size,
+        requestId
       );
       if (receiptIssue) {
         requirePreparedFileDeliveryManualCheck(deliveryOperation, "uncertain", receiptIssue);

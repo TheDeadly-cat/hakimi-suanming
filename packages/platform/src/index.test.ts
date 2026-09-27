@@ -61,6 +61,64 @@ afterEach(() => {
 });
 
 describe("web file transfer port", () => {
+  it("binds a renamed save to the captured request and Blob, and waits for close before saved", async () => {
+    Object.defineProperty(globalThis, "isSecureContext", { configurable: true, value: true });
+    let choose!: (handle: unknown) => void;
+    let commit!: () => void;
+    const write = vi.fn().mockResolvedValue(undefined);
+    const close = vi.fn(() => new Promise<void>(resolve => { commit = resolve; }));
+    const createWritable = vi.fn().mockResolvedValue({ write, close, abort: vi.fn() });
+    Object.defineProperty(window, "showSaveFilePicker", { configurable: true,
+      value: vi.fn(() => new Promise(resolve => { choose = resolve; })) });
+    const original = new Blob(["frozen payload"]);
+    const payload = { filename: "suggested.zip", blob: original };
+    const options = { destination: "chosen_location" as const, requestId: "save-17" };
+    let settled = false;
+    const pending = webFileTransferPort.saveFile(payload, options).then(result => { settled = true; return result; });
+    payload.filename = "changed.zip";
+    payload.blob = new Blob(["different bytes"]);
+    options.requestId = "other-operation";
+    choose({ name: "我的研究备份.zip", createWritable });
+    await vi.waitFor(() => expect(close).toHaveBeenCalledOnce());
+    expect(write).toHaveBeenCalledExactlyOnceWith(original);
+    expect(settled).toBe(false);
+    commit();
+    await expect(pending).resolves.toEqual({
+      status: "saved", filename: "我的研究备份.zip", method: "file_system_access",
+      bytesWritten: original.size, requestedFilename: "suggested.zip", requestId: "save-17"
+    });
+  });
+
+  it.each(["", "../private.zip", "bad:name.zip", "CON.zip", "name\u0000.zip", "x".repeat(256)])(
+    "refuses invalid selected filename %j before opening a writer", async name => {
+      Object.defineProperty(globalThis, "isSecureContext", { configurable: true, value: true });
+      const createWritable = vi.fn();
+      Object.defineProperty(window, "showSaveFilePicker", { configurable: true,
+        value: vi.fn().mockResolvedValue({ name, createWritable }) });
+      const result = await webFileTransferPort.saveFile({ filename: "backup.zip", blob: new Blob(["zip"]) },
+        { destination: "chosen_location", requestId: "name-check" });
+      expect(result).toMatchObject({ status: "failed", operation: "save", stage: "pick",
+        filename: "backup.zip", requestedFilename: "backup.zip", requestId: "name-check" });
+      expect(createWritable).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(["write", "close"] as const)("keeps actual and requested names on a renamed %s failure", async stage => {
+    Object.defineProperty(globalThis, "isSecureContext", { configurable: true, value: true });
+    const failure = new Error(stage + " failed");
+    const writer = { write: vi.fn().mockResolvedValue(undefined), close: vi.fn().mockResolvedValue(undefined), abort: vi.fn() };
+    writer[stage].mockRejectedValueOnce(failure);
+    Object.defineProperty(window, "showSaveFilePicker", { configurable: true,
+      value: vi.fn().mockResolvedValue({ name: "实际名称.zip", createWritable: vi.fn().mockResolvedValue(writer) }) });
+    await expect(webFileTransferPort.saveFile({ filename: "backup.zip", blob: new Blob(["zip"]) },
+      { destination: "chosen_location", requestId: "failure-check" })).resolves.toEqual({
+      status: "failed", filename: "实际名称.zip", operation: "save", stage, reason: stage + " failed",
+      requestedFilename: "backup.zip", requestId: "failure-check"
+    });
+    expect(writer.abort).toHaveBeenCalledWith(failure);
+    if (stage === "write") expect(writer.close).not.toHaveBeenCalled();
+  });
+
   it("reports an anchor click as download_requested and revokes the object URL", async () => {
     vi.useFakeTimers();
     const createObjectURL = vi.fn(() => "blob:single-chart");
@@ -110,6 +168,7 @@ describe("web file transfer port", () => {
     expect(result).toEqual({
       status: "saved",
       filename: "已选择.json",
+      requestedFilename: "建议名称.json",
       method: "file_system_access",
       bytesWritten: blob.size
     });
@@ -126,6 +185,7 @@ describe("web file transfer port", () => {
     await expect(saveBlobFileToChosenLocation("backup.zip", new Blob(["zip"]))).resolves.toEqual({
       status: "cancelled",
       filename: "backup.zip",
+      requestedFilename: "backup.zip",
       operation: "save",
       reason: "未选择保存位置，或浏览器阻止了该目标。"
     });
@@ -140,6 +200,7 @@ describe("web file transfer port", () => {
     await expect(saveBlobFileToChosenLocation("report.md", new Blob(["report"]))).resolves.toEqual({
       status: "unsupported",
       filename: "report.md",
+      requestedFilename: "report.md",
       operation: "save",
       reason: "当前浏览器不支持选择保存位置；请改用下载文件。"
     });
@@ -165,6 +226,7 @@ describe("web file transfer port", () => {
     await expect(saveBlobFileToChosenLocation("report.md", new Blob(["report"]))).resolves.toEqual({
       status: "failed",
       filename: "report.md",
+      requestedFilename: "report.md",
       operation: "save",
       stage: "write",
       reason: "storage quota exhausted"
@@ -193,6 +255,7 @@ describe("web file transfer port", () => {
     expect(result).toEqual({
       status: "failed",
       filename: "report.md",
+      requestedFilename: "report.md",
       operation: "save",
       stage: "close",
       reason: "safe browsing rejected"
