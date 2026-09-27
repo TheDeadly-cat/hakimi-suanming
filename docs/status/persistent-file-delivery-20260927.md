@@ -27,7 +27,7 @@
 
 命令：
 
-    npm run test:e2e:persistent-delivery
+    node node_modules/@playwright/test/cli.js test --config apps/web/playwright.persistent-file-delivery.config.ts
 
 前提是依照现有默认 v13 流程构建、设置 HAKIMI_RELEASE_EVIDENCE_ID，并在 dist/web 外生成 tmp/release-artifact-identity.json。该命令只校验和预览已经锁定的产物，不重建它，也不接管 5188/5189。
 
@@ -41,7 +41,7 @@
 
 如需显式重现管道路径，只对最小用例设置 HAKIMI_DOWNLOAD_REPRO_PIPE=1 并选择一个浏览器项目：
 
-    npm run test:e2e:persistent-delivery -- --grep "minimal fixed ZIP" --project msedge-headless
+    node node_modules/@playwright/test/cli.js test --config apps/web/playwright.persistent-file-delivery.config.ts --grep "minimal fixed ZIP" --project msedge-headless
 
 这个开关不会将失败改成预期成功，也不会改变完整应用用例；它不是发布验收模式。
 
