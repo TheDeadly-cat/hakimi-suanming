@@ -164,9 +164,9 @@ test("minimal fixed ZIP download verifies completion and survival across profile
             anchor.click(); anchor.remove(); setTimeout(() => URL.revokeObjectURL(url), 0);
           };
         }, [...zip]);
-        const promised = page.waitForEvent("download");
-        await page.locator("#download").click();
-        const download = await promised;
+        const [download] = await Promise.all([
+          page.waitForEvent("download"), page.locator("#download").click()
+        ]);
         expect(await download.failure()).toBeNull();
         const saved = info.outputPath("minimal-" + round + ".zip");
         await download.saveAs(saved);

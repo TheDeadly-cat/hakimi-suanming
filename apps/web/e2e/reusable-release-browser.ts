@@ -43,8 +43,10 @@ async function requireSameDirectory(directory: string, identity: { dev: bigint; 
 
 /**
  * Reusable, exclusively owned profile for download/reopen regression tests.
- * Local isolation reproduced native 0xC0000005 exits with CDP pipe after reuse;
- * changing only the debugging transport to a loopback port completed delivery.
+ * Local isolation reproduced native 0xC0000005 exits in download-bubble cache
+ * updates after reuse. Port transport alone did not reliably prevent them.
+ * Finish the initial read-only attachment before applying Playwright's default
+ * download override; keep the same owned native process across both phases.
  * Application bytes, validation, browser channel and launch protections stay fixed.
  * This is an automation compatibility path, not a production download fallback.
  */
@@ -88,7 +90,7 @@ export async function createReusableReleaseBrowser(projectName: string, options:
       nativeExit = new Promise(resolve => {
         ownedChild.once("exit", (code, signal) => {
           terminated = true;
-          unexpectedExit = !closeRequested;
+          unexpectedExit ||= !closeRequested;
           exitResult = { code, signal };
           emit("native-exit", { pid: ownedChild.pid, code, signal, closeRequested });
           resolve();
@@ -115,6 +117,25 @@ export async function createReusableReleaseBrowser(projectName: string, options:
         await new Promise(resolve => setTimeout(resolve, 50));
       }
       if (!port) throw new Error("Owned browser did not publish a fresh debugging endpoint.");
+      // connectOverCDP normally applies download overrides while initial pages
+      // are attaching. First let the persistent profile and its initial targets
+      // initialize without those overrides. Closing this CDP connection only
+      // disconnects it; Browser.close below is the explicit native shutdown.
+      browser = await chromium.connectOverCDP("http://127.0.0.1:" + port, { noDefaults: true });
+      const initializationControl = await browser.newBrowserCDPSession();
+      const initializationProcesses = await initializationControl.send("SystemInfo.getProcessInfo");
+      if (!initializationProcesses.processInfo.some(item => item.type === "browser" && item.id === ownedChild.pid)) {
+        throw new Error("Initialization endpoint does not identify the owned browser process.");
+      }
+      const initialVersion = await initializationControl.send("Browser.getVersion");
+      requireReleaseBrowserRuntimeProduct(projectName, initialVersion.product);
+      const initialPages = browser.contexts()[0]?.pages() ?? [];
+      if (initialPages.length === 0) throw new Error("Owned browser has no initial page.");
+      await Promise.all(initialPages.map(page => page.waitForLoadState("domcontentloaded")));
+      emit("read-only-attach-ready", { pid: ownedChild.pid, product: initialVersion.product,
+        initialPages: initialPages.length });
+      await browser.close();
+      if (terminated) throw new Error("Owned browser exited during initialization disconnect.");
       browser = await chromium.connectOverCDP("http://127.0.0.1:" + port);
       const control = await browser.newBrowserCDPSession();
       const processes = await control.send("SystemInfo.getProcessInfo");
@@ -123,11 +144,15 @@ export async function createReusableReleaseBrowser(projectName: string, options:
       }
       const version = await control.send("Browser.getVersion");
       requireReleaseBrowserRuntimeProduct(projectName, version.product);
+      if (version.product !== initialVersion.product) throw new Error("Browser identity changed between attachments.");
       const context = browser.contexts()[0];
       if (!context) throw new Error("Owned browser has no persistent default context.");
       emit("ready", { product: version.product, pid: ownedChild.pid, headless,
         transport: "loopback-cdp-port", profileDirectory });
-      context.on("close", () => emit("context-closed", { closeRequested }));
+      context.on("close", () => {
+        unexpectedExit ||= !closeRequested;
+        emit("context-closed", { closeRequested });
+      });
       let closed = false;
       return {
         context,
