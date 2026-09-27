@@ -53,38 +53,63 @@ async function savedBackup(page: Page, info: TestInfo, filename: string, expecte
 }
 async function seedThousandCases(page: Page) {
   return page.evaluate(async () => {
-    const resources = [...new Set(performance.getEntriesByType("resource").map(item => item.name))]
-      .filter(url => new URL(url).origin === location.origin && /\/assets\/index-[^/]+\.js$/.test(new URL(url).pathname));
-    let Repository: any;
-    let Database: any;
-    for (const url of resources) {
-      const namespace = await import(/* @vite-ignore */ url);
-      for (const value of Object.values(namespace)) {
-        if (typeof value !== "function" || !value.prototype) continue;
-        if (typeof value.prototype.prepareFullDataSnapshotReplacement === "function") Repository = value;
-        if (typeof value.prototype.withReleaseMigrationWriteAccess === "function") Database = value;
-      }
-    }
-    if (!Repository || !Database) throw new Error("Observed artifact did not expose its storage classes.");
-    const database = new Database("hakimi-bazi-research", { targetSchema: 13 });
+    const requestResult = <T,>(request: IDBRequest<T>) => new Promise<T>((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error ?? new Error("Fixture read failed."));
+    });
+    const transactionDone = (transaction: IDBTransaction) => new Promise<void>((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onabort = transaction.onerror = () => reject(transaction.error ?? new Error("Fixture transaction failed."));
+    });
+    const database = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open("hakimi-bazi-research");
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error ?? new Error("Fixture database open failed."));
+      request.onupgradeneeded = () => {
+        request.transaction?.abort();
+        reject(new Error("Fixture setup must not create or upgrade a database."));
+      };
+    });
     try {
-      const repository = new Repository(database);
-      const payload = await repository.readFullDataSnapshot();
-      const caseRecord = payload.cases[0], revision = payload.revisions[0];
-      if (!caseRecord || !revision) throw new Error("Synthetic UI case is missing.");
-      payload.cases = [];
-      payload.revisions = [];
+      // Test-only setup on a fresh physical v13 profile; never bypass v16 mutation epochs.
+      if (database.version !== 130) throw new Error("Synthetic fixture requires physical v13 (130).");
+      const stores = ["cases", "revisions", "birthFingerprints"];
+      const read = database.transaction(stores, "readonly");
+      const readDone = transactionDone(read);
+      const [cases, revisions, fingerprints] = await Promise.all(stores.map(name =>
+        requestResult(read.objectStore(name).getAll())
+      ));
+      await readDone;
+      const caseRecord = cases[0], revision = revisions[0];
+      const fingerprint = fingerprints.find(record => record.recordType === "revision" && record.sourceId === revision?.id);
+      if (cases.length !== 1 || revisions.length !== 1 || !fingerprint ||
+          revision.caseId !== caseRecord.id || caseRecord.latestRevisionId !== revision.id) {
+        throw new Error("Synthetic UI case, revision, and fingerprint must form one valid fixture.");
+      }
+      const seededCases = [], seededRevisions = [], seededFingerprints = [];
       for (let index = 0; index < 1_000; index++) {
         const suffix = String(index).padStart(12, "0");
         const caseId = "40000000-0000-4000-8000-" + suffix;
         const revisionId = "50000000-0000-4000-8000-" + suffix;
-        payload.cases.push({ ...structuredClone(caseRecord), id: caseId, latestRevisionId: revisionId,
+        seededCases.push({ ...structuredClone(caseRecord), id: caseId, latestRevisionId: revisionId,
           alias: "隔离下载验收-" + String(index).padStart(4, "0") });
-        payload.revisions.push({ ...structuredClone(revision), id: revisionId, caseId });
+        seededRevisions.push({ ...structuredClone(revision), id: revisionId, caseId });
+        seededFingerprints.push({ ...structuredClone(fingerprint), key: "revision:" + revisionId,
+          sourceId: revisionId, subjectId: caseId, recordType: "revision" });
       }
-      const payloadBytes = new TextEncoder().encode(JSON.stringify(payload)).byteLength;
-      await repository.replaceFullDataSnapshot(payload);
-      return { cases: 1_000, revisions: 1_000, payloadBytes };
+      const coreFixtureBytes = new TextEncoder().encode(JSON.stringify({
+        cases: seededCases, revisions: seededRevisions
+      })).byteLength;
+      const write = database.transaction(stores, "readwrite");
+      const writeDone = transactionDone(write);
+      for (const [offset, records] of [seededCases, seededRevisions, seededFingerprints].entries()) {
+        const store = write.objectStore(stores[offset]!);
+        store.clear();
+        for (const record of records) store.put(record);
+      }
+      await writeDone;
+      return { cases: seededCases.length, revisions: seededRevisions.length,
+        fingerprints: seededFingerprints.length, coreFixtureBytes, setup: "native-idb-v13-synthetic-only" };
     } finally { database.close(); }
   });
 }
