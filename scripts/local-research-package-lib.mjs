@@ -78,46 +78,37 @@ async function copyBytes(source, destination, containmentRoot) {
 // Explicit next local engineering candidate; never selected by version ordering.
 // The built application belongs to this source commit; packaging changes are separate.
 export const LOCAL_RESEARCH_CANDIDATE = Object.freeze({
-  buildVersion: "4de42e9db980",
-  sourceCommit: "d3ff1bdcc64d0917dcc604f753ac896eb62a9c1e",
-  evidenceId: "hre1-8f0e82a7568246e68d2c535527e3431d",
-  lockSha256: "d8a12d67f39555ff598a583c4b90ab2746156a4982f2cfbd5a1a6065a08b0f62",
-  artifactSetDigest: "0ef6aafa437d6d894a232a1789dd8e35d72de9df9dd02982b38bc75609e6c1e5",
+  buildVersion: "8f67be033617",
+  sourceCommit: "1205cda6067a56d3045bdbaf326dec79423d6a88",
+  evidenceId: "hre1-5d9155b9f1fe9e4f156d0cd7e82fb661",
+  lockSha256: "8d2562d322002a0e689f35e57e97b970c68c7e155c220c78af225048c6579b2f",
+  artifactSetDigest: "9b993355935570f95ac9178793a3d4f5e7db95640fcbab959e3db7a88e30b7fe",
   fileCount: 137,
   origin: "http://127.0.0.1:5189/",
   nodeVersion: "24.16.0",
-  packageRevision: "2",
+  packageRevision: "1",
   localEngineeringCandidate: true,
   formalAdmissionAuthorized: false,
   expertClaimsAuthorized: false,
   publicReleaseAuthorized: false
 });
+// Original 1205cda same-artifact summaries: 12 delivery, 8 backup, 2 research.
+// Local engineering checks, not formal admission or Windows picker receipts.
 const CANDIDATE_RECEIPTS = Object.freeze([
   {
-    "path": "tmp/first-controller-receipts-4de42e9db980/boot.json",
-    "sha256": "b73716f2f11da7f9509dcaab76257feae1f0591126c1fd18459d2f6b6ab0adfc"
+    "path": "tmp/delivery-receipts-8f67be033617/persistent-delivery.json",
+    "sha256": "93a67defea833dc100c41fab07ff2084a81ee50ab9b363d32cab39cfdc2b742b"
   },
   {
-    "path": "tmp/first-controller-receipts-4de42e9db980/browser-results/boot-17140-acad3275-139f-4218-97a3-89b4193c58cb.json",
-    "sha256": "8670b1953ff34924388f5117ef6cbcbf445b6b5a458f33a7e59e11b8779e977b"
+    "path": "tmp/delivery-receipts-8f67be033617/backup.json",
+    "sha256": "6a4c7cc17ab982d66d7edd02f065763d9e5ba90e2eab1af954ae6e8fef7d27cd"
   },
   {
-    "path": "tmp/first-controller-receipts-4de42e9db980/pwa.json",
-    "sha256": "9c2d517ef50f75d97d449ac85f210b02dd70b1c4fabdfd84176972c3e993c012"
-  },
-  {
-    "path": "tmp/first-controller-receipts-4de42e9db980/browser-results/pwa-49508-0e7ab317-1215-4fda-a860-72c153155eb8.json",
-    "sha256": "72a5455f85e0bad05407cd5b1b08bf1f8a899cf61a100785723dfc7e37038d1c"
-  },
-  {
-    "path": "tmp/first-controller-receipts-4de42e9db980/web-v1-flow.json",
-    "sha256": "a7cea705c29f9f39a5ea8ef7cbd43a2738e2c704da2c8c6e8bec500d4f9988b2"
-  },
-  {
-    "path": "tmp/first-controller-receipts-4de42e9db980/browser-results/web-v1-flow-38848-d2f11ad5-1416-4612-a6d1-e004659eb232.json",
-    "sha256": "1e011b5244afd795a5cd40e6b902fabb80dc722d915e40f552bfb55c3dcb1e2b"
+    "path": "tmp/delivery-receipts-8f67be033617/web-v1.json",
+    "sha256": "b42da88210f0c20abf7de06594c82c1e00695a4f9d3ccffd2362372f3c5fdc33"
   }
-].map((entry) => Object.freeze(entry)));
+]
+.map((entry) => Object.freeze(entry)));
 
 // Only the two explicit selections are accepted. Existing imports retain c15ef.
 export function createLocalPackageTools(release) {
