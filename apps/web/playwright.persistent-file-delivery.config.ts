@@ -8,7 +8,7 @@ const outputDir = path.join(os.tmpdir(), "hakimi-bazi-persistent-file-delivery",
 
 export default defineConfig({
   ...baseConfig,
-  testMatch: "persistent-file-delivery.spec.ts",
+  testMatch: ["persistent-file-delivery.spec.ts", "chosen-location-delivery.spec.ts"],
   outputDir,
   timeout: 360_000,
   expect: { timeout: 30_000 },
