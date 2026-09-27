@@ -68,6 +68,8 @@ export type FileTransferCapabilities = {
 
 export type FileSaveOptions = {
   destination?: "default" | "chosen_location";
+  /** Correlates a chosen-location result with this caller's delivery operation. */
+  requestId?: string;
 };
 
 export type FileSaveFailureStage = "download" | "pick" | "create_writable" | "write" | "close";
@@ -77,13 +79,14 @@ export type FilePickResult =
   | { status: "cancelled" }
   | { status: "unsupported"; reason: string };
 
-export type FileSaveResult =
+export type FileSaveResult = (
   | { status: "saved"; filename: string; method: "native"; bytesWritten?: number }
   | { status: "saved"; filename: string; method: "file_system_access"; bytesWritten: number }
   | { status: "download_requested"; filename: string; method: "browser_download" }
   | { status: "cancelled"; filename: string; operation: "save"; reason?: string }
   | { status: "unsupported"; filename: string; operation: "save"; reason: string }
-  | { status: "failed"; filename: string; operation: "save"; stage: FileSaveFailureStage; reason: string };
+  | { status: "failed"; filename: string; operation: "save"; stage: FileSaveFailureStage; reason: string }
+) & { requestedFilename?: string; requestId?: string };
 
 export type FileShareResult =
   | { status: "shared"; filename: string; method: "native" | "web_share" }
@@ -124,7 +127,7 @@ export function validateTransferFilename(filename: string): string {
     || filename === ".."
     || filename.endsWith(".")
     || Array.from(filename).length > 255
-    || /[\\/\p{Cc}\p{Cf}]/u.test(filename)
+    || /[<>:"|?*\\/\p{Cc}\p{Cf}]/u.test(filename)
     || /^(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/u.test(baseName)
   ) {
     throw new Error("文件名必须是 1～255 个字符的普通文件名，不能包含路径或控制字符。");
@@ -347,11 +350,12 @@ async function saveWebFileToChosenLocation(payload: FilePayload): Promise<FileSa
     return saveFailure(filename, "pick", reason, "浏览器未能打开保存位置选择器。");
   }
 
-  let selectedFilename = filename;
+  let selectedFilename: string;
   try {
-    if (handle.name) selectedFilename = validateTransferFilename(handle.name);
-  } catch {
-    // Preserve the already validated suggested name when the browser returns an unsafe display name.
+    selectedFilename = validateTransferFilename(handle.name);
+  } catch (reason) {
+    // Do not write to a target whose actual name cannot be represented safely.
+    return saveFailure(filename, "pick", reason, "浏览器返回的实际文件名无效，尚未写入文件。");
   }
   let writable: FileSystemWritableFileStream;
   try {
@@ -465,9 +469,17 @@ export const webFileTransferPort: FileTransferPort = {
   },
   pickFile: pickWebFile,
   saveFile(payload, options) {
-    return options?.destination === "chosen_location"
-      ? saveWebFileToChosenLocation(payload)
-      : requestWebDownload(payload);
+    if (options?.destination !== "chosen_location") return requestWebDownload(payload);
+    const requestedFilename = validateTransferFilename(payload.filename);
+    const requestId = options.requestId;
+    if (requestId !== undefined && (typeof requestId !== "string" || !/^[a-zA-Z0-9._:-]{1,128}$/u.test(requestId))) {
+      return Promise.reject(new Error("指定位置保存的操作标识无效。"));
+    }
+    // Capture the exact Blob and request before the picker yields to the caller.
+    const captured = { filename: requestedFilename, blob: payload.blob, title: payload.title };
+    return saveWebFileToChosenLocation(captured).then(result => ({
+      ...result, requestedFilename, ...(requestId === undefined ? {} : { requestId })
+    }));
   },
   shareFile: shareWebFile
 };
@@ -553,10 +565,10 @@ export function saveBlobFile(filename: string, blob: Blob): Promise<FileSaveResu
   return getFileTransferPort().saveFile({ filename: validateTransferFilename(filename), blob });
 }
 
-export function saveBlobFileToChosenLocation(filename: string, blob: Blob): Promise<FileSaveResult> {
+export function saveBlobFileToChosenLocation(filename: string, blob: Blob, requestId?: string): Promise<FileSaveResult> {
   return getFileTransferPort().saveFile(
     { filename: validateTransferFilename(filename), blob },
-    { destination: "chosen_location" }
+    { destination: "chosen_location", ...(requestId === undefined ? {} : { requestId }) }
   );
 }
 
@@ -572,7 +584,7 @@ export type ReportExportPort = {
   getCapabilities(): FileTransferCapabilities;
   printReport(): Promise<void>;
   saveFile(blob: Blob, filename: string): Promise<FileSaveResult>;
-  saveFileToChosenLocation(blob: Blob, filename: string): Promise<FileSaveResult>;
+  saveFileToChosenLocation(blob: Blob, filename: string, requestId?: string): Promise<FileSaveResult>;
   shareFile(blob: Blob, filename: string, title?: string): Promise<FileShareResult>;
 };
 
@@ -594,8 +606,8 @@ export const webReportExportPort: ReportExportPort = {
   saveFile(blob, filename) {
     return saveBlobFile(filename, blob);
   },
-  saveFileToChosenLocation(blob, filename) {
-    return saveBlobFileToChosenLocation(filename, blob);
+  saveFileToChosenLocation(blob, filename, requestId) {
+    return saveBlobFileToChosenLocation(filename, blob, requestId);
   },
   shareFile(blob, filename, title) {
     return shareBlobFile(filename, blob, title);

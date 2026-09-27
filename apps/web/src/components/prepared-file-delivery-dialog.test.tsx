@@ -38,12 +38,14 @@ function createExportPort(
     filename: artifact.filename,
     method: "browser_download"
   });
-  saveFileToChosenLocation.mockResolvedValue({
+  saveFileToChosenLocation.mockImplementation(async (_blob, filename, requestId) => ({
     status: "saved",
     filename: artifact.filename,
     method: "file_system_access",
-    bytesWritten: artifact.blob.size
-  });
+    bytesWritten: artifact.blob.size,
+    requestedFilename: filename,
+    requestId
+  }));
   shareFile.mockResolvedValue({
     status: "shared",
     filename: artifact.filename,
@@ -62,6 +64,75 @@ function createExportPort(
 describe("PreparedFileDeliveryDialog", () => {
   beforeEach(() => {
     resetPreparedFileDeliveryCoordinatorForTests();
+  });
+
+  it.each([artifact.filename, "我的研究备份.md", "名".repeat(251) + ".zip"])(
+    "accepts an explicitly bound chosen-location save and shows its actual name: %s", async filename => {
+      const user = userEvent.setup();
+      const delivery = createExportPort();
+      delivery.saveFileToChosenLocation.mockImplementationOnce(async (blob, requestedFilename, requestId) => ({
+        status: "saved", filename, method: "file_system_access", bytesWritten: blob.size,
+        requestedFilename, requestId
+      }));
+      const onDeliveryResolution = vi.fn();
+      render(<PreparedFileDeliveryDialog artifact={artifact} exportPort={delivery.port} onClose={vi.fn()}
+        onDeliveryResolution={onDeliveryResolution} />);
+      await user.click(screen.getByRole("button", { name: /保存到指定位置/ }));
+      expect(await screen.findByText(filename + " 已由当前平台确认写入。", { selector: ".success-message" })).toBeTruthy();
+      expect(screen.getByRole("dialog").getAttribute("data-retry-gate")).toBe("open");
+      expect(onDeliveryResolution).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+        artifact, intent: "chosen_location", result: expect.objectContaining({ filename,
+          requestedFilename: artifact.filename, requestId: "1", bytesWritten: artifact.blob.size })
+      }));
+    }
+  );
+
+  it.each([
+    ["different operation", { requestId: "stale-operation" }],
+    ["different suggested name", { requestedFilename: "other-artifact.md" }],
+    ["missing operation", { requestId: undefined }],
+    ["invalid actual name", { filename: "../other.md" }],
+    ["native method has no renamed-save contract", { method: "native" }],
+    ["different byte size", { bytesWritten: artifact.blob.size + 1 }]
+  ] as const)("keeps an invalid renamed receipt behind manual reconciliation: %s", async (_label, patch) => {
+    const user = userEvent.setup();
+    const delivery = createExportPort();
+    delivery.saveFileToChosenLocation.mockImplementationOnce(async (blob, requestedFilename, requestId) => ({
+      status: "saved", filename: "实际名称.md", method: "file_system_access", bytesWritten: blob.size,
+      requestedFilename, requestId, ...patch
+    }));
+    const onDeliveryResolution = vi.fn();
+    render(<PreparedFileDeliveryDialog artifact={artifact} exportPort={delivery.port} onClose={vi.fn()}
+      onDeliveryResolution={onDeliveryResolution} />);
+    await user.click(screen.getByRole("button", { name: /保存到指定位置/ }));
+    await waitFor(() => expect(getPreparedFileDeliverySnapshot().status).toBe("manual_check_required"));
+    expect(onDeliveryResolution).not.toHaveBeenCalled();
+    expect(screen.queryByText(/已由当前平台确认写入/, { selector: ".success-message" })).toBeNull();
+    expect((screen.getByRole("button", { name: /下载文件/ }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("does not accept a renamed ordinary download even with chosen-location metadata", async () => {
+    const user = userEvent.setup();
+    const delivery = createExportPort();
+    delivery.saveFile.mockResolvedValueOnce({ status: "download_requested", filename: "other.md",
+      method: "browser_download", requestedFilename: artifact.filename, requestId: "1" });
+    render(<PreparedFileDeliveryDialog artifact={artifact} exportPort={delivery.port} onClose={vi.fn()} />);
+    await user.click(screen.getByRole("button", { name: /下载文件/ }));
+    await waitFor(() => expect(getPreparedFileDeliverySnapshot().status).toBe("manual_check_required"));
+    expect(screen.getByText("文件交付回执的文件名与当前冻结工件不一致。")).toBeTruthy();
+  });
+
+  it("keeps an unchanged legacy native save compatible without granting it rename permission", async () => {
+    const user = userEvent.setup();
+    const delivery = createExportPort();
+    delivery.saveFileToChosenLocation.mockResolvedValueOnce({
+      status: "saved", filename: artifact.filename, method: "native"
+    }).mockResolvedValueOnce({ status: "saved", filename: "other.md", method: "native" });
+    render(<PreparedFileDeliveryDialog artifact={artifact} exportPort={delivery.port} onClose={vi.fn()} />);
+    await user.click(screen.getByRole("button", { name: /保存到指定位置/ }));
+    expect(await screen.findByText(artifact.filename + " 已由当前平台确认写入。", { selector: ".success-message" })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: /保存到指定位置/ }));
+    await waitFor(() => expect(getPreparedFileDeliverySnapshot().status).toBe("manual_check_required"));
   });
 
   it("按运行时能力显示交付入口，并把同一份 Blob 交给指定保存、下载和分享", async () => {
@@ -86,7 +157,7 @@ describe("PreparedFileDeliveryDialog", () => {
     expect(screen.getByRole("button", { name: /系统分享/ })).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: /保存到指定位置/ }));
-    await waitFor(() => expect(saveFileToChosenLocation).toHaveBeenCalledWith(artifact.blob, artifact.filename));
+    await waitFor(() => expect(saveFileToChosenLocation).toHaveBeenCalledWith(artifact.blob, artifact.filename, "1"));
     expect(await screen.findByText(/已由当前平台确认写入/, { selector: ".success-message" })).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: /下载文件/ }));
@@ -159,6 +230,7 @@ describe("PreparedFileDeliveryDialog", () => {
     const user = userEvent.setup();
     const delivery = createExportPort();
     if (intent === "chosen_location") {
+      Object.assign(result, { requestedFilename: artifact.filename, requestId: "1" });
       delivery.saveFileToChosenLocation.mockResolvedValueOnce(result as never);
     } else if (intent === "share") {
       delivery.shareFile.mockResolvedValueOnce(result as never);
@@ -245,12 +317,14 @@ describe("PreparedFileDeliveryDialog", () => {
       {
         label: "bytes mismatch",
         intent: "chosen_location",
-        arrange: ({ saveFileToChosenLocation }) => saveFileToChosenLocation.mockResolvedValueOnce({
+        arrange: ({ saveFileToChosenLocation }) => saveFileToChosenLocation.mockImplementationOnce(async (_blob, filename, requestId) => ({
           status: "saved",
           filename: artifact.filename,
           method: "file_system_access",
+          requestedFilename: filename,
+          requestId,
           bytesWritten: artifact.blob.size + 1
-        })
+        }))
       },
       {
         label: "intent mismatch",
@@ -341,13 +415,16 @@ describe("PreparedFileDeliveryDialog", () => {
         status: "cancelled",
         filename: artifact.filename,
         operation: "save",
-        reason: "未选择保存位置。"
+        reason: "未选择保存位置。",
+        requestedFilename: artifact.filename,
+        requestId: "1"
       })
       .mockResolvedValueOnce({
         status: "saved",
         filename: artifact.filename,
         method: "file_system_access",
-        bytesWritten: artifact.blob.size
+        bytesWritten: artifact.blob.size,
+        requestedFilename: artifact.filename, requestId: "2"
       });
 
     render(
@@ -644,7 +721,9 @@ describe("PreparedFileDeliveryDialog", () => {
       status: "saved",
       filename: artifact.filename,
       method: "file_system_access",
-      bytesWritten: artifact.blob.size
+      bytesWritten: artifact.blob.size,
+      requestedFilename: artifact.filename,
+      requestId: delivery.saveFileToChosenLocation.mock.calls[0]?.[2]
     });
 
     await waitFor(() => expect(getPreparedFileDeliverySnapshot().status).toBe("idle"));

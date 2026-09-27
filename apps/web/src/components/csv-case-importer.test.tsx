@@ -23,7 +23,8 @@ const {
   printReportMock: vi.fn()
 }));
 
-vi.mock("@hakimi/platform", () => ({
+vi.mock("@hakimi/platform", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@hakimi/platform")>(),
   pickFile: pickFileMock,
   webReportExportPort: {
     getCapabilities: getExportCapabilitiesMock,
@@ -174,6 +175,8 @@ describe("CsvCaseImporter", () => {
     const templateDelivery = await downloadPreparedFile(1);
     expect(templateDelivery.filename).toBe("hakimi-bazi-case-import-template.csv");
     expect(await templateDelivery.blob.text()).toContain("案例名,历法,出生日期,出生时间,时间精度,IANA时区");
+    fireEvent.click(await within(templateDelivery.dialog).findByRole("button", { name: "已核对，允许再次下载" }));
+    await waitFor(() => expect(templateDelivery.dialog.getAttribute("data-retry-gate")).toBe("open"));
     fireEvent.click(within(templateDelivery.dialog).getByRole("button", { name: "关闭" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 

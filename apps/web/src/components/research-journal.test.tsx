@@ -167,11 +167,13 @@ beforeEach(async () => {
     filename,
     method: "browser_download"
   }));
-  saveFileToChosenLocationMock.mockReset().mockImplementation(async (blob: Blob, filename: string) => ({
+  saveFileToChosenLocationMock.mockReset().mockImplementation(async (blob: Blob, filename: string, requestId: string) => ({
     status: "saved",
     filename,
     method: "file_system_access",
-    bytesWritten: blob.size
+    bytesWritten: blob.size,
+    requestedFilename: filename,
+    requestId
   }));
   shareFileMock.mockReset().mockImplementation(async (_blob: Blob, filename: string) => ({
     status: "shared",
