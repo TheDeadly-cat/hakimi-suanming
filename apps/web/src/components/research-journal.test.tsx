@@ -277,6 +277,56 @@ describe("ResearchJournal", () => {
     }
   });
 
+  it("只编辑笔记正文并重开后保留独立标签及标签内顿号", async () => {
+    const calculated = await calculateChart(input, WORKING_DEFAULT_RULE_PROFILE);
+    const bundle = await caseRepository.createCase({ alias: "笔记标签往返", calculated });
+    const revision = bundle.revisions[0];
+    const tags = ["边界", "甲、乙专题", "待核验"];
+    const sourceRefs = ["书名甲、乙 / 第一章", "另一条来源"];
+    const note = await researchRepository.createResearchNote({
+      caseId: bundle.caseRecord.id,
+      anchor: { kind: "revision", revisionId: revision.id },
+      body: "原笔记正文",
+      tags,
+      sourceRefs,
+      lifecycle: "active"
+    });
+
+    for (let edit = 1; edit <= 2; edit += 1) {
+      const view = render(<ResearchJournal caseId={bundle.caseRecord.id} revision={revision} selection={{ pillar: "day", field: "stem" }} />);
+      fireEvent.click(await screen.findByRole("button", { name: "编辑笔记" }));
+      fireEvent.change(screen.getByLabelText(/Markdown 笔记/), { target: { value: `正文修订 ${edit}` } });
+      fireEvent.click(screen.getByRole("button", { name: "保存新版本" }));
+      await screen.findByText("研究笔记已生成新编辑版本。");
+      const stored = await researchRepository.listResearchNotesByCase(bundle.caseRecord.id);
+      expect(stored).toHaveLength(1);
+      expect(stored[0]).toMatchObject({ id: note.id, body: `正文修订 ${edit}`, tags, sourceRefs, editVersion: edit + 1 });
+      expect(stored[0].anchor).toEqual(note.anchor);
+      view.unmount();
+    }
+  });
+
+  it("只编辑事件正文并重开后保留独立标签及标签内顿号", async () => {
+    const calculated = await calculateChart(input, WORKING_DEFAULT_RULE_PROFILE);
+    const bundle = await caseRepository.createCase({ alias: "事件标签往返", calculated });
+    const revision = bundle.revisions[0];
+    const tags = ["事业", "甲、乙专题", "复盘"];
+    const record = await createDayEvent({ caseId: bundle.caseRecord.id, revisionId: revision.id, title: "事件标签记录", tags });
+
+    for (let edit = 1; edit <= 2; edit += 1) {
+      const view = render(<ResearchJournal caseId={bundle.caseRecord.id} revision={revision} selection={{ pillar: "day", field: "stem" }} />);
+      fireEvent.click(await screen.findByRole("button", { name: "编辑事件" }));
+      fireEvent.change(screen.getByLabelText("事件笔记"), { target: { value: `事件正文修订 ${edit}` } });
+      fireEvent.click(screen.getByRole("button", { name: "保存事件修改" }));
+      await waitFor(async () => {
+        const stored = await researchRepository.listEventsByCase(bundle.caseRecord.id);
+        expect(stored).toHaveLength(1);
+        expect(stored[0]).toMatchObject({ id: record.id, body: `事件正文修订 ${edit}`, tags, revisionId: revision.id });
+      });
+      view.unmount();
+    }
+  });
+
   it("完成笔记与真实事件的保存、检索和软删除闭环", async () => {
     const calculated = await calculateChart(input, WORKING_DEFAULT_RULE_PROFILE);
     const bundle = await caseRepository.createCase({ alias: "研究样本", calculated });

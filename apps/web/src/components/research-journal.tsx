@@ -800,7 +800,7 @@ export function ResearchJournal({
   const beginEditNote = (note: ResearchNoteRecord) => {
     setEditingNote(note);
     setNoteBody(note.body);
-    setNoteTags(note.tags.join("、"));
+    setNoteTags(note.tags.join("，"));
     setNoteSources(note.sourceRefs.join("\n"));
     setError(null);
   };
@@ -1030,7 +1030,7 @@ export function ResearchJournal({
       datePrecision: record.datePrecision,
       startDate: record.startDate ?? "",
       endDate: record.endDate ?? "",
-      tags: record.tags.join("、"),
+      tags: record.tags.join("，"),
       sourceRefs: record.sourceRefs.join("\n"),
       feedback: record.feedback,
       body: record.body,
@@ -1254,7 +1254,7 @@ export function ResearchJournal({
             <label className="field"><span>锚定位置</span><select value={noteAnchorMode} onChange={(event) => setNoteAnchorMode(event.target.value as NoteAnchorMode)}><option value="field">当前字段 · {selection.pillar}.{selection.field}</option><option value="revision">当前修订</option><option value="case">整个案例</option></select></label>
           ) : editingNote ? <p className="editor-context">原锚点：{noteAnchorLabel(editingNote)} · editVersion {editingNote.editVersion}</p> : <p className="editor-context">未知时辰候选组只允许案例级锚点；不会绑定代表探针、DST 变体或虚构修订。</p>}
           <label className="field"><span>Markdown 笔记 <em>必填</em></span><textarea ref={noteBodyInputRef} rows={6} value={noteBody} onChange={(event) => setNoteBody(event.target.value)} placeholder="记录观察、反例、待复核问题；不要把笔记改写成命盘事实。" maxLength={JOURNAL_BODY_MAX_LENGTH} required /></label>
-          <div className="field-grid"><label className="field"><span>标签</span><input value={noteTags} onChange={(event) => setNoteTags(event.target.value)} placeholder="边界、待核验" maxLength={JOURNAL_LIST_INPUT_MAX_LENGTH} /></label><label className="field"><span>来源引用</span><input value={noteSources} onChange={(event) => setNoteSources(event.target.value)} placeholder="书名/版本/章节，用分号分隔" maxLength={JOURNAL_LIST_INPUT_MAX_LENGTH} /></label></div>
+          <div className="field-grid"><label className="field"><span>标签</span><input value={noteTags} onChange={(event) => setNoteTags(event.target.value)} placeholder="边界，待核验" maxLength={JOURNAL_LIST_INPUT_MAX_LENGTH} /></label><label className="field"><span>来源引用</span><input value={noteSources} onChange={(event) => setNoteSources(event.target.value)} placeholder="书名/版本/章节，用分号分隔" maxLength={JOURNAL_LIST_INPUT_MAX_LENGTH} /></label></div>
           <div className="journal-actions"><button type="submit" className="primary-action" disabled={journalMutationActive} aria-busy={noteSaving}>{noteSaving ? <RefreshCw className="is-spinning" aria-hidden="true" /> : <Save aria-hidden="true" />}{noteSaving ? "正在保存笔记…" : editingNote ? "保存新版本" : "保存笔记"}</button>{editingNote ? <button type="button" className="secondary-action" disabled={journalMutationActive} onClick={cancelNoteEdit}><X aria-hidden="true" />取消编辑</button> : null}</div>
           </fieldset>
         </form>
@@ -1297,7 +1297,7 @@ export function ResearchJournal({
           )}
           <div className="field-grid"><label className="field"><span>事件标题 <em>必填</em></span><input ref={eventTitleInputRef} value={eventDraft.title} onChange={(event) => updateEventDraft("title", event.target.value)} maxLength={JOURNAL_TITLE_MAX_LENGTH} required /></label><label className="field"><span>反馈</span><select value={eventDraft.feedback} onChange={(event) => updateEventDraft("feedback", event.target.value as EventDraft["feedback"])}><option value="unreviewed">未复核</option><option value="supports">支持当前假设</option><option value="contradicts">反例</option><option value="mixed">混合</option></select></label></div>
           <div className="field-grid"><label className="field"><span>日期精度</span><select disabled={editingLegacyEvent} value={eventDraft.datePrecision} onChange={(event) => setEventDraft((current) => ({ ...current, datePrecision: event.target.value as EventDraft["datePrecision"], startDate: "", endDate: "", startDisambiguation: "reject", endDisambiguation: "reject" }))}><option value="year">年</option><option value="month">月</option><option value="day">日</option><option value="minute">分钟</option><option value="unknown">未知</option></select></label><label className="field"><span>{eventDraft.datePrecision === "minute" ? "起始民用分钟" : "起始日期"}</span><input type={dateInputType} disabled={editingLegacyEvent || eventDraft.datePrecision === "unknown"} value={eventDraft.startDate} onChange={(event) => setEventDraft((current) => ({ ...current, startDate: event.target.value, startDisambiguation: "reject" }))} placeholder={eventDraft.datePrecision === "year" ? "YYYY" : undefined} /></label></div>
-          <div className="field-grid"><label className="field"><span>{eventDraft.datePrecision === "minute" ? "结束民用分钟（可选）" : "结束日期（可选）"}</span><input type={dateInputType} disabled={editingLegacyEvent || eventDraft.datePrecision === "unknown"} value={eventDraft.endDate} onChange={(event) => setEventDraft((current) => ({ ...current, endDate: event.target.value, endDisambiguation: "reject" }))} placeholder={eventDraft.datePrecision === "year" ? "YYYY" : undefined} /></label><label className="field"><span>标签</span><input value={eventDraft.tags} onChange={(event) => updateEventDraft("tags", event.target.value)} placeholder="事业、搬迁、反例" maxLength={JOURNAL_LIST_INPUT_MAX_LENGTH} /></label></div>
+          <div className="field-grid"><label className="field"><span>{eventDraft.datePrecision === "minute" ? "结束民用分钟（可选）" : "结束日期（可选）"}</span><input type={dateInputType} disabled={editingLegacyEvent || eventDraft.datePrecision === "unknown"} value={eventDraft.endDate} onChange={(event) => setEventDraft((current) => ({ ...current, endDate: event.target.value, endDisambiguation: "reject" }))} placeholder={eventDraft.datePrecision === "year" ? "YYYY" : undefined} /></label><label className="field"><span>标签</span><input value={eventDraft.tags} onChange={(event) => updateEventDraft("tags", event.target.value)} placeholder="事业，搬迁，反例" maxLength={JOURNAL_LIST_INPUT_MAX_LENGTH} /></label></div>
           {eventRangeInvalid ? <div className="event-range-error" role="alert"><strong>事件时间范围无效</strong><p>{eventDraft.datePrecision === "minute" ? "按当前时区与 DST 选择解析后，结束 UTC 早于起始 UTC。" : "结束日期早于起始日期。"}</p></div> : null}
           {editingLegacyEvent ? (
             <div className="legacy-time-upgrade">
