@@ -56,6 +56,7 @@ test("locked v13 preserves journal tags through two edits, native reopen, actual
   let operationError: unknown;
   try {
     session = await source.launch();
+    session.context.setDefaultTimeout(15_000);
     let page = await session.context.newPage();
     problems.push(collectConsoleProblems(page));
     await page.goto(origin + "/new?demo=1");
@@ -76,7 +77,7 @@ test("locked v13 preserves journal tags through two edits, native reopen, actual
     await expect(page.getByRole("status").filter({ hasText: "研究笔记已保存到本地案例" })).toBeVisible();
     const eventEditor = page.getByRole("region", { name: "记录研究事件", exact: true });
     await eventEditor.getByLabel(/事件标题/).fill("合成标签往返事件");
-    await eventEditor.getByLabel("日期精度", { exact: true }).selectOption("unknown");
+    await eventEditor.getByLabel("日期精度").selectOption("unknown");
     await eventEditor.getByLabel("标签", { exact: true }).fill(tags.join("，"));
     await eventEditor.getByLabel("来源引用", { exact: true }).fill(sources.join("；"));
     await eventEditor.getByLabel("事件笔记", { exact: true }).fill("合成事件原正文");
@@ -112,6 +113,7 @@ test("locked v13 preserves journal tags through two edits, native reopen, actual
       await expect(page.getByRole("status").filter({ hasText: "事件记录已更新" })).toBeVisible();
       await session.close(); session = undefined;
       session = await source.launch();
+      session.context.setDefaultTimeout(15_000);
       page = await session.context.newPage();
       problems.push(collectConsoleProblems(page));
       await page.goto(researchURL);
@@ -139,6 +141,7 @@ test("locked v13 preserves journal tags through two edits, native reopen, actual
     await session.close(); session = undefined;
 
     session = await target.launch();
+    session.context.setDefaultTimeout(15_000);
     page = await session.context.newPage();
     problems.push(collectConsoleProblems(page));
     await dataPage(page);
