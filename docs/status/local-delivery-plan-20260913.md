@@ -1,5 +1,46 @@
 # 本地交付目标与验收台账
 
+## 当前交付摘要 · 2026-10-02
+
+本批范围是将 PR #13 已有标签修复交付为新的默认 v13 本地候选。下方各日期是原始历史记录；此前的“空资料库”“首次启用”“尚无真实使用反馈”不再代表现状。
+
+| 对象 | 本批明确身份与边界 |
+| --- | --- |
+| 应用源码 | `32c54490b7ad08b59e4294d32d868fd2091707fe`，tree `e944dfc208b6a2608f3d02b10ef91f0af856842e`；继承 PR #13 `f43c7eb` 和 PR #11 `48fac10`。生产修改仍只有笔记、事件编辑标签的分隔符与占位提示；新增取消、失败和同产物回归。 |
+| 新候选 | `fbe0180702f2 / package revision 1`，`legacy-v13 / Schema 13 / migrationId null`。evidenceId `hre1-ffb3f471c72833481fb1d4855f601fd8`；应用 137 文件，lock SHA-256 `2f783541be491e8c0fef93f6e083d4a65be8cf16b9353e2b6a8d84d46a8c93eb`，文件集合摘要 `8ebf902e9f430b2ddbf8fd88d5d1fa7f71d2950ea128106ae686be0f337af574`。不是旧 `8f67` 的新包装。 |
+| 当前实际安装 | 5189 仍为 `8f67be033617-package-v1`，应用来源 `1205cda6067a56d3045bdbaf326dec79423d6a88`。用户已于 09-27 批准启用，09-29 完成真实研究保存和备份核对。现用安装尚不含 PR #13 标签修复。 |
+| 回退保留 | 下一次切换的直接回退对象为现用 `8f67be033617-package-v1`；更早的 `4de42e9db980-package-v2` 继续保留。5188 固定 `c15ef05bb165` 不动。两个候选的完整清单和两份快捷方式均已核对。 |
+| 权限 | 用户本轮仅授权验证工具只读访问 `local-user-data-cleanup.ts`；未修改或公开内容。没有下一产物的安装启用、main 合并、公开发布、专家声明授权。 |
+
+本地 `npm run typecheck` 的完整 TypeScript 程序退出 0；`npm test` 的完整 Vitest 为 **214 文件、2860/2860**；`npm run build` 的历史源锁/运行时前置与 Vite 程序退出 0。三条正式 npm 生命周期的聚合退出仍为 1，原因是独立的 `EXPERT_QUALIFICATION_RECEIPT_LOADER_UNAVAILABLE`，未把诊断或程序通过冒充正式准入。研究日志定向 36/36；相关浏览器关闭、profile、报告器与探测 Node 合同 39/39。原始日志在本机 `HakimiBaziWorkbenchCandidates/validation/20261002-v13-tag-delivery/`。
+
+新产物的同产物标签闭环 **Edge/Chrome 2/2**、既有下载/另存为/持久重开矩阵 **12/12**、PWA 安装性与离线冷启动 **2/2** 通过；零重试、跳过或 flaky。两个隔离资料空间的十六分区、完整备份 payload、案例/修订、笔记/事件 ID、锚点、标签和来源逐项一致。普通下载核对了实际保存文件；另存为自动化仅替代系统选择器，真实 FileSystemFileHandle 读写仍执行，不冒充人工 Windows 弹窗验收。
+
+首次两浏览器尝试停在下拉框标签定位；第二次及一次单浏览器诊断停在含原正文的 textarea 精确标签定位。截图确认编辑界面和记录均存在，没有应用错误。原失败、诊断、截图及通过结果全部保留；修正仅涉及测试工具，未重建应用。完整测试工具提交 `ed36887836fe50f82fa6347ed1306b8cc6abf353` 的 [Quick CI 37025161151](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/37025161151) 已终结：工程聚合与各工程任务通过，正式专家及正式聚合失败。这一结果不自动转签给后续打包提交。
+
+安装包共 **152 文件**，清单 SHA-256 `2b976ade0ef0c02077dfb2301962f0d85b4a037a0ff0b956c66cdb38a52684f4`；ZIP `hakimi-fbe0180702f2-package-v1.zip` 的 SHA-256 为 `e9a6af1ba3394b9f97e89f28f5e13d7d09429c2e6a3d485f55c3b187679f4486`。ZIP 解压复验与独立 Windows 安装副本身份一致，重复安装 `reused=true`。安装集成 **18/18** 通过；实际安装服务的 136 个可公开提供文件逐字节核对，另一个 `_headers` 文件正确不提供。
+
+原生 PowerShell 启动器在一次性端口映射副本上 **4/4** 通过：冷启动、同 PID 重复复用、未知监听拒绝并保留、包身份错误时零启动。只映射打包库的一处 origin 和启动器七处端口常量，并更新测试副本清单；应用、原锁和正式安装包未改，端口为 `60073`，结束后仅关闭本轮所有进程。首次夹具正确拒绝损坏包，但测试预期的错误包装文字与 PowerShell 直接错误不同；原失败保留，修正断言并新增无监听检查后通过。这个结果不是生产 5189 现场启动回执。
+
+新安装副本与旧 `8f67` 在同一临时端口 `59761` 完成应用壳/服务回退核对；旧包原字节保留，未打开真实浏览器或导入备份。现用服务、快捷方式及资料没有切换。安全启用和失败回退的具体步骤见 [安装说明](../../LOCAL-CANDIDATE-INSTALL.txt)。工程候选已具备用户启用决策所需本地证据；现场启用仍须单独批准。
+
+| 本地执行 | 结果与原始记录（均在上述 20261002 目录） |
+| --- | --- |
+| `npm run typecheck`；最终测试调整后 `node node_modules/typescript/bin/tsc --noEmit -p tsconfig.json` | 完整程序退出 0；生命周期聚合 1（正式专家门）。`typecheck.log`、`typecheck-final-program.log` |
+| `npm test` | 214 文件、2860 项通过；程序 0，生命周期聚合 1。`full-vitest.log` |
+| `node --test scripts/local-research-probe.test.mjs scripts/owned-browser-shutdown.test.mjs scripts/persistent-file-delivery-reporter.test.mjs scripts/release-persistent-profile.test.mjs` | 39/39。`node-contracts.log` |
+| `npm run build`；`node scripts/verify-built-release-storage-manifest.mjs dist/web --expected-channel default-v13`；`node scripts/release-artifact-identity.mjs --write --dist dist/web --lock tmp/release-artifact-identity.json` | Vite、前置、manifest、锁通过；build 生命周期聚合 1。`build.log`、`manifest.log`、`lock.log` |
+| `node node_modules/@playwright/test/cli.js test --config apps/web/playwright.journal-tag-artifact.config.ts` | 2/2。`journal-browser-final.log`、`journal-browser-completeness.json`、`journal-browser-evidence/` |
+| 同一 Playwright 命令，配置 `apps/web/playwright.persistent-file-delivery.config.ts`、`apps/web/playwright.release-pwa-artifact.config.ts` | 12/12、2/2；严格报告器通过。`persistent-delivery.log`、`persistent-browser-evidence/`、`pwa.log` |
+| `node scripts/local-research-candidate.mjs package --artifact-workspace . --output <QA>/package`；`node scripts/validate-local-installation.mjs --candidate --package-root <QA>/package --output <QA>/installation-contracts` | 打包零重建，18/18。`package-created.json`、`installation-contracts/results.json` |
+| 原 PowerShell 安装器 `-NoShortcut -InstallRoot <QA>/isolated-install` 两次；本机 `verify-launcher-isolated-v2.mjs`、`verify-installed-and-rollback.mjs` | 安装首次/复用、原生隔离启动 4/4、服务文件与回退通过。`native-install-*.json`、`native-launcher-results-v2.json`、`installed-and-rollback.json`、`zip-readback.json` |
+
+合入关系：PR #11 基于整合分支；PR #12（旧包身份）与 PR #13（标签修复）都基于 PR #11。[本批 Draft PR #14](https://github.com/TheDeadly-cat/hakimi-suanming/pull/14) 继承 #13，复用 #11 已具备、与 #12 相同的打包程序，只重新绑定新产物身份。不要机械把 #12 旧常量覆盖到新候选；多个 PR 各自的通过也不证明任意合并组合通过。建议依次审查 #11、#13、#14，保留 #12 为旧安装归属；实际合入仍须针对最终合并结果验证和另行批准。
+
+旧 main 仍为 `c2d18ca453971d3087abe53e21872cd707ea7d42`；最近定时 [Nightly 36936529679](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/36936529679) 在这个 main 上失败。它不是本开发分支或 `fbe0180702f2` 的结果。本批没有改变 main、工作流目标、定时配置或失败通知。
+
+保留事项按影响区分：正式专家资格、原始意见和来源权利仍阻断相应准入、专家声明与公开发布；同机隔离验收不能代替第二台 Windows。用户没有需要更正的真实资料，真实新修订保存继续记为未测并保留原盘，此项不阻断本批合成资料工程收尾。新候选启用须另获批准并从实际使用浏览器导出、预检当前备份；安装回退仅回到旧应用壳和服务，不能自动恢复旧数据覆盖后续研究内容。
+
 ## 当前交付摘要 · 2026-09-25
 
 ### c0f9fdc 联合结果与新页面启动诊断
