@@ -108,7 +108,7 @@ test("locked v13 preserves journal tags through two edits, native reopen, actual
       await page.getByRole("button", { name: "编辑事件", exact: true }).click();
       const event = page.getByRole("region", { name: "编辑研究事件", exact: true });
       await expect(event.getByLabel("标签", { exact: true })).toHaveValue(tags.join("，"));
-      await event.getByLabel("事件笔记", { exact: true }).fill("合成事件正文修订 " + round);
+      await event.getByLabel("事件笔记").fill("合成事件正文修订 " + round);
       await event.getByRole("button", { name: "保存事件修改", exact: true }).click();
       await expect(page.getByRole("status").filter({ hasText: "事件记录已更新" })).toBeVisible();
       await session.close(); session = undefined;
@@ -165,7 +165,18 @@ test("locked v13 preserves journal tags through two edits, native reopen, actual
       targetProfile: target.profileDirectory, stores: beforeExport.stores, restored: restored.stores,
       payloadDigest: final.checked.digests.payload, noteId: note.id, eventId: event.id, tags, sources,
       nativeReopens: 2, formalReleaseEvidenceReceipt: false });
-  } catch (error) { operationError = error; throw error; }
+  } catch (error) {
+    operationError = error;
+    if (session) {
+      for (const [index, page] of session.context.pages().entries()) {
+        if (!page.url().startsWith(origin)) continue;
+        await page.screenshot({ path: info.outputPath(`owned-page-failure-${index}.png`) });
+        await attach(info, "owned-page-failure", { url: page.url(), problems,
+          editors: await page.locator(".research-editor-section").allTextContents() });
+      }
+    }
+    throw error;
+  }
   finally {
     try { if (session) await session.close(); }
     catch (error) {
