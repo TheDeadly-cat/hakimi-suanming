@@ -327,6 +327,56 @@ describe("ResearchJournal", () => {
     }
   });
 
+  it.each(["note", "event"] as const)("取消 %s 编辑不调用仓储更新且完整原记录不变", async (kind) => {
+    const calculated = await calculateChart(input, WORKING_DEFAULT_RULE_PROFILE);
+    const bundle = await caseRepository.createCase({ alias: "取消编辑隔离样本", calculated });
+    const revision = bundle.revisions[0];
+    const note = await researchRepository.createResearchNote({
+      caseId: bundle.caseRecord.id, anchor: { kind: "revision", revisionId: revision.id },
+      body: "取消前笔记", tags: ["边界", "甲、乙专题"], sourceRefs: ["书名甲、乙"], lifecycle: "active"
+    });
+    const event = await createDayEvent({ caseId: bundle.caseRecord.id, revisionId: revision.id,
+      title: "取消前事件", tags: ["事业", "甲、乙专题"] });
+    const updateNote = vi.spyOn(researchRepository, "updateResearchNote");
+    const updateEvent = vi.spyOn(researchRepository, "updateEvent");
+    render(<ResearchJournal caseId={bundle.caseRecord.id} revision={revision} selection={{ pillar: "day", field: "stem" }} />);
+    fireEvent.click(await screen.findByRole("button", { name: kind === "note" ? "编辑笔记" : "编辑事件" }));
+    fireEvent.change(screen.getByLabelText(kind === "note" ? /Markdown 笔记/ : "事件笔记"), { target: { value: "不应保存的正文" } });
+    fireEvent.change(screen.getAllByLabelText("标签")[kind === "note" ? 0 : 1], { target: { value: "不应保存的标签" } });
+    fireEvent.click(screen.getByRole("button", { name: "取消编辑" }));
+    expect(updateNote).not.toHaveBeenCalled();
+    expect(updateEvent).not.toHaveBeenCalled();
+    expect(await researchRepository.listResearchNotesByCase(bundle.caseRecord.id)).toEqual([note]);
+    expect(await researchRepository.listEventsByCase(bundle.caseRecord.id)).toEqual([event]);
+  });
+
+  it.each(["note", "event"] as const)("%s 编辑在提交前被拒绝时原记录不变且不显示成功", async (kind) => {
+    const calculated = await calculateChart(input, WORKING_DEFAULT_RULE_PROFILE);
+    const bundle = await caseRepository.createCase({ alias: "保存失败隔离样本", calculated });
+    const revision = bundle.revisions[0];
+    const note = await researchRepository.createResearchNote({
+      caseId: bundle.caseRecord.id, anchor: { kind: "revision", revisionId: revision.id },
+      body: "失败前笔记", tags: ["边界", "甲、乙专题"], sourceRefs: ["书名甲、乙"], lifecycle: "active"
+    });
+    const event = await createDayEvent({ caseId: bundle.caseRecord.id, revisionId: revision.id,
+      title: "失败前事件", tags: ["事业", "甲、乙专题"] });
+    // This fixture rejects before storage. The UI must still fail closed because
+    // a generic repository rejection alone cannot prove whether a write committed.
+    const update = kind === "note"
+      ? vi.spyOn(researchRepository, "updateResearchNote").mockRejectedValueOnce(new Error("fixture-before-commit"))
+      : vi.spyOn(researchRepository, "updateEvent").mockRejectedValueOnce(new Error("fixture-before-commit"));
+    render(<ResearchJournal caseId={bundle.caseRecord.id} revision={revision} selection={{ pillar: "day", field: "stem" }} />);
+    fireEvent.click(await screen.findByRole("button", { name: kind === "note" ? "编辑笔记" : "编辑事件" }));
+    fireEvent.change(screen.getByLabelText(kind === "note" ? /Markdown 笔记/ : "事件笔记"), { target: { value: "失败正文" } });
+    fireEvent.click(screen.getByRole("button", { name: kind === "note" ? "保存新版本" : "保存事件修改" }));
+    expect(await screen.findByRole("heading", { name: "写入结果未知，研究日志已锁定" })).toBeTruthy();
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText("研究笔记已生成新编辑版本。")).toBeNull();
+    expect(screen.queryByText("事件记录已更新。")).toBeNull();
+    expect(await researchRepository.listResearchNotesByCase(bundle.caseRecord.id)).toEqual([note]);
+    expect(await researchRepository.listEventsByCase(bundle.caseRecord.id)).toEqual([event]);
+  });
+
   it("完成笔记与真实事件的保存、检索和软删除闭环", async () => {
     const calculated = await calculateChart(input, WORKING_DEFAULT_RULE_PROFILE);
     const bundle = await caseRepository.createCase({ alias: "研究样本", calculated });
