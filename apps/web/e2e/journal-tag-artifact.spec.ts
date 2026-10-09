@@ -179,6 +179,12 @@ test("locked v13 preserves separate body tag and source edits, failed saves, nat
         await page.setViewportSize({ width: 390, height: 844 });
         expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
         await editor.screenshot({ path: info.outputPath("note-sources-mobile.png") });
+        // An element screenshot includes the fixed navigation at its current
+        // viewport position. Confirm the actual narrow-screen action remains
+        // reachable after scrolling, without creating another saved version.
+        await editor.getByRole("button", { name: "保存新版本", exact: true }).click({ trial: true });
+        await editor.getByRole("button", { name: "取消编辑", exact: true }).click({ trial: true });
+        await page.screenshot({ path: info.outputPath("note-actions-mobile.png") });
         await page.setViewportSize({ width: 1280, height: 800 });
       }
       await editor.getByLabel("来源引用", { exact: true }).fill("取消时不应保存的来源");
