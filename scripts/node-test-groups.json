@@ -191,6 +191,7 @@
         "scripts/deployed-pwa-evidence-v3.test.mjs",
         "scripts/deployed-pwa-evidence.test.mjs",
         "scripts/deployed-pwa-host-provider-composition.test.mjs",
+        "scripts/journal-artifact-errors.test.mjs",
         "scripts/provider-deployment-candidate-loader.test.mjs",
         "scripts/provider-deployment-candidate-runtime.test.mjs",
         "scripts/provider-deployment-candidate-sequence-loader.test.mjs",

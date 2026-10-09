@@ -9,11 +9,11 @@
     "@hakimi/contracts": "*",
     "@hakimi/integrity": "*",
     "@hakimi/knowledge-core": "*",
-    "@hakimi/rule-packs": "*",
     "@hakimi/revision-replay": "*",
+    "@hakimi/rule-packs": "*",
     "@hakimi/storage": "*",
     "@hakimi/time-core": "*",
     "@hakimi/transit-core": "*",
-    "fflate": "0.8.2"
+    "fflate": "0.8.3"
   }
 }

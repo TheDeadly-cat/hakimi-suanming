@@ -788,3 +788,18 @@
     box-shadow: inset 3px 0 CanvasText;
   }
 }
+.journal-source-refs {
+  min-width: 0;
+}
+
+.journal-source-refs__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.5rem;
+}
+
+.journal-source-refs__row textarea {
+  width: 100%;
+  resize: vertical;
+}

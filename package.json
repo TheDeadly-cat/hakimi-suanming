@@ -258,8 +258,8 @@
     "util": "0.12.5"
   },
   "devDependencies": {
-    "@babel/parser": "7.29.8",
     "@axe-core/playwright": "4.12.1",
+    "@babel/parser": "7.29.8",
     "@playwright/test": "1.62.1",
     "@testing-library/react": "16.3.2",
     "@testing-library/user-event": "14.6.1",
@@ -269,7 +269,7 @@
     "fake-indexeddb": "6.2.5",
     "jsdom": "30.0.1",
     "typescript": "7.0.2",
-    "vitest": "4.1.10",
+    "vitest": "4.1.11",
     "zod": "4.4.3"
   }
 }

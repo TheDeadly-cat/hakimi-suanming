@@ -9,10 +9,13 @@ import {
 import { captureStorageV13NativeReadonlySnapshot } from "./storage-v13-native-readonly";
 import { verifyLockedDefaultV13Artifact, type LockedDefaultV13Artifact } from "./locked-default-v13-artifact";
 import { createReusableReleaseBrowser } from "./reusable-release-browser";
+import { runJournalArtifactCheck } from "./journal-artifact-errors";
 
 const origin = "http://127.0.0.1:4197";
 const tags = ["边界", "甲、乙专题", "待核验"];
-const sources = ["合成书名甲、乙 / 第一章", "另一条合成来源"];
+const sources = ["合成书名甲、乙, 第一章；附录", "另一条合成来源\n同一条来源的版本说明"];
+const editedTags = [...tags, "追加复核"];
+const editedSources = [sources[0]!, "第二条来源：更正版, 卷二；附录\n同条换行", "新增来源丙、丁, 卷三；附录"];
 const sha256 = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
 async function attach(info: TestInfo, name: string, value: unknown) {
   await info.attach(name, { body: Buffer.from(JSON.stringify(value, null, 2)), contentType: "application/json" });
@@ -46,18 +49,18 @@ async function snapshot(page: Page, phase: string) {
   return captureStorageV13NativeReadonlySnapshot(page, { captureId: "journal-tags-" + phase, operationId: "export", phase });
 }
 
-test("locked v13 preserves journal tags through two edits, native reopen, actual ZIP and isolated restore", async ({}, info) => {
+test("locked v13 preserves separate body tag and source edits, failed saves, native reopen and isolated ZIP restore", async ({}, info) => {
   const artifact = await verifyLockedDefaultV13Artifact();
   const lifecycle: unknown[] = [];
   const problems: string[][] = [];
   const source = await createReusableReleaseBrowser(info.project.name, { observe: event => lifecycle.push(event) });
   const target = await createReusableReleaseBrowser(info.project.name, { observe: event => lifecycle.push(event) });
   let session: Awaited<ReturnType<typeof source.launch>> | undefined;
-  let operationError: unknown;
-  try {
+  await runJournalArtifactCheck({ operation: async () => {
     session = await source.launch();
     session.context.setDefaultTimeout(15_000);
     let page = await session.context.newPage();
+    await page.setViewportSize({ width: 1280, height: 800 });
     problems.push(collectConsoleProblems(page));
     await page.goto(origin + "/new?demo=1");
     await bound(page, artifact);
@@ -72,14 +75,18 @@ test("locked v13 preserves journal tags through two edits, native reopen, actual
     await noteEditor.getByLabel("锚定位置").selectOption("revision");
     await noteEditor.getByLabel(/Markdown 笔记/).fill("合成笔记原正文");
     await noteEditor.getByLabel("标签", { exact: true }).fill(tags.join("，"));
-    await noteEditor.getByLabel("来源引用", { exact: true }).fill(sources.join("；"));
+    await noteEditor.getByLabel("来源引用", { exact: true }).fill(sources[0]!);
+    await noteEditor.getByRole("button", { name: "添加一条来源", exact: true }).click();
+    await noteEditor.getByLabel("来源引用 2", { exact: true }).fill(sources[1]!);
     await noteEditor.getByRole("button", { name: "保存笔记", exact: true }).click();
     await expect(page.getByRole("status").filter({ hasText: "研究笔记已保存到本地案例" })).toBeVisible();
     const eventEditor = page.getByRole("region", { name: "记录研究事件", exact: true });
     await eventEditor.getByLabel(/事件标题/).fill("合成标签往返事件");
     await eventEditor.getByLabel("日期精度").selectOption("unknown");
     await eventEditor.getByLabel("标签", { exact: true }).fill(tags.join("，"));
-    await eventEditor.getByLabel("来源引用", { exact: true }).fill(sources.join("；"));
+    await eventEditor.getByLabel("来源引用", { exact: true }).fill(sources[0]!);
+    await eventEditor.getByRole("button", { name: "添加一条来源", exact: true }).click();
+    await eventEditor.getByLabel("来源引用 2", { exact: true }).fill(sources[1]!);
     await eventEditor.getByLabel("事件笔记", { exact: true }).fill("合成事件原正文");
     await eventEditor.getByRole("button", { name: "添加事件", exact: true }).click();
     await expect(page.getByRole("status").filter({ hasText: "事件已链接到当前案例与修订" })).toBeVisible();
@@ -121,20 +128,93 @@ test("locked v13 preserves journal tags through two edits, native reopen, actual
       await expect(page.getByText("合成笔记正文修订 " + round, { exact: true })).toBeVisible();
       await expect(page.getByText("合成事件正文修订 " + round, { exact: true })).toBeVisible();
     }
-    await page.screenshot({ path: info.outputPath("reopened-journal.png"), fullPage: false });
+    for (const kind of ["note", "event"] as const) {
+      await page.getByRole("button", { name: kind === "note" ? "编辑笔记" : "编辑事件", exact: true }).click();
+      const editor = page.getByRole("region", { name: kind === "note" ? "编辑研究笔记" : "编辑研究事件", exact: true });
+      await expect(editor.getByLabel("来源引用", { exact: true })).toHaveValue(sources[0]!);
+      await expect(editor.getByLabel("来源引用 2", { exact: true })).toHaveValue(sources[1]!);
+      await editor.getByLabel("标签", { exact: true }).fill(editedTags.join("，"));
+      await editor.getByRole("button", { name: kind === "note" ? "保存新版本" : "保存事件修改", exact: true }).click();
+      await expect(page.getByRole("status").filter({ hasText: kind === "note" ? "研究笔记已生成新编辑版本" : "事件记录已更新" })).toBeVisible();
+    }
+    for (const kind of ["note", "event"] as const) {
+      await page.getByRole("button", { name: kind === "note" ? "编辑笔记" : "编辑事件", exact: true }).click();
+      const editor = page.getByRole("region", { name: kind === "note" ? "编辑研究笔记" : "编辑研究事件", exact: true });
+      await expect(editor.getByLabel("来源引用", { exact: true })).toHaveValue(sources[0]!);
+      await editor.getByLabel("来源引用 2", { exact: true }).fill(editedSources[1]!);
+      await editor.getByRole("button", { name: "添加一条来源", exact: true }).click();
+      await editor.getByLabel("来源引用 3", { exact: true }).fill(editedSources[2]!);
+      await editor.getByRole("button", { name: kind === "note" ? "保存新版本" : "保存事件修改", exact: true }).click();
+      await expect(page.getByRole("status").filter({ hasText: kind === "note" ? "研究笔记已生成新编辑版本" : "事件记录已更新" })).toBeVisible();
+    }
+    await session.close(); session = undefined;
+    session = await source.launch();
+    session.context.setDefaultTimeout(15_000);
+    page = await session.context.newPage();
+    await page.setViewportSize({ width: 1280, height: 800 });
+    problems.push(collectConsoleProblems(page));
+    await page.goto(researchURL);
+    await bound(page, artifact);
+
+    for (const kind of ["note", "event"] as const) {
+      const beforeCancel = await snapshot(page, kind + "-before-cancel");
+      await page.getByRole("button", { name: kind === "note" ? "编辑笔记" : "编辑事件", exact: true }).click();
+      const editor = page.getByRole("region", { name: kind === "note" ? "编辑研究笔记" : "编辑研究事件", exact: true });
+      await expect(editor.getByLabel("标签", { exact: true })).toHaveValue(editedTags.join("，"));
+      for (let index = 0; index < editedSources.length; index++) {
+        await expect(editor.getByLabel(index === 0 ? "来源引用" : `来源引用 ${index + 1}`, { exact: true })).toHaveValue(editedSources[index]!);
+      }
+      await editor.screenshot({ path: info.outputPath(kind + "-sources-desktop.png") });
+      if (kind === "note") {
+        await page.setViewportSize({ width: 390, height: 844 });
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+        await editor.screenshot({ path: info.outputPath("note-sources-mobile.png") });
+        await page.setViewportSize({ width: 1280, height: 800 });
+      }
+      await editor.getByLabel("来源引用", { exact: true }).fill("取消时不应保存的来源");
+      await editor.getByLabel("标签", { exact: true }).fill("取消时不应保存的标签");
+      await editor.getByRole("button", { name: "取消编辑", exact: true }).click();
+      expect((await snapshot(page, kind + "-after-cancel")).stores).toEqual(beforeCancel.stores);
+
+      await page.getByRole("button", { name: kind === "note" ? "编辑笔记" : "编辑事件", exact: true }).click();
+      await editor.getByLabel("来源引用", { exact: true }).fill("提交前拒绝时不应写入的来源");
+      const beforeFailure = await snapshot(page, kind + "-before-failed-save");
+      await page.evaluate(targetStore => {
+        const original = IDBDatabase.prototype.transaction;
+        const fault = { targetStore, consumed: false, abortedBeforeReturn: false };
+        (window as any).__journalSourceSaveFault = fault;
+        IDBDatabase.prototype.transaction = function(storeNames: string | string[], mode?: IDBTransactionMode, options?: IDBTransactionOptions) {
+          const transaction = original.call(this, storeNames, mode, options);
+          const stores = typeof storeNames === "string" ? [storeNames] : [...storeNames];
+          if (this.name === "hakimi-bazi-research" && mode === "readwrite" && stores.includes(targetStore) && !fault.consumed) {
+            fault.consumed = true;
+            transaction.abort();
+            fault.abortedBeforeReturn = true;
+          }
+          return transaction;
+        };
+      }, kind === "note" ? "researchNotes" : "events");
+      await editor.getByRole("button", { name: kind === "note" ? "保存新版本" : "保存事件修改", exact: true }).click();
+      await expect(page.getByRole("heading", { name: "写入结果未知，研究日志已锁定", exact: true })).toBeVisible();
+      expect(await page.evaluate(() => (window as any).__journalSourceSaveFault)).toMatchObject({ consumed: true, abortedBeforeReturn: true });
+      expect((await snapshot(page, kind + "-after-failed-save")).stores).toEqual(beforeFailure.stores);
+      await expect(page.getByRole("status").filter({ hasText: kind === "note" ? "研究笔记已生成新编辑版本" : "事件记录已更新" })).toHaveCount(0);
+      await page.reload();
+      await bound(page, artifact);
+    }
     await dataPage(page);
     const beforeExport = await snapshot(page, "source");
     const final = await savedBackup(page, info, "after-reopen.zip");
-    // Allowed changes are fixed before execution: note body/editVersion/updatedAt,
-    // event body/updatedAt; ZIP envelope export time is outside payload. No other
+    // Allowed changes are fixed before execution: body, tags and sourceRefs;
+    // note editVersion/updatedAt and event updatedAt. ZIP envelope time is outside payload. No other
     // persisted field or partition is omitted from equality.
     const note = final.checked.payload.researchNotes[0]!;
     const event = final.checked.payload.events[0]!;
     expect(Date.parse(note.updatedAt)).toBeGreaterThanOrEqual(Date.parse(originalNote.updatedAt));
     expect(Date.parse(event.updatedAt)).toBeGreaterThanOrEqual(Date.parse(originalEvent.updatedAt));
     expect(final.checked.payload).toEqual({ ...initial.checked.payload,
-      researchNotes: [{ ...originalNote, body: "合成笔记正文修订 2", editVersion: 3, updatedAt: note.updatedAt }],
-      events: [{ ...originalEvent, body: "合成事件正文修订 2", updatedAt: event.updatedAt }]
+      researchNotes: [{ ...originalNote, body: "合成笔记正文修订 2", tags: editedTags, sourceRefs: editedSources, editVersion: 5, updatedAt: note.updatedAt }],
+      events: [{ ...originalEvent, body: "合成事件正文修订 2", tags: editedTags, sourceRefs: editedSources, updatedAt: event.updatedAt }]
     });
     await preflightBackupZip(page, final.bytes, "after-reopen.zip");
     expect((await snapshot(page, "after-preflight")).stores).toEqual(beforeExport.stores);
@@ -163,25 +243,14 @@ test("locked v13 preserves journal tags through two edits, native reopen, actual
     await verifyLockedDefaultV13Artifact(artifact);
     await attach(info, "same-artifact-proof", { artifact, sourceProfile: source.profileDirectory,
       targetProfile: target.profileDirectory, stores: beforeExport.stores, restored: restored.stores,
-      payloadDigest: final.checked.digests.payload, noteId: note.id, eventId: event.id, tags, sources,
-      nativeReopens: 2, formalReleaseEvidenceReceipt: false });
-  } catch (error) {
-    operationError = error;
-    if (session) {
-      for (const [index, page] of session.context.pages().entries()) {
-        if (!page.url().startsWith(origin)) continue;
-        await page.screenshot({ path: info.outputPath(`owned-page-failure-${index}.png`) });
-        await attach(info, "owned-page-failure", { url: page.url(), problems,
-          editors: await page.locator(".research-editor-section").allTextContents() });
-      }
-    }
-    throw error;
-  }
-  finally {
-    try { if (session) await session.close(); }
-    catch (error) {
-      if (operationError) throw new AggregateError([operationError, error], "Journal validation and browser cleanup failed.");
-      throw error;
-    } finally { await attach(info, "owned-browser-lifecycle", lifecycle); }
-  }
+      payloadDigest: final.checked.digests.payload, noteId: note.id, eventId: event.id,
+      tags: editedTags, sources: editedSources, bodyOnlyEdits: 2, tagOnlyEdits: 1, sourceOnlyEdits: 1,
+      cancellationPreservedAllStores: true, failedSavesAbortedBeforeCommit: true,
+      nativeReopens: 3, formalReleaseEvidenceReceipt: false });
+  }, diagnostics: () => session ? session.context.pages().filter(page => page.url().startsWith(origin)).flatMap((page, index) => [
+    { label: `Journal failure screenshot ${index} failed`, run: () => page.screenshot({ path: info.outputPath(`owned-page-failure-${index}.png`) }) },
+    { label: `Journal failure page attachment ${index} failed`, run: async () => attach(info, "owned-page-failure", { url: page.url(), problems,
+      editors: await page.locator(".research-editor-section").allTextContents() }) }
+  ]) : [], cleanup: async () => { if (session) await session.close(); },
+  attachLifecycle: () => attach(info, "owned-browser-lifecycle", lifecycle) });
 });
