@@ -252,7 +252,7 @@ test("real workspace loads the exact 25-family slim index with a checkpoint iden
   assert.equal(summary.selectedCurrentCount, 17);
   assert.equal(summary.currentUnavailableCount, 8);
   assert.equal(index.historyCheckpoint.familyCount, 25);
-  assert.equal(index.historyCheckpoint.memberCount, 78);
+  assert.equal(index.historyCheckpoint.memberCount, 79);
   assert.equal(summary.historyCheckpointIdentityMechanicallyVerified, true);
   assert.equal(summary.fullHistoryVerifiedByCurrentIndexLoad, false);
   assert.ok(index.entries.every((entry) => !Object.hasOwn(entry, "history")));

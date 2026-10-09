@@ -11,22 +11,22 @@
   "source": {
     "path": "content/system-admission/current-index.v1.json",
     "indexId": "hakimi.repository/current-index/1.0.0",
-    "indexDigest": "63e71d0c36e2f216711ac6c0b8ae0051c7f3ccd98d5b4a55cfdce8560180520e",
+    "indexDigest": "99810764c3f9b9ed900207b8b5860ccf86752454359ce37613a3061e041a33ba",
     "rawBytes": 42740,
-    "rawSha256": "df7e9ac217d480ea84acb02d0f3484d8684fbcc6426eef9d0dbc7d8d358f326a",
+    "rawSha256": "ae93fc41599aa01b865be20b4e8a03ac81c49452e03dce744336045cf8a6da64",
     "machineSourceOnly": true,
     "humanDocumentIsAuthority": false
   },
   "historyCheckpoint": {
-    "path": "content/system-admission/history-checkpoint.v2.json",
-    "checkpointId": "hakimi.repository/history-checkpoint/2.0.0",
+    "path": "content/system-admission/history-checkpoint.v3.json",
+    "checkpointId": "hakimi.repository/history-checkpoint/3.0.0",
     "rawBytes": 36579,
-    "rawSha256": "e1eba8f4d7a7ed7ffbe343cf8cc4c7dd2a453cba27a8d0b090da9b6cfb67c7ff",
-    "checkpointDigest": "4b245ecf7f3493edf7654e882eb9735116a2b5d8ea0fcdb289ed8271720187e7",
+    "rawSha256": "564d810dcb4e2f2e7864d9206887e8c6e23919ffd8eafde975cc79466eaa2a89",
+    "checkpointDigest": "7c2177c1179680b02a1a0162d51936ef02dd1ea49889e9a84824a4815cab0864",
     "familyCount": 25,
-    "memberCount": 78,
-    "familyInventoryDigest": "b62871655ccc771849e2ce35794411285157ef31be172690c3f7a6200ae30ddf",
-    "historyRootDigest": "aa4aa5ea9a1774202c6bc1064e26d37119ed1e2af5bc22c013bd0fc4404debb5",
+    "memberCount": 79,
+    "familyInventoryDigest": "874c0806bc2b1a6d52f4e5934cb23833b80a10b004d5a84732ed9e208534eacc",
+    "historyRootDigest": "a89517bb6880328ab2d4f8d725846f81af5be11bc5de0e50123c1f98830fbea0",
     "identityMechanicallyVerified": true,
     "fullHistoryVerifiedByCurrentIndexLoad": false
   },
@@ -150,18 +150,18 @@
       "familyKey": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest",
       "selectionState": "selected_current_head",
       "head": {
-        "version": "2.3.0",
-        "path": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.3.0.json",
-        "artifactId": "hakimi.bazi.single-chart-report.domain-release-manifest/2.3.0",
-        "rawSha256": "d155b4d3cf8693ca61a210091a8563aea8cdbe646689f11e09e946e2d1333578",
-        "semanticDigest": "98babe5a9e29ad20807961f1561991c8ddaa5bb068f6da37cd1b0978b509fa3f"
+        "version": "2.4.0",
+        "path": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.4.0.json",
+        "artifactId": "hakimi.bazi.single-chart-report.domain-release-manifest/2.4.0",
+        "rawSha256": "d630c555ec7441a7547d49878e25aac4d6d9481d929178f8369937a282b66689",
+        "semanticDigest": "7984b2304c0e7b25dfc8f3c23229de68129fb3fdf4d8847adb83e0ba400f2d0a"
       },
       "selectedCurrent": {
-        "version": "2.3.0",
-        "path": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.3.0.json",
-        "artifactId": "hakimi.bazi.single-chart-report.domain-release-manifest/2.3.0",
-        "rawSha256": "d155b4d3cf8693ca61a210091a8563aea8cdbe646689f11e09e946e2d1333578",
-        "semanticDigest": "98babe5a9e29ad20807961f1561991c8ddaa5bb068f6da37cd1b0978b509fa3f"
+        "version": "2.4.0",
+        "path": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.4.0.json",
+        "artifactId": "hakimi.bazi.single-chart-report.domain-release-manifest/2.4.0",
+        "rawSha256": "d630c555ec7441a7547d49878e25aac4d6d9481d929178f8369937a282b66689",
+        "semanticDigest": "7984b2304c0e7b25dfc8f3c23229de68129fb3fdf4d8847adb83e0ba400f2d0a"
       }
     },
     {

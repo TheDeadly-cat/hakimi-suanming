@@ -256,10 +256,10 @@ test("non-versioned Bazi expert packet projects its verified current binding wit
   assert.equal(packet.historicalAnchorVerifiedByCurrentLoad, false);
   assert.deepEqual(packet.historicalAnchor, HISTORICAL_BAZI_EXPERT_REVIEW_PACKET);
   assert.deepEqual(packet.driftReasons, []);
-  assert.equal(projection.historyCheckpoint.path, "content/system-admission/history-checkpoint.v2.json");
-  assert.equal(projection.historyCheckpoint.checkpointId, "hakimi.repository/history-checkpoint/2.0.0");
+  assert.equal(projection.historyCheckpoint.path, "content/system-admission/history-checkpoint.v3.json");
+  assert.equal(projection.historyCheckpoint.checkpointId, "hakimi.repository/history-checkpoint/3.0.0");
   assert.equal(projection.historyCheckpoint.familyCount, 25);
-  assert.equal(projection.historyCheckpoint.memberCount, 78);
+  assert.equal(projection.historyCheckpoint.memberCount, 79);
   assert.equal(projection.historyCheckpoint.fullHistoryVerifiedByCurrentIndexLoad, false);
   assert.ok(Object.values(projection.authorityBoundary).every((value) => value === false));
 });
