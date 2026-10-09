@@ -397,17 +397,19 @@ describe("ResearchJournal", () => {
     const recordId = kind === "note" ? note.id : event.id;
     const changedSources = [sourceRefs[0], "来源乙：修订版本, 附录；备注\n保留同条换行", "新增来源丙、丁, 卷三；附录"];
 
-    for (const step of ["sources", "tags"] as const) {
+    for (const step of ["append", "modify", "tags"] as const) {
       const view = render(<ResearchJournal caseId={bundle.caseRecord.id} revision={revision} selection={{ pillar: "day", field: "stem" }} />);
       fireEvent.click(await screen.findByRole("button", { name: kind === "note" ? "编辑笔记" : "编辑事件" }));
       const region = screen.getByRole("region", { name: kind === "note" ? "编辑研究笔记" : "编辑研究事件" });
       const editor = within(region);
       expect((editor.getByLabelText("来源引用", { exact: true }) as HTMLTextAreaElement).value).toBe(sourceRefs[0]);
-      if (step === "sources") {
+      if (step === "append") {
         expect((editor.getByLabelText("来源引用 2", { exact: true }) as HTMLTextAreaElement).value).toBe(sourceRefs[1]);
-        fireEvent.change(editor.getByLabelText("来源引用 2", { exact: true }), { target: { value: changedSources[1] } });
         fireEvent.click(editor.getByRole("button", { name: "添加一条来源" }));
         fireEvent.change(editor.getByLabelText("来源引用 3", { exact: true }), { target: { value: changedSources[2] } });
+      } else if (step === "modify") {
+        expect((editor.getByLabelText("来源引用 2", { exact: true }) as HTMLTextAreaElement).value).toBe(sourceRefs[1]);
+        fireEvent.change(editor.getByLabelText("来源引用 2", { exact: true }), { target: { value: changedSources[1] } });
       } else {
         fireEvent.change(editor.getByLabelText("标签", { exact: true }), { target: { value: "边界，甲、乙专题，复核" } });
       }
@@ -417,9 +419,10 @@ describe("ResearchJournal", () => {
           ? await researchRepository.listResearchNotesByCase(bundle.caseRecord.id)
           : await researchRepository.listEventsByCase(bundle.caseRecord.id);
         expect(records).toHaveLength(1);
-        expect(records[0]).toMatchObject({ id: recordId, body: "来源测试原正文", sourceRefs: changedSources,
-          tags: step === "sources" ? tags : [...tags, "复核"] });
-        if (kind === "note") expect(records[0]).toMatchObject({ anchor: note.anchor, editVersion: step === "sources" ? 2 : 3 });
+        expect(records[0]).toMatchObject({ id: recordId, body: "来源测试原正文",
+          sourceRefs: step === "append" ? [...sourceRefs, changedSources[2]] : changedSources,
+          tags: step === "tags" ? [...tags, "复核"] : tags });
+        if (kind === "note") expect(records[0]).toMatchObject({ anchor: note.anchor, editVersion: step === "append" ? 2 : step === "modify" ? 3 : 4 });
         else expect(records[0]).toMatchObject({ revisionId: revision.id, transitNodeRef: null });
       });
       view.unmount();

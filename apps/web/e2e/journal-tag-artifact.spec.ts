@@ -141,9 +141,19 @@ test("locked v13 preserves separate body tag and source edits, failed saves, nat
       await page.getByRole("button", { name: kind === "note" ? "编辑笔记" : "编辑事件", exact: true }).click();
       const editor = page.getByRole("region", { name: kind === "note" ? "编辑研究笔记" : "编辑研究事件", exact: true });
       await expect(editor.getByLabel("来源引用", { exact: true })).toHaveValue(sources[0]!);
-      await editor.getByLabel("来源引用 2", { exact: true }).fill(editedSources[1]!);
+      await expect(editor.getByLabel("来源引用 2", { exact: true })).toHaveValue(sources[1]!);
       await editor.getByRole("button", { name: "添加一条来源", exact: true }).click();
       await editor.getByLabel("来源引用 3", { exact: true }).fill(editedSources[2]!);
+      await editor.getByRole("button", { name: kind === "note" ? "保存新版本" : "保存事件修改", exact: true }).click();
+      await expect(page.getByRole("status").filter({ hasText: kind === "note" ? "研究笔记已生成新编辑版本" : "事件记录已更新" })).toBeVisible();
+    }
+    for (const kind of ["note", "event"] as const) {
+      await page.getByRole("button", { name: kind === "note" ? "编辑笔记" : "编辑事件", exact: true }).click();
+      const editor = page.getByRole("region", { name: kind === "note" ? "编辑研究笔记" : "编辑研究事件", exact: true });
+      await expect(editor.getByLabel("来源引用", { exact: true })).toHaveValue(sources[0]!);
+      await expect(editor.getByLabel("来源引用 2", { exact: true })).toHaveValue(sources[1]!);
+      await expect(editor.getByLabel("来源引用 3", { exact: true })).toHaveValue(editedSources[2]!);
+      await editor.getByLabel("来源引用 2", { exact: true }).fill(editedSources[1]!);
       await editor.getByRole("button", { name: kind === "note" ? "保存新版本" : "保存事件修改", exact: true }).click();
       await expect(page.getByRole("status").filter({ hasText: kind === "note" ? "研究笔记已生成新编辑版本" : "事件记录已更新" })).toBeVisible();
     }
@@ -216,7 +226,7 @@ test("locked v13 preserves separate body tag and source edits, failed saves, nat
     expect(Date.parse(note.updatedAt)).toBeGreaterThanOrEqual(Date.parse(originalNote.updatedAt));
     expect(Date.parse(event.updatedAt)).toBeGreaterThanOrEqual(Date.parse(originalEvent.updatedAt));
     expect(final.checked.payload).toEqual({ ...initial.checked.payload,
-      researchNotes: [{ ...originalNote, body: "合成笔记正文修订 2", tags: editedTags, sourceRefs: editedSources, editVersion: 5, updatedAt: note.updatedAt }],
+      researchNotes: [{ ...originalNote, body: "合成笔记正文修订 2", tags: editedTags, sourceRefs: editedSources, editVersion: 6, updatedAt: note.updatedAt }],
       events: [{ ...originalEvent, body: "合成事件正文修订 2", tags: editedTags, sourceRefs: editedSources, updatedAt: event.updatedAt }]
     });
     await preflightBackupZip(page, final.bytes, "after-reopen.zip");
@@ -247,7 +257,8 @@ test("locked v13 preserves separate body tag and source edits, failed saves, nat
     await attach(info, "same-artifact-proof", { artifact, sourceProfile: source.profileDirectory,
       targetProfile: target.profileDirectory, stores: beforeExport.stores, restored: restored.stores,
       payloadDigest: final.checked.digests.payload, noteId: note.id, eventId: event.id,
-      tags: editedTags, sources: editedSources, bodyOnlyEdits: 2, tagOnlyEdits: 1, sourceOnlyEdits: 1,
+      tags: editedTags, sources: editedSources, bodyOnlyEdits: 2, tagOnlyEdits: 1, sourceOnlyEdits: 2,
+      sourceAppendPreservedOriginalEntries: true, sourceModificationPreservedOtherEntries: true,
       cancellationPreservedAllStores: true, failedSavesAbortedBeforeCommit: true,
       nativeReopens: 3, formalReleaseEvidenceReceipt: false });
   }, diagnostics: () => session ? session.context.pages().filter(page => page.url().startsWith(origin)).flatMap((page, index) => [
