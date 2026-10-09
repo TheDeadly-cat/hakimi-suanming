@@ -180,21 +180,24 @@ test("locked v13 preserves separate body tag and source edits, failed saves, nat
       await editor.getByLabel("来源引用", { exact: true }).fill("提交前拒绝时不应写入的来源");
       const beforeFailure = await snapshot(page, kind + "-before-failed-save");
       await page.evaluate(targetStore => {
-        const original = IDBDatabase.prototype.transaction;
+        const original = IDBObjectStore.prototype.put;
         const fault = { targetStore, consumed: false, abortedBeforeReturn: false };
         (window as any).__journalSourceSaveFault = fault;
-        IDBDatabase.prototype.transaction = function(storeNames: string | string[], mode?: IDBTransactionMode, options?: IDBTransactionOptions) {
-          const transaction = original.call(this, storeNames, mode, options);
-          const stores = typeof storeNames === "string" ? [storeNames] : [...storeNames];
-          if (this.name === "hakimi-bazi-research" && mode === "readwrite" && stores.includes(targetStore) && !fault.consumed) {
+        // Dexie's dbcore captures the transaction factory when opening a database.
+        // Intercept the live object-store write, before the native put is queued.
+        IDBObjectStore.prototype.put = function(value: unknown, key?: IDBValidKey) {
+          const transaction = this.transaction;
+          if (transaction.db.name === "hakimi-bazi-research" && transaction.mode === "readwrite" && this.name === targetStore && !fault.consumed) {
             fault.consumed = true;
             transaction.abort();
             fault.abortedBeforeReturn = true;
+            throw new DOMException("Synthetic journal write rejected before native put", "AbortError");
           }
-          return transaction;
+          return key === undefined ? original.call(this, value) : original.call(this, value, key);
         };
       }, kind === "note" ? "researchNotes" : "events");
       await editor.getByRole("button", { name: kind === "note" ? "保存新版本" : "保存事件修改", exact: true }).click();
+      await expect.poll(() => page.evaluate(() => (window as any).__journalSourceSaveFault)).toMatchObject({ consumed: true, abortedBeforeReturn: true });
       await expect(page.getByRole("heading", { name: "写入结果未知，研究日志已锁定", exact: true })).toBeVisible();
       expect(await page.evaluate(() => (window as any).__journalSourceSaveFault)).toMatchObject({ consumed: true, abortedBeforeReturn: true });
       expect((await snapshot(page, kind + "-after-failed-save")).stores).toEqual(beforeFailure.stores);
@@ -250,7 +253,8 @@ test("locked v13 preserves separate body tag and source edits, failed saves, nat
   }, diagnostics: () => session ? session.context.pages().filter(page => page.url().startsWith(origin)).flatMap((page, index) => [
     { label: `Journal failure screenshot ${index} failed`, run: () => page.screenshot({ path: info.outputPath(`owned-page-failure-${index}.png`) }) },
     { label: `Journal failure page attachment ${index} failed`, run: async () => attach(info, "owned-page-failure", { url: page.url(), problems,
-      editors: await page.locator(".research-editor-section").allTextContents() }) }
+      editors: await page.locator(".research-editor-section").allTextContents(),
+      fault: await page.evaluate(() => (window as any).__journalSourceSaveFault ?? null) }) }
   ]) : [], cleanup: async () => { if (session) await session.close(); },
   attachLifecycle: () => attach(info, "owned-browser-lifecycle", lifecycle) });
 });
