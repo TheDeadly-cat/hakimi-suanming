@@ -1,5 +1,70 @@
 # 本地交付目标与验收台账
 
+## 当前交付摘要 · 2026-10-10（10-09 来源完整性审阅收尾）
+
+本批修复笔记、事件的来源引用编辑，并保留既有标签修复。旧 `fbe0180702f2` 的正文往返通过，不能证明编辑来源字段也无损；它的原包、回执和失败均保留。本批另构建 **`ab0f35c0d9d1 / package revision 1`**，不是给旧产物增加包装修订号。
+
+| 身份 | 本批记录 |
+| --- | --- |
+| 应用构建源码 | `564f88e7f47844d10e26bbc79c34e1ce48edf77a`，tree `f77179fa2e50252b487b7b08035d2e766248f25f`。生产范围为来源数组表单、局部样式与受影响依赖；另刷新明确属于当前检出的历史计算运行时 sidecar。历史源锁、固定断言及 Schema 均未改。 |
+| 应用产物 | `ab0f35c0d9d1`；`legacy-v13 / Schema 13 / migrationId null`；137 文件；evidenceId `hre1-8b9009e2be973f93113abb9fded99932`。 |
+| 产物锁 | SHA-256 `78ab59d932cbfec75c63a2f94eaa91f7ae24e2a066eaaaa54a210e8e9773ecc9`；文件集合摘要 `45b1b94bedb1995f031cf025f25b349917dadabefc07916fca36b478c83c3459`。 |
+| npm 锁 | SHA-256 `ceb0276477547cbf209e7937f9a5dcdc05a34ae21869af44b1f92825576c3e19`；Node `24.16.0`、npm `11.13.0` 保持固定。 |
+| 浏览器测试工具 | `d17743faa178cbf9711334a337cf1f7089b07629`；追加、修改来源分两次独立保存。后续打包/文档提交没有重新构建应用。最终工具提交、Git blob 对照与实际 CI checkout 另外记录在本批 PR 描述和本机 `closeout-verification.json`。 |
+| 安装包 | 152 文件；清单 SHA-256 `27c836c924745939d6e68e68192a7f697592496a84bf182c1a0bafe008cfb8f4`。ZIP `hakimi-ab0f35c0d9d1-package-v1.zip`，2,428,913 字节，SHA-256 `6cd9c78c6973696b93661225e323c7b2c2373ab7b9ff27eb3382bd71c7d92870`。 |
+| 已保存入口和回退 | 桌面 Candidate 快捷方式仍指向 `8f67be033617-package-v1`。本轮未打开真实浏览器确认当时运行版本；启动验收只使用独立端口。旧 `8f67`、`4de42`、`fbe` 完整清单/文件与两份桌面快捷方式保留。5188 固定 `c15ef05bb165` 不动。 |
+| 权限 | 本轮验证工具获准只读访问 `local-user-data-cleanup.ts`，未手动检查、修改或公开其内容。未取得新包启用、main 合并或公开发布授权。 |
+
+来源不再从数组拼入单行输入框再按标点拆回。现在每条来源一个编辑框，复制原数组进入草稿；保存按条去除首尾空白、忽略空框，内部标点和换行保留。沿用最多 100 条、每条最多 500 字符及仓储去重/校验规则；不批量重写旧资料。合法标签内顿号继续保留，标签语法未扩宽。
+
+同一锁定产物的 Edge、Chrome **2/2** 检查分别执行：正文独立保存两次；标签独立保存一次；只追加第三条来源；只更正第二条来源；三次原生关闭并重开。逐项比较笔记/事件 ID、修订与节点锚点、标签和来源数组。取消后十六个 store 不变；真实 IndexedDB `put` 前中止事务的保存失败也保持十六个 store 不变，并出现“写入结果未知”锁定。最终实际 ZIP 完整 payload 只允许这些明确编辑字段变化；预检零写入，第二个全新隔离 profile 恢复后十六个 store 与 payload 摘要一致。测试资料全部为合成案例。
+
+桌面和 390px 来源编辑截图已检查，无横向溢出。长表单截图会捕获当时的固定导航，故另核对窄屏保存/取消按钮实际可操作位置，并保存完整视口截图；这两次试点击不产生额外保存版本。PWA 安装性及离线深链冷启动 **2/2**，下载、实际 FileSystemFileHandle 改名/取消、千案例备份与持久重开矩阵 **12/12**，均零重试、跳过或 flaky。自动替代系统选择器仍不等于人工 Windows 保存弹窗验收。
+
+失败诊断改为统一保留首错、诊断错误、清理错误和生命周期附件错误；截图失败不阻止后续附件，最终附件失败也不会覆盖原操作错误。六项故障合同覆盖截图、附件、诊断枚举、关闭与最终证据失败及 falsy 抛出值，不吞掉清理失败。
+
+### 依赖审计归因与限定处置
+
+10-09 在旧 `3e17fea` 锁下，全部审计为 **6 个受影响包条目（4 moderate、2 high）**，生产审计为 **2 moderate、0 high**。同一 advisory 在 Vitest 与 mocker 有两个包条目；这个数量不是六个已证实可利用漏洞。完成以下范围内升级后，`npm audit --json` 和 `npm audit --omit=dev --json` 都为 **0 告警、退出 0**。四份原始 JSON、依赖链和前后锁差异保留。
+
+| 依赖链/表面 | 原版本 → 新版本 | 告警与本项目触发条件 |
+| --- | --- | --- |
+| 生产 `@hakimi/backup → fflate` | `0.8.2 → 0.8.3` | [畸形 ZIP64 解压循环](https://github.com/advisories/GHSA-px8p-9vwx-vf98)。现有备份路径在 `unzipSync` 前拒绝 ZIP64 sentinel/额外字段；保留这些检查并升级补丁。 |
+| 生产 `@hakimi/tzdb-core → moment-timezone` 当前/2025b → moment | `2.30.1 → 2.31.0` | [非字符串 locale 路径遍历](https://github.com/moment/moment/security/advisories/GHSA-4p3w-j4w9-5jqw)。支持路径使用 Zone/zone 查询，没有建立不可信 locale 对象输入路径；两套时区包、数据及适配器保留。 |
+| 开发 Vitest/mocker | `4.1.10 → 4.1.11`（匹配全部内部包） | [独立 mocker 重定向读取](https://github.com/advisories/GHSA-82fw-gwwq-j7x9)。本项目 jsdom run 配置不启用相应独立服务，静态交付包也没有该服务器。 |
+| 开发 Vite/PostCSS、jsdom/css-tree → source-map-js | `1.2.1 → 1.2.2` | [恶意 indexed source map 偏移导致阻塞](https://github.com/advisories/GHSA-68fv-2mgg-jv7q)。生产安装包不复制 node_modules，也不提供 source-map 解析入口；构建/测试表面仍做补丁升级。 |
+| 开发 jsdom `30.0.1 → npm undici` | `8.9.0 → 8.11.2` | 原 JSON 包含 WebSocket、响应/缓存、重试及 [BalancedPool TLS 选项丢失](https://github.com/nodejs/undici/security/advisories/GHSA-w293-vg96-wgc3) 等条目，修复阈值为 `8.10.2`。配置相关的工具网络可达性未做运行时漏洞验证，静态归因保留 `needs_review`；受影响 npm 版本已替换。 |
+
+锁只变更 12 个受影响 node_modules 条目及根/backup 清单对应元数据；意外带入的无关更新已撤回，Vite `8.2.0 / web 7.3.6`、PostCSS `8.5.25`、Rolldown `1.2.1` 保持基线版本。最小锁上的 `npm ci` 成功；未使用 `audit fix --force`。当前运行时 sidecar 因根清单和 moment 身份变化而重建，源锁及冻结历史材料未重签；相关包合同 **44/44** 通过。
+
+这是针对原审计条目的静态归因及依赖维护，不是整仓安全扫描或已证实攻击复现。Node 自带 undici 仍为另一身份 `7.25.0`，没有随 npm undici 升级；零 npm 告警不能证明该内置组件或整个运行环境不存在风险。
+
+### 本地产物和安装证据
+
+原始日志、实际合成 ZIP、前后失败、截图和通过结果在本机 `HakimiBaziWorkbenchCandidates/validation/20261009-source-integrity/`。包只包含应用、八个安装运行文件、原锁和五份原始浏览器结果，不包含 profile 或私人案例/备份。计数摘要不含产物身份时可能与旧结果字节相同，必须同时读取新运行日志中的锁和原始详细结果；不能单独转签摘要。
+
+| 执行 | 本批结果及文件 |
+| --- | --- |
+| 完整类型检查、完整 Vitest、默认 v13 构建 | 程序退出 0；**214 文件、2862/2862**。正式 npm 生命周期聚合仍为 1，独立原因是 `EXPERT_QUALIFICATION_RECEIPT_LOADER_UNAVAILABLE`。`typecheck-repaired.log`、`full-vitest-repaired.log`、`build-repaired.log`；测试调整后的完整类型检查程序亦退出 0（`typecheck-final-program.log`）。 |
+| 研究日志/写锁合同 | 日志 **38/38**；日志与写锁 **47/47**。浏览器关闭、profile、报告器、首错与测试清单合同 **46/46**；包身份调整后的首错/探测合同 **12/12**。 |
+| 同锁浏览器 | 日志 **2/2**，下载 **12/12**，PWA **2/2**。`journal-browser-mobile-actions.log`、`journal-browser-mobile-actions-completeness.json`、`persistent-delivery.log`、`pwa-run.log`；原始输出在相应 `*-browser-evidence/`。 |
+| 完整包/ZIP | `package-created.json`、`zip-extracted-verification.json`、`zip-sha256.json`；打包逐字节复制，无重建。实际 ZIP 解压后完整清单相同；另从解压目录运行原 Windows 安装器到第二个独立根目录。 |
+| 安装集成和原生安装 | **18/18**（`installation-contracts/results.json`）。原 PowerShell 安装器 `-NoShortcut` 首次安装及重复只读复用均通过，`native-install-first.json`、`native-install-second.json`、`native-install-from-zip.json`。 |
+| Windows 原生启动器 | 临时端口 `61104` 上 **4/4**：冷启动、同 PID 复用、未知监听拒绝并保留、坏包零启动。仅映射库中一处 origin 和启动器七处端口字面量，并更新一次性副本清单；应用、锁及正式包不改。`native-launcher-results-v2.json`。不是 5189 现场回执。 |
+| 实际安装服务与回退 | 136 个可提供应用文件逐字节匹配，`_headers` 正确拒绝。旧 `8f67` 应用壳/服务在同一临时端口 `61108` 验证回退；原包保留，未开真实浏览器或恢复旧数据。`installed-and-rollback.json`。 |
+
+首轮全量验证曾因当前运行时 sidecar 未刷新而阻止构建，并发现已有写锁夹具在 drain 后继承 `active=false` 的 Dexie 事务。只用既有 `Dexie.ignoreTransaction` 隔离那两次独立测试写入，保留锁错误断言并增加零记录断言；没有修改写锁运行时。首轮浏览器中事务工厂故障注入被 Dexie 缓存绕开，合成保存确实发生并令测试失败；改为活跃 store 的原生 `put` 前中止后通过。最终执行另一次遗漏显式 evidenceId 的调用被入口拒绝，记录保留；补齐身份后两浏览器通过。所有失败均未改成通过或移除。
+
+### 远端归属与保留项
+
+[Draft PR #14](https://github.com/TheDeadly-cat/hakimi-suanming/pull/14) 继续基于 `codex/journal-tag-roundtrip-20260929`，继承 #13 并复用 #11 的打包器；本批普通快进更新其开发分支，不合入 main。该 PR 本批描述记录最终 head、实际 checkout/tree 与固定 CI 运行链接；本摘要的本地包不冒充远端重新构建的逐字节产物。
+
+纠正旧状态：旧 `3e17fea` 的 [Migration CI 37026776207](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/37026776207) 已终结为成功，五组与汇总通过；不再记为运行中。旧 Quick CI 实际 checkout `a780c8cd247a7e775c2244ffd6c460241411a8f2` 与旧 source tree 同为 `127a2030d104fba484713df8d0a3e50f71d91ea0`。这两项只属于旧提交，新 CI 按本批最终 head 另读，不借用旧通过。
+
+正式专家门仍要求两名合格独立专家，绑定原始意见及合格意见均为零，资格凭证加载器不可用；既有来源权利门和公开发布门未关闭。本批工程通过不会改变这些状态。第二台 Windows、新包人工 Windows 保存弹窗、生产 5189 启用没有执行；用户没有真实资料更正，真实新修订保存保持未测、原盘保留。
+
+候选已具备本地启用决策的工程证据。实际启用仍须用户对 `ab0f35c0d9d1 / 修订 1` 另行批准，并从实际使用浏览器导出和预检当前完整备份；步骤见 [候选安装说明](../../LOCAL-CANDIDATE-INSTALL.txt)。应用回退不能自动导入旧备份覆盖后续研究内容。
+
 ## 当前交付摘要 · 2026-10-02
 
 本批范围是将 PR #13 已有标签修复交付为新的默认 v13 本地候选。下方各日期是原始历史记录；此前的“空资料库”“首次启用”“尚无真实使用反馈”不再代表现状。

@@ -12,7 +12,7 @@ $mutex = $null
 $acquired = $false
 try {
   if ([string]::IsNullOrWhiteSpace($PackageRoot)) {
-    $PackageRoot = Join-Path $env:USERPROFILE "HakimiBaziWorkbenchCandidates\packages\fbe0180702f2-package-v1"
+    $PackageRoot = Join-Path $env:USERPROFILE "HakimiBaziWorkbenchCandidates\packages\ab0f35c0d9d1-package-v1"
   }
   if ([string]::IsNullOrWhiteSpace($NodeExecutable)) { $NodeExecutable = (Get-Command node.exe -ErrorAction Stop).Source }
   if ([string]::IsNullOrWhiteSpace($LogRoot)) { $LogRoot = Join-Path $env:USERPROFILE "HakimiBaziWorkbenchCandidates\candidate-launch-logs" }

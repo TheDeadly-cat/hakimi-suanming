@@ -1,17 +1,21 @@
-哈基米本地研究候选版 fbe0180702f2 / 安装包修订 1（待用户批准启用）
+哈基米本地研究候选版 ab0f35c0d9d1 / 安装包修订 1（待用户批准启用）
 
-应用源码：32c54490b7ad08b59e4294d32d868fd2091707fe。
-源码 tree：e944dfc208b6a2608f3d02b10ef91f0af856842e。
-包含 PR #13 标签编辑修复，保留合法标签内顿号及来源引用。
+应用源码：564f88e7f47844d10e26bbc79c34e1ce48edf77a。
+源码 tree：f77179fa2e50252b487b7b08035d2e766248f25f。
+保留 PR #13 标签修复，同时修复笔记和事件的来源引用编辑。
+来源按条编辑，每个框保存一条；内部逗号、分号、顿号与换行保留，
+首尾空白去除、空框忽略；每条最多 500 字符、最多 100 条，沿用现有资料规则。
+不拆改已存历史数组，不更改 Schema。
 默认身份：legacy-v13 / Schema 13 / migrationId null。
-evidenceId：hre1-ffb3f471c72833481fb1d4855f601fd8。
-产物锁 SHA-256：2f783541be491e8c0fef93f6e083d4a65be8cf16b9353e2b6a8d84d46a8c93eb。
-137 文件集合摘要：8ebf902e9f430b2ddbf8fd88d5d1fa7f71d2950ea128106ae686be0f337af574。
+evidenceId：hre1-8b9009e2be973f93113abb9fded99932。
+产物锁 SHA-256：78ab59d932cbfec75c63a2f94eaa91f7ae24e2a066eaaaa54a210e8e9773ecc9。
+137 文件集合摘要：45b1b94bedb1995f031cf025f25b349917dadabefc07916fca36b478c83c3459。
 打包器复用 PR #11 已具备、与 PR #12 相同的程序，只绑定新身份和目录。
 安装逐字节复制锁定产物，不构建、不下载运行时、不自动迁移或恢复资料。
 需要已安装 Node.js 24.16.0 和 Windows PowerShell 5.1。
 
-现用 5189 仍为 8f67be033617-package-v1，已有真实资料，尚不含标签修复。
+已保存的 5189 快捷方式仍指向 8f67be033617-package-v1，尚不含本批修复。
+本轮未打开真实浏览器或确认其当时显示的运行版本。
 本包准备不等于启用，也不代表公开发布或专家准入。日用 5188 的 c15ef05bb165 不动。
 包内只有应用、工具、锁和合成资料测试结果；没有私人案例、备份或 profile。
 普通“请求下载”不等于写盘；本次验收另核对实际 ZIP 和完整预检。
@@ -21,17 +25,17 @@ evidenceId：hre1-ffb3f471c72833481fb1d4855f601fd8。
 一、准备安装副本（不创建快捷方式，不启动服务）
 将 ZIP 完整解压到新目录，在其中运行：
   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-local-candidate.ps1 -NoShortcut
-默认目标：%USERPROFILE%\HakimiBaziWorkbenchCandidates\packages\fbe0180702f2-package-v1。
+默认目标：%USERPROFILE%\HakimiBaziWorkbenchCandidates\packages\ab0f35c0d9d1-package-v1。
 隔离验收可追加 -InstallRoot "D:\HakimiCandidate-Isolated"，使用全新根目录。
 相同完整包可复用；已有不同内容拒绝覆盖。可单独核对：
   node .\scripts\local-research-candidate.mjs verify --package-root "安装副本完整路径"
 
-二、仅在用户针对 fbe0180702f2 / 修订 1 明确批准后启用
+二、仅在用户针对 ab0f35c0d9d1 / 修订 1 明确批准后启用
 1. 从实际使用 5189 的浏览器导出当前完整 ZIP，核对实际文件并在页面预检。
    保留“预检通过，尚未写入”结果，不为备份验收恢复或覆盖真实资料。
 2. 保留 %USERPROFILE%\HakimiBaziWorkbenchCandidates\packages\8f67be033617-package-v1
    整个目录、local-package-files.json 和原锁。这是直接回退对象；
-   更早的 4de42e9db980-package-v2 也保留。
+   更早的 4de42e9db980-package-v2 与未启用的 fbe0180702f2 原候选也保留。
 3. 将桌面“哈基米八字研究台 - Candidate (5189).lnk”复制到新日期备份目录，
    记录 TargetPath、Arguments、WorkingDirectory 和文件 SHA-256。
 4. 从原 startup.json 与进程命令行双重核对 5189 的监听 PID、包目录。
@@ -40,7 +44,7 @@ evidenceId：hre1-ffb3f471c72833481fb1d4855f601fd8。
    从新安装副本启动：
    powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\launch-local-candidate.ps1 -PackageRoot "新安装副本完整路径"
 6. 核对启动记录、监听 PID 和包目录；同入口再启动应 started=false。
-   在实际浏览器核对 build=fbe0180702f2、Schema 13、migrationId=null，确认原资料仍在。
+   在实际浏览器核对 build=ab0f35c0d9d1、Schema 13、migrationId=null，确认原资料仍在。
    若 Service Worker 仍显示旧版本，停止验收并核对更新状态，不清空或注销真实资料空间。
 7. 保存现场验收结果。以上启用操作没有在本批准备中自动执行。
 
@@ -55,8 +59,9 @@ evidenceId：hre1-ffb3f471c72833481fb1d4855f601fd8。
 资料恢复必须另行明确选择，且先保存当前资料。
 
 四、验收边界
-原始记录：本机 HakimiBaziWorkbenchCandidates\validation\20261002-v13-tag-delivery。
+原始记录：本机 HakimiBaziWorkbenchCandidates\validation\20261009-source-integrity。
 同机隔离资料空间、原生启动器测试端口映射副本与生产 5189 现场启用分别记录。
 第二台 Windows、新包真实 Windows 保存弹窗和生产现场启用未执行。
 用户暂无真实资料更正，新修订保存保持未测、原盘保留；不要求重做既有真实使用。
 正式专家资格、独立意见、来源权利与公开发布门继续独立。
+本批依赖审计在规定工具链和新锁文件下为零告警；这不等于所有安全风险已排除。
