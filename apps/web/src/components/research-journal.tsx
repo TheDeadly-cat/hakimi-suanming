@@ -143,6 +143,13 @@ function SourceReferencesEditor({ values, onChange }: {
   onChange: (values: string[]) => void;
 }) {
   const rows = values.length ? values : [""];
+  const sourceInputs = useRef<(HTMLTextAreaElement | null)[]>([]);
+  const pendingFocus = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    if (pendingFocus.current === null) return;
+    sourceInputs.current[pendingFocus.current]?.focus();
+    pendingFocus.current = null;
+  }, [values]);
   return (
     <div className="field journal-source-refs" role="group" aria-label="来源引用编辑">
       <span>来源引用</span>
@@ -152,15 +159,23 @@ function SourceReferencesEditor({ values, onChange }: {
           <label className="field">
             <span>第 {index + 1} 条来源</span>
             <textarea aria-label={index === 0 ? "来源引用" : `来源引用 ${index + 1}`} rows={2}
+              ref={(element) => { sourceInputs.current[index] = element; }}
               value={value} maxLength={500} placeholder="书名、版本、章节或资料说明"
               onChange={(event) => onChange(rows.map((item, row) => row === index ? event.target.value : item))} />
           </label>
           <button type="button" className="secondary-action" aria-label={`移除来源引用 ${index + 1}`}
-            onClick={() => onChange(rows.filter((_item, row) => row !== index))}>移除</button>
+            onClick={() => {
+              const remaining = rows.filter((_item, row) => row !== index);
+              pendingFocus.current = Math.min(index, Math.max(0, remaining.length - 1));
+              onChange(remaining);
+            }}>移除</button>
         </div>
       ))}
       <button type="button" className="secondary-action" disabled={rows.length >= 100}
-        onClick={() => onChange([...rows, ""])}><Plus aria-hidden="true" />添加一条来源</button>
+        onClick={() => {
+          pendingFocus.current = rows.length;
+          onChange([...rows, ""]);
+        }}><Plus aria-hidden="true" />添加一条来源</button>
     </div>
   );
 }

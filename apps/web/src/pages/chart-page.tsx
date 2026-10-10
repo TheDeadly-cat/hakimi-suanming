@@ -964,7 +964,8 @@ export function ChartPage({ caseId, revisionId }: { caseId: string; revisionId: 
   const selectResearchEvent = (eventId: string, options?: { replace?: boolean }) => {
     navigate(`${location.pathname}${buildChartSearch("research", route.transit, { eventId })}`, {
       replace: options?.replace,
-      scroll: false
+      scroll: false,
+      focus: false
     });
   };
   const selectCell = (next: MatrixSelection) => {

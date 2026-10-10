@@ -429,6 +429,61 @@ describe("ResearchJournal", () => {
     }
   });
 
+  it.each(["note", "event"] as const)("%s 移除来源后焦点留在邻近输入，清空后仍可取消且不写入", async (kind) => {
+    const calculated = await calculateChart(input, WORKING_DEFAULT_RULE_PROFILE);
+    const bundle = await caseRepository.createCase({ alias: "来源焦点隔离样本", calculated });
+    const revision = bundle.revisions[0];
+    const sourceRefs = ["来源甲", "来源乙", "来源丙"];
+    const note = await researchRepository.createResearchNote({
+      caseId: bundle.caseRecord.id, anchor: { kind: "revision", revisionId: revision.id },
+      body: "焦点测试正文", tags: ["合成"], sourceRefs, lifecycle: "active"
+    });
+    const event = await createDayEvent({ caseId: bundle.caseRecord.id, revisionId: revision.id,
+      title: "焦点测试事件", sourceRefs });
+    render(<ResearchJournal caseId={bundle.caseRecord.id} revision={revision} selection={{ pillar: "day", field: "stem" }} />);
+    fireEvent.click(await screen.findByRole("button", { name: kind === "note" ? "编辑笔记" : "编辑事件" }));
+    const editor = within(screen.getByRole("region", { name: kind === "note" ? "编辑研究笔记" : "编辑研究事件" }));
+    for (const index of [3, 1, 1]) {
+      const remove = editor.getByRole("button", { name: `移除来源引用 ${index}` });
+      remove.focus();
+      fireEvent.click(remove);
+      const expected = editor.getByLabelText(index === 3 ? "来源引用 2" : "来源引用", { exact: true });
+      expect(document.activeElement).toBe(expected);
+    }
+    expect((editor.getByLabelText("来源引用", { exact: true }) as HTMLTextAreaElement).value).toBe("");
+    fireEvent.click(editor.getByRole("button", { name: "取消编辑" }));
+    expect(await researchRepository.listResearchNotesByCase(bundle.caseRecord.id)).toEqual([note]);
+    expect(await researchRepository.listEventsByCase(bundle.caseRecord.id)).toEqual([event]);
+  });
+
+  it.each(["note", "event"] as const)("%s 添加第 100 条来源后聚焦可用输入，输入时不抢焦点且取消不写入", async (kind) => {
+    const calculated = await calculateChart(input, WORKING_DEFAULT_RULE_PROFILE);
+    const bundle = await caseRepository.createCase({ alias: "来源上限焦点隔离样本", calculated });
+    const revision = bundle.revisions[0];
+    const sourceRefs = Array.from({ length: 99 }, (_, index) => `合成来源 ${index + 1}`);
+    const note = await researchRepository.createResearchNote({
+      caseId: bundle.caseRecord.id, anchor: { kind: "revision", revisionId: revision.id },
+      body: "上限焦点正文", tags: ["合成"], sourceRefs, lifecycle: "active"
+    });
+    const event = await createDayEvent({ caseId: bundle.caseRecord.id, revisionId: revision.id,
+      title: "上限焦点事件", sourceRefs });
+    render(<ResearchJournal caseId={bundle.caseRecord.id} revision={revision} selection={{ pillar: "day", field: "stem" }} />);
+    fireEvent.click(await screen.findByRole("button", { name: kind === "note" ? "编辑笔记" : "编辑事件" }));
+    const editor = within(screen.getByRole("region", { name: kind === "note" ? "编辑研究笔记" : "编辑研究事件" }));
+    const add = editor.getByRole("button", { name: "添加一条来源" });
+    add.focus();
+    fireEvent.click(add);
+    expect((add as HTMLButtonElement).disabled).toBe(true);
+    expect(document.activeElement).toBe(editor.getByLabelText("来源引用 100", { exact: true }));
+    const first = editor.getByLabelText("来源引用", { exact: true });
+    first.focus();
+    fireEvent.change(first, { target: { value: "合成来源一已更正" } });
+    expect(document.activeElement).toBe(first);
+    fireEvent.click(editor.getByRole("button", { name: "取消编辑" }));
+    expect(await researchRepository.listResearchNotesByCase(bundle.caseRecord.id)).toEqual([note]);
+    expect(await researchRepository.listEventsByCase(bundle.caseRecord.id)).toEqual([event]);
+  });
+
   it("完成笔记与真实事件的保存、检索和软删除闭环", async () => {
     const calculated = await calculateChart(input, WORKING_DEFAULT_RULE_PROFILE);
     const bundle = await caseRepository.createCase({ alias: "研究样本", calculated });
