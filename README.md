@@ -71,6 +71,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-local-cand
 
 新产物身份、验证和 PR 关系见 [本地交付当前摘要](./docs/status/local-delivery-plan-20260913.md)，操作见 [候选包安装与回退说明](./LOCAL-CANDIDATE-INSTALL.txt)。**安装说明保留打包时的启用前快照；本人当前启用状态以最新现场验收摘要为准，其他机器仍须独立完成批准与验收。** 直接回退包为 `8f67be033617-package-v1`，更早的 [4de42e9db980 记录](./docs/status/local-candidate-4de42e9db980-20260913.md)及原包保留。回退应用不能自动恢复旧资料覆盖后续研究。整体 CI、正式专家和来源权利门仍独立判断。
 
+### 后继候选包 f043（待批准启用）
+
+PR #16 的事件索引、来源拒绝与焦点修复已准备为 **`f0430d400b64 / package-v1`**，复用 `2482941` 对应的已验构建，应用与原锁均未重建或重签。实际 ZIP、独立 Windows 安装、18 项合同、4 项隔离启动器及安装副本 Edge/Chrome 10 项检查通过。它尚未替换日常 5189 的 ab0；本人继续使用 Codex 内置浏览器资料空间。
+
+完整身份、包摘要、远端落点和验收边界见 [f043 交付记录](./docs/status/local-candidate-f0430d400b64-20261011.md)，新包使用独立命名的 [安装与回退说明](./LOCAL-EVENT-INDEX-CANDIDATE-INSTALL.txt)。旧包和入口保留；启用仍须单独选择及实际浏览器备份预检，正式专家和公开发布不随工程准备放行。
+
 ## 开发源码
 
 需要 Node.js `24.16.0` 与 npm `11.13.0`。开发与上述固定产物安装互不代替：

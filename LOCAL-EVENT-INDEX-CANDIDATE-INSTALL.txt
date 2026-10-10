@@ -1,0 +1,64 @@
+哈基米本地研究候选版 f0430d400b64 / 安装包修订 1（待单独批准启用）
+
+应用源码：2482941f46acafc6fe0b331f536db06a45710fc8。
+源码 tree：a255053b455288ffa40c1d925fb789eadedba50e。
+本包包含 PR #16 事件保存后的父页索引同步、严格 ID 定位，
+以及继承的来源编辑焦点、来源校验失败保留草稿和取消修复。
+默认身份：legacy-v13 / Schema 13 / migrationId null。
+evidenceId：hre1-e735fd9bc9080ab00280ac0feee7f7b4。
+原锁 SHA-256：ba590e52629a61fba574be0912bc886e00a848b8c45c4778ba8cd7b7d15b40c5。
+137 文件集合摘要：d44120bfe3bb41cec77b7871deb6469d25b554778dffa2271f39095a61e33e45。
+应用放在 candidate-artifact，保留原锁中的目录身份，未重建、改锁或转签旧回执。
+需要已安装 Node.js 24.16.0 与 Windows PowerShell 5.1。
+
+日常 5189 仍使用已批准的 ab0f35c0d9d1 / 修订 1。
+本人日常资料空间为 Codex 内置浏览器；桌面入口调用系统默认浏览器，资料不共享。
+准备本包不表示启用、第二台 Windows 验收、专家准入或公开发布。
+5188 固定 c15ef05bb165 不变。包内原始回执仅含独立合成测试资料。
+本包不迁移、清理、恢复或复制真实资料、浏览器目录。
+
+一、准备安装副本（不创建快捷方式，不启动服务）
+将 ZIP 完整解压到全新目录，在其中运行：
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-local-event-index-candidate.ps1 -NoShortcut
+默认目标：%USERPROFILE%\HakimiBaziWorkbenchCandidates\packages\f0430d400b64-package-v1。
+隔离验收可追加 -InstallRoot "D:\HakimiCandidate-Isolated"，使用全新根目录。
+完整相同的包只读复用；已有不同内容或同名其他入口拒绝覆盖。
+核对完整包：
+  node .\scripts\local-research-event-index-candidate.mjs verify --package-root "安装副本完整路径"
+安装不下载工具，不构建应用，不自动创建或迁移数据库。
+
+二、仅在用户针对 f0430d400b64 / 修订 1 单独批准后切换 5189
+1. 从实际使用的 Codex 内置浏览器导出当前完整 ZIP，核对物理文件并在页面预检。
+   保留“预检通过，尚未写入”；不为验收执行恢复覆盖。
+2. 保留现用 ab0f35c0d9d1-package-v1 全目录、清单、原锁和旧入口。
+   它是本次直接回退对象；更早的 8f67、4de42、fbe 也保留。
+3. 将 Candidate (5189) 桌面快捷方式复制到新日期备份目录，核对文件摘要和属性。
+4. 从 startup.json、监听地址及进程命令行确认旧 5189 服务 PID 和包目录。
+   仅在身份确认和授权后停止该旧服务；未知监听不得停止或自动换端口。
+5. 经批准保留并改名旧快捷方式，再安装新包创建原名入口。
+   启动本包：
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\launch-local-event-index-candidate.ps1 -PackageRoot "新安装副本完整路径" -NoBrowser
+   再回 Codex 内置浏览器打开 http://127.0.0.1:5189/，继续使用原资料空间。
+   不带 -NoBrowser 时会调用系统默认浏览器；这不是本人既有资料的入口。
+6. 核对监听与启动记录、重复调用复用同一 PID；核对页面和 Service Worker 为 f043。
+   确认 Schema 13、migrationId null、原资料一致、控制器确认及写入冻结解除。
+   旧缓存未更新时先核对正常更新过程，不清缓存、注销控制器或清空资料。
+7. 最小现场验收只新增明确标记的合成案例；真实资料更正保持用户自选。
+   保存实际备份、预检及验收结果。本批隔离准备没有执行这些现场切换步骤。
+
+三、失败回退
+保留首错、日志及现场；仅停止已确认属于 f043 的服务 PID。
+核对旧 ab0 完整包，用其原启动器回到同一 5189：
+  node "旧包完整路径\scripts\local-research-candidate.mjs" verify --package-root "旧包完整路径"
+  powershell -NoProfile -ExecutionPolicy Bypass -File "旧包完整路径\scripts\launch-local-candidate.ps1" -PackageRoot "旧包完整路径" -NoBrowser
+再回 Codex 内置浏览器核对旧版本与当前资料。
+应用回退仅处理应用壳、服务和入口；不能自动导入旧备份覆盖后续研究内容。
+资料恢复须另行明确选择，并先保存当前资料。
+
+四、证据与边界
+原 f043 同产物回执：validation\20261010-event-index。
+本次安装包、ZIP、独立安装和启动证据：validation\20261011-event-index-package。
+工具与包身份、实际隔离结果见 GitHub 后继交付记录；旧源码 CI 只绑定原 2482941。
+原生启动器验收使用改映射到临时端口的独立副本，不等于生产 5189 启用。
+第二台 Windows、本包人工原生保存弹窗、真实更正后的新修订及正式专家仍独立待验。
+本说明是打包时的启用前快照；以后启用状态以最新现场记录为准，其他机器独立验收。
