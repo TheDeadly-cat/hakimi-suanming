@@ -1,6 +1,8 @@
 import { Archive, Link2, Pencil, Plus, RefreshCw, RotateCcw, Save, Search, Trash2, X } from "lucide-react";
 import { useCallback, useDeferredValue, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
 import {
+  eventRecordSchema,
+  researchNoteRecordSchema,
   type CitationRecord,
   type DstDisambiguationPolicy,
   type EventRecord,
@@ -761,13 +763,19 @@ export function ResearchJournal({
       setError("研究笔记不能为空。");
       return;
     }
+    const noteSourcesSnapshot = sourceReferencesForSave(noteSources);
+    const sourcesCheck = researchNoteRecordSchema.shape.sourceRefs.safeParse(noteSourcesSnapshot);
+    if (!sourcesCheck.success) {
+      setMessage(null);
+      setError(`来源引用未保存：${sourcesCheck.error.issues[0]?.message ?? "请检查来源引用"}。可更正后保存，或取消编辑。`);
+      return;
+    }
     const operation = beginJournalMutation("note-save");
     if (!operation) return;
     const editedNoteId = editingNote?.id ?? null;
     setError(null);
     setMessage(null);
     const noteTagsSnapshot = splitList(noteTags);
-    const noteSourcesSnapshot = sourceReferencesForSave(noteSources);
     const noteDraftIdentity = `正文 ${noteBody.length} 字符 · ${noteTagsSnapshot.length} 个标签 · ${noteSourcesSnapshot.length} 个来源引用`;
     let writeCallStarted = false;
     let mutationClues: JournalMutationClues | null = null;
@@ -970,6 +978,13 @@ export function ResearchJournal({
       setError("分钟级事件时间尚未完成精确解析；请处理时区、DST 重叠或空档后再保存。");
       return;
     }
+    const eventSourcesSnapshot = sourceReferencesForSave(eventDraft.sourceRefs);
+    const sourcesCheck = eventRecordSchema.shape.sourceRefs.safeParse(eventSourcesSnapshot);
+    if (!sourcesCheck.success) {
+      setMessage(null);
+      setError(`来源引用未保存：${sourcesCheck.error.issues[0]?.message ?? "请检查来源引用"}。可更正后保存，或取消编辑。`);
+      return;
+    }
     const operation = beginJournalMutation("event-save");
     if (!operation) return;
     setError(null);
@@ -990,7 +1005,7 @@ export function ResearchJournal({
       const contentPayload = {
         title: eventDraft.title,
         tags: splitList(eventDraft.tags),
-        sourceRefs: sourceReferencesForSave(eventDraft.sourceRefs),
+        sourceRefs: eventSourcesSnapshot,
         feedback: eventDraft.feedback,
         body: eventDraft.body
       };
