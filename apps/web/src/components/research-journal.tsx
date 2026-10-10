@@ -340,6 +340,7 @@ type ResearchJournalProps = {
   selectedEventError?: string | null;
   selectedEventErrorAnnouncedByParent?: boolean;
   onSelectEvent?: (eventId: string, options?: { replace?: boolean }) => void;
+  onEventsCommitted?: (caseId: string) => void;
 } & (
   | { revision: RevisionRecord; selection: MatrixSelection; transitNode?: TransitNode | null }
   | { revision: null; selection?: null; transitNode?: null }
@@ -354,7 +355,8 @@ export function ResearchJournal({
   selectedEventId = null,
   selectedEventError = null,
   selectedEventErrorAnnouncedByParent = false,
-  onSelectEvent
+  onSelectEvent,
+  onEventsCommitted
 }: ResearchJournalProps) {
   const journalMutationIssueTitleId = useId();
   const noteSectionTitleId = useId();
@@ -947,6 +949,7 @@ export function ResearchJournal({
   };
 
   const registerEventTimeMigration = (result: EventTimeMigrationResult) => {
+    onEventsCommitted?.(caseId);
     setEvents((current) => {
       const byId = new Map(current.map((record) => [record.id, record]));
       byId.set(result.source.id, result.source);
@@ -1052,6 +1055,7 @@ export function ResearchJournal({
             ? "事件已链接到当前案例、修订与运限节点。"
             : "事件已链接到当前案例与修订。";
       }
+      onEventsCommitted?.(caseId);
       if (!journalMutationCanUpdateCurrentInstance(operation)) return;
       setEvents((current) => {
         const byId = new Map(current.map((record) => [record.id, record]));
@@ -1140,6 +1144,7 @@ export function ResearchJournal({
       if (record.deletedAt) await researchRepository.restoreEvent(record.id);
       else await researchRepository.softDeleteEvent(record.id);
       writeCallStarted = false;
+      onEventsCommitted?.(caseId);
       if (!journalMutationCanUpdateCurrentInstance(operation)) return;
       await refresh();
       if (!journalMutationCanUpdateCurrentInstance(operation)) return;
