@@ -190,6 +190,13 @@ function assertBoundedChartRuntimePayload(
 }
 
 type ResearchEventIndex = Awaited<ReturnType<typeof researchRepository.listEventsByCase>>;
+type ChartEventIndexState = {
+  context: string | null;
+  requestVersion: number;
+  status: "loading" | "loaded" | "error";
+  records: ResearchEventIndex;
+  error: string | null;
+};
 
 function chartBundleIntegrityIssue(bundle: CaseBundle, expectedCaseId: string): string | null {
   const caseIdentifierIssue = chartIdentifierIssue(bundle.caseRecord.id, "案例返回的 Case ID");
@@ -569,6 +576,7 @@ function ResearchView({
   selectedEventId,
   selectedEventError,
   onSelectEvent,
+  onEventsCommitted,
   receiptSchemaVersion,
   receiptWritesAllowed
 }: {
@@ -581,6 +589,7 @@ function ResearchView({
   selectedEventId: string | null;
   selectedEventError: string | null;
   onSelectEvent: (eventId: string, options?: { replace?: boolean }) => void;
+  onEventsCommitted: (caseId: string) => void;
   receiptSchemaVersion: number;
   receiptWritesAllowed: boolean;
 }) {
@@ -673,6 +682,7 @@ function ResearchView({
         <div className="provenance-list">{revision.facts.fieldProvenance.map((item) => <div key={item.field}><code>{safeVisibleText(item.field, "字段不可显示", 180)}</code><span>{safeVisibleText(item.algorithmId, "算法不可显示", 180)}</span><StatusPill tone="warning">{item.verificationStatus}</StatusPill></div>)}</div>
       </section>
       <ResearchJournal
+        key={`${caseId}:${revision.id}`}
         caseId={caseId}
         revision={revision}
         selection={selection}
@@ -682,6 +692,7 @@ function ResearchView({
         selectedEventError={selectedEventError}
         selectedEventErrorAnnouncedByParent={selectedEventError !== null}
         onSelectEvent={onSelectEvent}
+        onEventsCommitted={onEventsCommitted}
       />
     </div>
   );
@@ -708,9 +719,18 @@ export function ChartPage({ caseId, revisionId }: { caseId: string; revisionId: 
   const [selection, setSelection] = useState<MatrixSelection>({ pillar: "day", field: "stem" });
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [transitSnapshot, setTransitSnapshot] = useState<TransitSnapshot | null>(null);
-  const [transitEvents, setTransitEvents] = useState<Awaited<ReturnType<typeof researchRepository.listEventsByCase>>>([]);
-  const [transitEventsReady, setTransitEventsReady] = useState(false);
-  const [transitEventsError, setTransitEventsError] = useState<string | null>(null);
+  const [eventIndex, setEventIndex] = useState<ChartEventIndexState>({
+    context: null, requestVersion: 0, status: "loading", records: [], error: null
+  });
+  const eventIndexRequestVersionRef = useRef(0);
+  const eventIndexContext = `${caseId}:${revisionId}`;
+  const currentEventIndexContextRef = useRef({ caseId, key: eventIndexContext });
+  currentEventIndexContextRef.current = { caseId, key: eventIndexContext };
+  const eventIndexCurrent = eventIndex.context === eventIndexContext
+    && eventIndex.requestVersion === eventIndexRequestVersionRef.current;
+  const transitEvents = eventIndexCurrent ? eventIndex.records : [];
+  const transitEventsReady = eventIndexCurrent && eventIndex.status !== "loading";
+  const transitEventsError = eventIndexCurrent ? eventIndex.error : null;
   const [transitEventsReloadVersion, setTransitEventsReloadVersion] = useState(0);
   const [transitLoading, setTransitLoading] = useState(false);
   const [transitError, setTransitError] = useState<string | null>(null);
@@ -839,35 +859,32 @@ export function ChartPage({ caseId, revisionId }: { caseId: string; revisionId: 
   }, [revision, route.transit.atInstant, route.transit.manualDirection, transitContextActive]);
 
   useEffect(() => {
+    const requestVersion = ++eventIndexRequestVersionRef.current;
+    setEventIndex({ context: eventIndexContext, requestVersion, status: "loading", records: [], error: null });
     if (!transitEventContextReady || !bundle) {
-      setTransitEvents([]);
-      setTransitEventsReady(false);
-      setTransitEventsError(null);
       return;
     }
     let active = true;
+    const isCurrent = () => active
+      && requestVersion === eventIndexRequestVersionRef.current
+      && currentEventIndexContextRef.current.key === eventIndexContext;
     const expectedRevisionIds = new Set(bundle.revisions.map((item) => item.id));
-    setTransitEvents([]);
-    setTransitEventsReady(false);
-    setTransitEventsError(null);
     researchRepository.listEventsByCase(caseId, { includeDeleted: true }).then((records) => {
-      if (!active) return;
+      if (!isCurrent()) return;
       assertBoundedChartRuntimePayload(records, "事件索引", {
         arrayItems: MAX_CHART_EVENT_INDEX_RECORDS,
         nodes: 200_000
       });
       const integrityIssue = eventIndexIntegrityIssue(records, caseId, expectedRevisionIds);
       if (integrityIssue) throw new Error(integrityIssue);
-      setTransitEvents(records);
+      setEventIndex({ context: eventIndexContext, requestVersion, status: "loaded", records, error: null });
     }).catch((reason: unknown) => {
-      if (!active) return;
-      setTransitEvents([]);
-      setTransitEventsError(safeVisibleErrorMessage(reason, "无法读取当前案例的事件索引。"));
-    }).finally(() => {
-      if (active) setTransitEventsReady(true);
+      if (!isCurrent()) return;
+      setEventIndex({ context: eventIndexContext, requestVersion, status: "error", records: [],
+        error: safeVisibleErrorMessage(reason, "无法读取当前案例的事件索引。") });
     });
     return () => { active = false; };
-  }, [bundle, caseId, caseLoadVersion, transitEventContextReady, transitEventsReloadVersion]);
+  }, [bundle, caseId, caseLoadVersion, eventIndexContext, transitEventContextReady, transitEventsReloadVersion]);
 
   const selectedTransitNode = useMemo(() => {
     if (!transitSnapshot || !route.transit.selection) return null;
@@ -995,12 +1012,14 @@ export function ChartPage({ caseId, revisionId }: { caseId: string; revisionId: 
     setCaseLoadVersion((current) => current + 1);
   };
 
-  const retryTransitEvents = () => {
-    setTransitEvents([]);
-    setTransitEventsReady(false);
-    setTransitEventsError(null);
+  const invalidateEventIndex = useCallback((committedCaseId: string) => {
+    if (committedCaseId !== currentEventIndexContextRef.current.caseId) return;
+    const requestVersion = ++eventIndexRequestVersionRef.current;
+    setEventIndex({ context: currentEventIndexContextRef.current.key, requestVersion,
+      status: "loading", records: [], error: null });
     setTransitEventsReloadVersion((current) => current + 1);
-  };
+  }, []);
+  const retryTransitEvents = () => invalidateEventIndex(caseId);
 
   if (caseLoading) return (
     <div
@@ -1224,6 +1243,7 @@ export function ChartPage({ caseId, revisionId }: { caseId: string; revisionId: 
               selectedEventId={selectedEventRoute.eventId}
               selectedEventError={selectedEventRoute.error}
               onSelectEvent={selectResearchEvent}
+              onEventsCommitted={invalidateEventIndex}
               receiptSchemaVersion={caseRepository.database.targetSchemaVersion}
               receiptWritesAllowed={!isTrashed}
             />
