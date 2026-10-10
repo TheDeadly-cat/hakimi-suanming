@@ -491,7 +491,7 @@ describe("ChartPage transit route", () => {
     mockResearchJournalSnapshot(caseRecord.id, [record]);
     window.history.replaceState({}, "", `/cases/${caseRecord.id}/revisions/${revision.id}?view=research&event=${record.id}`);
 
-    render(<ChartPage caseId={caseRecord.id} revisionId={revision.id} />);
+    render(<main><ChartPage caseId={caseRecord.id} revisionId={revision.id} /></main>);
 
     const card = await screen.findByRole("article", { name: "事件 深链精确事件" });
     expect(screen.getByText("未绑定安装包 · 内置或派生规则快照")).toBeTruthy();
@@ -499,6 +499,25 @@ describe("ChartPage transit route", () => {
     expect(screen.getByText("深链定位")).toBeTruthy();
     await waitFor(() => expect(document.activeElement).toBe(card));
     expect(screen.queryByRole("alert", { name: /无法定位事件/ })).toBeNull();
+
+    // Drain the competing editor and route navigation frames in their real order.
+    // Selecting the same event URL must not move focus back to the page heading.
+    const frames = new Map<number, FrameRequestCallback>();
+    let frameId = 0;
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+      frames.set(++frameId, callback);
+      return frameId;
+    });
+    vi.spyOn(window, "cancelAnimationFrame").mockImplementation((id) => { frames.delete(id); });
+    fireEvent.click(within(card).getByRole("button", { name: "编辑事件" }));
+    for (let frame = 0; frames.size && frame < 10; frame += 1) {
+      const current = [...frames.values()];
+      frames.clear();
+      act(() => current.forEach((callback) => callback(performance.now())));
+    }
+    expect(frames.size).toBe(0);
+    const editor = within(screen.getByRole("region", { name: "编辑研究事件" }));
+    expect(document.activeElement).toBe(editor.getByLabelText(/事件标题/));
   });
 
   it("跨修订事件深链给出告警且绝不回退到近似事件", async () => {

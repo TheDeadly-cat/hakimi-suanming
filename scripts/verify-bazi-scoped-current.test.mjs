@@ -736,7 +736,7 @@ test("selected domain and expert tasks preserve historical anchors and reject ab
     entry.familyKey === "content/domain-release/bazi.single-chart-report.v1.7.0.manifest");
   assert.equal(domainEntries.length, 1);
   assert.notEqual(domainEntries[0].head, null);
-  assert.equal(domainEntries[0].selectedCurrent.version, "2.3.0");
+  assert.equal(domainEntries[0].selectedCurrent.version, "2.4.0");
   const expert = index.nonVersionedSelections.baziExpertReviewPacket;
   assert.notEqual(expert.historicalAnchor, null);
   assert.equal(expert.currentAvailable, true);
@@ -861,7 +861,7 @@ test("current domain CLI verifies inputs while current expert CLI remains qualif
       assert.equal(outcome.stderr, "");
       const resolution = JSON.parse(outcome.stdout);
       assert.equal(resolution.currentAvailable, true);
-      assert.equal(resolution.artifact.artifactId, "hakimi.bazi.single-chart-report.domain-release-manifest/2.3.0");
+      assert.equal(resolution.artifact.artifactId, "hakimi.bazi.single-chart-report.domain-release-manifest/2.4.0");
       assert.equal(resolution.authorityBoundary.releaseReady, false);
       assert.equal(resolution.authorityBoundary.expertClaimsAuthorized, false);
     }

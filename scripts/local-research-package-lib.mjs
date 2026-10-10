@@ -78,15 +78,15 @@ async function copyBytes(source, destination, containmentRoot) {
 // Explicit next local engineering candidate; never selected by version ordering.
 // The built application belongs to this source commit; packaging changes are separate.
 export const LOCAL_RESEARCH_CANDIDATE = Object.freeze({
-  buildVersion: "4de42e9db980",
-  sourceCommit: "d3ff1bdcc64d0917dcc604f753ac896eb62a9c1e",
-  evidenceId: "hre1-8f0e82a7568246e68d2c535527e3431d",
-  lockSha256: "d8a12d67f39555ff598a583c4b90ab2746156a4982f2cfbd5a1a6065a08b0f62",
-  artifactSetDigest: "0ef6aafa437d6d894a232a1789dd8e35d72de9df9dd02982b38bc75609e6c1e5",
+  buildVersion: "ab0f35c0d9d1",
+  sourceCommit: "564f88e7f47844d10e26bbc79c34e1ce48edf77a",
+  evidenceId: "hre1-8b9009e2be973f93113abb9fded99932",
+  lockSha256: "78ab59d932cbfec75c63a2f94eaa91f7ae24e2a066eaaaa54a210e8e9773ecc9",
+  artifactSetDigest: "45b1b94bedb1995f031cf025f25b349917dadabefc07916fca36b478c83c3459",
   fileCount: 137,
   origin: "http://127.0.0.1:5189/",
   nodeVersion: "24.16.0",
-  packageRevision: "2",
+  packageRevision: "1",
   localEngineeringCandidate: true,
   formalAdmissionAuthorized: false,
   expertClaimsAuthorized: false,
@@ -94,28 +94,24 @@ export const LOCAL_RESEARCH_CANDIDATE = Object.freeze({
 });
 const CANDIDATE_RECEIPTS = Object.freeze([
   {
-    "path": "tmp/first-controller-receipts-4de42e9db980/boot.json",
-    "sha256": "b73716f2f11da7f9509dcaab76257feae1f0591126c1fd18459d2f6b6ab0adfc"
+    "path": "tmp/delivery-receipts-ab0f35c0d9d1/journal-integrity-mobile-actions.json",
+    "sha256": "a38f600482f662ee512cfd2237b38ad2ba7ed19a38ee8387ba949fc14a2892eb"
   },
   {
-    "path": "tmp/first-controller-receipts-4de42e9db980/browser-results/boot-17140-acad3275-139f-4218-97a3-89b4193c58cb.json",
-    "sha256": "8670b1953ff34924388f5117ef6cbcbf445b6b5a458f33a7e59e11b8779e977b"
+    "path": "tmp/delivery-receipts-ab0f35c0d9d1/persistent-delivery.json",
+    "sha256": "06aa075381891dd17c1ebd9e8ae683cb0817f836f9e8f0ad7b431c32f6a86ed7"
   },
   {
-    "path": "tmp/first-controller-receipts-4de42e9db980/pwa.json",
-    "sha256": "9c2d517ef50f75d97d449ac85f210b02dd70b1c4fabdfd84176972c3e993c012"
+    "path": "tmp/delivery-receipts-ab0f35c0d9d1/persistent-results.json",
+    "sha256": "834fffe1a6e20b20d51597edf97ea249208e0bcce386fa230540c1ce0ee3e483"
   },
   {
-    "path": "tmp/first-controller-receipts-4de42e9db980/browser-results/pwa-49508-0e7ab317-1215-4fda-a860-72c153155eb8.json",
+    "path": "tmp/delivery-receipts-ab0f35c0d9d1/pwa.json",
     "sha256": "72a5455f85e0bad05407cd5b1b08bf1f8a899cf61a100785723dfc7e37038d1c"
   },
   {
-    "path": "tmp/first-controller-receipts-4de42e9db980/web-v1-flow.json",
-    "sha256": "a7cea705c29f9f39a5ea8ef7cbd43a2738e2c704da2c8c6e8bec500d4f9988b2"
-  },
-  {
-    "path": "tmp/first-controller-receipts-4de42e9db980/browser-results/web-v1-flow-38848-d2f11ad5-1416-4612-a6d1-e004659eb232.json",
-    "sha256": "1e011b5244afd795a5cd40e6b902fabb80dc722d915e40f552bfb55c3dcb1e2b"
+    "path": "tmp/delivery-receipts-ab0f35c0d9d1/pwa-run.log",
+    "sha256": "9a4d2028bf900801e0c62bf6a0790d1e23eb998fe5935ecd6cab0a3b4f76b8c6"
   }
 ].map((entry) => Object.freeze(entry)));
 

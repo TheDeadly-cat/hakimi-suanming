@@ -11,12 +11,12 @@
 
 普通 Web/PWA 构建固定为 `legacy-v13 / targetSchema 13 / migrationId null`。Schema 16 仅是独立输出目录中的工程候选，不是默认版本，也没有公开发布授权。当前产品定位是本地优先研究工具和工程预览；工程哈希、迁移矩阵或 Release Evidence 均不代表命理专家真值。
 
-唯一机器 current 源是 [canonical current-index](./content/system-admission/current-index.v1.json)，人工可读入口是由它精确生成的 [current-index 状态投影](./docs/status/current-index-summary.md)。完整的多版本历史由独立的 [history checkpoint](./content/system-admission/history-checkpoint.v2.json) 校验；普通 current 读取只绑定该检查点身份、版本族名称清单和每族当前端点，不把更旧历史字节装入 current 结果。[当前发布状态历史长账](./docs/status/current-release-status.md) 仅保留历史叙述，不再构成 current 或授权来源；发布边界另见 [Web v1 发布章程](./docs/Web-v1发布章程与兼容范围-v0.1-2026-08-21.md)、[发布代际台账](./docs/release/release-generation-history.json) 和 [发布回滚手册](./docs/release/web-v1-release-and-rollback-runbook.md)。在所有者确认许可证策略前，本项目明确保留全部权利，不声称是开源项目。
+唯一机器 current 源是 [canonical current-index](./content/system-admission/current-index.v1.json)，人工可读入口是由它精确生成的 [current-index 状态投影](./docs/status/current-index-summary.md)。完整的多版本历史由独立的 [history checkpoint](./content/system-admission/history-checkpoint.v3.json) 校验；普通 current 读取只绑定该检查点身份、版本族名称清单和每族当前端点，不把更旧历史字节装入 current 结果。[当前发布状态历史长账](./docs/status/current-release-status.md) 仅保留历史叙述，不再构成 current 或授权来源；发布边界另见 [Web v1 发布章程](./docs/Web-v1发布章程与兼容范围-v0.1-2026-08-21.md)、[发布代际台账](./docs/release/release-generation-history.json) 和 [发布回滚手册](./docs/release/web-v1-release-and-rollback-runbook.md)。在所有者确认许可证策略前，本项目明确保留全部权利，不声称是开源项目。
 <!-- CURRENT_STATUS_ENTRYPOINT_V1_END -->
 
 由 DeepSeek 接续开发时，先阅读 [DeepSeek 后续工作启动指引](./docs/DeepSeek后续工作启动指引-2026-08-10.md)。该指引记录 2026-08-10 用户确认的本地保存、内容、Android 顺序、Git 基线授权和部署历史未知等决定，以及第一批安全工作包。
 
-当前整合、远端工程/完整历史组、实际启用状态及下一批三项工作集中在 [本地交付当前摘要](./docs/status/local-delivery-plan-20260913.md)。
+当前源码、候选产物、实际启用版本、验证与回退安排集中在 [本地交付当前摘要](./docs/status/local-delivery-plan-20260913.md)。按日期区分当前摘要与下方保留的历史记录。
 
 ## 本人本地使用：固定 5188 入口
 
@@ -25,12 +25,14 @@
 | 入口 | 用途 |
 | --- | --- |
 | `127.0.0.1:5188` | 固定产物的本人日常使用；重复启动复用，身份不符停止 |
-| `127.0.0.1:5189` | 已启用的 `4de42e9db980` 修订 `2` 本地工程候选；拥有独立案例数据空间 |
+| `127.0.0.1:5189` | 2026-10-10 经用户单独批准启用 `ab0f35c0d9d1` 修订 `1`；本机最小现场验收通过，Schema 13 不变 |
 | `127.0.0.1:5173` | 开发源码调试，不是日常案例库 |
 | 隔离测试配置指定的地址 | 自动测试与故障注入，使用独立浏览器资料目录 |
 | 旧 `4173` 说明/快捷方式 | 历史开发预览，不能当作当前日常入口；本项目新桌面命令不再自动构建到该端口 |
 
-不同端口是不同浏览器数据空间。看到空案例库时先核对地址，不要清除浏览器数据；转移资料须在来源地址导出完整备份，并在目标地址预检后恢复。本地安装器不迁移或清理浏览器资料。
+本人已明确选择 **Codex 内置浏览器** 作为日常 5189 资料入口。使用本聊天已保留的内置浏览器标签访问 **http://127.0.0.1:5189/**；身份和清单可在 [数据管理页](http://127.0.0.1:5189/settings/data) 核对，再从“工作台”或“案例库”进入研究。正常重新载入已确认 ab0、Schema 13、控制器确认和九条记录。若服务未启动，先使用已安装包启动器启动 5189，再回此浏览器；无需重新安装或转移资料。桌面 Candidate 入口仍调用系统默认浏览器，不是本人这份资料的日常入口。
+
+不同端口、不同浏览器资料目录是不同数据空间，不会自动共享资料。看到空案例库时先核对地址和浏览器，不要清除浏览器数据；转移资料须在来源地址导出完整备份，并在目标地址预检后恢复。本地安装器不迁移或清理浏览器资料。
 
 ### 新机器或重装固定产物
 
@@ -53,19 +55,21 @@ npm run desktop:launch
 
 ### 独立候选版（5189）
 
-本机候选入口已在用户明确选择、旧包和入口备份、安装副本验收后启用 **`4de42e9db980` / 安装包修订 `2`**，仍为 Schema 13。桌面 Candidate (5189) 已切换并验证复用；旧 `9057371baf85` 包和快捷方式备份保留，5188 未改动。修订 2 仅更新安装探测工具，修复应用字节及原回执与修订 1 一致。
+本机 5189 已于 **2026-10-10** 经用户单独批准切换到 **`ab0f35c0d9d1 / package-v1`**，默认仍为 `legacy-v13 / Schema 13 / migrationId null`。实际页面、Service Worker 确认和安装服务均绑定该产物；当前入口与重复启动复用已核对，5188 不动。原有研究记录按 ID 和完整内容摘要核对未变；新增仅为明确标记的合成验收案例，其笔记、事件的来源追加、更正、重新打开及实际完整 ZIP 预检通过。
 
-完整解压修复 ZIP 后，已有 5189 安装的用户先安装到独立新目录，不建立或替换快捷方式：
+该产物保留 PR #13 标签修复，并修复编辑来源时可能合并原条目的问题。每条来源独立编辑，内部标点和换行保留，沿用首尾空白处理及既有仓储校验。旧 `8f67`、`4de42`、`fbe` 包和原入口保留；现场记录与启用前工程准备快照分别保存在 [本地交付当前摘要](./docs/status/local-delivery-plan-20260913.md)。
+
+在其他已有 5189 安装的环境，完整解压修复 ZIP 后，先安装到独立新目录，不建立或替换快捷方式：
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-local-candidate.ps1 -NoShortcut
 ```
 
-修复包默认安装在 `%USERPROFILE%\HakimiBaziWorkbenchCandidates\packages\4de42e9db980-package-v2`。首次安装且没有旧候选入口时，可省略 `-NoShortcut`；同名其他快捷方式会被保留并报告冲突。已有 5189 服务与资料的版本切换须先保存完整备份，再另行决定，不从这条安装命令自动执行。
+新包默认副本目录为 `%USERPROFILE%\HakimiBaziWorkbenchCandidates\packages\ab0f35c0d9d1-package-v1`。已有不同目录内容或同名其他快捷方式会被保留并报告冲突。准备安装副本不等于启用；其他安装的切换仍须单独获得批准，并从实际使用浏览器导出及预检当前备份，保留原安装和快捷方式。
 
-安装不下载依赖、不构建、不迁移案例；默认 `desktop:install` / `desktop:launch` 仍选择原 c15ef 日常产物。新修复包的独立安装，以及安装副本在 Edge/Chrome 中的启动、PWA、完整研究与备份恢复流程已通过。本机固定 5189 已完成保存、页面关闭重开和完整备份隔离恢复验收；第二台 Windows 和本人真实研究反馈仍待完成。
+安装不下载依赖、不构建、不迁移案例；默认 `desktop:install` / `desktop:launch` 仍选择原 c15ef 日常产物。新产物结果与旧包验收分开记载，第二台 Windows 尚未验收。用户暂无真实资料更正，原盘保留，新修订保存记为未测；不再要求重做已有真实使用。
 
-产物、安装包摘要、验证与未完成项见 [4de42e9db980 修复候选记录](./docs/status/local-candidate-4de42e9db980-20260913.md)；[9057371baf85 交付记录](./docs/status/local-candidate-9057371baf85-20260913.md)继续保留原版本结果。操作说明见 [候选包安装说明](./LOCAL-CANDIDATE-INSTALL.txt)。整体 CI、真实专家和领域来源门仍独立判断。
+新产物身份、验证和 PR 关系见 [本地交付当前摘要](./docs/status/local-delivery-plan-20260913.md)，操作见 [候选包安装与回退说明](./LOCAL-CANDIDATE-INSTALL.txt)。**安装说明保留打包时的启用前快照；本人当前启用状态以最新现场验收摘要为准，其他机器仍须独立完成批准与验收。** 直接回退包为 `8f67be033617-package-v1`，更早的 [4de42e9db980 记录](./docs/status/local-candidate-4de42e9db980-20260913.md)及原包保留。回退应用不能自动恢复旧资料覆盖后续研究。整体 CI、正式专家和来源权利门仍独立判断。
 
 ## 开发源码
 

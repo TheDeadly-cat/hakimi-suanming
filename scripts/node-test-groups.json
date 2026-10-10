@@ -16,6 +16,7 @@
       "id": "current-governance",
       "tests": [
         "scripts/verify-bazi-expert-inspection.test.mjs",
+        "scripts/verify-bazi-domain-release-manifest-v2-4.test.mjs",
         "scripts/verify-cross-system-engineering-fact-receipts.test.mjs",
         "scripts/verify-current-history-boundary.test.mjs",
         "scripts/verify-current-independent-scoped.test.mjs",
@@ -191,6 +192,7 @@
         "scripts/deployed-pwa-evidence-v3.test.mjs",
         "scripts/deployed-pwa-evidence.test.mjs",
         "scripts/deployed-pwa-host-provider-composition.test.mjs",
+        "scripts/journal-artifact-errors.test.mjs",
         "scripts/provider-deployment-candidate-loader.test.mjs",
         "scripts/provider-deployment-candidate-runtime.test.mjs",
         "scripts/provider-deployment-candidate-sequence-loader.test.mjs",

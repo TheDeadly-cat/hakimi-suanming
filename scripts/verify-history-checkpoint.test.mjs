@@ -150,11 +150,11 @@ test("real workspace obtains distinct identity-only and full-history private bra
   assert.equal(Object.isFrozen(checkpoint), true);
   assert.equal(Object.isFrozen(checkpoint.families), true);
   assert.equal(summary.familyCount, 25);
-  assert.equal(summary.memberCount, 78);
+  assert.equal(summary.memberCount, 79);
   assert.equal(summary.artifactLineageFamilyCount, 24);
   assert.equal(summary.indexOnlyLegacyFamilyCount, 1);
   assert.equal(summary.previousCheckpointMechanicallyVerified, true);
-  assert.equal(summary.previousHistoryMembersPreserved, 77);
+  assert.equal(summary.previousHistoryMembersPreserved, 78);
 });
 
 test("successor full history retains the exact previous checkpoint bytes", async () => {
@@ -163,7 +163,7 @@ test("successor full history retains the exact previous checkpoint bytes", async
   assert.equal(createHash("sha256").update(bytes).digest("hex"), PREVIOUS_HISTORY_CHECKPOINT.rawSha256);
   const summary = getHistoryCheckpointSummary(await loadHistoryCheckpoint(ROOT));
   assert.equal(summary.previousCheckpointPath, PREVIOUS_HISTORY_CHECKPOINT.path);
-  assert.equal(summary.previousHistoryMembersPreserved, 77);
+  assert.equal(summary.previousHistoryMembersPreserved, 78);
   assert.equal(summary.authorityBoundary.formalAdmissionAuthorized, false);
 });
 

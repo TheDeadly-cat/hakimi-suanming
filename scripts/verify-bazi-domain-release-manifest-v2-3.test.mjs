@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import test from "node:test";
+import test, { after } from "node:test";
+import { createBaziDomainManifestV23HistoricalInputs } from "./bazi-domain-manifest-v23-history.test-fixture.mjs";
 
 import {
   isVerifiedBaziDomainReleaseManifestV22,
@@ -23,7 +24,9 @@ import {
   serializeBaziDomainReleaseManifestV23
 } from "./bazi-domain-release-manifest-v2-3-lib.mjs";
 
-const ROOT = path.resolve(import.meta.dirname, "..");
+const historicalInputs = await createBaziDomainManifestV23HistoricalInputs();
+const ROOT = historicalInputs.root;
+after(() => historicalInputs.cleanup());
 const OLD_PATH = "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.2.0.json";
 const REBOUND_PATHS = ["package-lock.json", "packages/research-export/src/single-chart-report.ts"];
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");

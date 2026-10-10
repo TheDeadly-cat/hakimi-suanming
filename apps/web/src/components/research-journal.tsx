@@ -81,7 +81,7 @@ type EventDraft = {
   startDate: string;
   endDate: string;
   tags: string;
-  sourceRefs: string;
+  sourceRefs: string[];
   feedback: EventRecord["feedback"];
   body: string;
   timeZone: string;
@@ -95,7 +95,7 @@ const emptyEventDraft: EventDraft = {
   startDate: "",
   endDate: "",
   tags: "",
-  sourceRefs: "",
+  sourceRefs: [],
   feedback: "unreviewed",
   body: "",
   timeZone: "Asia/Shanghai",
@@ -132,6 +132,52 @@ function journalErrorMessage(reason: unknown, fallback: string): string {
 
 function splitList(value: string): string[] {
   return value.split(/[,，;；\n]/).map((item) => item.trim()).filter(Boolean);
+}
+
+function sourceReferencesForSave(values: readonly string[]): string[] {
+  return values.map((value) => value.trim()).filter(Boolean);
+}
+
+function SourceReferencesEditor({ values, onChange }: {
+  values: readonly string[];
+  onChange: (values: string[]) => void;
+}) {
+  const rows = values.length ? values : [""];
+  const sourceInputs = useRef<(HTMLTextAreaElement | null)[]>([]);
+  const pendingFocus = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    if (pendingFocus.current === null) return;
+    sourceInputs.current[pendingFocus.current]?.focus();
+    pendingFocus.current = null;
+  }, [values]);
+  return (
+    <div className="field journal-source-refs" role="group" aria-label="来源引用编辑">
+      <span>来源引用</span>
+      <small>每个框保存一条来源。标点和框内换行保留；空框不保存，首尾空白去除。</small>
+      {rows.map((value, index) => (
+        <div className="journal-source-refs__row" key={index}>
+          <label className="field">
+            <span>第 {index + 1} 条来源</span>
+            <textarea aria-label={index === 0 ? "来源引用" : `来源引用 ${index + 1}`} rows={2}
+              ref={(element) => { sourceInputs.current[index] = element; }}
+              value={value} maxLength={500} placeholder="书名、版本、章节或资料说明"
+              onChange={(event) => onChange(rows.map((item, row) => row === index ? event.target.value : item))} />
+          </label>
+          <button type="button" className="secondary-action" aria-label={`移除来源引用 ${index + 1}`}
+            onClick={() => {
+              const remaining = rows.filter((_item, row) => row !== index);
+              pendingFocus.current = Math.min(index, Math.max(0, remaining.length - 1));
+              onChange(remaining);
+            }}>移除</button>
+        </div>
+      ))}
+      <button type="button" className="secondary-action" disabled={rows.length >= 100}
+        onClick={() => {
+          pendingFocus.current = rows.length;
+          onChange([...rows, ""]);
+        }}><Plus aria-hidden="true" />添加一条来源</button>
+    </div>
+  );
 }
 
 function noteAnchorLabel(note: ResearchNoteRecord): string {
@@ -337,7 +383,7 @@ export function ResearchJournal({
   const [noteAnchorMode, setNoteAnchorMode] = useState<NoteAnchorMode>(() => revision ? "field" : "case");
   const [noteBody, setNoteBody] = useState("");
   const [noteTags, setNoteTags] = useState("");
-  const [noteSources, setNoteSources] = useState("");
+  const [noteSources, setNoteSources] = useState<string[]>([]);
   const [editingNote, setEditingNote] = useState<ResearchNoteRecord | null>(null);
 
   const subjectTimeZone = defaultTimeZone ?? revision?.input.timeZone ?? "Asia/Shanghai";
@@ -455,7 +501,7 @@ export function ResearchJournal({
     setNoteAnchorMode(revision ? "field" : "case");
     setNoteBody("");
     setNoteTags("");
-    setNoteSources("");
+    setNoteSources([]);
     setEditingNote(null);
     setEventDraft({ ...emptyEventDraft, timeZone: subjectTimeZone });
     setEditingEvent(null);
@@ -706,7 +752,7 @@ export function ResearchJournal({
     setEditingNote(null);
     setNoteBody("");
     setNoteTags("");
-    setNoteSources("");
+    setNoteSources([]);
   };
 
   const saveNote = async (event: FormEvent) => {
@@ -721,7 +767,7 @@ export function ResearchJournal({
     setError(null);
     setMessage(null);
     const noteTagsSnapshot = splitList(noteTags);
-    const noteSourcesSnapshot = splitList(noteSources);
+    const noteSourcesSnapshot = sourceReferencesForSave(noteSources);
     const noteDraftIdentity = `正文 ${noteBody.length} 字符 · ${noteTagsSnapshot.length} 个标签 · ${noteSourcesSnapshot.length} 个来源引用`;
     let writeCallStarted = false;
     let mutationClues: JournalMutationClues | null = null;
@@ -801,7 +847,7 @@ export function ResearchJournal({
     setEditingNote(note);
     setNoteBody(note.body);
     setNoteTags(note.tags.join("，"));
-    setNoteSources(note.sourceRefs.join("\n"));
+    setNoteSources([...note.sourceRefs]);
     setError(null);
   };
 
@@ -944,7 +990,7 @@ export function ResearchJournal({
       const contentPayload = {
         title: eventDraft.title,
         tags: splitList(eventDraft.tags),
-        sourceRefs: splitList(eventDraft.sourceRefs),
+        sourceRefs: sourceReferencesForSave(eventDraft.sourceRefs),
         feedback: eventDraft.feedback,
         body: eventDraft.body
       };
@@ -1031,7 +1077,7 @@ export function ResearchJournal({
       startDate: record.startDate ?? "",
       endDate: record.endDate ?? "",
       tags: record.tags.join("，"),
-      sourceRefs: record.sourceRefs.join("\n"),
+      sourceRefs: [...record.sourceRefs],
       feedback: record.feedback,
       body: record.body,
       timeZone: record.timeContext.kind === "zoned_minute" ? record.timeContext.timeZone : subjectTimeZone,
@@ -1254,7 +1300,7 @@ export function ResearchJournal({
             <label className="field"><span>锚定位置</span><select value={noteAnchorMode} onChange={(event) => setNoteAnchorMode(event.target.value as NoteAnchorMode)}><option value="field">当前字段 · {selection.pillar}.{selection.field}</option><option value="revision">当前修订</option><option value="case">整个案例</option></select></label>
           ) : editingNote ? <p className="editor-context">原锚点：{noteAnchorLabel(editingNote)} · editVersion {editingNote.editVersion}</p> : <p className="editor-context">未知时辰候选组只允许案例级锚点；不会绑定代表探针、DST 变体或虚构修订。</p>}
           <label className="field"><span>Markdown 笔记 <em>必填</em></span><textarea ref={noteBodyInputRef} rows={6} value={noteBody} onChange={(event) => setNoteBody(event.target.value)} placeholder="记录观察、反例、待复核问题；不要把笔记改写成命盘事实。" maxLength={JOURNAL_BODY_MAX_LENGTH} required /></label>
-          <div className="field-grid"><label className="field"><span>标签</span><input value={noteTags} onChange={(event) => setNoteTags(event.target.value)} placeholder="边界，待核验" maxLength={JOURNAL_LIST_INPUT_MAX_LENGTH} /></label><label className="field"><span>来源引用</span><input value={noteSources} onChange={(event) => setNoteSources(event.target.value)} placeholder="书名/版本/章节，用分号分隔" maxLength={JOURNAL_LIST_INPUT_MAX_LENGTH} /></label></div>
+          <div className="field-grid"><label className="field"><span>标签</span><input value={noteTags} onChange={(event) => setNoteTags(event.target.value)} placeholder="边界，待核验" maxLength={JOURNAL_LIST_INPUT_MAX_LENGTH} /></label><SourceReferencesEditor values={noteSources} onChange={setNoteSources} /></div>
           <div className="journal-actions"><button type="submit" className="primary-action" disabled={journalMutationActive} aria-busy={noteSaving}>{noteSaving ? <RefreshCw className="is-spinning" aria-hidden="true" /> : <Save aria-hidden="true" />}{noteSaving ? "正在保存笔记…" : editingNote ? "保存新版本" : "保存笔记"}</button>{editingNote ? <button type="button" className="secondary-action" disabled={journalMutationActive} onClick={cancelNoteEdit}><X aria-hidden="true" />取消编辑</button> : null}</div>
           </fieldset>
         </form>
@@ -1313,7 +1359,7 @@ export function ResearchJournal({
               {eventDraft.endDate ? <MinuteBoundaryPreview label="结束" name="event-end-disambiguation" preview={endMinutePreview} disambiguation={eventDraft.endDisambiguation} onDisambiguationChange={(policy) => updateEventDraft("endDisambiguation", policy)} /> : null}
             </div>
           ) : null}
-          <label className="field"><span>来源引用</span><input value={eventDraft.sourceRefs} onChange={(event) => updateEventDraft("sourceRefs", event.target.value)} placeholder="日记、当事人口述、公开资料" maxLength={JOURNAL_LIST_INPUT_MAX_LENGTH} /></label>
+          <SourceReferencesEditor values={eventDraft.sourceRefs} onChange={(values) => updateEventDraft("sourceRefs", values)} />
           <label className="field"><span>事件笔记</span><textarea rows={4} value={eventDraft.body} onChange={(event) => updateEventDraft("body", event.target.value)} maxLength={JOURNAL_BODY_MAX_LENGTH} /></label>
           <div className="journal-actions"><button type="submit" className="primary-action" disabled={!eventTimeCanSave || journalMutationActive} aria-busy={eventSaving}>{eventSaving ? <RefreshCw className="is-spinning" aria-hidden="true" /> : <Plus aria-hidden="true" />}{eventSaving ? "正在保存事件…" : editingEvent ? "保存事件修改" : "添加事件"}</button>{editingEvent ? <button type="button" className="secondary-action" disabled={journalMutationActive} onClick={cancelEventEdit}><X aria-hidden="true" />取消编辑</button> : null}</div>
           </fieldset>

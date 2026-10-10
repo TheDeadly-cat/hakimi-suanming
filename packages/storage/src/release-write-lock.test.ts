@@ -217,10 +217,13 @@ describe("release-generation database write lock", () => {
     await drain;
     expect(drainFinished).toBe(true);
     expect(await drainer.table("appSettings").toArray()).toEqual([]);
-    await expect(writerSettings.put({ id: "post-drain-writer" }))
+    // These are new writes after drain, independent of the aborted transaction's
+    // async zone. Test the fence guard rather than TransactionInactiveError.
+    await expect(Dexie.ignoreTransaction(() => writerSettings.put({ id: "post-drain-writer" })))
       .rejects.toBeInstanceOf(ReleaseDatabaseWriteLockedError);
-    await expect(drainer.table("appSettings").put({ id: "post-drain-drainer" }))
+    await expect(Dexie.ignoreTransaction(() => drainer.table("appSettings").put({ id: "post-drain-drainer" })))
       .rejects.toBeInstanceOf(ReleaseDatabaseWriteLockedError);
+    expect(await Dexie.ignoreTransaction(() => drainer.table("appSettings").toArray())).toEqual([]);
 
     writer.close();
     drainer.close();

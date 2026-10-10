@@ -503,7 +503,7 @@
       },
       {
         "path": "package.json",
-        "lfUtf8Sha256": "e1baefcc532feb421c71202ea368bb0b77c916a1b0187e892591407a09ab9c29",
+        "lfUtf8Sha256": "2e4799d256c26a51b25e2e099a272cd4015df42bce5769d4758e99a1b9010725",
         "byteLength": 32720
       }
     ],
@@ -581,15 +581,15 @@
       "installPath": "node_modules/moment",
       "requestName": "moment",
       "packageName": "moment",
-      "version": "2.30.1",
-      "resolved": "https://registry.npmjs.org/moment/-/moment-2.30.1.tgz",
-      "integrity": "sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==",
+      "version": "2.31.0",
+      "resolved": "https://registry.npmjs.org/moment/-/moment-2.31.0.tgz",
+      "integrity": "sha512-0acOTfMiWOheYS4eoWb80yYMb/JLvVv9SHbs2PehaDzfUG0Bw855SKyk0IKTnPGa5+U2bmi3W68l1+sGLX/pvw==",
       "dependencyEdges": [],
       "installedTree": {
-        "sha256": "9d8faf47d8abe8dc755d1a9546155b228f637658ac7d57aefd5b9d87bde10616",
-        "fileCount": 539,
+        "sha256": "9d3437646ce35c75d1afd6655c04be4d7ed958b5eca8ad9abc93a21ccc44292c",
+        "fileCount": 545,
         "directoryCount": 16,
-        "byteLength": 4350323
+        "byteLength": 4497001
       }
     },
     {
@@ -650,5 +650,5 @@
       }
     }
   ],
-  "overallSha256": "dd4beaaa15da24c0a6882996f894d4e8a2c8ecd9cd8fb27547ebea832c888c22"
+  "overallSha256": "b59b9c83fb52e6965a10c6985a13599078bc3a69251a9d2188cda8f89bc50ff7"
 }

@@ -167,8 +167,8 @@ const SELECTION_BOUNDARY = OBJECT_FREEZE({
 // so its persisted raw identity is pinned out of band by this verifier.
 const EXPECTED_PERSISTED = OBJECT_FREEZE({
   rawBytes: 42740,
-  rawSha256: "df7e9ac217d480ea84acb02d0f3484d8684fbcc6426eef9d0dbc7d8d358f326a",
-  indexDigest: "63e71d0c36e2f216711ac6c0b8ae0051c7f3ccd98d5b4a55cfdce8560180520e"
+  rawSha256: "ae93fc41599aa01b865be20b4e8a03ac81c49452e03dce744336045cf8a6da64",
+  indexDigest: "99810764c3f9b9ed900207b8b5860ccf86752454359ce37613a3061e041a33ba"
 });
 
 const BAZI_EXPERT_REVIEW_PACKET = HISTORICAL_BAZI_EXPERT_REVIEW_PACKET;

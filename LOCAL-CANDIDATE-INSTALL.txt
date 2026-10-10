@@ -1,32 +1,67 @@
-哈基米本地研究候选版 4de42e9db980 / 安装包修订 2（独立入口 5189）
+哈基米本地研究候选版 ab0f35c0d9d1 / 安装包修订 1（待用户批准启用）
 
-应用源码：d3ff1bdcc64d0917dcc604f753ac896eb62a9c1e。
-此包保存已完成 Edge/Chrome 16 条启动检查、PWA 和连续用户流程验证的同一份产物及原始回执。
-它是本地工程候选。真实专家准入、来源校勘和整体 CI 尚未全部完成。
+应用源码：564f88e7f47844d10e26bbc79c34e1ce48edf77a。
+源码 tree：f77179fa2e50252b487b7b08035d2e766248f25f。
+保留 PR #13 标签修复，同时修复笔记和事件的来源引用编辑。
+来源按条编辑，每个框保存一条；内部逗号、分号、顿号与换行保留，
+首尾空白去除、空框忽略；每条最多 500 字符、最多 100 条，沿用现有资料规则。
+不拆改已存历史数组，不更改 Schema。
+默认身份：legacy-v13 / Schema 13 / migrationId null。
+evidenceId：hre1-8b9009e2be973f93113abb9fded99932。
+产物锁 SHA-256：78ab59d932cbfec75c63a2f94eaa91f7ae24e2a066eaaaa54a210e8e9773ecc9。
+137 文件集合摘要：45b1b94bedb1995f031cf025f25b349917dadabefc07916fca36b478c83c3459。
+打包器复用 PR #11 已具备、与 PR #12 相同的程序，只绑定新身份和目录。
+安装逐字节复制锁定产物，不构建、不下载运行时、不自动迁移或恢复资料。
+需要已安装 Node.js 24.16.0 和 Windows PowerShell 5.1。
 
-需要已安装 Node.js 24.16.0。安装和启动不会运行 npm、重新构建或自动下载运行时。
-先完整解压到新文件夹，在 PowerShell 中运行：
-  powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-local-candidate.ps1
-默认安装在当前用户 USERPROFILE\HakimiBaziWorkbenchCandidates\packages\4de42e9db980-package-v2，
-建立名称含 Candidate (5189) 的独立快捷方式。已有不同包或快捷方式会被保留并拒绝覆盖。
-不建立快捷方式：增加 -NoShortcut。
-自选全新安装根目录：增加 -InstallRoot "D:\HakimiCandidate"。
+已保存的 5189 快捷方式仍指向 8f67be033617-package-v1，尚不含本批修复。
+本轮未打开真实浏览器或确认其当时显示的运行版本。
+本包准备不等于启用，也不代表公开发布或专家准入。日用 5188 的 c15ef05bb165 不动。
+包内只有应用、工具、锁和合成资料测试结果；没有私人案例、备份或 profile。
+普通“请求下载”不等于写盘；本次验收另核对实际 ZIP 和完整预检。
+另存为自动化只替代系统选择器，实际 FileSystemFileHandle 写入、改名、取消另有结果。
+它不代表新包已通过用户操作的真实 Windows 弹窗，旧包人工作业结果不转签。
 
-启动：双击 Candidate (5189) 快捷方式，或运行：
-  powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\launch-local-candidate.ps1 -PackageRoot "已解压包的完整路径"
-入口固定为 http://127.0.0.1:5189/。端口被其他服务占用时停止，既不换端口也不终止该服务。
-日常 c15ef 版本继续使用 5188。本候选不会替换日常安装或自动清理、迁移浏览器数据。
-两个入口的数据空间独立。第一次打开候选时案例库为空是正常的。
-在候选中新建的案例留在 5189；需要保留时使用应用里的完整备份导出，并妥善保存 ZIP。
-安装副本不会内置任何用户案例、古籍原件、专家原件、浏览器档案或账户凭据。
+一、准备安装副本（不创建快捷方式，不启动服务）
+将 ZIP 完整解压到新目录，在其中运行：
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-local-candidate.ps1 -NoShortcut
+默认目标：%USERPROFILE%\HakimiBaziWorkbenchCandidates\packages\ab0f35c0d9d1-package-v1。
+隔离验收可追加 -InstallRoot "D:\HakimiCandidate-Isolated"，使用全新根目录。
+相同完整包可复用；已有不同内容拒绝覆盖。可单独核对：
+  node .\scripts\local-research-candidate.mjs verify --package-root "安装副本完整路径"
 
-当前验证范围：同一 Windows 主机上的两个真实浏览器；另一台干净 Windows 和本人真实研究周期尚待验收。
-原始日志和截图保存在维护者 Z 盘备份。包内原始回执只证明其明确列出的测试与产物，不能证明正式发布许可。
+二、仅在用户针对 ab0f35c0d9d1 / 修订 1 明确批准后启用
+1. 从实际使用 5189 的浏览器导出当前完整 ZIP，核对实际文件并在页面预检。
+   保留“预检通过，尚未写入”结果，不为备份验收恢复或覆盖真实资料。
+2. 保留 %USERPROFILE%\HakimiBaziWorkbenchCandidates\packages\8f67be033617-package-v1
+   整个目录、local-package-files.json 和原锁。这是直接回退对象；
+   更早的 4de42e9db980-package-v2 与未启用的 fbe0180702f2 原候选也保留。
+3. 将桌面“哈基米八字研究台 - Candidate (5189).lnk”复制到新日期备份目录，
+   记录 TargetPath、Arguments、WorkingDirectory 和文件 SHA-256。
+4. 从原 startup.json 与进程命令行双重核对 5189 的监听 PID、包目录。
+   只在身份确认及启用授权后停止该旧候选进程。未知监听不得停止或更换端口。
+5. 经批准保留并改名旧快捷方式，再安装新包创建原名入口；安装器不会覆盖旧入口。
+   从新安装副本启动：
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\launch-local-candidate.ps1 -PackageRoot "新安装副本完整路径"
+6. 核对启动记录、监听 PID 和包目录；同入口再启动应 started=false。
+   在实际浏览器核对 build=ab0f35c0d9d1、Schema 13、migrationId=null，确认原资料仍在。
+   若 Service Worker 仍显示旧版本，停止验收并核对更新状态，不清空或注销真实资料空间。
+7. 保存现场验收结果。以上启用操作没有在本批准备中自动执行。
 
-已有 5189 候选安装的本机：先用 -NoShortcut 安装到新目录。现有快捷方式和监听服务不会被替换。
-本包修复首次控制器确认前允许输入、接管刷新后输入丢失的问题。切换已有 5189 入口前需另行明确决定，并先保存当前研究资料。
-第一份 9057371baf85 候选及 c15ef 日常包继续保留原始身份。
+三、失败回退
+保留日志与现场，只停止已确认属于新包的监听 PID。用原 8f67 包和旧快捷方式回到同一 5189。
+先验证旧包：
+  node "旧包完整路径\scripts\local-research-candidate.mjs" verify --package-root "旧包完整路径"
+启动旧包：
+  powershell -NoProfile -ExecutionPolicy Bypass -File "旧包完整路径\scripts\launch-local-candidate.ps1" -PackageRoot "旧包完整路径"
+核对旧版本、当前资料；不匹配时保留现场并诊断，不继续写入或清理。
+应用回退仅处理应用壳、服务及快捷方式；不能自动导入旧备份覆盖启用后新增研究内容。
+资料恢复必须另行明确选择，且先保存当前资料。
 
-修订 2 保留原 137 个应用文件、产物锁及浏览器回执，应用没有重新构建。
-只更新安装工具：探测已占用端口时按锁定文件大小流式读取，超量立即取消。
-修订 1 的 ZIP、安装目录和原始验证记录继续保留，不能覆盖为修订 2。
+四、验收边界
+原始记录：本机 HakimiBaziWorkbenchCandidates\validation\20261009-source-integrity。
+同机隔离资料空间、原生启动器测试端口映射副本与生产 5189 现场启用分别记录。
+第二台 Windows、新包真实 Windows 保存弹窗和生产现场启用未执行。
+用户暂无真实资料更正，新修订保存保持未测、原盘保留；不要求重做既有真实使用。
+正式专家资格、独立意见、来源权利与公开发布门继续独立。
+本批依赖审计在规定工具链和新锁文件下为零告警；这不等于所有安全风险已排除。
