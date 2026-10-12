@@ -115,19 +115,51 @@ const CANDIDATE_RECEIPTS = Object.freeze([
   }
 ].map((entry) => Object.freeze(entry)));
 
-// Only the two explicit selections are accepted. Existing imports retain c15ef.
+// PR #16's previously tested artifact is a separate selection. The original
+// ab0 definition, receipts and runtime entry points remain available unchanged.
+export const LOCAL_RESEARCH_EVENT_INDEX_CANDIDATE = Object.freeze({
+  buildVersion: "f0430d400b64",
+  sourceCommit: "2482941f46acafc6fe0b331f536db06a45710fc8",
+  evidenceId: "hre1-e735fd9bc9080ab00280ac0feee7f7b4",
+  lockSha256: "ba590e52629a61fba574be0912bc886e00a848b8c45c4778ba8cd7b7d15b40c5",
+  artifactSetDigest: "d44120bfe3bb41cec77b7871deb6469d25b554778dffa2271f39095a61e33e45",
+  fileCount: 137,
+  artifactRoot: "candidate-artifact",
+  origin: "http://127.0.0.1:5189/",
+  nodeVersion: "24.16.0",
+  packageRevision: "1",
+  localEngineeringCandidate: true,
+  formalAdmissionAuthorized: false,
+  expertClaimsAuthorized: false,
+  publicReleaseAuthorized: false
+});
+const EVENT_INDEX_RECEIPTS = Object.freeze([
+  {
+    path: "tmp/delivery-receipts-f0430d400b64/evidence-receipt.json",
+    sha256: "4110ee321fdc9726003314260238f2ff2bd8df87cfd4e41670bcb0224eb6a82d"
+  },
+  {
+    path: "tmp/delivery-receipts-f0430d400b64/source-git-binding.json",
+    sha256: "0b3e433defea738a1057ce990073b2771891ac2a6efbdffb56a6de4adfa779a1"
+  }
+].map((entry) => Object.freeze(entry)));
+
+// Only explicit selections are accepted. Existing imports retain c15ef/ab0.
 export function createLocalPackageTools(release) {
-  if (release !== LOCAL_RESEARCH_RELEASE && release !== LOCAL_RESEARCH_CANDIDATE) {
+  if (release !== LOCAL_RESEARCH_RELEASE && release !== LOCAL_RESEARCH_CANDIDATE
+    && release !== LOCAL_RESEARCH_EVENT_INDEX_CANDIDATE) {
     throw new Error("Select a documented local artifact; arbitrary release definitions are not accepted.");
   }
-  const isCandidate = release === LOCAL_RESEARCH_CANDIDATE;
+  const isEventIndex = release === LOCAL_RESEARCH_EVENT_INDEX_CANDIDATE;
+  const isCandidate = release === LOCAL_RESEARCH_CANDIDATE || isEventIndex;
+  const artifactRelativeRoot = isEventIndex ? release.artifactRoot : "dist/web";
   const packageKind = isCandidate ? "local_research_candidate_package" : "fixed_local_research_package";
-  const proofFiles = isCandidate ? CANDIDATE_RECEIPTS : [];
+  const proofFiles = isEventIndex ? EVENT_INDEX_RECEIPTS : isCandidate ? CANDIDATE_RECEIPTS : [];
   const RUNTIME_FILES = isCandidate ? FIXED_RUNTIME_FILES.map((name) => ({
-    "LOCAL-RESEARCH-INSTALL.txt": "LOCAL-CANDIDATE-INSTALL.txt",
-    "scripts/local-research.mjs": "scripts/local-research-candidate.mjs",
-    "scripts/install-local-research.ps1": "scripts/install-local-candidate.ps1",
-    "scripts/launch-local-research.ps1": "scripts/launch-local-candidate.ps1"
+    "LOCAL-RESEARCH-INSTALL.txt": isEventIndex ? "LOCAL-EVENT-INDEX-CANDIDATE-INSTALL.txt" : "LOCAL-CANDIDATE-INSTALL.txt",
+    "scripts/local-research.mjs": isEventIndex ? "scripts/local-research-event-index-candidate.mjs" : "scripts/local-research-candidate.mjs",
+    "scripts/install-local-research.ps1": isEventIndex ? "scripts/install-local-event-index-candidate.ps1" : "scripts/install-local-candidate.ps1",
+    "scripts/launch-local-research.ps1": isEventIndex ? "scripts/launch-local-event-index-candidate.ps1" : "scripts/launch-local-candidate.ps1"
   })[name] ?? name) : FIXED_RUNTIME_FILES;
   async function verifyCandidateReceipts(root) {
     for (const entry of proofFiles) {
@@ -143,7 +175,7 @@ export function createLocalPackageTools(release) {
     const snapshot = await readStableRegularFileSnapshot(lockPath, { containmentRoot: absolute, label: "Pinned local artifact lock" });
     if (snapshot.sha256 !== release.lockSha256) throw new Error("Fixed local artifact lock identity mismatch.");
     const result = await verifyReleaseArtifactIdentityLock({
-      cwd: absolute, dist: path.join(absolute, "dist/web"), lockPath,
+      cwd: absolute, dist: path.join(absolute, artifactRelativeRoot), lockPath,
       evidenceId: release.evidenceId
     });
     if (result.lock.buildVersion !== release.buildVersion
@@ -161,7 +193,7 @@ export function createLocalPackageTools(release) {
     const verified = await verifyFixedLocalArtifact(source);
     await mkdir(output, { recursive: false });
     for (const entry of verified.lock.files) {
-      const rel = `dist/web/${entry.path}`;
+      const rel = `${artifactRelativeRoot}/${entry.path}`;
       const copied = await copyBytes(path.join(source, rel), path.join(output, rel), source);
       if (copied.sha256 !== entry.sha256 || copied.size !== entry.size) throw new Error("Artifact changed while packaging.");
     }
@@ -186,7 +218,7 @@ export function createLocalPackageTools(release) {
       || canonicalJson(manifest.release) !== canonicalJson(release)
       || !Array.isArray(manifest.files)) throw new Error("Local package manifest is invalid.");
     const verified = await verifyFixedLocalArtifact(absolute);
-    const expectedPaths = [...verified.lock.files.map((entry) => `dist/web/${entry.path}`), LOCK_PATH, ...RUNTIME_FILES, ...proofFiles.map((entry) => entry.path)].sort();
+    const expectedPaths = [...verified.lock.files.map((entry) => `${artifactRelativeRoot}/${entry.path}`), LOCK_PATH, ...RUNTIME_FILES, ...proofFiles.map((entry) => entry.path)].sort();
     const actualPaths = manifest.files.map((entry) => entry.path).sort();
     if (canonicalJson(actualPaths) !== canonicalJson(expectedPaths)) throw new Error("Local package required file set is incomplete or duplicated.");
     const actual = await collectArtifactEntries(absolute, [PACKAGE_MANIFEST], { containmentRoot: absolute });
@@ -255,7 +287,7 @@ export function createLocalPackageTools(release) {
     const verified = await verifyLocalPackage(packageRoot);
     const content = new Map();
     for (const entry of verified.artifact.lock.files) {
-      const snapshot = await readStableRegularFileSnapshot(path.join(verified.packageRoot, "dist/web", entry.path), {
+      const snapshot = await readStableRegularFileSnapshot(path.join(verified.packageRoot, artifactRelativeRoot, entry.path), {
         containmentRoot: verified.packageRoot, label: "Served local artifact"
       });
       if (snapshot.sha256 !== entry.sha256) throw new Error("Artifact changed before preview startup.");
