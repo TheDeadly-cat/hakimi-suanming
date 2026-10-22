@@ -178,6 +178,7 @@ import {
 } from "./ziwei-hko-restricted-source-pre-release-policy-lib.mjs";
 
 export { verifyZiweiHkoRestrictedSourcePreReleasePolicy };
+import { verifyZiweiHkoVite737CurrentImplementation } from "./ziwei-hko-vite737-current-implementation-lib.mjs";
 
 export const REQUIRED_MIGRATION_WORKFLOW_COMMANDS = Object.freeze([
   "node --test scripts/verify-release-governance.test.mjs",
@@ -7596,7 +7597,7 @@ verifyReleaseArtifactIdentityChain(releaseRunbook, "Release runbook");
 verifyFormalReleaseVerificationReceipt(releaseWorkflow, "Release workflow");
 verifyFormalReleaseVerificationReceipt(releaseRunbook, "Release runbook");
 const ziweiHkoRestrictedSourcePreReleaseGovernance =
-  verifyZiweiHkoRestrictedSourcePreReleasePolicy({
+  verifyZiweiHkoVite737CurrentImplementation({
     policy: ziweiHkoRestrictedSourcePreReleasePolicy,
     packageJson,
     quickWorkflow,
