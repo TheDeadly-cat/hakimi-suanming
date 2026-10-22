@@ -746,13 +746,12 @@ export async function waitForForegroundAppReady(page: Page): Promise<void> {
 export async function createDemoCase(page: Page, origin: string): Promise<string> {
   await page.goto(`${origin}/new?demo=1`, { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "新建排盘" })).toBeVisible();
-  for (let step = 0; step < 3; step += 1) {
-    await page.getByRole("button", { name: "下一步", exact: true }).click();
-  }
-  await expect(page.getByRole("heading", { name: "检查、生成并保存" })).toBeVisible();
-  await page.getByRole("button", { name: "生成命盘", exact: true }).click();
+  await page.getByRole("button", { name: "生成我的命盘", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "确认出生资料与命盘", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "四柱候选结果" })).toBeVisible();
-  await page.getByRole("button", { name: "保存并打开", exact: true }).click();
+  const save = page.getByRole("button", { name: "保存到本机并查看解读", exact: true });
+  await expect(save).toBeEnabled();
+  await save.click();
   await page.waitForURL(/\/cases\/[0-9a-f-]+\/revisions\/[0-9a-f-]+$/iu);
   await waitForAppReady(page);
   const caseId = new URL(page.url()).pathname.split("/")[2];
