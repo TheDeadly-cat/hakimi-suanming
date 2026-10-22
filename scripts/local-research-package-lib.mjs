@@ -525,8 +525,58 @@ const READING_021_RECEIPTS = Object.freeze([
 
 // Stable local 0.21.1 trial; seal only after the frozen source is built.
 // Existing 021 identity, installation and browser data origin remain unchanged.
-export const LOCAL_RESEARCH_READING_0211_CANDIDATE = null;
-const READING_0211_RECEIPTS = Object.freeze([]);
+export const LOCAL_RESEARCH_READING_0211_CANDIDATE = Object.freeze({
+  "buildVersion": "7c1ae0cea354",
+  "baseCommit": "08cf0fc44d618cf69682fc7c7f4dc5101594a501",
+  "sourceDirty": false,
+  "partialSourceDigest": "ffbfe8482a01b5f770ef7d6e33263e4ac46b30b9021d8dc9ad5f3f20e2f8e2d0",
+  "sourceIdentityScope": "Explicit application/source set excluding protected file; not a full source-tree identity. Normal compiler traversal and all Vite plugins retained.",
+  "evidenceId": "hre1-9330ad961d82355948b796bd26d3ded4",
+  "lockSha256": "8e7b5926e04036b3d8a4f953044312fd5f8bbcda5587126c5004e590d173abaa",
+  "artifactSetDigest": "587821ecc41bd07e7a099a3c29bde22b49594077233ddb0f66b5def00dc5bf60",
+  "fileCount": 142,
+  "artifactRoot": "candidate-artifact",
+  "origin": "http://127.0.0.1:5202/",
+  "nodeVersion": "24.16.0",
+  "packageRevision": "1",
+  "displayName": "哈基米八字试用版",
+  "displayVersion": "2026-10-23 · 稳定试用更新",
+  "reportEdition": "0.21.1",
+  "concretePeriodProseVersion": "0.3.2",
+  "synthesisVersion": "0.19.0",
+  "synthesisSourceVersion": "hakimi.local-reading-synthesis/0.19.0",
+  "applicationVersion": "0.2.0-p0",
+  "localEngineeringCandidate": true,
+  "formalAdmissionAuthorized": false,
+  "expertClaimsAuthorized": false,
+  "publicReleaseAuthorized": false
+});
+const READING_0211_RECEIPTS = Object.freeze([
+  {
+    "path": "tmp/delivery-receipts-7c1ae0cea354/application-source-binding.json",
+    "sha256": "fe44b20016ae6c7d604a2e45b0bc1ad439c27d064ff8c6ab95a74cd67ed07023"
+  },
+  {
+    "path": "tmp/delivery-receipts-7c1ae0cea354/build-receipt.json",
+    "sha256": "aa43296b5f6267614eb18508438d7f4b678ff7028f956a2ba1451e20024a4ece"
+  },
+  {
+    "path": "tmp/delivery-receipts-7c1ae0cea354/candidate-identity.json",
+    "sha256": "1c7030a88d80b5157af609fef51b0f34bf26c37e2cb1ddd619da25ca2b532048"
+  },
+  {
+    "path": "tmp/delivery-receipts-7c1ae0cea354/build.log",
+    "sha256": "280648f9cade4c014be2b4d125a7fe8a218f8df15ae465fa76759268ec94d905"
+  },
+  {
+    "path": "tmp/delivery-receipts-7c1ae0cea354/build-helper.mjs",
+    "sha256": "9718b62879f6a93ee087b2077b6e36e7942edbbe7ca3a1d906feec70ed0f1754"
+  },
+  {
+    "path": "tmp/delivery-receipts-7c1ae0cea354/vite.config.mjs",
+    "sha256": "0f05cd15cbd5736d6b6e6882614e8b435fcc670502c1ac4a02c14e5ce3496da7"
+  }
+].map((entry) => Object.freeze(entry)));
 
 // Only explicit selections are accepted. Existing imports retain c15ef/ab0.
 export function createLocalPackageTools(release) {

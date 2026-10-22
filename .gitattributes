@@ -317,3 +317,4 @@
 
 # Preserve exact frozen 0.21 prose bytes; import relocation is the sole transformation.
 /apps/web/src/lib/legacy-prose-v021/** -text
+/scripts/fixtures/ziwei-iztro-vite-7.3.7-build-notice-observation.json text eol=lf
