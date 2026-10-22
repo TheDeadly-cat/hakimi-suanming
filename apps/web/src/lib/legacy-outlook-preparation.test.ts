@@ -64,7 +64,10 @@ it("pairs both real prose epochs with the same current target and preserves old 
 
 it("cannot use a completed proof for edited sources, missing actual monthly input or altered contexts", async () => {
   const altered = structuredClone(source); altered.annual!.years[0]!.judgmentSegments[1]!.startInstant = "2029-06-01T00:00:00Z";
-  expect(() => buildAnnualReadingChoicePairs(altered)).toThrow("尚未核对");
+  // Current choices reject the corrupted interval before historical pairing;
+  // the independently queried old proof must also remain unavailable.
+  expect(() => buildAnnualReadingChoicePairs(altered)).toThrow("时间脉络分段判断与节点或区间不匹配");
+  expect(() => preparedLegacyOutlook(altered)).toThrow("尚未核对");
   await expect(prepareLegacyAnnualReading(altered)).rejects.toThrow("完整计算输出");
   const missing = { ...source, monthly: undefined, monthlyDomains: undefined };
   await prepareLegacyAnnualReading(missing);

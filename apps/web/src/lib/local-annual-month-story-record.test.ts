@@ -8,7 +8,12 @@ import { buildLocalReadingSnapshot } from "./local-reading-record";
 import { buildAnnualYearChoicePairs, prepareLegacyAnnualReading } from "./legacy-annual-reading-profile";
 
 let data: Awaited<ReturnType<typeof annualMonthStoryFixture>>;
-beforeAll(async () => { data = await annualMonthStoryFixture("unspecified"); }, 60_000);
+beforeAll(async () => {
+  data = await annualMonthStoryFixture("unspecified");
+  // Prepare the actual historical backend with the shared fixture, not inside
+  // the adoption/source-lookup transaction. No replay output is mocked.
+  await prepareLegacyAnnualReading({ ...data.source, annual: data.annual, annualDomains: data.annualDomains });
+}, 60_000);
 const first = () => annualMonthStoryEntries(data.story)[0]!;
 function note(body: string, minute: number): ResearchNoteRecord {
   const instant = new Date(Date.UTC(2026, 9, 16, 1, minute)).toISOString();
@@ -32,8 +37,9 @@ async function adopted(choice = choiceFor()) {
 describe("year-month story records and personal provenance", () => {
   it("verifies an own legacy month adoption before the independent UI source lookup", async () => {
     const currentChoice = choiceFor(), yearSource = { ...data.source, domains: data.source.annualDomains };
-    await prepareLegacyAnnualReading({ ...data.source, annual: data.annual, annualDomains: data.annualDomains });
-    const pair = buildAnnualYearChoicePairs(yearSource, { subjectIds: [currentChoice.id] }).pairs[0]!;
+    const pair = buildAnnualYearChoicePairs(yearSource, {
+      epochs: ["event-0.5"], families: ["annual-month"], subjectIds: [currentChoice.id]
+    }).pairs[0]!;
     expect(pair).toBeDefined();
     const old = pair.legacyChoice, root = note(buildStructuredReadingFeedback(data.source.assessment, {
       subjectId: old.id, subjectLabel: old.label, originalConclusion: old.originalConclusion, sourceVersions: old.sourceVersions,

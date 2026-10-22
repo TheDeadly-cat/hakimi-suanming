@@ -169,7 +169,13 @@ describe("annual event first reading", () => {
     const mainline = segment.paragraphs.find((paragraph) => paragraph.kind === "mainline")!;
     const copies = screen.getAllByText(mainline.text, { normalizer: (text) => text });
     expect(copies.filter(node => !node.closest("details:not([open])"))).toHaveLength(1);
-    expect(copies.some(node => node.closest(".annual-event-reading-members"))).toBe(true);
+    // The mainline no longer has to be identical to a member summary. Each
+    // distinct original member must still survive in its own folded record.
+    const originals = view.container.querySelector(".annual-event-reading-members")!;
+    expect(originals).not.toBeNull();
+    for (const item of settlement.branches[0]!.segments[0]!.items.filter(item => item.domain !== "relationship")) {
+      expect(within(originals as HTMLElement).getByText(item.summary, { normalizer: text => text })).toBeTruthy();
+    }
     expect(view.container.querySelector(".annual-event-reading-summary")).toBeNull();
     expect(view.container.querySelector("[data-composition-id]")).not.toBeNull();
   });

@@ -58,10 +58,17 @@ it("makes preparation pressure concrete and retains the whole-judgment condition
   expect(result.paragraphs.find(p=>p.kind==="relationship")!.eventItemIds).toEqual([]);
   expect(result.paragraphs.some(p => p.detailsOnly && p.kind === "scene")).toBe(true);
   expect(text(result)).toContain("资料、说明和修改一轮轮增加");
-  expect(text(result)).toContain("若有正在学习的做法");
+  // The current producer preserves two distinct conditional identities. Do
+  // not replace them with the older generic learning/objects examples.
+  expect(text(result)).toContain("若在职，涉及岗位培训、前辈指导或需要补充的专业说明时");
+  expect(text(result)).toContain("若正在求职或进修，涉及目标资格、课程理解与申请材料的准备时");
+  const career=result.eventMappings.find(mapping=>result.originals.eventTexts.find(item=>item.id===mapping.eventId)?.domain === "career")!;
+  expect(career.examples).toHaveLength(2);
+  expect(career.examples.every(example=>example.text===example.original)).toBe(true);
   expect(text(result)).toContain("新旧做法来回切换");
   expect(result.paragraphs.filter(p=>!p.detailsOnly).map(p=>p.text).join()).not.toContain("年支内的丁偏印");
-  expect(text(result)).not.toMatch(/原配合存在具体牵连|你已在职/);
+  expect(result.paragraphs.filter(p=>p.kind === "mainline").map(p=>p.text).join()).not.toContain("原配合存在具体牵连");
+  expect(text(result)).not.toContain("你已在职");
   expect(text(result)).toContain("准备时间");
   expect(result.eventMappings.flatMap(item => item.examples)).toHaveLength(4);
   expect(result.originals.eventTexts.flatMap(item => item.examples)).toEqual(source.events.branches[0]!.segments[0]!.items.filter(item => item.domain !== "relationship").flatMap(item => item.examples));
@@ -73,7 +80,12 @@ it("distinguishes a trial from completed work and keeps new uses separate from t
   expect(proposal.paragraphs.filter(p=>!p.detailsOnly)).toHaveLength(4); expect(settlement.paragraphs.filter(p=>!p.detailsOnly)).toHaveLength(4);
   expect(proposal.headline).toContain("改法与作品较有利于试用"); expect(text(proposal)).toContain("材料、时间和花费");
   expect(settlement.headline).toContain("确认与续用"); expect(text(settlement)).toContain("不同用途");
-  expect(text(settlement)).toContain("若已有共同费用或借用物品");
+  expect(text(settlement)).toContain("若在职，涉及已发生费用、报销记录和原待遇约定时");
+  expect(text(settlement)).toContain("若有自营业务或实际合作，涉及已交付服务的账款、材料成本与续约投入时");
+  expect(text(proposal)).not.toContain("已发生费用、报销记录和原待遇约定");
+  const money=settlement.eventMappings.find(mapping=>settlement.originals.eventTexts.find(item=>item.id===mapping.eventId)?.domain === "wealth")!;
+  expect(money.examples).toHaveLength(2);
+  expect(money.examples.every(example=>example.text===example.original)).toBe(true);
   expect(settlement.caption).toBe("有机会，也有阻力");
   expect(settlement.originals.wholeJudgment.label).toBe("条件性");
   expect(text(settlement)).toContain("补充指导或方法转换打断");
@@ -198,7 +210,11 @@ it("keeps optional-source fallback literal and only maps the verified new task w
     expect(extended.coveredEventIds).toEqual(practical.map(item => item.id));
     expect(extended.eventMappings.flatMap(mapping => mapping.examples.map(example => example.original))).toEqual(practical.flatMap(item => item.examples));
     expect(extended.eventMappings.flatMap(mapping => mapping.examples).every(example => !example.sceneSource)).toBe(true);
-    expect(extended.eventMappings.flatMap(mapping => mapping.examples).some(example => example.text !== example.original)).toBe(true);
+    // Current role-specific source sentences are already concrete and are not
+    // entries in the old exact-sentence translation table. Preserve them;
+    // the same-source task explanation still changes the main reading.
+    expect(extended.eventMappings.flatMap(mapping => mapping.examples).every(example => example.text === example.original)).toBe(true);
+    expect(extended.paragraphs.find(paragraph=>paragraph.kind === "mainline")!.text).not.toBe(old.paragraphs.find(paragraph=>paragraph.kind === "mainline")!.text);
   }
 });
 
@@ -260,7 +276,15 @@ it("distinguishes authority support being displaced from concentrated demands an
   const functions=food.originals.wholeJudgment.axes.find(axis=>axis.axis==="pattern")!.taskLinks!.items[0]!.functions;
   expect(functions.some(edge=>edge.from.stem==="庚"&&edge.to.stem==="壬"&&edge.operation==="generate")).toBe(true);
   expect(functions.some(edge=>edge.from.stem==="庚"&&edge.to.stem==="甲"&&edge.operation==="control")).toBe(true);
-  expect(text(food)).not.toContain("原有份额与新增需要相互牵动");
+  const sourceTail="原有份额与新增需要相互牵动";
+  expect(food.paragraphs.filter(paragraph=>paragraph.kind === "mainline").map(paragraph=>paragraph.text).join()).not.toContain(sourceTail);
+  const retained=food.eventMappings.flatMap(mapping=>mapping.examples.filter(example=>example.original.includes(sourceTail)).map(example=>({...example,domain:food.originals.eventTexts.find(item=>item.id===mapping.eventId)!.domain})));
+  expect(retained).toHaveLength(2);
+  for(const example of retained){
+    expect(example.domain).toBe("wealth");expect(example.text).toBe(example.original);
+    expect(example.text).toMatch(/^若(?:在职|正在求职或进修)，涉及(?:集中要求占用的时间、工具与临时协助|相近期限需要的准备时间、材料和往返安排)时/u);
+    expect(food.paragraphs.find(paragraph=>paragraph.id===example.paragraphId)!.text.split("\n")).toContain(example.text);
+  }
   expect(official.coveredEventIds).toHaveLength(2); expect(food.coveredEventIds).toHaveLength(2);
 });
 

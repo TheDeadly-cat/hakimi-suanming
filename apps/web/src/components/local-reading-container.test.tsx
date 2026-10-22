@@ -173,9 +173,12 @@ async function waitForPersonalReading() {
   // those operations rather than imposing waitFor's 1-second DOM polling budget
   // on ten years of calculations. No preparation or verification is mocked out.
   do {
-    await waitFor(() => expect(pendingKeyMonths.size > 0
-      || document.querySelector(".local-reading-document")?.getAttribute("aria-busy") === "false").toBe(true));
     await act(async () => {
+      // Records, contextual verification and personal replay can still be
+      // running before the first month batch exists. Yield to those real
+      // operations instead of assuming they finish within a 1-second poll.
+      // The enclosing integration test retains its finite completion budget.
+      if (!pendingKeyMonths.size) await new Promise<void>(resolve => setTimeout(resolve, 0));
       // Rejections are published by the real container and asserted by the
       // failure-path tests; the waiting helper must not throw them itself.
       while (pendingKeyMonths.size) await Promise.allSettled([...pendingKeyMonths]);
