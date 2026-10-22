@@ -17,6 +17,7 @@ on:
       - "apps/web/src/recovery-main.tsx"
       - "apps/web/src/main.tsx"
       - "apps/web/src/lib/app-boot-*"
+      - "apps/web/src/lib/app-failure-phase*"
       - "apps/web/src/lib/app-version.ts"
       - "apps/web/src/lib/current-release.ts"
       - "apps/web/src/lib/full-backup-worker-client.ts"

@@ -121,3 +121,36 @@ it("separates new annual opportunities from monthly settlement and excludes spec
   expect(concreteFinancialYearMonthContrast({annual,judgment:monthly,age,work:"retired"})).toBe("");
   expect(concreteFinancialYearMonthContrast({annual,judgment:judgment([action("正财","assists")],"official-resource","assists"),age})).toBe("");
 });
+
+it("preserves all five actual effects for special financial tasks instead of turning undecided actors into support or pressure",()=>{
+  for(const task of ["resource_first","wealth_first"] as const)for(const effect of ["assists","obstructs","mixed","neutral","unresolved"] as const){
+    const source=judgment([action("偏财",effect),action("正财","neutral","main_hidden")],"hurting-wealth",effect),before=JSON.stringify(source);
+    for(const domain of ["career","wealth"] as const)for(const horizon of ["year","month"] as const){
+      const result=buildConcretePeriodProse({judgment:source,domain,age,task:{preferredPathId:"hurting-wealth",task} as NatalWealthResourceTask,lifeSignals:{events:[],horizon}});
+      const expected=effect === "assists"?"opportunity":effect === "obstructs"?"caution":"topic";
+      expect(result.sentences).toHaveLength(1);expect(result.sentences![0]!.kind).toBe(expected);
+      expect(result.facts[0]).toMatchObject({kind:expected,actor:"偏财",actionIndex:0,visibility:"visible"});
+      expect(result.sentences![0]!.sources[0]!.detail).toContain(`visible/${effect}`);
+      if(effect === "unresolved")expect(result.text).toContain("尚未判清");
+      if(effect === "neutral")expect(result.text).toContain("本身未");
+      if(effect === "mixed")expect(result.text).toMatch(/配合与限制|配合与牵制/u);
+      if(["neutral","unresolved"].includes(effect))expect(result.text+result.headline).not.toMatch(/有冲突|更容易受制|有改善条件|有助于/u);
+    }
+    expect(JSON.stringify(source)).toBe(before);
+  }
+});
+
+it("does not infer a helpful financial actor from the special path itself, while preserving a real hidden actor's scope",()=>{
+  for(const path of ["resource-wealth","official-resource","killings-resource","food-killings"]){
+    const source=judgment([action("比肩","neutral"),action("食神","assists","main_hidden")],path,"mixed");
+    const result=buildConcretePeriodProse({judgment:source,domain:"wealth",age,lifeSignals:{events:[],horizon:"month"}});
+    expect(result.text).toBe("本月未形成独立增收或额外支出的判断。");
+    expect(result.facts[0]).toMatchObject({kind:"topic",actionIndex:null,actor:""});
+    expect(result.sentences![0]!.sources[0]!.kind).toBe("scope");
+  }
+  const source=judgment([action("比肩","neutral"),action("正财","assists","main_hidden")],"food-killings","mixed");
+  const result=buildConcretePeriodProse({judgment:source,domain:"wealth",age,lifeSignals:{events:[],horizon:"month"}});
+  expect(result.text).toContain("支内辅助条件");expect(result.text).toContain("不直接等于新增收入");
+  expect(result.facts[0]).toMatchObject({kind:"opportunity",actionIndex:1,actor:"正财",visibility:"main_hidden"});
+  expect(result.sentences![0]!.sources[0]!.detail).toContain("main_hidden/assists");
+});

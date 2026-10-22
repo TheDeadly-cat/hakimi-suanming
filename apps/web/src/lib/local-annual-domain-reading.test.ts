@@ -44,7 +44,7 @@ describe("annual domain reading from actual local branch and actor facts", () =>
     expect(x.examples).not.toEqual(y.examples);
     expect(y.evidence.join()).toMatch(/支本气己偏印.*增加牵制/);
     expect(x.evidence.join()).toContain("支本气癸食神");
-    expect(y.obstacles.join()).toContain("专项准备");
+    expect(y.obstacles.join()).toContain("准备环节或额外要求挤入");
   });
 
   it("B2028 attributes support to hidden Geng, not the exposed Wu, and keeps B2029's actual handover", () => {

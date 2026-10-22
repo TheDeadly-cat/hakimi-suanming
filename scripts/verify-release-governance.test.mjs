@@ -3434,8 +3434,8 @@ test("accepts the independent Edge/Chrome SW two-generation fixture contract", (
       artifactIdentityType: "sw_two_generation_local_fixture_artifact_set",
       artifactGenerationNames: ["stable-a", "healthy-b", "broken-b"],
       sharedArtifactSetRunnerOwned: true,
-      criticalSourceFilesBound: 21,
-      productSourceFilesBound: 9,
+      criticalSourceFilesBound: 22,
+      productSourceFilesBound: 10,
       criticalSourceSetCanonicalSha256:
         REQUIRED_SW_TWO_GENERATION_CRITICAL_SOURCE_SET_SHA256,
       formalReleaseReceipt: false,

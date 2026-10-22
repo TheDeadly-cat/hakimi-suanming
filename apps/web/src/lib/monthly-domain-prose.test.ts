@@ -159,7 +159,12 @@ describe("month-specific life prose from exact segmented actors", () => {
       const result = buildMonthlyDomainProse(source);
       for(const domain of result.slice(0,2)) {
         if(effect !== "assists") expect(domain.opportunities).toEqual([]);
-        if(effect === "neutral") { expect(domain.obstacles.filter(line=>!line.startsWith("原扶抑"))).toEqual([]); expect(domain.summary).not.toMatch(/较能发挥|容易遇到的牵制/u); }
+        if(effect === "neutral") {
+          expect(pattern.taskLinks!.items.some(link => link.relations.some(relation => relation.contributesPressure
+            && relation.from.origin.kind === "background"))).toBe(true);
+          expect(domain.obstacles).toContain("原来需要保护的处理方法或承接支持仍受到背景牵制，不能只看新增事项。");
+          expect(domain.summary).not.toMatch(/较能发挥|容易遇到的牵制/u);
+        }
         expect(domain.evidence.join()).toContain(`月干 neutral、支本气 ${effect}`);
         expect([domain.summary,...domain.examples.slice(0, 2)].join()).not.toMatch(/工资|客户|岗位|验收|培训|薪酬/u);
         expect(domain.examples.slice(2).every((example) => example.includes("：若"))).toBe(true);

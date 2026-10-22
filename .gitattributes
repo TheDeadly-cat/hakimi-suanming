@@ -186,6 +186,8 @@
 /apps/web/src/lib/release-controller-takeover-write-fence.ts text eol=lf
 /apps/web/src/lib/release-database-coordinator.ts text eol=lf
 /apps/web/src/lib/service-worker-takeover-retry.ts text eol=lf
+/apps/web/src/lib/app-failure-phase.ts text eol=lf
+/scripts/fixtures/sw-critical-source-c0f9fdc.json text eol=lf
 /apps/web/src/main.tsx text eol=lf
 /apps/web/src/pages/case-library-page.tsx text eol=lf
 /apps/web/sw-two-generation-artifact-identity.ts text eol=lf
@@ -312,3 +314,6 @@
 /scripts/fixtures/four-system-v213-additional-inputs.zip -text
 /scripts/fixtures/four-system-v214-additional-inputs.zip -text
 /scripts/fixtures/four-system-observation-registry-v2-original-inputs.zip -text
+
+# Preserve exact frozen 0.21 prose bytes; import relocation is the sole transformation.
+/apps/web/src/lib/legacy-prose-v021/** -text

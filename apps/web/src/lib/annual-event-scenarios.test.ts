@@ -120,19 +120,33 @@ describe("local annual event scenarios", () => {
     expect(JSON.stringify(scenarios)).not.toContain("本命时柱");
   });
 
-  it("the same incoming wealth god produces different concrete scenarios for a supported peer-flow and an overburdened hurting-wealth chart", async () => {
+  it("keeps mixed background pressure distinct from obstruction and retains a real supportive scenario contrast", async () => {
     const weak = await revisionFor("1995-11-16"), strong = revisions[0]!;
     const [a, b] = await Promise.all([strong, weak].map((revision) => buildLocalAnnualOutlook(revision, buildBaziPreliminaryAssessment(revision), 2025)));
     const first = a!.years[0]!, second = b!.years[0]!;
     expect(first.yearGanZhi).toBe("乙巳"); expect(second.yearGanZhi).toBe("乙巳");
-    expect(first.judgment!.axes.find((axis) => axis.axis === "pattern")!.effect).toBe("assists");
+    const supported = first.judgment!.axes.find((axis) => axis.axis === "pattern")!;
+    expect(supported.effect).toBe("mixed");
+    expect(supported.stemActions!.items.find(actor => actor.visibility === "visible")!.effect).toBe("assists");
+    expect(supported.blockers.length).toBeGreaterThan(0);
     expect(second.judgment!.axes.find((axis) => axis.axis === "pattern")!.effect).toBe("obstructs");
     const good = buildAnnualEventScenarios(strong, buildBaziPreliminaryAssessment(strong), first);
     const pressure = buildAnnualEventScenarios(weak, buildBaziPreliminaryAssessment(weak), second);
     expect(good[0]!.summary).toContain("成果"); expect(pressure[0]!.summary).toContain("新需求与已有任务同时占用精力");
     for (const domain of ["career", "wealth"] as const) {
-      expect(good.find((item) => item.domain === domain)!.examples).not.toEqual(pressure.find((item) => item.domain === domain)!.examples);
-      expect(good.find((item) => item.domain === domain)!.title).not.toBe(pressure.find((item) => item.domain === domain)!.title);
+      if (domain === "career") expect(good.find((item) => item.domain === domain)!.title).not.toBe(pressure.find((item) => item.domain === domain)!.title);
+      expect(good.find((item) => item.domain === domain)!.summary).not.toBe(pressure.find((item) => item.domain === domain)!.summary);
+      expect(good.find((item) => item.domain === domain)!.evidence).not.toEqual(pressure.find((item) => item.domain === domain)!.evidence);
+    }
+    // A2025 no longer supplies a whole-pattern assists fixture. Keep its real
+    // mixed result above; use the existing official/resource 2027 fixture to
+    // retain the concrete supportive-vs-pressure scenario assertion.
+    const supportRevision = revisions[1]!, supportYear = outlooks[1]!.years.find(year => year.year === 2027)!;
+    expect(supportYear.judgment!.axes.find(axis => axis.axis === "pattern")!.effect).toBe("assists");
+    const ownScenarios = buildAnnualEventScenarios(supportRevision, buildBaziPreliminaryAssessment(supportRevision), supportYear);
+    for (const domain of ["career", "wealth"] as const) {
+      expect(ownScenarios.find(item => item.domain === domain)!.title).not.toBe(pressure.find(item => item.domain === domain)!.title);
+      expect(ownScenarios.find(item => item.domain === domain)!.examples).not.toEqual(pressure.find(item => item.domain === domain)!.examples);
     }
     expect(good[0]!.evidence.join()).toContain("peer-output-wealth");
     expect(pressure[0]!.evidence.join()).toContain("hurting-wealth");

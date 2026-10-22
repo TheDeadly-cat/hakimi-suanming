@@ -205,6 +205,26 @@ it("keeps unknown-direction branches separate and retains child learning scenes 
   expect(JSON.stringify({ a, child })).toBe(before);
 });
 
+it("keeps child month headings and the shared scope in the same age context as the actual reading",()=>{
+  const result=read(child);
+  expect(result.scopeText).toContain("儿童时段");expect(result.scopeText).not.toMatch(/有伴侣看|工作费力|全年有机会/u);
+  for(const branch of result.branches)for(const year of branch.years)for(const segment of year.segments){
+    expect(segment.domains.map(domain=>domain.title)).toEqual(["学习与活动","时间与用品","家人与同伴"]);
+    for(const window of segment.monthWindows){
+      expect(window.label+window.text).not.toMatch(/事业(?:机会|阻力|：)|财运(?:机会|阻力|：)/u);
+      for(const member of window.members)expect(member.topics.map(topic=>topic.title)).toEqual(["学习与活动","时间与用品","家人与同伴"]);
+    }
+  }
+});
+
+it("does not claim an annual opportunity from mixed protect-resource conditions without actual support",()=>{
+  const result=read(protect),segment=result.branches[0]!.years[0]!.segments[0]!;
+  expect(protect.annual.years[0]!.judgmentSegments[0]!.judgment.axes.find(axis=>axis.axis === "pattern")!.effect).toBe("mixed");
+  expect(segment.judgmentText).toContain("综合取舍仍有条件");
+  expect(segment.judgmentText).not.toContain("有机会，也有阻力");
+  expect(segment.judgmentText).not.toContain("有局部推进线索");
+});
+
 it("rejects foreign charts, years, branches and changed month inputs while stating genuine coverage gaps", () => {
   expect(() => read({ ...b, report: a.report })).toThrow("命盘");
   const wrongYear = structuredClone(b); wrongYear.extras.keyMonthYears[0]!.year = 2038;
@@ -266,6 +286,11 @@ it("preserves verified non-income context in annual and selected monthly financi
     const prepared=await prepareKeyMonthYear({...source,annualEvents,annualLifeStories},2033,[]);
     const extras={...b.extras,contextual,annualEvents,annualLifeStories,keyMonthYears:[prepared]};
     const report=buildBriefReadingReport(b.assessment,b.annual,extras)!,result=buildPlainTenYearReading({...b,report,extras});
+    const contextualYear=result.branches[0]!.years.find(item=>item.year===2033)!;
+    for(const segment of contextualYear.segments){
+      expect(segment.domains.filter(domain=>domain.domain!=="relationship").map(domain=>domain.title).join()).not.toMatch(/事业|财运/u);
+      for(const window of segment.monthWindows)expect(window.text+window.label).not.toMatch(/事业(?:机会|阻力|：)|财运(?:机会|阻力|：)/u);
+    }
     const selected=result.branches[0]!.years.find(year=>year.year===2033)!.segments.flatMap(segment=>segment.events).filter(event=>["money_inflow","money_loss"].includes(event.category));
     expect(selected.length).toBeGreaterThan(0);expect(selected.flatMap(event=>event.months).length).toBeGreaterThan(0);
     for(const event of selected){

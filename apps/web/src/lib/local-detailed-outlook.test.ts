@@ -203,7 +203,7 @@ describe("detailed life and monthly outlook from actual interval facts", () => {
 
   it("publishes the comprehensive judgment as the direction and headline without losing the own-month distinction", () => {
     const visibleDirection = (label: string) => label === "条件性" || label === "暂不可判" ? null : label;
-    expect(life.version).toBe("hakimi.local-detailed-outlook/0.5.0");
+    expect(life.version).toBe("hakimi.local-detailed-outlook/0.6.0");
     expect(monthly.version).toBe(life.version);
     expect(life.summary).toContain("当前行辛巳大运");
     expect(life.summary).toContain("2028-12-21 04:58:00");
@@ -274,15 +274,22 @@ describe("detailed life and monthly outlook from actual interval facts", () => {
     await expect(buildLocalLifeOutlook(male, assessment, 2026, { atInstant: "2025-12-01T00:00:00Z" })).rejects.toThrow(/所选/);
   });
 
-  it("the same actual month stem has different domain text when its structural effect differs", () => {
+  it("keeps same-stem own-month differences and the separate persistent background pressure", () => {
     const spring = monthly.months.find((month) => month.label === "惊蛰月")!, winter = monthly.months.find((month) => month.label === "小寒月")!;
     expect(spring.stemTenGod).toBe(winter.stemTenGod); expect(spring.ganZhi).toBe("乙卯"); expect(winter.ganZhi).toBe("乙丑");
-    expect(spring.judgment!.axes.find((axis) => axis.axis === "pattern")!.effect).toBe("assists");
+    const springPattern = spring.judgment!.axes.find((axis) => axis.axis === "pattern")!;
+    expect(springPattern.effect).toBe("mixed");
+    expect(springPattern.stemActions!.items.find(actor => actor.visibility === "visible")!.effect).toBe("assists");
+    expect(springPattern.blockers.length).toBeGreaterThan(0);
     expect(winter.judgment!.axes.find((axis) => axis.axis === "pattern")!.effect).toBe("mixed");
-    expect(spring.themes[0]!.text).toContain("一轮试用");
+    expect(spring.ownJudgment!.axes.find(axis => axis.axis === "pattern")!.effect).toBe("obstructs");
+    expect(spring.ownJudgment!.backgroundRefs).toEqual([]);
+    expect(winter.ownJudgment!.backgroundRefs).toEqual([]);
+    expect(spring.ownJudgment!.axes.find(axis => axis.axis === "pattern")).not.toEqual(winter.ownJudgment!.axes.find(axis => axis.axis === "pattern"));
+    expect(spring.themes[0]!.text).toContain("实际承接能力");
     expect(winter.themes[0]!.text).toContain("实际承接能力");
-    expect(spring.themes[0]!.text).not.toBe(winter.themes[0]!.text);
-    expect(spring.themes[1]!.text).not.toBe(winter.themes[1]!.text);
+    expect(spring.themes[0]!.evidence).not.toEqual(winter.themes[0]!.evidence);
+    expect(spring.themes[1]!.evidence).not.toEqual(winter.themes[1]!.evidence);
     expect(spring.themes[0]!.evidence.join()).toContain("peer-output-wealth");
   });
 

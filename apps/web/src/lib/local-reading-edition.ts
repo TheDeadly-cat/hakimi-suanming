@@ -21,7 +21,7 @@ import { composeAnnualEvents, annualEventCompositionSubjectId } from "./local-an
 import { buildMonthReadingRhythm, MONTH_READING_RHYTHM_VERSION } from "./local-month-reading-rhythm";
 import { buildBriefReadingReport, type BriefReadingReport } from "./brief-reading-report";
 
-export const LOCAL_READING_EDITION_VERSION = "hakimi.local-reading-edition/0.21.0" as const;
+export const LOCAL_READING_EDITION_VERSION = "hakimi.local-reading-edition/0.21.1" as const;
 export interface LocalReadingReport { reading: string; archive: string; version: typeof LOCAL_READING_EDITION_VERSION }
 const unique = (items: readonly string[]) => [...new Set(items.filter((item) => item.trim()))];
 /** Conditions may share a note only when their complete sets of referring

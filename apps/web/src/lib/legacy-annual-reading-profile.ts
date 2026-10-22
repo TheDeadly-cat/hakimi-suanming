@@ -1,3 +1,14 @@
+import * as prose021Events from "./legacy-prose-v021/local-annual-event-reading";
+import * as prose021Story from "./legacy-prose-v021/annual-life-story";
+import * as prose021Month from "./legacy-prose-v021/local-annual-month-story";
+import * as prose021Stage from "./legacy-prose-v021/local-life-stage-years";
+import * as prose021Domains from "./legacy-prose-v021/local-monthly-domain-reading";
+import { ANNUAL_EVENT_READING_PROSE_VERSION as PROSE_021_ANNUAL_VERSION } from "./legacy-prose-v021/annual-event-reading-prose";
+import { MONTHLY_DOMAIN_PROSE_VERSION as PROSE_021_MONTH_VERSION } from "./legacy-prose-v021/monthly-domain-prose";
+import { ANNUAL_EVENT_SIGNALS_VERSION } from "./annual-event-signals";
+import { OUTLOOK_TASK_LINK_PROSE_VERSION } from "./outlook-task-link-prose";
+import { LOCAL_OUTLOOK_POLICY_VERSION } from "./local-outlook-judgment";
+import { buildMonthlyDomainReadings } from "./local-monthly-domain-reading";
 import { NATAL_PATTERN_PATH_VERSION } from "../../../../packages/bazi-interpretation/src/natal-pattern-path";
 import { STRUCTURAL_STRENGTH_ASSESSMENT_VERSION } from "../../../../packages/bazi-interpretation/src/structural-strength-assessment";
 import { OUTLOOK_CLASSICAL_SOURCES_VERSION } from "../../../../packages/bazi-interpretation/src/outlook-classical-sources";
@@ -61,7 +72,7 @@ import * as oldStage from "./legacy-annual-v05/local-life-stage-years";
 import * as oldStageRecord from "./legacy-annual-v05/local-life-stage-years-record";
 
 /** This profile verifies historical originals; it is never a current prose producer. */
-export const LEGACY_ANNUAL_READING_PROFILE_VERSION = "hakimi.legacy-annual-reading-profile/outlook-0.9-events-0.5-0.6/2" as const;
+export const LEGACY_ANNUAL_READING_PROFILE_VERSION = "hakimi.legacy-annual-reading-profile/outlook-0.9-events-0.5-0.6-prose-0.21/3" as const;
 export type LegacyAnnualChoiceFamily = "event" | "story" | "composition" | "domain" | "contextual" | "annual" | "annual-month" | "stage-year"
   | "annual-overview" | "trajectory" | "timeline-stage" | "scenario" | "life-overview" | "decade" | "life-stage" | "life-transition" | "month" | "monthly-domain";
 export interface LegacyAnnualReadingInput {
@@ -77,7 +88,7 @@ export interface LegacyAnnualYearReadingInput {
   domains: LocalAnnualDomainReading; contextual?: LocalContextualReadingBundle | null;
   monthly?: LocalMonthlyOutlook | null; monthlyDomains?: LocalMonthlyDomainReadings | null;
 }
-export interface LegacyAnnualReadingFilter { epochs?: readonly ("event-0.5" | "event-0.6")[]; families?: readonly LegacyAnnualChoiceFamily[]; subjectIds?: readonly string[] }
+export interface LegacyAnnualReadingFilter { epochs?: readonly ("event-0.5" | "event-0.6" | "prose-0.21")[]; families?: readonly LegacyAnnualChoiceFamily[]; subjectIds?: readonly string[] }
 type Binding = oldEvents.LocalAnnualEventReading["sourceBinding"];
 export interface LegacyAnnualSegmentScope {
   branchId: string; segmentId: string; startInstant: string; endExclusiveInstant: string;
@@ -154,6 +165,52 @@ function assertLegacyVersions(versions: readonly string[], contextual?: LocalCon
   const ref = contextual?.contextSource.reference;
   const contextVersion = ref ? `context-record/${ref.noteId}/${ref.editVersion}/${ref.bodySha256}` : null;
   for (const version of versions) if (!acceptedVersions.has(version) && version !== contextVersion) fail(`旧来源含不支持的版本：${version}。`);
+}
+// This epoch reuses the unchanged 0.21 calculation backend, never the 0.9
+// backend. Only the source-frozen prose closure is historical.
+function assertProse021Dependencies(input: Pick<LegacyAnnualReadingInput, "revision" | "assessment">): void {
+  assertDependencies(input);
+  const expected: [string, string][] = [
+    [LOCAL_OUTLOOK_JUDGMENT_VERSION, "hakimi.local-outlook-judgment/0.10.0"],
+    [LOCAL_OUTLOOK_POLICY_VERSION, "hakimi.outlook-model/0.8.0"],
+    [LOCAL_ANNUAL_OUTLOOK_VERSION, "hakimi.local-annual-outlook/0.9.0"],
+    [LOCAL_DETAILED_OUTLOOK_VERSION, "hakimi.local-detailed-outlook/0.6.0"],
+    [LIFE_STAGE_STORY_VERSION, "hakimi.local-life-stage-story/0.2.0"],
+    [MONTHLY_DOMAIN_READING_VERSION, "hakimi.local-monthly-domain-reading/0.4.0"],
+    [currentEvents.ANNUAL_EVENT_READING_VERSION, "hakimi.local-annual-event-reading/0.7.0"],
+    [currentStory.ANNUAL_LIFE_STORY_VERSION, "hakimi.annual-life-story/0.5.0"],
+    [currentStage.LIFE_STAGE_YEARS_VERSION, "hakimi.local-life-stage-years/0.4.0"],
+    [currentMonth.LOCAL_ANNUAL_MONTH_STORY_VERSION, "hakimi.local-annual-month-story/0.4.0"],
+    [currentComposition.ANNUAL_EVENT_COMPOSITION_VERSION, "hakimi.local-annual-event-composition/0.2.0"],
+    [ANNUAL_EVENT_SIGNALS_VERSION, "hakimi.annual-event-signals/0.4.0"],
+    [OUTLOOK_TASK_LINK_PROSE_VERSION, "hakimi.outlook-task-link-prose/0.1.0"],
+    [PROSE_021_ANNUAL_VERSION, "hakimi.annual-event-reading-prose/0.11.0"],
+    [PROSE_021_MONTH_VERSION, "hakimi.monthly-domain-prose/0.4.0"]
+  ];
+  for (const [actual, version] of expected) if (actual !== version) fail(`0.21共享依赖版本已变化：${version}。`);
+}
+const prose021Versions = new Set([...acceptedVersions,
+  "hakimi.local-outlook-judgment/0.10.0", "hakimi.outlook-model/0.8.0", "hakimi.local-annual-outlook/0.9.0",
+  "hakimi.local-detailed-outlook/0.6.0", "hakimi.local-life-stage-story/0.2.0", "hakimi.local-monthly-domain-reading/0.4.0",
+  "hakimi.local-annual-event-reading/0.7.0", "hakimi.annual-life-story/0.5.0", "hakimi.local-life-stage-years/0.4.0",
+  "hakimi.annual-event-signals/0.4.0", "hakimi.outlook-task-link-prose/0.1.0",
+  "hakimi.annual-event-reading-prose/0.11.0", "hakimi.monthly-domain-prose/0.4.0"
+]);
+function assertProse021Versions(versions: readonly string[], contextual?: LocalContextualReadingBundle | null): void {
+  const ref = contextual?.contextSource.reference;
+  const contextVersion = ref ? `context-record/${ref.noteId}/${ref.editVersion}/${ref.bodySha256}` : null;
+  for (const version of versions) if (!prose021Versions.has(version) && version !== contextVersion) fail(`0.21旧来源含不支持的版本：${version}。`);
+}
+function prose021Input<T extends LegacyAnnualReadingInput | LegacyAnnualYearReadingInput>(input: T): T {
+  assertProse021Dependencies(input);
+  if (!input.monthlyDomains) return input;
+  if (!input.monthly) return fail("0.21月领域缺少实际月份来源。");
+  const current = buildMonthlyDomainReadings({ revision: input.revision, assessment: input.assessment,
+    monthly: input.monthly, contextual: input.contextual });
+  if (!same(current, input.monthlyDomains)) return fail("0.21重放的当前月领域与完整来源不一致。");
+  const monthlyDomains = prose021Domains.buildMonthlyDomainReadings({ revision: input.revision,
+    assessment: input.assessment, monthly: input.monthly, contextual: input.contextual });
+  return { ...input, monthlyDomains };
 }
 function accepts(family: LegacyAnnualChoiceFamily, filter?: LegacyAnnualReadingFilter): boolean { return !filter?.families || filter.families.includes(family); }
 function selected(entry: LegacyAnnualReadingChoice, filter?: LegacyAnnualReadingFilter): boolean {
@@ -323,6 +380,49 @@ const currentAdapter = makeAdapter<currentEvents.LocalAnnualEventReading>({
   }
 });
 
+const prose021Adapter = makeAdapter<currentEvents.LocalAnnualEventReading>({
+  frozen: false,
+  buildEvents: (input) => prose021Events.buildAnnualEventReading(input),
+  eventText: (reading, branch, segment, item) => currentEventRecord.annualEventFeedbackText(reading, branch, segment, item),
+  story: (input) => prose021Story.buildAnnualLifeStory(input),
+  storyText: (story, segment) => currentStoryRecord.annualLifeStoryFeedbackText(story, segment),
+  storySubject: (story, segment) => currentStoryRecord.annualLifeStorySubjectId(story, segment),
+  storyVersions: (story, segment) => currentStoryRecord.annualLifeStoryFeedbackVersions(story, segment),
+  compositions: (input, reading) => {
+    const result: LegacyAnnualReadingChoice[] = [];
+    for (const branch of currentComposition.composeAnnualEvents(reading).branches) for (const segment of branch.segments) {
+      const originalBranch = reading.branches.find((item) => item.id === branch.id) ?? fail("合并事项缺少原分支。");
+      const original = originalBranch.segments.find((item) => item.id === segment.id) ?? fail("合并事项缺少原分段。");
+      for (const group of segment.items) if (group.kind === "settlement") result.push(entry({
+        id: currentComposition.annualEventCompositionSubjectId(reading.year, original, group), label: group.title,
+        originalConclusion: currentCompositionRecord.annualEventCompositionFeedbackText(reading, originalBranch, original, group),
+        sourceVersions: [currentComposition.ANNUAL_EVENT_COMPOSITION_VERSION, currentEventRecord.READING_ANNUAL_EVENTS_VERSION, ...reading.sourceVersions]
+      }, scopeFor(input, "composition", { ...segmentScope(original), contextRef: reading.contextRef,
+        itemIds: group.members.map((item) => item.id) })));
+    }
+    return result;
+  },
+  month: (input) => prose021Month.buildAnnualMonthStory({ ...input, annualDomains: input.domains, annualEvents: input.events }),
+  monthVersions: (story) => currentMonthRecord.annualMonthStoryFeedbackVersions(story),
+  stage: (input) => {
+    const annualEvents = { version: currentEventRecord.READING_ANNUAL_EVENTS_VERSION, sourceBinding: bindingFor(input),
+      startYear: input.annual.startYear, endYear: input.annual.endYear, years: input.events };
+    const bridge = prose021Stage.buildLifeStageYears({ ...input, annualEvents });
+    return bridge.years.map((year) => {
+      const originalYear = input.annual.years.find((item) => item.year === year.year) ?? fail("阶段年度缺少真实年来源。");
+      const domains = input.annualDomains.years.find((item) => item.year === year.year) ?? fail("阶段年度缺少同年领域。");
+      return entry({ id: currentStageRecord.lifeStageYearSubjectId(bridge, year), label: year.headline,
+        originalConclusion: currentStageRecord.lifeStageYearFeedbackText(bridge, year),
+        sourceVersions: currentStageRecord.lifeStageYearFeedbackVersions(bridge, year) }, scopeFor({ ...input, year: originalYear, domains }, "stage-year", {
+        branchId: bridge.branchId, startInstant: year.startInstant, endExclusiveInstant: year.endExclusiveInstant,
+        decadeId: bridge.stage.decadeId, stageRef: bridge.stage.nodeRef, targetRef: year.yearNodeRef, contextRef: year.contextRef,
+        segments: year.segments.map((segment) => ({ ...segmentScope(segment), targetRef: year.yearNodeRef })),
+        itemIds: year.segments.flatMap((segment) => segment.items.map((item) => item.id))
+      }));
+    });
+  }
+});
+
 function enumerateYear<E extends EventYear>(input: LegacyAnnualYearReadingInput, adapter: Adapter<E>, filter?: LegacyAnnualReadingFilter) {
   const reading = adapter.buildEvents(input);
   if (adapter.frozen) assertLegacyVersions([reading.version, ...reading.sourceVersions], input.contextual);
@@ -418,11 +518,11 @@ function uniqueEntries(entries: LegacyAnnualReadingChoice[]): LegacyAnnualReadin
   return entries;
 }
 function pairChoices(input: Pick<LegacyAnnualReadingInput, "revision" | "assessment" | "contextual">,
-  old: LegacyAnnualReadingChoice[], current: LegacyAnnualReadingChoice[]): AnnualReadingChoicePairs {
+  old: LegacyAnnualReadingChoice[], current: LegacyAnnualReadingChoice[], prose021 = false): AnnualReadingChoicePairs {
   uniqueEntries(old); uniqueEntries(current);
   const pairs: AnnualReadingChoicePair[] = [], unpaired: AnnualReadingChoicePairs["unpaired"] = [];
   for (const previous of old) {
-    assertLegacyVersions(previous.sourceVersions ?? [], input.contextual);
+    (prose021 ? assertProse021Versions : assertLegacyVersions)(previous.sourceVersions ?? [], input.contextual);
     const next = current.find((item) => item.id === previous.id);
     const { legacyScope: scope, ...legacyChoice } = previous;
     if (!next || !same(scope, next.legacyScope)) { unpaired.push({ legacyChoice, reason: next ? "原分支、区间、节点、领域或背景已经变化。" : "当前没有同一反馈主题。" }); continue; }
@@ -439,7 +539,7 @@ export async function prepareLegacyAnnualReading(input: LegacyAnnualReadingInput
   await prepareLegacyOutlook(input);
 }
 function epochs(filter?: LegacyAnnualReadingFilter) {
-  return filter?.epochs ?? ["event-0.5", "event-0.6"];
+  return filter?.epochs ?? ["event-0.5", "event-0.6", "prose-0.21"];
 }
 const enumerateOld = (input: LegacyAnnualReadingInput, epoch: string, filter?: LegacyAnnualReadingFilter) =>
   epoch === "event-0.5" ? enumerate(input, oldAdapter, filter) : enumerate(input, priorAdapter, filter);
@@ -451,24 +551,39 @@ function distinctOld(entries: LegacyAnnualReadingChoice[]): LegacyAnnualReadingC
 }
 export function buildLegacyAnnualReadingChoices(input: LegacyAnnualReadingInput, filter?: LegacyAnnualReadingFilter): LegacyAnnualReadingChoices {
   assertDependencies(input);
-  const old = preparedLegacyOutlook(input);
-  const choices = distinctOld(epochs(filter).flatMap((epoch) => enumerateOld(old, epoch, filter)));
-  for (const choice of choices) assertLegacyVersions(choice.sourceVersions ?? [], old.contextual);
+  const choices = distinctOld(epochs(filter).flatMap(epoch => {
+    if (epoch === "prose-0.21") {
+      const result = enumerate(prose021Input(input), prose021Adapter, filter);
+      for (const choice of result) assertProse021Versions(choice.sourceVersions ?? [], input.contextual);
+      return result;
+    }
+    const old = preparedLegacyOutlook(input), result = enumerateOld(old, epoch, filter);
+    for (const choice of result) assertLegacyVersions(choice.sourceVersions ?? [], old.contextual);
+    return result;
+  }));
   return { profileVersion: LEGACY_ANNUAL_READING_PROFILE_VERSION, sourceBinding: bindingFor(input), choices };
 }
 export function buildAnnualReadingChoicePairs(input: LegacyAnnualReadingInput, filter?: LegacyAnnualReadingFilter): AnnualReadingChoicePairs {
   assertDependencies(input);
-  const old = preparedLegacyOutlook(input), current = enumerate(input, currentAdapter, filter);
-  const results = epochs(filter).map((epoch) => pairChoices(old, enumerateOld(old, epoch, filter), current));
+  const current = enumerate(input, currentAdapter, filter);
+  const results = epochs(filter).map(epoch => {
+    if (epoch === "prose-0.21") return pairChoices(input, enumerate(prose021Input(input), prose021Adapter, filter), current, true);
+    const old = preparedLegacyOutlook(input);
+    return pairChoices(old, enumerateOld(old, epoch, filter), current);
+  });
   return { profileVersion: LEGACY_ANNUAL_READING_PROFILE_VERSION, sourceBinding: bindingFor(input),
-    pairs: [...new Map(results.flatMap((result) => result.pairs).map((pair) => [stable(pair), pair])).values()],
-    unpaired: [...new Map(results.flatMap((result) => result.unpaired).map((item) => [stable(item), item])).values()] };
+    pairs: [...new Map(results.flatMap(result => result.pairs).map(pair => [stable(pair), pair])).values()],
+    unpaired: [...new Map(results.flatMap(result => result.unpaired).map(item => [stable(item), item])).values()] };
 }
 export function buildAnnualYearChoicePairs(input: LegacyAnnualYearReadingInput, filter?: LegacyAnnualReadingFilter): AnnualReadingChoicePairs {
   assertDependencies(input);
-  const old = preparedLegacyYear(input), current = enumerateYear(input, currentAdapter, filter).entries;
-  const results = epochs(filter).map((epoch) => pairChoices(old, enumerateOldYear(old, epoch, filter), current));
+  const current = enumerateYear(input, currentAdapter, filter).entries;
+  const results = epochs(filter).map(epoch => {
+    if (epoch === "prose-0.21") return pairChoices(input, enumerateYear(prose021Input(input), prose021Adapter, filter).entries, current, true);
+    const old = preparedLegacyYear(input);
+    return pairChoices(old, enumerateOldYear(old, epoch, filter), current);
+  });
   return { profileVersion: LEGACY_ANNUAL_READING_PROFILE_VERSION, sourceBinding: bindingFor(input),
-    pairs: [...new Map(results.flatMap((result) => result.pairs).map((pair) => [stable(pair), pair])).values()],
-    unpaired: [...new Map(results.flatMap((result) => result.unpaired).map((item) => [stable(item), item])).values()] };
+    pairs: [...new Map(results.flatMap(result => result.pairs).map(pair => [stable(pair), pair])).values()],
+    unpaired: [...new Map(results.flatMap(result => result.unpaired).map(item => [stable(item), item])).values()] };
 }

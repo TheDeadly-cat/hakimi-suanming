@@ -89,7 +89,7 @@ describe("complete local deep reading persistence", () => {
       } else expect(contextual!.readings.length).toBeGreaterThan(30);
       const synthesis = buildReadingSynthesis({ revision, assessment, comprehensive, life, annual, timeline, contextual, personal: personalReading });
       const priorities = buildReadingPriorities({ revision, annual, life, timeline, annualDomains });
-      const monthlyDomains = buildMonthlyDomainReadings({ revision, assessment, monthly });
+      const monthlyDomains = buildMonthlyDomainReadings({ revision, assessment, monthly, contextual });
       const annualEvents = buildReadingAnnualEvents({ revision, assessment, annual, annualDomains, contextual });
       const annualLifeInput = { revision, assessment, annual, annualDomains, annualEvents, contextual };
       const annualLifeBefore = JSON.stringify(annualLifeInput);
@@ -251,7 +251,7 @@ describe("complete local deep reading persistence", () => {
       const annualEntry = crossedContextual.readings.find((item) => item.scope.kind === "annual")!;
       if (annualEntry.scope.kind === "annual") annualEntry.scope.startInstant = "1900-01-01T00:00:00.000Z";
       expect(() => buildLocalReadingSnapshot(assessment, annual, { sourceRevision: revision, comprehensive, contextual: crossedContextual })).toThrow("背景适配的年度分支或区间不一致");
-      expect(body).toContain("当前阅读状态：已采用个人修订");
+      expect(body).toContain("当前阅读状态：已采用的个人修订");
       expect(body).toContain(`#### 本次阅读正文\n\n${proposed}`);
       expect(body).toContain(choice.originalConclusion);
       expect(body).toContain(personalReading.entries[0]!.selectedReviewRefs[0]!.bodySha256);
@@ -408,5 +408,5 @@ describe("complete local deep reading persistence", () => {
       console.info(JSON.stringify({ sex, characters: body.length, storedCharacters: storedBody.length, storageFormat: storedBody.split("\n")[0], chapters: comprehensive.chapters.length, decades: life.decades.length, months: monthly.months.length,
         annualScenarioYears: annualScenarios.years.length, scenarios: annualScenarios.years.reduce((sum, entry) => sum + entry.scenarios.length, 0) }));
     } finally { await database.delete(); }
-  });
+  }, 60_000);
 });

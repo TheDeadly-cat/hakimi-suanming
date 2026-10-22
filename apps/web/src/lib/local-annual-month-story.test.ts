@@ -257,7 +257,10 @@ describe("annual matters connected to twelve actual monthly periods", () => {
     const [forward, backward] = month.branches;
     expect(backward!.periods[0]!.endExclusiveInstant).toBe("2028-12-20T20:58:00.000Z");
     expect(backward!.periods[1]!.startInstant).toBe(backward!.periods[0]!.endExclusiveInstant);
-    expect(forward!.periods[0]!.judgmentCaption).not.toBe(backward!.periods[0]!.judgmentCaption);
+    // Different branches can both be mixed. Identical captions must not merge
+    // their distinct effects, intervals, background refs or original evidence.
+    expect(forward!.periods[0]!.judgmentCaption).toBe(backward!.periods[0]!.judgmentCaption);
+    expect(forward!.periods[0]!.conditions).not.toEqual(backward!.periods[0]!.conditions);
     expect(backward!.periods[0]!.judgmentCaption).toBe(backward!.periods[1]!.judgmentCaption);
     expect(forward!.periods[0]!.backgroundLabels).toContain("丁亥大运");
     expect(backward!.periods[0]!.backgroundLabels).toContain("辛巳大运"); expect(backward!.periods[1]!.backgroundLabels).toContain("庚辰大运");

@@ -73,7 +73,12 @@ describe("exact same-source annual-to-month context", () => {
       expect(period.annualSegment!.backgroundRefs).toEqual(period.monthlySegment.backgroundRefs.filter((ref) => ref.nodeType === "dayun"));
     }
     expect(parallel.branches[0]!.periods[0]!.monthlyJudgment.axes.find((axis) => axis.axis === "pattern")!.effect).toBe("mixed");
-    expect(parallel.branches[1]!.periods.every((period) => period.monthlyJudgment.axes.find((axis) => axis.axis === "pattern")!.effect === "assists")).toBe(true);
+    for (const period of parallel.branches[1]!.periods) {
+      const pattern = period.monthlyJudgment.axes.find(axis => axis.axis === "pattern")!;
+      expect(pattern.effect).toBe("mixed");
+      expect(pattern.stemActions!.items.find(actor => actor.visibility === "visible")!.effect).toBe("assists");
+      expect(pattern.blockers.length).toBeGreaterThan(0);
+    }
   });
 
   it("keeps B2032 real month gods and month-palace facts separate from the annual relationship window", () => {
@@ -164,7 +169,7 @@ describe("exact same-source annual-to-month context", () => {
     expect(() => buildAnnualMonthContext(wrong)).toThrow();
   });
 
-  it("validates contextual annual wording against its confirmed source and keeps monthly original prose unadapted", async () => {
+  it("requires annual and monthly prose to share the confirmed contextual source", async () => {
     const input = structuredClone(b), body = await buildReadingContextRecord(input.revision, null, { work: "student", relationship: "single", fromYear: 2032, toYear: 2032, notes: "不从备注推定职业或婚史" });
     const note: ResearchNoteRecord = { schemaVersion: "1.0.0", id: crypto.randomUUID(), caseId: input.revision.caseId, anchor: { kind: "revision", revisionId: input.revision.id }, bodyFormat: "markdown", body,
       tags: ["阅读背景"], sourceRefs: [], lifecycle: "active", editVersion: 1, createdAt: "2026-10-16T00:00:00Z", updatedAt: "2026-10-16T00:00:00Z" };
@@ -172,6 +177,10 @@ describe("exact same-source annual-to-month context", () => {
     input.contextual = buildContextualReadingBundle({ revision: input.revision, assessment: input.assessment, comprehensive: null, context: resolved.latest,
       annualDomains: { version: input.annualDomains.version, revisionId: input.revision.id, chartResultHash: input.revision.manifest.resultHash, includeHour: true, startYear: 2032, endYear: 2032, years: [input.annualDomains] }, referenceYear: 2032 })!;
     input.annualEvents = buildAnnualEventReading({ revision: input.revision, assessment: input.assessment, year: input.year, domains: input.annualDomains, contextual: input.contextual });
+    // A current contextual annual source cannot be paired with the earlier,
+    // unadapted monthly collection, even when its timing is identical.
+    expect(() => buildAnnualMonthContext(input)).toThrow("月份领域全文或分段");
+    input.monthlyDomains = buildMonthlyDomainReadings({ revision: input.revision, assessment: input.assessment, monthly: input.monthly, contextual: input.contextual });
     const result = buildAnnualMonthContext(input), period = result.months[0]!.branches[0]!.periods[0]!;
     expect(result.contextRef).toEqual(input.contextual.contextSource.reference);
     expect(period.annualSegment!.items.find((item) => item.domain === "career")!.origin.contextSubjectId).not.toBeNull();

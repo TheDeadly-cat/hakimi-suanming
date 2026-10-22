@@ -523,6 +523,11 @@ const READING_021_RECEIPTS = Object.freeze([
   }
 ].map((entry) => Object.freeze(entry)));
 
+// Stable local 0.21.1 trial; seal only after the frozen source is built.
+// Existing 021 identity, installation and browser data origin remain unchanged.
+export const LOCAL_RESEARCH_READING_0211_CANDIDATE = null;
+const READING_0211_RECEIPTS = Object.freeze([]);
+
 // Only explicit selections are accepted. Existing imports retain c15ef/ab0.
 export function createLocalPackageTools(release) {
   if (!release) throw new Error("The selected local artifact has not been sealed; no package or service can be created.");
@@ -535,7 +540,8 @@ export function createLocalPackageTools(release) {
     && release !== LOCAL_RESEARCH_READING_018_CANDIDATE
     && release !== LOCAL_RESEARCH_READING_019_CANDIDATE
     && release !== LOCAL_RESEARCH_READING_020_CANDIDATE
-    && release !== LOCAL_RESEARCH_READING_021_CANDIDATE) {
+    && release !== LOCAL_RESEARCH_READING_021_CANDIDATE
+    && release !== LOCAL_RESEARCH_READING_0211_CANDIDATE) {
     throw new Error("Select a documented local artifact; arbitrary release definitions are not accepted.");
   }
   const isEventIndex = release === LOCAL_RESEARCH_EVENT_INDEX_CANDIDATE;
@@ -547,7 +553,8 @@ export function createLocalPackageTools(release) {
   const isReading019 = release === LOCAL_RESEARCH_READING_019_CANDIDATE;
   const isReading020 = release === LOCAL_RESEARCH_READING_020_CANDIDATE;
   const isReading021 = release === LOCAL_RESEARCH_READING_021_CANDIDATE;
-  if (isReading017 || isReading018 || isReading019 || isReading020 || isReading021) {
+  const isReading0211 = release === LOCAL_RESEARCH_READING_0211_CANDIDATE;
+  if (isReading017 || isReading018 || isReading019 || isReading020 || isReading021 || isReading0211) {
     const origin = new URL(release.origin);
     if (origin.protocol !== "http:" || origin.hostname !== "127.0.0.1" || origin.pathname !== "/"
       || origin.search || origin.hash || origin.username || origin.password || origin.href !== release.origin
@@ -568,26 +575,31 @@ export function createLocalPackageTools(release) {
       || release.synthesisVersion !== "0.19.0" || release.synthesisSourceVersion !== "hakimi.local-reading-synthesis/0.19.0")) {
       throw new Error("The 021 update must retain the 5202 browser origin and declare its actual report edition and synthesis producer.");
     }
-    if (release.artifactRoot !== "candidate-artifact" || (isReading021 ? READING_021_RECEIPTS : isReading020 ? READING_020_RECEIPTS : isReading019 ? READING_019_RECEIPTS : isReading018 ? READING_018_RECEIPTS : READING_017_RECEIPTS).length === 0) {
+    if (isReading0211 && (release.origin !== "http://127.0.0.1:5202/" || release.reportEdition !== "0.21.1"
+      || release.concretePeriodProseVersion !== "0.3.2"
+      || release.synthesisVersion !== "0.19.0" || release.synthesisSourceVersion !== "hakimi.local-reading-synthesis/0.19.0")) {
+      throw new Error("The 0211 update must retain the 5202 origin and declare its actual report, period prose and synthesis versions.");
+    }
+    if (release.artifactRoot !== "candidate-artifact" || (isReading0211 ? READING_0211_RECEIPTS : isReading021 ? READING_021_RECEIPTS : isReading020 ? READING_020_RECEIPTS : isReading019 ? READING_019_RECEIPTS : isReading018 ? READING_018_RECEIPTS : READING_017_RECEIPTS).length === 0) {
       throw new Error("The reading trial requires its real artifact root and sealed evidence receipts.");
     }
   }
-  const isCandidate = release === LOCAL_RESEARCH_CANDIDATE || isEventIndex || isConvergence || isTrial || isDeepReading || isReading017 || isReading018 || isReading019 || isReading020 || isReading021;
-  const artifactRelativeRoot = isEventIndex || isConvergence || isTrial || isDeepReading || isReading017 || isReading018 || isReading019 || isReading020 || isReading021 ? release.artifactRoot : "dist/web";
+  const isCandidate = release === LOCAL_RESEARCH_CANDIDATE || isEventIndex || isConvergence || isTrial || isDeepReading || isReading017 || isReading018 || isReading019 || isReading020 || isReading021 || isReading0211;
+  const artifactRelativeRoot = isEventIndex || isConvergence || isTrial || isDeepReading || isReading017 || isReading018 || isReading019 || isReading020 || isReading021 || isReading0211 ? release.artifactRoot : "dist/web";
   const packageKind = isCandidate ? "local_research_candidate_package" : "fixed_local_research_package";
-  const proofFiles = isReading021 ? READING_021_RECEIPTS : isReading020 ? READING_020_RECEIPTS : isReading019 ? READING_019_RECEIPTS : isReading018 ? READING_018_RECEIPTS : isReading017 ? READING_017_RECEIPTS : isDeepReading ? DEEP_READING_RECEIPTS : isTrial ? TRIAL_RECEIPTS : isConvergence ? CONVERGENCE_RECEIPTS : isEventIndex ? EVENT_INDEX_RECEIPTS : isCandidate ? CANDIDATE_RECEIPTS : [];
+  const proofFiles = isReading0211 ? READING_0211_RECEIPTS : isReading021 ? READING_021_RECEIPTS : isReading020 ? READING_020_RECEIPTS : isReading019 ? READING_019_RECEIPTS : isReading018 ? READING_018_RECEIPTS : isReading017 ? READING_017_RECEIPTS : isDeepReading ? DEEP_READING_RECEIPTS : isTrial ? TRIAL_RECEIPTS : isConvergence ? CONVERGENCE_RECEIPTS : isEventIndex ? EVENT_INDEX_RECEIPTS : isCandidate ? CANDIDATE_RECEIPTS : [];
   const RUNTIME_FILES = [...(isCandidate ? FIXED_RUNTIME_FILES.map((name) => ({
-    "LOCAL-RESEARCH-INSTALL.txt": isReading021 ? "LOCAL-READING-021-INSTALL.txt" : isReading020 ? "LOCAL-READING-020-INSTALL.txt" : isReading019 ? "LOCAL-READING-019-INSTALL.txt" : isReading018 ? "LOCAL-READING-018-INSTALL.txt" : isReading017 ? "LOCAL-READING-017-INSTALL.txt" : isDeepReading ? "LOCAL-DEEP-READING-INSTALL.txt" : isTrial ? "LOCAL-FREE-TRIAL-INSTALL.txt" : isConvergence ? "LOCAL-CONVERGENCE-CANDIDATE-INSTALL.txt" : isEventIndex ? "LOCAL-EVENT-INDEX-CANDIDATE-INSTALL.txt" : "LOCAL-CANDIDATE-INSTALL.txt",
-    "scripts/local-research.mjs": isReading021 ? "scripts/local-research-reading-021-candidate.mjs" : isReading020 ? "scripts/local-research-reading-020-candidate.mjs" : isReading019 ? "scripts/local-research-reading-019-candidate.mjs" : isReading018 ? "scripts/local-research-reading-018-candidate.mjs" : isReading017 ? "scripts/local-research-reading-017-candidate.mjs" : isDeepReading ? "scripts/local-research-deep-reading-candidate.mjs" : isTrial ? "scripts/local-research-trial-candidate.mjs" : isConvergence ? "scripts/local-research-convergence-candidate.mjs" : isEventIndex ? "scripts/local-research-event-index-candidate.mjs" : "scripts/local-research-candidate.mjs",
-    "scripts/install-local-research.ps1": isReading021 ? "scripts/install-local-reading-021-candidate.ps1" : isReading020 ? "scripts/install-local-reading-020-candidate.ps1" : isReading019 ? "scripts/install-local-reading-019-candidate.ps1" : isReading018 ? "scripts/install-local-reading-018-candidate.ps1" : isReading017 ? "scripts/install-local-reading-017-candidate.ps1" : isDeepReading ? "scripts/install-local-deep-reading-candidate.ps1" : isTrial ? "scripts/install-local-trial-candidate.ps1" : isConvergence ? "scripts/install-local-convergence-candidate.ps1" : isEventIndex ? "scripts/install-local-event-index-candidate.ps1" : "scripts/install-local-candidate.ps1",
-    "scripts/launch-local-research.ps1": isReading021 ? "scripts/launch-local-reading-021-candidate.ps1" : isReading020 ? "scripts/launch-local-reading-020-candidate.ps1" : isReading019 ? "scripts/launch-local-reading-019-candidate.ps1" : isReading018 ? "scripts/launch-local-reading-018-candidate.ps1" : isReading017 ? "scripts/launch-local-reading-017-candidate.ps1" : isDeepReading ? "scripts/launch-local-deep-reading-candidate.ps1" : isTrial ? "scripts/launch-local-trial-candidate.ps1" : isConvergence ? "scripts/launch-local-convergence-candidate.ps1" : isEventIndex ? "scripts/launch-local-event-index-candidate.ps1" : "scripts/launch-local-candidate.ps1"
-  })[name] ?? name) : FIXED_RUNTIME_FILES), ...(isReading021 ? ["START-READING-021.cmd"] : isReading020 ? ["START-READING-020.cmd"] : isReading019 ? ["START-READING-019.cmd"] : isReading018 ? ["START-READING-018.cmd"] : isReading017 ? ["START-READING-017.cmd"] : isDeepReading ? ["START-DEEP-READING.cmd"] : isTrial ? ["START-FREE-TRIAL.cmd"] : [])];
+    "LOCAL-RESEARCH-INSTALL.txt": isReading0211 ? "LOCAL-READING-0211-INSTALL.txt" : isReading021 ? "LOCAL-READING-021-INSTALL.txt" : isReading020 ? "LOCAL-READING-020-INSTALL.txt" : isReading019 ? "LOCAL-READING-019-INSTALL.txt" : isReading018 ? "LOCAL-READING-018-INSTALL.txt" : isReading017 ? "LOCAL-READING-017-INSTALL.txt" : isDeepReading ? "LOCAL-DEEP-READING-INSTALL.txt" : isTrial ? "LOCAL-FREE-TRIAL-INSTALL.txt" : isConvergence ? "LOCAL-CONVERGENCE-CANDIDATE-INSTALL.txt" : isEventIndex ? "LOCAL-EVENT-INDEX-CANDIDATE-INSTALL.txt" : "LOCAL-CANDIDATE-INSTALL.txt",
+    "scripts/local-research.mjs": isReading0211 ? "scripts/local-research-reading-0211-candidate.mjs" : isReading021 ? "scripts/local-research-reading-021-candidate.mjs" : isReading020 ? "scripts/local-research-reading-020-candidate.mjs" : isReading019 ? "scripts/local-research-reading-019-candidate.mjs" : isReading018 ? "scripts/local-research-reading-018-candidate.mjs" : isReading017 ? "scripts/local-research-reading-017-candidate.mjs" : isDeepReading ? "scripts/local-research-deep-reading-candidate.mjs" : isTrial ? "scripts/local-research-trial-candidate.mjs" : isConvergence ? "scripts/local-research-convergence-candidate.mjs" : isEventIndex ? "scripts/local-research-event-index-candidate.mjs" : "scripts/local-research-candidate.mjs",
+    "scripts/install-local-research.ps1": isReading0211 ? "scripts/install-local-reading-0211-candidate.ps1" : isReading021 ? "scripts/install-local-reading-021-candidate.ps1" : isReading020 ? "scripts/install-local-reading-020-candidate.ps1" : isReading019 ? "scripts/install-local-reading-019-candidate.ps1" : isReading018 ? "scripts/install-local-reading-018-candidate.ps1" : isReading017 ? "scripts/install-local-reading-017-candidate.ps1" : isDeepReading ? "scripts/install-local-deep-reading-candidate.ps1" : isTrial ? "scripts/install-local-trial-candidate.ps1" : isConvergence ? "scripts/install-local-convergence-candidate.ps1" : isEventIndex ? "scripts/install-local-event-index-candidate.ps1" : "scripts/install-local-candidate.ps1",
+    "scripts/launch-local-research.ps1": isReading0211 ? "scripts/launch-local-reading-0211-candidate.ps1" : isReading021 ? "scripts/launch-local-reading-021-candidate.ps1" : isReading020 ? "scripts/launch-local-reading-020-candidate.ps1" : isReading019 ? "scripts/launch-local-reading-019-candidate.ps1" : isReading018 ? "scripts/launch-local-reading-018-candidate.ps1" : isReading017 ? "scripts/launch-local-reading-017-candidate.ps1" : isDeepReading ? "scripts/launch-local-deep-reading-candidate.ps1" : isTrial ? "scripts/launch-local-trial-candidate.ps1" : isConvergence ? "scripts/launch-local-convergence-candidate.ps1" : isEventIndex ? "scripts/launch-local-event-index-candidate.ps1" : "scripts/launch-local-candidate.ps1"
+  })[name] ?? name) : FIXED_RUNTIME_FILES), ...(isReading0211 ? ["START-READING-0211.cmd"] : isReading021 ? ["START-READING-021.cmd"] : isReading020 ? ["START-READING-020.cmd"] : isReading019 ? ["START-READING-019.cmd"] : isReading018 ? ["START-READING-018.cmd"] : isReading017 ? ["START-READING-017.cmd"] : isDeepReading ? ["START-DEEP-READING.cmd"] : isTrial ? ["START-FREE-TRIAL.cmd"] : [])];
   async function verifyCandidateReceipts(root) {
     for (const entry of proofFiles) {
       const snapshot = await readStableRegularFileSnapshot(path.join(root, entry.path), {
-        containmentRoot: root, label: isConvergence || isTrial || isDeepReading || isReading017 || isReading018 || isReading019 || isReading020 || isReading021 ? "Frozen application evidence" : "Original same-artifact browser receipt"
+        containmentRoot: root, label: isConvergence || isTrial || isDeepReading || isReading017 || isReading018 || isReading019 || isReading020 || isReading021 || isReading0211 ? "Frozen application evidence" : "Original same-artifact browser receipt"
       });
-      if (snapshot.sha256 !== entry.sha256) throw new Error(`Candidate ${isConvergence || isTrial || isDeepReading || isReading017 || isReading018 || isReading019 || isReading020 || isReading021 ? "evidence" : "browser"} receipt identity mismatch.`);
+      if (snapshot.sha256 !== entry.sha256) throw new Error(`Candidate ${isConvergence || isTrial || isDeepReading || isReading017 || isReading018 || isReading019 || isReading020 || isReading021 || isReading0211 ? "evidence" : "browser"} receipt identity mismatch.`);
     }
   }
   async function verifyFixedLocalArtifact(root) {
@@ -705,7 +717,7 @@ export function createLocalPackageTools(release) {
   async function startLocalPackageServer(packageRoot, { port = Number(new URL(release.origin).port) } = {}) {
     if (isCandidate && (!Number.isInteger(port) || port < 0 || port > 65535)) throw new Error("Candidate port must be an explicit integer.");
     if (isCandidate && port === 5188) throw new Error("Candidate serving may not use the daily 5188 origin.");
-    if ((isReading017 || isReading018 || isReading019 || isReading020 || isReading021) && [5189, 5197, 5199, 5201].includes(port)) throw new Error("Reading trial serving may not use an existing daily, development, or older trial origin.");
+    if ((isReading017 || isReading018 || isReading019 || isReading020 || isReading021 || isReading0211) && [5189, 5197, 5199, 5201].includes(port)) throw new Error("Reading trial serving may not use an existing daily, development, or older trial origin.");
     if (isDeepReading && [5189, 5197, 5199].includes(port)) throw new Error("Deep reading trial serving may not use an existing daily or development origin.");
     if (isTrial && [5189, 5197].includes(port)) throw new Error("Free trial serving may not use an existing daily or development origin.");
     const verified = await verifyLocalPackage(packageRoot);
@@ -744,7 +756,7 @@ export function createLocalPackageTools(release) {
     const verified = await verifyLocalPackage(packageRoot);
     const url = new URL(origin);
     if (isCandidate && url.port === "5188") throw new Error("Candidate probing may not use the daily 5188 origin.");
-    if ((isReading017 || isReading018 || isReading019 || isReading020 || isReading021) && ["5189", "5197", "5199", "5201"].includes(url.port)) throw new Error("Reading trial probing may not use an existing daily, development, or older trial origin.");
+    if ((isReading017 || isReading018 || isReading019 || isReading020 || isReading021 || isReading0211) && ["5189", "5197", "5199", "5201"].includes(url.port)) throw new Error("Reading trial probing may not use an existing daily, development, or older trial origin.");
     if (isDeepReading && ["5189", "5197", "5199"].includes(url.port)) throw new Error("Deep reading trial probing may not use an existing daily or development origin.");
     if (isTrial && ["5189", "5197"].includes(url.port)) throw new Error("Free trial probing may not use an existing daily or development origin.");
     if (url.protocol !== "http:" || url.hostname !== "127.0.0.1" || url.pathname !== "/" || url.search || url.hash || url.username) throw new Error("Probe requires an explicit loopback origin.");

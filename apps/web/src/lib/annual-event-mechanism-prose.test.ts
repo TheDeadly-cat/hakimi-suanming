@@ -242,6 +242,11 @@ it("gives unassigned adults conditional occupational scenes while leaving their 
     expect(output.examples.length).toBeLessThanOrEqual(3);
     expect(output.examples.every(line=>/^若(?:在职|正在求职或进修|有自营业务或实际合作)，/.test(line))).toBe(true);
     expect(output.reasoning).toContain(value.patternContext!.summary); expect(value).toEqual(before);
+    expect(value.effect).toBe("assists");
+    expect(value.patternContext!.effect).toBe("mixed");
+    expect(value.patternContext!.taskLinks!.items.some(link => link.relations.some(relation => relation.contributesPressure
+      && relation.from.origin.kind === "background"))).toBe(true);
+    expect(output.summary).toContain("大运背景");
   }
   expect(buildAnnualEventReadingProse(input("b/2030")).summary).toContain("提出不同做法、展示样例");
   expect(buildAnnualEventReadingProse(input("b/2032")).summary).toContain("已有成果的确认");

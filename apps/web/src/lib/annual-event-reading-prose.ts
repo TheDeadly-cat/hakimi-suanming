@@ -10,7 +10,7 @@ import type { AnnualEventPatternContext, AnnualEventStemActionSignal } from "./a
 import { buildAnnualMechanismTopic } from "./annual-event-mechanism-prose";
 import { buildAdultLifeSituations } from "./adult-life-situations";
 
-export const ANNUAL_EVENT_READING_PROSE_VERSION = "hakimi.annual-event-reading-prose/0.11.0" as const;
+export const ANNUAL_EVENT_READING_PROSE_VERSION = "hakimi.annual-event-reading-prose/0.12.0" as const;
 export type AnnualEventReadingProseKind = "work_change" | "study" | "proposal" | "delivery" | "settlement" | "new_collaboration" | "shared_arrangements";
 export interface AnnualEventReadingProseInput {
   kind: AnnualEventReadingProseKind; domain: "career" | "wealth" | "relationship" | "change";

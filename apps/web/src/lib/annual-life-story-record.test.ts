@@ -59,14 +59,14 @@ async function personalFor(source: BuildReadingAnnualLifeStoriesInput, choice: R
 describe("annual life story exact originals and additive report", () => {
   it("records every original branch/segment and all new paragraphs, refs and conditions once without changing the inputs", () => {
     const before = JSON.stringify(a), text = describeReadingAnnualLifeStories(aStories, a).join("\n"), ids: string[] = [];
-    expect(aStories.version).toBe("hakimi.annual-life-story/0.4.0");
+    expect(aStories.version).toBe("hakimi.annual-life-story/0.5.0");
     const story = aStories.years.find((item) => item.year === 2028)!;
     expect(story.branches.map((branch) => [branch.id, branch.segments.length])).toEqual([["forward", 1], ["backward", 2]]);
     expect(story.branches[1]!.segments[0]!.endExclusiveInstant).toBe("2028-12-20T20:58:00.000Z");
     for (const year of aStories.years) for (const branch of year.branches) for (const segment of branch.segments) {
       ids.push(annualLifeStorySubjectId(year, segment)); const feedback = annualLifeStoryFeedbackText(year, segment);
       expect(feedback.length).toBeLessThanOrEqual(30_000); expect(annualLifeStoryFeedbackVersions(year, segment)).toHaveLength(3);
-      expect(annualLifeStoryFeedbackVersions(year, segment)[0]).toBe("hakimi.annual-life-story/0.4.0");
+      expect(annualLifeStoryFeedbackVersions(year, segment)[0]).toBe("hakimi.annual-life-story/0.5.0");
       expect(text).toContain(feedback); expect(feedback).toContain(JSON.stringify(segment.sourceVersions));
       expect(feedback).toContain(JSON.stringify(segment.backgroundRefs)); expect(feedback).not.toContain("总评覆盖年份");
       for (const paragraph of segment.paragraphs) { expect(feedback).toContain(paragraph.text); expect(feedback).toContain(JSON.stringify(paragraph.basisRefs)); }

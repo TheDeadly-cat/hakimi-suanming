@@ -183,7 +183,7 @@ describe("local annual outlook with actual transit facts", () => {
     expect(assessment.balance.baselineDirection).toBe("balanced");
     expect(assessment.balance.baselineFavorableElements).toEqual([]);
     const result = await buildLocalAnnualOutlook(male, assessment, 2026);
-    expect(result.version).toBe("hakimi.local-annual-outlook/0.8.0");
+    expect(result.version).toBe("hakimi.local-annual-outlook/0.9.0");
     expect(new Set(result.years.map((year) => year.label)).size).toBeGreaterThan(1);
     expect(result.years[0]!.label).toBe("有压力");
     expect(result.years.every((year) => year.label === year.judgment!.label && year.judgment!.primaryAxis === "pattern")).toBe(true);

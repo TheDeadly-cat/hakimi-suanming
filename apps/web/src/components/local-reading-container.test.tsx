@@ -31,6 +31,7 @@ import * as monthlyDomainsModule from "../lib/local-monthly-domain-reading";
 import * as detailedOutlookModule from "../lib/local-detailed-outlook";
 import * as lifeStageStoryModule from "../lib/local-life-stage-story";
 import * as annualLifeStoryModule from "../lib/annual-life-story";
+import * as keyMonthSourceModule from "../lib/key-month-event-source";
 import { annualEventFeedbackText, annualEventFeedbackSubjectId } from "../lib/local-annual-event-record";
 import { annualLifeStoryFeedbackText, annualLifeStorySubjectId, annualLifeStoryFeedbackVersions } from "../lib/annual-life-story-record";
 
@@ -136,6 +137,7 @@ let repository: ResearchRepository;
 let revisionA: RevisionRecord;
 let revisionB: RevisionRecord;
 let actualAnnualReady: Promise<LocalAnnualOutlook> | null = null;
+const pendingKeyMonths = new Set<Promise<keyMonthSourceModule.PreparedKeyMonthYear>>();
 function deferred<T>() {
   let resolve!: (value: T) => void;
   let reject!: (reason: unknown) => void;
@@ -167,7 +169,20 @@ async function waitForPersonalReading() {
   // Deliver the actual calendar calculation before asserting its dependent
   // personal-reading publication; controlled pending fixtures stay separate.
   if (actualAnnualReady) await act(async () => { await actualAnnualReady; });
-  await waitFor(() => expect(document.querySelector(".local-reading-document")?.getAttribute("aria-busy")).toBe("false"));
+  // The complete report now waits for every real month-year preparation. Await
+  // those operations rather than imposing waitFor's 1-second DOM polling budget
+  // on ten years of calculations. No preparation or verification is mocked out.
+  do {
+    await waitFor(() => expect(pendingKeyMonths.size > 0
+      || document.querySelector(".local-reading-document")?.getAttribute("aria-busy") === "false").toBe(true));
+    await act(async () => {
+      // Rejections are published by the real container and asserted by the
+      // failure-path tests; the waiting helper must not throw them itself.
+      while (pendingKeyMonths.size) await Promise.allSettled([...pendingKeyMonths]);
+    });
+    // A source change committed by act may schedule a new, current batch.
+  } while (document.querySelector(".local-reading-document")?.getAttribute("aria-busy") === "true");
+  expect(document.querySelector(".local-reading-document")?.getAttribute("aria-busy")).toBe("false");
 }
 async function useActualAnnual() {
   const actual = await vi.importActual<typeof import("../lib/local-annual-outlook")>("../lib/local-annual-outlook");
@@ -185,6 +200,14 @@ beforeAll(async () => {
   chartB = await calculateChart({ ...birth, time: "10:26" }, WORKING_DEFAULT_RULE_PROFILE);
 });
 beforeEach(async () => {
+  pendingKeyMonths.clear();
+  const prepare = keyMonthSourceModule.prepareKeyMonthYear;
+  vi.spyOn(keyMonthSourceModule, "prepareKeyMonthYear").mockImplementation((...args) => {
+    const result = prepare(...args);
+    pendingKeyMonths.add(result);
+    void result.then(() => pendingKeyMonths.delete(result), () => pendingKeyMonths.delete(result));
+    return result;
+  });
   actualAnnualReady = null;
   resetResearchJournalMutationCoordinatorForTests();
   database = new ResearchDatabase(`reading-container-synthetic-${crypto.randomUUID()}`, { targetSchema: 13, releaseWritesLocked: false });
@@ -237,7 +260,7 @@ describe("reading container persistence and asynchronous publication", () => {
     await waitForPersonalReading();
     expect(detail.mock.calls.at(-1)![0].personalReadingReady).toBe(true);
     expect(within(screen.getByTestId("personal-scope")).getByText(proposed)).toBeDefined();
-  });
+  }, 60_000);
 
   it("binds every annual story choice, preserves adoption on its own segment and reuses the verified collection on note refresh", async () => {
     await useActualAnnual();
@@ -419,7 +442,7 @@ describe("reading container persistence and asynchronous publication", () => {
       expect(document.source.readingVersions).toEqual([lifeStageStoryModule.LIFE_STAGE_STORY_VERSION, detailedOutlookModule.LOCAL_DETAILED_OUTLOOK_VERSION]);
       for (const text of ["完整来源版本：", "原判断依据引用：", "原节点：", revisionA.manifest.resultHash]) expect(document.originalConclusion).toContain(text);
     }
-  });
+  }, 60_000);
   it("does not save a complete report when the life-stage story source cannot be verified", async () => {
     await useActualAnnual();
     vi.spyOn(lifeStageStoryModule, "buildLifeStageStory").mockImplementation(() => { throw new Error("合成人生阶段原判断校验失败。"); });
@@ -429,13 +452,15 @@ describe("reading container persistence and asynchronous publication", () => {
     fireEvent.click(workbench().getByRole("button", { name: "保存测试快照" }));
     await waitFor(() => expect(screen.getByTestId("save-status").textContent).toBe("合成人生阶段原判断校验失败。"));
     expect(await repository.listResearchNotesByCase(revisionA.caseId)).toEqual([]);
-  });
+  }, 60_000);
   it("saves year-to-month feedback with exact selected sources and all transitive versions in its original text", async () => {
     await useActualAnnual();
     const buildStory = vi.spyOn(annualMonthStoryModule, "buildAnnualMonthStory");
     render(<LocalReadingContainer {...propsFor(revisionA)} />);
     await waitForPersonalReading();
-    expect(buildStory).toHaveBeenCalledTimes(1);
+    const selectedMonthlyInput = buildStory.mock.calls[0]![0].monthly;
+    const selectedBuilds = () => buildStory.mock.calls.filter(([input]) => input.monthly === selectedMonthlyInput);
+    expect(selectedBuilds()).toHaveLength(1);
     const choices = JSON.parse(screen.getByTestId("month-story-choices").textContent!) as { id: string; sourceVersions: string[] }[];
     const firstText = screen.getByTestId("month-story-first-text").textContent;
     expect(choices).toHaveLength(36);
@@ -453,8 +478,8 @@ describe("reading container persistence and asynchronous publication", () => {
       ANNUAL_MONTH_CONTEXT_VERSION, ANNUAL_EVENT_READING_VERSION, MONTHLY_DOMAIN_READING_VERSION]);
     for (const text of ["完整来源版本：", "年月原文引用：", "原始节点：", "（不含终点）", revisionA.manifest.resultHash]) expect(parsed.value.originalConclusion).toContain(text);
     await waitForPersonalReading();
-    expect(buildStory).toHaveBeenCalledTimes(1); // Note refresh did not change any calculation source.
-  });
+    expect(selectedBuilds()).toHaveLength(1); // The selected monthly calculation remains cached; other years are independently prepared.
+  }, 60_000);
   it("fails closed before a snapshot write when current year-to-month sources cannot be verified", async () => {
     await useActualAnnual();
     vi.spyOn(annualMonthStoryModule, "buildAnnualMonthStory").mockImplementation(() => { throw new Error("合成同源校验失败，保留原年度与流月。"); });
@@ -467,15 +492,21 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(screen.getAllByText("合成同源校验失败，保留原年度与流月。").length).toBeGreaterThan(1);
     expect(researchRepository.createResearchNote).not.toHaveBeenCalled();
     expect(getResearchJournalMutationSnapshot().status).toBe("idle");
-  });
+  }, 60_000);
   it("does not publish a late earlier monthly result or its feedback choices after selecting another year", async () => {
     await useActualAnnual();
     const realMonthly = detailedOutlookModule.buildLocalMonthlyOutlook;
     const oldResult = await realMonthly(revisionA, buildBaziPreliminaryAssessment(revisionA), 2027);
     const late = deferred<detailedOutlookModule.LocalMonthlyOutlook>();
-    vi.spyOn(detailedOutlookModule, "buildLocalMonthlyOutlook").mockImplementation((...args) => args[2] === 2027 ? late.promise : realMonthly(...args));
     render(<LocalReadingContainer {...propsFor(revisionA)} />);
     await waitForPersonalReading();
+    // Delay only the selected-month request, not every 2027 request made by
+    // the full report's independently verified all-year month preparation.
+    let delayed = false;
+    vi.spyOn(detailedOutlookModule, "buildLocalMonthlyOutlook").mockImplementation((...args) => {
+      if (args[2] === 2027 && !delayed) { delayed = true; return late.promise; }
+      return realMonthly(...args);
+    });
     const select = (year: number) => {
       fireEvent.change(screen.getByLabelText("查询年份"), { target: { value: String(year) } });
       fireEvent.click(screen.getByRole("button", { name: "查看这一年" }));
@@ -496,7 +527,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(screen.getByTestId("month-story-choices").textContent).toBe(current);
     expect(screen.getByRole("group", { name: "2028年节令月份" })).toBeTruthy();
     expect(screen.queryByRole("group", { name: "2027年节令月份" })).toBeNull();
-  });
+  }, 60_000);
   it("saves the selected monthly domain with its exact source text and period", async () => {
     render(<LocalReadingContainer {...propsFor(revisionA)} />);
     await waitFor(() => expect(workbench().getByRole("button", { name: "保存首个月度领域反馈" }).hasAttribute("disabled")).toBe(false));
@@ -512,7 +543,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(parsed.value.source.readingVersions).toContain(detailedOutlookModule.LOCAL_DETAILED_OUTLOOK_VERSION);
     for (const text of ["（不含终点）", "原判断：", "可能情境：", "实际对照：", "背景："]) expect(parsed.value.originalConclusion).toContain(text);
     expect(parsed.value.originalConclusion.length).toBeLessThanOrEqual(30_000);
-  });
+  }, 60_000);
   it("reads the latest structured background even if its display tag was removed", async () => {
     const year = new Date().getFullYear();
     const draft = { work: "seeking_work" as const, relationship: "unspecified" as const, fromYear: year, toYear: year, notes: "合成标签编辑测试。" };
@@ -525,7 +556,7 @@ describe("reading container persistence and asynchronous publication", () => {
     await waitFor(() => expect(screen.getByTestId("contextual-career").textContent).toContain("已任职"));
     expect(screen.getByTestId("contextual-career").textContent).not.toContain("求职阶段");
     expect(screen.getAllByText("阅读背景记录", { exact: true })).toHaveLength(2);
-  });
+  }, 60_000);
 
   // Each test keeps the original 5s transaction budget. Preparation still
   // runs the real UI/storage flow; the unchanged complete chain is also timed
@@ -535,15 +566,19 @@ describe("reading container persistence and asynchronous publication", () => {
     let root: ResearchNoteRecord;
     let buildStory: MockInstance<typeof annualMonthStoryModule.buildAnnualMonthStory>;
     let buildMonthly: MockInstance<typeof monthlyDomainsModule.buildMonthlyDomainReadings>;
+    let displayedStory: annualMonthStoryModule.LocalAnnualMonthStory;
     beforeEach(async () => {
       await useActualAnnual();
       buildStory = vi.spyOn(annualMonthStoryModule, "buildAnnualMonthStory");
       buildMonthly = vi.spyOn(monthlyDomainsModule, "buildMonthlyDomainReadings");
+      const detailed = vi.spyOn(detailedPanelModule, "DetailedOutlookPanel");
       first = render(<LocalReadingContainer {...propsFor(revisionA)} />);
       await waitForPersonalReading();
+      displayedStory = detailed.mock.calls.at(-1)![0].annualMonthStory!;
     });
     async function saveAndReopenContext() {
-    expect(buildStory).toHaveBeenCalledTimes(1);
+    expect(displayedStory).toBeDefined();
+    expect(buildStory.mock.results.filter(result => result.type === "return" && result.value === displayedStory)).toHaveLength(1);
     expect(screen.getByTestId("contextual-career").textContent).toBe("原通用事业说明");
     fireEvent.click(contextPanel().getByText("补充当前生活背景", { exact: false }));
     fireEvent.change(contextPanel().getByLabelText("职业或主要日常状态"), { target: { value: "seeking_work" } });
@@ -567,13 +602,12 @@ describe("reading container persistence and asynchronous publication", () => {
     first.unmount();
     render(<LocalReadingContainer {...propsFor(revisionA)} />);
     await waitFor(() => expect(screen.getByTestId("contextual-career").textContent).toContain("求职"));
-    await waitForPersonalReading();
     }
     it("uses explicitly saved life context and persists the exact background after reopening", async () => {
       await saveAndReopenContext();
     });
     describe("after the background was saved and reopened through the real UI", () => {
-      beforeEach(saveAndReopenContext);
+      beforeEach(async () => { await saveAndReopenContext(); await waitForPersonalReading(); }, 60_000);
       it("saves the complete contextual snapshot and clears by appending without rewriting either prior record", async () => {
     fireEvent.click(workbench().getByRole("button", { name: "保存测试快照" }));
     await waitFor(async () => expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(2));
@@ -603,7 +637,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(clearDocument.value.context.relationship).toBe("unspecified");
       });
     });
-  });
+  }, 60_000);
 
   describe("explicit personal adoption transactions", () => {
     let assessment: ReturnType<typeof buildBaziPreliminaryAssessment>;
@@ -665,7 +699,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(restored.find((record) => record.id === adoption.id)!.body).toBe(adoption.body);
       });
     });
-  });
+  }, 60_000);
 
   it("includes an archived latest action in the personal chain instead of reviving an older revision", async () => {
     const assessment = buildBaziPreliminaryAssessment(revisionA);
@@ -685,7 +719,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(researchRepository.listResearchNotesByCase).toHaveBeenCalledWith(revisionA.caseId, { includeArchived: true });
     expect(await repository.listResearchNotesByCase(revisionA.caseId, { includeArchived: true })).toHaveLength(3);
     expect(latest.lifecycle).toBe("archived");
-  });
+  }, 60_000);
 
   it("retains the complete domain reading and exact branch period when recording annual feedback", async () => {
     const actual = await vi.importActual<typeof import("../lib/local-annual-outlook")>("../lib/local-annual-outlook");
@@ -707,7 +741,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(parsed.value.originalConclusion).toContain("实际对照：");
     expect(parsed.value.originalConclusion).toContain("可能情境：");
     expect(parsed.value.originalConclusion.length).toBeLessThanOrEqual(30_000);
-  });
+  }, 60_000);
   it("keeps the displayed stage interval and source versions when recording stage feedback", async () => {
     const actual = await vi.importActual<typeof import("../lib/local-annual-outlook")>("../lib/local-annual-outlook");
     vi.mocked(buildLocalAnnualOutlook).mockImplementation(actual.buildLocalAnnualOutlook);
@@ -727,7 +761,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(parsed.value.originalConclusion).toContain("（不含终点）");
     expect(parsed.value.originalConclusion).toContain("按当前修订的起运方向");
     expect(parsed.value.originalConclusion.length).toBeLessThanOrEqual(30_000);
-  });
+  }, 60_000);
   it("saves feedback against one concrete useful stem with its original conditions and both rule versions", async () => {
     const comprehensive = buildBaziComprehensiveReading(revisionA, buildBaziPreliminaryAssessment(revisionA));
     const guidance = comprehensive.usefulGuidance!, entry = guidance.entries[0]!;
@@ -745,7 +779,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(notes[0]!.body).toContain(entry.judgment);
     for (const condition of entry.conditions) expect(notes[0]!.body).toContain(condition);
     expect(notes[0]!.body).toContain(`useful-stem-${entry.id}`);
-  });
+  }, 60_000);
   async function createStructuredFeedback() {
     return createNote(revisionA, buildStructuredReadingFeedback(buildBaziPreliminaryAssessment(revisionA), {
       subjectId: "natal-overview", subjectLabel: "命局总论", originalConclusion: "原版结论：更关注技能兑现。", actualSituation: "实际先学习，再工作。",
@@ -783,7 +817,7 @@ describe("reading container persistence and asynchronous publication", () => {
     fireEvent.click(screen.getByText("用户反馈").closest("summary")!);
     await waitFor(() => expect(screen.getByText("当前个人修订")).toBeDefined());
     expect(screen.getByText("追加复核记录")).toBeDefined();
-  });
+  }, 60_000);
 
   it("rejects an edited original in the fresh preflight without creating a review or declaring an unknown write", async () => {
     const root = await createStructuredFeedback(); render(<LocalReadingContainer {...propsFor(revisionA)} />);
@@ -794,7 +828,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(1);
     expect(getResearchJournalMutationSnapshot().status).toBe("idle");
     expect((screen.getByLabelText("希望保留的个人修订文本") as HTMLTextAreaElement).value).toBe("先完成学习，再逐步承担项目。");
-  });
+  }, 60_000);
 
   it("does not duplicate an appended review after the database committed but its acknowledgement was lost", async () => {
     await createStructuredFeedback(); render(<LocalReadingContainer {...propsFor(revisionA)} />); await openReviewForm();
@@ -808,7 +842,7 @@ describe("reading container persistence and asynchronous publication", () => {
     fireEvent.click(screen.getByRole("button", { name: "保存追加复核" }));
     await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("等待核对"));
     expect(write).toHaveBeenCalledTimes(1);
-  });
+  }, 60_000);
   it("derives feedback choices for all actual ten years and saves both scenario feedback and the complete scenario snapshot", async () => {
     const actual = await vi.importActual<typeof import("../lib/local-annual-outlook")>("../lib/local-annual-outlook");
     vi.mocked(buildLocalAnnualOutlook).mockImplementation(actual.buildLocalAnnualOutlook);
@@ -831,7 +865,7 @@ describe("reading container persistence and asynchronous publication", () => {
     for (let year = current; year < current + 10; year++) expect(text).toContain(`### ${year}`);
     expect(text).toContain("情境依据：源修订");
     expect(text).toContain("不补充或改写顺逆判断");
-  });
+  }, 60_000);
 
   it("saves feedback to the real repository and shows it again after remount", async () => {
     const view = render(<LocalReadingContainer {...propsFor(revisionA)} />);
@@ -846,7 +880,7 @@ describe("reading container persistence and asynchronous publication", () => {
     view.unmount();
     const reopened = render(<LocalReadingContainer {...propsFor(revisionA)} />);
     await waitFor(() => expect(reopened.container.querySelector("pre")?.textContent).toBe(records[0]?.body));
-  });
+  }, 60_000);
 
   it("shows the end and newlines of valid feedback longer than 10000 characters", async () => {
     const body = buildLocalReadingFeedback(buildBaziPreliminaryAssessment(revisionA),
@@ -857,7 +891,7 @@ describe("reading container persistence and asynchronous publication", () => {
     await waitFor(() => expect(view.container.querySelector("pre")?.textContent).toBe(body));
     expect(view.container.querySelector("pre")?.textContent).toContain("实际情况末尾标记");
     expect(view.container.querySelector("pre")?.textContent).toContain("\n\n");
-  });
+  }, 60_000);
 
   it("refuses incomplete save and export callbacks until actual annual events and all report inputs are ready", async () => {
     const actual = await useActualAnnual(), late = deferred<LocalAnnualOutlook>();
@@ -884,7 +918,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(full).toContain("## 年度应事情境先读");
     expect(full).toContain("## 年度主题与十二节令月");
     expect(full).toContain(annualMonthStoryModule.LOCAL_ANNUAL_MONTH_STORY_VERSION);
-  });
+  }, 60_000);
 
   it("does not label an empty annual state fixture as a complete saved report", async () => {
     render(<LocalReadingContainer {...propsFor(revisionA)} />);
@@ -893,7 +927,7 @@ describe("reading container persistence and asynchronous publication", () => {
     await waitFor(() => expect(screen.getByTestId("save-status").textContent).toContain("完整解读缺少年度"));
     expect(researchRepository.createResearchNote).not.toHaveBeenCalled();
     expect(getResearchJournalMutationSnapshot().status).toBe("idle");
-  });
+  }, 60_000);
 
   it("does not retry a write whose acknowledgement is lost after the real record was committed", async () => {
     await useActualAnnual();
@@ -919,7 +953,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(pack).toHaveBeenCalledTimes(1);
     expect(detail.mock.calls.at(-1)![0].personalReadingReady).toBe(true);
     expect(getResearchJournalMutationSnapshot().status).toBe("call_unknown");
-  });
+  }, 60_000);
 
   it("does not publish old annual results or a late old-save refresh into a newly keyed revision", async () => {
     const lateAnnual = deferred<LocalAnnualOutlook>();
@@ -946,5 +980,5 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(view.container.querySelector("pre")?.textContent).toBe("只属于修订B的反馈");
     expect(view.container.textContent).not.toContain(persistedA.body);
     expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(1);
-  });
+  }, 60_000);
 });

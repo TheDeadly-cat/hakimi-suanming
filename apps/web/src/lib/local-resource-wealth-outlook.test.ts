@@ -66,7 +66,7 @@ describe("actual resource wealth path is shared by natal and timed readings", ()
     for (const judgment of judgments.filter((item) => item && item.axes.length)) {
       expect(pattern(judgment).pathId).toBe("resource-wealth");
       expect(judgment.sourceBinding.revisionId).toBe(source.revision.id);
-      expect(judgment.version).toBe("hakimi.local-outlook-judgment/0.8.0");
+      expect(judgment.version).toBe("hakimi.local-outlook-judgment/0.10.0");
     }
     for (const segment of [...years.years.flatMap((year) => year.judgmentSegments), ...months.months.flatMap((month) => month.judgmentSegments)]) {
       expect(segment.judgment.interval).toEqual({ startInstant: segment.startInstant, endExclusiveInstant: segment.endExclusiveInstant });

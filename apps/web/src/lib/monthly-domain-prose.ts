@@ -12,7 +12,7 @@ import { buildLocalReadingAgeContext, type LocalReadingAgeContext } from "./loca
 import type { ReadingContextWork } from "./local-reading-context";
 import { ADULT_LIFE_SITUATIONS_VERSION, buildAdultLifeSituations, type AdultSituationMechanism } from "./adult-life-situations";
 
-export const MONTHLY_DOMAIN_PROSE_VERSION = "hakimi.monthly-domain-prose/0.4.0" as const;
+export const MONTHLY_DOMAIN_PROSE_VERSION = "hakimi.monthly-domain-prose/0.5.0" as const;
 export interface MonthlyDomainProseInput {
   revision: RevisionRecord; assessment: BaziPreliminaryAssessment;
   month: Pick<LocalMonthlyPeriod, "ganZhi" | "nodeRef">; yearGanZhi: string | null;
@@ -350,13 +350,14 @@ export function buildMonthlyDomainProse(input: MonthlyDomainProseInput): AnnualD
       const linked = buildNatalTransitTaskProse({ links: pattern.taskLinks, effect: pattern.effect,
         actions: pattern.stemActions!.items, ageStage: age.stage, domain, horizon: "month" });
       if (linked) {
-        headline = `${month.ganZhi}月：${linked.title}`; summary = linked.summary;
-        if (age.stage === "adult" && (!input.appliedWork || input.appliedWork === "unspecified")) examples = linked.examples;
-        // The task-specific account replaces the generic route explanation;
-        // all original actor/condition evidence stays in the existing fields.
-        paragraphs = [linked.taskSummary];
-        opportunities = pattern.stemActions!.items.some((action) => ["assists", "mixed"].includes(action.effect)) ? ["已有方法或支持能接上本段具体要求的部分，可以继续发挥。"] : [];
-        obstacles = pattern.taskLinks!.items.some((link) => link.relations.some((relation) => relation.contributesPressure)) ? ["原来需要保护的处理方法或承接支持仍受到具体牵制，不能只看新增事项。"] : [];
+        // Task links explain an additional natal/background dependency. They
+        // must not replace this month's own role, age or confirmed life setting.
+        // In particular, the visible/hidden example positions stay intact.
+        summary += linked.taskSummary;
+        if (pattern.taskLinks!.items.some((link) => link.relations.some((relation) => relation.contributesPressure
+          && relation.from.origin.kind === "background"))) {
+          obstacles.push("原来需要保护的处理方法或承接支持仍受到背景牵制，不能只看新增事项。");
+        }
       }
     }
     return { id: domain, title, headline, summary, paragraphs, opportunities, obstacles, examples, watchPoints,

@@ -24,12 +24,12 @@ async function actualInput(date: string, year: number, kind: AnnualEventReadingP
   const endExclusiveInstant = new Date(Math.min(Date.parse(node.endExclusiveInstant), dayun ? Date.parse(dayun.endExclusiveInstant) : Infinity)).toISOString();
   const judgment = buildLocalOutlookJudgment(revision, buildBaziPreliminaryAssessment(revision), { target: node, background: dayun ? { dayun } : undefined, startInstant, endExclusiveInstant });
   const axis = judgment.axes.find((entry) => entry.axis === "pattern")!;
-  const actor = axis.evidence.find((line) => line.startsWith(`流年${node.ganZhi}透`) && line.includes("作为透干作用")) ?? "";
+  const actor = axis.stemActions!.items.find(item => item.visibility === "visible")!;
   const relationTypes = (position: "month" | "day") => calculatePillarRelations({ year: node.ganZhi, month: revision.facts.pillars[position].ganZhi, day: node.ganZhi, hour: revision.facts.pillars[position].ganZhi }).facts
     .filter((fact) => fact.completeness === "binary" && fact.participants.length === 2 && fact.participants.some((part) => part.position === "year") && fact.participants.some((part) => part.position === "month")).map((fact) => fact.relationType);
   const month = relationTypes("month"), day = relationTypes("day");
   return { kind, domain, god: LunarUtil.SHI_SHEN[revision.facts.pillars.day.stem + node.ganZhi[0]], path: axis.pathId,
-    effect: actor.includes("支持此路径分支") ? "assists" : actor.includes("增加阻碍或负荷") ? "obstructs" : "neutral", patternEffect: axis.effect,
+    effect: actor.effect, patternEffect: axis.effect,
     age: buildLocalReadingAgeContext(revision.timeCalibration.utcInstant, judgment.interval.startInstant, judgment.interval.endExclusiveInstant),
     hasMonthBranchClash: month.includes("branch_six_clash"), hasMonthBranchCombination: month.includes("branch_six_combination"),
     hasDayBranchClash: day.includes("branch_six_clash"), hasDayBranchCombination: day.includes("branch_six_combination"),
@@ -287,9 +287,10 @@ describe("specific annual event prose consumes facts without selecting events or
     expect(career.summary).not.toBe(wealth.summary); expect(career.examples).not.toEqual(wealth.examples);
   });
 
-  it("B2030 improvement and B2032 existing settlement remain distinct for confirmed employment despite their shared supportive pattern", () => {
+  it("B2030 improvement and B2032 settlement keep their own assistance separate from the continuing background pressure", () => {
     expect([b30.god, b32.god]).toEqual(["伤官", "正财"]);
-    expect([b30.patternEffect, b32.patternEffect]).toEqual(["assists", "assists"]);
+    expect([b30.effect, b32.effect]).toEqual(["assists", "assists"]);
+    expect([b30.patternEffect, b32.patternEffect]).toEqual(["mixed", "mixed"]);
     const proposal = buildAnnualEventReadingProse({ ...b30, appliedWork: "employed" }), settlement = buildAnnualEventReadingProse({ ...b32, appliedWork: "employed" });
     expect(proposal.title).toContain("试点"); expect(settlement.title).toContain("回款条件");
     expect(proposal.examples.join()).toContain("改法"); expect(settlement.examples.join()).toContain("验收");

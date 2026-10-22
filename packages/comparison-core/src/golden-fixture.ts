@@ -7,10 +7,10 @@ import type {
 import { sha256Hex } from "@hakimi/integrity";
 
 export const FORMAL_COMPARISON_GOLDEN_FIXTURE_ID = "formal-comparison-engineering-regression-v1" as const;
-export const FORMAL_COMPARISON_GOLDEN_FIXTURE_VERSION = "1.1.0" as const;
+export const FORMAL_COMPARISON_GOLDEN_FIXTURE_VERSION = "1.2.0" as const;
 export const FORMAL_COMPARISON_GOLDEN_EVIDENCE_STATUS = "engineering_regression_only" as const;
 export const PAIR_STRUCTURE_RESEARCH_GOLDEN_FIXTURE_ID = "pair-structure-research-engineering-regression-v1" as const;
-export const PAIR_STRUCTURE_RESEARCH_GOLDEN_FIXTURE_VERSION = "1.1.0" as const;
+export const PAIR_STRUCTURE_RESEARCH_GOLDEN_FIXTURE_VERSION = "1.2.0" as const;
 export const PAIR_STRUCTURE_RESEARCH_GOLDEN_EVIDENCE_STATUS = "engineering_regression_only" as const;
 const TRANSIT_NODE_TYPES: readonly TransitNodeType[] = ["dayun", "xiaoyun", "year", "month", "day", "hour"];
 

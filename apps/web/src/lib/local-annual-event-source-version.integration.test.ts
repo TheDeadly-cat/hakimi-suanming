@@ -57,7 +57,7 @@ async function adoptedRecords(choice: ReadingFeedbackChoice): Promise<ResearchNo
 
 describe("event prose version reaches projection, feedback and same-source recording", () => {
   it("carries prose 0.7 through real work changes and complete settlement members without changing their identities or exact periods", () => {
-    expect(ANNUAL_EVENT_READING_PROSE_VERSION).toBe("hakimi.annual-event-reading-prose/0.7.0");
+    expect(ANNUAL_EVENT_READING_PROSE_VERSION).toBe("hakimi.annual-event-reading-prose/0.12.0");
     const original = JSON.stringify(events), projected = projectPriorityAnnualEvents(priorities, events);
     for (const year of events.years) {
       expect(year.sourceVersions).toContain(ANNUAL_EVENT_READING_PROSE_VERSION);

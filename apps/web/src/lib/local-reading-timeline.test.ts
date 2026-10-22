@@ -140,7 +140,13 @@ describe("existing judgments organized as exact, branch-specific reading stages"
     const support = narrative.statements.find((statement) => statement.kind === "support_window")!;
     expect(support.text).toContain("结构上较顺，需看承接与救应");
     expect(support.text).toContain("本年天干未单独定向"); expect(support.text).toContain("藏庚");
-    expect(support.text).toContain("以2028年的作用为例"); expect(support.text).toContain("以2029年的作用为例");
+    expect(support.text).toContain("以2028年的作用为例");
+    expect(support.text).toContain("2029-05-23前");
+    const handoverInstant = resourceAnnual.years.find(year => year.year === 2029)!.judgmentSegments[1]!.startInstant;
+    const afterHandover = result.stages.find(stage => stage.startInstant === handoverInstant)!;
+    expect(afterHandover).toBeDefined();
+    expect(support.stageIds).not.toContain(afterHandover.id);
+    expect(afterHandover.caption).toContain("利弊并见");
     for (const statement of narrative.statements) {
       expect(statement.stageIds.every((id) => result.stages.some((stage) => stage.id === id && stage.branchId === "locked"))).toBe(true);
       expect(statement.turningPointIds.every((id) => result.turningPoints.some((point) => point.id === id && point.branchId === "locked"))).toBe(true);
@@ -150,7 +156,9 @@ describe("existing judgments organized as exact, branch-specific reading stages"
     const overview = narrative.statements.find((statement) => statement.kind === "overview")!;
     expect(overview.stageIds).toEqual(result.stages.map((stage) => stage.id));
     for (const stage of result.stages) expect(overview.text).toContain(stage.caption);
-    expect(overview.text).toContain("2034-02-04至2036-02-04前，条件性");
+    expect(overview.text).toContain("2034-02-04至2036-02-04前，结构上有压力");
+    expect(resourceAnnual.years.filter(year => year.year >= 2034).every(year => year.judgmentSegments.every(segment =>
+      segment.judgment.axes.find(axis => axis.axis === "pattern")!.effect === "obstructs"))).toBe(true);
   });
 
   it("keeps the real unchanged-pressure handover explicit and the pre-handover background gap visible", () => {

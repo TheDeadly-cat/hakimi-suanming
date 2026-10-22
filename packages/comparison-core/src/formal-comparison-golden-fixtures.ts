@@ -7,17 +7,28 @@ import {
   formalComparisonSourceSchema,
   revisionRecordSchema,
   type BirthInput,
+  type ComparisonItem,
+  type FormalComparisonProjection,
   type FormalComparisonRequest,
   type FormalComparisonSlotId,
   type FormalComparisonSource,
-  type PairStructureResearchRequest
+  type PairStructureResearchRequest,
+  type PairStructureResearchProjection,
+  type SynchronizedTransitResult
 } from "@hakimi/contracts";
 import { sha256Hex } from "@hakimi/integrity";
 import { withDayBoundary } from "@hakimi/rule-profiles";
 import {
+  requireHistoricalTransitSnapshotExecutor,
+  TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0,
+  TransitCoreError
+} from "@hakimi/transit-core";
+import {
   COMPARISON_CATEGORY_ORDER,
   COMPARISON_FIELD_DEFINITIONS,
   PAIR_STRUCTURE_RESEARCH_POLICY,
+  buildFormalComparisonHashPayload,
+  buildPairStructureResearchHashPayload,
   projectPairStructureResearch,
   projectFormalComparison
 } from "./index";
@@ -36,15 +47,15 @@ export const FORMAL_COMPARISON_GOLDEN_TARGET_INSTANT = "2024-02-04T08:27:07.000Z
 const packageRoot = path.resolve(fileURLToPath(new URL("../", import.meta.url)));
 export const FORMAL_COMPARISON_GOLDEN_SOURCES_PATH = path.join(
   packageRoot,
-  "fixtures/formal-comparison-sources.v1.json"
+  "fixtures/formal-comparison-sources.v1.2.json"
 );
 export const FORMAL_COMPARISON_GOLDEN_PROJECTIONS_PATH = path.join(
   packageRoot,
-  "fixtures/formal-comparison-projections.v1.json"
+  "fixtures/formal-comparison-projections.v1.2.json"
 );
 export const PAIR_STRUCTURE_RESEARCH_GOLDEN_PROJECTION_PATH = path.join(
   packageRoot,
-  "fixtures/pair-structure-research-projection.v1.json"
+  "fixtures/pair-structure-research-projection.v1.2.json"
 );
 
 type SourceDefinition = {
@@ -247,7 +258,40 @@ function requestFor(
   };
 }
 
-export async function buildFormalComparisonGoldenFixtures() {
+// Fixture-only historical reconstruction. Production generation continues to
+// use current calculations; old evidence is replayed with its frozen executor.
+async function frozenTransit(item: ComparisonItem, atInstant: string): Promise<SynchronizedTransitResult> {
+  try {
+    return { itemKey: item.key, status: "resolved", snapshot: await requireHistoricalTransitSnapshotExecutor(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0).calculateSnapshot({
+      revision: item.revision, atInstant,
+      ...(item.manualDirection ? { manualDirection: item.manualDirection } : {})
+    }) };
+  } catch (cause) {
+    return { itemKey: item.key, status: "error",
+      code: cause instanceof TransitCoreError ? cause.code : "UNKNOWN_TRANSIT_ERROR",
+      message: cause instanceof Error ? cause.message : "同步运限计算失败。" };
+  }
+}
+
+export async function withFrozenComparisonTransitV12(raw: FormalComparisonProjection): Promise<FormalComparisonProjection> {
+  const projection = structuredClone(raw);
+  if (projection.targetInstant !== null) {
+    projection.transits = await Promise.all(projection.matrix.items.map((item) => frozenTransit(item, projection.targetInstant!)));
+    projection.manifest.resultHash = await sha256Hex(buildFormalComparisonHashPayload(projection));
+  }
+  return projection;
+}
+
+export async function withFrozenPairTransitV12(raw: PairStructureResearchProjection): Promise<PairStructureResearchProjection> {
+  const projection = structuredClone(raw);
+  for (const participant of projection.participants) {
+    participant.transit = await frozenTransit(participant.item, projection.targetInstant);
+  }
+  projection.manifest.resultHash = await sha256Hex(buildPairStructureResearchHashPayload(projection));
+  return projection;
+}
+
+export async function buildFormalComparisonGoldenFixtures(options: { historicalTransitV12?: boolean } = {}) {
   const sources = await Promise.all(SOURCE_DEFINITIONS.map(buildSource));
   const scenarios = [
     { scenarioId: "same-case-day-boundary-2", itemCount: 2, transitMode: "none" },
@@ -259,7 +303,8 @@ export async function buildFormalComparisonGoldenFixtures() {
     const definitions = SOURCE_DEFINITIONS.slice(0, scenario.itemCount);
     const scenarioSources = sources.slice(0, scenario.itemCount);
     const request = requestFor(definitions, scenario.transitMode);
-    const projection = await projectFormalComparison(request, scenarioSources);
+    const current = await projectFormalComparison(request, scenarioSources);
+    const projection = options.historicalTransitV12 ? await withFrozenComparisonTransitV12(current) : current;
     projections.push({
       scenarioId: scenario.scenarioId,
       request,
@@ -268,7 +313,7 @@ export async function buildFormalComparisonGoldenFixtures() {
   }
   const metadata = {
     fixtureId: FORMAL_COMPARISON_GOLDEN_FIXTURE_ID,
-    fixtureVersion: FORMAL_COMPARISON_GOLDEN_FIXTURE_VERSION,
+    fixtureVersion: options.historicalTransitV12 ? "1.1.0" : FORMAL_COMPARISON_GOLDEN_FIXTURE_VERSION,
     evidenceStatus: FORMAL_COMPARISON_GOLDEN_EVIDENCE_STATUS,
     warning: "仅用于工程确定性回归；不是命理金标、专家裁决或吉凶结论。",
     generator: "packages/comparison-core/scripts/update-formal-comparison-golden.mjs"
@@ -300,7 +345,8 @@ export async function buildFormalComparisonGoldenFixtures() {
     ],
     atInstant: FORMAL_COMPARISON_GOLDEN_TARGET_INSTANT
   };
-  const pairProjection = await projectPairStructureResearch(pairRequest, [sourceA, pairSourceB]);
+  const currentPair = await projectPairStructureResearch(pairRequest, [sourceA, pairSourceB]);
+  const pairProjection = options.historicalTransitV12 ? await withFrozenPairTransitV12(currentPair) : currentPair;
   return {
     sources: {
       ...metadata,
@@ -316,7 +362,7 @@ export async function buildFormalComparisonGoldenFixtures() {
     },
     pairResearch: {
       fixtureId: PAIR_STRUCTURE_RESEARCH_GOLDEN_FIXTURE_ID,
-      fixtureVersion: PAIR_STRUCTURE_RESEARCH_GOLDEN_FIXTURE_VERSION,
+      fixtureVersion: options.historicalTransitV12 ? "1.1.0" : PAIR_STRUCTURE_RESEARCH_GOLDEN_FIXTURE_VERSION,
       evidenceStatus: PAIR_STRUCTURE_RESEARCH_GOLDEN_EVIDENCE_STATUS,
       warning: "仅用于两个不同合成 Case 的工程确定性回归；只含双方各自事实，不是缘分、合婚吉凶、关系结论、命理金标或专家裁决。",
       generator: "packages/comparison-core/scripts/update-formal-comparison-golden.mjs",
@@ -354,6 +400,9 @@ export function formalComparisonGoldenFiles(
 export async function writeFormalComparisonGoldenFixtures(
   fixtures: Awaited<ReturnType<typeof buildFormalComparisonGoldenFixtures>>
 ): Promise<void> {
+  if (fixtures.sources.fixtureVersion !== FORMAL_COMPARISON_GOLDEN_FIXTURE_VERSION) {
+    throw new Error("历史对照金标只读，不能通过当前生成器重写。");
+  }
   await mkdir(path.dirname(FORMAL_COMPARISON_GOLDEN_SOURCES_PATH), { recursive: true });
   await Promise.all(formalComparisonGoldenFiles(fixtures).map((file) =>
     writeFile(file.path, file.content, "utf8")

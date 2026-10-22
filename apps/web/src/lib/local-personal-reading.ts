@@ -82,6 +82,8 @@ export async function buildLocalPersonalReading({ revision, assessment, choices,
       || parsed.value.source.includeHour !== sourceBinding.includeHour || parsed.value.source.assessmentVersion !== assessment.version
       || !parsed.value.source.readingVersions.some((version) => [
         "hakimi.local-annual-event-reading/0.5.0", "hakimi.local-annual-event-reading/0.6.0",
+        "hakimi.annual-event-reading-prose/0.11.0", "hakimi.monthly-domain-prose/0.4.0", "hakimi.annual-life-story/0.5.0",
+        "hakimi.local-annual-month-story/0.4.0", "hakimi.local-life-stage-years/0.4.0",
         "hakimi.local-outlook-judgment/0.9.0", "hakimi.local-annual-outlook/0.8.0", "hakimi.local-detailed-outlook/0.5.0", "hakimi.annual-event-scenarios/0.4.0"
       ].includes(version))) return [];
     const choice = bySubject.get(parsed.value.subjectId);

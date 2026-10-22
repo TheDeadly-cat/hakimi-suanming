@@ -88,7 +88,11 @@ describe("declared background changes life tasks while preserving the original c
     expect(outputs[0]![0]!.headline).toContain("改进方法"); expect(outputs[1]![0]!.headline).toContain("确认与收尾");
     expect(outputs[0]![0]!.summary).not.toBe(outputs[1]![0]!.summary);
     expect(outputs[0]![0]!.paragraphs.join()).toContain("庚伤官"); expect(outputs[1]![0]!.paragraphs.join()).toContain("壬正财");
-    expect(outputs[0]![0]!.paragraphs.join()).toContain("原领域没有单列阻力");
+    const originalCareer = readings[0]!.branches[0]!.segments[0]!.domains.find(domain => domain.id === "career")!;
+    expect(originalCareer.obstacles.length).toBeGreaterThan(0);
+    for (const obstacle of originalCareer.obstacles) expect(outputs[0]![0]!.basis.join()).toContain(obstacle);
+    expect(outputs[0]![0]!.paragraphs.join()).toContain("原文保留的阻力");
+    expect(outputs[0]![0]!.paragraphs.join()).not.toContain("原领域没有单列阻力");
     expect(JSON.stringify({ b, readings })).toBe(before);
   });
   it("preserves unknown-sex branches and every actual interval, condition and role attribution", () => {

@@ -11,12 +11,12 @@ import { legacyAnnualInputFromExtras } from "./local-personal-reading-legacy";
 import { plainMonthlyPresentation, plainAnnualMonthContrast } from "./plain-monthly-presentation";
 import { plainOutlookCaption } from "./plain-outlook-reading";
 import { buildConcretePeriodProse, concretePeriodCaption, concreteDirectionExplanation, concreteFinancialYearMonthContrast, concretePeriodMechanism, CONCRETE_PERIOD_PROSE_VERSION, type ConcretePeriodFact, type ConcreteLifeSentence } from "./concrete-period-prose";
-import { buildLocalReadingAgeContext } from "./local-reading-age-context";
-import { readingContextDraftSchema, READING_CONTEXT_FORMAT } from "./local-reading-context";
+import { buildLocalReadingAgeContext, type LocalReadingAgeContext } from "./local-reading-age-context";
+import { readingContextDraftSchema, READING_CONTEXT_FORMAT, type ReadingContextWork, type ReadingContextRelationship } from "./local-reading-context";
 import { CONTEXTUAL_READING_VERSION } from "./local-contextual-reading";
 import { createAnnualRelationshipTimingBuilder } from "./annual-relationship-timing";
 
-export const PLAIN_TEN_YEAR_READING_VERSION = "hakimi.plain-ten-year-reading/0.3.0" as const;
+export const PLAIN_TEN_YEAR_READING_VERSION = "hakimi.plain-ten-year-reading/0.3.1" as const;
 export interface PlainTenYearMonthWindow {
   id: string; branchId: string; annualSegmentId: string;
   startInstant: string; endExclusiveInstant: string;
@@ -67,28 +67,43 @@ const same = (a: unknown, b: unknown) => stable(a) === stable(b);
 const fail = (message: string): never => { throw new Error(`十年白话读稿：${message}`); };
 const dateTime = (instant: string) => new Date(Date.parse(instant) + 8 * 3_600_000).toISOString().slice(0, 16).replace("T", " ");
 const range = (from: string, to: string) => `${dateTime(from)}起至${dateTime(to)}前`;
-const scopeText = "全年有机会，也可能遇到费力月份。以下日期均为北京时间，月份以节气交接。工作、钱和感情分别判断：工作费力的月份也可能有感情进展。具体事情是有条件的生活情境，须先有相应的工作、款项或关系基础，不是已经发生的事实。感情方面，有在接触的人看联系与见面，有伴侣看共同安排；暂无明显转折的年份只说日常相处重点。这里先说关键时段，全部月份保留在完整流月中。";
+type DomainTitles=Record<"career"|"wealth"|"relationship",string>;
+function periodTitles(age:LocalReadingAgeContext,work?:ReadingContextWork,relationship?:ReadingContextRelationship):DomainTitles{
+  if(age.stage === "young_child"||age.stage === "youth")return{career:age.stage === "young_child"?"照料与活动":"学习与活动",wealth:"时间与用品",relationship:"家人与同伴"};
+  if(age.stage !== "adult")return{career:age.stage === "adult_transition"?"学习与生活安排":"日常事务",wealth:"时间与用品",relationship:"相处与关系"};
+  const titles:Partial<Record<ReadingContextWork,[string,string]>>={student:["学习与发展","学习投入与日常开支"],retired:["经验与日常活动","日常开支"],caregiving:["家庭照料与事务","家庭开支"],seeking_work:["求职与准备","求职投入与日常开支"]};
+  const [career,wealth]=titles[work??"unspecified"]??["事业","财运"];
+  return{career,wealth,relationship:relationship === "separated"?"旧关系交接":"感情"};
+}
+function periodScope(age:LocalReadingAgeContext,work?:ReadingContextWork,relationship?:ReadingContextRelationship):string{
+  if(age.stage === "young_child"||age.stage === "youth")return"儿童时段分别看学习活动、时间用品与家人同伴相处，不默认已有职业收入或成年婚恋安排。";
+  if(age.stage !== "adult")return age.stage === "adult_transition"?"跨过成长阶段的时段，按已列年龄分别理解学习、生活安排和相处；成年段也须有对应的现实身份。":"年龄或时辰条件不足的时段，保持日常事务与相处语境，不推定职业、收入或关系身份。";
+  const labels=periodTitles(age,work,relationship),known=work&&!["unspecified","employed","self_employed"].includes(work);
+  const workScope=known?`已填写背景适用的时段分别看${labels.career}、${labels.wealth}与${labels.relationship}。`:"事业、财运与感情分别判断，一项受阻不代表其他方面也受阻；具体事项须有相应工作、款项或关系基础。";
+  return workScope+(relationship === "separated"?"分开或分居背景只说明必要联系、责任与交接，不预设复合。":relationship === "single"?"单身背景先看相识和联系，不把共同生活或婚事写成已经有的安排。":relationship === "partnered"||relationship === "married"?"已有关系看共同安排与责任，不把接触增加直接写成新恋情。":"关系状态未填写，接触、承诺等事项须结合现实基础；没有明显转折的时段只看日常相处。");
+}
 
 function windowTopics(window: PlainTenYearMonthWindow): string {
   const topics = window.members.flatMap(member => member.topics);
+  const title=(domain:"career"|"wealth"|"relationship")=>unique(topics.filter(topic=>topic.domain===domain).map(topic=>topic.title)).join("、")||({career:"日常事务",wealth:"时间与用品",relationship:"相处"} as const)[domain];
   const adopted = unique(topics.filter(topic => topic.origin === "personal").map(topic => topic.text));
   const recurring=new Set(window.members.flatMap(member=>member.recurringEventIds));
   const facts = topics.filter(topic => topic.origin !== "personal" && topic.domain !== "relationship").flatMap(topic => topic.facts).filter(fact=>!fact.eventId||!recurring.has(fact.eventId));
   const distinct = (kind: ConcretePeriodFact["kind"]) => [...new Map(facts.filter(fact => fact.kind === kind).map(fact => [`${fact.domain}:${fact.text}`,fact])).values()];
   window.opportunities = distinct("opportunity"); window.cautions = distinct("caution");
-  if(window.origin !== "personal")window.label=concretePeriodCaption(window.effect,facts);
+  if(window.origin !== "personal")window.label=concretePeriodCaption(window.effect,facts,{career:title("career"),wealth:title("wealth")});
   // Select each sign independently, including hidden support. Career and money
   // are separate life situations, so neither can crowd the other out by order.
-  const prose=["career","wealth"].flatMap(domain=>{
+  const prose=(["career","wealth"] as const).flatMap(domain=>{
     const pick=(kind:ConcretePeriodFact["kind"])=>{
       const candidates=facts.filter(fact=>fact.domain===domain&&fact.kind===kind);
       return candidates.find(fact=>fact.eventId)??candidates.find(fact=>fact.actionIndex!==null)??candidates[0];
     };
     const topic=pick("topic"),opportunity=pick("opportunity"),caution=pick("caution");
-    const label=domain === "career"?"事业":"财运";
+    const label=title(domain);
     return [topic?`${label}：${topic.shortText??topic.text}。`:"",opportunity?`${label}机会：${opportunity.shortText??opportunity.text}。`:"",caution?`${label}阻力：${caution.shortText??caution.text}。`:""].filter(Boolean);
   });
-  const notes=window.eventNotes.map(note=>`${["romance","commitment","separation"].includes(note.category)?"感情":["money_inflow","money_loss"].includes(note.category)?"财运":"事业"}：${note.text}`);
+  const notes=window.eventNotes.map(note=>`${title(["romance","commitment","separation"].includes(note.category)?"relationship":["money_inflow","money_loss"].includes(note.category)?"wealth":"career")}：${note.text}`);
   return [...prose,...notes,...unique(window.members.map(member=>member.directionNote).filter(Boolean)),...unique(window.members.map(member=>member.annualContrast).filter(Boolean)),...adopted].filter(Boolean).join(" ");
 }
 
@@ -193,6 +208,7 @@ export function buildPlainTenYearReading(input: BuildPlainTenYearReadingInput): 
   });
   const personalMessage = (ids: readonly string[]) => `已采用个人修订，按个人原文阅读（${ids.map(id => personalTexts.find(text => text.id === id)?.title ?? fail("个人原文引用失配。")).join("、")}）。`;
   const gaps: string[] = [...report.coverage.gaps];
+  const scopeNotes=new Set<string>();
   const branches: PlainTenYearReading["branches"] = [];
   for (const yearRow of report.years) {
     const year = annual!.years.find(item => item.year === yearRow.year)!;
@@ -213,6 +229,9 @@ export function buildPlainTenYearReading(input: BuildPlainTenYearReadingInput): 
         const domains = structuredClone(row.domains);
         const age = buildLocalReadingAgeContext(sourceBinding.includeHour ? revision.timeCalibration.utcInstant : null,row.startInstant,row.endExclusiveInstant);
         const work = age.stage === "adult" && contextDraft && contextDraft.fromYear <= year.year && year.year <= contextDraft.toYear ? contextDraft.work : undefined;
+        const relationship=age.stage === "adult" && contextDraft && contextDraft.fromYear <= year.year && year.year <= contextDraft.toYear ? contextDraft.relationship : undefined;
+        const titles=periodTitles(age,work,relationship);
+        scopeNotes.add(periodScope(age,work,relationship));
         const backgrounds=actual.judgment.backgroundRefs.map(ref=>{
           const found=year.dayunSegments.find(part=>part.direction===actual.branchId&&same(part.nodeRef,ref))??fail("年段缺少同分支大运来源。");
           return {nodeType:"dayun" as const,ganZhi:found.ganZhi,ref:found.nodeRef};
@@ -220,13 +239,16 @@ export function buildPlainTenYearReading(input: BuildPlainTenYearReadingInput): 
         const rescueTrace=rescueFor({judgment:actual.judgment,target:{nodeType:"year",ganZhi:year.yearGanZhi!,ref:year.transitNodeRef!},backgrounds});
         const lifeSignals={events:row.eventTendencies.map(event=>event.original),relationshipTiming:timingFor(year,actual),rescueTrace,horizon:"year" as const};
         const domainEvidence:PlainTenYearSegment["domainEvidence"]=[];
+        const annualFacts:ConcretePeriodFact[]=[];
         for (const domain of domains) {
+          domain.title=titles[domain.domain];
           const ids = personalFor(domain.sourceSubjects);
           if (ids.length) { domain.origin = "personal"; domain.headline = "已采用个人修订"; domain.text = personalMessage(ids); domain.personalTextIds = ids; }
           else if (domain.origin === "personal") return fail("领域个人标记没有匹配的采用来源。");
           else {
             const prose = buildConcretePeriodProse({judgment:actual.judgment,domain:domain.domain,age,work,verdict:domain.verdict,task:extras.comprehensive?.patternDiagnosis?.wealthResourceTask,lifeSignals});
             domain.headline=prose.headline;domain.text=prose.text;
+            annualFacts.push(...prose.facts);
             domainEvidence.push({domain:domain.domain,sentences:prose.sentences??[]});
           }
           domain.showInBrief=true;
@@ -249,9 +271,12 @@ export function buildPlainTenYearReading(input: BuildPlainTenYearReadingInput): 
               reading, segment: monthlySegment, domain, month, annualYear: year, personal: prepared!.personal,
               task: extras.comprehensive?.patternDiagnosis?.wealthResourceTask });
             const monthAge=buildLocalReadingAgeContext(sourceBinding.includeHour?revision.timeCalibration.utcInstant:null,period.startInstant,period.endExclusiveInstant);
-            const prose=buildConcretePeriodProse({judgment:original.judgment,domain:domain.id,age:monthAge,work:monthAge.stage === "adult" ? work : undefined,task:extras.comprehensive?.patternDiagnosis?.wealthResourceTask,
+            const monthWork=monthAge.stage === "adult"&&contextDraft&&contextDraft.fromYear<=year.year&&year.year<=contextDraft.toYear?contextDraft.work:undefined;
+            const monthRelationship=monthAge.stage === "adult"&&contextDraft&&contextDraft.fromYear<=year.year&&year.year<=contextDraft.toYear?contextDraft.relationship:undefined;
+            const monthTitles=periodTitles(monthAge,monthWork,monthRelationship);
+            const prose=buildConcretePeriodProse({judgment:original.judgment,domain:domain.id,age:monthAge,work:monthWork,task:extras.comprehensive?.patternDiagnosis?.wealthResourceTask,
               lifeSignals:{events:period.events,monthlyEvidence:prepared!.reading.evidence,horizon:"month"}});
-            return { domain: domain.id, title: domain.title, text: ids.length ? personalMessage(ids) : prose.headline,
+            return { domain: domain.id, title: monthTitles[domain.id], text: ids.length ? personalMessage(ids) : prose.headline,
               summary: ids.length ? personalMessage(ids) : prose.text,
               origin: ids.length ? "personal" : prepared!.reading.contextRef ? "contextual" : "calculated", sourceSubjects, personalTextIds: ids,
               facts:ids.length||domain.id === "relationship"?[]:prose.facts,signature:ids.length?`personal:${ids.join("|")}`:prose.signature,sentences:ids.length?[]:prose.sentences??[] };
@@ -347,9 +372,15 @@ export function buildPlainTenYearReading(input: BuildPlainTenYearReadingInput): 
           : !monthWindows.length ? "本段没有可作个人解读的完整月份；出生前或未知时段不补造。"
             : `已保留本段${unique(monthWindows.flatMap(window=>window.monthIds)).length}个月份的完整来源，下面精选有具体事情的关键时段；其他月份可在完整流月中查看。换运月前后分别说明。`;
         const mechanisms=personalTextIds.length?[]:concretePeriodMechanism({judgment:actual.judgment,domain:"career",age,work,lifeSignals});
+        const primary=actual.judgment.axes.find(axis=>axis.axis===actual.judgment.primaryAxis);
+        const explicitHelp=(fact:ConcretePeriodFact)=>fact.kind === "opportunity"&&(fact.eventId
+          ?row.eventTendencies.some(event=>event.original.id===fact.eventId&&event.original.supportEvidenceIds.length>0&&event.original.direction!=="pressured")
+          :fact.actionIndex!==null&&actual.judgment.axes.find(axis=>axis.id===fact.axisId)?.stemActions?.items[fact.actionIndex]?.effect === "assists");
+        const supportedDomains=unique([...annualFacts.filter(explicitHelp).map(fact=>titles[fact.domain]),...domainEvidence.filter(domain=>domain.domain === "relationship"&&domain.sentences.some(sentence=>sentence.kind === "opportunity"&&sentence.sources.some(source=>source.kind === "event"&&row.eventTendencies.some(event=>event.original.id===source.id&&event.original.supportEvidenceIds.length>0)))).map(domain=>titles[domain.domain])]);
+        const annualCaption=primary?.effect === "mixed"||actual.judgment.label === "利弊并见"?supportedDomains.length?`${supportedDomains.join("、")}有局部推进线索，综合仍有牵制`:mechanisms.some(sentence=>sentence.kind === "opportunity")?"已有局部缓解，综合取舍仍有条件":"综合取舍仍有条件，尚未形成具体推进结论":plainOutlookCaption(actual.judgment,row.caption);
         segments.push({ id: row.id, branchId: row.branchId, startInstant: row.startInstant, endExclusiveInstant: row.endExclusiveInstant,
           ageLabel: row.ageLabel, headline: personalTextIds.length ? "本段含已采用的个人修订" : row.headline,
-          judgmentText: personalTextIds.length ? "相关领域按已采用的个人原文阅读，不用自动年度总判覆盖。" : `这一年度时段：${plainOutlookCaption(actual.judgment, row.caption)}。${mechanisms.map(sentence=>sentence.text).join("")}`,
+          judgmentText: personalTextIds.length ? "相关领域按已采用的个人原文阅读，不用自动年度总判覆盖。" : `这一年度时段：${annualCaption}。${mechanisms.map(sentence=>sentence.text).join("")}`,
           origin: personalTextIds.length ? "personal" : extras.contextual ? "contextual" : "calculated",
           domains, domainEvidence,mechanisms,events, monthWindows, monthCoverageText, sourceSubjects: [...row.sourceSubjects], personalTextIds });
       }
@@ -358,6 +389,7 @@ export function buildPlainTenYearReading(input: BuildPlainTenYearReadingInput): 
   }
   const coverageText = annual ? `逐年阅读${annual.startYear}—${annual.endYear}，共${annual.years.length}个立春年；已核${preparedByYear.size}年的月份资料。`
     : "当前没有完整年度窗口，未补造十年判断。";
+  const scopeText=["全年和月份分别判断。以下日期均为北京时间，月份以节气交接。",...(scopeNotes.size?[...scopeNotes]:["当前缺少完整年度或年龄条件，未据此推定职业、收入或关系身份。"]),"具体事情是有条件的生活情境，不是已经发生的事实。这里先说关键时段，全部月份保留在完整流月中。"].join(" ");
   const out = ["## 年份、月份与可能发生的事", coverageText, scopeText,...(recurringText?[recurringText]:[])];
   if (branches.length > 1) out.push("起运方向尚未确定，下列分支各自完整，不相加，也不择优。 ");
   for (const branch of branches) {

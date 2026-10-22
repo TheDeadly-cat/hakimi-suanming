@@ -476,11 +476,11 @@ export function buildAnnualMechanismTopic(input: AnnualEventReadingProseInput, c
   const linked = buildNatalTransitTaskProse({ links: context.taskLinks, effect: context.effect,
     actions: [actor, ...(input.mainQiAction ? [input.mainQiAction] : [])], ageStage: input.age.stage,
     kind: input.kind, domain: input.domain === "wealth" ? "wealth" : "career", horizon: "year" });
-  if (linked && input.age.stage === "adult" && (!input.appliedWork || input.appliedWork === "unspecified")) return {
-    title: linked.title, summary: linked.summary, examples: linked.examples,
-    reasoning: unique([context.summary, ...context.rescues, ...context.unresolvedConditions]) };
   const task = taskFor(input);
-  if (task) return buildTaskTopic(input, task, concreteTopic);
+  if (task) {
+    const topic = buildTaskTopic(input, task, concreteTopic);
+    return linked ? { ...topic, summary: `${topic.summary}${linked.taskSummary}` } : topic;
+  }
   const agePhases = lifePhases(input), firstPhase = agePhases[0]!;
   const adultSituations = adultSituationsFor(input, firstPhase);
   const objects = lifeObjects(input, firstPhase.stage, firstPhase.age), scene = kindScene(input, objects, firstPhase);

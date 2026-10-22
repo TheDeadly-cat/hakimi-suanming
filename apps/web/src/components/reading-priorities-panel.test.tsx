@@ -271,7 +271,7 @@ describe("compact navigation preserves actual event and personal scopes", () => 
     view.rerender(<ReadingPrioritiesPanel reading={actualB.priorities} annualEvents={actualB.events} annualLifeStories={shifted} />);
     expect(screen.queryByLabelText("这段年份的主结论")).toBeNull();
     expect(annualAnswerForYear(actualB.annual.years[0]!, shifted)).toBeNull();
-    expect(screen.getByLabelText("年份导航摘要").textContent).toContain("已有成果");
+    expect(screen.getByLabelText("年份导航摘要").textContent).toContain(actualB.events.years[0]!.branches[0]!.segments[0]!.items.find(item => item.domain === "career")!.title);
   });
 
   it("points to an adopted personal answer instead of covering it with the automatic title", () => {
@@ -288,6 +288,10 @@ describe("compact navigation preserves actual event and personal scopes", () => 
     const before = JSON.stringify(actualB), events = actualB.events.years[0]!, composed = composeAnnualEvents(events), segment = composed.branches[0]!.segments[0]!;
     const onSelectYear = vi.fn(); render(<ReadingPrioritiesPanel reading={actualB.priorities} annualEvents={actualB.events} onSelectYear={onSelectYear} />);
     const card = screen.getByRole("article", { name: "2032年先读" }), navigation = within(card).getByLabelText("年份导航摘要");
+    // Background pressure changes whether this real year is selected first;
+    // its exact original event scopes remain reachable under the other-years fold.
+    const otherYears = card.closest<HTMLDetailsElement>("details.reading-priority-others");
+    if (otherYears) { expect(otherYears.open).toBe(false); await userEvent.click(otherYears.querySelector("summary")!); }
     expect(segment.items.some((item) => item.kind === "settlement")).toBe(true);
     expect(segment.items.some((item) => item.kind === "single" && item.members[0].domain === "relationship")).toBe(true);
     expect(navigation.querySelectorAll("[data-event-id]")).toHaveLength(segment.items.length);
@@ -307,7 +311,7 @@ describe("compact navigation preserves actual event and personal scopes", () => 
     expect(JSON.stringify(actualB)).toBe(before);
   });
 
-  it("keeps group, member and independent relationship personal text visible, and restores retained or pending originals without stale adoption", () => {
+  it("keeps group, member and independent relationship personal text visible, and restores retained or pending originals without stale adoption", async () => {
     const reading = actualB.events.years[0]!, branch = reading.branches[0]!, originalSegment = branch.segments[0]!;
     const composition = composeAnnualEvents(reading), segment = composition.branches[0]!.segments[0]!, group = segment.items.find((item) => item.kind === "settlement")!;
     if (group.kind !== "settlement") throw new Error("Real B2032 settlement fixture is required");
@@ -320,6 +324,8 @@ describe("compact navigation preserves actual event and personal scopes", () => 
     ];
     const model = personalEntries(actualB.events, entries.slice(1));
     const view = render(<PersonalReadingProvider reading={model}><ReadingPrioritiesPanel reading={actualB.priorities} annualEvents={actualB.events} /></PersonalReadingProvider>);
+    const otherYears = screen.getByRole("article", { name: "2032年先读" }).closest<HTMLDetailsElement>("details.reading-priority-others");
+    if (otherYears) { expect(otherYears.open).toBe(false); await userEvent.click(otherYears.querySelector("summary")!); }
     const navigation = () => within(screen.getByRole("article", { name: "2032年先读" })).getByLabelText("年份导航摘要");
     expect(within(navigation()).getByText(group.title).closest("details:not([open])")).toBeNull();
     for (const text of [memberText, relationText]) expect(within(navigation()).getByText(text).closest("details:not([open])")).toBeNull();

@@ -8,7 +8,7 @@ import type { KeyMonthEventTendency, KeyMonthEventEvidence } from "./key-month-e
 import type { AnnualRelationshipTiming } from "./annual-relationship-timing";
 import type { OutlookRescueTraceBundle } from "./outlook-rescue-trace";
 
-export const CONCRETE_PERIOD_PROSE_VERSION = "hakimi.concrete-period-prose/0.3.1" as const;
+export const CONCRETE_PERIOD_PROSE_VERSION = "hakimi.concrete-period-prose/0.3.2" as const;
 export interface ConcreteLifeSentence {
   text:string; kind:"opportunity"|"caution"|"topic";
   sources:{kind:"event"|"action"|"task_relation"|"relationship_signal"|"rescue"|"scope";id:string;detail?:string}[];
@@ -173,9 +173,9 @@ function concreteHeadline(actor:OutlookStemAction|undefined,domain:"career"|"wea
 /** A comprehensive axis may differ from the work/money pattern axis. Preserve
  * its effect in the model but do not promise a visible opportunity we cannot
  * map from that axis into these two domains. */
-export function concretePeriodCaption(effect:OutlookEffect|null,facts:readonly ConcretePeriodFact[]):string {
+export function concretePeriodCaption(effect:OutlookEffect|null,facts:readonly ConcretePeriodFact[],labels:{career:string;wealth:string}={career:"事业",wealth:"财运"}):string {
   const help=facts.some(fact=>fact.kind === "opportunity"),pressure=facts.some(fact=>fact.kind === "caution");
-  const names=(kind:ConcretePeriodFact["kind"])=>[...new Set(facts.filter(fact=>fact.kind===kind).map(fact=>fact.domain === "career"?"事业":"财运"))].join("、");
+  const names=(kind:ConcretePeriodFact["kind"])=>[...new Set(facts.filter(fact=>fact.kind===kind).map(fact=>labels[fact.domain]))].join("、");
   if(effect === "mixed"&&!help)return pressure?`已见${names("caution")}阻力，综合取舍仍有条件`:"综合取舍仍有条件，尚未形成具体机会";
   if(effect === "assists"&&!help)return pressure?`${names("caution")}仍需留意，综合另有支持条件`:"综合有支持条件，各领域尚未形成具体机会";
   if(effect === "mixed"&&help)return `${names("opportunity")}有局部机会，${pressure?`${names("caution")}仍有阻力`:"综合仍有牵制"}`;
@@ -212,6 +212,21 @@ export function concreteFinancialYearMonthContrast(input: Omit<ConcretePeriodInp
 
 type LifeEvent=AnnualEventTendency|KeyMonthEventTendency;
 const lifeRank={clear:3,possible:2,weak:1,none:0,not_applicable:-1} as const;
+/** A financial actor in these paths describes support allocation, not cash.
+ * Undecided and neutral actions must remain topics; mixed is not proof that
+ * its conditional support has already taken effect. */
+function supportAllocationProse(action:OutlookStemAction,domain:"career"|"wealth"):{headline:string;text:string;kind:ConcreteLifeSentence["kind"]}{
+  const career=domain === "career";
+  const byEffect:Record<OutlookEffect,{headline:string;text:string;kind:ConcreteLifeSentence["kind"]}>={
+    assists:{headline:career?"任务与必要支持有协调空间":"资金与执行支持的配合有改善条件",text:career?"这项财的作用有助于调节负担、保留必要支持，让已有任务更有条件完成；不能据此直接说业务扩张或收入增加。":"这项财的作用有助于协调资金与必要支持的安排；这是执行条件的改善，不直接等于新增收入。",kind:"opportunity"},
+    obstructs:{headline:career?"发展关键在任务与必要支持能否衔接":"必要支持与新增承担有冲突，财务安排受限",text:career?"新增承担与必要支持之间有冲突，事业发展更容易受制于能否保住执行条件，而不是单纯机会多少。":"资金与必要支持的安排受到牵制，须先确认哪些承担占用了执行条件；这项作用本身不等于已经发生额外支出。",kind:"caution"},
+    mixed:{headline:career?"任务与必要支持的配合仍有取舍":"资金与执行支持的配合仍有取舍",text:career?"这项财涉及调节负担与保留必要支持，当前配合与限制并存；任务能否更顺利完成，仍取决于所列条件。":"资金与必要支持的安排同时有配合与限制，改善能否落实仍有条件；不能直接换成增收或额外支出的判断。",kind:"topic"},
+    neutral:{headline:career?"任务与必要支持的衔接是当前议题":"资金与必要支持的安排是当前议题",text:career?"这项财落在任务与必要支持的衔接上，本身未给出新增发展机会或受阻方向。":"这项财落在资金与必要支持的安排上，本身未形成新增进账、额外支出或安排改善的判断。",kind:"topic"},
+    unresolved:{headline:career?"任务与必要支持能否衔接尚待条件":"资金与执行支持能否改善尚未判清",text:career?"这项财能否调节负担、接上必要支持尚未判清，不能据此定为发展机会或受阻。":"资金与必要支持是否能够衔接尚未判清，未据此判断安排已经改善、收入增加或额外支出。",kind:"topic"},
+  };
+  const result=byEffect[action.effect];
+  return action.visibility === "main_hidden"?{...result,text:`支内辅助条件：${result.text}`} : result;
+}
 function differentiatedLifeProse(input:ConcretePeriodInput):ConcretePeriodProse {
   const signals=input.lifeSignals!,axis=input.judgment.axes.find(item=>item.axis === "pattern"),s=scene(input.age,input.work);
   const period=signals.horizon === "year"?"本年":"本月";
@@ -269,9 +284,9 @@ function differentiatedLifeProse(input:ConcretePeriodInput):ConcretePeriodProse 
     const direct=leadingInflow?.action.tenGod === "正财",extra=leadingInflow?.action.tenGod === "偏财",hiddenOnly=leadingInflow?.action.visibility === "main_hidden";
     const special=axis&&(["resource-wealth","official-resource","killings-resource","food-killings"].includes(axis.pathId)||input.task?.preferredPathId===axis.pathId&&["wealth_first","resource_first","official_joint"].includes(input.task?.task??""));
     const financialActor=actions.find(action=>action.visibility === "visible"&&["正财","偏财"].includes(action.tenGod))??actions.find(action=>["正财","偏财"].includes(action.tenGod));
-    const specialHeadline=financialActor&&["obstructs","mixed"].includes(financialActor.effect)?"必要支持与新增承担有冲突，财务安排受限":"资金与执行支持的配合有改善条件";
+    const specialProse=special&&financialActor?supportAllocationProse(financialActor,"wealth"):null;
     headline=inflow?hiddenOnly?"收入有辅助性线索，先看已有实际安排":direct?"已有报酬与回款的兑现更突出":extra?"新增合作与额外收入机会更突出":"有款项确认或进账线索"
-      :special&&financialActor?specialHeadline:loss?loss.level === "weak"?actorRefs(loss).length?"额外承担有较弱线索，先看实际收支":"旧有开支与负担仍影响结余":"财运更看能留下多少，支出压力较突出":"现有收支安排是重点，增收线索不突出";
+      :specialProse&&(!loss||["obstructs","mixed"].includes(financialActor!.effect))?specialProse.headline:loss?loss.level === "weak"?actorRefs(loss).length?"额外承担有较弱线索，先看实际收支":"旧有开支与负担仍影响结余":"财运更看能留下多少，支出压力较突出":"现有收支安排是重点，增收线索不突出";
     if(inflow){
       const text=hiddenOnly?`收入支持只在支内，属于辅助条件。${direct?"若已有报酬或欠款约定，可留意确认与兑现":"若现实中已有额外任务或合作，可留意其款项分配"}，不能据此直接推成新增客户或收入扩张。`
         :direct?"看点是已有工资、报酬、合同款或欠款能否确认与到账，偏向稳定来源的兑现，不自动等于工资上涨。"
@@ -290,8 +305,8 @@ function differentiatedLifeProse(input:ConcretePeriodInput):ConcretePeriodProse 
       add(text+(loss.level === "weak"?"额外花费仅有较弱线索。":""),"caution",eventSources(loss),loss,used[0]?.index);
     }
     if(!inflow&&!loss){
-      const source=visible? actionSources(visibleIndex):[{kind:"scope" as const,id:"income-events",detail:"no specific income event"}];
-      add(special?"已有的财作用帮助的是资金与必要支持之间的安排，不能直接当作赚钱增加。":signals.horizon === "month"?"本月未形成独立增收或额外支出的判断。":"这一段主要看现实中的收支安排，计算未单列出新增进账或明显额外支出的强信号。","topic",source);
+      if(specialProse&&financialActor){const index=actions.indexOf(financialActor);add(specialProse.text,specialProse.kind,actionSources(index),undefined,index);}
+      else add(signals.horizon === "month"?"本月未形成独立增收或额外支出的判断。":"这一段主要看现实中的收支安排，计算未单列出新增进账或明显额外支出的强信号。","topic",[{kind:"scope",id:"income-events",detail:"no specific income event or applicable financial actor"}]);
     }
     if(inflow?.counterEvidenceIds.length&&!loss)add("进账机会与同段阻力同时存在，可能有业务或款项可谈，但完成、确认、到账不一定同步。","caution",eventSources(inflow),inflow);
   }else{
@@ -306,8 +321,8 @@ function differentiatedLifeProse(input:ConcretePeriodInput):ConcretePeriodProse 
       const supportAllocation=axis&&(["resource-wealth","official-resource","killings-resource","food-killings"].includes(axis.pathId)||input.task?.preferredPathId===axis.pathId&&["wealth_first","resource_first","official_joint"].includes(input.task?.task??""));
       const wealth=supportAllocation?undefined:helps.find(action=>["正财","偏财"].includes(action.tenGod));
       if(supportAllocation&&["正财","偏财"].includes(visible.tenGod)){
-        headline="发展关键在任务与必要支持能否衔接";
-        add(["assists","mixed"].includes(visible.effect)?"这项财的作用帮助的是调整负担、保留必要支持，让已有任务更有条件完成；不能据此直接说业务扩张或收入增加。":"新增承担与必要支持之间有冲突，事业发展更容易受制于能否保住执行条件，而不是单纯机会多少。",["obstructs","mixed"].includes(visible.effect)?"caution":"opportunity",actionSources(visibleIndex),undefined,visibleIndex);
+        const projection=supportAllocationProse(visible,"career");headline=projection.headline;
+        add(projection.text,projection.kind,actionSources(visibleIndex),undefined,visibleIndex);
       }
       if(output){const index=actions.indexOf(output);headline=output.visibility === "main_hidden"?"能力和成果另有辅助发挥空间":"更利于凭能力和成果争取发展";add((output.visibility === "main_hidden"?"支内另有辅助机会：":"")+(output.tenGod === "食神"?"稳定产出、专业服务或已有业务更有发挥空间，成果可成为继续承接任务的依据。":"方案、技术、表达或解决难题的能力有可用之处，可留意成果被采用的机会。"),"opportunity",actionSources(index),undefined,index);}
       else if(wealth){const index=actions.indexOf(wealth);headline=wealth.tenGod === "偏财"?"外部需求和业务机会更突出":"已有业务的确认与落地更突出";add(wealth.tenGod === "偏财"?"新的需求、合作渠道或业务机会值得留意，发展重点在能否接住外部机会，而不只是原岗位里的日常任务。":"发展重点在把已有业务、合同责任或成果落实下来，完成确认后更有条件争取后续安排。","opportunity",actionSources(index),undefined,index);}

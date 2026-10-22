@@ -42,7 +42,11 @@ describe("natal main judgment across the first screen and full report", () => {
     const order = within(useful).getByRole("heading", { name: "取用先后与分工" });
     const roles = within(useful).getByRole("region", { name: "本盘用字分工" });
     expect(order.compareDocumentPosition(roles) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(order.closest("details")).toBeNull();
+    const originalReading = order.closest("details")!;
+    expect(originalReading.querySelector("summary")!.textContent).toContain("展开命局九章与专业分析");
+    expect(originalReading.open).toBe(false);
+    fireEvent.click(originalReading.querySelector("summary")!);
+    expect(originalReading.open).toBe(true);
     const explanation = within(useful).getByText("展开取用判断过程与条件").closest("details")!;
     expect(explanation.open).toBe(false);
     expect(explanation.textContent).toContain(input.comprehensive.usefulGuidance!.verdict);
