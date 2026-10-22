@@ -24,7 +24,7 @@ describe("AppShell candidate-set navigation", () => {
       </AppShell>
     );
 
-    const desktopCreate = within(screen.getByRole("complementary", { name: "研究台侧栏" }))
+    const desktopCreate = within(screen.getByRole("complementary", { name: "命盘侧栏" }))
       .getByRole("link", { name: "新建排盘" });
     const mobileCreate = within(screen.getByRole("navigation", { name: "手机主导航" }))
       .getByRole("link", { name: "新建排盘" });
@@ -109,7 +109,7 @@ describe("AppShell candidate-set navigation", () => {
       </AppShell>
     );
     const getDesktopCasesLink = () => within(screen.getByRole("navigation", { name: "主导航" }))
-      .getByRole("link", { name: "案例库" });
+      .getByRole("link", { name: "我的命盘" });
 
     fireEvent.pointerOver(getDesktopCasesLink());
     expect(firstPreload).toHaveBeenCalledTimes(1);
@@ -130,16 +130,13 @@ describe("AppShell candidate-set navigation", () => {
     expect(secondPreload).toHaveBeenCalledTimes(1);
   });
 
-  it("在全局壳层与研究边界一致暴露 legacy-v13 安全身份", () => {
-    const { container } = render(
+  it("首页壳层保留安全身份而不重复工程横幅，专业页继续显示研究边界", () => {
+    const { container, rerender } = render(
       <AppShell pathname="/">
         <h1>工作台</h1>
       </AppShell>
     );
-    const shell = container.querySelector(".app-shell");
-    const boundary = screen.getByLabelText("研究预览边界");
-
-    for (const node of [shell, boundary]) {
+    const assertSafetyIdentity = (node: Element | null) => {
       expect(node?.getAttribute("data-release-identity")).toBe("legacy-v13");
       expect(node?.getAttribute("data-schema-family")).toBe("legacy-v13");
       expect(node?.getAttribute("data-db-generation")).toBe("legacy-v13");
@@ -148,6 +145,11 @@ describe("AppShell candidate-set navigation", () => {
       expect(node?.getAttribute("data-mutation-epoch-bypassed")).toBe("false");
       expect(node?.getAttribute("data-public-release-authorized")).toBe("false");
       expect(node?.getAttribute("data-expert-truth-claimed")).toBe("false");
-    }
+    };
+    assertSafetyIdentity(container.querySelector(".app-shell"));
+    expect(screen.queryByLabelText("研究预览边界")).toBeNull();
+    rerender(<AppShell pathname="/knowledge"><h1>知识来源</h1></AppShell>);
+    assertSafetyIdentity(container.querySelector(".app-shell"));
+    assertSafetyIdentity(screen.getByLabelText("研究预览边界"));
   });
 });

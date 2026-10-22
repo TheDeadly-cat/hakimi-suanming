@@ -1,0 +1,33 @@
+哈基米八字试用版 · 解读一致性更新
+
+新报告成稿版本为 0.18.0。应用版本与数据库版本以包内验证结果为准，不能把报告版本当作数据库版本。
+本次沿用 http://127.0.0.1:5202/ 与 legacy-v13 / schema 13；不迁移、重写或删除浏览器资料。
+请继续使用原 Edge 用户配置。更换浏览器、配置或地址会进入不同资料空间。
+
+首次安装
+需要 Windows PowerShell 5.1 与 Node.js 24.16.0；本包不会下载安装环境。
+运行 scripts\install-local-reading-018-candidate.ps1，把校验过的完整包安装到独立 reading-018-trials 目录。
+桌面名称仍为“哈基米八字试用版”。已有同名但目标不同的快捷方式会被拒绝覆盖。
+
+从 0.17 更新（由交付人员执行）
+1. 保留旧 b43c3a06d356-package-v1 安装目录、原快捷方式副本和已核验的数据备份。
+2. 新包先 verify，再用安装器的 -NoShortcut 安装；不要覆盖旧目录。
+3. 核实 5202 监听进程确属旧安装，在没有未保存操作时由交付人员切换服务。
+   新启动器不会替你终止旧进程；当旧版仍占用 5202 时会明确拒绝启动。
+4. 从新目录的 scripts\launch-local-reading-018-candidate.ps1 -NoDialogs 启动服务。
+   不加 -OpenSystemBrowser 可继续在已打开的原 Edge 配置中访问同一 5202 地址。
+5. 在原 Edge 配置刷新，核实新版本已加载、原命盘与已存报告仍在，代表旧报告导出原文不变。
+6. 最后由交付人员将当前桌面快捷方式切向新目录，并保存旧快捷方式以便回退。
+   本次不需要重新导入已有 5202 数据；不要为更新代码恢复备份覆盖当前库。
+
+回退
+旧包始终保留。回退同样需要核对并切换 5202 服务，再恢复旧快捷方式；单点旧快捷方式不会自动终止新版服务。
+继续使用同一浏览器配置和地址，不清空浏览器存储。新版本产生的报告是否能被旧版读取须另行验证，不能承诺逆向兼容。
+
+校验与维护
+  node scripts\local-research-reading-018-candidate.mjs verify --package-root PACKAGE_DIR
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-local-reading-018-candidate.ps1 -PackageRoot PACKAGE_DIR -NoShortcut
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\launch-local-reading-018-candidate.ps1 -PackageRoot INSTALLED_DIR -NoDialogs
+
+启动器核验全部包文件与锁定产物，只监听 127.0.0.1。不会构建代码、自动换端口、清库或修改旧安装。
+日志写到 %USERPROFILE%\HakimiBaziWorkbenchCandidates\reading-018-launch-logs，包内文件保持不可变。

@@ -14,7 +14,6 @@ import {
   type LuckDirection
 } from "@hakimi/luck-core";
 import { calculatePillarRelations, type RelationType } from "@hakimi/relations-core";
-import { calculateTransitSnapshot } from "@hakimi/transit-core";
 import type {
   RevisionNatalReplayCapability,
   RevisionNatalReplayChangedField,
@@ -24,6 +23,7 @@ import type { RevisionDerivedReplayRequest } from "@hakimi/revision-replay";
 import { EvidencePanel } from "../components/evidence-panel";
 import { FourPillarsMatrix, type MatrixSelection } from "../components/four-pillars-matrix";
 import { BaziInterpretationPanel, BaziInterpretationSummary } from "../components/bazi-interpretation-panel";
+import { LocalReadingContainer } from "../components/local-reading-container";
 import { BirthTimePerturbationPanel } from "../components/birth-time-perturbation-panel";
 import { DeepSeekAssistantPanel } from "../components/deepseek-assistant-panel";
 import { ResearchJournal } from "../components/research-journal";
@@ -35,6 +35,7 @@ import { formatDateTime, shortHash } from "../lib/format";
 import { useExpertMode } from "../lib/expert-mode";
 import { AppLink, navigate, useAppLocation } from "../lib/router";
 import { safeVisibleErrorMessage, safeVisibleText } from "../lib/visible-text";
+import { calculateChartRouteTransitSnapshot } from "../lib/chart-transit-snapshot";
 import {
   buildChartSearch,
   canonicalInstant,
@@ -76,6 +77,7 @@ const pillarPositionLabels = { year: "年柱", month: "月柱", day: "日柱", h
 const pillarPositions = ["year", "month", "day", "hour"] as const;
 
 const chartViewItems: ReadonlyArray<{ key: ChartView; label: string; caption: string }> = [
+  { key: "reading", label: "解读", caption: "命局与年度判断" },
   { key: "overview", label: "概览", caption: "原局与历法" },
   { key: "structure", label: "结构", caption: "四柱与依据" },
   { key: "transit", label: "运限", caption: "时间切片" },
@@ -291,8 +293,8 @@ function OverviewView({ revision }: { revision: RevisionRecord }) {
         <dl className="overview-facts">
           <div><dt>原始历法输入</dt><dd>{revision.input.date} {revision.input.lunarLeapMonth ? "· 闰月 " : ""}{revision.input.time ?? "时辰未知"} · {revision.input.calendarType === "lunar" ? "农历" : "公历"}</dd></div>
           <div><dt>历法解析</dt><dd>{revision.timeCalibration.calendarResolution ? `${revision.timeCalibration.calendarResolution.inputCalendarType === "lunar" ? "转换至" : "保持"}公历 ${revision.timeCalibration.calendarResolution.resolvedGregorianDate} · 往返校验通过` : "旧修订未保存独立历法解析快照"}</dd></div>
-          <div><dt>公历</dt><dd>{revision.facts.calendar.solarText}</dd></div>
-          <div><dt>农历候选</dt><dd>{revision.facts.calendar.lunarText}</dd></div>
+          <div><dt>排盘当地公历</dt><dd>{revision.facts.calendar.solarText}</dd></div>
+          <div><dt>同瞬时固定 UTC+08:00 农历候选</dt><dd>{revision.facts.calendar.lunarText}<small>农历候选按固定 +08 日期显示，可能与当地出生日期的农历对照不同；原始输入保留。</small></dd></div>
           <div><dt>上一个节</dt><dd>{revision.facts.calendar.previousJie ?? "未计算"}</dd></div>
           <div><dt>下一个节</dt><dd>{revision.facts.calendar.nextJie ?? "未计算"}</dd></div>
           <div><dt>公历民用时</dt><dd>{revision.timeCalibration.originalCivilDateTime} · {revision.timeCalibration.timeZone}</dd></div>
@@ -840,11 +842,11 @@ export function ChartPage({ caseId, revisionId }: { caseId: string; revisionId: 
     setTransitLoading(true);
     setTransitSnapshot(null);
     setTransitError(null);
-    calculateTransitSnapshot({
+    calculateChartRouteTransitSnapshot({
       revision,
       atInstant: route.transit.atInstant,
       ...(route.transit.manualDirection ? { manualDirection: route.transit.manualDirection } : {})
-    }).then((result) => {
+    }, route.transit.selection).then((result) => {
       if (!active) return;
       assertBoundedChartRuntimePayload(result, "运限切片");
       setTransitSnapshot(result);
@@ -856,7 +858,7 @@ export function ChartPage({ caseId, revisionId }: { caseId: string; revisionId: 
       if (active) setTransitLoading(false);
     });
     return () => { active = false; };
-  }, [revision, route.transit.atInstant, route.transit.manualDirection, transitContextActive]);
+  }, [revision, route.transit.atInstant, route.transit.manualDirection, route.transit.selection?.nodeType, route.transit.selection?.nodeId, transitContextActive]);
 
   useEffect(() => {
     const requestVersion = ++eventIndexRequestVersionRef.current;
@@ -1054,6 +1056,16 @@ export function ChartPage({ caseId, revisionId }: { caseId: string; revisionId: 
 
   const isTrashed = bundle.caseRecord.deletedAt !== null;
   const isLatestRevision = bundle.caseRecord.latestRevisionId === revision.id;
+  if (view === "reading") return (
+    <div className="chart-page chart-page--reading" data-view="reading" {...CHART_SAFETY_ATTRIBUTES}>
+      <LocalReadingContainer key={`${caseId}:${revisionId}`} revision={revision}
+        caseName={bundle.caseRecord.alias} readOnly={isTrashed}
+        onEditBirthData={() => navigate(`${location.pathname}/revise`)}
+        onOpenDetails={() => navigate(viewHref("structure"))}
+        onOpenTransit={() => navigate(viewHref("transit"))}
+        onOpenRecords={() => navigate(viewHref("research"))} />
+    </div>
+  );
   const revisionHistoryLabel = `${isLatestRevision ? "当前最新" : "历史快照"} · 共 ${revisionsNewestFirst.length.toLocaleString("zh-CN")} 个修订`;
   const currentReadingTask = view === "overview"
     ? {

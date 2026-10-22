@@ -498,8 +498,8 @@
     "scriptManifests": [
       {
         "path": "apps/web/package.json",
-        "lfUtf8Sha256": "8451d463a5a009a62df8821ad4a881940996db2f55ed2a858e1a7a31ad4b2784",
-        "byteLength": 3439
+        "lfUtf8Sha256": "e70d1136f160783a114d9491a7ea4917446e98f2b9341034d364928b47ffc7f2",
+        "byteLength": 3488
       },
       {
         "path": "package.json",
@@ -650,5 +650,5 @@
       }
     }
   ],
-  "overallSha256": "b59b9c83fb52e6965a10c6985a13599078bc3a69251a9d2188cda8f89bc50ff7"
+  "overallSha256": "61c454be81588be1131cc3d036c6e4f508e8757aa08520508e95069e8f12fa03"
 }

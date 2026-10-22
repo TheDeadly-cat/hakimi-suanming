@@ -1,0 +1,56 @@
+.annual-event-reading-panel { margin: 22px 0; color: var(--reading-ink, #304738); min-width: 0; }
+.annual-event-reading-panel :is(p,li) { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.85; }
+.annual-event-reading-kicker { color: var(--reading-muted, #748269); font-size: 12px; letter-spacing: .06em; margin: 0 0 7px; }
+.annual-event-reading-panel > h4 { font: 600 23px/1.5 var(--reading-serif, "Songti SC", serif); margin: 0 0 10px; }
+.annual-event-reading-summary { font-size: 15px; color: #526650; margin: 0 0 18px; }
+.annual-event-reading-branch + .annual-event-reading-branch { border-top: 1px solid var(--reading-line, #dce2d1); margin-top: 24px; padding-top: 20px; }
+.annual-event-reading-branch > h5 { margin: 0 0 12px; font-size: 16px; color: var(--reading-jade, #446a45); }
+.annual-event-reading-segment + .annual-event-reading-segment { margin-top: 22px; }
+.annual-event-reading-background { margin: 0 0 5px; font-size: 14px; font-weight: 600; color: #526c4d; }
+.annual-event-reading-period, .annual-event-reading-age { font-size: 12px; color: var(--reading-muted, #748269); margin: 4px 0; }
+.annual-event-reading-caption { font-size: 13px; color: #5b7054; margin: 6px 0 12px; }
+.annual-event-reading-item { border: 1px solid var(--reading-line, #dce2d1); border-radius: 8px; background: #fafaf3; padding: 17px 19px; margin: 12px 0; min-width: 0; }
+.annual-event-reading-priority { margin: 0 0 8px; color: var(--reading-jade, #446a45); font-size: 12px; font-weight: 650; letter-spacing: .04em; }
+.annual-event-reading-item h6 { font-size: 17px; line-height: 1.6; color: var(--reading-ink, #304738); margin: 0 0 10px; }
+.annual-event-reading-item p { margin: 8px 0; font-size: 15px; }
+.annual-event-reading-item .annual-event-reading-verdict { font-weight: 550; }
+.annual-event-reading-item .annual-event-reading-applicability { padding-left: 10px; border-left: 2px solid #c5d4ba; color: #556a4f; font-size: 13px; }
+.annual-event-reading-applicability p { font-size: 12px; margin: 6px 0 2px; }
+.annual-event-reading-applicability ul { margin: 0 0 10px; padding-left: 18px; }
+.annual-event-reading-applicability li { font-size: 13px; margin: 3px 0; }
+.annual-event-reading-examples { padding-left: 20px; margin: 10px 0; }
+.annual-event-reading-examples li { font-size: 14px; margin: 5px 0; }
+.annual-event-reading-item .annual-event-reading-why { font-size: 14px; color: #536a4d; }
+.annual-event-reading-evidence { margin-top: 10px; color: var(--reading-muted, #67765e); }
+.annual-event-reading-evidence summary { cursor: pointer; font-size: 13px; color: var(--reading-jade, #446a45); line-height: 1.8; padding: 4px 0; }
+.annual-event-reading-evidence ul { padding-left: 20px; }
+.annual-event-reading-evidence :is(p,li) { font-size: 13px; }
+.annual-event-reading-feedback { display: inline-block; color: var(--reading-jade, #446a45); font-size: 13px; margin-top: 10px; padding: 5px 0; text-underline-offset: 4px; }
+.annual-event-reading-gap { background: #f2f0e6; border-radius: 6px; padding: 10px 13px; margin: 12px 0; font-size: 14px; }
+.annual-event-reading-panel :is(a,summary):focus-visible { outline: 2px solid #719367; outline-offset: 4px; }
+.annual-event-reading-facets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 14px; }
+.annual-event-reading-facets > section { min-width: 0; border-top: 1px solid var(--reading-line, #dce2d1); padding-top: 8px; }
+.annual-event-reading-facets .annual-event-reading-facet-title { color: var(--reading-jade, #446a45); font-size: 13px; font-weight: 650; }
+.annual-event-reading-members > .annual-event-reading-item { background: transparent; }
+.annual-life-summary { max-width: 57em; padding: 14px 0 22px; margin-bottom: 18px; border-bottom: 1px solid var(--reading-line, #dce2d1); }
+.annual-life-summary h6 { margin: 0 0 16px; font: 600 23px/1.6 var(--reading-serif, "Songti SC", serif); text-wrap: balance; }
+.annual-life-summary p { font-size: 16px; line-height: 1.95; margin: 13px 0; color: #465653; }
+.annual-life-summary [data-annual-story-kind="mainline"] { color: var(--reading-ink, #304738); }
+.annual-life-summary [data-annual-reader-kind="mainline"] { color: var(--reading-ink, #304738); }
+.annual-reader-original-items > summary { min-height: 44px; align-content: center; font-size: 14px; }
+.annual-life-summary-point { display: grid; grid-template-columns: 7.2em minmax(0, 1fr); gap: 14px; margin: 16px 0; align-items: baseline; }
+.annual-life-summary-point p { margin: 0; }
+.annual-life-summary-label { font-size: 13px; font-weight: 650; line-height: 1.8; color: var(--reading-jade, #446a45); }
+.annual-life-summary-point-mainline { display: block; margin: 0 0 20px; padding: 14px 18px; border-left: 2px solid #9dbbb0; background: #f3f6ef; }
+.annual-life-summary-point-mainline .annual-life-summary-label { display: block; margin-bottom: 5px; }
+.annual-life-summary .annual-event-reading-feedback { min-height: 44px; align-content: center; }
+.annual-life-summary .annual-event-reading-evidence :is(p,li) { font-size: 13px; }
+.annual-life-summary-personal blockquote { margin-inline: 0; padding-left: 16px; border-left: 2px solid #7daba3; font-size: 16px; line-height: 1.9; white-space: pre-wrap; overflow-wrap: anywhere; }
+.annual-life-summary-related a { display: inline-block; min-height: 44px; align-content: center; color: var(--reading-jade, #446a45); font-size: 15px; text-underline-offset: 4px; }
+.annual-event-reading-item[id] { scroll-margin-top: 92px; }
+.annual-event-reading-continuation { margin: 16px 0; padding: 14px 18px; border-left: 2px solid #9dbbb0; background: #f3f6ef; }
+.annual-event-reading-continuation > p { margin: 6px 0; font-size: 14px; }
+.annual-event-reading-continuation .annual-event-reading-continuation-title { font: 600 18px/1.7 var(--reading-serif, "Songti SC", serif); }
+.annual-event-reading-repeated > summary { min-height: 44px; align-content: center; cursor: pointer; color: var(--reading-jade, #446a45); font-size: 14px; }
+@media (max-width: 700px) { .annual-event-reading-facets { grid-template-columns: 1fr; gap: 8px; } }
+@media (max-width: 600px) { .annual-event-reading-item { padding: 14px 12px; } .annual-event-reading-panel > h4 { font-size: 21px; } .annual-event-reading-feedback { min-height: 32px; align-content: center; } .annual-life-summary h6 { font-size: 21px; } .annual-life-summary .annual-event-reading-feedback { min-height: 44px; } .annual-life-summary-point { grid-template-columns: 1fr; gap: 4px; } .annual-life-summary-point-mainline { padding: 12px 14px; } }

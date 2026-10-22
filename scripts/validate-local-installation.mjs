@@ -3,19 +3,23 @@ import { createServer, request as httpRequest } from "node:http";
 import { cp, link, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createHash } from "node:crypto";
-import { LOCAL_RESEARCH_CANDIDATE, LOCAL_RESEARCH_EVENT_INDEX_CANDIDATE, LOCAL_RESEARCH_RELEASE, createLocalPackageTools } from "./local-research-package-lib.mjs";
+import { LOCAL_RESEARCH_CANDIDATE, LOCAL_RESEARCH_EVENT_INDEX_CANDIDATE, LOCAL_RESEARCH_CONVERGENCE_CANDIDATE, LOCAL_RESEARCH_TRIAL_CANDIDATE, LOCAL_RESEARCH_DEEP_READING_CANDIDATE, LOCAL_RESEARCH_RELEASE, createLocalPackageTools } from "./local-research-package-lib.mjs";
 
 // Integration validation requires a real, explicitly selected package. It never
 // synthesizes the fixed c15ef identity or opens a daily browser profile.
 const args = process.argv.slice(2);
 const isEventIndex = args[0] === "--event-index-candidate";
-const isCandidate = args[0] === "--candidate" || isEventIndex;
+const isConvergence = args[0] === "--convergence-candidate";
+const isTrial = args[0] === "--trial-candidate";
+const isDeepReading = args[0] === "--deep-reading-candidate";
+const isCandidate = args[0] === "--candidate" || isEventIndex || isConvergence || isTrial || isDeepReading;
 if (isCandidate) args.shift();
-const selection = isEventIndex ? LOCAL_RESEARCH_EVENT_INDEX_CANDIDATE : isCandidate ? LOCAL_RESEARCH_CANDIDATE : LOCAL_RESEARCH_RELEASE;
-const artifactRoot = isEventIndex ? selection.artifactRoot : "dist/web";
+const selection = isDeepReading ? LOCAL_RESEARCH_DEEP_READING_CANDIDATE : isTrial ? LOCAL_RESEARCH_TRIAL_CANDIDATE : isConvergence ? LOCAL_RESEARCH_CONVERGENCE_CANDIDATE : isEventIndex ? LOCAL_RESEARCH_EVENT_INDEX_CANDIDATE : isCandidate ? LOCAL_RESEARCH_CANDIDATE : LOCAL_RESEARCH_RELEASE;
+if (!selection) throw new Error("The free local trial build has not been sealed.");
+const artifactRoot = isEventIndex || isConvergence || isTrial || isDeepReading ? selection.artifactRoot : "dist/web";
 const { installLocalPackage, probeLocalPackage, startLocalPackageServer, verifyLocalPackage } = createLocalPackageTools(selection);
 if (args.length !== 4 || args[0] !== "--package-root" || args[2] !== "--output") {
-  throw new Error("Usage: node scripts/validate-local-installation.mjs [--candidate|--event-index-candidate] --package-root REAL_PACKAGE --output NEW_QA_DIRECTORY");
+  throw new Error("Usage: node scripts/validate-local-installation.mjs [--candidate|--event-index-candidate|--convergence-candidate|--trial-candidate|--deep-reading-candidate] --package-root REAL_PACKAGE --output NEW_QA_DIRECTORY");
 }
 const input = path.resolve(args[1]);
 const output = path.resolve(args[3]);
@@ -45,8 +49,16 @@ async function close(server) { server.closeAllConnections(); await new Promise((
 await check("complete selected package verifies", async () => ({ manifestSha256: original.manifestSha256, files: original.manifest.files.length + 1 }));
 await check("arbitrary selections and the other pinned artifact are rejected", async () => {
   assert.throws(() => createLocalPackageTools({ ...selection }), /arbitrary/u);
-  for (const other of [LOCAL_RESEARCH_RELEASE, LOCAL_RESEARCH_CANDIDATE, LOCAL_RESEARCH_EVENT_INDEX_CANDIDATE]) {
+  for (const other of [LOCAL_RESEARCH_RELEASE, LOCAL_RESEARCH_CANDIDATE, LOCAL_RESEARCH_EVENT_INDEX_CANDIDATE, LOCAL_RESEARCH_CONVERGENCE_CANDIDATE, LOCAL_RESEARCH_TRIAL_CANDIDATE, LOCAL_RESEARCH_DEEP_READING_CANDIDATE].filter(Boolean)) {
     if (other !== selection) await assert.rejects(createLocalPackageTools(other).verifyLocalPackage(input));
+  }
+  if (isConvergence || isTrial || isDeepReading) {
+    const root = await fixture("false-clean-source-claim");
+    const manifest = structuredClone(original.manifest);
+    manifest.release.sourceDirty = false;
+    manifest.release.sourceCommit = manifest.release.baseCommit;
+    await writeFile(path.join(root, "local-package-files.json"), JSON.stringify(manifest));
+    await assert.rejects(verifyLocalPackage(root), /manifest is invalid/u);
   }
 });
 if (isCandidate) {
@@ -56,12 +68,16 @@ if (isCandidate) {
       await assert.rejects(startLocalPackageServer(input, { port }), /explicit integer/u);
     }
     await assert.rejects(probeLocalPackage(input, { origin: "http://127.0.0.1:5188/" }), /daily 5188/u);
+    if (isTrial || isDeepReading) for (const port of (isDeepReading ? [5189, 5197, 5199] : [5189, 5197])) {
+      await assert.rejects(startLocalPackageServer(input, { port }), /existing daily or development/u);
+      await assert.rejects(probeLocalPackage(input, { origin: `http://127.0.0.1:${port}/` }), /existing daily or development/u);
+    }
   });
   await check("rewriting a receipt and its package entry cannot transfer the original evidence", async () => {
     const root = await fixture("tampered-browser-receipt");
     const manifestPath = path.join(root, "local-package-files.json");
     const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
-    const entry = manifest.files.find((item) => item.path.endsWith(isEventIndex ? "/evidence-receipt.json" : "/pwa.json"));
+    const entry = manifest.files.find((item) => item.path.endsWith(isConvergence || isTrial || isDeepReading ? "/application-source-binding.json" : isEventIndex ? "/evidence-receipt.json" : "/pwa.json"));
     assert.ok(entry);
     const target = path.join(root, entry.path);
     const receipt = JSON.parse(await readFile(target, "utf8"));
@@ -71,7 +87,7 @@ if (isCandidate) {
     entry.size = bytes.length;
     entry.sha256 = createHash("sha256").update(bytes).digest("hex");
     await writeFile(manifestPath, JSON.stringify(manifest));
-    await assert.rejects(verifyLocalPackage(root), /browser receipt identity/u);
+    await assert.rejects(verifyLocalPackage(root), /(?:browser|evidence) receipt identity/u);
   });
 }
 await check("empty file manifest is rejected", async () => {

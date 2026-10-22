@@ -26,6 +26,8 @@ import { buildResearchQuerySearch } from "../lib/research-query-route";
 import { createResearchQueryDraft } from "../lib/research-query-session";
 import { AppLink, navigate } from "../lib/router";
 import { buildChartSearch } from "../lib/transit-route";
+import { isPackedReadingSnapshot } from "../lib/local-reading-snapshot-codec";
+import { ReadingSavedRecord } from "./reading-saved-record";
 import {
   EventTimeMigrationDeriveError,
   EventTimeMigrationPanel,
@@ -854,6 +856,10 @@ export function ResearchJournal({
   };
 
   const beginEditNote = (note: ResearchNoteRecord) => {
+    if (isPackedReadingSnapshot(note.body)) {
+      setError("完整解读快照只读保留；如需补充，请另写一条笔记或反馈。");
+      return;
+    }
     setEditingNote(note);
     setNoteBody(note.body);
     setNoteTags(note.tags.join("，"));
@@ -1327,16 +1333,17 @@ export function ResearchJournal({
           <div className="journal-list">
           {renderedNotes.map((note) => {
             const linkedCitations = citationsByTarget.researchNotes.get(note.id) ?? [];
+            const packedReading = isPackedReadingSnapshot(note.body);
             return <article key={note.id} className={note.lifecycle === "archived" ? "is-muted" : ""}>
               <header>
                 <div><strong>{noteAnchorLabel(note)}</strong><small>v{note.editVersion} · {note.lifecycle}</small></div>
                 <div className="journal-actions">
                   {citationIndexReady ? <AppLink className="icon-button" aria-label="为笔记添加知识引用" href={knowledgeResearchNoteHref(note.id)}><Link2 aria-hidden="true" /></AppLink> : null}
-                  <button ref={(element) => { if (element) noteEditButtonRefs.current.set(note.id, element); else noteEditButtonRefs.current.delete(note.id); }} type="button" className="icon-button" aria-label="编辑笔记" disabled={journalMutationActive} onClick={() => beginEditNote(note)}><Pencil aria-hidden="true" /></button>
+                  {!packedReading ? <button ref={(element) => { if (element) noteEditButtonRefs.current.set(note.id, element); else noteEditButtonRefs.current.delete(note.id); }} type="button" className="icon-button" aria-label="编辑笔记" disabled={journalMutationActive} onClick={() => beginEditNote(note)}><Pencil aria-hidden="true" /></button> : null}
                   <button type="button" className="icon-button" aria-label={note.lifecycle === "active" ? "归档笔记" : "恢复笔记"} disabled={journalMutationActive} onClick={() => void toggleNoteArchive(note)}>{note.lifecycle === "active" ? <Archive aria-hidden="true" /> : <RotateCcw aria-hidden="true" />}</button>
                 </div>
               </header>
-              <p>{note.body}</p>
+              {packedReading ? <ReadingSavedRecord record={note} /> : <p>{note.body}</p>}
               {note.tags.length ? <small className="journal-tags">{note.tags.join("、")}</small> : null}
               {linkedCitations.length ? <div className="journal-structured-citations"><small>知识引用 · {linkedCitations.length}</small>{linkedCitations.map((citation) => <AppLink key={citation.id} href={`/knowledge${buildKnowledgeSearch({ documentId: citation.documentId, sectionId: citation.locator.sectionId, lineNumber: citation.locator.startLine, citationId: citation.id, target: { kind: "research_note", noteId: note.id } })}`}><blockquote>{citation.quote}</blockquote></AppLink>)}</div> : null}
             </article>;

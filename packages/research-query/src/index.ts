@@ -32,12 +32,14 @@ import { canonicalStringify, sha256Hex } from "@hakimi/integrity";
 import { verifyKnowledgeDocumentIntegrity } from "@hakimi/knowledge-core";
 import {
   CURRENT_EXPLICIT_DERIVED_REPLAY_PROFILE,
+  EXPLICIT_DERIVED_REPLAY_PROFILE_V1_2_0,
   RevisionDerivedReplayError,
   resolveRevisionCalculationSource,
   verifyRevisionCalculationReceiptSourceBinding,
   type RevisionCalculationReceipt,
   type RevisionCalculationSourceComponentStatuses,
-  type RevisionCalculationSourceResolution
+  type RevisionCalculationSourceResolution,
+  type RevisionDerivedReplayProfile
 } from "@hakimi/revision-replay";
 import {
   verifyStoredEventTimeContextWithBundledArtifact,
@@ -57,6 +59,26 @@ export const RESEARCH_QUERY_ENGINE = Object.freeze({
   relationEngine: "hakimi-relations-core@0.1.0" as const,
   transitTimeline: TRANSIT_TIMELINE_VERSION,
   derivedReplayProfile: CURRENT_EXPLICIT_DERIVED_REPLAY_PROFILE.profileId
+});
+
+// Retained only for exact historical query exports and review-bundle replay.
+// Ordinary query execution always uses the current profile.
+export const RESEARCH_QUERY_ENGINE_TRANSIT_V1_2 = Object.freeze({
+  name: "hakimi-research-query" as const,
+  version: "0.2.0" as const,
+  queryVersion: 1 as const,
+  textMode: "nfkc-all-terms-substring-v1" as const,
+  relationEngine: "hakimi-relations-core@0.1.0" as const,
+  transitTimeline: "hakimi-transit:1.2.0" as const,
+  derivedReplayProfile: EXPLICIT_DERIVED_REPLAY_PROFILE_V1_2_0.profileId
+});
+type ResearchQueryEngine = typeof RESEARCH_QUERY_ENGINE | typeof RESEARCH_QUERY_ENGINE_TRANSIT_V1_2;
+type QueryExecutionContext = Readonly<{ engine: ResearchQueryEngine; profile: RevisionDerivedReplayProfile }>;
+const CURRENT_QUERY_CONTEXT: QueryExecutionContext = Object.freeze({
+  engine: RESEARCH_QUERY_ENGINE, profile: CURRENT_EXPLICIT_DERIVED_REPLAY_PROFILE
+});
+const RETAINED_QUERY_CONTEXT_V1_2: QueryExecutionContext = Object.freeze({
+  engine: RESEARCH_QUERY_ENGINE_TRANSIT_V1_2, profile: EXPLICIT_DERIVED_REPLAY_PROFILE_V1_2_0
 });
 
 export const RESEARCH_QUERY_EXPORT = Object.freeze({
@@ -212,7 +234,7 @@ export type ResearchQueryResult =
   | ResearchKnowledgeResult;
 
 export type ResearchQueryExecution = {
-  engine: typeof RESEARCH_QUERY_ENGINE;
+  engine: ResearchQueryEngine;
   query: ResearchQuery;
   queryDigest: string;
   dataEpoch: string;
@@ -228,7 +250,7 @@ export type ResearchQueryExportEnvelope = {
     format: typeof RESEARCH_QUERY_EXPORT.format;
     formatVersion: typeof RESEARCH_QUERY_EXPORT.formatVersion;
     queryVersion: typeof RESEARCH_QUERY_VERSION;
-    engine: typeof RESEARCH_QUERY_ENGINE;
+    engine: ResearchQueryEngine;
     appVersion: string;
     exportedAt: string;
     digestAlgorithm: typeof RESEARCH_QUERY_EXPORT.digestAlgorithm;
@@ -477,19 +499,22 @@ const exportPayloadSchema = z.strictObject({
     }
   });
 });
+function queryEngineSchema(engine: ResearchQueryEngine) {
+  return z.strictObject({
+    name: z.literal(engine.name), version: z.literal(engine.version),
+    queryVersion: z.literal(engine.queryVersion), textMode: z.literal(engine.textMode),
+    relationEngine: z.literal(engine.relationEngine), transitTimeline: z.literal(engine.transitTimeline),
+    derivedReplayProfile: z.literal(engine.derivedReplayProfile)
+  });
+}
+const supportedQueryEngineSchema = z.union([
+  queryEngineSchema(RESEARCH_QUERY_ENGINE), queryEngineSchema(RESEARCH_QUERY_ENGINE_TRANSIT_V1_2)
+]);
 const exportManifestSchema = z.strictObject({
   format: z.literal(RESEARCH_QUERY_EXPORT.format),
   formatVersion: z.literal(RESEARCH_QUERY_EXPORT.formatVersion),
   queryVersion: z.literal(RESEARCH_QUERY_VERSION),
-  engine: z.strictObject({
-    name: z.literal(RESEARCH_QUERY_ENGINE.name),
-    version: z.literal(RESEARCH_QUERY_ENGINE.version),
-    queryVersion: z.literal(RESEARCH_QUERY_VERSION),
-    textMode: z.literal(RESEARCH_QUERY_ENGINE.textMode),
-    relationEngine: z.literal(RESEARCH_QUERY_ENGINE.relationEngine),
-    transitTimeline: z.literal(RESEARCH_QUERY_ENGINE.transitTimeline),
-    derivedReplayProfile: z.literal(RESEARCH_QUERY_ENGINE.derivedReplayProfile)
-  }),
+  engine: supportedQueryEngineSchema,
   appVersion: z.string().regex(/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/),
   exportedAt: canonicalInstantSchema,
   digestAlgorithm: z.literal(RESEARCH_QUERY_EXPORT.digestAlgorithm),
@@ -512,6 +537,17 @@ const researchQueryExportEnvelopeSchema = z.strictObject({
   if (value.manifest.total !== value.payload.total) {
     context.addIssue({ code: "custom", path: ["manifest", "total"], message: "manifest.total 必须与 payload.total 一致" });
   }
+  value.payload.results.forEach((result, resultIndex) => {
+    if (result.scope !== "cases") return;
+    result.revisions.forEach((revision, revisionIndex) => {
+      if (revision.calculationSource !== null
+        && revision.calculationSource.profileId !== value.manifest.engine.derivedReplayProfile) {
+        context.addIssue({ code: "custom",
+          path: ["payload", "results", resultIndex, "revisions", revisionIndex, "calculationSource", "profileId"],
+          message: "查询结果的派生 Profile 必须与导出引擎的精确版本一致。" });
+      }
+    });
+  });
 });
 
 function compareCodePoint(left: string, right: string): number {
@@ -1096,7 +1132,8 @@ async function matchRevision(
   revision: RevisionRecord,
   query: ResearchCaseQuery,
   dataset: VerifiedDataset,
-  diagnostics: ResearchQueryDiagnostic[]
+  diagnostics: ResearchQueryDiagnostic[],
+  context: QueryExecutionContext
 ): Promise<RevisionMatch | null> {
   if (!matchesAny(query.dayMasters, revision.facts.pillars.day.stem)) return null;
   if (!matchesAny(query.monthBranches, revision.facts.pillars.month.branch)) return null;
@@ -1109,7 +1146,7 @@ async function matchRevision(
         revision,
         dataset.revisionCalculationReceiptsByRevision.get(revision.id) ?? [],
         {
-          profile: CURRENT_EXPLICIT_DERIVED_REPLAY_PROFILE,
+          profile: context.profile,
           ...(query.transit === null ? {} : { atInstant: query.transit.atInstant }),
           ...(query.transit?.manualDirection === null || query.transit?.manualDirection === undefined
             ? {}
@@ -1211,7 +1248,8 @@ async function executeCaseQuery(
   query: ResearchCaseQuery,
   dataset: VerifiedDataset,
   diagnostics: ResearchQueryDiagnostic[],
-  options: ExecuteResearchQueryOptions
+  options: ExecuteResearchQueryOptions,
+  context: QueryExecutionContext
 ): Promise<ResearchCaseResult[]> {
   const revisionsByCase = new Map<string, RevisionRecord[]>();
   for (const revision of dataset.revisions) {
@@ -1253,7 +1291,7 @@ async function executeCaseQuery(
       : allRevisions;
     const revisionMatches: RevisionMatch[] = [];
     for (const revision of selectedRevisions) {
-      const matched = await matchRevision(revision, query, dataset, diagnostics);
+      const matched = await matchRevision(revision, query, dataset, diagnostics, context);
       if (matched) revisionMatches.push(matched);
     }
     if (revisionMatches.length === 0) continue;
@@ -1596,6 +1634,24 @@ export async function executeResearchQuery(
   snapshot: ResearchQuerySnapshot,
   options: ExecuteResearchQueryOptions = {}
 ): Promise<ResearchQueryExecution> {
+  return executeWithQueryContext(input, snapshot, options, CURRENT_QUERY_CONTEXT);
+}
+
+/** Exact v1.2 replay for retained review evidence, never a default/user setting. */
+export async function replayResearchQueryWithTransitV1_2(
+  input: ResearchQuery,
+  snapshot: ResearchQuerySnapshot,
+  options: ExecuteResearchQueryOptions = {}
+): Promise<ResearchQueryExecution> {
+  return executeWithQueryContext(input, snapshot, options, RETAINED_QUERY_CONTEXT_V1_2);
+}
+
+async function executeWithQueryContext(
+  input: ResearchQuery,
+  snapshot: ResearchQuerySnapshot,
+  options: ExecuteResearchQueryOptions,
+  context: QueryExecutionContext
+): Promise<ResearchQueryExecution> {
   assertExecutionOptions(options);
   ensureNotAborted(options.signal);
   let query: ResearchQuery;
@@ -1612,7 +1668,7 @@ export async function executeResearchQuery(
   const diagnostics: ResearchQueryDiagnostic[] = [];
   let results: ResearchQueryResult[];
   if (query.scope === "cases") {
-    results = await executeCaseQuery(query, dataset, diagnostics, options);
+    results = await executeCaseQuery(query, dataset, diagnostics, options, context);
     if (query.relationTypes.length > 0) {
       diagnostics.push({
         kind: "warning",
@@ -1661,7 +1717,7 @@ export async function executeResearchQuery(
     );
   }
   const resultDigest = await sha256Hex({
-    engine: RESEARCH_QUERY_ENGINE,
+    engine: context.engine,
     queryDigest,
     dataEpoch: resolvedDataEpoch,
     results,
@@ -1669,7 +1725,7 @@ export async function executeResearchQuery(
   });
   ensureNotAborted(options.signal);
   return {
-    engine: RESEARCH_QUERY_ENGINE,
+    engine: context.engine,
     query,
     queryDigest,
     dataEpoch: resolvedDataEpoch,
@@ -1701,10 +1757,11 @@ function unsignedExportEnvelope(
 }
 
 async function expectedExecutionResultDigest(
-  payload: ResearchQueryExportEnvelope["payload"]
+  payload: ResearchQueryExportEnvelope["payload"],
+  engine: ResearchQueryEngine
 ): Promise<string> {
   return sha256Hex({
-    engine: RESEARCH_QUERY_ENGINE,
+    engine,
     queryDigest: payload.queryDigest,
     dataEpoch: payload.dataEpoch,
     results: payload.results,
@@ -1726,13 +1783,14 @@ export async function buildResearchQueryExport(
     resultDigest: execution.resultDigest
   };
   try {
+    supportedQueryEngineSchema.parse(execution.engine);
     exportPayloadSchema.parse(payload);
   } catch (cause) {
     throw new ResearchQueryExportError("UNVERIFIED_EXECUTION", "查询执行结果不满足可导出结构。", { cause });
   }
   const [queryDigest, resultDigest] = await Promise.all([
     sha256Hex(payload.query),
-    expectedExecutionResultDigest(payload)
+    expectedExecutionResultDigest(payload, execution.engine)
   ]);
   if (queryDigest !== payload.queryDigest || resultDigest !== payload.resultDigest) {
     throw new ResearchQueryExportError("UNVERIFIED_EXECUTION", "查询或结果摘要无法复算，已拒绝导出。" );
@@ -1747,7 +1805,7 @@ export async function buildResearchQueryExport(
     format: RESEARCH_QUERY_EXPORT.format,
     formatVersion: RESEARCH_QUERY_EXPORT.formatVersion,
     queryVersion: RESEARCH_QUERY_VERSION,
-    engine: RESEARCH_QUERY_ENGINE,
+    engine: execution.engine,
     appVersion: options.appVersion,
     exportedAt,
     digestAlgorithm: RESEARCH_QUERY_EXPORT.digestAlgorithm,
@@ -1816,7 +1874,7 @@ export async function verifyResearchQueryExport(input: unknown): Promise<Researc
     payload: payloadDigest
   };
   const [resultDigest, envelopeDigest] = await Promise.all([
-    expectedExecutionResultDigest(payload),
+    expectedExecutionResultDigest(payload, manifest.engine),
     sha256Hex(unsignedExportEnvelope(manifest, expected, payload))
   ]);
   if (

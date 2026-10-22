@@ -18,19 +18,53 @@ import { canonicalStringify, sha256Hex } from "@hakimi/integrity";
 import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
 import {
   calculateTransitSnapshot,
+  calculateTransitSnapshotV1_2_0,
   CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR,
   lookupHistoricalTransitSnapshotExecutor,
   TRANSIT_ALGORITHM_ID,
   TRANSIT_CORE_ENGINE,
   TRANSIT_TIMELINE_VERSION,
+  TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0,
 } from "@hakimi/transit-core";
 import { z } from "zod";
 import {
   createDefaultResearchQuery,
   executeResearchQuery,
   RESEARCH_QUERY_ENGINE,
+  RESEARCH_QUERY_ENGINE_TRANSIT_V1_2,
+  replayResearchQueryWithTransitV1_2,
   type ResearchQuerySnapshot,
 } from "./index";
+
+const CURRENT_REVIEW_CONTEXT = Object.freeze({
+  descriptor: CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR,
+  queryEngine: RESEARCH_QUERY_ENGINE,
+  calculateSnapshot: calculateTransitSnapshot,
+  executeQuery: executeResearchQuery
+});
+const RETAINED_REVIEW_CONTEXT_V1_2 = Object.freeze({
+  descriptor: TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0,
+  queryEngine: RESEARCH_QUERY_ENGINE_TRANSIT_V1_2,
+  calculateSnapshot: calculateTransitSnapshotV1_2_0,
+  executeQuery: replayResearchQueryWithTransitV1_2
+});
+const REVIEW_CONTEXTS = [CURRENT_REVIEW_CONTEXT, RETAINED_REVIEW_CONTEXT_V1_2] as const;
+type ReviewExecutionContext = (typeof REVIEW_CONTEXTS)[number];
+const retainedDescriptor = TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0;
+const transitTimelineBindingSchema = z.union([
+  z.literal(TRANSIT_TIMELINE_VERSION), z.literal(retainedDescriptor.timelineVersion)
+]);
+const transitAlgorithmBindingSchema = z.union([
+  z.literal(TRANSIT_ALGORITHM_ID), z.literal(retainedDescriptor.algorithmId)
+]);
+function refineTransitVersionPair(
+  value: { transitTimelineVersion: string; transitAlgorithmId: string }, context: z.RefinementCtx
+) {
+  if (!REVIEW_CONTEXTS.some(({ descriptor }) => value.transitTimelineVersion === descriptor.timelineVersion
+    && value.transitAlgorithmId === descriptor.algorithmId)) {
+    context.addIssue({ code: "custom", path: ["transitAlgorithmId"], message: "时间线与算法必须绑定同一保留版本。" });
+  }
+}
 
 export const TRANSIT_QUERY_REVIEW_BUNDLE_FORMAT = "hakimi-transit-query-review-bundle" as const;
 export const TRANSIT_QUERY_INDEPENDENT_REVIEW_FORMAT = "hakimi-transit-query-independent-review" as const;
@@ -78,7 +112,7 @@ const safeSourceRefSchema = z.string()
 
 const transitEngineBindingSchema = z.strictObject({
   name: z.literal(TRANSIT_CORE_ENGINE.name),
-  version: z.literal(TRANSIT_CORE_ENGINE.version),
+  version: z.union([z.literal(TRANSIT_CORE_ENGINE.version), z.literal(retainedDescriptor.engine.version)]),
   upstreamName: z.literal(TRANSIT_CORE_ENGINE.upstreamName),
   upstreamVersion: z.literal(TRANSIT_CORE_ENGINE.upstreamVersion),
   upstreamTagCommit: z.literal(TRANSIT_CORE_ENGINE.upstreamTagCommit),
@@ -107,8 +141,8 @@ const transitTimeZoneDatabaseBindingSchema = z.strictObject({
 });
 
 const transitSnapshotExecutorBindingSchema = z.strictObject({
-  timelineVersion: z.literal(CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR.timelineVersion),
-  algorithmId: z.literal(CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR.algorithmId),
+  timelineVersion: transitTimelineBindingSchema,
+  algorithmId: transitAlgorithmBindingSchema,
   engine: transitEngineBindingSchema,
   timeZoneDatabase: transitTimeZoneDatabaseBindingSchema,
 });
@@ -247,8 +281,9 @@ const reviewBundlePayloadSchema = z.strictObject({
       queryVersion: z.literal(RESEARCH_QUERY_ENGINE.queryVersion),
       textMode: z.literal(RESEARCH_QUERY_ENGINE.textMode),
       relationEngine: z.literal(RESEARCH_QUERY_ENGINE.relationEngine),
-      transitTimeline: z.literal(RESEARCH_QUERY_ENGINE.transitTimeline),
-      derivedReplayProfile: z.literal(RESEARCH_QUERY_ENGINE.derivedReplayProfile),
+      transitTimeline: transitTimelineBindingSchema,
+      derivedReplayProfile: z.union([z.literal(RESEARCH_QUERY_ENGINE.derivedReplayProfile),
+        z.literal(RESEARCH_QUERY_ENGINE_TRANSIT_V1_2.derivedReplayProfile)]),
     }),
     baziEngine: z.strictObject({
       name: z.literal(ENGINE.name),
@@ -260,10 +295,18 @@ const reviewBundlePayloadSchema = z.strictObject({
     }),
     transitEngine: transitEngineBindingSchema,
     transitSnapshotExecutor: transitSnapshotExecutorBindingSchema,
-    transitTimelineVersion: z.literal(TRANSIT_TIMELINE_VERSION),
-    transitAlgorithmId: z.literal(TRANSIT_ALGORITHM_ID),
+    transitTimelineVersion: transitTimelineBindingSchema,
+    transitAlgorithmId: transitAlgorithmBindingSchema,
     ruleProfile: ruleProfileSchema,
     ruleProfileDigest: sha256Schema,
+  }).superRefine((bindings, context) => {
+    const exact = REVIEW_CONTEXTS.some(({ descriptor, queryEngine }) =>
+      canonicalStringify(bindings.transitSnapshotExecutor) === canonicalStringify(descriptor)
+      && canonicalStringify(bindings.transitEngine) === canonicalStringify(descriptor.engine)
+      && canonicalStringify(bindings.researchQueryEngine) === canonicalStringify(queryEngine)
+      && bindings.transitTimelineVersion === descriptor.timelineVersion
+      && bindings.transitAlgorithmId === descriptor.algorithmId);
+    if (!exact) context.addIssue({ code: "custom", message: "审核包的查询、时间线和执行器必须是同一精确保留版本。" });
   }),
   reviewPolicy: z.strictObject({
     requiredIndependentReviewCount: z.literal(2),
@@ -334,8 +377,8 @@ export const transitQueryIndependentReviewPayloadSchema = z.strictObject({
   resultDigest: sha256Schema,
   ruleProfileDigest: sha256Schema,
   luckCycleRuleDigest: sha256Schema,
-  transitTimelineVersion: z.literal(TRANSIT_TIMELINE_VERSION),
-  transitAlgorithmId: z.literal(TRANSIT_ALGORITHM_ID),
+  transitTimelineVersion: transitTimelineBindingSchema,
+  transitAlgorithmId: transitAlgorithmBindingSchema,
   reviewer: independentReviewerSchema,
   verdict: z.enum(["accept", "replace", "reject"]),
   proposedExpected: expectedProjectionSchema.nullable(),
@@ -344,6 +387,7 @@ export const transitQueryIndependentReviewPayloadSchema = z.strictObject({
   createdAt: canonicalUtcInstantSchema,
   rationale: z.string().trim().min(1).max(4000),
 }).superRefine((value, context) => {
+  refineTransitVersionPair(value, context);
   if (value.verdict === "reject" && value.proposedExpected !== null) {
     context.addIssue({ code: "custom", path: ["proposedExpected"], message: "拒绝候选时不得给出生效期望" });
   }
@@ -465,8 +509,8 @@ export const transitQueryAdjudicationPayloadSchema = z.strictObject({
   resultDigest: sha256Schema,
   ruleProfileDigest: sha256Schema,
   luckCycleRuleDigest: sha256Schema,
-  transitTimelineVersion: z.literal(TRANSIT_TIMELINE_VERSION),
-  transitAlgorithmId: z.literal(TRANSIT_ALGORITHM_ID),
+  transitTimelineVersion: transitTimelineBindingSchema,
+  transitAlgorithmId: transitAlgorithmBindingSchema,
   independentReviewDigests: z.tuple([sha256Schema, sha256Schema]),
   decision: z.enum(["accept_expected", "replace_expected", "reject_candidate"]),
   effectiveExpected: expectedProjectionSchema.nullable(),
@@ -477,6 +521,7 @@ export const transitQueryAdjudicationPayloadSchema = z.strictObject({
   rationale: z.string().trim().min(1).max(4000),
   supersedesDecisionDigest: sha256Schema.nullable(),
 }).superRefine((value, context) => {
+  refineTransitVersionPair(value, context);
   if (new Set(value.independentReviewDigests).size !== 2) {
     context.addIssue({ code: "custom", path: ["independentReviewDigests"], message: "最终裁决必须绑定两份不同的独立审核" });
   }
@@ -866,6 +911,7 @@ function projectExpected(slot: TransitSlot, nodeType: TransitNodeType): TransitQ
 async function buildCandidate(
   scenario: Scenario,
   revisions: ReadonlyMap<BirthInput["sex"], RevisionRecord>,
+  context: ReviewExecutionContext,
 ): Promise<TransitQueryReviewCandidate> {
   const revision = revisions.get(scenario.sex);
   if (!revision) throw new Error(`missing synthetic revision for ${scenario.sex}`);
@@ -878,7 +924,7 @@ async function buildCandidate(
     events: [],
     knowledgeDocuments: [],
   };
-  const transit = await calculateTransitSnapshot({
+  const transit = await context.calculateSnapshot({
     revision,
     atInstant: scenario.atInstant,
     ...(scenario.manualDirection === null ? {} : { manualDirection: scenario.manualDirection }),
@@ -896,7 +942,7 @@ async function buildCandidate(
       matches: [matcher],
     },
   }) as ResearchCaseQuery;
-  const execution = await executeResearchQuery(query, snapshot, { now: () => FIXED_CALCULATED_AT });
+  const execution = await context.executeQuery(query, snapshot, { now: () => FIXED_CALCULATED_AT });
   const matchingCaseIds = execution.results.flatMap((result) => result.scope === "cases" ? [result.caseId] : []);
   const expectedMatched = proposedExpected.queryOutcome === "matched";
   if (expectedMatched !== (matchingCaseIds.length === 1 && matchingCaseIds[0] === CASE_ID)) {
@@ -942,23 +988,29 @@ async function buildCandidate(
   });
 }
 
-async function buildCurrentCandidates(): Promise<TransitQueryReviewCandidate[]> {
+async function buildCandidates(context: ReviewExecutionContext): Promise<TransitQueryReviewCandidate[]> {
   const revisionEntries = await Promise.all((["male", "female", "unspecified"] as const).map(async (sex) => [
     sex,
     await createRevision(sex),
   ] as const));
   const revisions = new Map<BirthInput["sex"], RevisionRecord>(revisionEntries);
-  return Promise.all(scenarios.map((scenario) => buildCandidate(scenario, revisions)));
+  return Promise.all(scenarios.map((scenario) => buildCandidate(scenario, revisions, context)));
 }
 
 export async function createTransitQueryReviewBundle(options: {
   generatedAt?: string;
 } = {}): Promise<TransitQueryReviewBundleEnvelope> {
+  return buildReviewBundle(options, CURRENT_REVIEW_CONTEXT);
+}
+
+async function buildReviewBundle(
+  options: { generatedAt?: string }, context: ReviewExecutionContext
+): Promise<TransitQueryReviewBundleEnvelope> {
   const generatedAt = options.generatedAt ?? new Date().toISOString();
   if (!Number.isFinite(Date.parse(generatedAt))) {
     throw new TransitQueryReviewAuditError("TIME_INVALID", "审核包生成时间不是有效瞬时点。");
   }
-  const candidates = await buildCurrentCandidates();
+  const candidates = await buildCandidates(context);
   const ruleProfileDigest = await digestRuleProfile(WORKING_DEFAULT_RULE_PROFILE);
   const fixtureDigest = await sha256Hex({
     datasetId: TRANSIT_QUERY_REVIEW_DATASET_ID,
@@ -967,7 +1019,7 @@ export async function createTransitQueryReviewBundle(options: {
     baseBirthInput,
     scenarios,
     ruleProfileDigest,
-    transitSnapshotExecutor: CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR,
+    transitSnapshotExecutor: context.descriptor,
   });
   const datasetDigest = await sha256Hex({ fixtureDigest, candidates });
   const payload = reviewBundlePayloadSchema.parse({
@@ -986,12 +1038,12 @@ export async function createTransitQueryReviewBundle(options: {
     },
     bindings: {
       schemaVersion: SCHEMA_VERSION,
-      researchQueryEngine: RESEARCH_QUERY_ENGINE,
+      researchQueryEngine: context.queryEngine,
       baziEngine: ENGINE,
-      transitEngine: TRANSIT_CORE_ENGINE,
-      transitSnapshotExecutor: CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR,
-      transitTimelineVersion: TRANSIT_TIMELINE_VERSION,
-      transitAlgorithmId: TRANSIT_ALGORITHM_ID,
+      transitEngine: context.descriptor.engine,
+      transitSnapshotExecutor: context.descriptor,
+      transitTimelineVersion: context.descriptor.timelineVersion,
+      transitAlgorithmId: context.descriptor.algorithmId,
       ruleProfile: WORKING_DEFAULT_RULE_PROFILE,
       ruleProfileDigest,
     },
@@ -1064,7 +1116,10 @@ export async function preflightTransitQueryReviewBundle(
   }
   assertReviewTimeNotFuture(envelope.payload.generatedAt, options, "运限候选审核包生成时间");
 
-  const current = await createTransitQueryReviewBundle({ generatedAt: envelope.payload.generatedAt });
+  const replayContext = REVIEW_CONTEXTS.find(({ descriptor }) =>
+    canonicalStringify(descriptor) === canonicalStringify(envelope.payload.bindings.transitSnapshotExecutor));
+  if (!replayContext) throw new TransitQueryReviewAuditError("DATASET_MISMATCH", "审核包没有精确保留的复演上下文。");
+  const current = await buildReviewBundle({ generatedAt: envelope.payload.generatedAt }, replayContext);
   if (envelope.payload.dataset.fixtureDigest !== current.payload.dataset.fixtureDigest) {
     throw new TransitQueryReviewAuditError("FIXTURE_MISMATCH", "运限审核包绑定的 candidate-only fixture 已不是当前版本。");
   }

@@ -1,0 +1,21 @@
+哈基米八字试用版 · 差异化生活解读更新（2026-10-22）
+
+新报告成稿版本为0.21.0；应用版本和数据库版本以包内验证结果为准。
+沿用http://127.0.0.1:5202/与原Edge用户配置，数据库仍为legacy-v13/schema13。
+此次更新代码，不重新导入资料，不重写旧保存报告。更换浏览器、配置或地址会进入不同资料空间。
+
+运行环境：Windows PowerShell 5.1、Node.js 24.16.0。本包不会下载安装环境。
+旧020安装目录与快捷方式回滚副本保留；新包安装到独立reading-021-trials/<build>-package-v1。
+
+由交付人员执行更新：
+1. 校验新包，用scripts\install-local-reading-021-candidate.ps1 -PackageRoot PACKAGE_DIR -NoShortcut安装。
+2. 确认无未保存操作，核实5202旧服务归属后受控切换；新启动器不会终止旧服务、自动换端口或清库。
+3. 运行新安装目录的scripts\launch-local-reading-021-candidate.ps1 -PackageRoot INSTALLED_DIR -NoDialogs。
+4. 在原Edge配置刷新同一5202地址，确认新版已加载、旧资料与保存报告仍可访问，再切换桌面快捷方式。
+5. 保留旧020包和原快捷方式。回滚也须先核实并切换5202服务；单点旧快捷方式不会自动替换正在运行的新版。
+
+校验命令：node scripts\local-research-reading-021-candidate.mjs verify --package-root PACKAGE_DIR
+普通安装器拒绝覆盖不同目标的同名快捷方式；先用-NoShortcut，最后由交付人员备份并明确更新。
+START-READING-021.cmd或桌面快捷方式打开系统浏览器；资料按浏览器配置和地址保存，不自动跨浏览器共享。
+日志在%USERPROFILE%\HakimiBaziWorkbenchCandidates\reading-021-launch-logs，包内文件保持不可变。
+本包不承诺旧程序能够理解新版产生的所有报告；请保留旧资料备份及报告原件。

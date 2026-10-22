@@ -103,7 +103,7 @@ describe("Revision explicit derived replay", () => {
     expect(projection.transit.status).toBe("projected");
     if (projection.transit.status === "projected") {
       expect(projection.transit.result.target.instant).toBe("2025-08-18T00:00:00.000Z");
-      expect(projection.transit.result.timelineVersion).toBe("hakimi-transit:1.2.0");
+      expect(projection.transit.result.timelineVersion).toBe("hakimi-transit:1.3.0");
     }
     expect(projection.projectionDigest).toMatch(/^[a-f0-9]{64}$/);
     expect(Object.isFrozen(projection)).toBe(true);

@@ -28,7 +28,7 @@ const trackLabels: Record<TransitNodeType, { title: string; hint: string }> = {
   year: { title: "流年", hint: "固定 UTC+08 · 立春界年" },
   month: { title: "流月", hint: "固定 UTC+08 · 十二节界月" },
   day: { title: "流日", hint: "修订 IANA 时区 · 锁版换日" },
-  hour: { title: "流时", hint: "修订 IANA 时区 · 两小时区间" }
+  hour: { title: "流时", hint: "修订 IANA 时区 · 以节点起止为准" }
 };
 
 const scaleOptions: ReadonlyArray<{ value: TransitScale; label: string; description: string }> = [
@@ -673,6 +673,9 @@ export function TransitWorkbench({
 
       {settledSnapshot ? (
         <>
+          {settledSnapshot.timelineVersion === "hakimi-transit:1.2.0" ? (
+            <p className="transit-binding-note" role="note">正在查看旧节点的历史计算（v1.2），原计算事实已保留。重新定位时间可读取当前结果。</p>
+          ) : null}
           <div className="transit-target-summary" role="status" aria-live="polite">
             <span>案例时区 <strong>{shortWall(settledSnapshot.target.revisionWallDateTime)}</strong></span>
             <span>固定 +08 <strong>{shortWall(settledSnapshot.target.fixedPlusEightWallDateTime)}</strong></span>

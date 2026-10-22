@@ -1,0 +1,43 @@
+哈基米八字试用版（2026-10-21）
+
+这是已封包的本地试用程序。报告成稿版本为 0.17；它不是应用版本号或数据库版本号。
+程序保留现有本地规则、个人修订、已存报告与完整备份功能，不代表命理准确率验证或公开发布。
+
+开始使用
+1. 环境需要 Windows PowerShell 5.1 和 Node.js 24.16.0。本包不会自动下载或安装环境。
+2. 解压完整包，运行 scripts\install-local-reading-017-candidate.ps1。
+   安装默认放在 %USERPROFILE%\HakimiBaziWorkbenchCandidates\reading-017-trials 下独立目录。
+   它只新建目录，并创建桌面“哈基米八字试用版”快捷方式；不同内容的旧目录或同名快捷方式不会被覆盖。
+3. 双击新快捷方式或 START-READING-017.cmd。启动先核验完整包身份，然后在固定本机地址启动。
+   地址来自本包已经锁定的 release.origin，预计为 http://127.0.0.1:5202/，以核验结果为准。
+   启动不构建代码、不清空资料、不终止占用端口的其他程序，也不会自动更换端口。
+
+资料连续使用：请读这一段
+资料属于“浏览器用户配置 + 完整地址”，不是安装文件夹。
+系统浏览器、Codex 内置浏览器，以及 5188/5189/5197/5199/5201 等旧地址的资料互不自动共享。
+双击快捷方式打开系统浏览器；如果该浏览器尚未恢复备份，页面可能是空库。
+如果本次交付是在 Codex 内置浏览器恢复了资料，请在该浏览器打开已锁定的新地址继续使用。
+不要把“旧资料未删除”误当成“新浏览器已经有全部资料”。
+
+迁移和核对
+1. 在每个实际持有资料的旧入口，通过应用的数据管理导出完整备份，保留原文件。
+2. 如果目标浏览器已有资料，先导出其完整备份。恢复可能替换目标资料，不能直接覆盖未备份的库。
+3. 在目标浏览器的新地址预检、恢复经过核对的完整备份。
+4. 核对命盘、修订、笔记和已存报告数量，打开代表旧报告，确认下载正文与原文件相同。
+5. 此安装器不会合并数据库或复制浏览器配置文件；多个来源的合并需另有经核验的备份文件。
+   数据库仍为 legacy-v13 / schema 13，本次没有数据库迁移。
+
+保留旧版和回退
+旧安装、旧快捷方式和旧地址均保留。需要回退时打开原快捷方式或原安装入口。
+请同时保留升级前备份和新版本备份。旧程序能否读取新格式报告须另行验证，不承诺向下兼容新报告。
+不要把新目录复制到旧目录上，不要删除旧浏览器资料，也不要为释放端口终止不明进程。
+
+维护人员命令（不需要普通使用者执行）
+  node scripts\local-research-reading-017-candidate.mjs verify --package-root PACKAGE_DIR
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-local-reading-017-candidate.ps1 -PackageRoot PACKAGE_DIR -NoShortcut
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\launch-local-reading-017-candidate.ps1 -PackageRoot INSTALLED_DIR -NoDialogs
+最后一条只启动本地服务，不打开系统浏览器，便于在已经恢复资料的浏览器中访问同一地址。
+需要打开系统浏览器时另加 -OpenSystemBrowser。
+
+日志默认写到 %USERPROFILE%\HakimiBaziWorkbenchCandidates\reading-017-launch-logs。
+包内文件不可变；启动/校验失败会保留日志，不自动重装、清库或重试数据写入。

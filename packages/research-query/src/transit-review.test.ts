@@ -1,4 +1,8 @@
 import { beforeAll, describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { gunzipSync } from "node:zlib";
+import { resolve } from "node:path";
 import { sha256Hex } from "@hakimi/integrity";
 import {
   CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR,
@@ -27,6 +31,7 @@ import {
   serializeTransitQueryAdjudicationEnvelope,
   serializeTransitQueryIndependentReviewEnvelope,
   serializeTransitQueryReviewBundle,
+  transitQueryReviewBundleEnvelopeSchema,
   summarizeTransitQueryReviewEvidence,
   verifyTransitQueryReviewCandidates,
   type TransitQueryAdjudicationEnvelope,
@@ -37,6 +42,16 @@ import {
 } from "./transit-review";
 
 const GENERATED_AT = "2026-08-02T00:01:00.000Z";
+
+function retainedReviewBundle(): TransitQueryReviewBundleEnvelope {
+  // Produced by the unchanged 6cb review generator with explicit retained
+  // v1.2 query/transit executors. This is synthetic replay evidence, not an
+  // original human review or a newly signed corrected result.
+  const bytes = gunzipSync(readFileSync(resolve(process.cwd(), "packages/research-query/src/golden/transit-review-v1.2-original-source.json.gz")));
+  expect(createHash("sha256").update(bytes).digest("hex"))
+    .toBe("5294b093a0d37b5dea1436da0b9aef330791204a0fb90ed687b44c28cd052bd7");
+  return transitQueryReviewBundleEnvelopeSchema.parse(JSON.parse(bytes.toString("utf8")));
+}
 
 function cloneBundle(bundle: TransitQueryReviewBundleEnvelope): TransitQueryReviewBundleEnvelope {
   return structuredClone(bundle);
@@ -175,6 +190,43 @@ async function expectAuditCode(promise: Promise<unknown>, code: TransitQueryRevi
 
 describe("P1-04 运限查询专家审核包", () => {
   let bundle: TransitQueryReviewBundleEnvelope;
+
+  it("按旧 v1.2 完整绑定复演冻结候选包，不采用当前执行器或重签旧结果", async () => {
+    const retained = retainedReviewBundle();
+    const before = JSON.stringify(retained);
+    await expect(preflightTransitQueryReviewBundle(retained, { now: "2026-10-13T00:00:00.000Z" }))
+      .resolves.toEqual(retained);
+    expect(retained.payload.bindings.transitTimelineVersion).toBe("hakimi-transit:1.2.0");
+    expect(JSON.stringify(retained)).toBe(before);
+  });
+
+  it("旧候选的两份合成审核及裁决保持旧版本绑定，并拒绝新旧算法混配", async () => {
+    const retained = retainedReviewBundle();
+    const context = await createTransitQueryReviewPreflightContext(retained, { now: "2026-10-13T00:00:00.000Z" });
+    const reviewA = await createIndependentReview(retained, "retained-reviewer-a", "2026-08-02T00:02:00.000Z", "2026-08-02T00:03:00.000Z");
+    const reviewB = await createIndependentReview(retained, "retained-reviewer-b", "2026-08-02T00:04:00.000Z", "2026-08-02T00:05:00.000Z");
+    await expect(preflightTransitQueryIndependentReviewInContext(reviewA, context)).resolves.toBeDefined();
+    const adjudication = await createAdjudication(retained, [reviewA, reviewB]);
+    await expect(preflightTransitQueryAdjudicationInContext(adjudication, context, [reviewA, reviewB])).resolves.toBeDefined();
+    const mixedReview = structuredClone(reviewA);
+    mixedReview.payload.transitAlgorithmId = CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR.algorithmId;
+    mixedReview.digest = await sha256Hex(mixedReview.payload);
+    await expect(preflightTransitQueryIndependentReviewInContext(mixedReview, context)).rejects.toThrow();
+    const mixedAdjudication = structuredClone(adjudication);
+    mixedAdjudication.payload.transitAlgorithmId = CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR.algorithmId;
+    mixedAdjudication.digest = await sha256Hex(mixedAdjudication.payload);
+    await expect(preflightTransitQueryAdjudicationInContext(mixedAdjudication, context, [reviewA, reviewB])).rejects.toThrow();
+  });
+
+  it("完整重摘要也不能把旧候选的任一引擎字段混进当前绑定元组", async () => {
+    const retained = retainedReviewBundle();
+    for (const key of ["researchQueryEngine", "transitEngine", "transitSnapshotExecutor", "transitTimelineVersion", "transitAlgorithmId"] as const) {
+      const mixed = structuredClone(bundle);
+      Object.assign(mixed.payload.bindings, { [key]: retained.payload.bindings[key] });
+      mixed.digest = await sha256Hex(mixed.payload);
+      await expect(preflightTransitQueryReviewBundle(mixed, { now: "2026-10-13T00:00:00.000Z" })).rejects.toThrow();
+    }
+  });
   let reviewA: TransitQueryIndependentReviewEnvelope;
   let reviewB: TransitQueryIndependentReviewEnvelope;
   let adjudication: TransitQueryAdjudicationEnvelope;

@@ -55,6 +55,8 @@ const compactEvidenceQuery = "(max-width: 1099px)";
 const provenanceKindIds = new Set<string>(Object.keys(provenanceKindLabels));
 const verificationStatusIds = new Set<string>(Object.keys(verificationStatusLabels));
 const citationStatusIds = new Set<string>(Object.keys(citationStatusLabels));
+const evidenceDayBoundaries = ["zi_start_23", "midnight"] as const satisfies
+  readonly RevisionRecord["ruleProfile"]["calendar"]["dayBoundary"][];
 const unsafeEvidenceTextPattern = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]/u;
 const unsafeEvidenceTextGlobalPattern = new RegExp(unsafeEvidenceTextPattern.source, "gu");
 const sensitiveEvidenceFailurePattern = /((?:api[-_ ]?key|authorization|access[-_ ]?token|refresh[-_ ]?token|secret|password)\s*[:=]\s*)[^\s,;]+/giu;
@@ -414,7 +416,7 @@ function inspectEvidenceBinding(revision: RevisionRecord, selection: MatrixSelec
   ))) {
     return { state: "error", issue: "当前 Revision 的引擎或摘要绑定不可识别" };
   }
-  if (calendarRecord.dayBoundary !== "zi_start_23" && calendarRecord.dayBoundary !== "midnight_00") {
+  if (!evidenceDayBoundaries.some((dayBoundary) => dayBoundary === calendarRecord.dayBoundary)) {
     return { state: "error", issue: "当前 Revision 的换日规则不可识别" };
   }
 

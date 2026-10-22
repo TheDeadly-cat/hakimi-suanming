@@ -1,0 +1,21 @@
+.reading-context-panel { margin: 24px 0; padding: 0 18px; border: 1px solid #dddccf; border-radius: 9px; background: #f8f7f0; color: #344f41; }
+.reading-context-panel > summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; padding: 16px 0; cursor: pointer; line-height: 1.6; }
+.reading-context-panel > summary > span:first-child { font-weight: 650; }
+.reading-context-panel summary small { margin-left: 7px; font-size: 12px; font-weight: 400; color: #68796b; }
+.reading-context-summary { font-size: 13px; color: #68796b; overflow-wrap: anywhere; }
+.reading-context-body { border-top: 1px solid #e3e2d5; padding: 4px 0 16px; }
+.reading-context-body > p { font-size: 14px; line-height: 1.8; }
+.reading-context-grid, .reading-context-years { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; }
+.reading-context-panel label { display: flex; flex-direction: column; gap: 7px; font-size: 14px; line-height: 1.6; }
+.reading-context-panel select, .reading-context-panel input, .reading-context-panel textarea { box-sizing: border-box; min-width: 0; width: 100%; padding: 10px 12px; border: 1px solid #cbd1c4; border-radius: 6px; background: #fffef9; color: #263f34; font: inherit; }
+.reading-context-panel textarea { resize: vertical; line-height: 1.8; }
+.reading-context-years { margin: 18px 0; padding: 12px 14px 14px; border: 1px solid #dedfd2; border-radius: 6px; }
+.reading-context-years legend { padding: 0 5px; font-size: 13px; color: #64715f; }
+.reading-context-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-top: 16px; }
+.reading-context-actions button { min-height: 42px; white-space: normal; }
+.reading-context-panel .reading-context-note { color: #697567; font-size: 12px; line-height: 1.8; }
+.reading-context-panel .reading-context-error { color: #944d39; white-space: pre-wrap; overflow-wrap: anywhere; }
+.reading-context-message { color: #3b654e; }
+.reading-context-panel :is(select,input,textarea,button,summary):focus-visible { outline: 2px solid #698d76; outline-offset: 3px; }
+.reading-context-panel :disabled { opacity: .65; cursor: not-allowed; }
+@media (max-width: 600px) { .reading-context-panel { padding: 0 13px; } .reading-context-grid { grid-template-columns: 1fr; } .reading-context-years { gap: 12px; padding: 10px; } .reading-context-actions { align-items: stretch; } .reading-context-actions button { min-height: 44px; } }

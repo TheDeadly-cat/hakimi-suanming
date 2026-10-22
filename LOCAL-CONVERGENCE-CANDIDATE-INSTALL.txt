@@ -1,0 +1,40 @@
+哈基米本地研究候选版 480f5f822bd1 / 安装包修订 1（未安装、未启用）
+
+应用身份：legacy-v13 / Schema 13 / migrationId null。
+baseCommit：6cb7075ff16980972fb6d4ac4738e3d186c181cf。
+sourceDirty：true；这是一份已冻结的未提交应用源码快照，baseCommit 不包含全部整改。
+sourceTreeDigest：c466bf6ae3e1b3b34c4bb1261709bc6ae34d84554e918921e3c94dafc6512e27。
+evidenceId：hre1-8c689e0d9d9066f4e931722c5824aec0。
+原锁 SHA-256：1aaaf43aa634d7698e83bc38175c1d0aafc4174246c448d4dd755f59afe3c235。
+137 文件集合摘要：1f3ed95d99541cacc10e7b7891be826c25b7712f96484a11c7fcefedf5d4f696。
+完整应用源码清单与本次构建身份见包内 tmp/delivery-receipts-480f5f822bd1。
+后继交付工具另由包清单和外部工具身份记录绑定，不冒称属于原应用源码快照。
+需要现有 Node.js 24.16.0、Windows PowerShell 5.1；不下载工具或重新构建。
+
+资料入口
+日常资料空间为 Codex 内置浏览器中的 http://127.0.0.1:5189/。
+后继启动器先核验完整包、监听与应用身份；默认只启动服务并提示回到 Codex。
+它不会自动打开系统浏览器，也不发明或调用 Codex 专用协议。
+显式选择 -OpenSystemBrowser 时会提示系统浏览器是独立资料空间，确认后才打开。
+未知监听、损坏包或冲突入口一律拒绝，不停止他人服务、不换端口、不清理资料。
+
+隔离准备与本地必跑门
+涉及 scripts/local-research-*、install/launch-local-*、validate-local-*、
+local-delivery-gate*、包固定身份或候选应用字节变化时，交付前必须在源码目录运行：
+  node scripts/validate-local-delivery.mjs --convergence-candidate --package-root "完整候选包路径" --output "仓外全新验收目录"
+必须取得同一包清单身份的 18 安装合同、6 probe 和 6 原生启动合同全部通过。
+任一进程失败、结果缺失、跳过或身份不符都会阻断；不得把旧包绿灯复用于新包。
+原生合同只在临时副本映射随机端口，拦截浏览器请求；不访问真实资料空间。
+
+只有用户单独批准安装及启用后，才执行以下现场步骤
+保留原 ab0/f043 包、清单、旧入口及当前资料备份，先核对旧监听所属包与 PID。
+本包不能在旧 5189 服务仍运行时直接接管端口。停止旧服务与现场切换需单独授权。
+准备新安装副本（不启动服务；-NoShortcut 不创建桌面入口）：
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-local-convergence-candidate.ps1 -NoShortcut
+默认目标为 %USERPROFILE%\HakimiBaziWorkbenchCandidates\packages\480f5f822bd1-package-v1。
+已有相同包只读复用，其他内容拒绝覆盖；新的 Codex (5189) 入口不会覆盖旧 Candidate 入口。
+经批准切换后启动：
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\launch-local-convergence-candidate.ps1 -PackageRoot "新安装副本路径"
+回到 Codex 内置浏览器打开同一 5189；核对页面/控制器版本与既有资料。
+失败时保留日志，只停止确认属于新包的服务，再以原 ab0 包和旧入口回到同一资料空间。
+应用回退不自动恢复或覆盖资料。第二台 Windows、专家准入与公开发布保持独立待验。

@@ -1,0 +1,35 @@
+.app-shell.app-shell--reading { grid-template-columns: 196px minmax(0, 1fr); }
+.app-shell--reading .app-main { padding: 0; max-width: none; width: 100%; }
+.app-shell--reading .app-column { min-width: 0; }
+.reading-sidebar { position: sticky; top: 0; height: 100dvh; min-height: 600px; display: flex; flex-direction: column; border-right: 1px solid var(--line-200); padding: 32px 14px 24px; overflow: hidden; }
+.reading-sidebar .brand { padding: 0 10px; gap: 14px; }
+.reading-sidebar .brand strong { font: 600 23px var(--font-editorial); letter-spacing: 3px; }
+.reading-sidebar .brand small { margin-top: 4px; font: 17px var(--font-editorial); }
+.reading-sidebar nav { margin-top: 44px; display: grid; gap: 14px; }
+.reading-sidebar nav a, .reading-sidebar-bottom > a { display: flex; gap: 17px; align-items: center; min-height: 54px; padding: 12px 17px; border-radius: 8px; font-size: 16px; font-weight: 500; color: var(--ink-750); text-decoration: none; position: relative; }
+.reading-sidebar a svg { width: 22px; height: 22px; flex: 0 0 auto; }
+.reading-sidebar nav .is-active { color: var(--jade-750); background: var(--jade-100); }
+.reading-sidebar nav .is-active::before { content: ""; width: 3px; height: 26px; background: var(--jade-700); position: absolute; left: 0; }
+.reading-sidebar nav a:hover, .reading-sidebar-bottom > a:hover { background: var(--jade-selection); }
+.reading-sidebar-bottom { margin-top: auto; padding-top: 170px; position: relative; }
+.reading-sidebar-bottom > img { width: 470px; height: 230px; object-fit: cover; object-position: left; opacity: .32; position: absolute; bottom: 140px; left: -30px; z-index: 0; pointer-events: none; }
+.reading-sidebar-bottom > p, .reading-sidebar-bottom > a { position: relative; z-index: 1; }
+.reading-sidebar-bottom p { color: var(--ink-500); font: 14px/1.9 var(--font-editorial); letter-spacing: 5px; margin: 0 25px 48px; }
+.app-shell--reading .app-main > .page { padding: 32px clamp(20px, 3vw, 48px); }
+.app-shell--reading .dashboard-masthead { background: var(--paper-raised); box-shadow: none; border-top: 0; padding-inline: 0; }
+.app-shell--reading .dashboard-masthead::before, .app-shell--reading .dashboard-masthead::after { display: none; }
+.app-shell--reading .dashboard-masthead .page-heading h1 { font-size: clamp(30px, 3.5vw, 46px); line-height: 1.35; }
+.dashboard-more-tools { margin-block: 20px; border-block: 1px solid var(--line-200); }
+.dashboard-more-tools > summary, .wizard-technical-details > summary { min-height: 48px; padding: 13px 4px; cursor: pointer; color: var(--jade-750); font-size: 14px; font-weight: 600; }
+.dashboard-more-tools > summary:focus-visible, .wizard-technical-details > summary:focus-visible { outline: 2px solid var(--jade-700); outline-offset: 3px; }
+.dashboard-more-tools[open] { padding-bottom: 20px; }
+.app-shell--reading .page--wizard { max-width: 1120px; margin-inline: auto; }
+.app-shell--reading .page--wizard .wizard-layout { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.app-shell--reading .page--wizard .wizard-stage { background: var(--paper-raised); box-shadow: none; border-radius: 8px; border-top: 2px solid var(--jade-700); }
+.app-shell--reading .page--wizard .rule-snapshot { position: static; top: auto; background: transparent; border: 0; box-shadow: none; padding: 0; }
+.wizard-technical-details { margin-block: 18px; border-block: 1px solid var(--line-200); }
+.wizard-technical-details[open] { padding-bottom: 18px; }
+.rule-snapshot > .wizard-technical-details { margin-block: 0; }
+@media(max-width:1100px) and (min-width:768px) { .app-shell.app-shell--reading { grid-template-columns: 170px minmax(0,1fr); } .reading-sidebar { padding-inline: 10px; } .reading-sidebar .brand { gap: 9px; padding-inline: 5px; } .reading-sidebar nav a { gap: 12px; padding-inline: 12px; } }
+@media(max-width:767px) { .app-shell--reading { display: block; } .reading-sidebar { display: none; } .app-shell--reading .app-main { padding-bottom: 68px; } .app-shell--reading .app-main > .page { padding: 22px 16px; } }
+@media(max-width:767px) { .app-shell.app-shell--reading .mobile-bottom-nav { grid-template-columns: repeat(4, minmax(0,1fr)); } .app-shell.app-shell--reading .page--wizard[data-presentation="simple"] .wizard-actions { bottom: calc(68px + env(safe-area-inset-bottom)); } }

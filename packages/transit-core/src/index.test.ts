@@ -18,6 +18,8 @@ import {
 import {
   COMPATIBLE_TRANSIT_TIMELINE_VERSION_V1_1,
   CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR,
+  TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0,
+  calculateTransitSnapshotV1_2_0,
   HISTORICAL_TRANSIT_SNAPSHOT_EXECUTOR_REGISTRY,
   TRANSIT_CORE_ENGINE,
   TRANSIT_SNAPSHOT_TIME_ZONE_DATABASE_V1_2_0,
@@ -222,10 +224,10 @@ describe("calculateTransitSnapshot", () => {
 
     expect(repeated).toEqual(first);
     expect(equivalentOffset).toEqual(first);
-    expect(first.timelineVersion).toBe("hakimi-transit:1.2.0");
+    expect(first.timelineVersion).toBe("hakimi-transit:1.3.0");
     expect(first.tzdbVersion).toBe(first.timeZoneDatabase.snapshotId);
     expect(first.timeZoneDatabase.ianaVersion).toBe("2026c");
-    expect(first.manifest.algorithmId).toBe("hakimi-transit-core:parallel-active-intervals:v2");
+    expect(first.manifest.algorithmId).toBe("hakimi-transit-core:parallel-active-intervals:v3");
     expect(first.resultHash).toMatch(/^[a-f0-9]{64}$/);
     expect(first.tracks.hour.length).toBeLessThanOrEqual(5);
     expect(first.tracks.xiaoyun.length).toBeLessThanOrEqual(5);
@@ -556,7 +558,7 @@ describe("resolveTransitNodeRef", () => {
   });
 
   it("精确验证并原样保留 allowlist 内的 v1.1/v2 历史引用", async () => {
-    const historical = await compatibleV11Ref(activeDay);
+    const historical = await compatibleV11Ref(resolved((await calculateTransitSnapshotV1_2_0({ revision, atInstant: activeDay.startInstant })).slots.day));
     await expect(verifyCompatibleTransitNodeRef(revision, historical)).resolves.toEqual(historical);
     await expect(resolveTransitNodeRef(revision, historical)).rejects.toMatchObject({
       code: "TRANSIT_CONTEXT_MISMATCH"
@@ -564,7 +566,7 @@ describe("resolveTransitNodeRef", () => {
   });
 
   it("历史兼容入口对未知版本、未知算法与事实篡改保持失败关闭", async () => {
-    const historical = await compatibleV11Ref(activeDay);
+    const historical = await compatibleV11Ref(resolved((await calculateTransitSnapshotV1_2_0({ revision, atInstant: activeDay.startInstant })).slots.day));
     await expect(verifyCompatibleTransitNodeRef(revision, {
       ...historical,
       timelineVersion: "hakimi-transit:1.0.0"
@@ -647,36 +649,36 @@ describe("historical TransitSnapshot executor registry", () => {
 
   it("按完整 v1.2 描述符精确选择并重建完整快照", async () => {
     const executor = lookupHistoricalTransitSnapshotExecutor(
-      CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR
+      TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0
     );
     expect(executor?.executorId).toBe("hakimi-transit-core:transit-snapshot-executor:1.2.0");
 
     const [current, replayed] = await Promise.all([
-      calculateTransitSnapshot({ revision, atInstant: inputInstant }),
+      calculateTransitSnapshotV1_2_0({ revision, atInstant: inputInstant }),
       requireHistoricalTransitSnapshotExecutor(
-        CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR
+        TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0
       ).calculateSnapshot({ revision, atInstant: inputInstant })
     ]);
 
     expect(replayed).toEqual(current);
-    expect(replayed.timelineVersion).toBe(CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR.timelineVersion);
+    expect(replayed.timelineVersion).toBe(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0.timelineVersion);
     expect(replayed.timeZoneDatabase).toEqual(TRANSIT_SNAPSHOT_TIME_ZONE_DATABASE_V1_2_0);
     expect(replayed.manifest).toMatchObject({
-      algorithmId: CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR.algorithmId,
-      engineName: CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR.engine.name,
-      engineVersion: CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR.engine.version,
-      upstreamName: CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR.engine.upstreamName,
-      upstreamVersion: CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR.engine.upstreamVersion
+      algorithmId: TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0.algorithmId,
+      engineName: TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0.engine.name,
+      engineVersion: TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0.engine.version,
+      upstreamName: TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0.engine.upstreamName,
+      upstreamVersion: TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0.engine.upstreamVersion
     });
     for (const node of Object.values(replayed.tracks).flat()) {
-      expect(node.ref.timelineVersion).toBe(CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR.timelineVersion);
-      expect(node.ref.algorithmId).toBe(CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR.algorithmId);
+      expect(node.ref.timelineVersion).toBe(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0.timelineVersion);
+      expect(node.ref.algorithmId).toBe(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0.algorithmId);
     }
   });
 
   it("Casablanca 差异哨兵只用冻结 2026c 生成目标墙时与流日/流时边界", async () => {
     const replayed = await requireHistoricalTransitSnapshotExecutor(
-      CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR
+      TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0
     ).calculateSnapshot({
       revision: casablancaRevision,
       atInstant: "2026-10-01T00:00:00Z"
@@ -702,7 +704,7 @@ describe("historical TransitSnapshot executor registry", () => {
 
   it("v1.2 对 retained 2025b Revision 明确失败关闭，不借当前 2026c 替代", async () => {
     await expect(requireHistoricalTransitSnapshotExecutor(
-      CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR
+      TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0
     ).calculateSnapshot({
       revision: retainedCasablancaRevision,
       atInstant: "2026-10-01T00:00:00Z"
@@ -710,7 +712,7 @@ describe("historical TransitSnapshot executor registry", () => {
   });
 
   it("对 retained v1.1、未知身份、部分描述符和任一引擎字段不符均失败关闭", () => {
-    const base = structuredClone(CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR);
+    const base = structuredClone(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0);
     const mismatches: unknown[] = [
       { ...base, timelineVersion: COMPATIBLE_TRANSIT_TIMELINE_VERSION_V1_1 },
       { ...base, timelineVersion: "hakimi-transit:9.9.9" },
@@ -750,15 +752,15 @@ describe("historical TransitSnapshot executor registry", () => {
   });
 
   it("冻结 registry、entry 及嵌套描述符，篡改尝试不改变后续选择", () => {
-    const entry = HISTORICAL_TRANSIT_SNAPSHOT_EXECUTOR_REGISTRY[0];
+    const entry = lookupHistoricalTransitSnapshotExecutor(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0);
     expect(entry).toBeDefined();
     if (!entry) throw new Error("expected the current transit executor entry");
 
     expect(Object.isFrozen(TRANSIT_CORE_ENGINE)).toBe(true);
-    expect(Object.isFrozen(CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR)).toBe(true);
-    expect(Object.isFrozen(CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR.engine)).toBe(true);
-    expect(Object.isFrozen(CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR.timeZoneDatabase)).toBe(true);
-    expect(Object.isFrozen(CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR.timeZoneDatabase.resolver)).toBe(true);
+    expect(Object.isFrozen(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0)).toBe(true);
+    expect(Object.isFrozen(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0.engine)).toBe(true);
+    expect(Object.isFrozen(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0.timeZoneDatabase)).toBe(true);
+    expect(Object.isFrozen(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0.timeZoneDatabase.resolver)).toBe(true);
     expect(Object.isFrozen(HISTORICAL_TRANSIT_SNAPSHOT_EXECUTOR_REGISTRY)).toBe(true);
     expect(Object.isFrozen(entry)).toBe(true);
     expect(Object.isFrozen(entry.descriptor)).toBe(true);
@@ -779,13 +781,13 @@ describe("historical TransitSnapshot executor registry", () => {
       (HISTORICAL_TRANSIT_SNAPSHOT_EXECUTOR_REGISTRY as unknown as Array<typeof entry>).push(entry);
     }).toThrow(TypeError);
 
-    expect(lookupHistoricalTransitSnapshotExecutor(CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR)).toBe(entry);
-    expect(HISTORICAL_TRANSIT_SNAPSHOT_EXECUTOR_REGISTRY).toHaveLength(1);
+    expect(lookupHistoricalTransitSnapshotExecutor(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0)).toBe(entry);
+    expect(HISTORICAL_TRANSIT_SNAPSHOT_EXECUTOR_REGISTRY).toHaveLength(2);
   });
 
   it("严格拒绝历史输入额外键，并深冻结每次独立输出", async () => {
     const executor = requireHistoricalTransitSnapshotExecutor(
-      CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR
+      TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0
     );
     await expect(executor.calculateSnapshot({
       revision,
@@ -835,7 +837,7 @@ describe("historical TransitSnapshot executor registry", () => {
 
   it("并发 A/v1.1/A 不回退、不污染，两个 A 结果保持逐字段一致", async () => {
     const unavailableV11 = {
-      ...structuredClone(CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR),
+      ...structuredClone(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0),
       timelineVersion: COMPATIBLE_TRANSIT_TIMELINE_VERSION_V1_1
     };
     const calculate = (descriptor: unknown) => Promise.resolve().then(() =>
@@ -846,9 +848,9 @@ describe("historical TransitSnapshot executor registry", () => {
     );
 
     const [firstA, unavailableB, secondA] = await Promise.allSettled([
-      calculate(CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR),
+      calculate(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0),
       calculate(unavailableV11),
-      calculate(CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR)
+      calculate(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0)
     ]);
 
     expect(firstA.status).toBe("fulfilled");

@@ -58,7 +58,7 @@ describe("RevisionDerivedReplayPanel", () => {
     expect(screen.getByText(/条关系记录/)).not.toBeNull();
     expect(screen.getByText(/10 柱/)).not.toBeNull();
     expect(screen.getByText(/6 层已解析/)).not.toBeNull();
-    expect(screen.getAllByText(/relations-0\.1\.0_luck-0\.1\.0_transit-1\.2\.0/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/relations-0\.1\.0_luck-0\.1\.0_transit-1\.3\.0/).length).toBeGreaterThan(0);
     const disclosure = screen.getByText("完整执行绑定").closest("details");
     expect(disclosure).not.toBeNull();
     await userEvent.click(within(disclosure!).getByText("完整执行绑定"));

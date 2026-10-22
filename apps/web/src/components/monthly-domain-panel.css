@@ -1,0 +1,35 @@
+.monthly-domain-panel { margin: 22px 0; padding: 22px 24px; border: 1px solid #d7dece; border-radius: 9px; background: #faf9f1; color: #304638; min-width: 0; }
+.monthly-domain-kicker { margin: 0 0 6px; color: #75816b; font-size: 12px; letter-spacing: .06em; }
+.monthly-domain-heading { font-family: "Noto Serif SC", "Songti SC", serif; font-size: 24px; font-weight: 600; line-height: 1.5; margin: 6px 0 12px; }
+.monthly-domain-panel p, .monthly-domain-panel li { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.9; }
+.monthly-domain-summary { font-size: 15px; color: #456345; margin: 0 0 20px; }
+.monthly-domain-branch + .monthly-domain-branch { margin-top: 26px; padding-top: 20px; border-top: 1px solid #cfdac6; }
+.monthly-domain-branch-heading { font-size: 16px; color: #58714f; margin: 0 0 14px; }
+.monthly-domain-segment { min-width: 0; }
+.monthly-domain-segment + .monthly-domain-segment { margin-top: 26px; padding-top: 20px; border-top: 1px solid #d6dfcd; }
+.monthly-domain-segment-heading { border-left: 3px solid #8da47b; padding-left: 12px; margin: 14px 0 20px; }
+.monthly-domain-background { font-size: 14px; font-weight: 600; color: #486341; margin: 0 0 5px; }
+.monthly-domain-panel .monthly-domain-period { font-size: 12px; line-height: 1.7; color: #77816c; margin: 5px 0; }
+.monthly-domain-caption { font-size: 14px; font-weight: 600; color: #4c6844; margin: 7px 0; }
+.monthly-domain { margin-top: 22px; }
+.monthly-domain + .monthly-domain { padding-top: 20px; border-top: 1px solid #e1e5d8; }
+.monthly-domain-label { color: #7a866d; font-size: 12px; margin: 0 0 7px; }
+.monthly-domain h5 { font-family: "Noto Serif SC", "Songti SC", serif; font-size: 19px; font-weight: 600; line-height: 1.6; margin: 0 0 9px; }
+.monthly-domain > p, .monthly-domain .personal-reading-computed > div > p { font-size: 15px; }
+.monthly-domain-verdict { font-weight: 500; color: #35553a; }
+.monthly-domain-examples { margin: 16px 0; padding: 12px 16px; background: #f0f3e7; border-left: 2px solid #9caf89; border-radius: 5px; }
+.monthly-domain-points { margin: 16px 0; min-width: 0; }
+.monthly-domain-points h6 { font-size: 13px; color: #596f50; margin: 0 0 7px; }
+.monthly-domain-points ul { margin: 6px 0; padding-left: 18px; }
+.monthly-domain-points li { font-size: 14px; }
+.monthly-domain-points li + li { margin-top: 6px; }
+.monthly-domain-points-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.monthly-domain-evidence { margin-top: 12px; font-size: 13px; color: #6d7863; }
+.monthly-domain-evidence summary { color: #5a754e; cursor: pointer; line-height: 1.8; }
+.monthly-domain-evidence ul { margin: 10px 0; padding-left: 18px; }
+.monthly-domain-evidence li + li { margin-top: 6px; }
+.monthly-domain-feedback-link { display: inline-block; color: #4b7045; font-size: 13px; text-underline-offset: 4px; margin-top: 10px; padding: 5px 0; }
+.monthly-domain-gap { margin: 14px 0; padding: 12px 14px; border-radius: 5px; background: #f0ede2; color: #746c59; font-size: 13px; }
+.monthly-domain-scope { margin-top: 24px; padding-top: 14px; border-top: 1px solid #dce2d1; }
+.monthly-domain-panel :is(a,summary):focus-visible { outline: 2px solid #789767; outline-offset: 4px; }
+@media (max-width: 600px) { .monthly-domain-panel { padding: 17px 14px; margin: 18px 0; } .monthly-domain-heading { font-size: 21px; } .monthly-domain h5 { font-size: 18px; } .monthly-domain-points-grid { grid-template-columns: 1fr; gap: 0; } .monthly-domain-feedback-link { min-height: 44px; display: inline-flex; align-items: center; box-sizing: border-box; } }

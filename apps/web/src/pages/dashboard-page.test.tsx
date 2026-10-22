@@ -82,7 +82,7 @@ describe("DashboardPage", () => {
   it("空工作台同时提供新建、演示和 CSV 导入入口", async () => {
     render(<DashboardPage />);
 
-    expect(await screen.findByRole("heading", { name: "先建立第一张可复算的研究样本" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "建立你的第一张命盘" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "从空白开始" }).getAttribute("href")).toBe("/new");
     expect(screen.getByRole("link", { name: "载入演示值" }).getAttribute("href")).toBe("/new?demo=1");
     expect(screen.getByRole("link", { name: "导入 CSV" }).getAttribute("href")).toBe("/cases?import=csv");
