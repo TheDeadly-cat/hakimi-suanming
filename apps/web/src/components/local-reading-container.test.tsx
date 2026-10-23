@@ -20,6 +20,7 @@ import { LocalReadingContainer } from "./local-reading-container";
 import { getResearchJournalMutationSnapshot, resetResearchJournalMutationCoordinatorForTests } from "./research-journal-mutation-coordinator";
 import type { LocalReadingSynthesis } from "../lib/local-reading-synthesis";
 import * as personalReadingModule from "../lib/local-personal-reading";
+import * as readingFeedbackModule from "../lib/local-reading-feedback";
 import * as detailedPanelModule from "./detailed-outlook-panel";
 import * as snapshotCodecModule from "../lib/local-reading-snapshot-codec";
 import * as readingEditionModule from "../lib/local-reading-edition";
@@ -715,9 +716,38 @@ describe("reading container persistence and asynchronous publication", () => {
     // Saving refreshes notes; wait for their verified personal-reading replay
     // before opening an action whose source record is being reloaded.
     await waitForPersonalReading();
+    // Opening the record mounts a separate verifier after the container has
+    // finished its personal replay. Hold only its publication, not its real
+    // hash/chain checks, to exercise this second asynchronous boundary.
+    const readThread = readingFeedbackModule.readFeedbackThread;
+    const publishThread = deferred<void>();
+    const threadReads: {
+      verified: ReturnType<typeof readThread>; published: ReturnType<typeof readThread>;
+    }[] = [];
+    vi.spyOn(readingFeedbackModule, "readFeedbackThread").mockImplementation((record, records) => {
+      const verified = readThread(record, records);
+      if (record.id !== root.id || !records.some((item) => item.id === snapshot.id)) return verified;
+      const published = publishThread.promise.then(() => verified);
+      threadReads.push({ verified, published });
+      return published;
+    });
+    fireEvent.click(screen.getByText("反馈、个人修订与补充资料", { exact: true }));
     fireEvent.click(screen.getByText("用户反馈", { exact: true }));
-    const restore = await screen.findByRole("button", { name: "恢复原解读" });
-    fireEvent.click(restore);
+    await waitFor(() => expect(threadReads).not.toHaveLength(0));
+    const review = within(screen.getByRole("region", { name: "反馈复核与个人修订" }));
+    expect(review.getByText("正在核对关联")).toBeDefined();
+    expect(review.queryByRole("button", { name: "恢复原解读" })).toBeNull();
+    // Await the actual verifier result instead of assigning its work the DOM
+    // query's default one-second timeout. Never fabricate a successful thread.
+    const pendingThread = threadReads.at(-1)!;
+    const verifiedThread = await pendingThread.verified;
+    expect(verifiedThread.issues).toEqual([]);
+    expect(verifiedThread.canAppend).toBe(true);
+    expect(verifiedThread.latest?.record.id).toBe(adoption.id);
+    expect(verifiedThread.latest?.value.state).toBe("revised");
+    expect(verifiedThread.latest?.value.revisedConclusion).toBe(proposed);
+    await act(async () => { publishThread.resolve(); await pendingThread.published; });
+    fireEvent.click(review.getByRole("button", { name: "恢复原解读" }));
     await waitFor(() => expect(scope().queryByText("当前保留原解读，个人反馈与修订历史仍在。")).not.toBeNull());
     expect(scope().queryByText("已采用的个人修订")).toBeNull();
     await waitFor(() => expect(screen.getByTestId("synthesis").textContent).not.toContain(proposed));
