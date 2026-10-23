@@ -60,9 +60,10 @@ export function deterministicCapacityRevisionId(index: number): string {
 
 export async function readLegalCapacityCaseFixture(
   page: Page,
-  databaseName = LEGACY_V13_CAPACITY_DATABASE_NAME
+  databaseName = LEGACY_V13_CAPACITY_DATABASE_NAME,
+  createCase: (page: Page) => Promise<unknown> = createDemoCase
 ): Promise<LegalCapacityCaseFixture> {
-  await createDemoCase(page);
+  await createCase(page);
   const match = new URL(page.url()).pathname.match(/^\/cases\/([^/]+)\/revisions\/([^/]+)$/u);
   if (!match) throw new Error(`演示案例 URL 不符合预期：${page.url()}`);
   const [, caseId, revisionId] = match;

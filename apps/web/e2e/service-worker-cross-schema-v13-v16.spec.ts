@@ -1077,7 +1077,11 @@ test("双旧 v13 页中一页已确认、另一页仍在万条慢审计时，新
   const externalRequests = collectExternalRequests(context, switchServer.origin);
   try {
     const stable = await openStableBridge(context, switchServer, sourceV13);
-    const fixture = await readLegalCapacityCaseFixture(stable.page, sourceDescriptor.databaseName);
+    const fixture = await readLegalCapacityCaseFixture(
+      stable.page,
+      sourceDescriptor.databaseName,
+      page => createDemoCase(page, switchServer.origin)
+    );
     expect(await seedLegacyV13CapacityCases(
       stable.page,
       fixture,
