@@ -3,19 +3,32 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ResearchNoteRecord } from "@hakimi/contracts";
 import { webReportExportPort } from "@hakimi/platform";
-import { packReadingSnapshot } from "../lib/local-reading-snapshot-codec";
-import { encodeReadingReportBundle } from "../lib/local-reading-report-bundle";
+import { packReadingSnapshot, unpackReadingSnapshot } from "../lib/local-reading-snapshot-codec";
+import { encodeReadingReportBundle, decodeReadingReportBundle } from "../lib/local-reading-report-bundle";
 import { LOCAL_READING_FEEDBACK_TAG } from "../lib/local-reading-record";
 import { LOCAL_READING_REVIEW_TAG } from "../lib/local-reading-feedback";
 import { LOCAL_READING_CONTEXT_TAG } from "../lib/local-reading-context";
 import { ReadingSavedRecord } from "./reading-saved-record";
 import { resetPreparedFileDeliveryCoordinatorForTests } from "./prepared-file-delivery-coordinator";
+import { syntheticIndexedReport } from "../test/reading-case-review-fixture";
 
 beforeEach(() => resetPreparedFileDeliveryCoordinatorForTests());
 afterEach(() => { vi.restoreAllMocks(); resetPreparedFileDeliveryCoordinatorForTests(); });
 const blobText = (blob: Blob) => new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = reject; reader.readAsText(blob); });
 
 describe("original saved reading export", () => {
+  it.each(["reading", "archive"] as const)("keeps indexed saved %s bytes after using its topic reader", async kind => {
+    const record = await syntheticIndexedReport(), original = await decodeReadingReportBundle(await unpackReadingSnapshot(record.body)), before = JSON.stringify(record);
+    const save = vi.spyOn(webReportExportPort, "saveFile").mockImplementation(async (_blob, filename) => ({ status: "download_requested", filename, method: "browser_download" }));
+    render(<ReadingSavedRecord record={record} defaultOpen/>);
+    await userEvent.click(await screen.findByText("按当时的专题与依据阅读"));
+    fireEvent.click(screen.getByRole("button", { name: "事业发展" }));
+    fireEvent.change(screen.getByLabelText("保存范围内的年份"), { target: { value: "2027" } });
+    fireEvent.click(screen.getByRole("button", { name: kind === "reading" ? "导出这份通读报告" : "导出这份完整档案" }));
+    fireEvent.click(screen.getByRole("button", { name: /^下载$/ }));
+    await waitFor(() => expect(save).toHaveBeenCalledTimes(1));
+    expect(await blobText(save.mock.calls[0]![0])).toBe(original![kind]); expect(JSON.stringify(record)).toBe(before);
+  });
   it.each([LOCAL_READING_FEEDBACK_TAG, LOCAL_READING_REVIEW_TAG, LOCAL_READING_CONTEXT_TAG])("keeps the original export for a legacy %s record", async tag => {
     const original = "# 旧记录原文\r\n原选择与说明\u200b不重算。\n";
     const record: ResearchNoteRecord = { schemaVersion: "1.0.0", id: crypto.randomUUID(), caseId: crypto.randomUUID(),

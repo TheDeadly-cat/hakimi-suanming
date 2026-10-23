@@ -19,6 +19,7 @@ import { buildLocalPersonalReading } from "./local-personal-reading";
 import { buildLocalReadingSnapshot } from "./local-reading-record";
 import { annualDomainFeedbackText } from "./local-annual-domain-record";
 import { prepareKeyMonthYear } from "./key-month-event-source";
+import { appendReadingExplanationIndex, readReadingExplanationIndex, READING_EXPLANATION_MARKER } from "./reading-explanation-index";
 
 async function fixture(unknown=false){
   const chart=await calculateChart({schemaVersion:"1.0.0",calendarType:"gregorian",date:unknown?"1995-08-18":"1995-05-18",time:"08:26",timePrecision:"exact_minute",sex:unknown?"unspecified":"male",timeZone:"Asia/Shanghai",lunarLeapMonth:false,
@@ -32,6 +33,21 @@ async function fixture(unknown=false){
   return {revision,assessment,annual,extras:{sourceRevision:revision,comprehensive,life,lifeStageStory,synthesis,annualDomains,annualEvents,annualLifeStories}};
 }
 let b:Awaited<ReturnType<typeof fixture>>,u:typeof b;
+function expectPreservedArchiveWithIndex(exported: ReturnType<typeof buildLocalReadingReport>, original: string, input: typeof b) {
+  const boundary = exported.archive.indexOf(`\n\n${READING_EXPLANATION_MARKER}\n`);
+  expect(boundary).toBe(original.length);
+  expect(exported.archive.slice(0, boundary)).toBe(original);
+  expect(exported.archive.split(READING_EXPLANATION_MARKER)).toHaveLength(2);
+  const index = readReadingExplanationIndex(exported.archive);
+  expect(index).not.toBeNull(); if (!index) throw new Error("New report must retain its appended explanation index");
+  expect(index.sourceSnapshot).toMatchObject({ caseId: input.revision.caseId, revisionId: input.revision.id,
+    chartResultHash: input.revision.manifest.resultHash, includeHour: input.assessment.sourceBinding.includeHour,
+    reportVersion: exported.version, inputRecordedAt: input.revision.createdAt, ruleProfileDigest: input.revision.manifest.ruleProfileDigest });
+  expect(index.sourceSnapshot.input).toEqual(input.revision.input);
+  expect(index.uncertainty).toMatchObject({ revisionId: input.revision.id, chartResultHash: input.revision.manifest.resultHash });
+  expect(appendReadingExplanationIndex(original, index)).toBe(exported.archive);
+  return index;
+}
 beforeAll(async()=>{[b,u]=await Promise.all([fixture(),fixture(true)]);},60000);
 const han=(text:string)=>[...text.matchAll(/\p{Script=Han}/gu)].length;
 describe("brief report from unchanged complete reading sources",()=>{
@@ -65,7 +81,10 @@ describe("brief report from unchanged complete reading sources",()=>{
       expect(month.original.supportEvidenceIds.every(id=>month.evidence.some(evidence=>evidence.id===id))).toBe(true);
     }
     const plain=buildLocalReadingReport(b.assessment,b.annual,b.extras),complete=buildLocalReadingReport(b.assessment,b.annual,extras);
-    expect(complete.archive).toBe(plain.archive);
+    const originalArchive=buildLocalReadingSnapshot(b.assessment,b.annual,b.extras);
+    const plainIndex=expectPreservedArchiveWithIndex(plain,originalArchive,b),completeIndex=expectPreservedArchiveWithIndex(complete,originalArchive,b);
+    expect(plainIndex.conclusions.filter(item=>item.scope.level==="month")).toHaveLength(0);
+    for(const year of [2031,2032])expect(completeIndex.conclusions.some(item=>item.scope.level==="month"&&item.scope.year===year)).toBe(true);
     expect(complete.reading).toContain("关键月份的计算与事件依据");
     expect(complete.reading).toContain("本盘采用结论的得分与古籍依据");
     expect(JSON.stringify(keyMonthYears)).toBe(before);
@@ -156,7 +175,11 @@ describe("brief report from unchanged complete reading sources",()=>{
     const wrong=structuredClone(personalReading);wrong.entries[0]!.originalConclusion+="篡改";
     expect(()=>buildBriefReadingReport(b.assessment,b.annual,{...b.extras,personalReading:wrong})).toThrow();
     const exported=buildLocalReadingReport(b.assessment,b.annual,{...b.extras,personalReading});
-    expect(exported.reading).toContain(personalText);expect(exported.archive).toBe(buildLocalReadingSnapshot(b.assessment,b.annual,{...b.extras,personalReading}));
+    expect(exported.reading).toContain(personalText);
+    const index=expectPreservedArchiveWithIndex(exported,buildLocalReadingSnapshot(b.assessment,b.annual,{...b.extras,personalReading}),b);
+    const frozenPersonal=index.conclusions.filter(item=>item.origin==="personal"&&item.scope.year===2032);
+    expect(frozenPersonal.length).toBeGreaterThan(0);
+    expect(frozenPersonal.every(item=>item.text===personalText&&item.personalTextIds.length>0)).toBe(true);
     const multilineLabel=structuredClone(personalReading);multilineLabel.entries[0]!.subjectLabel="原标签\n## 不得跳出个人章";
     const labelled=buildLocalReadingReport(b.assessment,b.annual,{...b.extras,personalReading:multilineLabel}).reading.split("## 已采用的个人修订原文")[1]!.split("## 完整详细阅读（按需展开）")[0]!;
     expect(labelled).toContain(personalText);expect(labelled).not.toContain("\n## 不得跳出个人章");
@@ -179,10 +202,10 @@ describe("brief report from unchanged complete reading sources",()=>{
       expect(event.branches.flatMap(item=>item.items).some(item=>item.segmentId===segment.id)).toBe(false);
     }
   },60000);
-  it("keeps fixed open and folded chapters, preserves the complete detailed reading and leaves its archive exact",()=>{
+  it("keeps fixed open and folded chapters, preserves the complete detailed reading and appends an index after the exact original archive",()=>{
     const brief=buildBriefReadingReport(b.assessment,b.annual,b.extras)!,detailed=buildDetailedReadingReport(b.assessment,b.annual,b.extras),report=buildLocalReadingReport(b.assessment,b.annual,b.extras);
     expect(report.reading).toContain(brief.plainReading!.bodyText);expect(report.reading).toContain("## 已采用的个人修订原文");expect(report.reading).toContain("## 完整详细阅读（按需展开）");
-    expect(report.reading).toContain(nestDetailedReading(detailed.reading));expect(report.archive).toBe(detailed.archive);
+    expect(report.reading).toContain(nestDetailedReading(detailed.reading));expectPreservedArchiveWithIndex(report,detailed.archive,b);
     const appendix=report.reading.split("## 完整详细阅读（按需展开）")[1]!;
     for(const overview of brief.yearOverview)expect(appendix).toContain(overview.summary);
     expect(appendix).toContain("### 事件清单依据");

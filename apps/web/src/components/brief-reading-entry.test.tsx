@@ -28,6 +28,7 @@ import { buildLocalPersonalReading } from "../lib/local-personal-reading";
 import { buildStructuredReadingFeedback, buildReadingFeedbackReview, buildReadingFeedbackChoices, readingFeedbackSource, type ReadingFeedbackChoice } from "../lib/local-reading-feedback";
 import { BriefReadingReportPanel } from "./brief-reading-report-panel";
 import { ChartReadingWorkbench } from "./chart-reading-workbench";
+import { appendReadingExplanationIndex, readReadingExplanationIndex, READING_EXPLANATION_MARKER } from "../lib/reading-explanation-index";
 
 async function fixture(date: string, sex: "male" | "female" | "unspecified", time = "08:26", from = 2026, to = 2035, reference = 2029) {
   const calculated = await calculateChart({ schemaVersion: "1.0.0", calendarType: "gregorian", date, time, timePrecision: "exact_minute", timeZone: "Asia/Shanghai", sex,
@@ -46,6 +47,21 @@ async function fixture(date: string, sex: "male" | "female" | "unspecified", tim
   return { revision, assessment, annual, extras, report: buildBriefReadingReport(assessment, annual, extras)! };
 }
 type Fixture = Awaited<ReturnType<typeof fixture>>;
+function expectPreservedArchiveWithIndex(exported: ReturnType<typeof buildLocalReadingReport>, original: string, input: Fixture) {
+  const boundary = exported.archive.indexOf(`\n\n${READING_EXPLANATION_MARKER}\n`);
+  expect(boundary).toBe(original.length);
+  expect(exported.archive.slice(0, boundary)).toBe(original);
+  expect(exported.archive.split(READING_EXPLANATION_MARKER)).toHaveLength(2);
+  const index = readReadingExplanationIndex(exported.archive);
+  expect(index).not.toBeNull(); if (!index) throw new Error("New report must retain its appended explanation index");
+  expect(index.sourceSnapshot).toMatchObject({ caseId: input.revision.caseId, revisionId: input.revision.id,
+    chartResultHash: input.revision.manifest.resultHash, includeHour: input.assessment.sourceBinding.includeHour,
+    reportVersion: exported.version, inputRecordedAt: input.revision.createdAt, ruleProfileDigest: input.revision.manifest.ruleProfileDigest });
+  expect(index.sourceSnapshot.input).toEqual(input.revision.input);
+  expect(index.uncertainty).toMatchObject({ revisionId: input.revision.id, chartResultHash: input.revision.manifest.resultHash });
+  expect(appendReadingExplanationIndex(original, index)).toBe(exported.archive);
+  return index;
+}
 let b: Fixture, unknown: Fixture, child: Fixture, official: Fixture;
 beforeAll(async () => {
   [b, unknown, child, official] = await Promise.all([
@@ -140,7 +156,8 @@ describe("brief reading as a readable, source-bound entry", () => {
     const exported = buildLocalReadingReport(b.assessment, b.annual, extras);
     expect(exported.reading).toContain(text);
     expect(exported.reading.split("## 已采用的个人修订原文")[0]).not.toContain(natal.original.firstChoice.decision);
-    expect(exported.archive).toBe(buildLocalReadingSnapshot(b.assessment, b.annual, extras));
+    const index = expectPreservedArchiveWithIndex(exported, buildLocalReadingSnapshot(b.assessment, b.annual, extras), b);
+    expect(index.conclusions.filter(item => item.origin === "personal" && item.scope.level === "natal").map(item => item.text)).toContain(text);
   });
 
   it("shows actual B2032 money months, rejects altered sources, and lets a monthly adoption replace only that month's answer", async () => {
@@ -202,7 +219,11 @@ describe("brief reading as a readable, source-bound entry", () => {
     const exported = buildLocalReadingReport(b.assessment, b.annual, { ...b.extras, keyMonthYears: [adopted] });
     expect(exported.reading).toContain(text);
     expect(exported.reading).toContain(month.original.scope.startInstant);
-    expect(exported.archive).toBe(buildLocalReadingSnapshot(b.assessment, b.annual, b.extras));
+    const index = expectPreservedArchiveWithIndex(exported, buildLocalReadingSnapshot(b.assessment, b.annual, b.extras), b);
+    const savedPersonalMonth = index.conclusions.find(item => item.origin === "personal" && item.scope.level === "month" && item.text === text);
+    expect(savedPersonalMonth).toBeDefined();
+    expect(savedPersonalMonth?.scope.year).toBe(2032);
+    expect(savedPersonalMonth?.personalTextIds.length).toBeGreaterThan(0);
     expect(JSON.stringify(source)).toBe(before);
   }, 30_000);
 

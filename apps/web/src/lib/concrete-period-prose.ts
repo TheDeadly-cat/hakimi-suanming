@@ -1,3 +1,4 @@
+import { evaluateConditionalContentRules, type ConditionalContentAssessment, type ConditionalContentRuleId, type ConditionalActionPolicy } from "./conditional-content-rules";
 import type { NatalWealthResourceTask } from "../../../../packages/bazi-interpretation/src/natal-wealth-resource-task";
 import type { BriefAnnualDomainVerdict } from "./brief-annual-reading";
 import type { LocalReadingAgeContext } from "./local-reading-age-context";
@@ -8,9 +9,10 @@ import type { KeyMonthEventTendency, KeyMonthEventEvidence } from "./key-month-e
 import type { AnnualRelationshipTiming } from "./annual-relationship-timing";
 import type { OutlookRescueTraceBundle } from "./outlook-rescue-trace";
 
-export const CONCRETE_PERIOD_PROSE_VERSION = "hakimi.concrete-period-prose/0.3.2" as const;
+export const CONCRETE_PERIOD_PROSE_VERSION = "hakimi.concrete-period-prose/0.4.0" as const;
 export interface ConcreteLifeSentence {
   text:string; kind:"opportunity"|"caution"|"topic";
+  ruleIds?:ConditionalContentRuleId[]; ruleDecisionIds?:string[];
   sources:{kind:"event"|"action"|"task_relation"|"relationship_signal"|"rescue"|"scope";id:string;detail?:string}[];
 }
 export interface ConcretePeriodFact {
@@ -24,10 +26,12 @@ export interface ConcretePeriodFact {
   companionText?: string;
   eventId?:string; evidenceIds?:string[];
   shortText?:string;
+  ruleIds?:ConditionalContentRuleId[]; ruleDecisionIds?:string[];
 }
 export interface ConcretePeriodProse {
   headline: string; text: string; facts: ConcretePeriodFact[]; signature: string;
   sentences?:ConcreteLifeSentence[];
+  contentRules?:ConditionalContentAssessment;
 }
 export interface ConcretePeriodInput {
   judgment: LocalOutlookJudgment; domain: "career" | "wealth" | "relationship";
@@ -86,7 +90,7 @@ function ongoingPressure(actor:OutlookStemAction|undefined,domain:"career"|"weal
   return money?`${current[1]}，${cause}，可能再花一次材料、工具或帮助的费用`
     :`${current[0]}，${cause}，新旧任务容易挤在一起、推迟完成`;
 }
-function words(action: OutlookStemAction, domain: "career" | "wealth", s: Scene, axis: OutlookAxisFinding, task?: NatalWealthResourceTask | null): Words {
+function words(action: OutlookStemAction, domain: "career" | "wealth", s: Scene, axis: OutlookAxisFinding, task?: NatalWealthResourceTask | null, policy?:ConditionalActionPolicy): Words {
   const money = domain === "wealth", financial = ["正财", "偏财"].includes(action.tenGod), resource = ["正印", "偏印"].includes(action.tenGod), output = ["食神", "伤官"].includes(action.tenGod);
   const role = task?.preferredPathId === axis.pathId ? task.task : null;
   const table: Record<string, Omit<Words, "mechanism">> = money ? {
@@ -115,23 +119,23 @@ function words(action: OutlookStemAction, domain: "career" | "wealth", s: Scene,
   let value: Words = { ...(table[action.tenGod] ?? {help:"已开始的事情有继续推进的条件",pressure:"已开始的事情仍有受阻环节",topic:"现有事项的下一步需要确认"}), mechanism:`role:${action.tenGod}` };
   // A wealth actor may reduce excessive preparation or remove essential help.
   // Its name alone must never turn either operation into a claim of income.
-  if (financial && (role === "wealth_first" || axis.pathId === "resource-wealth")) value = {mechanism:"trim_redundant_preparation",
+  if (policy ? policy.mechanism === "trim_redundant_preparation" : financial && (role === "wealth_first" || axis.pathId === "resource-wealth")) value = {mechanism:"trim_redundant_preparation",
     help:money?`有机会停掉重复课程、少买一套工具，把已买的东西真正用起来`:`有机会少补一轮资料或培训，直接把已经会的部分做出来`,
     pressure:money?`想省下的课程、工具或维护费还停不下来，又可能增加新开销`:`一边要求实际完成，一边仍要补材料或等指导，进度容易卡住`,
     topic:money?`重点是能否省下重复购买和准备的费用，不能据此认定会进账`:`重点是缩短准备时间，进入实际完成任务的阶段`};
-  else if (financial && (role === "resource_first" || role === "official_joint")) value = {mechanism:"protect_needed_support",
+  else if (policy ? policy.mechanism === "protect_needed_support" : financial && (role === "resource_first" || role === "official_joint")) value = {mechanism:"protect_needed_support",
     help:money?`实际任务的费用与必要课程、工具较能兼顾，不必拆东补西`:`任务安排较能兼顾必要指导，已经开始的事情有条件接着做`,
     pressure:money?`新任务或约定挪用了原本留给学习、工具和帮助的费用`:`答应的新任务占走学习、指导或练习时间，原任务容易停在不会做的一步`,
     topic:money?`要同时安排任务费用与必要学习、工具的钱`:`已有要求与必要指导需要同时落实`};
-  else if (resource && (role === "resource_first" || ["official-resource", "killings-resource"].includes(axis.pathId))) value = {mechanism:"needed_support",
+  else if (policy ? policy.mechanism === "needed_support" : resource && (role === "resource_first" || ["official-resource", "killings-resource"].includes(axis.pathId))) value = {mechanism:"needed_support",
     help:money?`必要课程、工具或帮助较能到位，已经花的钱较容易用到眼前任务上`:`得到的讲解、示范或协助较能解决具体难点，任务有机会恢复进度`,
     pressure:money?`真正需要的课程、工具或帮助未能到位，已有费用难换来实际进展`:`必要指导没接上，已有任务和期限却没有减少`,
     topic:money?`重点是必须用到的课程、工具或帮助能否落实`:`重点是把必要指导接到实际任务上`};
-  else if (financial && ["official-resource","killings-resource","food-killings"].includes(axis.pathId)) value = {mechanism:"fund_execution_support",
+  else if (policy ? ["fund_execution_support","food_killing_cost"].includes(policy.mechanism) : financial && ["official-resource","killings-resource","food-killings"].includes(axis.pathId)) value = {mechanism:"fund_execution_support",
     help:money?`已有费用、工具或他人帮助较能用到急需解决的任务上`:`现有工具或协作较能帮助解决眼前难题，任务有继续推进的条件`,
     pressure:money?`完成任务所需的工具和帮助可能被别的安排占用，又要临时补费用`:`新的安排挤占原来解决问题需要的帮助，任务容易更难协调`,
     topic:money?`重点是完成任务所需的费用和帮助，不据此推断新增收入`:`重点是工具、帮助与实际任务能否接得上`};
-  if (output && axis.pathId === "official-wealth") value.pressure = money?`方案不符合原约定，重新做样品或修改又多花一次钱和材料`:`自己的改法碰到既定规则，容易因标准不一致被退回修改`;
+  if (policy ? policy.mechanism === "authority_conflict" : output && axis.pathId === "official-wealth") value.pressure = money?`方案不符合原约定，重新做样品或修改又多花一次钱和材料`:`自己的改法碰到既定规则，容易因标准不一致被退回修改`;
   const pressureEdges = axis.taskLinks?.items.flatMap(link => link.relations).filter(edge => edge.contributesPressure && edge.from.origin.kind === "target" && edge.from.stem === action.stem && edge.from.visibility === action.visibility) ?? [];
   if (pressureEdges.some(edge => edge.to.group === "resource")) {value.mechanism += ":support_displaced";value.pressure = money?`当前任务挪用了必要课程、工具或协助的费用，原本需要的帮助难以落实`:`新安排占走必要指导或练习时间，任务容易卡在缺少帮助的一步`;}
   if (pressureEdges.some(edge => edge.to.group === "authority")) {value.mechanism += ":standard_conflict";value.pressure = money?`做法与约定不一致，退回重做会再花时间和材料`:`做法与审核要求或约定不同，容易被要求重做、重新确认责任`;}
@@ -159,13 +163,13 @@ function relation(input: ConcretePeriodInput, s: Scene): ConcretePeriodProse {
   return {headline,text:condition+action,facts:[],signature:`relationship:${change}:${state}:${actor?.tenGod??"unknown"}:${input.age.stage}`};
 }
 
-function concreteHeadline(actor:OutlookStemAction|undefined,domain:"career"|"wealth",s:Scene,axis:OutlookAxisFinding,task?:NatalWealthResourceTask|null):string {
+function concreteHeadline(actor:OutlookStemAction|undefined,domain:"career"|"wealth",s:Scene,axis:OutlookAxisFinding,task?:NatalWealthResourceTask|null,policy?:ConditionalActionPolicy):string {
   if(!actor)return "这一时段缺少完整判断";
-  const detail=words(actor,domain,s,axis,task),help=["assists","mixed"].includes(actor.effect),pressure=["obstructs","mixed"].includes(actor.effect);
+  const detail=words(actor,domain,s,axis,task,policy),help=["assists","mixed"].includes(actor.effect),pressure=["obstructs","mixed"].includes(actor.effect);
   if(detail.mechanism.startsWith("trim_redundant_preparation"))return domain === "career"?"重点是少做重复准备，让事情做完":"重点是收拢重复购买和准备的费用";
   if(detail.mechanism.startsWith("needed_support")||detail.mechanism.startsWith("protect_needed_support")||detail.mechanism.startsWith("fund_execution_support"))return domain === "career"?"必要指导和协助能否跟上任务是关键":"必要工具、课程和协助的钱要留出来";
-  const career:Record<string,string>={正印:pressure?"补资料或培训容易拖慢任务":"指导和学习能否用于实际任务是重点",偏印:pressure?"换工具、换办法容易返工":"新工具、新办法值得小范围试用",食神:help?"熟悉的任务和作品更容易做成":"原有任务能否持续做完是重点",伤官:help?"方案或改法有被试用的机会":"方案容易遇到标准或修改上的分歧",正财:"交付、验收和收尾是重点",偏财:s.money?"新合作和临时项目是重点":"新活动和临时任务是重点",正官:"职责、审核和完成期限是重点",七杀:"急任务、集中要求与赶工是重点",比肩:"独立负责与合作交接需要说清楚",劫财:"协作参与和任务分工可能调整"};
-  const wealth:Record<string,string>={正印:`${s.purchases}的花费要看实际用途`,偏印:"换工具或补课程，容易产生两套费用",食神:s.money?"已有服务的延续和维护费用是重点":"旧用品的沿用和维护是重点",伤官:"试做、改版和追加材料的花费是重点",正财:s.money?(help?"原约定款项有确认、结算机会":pressure?"已有款项容易卡在确认和到账":"已有约定的钱要核对清楚"):"费用分摊和用品归还是重点",偏财:s.money?(help?"额外合作有机会，先谈清报酬":"临时垫付与追加预算要留意"):"新活动的费用和用品要先安排",正官:"履行约定所需的费用不能漏算",七杀:"几项急用费用可能集中出现",比肩:"各自出多少、分多少需要说清楚",劫财:"追加出资和费用分担需要说清楚"};
+  const career:Record<string,string>={正印:pressure?"补资料或培训容易拖慢任务":"指导和学习能否用于实际任务是重点",偏印:pressure?"换工具、换办法容易返工":"新工具、新办法值得小范围试用",食神:help?"熟悉的任务和作品更容易做成":"原有任务能否持续做完是重点",伤官:help?"方案或改法有被试用的机会":pressure?"方案容易遇到标准或修改上的分歧":"方案表达与改法试用是重点",正财:"交付、验收和收尾是重点",偏财:s.money?"新合作和临时项目是重点":"新活动和临时任务是重点",正官:"职责、审核和完成期限是重点",七杀:"急任务、集中要求与赶工是重点",比肩:"独立负责与合作交接需要说清楚",劫财:"协作参与和任务分工可能调整"};
+  const wealth:Record<string,string>={正印:`${s.purchases}的花费要看实际用途`,偏印:pressure?"换工具或补课程，容易产生两套费用":"专项工具与课程的用途是重点",食神:s.money?"已有服务的延续和维护费用是重点":"旧用品的沿用和维护是重点",伤官:"试做、改版和追加材料的花费是重点",正财:s.money?(help?"原约定款项有确认、结算机会":pressure?"已有款项容易卡在确认和到账":"已有约定的钱要核对清楚"):"费用分摊和用品归还是重点",偏财:s.money?(help?"额外合作有机会，先谈清报酬":pressure?"临时垫付与追加预算要留意":"新合作的费用与分配是重点"):"新活动的费用和用品要先安排",正官:"履行约定所需的费用不能漏算",七杀:"几项急用费用可能集中出现",比肩:"各自出多少、分多少需要说清楚",劫财:"追加出资和费用分担需要说清楚"};
   if(domain === "wealth"&&!s.money&&["比肩","劫财"].includes(actor.tenGod))return "用品使用、活动时间和共同分担要说清楚";
   return (domain === "career"?career:wealth)[actor.tenGod]??"现有事项需要确认具体安排";
 }
@@ -227,12 +231,12 @@ function supportAllocationProse(action:OutlookStemAction,domain:"career"|"wealth
   const result=byEffect[action.effect];
   return action.visibility === "main_hidden"?{...result,text:`支内辅助条件：${result.text}`} : result;
 }
-function differentiatedLifeProse(input:ConcretePeriodInput):ConcretePeriodProse {
+function differentiatedLifeProse(input:ConcretePeriodInput,contentRules:ConditionalContentAssessment):ConcretePeriodProse {
   const signals=input.lifeSignals!,axis=input.judgment.axes.find(item=>item.axis === "pattern"),s=scene(input.age,input.work);
   const period=signals.horizon === "year"?"本年":"本月";
   // Unknown ages and non-working contexts retain their validated, age-specific
   // domain scenes. They must not enter an adult career/income translation.
-  const adult=input.age.stage === "adult"&&input.age.segments.every(part=>part.stage === "adult");
+  const adult=contentRules.adultScenes;
   if(!adult||input.domain !== "relationship"&&!s.money){
     const original=buildConcretePeriodProse({...input,lifeSignals:undefined});
     const current=signals.events.filter(event=>event.domain===input.domain&&lifeRank[event.level]>0);
@@ -262,11 +266,11 @@ function differentiatedLifeProse(input:ConcretePeriodInput):ConcretePeriodProse 
   if(input.domain === "relationship"){
     const romance=events.find(event=>event.category === "romance"),commitment=events.find(event=>event.category === "commitment"),separation=events.find(event=>event.category === "separation");
     headline=romance&&commitment?lifeRank[romance.level]>lifeRank[commitment.level]?"先看认识和关系发展，承诺落实的线索稍弱":"关系有向明确承诺推进的线索"
-      :romance?"认识、联系或现有关系发展更突出":commitment?"共同生活与承诺落实更突出":separation?separation.level === "weak"?"相处安排有调整信号，结束关系的依据较弱":"关系分歧与是否继续成为重点":"关系以原有状态延续为主";
+      :romance?"认识、联系或现有关系发展更突出":commitment?"共同生活与承诺落实更突出":separation?separation.level === "weak"?"相处安排有调整信号，结束关系的依据较弱":"关系分歧与是否继续成为重点":"本期未见独立突出的感情变化线索";
     for(const event of [romance,commitment,separation].filter((item):item is LifeEvent=>Boolean(item)))add(eventLine(event),event.category === "separation"?"caution":"opportunity",eventSources(event),event);
     const timing=signals.relationshipTiming;
     if(timing){
-      for(const lens of timing.lenses){
+      for(const lens of timing.lenses.filter(lens=>contentRules.relationshipLensIds.includes(lens.id))){
         const active=lens.signals.filter(signal=>lens.triggerSignalIds.includes(signal.id));
         if(!active.length)continue;
         const star=active.filter(signal=>signal.relevance === "primary_star"&&(signal.kind === "star_entry"||signal.kind === "hidden_to_visible"));
@@ -277,7 +281,7 @@ function differentiatedLifeProse(input:ConcretePeriodInput):ConcretePeriodProse 
         if(parts.length)add(`${timing.lenses.length>1?`${lens.label}：`:"依据是"}${[...new Set(parts)].join("；")}。`,"topic",active.map(signal=>({kind:"relationship_signal",id:`${lens.id}:${signal.id}`,detail:signal.relationType??signal.kind})));
       }
       if(!sentences.length)add("全年未见明确的婚恋转折信号，短期机会看月份。","topic",[{kind:"scope",id:`relationship:${timing.scope.segmentId}`,detail:"no annual trigger; monthly triggers remain independent"}]);
-    }else if(!sentences.length)add("本月没有独立突出的相识、承诺或关系冲突信号，按已有关系状态延续理解。","topic",[{kind:"scope",id:input.judgment.targetRef?.nodeType??"month",detail:"no active relationship event"}]);
+    }else if(!sentences.length)add("本月没有独立突出的相识、承诺或关系冲突信号；缺少信号不代表关系必然稳定。","topic",[{kind:"scope",id:input.judgment.targetRef?.nodeType??"month",detail:"no active relationship event"}]);
   }else if(input.domain === "wealth"){
     const inflow=events.find(event=>event.category === "money_inflow"),loss=events.find(event=>event.category === "money_loss");
     const inflowActors=inflow?actorRefs(inflow):[],leadingInflow=inflowActors.find(item=>item.action.visibility === "visible")??inflowActors[0];
@@ -342,7 +346,8 @@ function differentiatedLifeProse(input:ConcretePeriodInput):ConcretePeriodProse 
       const neutral:Record<string,[string,string]>={正印:["专业资历与组织支持是重点","专业资历、平台或他人支持与实际成果之间的衔接，是这一段的职业议题。"],偏印:["专业路线与工作适配是重点","专业路线、方法和岗位适配是这一段的职业议题，现有角色本身尚未给出明确的扩张或受阻方向。"],正官:["职责、考核与正式安排是重点","主要议题是职责、考核标准和正式安排，角色出现本身不等于已经升职或受阻。"],七杀:["集中任务与责任要求是重点","任务、责任和外部要求更突出，重点是实际承接的范围，角色出现本身不等于地位变化。"]};
       if(fallback&&wealth!==visible&&!(supportAllocation&&["正财","偏财"].includes(visible.tenGod))){
         const pressure=["obstructs","mixed"].includes(visible.effect),favorable=visible.effect === "assists";
-        const selected=!pressure&&neutral[visible.tenGod]?neutral[visible.tenGod]!:fallback;
+        const roleTopic=words(visible,"career",s,axis!,input.task,contentRules.actionPolicies.find(p=>p.actionIndex===visibleIndex));
+        const selected=!pressure&&!favorable?(neutral[visible.tenGod]??[concreteHeadline(visible,"career",s,axis!,input.task,contentRules.actionPolicies.find(p=>p.actionIndex===visibleIndex)),roleTopic.topic+"。"]) : fallback;
         if(!headline)headline=selected[0];
         const text=favorable&&["正印","偏印"].includes(visible.tenGod)?"专业资历、组织或他人支持有助于当前任务，发展机会在于把支持真正接到职责与成果上。":selected[1];
         add(text,pressure?"caution":favorable?"opportunity":"topic",actionSources(visibleIndex),undefined,visibleIndex);
@@ -359,7 +364,7 @@ function differentiatedLifeProse(input:ConcretePeriodInput):ConcretePeriodProse 
       const special=["resource-wealth","official-resource","killings-resource","food-killings"].includes(axis!.pathId)||input.task?.preferredPathId===axis!.pathId&&["wealth_first","resource_first","official_joint"].includes(input.task?.task??"");
       fact.shortText=kinds.some(god=>["比肩","劫财"].includes(god))?"收益分配与共同承担更易起争议，留意自己留下的份额":kinds.some(god=>["正财","偏财"].includes(god))?special?"新增任务与必要支持争用资金，可能追加承担费用":"原款项可能延后，临时支出或周转压力增加":kinds.some(god=>["正印","偏印"].includes(god))?"支持成本可能先出现，回报尚未落实，结余容易受挤压":kinds.length?"成果的成本、返工或后续承担容易吃掉收益":"旧事项仍占资金，留意回款与实际结余";
     }else if(fact.domain === "career"&&actor){
-      const fallback=words(actor,"career",s,axis!,input.task);
+      const fallback=words(actor,"career",s,axis!,input.task,contentRules.actionPolicies.find(p=>p.actionIndex===fact.actionIndex));
       const financialSupportOnly=["resource-wealth","official-resource","killings-resource","food-killings"].includes(axis!.pathId)||input.task?.preferredPathId===axis!.pathId&&["wealth_first","resource_first","official_joint"].includes(input.task?.task??"");
       fact.shortText=fact.kind === "opportunity"?["食神","伤官"].includes(actor.tenGod)?`${actor.visibility === "main_hidden"?"另有支内助力，":""}${actor.tenGod === "食神"?"熟悉技能、持续服务或稳定产出有继续被采用的机会":"新方案、技术改进或解决难题有被试用的机会"}`:["正财","偏财"].includes(actor.tenGod)?financialSupportOnly?"必要支持与任务之间有可协调的条件，不直接表示业务扩张":"业务或合作有可推进之处，是否扩张仍要看承接条件":"专业支持有利于任务落实"
         :fact.kind === "caution"?actor.tenGod === "正印"?"组织或专业支持与既有成果不易接上，职业认可和施展空间受制":actor.tenGod === "偏印"?"专项方法或职业路线与实际需求不合，变更和适配更费力":fallback.pressure
@@ -373,6 +378,7 @@ function differentiatedLifeProse(input:ConcretePeriodInput):ConcretePeriodProse 
 /** Exact task and rescue operations explain why two superficially similar
  * years differ. Target, long-term background and conditional relief stay apart. */
 export function concretePeriodMechanism(input:ConcretePeriodInput):ConcreteLifeSentence[] {
+  const contentRules=evaluateConditionalContentRules(input);
   const axis=input.judgment.axes.find(item=>item.axis === "pattern"),sentences:ConcreteLifeSentence[]=[],relations=axis?.taskLinks?.items.flatMap(link=>link.relations.map((edge,index)=>({link,index,edge})))??[];
   for(const origin of ["target","dayun","year"] as const){
     const edges=relations.filter(({edge})=>edge.contributesPressure&&(origin === "target"?edge.from.origin.kind === "target":edge.from.origin.kind === "background"&&edge.from.origin.nodeRef.nodeType===origin));
@@ -395,27 +401,32 @@ export function concretePeriodMechanism(input:ConcretePeriodInput):ConcreteLifeS
     const complete=text+(constraints.length?`同时，${constraints.join("、")}，缓解自身仍受限制。`:"")+(counter.length?`${[...new Set(counter)].join("、")}，这项新增作用也要保留。`:"");
     if(!sentences.some(sentence=>sentence.text===complete))sentences.push({text:complete,kind:trace.countsAsSupport?"opportunity":"topic",sources:[{kind:"rescue",id:trace.id,detail:`${trace.kind}/${trace.candidateStatus}/countsAsSupport=${trace.countsAsSupport}; ${trace.conditionRefs.map(ref=>`${ref.axisId}:${ref.field}:${ref.index}`).join(",")}`}]});
   }
-  return sentences;
+  return sentences.map(sentence=>{
+    const ids=new Set(sentence.sources.map(source=>source.id));
+    const decisions=contentRules.decisions.filter(d=>d.status==="applied"&&ids.has(d.targetId));
+    return {...sentence,ruleIds:[...new Set(decisions.map(d=>d.ruleId))],ruleDecisionIds:decisions.map(d=>d.id)};
+  });
 }
 
 /** Translates computed actions into possible everyday situations. Overall
  * good/bad is copied from the axis; counting these scenes never re-scores it. */
-export function buildConcretePeriodProse(input: ConcretePeriodInput): ConcretePeriodProse {
-  if(input.lifeSignals)return differentiatedLifeProse(input);
+function generateConcretePeriodProse(input: ConcretePeriodInput,contentRules:ConditionalContentAssessment): ConcretePeriodProse {
+  if(input.lifeSignals)return differentiatedLifeProse(input,contentRules);
   const s = scene(input.age, input.work);
   if (input.domain === "relationship") return relation(input,s);
   const domain = input.domain, axis = input.judgment.axes.find(item => item.axis === "pattern"), facts: ConcretePeriodFact[] = [];
   if (!axis) return {headline:"这一时段缺少完整判断",text:"现有计算未形成完整结论，未补写具体好坏或事件。",facts,signature:"missing-pattern"};
   for (const [index,action] of (axis.stemActions?.items ?? []).entries()) {
-    const line = words(action,domain,s,axis,input.task);
+    const policy=contentRules.actionPolicies.find(p=>p.actionIndex===index);
+    const line = words(action,domain,s,axis,input.task,policy);
     const add = (kind:ConcretePeriodFact["kind"],text:string) => {
       const companionText=domain === "wealth"&&kind === "opportunity"&&line.mechanism === "role:食神"?(s.money?"已有付费约定时，可继续谈下一批报酬或续单":"旧材料和用品也较容易沿用")
         :domain === "wealth"&&kind === "opportunity"&&line.mechanism === "role:伤官"?"为试做买的材料和工具较能派上用场":undefined;
       if (!facts.some(f => f.kind === kind && f.text === text)) facts.push({kind,domain,text,axisId:axis.id,actionIndex:index,relationId:null,actor:action.tenGod,visibility:action.visibility,mechanism:line.mechanism,...(companionText?{companionText}:{})});
     };
-    if (["assists","mixed"].includes(action.effect)) add("opportunity",line.help);
-    if (["obstructs","mixed"].includes(action.effect)) add("caution",line.pressure);
-    if (["neutral","unresolved"].includes(action.effect)) add("topic",line.topic);
+    if (policy?.allowedKinds.includes("opportunity")) add("opportunity",line.help);
+    if (policy?.allowedKinds.includes("caution")) add("caution",line.pressure);
+    if (policy?.allowedKinds.length===1&&policy.allowedKinds[0]==="topic") add("topic",line.topic);
   }
   for (const link of axis.taskLinks?.items ?? []) for (const [index,edge] of link.relations.entries()) {
     if (!edge.contributesPressure || edge.from.origin.kind === "target") continue;
@@ -424,12 +435,40 @@ export function buildConcretePeriodProse(input: ConcretePeriodInput): ConcretePe
       ...(domain === "wealth"?{companionText:"因此可能再花一次材料、工具或帮助的费用"}:{})});
   }
   const opportunity = facts.filter(f => f.kind === "opportunity"), caution = facts.filter(f => f.kind === "caution"), topic = facts.filter(f => f.kind === "topic");
-  const headline = concreteHeadline(axis.stemActions?.items.find(item=>item.visibility === "visible"),domain,s,axis,input.task);
+  const visibleIndex=axis.stemActions?.items.findIndex(item=>item.visibility === "visible");
+  const headline = concreteHeadline(axis.stemActions?.items.find(item=>item.visibility === "visible"),domain,s,axis,input.task,contentRules.actionPolicies.find(p=>p.actionIndex===visibleIndex));
   // The annual main answer leads with one concrete situation of each sign.
   // All actor and background facts remain available to monthly selection and
   // detailed evidence, including the hidden actor that supplies the help.
   const currentTopic = topic.find(f=>f.visibility === "visible") ?? topic[0];
-  const text = [currentTopic?`当前重点：${currentTopic.text}。`:"",opportunity.length?`机会：${opportunity[0]!.text}。`:"",caution.length?`阻力：${caution[0]!.text}。`:"",
+  const text = [currentTopic?`当前重点：${currentTopic.text}。`:"",opportunity.length?`机会：${opportunity[0]!.visibility === "main_hidden"?"支内另有辅助，":""}${opportunity[0]!.text}。`:"",caution.length?`阻力：${caution[0]!.visibility === "main_hidden"?"支内作用提示，":""}${caution[0]!.text}。`:"",
     !opportunity.length&&!caution.length&&!currentTopic?"主要事项：先确认眼前事项的实际安排。":""].filter(Boolean).join("");
   return {headline,text,facts,signature:JSON.stringify([axis.effect,input.age.stage,input.work??"unspecified",facts.map(({kind,actor,mechanism,text})=>[kind,actor,mechanism,text])])};
+}
+
+/** Rule decisions select the actual meaning/allowed signs above and gate event
+ * reuse. Original event texts and computed objects remain untouched. */
+export function buildConcretePeriodProse(input:ConcretePeriodInput):ConcretePeriodProse {
+  const contentRules=evaluateConditionalContentRules(input);
+  if(input.age.stage==="before_birth")return {headline:"本区间早于出生",text:"本区间不作个人经历或生活事件解读。",facts:[],sentences:[{text:"本区间不作个人经历或生活事件解读。",kind:"topic",sources:[{kind:"scope",id:"age"}],ruleIds:["age-scope"],ruleDecisionIds:["age-scope:scope"]}],signature:"before-birth",contentRules};
+  const allowed=new Set(contentRules.eventPolicies.filter(policy=>policy.allowed).map(policy=>policy.eventId));
+  const selected=input.lifeSignals?{...input,lifeSignals:{...input.lifeSignals,events:input.lifeSignals.events.filter(event=>allowed.has(event.id))}}:input;
+  const result=generateConcretePeriodProse(selected,contentRules);
+  const attach=(sources:ConcreteLifeSentence["sources"])=>{
+    const targets=new Set(sources.map(source=>source.id));
+    const eventDecisions=new Set(contentRules.eventPolicies.filter(policy=>targets.has(policy.eventId)).flatMap(policy=>policy.decisionIds));
+    const decisions=contentRules.decisions.filter(d=>d.status==="applied"&&(targets.has(d.targetId)||eventDecisions.has(d.id)||d.targetId==="scope"));
+    return {ruleIds:[...new Set(decisions.map(d=>d.ruleId))],ruleDecisionIds:decisions.map(d=>d.id)};
+  };
+  const facts=result.facts.map(fact=>{
+    const sources:ConcreteLifeSentence["sources"]=fact.eventId?[{kind:"event",id:fact.eventId}]:fact.actionIndex!==null?[{kind:"action",id:`${fact.axisId}:${fact.actionIndex}`}]:fact.relationId?[{kind:"task_relation",id:`${fact.axisId}:${fact.relationId}`}]:[{kind:"scope",id:"scope"}];
+    return {...fact,...attach(sources)};
+  });
+  // The direct, age-specific route also receives a sentence-level map. Only
+  // the three facts actually printed in its summary are cited, not every fact
+  // retained for expanded evidence.
+  const printed=result.sentences??[facts.find(f=>f.kind==="topic"&&f.visibility==="visible")??facts.find(f=>f.kind==="topic"),facts.find(f=>f.kind==="opportunity"),facts.find(f=>f.kind==="caution")]
+    .filter((fact):fact is typeof facts[number]=>Boolean(fact)).map(fact=>({text:fact.text,kind:fact.kind,sources:fact.actionIndex!==null?[{kind:"action" as const,id:`${fact.axisId}:${fact.actionIndex}`}]:fact.relationId?[{kind:"task_relation" as const,id:`${fact.axisId}:${fact.relationId}`}]:[{kind:"scope" as const,id:"scope"}]}));
+  const sentences=printed.map(sentence=>({...sentence,...attach(sentence.sources)}));
+  return {...result,facts,...(sentences?{sentences}:{}),contentRules};
 }

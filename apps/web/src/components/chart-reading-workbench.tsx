@@ -1,5 +1,5 @@
 import { ArrowRight, BookOpen, BriefcaseBusiness, Check, ChevronDown, ChevronRight, Database, FileDown, HeartHandshake, Leaf, LoaderCircle, PencilLine, Plus, Save, Waves } from "lucide-react";
-import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
 import type { RevisionRecord } from "@hakimi/contracts";
 import type { BaziPreliminaryAssessment, PreliminaryReading, PreliminarySection, PreliminarySource } from "../../../../packages/bazi-interpretation/src/preliminary-assessment";
 import { getWorkingBalance } from "../../../../packages/bazi-interpretation/src/structural-strength-assessment";
@@ -27,6 +27,7 @@ import { plainYearCaption, plainYearSummary } from "../lib/plain-year-overview";
 import { PlainYearOverviewPanel } from "./plain-year-overview-panel";
 import type { BriefReadingReport } from "../lib/brief-reading-report";
 import { BriefReadingReportPanel } from "./brief-reading-report-panel";
+import { revealReadingSection } from "./reading-section-navigation";
 import { buildReadingFeedbackChoices, FEEDBACK_RATINGS, type FeedbackRating, type ReadingFeedbackDraft, type ReadingFeedbackChoice } from "../lib/local-reading-feedback";
 import "./chart-reading-workbench.css";
 
@@ -39,6 +40,8 @@ export interface ChartReadingWorkbenchProps {
   comprehensive?: BaziComprehensiveReading | null;
   synthesis?: LocalReadingSynthesis | null;
   briefReport?: BriefReadingReport | null;
+  explanationPanel?: ReactNode;
+  onPrepareCompleteReading?: () => void;
   priorities?: LocalReadingPriorities | null;
   annualEvents?: LocalReadingAnnualEvents | null;
   annualLifeStories?: LocalReadingAnnualLifeStories | null;
@@ -238,13 +241,19 @@ function FeedbackForm({ assessment, annual, choices, target, onAddFeedback }: { 
   </section>;
 }
 
-function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive, synthesis, briefReport, priorities, annualEvents, annualLifeStories, annualLifeStoryPersonalSources, extraFeedbackChoices = [], feedbackTarget, reportLoading = false, onExportReading, onExportArchive, selectedYear: controlledYear, onSelectYear, annualOutlook, lifeOutlook, timeline, annualLoading = false, annualError, onSaveReading, onAddFeedback, onEditBirthData, onOpenDetails, onOpenTransit, decorativeImageUrl }: ChartReadingWorkbenchProps) {
+function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive, synthesis, briefReport, explanationPanel, onPrepareCompleteReading, priorities, annualEvents, annualLifeStories, annualLifeStoryPersonalSources, extraFeedbackChoices = [], feedbackTarget, reportLoading = false, onExportReading, onExportArchive, selectedYear: controlledYear, onSelectYear, annualOutlook, lifeOutlook, timeline, annualLoading = false, annualError, onSaveReading, onAddFeedback, onEditBirthData, onOpenDetails, onOpenTransit, decorativeImageUrl }: ChartReadingWorkbenchProps) {
   const sectionId = useId();
   const [topic, setTopic] = useState<ReadingTopic>("self");
   const [axis, setAxis] = useState<ReadingAxis | null>(null);
   const [year, setYear] = useState<number | null>(null);
   const [saveState, setSaveState] = useState<"idle" | "pending" | "saved" | "failed">("idle");
   const [saveError, setSaveError] = useState("");
+  const [completeNatalOpen, setCompleteNatalOpen] = useState(false);
+  const [completeYearsOpen, setCompleteYearsOpen] = useState(false);
+  const [backgroundRequested, setBackgroundRequested] = useState(false);
+  const [backgroundHasMounted, setBackgroundHasMounted] = useState(false);
+  const [backgroundTarget, setBackgroundTarget] = useState<{ id: string } | null>(null);
+  const backgroundRef = useRef<HTMLDetailsElement>(null);
   const saveBusy = useRef(false);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const includeHour = assessment.sourceBinding.includeHour;
@@ -268,6 +277,28 @@ function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive
   const boundBrief = briefReport?.sourceBinding.caseId === revision.caseId && briefReport.sourceBinding.revisionId === revision.id
     && briefReport.sourceBinding.chartResultHash === revision.manifest.resultHash && briefReport.sourceBinding.includeHour === assessment.sourceBinding.includeHour
     && (!boundAnnual || (briefReport.coverage.fromYear === boundAnnual.startYear && briefReport.coverage.toYear === boundAnnual.endYear)) ? briefReport : null;
+  // Keep the fallback reader visible once initial preparation finishes. In the
+  // main-report flow, this large subtree mounts only after an explicit request.
+  // Once mounted it stays mounted so nested year comparisons retain their state.
+  const mountBackground = backgroundHasMounted || (!reportLoading && (backgroundRequested || !boundBrief));
+  const backgroundAnchors = useMemo(() => new Set(["reading-full-report", ...(boundSynthesis?.sections.map(section => `reading-${section.id}`) ?? [])]), [boundSynthesis]);
+  const requestBackground = useCallback((id: string) => {
+    if (!backgroundAnchors.has(id)) return;
+    setBackgroundRequested(true); setBackgroundTarget({ id });
+    if (backgroundRef.current) backgroundRef.current.open = true;
+  }, [backgroundAnchors]);
+  useEffect(() => { if (mountBackground && !backgroundHasMounted) setBackgroundHasMounted(true); }, [mountBackground, backgroundHasMounted]);
+  useEffect(() => {
+    const followHash = () => { try { requestBackground(decodeURIComponent(window.location.hash.slice(1))); } catch { /* Leave malformed hashes untouched. */ } };
+    followHash(); window.addEventListener("hashchange", followHash);
+    return () => window.removeEventListener("hashchange", followHash);
+  }, [requestBackground]);
+  useEffect(() => {
+    if (!mountBackground || !backgroundTarget) return;
+    const target = revealReadingSection(backgroundTarget.id);
+    target?.scrollIntoView?.({ block: "start" });
+    if (target?.hasAttribute("tabindex")) target.focus({ preventScroll: true });
+  }, [mountBackground, backgroundTarget]);
   const month = pillars.month;
   const secondary = includeHour ? pillars.hour : pillars.year;
   const seasonalScope = assessment.sources.find((source) => assessment.seasonal.sourceIds.includes(source.id))?.provenance?.scope;
@@ -292,7 +323,10 @@ function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive
     event.preventDefault(); setTopic(TOPICS[next]!.id); tabRefs.current[next]?.focus();
   }
 
-  return <section className="chart-reading-workbench" aria-label="命盘与本地解读">
+  return <section className="chart-reading-workbench" aria-label="命盘与本地解读" onClickCapture={event => {
+    const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href^="#"]') : null;
+    if (link) { try { requestBackground(decodeURIComponent(link.getAttribute("href")!.slice(1))); } catch { /* Keep native navigation. */ } }
+  }}>
     <header className="reading-workbench-header">
       <div className="reading-case-heading"><strong>{text(caseName, "我的命盘", 120)}</strong><span>{revision.input.calendarType === "lunar" ? "农历 " : ""}{text(revision.input.date)} {includeHour ? text(revision.input.time) : "时辰未定"}</span><span>{text(revision.input.timeZone)}</span></div>
       <div className="reading-header-actions">
@@ -359,7 +393,9 @@ function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive
       <section className="reading-answer-column" id="reading-natal" tabIndex={-1} aria-labelledby={`${sectionId}-headline`}>
         <div className="reading-section-heading reading-answer-kicker"><h2>{boundBrief ? "主报告" : "本盘判断"}</h2><span>{boundBrief ? "先说结论，再看事业、财运、感情与年月" : "基于四柱结构的本地初步解读"}</span></div>
         <h1 id={`${sectionId}-headline`} className="reading-main-headline">{text(pillars.day.stem)}{ELEMENTS[SYMBOL_ELEMENT[pillars.day.stem] ?? ""]}日主 · {text(workingBalance.label)}</h1>
-        {boundBrief ? <BriefReadingReportPanel report={boundBrief} variant="summary" onSelectYear={(next) => { setYear(next); onSelectYear?.(next); }} /> : boundSynthesis ? <ReadingSynthesisPanel reading={boundSynthesis} variant="summary" plainCards={buildPlainNatalCards(boundSynthesis, boundComprehensive, { revision, referenceInstant: boundLife?.referenceInstant })} />
+        {explanationPanel ? <>{explanationPanel}{boundBrief ? <details className="reading-fold" onToggle={event => setCompleteNatalOpen(event.currentTarget.open)}>
+          <summary>展开完整本命阅读</summary>{completeNatalOpen ? <BriefReadingReportPanel report={boundBrief} variant="summary" onSelectYear={(next) => { setYear(next); onSelectYear?.(next); }} /> : null}</details> : null}</>
+          : boundBrief ? <BriefReadingReportPanel report={boundBrief} variant="summary" onSelectYear={(next) => { setYear(next); onSelectYear?.(next); }} /> : boundSynthesis ? <ReadingSynthesisPanel reading={boundSynthesis} variant="summary" plainCards={buildPlainNatalCards(boundSynthesis, boundComprehensive, { revision, referenceInstant: boundLife?.referenceInstant })} />
           : <PersonalReadingScope subjectId={boundComprehensive ? "chapter-overview" : "natal-overview"}><p className="reading-main-summary">{text(boundComprehensive?.chapters.find((chapter) => chapter.id === "overview")?.verdict ?? assessment.pattern.summary)}</p></PersonalReadingScope>}
         {!boundBrief ? <div className="reading-now-overview" aria-label="当前阶段与所选年份">
           <section><span>当前大运</span>
@@ -385,8 +421,13 @@ function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive
       </section>
     </div>
       <section className="reading-full-report" id="reading-full-report" tabIndex={-1} aria-label="命局详读与重点年份">
-        {boundBrief ? <BriefReadingReportPanel report={boundBrief} variant="years" onSelectYear={(next) => { setYear(next); onSelectYear?.(next); }} /> : null}
-        <details className="reading-fold reading-brief-background" open={boundBrief ? undefined : true}><summary>展开命局详读、年份对照与原始依据</summary>
+        {boundBrief && explanationPanel ? <details className="reading-fold" onToggle={event => { setCompleteYearsOpen(event.currentTarget.open); if (event.currentTarget.open) onPrepareCompleteReading?.(); }}>
+          <summary>展开完整十年阅读与关键月份</summary>{completeYearsOpen ? <BriefReadingReportPanel report={boundBrief} variant="years" onSelectYear={(next) => { setYear(next); onSelectYear?.(next); }} /> : null}</details>
+          : boundBrief ? <BriefReadingReportPanel report={boundBrief} variant="years" onSelectYear={(next) => { setYear(next); onSelectYear?.(next); }} /> : null}
+        <details ref={backgroundRef} className="reading-fold reading-brief-background" open={!reportLoading && !boundBrief ? true : undefined}
+          onToggle={event => { if (event.target === event.currentTarget && event.currentTarget.open) setBackgroundRequested(true); }}>
+        <summary>展开命局详读、年份对照与原始依据</summary>
+        {mountBackground ? <>
         {boundAnnual ? <PlainYearOverviewPanel annual={boundAnnual} expectedSource={{ ...assessment.sourceBinding, caseId: revision.caseId }} personalSources={annualLifeStoryPersonalSources} onSelectYear={(next) => { setYear(next); onSelectYear?.(next); }} /> : null}
         {boundSynthesis ? <details className="reading-fold"><summary>展开完整命局说明与古籍依据</summary><ReadingSynthesisPanel reading={boundSynthesis} variant="sections" /></details> : null}
         {boundPriorities ? <><RelationshipWindowsPanel reading={boundPriorities} annualEvents={annualEvents?.sourceBinding.caseId === revision.caseId ? annualEvents : null} selectedYear={controlledYear ?? year ?? undefined} onSelectYear={(next) => { setYear(next); onSelectYear?.(next); }} />
@@ -404,6 +445,10 @@ function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive
         </div>
         </>}
         <details className="reading-fold reading-method"><summary><span>判断口径与差异</span><small>适用范围与不同角度的可能差异</small><ChevronRight size={18} aria-hidden="true" /></summary><EvidenceList items={assessment.limitations} /><p>格局、扶抑与调候分别回答不同的问题；反馈用于保存和对照，不会自动修改这些判断规则。</p><SourceNotes sourceIds={assessment.sources.map((source) => source.id)} sources={assessment.sources} /></details>
+        </> : <>
+          {[...backgroundAnchors].filter(id => id !== "reading-full-report").map(id => <span key={id} id={id} data-reading-lazy-anchor="true" />)}
+          {reportLoading ? <p role="status">正在整理完整阅读，准备后可展开本段。</p> : null}
+        </>}
         </details>
         {onAddFeedback ? <details className="reading-fold" open={feedbackTarget ? true : undefined}><summary>这份判断有不符合的地方？填写反馈</summary><FeedbackForm assessment={assessment} annual={boundAnnual} choices={extraFeedbackChoices} target={feedbackTarget} onAddFeedback={onAddFeedback} /></details> : null}
         <p className="reading-endnote"><BookOpen size={13} aria-hidden="true" />传统命理解释，供个人参考。</p>

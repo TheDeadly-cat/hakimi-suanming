@@ -14,6 +14,8 @@ import * as codec from "../lib/local-reading-snapshot-codec";
 import * as reportBundle from "../lib/local-reading-report-bundle";
 import { ReadingSavedRecord } from "./reading-saved-record";
 import { ReadingReportText } from "./reading-report-text";
+import { syntheticIndexedReport, syntheticReviewIndex } from "../test/reading-case-review-fixture";
+import * as explanationIndex from "../lib/reading-explanation-index";
 
 function note(body: string): ResearchNoteRecord {
   return { schemaVersion: "1.0.0", id: "11111111-1111-4111-8111-111111111111",
@@ -33,6 +35,42 @@ async function toggle(container: HTMLElement) {
 afterEach(() => vi.restoreAllMocks());
 
 describe("saved reading text publication", () => {
+  it("reads topics and original evidence only from the saved index, including saved months and time uncertainty", async () => {
+    const index = syntheticReviewIndex(), annual = index.conclusions[0]!;
+    index.conclusions.unshift({ ...structuredClone(annual), stableId: `${index.sourceSnapshot.revisionId}/natal:career`, label: "保存时的事业整体",
+      text: "当时的本命事业原句", scope: { level: "natal", year: null, branchId: null, startInstant: null, endExclusiveInstant: null } });
+    index.conclusions.push({ ...structuredClone(annual), stableId: `${index.sourceSnapshot.revisionId}/month:2027:8:career`, label: "2027 年八月的事业",
+      text: "保存时八月的独立结论，不从新版补写。", scope: { ...annual.scope, level: "month", startInstant: "2027-08-08T01:23:00.000Z", endExclusiveInstant: "2027-09-08T01:23:00.000Z" } });
+    const record = await syntheticIndexedReport(index), before = JSON.stringify(record), recalculate = vi.spyOn(explanationIndex, "buildReadingTimeUncertainty");
+    const view = render(<ReadingSavedRecord record={record} defaultOpen/>);
+    await userEvent.click(await screen.findByText("按当时的专题与依据阅读"));
+    const section = await screen.findByRole("region", { name: "已保存报告的专题与依据" });
+    expect(section.textContent).toContain("当时的本命事业原句");
+    fireEvent.click(screen.getByRole("button", { name: "事业发展" }));
+    fireEvent.change(screen.getByLabelText("保存范围内的年份"), { target: { value: "2027" } });
+    expect(section.textContent).toContain(annual.text);
+    await userEvent.click(screen.getByText(`查看依据 · ${annual.label}`));
+    expect(section.textContent).toContain(annual.evidence.facts[0]); expect(section.textContent).toContain("出生时刻未填写");
+    fireEvent.click(screen.getByRole("button", { name: "关键月份" }));
+    expect(section.textContent).toContain("保存时八月的独立结论，不从新版补写。");
+    fireEvent.click(screen.getByRole("button", { name: "当时的时间不确定性" }));
+    expect(section.textContent).toContain(index.uncertainty.note);
+    expect(screen.queryByRole("button", { name: "检查出生时间前后的四柱变化" })).toBeNull(); expect(recalculate).not.toHaveBeenCalled();
+    expect(screen.getByRole("article", { name: "已保存的通读报告" })).toBeTruthy(); expect(JSON.stringify(record)).toBe(before);
+  });
+  it("preserves the original reader and exact export when the optional saved index is invalid or belongs elsewhere", async () => {
+    const record = await syntheticIndexedReport(), otherCase = { ...record, caseId: crypto.randomUUID() };
+    const view = render(<ReadingSavedRecord record={otherCase} defaultOpen/>);
+    await screen.findByRole("article", { name: "已保存的通读报告" });
+    expect(screen.getByRole("alert").textContent).toContain("位置或时间不一致");
+    expect(screen.queryByText("按当时的专题与依据阅读")).toBeNull();
+    expect(screen.getByRole("button", { name: "导出这份完整档案" })).toBeTruthy();
+    const damagedIndex = await reportBundle.encodeReadingReportBundle({ reading: "# 原始阅读仍在", archive: `${explanationIndex.READING_EXPLANATION_MARKER}\n{broken`, version: "edition/old" });
+    view.rerender(<ReadingSavedRecord record={note(damagedIndex)} defaultOpen/>);
+    await screen.findByRole("heading", { name: "原始阅读仍在" });
+    expect(screen.getByRole("alert")).toBeTruthy(); expect(screen.queryByText("按当时的专题与依据阅读")).toBeNull();
+    expect(screen.getByRole("button", { name: "导出这份通读报告" })).toBeTruthy();
+  });
   it("scrolls chapter and condition targets only inside their reader while focus never scrolls the page", () => {
     render(<ReadingReportText text={"# 通读稿\n\n## 一、整盘主线\n正文[注1](#reading-condition-1)。\n\n## 二、命局九章详读\n另一章。\n\n## 适用条件注释\n以下条件均保留原文，同一句只记录一次；每条列明本稿中引用它的范围。\n\n### 注1\n原条件。"} />);
     const reader = screen.getByRole("article", { name: "已保存的通读报告" });
@@ -117,6 +155,7 @@ describe("saved reading text publication", () => {
     const view = render(<ReadingSavedRecord record={record} />);
     await toggle(view.container);
     await screen.findByRole("article", { name: "已保存的通读报告" });
+    expect(view.container.textContent).toContain("这份报告当时没有保存逐条结论与依据索引");
     expect(screen.getByRole("heading", { name: "主要结论" })).toBeTruthy();
     expect(view.container.textContent).toContain("最后一项🌿");
     expect(view.container.querySelector("script")).toBeNull();

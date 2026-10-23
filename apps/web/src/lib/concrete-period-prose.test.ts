@@ -22,7 +22,7 @@ function background(j:LocalOutlookJudgment):LocalOutlookJudgment {
 it("keeps hidden support and visible pressure as independent concrete possibilities without changing the effect",()=>{
   const source=judgment([action("正印","obstructs"),action("伤官","assists","main_hidden")]),before=JSON.stringify(source);
   const work=buildConcretePeriodProse({judgment:source,domain:"career",age});
-  expect(work.text).toContain("机会：提出的新方案");expect(work.text).toContain("阻力：被要求补资料");
+  expect(work.text).toContain("机会：支内另有辅助，提出的新方案");expect(work.text).toContain("阻力：被要求补资料");
   expect(work.facts.find(f=>f.kind === "opportunity")).toMatchObject({actor:"伤官",visibility:"main_hidden",actionIndex:1});
   expect(work.headline).toContain("补资料");expect(JSON.stringify(source)).toBe(before);
 });

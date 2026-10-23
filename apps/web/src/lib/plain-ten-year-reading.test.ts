@@ -1,4 +1,4 @@
-import { beforeAll, expect, it } from "vitest";
+import { beforeAll, expect, it, vi } from "vitest";
 import { calculateChart } from "@hakimi/bazi-core";
 import { storedRevisionRecordSchema, researchNoteRecordSchema, type ResearchNoteRecord } from "@hakimi/contracts";
 import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
@@ -17,6 +17,7 @@ import { buildLocalPersonalReading } from "./local-personal-reading";
 import { buildPlainTenYearReading } from "./plain-ten-year-reading";
 import { buildReadingContextRecord, resolveReadingContext } from "./local-reading-context";
 import { buildContextualReadingBundle } from "./local-contextual-reading-record";
+import * as concreteProse from "./concrete-period-prose";
 
 async function fixture(kind: "B" | "A" | "child" | "A32" | "protect") {
   const child = kind === "child", date = child ? "2019-12-22" : kind === "A"||kind === "A32" ? "1995-08-18" : kind === "protect"?"1957-09-13":"1995-05-18";
@@ -163,6 +164,50 @@ it("keeps exact target pressure, continuing fortune background and constrained r
   for(const row of result.branches[0]!.years)for(const segment of row.segments)for(const event of segment.events.filter(event=>event.origin!=="personal"))expect(event.showInMain).toBe(false);
 });
 
+it("does not restore background-only annual spending events through the independent-event fallback",()=>{
+  const before=JSON.stringify(b),result=read(b),excludedYears:number[]=[];
+  for(const year of result.branches[0]!.years)for(const segment of year.segments){
+    const domain=segment.domainEvidence.find(item=>item.domain === "wealth")!;
+    const originals=b.report.years.find(item=>item.year===year.year)!.branches[0]!.segments.find(item=>item.id===segment.id)!.eventTendencies;
+    for(const policy of domain.contentRules!.eventPolicies.filter(item=>!item.allowed)){
+      const original=originals.find(item=>item.original.id===policy.eventId)!;
+      if(original.category!=="money_loss"||["none","not_applicable"].includes(original.level))continue;
+      const support=original.original.evidence.filter(item=>original.original.supportEvidenceIds.includes(item.id));
+      expect(support.length).toBeGreaterThan(0);
+      expect(support.every(item=>item.origin === "dayun"&&item.kind === "task_relation")).toBe(true);
+      expect(segment.events.some(event=>event.id===policy.eventId)).toBe(false);
+      expect(domain.contentRules!.decisions.find(item=>item.targetId===policy.eventId)!.exclusions).toContain("缺少完整的当期独立支持证据");
+      excludedYears.push(year.year);
+    }
+  }
+  expect(excludedYears).toEqual([2029,2030,2031,2032,2033,2034,2035]);
+  expect(result.branches[0]!.years.find(year=>year.year===2029)!.segments[1]!.judgmentText).toContain("同段大运持续的阻力");
+  expect(JSON.stringify(b)).toBe(before);
+});
+
+it("still displays an allowed current-year event when its domain prose does not already cover it",()=>{
+  const original=b.report.years.find(year=>year.year===2032)!.branches[0]!.segments[0]!.eventTendencies.find(event=>event.category === "money_inflow")!.original;
+  expect(original.evidence.some(item=>original.supportEvidenceIds.includes(item.id)&&item.origin === "year")).toBe(true);
+  const actual=concreteProse.buildConcretePeriodProse;
+  // This is a presentation-only variation: retain the real policy, evidence,
+  // actor and event, but let the independent card supply an omitted sentence.
+  const spy=vi.spyOn(concreteProse,"buildConcretePeriodProse").mockImplementation(input=>{
+    const prose=actual(input);
+    if(input.domain!=="wealth"||input.lifeSignals?.horizon!=="year"||!input.lifeSignals.events.some(event=>event.id===original.id))return prose;
+    const sentences=prose.sentences?.filter(sentence=>!sentence.sources.some(source=>source.kind === "event"&&source.id===original.id));
+    return {...prose,sentences,text:sentences?.map(sentence=>sentence.text).join("")??prose.text};
+  });
+  try{
+    const segment=read(b).branches[0]!.years.find(year=>year.year===2032)!.segments[0]!;
+    expect(segment.domainEvidence.find(domain=>domain.domain === "wealth")!.contentRules!.eventPolicies.find(policy=>policy.eventId===original.id)!.allowed).toBe(true);
+    const displayed=segment.events.find(event=>event.id===original.id)!;
+    expect(displayed.showInMain).toBe(true);
+    expect(displayed.category).toBe("money_inflow");
+    expect(displayed.months.length).toBeGreaterThan(0);
+    expect(displayed.months.every(month=>month.original.scope.annualSegmentId===segment.id)).toBe(true);
+  }finally{spy.mockRestore();}
+});
+
 it("never compresses counter-evidence for an income opportunity into a positive financial claim",()=>{
   const result=read(b),windows=result.branches.flatMap(branch=>branch.years.flatMap(year=>year.segments.flatMap(segment=>segment.monthWindows)));
   const counters=windows.flatMap(window=>window.members.flatMap(member=>member.topics.flatMap(topic=>topic.facts))).filter(fact=>fact.kind === "caution"&&fact.eventId?.endsWith("money_inflow"));
@@ -269,14 +314,20 @@ it("suppresses replaced yearly, monthly-domain and month-story words and directi
     if (subjectId !== "annual-2029") {
       expect(target.members[0]!.topics.find(topic => topic.domain === "career")!.origin).not.toBe("personal");
       expect(y.segments[1]!.monthWindows.every(window => window.origin !== "personal")).toBe(true);
-    } else expect(y.segments.every(part => part.origin === "personal")).toBe(true);
+    } else {
+      expect(y.segments.every(part => part.origin === "personal")).toBe(true);
+      const preserved=y.segments[1]!.events.find(event=>event.category === "money_loss")!;
+      expect(preserved.origin).toBe("personal");expect(preserved.showInMain).toBe(true);
+      expect(preserved.personalTextIds.length).toBeGreaterThan(0);
+      for(const id of preserved.personalTextIds)expect(result.personalTexts.find(text=>text.id===id)?.text).toBe("完整个人原文\n第二行保留；不与自动判断混写。");
+    }
   }
 }, 60000);
 
-it("preserves verified non-income context in annual and selected monthly financial events",async()=>{
+it("preserves verified non-income expenses without restoring unsupported income or background-only annual spending",async()=>{
   for(const work of ["student","retired","caregiving","seeking_work"] as const){
     const note=researchNoteRecordSchema.parse({schemaVersion:"1.0.0",id:crypto.randomUUID(),caseId:b.revision.caseId,
-      anchor:{kind:"revision",revisionId:b.revision.id},bodyFormat:"markdown",body:await buildReadingContextRecord(b.revision,null,{work,relationship:"unspecified",fromYear:2033,toYear:2033,notes:""}),
+      anchor:{kind:"revision",revisionId:b.revision.id},bodyFormat:"markdown",body:await buildReadingContextRecord(b.revision,null,{work,relationship:"unspecified",fromYear:2026,toYear:2033,notes:""}),
       tags:["阅读背景"],sourceRefs:[],lifecycle:"active",editVersion:1,createdAt:"2026-10-22T00:00:00Z",updatedAt:"2026-10-22T00:00:00Z"});
     const resolved=await resolveReadingContext({revision:b.revision,records:[note]});
     const contextual=buildContextualReadingBundle({revision:b.revision,assessment:b.assessment,comprehensive:b.extras.comprehensive,
@@ -284,17 +335,30 @@ it("preserves verified non-income context in annual and selected monthly financi
     const source={...b,contextual},annualEvents=buildReadingAnnualEvents(source);
     const annualLifeStories=buildReadingAnnualLifeStories({...source,annualEvents});
     const prepared=await prepareKeyMonthYear({...source,annualEvents,annualLifeStories},2033,[]);
-    const extras={...b.extras,contextual,annualEvents,annualLifeStories,keyMonthYears:[prepared]};
+    const expenseYear=await prepareKeyMonthYear({...source,annualEvents,annualLifeStories},2026,[]);
+    const extras={...b.extras,contextual,annualEvents,annualLifeStories,keyMonthYears:[expenseYear,prepared]};
     const report=buildBriefReadingReport(b.assessment,b.annual,extras)!,result=buildPlainTenYearReading({...b,report,extras});
     const contextualYear=result.branches[0]!.years.find(item=>item.year===2033)!;
     for(const segment of contextualYear.segments){
       expect(segment.domains.filter(domain=>domain.domain!=="relationship").map(domain=>domain.title).join()).not.toMatch(/事业|财运/u);
       for(const window of segment.monthWindows)expect(window.text+window.label).not.toMatch(/事业(?:机会|阻力|：)|财运(?:机会|阻力|：)/u);
     }
-    const selected=result.branches[0]!.years.find(year=>year.year===2033)!.segments.flatMap(segment=>segment.events).filter(event=>["money_inflow","money_loss"].includes(event.category));
+    const unsupported=contextualYear.segments.flatMap(segment=>segment.events).filter(event=>["money_inflow","money_loss"].includes(event.category));
+    expect(unsupported).toEqual([]);
+    const original2033=report.years.find(year=>year.year===2033)!.branches[0]!.segments[0]!.eventTendencies;
+    for(const category of ["money_inflow","money_loss"]){
+      const original=original2033.find(event=>event.category===category)!;
+      expect(original.level).not.toBe("none");
+      const decision=contextualYear.segments[0]!.domainEvidence.find(domain=>domain.domain==="wealth")!.contentRules!.decisions.find(item=>item.targetId===original.id)!;
+      expect(decision.status).toBe("excluded");
+      expect(decision.exclusions).toContain(category==="money_inflow"?"本期财作用不是可表达收入的作用或身份":"缺少完整的当期独立支持证据");
+    }
+    const selected=result.branches[0]!.years.find(year=>year.year===2026)!.segments.flatMap(segment=>segment.events).filter(event=>["money_inflow","money_loss"].includes(event.category));
     expect(selected.length).toBeGreaterThan(0);expect(selected.flatMap(event=>event.months).length).toBeGreaterThan(0);
     for(const event of selected){
-      const original=report.years.find(year=>year.year===2033)!.branches[0]!.segments.flatMap(segment=>segment.eventTendencies).find(item=>item.id===event.id)!.original;
+      expect(event.category).toBe("money_loss");
+      const original=report.years.find(year=>year.year===2026)!.branches[0]!.segments.flatMap(segment=>segment.eventTendencies).find(item=>item.id===event.id)!.original;
+      expect(original.evidence.some(item=>original.supportEvidenceIds.includes(item.id)&&item.origin==="year")).toBe(true);
       expect(original.workState).toBe(work);expect(event.text).toBe(original.text);
       for(const month of event.months){expect(month.original.workState).toBe(work);expect(month.text).toBe(month.original.text);expect(month.text).not.toContain("已谈妥报酬的新任务");}
     }

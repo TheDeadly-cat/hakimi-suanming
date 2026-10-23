@@ -1,0 +1,36 @@
+.reading-explanation-workbench { min-width: 0; line-height: 1.75; }
+.reading-explanation-intro, .reading-explanation-scope { color: var(--reading-muted); }
+.reading-explanation-topics { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.reading-explanation-workbench button, .reading-explanation-workbench select, .reading-explanation-workbench input {
+  min-height: 44px; border: 1px solid var(--reading-line); border-radius: 6px; padding: 8px 12px;
+  color: var(--reading-ink); background: var(--reading-paper); font: inherit; max-width: 100%;
+}
+.reading-explanation-workbench button { cursor: pointer; }
+.reading-explanation-workbench button:disabled { cursor: wait; opacity: .65; }
+.reading-explanation-topics button[aria-pressed="true"] { color: var(--reading-paper); background: var(--reading-jade); border-color: var(--reading-jade); }
+.reading-explanation-workbench :is(button, input, select, summary):focus-visible { outline: 3px solid var(--reading-jade); outline-offset: 3px; }
+.reading-explanation-question > div { display: flex; gap: 8px; margin-top: 6px; }
+.reading-explanation-question input { min-width: 0; flex: 1; }
+.reading-explanation-selectors { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+.reading-explanation-selectors label { display: grid; gap: 4px; min-width: 0; max-width: 100%; }
+.reading-explanation-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; }
+.reading-explanation-summary article:first-child { grid-column: 1 / -1; }
+.reading-explanation-workbench article { min-width: 0; padding: 12px 0 20px; border-bottom: 1px solid var(--reading-line); }
+.reading-explanation-workbench h3 { font-family: var(--reading-serif); margin: 8px 0; }
+.reading-explanation-workbench h4 { margin: 20px 0 6px; }
+.reading-explanation-original { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; margin: 8px 0; }
+.reading-explanation-limit { font-size: .92em; color: var(--reading-muted); }
+.reading-explanation-evidence > summary { min-height: 44px; cursor: pointer; padding: 8px 0; color: var(--reading-jade); }
+.reading-explanation-evidence > div { border-left: 2px solid var(--reading-line); padding-left: 16px; }
+.reading-explanation-evidence ul { padding-left: 20px; }
+.reading-explanation-evidence blockquote { margin: 12px 0; border-left: 2px solid var(--reading-line); padding-left: 12px; }
+.reading-explanation-evidence cite { font-style: normal; color: var(--reading-muted); }
+.reading-explanation-workbench dl { margin: 12px 0; }
+.reading-explanation-workbench dt { font-weight: 600; }
+.reading-explanation-workbench dd { margin: 0 0 12px; }
+@media (max-width: 680px) {
+  .reading-explanation-summary { grid-template-columns: minmax(0, 1fr); }
+  .reading-explanation-question > div { flex-wrap: wrap; }
+  .reading-explanation-question input { flex-basis: 100%; }
+  .reading-explanation-selectors > label { width: 100%; }
+}

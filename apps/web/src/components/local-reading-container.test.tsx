@@ -35,6 +35,8 @@ import * as keyMonthSourceModule from "../lib/key-month-event-source";
 import { annualEventFeedbackText, annualEventFeedbackSubjectId } from "../lib/local-annual-event-record";
 import { annualLifeStoryFeedbackText, annualLifeStorySubjectId, annualLifeStoryFeedbackVersions } from "../lib/annual-life-story-record";
 
+const workbenchAction = vi.hoisted(() => ({ pending: null as Promise<void> | null }));
+
 vi.mock("../lib/local-annual-outlook", async () => ({
   ...await vi.importActual<typeof import("../lib/local-annual-outlook")>("../lib/local-annual-outlook"), buildLocalAnnualOutlook: vi.fn(), buildLocalAnnualOutlookRange: vi.fn()
 }));
@@ -56,9 +58,13 @@ vi.mock("./chart-reading-workbench", () => ({
     onSaveReading?: () => Promise<void>; onExportReading?: () => void; onAddFeedback?: (draft: ReadingFeedbackDraft) => Promise<void>;
   }) => {
     const [message, setMessage] = useState("");
-    const run = async (callback: (() => Promise<void>) | undefined) => {
-      try { await callback?.(); setMessage("测试保存成功"); }
-      catch (reason) { setMessage(reason instanceof Error ? reason.message : "错误"); }
+    const run = (callback: (() => Promise<void>) | undefined) => {
+      setMessage("");
+      workbenchAction.pending = (async () => {
+        try { await callback?.(); setMessage("测试保存成功"); }
+        catch (reason) { setMessage(reason instanceof Error ? reason.message : "错误"); }
+      })();
+      return workbenchAction.pending;
     };
     return <div data-testid="mock-reading-workbench"><span data-testid="current-revision">{props.revision.id}</span>
       <span data-testid="annual-revision">{props.annualOutlook?.revisionId ?? "尚无年度"}</span>
@@ -160,6 +166,21 @@ async function createNote(revision: RevisionRecord, body: string) {
 // Query the actual operation area instead of repeatedly walking every hidden
 // paragraph in the real detailed/report components. Assertions stay unchanged.
 const workbench = () => within(screen.getByTestId("mock-reading-workbench"));
+async function saveCompleteSnapshot(expected: string | RegExp = "测试保存成功") {
+  fireEvent.click(workbench().getByRole("button", { name: "保存测试快照" }));
+  const pending = workbenchAction.pending;
+  expect(pending, "The UI must invoke the actual save callback").not.toBeNull();
+  // Saving now prepares the unrequested years on demand. Await that real
+  // callback (including source validation, codec and repository write) before
+  // checking its UI acknowledgement; do not use the 1-second DOM poll as a
+  // budget for ten years of preparation or accept a previous success message.
+  await act(async () => { await pending; });
+  await waitFor(() => {
+    const status = screen.getByTestId("save-status").textContent;
+    if (typeof expected === "string") expect(status).toBe(expected);
+    else expect(status).toMatch(expected);
+  });
+}
 const contextPanel = () => {
   const element = document.querySelector<HTMLElement>(".reading-context-panel");
   if (!element) throw new Error("Expected the real context panel");
@@ -203,6 +224,7 @@ beforeAll(async () => {
   chartB = await calculateChart({ ...birth, time: "10:26" }, WORKING_DEFAULT_RULE_PROFILE);
 });
 beforeEach(async () => {
+  workbenchAction.pending = null;
   pendingKeyMonths.clear();
   const prepare = keyMonthSourceModule.prepareKeyMonthYear;
   vi.spyOn(keyMonthSourceModule, "prepareKeyMonthYear").mockImplementation((...args) => {
@@ -612,8 +634,8 @@ describe("reading container persistence and asynchronous publication", () => {
     describe("after the background was saved and reopened through the real UI", () => {
       beforeEach(async () => { await saveAndReopenContext(); await waitForPersonalReading(); }, 60_000);
       it("saves the complete contextual snapshot and clears by appending without rewriting either prior record", async () => {
-    fireEvent.click(workbench().getByRole("button", { name: "保存测试快照" }));
-    await waitFor(async () => expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(2));
+    await saveCompleteSnapshot();
+    expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(2);
     let notes = await repository.listResearchNotesByCase(revisionA.caseId);
     const saved = notes.find((note) => note.tags.includes("本地解读快照"))!;
     const body = await unpackReadingSnapshot(saved.body);
@@ -638,7 +660,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(clearDocument.value.previousRef?.noteId).toBe(root.id);
     expect(clearDocument.value.context.work).toBe("unspecified");
     expect(clearDocument.value.context.relationship).toBe("unspecified");
-      });
+      }, 60_000);
     });
   }, 60_000);
 
@@ -681,8 +703,8 @@ describe("reading container persistence and asynchronous publication", () => {
     describe("after explicit adoption and reopening through the real UI", () => {
       beforeEach(adoptAndReopen);
       it("saves both original and adopted texts then restores by appending while preserving the snapshot", async () => {
-    fireEvent.click(workbench().getByRole("button", { name: "保存测试快照" }));
-    await waitFor(async () => expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(3));
+    await saveCompleteSnapshot();
+    expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(3);
     const withSnapshot = await repository.listResearchNotesByCase(revisionA.caseId);
     const snapshot = withSnapshot.find((record) => record.tags.includes("本地解读快照"))!;
     const body = await unpackReadingSnapshot(snapshot.body);
@@ -690,6 +712,9 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(body).toContain(assessment.headline);
     expect(body).toContain(adoption.id);
     // Restore through the real append callback, retaining all earlier records.
+    // Saving refreshes notes; wait for their verified personal-reading replay
+    // before opening an action whose source record is being reloaded.
+    await waitForPersonalReading();
     fireEvent.click(screen.getByText("用户反馈", { exact: true }));
     const restore = await screen.findByRole("button", { name: "恢复原解读" });
     fireEvent.click(restore);
@@ -700,7 +725,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(restored).toHaveLength(4);
     expect(restored.find((record) => record.id === snapshot.id)!.body).toBe(snapshot.body);
     expect(restored.find((record) => record.id === adoption.id)!.body).toBe(adoption.body);
-      });
+      }, 60_000);
     });
   }, 60_000);
 
@@ -839,11 +864,11 @@ describe("reading container persistence and asynchronous publication", () => {
       await repository.createResearchNote(input); throw new Error("Synthetic lost review acknowledgement");
     });
     fireEvent.click(screen.getByRole("button", { name: "保存追加复核" }));
-    await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("保存结果尚未确认"));
+    await waitFor(() => expect(screen.getAllByRole("alert").some(node => node.textContent?.includes("保存结果尚未确认"))).toBe(true));
     expect(getResearchJournalMutationSnapshot().status).toBe("call_unknown");
     expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(2);
     fireEvent.click(screen.getByRole("button", { name: "保存追加复核" }));
-    await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("等待核对"));
+    await waitFor(() => expect(screen.getAllByRole("alert").some(node => node.textContent?.includes("等待核对"))).toBe(true));
     expect(write).toHaveBeenCalledTimes(1);
   }, 60_000);
   it("derives feedback choices for all actual ten years and saves both scenario feedback and the complete scenario snapshot", async () => {
@@ -860,8 +885,8 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(notes[0]!.body).toContain("年度情境规则：hakimi.annual-event-scenarios/0.4.0");
     expect(notes[0]!.body).toContain("合成情境反馈：实际主要调整了岗位职责。");
     await waitForPersonalReading();
-    fireEvent.click(workbench().getByRole("button", { name: "保存测试快照" }));
-    await waitFor(async () => expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(2));
+    await saveCompleteSnapshot();
+    expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(2);
     notes = await repository.listResearchNotesByCase(revisionA.caseId);
     const snapshot = notes.find((note) => note.tags.includes("本地解读快照"))!;
     const text = await unpackReadingSnapshot(snapshot.body);
@@ -907,14 +932,13 @@ describe("reading container persistence and asynchronous publication", () => {
     fireEvent.click(workbench().getByRole("button", { name: "保存测试快照" }));
     await waitFor(() => expect(screen.getByTestId("save-status").textContent).toContain("完整解读仍在整理"));
     fireEvent.click(workbench().getByRole("button", { name: "导出测试报告" }));
-    expect(screen.getAllByText("完整解读仍在整理，请完成后再保存或导出。").length).toBeGreaterThan(1);
+    await waitFor(() => expect(screen.getAllByText("完整解读仍在整理，请完成后再保存或导出。").length).toBeGreaterThan(1));
     expect(researchRepository.createResearchNote).not.toHaveBeenCalled();
     expect(getResearchJournalMutationSnapshot().status).toBe("idle");
     await act(async () => { late.resolve(computed); await late.promise; });
     await waitForPersonalReading();
     expect(screen.getByTestId("report-loading").textContent).toBe("false");
-    fireEvent.click(workbench().getByRole("button", { name: "保存测试快照" }));
-    await waitFor(() => expect(screen.getByTestId("save-status").textContent).toBe("测试保存成功"));
+    await saveCompleteSnapshot();
     const notes = await repository.listResearchNotesByCase(revisionA.caseId);
     expect(notes).toHaveLength(1);
     const full = await unpackReadingSnapshot(notes[0]!.body);
@@ -944,8 +968,7 @@ describe("reading container persistence and asynchronous publication", () => {
     render(<LocalReadingContainer {...propsFor(revisionA)} />);
     await waitFor(() => expect(screen.getByTestId("annual-revision").textContent).toBe(revisionA.id));
     await waitForPersonalReading();
-    fireEvent.click(workbench().getByRole("button", { name: "保存测试快照" }));
-    await waitFor(() => expect(screen.getByTestId("save-status").textContent).toContain("保存结果尚未确认"));
+    await saveCompleteSnapshot(/保存结果尚未确认/);
     expect(getResearchJournalMutationSnapshot().status).toBe("call_unknown");
     expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(1);
     await waitForPersonalReading();

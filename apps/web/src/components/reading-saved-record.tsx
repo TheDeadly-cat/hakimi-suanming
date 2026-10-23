@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ResearchNoteRecord } from "@hakimi/contracts";
 import { webReportExportPort } from "@hakimi/platform";
 import { formatDateTime } from "../lib/format";
@@ -7,9 +7,12 @@ import { isPackedReadingSnapshot, unpackReadingSnapshot } from "../lib/local-rea
 import { decodeReadingReportBundle, isReadingReportBundle, type ReadingReportBundle } from "../lib/local-reading-report-bundle";
 import { parseReadingFeedback, LOCAL_READING_REVIEW_TAG } from "../lib/local-reading-feedback";
 import { LOCAL_READING_CONTEXT_TAG, parseReadingContext } from "../lib/local-reading-context";
+import { LOCAL_READING_CASE_REVIEW_TAG, parseReadingCaseReview } from "../lib/reading-case-review";
+import { readReadingExplanationIndex } from "../lib/reading-explanation-index";
 import { ReadingFeedbackReview, type AppendReadingReview } from "./reading-feedback-review";
 import { PreparedFileDeliveryDialog, type PreparedFileArtifact } from "./prepared-file-delivery-dialog";
 import { ReadingReportText } from "./reading-report-text";
+import { ReadingSavedExplanation } from "./reading-saved-explanation";
 import "./reading-saved-record.css";
 
 const EMPTY_RECORDS: readonly ResearchNoteRecord[] = [];
@@ -19,6 +22,7 @@ export function ReadingSavedRecord({ record, relatedRecords = EMPTY_RECORDS, onA
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const [archiveOpen, setArchiveOpen] = useState<{ body: string; open: boolean } | null>(null);
+  const [explanationOpen, setExplanationOpen] = useState<{ body: string; open: boolean } | null>(null);
   const [savedArtifact, setSavedArtifact] = useState<{ id: string; body: string; editVersion: number; value: PreparedFileArtifact } | null>(null);
   const artifact = savedArtifact?.id === record.id && savedArtifact.body === record.body && savedArtifact.editVersion === record.editVersion
     ? savedArtifact.value : null;
@@ -32,10 +36,21 @@ export function ReadingSavedRecord({ record, relatedRecords = EMPTY_RECORDS, onA
   const context = record.tags.includes(LOCAL_READING_CONTEXT_TAG) || parseReadingContext(record.body).kind !== "legacy";
   const parsedFeedback = feedback ? parseReadingFeedback(record.body) : null;
   const reviewRecord = record.tags.includes(LOCAL_READING_REVIEW_TAG) || parsedFeedback?.kind === "review";
-  const allowBundle = !feedback && !context && !reviewRecord;
+  const caseReview = record.tags.includes(LOCAL_READING_CASE_REVIEW_TAG) || parseReadingCaseReview(record.body).kind !== "legacy";
+  const allowBundle = !feedback && !context && !reviewRecord && !caseReview;
   const requiresDecode = packed || (allowBundle && isReadingReportBundle(record.body));
   const text = requiresDecode ? decoded?.body === record.body ? decoded.text : null : record.body;
   const bundle = allowBundle && decoded?.body === record.body ? decoded.bundle : null;
+  const explanation = useMemo(() => {
+    if (!bundle) return { index: null, error: "" };
+    try {
+      const index = readReadingExplanationIndex(bundle.archive);
+      if (index && (record.anchor.kind !== "revision" || index.sourceSnapshot.caseId !== record.caseId
+        || index.sourceSnapshot.revisionId !== record.anchor.revisionId || index.sourceSnapshot.reportVersion !== bundle.version
+        || Date.parse(index.generatedAt) > Date.parse(record.createdAt))) throw new Error("已保存依据索引与报告的版本、位置或时间不一致，未自动关联。原通读文字仍保留。");
+      return { index, error: "" };
+    } catch (reason) { return { index: null, error: reason instanceof Error ? reason.message : "已保存依据索引未能核对，原通读文字仍保留。" }; }
+  }, [bundle, record.caseId, record.anchor, record.createdAt]);
   useEffect(() => {
     if (!open || !requiresDecode || text !== null) return;
     let current = true;
@@ -50,7 +65,7 @@ export function ReadingSavedRecord({ record, relatedRecords = EMPTY_RECORDS, onA
     return () => { current = false; };
   }, [open, packed, requiresDecode, allowBundle, record.body, text]);
   return <><details className="reading-saved-record" open={open} onToggle={(event) => setOpen(event.currentTarget.open)}><summary>
-    <strong>{context ? "阅读背景记录" : reviewRecord ? "追加复核记录" : feedback ? "用户反馈" : reportLabel ?? "解读快照"}</strong>
+    <strong>{caseReview ? "具体结论复盘" : context ? "阅读背景记录" : reviewRecord ? "追加复核记录" : feedback ? "用户反馈" : reportLabel ?? "解读快照"}</strong>
     <time dateTime={record.createdAt}>{formatDateTime(record.createdAt)}</time></summary>
     {open && text === null && !error ? <p role="status">正在打开完整解读…</p> : null}
     {open && error ? <p role="alert">{error}</p> : null}
@@ -74,6 +89,11 @@ export function ReadingSavedRecord({ record, relatedRecords = EMPTY_RECORDS, onA
       onExportThread={(body) => setArtifact({ blob: new Blob([body], { type: "text/markdown;charset=utf-8" }), filename: `hakimi-feedback-review-${record.id}.md`,
         title: "反馈与追加复核", description: "包含原反馈及按顺序追加的个人复核原文。", sharePolicy: "blocked_sensitive" })} /> : null}
     {open && bundle ? <>
+      {explanation.error ? <p role="alert">{explanation.error}</p> : explanation.index ? <details className="reading-feedback-original"
+        open={explanationOpen?.body === record.body && explanationOpen.open} onToggle={event => setExplanationOpen({ body: record.body, open: event.currentTarget.open })}>
+        <summary>按当时的专题与依据阅读</summary>
+        {explanationOpen?.body === record.body && explanationOpen.open ? <ReadingSavedExplanation key={record.body} index={explanation.index}/> : null}
+      </details> : <p>这份报告当时没有保存逐条结论与依据索引，以下继续显示当时原文；不使用新版内容倒填。</p>}
       <ReadingReportText text={bundle.reading} />
       <details open={archiveOpen?.body === record.body && archiveOpen.open} className="reading-feedback-original" onToggle={(event) => setArchiveOpen({ body: record.body, open: event.currentTarget.open })}>
         <summary>查看已保存的完整档案</summary>
@@ -82,5 +102,6 @@ export function ReadingSavedRecord({ record, relatedRecords = EMPTY_RECORDS, onA
     </> : text !== null && !bundle ? parsedFeedback?.kind === "feedback" || parsedFeedback?.kind === "review"
       ? <details className="reading-feedback-original"><summary>查看保存原文与来源</summary><pre tabIndex={0} aria-label="已保存记录全文">{text.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f\u061c\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]/gu, " ")}</pre></details>
       : <pre tabIndex={0} aria-label="已保存记录全文">{text.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f\u061c\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]/gu, " ")}</pre> : null}
+    {open && text !== null && !bundle && allowBundle ? <p>这份原记录当时未保存可读取的专题依据索引，继续保留原文。</p> : null}
   </details>{artifact ? <PreparedFileDeliveryDialog presentation="reading" artifact={artifact} exportPort={webReportExportPort} onClose={() => setArtifact(null)} /> : null}</>;
 }

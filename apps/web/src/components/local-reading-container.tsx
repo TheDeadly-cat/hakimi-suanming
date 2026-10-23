@@ -43,7 +43,11 @@ import { annualEventCompositionChoices } from "../lib/local-annual-event-composi
 import { buildAnnualMonthStory, LOCAL_ANNUAL_MONTH_STORY_VERSION, type LocalAnnualMonthStory } from "../lib/local-annual-month-story";
 import { annualMonthStoryEntries, annualMonthStorySubjectId, annualMonthStoryFeedbackText, annualMonthStoryFeedbackVersions } from "../lib/local-annual-month-story-record";
 import { buildLocalReadingFeedback, LOCAL_READING_FEEDBACK_TAG, LOCAL_READING_SNAPSHOT_TAG, type LocalReadingAnnualScenarios } from "../lib/local-reading-record";
-import { buildLocalReadingReport } from "../lib/local-reading-edition";
+import { buildLocalReadingReport, LOCAL_READING_EDITION_VERSION } from "../lib/local-reading-edition";
+import { buildReadingExplanationIndex, type ReadingTimeUncertainty } from "../lib/reading-explanation-index";
+import { ReadingExplanationWorkbench } from "./reading-explanation-workbench";
+import { ReadingCaseReviewPanel } from "./reading-case-review-panel";
+import { createReadingMonthPreparation } from "../lib/reading-month-preparation";
 import { buildBriefReadingReport } from "../lib/brief-reading-report";
 import { prepareKeyMonthYear, type PreparedKeyMonthYear, type KeyMonthEventSources } from "../lib/key-month-event-source";
 import { KEY_MONTH_EVENT_TENDENCIES_VERSION } from "../lib/key-month-event-tendencies";
@@ -84,6 +88,7 @@ function LocalReadingContent(props: Props) {
   }, [revision]);
   const assessment = assessmentResult.value;
   const [records, setRecords] = useState<ResearchNoteRecord[]>([]);
+  const [caseRecords, setCaseRecords] = useState<ResearchNoteRecord[]>([]);
   const [recordsError, setRecordsError] = useState<string | null>(null);
   const [recordsLoading, setRecordsLoading] = useState(true);
   const comprehensiveResult = useMemo(() => {
@@ -417,6 +422,7 @@ function LocalReadingContent(props: Props) {
     try {
       const notes = await researchRepository.listResearchNotesByCase(revision.caseId, { includeArchived: true });
       if (!active.current || version !== readVersion.current) return;
+      setCaseRecords(notes);
       setRecords(notes.filter((note) => note.anchor.kind === "revision" && note.anchor.revisionId === revision.id
         && (note.tags.includes(LOCAL_READING_SNAPSHOT_TAG) || note.tags.includes(LOCAL_READING_FEEDBACK_TAG) || note.tags.includes(LOCAL_READING_CONTEXT_TAG)
           || parseReadingContext(note.body).kind !== "legacy")));
@@ -560,8 +566,6 @@ function LocalReadingContent(props: Props) {
     || Boolean(selectedAnnual && monthly && !annualMonthStory && !storyError && !contextError && !contextualResult.error);
   const requireCompleteReading = () => {
     if (reportLoading) throw new Error("完整解读仍在整理，请完成后再保存或导出。");
-    if (keyMonthLoading) throw new Error("正在逐年整理真实流月，请完成后再保存或导出。");
-    if (keyMonthError) throw new Error(keyMonthError);
     const error = comprehensiveResult.error ?? annualError ?? lifeError ?? monthlyError ?? personalError ?? contextError ?? contextualResult.error ?? storyError;
     if (error) throw new Error(error);
     if (stageAnnualRange?.status === "unavailable") throw new Error("所选大运没有可完整阅读的年度范围，不能把其他年份保存为这步大运的解读。");
@@ -580,8 +584,7 @@ function LocalReadingContent(props: Props) {
     } catch (reason) { return { value: null, error: safeVisibleErrorMessage(reason, "主报告尚未整理完成，可展开查看现有解读。") }; }
   }, [reportLoading, assessment, synthesis, annual, life, annualEvents, annualLifeStories, personalReadingReady, revision, comprehensive,
     lifeStageStory, lifeStageYears, monthly, monthlyDomains, annualScenarios, timeline, annualDomains, annualMonthStory, personalReading, contextual, priorities]);
-  // Every year in the complete reading gets its own calculated months, even
-  // when no event was selected for the shorter event-category overview.
+  // Reading requests one year; a complete save/export still prepares every year.
   const plannedKeyYears = [...new Set(baseBriefResult.value?.years.map(year => year.year) ?? [])].sort((a, b) => a - b);
   const plannedKeyYearsKey = JSON.stringify(plannedKeyYears);
   const keyMonthRecords = records.filter(record => record.tags.includes(LOCAL_READING_FEEDBACK_TAG) || record.tags.includes(LOCAL_READING_REVIEW_TAG));
@@ -596,30 +599,28 @@ function LocalReadingContent(props: Props) {
   const keyMonthSources = useMemo<KeyMonthEventSources | null>(() => assessment && annual && annualDomains && annualEvents && annualLifeStories
     ? { revision, assessment, annual, annualDomains, annualEvents, annualLifeStories, contextual, legacySource: personalLegacySource } : null,
     [revision, assessment, annual, annualDomains, annualEvents, annualLifeStories, contextual, personalLegacySource]);
+  const monthPreparation = useMemo(() => keyMonthSources && keyMonthRequestKey
+    ? createReadingMonthPreparation(JSON.parse(plannedKeyYearsKey) as number[], async year => {
+      // Let the progress state paint and input events run between calculated years.
+      await new Promise<void>(resolve => setTimeout(resolve, 0));
+      return prepareKeyMonthYear(keyMonthSources, year, keyMonthRecords);
+    }) : null,
+    [keyMonthSources, keyMonthRequestKey, plannedKeyYearsKey]);
+  const [completePreparing, setCompletePreparing] = useState(false);
   useEffect(() => {
-    if (!keyMonthRequestKey || !keyMonthSources || !plannedKeyYears.length) return;
-    if (keyMonthResult?.key === keyMonthRequestKey && keyMonthResult.facts === keyMonthFacts && keyMonthResult.ready) return;
-    let current = true, cursor = 0, completed = 0;
-    const years = JSON.parse(plannedKeyYearsKey) as number[], prepared: PreparedKeyMonthYear[] = [];
-    setKeyMonthResult({ key: keyMonthRequestKey, facts: keyMonthFacts, years: [], completed: 0, ready: false, error: null });
-    const work = async () => {
-      while (current && cursor < years.length) {
-        const year = years[cursor++]!;
-        const value = await prepareKeyMonthYear(keyMonthSources, year, keyMonthRecords);
-        if (!current) return;
-        prepared.push(value); completed++;
-        setKeyMonthResult({ key: keyMonthRequestKey, facts: keyMonthFacts, years: [], completed, ready: false, error: null });
-      }
-    };
-    void Promise.all([work(), work()]).then(() => {
-      if (current) setKeyMonthResult({ key: keyMonthRequestKey, facts: keyMonthFacts, years: prepared.sort((a, b) => a.year - b.year), completed, ready: true, error: null });
+    if (!monthPreparation || !plannedKeyYears.includes(queryYear)) return;
+    let current = true;
+    const ready = monthPreparation.ready();
+    setKeyMonthResult({ key: keyMonthRequestKey, facts: keyMonthFacts, years: ready, completed: ready.length, ready: false, error: null });
+    void monthPreparation.read(queryYear).then(() => {
+      const values = monthPreparation.ready();
+      if (current) setKeyMonthResult({ key: keyMonthRequestKey, facts: keyMonthFacts, years: values, completed: values.length, ready: true, error: null });
     }).catch(reason => {
-      if (current) setKeyMonthResult({ key: keyMonthRequestKey, facts: keyMonthFacts, years: [], completed, ready: true,
+      if (current) setKeyMonthResult({ key: keyMonthRequestKey, facts: keyMonthFacts, years: monthPreparation.ready(), completed: monthPreparation.ready().length, ready: true,
         error: safeVisibleErrorMessage(reason, "重点月份暂未整理完成，已保留本命与年度结论。") });
-      current = false;
     });
     return () => { current = false; };
-  }, [keyMonthRequestKey, keyMonthSources, plannedKeyYearsKey, keyMonthFacts]);
+  }, [monthPreparation, keyMonthRequestKey, keyMonthFacts, queryYear, plannedKeyYearsKey]);
   const keyMonthReady = keyMonthResult?.key === keyMonthRequestKey && keyMonthResult.facts === keyMonthFacts && keyMonthResult.ready;
   const keyMonthLoading = !!keyMonthRequestKey && plannedKeyYears.length > 0 && !keyMonthReady;
   const keyMonthError = keyMonthResult?.key === keyMonthRequestKey && keyMonthResult.facts === keyMonthFacts ? keyMonthResult.error : null;
@@ -633,13 +634,27 @@ function LocalReadingContent(props: Props) {
   }, [baseBriefResult, keyMonthYears, assessment, annual, revision, comprehensive, life, lifeStageStory, lifeStageYears, monthly,
     monthlyDomains, annualScenarios, timeline, annualDomains, annualEvents, annualLifeStories, annualMonthStory, personalReading, contextual, synthesis, priorities]);
   const requestFeedback = (id: string) => setFeedbackTarget((previous) => ({ id, requestId: (previous?.requestId ?? 0) + 1 }));
-  const prepareCompleteReport = () => {
+  const [timeUncertainty, setTimeUncertainty] = useState<ReadingTimeUncertainty | undefined>();
+  const explanationGeneratedAt = useMemo(() => new Date().toISOString(), [baseBriefResult.value, timeUncertainty]);
+  const reportInputToken = useMemo(() => ({}), [baseBriefResult.value, monthPreparation, timeUncertainty, queryYear]);
+  const currentReportInput = useRef(reportInputToken);
+  currentReportInput.current = reportInputToken;
+  const explanationResult = useMemo(() => {
+    if (!briefResult.value || !assessment) return { value: null, error: null };
+    try { return { value: buildReadingExplanationIndex({ report: briefResult.value, revision, assessment, synthesis,
+      context: contextual?.contextSource ?? null, generatedAt: explanationGeneratedAt, reportVersion: LOCAL_READING_EDITION_VERSION,
+      timeUncertainty }), error: null }; }
+    catch (reason) { return { value: null, error: safeVisibleErrorMessage(reason, "逐条依据暂未整理完成，原报告仍可阅读。") }; }
+  }, [briefResult.value, revision, assessment, synthesis, contextual, explanationGeneratedAt, timeUncertainty]);
+  // Preserve the topic component while a new year is calculated; its old result
+  // is hidden during the transition, never presented as the requested year.
+  const lastExplanation = useRef(explanationResult.value);
+  if (explanationResult.value) lastExplanation.current = explanationResult.value;
+  const displayedExplanation = explanationResult.value ?? (lastExplanation.current?.sourceSnapshot.revisionId === revision.id ? lastExplanation.current : null);
+  const prepareCompleteReport = async () => {
     requireCompleteReading();
     if (!briefResult.value || briefResult.error) throw new Error(briefResult.error ?? "完整主报告仍在整理，请稍后保存。");
-    if (!annual || !keyMonthReady || !keyMonthYears || keyMonthYears.length !== annual.years.length
-      || annual.years.some(year => !keyMonthYears.some(prepared => prepared.year === year.year))) {
-      throw new Error("年度范围内的月份尚未全部核对，请完成后再保存或导出。");
-    }
+    if (!monthPreparation || !annual) throw new Error("年度与月份来源尚未准备好。");
     if (!assessment) throw new Error("当前命局解读尚未生成。");
     if (annualScenariosResult.error) throw new Error(annualScenariosResult.error);
     if (timelineResult.error) throw new Error(timelineResult.error);
@@ -648,13 +663,22 @@ function LocalReadingContent(props: Props) {
     if (annualEventsResult.error) throw new Error(annualEventsResult.error);
     if (annual && !annualEvents) throw new Error("年度应事情境仍在整理，请稍后保存完整解读。");
     if (synthesisResult.error || prioritiesResult.error) throw new Error(synthesisResult.error ?? prioritiesResult.error!);
-    return buildLocalReadingReport(assessment, annual, { sourceRevision: revision, comprehensive, life, lifeStageStory, lifeStageYears, monthly, monthlyDomains,
-      annualScenarios, timeline, annualDomains, annualEvents, annualLifeStories, annualMonthStory, personalReading: requirePersonalReading(),
-      contextual: requireContextualReading(), synthesis, priorities, keyMonthYears });
-  };
-  const exportCompleteReport = (format: "reading" | "archive") => {
+    setCompletePreparing(true);
     try {
-      const report = prepareCompleteReport();
+      const allKeyMonths = await monthPreparation.all();
+      if (!active.current || currentReportInput.current !== reportInputToken) throw new Error("准备期间命盘、背景或年份已变化，本次没有保存旧请求；请在当前页面重新操作。");
+      if (allKeyMonths.length !== annual.years.length || annual.years.some(year => !allKeyMonths.some(prepared => prepared.year === year.year))) {
+        throw new Error("年度范围内的月份尚未全部核对，未生成不完整报告。");
+      }
+      setKeyMonthResult({ key: keyMonthRequestKey, facts: keyMonthFacts, years: allKeyMonths, completed: allKeyMonths.length, ready: true, error: null });
+      return buildLocalReadingReport(assessment, annual, { sourceRevision: revision, comprehensive, life, lifeStageStory, lifeStageYears, monthly, monthlyDomains,
+      annualScenarios, timeline, annualDomains, annualEvents, annualLifeStories, annualMonthStory, personalReading: requirePersonalReading(),
+      contextual: requireContextualReading(), synthesis, priorities, keyMonthYears: allKeyMonths, explanationGeneratedAt, explanationTimeUncertainty: timeUncertainty });
+    } finally { if (active.current) setCompletePreparing(false); }
+  };
+  const exportCompleteReport = async (format: "reading" | "archive") => {
+    try {
+      const report = await prepareCompleteReport();
       setExportArtifact({ blob: new Blob([report[format]], { type: "text/markdown;charset=utf-8" }),
         filename: `hakimi-${format === "reading" ? "reading" : "reading-archive"}-${revision.id}.md`,
         title: format === "reading" ? "完整命理解读" : "完整判断与依据档案",
@@ -670,7 +694,7 @@ function LocalReadingContent(props: Props) {
     <p>{assessmentResult.error}</p><button className="secondary-action" onClick={props.onOpenDetails}>查看原始命盘</button></section>;
   return <PersonalReadingProvider reading={personalReading} onAdopt={props.readOnly ? undefined : adoptPersonalRevision}>
     <ContextualReadingProvider readings={contextual?.readings ?? []} contextRef={contextual?.contextSource.reference} referenceYear={contextual?.referenceYear} onFeedback={props.readOnly ? undefined : requestFeedback}>
-    <div className="local-reading-document" aria-busy={reportLoading || keyMonthLoading} onClickCapture={event => {
+    <div className="local-reading-document" aria-busy={reportLoading || completePreparing} onClickCapture={event => {
       const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href^="#reading-"]') : null;
       const href = link?.getAttribute("href");
       if (!href) return;
@@ -691,21 +715,27 @@ function LocalReadingContent(props: Props) {
     {synthesisResult.error ? <p className="reading-readonly" role="alert">{synthesisResult.error}</p> : null}
     {prioritiesResult.error ? <p className="reading-readonly" role="alert">{prioritiesResult.error}</p> : null}
     {briefResult.error ? <p className="reading-readonly" role="alert">{briefResult.error}</p> : null}
-    {keyMonthLoading ? <p className="reading-readonly" role="status">正在逐年整理关键月份（{keyMonthResult?.key === keyMonthRequestKey ? keyMonthResult.completed : 0}/{plannedKeyYears.length}），本命与年度结论可先阅读。</p> : null}
+    {explanationResult.error ? <p className="reading-readonly" role="alert">{explanationResult.error}</p> : null}
+    {keyMonthLoading ? <p className="reading-readonly" role="status">正在整理 {queryYear} 年的关键月份，本命与年度结论可先阅读。</p> : null}
+    {completePreparing ? <p className="reading-readonly" role="status">正在补齐完整报告所需的 {plannedKeyYears.length} 年月份，完成核对后才会保存或导出。</p> : null}
     {keyMonthError ? <p className="reading-readonly" role="alert">{keyMonthError}</p> : null}
     <ReadingSectionNavigation canGiveFeedback={!props.readOnly} />
     <ChartReadingWorkbench revision={revision} caseName={props.caseName} assessment={assessment}
       comprehensive={comprehensive} synthesis={synthesis} briefReport={briefResult.value} priorities={priorities} annualEvents={annualEvents}
+      explanationPanel={displayedExplanation ? <ReadingExplanationWorkbench index={displayedExplanation} revision={revision}
+        records={caseRecords} onTimeUncertaintyChange={setTimeUncertainty} onRequestYear={selectYear} monthsLoading={keyMonthLoading}
+        loading={!explanationResult.value || reportLoading} /> : undefined}
+      onPrepareCompleteReading={() => { void prepareCompleteReport().catch(reason => setExportError(safeVisibleErrorMessage(reason, "完整年月暂未准备好，已保留当前专题。"))); }}
       annualLifeStories={navigationStories} annualLifeStoryPersonalSources={annualLifePersonalResult.value}
-      extraFeedbackChoices={feedbackChoices} feedbackTarget={feedbackTarget} reportLoading={reportLoading || keyMonthLoading}
+      extraFeedbackChoices={feedbackChoices} feedbackTarget={feedbackTarget} reportLoading={reportLoading || completePreparing}
       selectedYear={queryYear} onSelectYear={selectYear}
       annualOutlook={annual} lifeOutlook={life} timeline={timeline} annualLoading={annualLoading} annualError={annualError}
       decorativeImageUrl={mountainsUrl} onOpenDetails={props.onOpenDetails} onOpenTransit={props.onOpenTransit}
       onEditBirthData={props.readOnly ? undefined : props.onEditBirthData}
-      onExportReading={() => exportCompleteReport("reading")}
-      onExportArchive={() => exportCompleteReport("archive")}
+      onExportReading={() => { void exportCompleteReport("reading"); }}
+      onExportArchive={() => { void exportCompleteReport("archive"); }}
       onSaveReading={props.readOnly ? undefined : () => saveRecord(async () => {
-        const report = prepareCompleteReport();
+        const report = await prepareCompleteReport();
         return packReadingSnapshot(await encodeReadingReportBundle(report));
       }, LOCAL_READING_SNAPSHOT_TAG)}
       onAddFeedback={props.readOnly ? undefined : (draft) => {
@@ -741,6 +771,9 @@ function LocalReadingContent(props: Props) {
       ? <p className="outlook-period">当前年份与年龄范围没有可套用的职业或关系身份，以上保留完整通用解读。</p> : null}
     </details>
     {exportArtifact ? <PreparedFileDeliveryDialog presentation="reading" artifact={exportArtifact} exportPort={webReportExportPort} onClose={() => setExportArtifact(null)} /> : null}
+    <details className="reading-extended-details" id="reading-case-review"><summary>围绕一条已保存结论复盘</summary>
+      <ReadingCaseReviewPanel caseId={revision.caseId} records={caseRecords} readOnly={props.readOnly || recordsLoading || !!recordsError} onReload={refreshRecords} />
+    </details>
     <section className="reading-saved-records" id="reading-records" tabIndex={-1} aria-labelledby="reading-saved-title">
       <div><h2 id="reading-saved-title">这张命盘的已存报告</h2>
         <div><AppLink className="text-link" href={`/reports?case=${encodeURIComponent(revision.caseId)}`}>前往我的报告</AppLink><button className="text-button" onClick={() => void refreshRecords()}>重新读取记录</button></div></div>

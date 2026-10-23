@@ -1,6 +1,6 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { calculateChart } from "@hakimi/bazi-core";
 import { storedRevisionRecordSchema } from "@hakimi/contracts";
 import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
@@ -17,6 +17,10 @@ import { LOCAL_PERSONAL_READING_VERSION, type LocalPersonalReading } from "../li
 import { ChartReadingWorkbench } from "./chart-reading-workbench";
 import { ReadingPrioritiesPanel } from "./reading-priorities-panel";
 import { PersonalReadingProvider } from "./personal-reading-note";
+import { buildBaziComprehensiveReading } from "../../../../packages/bazi-interpretation/src/comprehensive-reading";
+import { buildReadingSynthesis } from "../lib/local-reading-synthesis";
+import { buildBriefReadingReport } from "../lib/brief-reading-report";
+import { revealReadingSection } from "./reading-section-navigation";
 
 async function fixture(date: string, sex: "male" | "unspecified") {
   const chart = await calculateChart({ schemaVersion: "1.0.0", calendarType: "gregorian", date, time: "08:26", timePrecision: "exact_minute", timeZone: "Asia/Shanghai", sex,
@@ -25,11 +29,23 @@ async function fixture(date: string, sex: "male" | "unspecified") {
   const assessment = buildBaziPreliminaryAssessment(revision), annual = await buildLocalAnnualOutlook(revision, assessment, 2028);
   const annualDomains = { version: ANNUAL_DOMAIN_READING_VERSION, revisionId: revision.id, chartResultHash: revision.manifest.resultHash, includeHour: assessment.sourceBinding.includeHour,
     startYear: annual.startYear, endYear: annual.endYear, years: annual.years.map((year) => buildAnnualDomainReading({ revision, assessment, year })) };
-  return { revision, assessment, annual, priorities: buildReadingPriorities({ revision, annual, annualDomains }),
+  return { revision, assessment, annual, annualDomains, priorities: buildReadingPriorities({ revision, annual, annualDomains }),
     events: buildReadingAnnualEvents({ revision, assessment, annual, annualDomains }) };
 }
 let b: Awaited<ReturnType<typeof fixture>>, unknown: Awaited<ReturnType<typeof fixture>>;
-beforeAll(async () => { [b, unknown] = await Promise.all([fixture("1995-05-18", "male"), fixture("1995-08-18", "unspecified")]); }, 60_000);
+function backgroundFixture(value: Awaited<ReturnType<typeof fixture>>) {
+  const comprehensive = buildBaziComprehensiveReading(value.revision, value.assessment);
+  const synthesis = buildReadingSynthesis({ revision: value.revision, assessment: value.assessment, comprehensive, annual: value.annual });
+  const brief = buildBriefReadingReport(value.assessment, value.annual, { sourceRevision: value.revision, comprehensive, synthesis,
+    annualDomains: value.annualDomains, annualEvents: value.events });
+  if (!brief) throw new Error("Synthetic main report must be available for deferred background tests");
+  return { comprehensive, synthesis, brief };
+}
+let bBackground: ReturnType<typeof backgroundFixture>;
+beforeAll(async () => {
+  [b, unknown] = await Promise.all([fixture("1995-05-18", "male"), fixture("1995-08-18", "unspecified")]);
+  bBackground = backgroundFixture(b);
+}, 60_000);
 
 async function card(year: number, branch?: HTMLElement) {
   const element = within(branch ?? screen.getByRole("region", { name: "关键年份先读" })).getByRole("article", { name: `${year}年先读`, hidden: true });
@@ -71,6 +87,77 @@ function personal(subjectId: string, originalConclusion: string, personalText: s
 }
 
 describe("priority-year event reading on actual charts", () => {
+  it("keeps the explanation panel mounted across a transient missing brief report while a year changes", () => {
+    const props = { revision: b.revision, caseName: "合成年份切换", assessment: b.assessment, annualOutlook: b.annual,
+      priorities: b.priorities, annualEvents: b.events };
+    const panel = <input aria-label="专题内部阅读状态" defaultValue="初始问题"/>;
+    const view = render(<ChartReadingWorkbench {...props} briefReport={bBackground.brief} explanationPanel={panel}/>);
+    const input = screen.getByLabelText("专题内部阅读状态");
+    fireEvent.change(input, { target: { value: "已经选择的关系问题" } });
+    view.rerender(<ChartReadingWorkbench {...props} briefReport={null} explanationPanel={panel} reportLoading/>);
+    expect(screen.getByLabelText("专题内部阅读状态")).toBe(input); expect(input).toHaveProperty("value", "已经选择的关系问题");
+    expect(screen.queryByText("展开完整本命阅读")).toBeNull();
+    expect(view.container.querySelector(".reading-brief-background .reading-priority-years")).toBeNull();
+    view.rerender(<ChartReadingWorkbench {...props} briefReport={bBackground.brief} explanationPanel={panel}/>);
+    expect(screen.getByLabelText("专题内部阅读状态")).toBe(input); expect(input).toHaveProperty("value", "已经选择的关系问题");
+    expect(screen.getByText("展开完整本命阅读")).toBeTruthy();
+  });
+  it("does not mount the large background while preparing or initially folded, then retains nested comparison state after reopening", async () => {
+    const props = { revision: b.revision, caseName: "合成延迟阅读", assessment: b.assessment, annualOutlook: b.annual,
+      priorities: b.priorities, annualEvents: b.events, synthesis: bBackground.synthesis, comprehensive: bBackground.comprehensive };
+    const view = render(<ChartReadingWorkbench {...props} reportLoading/>);
+    const outer = view.container.querySelector<HTMLDetailsElement>(".reading-brief-background")!;
+    expect(outer.open).toBe(false); expect(outer.querySelector(".reading-priority-years")).toBeNull();
+    expect(outer.querySelector(".reading-synthesis-sections")).toBeNull();
+    view.rerender(<ChartReadingWorkbench {...props} briefReport={bBackground.brief} explanationPanel={<p>主报告可先阅读</p>}/>);
+    expect(outer.open).toBe(false); expect(outer.querySelector(".reading-priority-years")).toBeNull();
+    expect(screen.getByText("主报告可先阅读")).toBeTruthy();
+    await userEvent.click(outer.querySelector("summary")!);
+    await waitFor(() => expect(outer.querySelector(".reading-priority-years")).not.toBeNull());
+    await userEvent.click(within(outer).getByText("展开重点年份的原判断与细分事项"));
+    const comparison = within(outer).getByText(`并列比较两年 · ${b.priorities.branches[0]!.label}`).closest("details")!;
+    await userEvent.click(comparison.querySelector("summary")!);
+    const first = within(comparison).getByLabelText("比较年份一"), second = within(comparison).getByLabelText("比较年份二");
+    await userEvent.selectOptions(first, "2030"); await userEvent.selectOptions(second, "2032");
+    await userEvent.click(outer.querySelector("summary")!); expect(outer.open).toBe(false);
+    expect(within(comparison).getByLabelText("比较年份一")).toBe(first);
+    await userEvent.click(outer.querySelector("summary")!); expect(outer.open).toBe(true);
+    expect(within(comparison).getByLabelText("比较年份一")).toBe(first); expect(first).toHaveProperty("value", "2030");
+    expect(second).toHaveProperty("value", "2032"); expect(comparison.open).toBe(true);
+  });
+  it("resolves an existing synthesis hash after lazy mounting and reopens through the original full-report link", async () => {
+    const oldUrl = window.location.pathname + window.location.search + window.location.hash;
+    const section = bBackground.synthesis.sections[0]!, targetId = `reading-${section.id}`;
+    try {
+      window.history.replaceState(null, "", `#${targetId}`);
+      const props = { revision: b.revision, caseName: "合成锚点阅读", assessment: b.assessment, annualOutlook: b.annual,
+        priorities: b.priorities, annualEvents: b.events, synthesis: bBackground.synthesis, briefReport: bBackground.brief,
+        explanationPanel: <p>合成主报告</p> };
+      const view = render(<ChartReadingWorkbench {...props} reportLoading/>);
+      expect(document.getElementById(targetId)?.dataset.readingLazyAnchor).toBe("true");
+      view.rerender(<ChartReadingWorkbench {...props}/>);
+      await waitFor(() => expect(document.getElementById(targetId)?.dataset.readingLazyAnchor).toBeUndefined());
+      const target = document.getElementById(targetId)!;
+      expect(target).not.toBeNull(); expect(target.closest("details:not([open])")).toBeNull();
+      expect(target.textContent).toContain(section.title);
+      const outer = view.container.querySelector<HTMLDetailsElement>(".reading-brief-background")!;
+      await userEvent.click(outer.querySelector("summary")!); expect(outer.open).toBe(false);
+      await userEvent.click(screen.getByRole("link", { name: "展开逐年判断与完整依据" }));
+      await waitFor(() => expect(outer.open).toBe(true));
+      expect(document.getElementById(targetId)).toBe(target);
+    } finally { window.history.replaceState(null, "", oldUrl); }
+  });
+  it("keeps feedback targeting and typed experience independent of the unmounted background", async () => {
+    const props = { revision: b.revision, caseName: "合成反馈定位", assessment: b.assessment, annualOutlook: b.annual,
+      priorities: b.priorities, annualEvents: b.events, briefReport: bBackground.brief, onAddFeedback: vi.fn() };
+    const view = render(<ChartReadingWorkbench {...props} feedbackTarget={{ id: "natal-overview", requestId: 1 }}/>);
+    expect(revealReadingSection("reading-feedback")).toBe(screen.getByRole("region", { name: "本次反馈" }));
+    fireEvent.change(screen.getByLabelText("实际情况"), { target: { value: "既有反馈草稿不应丢失" } });
+    view.rerender(<ChartReadingWorkbench {...props} feedbackTarget={{ id: "annual-2030", requestId: 2 }}/>);
+    await waitFor(() => expect(screen.getByLabelText("要反馈的原结论")).toHaveProperty("value", "annual-2030"));
+    expect(screen.getByLabelText("实际情况")).toHaveProperty("value", "既有反馈草稿不应丢失");
+    expect(view.container.querySelector(".reading-brief-background .reading-priority-years")).toBeNull();
+  });
   it("shows B2030's trial and B2032's combined closeout before full domains through the workbench", async () => {
     const before = JSON.stringify(b);
     const year2030 = b.events.years.find((year) => year.year === 2030)!, year2032 = b.events.years.find((year) => year.year === 2032)!;

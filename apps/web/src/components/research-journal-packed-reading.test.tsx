@@ -8,6 +8,7 @@ import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
 import { packReadingSnapshot, READING_SNAPSHOT_ENVELOPE } from "../lib/local-reading-snapshot-codec";
 import { ResearchJournal } from "./research-journal";
 import { resetResearchJournalMutationCoordinatorForTests } from "./research-journal-mutation-coordinator";
+import { LOCAL_READING_CASE_REVIEW_TAG } from "../lib/reading-case-review";
 
 describe("research journal complete reading records", () => {
   it("reads a packed snapshot without offering its envelope to the ordinary editor, while ordinary notes remain editable", async () => {
@@ -26,6 +27,10 @@ describe("research journal complete reading records", () => {
         body, tags: ["本地解读快照"], sourceRefs: [], lifecycle: "active" });
       await repository.createResearchNote({ caseId: revision.caseId, anchor: { kind: "revision", revisionId: revision.id },
         body: "普通研究笔记可编辑", tags: [], sourceRefs: [], lifecycle: "active" });
+      const taggedReview = await repository.createResearchNote({ caseId: revision.caseId, anchor: { kind: "revision", revisionId: revision.id },
+        body: "迁入的复盘原文，只能另行追加更正。", tags: [LOCAL_READING_CASE_REVIEW_TAG], sourceRefs: [], lifecycle: "active" });
+      const markerReview = await repository.createResearchNote({ caseId: revision.caseId, anchor: { kind: "revision", revisionId: revision.id },
+        body: "<!-- hakimi.reading-case-review/99\n{}\n-->\n\n尚不支持的历史复盘格式。", tags: [], sourceRefs: [], lifecycle: "active" });
       vi.spyOn(researchRepository, "readResearchJournalSnapshot").mockImplementation((...args) => repository.readResearchJournalSnapshot(...args));
       const update = vi.spyOn(researchRepository, "updateResearchNote").mockImplementation((...args) => repository.updateResearchNote(...args));
       const view = render(<ResearchJournal caseId={revision.caseId} revision={revision} selection={{ pillar: "day", field: "stem" }} />);
@@ -36,6 +41,12 @@ describe("research journal complete reading records", () => {
       expect(packedArticle.textContent?.includes(READING_SNAPSHOT_ENVELOPE)).toBe(false);
       await userEvent.click(within(packedArticle).getByText("解读快照", { exact: true }));
       await waitFor(() => expect(packedArticle.querySelector("pre")?.textContent === plain).toBe(true));
+      for (const original of [taggedReview, markerReview]) {
+        const reviewArticle = [...view.container.querySelectorAll("pre")].find(element => element.textContent === original.body)!.closest("article")!;
+        expect(within(reviewArticle).queryByRole("button", { name: "编辑笔记" })).toBeNull();
+        expect(reviewArticle.textContent).toContain("围绕原结论追加一条记录");
+        expect(within(reviewArticle).getByRole("button", { name: "归档笔记" })).toBeTruthy();
+      }
       const ordinaryArticle = screen.getByText("普通研究笔记可编辑", { exact: true }).closest("article")!;
       await userEvent.click(within(ordinaryArticle).getByRole("button", { name: "编辑笔记" }));
       expect((screen.getByRole("textbox", { name: /Markdown 笔记/ }) as HTMLTextAreaElement).value).toBe("普通研究笔记可编辑");

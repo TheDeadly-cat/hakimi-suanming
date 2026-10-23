@@ -15,8 +15,9 @@ import { buildLocalReadingAgeContext, type LocalReadingAgeContext } from "./loca
 import { readingContextDraftSchema, READING_CONTEXT_FORMAT, type ReadingContextWork, type ReadingContextRelationship } from "./local-reading-context";
 import { CONTEXTUAL_READING_VERSION } from "./local-contextual-reading";
 import { createAnnualRelationshipTimingBuilder } from "./annual-relationship-timing";
+import { CONDITIONAL_CONTENT_RULES_VERSION, type ConditionalContentAssessment } from "./conditional-content-rules";
 
-export const PLAIN_TEN_YEAR_READING_VERSION = "hakimi.plain-ten-year-reading/0.3.1" as const;
+export const PLAIN_TEN_YEAR_READING_VERSION = "hakimi.plain-ten-year-reading/0.4.0" as const;
 export interface PlainTenYearMonthWindow {
   id: string; branchId: string; annualSegmentId: string;
   startInstant: string; endExclusiveInstant: string;
@@ -30,7 +31,7 @@ export interface PlainTenYearMonthWindow {
     startInstant: string; endExclusiveInstant: string; ageLabel: string;
     topics: { domain: "career" | "wealth" | "relationship"; title: string; text: string; summary: string;
       origin: "calculated" | "contextual" | "personal"; sourceSubjects: string[]; personalTextIds: string[];
-      facts: ConcretePeriodFact[]; signature: string; sentences:ConcreteLifeSentence[] }[]; annualContrast: string; recurringEventIds:string[]; directionNote:string }[];
+      facts: ConcretePeriodFact[]; signature: string; sentences:ConcreteLifeSentence[]; contentRules?:ConditionalContentAssessment }[]; annualContrast: string; recurringEventIds:string[]; directionNote:string }[];
   sourceSubjects: string[]; personalTextIds: string[];
 }
 export interface PlainTenYearEvent {
@@ -45,7 +46,7 @@ export interface PlainTenYearSegment {
   id: string; branchId: string; startInstant: string; endExclusiveInstant: string; ageLabel: string;
   headline: string; judgmentText: string; origin: "calculated" | "contextual" | "personal";
   domains: BriefReadingYearDomain[]; events: PlainTenYearEvent[]; monthWindows: PlainTenYearMonthWindow[];
-  domainEvidence:{domain:"career"|"wealth"|"relationship";sentences:ConcreteLifeSentence[]}[];mechanisms:ConcreteLifeSentence[];
+  domainEvidence:{domain:"career"|"wealth"|"relationship";sentences:ConcreteLifeSentence[];contentRules?:ConditionalContentAssessment}[];mechanisms:ConcreteLifeSentence[];
   monthCoverageText: string; sourceSubjects: string[]; personalTextIds: string[];
 }
 export interface PlainTenYearReading {
@@ -249,7 +250,7 @@ export function buildPlainTenYearReading(input: BuildPlainTenYearReadingInput): 
             const prose = buildConcretePeriodProse({judgment:actual.judgment,domain:domain.domain,age,work,verdict:domain.verdict,task:extras.comprehensive?.patternDiagnosis?.wealthResourceTask,lifeSignals});
             domain.headline=prose.headline;domain.text=prose.text;
             annualFacts.push(...prose.facts);
-            domainEvidence.push({domain:domain.domain,sentences:prose.sentences??[]});
+            domainEvidence.push({domain:domain.domain,sentences:prose.sentences??[],contentRules:prose.contentRules});
           }
           domain.showInBrief=true;
         }
@@ -279,7 +280,7 @@ export function buildPlainTenYearReading(input: BuildPlainTenYearReadingInput): 
             return { domain: domain.id, title: monthTitles[domain.id], text: ids.length ? personalMessage(ids) : prose.headline,
               summary: ids.length ? personalMessage(ids) : prose.text,
               origin: ids.length ? "personal" : prepared!.reading.contextRef ? "contextual" : "calculated", sourceSubjects, personalTextIds: ids,
-              facts:ids.length||domain.id === "relationship"?[]:prose.facts,signature:ids.length?`personal:${ids.join("|")}`:prose.signature,sentences:ids.length?[]:prose.sentences??[] };
+              facts:ids.length||domain.id === "relationship"?[]:prose.facts,signature:ids.length?`personal:${ids.join("|")}`:prose.signature,sentences:ids.length?[]:prose.sentences??[],contentRules:ids.length?undefined:prose.contentRules };
           });
           const ids = unique(topics.flatMap(topic => topic.personalTextIds));
           const effect = ids.length ? null : original.judgment.axes.find(axis => axis.axis === original.judgment.primaryAxis)?.effect ?? null;
@@ -314,6 +315,13 @@ export function buildPlainTenYearReading(input: BuildPlainTenYearReadingInput): 
           // the full month reading; weak monthly possibilities must not turn
           // every unsupported year into the same list of life events.
           if (!ids.length && ["none", "not_applicable"].includes(event.level)) continue;
+          // An omitted domain sentence is not evidence that its event is
+          // eligible. Keep the same exact policy at this independent-event
+          // entry point, before linking a month to the annual claim. Original
+          // signals remain in the source report; adopted text takes priority.
+          const eventPolicy = domainEvidence.find(domain => domain.domain === event.original.domain)
+            ?.contentRules?.eventPolicies.find(policy => policy.eventId === event.original.id);
+          if (!ids.length && eventPolicy?.allowed !== true) continue;
           const selections = prepared ? selectKeyMonthEvents(prepared.reading, { category: event.category, branchId: actual.branchId,
             startInstant: row.startInstant, endExclusiveInstant: row.endExclusiveInstant, limit: 1 }) : [];
           const months = selections.map(selection => {
@@ -409,6 +417,6 @@ export function buildPlainTenYearReading(input: BuildPlainTenYearReadingInput): 
     }
   }
   if (gaps.length) out.push("覆盖缺口：", ...unique(gaps));
-  return { version: PLAIN_TEN_YEAR_READING_VERSION, sourceBinding, sourceVersions: unique([PLAIN_TEN_YEAR_READING_VERSION,CONCRETE_PERIOD_PROSE_VERSION, ...report.sourceVersions]),
+  return { version: PLAIN_TEN_YEAR_READING_VERSION, sourceBinding, sourceVersions: unique([PLAIN_TEN_YEAR_READING_VERSION,CONCRETE_PERIOD_PROSE_VERSION,CONDITIONAL_CONTENT_RULES_VERSION, ...report.sourceVersions]),
     coverageText, scopeText:[scopeText,recurringText].filter(Boolean).join(" "), branches, personalTexts, gaps: unique(gaps), bodyText: out.join("\n\n") };
 }

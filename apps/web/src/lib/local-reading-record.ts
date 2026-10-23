@@ -32,6 +32,7 @@ import { describeLifeStageYears } from "./local-life-stage-years-record";
 import type { LocalReadingAnnualLifeStories } from "./annual-life-story";
 import { describeReadingAnnualLifeStories } from "./annual-life-story-record";
 import type { PreparedKeyMonthYear } from "./key-month-event-source";
+import type { ReadingTimeUncertainty } from "./reading-explanation-index";
 
 export const LOCAL_READING_SNAPSHOT_TAG = "本地解读快照";
 export const LOCAL_READING_FEEDBACK_TAG = "解读反馈";
@@ -47,6 +48,8 @@ export interface LocalReadingAnnualScenarios {
   years: { year: number; transitNodeRef: TransitNodeRef | null; scenarios: AnnualEventScenario[] }[];
 }
 export interface LocalReadingSnapshotExtras {
+  explanationGeneratedAt?: string;
+  explanationTimeUncertainty?: ReadingTimeUncertainty;
   keyMonthYears?: PreparedKeyMonthYear[] | null;
   sourceRevision?: RevisionRecord;
   synthesis?: LocalReadingSynthesis | null;
