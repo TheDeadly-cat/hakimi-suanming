@@ -5,6 +5,7 @@ import { canonicalizeStrengthTenGod, strengthTenGodGroup } from "./strength-poli
 import { strengthElementForStem, type PillarPosition } from "./strength-assessment-core";
 import { natalRelationshipRole, natalFamilyHeadline, relationshipInteractionLife } from "./natal-relationship-life-prose";
 import { NATAL_RELATIONSHIP_SOURCES, NATAL_RELATIONSHIP_SOURCES_VERSION } from "./natal-relationship-sources";
+import { NATAL_READING_RULE_APPLICATIONS_VERSION, NATAL_READING_PROVENANCE_LIMIT, type NatalReadingRuleApplication } from "./natal-reading-rule-application";
 
 export const NATAL_RELATIONSHIP_FOUNDATION_VERSION = "hakimi.natal-relationship-foundation/0.2.0" as const;
 export interface NatalRelationshipOccurrence {
@@ -25,6 +26,7 @@ export interface NatalRelationshipInteraction {
 export interface NatalRelationshipText {
   headline: string; verdict: string; paragraphs: string[]; strengths: string[]; cautions: string[];
   suggestions: string[]; evidence: string[]; sourceIds: string[];
+  ruleApplications?: NatalReadingRuleApplication[];
 }
 export interface NatalRelationshipFoundation {
   version: typeof NATAL_RELATIONSHIP_FOUNDATION_VERSION;
@@ -34,6 +36,7 @@ export interface NatalRelationshipFoundation {
   interactions: NatalRelationshipInteraction[];
   relationship: NatalRelationshipText; family: NatalRelationshipText;
   sources: PreliminarySource[]; conditions: string[];
+  ruleApplicationsVersion?: typeof NATAL_READING_RULE_APPLICATIONS_VERSION;
 }
 const ORDER: PillarPosition[] = ["year", "month", "day", "hour"];
 const POSITION: Record<PillarPosition, string> = { year: "年柱", month: "月柱", day: "日柱", hour: "时柱" };
@@ -118,13 +121,30 @@ export function buildNatalRelationshipFoundation(revision: RevisionRecord, asses
   const selectedEvidence = unique([`本命关系规则${NATAL_RELATIONSHIP_FOUNDATION_VERSION}；来源资料${NATAL_RELATIONSHIP_SOURCES_VERSION}；初判${assessment.version}。`, ...perspectives.flatMap((p) => p.occurrences.flatMap((o) => o.evidence)), ...dayPalace.evidence,
     ...interactions.map((i) => `${i.scope}：${i.text}；原事实${i.fact.id}；规则${i.fact.ruleId}；算法${i.fact.algorithmId}。`)]);
   const sourceIds = unique([SOURCE.palace, SOURCE.conditions, SOURCE.position, ...perspectives.flatMap((p) => p.sourceIds), ...(interactions.length ? [SOURCE.relations] : [])]);
+  const relationRule = (ruleId: string, title: string, decision: string, support: string[], limitations: string[], ids: string[],
+    selector: string, selection: string, factRefs: string[]): NatalReadingRuleApplication => ({
+    ruleId, title, decision, support: unique(support), limitations: unique([...limitations, NATAL_READING_PROVENANCE_LIMIT]), sourceIds: unique(ids),
+    sourceSubjects: ["chapter-relationships"], provenance: { version: NATAL_READING_RULE_APPLICATIONS_VERSION,
+      producerVersion: NATAL_RELATIONSHIP_FOUNDATION_VERSION, selector, selection, factRefs }
+  });
+  const relationshipRules: NatalReadingRuleApplication[] = [
+    relationRule(`natal-relationship-role/${mainGod}`, "日支本气的相处主题", dayPalace.summary, dayPalace.evidence,
+      ["按日支本气选择相处主题；现代生活表达是本地转换，不据此判断婚期、伴侣人数或现实婚恋状态。"], [SOURCE.palace, SOURCE.conditions],
+      "natalRelationshipRole", mainGod, [`day:main_hidden:${dayPalace.mainStem}`]),
+    ...perspectives.map(p => relationRule(`natal-relationship-perspective/${p.id}`, p.label, p.summary,
+      p.occurrences.flatMap(o => o.evidence), p.conditions, p.sourceIds, "buildNatalRelationshipFoundation.perspectives", p.id, p.occurrences.map(o => o.id))),
+    ...[...palaceRelations, ...starRelations].map(interaction => relationRule(interaction.fact.ruleId, interaction.scope === "day_palace" ? "实际日支互动" : "实际明透星干互动",
+      `${interaction.text}；只采用这组已计算的星位或宫位联系，具体生活场景另按当前年龄和背景投影。`, [interaction.text],
+      ["只保留原二元关系及其实际参与位置；相合不等于成婚，相冲不等于分开，不借事业格局评价亲密关系。"], interaction.sourceIds,
+      "calculatePillarRelations", interaction.scope, [interaction.fact.id, ...interaction.starOccurrenceIds]))
+  ];
   const relationship: NatalRelationshipText = {
     headline: `${roleHeading}，${day.branch}位${joined.length && clashed.length ? "合冲并存" : clashed.length ? "有冲，重在协调节奏" : joined.length ? "有合，重在共同计划" : `侧重${theme.title}`}`,
     verdict: `${roleMeaning}${dayPalace.summary}`,
     paragraphs: [`${perspectives.map((p) => p.summary).join(" ")}${roleMeaning}`, `${dayPalace.summary}${dayHidden.length > 1 ? `其余藏位还有${dayHidden.slice(1).map((o) => `${o.stem}${o.tenGod}`).join("、")}，本气与余气分别保留。` : ""}生活落点是${theme.action}。${theme.scene}`, palaceMeaning, starMeaning],
     strengths: [theme.strength, joined.length ? "共同计划可以成为对齐时间、任务和需要的具体入口" : "将已见的投入、责任和日常习惯分开谈，有助于找到彼此能配合的部分"],
     cautions: [theme.caution, clashed.length ? "外部日程与共同安排不一致时，容易出现一方认为已经约好、另一方认为仍可调整的落差" : starRelations.some((i) => i.fact.relationType === "stem_clash") ? "不同承诺或表达方式互相抵触时，容易把一件事的分歧扩大到对对方整体态度的判断" : "把自己的投入方式当成对方也认可的方式，容易忽略彼此真正需要的回应"],
-    suggestions: [theme.suggestion, clashed.length ? "安排有变时，把调整原因、替代时间和原有承诺的接续一起说清" : "用一件近期共同事项对照各自期待，确定下一次怎样配合"], evidence: selectedEvidence, sourceIds
+    suggestions: [theme.suggestion, clashed.length ? "安排有变时，把调整原因、替代时间和原有承诺的接续一起说清" : "用一件近期共同事项对照各自期待，确定下一次怎样配合"], evidence: selectedEvidence, sourceIds, ruleApplications: relationshipRules
   };
   const year = r.facts.pillars.year, month = r.facts.pillars.month;
   const yearGod = canonicalizeStrengthTenGod(year.stemTenGod), monthGod = canonicalizeStrengthTenGod(month.stemTenGod);
@@ -170,5 +190,6 @@ export function buildNatalRelationshipFoundation(revision: RevisionRecord, asses
     ...(!includeHour ? ["时辰未确定，本次完全排除时柱透藏、根与互动；未知时柱不能用于补足任何关系对象。"] : [])
   ];
   return { version: NATAL_RELATIONSHIP_FOUNDATION_VERSION, sourceBinding: { revisionId: r.id, chartResultHash: r.manifest.resultHash, includeHour, sex: r.input.sex },
-    perspectives, dayPalace, interactions, relationship, family, sources: structuredClone(NATAL_RELATIONSHIP_SOURCES.filter((s) => sourceIds.includes(s.id) || familySourceIds.includes(s.id))), conditions };
+    perspectives, dayPalace, interactions, relationship, family, sources: structuredClone(NATAL_RELATIONSHIP_SOURCES.filter((s) => sourceIds.includes(s.id) || familySourceIds.includes(s.id))), conditions,
+    ruleApplicationsVersion: NATAL_READING_RULE_APPLICATIONS_VERSION };
 }

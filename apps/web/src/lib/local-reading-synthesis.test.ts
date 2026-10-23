@@ -165,7 +165,12 @@ describe("a connected synthesis with exact original and personal provenance", ()
       expect(detail.findings.length).toBeGreaterThan(0);
       const sections = result.sections.filter((section) => section.id.startsWith("natal-detail-"));
       expect(sections).toHaveLength(detail.findings.length);
-      expect(result.sources).toEqual(detail.sources);
+      for (const source of detail.sources) expect(result.sources!.find(item => item.id === source.id)).toEqual(source);
+      expect(new Set(result.sources!.map(source => source.id)).size).toBe(result.sources!.length);
+      for (const section of result.sections.filter(item => ["career", "wealth", "relationships"].includes(item.id))) {
+        expect(section.sourceIds!.length).toBeGreaterThan(0);
+        for (const id of section.sourceIds!) expect(result.sources!.some(source => source.id === id)).toBe(true);
+      }
       expect(result.sourceVersions.filter((version) => version === NATAL_STRUCTURE_DETAIL_VERSION)).toEqual([NATAL_STRUCTURE_DETAIL_VERSION]);
       for (const finding of detail.findings) {
         kinds.add(finding.kind);

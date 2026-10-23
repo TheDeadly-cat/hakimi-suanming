@@ -22,12 +22,15 @@ import { buildNatalRelationshipLifeStory } from "./natal-relationship-life-story
 import { buildLifeStageStory } from "./local-life-stage-story";
 import { lifeStageStorySubjectId, lifeStageStoryFeedbackText, lifeStageStoryFeedbackVersions } from "./local-life-stage-story-record";
 
+import { NATAL_READING_RULE_APPLICATIONS_VERSION, NATAL_READING_PROVENANCE_LIMIT, type NatalReadingRuleApplication } from "../../../../packages/bazi-interpretation/src/natal-reading-rule-application";
+
 export const READING_SYNTHESIS_VERSION = "hakimi.local-reading-synthesis/0.19.0" as const;
 export const LOCAL_READING_SYNTHESIS_VERSION = READING_SYNTHESIS_VERSION;
 export interface ReadingSynthesisSection {
   id: string; title: string; paragraphs: string[]; sourceSubjects: string[];
   answer?: string;
   sourceIds?: string[];
+  ruleApplications?: NatalReadingRuleApplication[];
   ageAdapted?: boolean;
   lifeAdapted?: boolean;
   contextProjection?: { subjectId: string; reference: ReadingContextReference; referenceYear: number; sourceVersions: string[] };
@@ -128,6 +131,7 @@ export function buildLocalReadingSynthesis(input: LocalReadingSynthesisInput): L
   const relationshipStory = c.relationshipFoundation ? buildNatalRelationshipLifeStory({ revision: r, assessment: p, comprehensive: c,
     referenceInstant: input.life?.referenceInstant ?? null, contextual: context }) : null;
   const sourceVersions = [READING_SYNTHESIS_VERSION, READING_YEAR_SUMMARY_VERSION, p.version, workingBalance.version, c.version,
+    ...(c.ruleApplicationsVersion ? [c.ruleApplicationsVersion] : []),
     ...(natalStory?.sourceVersions ?? []), ...(familyStory?.sourceVersions ?? []), ...(relationshipStory?.sourceVersions ?? []),
     ...(timeline ? [timeline.version, ...timeline.sourceVersions] : []),
     ...(c.patternDiagnosis ? [c.patternDiagnosis.version] : []), ...(c.usefulGuidance ? [c.usefulGuidance.version] : []),
@@ -224,6 +228,8 @@ export function buildLocalReadingSynthesis(input: LocalReadingSynthesisInput): L
     sections.push({ id: item.id, title: career ? "事业与能力发挥" : "财务与回报", origin: item.contextual ? "contextual" : "calculated",
       answer: item.contextual?.summary ?? item.original.verdict,
       paragraphs: [text], sourceSubjects: [`chapter-${item.id}`, ...(item.contextual ? [item.contextual.subjectId] : [])],
+      sourceIds: unique([...(item.original.sourceIds ?? []), ...(item.original.ruleApplications ?? []).flatMap(rule => rule.sourceIds)]),
+      ruleApplications: structuredClone(item.original.ruleApplications ?? []),
       evidence: [...item.original.evidence, ...(item.contextual?.basis ?? [])],
       conditions: [...item.original.cautions, workingBalance.summary, ...workingBalance.conditions, ...(c.patternDiagnosis?.conditions ?? [])] });
   }
@@ -236,7 +242,10 @@ export function buildLocalReadingSynthesis(input: LocalReadingSynthesisInput): L
       subjectId: relation.contextual.subjectId, reference: { ...context.contextSource.reference }, referenceYear: context.referenceYear,
       sourceVersions: [...relation.contextual.sourceVersions]
     } : undefined;
+    const relationshipRules = (relation.original.ruleApplications ?? []).filter(rule => projected?.age?.stage === "before_birth" ? false
+      : projected && ["young_child", "youth"].includes(projected.age?.stage ?? "") ? rule.provenance.selector !== "buildNatalRelationshipFoundation.perspectives" : true);
     sections.push({ id: "relationships", title: projected?.title ?? "亲密关系与相处", origin: relation.contextual ? "contextual" : "calculated",
+      sourceIds: unique(relationshipRules.flatMap(rule => rule.sourceIds)), ruleApplications: structuredClone(relationshipRules),
       ...(projected ? { lifeAdapted: true } : {}), ...(contextProjection ? { contextProjection } : {}),
       sourceSubjects: projected?.sourceSubjects ?? ["chapter-relationships", ...(relation.contextual ? [relation.contextual.subjectId] : [])],
       answer: projected ? projected.paragraphs.join("\n\n") || "本参考时点早于出生，不安排个人相处经历。" : relation.contextual?.summary ?? relation.original.verdict,
@@ -453,6 +462,16 @@ export function buildLocalReadingSynthesis(input: LocalReadingSynthesisInput): L
       section.answer = paragraphs.map((paragraph) => paragraph.text).join("\n\n");
       section.title = unique(paragraphs.map((paragraph) => paragraph.label)).join(" · ");
       section.sourceSubjects = unique([...section.sourceSubjects, ...paragraphs.flatMap((paragraph) => paragraph.sourceSubjects)]);
+      section.ruleApplications = (section.ruleApplications ?? []).map(rule => ({ ...rule,
+        limitations: unique([...rule.limitations, "本项支持原本命路径和作用条件；年龄、身份与生活用语由生活投影改写，未作整段语义验证。"])
+      }));
+      section.ruleApplications.push({ ruleId: "natal-life-domain-projection", title: "本领域的生活投影选择",
+        decision: `沿已选${natalStory.pathId}解释${item.id === "career" ? "能力发挥" : "投入与回报"}；只投影当前年龄及已确认背景，不新判职业或收益。`,
+        support: [`实际路径：${natalStory.pathId}。`, `年龄阶段：${natalStory.age?.stage ?? "unknown"}；已采用身份：${natalStory.appliedWork ?? "unspecified"}。`],
+        limitations: [NATAL_READING_PROVENANCE_LIMIT, "年龄或现实身份未知时保持中性范围，不把条件例子当成已发生经历。"],
+        sourceIds: [], sourceSubjects: [...section.sourceSubjects], provenance: { version: NATAL_READING_RULE_APPLICATIONS_VERSION,
+          producerVersion: natalStory.version, selector: "buildNatalLifeStory.workWealthParagraphs", selection: `${item.id}/${natalStory.pathId}/${natalStory.age?.stage ?? "unknown"}/${natalStory.appliedWork ?? "unspecified"}`,
+          factRefs: [...paragraphs.flatMap(paragraph => paragraph.sourceSubjects)] } });
       if (natalStory.appliedWork) section.origin = "contextual";
     }
   }
@@ -508,7 +527,7 @@ export function buildLocalReadingSynthesis(input: LocalReadingSynthesisInput): L
     sourceVersions.push(structureDetail.version, ...structureDetail.sourceVersions);
   }
   return { version: READING_SYNTHESIS_VERSION, sourceBinding: binding, sourceVersions: unique(sourceVersions),
-    ...(detailSections.length ? { sources: structuredClone(structureDetail.sources) } : {}),
+    sources: structuredClone([...new Map([...p.sources, ...(c.sources ?? []), ...structureDetail.sources].map(source => [source.id, source])).values()]),
     contextRef: context ? { ...context.contextSource.reference } : null,
     personalRefs: [...new Map(personalRefs.map((ref) => [JSON.stringify(ref), { ...ref }])).values()],
     headline: structurePersonal || usefulPersonal || overviewPersonal || natalOverviewPersonal || activeKeyPoints.length < keyPoints.length ? "命局理解与已采用的个人修订"

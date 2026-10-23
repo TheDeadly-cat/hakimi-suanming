@@ -10,6 +10,8 @@ import { canonicalizeStrengthTenGod, strengthTenGodGroup, type TenGodGroup } fro
 import { strengthElementForStem, strengthElementLabel, type PillarPosition } from "./strength-assessment-core";
 import { getWorkingBalance } from "./structural-strength-assessment";
 import { buildNatalRelationshipFoundation } from "./natal-relationship-foundation";
+import { NATAL_PATTERN_PATH_VERSION } from "./natal-pattern-path";
+import { NATAL_READING_RULE_APPLICATIONS_VERSION, NATAL_READING_PROVENANCE_LIMIT, type NatalReadingRuleApplication } from "./natal-reading-rule-application";
 
 export const BAZI_COMPREHENSIVE_READING_VERSION = "hakimi.bazi-comprehensive-reading/0.15.0" as const;
 export type BaziComprehensiveChapterId = "overview" | "structure" | "useful_elements" | "personality" | "career" | "wealth" | "relationships" | "family" | "development";
@@ -24,6 +26,7 @@ export interface BaziComprehensiveChapter {
   suggestions: string[];
   evidence: string[];
   sourceIds: string[];
+  ruleApplications?: NatalReadingRuleApplication[];
 }
 export interface BaziComprehensiveReading {
   version: typeof BAZI_COMPREHENSIVE_READING_VERSION;
@@ -36,6 +39,7 @@ export interface BaziComprehensiveReading {
   patternDiagnosis?: NatalPatternDiagnosis;
   usefulGuidance?: NatalUsefulGuidance;
   relationshipFoundation?: ReturnType<typeof buildNatalRelationshipFoundation>;
+  ruleApplicationsVersion?: typeof NATAL_READING_RULE_APPLICATIONS_VERSION;
 }
 
 type Occurrence = { position: PillarPosition; pillar: PillarFact; stem: string; god: string; group: TenGodGroup; visible: boolean };
@@ -265,6 +269,30 @@ export function buildBaziComprehensiveReading(revision: RevisionRecord, prelimin
   const add = (chapter: BaziComprehensiveChapter) => chapters.push({ ...chapter,
     evidence: unique(chapter.evidence), suggestions: unique(chapter.suggestions), sourceIds: unique(chapter.sourceIds).filter((id) => sourceIds.has(id)) });
   const baseSources = [...p.pattern.sourceIds, ...p.balance.sourceIds, ...working.sourceIds, ...diagnosis.sourceIds, "hakimi-editorial"];
+  const domainRules = (domain: "career" | "wealth"): NatalReadingRuleApplication[] => {
+    const subjects = [`chapter-${domain}`, "chapter-structure", "chapter-useful_elements"];
+    const application = (ruleId: string, title: string, decision: string, support: string[], limitations: string[], ids: string[],
+      selector: string, selection: string, factRefs: string[], producerVersion: string): NatalReadingRuleApplication => ({
+      ruleId, title, decision, support: unique(support), limitations: unique([...limitations, NATAL_READING_PROVENANCE_LIMIT]),
+      sourceIds: unique(ids).filter(id => sourceIds.has(id)), sourceSubjects: subjects,
+      provenance: { version: NATAL_READING_RULE_APPLICATIONS_VERSION, producerVersion, selector, selection, factRefs }
+    });
+    return [
+      application(diagnosis.primaryPathId, "本命主路径选择", `本领域采用${diagnosis.paths.find(item => item.role === "primary")!.label}作为结构路径；${domain === "career" ? "解释能力与职责怎样衔接" : "解释投入、用途与兑现的关系"}，不据路径名称断定实际成就。`,
+        diagnosis.foundation, diagnosis.conditions, diagnosis.sourceIds, "selectNatalPatternPath", diagnosis.primaryPathId,
+        ["pattern.monthMainStem", "pattern.monthMainTenGod", ...c.occurrences.filter(item => item.visible).map(item => `${item.position}:visible:${item.stem}`)], NATAL_PATTERN_PATH_VERSION),
+      application(working.ruleId, "当前承受与取用基线", `${working.summary}；仅作为本领域承担范围与取用条件，不把计权当成职业或财富分数。`,
+        working.evidence, working.conditions, working.sourceIds, "getWorkingBalance", `${working.selection}/${working.focus}/${working.direction}`,
+        ["balance.structural.working", "balance.supportWeight", "balance.demandWeight"], working.version),
+      ...(diagnosis.wealthResourceTask.applicable ? [application(diagnosis.wealthResourceTask.task, "财印任务的实际选择", diagnosis.wealthResourceTask.summary,
+        diagnosis.wealthResourceTask.evidence, diagnosis.wealthResourceTask.conditions, diagnosis.wealthResourceTask.sourceIds,
+        "evaluateNatalWealthResourceTask", diagnosis.wealthResourceTask.task, ["patternDiagnosis.wealthResourceTask.pairs", "patternDiagnosis.wealthResourceTask.monthCommand"], diagnosis.wealthResourceTask.version)] : []),
+      ...[...diagnosis.blockers.map(finding => ({ finding, kind: "blocker" })), ...diagnosis.rescues.map(finding => ({ finding, kind: "rescue" }))].map(({ finding, kind }) =>
+        application(finding.id, kind === "blocker" ? "原局具体阻碍" : "原局救应候选", finding.text, finding.evidence,
+          [...diagnosis.conditions, kind === "rescue" ? "救应保留原有条件，不因候选存在就认定阻碍已经解除。" : "这项作用不等于现实事件已经发生。", `原判断范围：${finding.scope === "primary" ? "当前主路径" : "另列备选路径，不替代主判"}。`],
+          [finding.sourceId], `buildNatalPatternDiagnosis.${kind}`, `${finding.scope}/${finding.id}`, finding.passageIds.map(id => `${finding.sourceId}/${id}`), diagnosis.version))
+    ];
+  };
   const roots = c.occurrences.filter((item) => !item.visible && strengthElementForStem(item.stem) === p.balance.dayMasterElement);
   const rootText = roots.length ? `日主同类根气见于${roots.map(where).join("、")}，自身有承接来源，关键在这些力量能否用到当下的任务中。`
     : "所选地支没有日主同五行藏干，承接任务时更要依靠印星支持、准备与现实协作。";
@@ -362,7 +390,7 @@ export function buildBaziComprehensiveReading(revision: RevisionRecord, prelimin
     ], strengths: [route.reason + "。", `月柱明确呈现${GROUP_THEMES[monthVisibleGroup]}，可作为训练和选任务的切入点。`],
     cautions: [route.risk, candidate(c, "official-hurting") ? "官伤并见时，表达改进意见与遵循既有规则之间尤其需要明确沟通次序。" : "结构取向不能直接保证职位、行业匹配或晋升结果。"],
     suggestions: [route.action, working.direction === "support" ? "新任务先确认谁提供支持、边界在哪里，再确认目标。" : "用成果、验收和复盘代替仅以投入时长证明努力。"],
-    evidence: [pillarEvidence(c, "month"), groupEvidence(c, "output"), groupEvidence(c, "authority"), basis(c), ...diagnosis.evidence, ...(mainCandidate?.evidence ?? []), ...relationsFor(c, ["month"]).map(relationEvidence)], sourceIds: baseSources });
+    evidence: [pillarEvidence(c, "month"), groupEvidence(c, "output"), groupEvidence(c, "authority"), basis(c), ...diagnosis.evidence, ...(mainCandidate?.evidence ?? []), ...relationsFor(c, ["month"]).map(relationEvidence)], sourceIds: baseSources, ruleApplications: domainRules("career") });
 
   const wealthShown = inGroup(c, "wealth", true), wealthHidden = inGroup(c, "wealth", false);
   const peerShown = hasVisible(c, "peer"), outputWealth = ["food-wealth", "hurting-wealth", "mixed-output-wealth"].includes(route.id);
@@ -391,7 +419,7 @@ export function buildBaziComprehensiveReading(revision: RevisionRecord, prelimin
     ], strengths: [outputWealth ? "食伤与财的可见联系，可支持以成果带动兑现的实践路径。" : wealthShown.length ? "财星位置清楚，便于把经营对象和责任具体化。" : `可先以${route.name}积累现实能力，再逐步建立兑现环节。`, groupEvidence(c, "wealth")],
     cautions: [working.direction === "support" ? "经营对象和承诺增加时，自身承接也必须同步，不宜只追求数量。" : "有泄耗或经营出口不等于已经形成稳定回报。", "比劫、财星或合冲都不直接等于破财、暴富或某项投资适合。"],
     suggestions: [outputWealth ? "将产出、验收、兑现分开记录，找出哪一环真正受阻。" : "先确认自己已经具备的技能、时间和资源，再设置可兑现目标。", "共同事项写清投入、分工和退出安排，不用命盘代替现实判断。"],
-    evidence: [groupEvidence(c, "wealth"), groupEvidence(c, "output"), groupEvidence(c, "peer"), basis(c), ...diagnosis.evidence, ...(candidate(c, "output-wealth")?.evidence ?? [])], sourceIds: baseSources });
+    evidence: [groupEvidence(c, "wealth"), groupEvidence(c, "output"), groupEvidence(c, "peer"), basis(c), ...diagnosis.evidence, ...(candidate(c, "output-wealth")?.evidence ?? [])], sourceIds: baseSources, ruleApplications: domainRules("wealth") });
 
   add({ id: "relationships", title: "亲密关系与合作", ...relationshipFoundation.relationship });
   add({ id: "family", title: "家庭与支持环境", ...relationshipFoundation.family });
@@ -413,7 +441,7 @@ export function buildBaziComprehensiveReading(revision: RevisionRecord, prelimin
     title: `${pillars.day.stem}${strengthElementLabel(p.balance.dayMasterElement)}命局综合解读`,
     summary: rootedMixedAuthority || wealthResourceAnswer ? `${working.label}。${diagnosis.currentJudgment}${guidance.answer.headline}。`
       : `${p.headline}。本盘主线为${route.name}，总体安排以“${pace(c)}”为先。${guidance.seasonalBalanceConflict.summary}`,
-    chapters, sources, patternDiagnosis: diagnosis, usefulGuidance: guidance, relationshipFoundation,
+    chapters, sources, patternDiagnosis: diagnosis, usefulGuidance: guidance, relationshipFoundation, ruleApplicationsVersion: NATAL_READING_RULE_APPLICATIONS_VERSION,
     limitations: [
       "各章为本地规则结合传统结构的现代综合解释；sourceIds 指向术语和方法来源，不表示古籍逐句支持每条现实建议。0.6.0 将已有取用角色按主任务、配合对象与实际条件组织为主结论，不另设全盘喜忌分数；生活情境仍是按本命路径、承接基线与透藏位置组织的编辑模型。",
       "扶抑权重沿用本地初判基线，敏感性分歧继续保留；透藏与互动不自动证明成格、从格、专旺或真化。",

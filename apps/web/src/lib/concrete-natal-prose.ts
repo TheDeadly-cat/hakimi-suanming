@@ -6,9 +6,10 @@ import type { RevisionRecord } from "@hakimi/contracts";
 import type { LocalContextualReadingBundle } from "./local-contextual-reading-record";
 import { buildNatalLifeStory } from "./natal-life-story";
 import { buildNatalRelationshipLifeStory } from "./natal-relationship-life-story";
+import { NATAL_READING_RULE_APPLICATIONS_VERSION, NATAL_READING_PROVENANCE_LIMIT, type NatalReadingRuleApplication } from "../../../../packages/bazi-interpretation/src/natal-reading-rule-application";
 
 export const CONCRETE_NATAL_PROSE_VERSION = "hakimi.concrete-natal-prose/0.2.0" as const;
-interface DomainProse { headline: string; paragraphs: string[] }
+interface DomainProse { headline: string; paragraphs: string[]; sourceIds?: string[]; ruleApplications?: NatalReadingRuleApplication[] }
 export interface ConcreteNatalProse {
   version: typeof CONCRETE_NATAL_PROSE_VERSION; sourceVersions: string[];
   introduction: { strength: string; obstacle: string } | null;
@@ -125,12 +126,43 @@ export function buildConcreteNatalProse(input: {
   const adult = story.age?.stage === "adult";
   const workingLife = adult && [null, "employed", "self_employed", "seeking_work"].includes(story.appliedWork);
   const mixedAuthority = working.focus === "rooted_peer_mixed_authority";
+  const localRule = (domain: "career" | "wealth" | "relationships", selector: string, selection: string, decision: string,
+    support: string[], factRefs: string[], sourceIds: string[] = []): NatalReadingRuleApplication => ({
+    ruleId: selector, title: "最终正文的实际选择", decision, support,
+    limitations: [NATAL_READING_PROVENANCE_LIMIT, "事实与现代解释分开；没有据此新增职业、收入或婚恋结果。"],
+    sourceIds, sourceSubjects: [`chapter-${domain}`], provenance: { version: NATAL_READING_RULE_APPLICATIONS_VERSION,
+      producerVersion: CONCRETE_NATAL_PROSE_VERSION, selector, selection, factRefs }
+  });
+  const domainRules = (domain: "career" | "wealth") => {
+    const inherited = c.chapters.find(chapter => chapter.id === domain)?.ruleApplications ?? [];
+    const rules = inherited.filter(rule => {
+      const selector = rule.provenance.selector;
+      if (selector === "selectNatalPatternPath") return true;
+      if (selector === "getWorkingBalance") return domain === "wealth" || mixedAuthority;
+      if (selector === "evaluateNatalWealthResourceTask") return Boolean(selectedTask) && rule.provenance.selection === selectedTask;
+      return domain === "career" && blockers.length > 0 && ["buildNatalPatternDiagnosis.blocker", "buildNatalPatternDiagnosis.rescue"].includes(selector)
+        && rule.provenance.selection.startsWith("primary/");
+    });
+    const selected = mixedAuthority ? working.focus : selectedTask || d.primaryPathId;
+    rules.push(localRule(domain, "buildConcreteNatalProse.route", `${domain}/${selected}`,
+      `实际采用${selected}的${domain === "career" ? "能力与职责" : "投入与财务"}解释分支；这项记录定位现代正文选择，不把它当古籍原话。`,
+      [`主路径：${d.primaryPathId}；相符财印任务：${selectedTask || "未采用"}。`, `当前年龄：${story.age?.stage ?? "unknown"}；身份：${story.appliedWork ?? "unspecified"}。`],
+      ["patternDiagnosis.primaryPathId", "patternDiagnosis.wealthResourceTask", "balance.structural.working", "natalLifeStory.age", "natalLifeStory.appliedWork"]));
+    rules.push(domain === "career" ? localRule(domain, "buildConcreteNatalProse.primaryRoles", primary.map(entry => entry.id).join("|"),
+      "正文只列本次已选主用字及其实际透藏、根与使用条件。", primary.map(entry => `${entry.stem}${entry.tenGod}：${entry.presenceText}。`),
+      primary.map(entry => `usefulGuidance.entries.${entry.id}`), unique([...u.answer.sourceIds, ...primary.flatMap(entry => entry.sourceIds)]))
+      : localRule(domain, "buildConcreteNatalProse.wealthPresence", shownWealth.length ? "visible" : hiddenWealth.length ? "hidden_only" : "absent",
+        "按本盘实际财字透藏区分承接条件，不以财字出现或数量证明收入已经取得。", wealth.filter(entry => entry.presence !== "absent").map(entry => `${entry.stem}${entry.tenGod}：${entry.presenceText}。`),
+        wealth.map(entry => `usefulGuidance.entries.${entry.id}`)));
+    return structuredClone(rules);
+  };
   if (workingLife && route) {
     const headline = mixedAuthority ? "禄劫有根，财生官兼带七杀，发展与权责压力并行" : route.career;
     const meaning = mixedAuthority ? "自身有根，财也有现实作用，但它同时生正官与七杀。事业既有资源与责任的连接，也有不同要求并行的问题；官杀尚未取清，因此不能归成单一、纯粹的仕途或经营优势。" : route.meaning;
     const status = blockers.length ? `本盘已见的限制：${blockers.map(item => item.text).join(" ")}${rescues.length ? `同时保留救应候选：${rescues.map(item => item.text).join(" ")}` : ""}` : "";
     const supports = primary.length ? `实际用字与承接：${availability(primary)}。${u.answer.condition}` : `当前取用：${u.answer.headline}`;
-    result.domains.career = { headline, paragraphs: [meaning, supports, status].filter(Boolean) };
+    const careerRules = domainRules("career");
+    result.domains.career = { headline, paragraphs: [meaning, supports, status].filter(Boolean), ruleApplications: careerRules, sourceIds: unique(careerRules.flatMap(rule => rule.sourceIds)) };
     const income = mixedAuthority ? "财已透有根，但同时资助官与杀，因此财务资源与责任压力相连。收入机会不能与承担的成本分开，也不能因身势已有结论，就把财官杀同时到来都看成回报增加。" : route.income;
     const financialState = shownWealth.length ? `本盘依据：${distribution(wealth)}。其中${availability(shownWealth)}；财的实际承接还要结合原局合克。`
       : hiddenWealth.length ? `本盘依据：${distribution(hiddenWealth)}，财星藏而未透。${output.length ? `已透${unique(output.map(name)).join("、")}，能力出口较明确；财的承接仍要由相应的现实需求与运年配合带动。` : "当前财的线索保留在藏干层，实际承接仍需对应的能力与现实机会。"}`
@@ -142,7 +174,8 @@ export function buildConcreteNatalProse(input: {
     result.domains.wealth = { headline: selectedTask === "wealth_first" || d.primaryPathId === "resource-wealth" ? "财先承担调印任务，收入仍看实际财路与承载"
       : selectedTask === "resource_first" ? "有食伤财的连接，但先稳承载，不能把财重当作收入更好"
         : d.primaryPathId === "resource-output" ? "收入主要看专业报酬，财的承接仍需现实需求带动"
-          : shownWealth.length ? "收入通道已有财星支点，回报与所承担的负担相连" : hiddenWealth.length ? "收入沿现有能力形成，财的承接仍需机会带动" : "收入先沿已有能力分析，财的承接主判尚不完整", paragraphs: [income, financialState, carrying] };
+          : shownWealth.length ? "收入通道已有财星支点，回报与所承担的负担相连" : hiddenWealth.length ? "收入沿现有能力形成，财的承接仍需机会带动" : "收入先沿已有能力分析，财的承接主判尚不完整", paragraphs: [income, financialState, carrying],
+      ruleApplications: domainRules("wealth"), sourceIds: unique(domainRules("wealth").flatMap(rule => rule.sourceIds)) };
   }
   // A known non-employment setting keeps its age/context-specific living
   // answer. The factual natal conclusions are displayed separately by caller.
@@ -172,11 +205,16 @@ export function buildConcreteNatalProse(input: {
         : state === "separated" ? "当前采用你填写的分开或分居背景；仍需联系时，只说明实际交接与责任，不预设复合或关系最终结果。"
           : "现实关系状态未填写，以上分别说明星、宫与互动，不补成已经恋爱或结婚的经历。";
     paragraphs.push(background);
+    const relationshipRules = structuredClone(f.relationship.ruleApplications ?? []);
+    relationshipRules.push(localRule("relationships", "buildConcreteNatalProse.relationship", `${day.mainTenGod}/${state ?? "unspecified"}`,
+      "最终关系正文沿日支角色、独立星宫事实及已核现实关系状态组织，不采用事业格局或财运方向。",
+      [day.summary, `实际关系状态：${state ?? "unspecified"}。`], [`day:main_hidden:${day.mainStem}`, ...palace.map(item => item.fact.id), ...stars.map(item => item.fact.id)]));
     result.domains.relationships = { headline: state === "separated" ? "婚恋结构按星宫保留，当前只落到分开后的实际联系"
       : joined && clashed ? "夫妻宫合冲并见，联系与变化需要分别判断"
         : clashed ? "夫妻宫有冲，婚恋安排有变化线索"
-        : joined ? "感情重相处与共同生活，婚姻落实会牵动长期安排" : "婚恋重心先看日常相处方式与关系星的配合", paragraphs };
+        : joined ? "感情重相处与共同生活，婚姻落实会牵动长期安排" : "婚恋重心先看日常相处方式与关系星的配合", paragraphs,
+      ruleApplications: relationshipRules, sourceIds: unique(relationshipRules.flatMap(rule => rule.sourceIds)) };
   }
-  result.sourceVersions = unique(result.sourceVersions);
+  result.sourceVersions = unique([...result.sourceVersions, NATAL_READING_RULE_APPLICATIONS_VERSION]);
   return result;
 }

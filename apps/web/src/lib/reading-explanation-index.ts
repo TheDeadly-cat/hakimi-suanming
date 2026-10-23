@@ -16,7 +16,8 @@ const nullableText = boundedText.nullable();
 const scopeSchema = z.object({ level: z.enum(["natal", "year", "month"]), year: z.number().int().nullable(),
   branchId: nullableText, startInstant: nullableText, endExclusiveInstant: nullableText }).strict();
 const applicationSchema = z.object({ ruleId: boundedText, title: boundedText, decision: boundedText,
-  support: texts, limitations: texts, sourceIds: texts, sourceSubjects: texts }).strict();
+  support: texts, limitations: texts, sourceIds: texts, sourceSubjects: texts,
+  provenance: z.object({ version: boundedText, producerVersion: boundedText, selector: boundedText, selection: boundedText, factRefs: texts }).strict().optional() }).strict();
 const conclusionSchema = z.object({ stableId: boundedText, label: boundedText, text: boundedText,
   domain: z.enum(["natal", "career", "wealth", "relationship", "timing"]), scope: scopeSchema,
   sourceSubjects: texts, direction: nullableText, origin: z.enum(["calculated", "contextual", "personal"]),
@@ -126,7 +127,7 @@ export function buildReadingExplanationIndex(input: BuildReadingExplanationIndex
     sourceSnapshot: { ...report.sourceBinding, input: clone(revision.input), ruleProfile: clone(revision.ruleProfile),
       ruleProfileDigest: revision.manifest.ruleProfileDigest, timeCalibration: clone(revision.timeCalibration),
       engineVersions: clone({ engine: revision.manifest.engine, timeZoneDatabase: revision.manifest.timeZoneDatabase ?? null }),
-      context: clone(input.context ?? null), sourceVersions: unique([...report.sourceVersions, ...(report.plainReading?.sourceVersions ?? []), READING_EXPLANATION_INDEX_VERSION]),
+      context: clone(input.context ?? null), sourceVersions: unique([...report.sourceVersions, ...(report.plainReading?.sourceVersions ?? []), ...(synthesis?.sourceVersions ?? []), READING_EXPLANATION_INDEX_VERSION]),
       reportVersion: input.reportVersion ?? "hakimi.local-reading-edition/0.22.0", inputRecordedAt: revision.createdAt },
     conclusions: [], sources: [...sources.values()].map(({ id, title, url, locator, excerpt, interpretation }) => ({ id, title, url, locator, excerpt, interpretation })),
     citationBindings: [], uncertainty: clone(input.timeUncertainty ?? unassessedReadingTime(revision)),
@@ -173,6 +174,9 @@ export function buildReadingExplanationIndex(input: BuildReadingExplanationIndex
   const domains = report.plainReading?.domains ?? report.domainCards.map(card => ({ ...card, paragraphs: [card.text] }));
   for (const domain of domains) {
     const section = synthesis?.sections.find(item => item.id === domain.id);
+    const finalDomain = report.plainReading?.domains.find(item => item.id === domain.id);
+    const appliedRules = finalDomain?.ruleApplications ?? section?.ruleApplications ?? [];
+    const appliedSources = finalDomain?.sourceIds ?? section?.sourceIds ?? [];
     const domainFacts = domain.id === "relationships"
       ? [`日柱${revision.facts.pillars.day.ganZhi}，日支${revision.facts.pillars.day.branch}；关系星与宫位互动的原始线索见下方支持依据。`,
         `登记的顺逆/传统关系视角信息：${revision.input.sex === "male" ? "男" : revision.input.sex === "female" ? "女" : "未指定"}；这不说明现实婚恋状态。`]
@@ -180,11 +184,13 @@ export function buildReadingExplanationIndex(input: BuildReadingExplanationIndex
         ...(natal ? [`本命结构判断${natal.scoreBasis.workingLabel}；扶助侧${natal.scoreBasis.supportWeight}，泄耗克侧${natal.scoreBasis.demandWeight}。计权不代表收入金额或事件概率。`] : [])];
     add(`natal:${domain.id}`, { label: domain.title, text: domain.paragraphs.join("\n\n"), domain: domainName(domain.id), scope: natalScope,
       direction: null, origin: domain.origin, sourceSubjects: domain.sourceSubjects,
-      evidence: { ...baseEvidence(section?.evidence ?? [], section?.conditions ?? report.plainReading?.limitations ?? [], domain.origin === "personal" ? [] : domainFacts),
+      evidence: { ...baseEvidence(finalDomain?.ruleApplications !== undefined ? appliedRules.flatMap(rule => rule.support) : section?.evidence ?? [],
+        finalDomain?.ruleApplications !== undefined ? unique([...appliedRules.flatMap(rule => rule.limitations), ...(report.plainReading?.limitations ?? [])]) : section?.conditions ?? report.plainReading?.limitations ?? [], domain.origin === "personal" ? [] : domainFacts,
+        domain.origin === "personal" ? [] : clone(appliedRules)),
         unknowns: [...(section ? [] : ["这份结果未提供该领域逐句的依据映射，不能把其他领域的引文借来支持它。"]),
           ...(input.context == null ? ["尚未填写并保存现实背景；不据此认定已经就业、收入变动或正在恋爱/婚姻中。"] : [])],
         ...(domain.origin === "personal" ? { support: [], unknowns: ["这是明确采用的个人原文，不作为自动计算或古籍已证明的结论。"] } : {}) }
-    }, domain.origin === "personal" ? [] : section?.sourceIds ?? [], `synthesis.sections.${domain.id}.sourceIds`, domain.personalTextIds);
+    }, domain.origin === "personal" ? [] : appliedSources, finalDomain?.sourceIds !== undefined ? `plainReading.domains.${domain.id}.sourceIds` : `synthesis.sections.${domain.id}.sourceIds`, domain.personalTextIds);
   }
   for (const branch of report.plainReading?.outlook.branches ?? []) for (const year of branch.years) for (const segment of year.segments) {
     const scope: ReadingConclusion["scope"] = { level: "year", year: year.year, branchId: branch.id, startInstant: segment.startInstant, endExclusiveInstant: segment.endExclusiveInstant };

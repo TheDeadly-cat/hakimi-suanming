@@ -5,6 +5,7 @@ import type { LocalReadingSnapshotExtras } from "./local-reading-record";
 import { buildLocalReadingAgeContext } from "./local-reading-age-context";
 import { buildPlainTenYearReading, type PlainTenYearReading } from "./plain-ten-year-reading";
 import { buildConcreteNatalProse } from "./concrete-natal-prose";
+import type { NatalReadingRuleApplication } from "../../../../packages/bazi-interpretation/src/natal-reading-rule-application";
 
 export const PLAIN_FULL_READING_VERSION = "hakimi.plain-full-reading/0.3.0" as const;
 export interface PlainFullReadingDomain {
@@ -12,6 +13,7 @@ export interface PlainFullReadingDomain {
   title: string; headline: string; paragraphs: string[];
   origin: "calculated" | "contextual" | "personal";
   personalTextIds: string[]; sourceSubjects: string[]; detailsRef: string;
+  sourceIds?: string[]; ruleApplications?: NatalReadingRuleApplication[];
 }
 export interface PlainFullReading {
   version: typeof PLAIN_FULL_READING_VERSION;
@@ -168,9 +170,9 @@ export function buildPlainFullReading(report: BriefReadingReport, assessment: Ba
     }
     if (adopted) return { id: card.id, title, headline: "按你已采用的个人解读", paragraphs: [card.personalTextIds.length
       ? card.text : "此项相关依据已有个人修订，完整内容见个人原文。"], origin: "personal", personalTextIds,
-      sourceSubjects, detailsRef: card.detailsRef };
+      sourceSubjects, detailsRef: card.detailsRef, sourceIds: [], ruleApplications: [] };
     if (age === "before_birth") return { id: card.id, title, headline: "参考时点早于出生", paragraphs: ["本时点不安排这项个人生活情景。"],
-      origin: card.origin, personalTextIds: [], sourceSubjects, detailsRef: card.detailsRef };
+      origin: card.origin, personalTextIds: [], sourceSubjects, detailsRef: card.detailsRef, sourceIds: [], ruleApplications: [] };
     if (section?.sourceSubjects.some(subject => replacedSubjects.has(subject))) return fail("自动正文仍引用已被个人修订替换的来源。");
     // answer is the existing age/context projection. Technical paragraphs are
     // never used as a substitute when that projection is present.
@@ -180,7 +182,9 @@ export function buildPlainFullReading(report: BriefReadingReport, assessment: Ba
     if (!concreteDomain && knownWork !== "unspecified" && card.id !== "relationships") headline = first(paragraphs[0] ?? card.text);
     if (!concreteDomain && age !== "adult" && card.id !== "relationships") headline = first(paragraphs[0] ?? card.text);
     return { id: card.id, title, headline, paragraphs: paragraphs.length ? paragraphs : [card.text],
-      origin: card.origin, personalTextIds: [], sourceSubjects, detailsRef: card.detailsRef };
+      origin: card.origin, personalTextIds: [], sourceSubjects, detailsRef: card.detailsRef,
+      sourceIds: [...(concreteDomain ? concreteDomain.sourceIds ?? [] : section?.sourceIds ?? [])],
+      ruleApplications: structuredClone(concreteDomain ? concreteDomain.ruleApplications ?? [] : section?.ruleApplications ?? []) };
   });
   const outlook = buildPlainTenYearReading({ report, assessment, annual, extras });
   const limitations = unique([
