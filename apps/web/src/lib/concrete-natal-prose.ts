@@ -6,6 +6,7 @@ import type { RevisionRecord } from "@hakimi/contracts";
 import type { LocalContextualReadingBundle } from "./local-contextual-reading-record";
 import { buildNatalLifeStory } from "./natal-life-story";
 import { buildNatalRelationshipLifeStory } from "./natal-relationship-life-story";
+import { READING_CONTEXT_WORK_LABELS, READING_CONTEXT_RELATIONSHIP_LABELS } from "./local-reading-context";
 import { NATAL_READING_RULE_APPLICATIONS_VERSION, NATAL_READING_PROVENANCE_LIMIT, type NatalReadingRuleApplication } from "../../../../packages/bazi-interpretation/src/natal-reading-rule-application";
 
 export const CONCRETE_NATAL_PROSE_VERSION = "hakimi.concrete-natal-prose/0.2.0" as const;
@@ -144,9 +145,12 @@ export function buildConcreteNatalProse(input: {
         && rule.provenance.selection.startsWith("primary/");
     });
     const selected = mixedAuthority ? working.focus : selectedTask || d.primaryPathId;
+    const pathLabel = d.paths.find(item => item.role === "primary" && item.id === d.primaryPathId)?.label || "未识别的结构路径";
+    const selectedLabel = mixedAuthority ? "禄劫有根、官杀并见" : pathLabel;
+    const ageLabel = story.age?.stage === "unknown" ? "未识别（缺少可靠年龄依据）" : story.age?.label ?? "未填写年龄参考";
     rules.push(localRule(domain, "buildConcreteNatalProse.route", `${domain}/${selected}`,
-      `实际采用${selected}的${domain === "career" ? "能力与职责" : "投入与财务"}解释分支；这项记录定位现代正文选择，不把它当古籍原话。`,
-      [`主路径：${d.primaryPathId}；相符财印任务：${selectedTask || "未采用"}。`, `当前年龄：${story.age?.stage ?? "unknown"}；身份：${story.appliedWork ?? "unspecified"}。`],
+      `实际采用“${selectedLabel}”解释${domain === "career" ? "能力与职责" : "投入与财务"}；这项记录定位现代正文选择，不把它当古籍原话。`,
+      [`主路径：${pathLabel}；相符财印任务：${selectedTask ? pathLabel : "未采用"}。`, `当前年龄：${ageLabel}；身份：${READING_CONTEXT_WORK_LABELS[story.appliedWork ?? "unspecified"] ?? "未识别"}。`],
       ["patternDiagnosis.primaryPathId", "patternDiagnosis.wealthResourceTask", "balance.structural.working", "natalLifeStory.age", "natalLifeStory.appliedWork"]));
     rules.push(domain === "career" ? localRule(domain, "buildConcreteNatalProse.primaryRoles", primary.map(entry => entry.id).join("|"),
       "正文只列本次已选主用字及其实际透藏、根与使用条件。", primary.map(entry => `${entry.stem}${entry.tenGod}：${entry.presenceText}。`),
@@ -208,7 +212,7 @@ export function buildConcreteNatalProse(input: {
     const relationshipRules = structuredClone(f.relationship.ruleApplications ?? []);
     relationshipRules.push(localRule("relationships", "buildConcreteNatalProse.relationship", `${day.mainTenGod}/${state ?? "unspecified"}`,
       "最终关系正文沿日支角色、独立星宫事实及已核现实关系状态组织，不采用事业格局或财运方向。",
-      [day.summary, `实际关系状态：${state ?? "unspecified"}。`], [`day:main_hidden:${day.mainStem}`, ...palace.map(item => item.fact.id), ...stars.map(item => item.fact.id)]));
+      [day.summary, `实际关系状态：${READING_CONTEXT_RELATIONSHIP_LABELS[state ?? "unspecified"] ?? "未识别"}。`], [`day:main_hidden:${day.mainStem}`, ...palace.map(item => item.fact.id), ...stars.map(item => item.fact.id)]));
     result.domains.relationships = { headline: state === "separated" ? "婚恋结构按星宫保留，当前只落到分开后的实际联系"
       : joined && clashed ? "夫妻宫合冲并见，联系与变化需要分别判断"
         : clashed ? "夫妻宫有冲，婚恋安排有变化线索"

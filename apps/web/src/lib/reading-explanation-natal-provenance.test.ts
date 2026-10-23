@@ -43,7 +43,7 @@ function products(input: Fixture) {
 
 it("attaches only the actual final producer's path, role and task selections to each natal domain", () => {
   for (const input of [b, female, financial]) {
-    const before = JSON.stringify(input), { report, index } = products(input);
+    const before = JSON.stringify(input), { synthesis, report, index } = products(input);
     for (const domain of report.plainReading!.domains) {
       const conclusion = index.conclusions.find(item => item.stableId.endsWith(`/natal:${domain.id}`))!;
       expect(conclusion.evidence.ruleApplications).toEqual(domain.ruleApplications);
@@ -54,7 +54,15 @@ it("attaches only the actual final producer's path, role and task selections to 
       expect(conclusion.evidence.ruleApplications.some(rule => rule.provenance?.selector === "buildNatalLifeStory.workWealthParagraphs")).toBe(false);
       expect(conclusion.evidence.ruleApplications.every(rule => !rule.provenance?.selection.startsWith("alternative/"))).toBe(true);
       for (const source of conclusion.evidence.citations) expect(resolveReadingCitationSupport(index, conclusion.stableId, source).status).toBe("associated_source");
+      for (const rule of conclusion.evidence.ruleApplications.filter(item => ["buildConcreteNatalProse.route", "buildConcreteNatalProse.relationship"].includes(item.provenance!.selector))) {
+        expect([rule.decision, ...rule.support].join()).not.toMatch(/resource-output|resource_first|wealth_first|official_joint|rooted_peer_mixed_authority|adult|unspecified/u);
+      }
     }
+    const projection = synthesis.sections.find(section => section.id === "career")!.ruleApplications!.find(rule => rule.ruleId === "natal-life-domain-projection")!;
+    expect([projection.decision, ...projection.support].join()).not.toMatch(/resource-output|adult|unspecified/u);
+    expect(projection.provenance.selection).toContain("/adult/unspecified");
+    expect(index.conclusions.find(item => item.stableId.endsWith("/natal:relationships"))!.evidence.ruleApplications
+      .find(rule => rule.provenance?.selector === "buildConcreteNatalProse.relationship")!.support).toContain("实际关系状态：未填写。");
     const career = report.plainReading!.domains.find(domain => domain.id === "career")!;
     expect(career.ruleApplications!.find(rule => rule.provenance.selector === "selectNatalPatternPath")!.provenance.selection).toBe(input.comprehensive.patternDiagnosis!.primaryPathId);
     const wealth = report.plainReading!.domains.find(domain => domain.id === "wealth")!;
@@ -99,6 +107,10 @@ it("keeps unknown-hour selected-column provenance free of hour references", () =
   for (const section of synthesis.sections.filter(item => ["career", "wealth", "relationships"].includes(item.id))) {
     expect(section.ruleApplications!.flatMap(rule => rule.provenance.factRefs).some(ref => ref.startsWith("hour:"))).toBe(false);
   }
+  const projection = synthesis.sections.find(section => section.id === "career")!.ruleApplications!.find(rule => rule.ruleId === "natal-life-domain-projection")!;
+  expect(projection.support.join()).toContain("未填写年龄参考");
+  expect(projection.support.join()).toContain("已采用身份：未填写");
+  expect(projection.provenance.selection).toContain("/unknown/unspecified");
   expect(comprehensive.relationshipFoundation!.perspectives.map(item => item.id)).toEqual(["wealth", "authority"]);
 });
 

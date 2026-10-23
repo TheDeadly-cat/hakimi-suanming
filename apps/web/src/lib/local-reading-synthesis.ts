@@ -13,7 +13,7 @@ import { buildReadingFeedbackChoices } from "./local-reading-feedback";
 import type { LocalPersonalReading, LocalPersonalReadingEntry, PersonalReadingRecordReference } from "./local-personal-reading";
 import { contextualFeedbackText, contextualFeedbackVersions, type LocalContextualReadingBundle } from "./local-contextual-reading-record";
 import type { ContextualDomainReading } from "./local-contextual-reading";
-import { READING_CONTEXT_FORMAT, type ReadingContextReference } from "./local-reading-context";
+import { READING_CONTEXT_FORMAT, READING_CONTEXT_WORK_LABELS, type ReadingContextReference } from "./local-reading-context";
 import { outlookJudgmentFeedbackText } from "./local-outlook-judgment-record";
 import { outlookDirectionCaption, summarizeAnnualJudgmentCaptions, READING_YEAR_SUMMARY_VERSION } from "./outlook-judgment-presentation";
 import { buildNatalLifeStory } from "./natal-life-story";
@@ -465,9 +465,11 @@ export function buildLocalReadingSynthesis(input: LocalReadingSynthesisInput): L
       section.ruleApplications = (section.ruleApplications ?? []).map(rule => ({ ...rule,
         limitations: unique([...rule.limitations, "本项支持原本命路径和作用条件；年龄、身份与生活用语由生活投影改写，未作整段语义验证。"])
       }));
+      const pathLabel = c.patternDiagnosis?.paths.find(path => path.role === "primary" && path.id === natalStory.pathId)?.label || "未识别的结构路径";
+      const ageLabel = natalStory.age?.stage === "unknown" ? "未识别（缺少可靠年龄依据）" : natalStory.age?.label ?? "未填写年龄参考";
       section.ruleApplications.push({ ruleId: "natal-life-domain-projection", title: "本领域的生活投影选择",
-        decision: `沿已选${natalStory.pathId}解释${item.id === "career" ? "能力发挥" : "投入与回报"}；只投影当前年龄及已确认背景，不新判职业或收益。`,
-        support: [`实际路径：${natalStory.pathId}。`, `年龄阶段：${natalStory.age?.stage ?? "unknown"}；已采用身份：${natalStory.appliedWork ?? "unspecified"}。`],
+        decision: `沿已选“${pathLabel}”解释${item.id === "career" ? "能力发挥" : "投入与回报"}；只投影当前年龄及已确认背景，不新判职业或收益。`,
+        support: [`实际路径：${pathLabel}。`, `年龄阶段：${ageLabel}；已采用身份：${READING_CONTEXT_WORK_LABELS[natalStory.appliedWork ?? "unspecified"] ?? "未识别"}。`],
         limitations: [NATAL_READING_PROVENANCE_LIMIT, "年龄或现实身份未知时保持中性范围，不把条件例子当成已发生经历。"],
         sourceIds: [], sourceSubjects: [...section.sourceSubjects], provenance: { version: NATAL_READING_RULE_APPLICATIONS_VERSION,
           producerVersion: natalStory.version, selector: "buildNatalLifeStory.workWealthParagraphs", selection: `${item.id}/${natalStory.pathId}/${natalStory.age?.stage ?? "unknown"}/${natalStory.appliedWork ?? "unspecified"}`,
