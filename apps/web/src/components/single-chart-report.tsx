@@ -6,6 +6,11 @@ import {
   type SingleChartResearchReport as SingleChartResearchReportModel
 } from "@hakimi/research-export";
 import {
+  readSingleChartCalendarFrameHeader,
+  SINGLE_CHART_CALENDAR_FRAME_VERSION,
+  type SingleChartCalendarFramePresentation
+} from "../../../../packages/research-export/src/single-chart-calendar-frame";
+import {
   evidenceSubjectIdForBaziStrengthBinding,
   isSingleChartReportEvidenceSubjectId
 } from "@hakimi/knowledge-core";
@@ -2539,11 +2544,19 @@ function SingleChartReportIndex({ items }: { items: readonly ReportIndexItem[] }
   );
 }
 
-export const SingleChartReport = forwardRef<HTMLElement, { report: SingleChartResearchReportModel }>(
-  function SingleChartReport({ report: reportInput }, reportRef) {
+export const SingleChartReport = forwardRef<HTMLElement, {
+  report: SingleChartResearchReportModel;
+  calendarPresentation?: SingleChartCalendarFramePresentation;
+}>(
+  function SingleChartReport({ report: reportInput, calendarPresentation }, reportRef) {
     const reportTitleId = useId();
     const provenanceInstructionsId = useId();
-    const prepared = prepareSingleChartReportForDisplay(reportInput);
+    let prepared = prepareSingleChartReportForDisplay(reportInput);
+    let calendarFrame: SingleChartCalendarFramePresentation["calendarFrame"] | null = null;
+    if (calendarPresentation !== undefined) {
+      try { calendarFrame = readSingleChartCalendarFrameHeader(calendarPresentation, reportInput); }
+      catch { prepared = { issue: "历法展示未通过当前报告身份绑定", report: null }; }
+    }
     const reportSectionIds = {
       summary: `${reportTitleId}-summary`,
       body: `${reportTitleId}-body`,
@@ -2634,6 +2647,7 @@ export const SingleChartReport = forwardRef<HTMLElement, { report: SingleChartRe
         aria-labelledby={reportTitleId}
         data-anonymized={report.anonymized ? "true" : "false"}
         data-binding-state="bound"
+        data-calendar-frame-version={calendarFrame ? SINGLE_CHART_CALENDAR_FRAME_VERSION : undefined}
         data-schema-family="legacy-v13"
         data-release-identity="legacy-v13"
         data-release-family="legacy-v13"
@@ -2664,12 +2678,13 @@ export const SingleChartReport = forwardRef<HTMLElement, { report: SingleChartRe
             <div>
               <p className="single-chart-report-kicker">HAKIMI · BAZI RESEARCH</p>
               <h1 id={reportTitleId}>{report.title}</h1>
-              <p>{report.subtitle}</p>
+              <p>{calendarFrame?.subtitle ?? report.subtitle}</p>
             </div>
             <div className="single-chart-report-identity">
               <strong>{report.caseLabel}</strong>
               <span>{report.revisionLabel}</span>
               <small>{report.anonymized ? "匿名模式" : "完整资料模式"} · 格式 {report.formatVersion}</small>
+              {calendarFrame ? <small>历法展示 1.0.0 · 当地公历 / 固定 +08 农历</small> : null}
             </div>
           </header>
 

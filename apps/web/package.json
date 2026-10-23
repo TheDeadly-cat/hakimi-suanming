@@ -31,8 +31,8 @@
   "dependencies": {
     "@hakimi/backup": "*",
     "@hakimi/bazi-core": "*",
-    "@hakimi/bazi-review-context": "*",
     "@hakimi/bazi-interpretation": "*",
+    "@hakimi/bazi-review-context": "*",
     "@hakimi/case-import": "*",
     "@hakimi/comparison-core": "*",
     "@hakimi/contracts": "*",
@@ -42,9 +42,9 @@
     "@hakimi/luck-core": "*",
     "@hakimi/platform": "*",
     "@hakimi/relations-core": "*",
-    "@hakimi/revision-replay": "*",
-    "@hakimi/research-query": "*",
     "@hakimi/research-export": "*",
+    "@hakimi/research-query": "*",
+    "@hakimi/revision-replay": "*",
     "@hakimi/rule-packs": "*",
     "@hakimi/rule-profiles": "*",
     "@hakimi/storage": "*",
@@ -53,12 +53,14 @@
     "dexie": "4.4.4",
     "html-to-image": "1.11.13",
     "lucide-react": "1.28.0",
+    "pako": "2.1.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@types/pako": "2.0.4",
     "@vitejs/plugin-react": "5.2.0",
-    "vite": "7.3.6"
+    "vite": "7.3.7"
   }
 }

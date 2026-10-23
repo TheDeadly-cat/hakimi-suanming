@@ -364,7 +364,7 @@ export function DashboardPage() {
     ? "loading"
     : subjectError || savedViewError
       ? "degraded"
-      : backupTone === "attention"
+      : backupTone === "attention" && !latest
         ? "attention"
         : "ready";
   const dashboardStateLabel = dashboardState === "loading"
@@ -426,15 +426,15 @@ export function DashboardPage() {
               href: latestPresentation.href,
               code: "CONTINUE",
               title: `继续「${dashboardRecordAlias(latest.alias)}」`,
-              detail: `${latestPresentation.detail} · 打开确切本地记录继续研究。`,
+              detail: `${latestPresentation.detail} · 继续阅读判断、年度变化与之前的反馈。`,
               icon: latestPresentation.kind === "candidate_set" ? Layers3 : Database,
               tone: "continue"
             }
           : {
               href: "/new?demo=1",
               code: "START",
-              title: "建立第一份研究样本",
-              detail: "先从明确标记的演示输入熟悉规则快照与保存边界。",
+              title: "先看一份示例解读",
+              detail: "用合成资料体验命局、大运流年和反馈记录。",
               icon: FilePlus2,
               tone: "quiet"
             };
@@ -455,16 +455,16 @@ export function DashboardPage() {
     >
       <div className="dashboard-masthead">
         <PageHeading
-          eyebrow="本地研究空间"
-          title="今天从哪份研究继续？"
-          description="本页只汇总当前浏览器可读的案例索引、保存视图与备份提示。核心计算不依赖 AI，备份标记也不等于文件可恢复。"
+          eyebrow="哈基米 · 八字"
+          title="读懂命局，看见岁运变化"
+          description="从出生资料开始，查看命局初判、事业关系与未来十年主题。解读和反馈保存在本机，无需 API 密钥。"
           actions={subjectError ? (
             <AppLink href="/settings/data" className="secondary-action">
               <HardDriveDownload aria-hidden="true" /> 检查本机数据
             </AppLink>
           ) : <>
-              <AppLink href="/cases/research" className="secondary-action">
-                <FileSearch aria-hidden="true" /> 专业研究检索
+              <AppLink href="/cases" className="secondary-action">
+                <FileSearch aria-hidden="true" /> 我的命盘
               </AppLink>
               <AppLink href="/new" className="primary-action">
                 <FilePlus2 aria-hidden="true" /> 新建排盘
@@ -473,7 +473,7 @@ export function DashboardPage() {
         />
         <dl className="dashboard-pulse" aria-label="本机工作台摘要" aria-live="polite" aria-atomic="true" aria-busy={loading || savedViewsLoading}>
           <div data-tone={subjectError ? "attention" : "quiet"}>
-            <dt>研究记录</dt>
+            <dt>本地命盘与记录</dt>
             <dd><strong>{recordsPulse}</strong><small>{subjectError ? "未取得可靠计数" : "当前浏览器"}</small></dd>
           </div>
           <div data-tone={savedViewError ? "attention" : "quiet"}>
@@ -487,6 +487,7 @@ export function DashboardPage() {
         </dl>
       </div>
 
+      <details className="dashboard-more-tools"><summary>资料管理与专业工具</summary>
       <div className="dashboard-route-guide">
         <p id="dashboard-route-guide-copy">
           <strong>研究路径</strong>
@@ -532,6 +533,7 @@ export function DashboardPage() {
           <ArrowRight className="dashboard-route-card__arrow" aria-hidden="true" />
         </AppLink>
       </nav>
+      </details>
 
       {loading ? (
         <div className="dashboard-skeleton" role="status" aria-label="正在读取本地案例">
@@ -568,7 +570,7 @@ export function DashboardPage() {
         </section>
       ) : latest && latestPresentation ? (
         <section className={`continue-research continue-research--${latestPresentation.kind}`} aria-labelledby="continue-title">
-          <div className="section-label"><span className="spine-dot" />继续研究</div>
+          <div className="section-label"><span className="spine-dot" />继续阅读</div>
           <div className="continue-row">
             <div className="continue-row__copy">
               <StatusPill tone={latestPresentation.kind === "candidate_set" ? "warning" : "info"}>{safeVisibleText(latestPresentation.status, "记录状态不可显示", 120)}</StatusPill>
@@ -589,9 +591,9 @@ export function DashboardPage() {
         <section className="empty-workspace" aria-labelledby="empty-title">
           <div className="empty-mark" aria-hidden="true"><Layers3 /></div>
           <div>
-            <p className="eyebrow">还没有本地研究记录</p>
-            <h2 id="empty-title">先建立第一张可复算的研究样本</h2>
-            <p>你可以从空白输入开始，也可以载入一组明确标记的演示值。两种方式都会调用当前本地计算适配层并保存完整规则快照；演示值不构成真实个案或专家结论。</p>
+            <p className="eyebrow">欢迎使用免费初解试用版</p>
+            <h2 id="empty-title">建立你的第一张命盘</h2>
+            <p>填写出生日期和时间，就能查看命局特点与年度变化。也可以先载入合成示例，熟悉如何读解读、查看依据和留下反馈。</p>
             <div className="button-row">
               <AppLink href="/new" className="primary-action">从空白开始</AppLink>
               <AppLink href="/new?demo=1" className="secondary-action">载入演示值</AppLink>
@@ -604,7 +606,7 @@ export function DashboardPage() {
       <div className="dashboard-grid">
         <section className="flat-section dashboard-recent" aria-labelledby="dashboard-recent-title">
           <div className="section-heading-row">
-            <div><p className="eyebrow">最近研究</p><h2 id="dashboard-recent-title">{loading ? "正在读取本地记录" : subjectError ? "案例库不可用" : total ? `${total} 条本地记录` : "等待第一条记录"}</h2></div>
+            <div><p className="eyebrow">最近打开</p><h2 id="dashboard-recent-title">{loading ? "正在读取本地记录" : subjectError ? "案例库不可用" : total ? `${total} 条本地记录` : "等待第一条记录"}</h2></div>
             <AppLink href="/cases" className="text-link">查看案例库 <ArrowRight aria-hidden="true" /></AppLink>
           </div>
           {!loading && !subjectError && total > orderedSubjects.length ? <p className="dashboard-recent-scope">首页按更新时间仅展示最近 {orderedSubjects.length} 条；完整的 {total} 条记录请进入案例库核对。</p> : null}
@@ -627,7 +629,7 @@ export function DashboardPage() {
               );
             }) : null}
             {!loading && subjectError ? <p className="muted-copy">案例库读取失败；这里没有显示空库结论或近似记录。</p> : null}
-            {!loading && !subjectError && !orderedSubjects.length ? <p className="muted-copy">保存正式命盘或未知时辰候选组后，这里会沿“岁序脊线”显示最近研究。</p> : null}
+            {!loading && !subjectError && !orderedSubjects.length ? <p className="muted-copy">保存命盘后，可以从这里继续阅读。</p> : null}
           </div>
         </section>
 

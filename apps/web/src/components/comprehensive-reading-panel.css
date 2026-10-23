@@ -1,0 +1,45 @@
+.deep-reading { margin-top: 28px; }
+.deep-reading-intro { margin-bottom: 20px; }
+.deep-reading-intro p { margin: 0 0 12px; font-size: 16px; line-height: 1.85; color: var(--reading-ink); }
+.deep-reading-intro > span { color: var(--reading-muted); font-size: 12px; }
+.deep-reading-tabs { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--reading-line); gap: 0 4px; }
+.deep-reading-tabs button { flex: 1 1 100px; min-height: 48px; padding: 10px 8px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--reading-muted); font-size: 14px; font-weight: 650; cursor: pointer; }
+.deep-reading-tabs button[aria-selected="true"] { color: var(--reading-jade); border-bottom-color: var(--reading-jade); }
+.deep-reading-chapter { padding: 28px 0; border-bottom: 1px solid var(--reading-line); }
+.deep-reading-chapter > .deep-reading-kicker { color: var(--reading-jade); font-size: 13px; letter-spacing: .08em; margin: 0 0 10px; }
+.deep-reading-chapter h3 { margin: 0 0 16px; font: 650 24px/1.5 var(--reading-serif); text-wrap: balance; }
+.deep-reading-chapter > p { max-width: 45em; margin: 14px 0; font-size: 16px; line-height: 1.9; color: #465653; }
+.deep-reading-chapter > .deep-reading-verdict { color: var(--reading-ink); font-weight: 600; }
+.deep-reading-points-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 22px; }
+.deep-reading-points h4 { font-size: 14px; color: var(--reading-jade); margin: 18px 0 10px; }
+.deep-reading-points ul, .deep-reading-evidence ul { padding-left: 20px; margin: 0; }
+.deep-reading-points li { padding-left: 2px; margin-bottom: 10px; font-size: 14px; line-height: 1.85; color: #465653; }
+.deep-reading-evidence { margin-top: 12px; }
+.deep-reading-explanation { margin-top: 12px; }
+.deep-reading-explanation summary { display: flex; align-items: center; gap: 8px; min-height: 44px; color: var(--reading-jade); font-size: 14px; cursor: pointer; }
+.deep-reading-explanation[open] summary svg { transform: rotate(180deg); }
+.deep-reading-explanation > p { max-width: 45em; font-size: 16px; line-height: 1.9; color: #465653; overflow-wrap: anywhere; }
+.deep-reading-explanation > .deep-reading-verdict { color: var(--reading-ink); }
+.deep-reading-evidence summary { display: flex; align-items: center; gap: 8px; min-height: 44px; color: var(--reading-jade); font-size: 13px; font-weight: 600; cursor: pointer; }
+.deep-reading-evidence[open] summary svg { transform: rotate(180deg); }
+.deep-reading-evidence li, .deep-reading-source p, .deep-reading-source blockquote { font-size: 13px; line-height: 1.8; color: var(--reading-muted); }
+.deep-reading-source { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--reading-line); }
+.deep-reading-source strong, .deep-reading-source a { font-size: 13px; }
+.deep-reading-source blockquote { margin: 12px 0; padding-left: 12px; border-left: 2px solid var(--reading-line); }
+.deep-reading-useful-roles { margin: 24px 0; }
+.deep-reading-useful-roles h4 { margin: 0 0 8px; color: var(--reading-jade); font-size: 16px; }
+.deep-reading-useful-roles dl { margin: 0; }
+.deep-reading-useful-entry { display: grid; grid-template-columns: minmax(90px, 1fr) minmax(0, 4fr); gap: 20px; padding: 20px 0; border-top: 1px solid var(--reading-line); }
+.deep-reading-useful-entry dt { display: flex; flex-wrap: wrap; align-content: start; align-items: baseline; gap: 4px 8px; }
+.deep-reading-useful-entry dt strong { font: 650 30px/1.3 var(--reading-serif); color: var(--reading-jade); }
+.deep-reading-useful-entry dt span { color: var(--reading-ink); font-size: 14px; }
+.deep-reading-useful-entry dt small { flex-basis: 100%; font-size: 12px; line-height: 1.7; color: var(--reading-muted); }
+.deep-reading-useful-entry dd { min-width: 0; margin: 0; }
+.deep-reading-useful-entry p { margin: 0 0 10px; font-size: 16px; line-height: 1.85; color: var(--reading-ink); overflow-wrap: anywhere; }
+.deep-reading-useful-entry .deep-reading-useful-presence { font-size: 14px; color: var(--reading-muted); }
+.deep-reading-useful-entry summary { display: flex; align-items: center; gap: 8px; min-height: 44px; color: var(--reading-jade); font-size: 13px; cursor: pointer; }
+.deep-reading-useful-entry details[open] summary svg { transform: rotate(180deg); }
+.deep-reading-useful-entry ul { margin: 0; padding-left: 20px; }
+.deep-reading-useful-entry li { margin: 0 0 8px; font-size: 14px; line-height: 1.8; color: var(--reading-muted); overflow-wrap: anywhere; }
+@media(max-width:520px) { .deep-reading-useful-entry { grid-template-columns: 1fr; gap: 10px; } .deep-reading-useful-entry dt small { flex-basis: auto; } }
+@media(max-width:520px) { .deep-reading-points-grid { grid-template-columns: 1fr; gap: 0; } .deep-reading-chapter h3 { font-size: 22px; } .deep-reading-tabs button { flex-basis: 27%; } }

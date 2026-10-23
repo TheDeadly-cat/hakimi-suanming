@@ -3,6 +3,7 @@
 import { readFile } from "node:fs/promises";
 import { beforeAll, describe, expect, it } from "vitest";
 import { verifyRevisionSnapshotIntegrity } from "@hakimi/chart-integrity";
+import { sha256Hex } from "@hakimi/integrity";
 import {
   FORMAL_COMPARISON_CATEGORY_ORDER,
   formalComparisonRequestSchema,
@@ -10,7 +11,11 @@ import {
 } from "@hakimi/contracts";
 import {
   COMPARISON_FIELD_DEFINITIONS,
+  buildFormalComparisonHashPayload,
+  buildPairStructureResearchHashPayload,
+  projectPairStructureResearch,
   projectFormalComparison,
+  verifyPairStructureResearchProjectionIntegrity,
   verifyFormalComparisonProjectionIntegrity
 } from "./index";
 import {
@@ -25,6 +30,9 @@ import {
 import {
   buildFormalComparisonGoldenFixtures,
   formalComparisonGoldenFiles,
+  serializeFormalComparisonGoldenFixture,
+  withFrozenComparisonTransitV12,
+  withFrozenPairTransitV12,
   writeFormalComparisonGoldenFixtures
 } from "./formal-comparison-golden-fixtures";
 
@@ -56,6 +64,60 @@ function findForbiddenKeys(value: unknown, path = "$", found: string[] = []): st
 }
 
 describe("FormalComparison versioned engineering golden fixtures", () => {
+  it("旧 1.1 金标继续逐字节复演，当前生成器拒绝覆盖旧证据", async () => {
+    const legacy = await buildFormalComparisonGoldenFixtures({ historicalTransitV12: true });
+    for (const [name, value] of [
+      ["formal-comparison-sources.v1.json", legacy.sources],
+      ["formal-comparison-projections.v1.json", legacy.projections],
+      ["pair-structure-research-projection.v1.json", legacy.pairResearch]
+    ] as const) {
+      expect(await readFile(new URL(`../fixtures/${name}`, import.meta.url), "utf8"))
+        .toBe(serializeFormalComparisonGoldenFixture(value));
+    }
+    await expect(writeFormalComparisonGoldenFixtures(legacy)).rejects.toThrow("历史对照金标只读");
+  });
+
+  it("旧对照按完整原运限身份复验，改写摘要也不能掩盖伪造来源或节点", async () => {
+    const scenario = fixtures.projections.scenarios.find((entry) => entry.scenarioId === "full-status-4")!;
+    const current = await projectFormalComparison(scenario.request, fixtures.sources.sources);
+    const legacy = await withFrozenComparisonTransitV12(current);
+    const original = structuredClone(legacy);
+    await expect(verifyFormalComparisonProjectionIntegrity(legacy)).resolves.toEqual(original);
+    expect(legacy).toEqual(original);
+    expect(legacy.manifest.resultHash).not.toBe(current.manifest.resultHash);
+    for (const mutate of [
+      (snapshot: typeof legacy.transits[number] & { status: "resolved" }) => { snapshot.snapshot.manifest.sourceRefs[0] += "?forged"; },
+      (snapshot: typeof legacy.transits[number] & { status: "resolved" }) => { Object.assign(snapshot.snapshot, { timelineVersion: "9.9.9" }); },
+      (snapshot: typeof legacy.transits[number] & { status: "resolved" }) => { snapshot.snapshot.target.instant = "2024-02-05T08:27:07.000Z"; }
+    ]) {
+      const forged = structuredClone(legacy);
+      const transit = forged.transits[0]!;
+      if (transit.status !== "resolved") throw new Error("Expected resolved historical transit");
+      mutate(transit);
+      const { resultHash: _oldHash, ...payload } = transit.snapshot;
+      transit.snapshot.resultHash = await sha256Hex(payload);
+      forged.manifest.resultHash = await sha256Hex(buildFormalComparisonHashPayload(forged));
+      await expect(verifyFormalComparisonProjectionIntegrity(forged)).rejects.toThrow();
+    }
+  });
+
+  it("双案例旧报告仍可复验，伪造来源并重签摘要不能通过", async () => {
+    const sourceA = fixtures.sources.sources[0]!;
+    const sourceB = { ...structuredClone(fixtures.sources.sources[2]!), slotId: "B" as const };
+    const current = await projectPairStructureResearch(fixtures.pairResearch.request, [sourceA, sourceB]);
+    const legacy = await withFrozenPairTransitV12(current);
+    await expect(verifyPairStructureResearchProjectionIntegrity(legacy)).resolves.toEqual(legacy);
+    expect(legacy.manifest.resultHash).not.toBe(current.manifest.resultHash);
+    const forged = structuredClone(legacy);
+    const transit = forged.participants[0].transit;
+    if (transit.status !== "resolved") throw new Error("Expected resolved transit");
+    transit.snapshot.manifest.sourceRefs[0] += "?forged";
+    const { resultHash: _oldHash, ...payload } = transit.snapshot;
+    transit.snapshot.resultHash = await sha256Hex(payload);
+    forged.manifest.resultHash = await sha256Hex(buildPairStructureResearchHashPayload(forged));
+    await expect(verifyPairStructureResearchProjectionIntegrity(forged)).rejects.toThrow("双案例结构研究投影");
+  });
+
   it("只有显式 write 才改写，check 模式要求逐字节一致", async () => {
     for (const file of formalComparisonGoldenFiles(fixtures)) {
       await expect(readFile(file.path, "utf8")).resolves.toBe(file.content);

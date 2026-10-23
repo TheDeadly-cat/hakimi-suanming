@@ -32,7 +32,8 @@ import {
   type RelationsResult
 } from "@hakimi/relations-core";
 import {
-  CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR,
+  TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0,
+  TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_3_0,
   lookupHistoricalTransitSnapshotExecutor,
   type TransitSnapshotExecutorDescriptor
 } from "@hakimi/transit-core";
@@ -193,6 +194,14 @@ function validateReplayProfile(rawProfile: unknown): asserts rawProfile is Revis
   assertExactContainerKeys(rawProfile.relations, ["descriptor", "ruleProfile"], [], "关系执行器选择");
   assertExactContainerKeys(rawProfile.luckCycle, ["descriptor"], [], "起运执行器选择");
   assertExactContainerKeys(rawProfile.transit, ["descriptor"], [], "Transit 执行器选择");
+  const knownProfile = [EXPLICIT_DERIVED_REPLAY_PROFILE_V1_2_0, CURRENT_EXPLICIT_DERIVED_REPLAY_PROFILE]
+    .find((profile) => profile.profileId === rawProfile.profileId);
+  // Unknown executors remain an explicit unavailable result. A retained,
+  // executable descriptor must never masquerade under another fixed profile.
+  if (knownProfile && lookupHistoricalTransitSnapshotExecutor(rawProfile.transit.descriptor)
+    && canonicalStringify(rawProfile.transit.descriptor) !== canonicalStringify(knownProfile.transit.descriptor)) {
+    throw new RevisionDerivedReplayError("INVALID_REQUEST", "固定 Profile 与 Transit 执行器身份不一致。");
+  }
 }
 
 function parseReplayRequest(rawRequest: unknown): RevisionDerivedReplayRequest {
@@ -226,7 +235,7 @@ function parseReplayRequest(rawRequest: unknown): RevisionDerivedReplayRequest {
   return request as RevisionDerivedReplayRequest;
 }
 
-export const CURRENT_EXPLICIT_DERIVED_REPLAY_PROFILE: RevisionDerivedReplayProfile = deepFreeze({
+export const EXPLICIT_DERIVED_REPLAY_PROFILE_V1_2_0: RevisionDerivedReplayProfile = deepFreeze({
   schemaVersion: REVISION_DERIVED_REPLAY_SCHEMA_VERSION,
   profileId: "hakimi-explicit-derived-replay:relations-0.1.0_luck-0.1.0_transit-1.2.0",
   relations: {
@@ -237,8 +246,14 @@ export const CURRENT_EXPLICIT_DERIVED_REPLAY_PROFILE: RevisionDerivedReplayProfi
     descriptor: structuredClone(LUCK_CYCLE_EXECUTOR_DESCRIPTOR)
   },
   transit: {
-    descriptor: structuredClone(CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR)
+    descriptor: structuredClone(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0)
   }
+});
+
+export const CURRENT_EXPLICIT_DERIVED_REPLAY_PROFILE: RevisionDerivedReplayProfile = deepFreeze({
+  ...structuredClone(EXPLICIT_DERIVED_REPLAY_PROFILE_V1_2_0),
+  profileId: "hakimi-explicit-derived-replay:relations-0.1.0_luck-0.1.0_transit-1.3.0",
+  transit: { descriptor: structuredClone(TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_3_0) }
 });
 
 function unavailable<T>(

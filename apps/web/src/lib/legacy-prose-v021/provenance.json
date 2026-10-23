@@ -1,0 +1,77 @@
+{
+  "sourceCommit": "2dfae4be00e51735c0e273e3fc7701867d1b9936",
+  "purpose": "Historical prose-only exact feedback replay; never current automatic output",
+  "transformation": "Relative imports only: internal closure stays local; other relative imports gain one ../",
+  "files": [
+    {
+      "name": "annual-event-mechanism-prose",
+      "originalPath": "apps/web/src/lib/annual-event-mechanism-prose.ts",
+      "originalBytes": 70350,
+      "originalSha256": "a600d211112c41b9aad37370e135f21bcf85c3c535be30ce28ae2e03b975046c",
+      "frozenPath": "apps/web/src/lib/legacy-prose-v021/annual-event-mechanism-prose.ts"
+    },
+    {
+      "name": "annual-event-reading-prose",
+      "originalPath": "apps/web/src/lib/annual-event-reading-prose.ts",
+      "originalBytes": 43320,
+      "originalSha256": "e7db5d3d262073c1ca367d14d20033f889b2571b2b1c8b1ff9a1a765bff5ec85",
+      "frozenPath": "apps/web/src/lib/legacy-prose-v021/annual-event-reading-prose.ts"
+    },
+    {
+      "name": "monthly-domain-prose",
+      "originalPath": "apps/web/src/lib/monthly-domain-prose.ts",
+      "originalBytes": 47821,
+      "originalSha256": "3073d0b23417be61fb761a1c0ff4113a4b3933fba1789d843641bc3434660171",
+      "frozenPath": "apps/web/src/lib/legacy-prose-v021/monthly-domain-prose.ts"
+    },
+    {
+      "name": "local-annual-event-reading",
+      "originalPath": "apps/web/src/lib/local-annual-event-reading.ts",
+      "originalBytes": 21865,
+      "originalSha256": "e5971ffa0eabcda918a3708982919d5447260745212f199563366f4dc8631b1e",
+      "frozenPath": "apps/web/src/lib/legacy-prose-v021/local-annual-event-reading.ts"
+    },
+    {
+      "name": "local-monthly-domain-reading",
+      "originalPath": "apps/web/src/lib/local-monthly-domain-reading.ts",
+      "originalBytes": 22297,
+      "originalSha256": "8dfdd666326d9a1ddae834b36fc479942602ec5a194bc12d26bf32845760bc3f",
+      "frozenPath": "apps/web/src/lib/legacy-prose-v021/local-monthly-domain-reading.ts"
+    },
+    {
+      "name": "annual-life-story",
+      "originalPath": "apps/web/src/lib/annual-life-story.ts",
+      "originalBytes": 21105,
+      "originalSha256": "19ae2b4eb1bf810f459761d6cfa5ecabbd1a7953c8ede7c45f2748645c1356bb",
+      "frozenPath": "apps/web/src/lib/legacy-prose-v021/annual-life-story.ts"
+    },
+    {
+      "name": "annual-month-context",
+      "originalPath": "apps/web/src/lib/annual-month-context.ts",
+      "originalBytes": 14187,
+      "originalSha256": "bafa3370300c4dc072ea875d27d5709a27d8f711502a247b038dd18f44718f72",
+      "frozenPath": "apps/web/src/lib/legacy-prose-v021/annual-month-context.ts"
+    },
+    {
+      "name": "local-annual-month-story",
+      "originalPath": "apps/web/src/lib/local-annual-month-story.ts",
+      "originalBytes": 16607,
+      "originalSha256": "aa365315478cd7b8ccbbb13fd0e403774be19ff3a05b05d6b7d7a3c6f2896d36",
+      "frozenPath": "apps/web/src/lib/legacy-prose-v021/local-annual-month-story.ts"
+    },
+    {
+      "name": "local-life-stage-years",
+      "originalPath": "apps/web/src/lib/local-life-stage-years.ts",
+      "originalBytes": 33933,
+      "originalSha256": "458ddcdffd68ab8e6670e329c707f49144f1876e924e486e26f26cade5cc21f8",
+      "frozenPath": "apps/web/src/lib/legacy-prose-v021/local-life-stage-years.ts"
+    },
+    {
+      "name": "local-annual-event-record",
+      "originalPath": "apps/web/src/lib/local-annual-event-record.ts",
+      "originalBytes": 10736,
+      "originalSha256": "7cd4a700c8504da9d2fb98671b69ae063ee3c4448e11e2196c5bd838bf819308",
+      "frozenPath": "apps/web/src/lib/legacy-prose-v021/local-annual-event-record.ts"
+    }
+  ]
+}

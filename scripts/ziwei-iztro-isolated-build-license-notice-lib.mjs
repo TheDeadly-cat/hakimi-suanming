@@ -57,7 +57,13 @@ export const ZIWEI_IZTRO_LICENSE_NOTICE_SURFACES = Object.freeze({
 });
 
 export const ZIWEI_IZTRO_LICENSE_NOTICE_EVIDENCE_PATH =
-  "content/system-admission/ziwei-iztro-build-notice-evidence.v1.json";
+  "scripts/fixtures/ziwei-iztro-vite-7.3.7-build-notice-observation.json";
+// The earlier Vite 7.3.6 observation is immutable history, not current build proof.
+const HISTORICAL_NOTICE_IDENTITY = Object.freeze({
+  path: "content/system-admission/ziwei-iztro-build-notice-evidence.v1.json",
+  bytes: 12871,
+  sha256: "cb8ab23f89531941fde358a452ecab41d508112eabec925fb56c76d508c20610"
+});
 
 export const ZIWEI_HKO_RESTRICTED_SOURCE_MATERIAL_IDENTITY = Object.freeze({
   sourceEvidence: Object.freeze({
@@ -87,13 +93,13 @@ const EVIDENCE_DIGEST_DOMAIN = "hakimi.ziwei.iztro-build-notice-evidence/1\0";
 const TEMPORARY_PREFIX = "hakimi-ziwei-iztro-license-verification-";
 const MAX_EVIDENCE_BYTES = 1024 * 1024;
 const VITE_BUILD_IDENTITY = Object.freeze({
-  version: "7.3.6",
-  resolved: "https://registry.npmjs.org/vite/-/vite-7.3.6.tgz",
-  integrity: "sha512-4XP60spRGjSZFf1qYH+dJIkK2znL3zQfl9KkOV9MkkRR/3Dls0dxaBsQPTloEc5BLXWPL9vsOxopxyKoMmDueg==",
+  version: "7.3.7",
+  resolved: "https://registry.npmjs.org/vite/-/vite-7.3.7.tgz",
+  integrity: "sha512-AHEzTORMbi7/7aXp7w7KZ5+DCUdSeLsJz0grY8xHpc9DHdYb0vQu6DqJfm2tOw3gDExNgPgnJTXxM6syYFHaCA==",
   lockPackagePath: "apps/web/node_modules/vite",
   packageManifestPath: "apps/web/node_modules/vite/package.json",
   packageManifestBytes: 5158,
-  packageManifestSha256: "e5ed0f85215f871fe22a48987dcd77fcfbe14064a53c0c9f7f48186a6b7e2cf0",
+  packageManifestSha256: "aae1f593c0e6f320989b60af6e90f8ed4ea5137e5a0b9db663f9b0088333eb3c",
   launcherPath: "apps/web/node_modules/vite/bin/vite.js",
   launcherBytes: 2574,
   launcherSha256: "fa03478846d229651a3c6aa64833ba2c6cbf580a798b92bd8f47c7480bafb5d8",
@@ -790,7 +796,7 @@ function verifyViteBuildIdentity(filesByPath) {
     || viteNode?.resolved !== VITE_BUILD_IDENTITY.resolved
     || viteNode?.integrity !== VITE_BUILD_IDENTITY.integrity
     || viteNode?.bin?.vite !== "bin/vite.js") {
-    fail("root package lock does not bind the fixed Vite 7.3.6 execution identity");
+    fail("root package lock does not bind the fixed Vite 7.3.7 execution identity");
   }
 }
 
@@ -1145,7 +1151,7 @@ function buildControlledBuildExecutionBoundary(snapshot) {
       });
     });
   return Object.freeze({
-    mode: "fixed_vite_7_3_6_endpoints_and_controlled_input_attestations",
+    mode: "fixed_vite_7_3_7_endpoints_and_controlled_input_attestations",
     viteIdentity: Object.freeze({
       packageName: "vite",
       version: VITE_BUILD_IDENTITY.version,
@@ -1223,9 +1229,10 @@ export function buildZiweiIztroLicenseNoticeEvidence(receipt, workspaceRoot = de
   const evidence = {
     schemaVersion: "1.0.0",
     recordType: "ziwei_iztro_top_level_build_notice_evidence",
-    evidenceLedgerId: "hakimi.ziwei.iztro-build-notice-evidence/1.0.0",
+    evidenceLedgerId: "hakimi.ziwei.iztro-build-notice-engineering-observation/vite-7.3.7/1",
     status: "controlled_ephemeral_build_top_level_notice_observed_unbound",
-    observedOn: "2026-08-30",
+    observedOn: "2026-10-23",
+    historicalObservation: HISTORICAL_NOTICE_IDENTITY,
     systemIdentity: {
       productSystemId: "ziwei-doushu",
       contractSystemId: "ziwei",
@@ -1349,6 +1356,14 @@ export function buildZiweiIztroLicenseNoticeEvidence(receipt, workspaceRoot = de
 }
 
 function loadAndVerifyEvidence(receipt, workspaceRoot) {
+  const historical = readHeldRegularFile(
+    resolveContainedWorkspaceFile(workspaceRoot, HISTORICAL_NOTICE_IDENTITY.path, "historical evidence"),
+    "historical evidence", MAX_EVIDENCE_BYTES
+  );
+  if (historical.byteLength !== HISTORICAL_NOTICE_IDENTITY.bytes
+    || historical.sha256 !== HISTORICAL_NOTICE_IDENTITY.sha256) {
+    fail("immutable historical notice evidence drifted");
+  }
   const evidenceFile = readHeldRegularFile(
     resolveContainedWorkspaceFile(workspaceRoot, ZIWEI_IZTRO_LICENSE_NOTICE_EVIDENCE_PATH, "evidence child"),
     "evidence child",

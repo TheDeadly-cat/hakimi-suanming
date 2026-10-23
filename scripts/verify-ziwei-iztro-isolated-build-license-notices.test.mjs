@@ -147,7 +147,7 @@ test("freezes the exact top-level iztro license and fixed lock identity", () => 
       ziweiIztroLicenseNoticeTestOnly.BUILD_INPUT_ATTESTATION_PRODUCER
     );
   }
-  assert.equal(controlledReceipt.buildExecutionBoundary.viteIdentity.version, "7.3.6");
+  assert.equal(controlledReceipt.buildExecutionBoundary.viteIdentity.version, "7.3.7");
   assert.equal(controlledReceipt.buildExecutionBoundary.viteIdentity.endpoints.length, 3);
   assert.equal(
     controlledReceipt.buildExecutionBoundary.rootLockSemanticIdentity.semanticIdentityVerified,
@@ -220,6 +220,17 @@ test("runs two fresh isolated builds and verifies the persisted one-way child", 
   assert.equal(summary.publicDeploymentAuthorized, false);
 });
 
+test("keeps the original historical observation byte-identical and separate from current build proof", () => {
+  const original = readFileSync(path.join(workspaceRoot, expectedEvidence.historicalObservation.path));
+  assert.equal(original.length, 12871);
+  assert.equal(sha256(original), "cb8ab23f89531941fde358a452ecab41d508112eabec925fb56c76d508c20610");
+  assert.equal(JSON.parse(original).buildExecutionObservation.viteIdentity.version, "7.3.6");
+  assert.equal(expectedEvidence.buildExecutionObservation.viteIdentity.version, "7.3.7");
+  assert.equal(ZIWEI_IZTRO_LICENSE_NOTICE_EVIDENCE_PATH.startsWith("scripts/fixtures/"), true);
+  assert.equal(expectedEvidence.authorityBoundary.publicDeploymentAuthorized, false);
+  assert.equal(expectedEvidence.authorityBoundary.expertClaimsAuthorized, false);
+});
+
 test("keeps top-level propagation separate from closure, Fortel, legal, expert and release authority", () => {
   assert.equal(expectedEvidence.coverageBoundary.coversIztro2_5_8TopLevelLicenseOnly, true);
   assert.equal(expectedEvidence.coverageBoundary.completeDependencyClosureCovered, false);
@@ -232,7 +243,7 @@ test("keeps top-level propagation separate from closure, Fortel, legal, expert a
   assert.equal(expectedEvidence.readBoundary.intervalIntegrityEstablished, false);
   assert.equal(expectedEvidence.readBoundary.abaResistanceEstablished, false);
   assert.equal(expectedEvidence.readBoundary.mutationEpochEstablished, false);
-  assert.equal(expectedEvidence.buildExecutionObservation.viteIdentity.version, "7.3.6");
+  assert.equal(expectedEvidence.buildExecutionObservation.viteIdentity.version, "7.3.7");
   assert.equal(expectedEvidence.buildExecutionObservation.viteIdentity.endpoints.length, 3);
   assert.deepEqual(
     expectedEvidence.buildExecutionObservation.viteIdentity.endpoints.map((endpoint) => endpoint.path),
@@ -577,7 +588,7 @@ test("rejects a fake Vite launcher before it can synthesize a passing output tre
         path.join(root, "output"),
         root
       ),
-      /vite_launcher_endpoint drifted from the fixed Vite 7\.3\.6 endpoint/u
+      /vite_launcher_endpoint drifted from the fixed Vite 7\.3\.7 endpoint/u
     );
     assert.equal(existsSync(executionMarker), false);
   } finally {
@@ -616,7 +627,7 @@ test("does not inherit NODE_OPTIONS loaders into the fixed Vite child", () => {
   }
 });
 
-test("binds Vite 7.3.6 lock semantics and rejects linked execution endpoints", (t) => {
+test("binds Vite 7.3.7 lock semantics and rejects linked execution endpoints", (t) => {
   const semanticRoot = copyControlledBuildInputs();
   try {
     const snapshot = ziweiIztroLicenseNoticeTestOnly.observeControlledBuildInputs(
@@ -633,7 +644,7 @@ test("binds Vite 7.3.6 lock semantics and rejects linked execution endpoints", (
         semanticRoot,
         "browser-preview"
       ),
-      /root package lock does not bind the fixed Vite 7\.3\.6 execution identity/u
+      /root package lock does not bind the fixed Vite 7\.3\.7 execution identity/u
     );
   } finally {
     cleanupRoot(semanticRoot);

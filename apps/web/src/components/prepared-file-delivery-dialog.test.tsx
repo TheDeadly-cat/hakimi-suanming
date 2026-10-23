@@ -545,16 +545,17 @@ describe("PreparedFileDeliveryDialog", () => {
     expect(await screen.findByText("不要直接重复交付")).toBeTruthy();
     expect(screen.getByText(/回执的文件名与当前冻结工件不一致/)).toBeTruthy();
     expect((downloadButton as HTMLButtonElement).disabled).toBe(true);
-    expect(screen.getByRole("dialog").getAttribute("data-close-gate")).toBe("manual_check_required");
-    expect((screen.getByRole("button", { name: "核对后关闭" }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByRole("dialog").getAttribute("data-close-gate")).toBe("open_pending_check");
+    expect((screen.getByRole("button", { name: "暂不核对，关闭" }) as HTMLButtonElement).disabled).toBe(false);
     fireEvent.keyDown(document, { key: "Escape" });
-    expect(onClose).not.toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(getPreparedFileDeliverySnapshot().status).toBe("manual_check_required");
 
     await user.click(screen.getByRole("button", { name: "我已核对，允许再次交付" }));
     expect((downloadButton as HTMLButtonElement).disabled).toBe(false);
     expect(saveFile).toHaveBeenCalledTimes(1);
     fireEvent.keyDown(document, { key: "Escape" });
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(2);
   });
 
   it("交付调用进行中消费 Escape，但不关闭对话框或解锁重复交付", async () => {
@@ -594,13 +595,14 @@ describe("PreparedFileDeliveryDialog", () => {
       method: "browser_download"
     });
     expect(await screen.findByText(/已请求浏览器下载/, { selector: ".prepared-delivery-feedback" })).toBeTruthy();
-    expect(screen.getByRole("dialog").getAttribute("data-close-gate")).toBe("manual_check_required");
-    expect((screen.getByRole("button", { name: "核对后关闭" }) as HTMLButtonElement).disabled).toBe(true);
-    fireEvent.keyDown(document, { key: "Escape" });
-    expect(onClose).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: "已核对，允许再次下载" }));
+    expect(screen.getByRole("dialog").getAttribute("data-close-gate")).toBe("open_pending_check");
+    expect((screen.getByRole("button", { name: "暂不核对，关闭" }) as HTMLButtonElement).disabled).toBe(false);
     fireEvent.keyDown(document, { key: "Escape" });
     expect(onClose).toHaveBeenCalledTimes(1);
+    expect(getPreparedFileDeliverySnapshot().status).toBe("manual_check_required");
+    await user.click(screen.getByRole("button", { name: "已核对，允许再次下载" }));
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onClose).toHaveBeenCalledTimes(2);
   });
 
   it("路由卸载后保留旧交付门禁，并由迟到回执转入人工核对", async () => {
@@ -665,13 +667,14 @@ describe("PreparedFileDeliveryDialog", () => {
 
     expect(await screen.findByText(/已请求浏览器下载/, { selector: ".prepared-delivery-feedback" })).toBeTruthy();
     expect(remountedDialog.getAttribute("data-retry-gate")).toBe("manual_file_check_required");
-    expect(remountedDialog.getAttribute("data-close-gate")).toBe("manual_check_required");
+    expect(remountedDialog.getAttribute("data-close-gate")).toBe("open_pending_check");
     expect(remountedDialog.getAttribute("data-delivery-scope")).toBe("previous_artifact");
     expect((screen.getByRole("button", { name: "已核对，允许再次下载" }) as HTMLButtonElement).disabled).toBe(false);
     expect(oldResolution).not.toHaveBeenCalled();
     expect(nextResolution).not.toHaveBeenCalled();
     fireEvent.keyDown(document, { key: "Escape" });
-    expect(nextClose).not.toHaveBeenCalled();
+    expect(nextClose).toHaveBeenCalledTimes(1);
+    expect(getPreparedFileDeliverySnapshot().status).toBe("manual_check_required");
     const manualCheckExit = new Event("beforeunload", { cancelable: true });
     expect(window.dispatchEvent(manualCheckExit)).toBe(false);
     expect(manualCheckExit.defaultPrevented).toBe(true);
@@ -762,7 +765,7 @@ describe("PreparedFileDeliveryDialog", () => {
     const remountedDialog = screen.getByRole("dialog");
     expect(remountedDialog.getAttribute("data-delivery-scope")).toBe("previous_artifact");
     expect(remountedDialog.getAttribute("data-retry-gate")).toBe("uncertain_delivery_acknowledgement_required");
-    expect(remountedDialog.getAttribute("data-close-gate")).toBe("manual_check_required");
+    expect(remountedDialog.getAttribute("data-close-gate")).toBe("open_pending_check");
     expect(nextPort.saveFile).not.toHaveBeenCalled();
   });
 

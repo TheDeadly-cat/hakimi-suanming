@@ -1,0 +1,32 @@
+.month-reading-rhythm { margin: 30px 0 16px; padding: 24px 0 0; border-top: 1px solid var(--reading-line, #dce2d3); min-width: 0; color: var(--reading-ink, #304738); }
+.month-reading-rhythm h3 { margin: 5px 0 12px; font: 600 25px/1.5 var(--reading-serif, serif); }
+.month-reading-rhythm h4 { font-size: 19px; margin: 24px 0 12px; }
+.month-reading-rhythm p, .month-reading-rhythm li, .month-reading-rhythm blockquote { overflow-wrap: anywhere; line-height: 1.8; }
+.month-reading-rhythm p { margin: 5px 0; }
+.month-reading-rhythm-kicker, .month-reading-rhythm-time { color: var(--reading-muted, #526d4b); font-size: 13px; }
+.month-reading-rhythm-overview { max-width: 70ch; font-size: 16px; }
+.month-reading-rhythm-ranges, .month-reading-rhythm-months { padding: 0; list-style: none; margin: 20px 0; }
+.month-reading-rhythm-ranges > li { border-left: 3px solid var(--reading-line, #dce2d3); padding: 5px 16px; margin: 14px 0; }
+.month-reading-rhythm-ranges > li[data-direction="较顺"] { border-color: var(--reading-jade, #446a45); }
+.month-reading-rhythm-ranges > li[data-direction="有压力"] { border-color: #976441; }
+.month-reading-rhythm-months > li { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 22px; padding: 18px 0; border-top: 1px solid var(--reading-line, #dce2d3); }
+.month-reading-rhythm-month { display: flex; align-items: flex-start; flex-direction: column; gap: 4px; }
+.month-reading-rhythm-month strong { font-size: 18px; }
+.month-reading-rhythm-month span { font-size: 14px; color: var(--reading-muted, #526d4b); }
+.month-reading-rhythm-content { min-width: 0; }
+.month-reading-rhythm-headline { font-weight: 600; font-size: 16px; }
+.month-reading-rhythm-handover { font-size: 14px; color: var(--reading-jade, #446a45); }
+.month-reading-rhythm a { color: var(--reading-jade, #446a45); text-underline-offset: 4px; min-height: 44px; display: inline-flex; align-items: center; }
+.month-reading-rhythm summary, .month-reading-full-details > summary { min-height: 44px; cursor: pointer; padding: 8px 0; color: var(--reading-muted, #526d4b); line-height: 1.8; }
+.month-reading-rhythm details { font-size: 13px; }
+.month-reading-rhythm-personal blockquote { margin: 8px 0; padding-left: 14px; border-left: 2px solid var(--reading-jade, #446a45); white-space: pre-wrap; }
+.month-reading-rhythm-personal > p { font-size: 13px; }
+.month-reading-rhythm :is(a,summary):focus-visible, .month-reading-full-details > summary:focus-visible { outline: 2px solid var(--reading-jade, #446a45); outline-offset: 3px; }
+.month-reading-rhythm-gap { padding: 10px 0; font-size: 14px; }
+.month-reading-full-details { margin: 0 0 24px; border-bottom: 1px solid var(--reading-line, #dce2d3); }
+.month-reading-full-details > .annual-month-story { border-block: 0; margin-top: 0; }
+@media (max-width: 620px) {
+  .month-reading-rhythm-months > li { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .month-reading-rhythm-month { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 6px 14px; }
+  .month-reading-rhythm-ranges > li { padding-left: 12px; }
+}

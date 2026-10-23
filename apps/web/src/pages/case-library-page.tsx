@@ -1198,9 +1198,9 @@ export function CaseLibraryPage() {
     >
       <div className="library-masthead">
         <PageHeading
-          eyebrow="Case library"
-          title="案例库"
-          description="统一管理正式命盘与未知时辰候选组；收藏常用记录，编辑研究元数据，并通过可恢复的回收站完成安全删除。"
+          eyebrow="本地命盘"
+          title="我的命盘"
+          description="打开命盘继续阅读解读、查看年度变化与反馈。常用命盘可以收藏；移入回收站后仍可恢复。"
           actions={error
             ? <AppLink href="/settings/data" className="secondary-action"><HardDriveDownload aria-hidden="true" />检查本机数据</AppLink>
             : <><AppLink href="/cases/research" className="secondary-action"><Search aria-hidden="true" />专业研究检索</AppLink><AppLink href="/new" className="primary-action"><FilePlus2 aria-hidden="true" />新建排盘</AppLink></>}

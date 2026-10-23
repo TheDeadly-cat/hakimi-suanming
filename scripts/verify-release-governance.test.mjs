@@ -169,6 +169,7 @@ import {
   ZIWEI_HKO_RESTRICTED_SOURCE_IMPLEMENTATION_SPECS,
   ZIWEI_HKO_RESTRICTED_SOURCE_PRE_RELEASE_POLICY_PATH
 } from "./ziwei-hko-restricted-source-pre-release-policy-lib.mjs";
+import { loadHistoricalZiweiHkoImplementations, verifyZiweiHkoVite737CurrentImplementation } from "./ziwei-hko-vite737-current-implementation-lib.mjs";
 
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const workflow = await readFile(
@@ -1186,7 +1187,7 @@ function swapExactLines(source, firstLine, secondLine) {
 }
 
 function verifyCurrentZiweiHkoPreReleasePolicy(overrides = {}) {
-  return verifyZiweiHkoRestrictedSourcePreReleasePolicy({
+  return verifyZiweiHkoVite737CurrentImplementation({
     policy: overrides.policy ?? ziweiHkoRestrictedSourcePreReleasePolicy,
     packageJson: overrides.packageJson ?? packageJson,
     quickWorkflow: overrides.quickWorkflow ?? quickWorkflow,
@@ -1338,7 +1339,12 @@ test("binds the Ziwei HKO live gate as a non-persisted independent pre-release o
     releaseReady: false,
     publicBuildInclusionAuthorized: false,
     publicDeploymentAuthorized: false,
-    publicReleaseAuthorized: false
+    publicReleaseAuthorized: false,
+    currentImplementationProfile: "hakimi.ziwei.hko-current-implementation/vite-7.3.7/1",
+    currentImplementationIdentityBound: true,
+    historicalPolicyReplayed: true,
+    historicalImplementationAuthorizedAsCurrent: false,
+    currentLiveBuildProvenByThisAdapter: false
   });
 });
 
@@ -1511,6 +1517,25 @@ test("rejects re-sealed HKO material, representation, freshness and extra receip
       /POLICY_SEMANTIC_DRIFT/u
     );
   }
+});
+
+test("separates the original HKO implementation replay from the current Vite patch successor", () => {
+  const input = {
+    policy: ziweiHkoRestrictedSourcePreReleasePolicy, packageJson, quickWorkflow,
+    implementationArtifacts: ziweiHkoRestrictedSourceImplementationArtifacts,
+    defaultV13RequiredReceiptCommands: decisions.releaseEvidence.defaultV13RequiredReceiptCommands,
+    webPackageJson, formalNpmEmbeddedCommands: currentFormalNpmEmbeddedCommands,
+    parentIsolationArtifacts: ziweiHkoParentIsolationArtifacts
+  };
+  assert.throws(() => verifyZiweiHkoRestrictedSourcePreReleasePolicy(input), /IMPLEMENTATION_IDENTITY_DRIFT/u);
+  const historical = loadHistoricalZiweiHkoImplementations(input.implementationArtifacts);
+  assert.equal(verifyZiweiHkoRestrictedSourcePreReleasePolicy({ ...input, implementationArtifacts: historical }).releaseReady, false);
+  assert.throws(() => verifyZiweiHkoVite737CurrentImplementation({ ...input, implementationArtifacts: historical }), /IMPLEMENTATION_IDENTITY_DRIFT/u);
+  const current = verifyZiweiHkoVite737CurrentImplementation(input);
+  assert.equal(current.currentImplementationProfile, "hakimi.ziwei.hko-current-implementation/vite-7.3.7/1");
+  assert.equal(current.historicalImplementationAuthorizedAsCurrent, false);
+  assert.equal(current.currentLiveBuildProvenByThisAdapter, false);
+  assert.equal(current.publicReleaseAuthorized, false);
 });
 
 test("rejects Ziwei HKO implementation identity drift", () => {
@@ -3434,8 +3459,8 @@ test("accepts the independent Edge/Chrome SW two-generation fixture contract", (
       artifactIdentityType: "sw_two_generation_local_fixture_artifact_set",
       artifactGenerationNames: ["stable-a", "healthy-b", "broken-b"],
       sharedArtifactSetRunnerOwned: true,
-      criticalSourceFilesBound: 21,
-      productSourceFilesBound: 9,
+      criticalSourceFilesBound: 22,
+      productSourceFilesBound: 10,
       criticalSourceSetCanonicalSha256:
         REQUIRED_SW_TWO_GENERATION_CRITICAL_SOURCE_SET_SHA256,
       formalReleaseReceipt: false,

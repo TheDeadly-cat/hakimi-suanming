@@ -1,0 +1,42 @@
+哈基米 · 免费初解试用版
+
+这是一个独立、本地运行的试用包：不使用 API，不连接付费模型，不上传命盘资料。
+可查看四柱、本地初判、大运流年主题，并保存研读和反馈；判断为本地规则初判，不承诺准确率或必然事件。
+
+开始使用
+1. 将整个 ZIP 解压到一个普通文件夹；不要只取出启动文件，不要直接在 ZIP 内运行。
+2. 双击 START-FREE-TRIAL.cmd。它会先核验完整包，隐藏启动本地服务，再明确打开系统默认浏览器。
+3. 固定试用地址为 http://127.0.0.1:5199/。保持包目录可用；浏览器关闭不会删除资料。
+4. 再次双击会验证并复用同一个正确服务。未知监听或包字节损坏时会拒绝启动，不会停止其他服务或自动换端口。
+
+重要：这是新的资料空间
+第一次在某个浏览器打开 5199 通常是空库。
+它不会自动看到 5189、5197 或 Codex 内置浏览器中的资料。
+同一地址在不同浏览器中也可能是不同资料空间；请固定使用你选定的浏览器。
+需要已有资料时，先在原入口通过“数据管理”正常导出备份，再在试用版中选择备份预检。
+恢复会替换试用版当前资料，执行前按页面要求保存安全备份并确认；本包不私自复制数据库。
+试用数据保存在该浏览器本机资料空间中，不保存在 ZIP 文件里；移动包目录不会搬运浏览器资料。
+
+运行环境与范围
+当前 Windows 需要已安装 Node.js 24.16.0 和 Windows PowerShell 5.1；启动器不自动下载安装运行环境。
+本包可移动目录使用，但不是内置运行时的免环境安装包；另一台电脑应先核对环境，再使用正常备份导入。
+未修改旧 5189 日常入口、旧包或 5197 开发预览。无需运行安装脚本，也不会自动创建或覆盖旧桌面快捷方式。
+服务只监听 127.0.0.1；没有公网部署、账号同步或远端模型服务。
+
+仅启动服务（不自动打开浏览器）
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\launch-local-trial-candidate.ps1
+显式打开系统浏览器
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\launch-local-trial-candidate.ps1 -OpenSystemBrowser
+可选的复制安装只用于单独的 trials 目录；已有相同包只读复用，其他内容拒绝覆盖：
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-local-trial-candidate.ps1 -NoShortcut
+
+身份与诊断
+完整文件清单为 local-package-files.json，应用身份锁位于 tmp\release-artifact-identity.json。
+该试用包只在真实构建与浏览器验证回执封存后组装；未封存工具会明确拒绝组包和启动。
+本地启动日志在 %USERPROFILE%\HakimiBaziWorkbenchCandidates\trial-launch-logs，包本身不会被日志修改。
+若启动失败，保留错误与日志，不删除浏览器资料、不停止未知进程、不改端口绕过。
+
+维护者交付门（源码目录运行）
+  node scripts/validate-local-delivery.mjs --trial-candidate --package-root "真实试用包路径" --output "全新仓外验证目录"
+安装合同18项、probe6项、原生启动6项必须全部通过且绑定同一包清单；不得拿旧包验证代替新包。
+测试使用临时副本和随机端口，显式浏览器请求被拦截；最终试用与日常启用仍分别记录。

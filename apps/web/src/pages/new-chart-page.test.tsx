@@ -453,7 +453,7 @@ describe("NewChartPage 时间校准", () => {
     expect(screen.getByLabelText(/出生日期/)).toHaveProperty("value", historicalInput.date);
     expect(screen.getByLabelText(/民用时间/)).toHaveProperty("value", historicalInput.time);
     expect(screen.getByLabelText(/IANA 时区/)).toHaveProperty("value", historicalInput.timeZone);
-    expect(screen.getByRole("option", { name: /未知时辰/ })).toHaveProperty("disabled", true);
+    expect(screen.getByRole("option", { name: /不知道出生时辰/ })).toHaveProperty("disabled", true);
 
     fireEvent.click(screen.getByRole("button", { name: /下一步/ }));
     expect(screen.getByRole("radio", { name: /00:00 午夜换日/ })).toHaveProperty("checked", true);

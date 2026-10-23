@@ -33,7 +33,8 @@ import { RETAINED_TIME_ZONE_DATABASE_2025B } from "@hakimi/tzdb-core";
 import {
   COMPATIBLE_TRANSIT_TIMELINE_VERSION_V1_1,
   TRANSIT_TIMELINE_VERSION,
-  calculateTransitSnapshot
+  calculateTransitSnapshot,
+  calculateTransitSnapshotV1_2_0
 } from "@hakimi/transit-core";
 import {
   RESEARCH_QUERY_ENGINE,
@@ -42,6 +43,7 @@ import {
   createDefaultResearchQuery,
   encodeResearchQueryExport,
   executeResearchQuery,
+  replayResearchQueryWithTransitV1_2,
   isResearchResultKey,
   tokenizeResearchText,
   verifyResearchQueryExport,
@@ -54,6 +56,7 @@ import {
   ADVANCED_CASE_QUERY_TRUTH_TABLE,
   ADVANCED_CASE_RESULT_DIGEST
 } from "../test-fixtures/advanced-case-query";
+import { ADVANCED_CASE_TRANSIT_V1_3_IDENTITY } from "../test-fixtures/advanced-case-query-transit-v1.3";
 
 const CASE_A = "11111111-1111-4111-8111-111111111111";
 const CASE_B = "22222222-2222-4222-8222-222222222222";
@@ -597,8 +600,9 @@ describe("ResearchQuery executor v1", () => {
 
     expect(execution.query).toEqual(ADVANCED_CASE_QUERY);
     expect(execution.queryDigest).toBe(ADVANCED_CASE_QUERY_DIGEST);
-    expect(execution.dataEpoch).toBe(ADVANCED_CASE_DATA_EPOCH);
-    expect(execution.resultDigest).toBe(ADVANCED_CASE_RESULT_DIGEST);
+    expect({ dataEpoch: execution.dataEpoch, resultDigest: execution.resultDigest,
+      nodeId: execution.results[0]?.scope === "cases" ? execution.results[0].transitMatches[0]?.nodeId : null
+    }).toEqual(ADVANCED_CASE_TRANSIT_V1_3_IDENTITY);
     expect(execution.results).toEqual([
       expect.objectContaining({
         key: `case:${CASE_A}`,
@@ -615,7 +619,7 @@ describe("ResearchQuery executor v1", () => {
           transitMatches: [expect.objectContaining({
             revisionId: REV_A2,
             nodeType: "year",
-            nodeId: "1738591828000.bd545edbe54548cfc6ffb752b3816661eee32298ec5eef13448fe110952fb3c2",
+            nodeId: ADVANCED_CASE_TRANSIT_V1_3_IDENTITY.nodeId,
             ganZhi: "乙巳",
             stemTenGod: "伤官"
           })]
@@ -633,6 +637,20 @@ describe("ResearchQuery executor v1", () => {
       "DETERMINISTIC_RELATIONS_NOT_INTERPRETIVE_STRUCTURE",
       "TRANSIT_ENGINEERING_PREVIEW_NO_GOLD_CASES"
     ]));
+  });
+
+  it("保留原 v1.2 高级查询 fixture、节点和两个摘要，不把旧证据重签成 v1.3", async () => {
+    const legacy = structuredClone(snapshot);
+    const oldTransit = await calculateTransitSnapshotV1_2_0({ revision: revisionA2, atInstant: ADVANCED_CASE_QUERY.transit!.atInstant });
+    if (oldTransit.slots.year.status !== "resolved") throw new Error("expected retained year");
+    legacy.events.find((event) => event.id === EVENT_TRANSIT)!.transitNodeRef = oldTransit.slots.year.node.ref;
+    const execution = await replayResearchQueryWithTransitV1_2(ADVANCED_CASE_QUERY, { ...legacy, candidateSets: [] },
+      { now: () => "2026-08-02T01:00:00.000Z" });
+    expect(execution.queryDigest).toBe(ADVANCED_CASE_QUERY_DIGEST);
+    expect(execution.dataEpoch).toBe(ADVANCED_CASE_DATA_EPOCH);
+    expect(execution.resultDigest).toBe(ADVANCED_CASE_RESULT_DIGEST);
+    expect(execution.total).toBe(1);
+    expect(oldTransit.slots.year.node.ref.nodeId).toBe("1738591828000.bd545edbe54548cfc6ffb752b3816661eee32298ec5eef13448fe110952fb3c2");
   });
 
   it("事件与知识作用域返回严格深链键和匹配来源", async () => {
@@ -988,8 +1006,9 @@ describe("ResearchQuery executor v1", () => {
   });
 
   it("查询 allowlist 内的 v1.1/v2 历史运限引用且不改写原文", async () => {
-    if (yearNode.status !== "resolved") throw new Error("fixture year node must resolve");
-    const historical = structuredClone(yearNode.node.ref);
+    const retained = (await calculateTransitSnapshotV1_2_0({ revision: revisionA2, atInstant: "2025-03-12T04:00:00.000Z" })).slots.year;
+    if (retained.status !== "resolved") throw new Error("fixture retained year node must resolve");
+    const historical = structuredClone(retained.node.ref);
     historical.timelineVersion = COMPATIBLE_TRANSIT_TIMELINE_VERSION_V1_1;
     const factHash = await sha256Hex({
       timelineVersion: historical.timelineVersion,
@@ -999,15 +1018,15 @@ describe("ResearchQuery executor v1", () => {
       ruleProfileDigest: historical.ruleProfileDigest,
       luckCycleRuleDigest: historical.luckCycleRuleDigest,
       manualDirection: historical.manualDirection,
-      nodeType: yearNode.node.nodeType,
-      startInstant: yearNode.node.startInstant,
-      endExclusiveInstant: yearNode.node.endExclusiveInstant,
-      frame: yearNode.node.frame,
-      ganZhi: yearNode.node.ganZhi,
-      index: yearNode.node.index,
-      boundaryLabel: yearNode.node.boundaryLabel
+      nodeType: retained.node.nodeType,
+      startInstant: retained.node.startInstant,
+      endExclusiveInstant: retained.node.endExclusiveInstant,
+      frame: retained.node.frame,
+      ganZhi: retained.node.ganZhi,
+      index: retained.node.index,
+      boundaryLabel: retained.node.boundaryLabel
     });
-    historical.nodeId = `${Date.parse(yearNode.node.startInstant)}.${factHash}`;
+    historical.nodeId = `${Date.parse(retained.node.startInstant)}.${factHash}`;
     const compatible = structuredClone(snapshot);
     const eventRecord = compatible.events.find((record) => record.id === EVENT_TRANSIT);
     if (!eventRecord) throw new Error("expected transit event fixture");

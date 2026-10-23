@@ -1,0 +1,31 @@
+.annual-month-story { margin: 30px 0; padding: 24px 0; border-block: 1px solid var(--reading-line, #dce2d3); min-width: 0; color: var(--reading-ink, #304738); }
+.annual-month-story header h3 { margin: 5px 0 12px; font: 600 25px/1.5 var(--reading-serif, serif); }
+.annual-month-story p, .annual-month-story li, .annual-month-story blockquote { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.85; }
+.annual-month-story-kicker { margin: 0; font-size: 13px; color: var(--reading-muted, #526d4b); }
+.annual-month-story-tabs { display: flex; border-bottom: 1px solid var(--reading-line, #dce2d3); margin-top: 22px; }
+.annual-month-story-tabs button { flex: 1; min-height: 48px; padding: 10px 12px; border: 0; border-bottom: 2px solid transparent; color: inherit; background: transparent; font-size: 16px; cursor: pointer; }
+.annual-month-story-tabs button[aria-selected="true"] { border-bottom-color: var(--reading-jade, #446a45); color: var(--reading-jade, #446a45); font-weight: 600; }
+.annual-month-story :is(button,a,summary):focus-visible { outline: 2px solid var(--reading-jade, #446a45); outline-offset: 3px; }
+.annual-month-story-months { list-style: none; margin: 0; padding: 0; }
+.annual-month-story-months > li { display: grid; grid-template-columns: 106px minmax(0, 1fr); gap: 24px; padding: 24px 0; border-bottom: 1px solid var(--reading-line, #dce2d3); }
+.annual-month-story-month-label { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+.annual-month-story-month-label strong { font-size: 18px; }
+.annual-month-story-month-label span, .annual-month-story-caption, .annual-month-story-part { color: var(--reading-muted, #526d4b); font-size: 13px; }
+.annual-month-story a { color: var(--reading-jade, #446a45); text-underline-offset: 4px; min-height: 44px; display: inline-flex; align-items: center; }
+.annual-month-story-month-content { min-width: 0; }
+.annual-month-story article + article { border-top: 1px dashed var(--reading-line, #dce2d3); padding-top: 20px; margin-top: 20px; }
+.annual-month-story h5 { margin: 0 0 8px; font-size: 18px; line-height: 1.7; }
+.annual-month-story-answer { font-size: 16px; margin: 8px 0; }
+.annual-month-story ul { padding-left: 20px; }
+.annual-month-story summary { cursor: pointer; min-height: 44px; font-size: 13px; line-height: 1.7; padding: 5px 0; color: var(--reading-muted, #526d4b); }
+.annual-month-story details { font-size: 13px; }
+.annual-month-story-feedback { font-size: 13px; margin-top: 6px; }
+.annual-month-story-personal { padding: 10px 14px; background: #edf3e8; border-left: 3px solid #789773; }
+.annual-month-story blockquote { margin: 8px 0; padding-left: 14px; border-left: 2px solid #789773; }
+.annual-month-story-scope { margin-top: 14px; }
+#reading-monthly-detail { scroll-margin-top: 76px; }
+@media(max-width: 620px) {
+  .annual-month-story-months > li { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .annual-month-story-month-label { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 16px; }
+  .annual-month-story-tabs button { padding-inline: 5px; font-size: 15px; }
+}

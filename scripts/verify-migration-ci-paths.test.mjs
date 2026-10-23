@@ -239,6 +239,8 @@ test("Git Windows checkout preserves raw SW and governance identities plus retai
 test("application boot responsibility and build identity tests independently trigger Migration CI", () => {
   assert(filters.includes("apps/web/src/lib/app-boot-*"));
   for (const changedPath of [
+    "apps/web/src/lib/app-failure-phase.ts",
+    "apps/web/src/lib/app-failure-phase.test.ts",
     "apps/web/src/lib/app-boot-ready.ts",
     "apps/web/src/lib/app-boot-ready.test.ts",
     "apps/web/src/lib/app-boot-failure.ts",

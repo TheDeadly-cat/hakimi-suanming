@@ -1,0 +1,29 @@
+.personal-reading-note { min-width: 0; }
+.personal-reading-note p, .personal-reading-original-text { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.85; }
+.personal-reading-adopted { margin: 12px 0; padding: 18px 20px; border: 1px solid #b8c9b9; border-left: 3px solid #668b77; border-radius: 8px; background: #f0f5ec; color: #203e33; }
+.personal-reading-adopted > p { margin: 10px 0; font-size: 16px; }
+.personal-reading-label { font-size: 13px; font-weight: 700; letter-spacing: .05em; }
+.personal-reading-adopted small, .personal-reading-source, .personal-reading-state { color: #596e61; font-size: 13px; line-height: 1.7; }
+.personal-reading-computed { margin: 14px 0; border-bottom: 1px solid #e0e3d9; padding-bottom: 14px; }
+.personal-reading-computed > div { margin-top: 16px; }
+.personal-reading-note summary, .personal-reading-overview summary { cursor: pointer; line-height: 1.7; color: #365f4d; }
+.personal-reading-note summary:focus-visible, .personal-reading-overview summary:focus-visible, .personal-reading-note button:focus-visible { outline: 2px solid #668b77; outline-offset: 4px; }
+.personal-reading-supplements { margin-top: 18px; padding: 14px 16px; border-radius: 8px; background: #f7f5ee; border: 1px solid #e7e2d5; }
+.personal-reading-supplements h4 { margin: 0 0 10px; font-size: 15px; color: #4b5d50; }
+.personal-reading-supplements article + article { margin-top: 18px; border-top: 1px solid #e2ddcf; padding-top: 14px; }
+.personal-reading-supplements p { margin: 7px 0; }
+.personal-reading-proposal { margin-top: 12px; padding-left: 12px; border-left: 2px solid #bdb99e; }
+.personal-reading-proposal .text-button { margin-top: 8px; white-space: normal; text-align: left; min-height: 36px; }
+.personal-reading-review-note { margin-top: 12px; color: #516556; }
+.personal-reading-issues { margin-top: 12px; color: #6b6558; font-size: 13px; overflow-wrap: anywhere; }
+.personal-reading-issues li { line-height: 1.75; margin: 6px 0; }
+.personal-reading-message { font-size: 14px; }
+.personal-reading-overview { margin: 16px 0; padding: 14px 18px; border: 1px solid #d7dfd0; border-radius: 8px; background: #f5f6ee; }
+.personal-reading-overview > p { margin: 0 0 5px; font-size: 14px; color: #355542; }
+.personal-reading-overview-item { border-top: 1px solid #dce1d5; margin-top: 20px; padding-top: 16px; }
+.personal-reading-overview-item > h3 { font-family: "Noto Serif SC", "Songti SC", serif; font-size: 18px; margin: 0 0 12px; }
+@media (max-width: 600px) {
+  .personal-reading-adopted, .personal-reading-supplements, .personal-reading-overview { padding: 14px 12px; }
+  .personal-reading-adopted > p { font-size: 15px; }
+  .personal-reading-note .text-button { min-height: 44px; }
+}

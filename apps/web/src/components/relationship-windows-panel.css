@@ -1,0 +1,40 @@
+.relationship-windows-panel { margin: 28px 0; padding: 20px 0; border-block: 1px solid var(--reading-border, #dce2d3); color: var(--reading-ink, #304738); min-width: 0; }
+.relationship-windows-kicker, .relationship-window-part { color: var(--reading-muted, #526d4b); font-size: 13px; margin: 0 0 6px; }
+.relationship-windows-panel h2 { font-family: "Noto Serif SC", "Songti SC", serif; font-size: 23px; line-height: 1.5; margin: 4px 0 10px; font-weight: 600; }
+.relationship-windows-panel h3 { font-size: 16px; margin: 20px 0 10px; }
+.relationship-windows-panel p, .relationship-windows-panel li { line-height: 1.8; overflow-wrap: anywhere; white-space: pre-wrap; }
+.relationship-windows-lead, .relationship-windows-note { font-size: 14px; color: var(--reading-muted, #526d4b); }
+.relationship-window-years { list-style: none; padding: 0; margin: 14px 0; }
+.relationship-window-years > li { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 0 18px; padding: 14px 0; border-top: 1px solid var(--reading-border, #dce2d3); }
+.relationship-window-year { grid-column: 1; grid-row: 1 / span 10; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.relationship-window-year strong { font-size: 18px; }
+.relationship-window-year a { color: var(--reading-accent, #446a45); font-size: 13px; min-height: 36px; display: inline-flex; align-items: center; text-underline-offset: 4px; }
+.relationship-window-period { grid-column: 2; min-width: 0; }
+.relationship-window-period + .relationship-window-period { margin-top: 12px; }
+.relationship-windows-panel summary { cursor: pointer; line-height: 1.7; min-height: 36px; padding: 4px 0; font-size: 16px; font-weight: 600; }
+.relationship-windows-panel a:focus-visible, .relationship-windows-panel summary:focus-visible { outline: 2px solid var(--reading-accent, #446a45); outline-offset: 4px; border-radius: 2px; }
+.relationship-window-title { margin: 3px 0 8px; font-size: 18px; font-weight: 600; line-height: 1.7; }
+.relationship-window-period p, .relationship-window-period li { font-size: 16px; }
+.relationship-window-answer { margin: 8px 0 12px; }
+.relationship-window-scenes { margin-block: 14px; padding: 10px 16px; background: #f1f4ec; border-left: 2px solid #8ca58a; }
+.relationship-window-scenes > p { margin: 0; color: var(--reading-muted, #526d4b); font-size: 13px; }
+.relationship-window-scenes ul { margin: 6px 0 2px; }
+.relationship-window-period ul { padding-left: 20px; }
+.relationship-window-period .relationship-window-time { font-size: 12px; color: var(--reading-muted, #526d4b); }
+.relationship-window-basis summary { font-size: 13px; font-weight: 400; }
+.relationship-window-basis li { font-size: 13px; }
+.relationship-window-continuity { color: var(--reading-muted, #526d4b); font-size: 12px; }
+.relationship-window-years > .relationship-window-group { grid-template-columns: 126px minmax(0, 1fr); }
+.relationship-window-period .relationship-window-continuity-note { font-size: 13px; color: var(--reading-muted, #526d4b); margin: 12px 0 6px; }
+.relationship-window-members { list-style: none; padding: 0 !important; margin: 0; }
+.relationship-window-members > li { border-top: 1px solid var(--reading-border, #dce2d3); padding: 10px 0; }
+.relationship-window-member-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 16px; }
+.relationship-window-member-heading a { color: var(--reading-accent, #446a45); min-height: 36px; display: inline-flex; align-items: center; font-size: 13px; text-underline-offset: 4px; }
+.relationship-window-original { padding: 4px 0; }
+@media (max-width: 620px) {
+  .relationship-window-years > li { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .relationship-window-year { grid-row: auto; flex-direction: row; align-items: center; justify-content: space-between; }
+  .relationship-window-period { grid-column: 1; }
+  .relationship-window-group > .relationship-window-year { flex-wrap: wrap; }
+  .relationship-window-years > .relationship-window-group { grid-template-columns: minmax(0, 1fr); }
+}

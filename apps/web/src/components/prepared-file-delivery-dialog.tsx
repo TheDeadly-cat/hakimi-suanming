@@ -41,6 +41,7 @@ type ArtifactDigestState = {
 export type PreparedFileDeliveryDialogProps = Readonly<{
   artifact: PreparedFileArtifact;
   exportPort: ReportExportPort;
+  presentation?: "standard" | "reading";
   onClose(): void;
   onDeliveryResolution?(event: PreparedFileDeliveryResolution): void;
 }>;
@@ -297,8 +298,10 @@ export function PreparedFileDeliveryDialog({
   artifact,
   exportPort,
   onClose,
-  onDeliveryResolution
+  onDeliveryResolution,
+  presentation = "standard"
 }: PreparedFileDeliveryDialogProps) {
+  const readingPresentation = presentation === "reading";
   const dialogId = useId();
   const titleId = `${dialogId}-title`;
   const descriptionId = `${dialogId}-description`;
@@ -380,7 +383,7 @@ export function PreparedFileDeliveryDialog({
     : null;
   const busy = deliverySnapshot.status === "in_flight";
   const manualCheckRequired = deliverySnapshot.status === "manual_check_required";
-  const closeBlocked = busy || manualCheckRequired;
+  const closeBlocked = busy;
   const artifactPresentation = useMemo(() => ({
     title: safeArtifactText(artifact.title, "未命名本机工件", 240),
     description: safeArtifactText(artifact.description, "没有可显示的交付说明。", 2_000),
@@ -483,6 +486,7 @@ export function PreparedFileDeliveryDialog({
       "button:not([disabled])",
       "[href]",
       "input:not([disabled])",
+      "summary",
       "[tabindex]:not([tabindex='-1'])"
     ].join(",");
     const focusableElements = () => dialog
@@ -496,7 +500,7 @@ export function PreparedFileDeliveryDialog({
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        if (getPreparedFileDeliverySnapshot().status === "idle") closeRef.current();
+        if (getPreparedFileDeliverySnapshot().status !== "in_flight") closeRef.current();
         return;
       }
       if (event.key !== "Tab" || !dialog) return;
@@ -647,7 +651,16 @@ export function PreparedFileDeliveryDialog({
   };
 
   const requestClose = () => {
-    if (getPreparedFileDeliverySnapshot().status === "idle") closeRef.current();
+    // Leaving this dialog does not reconcile a requested or unknown delivery.
+    // The shared coordinator keeps its exact issue and retry guard on remount.
+    if (getPreparedFileDeliverySnapshot().status !== "in_flight") closeRef.current();
+  };
+
+  const acknowledgeAndClose = () => {
+    if (!sharedIssue || !acknowledgePreparedFileDeliveryIssue(sharedIssue)) return;
+    // This acknowledges the user's check only. Keep the adapter's original
+    // requested/unknown outcome; never publish an invented saved receipt.
+    closeRef.current();
   };
 
   const acknowledgeDeliveryUncertainty = () => {
@@ -728,78 +741,14 @@ export function PreparedFileDeliveryDialog({
       ? "先前文件交付状态未知；核对系统文件位置、下载列表或分享目标后才能再次交付。"
       : visibleMessage ?? "";
 
-  return (
-    <div className="prepared-delivery-modal" role="presentation">
-      <div
-        ref={dialogRef}
-        className="prepared-delivery-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        aria-describedby={`${descriptionId} ${boundaryId} ${routesId}`}
-        aria-busy={busy}
-        data-share-policy={artifact.sharePolicy}
-        data-active-intent={activeIntent ?? "idle"}
-        data-delivery-state={deliveryStage}
-        data-delivery-outcome={messageKind ?? "none"}
-        data-delivery-stage={deliveryStage}
-        data-artifact-digest-state={artifactDigest.status}
-        data-delivery-call-state={busy ? "in_flight" : deliveryUncertainty ? "unknown" : "settled"}
-        data-retry-gate={retryGate}
-        data-close-gate={busy ? "delivery_in_flight" : manualCheckRequired ? "manual_check_required" : "open"}
-        data-delivery-coordinator="page-runtime-shared"
-        data-delivery-scope={coordinatorArtifactDescriptor === null
-          ? "idle"
-          : coordinatorTargetsCurrentArtifact
-            ? "current_artifact"
-            : "previous_artifact"}
-        data-release-family="legacy-v13"
-        data-release-identity="legacy-v13"
-        data-db-generation="13"
-        data-target-schema="13"
-        data-migration-id="null"
-        data-engineering-evidence-only="true"
-        data-public-release-authorized="false"
-        data-expert-truth-established="false"
-        data-formal-truth-established="false"
-        data-expert-truth-claimed="false"
-        data-mutation-mode="external-artifact-delivery-only"
-        data-domain-record-mutation-performed="false"
-        data-chart-or-storage-mutation-performed="false"
-        data-record-write-state="not_started"
-        data-external-file-side-effect-scope="user-initiated-only"
-        data-mutation-epoch-bypassed="false"
-        tabIndex={-1}
-      >
-        <span className="prepared-delivery-announcer" role="status" aria-live="polite" aria-atomic="true">
-          {liveAnnouncement}
-        </span>
-        <header className="prepared-delivery-header">
-          <div>
-            <p className="eyebrow">Local file delivery</p>
-            <h2 id={titleId}>{dialogTitle}</h2>
-            <span className="prepared-delivery-stage">{deliveryStageLabel}</span>
-          </div>
-          <button
-            type="button"
-            className="icon-button"
-            aria-label={busy
-              ? "文件交付进行中，完成后可关闭"
-              : manualCheckRequired
-                ? "请先完成人工核对，再关闭文件交付"
-                : "关闭文件交付"}
-            title={busy
-              ? "交付进行中，完成后可关闭"
-              : manualCheckRequired
-                ? "请先完成人工核对，再关闭"
-                : "关闭文件交付"}
-            disabled={closeBlocked}
-            onClick={requestClose}
-          >
-            <X aria-hidden="true" />
-          </button>
-        </header>
-
+  const readingStageLabel = busy ? "正在保存" : deliveryUncertainty ? "请核对上次保存"
+    : messageKind === "requested" ? requestedIntent === "share" ? "上次分享待核对" : "下载已发起" : preparationError || error ? "暂时无法保存"
+      : messageKind === "completed" ? "已保存" : messageKind === "cancelled" ? "已取消保存"
+        : hasSaveRoute ? "文件已准备好" : "暂无保存方式";
+  const readingAnnouncement = busy ? "正在保存文件，请保持窗口打开。" : deliveryUncertainty
+    ? "无法确认上次是否已保存，请先检查下载列表或目标位置。" : messageKind === "requested"
+      ? "文件操作已发起，请核对下载列表或接收结果。" : messageKind === "completed" ? "文件已保存。" : "";
+  const technicalDetails = <>
         <ol className="prepared-delivery-lifecycle" aria-label="文件交付证据阶段">
           <li data-state={artifactError ? "blocked" : "observed"}>
             <span aria-hidden="true">01</span>
@@ -823,9 +772,9 @@ export function PreparedFileDeliveryDialog({
           <div className="prepared-delivery-artifact-copy">
             <p className="prepared-delivery-label">Frozen local artifact</p>
             <strong>{visibleTitle}</strong>
-            <p id={descriptionId}>{visibleDescription}</p>
+            <p id={readingPresentation ? undefined : descriptionId}>{visibleDescription}</p>
             <p id={boundaryId} className="prepared-delivery-boundary">
-              “已生成”只表示不可变 Blob 已在页面会话中准备完成，且不证明物理 RAM 驻留或应用持久化；是否保存、下载或分享成功，以下方交付反馈和文件系统人工核对为准。
+              文件已在本页生成，尚不代表已保存到磁盘。下载或分享后，请核对目标位置的文件；关闭本页可能需要重新生成。
             </p>
             <dl className="prepared-delivery-ledger">
               <div>
@@ -891,6 +840,126 @@ export function PreparedFileDeliveryDialog({
           </div>
         </section>
 
+  </>;
+
+  return (
+    <div className="prepared-delivery-modal" role="presentation">
+      <div
+        ref={dialogRef}
+        className="prepared-delivery-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={readingPresentation ? descriptionId : `${descriptionId} ${boundaryId} ${routesId}`}
+        data-presentation={presentation}
+        aria-busy={busy}
+        data-share-policy={artifact.sharePolicy}
+        data-active-intent={activeIntent ?? "idle"}
+        data-delivery-state={deliveryStage}
+        data-delivery-outcome={messageKind ?? "none"}
+        data-delivery-stage={deliveryStage}
+        data-artifact-digest-state={artifactDigest.status}
+        data-delivery-call-state={busy ? "in_flight" : deliveryUncertainty ? "unknown" : "settled"}
+        data-retry-gate={retryGate}
+        data-close-gate={busy ? "delivery_in_flight" : manualCheckRequired ? "open_pending_check" : "open"}
+        data-delivery-coordinator="page-runtime-shared"
+        data-delivery-scope={coordinatorArtifactDescriptor === null
+          ? "idle"
+          : coordinatorTargetsCurrentArtifact
+            ? "current_artifact"
+            : "previous_artifact"}
+        data-release-family="legacy-v13"
+        data-release-identity="legacy-v13"
+        data-db-generation="13"
+        data-target-schema="13"
+        data-migration-id="null"
+        data-engineering-evidence-only="true"
+        data-public-release-authorized="false"
+        data-expert-truth-established="false"
+        data-formal-truth-established="false"
+        data-expert-truth-claimed="false"
+        data-mutation-mode="external-artifact-delivery-only"
+        data-domain-record-mutation-performed="false"
+        data-chart-or-storage-mutation-performed="false"
+        data-record-write-state="not_started"
+        data-external-file-side-effect-scope="user-initiated-only"
+        data-mutation-epoch-bypassed="false"
+        tabIndex={-1}
+      >
+        <span className="prepared-delivery-announcer" role="status" aria-live="polite" aria-atomic="true">
+          {readingPresentation ? readingAnnouncement : liveAnnouncement}
+        </span>
+        <header className="prepared-delivery-header">
+          <div>
+            <p className="eyebrow">{readingPresentation ? "保存到本机" : "Local file delivery"}</p>
+            <h2 id={titleId}>{readingPresentation ? "导出文件" : dialogTitle}</h2>
+            <span className="prepared-delivery-stage">{readingPresentation ? readingStageLabel : deliveryStageLabel}</span>
+          </div>
+          <button
+            type="button"
+            className="icon-button"
+            aria-label={readingPresentation ? busy ? "正在保存，完成后可关闭" : "关闭报告保存窗口" : busy
+              ? "文件交付进行中，完成后可关闭"
+              : manualCheckRequired
+                ? "关闭文件交付，保留待核对状态"
+                : "关闭文件交付"}
+            title={readingPresentation ? busy ? "正在保存，完成后可关闭" : "关闭报告保存窗口" : busy
+              ? "交付进行中，完成后可关闭"
+              : manualCheckRequired
+                ? "关闭并保留待核对状态"
+                : "关闭文件交付"}
+            disabled={closeBlocked}
+            onClick={requestClose}
+          >
+            <X aria-hidden="true" />
+          </button>
+        </header>
+
+        {readingPresentation ? <>
+          <section className="prepared-reading-report" aria-label="报告文件">
+            <strong>{visibleTitle}</strong>
+            <p className="prepared-reading-contents-label">包含内容</p>
+            <p id={descriptionId}>{visibleDescription}</p>
+            <dl>
+              <div><dt>文件名</dt><dd>{visibleFilename}</dd></div>
+              <div><dt>文件大小</dt><dd>{formatBytes(artifact.blob.size)}</dd></div>
+            </dl>
+          </section>
+          <details className="prepared-reading-details">
+            <summary>文件与保存详情</summary>
+            <div className="prepared-reading-details-body">{technicalDetails}
+              <dl className="prepared-delivery-ledger">
+                <div><dt>接收状态</dt><dd>{deliveryStageLabel}</dd></div>
+                <div><dt>状态详情</dt><dd>{preparationError ?? visibleError ?? (deliveryUncertainty ? safeArtifactText(deliveryUncertainty.detail, "状态未知", 800) : visibleMessage) ?? "尚未执行保存。"}</dd></div>
+                {sharedIssue ? <><div><dt>待核对文件</dt><dd>{visibleCoordinatorFilename}</dd></div><div><dt>请求时摘要</dt><dd><code>{sharedIssue.operation.sha256 ? `sha256:${sharedIssue.operation.sha256}` : "请求开始时未取得摘要"}</code></dd></div></> : null}
+              </dl>
+            </div>
+          </details>
+        </> : technicalDetails}
+
+        {readingPresentation ? <div className="prepared-reading-status">
+          {canChooseSaveLocation ? <p className="prepared-reading-note">选择已有同名文件时会覆盖，请留意保存位置。</p> : null}
+          {preparationError || visibleError ? <p role="alert">报告暂时无法保存，可展开“文件与保存详情”查看原因。</p> : null}
+          {!preparationError && !hasSaveRoute ? <p role="status">当前浏览器暂不支持保存这份报告。</p> : null}
+          {!coordinatorTargetsCurrentArtifact && visibleCoordinatorFilename ? <p>上一份文件“{visibleCoordinatorFilename}”仍待处理；完成核对后才能保存这份报告。</p> : null}
+          {busy ? <p role="status">正在保存文件，请保持窗口打开。</p> : null}
+          {deliveryUncertainty ? <div className="prepared-reading-check" role="alert">
+            <p>无法确认上次是否已保存。请先检查下载列表或目标位置，避免重复保存。</p>
+            <div>
+              <button type="button" className="secondary-action" onClick={acknowledgeAndClose}>已核对文件并关闭</button>
+              <button type="button" className="text-action" onClick={acknowledgeDeliveryUncertainty}>我已核对，允许再次保存</button>
+            </div>
+          </div> : null}
+          {messageKind === "requested" ? <div className="prepared-reading-check" role="status">
+            <p>{requestedIntent === "share" ? "上次分享已发起，请先在接收应用核对文件。" : "下载已发起，请到浏览器下载列表确认文件已完成。"}</p>
+            <div>
+              <button type="button" className="secondary-action" onClick={acknowledgeAndClose}>已核对文件并关闭</button>
+              <button type="button" className="text-action" onClick={acknowledgeRequestedDelivery}>{requestedIntent === "share" ? "已核对上次分享" : "已核对，允许再次下载"}</button>
+            </div>
+          </div> : null}
+          {!busy && !manualCheckRequired && messageKind === "completed" ? <p className="success-message">文件已保存，可到所选位置查看。</p> : null}
+          {!busy && !manualCheckRequired && messageKind === "cancelled" ? <p>已取消保存，仍可选择保存方式。</p> : null}
+        </div> : <>
         {canChooseSaveLocation ? (
           <p className="prepared-delivery-warning">“保存到指定位置”会覆盖你在系统面板中选中的同名已有文件。</p>
         ) : null}
@@ -934,7 +1003,11 @@ export function PreparedFileDeliveryDialog({
               <div><dt>开始时间</dt><dd><time dateTime={deliveryUncertainty.startedAt}>{deliveryUncertainty.startedAt}</time></dd></div>
               <div className="prepared-delivery-uncertainty__digest"><dt>请求时摘要</dt><dd><code>{deliveryUncertainty.sha256 ? `sha256:${deliveryUncertainty.sha256}` : "请求开始时未取得摘要"}</code></dd></div>
             </dl>
-            <div><span>请先检查目标目录、浏览器下载列表或系统分享结果；确认不会造成重复文件后再解锁。</span><button type="button" className="secondary-action" onClick={acknowledgeDeliveryUncertainty}>我已核对，允许再次交付</button></div>
+            <div>
+              <span>请先检查目标目录、浏览器下载列表或系统分享结果。可核对后直接关闭，也可明确选择重新交付；暂不核对时关闭会保留待核对状态。</span>
+              <button type="button" className="secondary-action" onClick={acknowledgeAndClose}>已核对交付情况并关闭</button>
+              <button type="button" className="secondary-action" onClick={acknowledgeDeliveryUncertainty}>我已核对，允许再次交付</button>
+            </div>
           </section>
         ) : null}
         {visibleError ? <div className="inline-error" role="alert"><strong>文件未交付</strong><p>{visibleError}</p></div> : null}
@@ -951,32 +1024,37 @@ export function PreparedFileDeliveryDialog({
                 ? "系统只确认已打开分享面板；请先在目标应用核对文件已接收并可以打开，再决定是否重新分享。"
                 : "浏览器只确认已发起下载请求；请先核对下载列表和本机文件，再决定是否重新下载。"}
             </span>
+            <button type="button" className="secondary-action" onClick={acknowledgeAndClose}>
+              {requestedIntent === "share" ? "已核对接收并关闭" : "已核对文件并关闭"}
+            </button>
             <button type="button" className="secondary-action" onClick={acknowledgeRequestedDelivery}>
               {requestedIntent === "share" ? "已核对，允许再次分享" : "已核对，允许再次下载"}
             </button>
           </div>
         ) : null}
 
-        <div className="prepared-delivery-actions" role="group" aria-label="文件交付方式">
+        </>}
+
+        <div className="prepared-delivery-actions" role="group" aria-label={readingPresentation ? "报告保存方式" : "文件交付方式"}>
           {canChooseSaveLocation ? (
             <button type="button" className="primary-action prepared-delivery-action" data-delivery-intent="chosen_location" disabled={busy || retryGate !== "open"} aria-busy={activeIntent === "chosen_location"} onClick={() => void deliver("chosen_location")}>
               {activeIntent === "chosen_location" ? <LoaderCircle className="is-spinning" aria-hidden="true" /> : <Save aria-hidden="true" />}
-              <span><strong>{activeIntent === "chosen_location" ? "正在保存到指定位置" : "保存到指定位置"}</strong><small>明确选择可信目录</small></span>
+              <span><strong>{activeIntent === "chosen_location" ? "正在保存到指定位置" : "保存到指定位置"}</strong>{readingPresentation ? null : <small>明确选择可信目录</small>}</span>
             </button>
           ) : null}
           {canDownloadFiles ? (
             <button type="button" className={`${canChooseSaveLocation ? "secondary-action" : "primary-action"} prepared-delivery-action`} data-delivery-intent="download" disabled={busy || retryGate !== "open"} aria-busy={activeIntent === "download"} onClick={() => void deliver("download")}>
               {activeIntent === "download" ? <LoaderCircle className="is-spinning" aria-hidden="true" /> : <Download aria-hidden="true" />}
-              <span><strong>{activeIntent === "download" ? "正在请求下载" : "下载文件"}</strong><small>随后核对浏览器下载列表</small></span>
+              <span><strong>{activeIntent === "download" ? readingPresentation ? "正在下载" : "正在请求下载" : readingPresentation ? "下载" : "下载文件"}</strong>{readingPresentation ? null : <small>随后核对浏览器下载列表</small>}</span>
             </button>
           ) : null}
-          {canShareFiles ? (
+          {!readingPresentation && canShareFiles ? (
             <button type="button" className="secondary-action prepared-delivery-action" data-delivery-intent="share" disabled={busy || retryGate !== "open"} aria-busy={activeIntent === "share"} onClick={() => void deliver("share")}>
               {activeIntent === "share" ? <LoaderCircle className="is-spinning" aria-hidden="true" /> : <Share2 aria-hidden="true" />}
               <span><strong>{activeIntent === "share" ? "正在打开系统分享" : "系统分享"}</strong><small>人工确认接收目标</small></span>
             </button>
           ) : null}
-          <button type="button" className="text-action prepared-delivery-close-action" disabled={closeBlocked} onClick={requestClose}>{manualCheckRequired ? "核对后关闭" : "关闭"}</button>
+          <button type="button" className="text-action prepared-delivery-close-action" disabled={closeBlocked} onClick={requestClose}>{!readingPresentation && manualCheckRequired ? "暂不核对，关闭" : "关闭"}</button>
         </div>
       </div>
     </div>

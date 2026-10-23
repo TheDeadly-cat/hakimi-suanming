@@ -1,0 +1,3289 @@
+{
+  "kind": "synthetic_original_before_f01_fix",
+  "sourceCommit": "6cb7075ff16980972fb6d4ac4738e3d186c181cf",
+  "note": "The v1.2 midnight hour is intentionally historically wrong; exact replay must preserve it. Never relabel it as v1.3.",
+  "revision": {
+    "input": {
+      "schemaVersion": "1.0.0",
+      "calendarType": "gregorian",
+      "date": "1995-08-18",
+      "time": "08:26",
+      "timePrecision": "exact_minute",
+      "timeZone": "Asia/Shanghai",
+      "sex": "male",
+      "lunarLeapMonth": false,
+      "location": {
+        "label": "Synthetic midnight regression",
+        "latitude": null,
+        "longitude": null,
+        "precision": "city"
+      },
+      "sourceNote": "Synthetic regression; no person data"
+    },
+    "timeCalibration": {
+      "schemaVersion": "1.0.0",
+      "originalCivilDateTime": "1995-08-18T08:26:00",
+      "activeWallTime": "1995-08-18T08:26:00",
+      "timeZone": "Asia/Shanghai",
+      "utcInstant": "1995-08-18T00:26:00Z",
+      "utcOffset": "+08:00",
+      "dstStatus": "resolved",
+      "solarTimePreview": null,
+      "solarTimeApplied": false,
+      "normalizationStatus": "instant_resolved",
+      "warnings": [],
+      "calendarResolution": {
+        "inputCalendarType": "gregorian",
+        "inputDate": "1995-08-18",
+        "inputLunarLeapMonth": false,
+        "resolvedGregorianDate": "1995-08-18",
+        "algorithmId": "hakimi-time-core:gregorian-identity:v1",
+        "frame": "identity_gregorian",
+        "upstreamName": null,
+        "upstreamVersion": null,
+        "roundTripVerified": true,
+        "sourceRefs": [],
+        "warnings": []
+      },
+      "timeZoneResolution": {
+        "kind": "unique",
+        "policy": "reject",
+        "status": "resolved_unique",
+        "requestedWallTime": "1995-08-18T08:26:00",
+        "candidates": [
+          {
+            "choice": "unique",
+            "instant": "1995-08-18T00:26:00Z",
+            "utcOffset": "+08:00",
+            "utcOffsetMinutes": 480,
+            "resolvedWallTime": "1995-08-18T08:26:00",
+            "zonedDateTime": "1995-08-18T08:26:00+08:00[Asia/Shanghai]",
+            "matchesInputWallTime": true
+          }
+        ],
+        "selectedCandidate": {
+          "choice": "unique",
+          "instant": "1995-08-18T00:26:00Z",
+          "utcOffset": "+08:00",
+          "utcOffsetMinutes": 480,
+          "resolvedWallTime": "1995-08-18T08:26:00",
+          "zonedDateTime": "1995-08-18T08:26:00+08:00[Asia/Shanghai]",
+          "matchesInputWallTime": true
+        }
+      },
+      "solarTime": null
+    },
+    "ruleProfile": {
+      "schemaVersion": "1.0.0",
+      "profileId": "ziping-working-midnight",
+      "profileVersion": "0.1.0",
+      "status": "working_default",
+      "label": "午夜换日对照配置",
+      "notice": "工程工作默认，不代表唯一正确流派；1900—2100 仅为声明支持范围，不代表已强验证，当前尚未通过 360 例金标准发布门。",
+      "sourceRefs": [],
+      "supportedRange": {
+        "stronglyVerifiedFrom": "1900-01-01",
+        "stronglyVerifiedTo": "2100-12-31",
+        "outsideRangePolicy": "experimental_with_warning"
+      },
+      "calendar": {
+        "yearBoundary": "lichun_exact",
+        "monthBoundary": "jie_exact",
+        "dayBoundary": "midnight",
+        "ziHourDayStemBasis": "civil_day",
+        "hourBasis": "civil_time",
+        "timezoneSource": "iana",
+        "dstAmbiguity": "require_user",
+        "locationPrecision": "city"
+      },
+      "solarTime": {
+        "enabled": false,
+        "showComparison": true,
+        "longitudeSource": "location",
+        "equationOfTimeModel": null
+      },
+      "luckCycle": {
+        "directionRule": "year_stem_yinyang_and_gender",
+        "unknownValuePolicy": "require_manual_direction",
+        "anchor": "directional_jie",
+        "startAgeMethod": "three_days_one_year_exact_duration",
+        "rounding": "retain_duration"
+      },
+      "layers": {
+        "hiddenStems": true,
+        "tenGods": true,
+        "nayin": true,
+        "voidBranches": true,
+        "twelveGrowth": true,
+        "stemBranchRelations": true,
+        "shensha": false
+      },
+      "interpretation": {
+        "strengthRulePack": null,
+        "structureRulePack": null,
+        "climateRulePack": null,
+        "usefulGodRulePack": null
+      }
+    },
+    "luckCycleRuleSnapshot": {
+      "schemaVersion": "1.0.0",
+      "ruleId": "ziping-working-midnight:luck-cycle-xiaoyun",
+      "ruleVersion": "0.1.0",
+      "directionRule": "year_stem_yinyang_and_gender",
+      "unknownSexPolicy": "require_manual_direction",
+      "anchor": "directional_jie",
+      "exactBoundaryPolicy": "zero_duration",
+      "startAgeMethod": "three_days_one_year_exact_duration",
+      "componentRatios": {
+        "sourceDaysPerTraditionalYear": 3,
+        "traditionalMonthsPerYear": 12,
+        "traditionalDaysPerMonth": 30,
+        "traditionalHoursPerDay": 24
+      },
+      "handoverCalendar": {
+        "frame": "fixed_plus08",
+        "additionOrder": "years_months_days_time",
+        "overflow": "constrain"
+      },
+      "decadeYears": 10,
+      "decadeCount": 10,
+      "xiaoyun": {
+        "method": "birth_hour_adjacent",
+        "directionRule": "exact_chart_year_stem_and_gender",
+        "directionReuse": "luck_cycle_or_manual_direction",
+        "firstAge": 1,
+        "firstStepOffset": 1,
+        "ageBasis": "nominal_age",
+        "boundaryAlignment": "flow_year_start_exact",
+        "boundaryFrame": "fixed_plus08",
+        "scope": "whole_life",
+        "cycleLength": 60,
+        "intervalPolicy": "half_open",
+        "unknownSexPolicy": "require_manual_direction",
+        "unknownHourPolicy": "unsupported"
+      }
+    },
+    "facts": {
+      "schemaVersion": "1.0.0",
+      "calendar": {
+        "solarText": "1995-08-18 08:26:00",
+        "lunarText": "一九九五年七月廿三",
+        "lunarYear": 1995,
+        "lunarMonth": 7,
+        "lunarDay": 23,
+        "isLeapMonth": false,
+        "previousJie": "立秋 · 1995-08-08 07:51:44 UTC+08:00",
+        "nextJie": "白露 · 1995-09-08 10:48:34 UTC+08:00"
+      },
+      "pillars": {
+        "year": {
+          "name": "year",
+          "label": "年柱",
+          "ganZhi": "乙亥",
+          "stem": "乙",
+          "branch": "亥",
+          "hiddenStems": [
+            "壬",
+            "甲"
+          ],
+          "stemTenGod": "偏财",
+          "branchTenGods": [
+            "伤官",
+            "正财"
+          ],
+          "wuXing": "木水",
+          "nayin": "山头火",
+          "twelveGrowth": "沐浴",
+          "xun": "甲戌",
+          "voidBranches": "申酉"
+        },
+        "month": {
+          "name": "month",
+          "label": "月柱",
+          "ganZhi": "甲申",
+          "stem": "甲",
+          "branch": "申",
+          "hiddenStems": [
+            "庚",
+            "壬",
+            "戊"
+          ],
+          "stemTenGod": "正财",
+          "branchTenGods": [
+            "劫财",
+            "伤官",
+            "正印"
+          ],
+          "wuXing": "木金",
+          "nayin": "泉中水",
+          "twelveGrowth": "帝旺",
+          "xun": "甲申",
+          "voidBranches": "午未"
+        },
+        "day": {
+          "name": "day",
+          "label": "日柱",
+          "ganZhi": "辛巳",
+          "stem": "辛",
+          "branch": "巳",
+          "hiddenStems": [
+            "丙",
+            "庚",
+            "戊"
+          ],
+          "stemTenGod": "日主",
+          "branchTenGods": [
+            "正官",
+            "劫财",
+            "正印"
+          ],
+          "wuXing": "金火",
+          "nayin": "白蜡金",
+          "twelveGrowth": "死",
+          "xun": "甲戌",
+          "voidBranches": "申酉"
+        },
+        "hour": {
+          "name": "hour",
+          "label": "时柱",
+          "ganZhi": "壬辰",
+          "stem": "壬",
+          "branch": "辰",
+          "hiddenStems": [
+            "戊",
+            "乙",
+            "癸"
+          ],
+          "stemTenGod": "伤官",
+          "branchTenGods": [
+            "正印",
+            "偏财",
+            "食神"
+          ],
+          "wuXing": "水土",
+          "nayin": "长流水",
+          "twelveGrowth": "墓",
+          "xun": "甲申",
+          "voidBranches": "午未"
+        }
+      },
+      "fieldProvenance": [
+        {
+          "field": "pillars.year.ganZhi",
+          "kind": "rule_derived",
+          "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:fixed-plus08:year-exact:v1",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.year.hiddenStems",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.year.stemTenGod",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.year.branchTenGods",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.year.wuXing",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.year.nayin",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.year.twelveGrowth",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.year.xun",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.year.voidBranches",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.month.ganZhi",
+          "kind": "rule_derived",
+          "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:fixed-plus08:month-exact:v1",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.month.hiddenStems",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.month.stemTenGod",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.month.branchTenGods",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.month.wuXing",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.month.nayin",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.month.twelveGrowth",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.month.xun",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.month.voidBranches",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.day.ganZhi",
+          "kind": "rule_derived",
+          "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:local-civil:day:midnight:v1",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.day.hiddenStems",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.day.stemTenGod",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.day.branchTenGods",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.day.wuXing",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.day.nayin",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.day.twelveGrowth",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.day.xun",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.day.voidBranches",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.hour.ganZhi",
+          "kind": "rule_derived",
+          "algorithmId": "hakimi-bazi-core:fixed-plus08-year-month-local-civil-day-hour:local-civil:hour:time-gan-from-final-day:midnight:v1",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.hour.hiddenStems",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.ZHI_HIDE_GAN",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.hour.stemTenGod",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.hour.branchTenGods",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.SHI_SHEN:final-day-stem",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.hour.wuXing",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.WU_XING_GAN+WU_XING_ZHI",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.hour.nayin",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.NAYIN",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.hour.twelveGrowth",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.CHANG_SHENG_OFFSET:final-day-stem",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.hour.xun",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXun",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        },
+        {
+          "field": "pillars.hour.voidBranches",
+          "kind": "rule_derived",
+          "algorithmId": "lunar-typescript:1.8.6:LunarUtil.getXunKong",
+          "sourceRefs": [],
+          "verificationStatus": "experimental",
+          "note": "工程候选四柱；年/月按同一瞬时点的固定 UTC+08:00 精确节气候选，日/时按本地民用墙时和显式换日规则生成，尚未通过项目金标准发布门。"
+        }
+      ]
+    },
+    "manifest": {
+      "schemaVersion": "1.0.0",
+      "hashSchemaVersion": "2.0.0",
+      "engine": {
+        "name": "hakimi-bazi-core",
+        "version": "0.4.0",
+        "upstreamName": "lunar-typescript",
+        "upstreamVersion": "1.8.6",
+        "upstreamTagCommit": "0f3e95d15e31f1a7c7b93d624542649347328a20",
+        "upstreamIntegrity": "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA=="
+      },
+      "tzdbVersion": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3",
+      "timeZoneDatabase": {
+        "schemaVersion": "1.0.0",
+        "kind": "bundled_iana_tzdb",
+        "ianaVersion": "2026c",
+        "artifactName": "moment-timezone/data/packed/latest.json",
+        "dataSha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81",
+        "resolver": {
+          "name": "hakimi-tzdb-core",
+          "version": "1.0.0"
+        },
+        "adapter": {
+          "name": "moment-timezone",
+          "version": "0.6.3"
+        },
+        "supportedRange": {
+          "from": "1900-01-01",
+          "to": "2100-12-31"
+        },
+        "snapshotId": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3"
+      },
+      "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+      "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+      "resultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+      "supportedRangeStatus": "experimental",
+      "verificationStatus": "engineering_preview",
+      "calculatedAt": "2026-10-13T02:07:39.131Z",
+      "warnings": [
+        "工程预览：当前结果尚未通过 360 例金标准与 20,000 例随机差分。",
+        "年柱与月柱使用已解析瞬时点投影到固定 UTC+08:00 后的精确立春/交节候选；这不是带历史 DST 的 IANA Asia/Shanghai 投影。",
+        "日柱与时柱使用 Asia/Shanghai 的本地民用墙时；时干已从最终显示日干与时支重新推导。",
+        "真太阳时与平太阳时仅保留对照数据，未应用到活动命盘。",
+        "lunar-typescript 仅作为白名单适配后的候选历法实现，不作为规则争议的最终裁判。"
+      ]
+    },
+    "schemaVersion": "1.0.0",
+    "id": "11111111-1111-4111-8111-111111111111",
+    "caseId": "22222222-2222-4222-8222-222222222222",
+    "revisionNumber": 1,
+    "createdAt": "2026-10-13T00:00:00.000Z"
+  },
+  "caseRecord": {
+    "schemaVersion": "1.0.0",
+    "recordVersion": 2,
+    "id": "22222222-2222-4222-8222-222222222222",
+    "alias": "Synthetic midnight regression",
+    "tags": [],
+    "notes": "",
+    "favorite": false,
+    "deletedAt": null,
+    "createdAt": "2026-10-13T00:00:00.000Z",
+    "updatedAt": "2026-10-13T00:00:00.000Z",
+    "latestRevisionId": "11111111-1111-4111-8111-111111111111",
+    "revisionCount": 1
+  },
+  "receipt": {
+    "schemaVersion": "1.0.0",
+    "recordType": "revision_calculation_receipt",
+    "id": "33333333-3333-4333-8333-333333333333",
+    "createdAt": "2026-10-13T00:00:01.000Z",
+    "captureKind": "explicit_calculation_snapshot",
+    "sourceRevision": {
+      "caseId": "22222222-2222-4222-8222-222222222222",
+      "revisionId": "11111111-1111-4111-8111-111111111111",
+      "revisionNumber": 1,
+      "snapshotDigest": "d567dc2f5ecef91ef51bc530932ab6dea7f0a51638ca6200f7cd83afee1ce6df",
+      "natalResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2"
+    },
+    "projection": {
+      "schemaVersion": "1.0.0",
+      "kind": "revision_explicit_executor_derivation",
+      "claim": "explicit_version_projection_not_stored_historical_output_comparison",
+      "storedHistoricalOutputCompared": false,
+      "status": "complete",
+      "sourceRevisionId": "11111111-1111-4111-8111-111111111111",
+      "sourceRevisionSnapshotDigest": "d567dc2f5ecef91ef51bc530932ab6dea7f0a51638ca6200f7cd83afee1ce6df",
+      "sourceNatalReplayDigest": "69f4bae6d804a00be40fe25febcde9b32d55caf5443418ab4db374451300e124",
+      "sourceNatalResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+      "profile": {
+        "schemaVersion": "1.0.0",
+        "profileId": "hakimi-explicit-derived-replay:relations-0.1.0_luck-0.1.0_transit-1.2.0",
+        "relations": {
+          "descriptor": {
+            "outputSchemaVersion": "1.0.0",
+            "ruleProfile": {
+              "schemaVersion": "1.0.0",
+              "profileId": "p0-03-working-default",
+              "profileVersion": "1.0.0"
+            },
+            "embeddedRelationTableVersion": "1.0.0",
+            "factAlgorithmVersion": "v1",
+            "engine": {
+              "name": "hakimi-relations-core",
+              "version": "0.1.0",
+              "upstreamName": "lunar-typescript",
+              "upstreamVersion": "1.8.6",
+              "upstreamTagCommit": "0f3e95d15e31f1a7c7b93d624542649347328a20",
+              "upstreamIntegrity": "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA=="
+            }
+          },
+          "ruleProfile": {
+            "schemaVersion": "1.0.0",
+            "profileId": "p0-03-working-default",
+            "profileVersion": "1.0.0",
+            "enabled": {
+              "stem_five_combination": true,
+              "stem_clash": true,
+              "branch_six_combination": true,
+              "branch_six_clash": true,
+              "branch_three_harmony": true,
+              "branch_three_meeting": true,
+              "branch_three_punishment": true,
+              "branch_binary_punishment": true,
+              "branch_self_punishment": true,
+              "branch_six_harm": true,
+              "branch_six_break": true
+            },
+            "stemClashRule": "lunar-util-chong-gan-4-v1",
+            "incompleteSetPolicy": "emit_two_of_three",
+            "punishmentSetRule": "two_triads_plus_zi_mao_and_four_self_branches-v1"
+          }
+        },
+        "luckCycle": {
+          "descriptor": {
+            "outputSchemaVersion": "1.0.0",
+            "ruleSnapshotSchemaVersion": "1.0.0",
+            "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+            "engine": {
+              "name": "hakimi-luck-core",
+              "version": "0.1.0"
+            },
+            "upstream": {
+              "name": "lunar-typescript",
+              "version": "1.8.6",
+              "tagCommit": "0f3e95d15e31f1a7c7b93d624542649347328a20",
+              "integrity": "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA=="
+            }
+          }
+        },
+        "transit": {
+          "descriptor": {
+            "timelineVersion": "hakimi-transit:1.2.0",
+            "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+            "engine": {
+              "name": "hakimi-transit-core",
+              "version": "0.1.0",
+              "upstreamName": "lunar-typescript",
+              "upstreamVersion": "1.8.6",
+              "upstreamTagCommit": "0f3e95d15e31f1a7c7b93d624542649347328a20",
+              "upstreamIntegrity": "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA=="
+            },
+            "timeZoneDatabase": {
+              "schemaVersion": "1.0.0",
+              "kind": "bundled_iana_tzdb",
+              "ianaVersion": "2026c",
+              "artifactName": "moment-timezone/data/packed/latest.json",
+              "dataSha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81",
+              "resolver": {
+                "name": "hakimi-tzdb-core",
+                "version": "1.0.0"
+              },
+              "adapter": {
+                "name": "moment-timezone",
+                "version": "0.6.3"
+              },
+              "supportedRange": {
+                "from": "1900-01-01",
+                "to": "2100-12-31"
+              },
+              "snapshotId": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3"
+            }
+          }
+        }
+      },
+      "request": {
+        "atInstant": "2024-02-04T16:30:00.000Z",
+        "manualDirection": null
+      },
+      "relations": {
+        "status": "projected",
+        "executorId": "hakimi-relations-core:pillar-relations-executor:0.1.0",
+        "resultDigest": "d11ec1acb626e7704ce00acfc0b1de4eccbef4fc7a6cd330b2909b5613d73ef5",
+        "result": {
+          "schemaVersion": "1.0.0",
+          "kind": "pillar_relation_facts",
+          "pillars": {
+            "year": "乙亥",
+            "month": "甲申",
+            "day": "辛巳",
+            "hour": "壬辰"
+          },
+          "ruleProfile": {
+            "schemaVersion": "1.0.0",
+            "profileId": "p0-03-working-default",
+            "profileVersion": "1.0.0",
+            "enabled": {
+              "stem_five_combination": true,
+              "stem_clash": true,
+              "branch_six_combination": true,
+              "branch_six_clash": true,
+              "branch_three_harmony": true,
+              "branch_three_meeting": true,
+              "branch_three_punishment": true,
+              "branch_binary_punishment": true,
+              "branch_self_punishment": true,
+              "branch_six_harm": true,
+              "branch_six_break": true
+            },
+            "stemClashRule": "lunar-util-chong-gan-4-v1",
+            "incompleteSetPolicy": "emit_two_of_three",
+            "punishmentSetRule": "two_triads_plus_zi_mao_and_four_self_branches-v1"
+          },
+          "facts": [
+            {
+              "id": "stem_clash|binary|chong_gan_4:乙辛|year:乙|day:辛",
+              "relationType": "stem_clash",
+              "ruleId": "chong_gan_4:乙辛",
+              "completeness": "binary",
+              "participants": [
+                {
+                  "position": "year",
+                  "ganZhi": "乙亥",
+                  "component": "stem",
+                  "value": "乙"
+                },
+                {
+                  "position": "day",
+                  "ganZhi": "辛巳",
+                  "component": "stem",
+                  "value": "辛"
+                }
+              ],
+              "requiredMembers": [
+                "乙",
+                "辛"
+              ],
+              "presentMembers": [
+                "乙",
+                "辛"
+              ],
+              "missingMembers": [],
+              "algorithmId": "hakimi-relations-core:stem_clash:position-pair-scan:v1",
+              "tableVersion": "lunar-typescript@1.8.6:LunarUtil.CHONG_GAN_4",
+              "verificationStatus": "upstream_public_constant_audited",
+              "sourceRefs": [
+                "https://github.com/6tail/lunar-typescript/blob/0f3e95d15e31f1a7c7b93d624542649347328a20/src/lib/LunarUtil.ts#L809-L814"
+              ],
+              "knownGaps": [
+                "lunar-typescript 1.8.6 leaves CHONG_GAN_4 I18n tokens unresolved; relations-core translates the public tokens through I18n.getMessage before auditing and copying the table."
+              ]
+            },
+            {
+              "id": "branch_six_combination|binary|he_zhi_6:巳申|month:申|day:巳",
+              "relationType": "branch_six_combination",
+              "ruleId": "he_zhi_6:巳申",
+              "completeness": "binary",
+              "participants": [
+                {
+                  "position": "month",
+                  "ganZhi": "甲申",
+                  "component": "branch",
+                  "value": "申"
+                },
+                {
+                  "position": "day",
+                  "ganZhi": "辛巳",
+                  "component": "branch",
+                  "value": "巳"
+                }
+              ],
+              "requiredMembers": [
+                "巳",
+                "申"
+              ],
+              "presentMembers": [
+                "申",
+                "巳"
+              ],
+              "missingMembers": [],
+              "algorithmId": "hakimi-relations-core:branch_six_combination:position-pair-scan:v1",
+              "tableVersion": "lunar-typescript@1.8.6:LunarUtil.HE_ZHI_6",
+              "verificationStatus": "upstream_public_constant_audited",
+              "sourceRefs": [
+                "https://github.com/6tail/lunar-typescript/blob/0f3e95d15e31f1a7c7b93d624542649347328a20/src/lib/LunarUtil.ts#L809-L814"
+              ],
+              "knownGaps": []
+            },
+            {
+              "id": "branch_six_clash|binary|chong:巳亥|year:亥|day:巳",
+              "relationType": "branch_six_clash",
+              "ruleId": "chong:巳亥",
+              "completeness": "binary",
+              "participants": [
+                {
+                  "position": "year",
+                  "ganZhi": "乙亥",
+                  "component": "branch",
+                  "value": "亥"
+                },
+                {
+                  "position": "day",
+                  "ganZhi": "辛巳",
+                  "component": "branch",
+                  "value": "巳"
+                }
+              ],
+              "requiredMembers": [
+                "巳",
+                "亥"
+              ],
+              "presentMembers": [
+                "亥",
+                "巳"
+              ],
+              "missingMembers": [],
+              "algorithmId": "hakimi-relations-core:branch_six_clash:position-pair-scan:v1",
+              "tableVersion": "lunar-typescript@1.8.6:LunarUtil.CHONG",
+              "verificationStatus": "upstream_public_constant_audited",
+              "sourceRefs": [
+                "https://github.com/6tail/lunar-typescript/blob/0f3e95d15e31f1a7c7b93d624542649347328a20/src/lib/LunarUtil.ts#L809-L814"
+              ],
+              "knownGaps": []
+            },
+            {
+              "id": "branch_three_harmony|incomplete_set|three-harmony:shen-zi-chen|month:申|hour:辰",
+              "relationType": "branch_three_harmony",
+              "ruleId": "three-harmony:shen-zi-chen",
+              "completeness": "incomplete_set",
+              "participants": [
+                {
+                  "position": "month",
+                  "ganZhi": "甲申",
+                  "component": "branch",
+                  "value": "申"
+                },
+                {
+                  "position": "hour",
+                  "ganZhi": "壬辰",
+                  "component": "branch",
+                  "value": "辰"
+                }
+              ],
+              "requiredMembers": [
+                "申",
+                "子",
+                "辰"
+              ],
+              "presentMembers": [
+                "申",
+                "辰"
+              ],
+              "missingMembers": [
+                "子"
+              ],
+              "algorithmId": "hakimi-relations-core:branch_three_harmony:required-set-presence:v1",
+              "tableVersion": "hakimi-relations-core:embedded-tables@1.0.0",
+              "verificationStatus": "embedded_table_pending_consultant_review",
+              "sourceRefs": [
+                "@hakimi/relations-core:embedded-traditional-relations:v1",
+                "https://github.com/yale8848/BaziGo/blob/02b21ddb25a6f7a271daf5ca6b1f099cd356baee/SiZhu/hehuachong.go",
+                "https://github.com/china-testing/bazi/blob/7150d5b6fba5e563dd0751b957dc990bb84ab6f0/ganzhi.py#L182-L282"
+              ],
+              "knownGaps": [
+                "lunar-typescript 1.8.6 does not expose this generic four-pillar relation table; the embedded mapping awaits table-by-table consultant verification.",
+                "An incomplete fact records two present members and one missing member only; it does not assert a completed three-member set."
+              ]
+            },
+            {
+              "id": "branch_three_punishment|incomplete_set|three-punishment:yin-si-shen|month:申|day:巳",
+              "relationType": "branch_three_punishment",
+              "ruleId": "three-punishment:yin-si-shen",
+              "completeness": "incomplete_set",
+              "participants": [
+                {
+                  "position": "month",
+                  "ganZhi": "甲申",
+                  "component": "branch",
+                  "value": "申"
+                },
+                {
+                  "position": "day",
+                  "ganZhi": "辛巳",
+                  "component": "branch",
+                  "value": "巳"
+                }
+              ],
+              "requiredMembers": [
+                "寅",
+                "巳",
+                "申"
+              ],
+              "presentMembers": [
+                "巳",
+                "申"
+              ],
+              "missingMembers": [
+                "寅"
+              ],
+              "algorithmId": "hakimi-relations-core:branch_three_punishment:required-set-presence:v1",
+              "tableVersion": "hakimi-relations-core:embedded-tables@1.0.0",
+              "verificationStatus": "embedded_table_pending_consultant_review",
+              "sourceRefs": [
+                "@hakimi/relations-core:embedded-traditional-relations:v1",
+                "https://github.com/yale8848/BaziGo/blob/02b21ddb25a6f7a271daf5ca6b1f099cd356baee/SiZhu/hehuachong.go",
+                "https://github.com/china-testing/bazi/blob/7150d5b6fba5e563dd0751b957dc990bb84ab6f0/ganzhi.py#L182-L282"
+              ],
+              "knownGaps": [
+                "lunar-typescript 1.8.6 does not expose this generic four-pillar relation table; the embedded mapping awaits table-by-table consultant verification.",
+                "An incomplete fact records two present members and one missing member only; it does not assert a completed three-member set.",
+                "The profile reports two configured three-member sets, the Zi-Mao binary pair, and four duplicate-branch self pairs; directional pair variants are not emitted."
+              ]
+            },
+            {
+              "id": "branch_six_harm|binary|six-harm:shen-hai|year:亥|month:申",
+              "relationType": "branch_six_harm",
+              "ruleId": "six-harm:shen-hai",
+              "completeness": "binary",
+              "participants": [
+                {
+                  "position": "year",
+                  "ganZhi": "乙亥",
+                  "component": "branch",
+                  "value": "亥"
+                },
+                {
+                  "position": "month",
+                  "ganZhi": "甲申",
+                  "component": "branch",
+                  "value": "申"
+                }
+              ],
+              "requiredMembers": [
+                "申",
+                "亥"
+              ],
+              "presentMembers": [
+                "亥",
+                "申"
+              ],
+              "missingMembers": [],
+              "algorithmId": "hakimi-relations-core:branch_six_harm:position-pair-scan:v1",
+              "tableVersion": "hakimi-relations-core:embedded-tables@1.0.0",
+              "verificationStatus": "embedded_table_pending_consultant_review",
+              "sourceRefs": [
+                "@hakimi/relations-core:embedded-traditional-relations:v1",
+                "https://github.com/yale8848/BaziGo/blob/02b21ddb25a6f7a271daf5ca6b1f099cd356baee/SiZhu/hehuachong.go",
+                "https://github.com/china-testing/bazi/blob/7150d5b6fba5e563dd0751b957dc990bb84ab6f0/ganzhi.py#L182-L282"
+              ],
+              "knownGaps": [
+                "lunar-typescript 1.8.6 does not expose this generic four-pillar relation table; the embedded mapping awaits table-by-table consultant verification."
+              ]
+            },
+            {
+              "id": "branch_six_break|binary|six-break:si-shen|month:申|day:巳",
+              "relationType": "branch_six_break",
+              "ruleId": "six-break:si-shen",
+              "completeness": "binary",
+              "participants": [
+                {
+                  "position": "month",
+                  "ganZhi": "甲申",
+                  "component": "branch",
+                  "value": "申"
+                },
+                {
+                  "position": "day",
+                  "ganZhi": "辛巳",
+                  "component": "branch",
+                  "value": "巳"
+                }
+              ],
+              "requiredMembers": [
+                "巳",
+                "申"
+              ],
+              "presentMembers": [
+                "申",
+                "巳"
+              ],
+              "missingMembers": [],
+              "algorithmId": "hakimi-relations-core:branch_six_break:position-pair-scan:v1",
+              "tableVersion": "hakimi-relations-core:embedded-tables@1.0.0",
+              "verificationStatus": "embedded_table_pending_consultant_review",
+              "sourceRefs": [
+                "@hakimi/relations-core:embedded-traditional-relations:v1",
+                "https://github.com/yale8848/BaziGo/blob/02b21ddb25a6f7a271daf5ca6b1f099cd356baee/SiZhu/hehuachong.go",
+                "https://github.com/china-testing/bazi/blob/7150d5b6fba5e563dd0751b957dc990bb84ab6f0/ganzhi.py#L182-L282"
+              ],
+              "knownGaps": [
+                "lunar-typescript 1.8.6 does not expose this generic four-pillar relation table; the embedded mapping awaits table-by-table consultant verification.",
+                "Open-source implementations differ on the Yin-Hai and Si-Shen break pairs; this six-pair table remains pending consultant verification."
+              ]
+            }
+          ],
+          "manifest": {
+            "engine": {
+              "name": "hakimi-relations-core",
+              "version": "0.1.0",
+              "upstreamName": "lunar-typescript",
+              "upstreamVersion": "1.8.6",
+              "upstreamTagCommit": "0f3e95d15e31f1a7c7b93d624542649347328a20",
+              "upstreamIntegrity": "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA=="
+            },
+            "deterministic": true,
+            "interpretationIncluded": false
+          }
+        }
+      },
+      "luckCycle": {
+        "status": "projected",
+        "executorId": "hakimi-luck-core:luck-cycle-executor:0.1.0",
+        "resultDigest": "94184b8debf1cc21a32c6ed8c2783d36dc391c7c0058afd52798285de544e204",
+        "result": {
+          "schemaVersion": "1.0.0",
+          "kind": "luck_cycle_facts",
+          "manifest": {
+            "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+            "engine": {
+              "name": "hakimi-luck-core",
+              "version": "0.1.0"
+            },
+            "ruleId": "ziping-working-midnight:luck-cycle-xiaoyun",
+            "ruleVersion": "0.1.0",
+            "upstream": {
+              "name": "lunar-typescript",
+              "version": "1.8.6",
+              "tagCommit": "0f3e95d15e31f1a7c7b93d624542649347328a20",
+              "integrity": "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA=="
+            },
+            "sourceRefs": [
+              "https://github.com/6tail/lunar-typescript/blob/0f3e95d15e31f1a7c7b93d624542649347328a20/src/lib/Lunar.ts",
+              "https://github.com/6tail/lunar-typescript/blob/0f3e95d15e31f1a7c7b93d624542649347328a20/src/lib/Yun.ts",
+              "https://github.com/6tail/lunar-typescript/blob/0f3e95d15e31f1a7c7b93d624542649347328a20/src/lib/DaYun.ts"
+            ],
+            "verificationStatus": "engineering_preview",
+            "goldCaseCount": 0,
+            "releaseGatePassed": false
+          },
+          "input": {
+            "schemaVersion": "1.0.0",
+            "birthInstant": "1995-08-18T00:26:00.000Z",
+            "sex": "male",
+            "expectedYearGanZhi": "乙亥",
+            "expectedMonthGanZhi": "甲申"
+          },
+          "rule": {
+            "schemaVersion": "1.0.0",
+            "ruleId": "ziping-working-midnight:luck-cycle-xiaoyun",
+            "ruleVersion": "0.1.0",
+            "directionRule": "year_stem_yinyang_and_gender",
+            "unknownSexPolicy": "require_manual_direction",
+            "anchor": "directional_jie",
+            "exactBoundaryPolicy": "zero_duration",
+            "startAgeMethod": "three_days_one_year_exact_duration",
+            "componentRatios": {
+              "sourceDaysPerTraditionalYear": 3,
+              "traditionalMonthsPerYear": 12,
+              "traditionalDaysPerMonth": 30,
+              "traditionalHoursPerDay": 24
+            },
+            "handoverCalendar": {
+              "frame": "fixed_plus08",
+              "additionOrder": "years_months_days_time",
+              "overflow": "constrain"
+            },
+            "decadeYears": 10,
+            "decadeCount": 10,
+            "xiaoyun": {
+              "method": "birth_hour_adjacent",
+              "directionRule": "exact_chart_year_stem_and_gender",
+              "directionReuse": "luck_cycle_or_manual_direction",
+              "firstAge": 1,
+              "firstStepOffset": 1,
+              "ageBasis": "nominal_age",
+              "boundaryAlignment": "flow_year_start_exact",
+              "boundaryFrame": "fixed_plus08",
+              "scope": "whole_life",
+              "cycleLength": 60,
+              "intervalPolicy": "half_open",
+              "unknownSexPolicy": "require_manual_direction",
+              "unknownHourPolicy": "unsupported"
+            }
+          },
+          "birth": {
+            "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+            "verificationStatus": "engineering_preview",
+            "instant": "1995-08-18T00:26:00.000Z",
+            "fixedPlusEightWallDateTime": "1995-08-18T08:26:00.000",
+            "yearGanZhi": "乙亥",
+            "monthGanZhi": "甲申"
+          },
+          "direction": {
+            "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+            "verificationStatus": "engineering_preview",
+            "value": "backward",
+            "basis": "year_stem_yinyang_and_gender",
+            "yearStem": "乙",
+            "yearStemPolarity": "yin",
+            "sex": "male"
+          },
+          "adjacentJie": {
+            "previous": {
+              "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+              "verificationStatus": "engineering_preview",
+              "name": "立秋",
+              "kind": "jie",
+              "relation": "strict_previous",
+              "fixedPlusEightWallDateTime": "1995-08-08T07:51:44.000",
+              "instant": "1995-08-07T23:51:44.000Z",
+              "sourcePrecision": "second"
+            },
+            "exactBoundary": null,
+            "next": {
+              "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+              "verificationStatus": "engineering_preview",
+              "name": "白露",
+              "kind": "jie",
+              "relation": "strict_next",
+              "fixedPlusEightWallDateTime": "1995-09-08T10:48:34.000",
+              "instant": "1995-09-08T02:48:34.000Z",
+              "sourcePrecision": "second"
+            },
+            "selectedAnchor": {
+              "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+              "verificationStatus": "engineering_preview",
+              "name": "立秋",
+              "kind": "jie",
+              "relation": "strict_previous",
+              "fixedPlusEightWallDateTime": "1995-08-08T07:51:44.000",
+              "instant": "1995-08-07T23:51:44.000Z",
+              "sourcePrecision": "second"
+            }
+          },
+          "anchorInterval": {
+            "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+            "verificationStatus": "engineering_preview",
+            "fromInstant": "1995-08-07T23:51:44.000Z",
+            "toInstant": "1995-08-18T00:26:00.000Z",
+            "durationMilliseconds": 866056000,
+            "durationSeconds": {
+              "numerator": "866056000",
+              "denominator": "1000",
+              "decimal": 866056,
+              "decimalIsDisplayOnly": true
+            },
+            "durationDays": {
+              "numerator": "866056000",
+              "denominator": "86400000",
+              "decimal": 10.023796296296,
+              "decimalIsDisplayOnly": true
+            }
+          },
+          "startAge": {
+            "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+            "verificationStatus": "engineering_preview",
+            "elapsedYears": {
+              "numerator": "866056000",
+              "denominator": "259200000",
+              "decimal": 3.341265432099,
+              "decimalIsDisplayOnly": true
+            },
+            "components": {
+              "years": 3,
+              "months": 4,
+              "days": 2,
+              "hours": 20,
+              "minutes": 32,
+              "seconds": 0,
+              "milliseconds": 0
+            },
+            "semantics": "elapsed_age_from_birth_not_nominal_age",
+            "sourceDurationMilliseconds": 866056000,
+            "sourceToTraditionalYearRatio": {
+              "numerator": "866056000",
+              "denominator": "259200000",
+              "decimal": 3.341265432099,
+              "decimalIsDisplayOnly": true
+            },
+            "unrounded": true
+          },
+          "handover": {
+            "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+            "verificationStatus": "engineering_preview",
+            "instant": "1998-12-20T20:58:00.000Z",
+            "fixedPlusEightWallDateTime": "1998-12-21T04:58:00.000",
+            "calendarFrame": "fixed_plus08",
+            "calendarOverflow": "constrain"
+          },
+          "decades": [
+            {
+              "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+              "verificationStatus": "engineering_preview",
+              "index": 1,
+              "ganZhi": "癸未",
+              "direction": "backward",
+              "startAge": {
+                "elapsedYears": {
+                  "numerator": "866056000",
+                  "denominator": "259200000",
+                  "decimal": 3.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 3,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "endAgeExclusive": {
+                "elapsedYears": {
+                  "numerator": "3458056000",
+                  "denominator": "259200000",
+                  "decimal": 13.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 13,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "startInstant": "1998-12-20T20:58:00.000Z",
+              "endExclusiveInstant": "2008-12-20T20:58:00.000Z",
+              "startFixedPlusEightWallDateTime": "1998-12-21T04:58:00.000",
+              "endExclusiveFixedPlusEightWallDateTime": "2008-12-21T04:58:00.000"
+            },
+            {
+              "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+              "verificationStatus": "engineering_preview",
+              "index": 2,
+              "ganZhi": "壬午",
+              "direction": "backward",
+              "startAge": {
+                "elapsedYears": {
+                  "numerator": "3458056000",
+                  "denominator": "259200000",
+                  "decimal": 13.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 13,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "endAgeExclusive": {
+                "elapsedYears": {
+                  "numerator": "6050056000",
+                  "denominator": "259200000",
+                  "decimal": 23.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 23,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "startInstant": "2008-12-20T20:58:00.000Z",
+              "endExclusiveInstant": "2018-12-20T20:58:00.000Z",
+              "startFixedPlusEightWallDateTime": "2008-12-21T04:58:00.000",
+              "endExclusiveFixedPlusEightWallDateTime": "2018-12-21T04:58:00.000"
+            },
+            {
+              "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+              "verificationStatus": "engineering_preview",
+              "index": 3,
+              "ganZhi": "辛巳",
+              "direction": "backward",
+              "startAge": {
+                "elapsedYears": {
+                  "numerator": "6050056000",
+                  "denominator": "259200000",
+                  "decimal": 23.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 23,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "endAgeExclusive": {
+                "elapsedYears": {
+                  "numerator": "8642056000",
+                  "denominator": "259200000",
+                  "decimal": 33.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 33,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "startInstant": "2018-12-20T20:58:00.000Z",
+              "endExclusiveInstant": "2028-12-20T20:58:00.000Z",
+              "startFixedPlusEightWallDateTime": "2018-12-21T04:58:00.000",
+              "endExclusiveFixedPlusEightWallDateTime": "2028-12-21T04:58:00.000"
+            },
+            {
+              "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+              "verificationStatus": "engineering_preview",
+              "index": 4,
+              "ganZhi": "庚辰",
+              "direction": "backward",
+              "startAge": {
+                "elapsedYears": {
+                  "numerator": "8642056000",
+                  "denominator": "259200000",
+                  "decimal": 33.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 33,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "endAgeExclusive": {
+                "elapsedYears": {
+                  "numerator": "11234056000",
+                  "denominator": "259200000",
+                  "decimal": 43.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 43,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "startInstant": "2028-12-20T20:58:00.000Z",
+              "endExclusiveInstant": "2038-12-20T20:58:00.000Z",
+              "startFixedPlusEightWallDateTime": "2028-12-21T04:58:00.000",
+              "endExclusiveFixedPlusEightWallDateTime": "2038-12-21T04:58:00.000"
+            },
+            {
+              "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+              "verificationStatus": "engineering_preview",
+              "index": 5,
+              "ganZhi": "己卯",
+              "direction": "backward",
+              "startAge": {
+                "elapsedYears": {
+                  "numerator": "11234056000",
+                  "denominator": "259200000",
+                  "decimal": 43.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 43,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "endAgeExclusive": {
+                "elapsedYears": {
+                  "numerator": "13826056000",
+                  "denominator": "259200000",
+                  "decimal": 53.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 53,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "startInstant": "2038-12-20T20:58:00.000Z",
+              "endExclusiveInstant": "2048-12-20T20:58:00.000Z",
+              "startFixedPlusEightWallDateTime": "2038-12-21T04:58:00.000",
+              "endExclusiveFixedPlusEightWallDateTime": "2048-12-21T04:58:00.000"
+            },
+            {
+              "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+              "verificationStatus": "engineering_preview",
+              "index": 6,
+              "ganZhi": "戊寅",
+              "direction": "backward",
+              "startAge": {
+                "elapsedYears": {
+                  "numerator": "13826056000",
+                  "denominator": "259200000",
+                  "decimal": 53.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 53,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "endAgeExclusive": {
+                "elapsedYears": {
+                  "numerator": "16418056000",
+                  "denominator": "259200000",
+                  "decimal": 63.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 63,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "startInstant": "2048-12-20T20:58:00.000Z",
+              "endExclusiveInstant": "2058-12-20T20:58:00.000Z",
+              "startFixedPlusEightWallDateTime": "2048-12-21T04:58:00.000",
+              "endExclusiveFixedPlusEightWallDateTime": "2058-12-21T04:58:00.000"
+            },
+            {
+              "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+              "verificationStatus": "engineering_preview",
+              "index": 7,
+              "ganZhi": "丁丑",
+              "direction": "backward",
+              "startAge": {
+                "elapsedYears": {
+                  "numerator": "16418056000",
+                  "denominator": "259200000",
+                  "decimal": 63.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 63,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "endAgeExclusive": {
+                "elapsedYears": {
+                  "numerator": "19010056000",
+                  "denominator": "259200000",
+                  "decimal": 73.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 73,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "startInstant": "2058-12-20T20:58:00.000Z",
+              "endExclusiveInstant": "2068-12-20T20:58:00.000Z",
+              "startFixedPlusEightWallDateTime": "2058-12-21T04:58:00.000",
+              "endExclusiveFixedPlusEightWallDateTime": "2068-12-21T04:58:00.000"
+            },
+            {
+              "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+              "verificationStatus": "engineering_preview",
+              "index": 8,
+              "ganZhi": "丙子",
+              "direction": "backward",
+              "startAge": {
+                "elapsedYears": {
+                  "numerator": "19010056000",
+                  "denominator": "259200000",
+                  "decimal": 73.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 73,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "endAgeExclusive": {
+                "elapsedYears": {
+                  "numerator": "21602056000",
+                  "denominator": "259200000",
+                  "decimal": 83.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 83,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "startInstant": "2068-12-20T20:58:00.000Z",
+              "endExclusiveInstant": "2078-12-20T20:58:00.000Z",
+              "startFixedPlusEightWallDateTime": "2068-12-21T04:58:00.000",
+              "endExclusiveFixedPlusEightWallDateTime": "2078-12-21T04:58:00.000"
+            },
+            {
+              "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+              "verificationStatus": "engineering_preview",
+              "index": 9,
+              "ganZhi": "乙亥",
+              "direction": "backward",
+              "startAge": {
+                "elapsedYears": {
+                  "numerator": "21602056000",
+                  "denominator": "259200000",
+                  "decimal": 83.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 83,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "endAgeExclusive": {
+                "elapsedYears": {
+                  "numerator": "24194056000",
+                  "denominator": "259200000",
+                  "decimal": 93.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 93,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "startInstant": "2078-12-20T20:58:00.000Z",
+              "endExclusiveInstant": "2088-12-20T20:58:00.000Z",
+              "startFixedPlusEightWallDateTime": "2078-12-21T04:58:00.000",
+              "endExclusiveFixedPlusEightWallDateTime": "2088-12-21T04:58:00.000"
+            },
+            {
+              "algorithmId": "hakimi-luck-core:directional-jie-three-days-one-year-exact:v1",
+              "verificationStatus": "engineering_preview",
+              "index": 10,
+              "ganZhi": "甲戌",
+              "direction": "backward",
+              "startAge": {
+                "elapsedYears": {
+                  "numerator": "24194056000",
+                  "denominator": "259200000",
+                  "decimal": 93.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 93,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "endAgeExclusive": {
+                "elapsedYears": {
+                  "numerator": "26786056000",
+                  "denominator": "259200000",
+                  "decimal": 103.341265432099,
+                  "decimalIsDisplayOnly": true
+                },
+                "components": {
+                  "years": 103,
+                  "months": 4,
+                  "days": 2,
+                  "hours": 20,
+                  "minutes": 32,
+                  "seconds": 0,
+                  "milliseconds": 0
+                },
+                "semantics": "elapsed_age_from_birth_not_nominal_age"
+              },
+              "startInstant": "2088-12-20T20:58:00.000Z",
+              "endExclusiveInstant": "2098-12-20T20:58:00.000Z",
+              "startFixedPlusEightWallDateTime": "2088-12-21T04:58:00.000",
+              "endExclusiveFixedPlusEightWallDateTime": "2098-12-21T04:58:00.000"
+            }
+          ],
+          "warnings": [
+            "当前结果是运限工程预览，只输出顺逆、节令时差、起运年龄与大运时间事实，不输出吉凶断语。",
+            "节令来自 lunar-typescript 1.8.6 的固定 UTC+08:00 秒级表；交运时刻也按固定 +08 历法顺序加年、月、日、时间。",
+            "起止年龄均为从出生时刻起算的实足折算年龄，不是虚岁；大运结束时刻采用半开区间 endExclusive。"
+          ],
+          "knownGaps": [
+            "尚无项目金标案例；goldCaseCount=0，releaseGatePassed=false。",
+            "三日一岁、顺逆取节、交运日历加法及月末 constrain 尚待命理专家裁决，不能视为唯一流派。",
+            "尚未支持按气、最近节气、天数取整、只保留年月日、真太阳时或出生地 IANA 日历交运等变体。",
+            "上游节令仅到秒；更高精度天文历表及 1900—2100 范围外尚未验证。"
+          ]
+        }
+      },
+      "transit": {
+        "status": "projected",
+        "executorId": "hakimi-transit-core:transit-snapshot-executor:1.2.0",
+        "resultDigest": "8ac34d961b59cde5b3c238104da2dba59ef337eaccf7391b3f4038f3b966c3df",
+        "result": {
+          "schemaVersion": "1.0.0",
+          "kind": "transit_snapshot",
+          "timelineVersion": "hakimi-transit:1.2.0",
+          "caseId": "22222222-2222-4222-8222-222222222222",
+          "revisionId": "11111111-1111-4111-8111-111111111111",
+          "revisionResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+          "tzdbVersion": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3",
+          "timeZoneDatabase": {
+            "schemaVersion": "1.0.0",
+            "kind": "bundled_iana_tzdb",
+            "ianaVersion": "2026c",
+            "artifactName": "moment-timezone/data/packed/latest.json",
+            "dataSha256": "43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81",
+            "resolver": {
+              "name": "hakimi-tzdb-core",
+              "version": "1.0.0"
+            },
+            "adapter": {
+              "name": "moment-timezone",
+              "version": "0.6.3"
+            },
+            "supportedRange": {
+              "from": "1900-01-01",
+              "to": "2100-12-31"
+            },
+            "snapshotId": "iana-tzdb@2026c/sha256:43f7878a298740ff6acabb9c726c7e5431a94bdca79abad274a6fe6e355bfe81/hakimi-tzdb-core@1.0.0/moment-timezone@0.6.3"
+          },
+          "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+          "luckCycleRuleSnapshot": {
+            "schemaVersion": "1.0.0",
+            "ruleId": "ziping-working-midnight:luck-cycle-xiaoyun",
+            "ruleVersion": "0.1.0",
+            "directionRule": "year_stem_yinyang_and_gender",
+            "unknownSexPolicy": "require_manual_direction",
+            "anchor": "directional_jie",
+            "exactBoundaryPolicy": "zero_duration",
+            "startAgeMethod": "three_days_one_year_exact_duration",
+            "componentRatios": {
+              "sourceDaysPerTraditionalYear": 3,
+              "traditionalMonthsPerYear": 12,
+              "traditionalDaysPerMonth": 30,
+              "traditionalHoursPerDay": 24
+            },
+            "handoverCalendar": {
+              "frame": "fixed_plus08",
+              "additionOrder": "years_months_days_time",
+              "overflow": "constrain"
+            },
+            "decadeYears": 10,
+            "decadeCount": 10,
+            "xiaoyun": {
+              "method": "birth_hour_adjacent",
+              "directionRule": "exact_chart_year_stem_and_gender",
+              "directionReuse": "luck_cycle_or_manual_direction",
+              "firstAge": 1,
+              "firstStepOffset": 1,
+              "ageBasis": "nominal_age",
+              "boundaryAlignment": "flow_year_start_exact",
+              "boundaryFrame": "fixed_plus08",
+              "scope": "whole_life",
+              "cycleLength": 60,
+              "intervalPolicy": "half_open",
+              "unknownSexPolicy": "require_manual_direction",
+              "unknownHourPolicy": "unsupported"
+            }
+          },
+          "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+          "luckCycleRuleSource": "revision_snapshot",
+          "manualDirection": null,
+          "target": {
+            "instant": "2024-02-04T16:30:00.000Z",
+            "revisionWallDateTime": "2024-02-05T00:30:00",
+            "fixedPlusEightWallDateTime": "2024-02-05T00:30:00.000",
+            "displayTimeZone": "Asia/Shanghai"
+          },
+          "slots": {
+            "dayun": {
+              "status": "resolved",
+              "node": {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "dayun",
+                  "startInstant": "2018-12-20T20:58:00.000Z",
+                  "nodeId": "1545339480000.6b3d5a69be22096c24d97a59d74e3422894a915461ae93b62c24e943e4bb7927"
+                },
+                "nodeType": "dayun",
+                "label": "第 3 柱",
+                "ganZhi": "辛巳",
+                "stemTenGod": "比肩",
+                "index": 3,
+                "boundaryLabel": "第 3 柱大运",
+                "startInstant": "2018-12-20T20:58:00.000Z",
+                "endExclusiveInstant": "2028-12-20T20:58:00.000Z",
+                "startWallDateTime": "2018-12-21T04:58:00.000",
+                "endExclusiveWallDateTime": "2028-12-21T04:58:00.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": true,
+                "verificationStatus": "engineering_preview"
+              }
+            },
+            "xiaoyun": {
+              "status": "resolved",
+              "node": {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "xiaoyun",
+                  "startInstant": "2024-02-04T08:27:07.000Z",
+                  "nodeId": "1707035227000.64b3ef7bcde8853fca28473f21decfc6af5a19205f642503b569f85bbf3b7d12"
+                },
+                "nodeType": "xiaoyun",
+                "label": "虚岁 30",
+                "ganZhi": "壬戌",
+                "stemTenGod": "伤官",
+                "index": 30,
+                "boundaryLabel": "精确立春增龄",
+                "startInstant": "2024-02-04T08:27:07.000Z",
+                "endExclusiveInstant": "2025-02-03T14:10:28.000Z",
+                "startWallDateTime": "2024-02-04T16:27:07.000",
+                "endExclusiveWallDateTime": "2025-02-03T22:10:28.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": true,
+                "verificationStatus": "engineering_preview"
+              }
+            },
+            "year": {
+              "status": "resolved",
+              "node": {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "year",
+                  "startInstant": "2024-02-04T08:27:07.000Z",
+                  "nodeId": "1707035227000.55c11edf81add4bba8fcc9d6f69fc168534795bacad26aa9537b61c5d90e3cc2"
+                },
+                "nodeType": "year",
+                "label": "2024 流年",
+                "ganZhi": "甲辰",
+                "stemTenGod": "正财",
+                "index": null,
+                "boundaryLabel": "立春",
+                "startInstant": "2024-02-04T08:27:07.000Z",
+                "endExclusiveInstant": "2025-02-03T14:10:28.000Z",
+                "startWallDateTime": "2024-02-04T16:27:07.000",
+                "endExclusiveWallDateTime": "2025-02-03T22:10:28.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": true,
+                "verificationStatus": "engineering_preview"
+              }
+            },
+            "month": {
+              "status": "resolved",
+              "node": {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "month",
+                  "startInstant": "2024-02-04T08:27:07.000Z",
+                  "nodeId": "1707035227000.7e2d1243e36b73f7927f7f26eb26f77d8c037d86b321248f76f1740d52e499c0"
+                },
+                "nodeType": "month",
+                "label": "立春月",
+                "ganZhi": "丙寅",
+                "stemTenGod": "正官",
+                "index": null,
+                "boundaryLabel": "立春",
+                "startInstant": "2024-02-04T08:27:07.000Z",
+                "endExclusiveInstant": "2024-03-05T02:22:45.000Z",
+                "startWallDateTime": "2024-02-04T16:27:07.000",
+                "endExclusiveWallDateTime": "2024-03-05T10:22:45.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": true,
+                "verificationStatus": "engineering_preview"
+              }
+            },
+            "day": {
+              "status": "resolved",
+              "node": {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "day",
+                  "startInstant": "2024-02-04T16:00:00.000Z",
+                  "nodeId": "1707062400000.c88a61a21d30ef89b83b6e93bcd513db039b71dfcd33fbf46845d45994fd333b"
+                },
+                "nodeType": "day",
+                "label": "02-05",
+                "ganZhi": "己亥",
+                "stemTenGod": "偏印",
+                "index": null,
+                "boundaryLabel": "midnight换日",
+                "startInstant": "2024-02-04T16:00:00.000Z",
+                "endExclusiveInstant": "2024-02-05T16:00:00.000Z",
+                "startWallDateTime": "2024-02-05T00:00:00",
+                "endExclusiveWallDateTime": "2024-02-06T00:00:00",
+                "frame": "revision_iana_civil",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": true,
+                "verificationStatus": "engineering_preview"
+              }
+            },
+            "hour": {
+              "status": "resolved",
+              "node": {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "hour",
+                  "startInstant": "2024-02-04T15:00:00.000Z",
+                  "nodeId": "1707058800000.68d9ae7076b33d6d4c24ab80a7378353b9eac1fb2c57095b4aa51dcbb4f76e87"
+                },
+                "nodeType": "hour",
+                "label": "子时",
+                "ganZhi": "壬子",
+                "stemTenGod": "伤官",
+                "index": null,
+                "boundaryLabel": "子时",
+                "startInstant": "2024-02-04T15:00:00.000Z",
+                "endExclusiveInstant": "2024-02-04T17:00:00.000Z",
+                "startWallDateTime": "2024-02-04T23:00:00",
+                "endExclusiveWallDateTime": "2024-02-05T01:00:00",
+                "frame": "revision_iana_civil",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": true,
+                "verificationStatus": "engineering_preview"
+              }
+            }
+          },
+          "tracks": {
+            "dayun": [
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "dayun",
+                  "startInstant": "1998-12-20T20:58:00.000Z",
+                  "nodeId": "914187480000.f3b96428ad1dd2e1787768b6a1d4a7a57ec92c9803b86c54ce9bccea48acb13c"
+                },
+                "nodeType": "dayun",
+                "label": "第 1 柱",
+                "ganZhi": "癸未",
+                "stemTenGod": "食神",
+                "index": 1,
+                "boundaryLabel": "第 1 柱大运",
+                "startInstant": "1998-12-20T20:58:00.000Z",
+                "endExclusiveInstant": "2008-12-20T20:58:00.000Z",
+                "startWallDateTime": "1998-12-21T04:58:00.000",
+                "endExclusiveWallDateTime": "2008-12-21T04:58:00.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "dayun",
+                  "startInstant": "2008-12-20T20:58:00.000Z",
+                  "nodeId": "1229806680000.0834ddc7e9382fba0e25c3226fdb393022865ab1caeeaec033201cfb59339cb1"
+                },
+                "nodeType": "dayun",
+                "label": "第 2 柱",
+                "ganZhi": "壬午",
+                "stemTenGod": "伤官",
+                "index": 2,
+                "boundaryLabel": "第 2 柱大运",
+                "startInstant": "2008-12-20T20:58:00.000Z",
+                "endExclusiveInstant": "2018-12-20T20:58:00.000Z",
+                "startWallDateTime": "2008-12-21T04:58:00.000",
+                "endExclusiveWallDateTime": "2018-12-21T04:58:00.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "dayun",
+                  "startInstant": "2018-12-20T20:58:00.000Z",
+                  "nodeId": "1545339480000.6b3d5a69be22096c24d97a59d74e3422894a915461ae93b62c24e943e4bb7927"
+                },
+                "nodeType": "dayun",
+                "label": "第 3 柱",
+                "ganZhi": "辛巳",
+                "stemTenGod": "比肩",
+                "index": 3,
+                "boundaryLabel": "第 3 柱大运",
+                "startInstant": "2018-12-20T20:58:00.000Z",
+                "endExclusiveInstant": "2028-12-20T20:58:00.000Z",
+                "startWallDateTime": "2018-12-21T04:58:00.000",
+                "endExclusiveWallDateTime": "2028-12-21T04:58:00.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": true,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "dayun",
+                  "startInstant": "2028-12-20T20:58:00.000Z",
+                  "nodeId": "1860958680000.8a7dde0b2bb18d841aed9f9adf888d3e934cdb180c5eee3627171242386a616d"
+                },
+                "nodeType": "dayun",
+                "label": "第 4 柱",
+                "ganZhi": "庚辰",
+                "stemTenGod": "劫财",
+                "index": 4,
+                "boundaryLabel": "第 4 柱大运",
+                "startInstant": "2028-12-20T20:58:00.000Z",
+                "endExclusiveInstant": "2038-12-20T20:58:00.000Z",
+                "startWallDateTime": "2028-12-21T04:58:00.000",
+                "endExclusiveWallDateTime": "2038-12-21T04:58:00.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "dayun",
+                  "startInstant": "2038-12-20T20:58:00.000Z",
+                  "nodeId": "2176491480000.8c2ea8bb8da19ecd05b93e68633c583f214e752c6a4ef3b1f22615332bedd157"
+                },
+                "nodeType": "dayun",
+                "label": "第 5 柱",
+                "ganZhi": "己卯",
+                "stemTenGod": "偏印",
+                "index": 5,
+                "boundaryLabel": "第 5 柱大运",
+                "startInstant": "2038-12-20T20:58:00.000Z",
+                "endExclusiveInstant": "2048-12-20T20:58:00.000Z",
+                "startWallDateTime": "2038-12-21T04:58:00.000",
+                "endExclusiveWallDateTime": "2048-12-21T04:58:00.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "dayun",
+                  "startInstant": "2048-12-20T20:58:00.000Z",
+                  "nodeId": "2492110680000.dc0e846dac5243acaa2eb64230184f502eb95c14fec547fac4b846c772eb944b"
+                },
+                "nodeType": "dayun",
+                "label": "第 6 柱",
+                "ganZhi": "戊寅",
+                "stemTenGod": "正印",
+                "index": 6,
+                "boundaryLabel": "第 6 柱大运",
+                "startInstant": "2048-12-20T20:58:00.000Z",
+                "endExclusiveInstant": "2058-12-20T20:58:00.000Z",
+                "startWallDateTime": "2048-12-21T04:58:00.000",
+                "endExclusiveWallDateTime": "2058-12-21T04:58:00.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "dayun",
+                  "startInstant": "2058-12-20T20:58:00.000Z",
+                  "nodeId": "2807643480000.0a441e4817b72cd7075604ef059476ff5b3cf97b92aaef8da8dbe7c44f209902"
+                },
+                "nodeType": "dayun",
+                "label": "第 7 柱",
+                "ganZhi": "丁丑",
+                "stemTenGod": "七杀",
+                "index": 7,
+                "boundaryLabel": "第 7 柱大运",
+                "startInstant": "2058-12-20T20:58:00.000Z",
+                "endExclusiveInstant": "2068-12-20T20:58:00.000Z",
+                "startWallDateTime": "2058-12-21T04:58:00.000",
+                "endExclusiveWallDateTime": "2068-12-21T04:58:00.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "dayun",
+                  "startInstant": "2068-12-20T20:58:00.000Z",
+                  "nodeId": "3123262680000.99e9c533693d9caf7b7beaab23d909aa6a9f37401ba84bfe2213ba96df2ca046"
+                },
+                "nodeType": "dayun",
+                "label": "第 8 柱",
+                "ganZhi": "丙子",
+                "stemTenGod": "正官",
+                "index": 8,
+                "boundaryLabel": "第 8 柱大运",
+                "startInstant": "2068-12-20T20:58:00.000Z",
+                "endExclusiveInstant": "2078-12-20T20:58:00.000Z",
+                "startWallDateTime": "2068-12-21T04:58:00.000",
+                "endExclusiveWallDateTime": "2078-12-21T04:58:00.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "dayun",
+                  "startInstant": "2078-12-20T20:58:00.000Z",
+                  "nodeId": "3438795480000.d5e31b85f02450db5104b73b37e6968e5cf4e0f2fa05e738072fb11706244283"
+                },
+                "nodeType": "dayun",
+                "label": "第 9 柱",
+                "ganZhi": "乙亥",
+                "stemTenGod": "偏财",
+                "index": 9,
+                "boundaryLabel": "第 9 柱大运",
+                "startInstant": "2078-12-20T20:58:00.000Z",
+                "endExclusiveInstant": "2088-12-20T20:58:00.000Z",
+                "startWallDateTime": "2078-12-21T04:58:00.000",
+                "endExclusiveWallDateTime": "2088-12-21T04:58:00.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "dayun",
+                  "startInstant": "2088-12-20T20:58:00.000Z",
+                  "nodeId": "3754414680000.5df2c60ed728eb5930f229978e3eeddf5ff562fa404593aac08b6f2188ffd72c"
+                },
+                "nodeType": "dayun",
+                "label": "第 10 柱",
+                "ganZhi": "甲戌",
+                "stemTenGod": "正财",
+                "index": 10,
+                "boundaryLabel": "第 10 柱大运",
+                "startInstant": "2088-12-20T20:58:00.000Z",
+                "endExclusiveInstant": "2098-12-20T20:58:00.000Z",
+                "startWallDateTime": "2088-12-21T04:58:00.000",
+                "endExclusiveWallDateTime": "2098-12-21T04:58:00.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              }
+            ],
+            "xiaoyun": [
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "xiaoyun",
+                  "startInstant": "2022-02-03T20:50:47.000Z",
+                  "nodeId": "1643921447000.4e57822576747504514a4c6de5f7c8c2a36e3dda84d9086268c9dc1239576c8c"
+                },
+                "nodeType": "xiaoyun",
+                "label": "虚岁 28",
+                "ganZhi": "甲子",
+                "stemTenGod": "正财",
+                "index": 28,
+                "boundaryLabel": "精确立春增龄",
+                "startInstant": "2022-02-03T20:50:47.000Z",
+                "endExclusiveInstant": "2023-02-04T02:42:33.000Z",
+                "startWallDateTime": "2022-02-04T04:50:47.000",
+                "endExclusiveWallDateTime": "2023-02-04T10:42:33.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "xiaoyun",
+                  "startInstant": "2023-02-04T02:42:33.000Z",
+                  "nodeId": "1675478553000.dddab245df4aabaa9939614e699dada342d0d109a3e6cc35bd38f0fb54650551"
+                },
+                "nodeType": "xiaoyun",
+                "label": "虚岁 29",
+                "ganZhi": "癸亥",
+                "stemTenGod": "食神",
+                "index": 29,
+                "boundaryLabel": "精确立春增龄",
+                "startInstant": "2023-02-04T02:42:33.000Z",
+                "endExclusiveInstant": "2024-02-04T08:27:07.000Z",
+                "startWallDateTime": "2023-02-04T10:42:33.000",
+                "endExclusiveWallDateTime": "2024-02-04T16:27:07.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "xiaoyun",
+                  "startInstant": "2024-02-04T08:27:07.000Z",
+                  "nodeId": "1707035227000.64b3ef7bcde8853fca28473f21decfc6af5a19205f642503b569f85bbf3b7d12"
+                },
+                "nodeType": "xiaoyun",
+                "label": "虚岁 30",
+                "ganZhi": "壬戌",
+                "stemTenGod": "伤官",
+                "index": 30,
+                "boundaryLabel": "精确立春增龄",
+                "startInstant": "2024-02-04T08:27:07.000Z",
+                "endExclusiveInstant": "2025-02-03T14:10:28.000Z",
+                "startWallDateTime": "2024-02-04T16:27:07.000",
+                "endExclusiveWallDateTime": "2025-02-03T22:10:28.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": true,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "xiaoyun",
+                  "startInstant": "2025-02-03T14:10:28.000Z",
+                  "nodeId": "1738591828000.f4fdec217a1e5eacf51149682c2f3179844295809c789633958270e1340c61ad"
+                },
+                "nodeType": "xiaoyun",
+                "label": "虚岁 31",
+                "ganZhi": "辛酉",
+                "stemTenGod": "比肩",
+                "index": 31,
+                "boundaryLabel": "精确立春增龄",
+                "startInstant": "2025-02-03T14:10:28.000Z",
+                "endExclusiveInstant": "2026-02-03T20:02:08.000Z",
+                "startWallDateTime": "2025-02-03T22:10:28.000",
+                "endExclusiveWallDateTime": "2026-02-04T04:02:08.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "xiaoyun",
+                  "startInstant": "2026-02-03T20:02:08.000Z",
+                  "nodeId": "1770148928000.7e03d23b55ff37f608024d71f06dbb9b563efd60e5af022597df125615a3d825"
+                },
+                "nodeType": "xiaoyun",
+                "label": "虚岁 32",
+                "ganZhi": "庚申",
+                "stemTenGod": "劫财",
+                "index": 32,
+                "boundaryLabel": "精确立春增龄",
+                "startInstant": "2026-02-03T20:02:08.000Z",
+                "endExclusiveInstant": "2027-02-04T01:46:18.000Z",
+                "startWallDateTime": "2026-02-04T04:02:08.000",
+                "endExclusiveWallDateTime": "2027-02-04T09:46:18.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              }
+            ],
+            "year": [
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "year",
+                  "startInstant": "2022-02-03T20:50:47.000Z",
+                  "nodeId": "1643921447000.cd59eeba776cb82f5cceda493530b375c2dc528ba45273c8441edd12b28dc5f2"
+                },
+                "nodeType": "year",
+                "label": "2022 流年",
+                "ganZhi": "壬寅",
+                "stemTenGod": "伤官",
+                "index": null,
+                "boundaryLabel": "立春",
+                "startInstant": "2022-02-03T20:50:47.000Z",
+                "endExclusiveInstant": "2023-02-04T02:42:33.000Z",
+                "startWallDateTime": "2022-02-04T04:50:47.000",
+                "endExclusiveWallDateTime": "2023-02-04T10:42:33.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "year",
+                  "startInstant": "2023-02-04T02:42:33.000Z",
+                  "nodeId": "1675478553000.cbc24a584be524a053d72a010c4abc4408c40fc96a3653da7f641ffb85020f36"
+                },
+                "nodeType": "year",
+                "label": "2023 流年",
+                "ganZhi": "癸卯",
+                "stemTenGod": "食神",
+                "index": null,
+                "boundaryLabel": "立春",
+                "startInstant": "2023-02-04T02:42:33.000Z",
+                "endExclusiveInstant": "2024-02-04T08:27:07.000Z",
+                "startWallDateTime": "2023-02-04T10:42:33.000",
+                "endExclusiveWallDateTime": "2024-02-04T16:27:07.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "year",
+                  "startInstant": "2024-02-04T08:27:07.000Z",
+                  "nodeId": "1707035227000.55c11edf81add4bba8fcc9d6f69fc168534795bacad26aa9537b61c5d90e3cc2"
+                },
+                "nodeType": "year",
+                "label": "2024 流年",
+                "ganZhi": "甲辰",
+                "stemTenGod": "正财",
+                "index": null,
+                "boundaryLabel": "立春",
+                "startInstant": "2024-02-04T08:27:07.000Z",
+                "endExclusiveInstant": "2025-02-03T14:10:28.000Z",
+                "startWallDateTime": "2024-02-04T16:27:07.000",
+                "endExclusiveWallDateTime": "2025-02-03T22:10:28.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": true,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "year",
+                  "startInstant": "2025-02-03T14:10:28.000Z",
+                  "nodeId": "1738591828000.d8d04328e2e8c404e50d1fd52466b281f93991dcf8a001c903183bbe31de645a"
+                },
+                "nodeType": "year",
+                "label": "2025 流年",
+                "ganZhi": "乙巳",
+                "stemTenGod": "偏财",
+                "index": null,
+                "boundaryLabel": "立春",
+                "startInstant": "2025-02-03T14:10:28.000Z",
+                "endExclusiveInstant": "2026-02-03T20:02:08.000Z",
+                "startWallDateTime": "2025-02-03T22:10:28.000",
+                "endExclusiveWallDateTime": "2026-02-04T04:02:08.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "year",
+                  "startInstant": "2026-02-03T20:02:08.000Z",
+                  "nodeId": "1770148928000.0bb38ee4c5d11b3f8c2ba9acf4ecd55c8af9ec2e0cf5f6c19725cff1b1a57c52"
+                },
+                "nodeType": "year",
+                "label": "2026 流年",
+                "ganZhi": "丙午",
+                "stemTenGod": "正官",
+                "index": null,
+                "boundaryLabel": "立春",
+                "startInstant": "2026-02-03T20:02:08.000Z",
+                "endExclusiveInstant": "2027-02-04T01:46:18.000Z",
+                "startWallDateTime": "2026-02-04T04:02:08.000",
+                "endExclusiveWallDateTime": "2027-02-04T09:46:18.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              }
+            ],
+            "month": [
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "month",
+                  "startInstant": "2023-12-07T09:32:55.000Z",
+                  "nodeId": "1701941575000.62f46f5011e134d18850fd8ba549217c2b5b3f60035d876c55b108adaf594159"
+                },
+                "nodeType": "month",
+                "label": "大雪月",
+                "ganZhi": "甲子",
+                "stemTenGod": "正财",
+                "index": null,
+                "boundaryLabel": "大雪",
+                "startInstant": "2023-12-07T09:32:55.000Z",
+                "endExclusiveInstant": "2024-01-05T20:49:22.000Z",
+                "startWallDateTime": "2023-12-07T17:32:55.000",
+                "endExclusiveWallDateTime": "2024-01-06T04:49:22.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "month",
+                  "startInstant": "2024-01-05T20:49:22.000Z",
+                  "nodeId": "1704487762000.ff514e2dfd877ecd549842bac65963bb30319b70c93502a4bc1ed08425011b59"
+                },
+                "nodeType": "month",
+                "label": "小寒月",
+                "ganZhi": "乙丑",
+                "stemTenGod": "偏财",
+                "index": null,
+                "boundaryLabel": "小寒",
+                "startInstant": "2024-01-05T20:49:22.000Z",
+                "endExclusiveInstant": "2024-02-04T08:27:07.000Z",
+                "startWallDateTime": "2024-01-06T04:49:22.000",
+                "endExclusiveWallDateTime": "2024-02-04T16:27:07.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "month",
+                  "startInstant": "2024-02-04T08:27:07.000Z",
+                  "nodeId": "1707035227000.7e2d1243e36b73f7927f7f26eb26f77d8c037d86b321248f76f1740d52e499c0"
+                },
+                "nodeType": "month",
+                "label": "立春月",
+                "ganZhi": "丙寅",
+                "stemTenGod": "正官",
+                "index": null,
+                "boundaryLabel": "立春",
+                "startInstant": "2024-02-04T08:27:07.000Z",
+                "endExclusiveInstant": "2024-03-05T02:22:45.000Z",
+                "startWallDateTime": "2024-02-04T16:27:07.000",
+                "endExclusiveWallDateTime": "2024-03-05T10:22:45.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": true,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "month",
+                  "startInstant": "2024-03-05T02:22:45.000Z",
+                  "nodeId": "1709605365000.8822f0625203a51b981ba3a5382cb2bd0b77a26e849169f9e10583edc66e1e41"
+                },
+                "nodeType": "month",
+                "label": "惊蛰月",
+                "ganZhi": "丁卯",
+                "stemTenGod": "七杀",
+                "index": null,
+                "boundaryLabel": "惊蛰",
+                "startInstant": "2024-03-05T02:22:45.000Z",
+                "endExclusiveInstant": "2024-04-04T07:02:17.000Z",
+                "startWallDateTime": "2024-03-05T10:22:45.000",
+                "endExclusiveWallDateTime": "2024-04-04T15:02:17.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "month",
+                  "startInstant": "2024-04-04T07:02:17.000Z",
+                  "nodeId": "1712214137000.90e7a7dad86b8164066e55357caadcc6b22472489365f33e64a0fa08b6b60a51"
+                },
+                "nodeType": "month",
+                "label": "清明月",
+                "ganZhi": "戊辰",
+                "stemTenGod": "正印",
+                "index": null,
+                "boundaryLabel": "清明",
+                "startInstant": "2024-04-04T07:02:17.000Z",
+                "endExclusiveInstant": "2024-05-05T00:10:05.000Z",
+                "startWallDateTime": "2024-04-04T15:02:17.000",
+                "endExclusiveWallDateTime": "2024-05-05T08:10:05.000",
+                "frame": "fixed_plus08",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              }
+            ],
+            "day": [
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "day",
+                  "startInstant": "2024-02-02T16:00:00.000Z",
+                  "nodeId": "1706889600000.66fe0454dc96b2a463f6aabc6ed46bbea37e60f7151c858f109ffccffbb7ef20"
+                },
+                "nodeType": "day",
+                "label": "02-03",
+                "ganZhi": "丁酉",
+                "stemTenGod": "七杀",
+                "index": null,
+                "boundaryLabel": "midnight换日",
+                "startInstant": "2024-02-02T16:00:00.000Z",
+                "endExclusiveInstant": "2024-02-03T16:00:00.000Z",
+                "startWallDateTime": "2024-02-03T00:00:00",
+                "endExclusiveWallDateTime": "2024-02-04T00:00:00",
+                "frame": "revision_iana_civil",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "day",
+                  "startInstant": "2024-02-03T16:00:00.000Z",
+                  "nodeId": "1706976000000.bec2e41a61d961d9f9d22eb70ad58fc1c5927f36e9813da10ac940153f856830"
+                },
+                "nodeType": "day",
+                "label": "02-04",
+                "ganZhi": "戊戌",
+                "stemTenGod": "正印",
+                "index": null,
+                "boundaryLabel": "midnight换日",
+                "startInstant": "2024-02-03T16:00:00.000Z",
+                "endExclusiveInstant": "2024-02-04T16:00:00.000Z",
+                "startWallDateTime": "2024-02-04T00:00:00",
+                "endExclusiveWallDateTime": "2024-02-05T00:00:00",
+                "frame": "revision_iana_civil",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "day",
+                  "startInstant": "2024-02-04T16:00:00.000Z",
+                  "nodeId": "1707062400000.c88a61a21d30ef89b83b6e93bcd513db039b71dfcd33fbf46845d45994fd333b"
+                },
+                "nodeType": "day",
+                "label": "02-05",
+                "ganZhi": "己亥",
+                "stemTenGod": "偏印",
+                "index": null,
+                "boundaryLabel": "midnight换日",
+                "startInstant": "2024-02-04T16:00:00.000Z",
+                "endExclusiveInstant": "2024-02-05T16:00:00.000Z",
+                "startWallDateTime": "2024-02-05T00:00:00",
+                "endExclusiveWallDateTime": "2024-02-06T00:00:00",
+                "frame": "revision_iana_civil",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": true,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "day",
+                  "startInstant": "2024-02-05T16:00:00.000Z",
+                  "nodeId": "1707148800000.1a92fb88411b9ee782a11852235c3915ff4325959c1ce440837fcf4417eebc3a"
+                },
+                "nodeType": "day",
+                "label": "02-06",
+                "ganZhi": "庚子",
+                "stemTenGod": "劫财",
+                "index": null,
+                "boundaryLabel": "midnight换日",
+                "startInstant": "2024-02-05T16:00:00.000Z",
+                "endExclusiveInstant": "2024-02-06T16:00:00.000Z",
+                "startWallDateTime": "2024-02-06T00:00:00",
+                "endExclusiveWallDateTime": "2024-02-07T00:00:00",
+                "frame": "revision_iana_civil",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "day",
+                  "startInstant": "2024-02-06T16:00:00.000Z",
+                  "nodeId": "1707235200000.e06144381d985235c22f6f7e9f29a3c6cc05ceabda98bd6737258b26ace08b90"
+                },
+                "nodeType": "day",
+                "label": "02-07",
+                "ganZhi": "辛丑",
+                "stemTenGod": "比肩",
+                "index": null,
+                "boundaryLabel": "midnight换日",
+                "startInstant": "2024-02-06T16:00:00.000Z",
+                "endExclusiveInstant": "2024-02-07T16:00:00.000Z",
+                "startWallDateTime": "2024-02-07T00:00:00",
+                "endExclusiveWallDateTime": "2024-02-08T00:00:00",
+                "frame": "revision_iana_civil",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              }
+            ],
+            "hour": [
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "hour",
+                  "startInstant": "2024-02-04T11:00:00.000Z",
+                  "nodeId": "1707044400000.199adf5fb992818793931201e8217e482721158f1bed168b346c4ecac723505b"
+                },
+                "nodeType": "hour",
+                "label": "戌时",
+                "ganZhi": "壬戌",
+                "stemTenGod": "伤官",
+                "index": null,
+                "boundaryLabel": "戌时",
+                "startInstant": "2024-02-04T11:00:00.000Z",
+                "endExclusiveInstant": "2024-02-04T13:00:00.000Z",
+                "startWallDateTime": "2024-02-04T19:00:00",
+                "endExclusiveWallDateTime": "2024-02-04T21:00:00",
+                "frame": "revision_iana_civil",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "hour",
+                  "startInstant": "2024-02-04T13:00:00.000Z",
+                  "nodeId": "1707051600000.17f874be7539f1e903bc40adb1e10e1c0d3244c9775d20df43b8b3c4f46608a3"
+                },
+                "nodeType": "hour",
+                "label": "亥时",
+                "ganZhi": "癸亥",
+                "stemTenGod": "食神",
+                "index": null,
+                "boundaryLabel": "亥时",
+                "startInstant": "2024-02-04T13:00:00.000Z",
+                "endExclusiveInstant": "2024-02-04T15:00:00.000Z",
+                "startWallDateTime": "2024-02-04T21:00:00",
+                "endExclusiveWallDateTime": "2024-02-04T23:00:00",
+                "frame": "revision_iana_civil",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "hour",
+                  "startInstant": "2024-02-04T15:00:00.000Z",
+                  "nodeId": "1707058800000.68d9ae7076b33d6d4c24ab80a7378353b9eac1fb2c57095b4aa51dcbb4f76e87"
+                },
+                "nodeType": "hour",
+                "label": "子时",
+                "ganZhi": "壬子",
+                "stemTenGod": "伤官",
+                "index": null,
+                "boundaryLabel": "子时",
+                "startInstant": "2024-02-04T15:00:00.000Z",
+                "endExclusiveInstant": "2024-02-04T17:00:00.000Z",
+                "startWallDateTime": "2024-02-04T23:00:00",
+                "endExclusiveWallDateTime": "2024-02-05T01:00:00",
+                "frame": "revision_iana_civil",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": true,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "hour",
+                  "startInstant": "2024-02-04T17:00:00.000Z",
+                  "nodeId": "1707066000000.e0af3ae9ed4809a8a9e6420683c410a3f7aae99303d8bc83c8f8fbcb4163dfa2"
+                },
+                "nodeType": "hour",
+                "label": "丑时",
+                "ganZhi": "乙丑",
+                "stemTenGod": "偏财",
+                "index": null,
+                "boundaryLabel": "丑时",
+                "startInstant": "2024-02-04T17:00:00.000Z",
+                "endExclusiveInstant": "2024-02-04T19:00:00.000Z",
+                "startWallDateTime": "2024-02-05T01:00:00",
+                "endExclusiveWallDateTime": "2024-02-05T03:00:00",
+                "frame": "revision_iana_civil",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              },
+              {
+                "ref": {
+                  "schemaVersion": "1.0.0",
+                  "namespace": "hakimi-transit-node",
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "chartResultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+                  "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+                  "luckCycleRuleDigest": "c641cffab054b67bde453bfdbfe775d1065702fc89f31b35a4596b0cf9234a68",
+                  "manualDirection": null,
+                  "timelineVersion": "hakimi-transit:1.2.0",
+                  "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+                  "nodeType": "hour",
+                  "startInstant": "2024-02-04T19:00:00.000Z",
+                  "nodeId": "1707073200000.079355752576ebc88b31e9e0369f2a510b39cb1c51a808bd2451027603462d56"
+                },
+                "nodeType": "hour",
+                "label": "寅时",
+                "ganZhi": "丙寅",
+                "stemTenGod": "正官",
+                "index": null,
+                "boundaryLabel": "寅时",
+                "startInstant": "2024-02-04T19:00:00.000Z",
+                "endExclusiveInstant": "2024-02-04T21:00:00.000Z",
+                "startWallDateTime": "2024-02-05T03:00:00",
+                "endExclusiveWallDateTime": "2024-02-05T05:00:00",
+                "frame": "revision_iana_civil",
+                "sourcePrecision": "second",
+                "isActiveAtTarget": false,
+                "verificationStatus": "engineering_preview"
+              }
+            ]
+          },
+          "manifest": {
+            "algorithmId": "hakimi-transit-core:parallel-active-intervals:v2",
+            "engineName": "hakimi-transit-core",
+            "engineVersion": "0.1.0",
+            "upstreamName": "lunar-typescript",
+            "upstreamVersion": "1.8.6",
+            "yearMonthFrame": "fixed_plus08",
+            "dayHourFrame": "revision_iana_civil",
+            "interpretationIncluded": false,
+            "goldCaseCount": 0,
+            "releaseGatePassed": false,
+            "sourceRefs": [
+              "https://github.com/6tail/lunar-typescript/blob/0f3e95d15e31f1a7c7b93d624542649347328a20/src/lib/Lunar.ts",
+              "https://github.com/6tail/lunar-typescript/blob/0f3e95d15e31f1a7c7b93d624542649347328a20/src/lib/XiaoYun.ts",
+              "npm:lunar-typescript@1.8.6#integrity=sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA==",
+              "https://data.iana.org/time-zones/releases/tzdata2026c.tar.gz"
+            ]
+          },
+          "resultHash": "0af3b98c8ebb14e6e70a260af77e1a543a2bb0566487797efe1792250b172877",
+          "warnings": [
+            "运限时间轴是工程预览：只输出时间区间、干支和相对原局日主的天干十神，不输出吉凶预测。",
+            "流年/流月按固定 UTC+08:00 精确立春与十二节；流日/流时按修订 IANA 时区和锁版换日规则并行计算。",
+            "IANA 命名时区投影使用随应用发布、内容寻址的 2026c 数据工件，不读取设备时区库。",
+            "小运采用出生时柱相邻起法并复用大运顺逆：虚岁 1 自出生瞬时点起，随后按固定 UTC+08:00 精确立春增龄；这是当前产品锁版建模选择。",
+            "各层是同一目标瞬时点的并行覆盖区间，不被错误建模成永久父子树。"
+          ],
+          "knownGaps": [
+            "小运原典与后世实务存在多种起法、顺逆和年龄边界；当前出生时柱相邻起法及精确立春边界是产品建模选择，尚非唯一流派结论。",
+            "运限金标案例仍为 0，所有节点 releaseGatePassed=false。",
+            "本地换日或时辰边界若落入 DST 重叠/空档，当前层会标记 unsupported，不会静默选择 earlier/later。",
+            "节令上游精度为秒；1900/2100 边缘窗口仍需独立历表与缓冲区策略验证。"
+          ]
+        }
+      },
+      "projectionDigest": "eeda41080289e0f978e6b7f5789abd9b4ab3ff943e568ffed56ebbba4c228d27"
+    },
+    "requestFingerprint": "965adcbe2c20e05edfea99e2905526bf538d41e903c99041757eb659445ea6ee",
+    "receiptDigest": "b3719be7106b94a520ac46b7c60ecad80fd066579d93dabcbb047ef246665d29"
+  },
+  "queryExport": {
+    "manifest": {
+      "format": "hakimi-research-query-export",
+      "formatVersion": "1.1.0",
+      "queryVersion": 1,
+      "engine": {
+        "name": "hakimi-research-query",
+        "version": "0.2.0",
+        "queryVersion": 1,
+        "textMode": "nfkc-all-terms-substring-v1",
+        "relationEngine": "hakimi-relations-core@0.1.0",
+        "transitTimeline": "hakimi-transit:1.2.0",
+        "derivedReplayProfile": "hakimi-explicit-derived-replay:relations-0.1.0_luck-0.1.0_transit-1.2.0"
+      },
+      "appVersion": "0.2.0-p0",
+      "exportedAt": "2026-10-13T00:00:02.000Z",
+      "digestAlgorithm": "sha256-canonical-json-v1",
+      "privacy": "full_local_research",
+      "sensitiveDataWarning": "导出包含检索词、标签、别名、事件命中及本地精确 ID；请按敏感研究资料保管。",
+      "total": 1
+    },
+    "digests": {
+      "query": "7c08c2551634b033780ad8abddfa5601fe38ba7ef5f1f9cf1398268f743cb99f",
+      "results": "bd1b723e5c67afd167c6f553bf6df81c53da63d33bc649aa88d46c71ba164374",
+      "diagnostics": "0f14d8db9ddb734b90153ef82513dc6ccb1725e98bcb894ae59321eb7664b572",
+      "payload": "27c457e2990d06b55d8146b798df4c3a73f44c99af3d0b2303c88d90e24b1bf2",
+      "envelope": "804e9090b33808dc20971e2465e31d32c282b6debd1b262fe29a379c50407765"
+    },
+    "payload": {
+      "query": {
+        "version": 1,
+        "scope": "cases",
+        "text": "",
+        "lifecycle": "active",
+        "favorites": "any",
+        "revisionScope": "latest",
+        "caseTags": [],
+        "dayMasters": [],
+        "monthBranches": [],
+        "relationTypes": [],
+        "ruleProfileDigests": [],
+        "transit": {
+          "atInstant": "2024-02-04T16:30:00.000Z",
+          "manualDirection": null,
+          "matches": [
+            {
+              "nodeType": "hour",
+              "ganZhi": "壬子",
+              "stemTenGod": null
+            }
+          ]
+        },
+        "events": null,
+        "sort": {
+          "field": "updatedAt",
+          "direction": "desc"
+        }
+      },
+      "queryDigest": "7c08c2551634b033780ad8abddfa5601fe38ba7ef5f1f9cf1398268f743cb99f",
+      "dataEpoch": "79672364f5c6288bc6c73d11ab7472b23ccca959284a1d6a09e9a0ddfa8493dc",
+      "total": 1,
+      "results": [
+        {
+          "key": "case:22222222-2222-4222-8222-222222222222",
+          "scope": "cases",
+          "title": "Synthetic midnight regression",
+          "alias": "Synthetic midnight regression",
+          "caseId": "22222222-2222-4222-8222-222222222222",
+          "createdAt": "2026-10-13T00:00:00.000Z",
+          "updatedAt": "2026-10-13T00:00:00.000Z",
+          "lifecycle": "active",
+          "favorite": false,
+          "matchedRevisionIds": [
+            "11111111-1111-4111-8111-111111111111"
+          ],
+          "revisions": [
+            {
+              "revisionId": "11111111-1111-4111-8111-111111111111",
+              "revisionNumber": 1,
+              "resultHash": "f114de497bddcaa0ee7f8e4663f675bff38e929c8d27ce3fdf244dbd5b7591c2",
+              "ruleProfileDigest": "25ad81149b573fc2ea9b3debf30042c3c59d0f8d8055e0ece08263357d7097ef",
+              "dayMaster": "辛",
+              "monthBranch": "申",
+              "relationFactIds": [],
+              "transitMatches": [
+                {
+                  "revisionId": "11111111-1111-4111-8111-111111111111",
+                  "nodeType": "hour",
+                  "nodeId": "1707058800000.68d9ae7076b33d6d4c24ab80a7378353b9eac1fb2c57095b4aa51dcbb4f76e87",
+                  "ganZhi": "壬子",
+                  "stemTenGod": "伤官",
+                  "startInstant": "2024-02-04T15:00:00.000Z",
+                  "endExclusiveInstant": "2024-02-04T17:00:00.000Z"
+                }
+              ],
+              "calculationSource": {
+                "source": "stored_receipt",
+                "ledgerStatus": "available",
+                "captureKind": "explicit_calculation_snapshot",
+                "storedHistoricalOutputCompared": true,
+                "comparisonStatus": "matched",
+                "profileId": "hakimi-explicit-derived-replay:relations-0.1.0_luck-0.1.0_transit-1.2.0",
+                "projectionDigest": "eeda41080289e0f978e6b7f5789abd9b4ab3ff943e568ffed56ebbba4c228d27",
+                "requestFingerprint": "965adcbe2c20e05edfea99e2905526bf538d41e903c99041757eb659445ea6ee",
+                "receipt": {
+                  "id": "33333333-3333-4333-8333-333333333333",
+                  "createdAt": "2026-10-13T00:00:01.000Z",
+                  "receiptDigest": "b3719be7106b94a520ac46b7c60ecad80fd066579d93dabcbb047ef246665d29",
+                  "requestFingerprint": "965adcbe2c20e05edfea99e2905526bf538d41e903c99041757eb659445ea6ee"
+                },
+                "componentStatuses": {
+                  "relations": {
+                    "projectionStatus": "projected",
+                    "replayedStatus": "projected",
+                    "comparisonStatus": "matched"
+                  },
+                  "luckCycle": {
+                    "projectionStatus": "projected",
+                    "replayedStatus": "projected",
+                    "comparisonStatus": "matched"
+                  },
+                  "transit": {
+                    "projectionStatus": "projected",
+                    "replayedStatus": "projected",
+                    "comparisonStatus": "matched"
+                  }
+                }
+              }
+            }
+          ],
+          "transitMatches": [
+            {
+              "revisionId": "11111111-1111-4111-8111-111111111111",
+              "nodeType": "hour",
+              "nodeId": "1707058800000.68d9ae7076b33d6d4c24ab80a7378353b9eac1fb2c57095b4aa51dcbb4f76e87",
+              "ganZhi": "壬子",
+              "stemTenGod": "伤官",
+              "startInstant": "2024-02-04T15:00:00.000Z",
+              "endExclusiveInstant": "2024-02-04T17:00:00.000Z"
+            }
+          ],
+          "matchingNoteIds": [],
+          "matchingEventIds": [],
+          "matchReasons": [
+            "transit:active_node"
+          ],
+          "relevanceScore": 1
+        }
+      ],
+      "diagnostics": [
+        {
+          "kind": "warning",
+          "code": "TRANSIT_ENGINEERING_PREVIEW_NO_GOLD_CASES",
+          "subjectId": null,
+          "revisionId": null,
+          "message": "运限筛选是可复算的软件工程预览；当前金标准案例数为 0，尚未通过发布门。"
+        }
+      ],
+      "resultDigest": "6f79260c206f1f2d4e20d90b67053c1938635989c4592da14507dd38a1ba3b60"
+    }
+  }
+}
