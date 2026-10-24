@@ -16,6 +16,6 @@
   "dependencies": {
     "@hakimi/ziwei-doushu-contracts-draft": "0.0.0-draft.0",
     "iztro": "2.5.8",
-    "zod": "4.4.3"
+    "zod": "4.6.7"
   }
 }

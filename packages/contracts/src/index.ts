@@ -1,6 +1,30 @@
 import { z } from "zod";
 import { isBundledTimeZoneName } from "@hakimi/tzdb-core";
 
+// Persisted contracts and UI limits use JavaScript UTF-16 units. Zod 4.6
+// measures its string length checks in code points; keep the original wire
+// limits explicitly without changing array/number checks or transforming text.
+export function utf16MaxLength(maximum: number, message?: string) {
+  return z.check<string>((payload) => {
+    if (payload.value.length > maximum) payload.issues.push({ code: "too_big", origin: "string", maximum,
+      inclusive: true, input: payload.value, continue: true, ...(message === undefined ? {} : { message }) });
+  });
+}
+export function utf16MinLength(minimum: number, message?: string) {
+  return z.check<string>((payload) => {
+    if (payload.value.length < minimum) payload.issues.push({ code: "too_small", origin: "string", minimum,
+      inclusive: true, input: payload.value, continue: true, ...(message === undefined ? {} : { message }) });
+  });
+}
+export function utf16Length(length: number, message?: string) {
+  return z.check<string>((payload) => {
+    if (payload.value.length === length) return;
+    payload.issues.push({ ...(payload.value.length > length ? { code: "too_big" as const, maximum: length } : { code: "too_small" as const, minimum: length }),
+      origin: "string", inclusive: true, exact: true, input: payload.value, continue: true, ...(message === undefined ? {} : { message }) });
+  });
+}
+
+
 export const SCHEMA_VERSION = "1.0.0" as const;
 export const LEGACY_HASH_SCHEMA_VERSION = "1.0.0" as const;
 export const HASH_SCHEMA_VERSION = "2.0.0" as const;
@@ -86,8 +110,7 @@ function resolverRelativeIanaTimeZoneSchema(isTimeZoneName: TimeZoneNamePredicat
 // declarative IANA-name shape; chart-integrity must still bind the value to the
 // exact content-addressed resolver before replay or any semantic use.
 const storedIanaTimeZoneNameSchema = z.string()
-  .min(1, "请选择 IANA 时区")
-  .max(255)
+  .min(1, "请选择 IANA 时区").check(utf16MaxLength(255))
   .regex(
     /^[A-Za-z0-9._+-]+(?:\/[A-Za-z0-9._+-]+)*$/,
     "不是可声明的 IANA 时区名称"
@@ -104,12 +127,12 @@ export const birthInputSchema = z
     sex: z.enum(["male", "female", "unspecified"]),
     lunarLeapMonth: z.boolean().default(false),
     location: z.object({
-      label: z.string().trim().max(80).default(""),
+      label: z.string().trim().check(utf16MaxLength(80)).default(""),
       latitude: z.number().min(-90).max(90).nullable().default(null),
       longitude: z.number().min(-180).max(180).nullable().default(null),
       precision: z.enum(["coordinates", "city", "unknown"]).default("unknown")
     }),
-    sourceNote: z.string().trim().max(500).default("")
+    sourceNote: z.string().trim().check(utf16MaxLength(500)).default("")
   })
   .superRefine((value, context) => {
     const calendarDateResult = value.calendarType === "gregorian"
@@ -200,8 +223,8 @@ export const ruleProfileSchema = z.object({
   profileId: z.string().regex(/^[a-z0-9-]+$/),
   profileVersion: z.string().regex(/^\d+\.\d+\.\d+$/),
   status: z.enum(["working_default", "verified", "experimental"]),
-  label: z.string().min(1).max(80),
-  notice: z.string().min(1).max(300),
+  label: z.string().min(1).check(utf16MaxLength(80)),
+  notice: z.string().min(1).check(utf16MaxLength(300)),
   sourceRefs: z.array(z.string()).default([]),
   supportedRange: z.object({
     stronglyVerifiedFrom: gregorianDateSchema,
@@ -296,7 +319,7 @@ export const xiaoyunRuleSnapshotSchema = z.strictObject({
 
 export const luckCycleRuleSnapshotSchema = z.strictObject({
   schemaVersion: z.literal(SCHEMA_VERSION),
-  ruleId: z.string().min(1).max(120),
+  ruleId: z.string().min(1).check(utf16MaxLength(120)),
   ruleVersion: z.string().regex(/^\d+\.\d+\.\d+$/),
   directionRule: z.literal("year_stem_yinyang_and_gender"),
   unknownSexPolicy: z.enum(["require_manual_direction", "reject"]),
@@ -471,10 +494,10 @@ export const storedNormalizedTimeCalibrationSchema = normalizedTimeCalibrationSc
 export const pillarFactSchema = z.object({
   name: z.enum(["year", "month", "day", "hour"]),
   label: z.enum(["年柱", "月柱", "日柱", "时柱"]),
-  ganZhi: z.string().length(2),
-  stem: z.string().length(1),
-  branch: z.string().length(1),
-  hiddenStems: z.array(z.string().length(1)),
+  ganZhi: z.string().check(utf16Length(2)),
+  stem: z.string().check(utf16Length(1)),
+  branch: z.string().check(utf16Length(1)),
+  hiddenStems: z.array(z.string().check(utf16Length(1))),
   stemTenGod: z.string(),
   branchTenGods: z.array(z.string()),
   wuXing: z.string(),
@@ -530,7 +553,7 @@ export const timeZoneDatabaseSnapshotSchema = z.strictObject({
   schemaVersion: z.literal(TIME_ZONE_DATABASE_SNAPSHOT_SCHEMA_VERSION),
   kind: z.literal("bundled_iana_tzdb"),
   ianaVersion: z.string().regex(/^\d{4}[a-z]$/),
-  artifactName: z.string().min(1).max(200),
+  artifactName: z.string().min(1).check(utf16MaxLength(200)),
   dataSha256: z.string().regex(/^[a-f0-9]{64}$/),
   resolver: z.strictObject({
     name: tzdbComponentNameSchema,
@@ -544,7 +567,7 @@ export const timeZoneDatabaseSnapshotSchema = z.strictObject({
     from: calendarDateTextSchema,
     to: calendarDateTextSchema
   }),
-  snapshotId: z.string().min(1).max(300)
+  snapshotId: z.string().min(1).check(utf16MaxLength(300))
 }).superRefine((value, context) => {
   if (value.snapshotId !== buildTimeZoneDatabaseSnapshotId(value)) {
     context.addIssue({ code: "custom", path: ["snapshotId"], message: "tzdb snapshotId 必须绑定 IANA 版本、数据摘要与解析器身份" });
@@ -565,7 +588,7 @@ export function buildTimeZoneDatabaseSnapshotId(value: TimeZoneDatabaseSnapshotI
     `/${value.adapter.name}@${value.adapter.version}`;
 }
 
-export const identifiedTzdbVersionSchema = z.string().min(1).max(300).regex(
+export const identifiedTzdbVersionSchema = z.string().min(1).check(utf16MaxLength(300)).regex(
   /^iana-tzdb@\d{4}[a-z]\/sha256:[a-f0-9]{64}\/[a-z0-9-]+@\d+\.\d+\.\d+\/[a-z0-9-]+@\d+\.\d+\.\d+$/
 );
 export const tzdbVersionSchema = z.union([
@@ -1314,7 +1337,7 @@ export function buildUnknownHourCandidateHashPayload(value: UnknownHourCandidate
 }
 
 export const caseTagsSchema = z
-  .array(z.string().min(1).max(30).refine((value) => value === value.trim(), "标签首尾不能包含空白"))
+  .array(z.string().min(1).check(utf16MaxLength(30)).refine((value) => value === value.trim(), "标签首尾不能包含空白"))
   .max(20)
   .superRefine((tags, context) => {
     if (new Set(tags).size !== tags.length) {
@@ -1325,9 +1348,9 @@ export const caseTagsSchema = z
 const legacyCaseRecordV1Shape = {
   schemaVersion: z.literal(SCHEMA_VERSION),
   id: z.string().uuid(),
-  alias: z.string().trim().min(1).max(80),
+  alias: z.string().trim().min(1).check(utf16MaxLength(80)),
   tags: caseTagsSchema,
-  notes: z.string().max(20_000),
+  notes: z.string().check(utf16MaxLength(20_000)),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   latestRevisionId: z.string().uuid(),
@@ -1390,13 +1413,11 @@ export const storedRevisionRecordSchema = revisionRecordSchema.safeExtend({
 
 const canonicalShortTextSchema = (maximum: number) => z
   .string()
-  .min(1)
-  .max(maximum)
+  .min(1).check(utf16MaxLength(maximum))
   .refine((value) => value === value.trim(), "文字首尾不能包含空白；仓库不会静默 trim");
 
 const canonicalOptionalTextSchema = (maximum: number) => z
-  .string()
-  .max(maximum)
+  .string().check(utf16MaxLength(maximum))
   .refine((value) => value === value.trim(), "文字首尾不能包含空白；仓库不会静默 trim");
 
 const researchTagsSchema = z
@@ -1426,7 +1447,7 @@ export const researchNoteRecordSchema = z.strictObject({
   caseId: z.string().uuid(),
   anchor: researchNoteAnchorSchema,
   bodyFormat: z.literal("markdown"),
-  body: z.string().max(200_000),
+  body: z.string().check(utf16MaxLength(200_000)),
   tags: researchTagsSchema,
   sourceRefs: researchSourceRefsSchema,
   lifecycle: z.enum(["active", "archived"]),
@@ -1449,7 +1470,7 @@ export const futureTransitNodeRefSchema = z.strictObject({
 });
 
 const sha256Schema = z.string().regex(/^[a-f0-9]{64}$/);
-const transitNodeIdSchema = z.string().regex(/^-?\d{1,16}\.[a-f0-9]{64}$/).max(90);
+const transitNodeIdSchema = z.string().regex(/^-?\d{1,16}\.[a-f0-9]{64}$/).check(utf16MaxLength(90));
 
 /** Stable v1 reference written by the transit workbench. */
 export const transitNodeRefSchema = z.strictObject({
@@ -1794,7 +1815,7 @@ export const comparisonItemSchema = z.strictObject({
 });
 
 export const comparisonCellSchema = z.strictObject({
-  value: z.string().max(1_000_000),
+  value: z.string().check(utf16MaxLength(1_000_000)),
   availability: comparisonCellAvailabilitySchema,
   status: comparisonCellStatusSchema
 });
@@ -1803,7 +1824,7 @@ export const comparisonRowSchema = z.strictObject({
   id: z.string().regex(/^[a-z][A-Za-z0-9_.]{0,159}$/),
   category: formalComparisonCategorySchema,
   label: canonicalShortTextSchema(160),
-  values: z.array(z.string().max(1_000_000)).min(2).max(4),
+  values: z.array(z.string().check(utf16MaxLength(1_000_000))).min(2).max(4),
   cells: z.array(comparisonCellSchema).min(2).max(4),
   status: comparisonRowStatusSchema,
   different: z.boolean()
@@ -2040,7 +2061,7 @@ export const pairStructureObservationSchema = z.strictObject({
   id: z.string().regex(/^[a-z][A-Za-z0-9_.]{0,159}$/),
   category: formalComparisonCategorySchema,
   label: canonicalShortTextSchema(160),
-  value: z.string().max(1_000_000),
+  value: z.string().check(utf16MaxLength(1_000_000)),
   availability: comparisonCellAvailabilitySchema
 });
 
@@ -2166,7 +2187,7 @@ export const pairStructureResearchProjectionSchema = exactStoredRecordSchema(
 
 export const eventDatePrecisionSchema = z.enum(["year", "month", "day", "minute", "unknown"]);
 
-const eventDateValueSchema = z.string().max(16);
+const eventDateValueSchema = z.string().check(utf16MaxLength(16));
 const EVENT_MINUTE_LOCAL_DATE_TIME_PATTERN = /^(?:19|20|21)\d{2}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d$/;
 export const eventMinuteLocalDateTimeSchema = z.string().regex(EVENT_MINUTE_LOCAL_DATE_TIME_PATTERN);
 const eventSecondWallDateTimeSchema = z.string().regex(
@@ -2207,7 +2228,7 @@ const eventTimeZoneCandidateSchema = z.strictObject({
   utcOffset: z.string().regex(/^[+-]\d{2}:[0-5]\d(?::[0-5]\d(?:\.\d{1,9})?)?$/),
   utcOffsetMinutes: z.number().finite(),
   resolvedWallTime: eventSecondWallDateTimeSchema,
-  zonedDateTime: z.string().min(1).max(160),
+  zonedDateTime: z.string().min(1).check(utf16MaxLength(160)),
   matchesInputWallTime: z.literal(true)
 });
 
@@ -2335,7 +2356,7 @@ const legacyEventRecordV1Shape = {
   sourceRefs: researchSourceRefsSchema,
   feedback: z.enum(["unreviewed", "supports", "contradicts", "mixed"]),
   bodyFormat: z.literal("markdown"),
-  body: z.string().max(200_000),
+  body: z.string().check(utf16MaxLength(200_000)),
   deletedAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime()
@@ -2945,8 +2966,7 @@ export const knowledgeSectionSchema = z.strictObject({
 
 const normalizedKnowledgeContentSchema = z
   .string()
-  .min(1)
-  .max(2_000_000)
+  .min(1).check(utf16MaxLength(2_000_000))
   .refine((value) => !value.startsWith("\uFEFF"), "规范化资料不能保留 UTF-8 BOM")
   .refine((value) => !value.includes("\r"), "规范化资料只能使用 LF 换行")
   .refine((value) => !value.includes("\0"), "资料不能包含 NUL 控制字符")
@@ -3048,7 +3068,7 @@ export const SOURCE_RIGHTS_SCHEMA_VERSION = "1.0.0" as const;
 export const reviewAttestationSchema = z.strictObject({
   reviewerId: canonicalShortTextSchema(120),
   reviewedAt: z.string().datetime(),
-  note: z.string().max(2_000)
+  note: z.string().check(utf16MaxLength(2_000))
 });
 
 export const sourceRightsRecordSchema = z.strictObject({
@@ -3058,8 +3078,8 @@ export const sourceRightsRecordSchema = z.strictObject({
   documentContentHash: sha256Schema,
   origin: z.enum(["user_import", "bundled"]),
   source: z.strictObject({
-    sourceUrl: z.string().url().max(2_000).nullable(),
-    publisher: z.string().max(300),
+    sourceUrl: z.string().url().check(utf16MaxLength(2_000)).nullable(),
+    publisher: z.string().check(utf16MaxLength(300)),
     publicationYear: z.number().int().min(1).max(9_999).nullable(),
     acquiredAt: z.string().datetime().nullable()
   }),
@@ -3092,16 +3112,16 @@ export const sourceRightsRecordSchema = z.strictObject({
       "project_authored",
       "unknown"
     ]),
-    jurisdiction: z.string().min(1).max(200).nullable(),
-    licenseId: z.string().min(1).max(200).nullable(),
-    copyrightNotice: z.string().max(2_000),
-    evidenceRefs: z.array(z.string().url().max(2_000)).max(100),
+    jurisdiction: z.string().min(1).check(utf16MaxLength(200)).nullable(),
+    licenseId: z.string().min(1).check(utf16MaxLength(200)).nullable(),
+    copyrightNotice: z.string().check(utf16MaxLength(2_000)),
+    evidenceRefs: z.array(z.string().url().check(utf16MaxLength(2_000))).max(100),
     distributionPolicy: z.enum(["local_private_only", "redistributable"])
   }),
   review: z.strictObject({
     status: z.enum(["unreviewed", "single_reviewed", "double_reviewed"]),
     attestations: z.array(reviewAttestationSchema).max(20),
-    note: z.string().max(4_000)
+    note: z.string().check(utf16MaxLength(4_000))
   }),
   editVersion: z.number().int().positive(),
   createdAt: z.string().datetime(),
@@ -3188,7 +3208,7 @@ export const sourceCarrierRecordSchema = z.strictObject({
     "link_only"
   ]),
   provider: canonicalShortTextSchema(300),
-  sourceUrl: z.string().url().max(2_000).nullable(),
+  sourceUrl: z.string().url().check(utf16MaxLength(2_000)).nullable(),
   acquiredAt: z.string().datetime(),
   accessMethod: canonicalShortTextSchema(500),
   contentDigest: sha256Schema.nullable(),
@@ -3204,17 +3224,17 @@ export const sourceCarrierRecordSchema = z.strictObject({
     ]),
     jurisdiction: canonicalShortTextSchema(200).nullable(),
     licenseId: canonicalShortTextSchema(200).nullable(),
-    copyrightNotice: z.string().max(2_000),
+    copyrightNotice: z.string().check(utf16MaxLength(2_000)),
     reproductionAllowed: z.boolean(),
     quotationAllowed: z.boolean(),
     redistributionAllowed: z.boolean(),
-    evidenceRefs: z.array(z.string().url().max(2_000)).max(100)
+    evidenceRefs: z.array(z.string().url().check(utf16MaxLength(2_000))).max(100)
   }),
   storagePolicy: z.enum(["public_repo", "private_vault", "link_only", "do_not_store"]),
   review: z.strictObject({
     status: z.enum(["unreviewed", "single_reviewed", "double_reviewed"]),
     attestations: z.array(reviewAttestationSchema).max(20),
-    note: z.string().max(4_000)
+    note: z.string().check(utf16MaxLength(4_000))
   }),
   editVersion: z.number().int().positive(),
   createdAt: z.string().datetime(),
@@ -3603,12 +3623,11 @@ export const citationRecordSchema = z.strictObject({
   locator: citationLocatorSchema,
   quote: z
     .string()
-    .min(1)
-    .max(20_000)
+    .min(1).check(utf16MaxLength(20_000))
     .refine((value) => !value.includes("\r"), "引用原文只能使用 LF 换行")
     .refine((value) => !value.includes("\0"), "引用原文不能包含 NUL 控制字符")
     .refine((value) => value.trim().length > 0, "引用原文不能为空"),
-  annotation: z.string().max(20_000),
+  annotation: z.string().check(utf16MaxLength(20_000)),
   targets: z
     .array(citationTargetSchema)
     .min(1)
@@ -3617,10 +3636,10 @@ export const citationRecordSchema = z.strictObject({
       (targets) => new Set(targets.map(citationTargetKey)).size === targets.length,
       "引用目标不能重复"
     ),
-  targetKeys: z.array(z.string().min(1).max(500)).min(1).max(100),
+  targetKeys: z.array(z.string().min(1).check(utf16MaxLength(500))).min(1).max(100),
   status: z.enum(["user_candidate", "verified", "rejected"]),
   reviewAttestations: z.array(reviewAttestationSchema).max(20),
-  decisionNote: z.string().max(4_000),
+  decisionNote: z.string().check(utf16MaxLength(4_000)),
   editVersion: z.number().int().positive(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime()
@@ -3657,11 +3676,11 @@ export const citationV03RecordSchema = z.strictObject({
   documentId: z.string().uuid(),
   documentContentHash: sha256Schema,
   locator: citationLocatorSchema,
-  quote: z.string().min(1).max(20_000)
+  quote: z.string().min(1).check(utf16MaxLength(20_000))
     .refine((value) => !value.includes("\r"), "引用原文只能使用 LF 换行")
     .refine((value) => !value.includes("\0"), "引用原文不能包含 NUL 控制字符")
     .refine((value) => value.trim().length > 0, "引用原文不能为空"),
-  annotation: z.string().max(20_000),
+  annotation: z.string().check(utf16MaxLength(20_000)),
   targets: z.array(citationTargetV03Schema).min(1).max(100).refine(
     (targets) => new Set(targets.map(citationTargetV03Key)).size === targets.length,
     "引用目标不能重复"
@@ -3686,7 +3705,7 @@ const legacyCandidateSetRecordV1Shape = {
   id: z.string().uuid(),
   alias: canonicalShortTextSchema(80),
   tags: caseTagsSchema,
-  notes: z.string().max(20_000),
+  notes: z.string().check(utf16MaxLength(20_000)),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   candidateSet: unknownHourCandidateResultSchema,
@@ -4135,8 +4154,7 @@ export type TzdbMigrationReceipt = z.infer<typeof tzdbMigrationReceiptSchema>;
 
 const LOCAL_ATTACHMENT_BASE64_MAX_CHARACTERS = 4 * Math.ceil(MAX_LOCAL_ATTACHMENT_BYTES / 3);
 const canonicalBase64TextSchema = z
-  .string()
-  .max(LOCAL_ATTACHMENT_BASE64_MAX_CHARACTERS)
+  .string().check(utf16MaxLength(LOCAL_ATTACHMENT_BASE64_MAX_CHARACTERS))
   .regex(
     /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/,
     "contentBase64 must be canonical padded standard Base64 without whitespace"
@@ -4158,9 +4176,7 @@ const localAttachmentFileNameSchema = canonicalShortTextSchema(255)
   .refine((value) => value !== "." && value !== "..", "fileName must name a file");
 
 const localAttachmentMediaTypeSchema = z
-  .string()
-  .min(3)
-  .max(255)
+  .string().check(utf16MinLength(3)).check(utf16MaxLength(255))
   .regex(
     /^[a-z0-9][a-z0-9!#$&^_.+-]{0,126}\/[a-z0-9][a-z0-9!#$&^_.+-]{0,126}$/,
     "mediaType must be one canonical lowercase MIME type without parameters"
@@ -4252,7 +4268,7 @@ export const installedRulePackRecordSchema = z.strictObject({
   packId: z.string().regex(/^[a-z0-9-]+$/),
   profileId: z.string().regex(/^[a-z0-9-]+$/),
   profileVersion: z.string().regex(/^\d+\.\d+\.\d+$/),
-  canonicalJson: z.string().min(2).max(2 * 1024 * 1024),
+  canonicalJson: z.string().check(utf16MinLength(2)).check(utf16MaxLength(2 * 1024 * 1024)),
   localTrust: z.literal("unverified_local_import"),
   importedAt: z.string().datetime()
 }).refine((value) => value.id === value.packDigest, {
@@ -4275,7 +4291,7 @@ export const activeRulePackRecordSchema = z.strictObject({
     acknowledgementVersion: z.literal("rule-pack-local-approval@1"),
     appVersion: appSemverTextSchema,
     engineName: z.literal("hakimi-bazi-core"),
-    engineVersion: z.string().min(1).max(80)
+    engineVersion: z.string().min(1).check(utf16MaxLength(80))
   })
 }).refine((value) => value.approval.acknowledgedAt === value.activatedAt, {
   path: ["approval", "acknowledgedAt"],

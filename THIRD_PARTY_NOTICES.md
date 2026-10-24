@@ -138,11 +138,11 @@ A declared license identifier is evidence from the lockfile, not a legal opinion
 - Locked artifact: https://registry.npmjs.org/scheduler/-/scheduler-0.27.0.tgz
 - Locked integrity: `sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==`
 
-### `zod` 4.4.3
+### `zod` 4.6.7
 
 - Declared license: `MIT`
 - Review classification: Declared license is in the narrow standard-notice allowlist; this is not a compliance determination.
-- Package URL: `pkg:npm/zod@4.4.3`
+- Package URL: `pkg:npm/zod@4.6.7`
 - Lock path: `node_modules/zod`
-- Locked artifact: https://registry.npmjs.org/zod/-/zod-4.4.3.tgz
-- Locked integrity: `sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==`
+- Locked artifact: https://registry.npmjs.org/zod/-/zod-4.6.7.tgz
+- Locked integrity: `sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==`

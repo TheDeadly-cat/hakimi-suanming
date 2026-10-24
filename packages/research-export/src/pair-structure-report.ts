@@ -1,4 +1,6 @@
 import {
+  utf16MaxLength,
+  utf16Length,
   comparisonCellAvailabilitySchema,
   formalComparisonCategorySchema,
   pairStructureResearchProjectionSchema,
@@ -95,19 +97,19 @@ if (ANONYMOUS_OBSERVATION_ID_SET.size !== PAIR_STRUCTURE_ANONYMOUS_OBSERVATION_I
 const anonymousObservationSchema = z.strictObject({
   id: z.string().refine((id) => ANONYMOUS_OBSERVATION_ID_SET.has(id), "字段不在双案例匿名事实白名单"),
   category: formalComparisonCategorySchema,
-  label: z.string().min(1).max(160),
-  value: z.string().max(1_000_000),
+  label: z.string().min(1).check(utf16MaxLength(160)),
+  value: z.string().check(utf16MaxLength(1_000_000)),
   availability: comparisonCellAvailabilitySchema
 });
 
 const anonymousResolvedTransitSlotSchema = z.strictObject({
   nodeType: transitNodeTypeSchema,
   status: z.literal("resolved"),
-  label: z.string().min(1).max(80),
-  ganZhi: z.string().length(2),
-  stemTenGod: z.string().max(20),
+  label: z.string().min(1).check(utf16MaxLength(80)),
+  ganZhi: z.string().check(utf16Length(2)),
+  stemTenGod: z.string().check(utf16MaxLength(20)),
   index: z.number().int().nonnegative().nullable(),
-  boundaryLabel: z.string().max(40).nullable(),
+  boundaryLabel: z.string().check(utf16MaxLength(40)).nullable(),
   startInstant: z.string().datetime({ offset: true }),
   endExclusiveInstant: z.string().datetime({ offset: true }),
   frame: z.enum(["fixed_plus08", "revision_iana_civil"]),
@@ -117,8 +119,8 @@ const anonymousResolvedTransitSlotSchema = z.strictObject({
 const anonymousUnavailableTransitSlotSchema = z.strictObject({
   nodeType: transitNodeTypeSchema,
   status: z.enum(["not_applicable", "unsupported"]),
-  reasonCode: z.string().min(1).max(60),
-  message: z.string().min(1).max(240)
+  reasonCode: z.string().min(1).check(utf16MaxLength(60)),
+  message: z.string().min(1).check(utf16MaxLength(240))
 });
 
 const anonymousTransitSlotSchema = z.union([
@@ -147,8 +149,8 @@ const anonymousResolvedTransitSchema = z.strictObject({
 
 const anonymousErrorTransitSchema = z.strictObject({
   status: z.literal("error"),
-  code: z.string().min(1).max(120),
-  message: z.string().min(1).max(1_000)
+  code: z.string().min(1).check(utf16MaxLength(120)),
+  message: z.string().min(1).check(utf16MaxLength(1_000))
 });
 
 const anonymousTransitSchema = z.discriminatedUnion("status", [

@@ -1,0 +1,21 @@
+哈基米八字试用版 · 0.22 受控启用候选
+
+新报告成稿版本为0.22.0；应用版本仍以真实包内声明为准，不把报告版本当作应用版本。
+此入口未绑定真实构建身份前拒绝封包、校验、安装和启动。封包完成不代表已获日常启用或正式发布许可。
+沿用http://127.0.0.1:5202/、原Edge用户配置及legacy-v13/schema13；不自动迁移或重复导入资料，不重写旧保存报告。
+
+运行环境：Windows PowerShell 5.1、Node.js 24.16.0。本包不下载安装环境；构建使用已冻结的npm11.13.0与依赖。
+旧0.21.1安装目录及固定身份保留；新包只安装到独立reading-022-trials/<真实build>-package-v<revision>。
+
+经用户批准后，由交付人员执行：
+1. 在原Edge配置导出最新完整备份并核对；另备份当前0.21.1快捷方式。不要拿IAB资料副本代替Edge基线。
+2. 使用scripts\local-research-reading-022-candidate.mjs verify --package-root PACKAGE_DIR校验真实新包。
+3. 用scripts\install-local-reading-022-candidate.ps1 -PackageRoot PACKAGE_DIR -NoShortcut安装；旧包不替换。
+4. 确认无未保存操作并核实5202进程归属后受控切换；启动器不会终止现有服务、换端口或清库。
+5. 运行新安装目录的scripts\launch-local-reading-022-candidate.ps1 -PackageRoot INSTALLED_DIR -NoDialogs。
+6. 在原Edge配置刷新同一5202地址，核对页面与Service Worker身份、旧报告、新报告保存/重开/导出及批准的复盘更正；最后才更新桌面快捷方式。
+
+回退保留新资料备份后，再受控切回旧0.21.1服务与其快捷方式；单点旧快捷方式不会替换正在运行的新服务。
+代码回退不等于资料回退：旧程序未必理解新版全部索引与复盘记录，不能自动恢复旧数据库或删除新记录。
+普通安装器拒绝覆盖不同目标的同名快捷方式。START-READING-022.cmd打开系统默认浏览器，不固定Edge或用户配置。
+日志位于%USERPROFILE%\HakimiBaziWorkbenchCandidates\reading-022-launch-logs，包内文件保持不可变。

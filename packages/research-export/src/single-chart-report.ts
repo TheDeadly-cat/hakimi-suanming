@@ -1,4 +1,6 @@
 import {
+  utf16MaxLength,
+  utf16Length,
   caseRecordSchema,
   citationRecordSchema,
   fieldProvenanceSchema,
@@ -412,8 +414,7 @@ export function hasSingleChartReportAggregateTextCapacity(value: unknown): boole
 }
 
 function boundedReportString(maximumCharacters: number, label: string) {
-  return z.string()
-    .max(maximumCharacters * 2, `${label} 超过当前展示容量`)
+  return z.string().check(utf16MaxLength(maximumCharacters * 2, `${label} 超过当前展示容量`))
     .refine(
       (value) => hasAtMostReportCodePoints(value, maximumCharacters),
       `${label} 超过当前展示容量`
@@ -518,7 +519,7 @@ const reportRowSchema = z.strictObject({
 const reportPillarSchema = z.strictObject({
   key: z.enum(["year", "month", "day", "hour"]),
   label: z.enum(["年柱", "月柱", "日柱", "时柱"]),
-  ganZhi: z.string().length(2),
+  ganZhi: z.string().check(utf16Length(2)),
   stemTenGod: reportLabelSchema("干十神"),
   hiddenStems: reportLabelSchema("藏干"),
   branchTenGods: reportLabelSchema("支十神"),
