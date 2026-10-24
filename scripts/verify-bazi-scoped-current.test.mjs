@@ -149,7 +149,7 @@ test("T3 expert progress reports received 0/1/2 structural originals while every
   for (const count of [0, 1, 2]) {
     const result = await loadBaziCurrentExpertReviewProgress(ROOT, records.slice(0, count));
     assert.equal(result.currentAvailable, true);
-    assert.equal(result.artifact.path, "content/bazi-strength-expert-review-packet.current.json");
+    assert.equal(result.artifact.path, "content/bazi-strength-expert-review-packet.current-v1.7.0.json");
     const progress = result.expertReviewProgress;
     assert.equal(progress.receivedOriginalOpinions, count);
     assert.equal(progress.qualifiedIndependentOpinions, 0);
@@ -736,11 +736,11 @@ test("selected domain and expert tasks preserve historical anchors and reject ab
     entry.familyKey === "content/domain-release/bazi.single-chart-report.v1.7.0.manifest");
   assert.equal(domainEntries.length, 1);
   assert.notEqual(domainEntries[0].head, null);
-  assert.equal(domainEntries[0].selectedCurrent.version, "2.5.0");
+  assert.equal(domainEntries[0].selectedCurrent.version, "2.6.0");
   const expert = index.nonVersionedSelections.baziExpertReviewPacket;
   assert.notEqual(expert.historicalAnchor, null);
   assert.equal(expert.currentAvailable, true);
-  assert.equal(expert.selectedCurrent.path, "content/bazi-strength-expert-review-packet.current.json");
+  assert.equal(expert.selectedCurrent.path, "content/bazi-strength-expert-review-packet.current-v1.7.0.json");
   assert.equal(expert.historicalAnchor.path, "content/bazi-strength-expert-review-packet.v1.json");
   const domain = await loadBaziCurrentDomainManifest(ROOT);
   const packet = await loadBaziCurrentExpertReviewPacket(ROOT);
@@ -861,7 +861,7 @@ test("current domain CLI verifies inputs while current expert CLI remains qualif
       assert.equal(outcome.stderr, "");
       const resolution = JSON.parse(outcome.stdout);
       assert.equal(resolution.currentAvailable, true);
-      assert.equal(resolution.artifact.artifactId, "hakimi.bazi.single-chart-report.domain-release-manifest/2.5.0");
+      assert.equal(resolution.artifact.artifactId, "hakimi.bazi.single-chart-report.domain-release-manifest/2.6.0");
       assert.equal(resolution.authorityBoundary.releaseReady, false);
       assert.equal(resolution.authorityBoundary.expertClaimsAuthorized, false);
     }
@@ -1041,7 +1041,7 @@ async function currentExpertClosureFixture() {
     return { path: relativePath, bytes, rawBytes: bytes.length,
       rawSha256: createHash("sha256").update(bytes).digest("hex") };
   };
-  const packetSnapshot = await snapshot("content/bazi-strength-expert-review-packet.current.json");
+  const packetSnapshot = await snapshot("content/bazi-strength-expert-review-packet.current-v1.7.0.json");
   const packet = JSON.parse(packetSnapshot.bytes.toString("utf8"));
   const sourceBinding = selected("content/bazi-strength-source-binding-candidates");
   const sourceRights = selected("content/bazi-strength-source-rights-candidates");
@@ -1084,7 +1084,7 @@ test("T2 current expert task closure verifies twelve inputs and eleven readiness
   const contract = baziScopedCurrentTestOnly.assertCurrentExpertPacketInputClosure(fixture);
   assert.equal(fixture.artifactSnapshots.length, 12);
   assert.equal(fixture.readinessBasisSnapshots.length, 11);
-  assert.equal(contract.sessionBinding.packetId, "hakimi.bazi.strength.expert-review-packet/1.6.0");
+  assert.equal(contract.sessionBinding.packetId, "hakimi.bazi.strength.expert-review-packet/1.7.0");
   assert.equal(contract.sessionBinding.readinessLedgerId, fixture.readinessBinding.artifactId);
   assert.equal(contract.bindingIds.length, 12);
   assert.equal(isVerifiedBaziScopedCurrentResolution(contract), false);

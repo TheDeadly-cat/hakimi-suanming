@@ -57,12 +57,18 @@ export const ZIWEI_IZTRO_LICENSE_NOTICE_SURFACES = Object.freeze({
 });
 
 export const ZIWEI_IZTRO_LICENSE_NOTICE_EVIDENCE_PATH =
-  "scripts/fixtures/ziwei-iztro-vite-7.3.7-build-notice-observation.json";
+  "scripts/fixtures/ziwei-iztro-vite-7.3.7-zod-4.6.7-build-notice-observation.json";
 // The earlier Vite 7.3.6 observation is immutable history, not current build proof.
 const HISTORICAL_NOTICE_IDENTITY = Object.freeze({
   path: "content/system-admission/ziwei-iztro-build-notice-evidence.v1.json",
   bytes: 12871,
   sha256: "cb8ab23f89531941fde358a452ecab41d508112eabec925fb56c76d508c20610"
+});
+
+const PREVIOUS_ENGINEERING_NOTICE_IDENTITY = Object.freeze({
+  path: "scripts/fixtures/ziwei-iztro-vite-7.3.7-build-notice-observation.json",
+  bytes: 13110,
+  sha256: "5f2ea2a68fa72e4c1d266c0a80b5982ff46d26b67e28283f87558e12bbaee114"
 });
 
 export const ZIWEI_HKO_RESTRICTED_SOURCE_MATERIAL_IDENTITY = Object.freeze({
@@ -1229,10 +1235,11 @@ export function buildZiweiIztroLicenseNoticeEvidence(receipt, workspaceRoot = de
   const evidence = {
     schemaVersion: "1.0.0",
     recordType: "ziwei_iztro_top_level_build_notice_evidence",
-    evidenceLedgerId: "hakimi.ziwei.iztro-build-notice-engineering-observation/vite-7.3.7/1",
+    evidenceLedgerId: "hakimi.ziwei.iztro-build-notice-engineering-observation/vite-7.3.7-zod-4.6.7/1",
     status: "controlled_ephemeral_build_top_level_notice_observed_unbound",
-    observedOn: "2026-10-23",
+    observedOn: "2026-10-25",
     historicalObservation: HISTORICAL_NOTICE_IDENTITY,
+    previousEngineeringObservation: PREVIOUS_ENGINEERING_NOTICE_IDENTITY,
     systemIdentity: {
       productSystemId: "ziwei-doushu",
       contractSystemId: "ziwei",
@@ -1356,13 +1363,15 @@ export function buildZiweiIztroLicenseNoticeEvidence(receipt, workspaceRoot = de
 }
 
 function loadAndVerifyEvidence(receipt, workspaceRoot) {
-  const historical = readHeldRegularFile(
-    resolveContainedWorkspaceFile(workspaceRoot, HISTORICAL_NOTICE_IDENTITY.path, "historical evidence"),
-    "historical evidence", MAX_EVIDENCE_BYTES
-  );
-  if (historical.byteLength !== HISTORICAL_NOTICE_IDENTITY.bytes
-    || historical.sha256 !== HISTORICAL_NOTICE_IDENTITY.sha256) {
-    fail("immutable historical notice evidence drifted");
+  // These byte checks preserve prior observations; they do not execute a historical build.
+  for (const identity of [HISTORICAL_NOTICE_IDENTITY, PREVIOUS_ENGINEERING_NOTICE_IDENTITY]) {
+    const historical = readHeldRegularFile(
+      resolveContainedWorkspaceFile(workspaceRoot, identity.path, "historical evidence"),
+      "historical evidence", MAX_EVIDENCE_BYTES
+    );
+    if (historical.byteLength !== identity.bytes || historical.sha256 !== identity.sha256) {
+      fail("immutable historical notice evidence drifted");
+    }
   }
   const evidenceFile = readHeldRegularFile(
     resolveContainedWorkspaceFile(workspaceRoot, ZIWEI_IZTRO_LICENSE_NOTICE_EVIDENCE_PATH, "evidence child"),

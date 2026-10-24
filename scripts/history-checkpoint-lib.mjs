@@ -112,15 +112,15 @@ function readOwnJsonDataProperty(value, key, label) {
 }
 
 export const HISTORY_CHECKPOINT_RELATIVE_PATH =
-  "content/system-admission/history-checkpoint.v4.json";
+  "content/system-admission/history-checkpoint.v5.json";
 
 export const PREVIOUS_HISTORY_CHECKPOINT = OBJECT_FREEZE({
-  path: "content/system-admission/history-checkpoint.v3.json",
+  path: "content/system-admission/history-checkpoint.v4.json",
   rawBytes: 36579,
-  rawSha256: "564d810dcb4e2f2e7864d9206887e8c6e23919ffd8eafde975cc79466eaa2a89",
-  checkpointId: "hakimi.repository/history-checkpoint/3.0.0",
-  checkpointDigest: "7c2177c1179680b02a1a0162d51936ef02dd1ea49889e9a84824a4815cab0864",
-  memberCount: 79
+  rawSha256: "2f3197a427e1d8e273c4ef4002de21c63e56a5816a2ea5a724a427fae23f89fa",
+  checkpointId: "hakimi.repository/history-checkpoint/4.0.0",
+  checkpointDigest: "a665d8f366bea3c723991d771004279faa1ff855660112d8f723e7b8265609fe",
+  memberCount: 80
 });
 
 // The original checkpoint covers multi-version families only. Keep this
@@ -136,9 +136,9 @@ export const HISTORICAL_BAZI_EXPERT_REVIEW_PACKET = OBJECT_FREEZE({
 
 const SCHEMA_VERSION = "1.0.0";
 const RECORD_TYPE = "canonical_repository_history_checkpoint_v1";
-const CHECKPOINT_ID = "hakimi.repository/history-checkpoint/4.0.0";
+const CHECKPOINT_ID = "hakimi.repository/history-checkpoint/5.0.0";
 const EXPECTED_FAMILY_COUNT = 25;
-const EXPECTED_MEMBER_COUNT = 80;
+const EXPECTED_MEMBER_COUNT = 82;
 const SHA256_PATTERN = /^[0-9a-f]{64}$/u;
 const FAMILY_HISTORY_DOMAIN = "hakimi.repository.history-checkpoint.v1/family-history";
 const MEMBER_INVENTORY_DOMAIN = "hakimi.repository.history-checkpoint.v1/member-inventory";
@@ -174,10 +174,10 @@ const SNAPSHOT_BOUNDARY = OBJECT_FREEZE({
 // The checkpoint cannot contain its own raw identity. Production identity
 // loading therefore requires this verifier-local, out-of-band pin.
 const EXPECTED_PERSISTED = OBJECT_FREEZE({
-  rawBytes: 36579,
-  rawSha256: "2f3197a427e1d8e273c4ef4002de21c63e56a5816a2ea5a724a427fae23f89fa",
-  historyRootDigest: "43aeb84409beb6c90313a41ff128823778747fe05f703e191cdc0722e3c68fac",
-  checkpointDigest: "a665d8f366bea3c723991d771004279faa1ff855660112d8f723e7b8265609fe"
+  rawBytes: 36582,
+  rawSha256: "d8f5cb2a5e09da303439fc06e0083f48d19a82b980ac15cbb0f6a35e667e4668",
+  historyRootDigest: "20b5d185e335bc5ec02c0d21c513cedc34ec2232b42d5a3cc8a84d7a758d90fe",
+  checkpointDigest: "ab2bf5fbefe5d91f65892c4dfeeadda235762b79d6ec333e6759f069cc4fd179"
 });
 
 const VERIFIED_IDENTITIES = new WeakMap();
@@ -526,7 +526,8 @@ async function readRepositoryFamilyInventory(workspaceRoot) {
       if (relative === HISTORY_CHECKPOINT_RELATIVE_PATH
         || relative === PREVIOUS_HISTORY_CHECKPOINT.path
         || relative === "content/system-admission/history-checkpoint.v1.json"
-        || relative === "content/system-admission/history-checkpoint.v2.json") continue;
+        || relative === "content/system-admission/history-checkpoint.v2.json"
+        || relative === "content/system-admission/history-checkpoint.v3.json") continue;
       versionedMembers.push({
         familyKey: `${relativeDirectory}/${match[1]}`,
         path: relative,

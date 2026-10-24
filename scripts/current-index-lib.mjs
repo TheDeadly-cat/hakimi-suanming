@@ -166,9 +166,9 @@ const SELECTION_BOUNDARY = OBJECT_FREEZE({
 // The current index cannot contain its own raw hash without a self-reference,
 // so its persisted raw identity is pinned out of band by this verifier.
 const EXPECTED_PERSISTED = OBJECT_FREEZE({
-  rawBytes: 42740,
-  rawSha256: "b832e49974eaef26d70c326aed004288300fd1c12bb16b2739126c2a93f51c71",
-  indexDigest: "cbc3bded7e52120bae0aa9a386b45ad71048c7326603a4b600d142b69d647c26"
+  rawBytes: 42753,
+  rawSha256: "516be227fb19b62830374415c29339895bec56d051cc5885e49fe13f8958ef68",
+  indexDigest: "8777ebda5f4f9a8ed591a5c4bd0ac0229aceb06ad1e9a2396b6c7f538c346cf8"
 });
 
 const BAZI_EXPERT_REVIEW_PACKET = HISTORICAL_BAZI_EXPERT_REVIEW_PACKET;
@@ -890,10 +890,11 @@ async function buildNonVersionedSelections(workspaceRoot, registeredSelections) 
   if (OBJECT_HAS_OWN(selected, "version")) keys.push("version");
   exactKeys(selected, keys, "NON_VERSIONED_SELECTION_MISMATCH", "selected expert packet");
   const fixedCurrentPacket = selected.path === "content/bazi-strength-expert-review-packet.current.json";
+  const dependencySuccessorPacket = selected.path === "content/bazi-strength-expert-review-packet.current-v1.7.0.json";
   const match = typeof selected.path === "string"
     ? regexExec(/^content\/bazi-strength-expert-review-packet\.v([0-9]+(?:\.[0-9]+){0,2})\.json$/u, selected.path)
     : null;
-  if ((!match && !fixedCurrentPacket) || !NUMBER_IS_SAFE_INTEGER(selected.rawBytes) || selected.rawBytes <= 0
+  if ((!match && !fixedCurrentPacket && !dependencySuccessorPacket) || !NUMBER_IS_SAFE_INTEGER(selected.rawBytes) || selected.rawBytes <= 0
     || typeof selected.rawSha256 !== "string" || !regexTest(SHA256_PATTERN, selected.rawSha256)
     || typeof selected.packetId !== "string" || selected.packetId.trim() !== selected.packetId || selected.packetId.length === 0
     || typeof selected.packetDigest !== "string" || !regexTest(SHA256_PATTERN, selected.packetDigest)) {
@@ -903,7 +904,11 @@ async function buildNonVersionedSelections(workspaceRoot, registeredSelections) 
     || selected.packetId !== "hakimi.bazi.strength.expert-review-packet/1.6.0")) {
     fail("NON_VERSIONED_SELECTION_MISMATCH", "固定当前审阅任务包必须绑定明确的 1.6.0 工程身份。");
   }
-  if (!fixedCurrentPacket && OBJECT_HAS_OWN(selected, "version")
+  if (dependencySuccessorPacket && (selected.version !== "1.7.0"
+    || selected.packetId !== "hakimi.bazi.strength.expert-review-packet/1.7.0")) {
+    fail("NON_VERSIONED_SELECTION_MISMATCH", "依赖后继审阅任务包必须绑定明确的 1.7.0 工程身份。");
+  }
+  if (!fixedCurrentPacket && !dependencySuccessorPacket && OBJECT_HAS_OWN(selected, "version")
     && parseVersion(selected.version, "NON_VERSIONED_SELECTION_MISMATCH").normalized
       !== parseVersion(match[1], "NON_VERSIONED_SELECTION_MISMATCH").normalized) {
     fail("NON_VERSIONED_SELECTION_MISMATCH", "expert current 版本与显式文件路径不一致。");

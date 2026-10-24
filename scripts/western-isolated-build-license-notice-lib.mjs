@@ -560,8 +560,23 @@ function readNoticeBasis(workspaceRoot) {
   });
 }
 
-// Only the changed HTML is taken from history. Build configs, licenses and
-// dependency locks must still equal their original bytes. Auxiliary source is
+export function verifyWesternHistoricalNoticeManifestBytes(currentBytes, historicalBytes) {
+  const original = Buffer.from(historicalBytes);
+  const current = Buffer.from(currentBytes);
+  if (current.equals(original)) return;
+  // This archive is independently pinned before this check. Permit only the
+  // reviewed Zod security pin; preserve every other byte, including formatting.
+  const historicalText = original.toString("utf8");
+  const oldPin = '"zod": "4.4.3"';
+  if (historicalText.split(oldPin).length !== 2
+    || !current.equals(Buffer.from(historicalText.replace(oldPin, '"zod": "4.6.7"')))) {
+    fail("historical notice replay manifest must be original or the exact reviewed Zod security pin update");
+  }
+}
+
+// The changed HTML and original manifest are taken from history. The current
+// manifest may differ only by the exact reviewed Zod security pin. Build configs,
+// licenses and dependency locks must still equal their original bytes. Auxiliary source is
 // copied from the current checkout; this replays the record's bounded notice
 // observations, not a complete historical source commit or application build.
 export function withWesternHistoricalNoticeReplay(run) {
@@ -572,6 +587,13 @@ export function withWesternHistoricalNoticeReplay(run) {
   for (const artifact of BASIS_ARTIFACTS) {
     if (artifact.path === HISTORICAL_HTML_PATH) continue;
     const current = sourceBefore.find((entry) => entry.path === artifact.path);
+    if (artifact.role === "adapter_package_manifest") {
+      const observed = readHeldRegularFile(resolveContainedWorkspaceFile(defaultWorkspaceRoot,
+        artifact.path, artifact.role), artifact.role);
+      if (observed.sha256 !== current.sha256) fail("current notice manifest changed during verification");
+      verifyWesternHistoricalNoticeManifestBytes(observed.bytes, entries[artifact.path]);
+      continue;
+    }
     if (current.sha256 !== sha256(entries[artifact.path])) fail("historical notice replay requires unchanged fixed build basis");
   }
   // The parent exists in the checkout. Creating a child here does not change

@@ -169,7 +169,8 @@ import {
   ZIWEI_HKO_RESTRICTED_SOURCE_IMPLEMENTATION_SPECS,
   ZIWEI_HKO_RESTRICTED_SOURCE_PRE_RELEASE_POLICY_PATH
 } from "./ziwei-hko-restricted-source-pre-release-policy-lib.mjs";
-import { loadHistoricalZiweiHkoImplementations, verifyZiweiHkoVite737CurrentImplementation } from "./ziwei-hko-vite737-current-implementation-lib.mjs";
+import { verifyZiweiHkoVite737CurrentImplementation } from "./ziwei-hko-vite737-current-implementation-lib.mjs";
+import { loadHistoricalZiweiHkoZod467Implementations, loadVite737ZiweiHkoImplementations, verifyZiweiHkoZod467CurrentImplementation } from "./ziwei-hko-zod467-current-implementation-lib.mjs";
 
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const workflow = await readFile(
@@ -1187,7 +1188,7 @@ function swapExactLines(source, firstLine, secondLine) {
 }
 
 function verifyCurrentZiweiHkoPreReleasePolicy(overrides = {}) {
-  return verifyZiweiHkoVite737CurrentImplementation({
+  return verifyZiweiHkoZod467CurrentImplementation({
     policy: overrides.policy ?? ziweiHkoRestrictedSourcePreReleasePolicy,
     packageJson: overrides.packageJson ?? packageJson,
     quickWorkflow: overrides.quickWorkflow ?? quickWorkflow,
@@ -1340,7 +1341,8 @@ test("binds the Ziwei HKO live gate as a non-persisted independent pre-release o
     publicBuildInclusionAuthorized: false,
     publicDeploymentAuthorized: false,
     publicReleaseAuthorized: false,
-    currentImplementationProfile: "hakimi.ziwei.hko-current-implementation/vite-7.3.7/1",
+    previousImplementationProfile: "hakimi.ziwei.hko-current-implementation/vite-7.3.7/1",
+    currentImplementationProfile: "hakimi.ziwei.hko-current-implementation/vite-7.3.7-zod-4.6.7/1",
     currentImplementationIdentityBound: true,
     historicalPolicyReplayed: true,
     historicalImplementationAuthorizedAsCurrent: false,
@@ -1528,11 +1530,15 @@ test("separates the original HKO implementation replay from the current Vite pat
     parentIsolationArtifacts: ziweiHkoParentIsolationArtifacts
   };
   assert.throws(() => verifyZiweiHkoRestrictedSourcePreReleasePolicy(input), /IMPLEMENTATION_IDENTITY_DRIFT/u);
-  const historical = loadHistoricalZiweiHkoImplementations(input.implementationArtifacts);
+  const historical = loadHistoricalZiweiHkoZod467Implementations(input.implementationArtifacts);
   assert.equal(verifyZiweiHkoRestrictedSourcePreReleasePolicy({ ...input, implementationArtifacts: historical }).releaseReady, false);
-  assert.throws(() => verifyZiweiHkoVite737CurrentImplementation({ ...input, implementationArtifacts: historical }), /IMPLEMENTATION_IDENTITY_DRIFT/u);
-  const current = verifyZiweiHkoVite737CurrentImplementation(input);
-  assert.equal(current.currentImplementationProfile, "hakimi.ziwei.hko-current-implementation/vite-7.3.7/1");
+  assert.throws(() => verifyZiweiHkoZod467CurrentImplementation({ ...input, implementationArtifacts: historical }), /IMPLEMENTATION_IDENTITY_DRIFT/u);
+  const current = verifyZiweiHkoZod467CurrentImplementation(input);
+  assert.equal(current.currentImplementationProfile, "hakimi.ziwei.hko-current-implementation/vite-7.3.7-zod-4.6.7/1");
+  const previous = loadVite737ZiweiHkoImplementations(input.implementationArtifacts);
+  assert.equal(verifyZiweiHkoVite737CurrentImplementation({ ...input, implementationArtifacts: previous }).currentImplementationProfile, "hakimi.ziwei.hko-current-implementation/vite-7.3.7/1");
+  assert.throws(() => verifyZiweiHkoVite737CurrentImplementation(input), /IMPLEMENTATION_IDENTITY_DRIFT/u);
+  assert.throws(() => verifyZiweiHkoZod467CurrentImplementation({ ...input, implementationArtifacts: previous }), /IMPLEMENTATION_IDENTITY_DRIFT/u);
   assert.equal(current.historicalImplementationAuthorizedAsCurrent, false);
   assert.equal(current.currentLiveBuildProvenByThisAdapter, false);
   assert.equal(current.publicReleaseAuthorized, false);

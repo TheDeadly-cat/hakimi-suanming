@@ -126,5 +126,5 @@ test("v2.4 still rejects the original dependency lock in a separate historical w
 });
 
 test("historical v2.4 cannot authorize the current dependency lock", async () => {
-  await assert.rejects(loadBaziDomainReleaseManifestV24(CURRENT_ROOT), code("COMPONENT_FILE_IDENTITY_DRIFT"));
+  await assert.rejects(loadBaziDomainReleaseManifestV24(CURRENT_ROOT), code("RAW_IDENTITY_MISMATCH"));
 });

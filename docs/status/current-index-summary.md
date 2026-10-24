@@ -11,22 +11,22 @@
   "source": {
     "path": "content/system-admission/current-index.v1.json",
     "indexId": "hakimi.repository/current-index/1.0.0",
-    "indexDigest": "cbc3bded7e52120bae0aa9a386b45ad71048c7326603a4b600d142b69d647c26",
-    "rawBytes": 42740,
-    "rawSha256": "b832e49974eaef26d70c326aed004288300fd1c12bb16b2739126c2a93f51c71",
+    "indexDigest": "8777ebda5f4f9a8ed591a5c4bd0ac0229aceb06ad1e9a2396b6c7f538c346cf8",
+    "rawBytes": 42753,
+    "rawSha256": "516be227fb19b62830374415c29339895bec56d051cc5885e49fe13f8958ef68",
     "machineSourceOnly": true,
     "humanDocumentIsAuthority": false
   },
   "historyCheckpoint": {
-    "path": "content/system-admission/history-checkpoint.v4.json",
-    "checkpointId": "hakimi.repository/history-checkpoint/4.0.0",
-    "rawBytes": 36579,
-    "rawSha256": "2f3197a427e1d8e273c4ef4002de21c63e56a5816a2ea5a724a427fae23f89fa",
-    "checkpointDigest": "a665d8f366bea3c723991d771004279faa1ff855660112d8f723e7b8265609fe",
+    "path": "content/system-admission/history-checkpoint.v5.json",
+    "checkpointId": "hakimi.repository/history-checkpoint/5.0.0",
+    "rawBytes": 36582,
+    "rawSha256": "d8f5cb2a5e09da303439fc06e0083f48d19a82b980ac15cbb0f6a35e667e4668",
+    "checkpointDigest": "ab2bf5fbefe5d91f65892c4dfeeadda235762b79d6ec333e6759f069cc4fd179",
     "familyCount": 25,
-    "memberCount": 80,
-    "familyInventoryDigest": "2772f8bc800e2f0cf114e1096b3c5b8504f55cba11804db4f16fcd1958d5de06",
-    "historyRootDigest": "43aeb84409beb6c90313a41ff128823778747fe05f703e191cdc0722e3c68fac",
+    "memberCount": 82,
+    "familyInventoryDigest": "3f4fa5642e7f2f346c840486b81405bbb48099f391dc9680063f6ace23969845",
+    "historyRootDigest": "20b5d185e335bc5ec02c0d21c513cedc34ec2232b42d5a3cc8a84d7a758d90fe",
     "identityMechanicallyVerified": true,
     "fullHistoryVerifiedByCurrentIndexLoad": false
   },
@@ -91,12 +91,12 @@
     "baziExpertReviewPacket": {
       "currentAvailable": true,
       "selectedCurrent": {
-        "version": "1.6.0",
-        "path": "content/bazi-strength-expert-review-packet.current.json",
+        "version": "1.7.0",
+        "path": "content/bazi-strength-expert-review-packet.current-v1.7.0.json",
         "rawBytes": 12692,
-        "rawSha256": "42c7541b9c1f84d5473bc91765cf599eb518abf2ebb656ba4360fbbd6ae37327",
-        "packetId": "hakimi.bazi.strength.expert-review-packet/1.6.0",
-        "packetDigest": "1b1e06439b4b3e44358b9e5b9feea2d44058933c8f66010d6a8940faa2da87e6"
+        "rawSha256": "7923e034ada0fb852aa6c8dc062863348d1262aa455680af560796e9967b4b97",
+        "packetId": "hakimi.bazi.strength.expert-review-packet/1.7.0",
+        "packetDigest": "d3c0dec1493efdbdc6c49bc0026e0fb1c6fe0a6315b079f293916b86f7fe50c2"
       },
       "historicalAnchorVerifiedByCurrentLoad": false,
       "historicalAnchor": {
@@ -150,18 +150,18 @@
       "familyKey": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest",
       "selectionState": "selected_current_head",
       "head": {
-        "version": "2.5.0",
-        "path": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.5.0.json",
-        "artifactId": "hakimi.bazi.single-chart-report.domain-release-manifest/2.5.0",
-        "rawSha256": "83ae87f913875636f5b82f717f3d1a0856812676e932190a7c05f85b99fec7cc",
-        "semanticDigest": "d00ebd0f3d6c26b31bc0b933d4b94845cc6b3b40879049f5cafe0e26a523d5c1"
+        "version": "2.6.0",
+        "path": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.6.0.json",
+        "artifactId": "hakimi.bazi.single-chart-report.domain-release-manifest/2.6.0",
+        "rawSha256": "2f7536ba92e78c02e348752dd945d3df8e84ae1deacc77096d84869109240ec8",
+        "semanticDigest": "445fec71d3bfc518a6a711607b38b13ef1e2fca963a128161564a59795766859"
       },
       "selectedCurrent": {
-        "version": "2.5.0",
-        "path": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.5.0.json",
-        "artifactId": "hakimi.bazi.single-chart-report.domain-release-manifest/2.5.0",
-        "rawSha256": "83ae87f913875636f5b82f717f3d1a0856812676e932190a7c05f85b99fec7cc",
-        "semanticDigest": "d00ebd0f3d6c26b31bc0b933d4b94845cc6b3b40879049f5cafe0e26a523d5c1"
+        "version": "2.6.0",
+        "path": "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.6.0.json",
+        "artifactId": "hakimi.bazi.single-chart-report.domain-release-manifest/2.6.0",
+        "rawSha256": "2f7536ba92e78c02e348752dd945d3df8e84ae1deacc77096d84869109240ec8",
+        "semanticDigest": "445fec71d3bfc518a6a711607b38b13ef1e2fca963a128161564a59795766859"
       }
     },
     {
@@ -222,18 +222,18 @@
       "familyKey": "content/system-admission/bazi-binding-freeze-requirements",
       "selectionState": "selected_current_head",
       "head": {
-        "version": "1.9.0",
-        "path": "content/system-admission/bazi-binding-freeze-requirements.v1.9.0.json",
-        "artifactId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.9.0",
-        "rawSha256": "e20145b5f34b5dc04464e482cda5da990f82e520236679efbf568b322637f797",
-        "semanticDigest": "42930e63cb0960df969f5fe059617eb96a8ec9bd857c486cd4b33a28d37a8ae1"
+        "version": "1.10.0",
+        "path": "content/system-admission/bazi-binding-freeze-requirements.v1.10.0.json",
+        "artifactId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.10.0",
+        "rawSha256": "39325874d730189e893220cc5fa500a26b77ace1ae8ea1316acb4ead2869df87",
+        "semanticDigest": "1bafd943b73c92312846832422ff05e8c919de94e3c858ab7fc45af674de14ac"
       },
       "selectedCurrent": {
-        "version": "1.9.0",
-        "path": "content/system-admission/bazi-binding-freeze-requirements.v1.9.0.json",
-        "artifactId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.9.0",
-        "rawSha256": "e20145b5f34b5dc04464e482cda5da990f82e520236679efbf568b322637f797",
-        "semanticDigest": "42930e63cb0960df969f5fe059617eb96a8ec9bd857c486cd4b33a28d37a8ae1"
+        "version": "1.10.0",
+        "path": "content/system-admission/bazi-binding-freeze-requirements.v1.10.0.json",
+        "artifactId": "hakimi.bazi.strength.binding-freeze-candidate-readiness/1.10.0",
+        "rawSha256": "39325874d730189e893220cc5fa500a26b77ace1ae8ea1316acb4ead2869df87",
+        "semanticDigest": "1bafd943b73c92312846832422ff05e8c919de94e3c858ab7fc45af674de14ac"
       }
     },
     {

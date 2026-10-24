@@ -5,7 +5,7 @@ import { copyFile, lstat, mkdtemp, open, readFile, realpath, rm } from "node:fs/
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import test from "node:test";
+import test, { after } from "node:test";
 
 import {
   BAZI_KNOWLEDGE_CORE_IDENTITY_REBOUND_BINDING_READINESS_RELATIVE_PATH,
@@ -17,17 +17,21 @@ import {
   serializeBaziKnowledgeCoreIdentityReboundBindingReadiness
 } from "./bazi-knowledge-core-identity-rebound-binding-readiness-lib.mjs";
 
-const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+import { createBaziDomainManifestV25HistoricalInputs } from "./bazi-dependency-predecessor.test-fixture.mjs";
+const actualWorkspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const historicalInputs = await createBaziDomainManifestV25HistoricalInputs();
+const workspaceRoot = historicalInputs.root;
+after(() => historicalInputs.cleanup());
 const artifactPath = path.resolve(
   workspaceRoot,
   ...BAZI_KNOWLEDGE_CORE_IDENTITY_REBOUND_BINDING_READINESS_RELATIVE_PATH.split("/")
 );
 const cliPath = path.resolve(
-  workspaceRoot,
+  actualWorkspaceRoot,
   "scripts/verify-bazi-knowledge-core-identity-rebound-binding-readiness.mjs"
 );
 const libPath = path.resolve(
-  workspaceRoot,
+  actualWorkspaceRoot,
   "scripts/bazi-knowledge-core-identity-rebound-binding-readiness-lib.mjs"
 );
 

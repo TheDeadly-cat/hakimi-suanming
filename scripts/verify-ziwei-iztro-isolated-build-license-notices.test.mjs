@@ -227,6 +227,22 @@ test("keeps the original historical observation byte-identical and separate from
   assert.equal(JSON.parse(original).buildExecutionObservation.viteIdentity.version, "7.3.6");
   assert.equal(expectedEvidence.buildExecutionObservation.viteIdentity.version, "7.3.7");
   assert.equal(ZIWEI_IZTRO_LICENSE_NOTICE_EVIDENCE_PATH.startsWith("scripts/fixtures/"), true);
+  const previous = readFileSync(path.join(workspaceRoot, expectedEvidence.previousEngineeringObservation.path));
+  assert.equal(previous.length, 13110);
+  assert.equal(sha256(previous), "5f2ea2a68fa72e4c1d266c0a80b5982ff46d26b67e28283f87558e12bbaee114");
+  const previousEvidence = JSON.parse(previous);
+  assert.equal(previousEvidence.evidenceLedgerId, "hakimi.ziwei.iztro-build-notice-engineering-observation/vite-7.3.7/1");
+  assert.equal(expectedEvidence.evidenceLedgerId, "hakimi.ziwei.iztro-build-notice-engineering-observation/vite-7.3.7-zod-4.6.7/1");
+  assert.throws(() => ziweiIztroLicenseNoticeTestOnly.requireExactCanonicalEvidenceBytes(previous, expectedEvidence), /unique current canonical/u);
+  assert.throws(() => ziweiIztroLicenseNoticeTestOnly.requireExactCanonicalEvidenceBytes(Buffer.from(`${JSON.stringify(expectedEvidence, null, 2)}\n`), previousEvidence), /unique current canonical/u);
+  const changedBasis = expectedEvidence.basisArtifacts.filter((artifact, index) => artifact.sha256 !== previousEvidence.basisArtifacts[index].sha256);
+  assert.deepEqual(changedBasis.map(artifact => artifact.role), ["adapter_package_manifest", "workspace_package_manifest"]);
+  for (const artifact of changedBasis) {
+    const manifest = JSON.parse(readFileSync(path.join(workspaceRoot, artifact.path)));
+    assert.equal(manifest.dependencies.zod, "4.6.7");
+    assert.equal(manifest.private, true);
+    assert.deepEqual(manifest.exports, {});
+  }
   assert.equal(expectedEvidence.authorityBoundary.publicDeploymentAuthorized, false);
   assert.equal(expectedEvidence.authorityBoundary.expertClaimsAuthorized, false);
 });

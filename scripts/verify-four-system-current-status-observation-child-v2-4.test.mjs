@@ -1,3 +1,4 @@
+import { assertCurrentFourSystemReportAndManifestDrift } from "./four-system-v22-history.test-fixture.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile, rm, writeFile } from "node:fs/promises";
@@ -45,8 +46,7 @@ before(async () => {
 after(async () => { await historicalInputs?.cleanup(); });
 
 test("current v2.4 loader and source CLI cannot inherit a historical working directory", async () => {
-  await assert.rejects(loadFourSystemCurrentStatusObservationChildV24(ROOT),
-    { code: "MANIFEST_IDENTITY_DRIFT" });
+  await assertCurrentFourSystemReportAndManifestDrift(loadFourSystemCurrentStatusObservationChildV24, ROOT);
   const run = spawnSync(process.execPath, [ACTUAL_CLI], {
     cwd: historicalInputs.root, encoding: "utf8", env: { ...process.env, NODE_OPTIONS: "" }, windowsHide: true
   });

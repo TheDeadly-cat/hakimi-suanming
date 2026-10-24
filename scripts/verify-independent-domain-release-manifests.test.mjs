@@ -62,6 +62,14 @@ const originalChangedPaths = [
   "packages/ziwei-doushu-contracts-draft/src/index.ts",
   "scripts/ziwei-hko-restricted-source-pre-release-policy-lib.mjs"
 ];
+const originalManifestPinArchivePath = "scripts/fixtures/independent-domain-zod443-original-manifests.zip";
+const originalManifestPinArchiveSha256 = "206ab4378389f5cac768b140c12a91d966de854cafa138f4bfc4c98539b4ab1f";
+const originalManifestPinPaths = [
+  "packages/ziwei-doushu-contracts-draft/package.json",
+  "packages/ziwei-iztro-adapter-draft/package.json",
+  "packages/western-astrology-contracts-draft/package.json",
+  "packages/western-astronomy-engine-adapter-draft/package.json"
+];
 let independentHistoricalRoot;
 let temporaryParent;
 let ownedHistoricalRoot;
@@ -100,11 +108,22 @@ function parseSharedOriginalArchive(bytes) {
   }));
 }
 
+function parseOriginalManifestPinArchive(bytes) {
+  assert.equal(createHash("sha256").update(bytes).digest("hex"), originalManifestPinArchiveSha256,
+    "Historical manifest-pin archive identity changed");
+  const { unzipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
+  const entries = unzipSync(bytes);
+  assert.deepEqual(Object.keys(entries).sort(), [...originalManifestPinPaths].sort());
+  return entries;
+}
+
 // Historical inputs are data. Both manifests use one coherent original-input
 // context; verifier imports and the verbatim CLI always come from current code.
 before(async () => {
-  const entries = parseOriginalArchive(await readFile(path.join(workspaceRoot,
-    "scripts/fixtures/ziwei-v2-manifest-original-changed-inputs.zip")));
+  const originalManifestPins = parseOriginalManifestPinArchive(
+    await readFile(path.join(workspaceRoot, originalManifestPinArchivePath)));
+  const entries = { ...parseOriginalArchive(await readFile(path.join(workspaceRoot,
+    "scripts/fixtures/ziwei-v2-manifest-original-changed-inputs.zip"))), ...originalManifestPins };
   const originalManifestBytes = Buffer.from(entries[ziweiDefinition.manifestPath]);
   const originalManifest = parseIndependentDomainManifestJsonBytes(originalManifestBytes);
   assert.equal(createHash("sha256").update(originalManifestBytes).digest("hex"),
@@ -120,7 +139,7 @@ before(async () => {
   expected.set(ziweiDefinition.predecessor.path, ziweiDefinition.predecessor.rawSha256);
   assert.equal(expected.size, 48);
   originalUnchangedInputs = [...expected].filter(([relativePath]) => entries[relativePath] === undefined);
-  assert.equal(originalUnchangedInputs.length, 43);
+  assert.equal(originalUnchangedInputs.length, 41);
   temporaryParent = await realpath(os.tmpdir());
   independentHistoricalRoot = await mkdtemp(path.join(temporaryParent, "hakimi-independent-originals-"));
   ownedHistoricalRoot = await lstat(independentHistoricalRoot, { bigint: true });
@@ -158,7 +177,7 @@ before(async () => {
     assert.equal(path.isAbsolute(relativePath), false);
     assert.equal(relativePath.includes("\\") || relativePath.includes(":"), false);
     assert.equal(relativePath.split("/").some((segment) => ["", ".", ".."].includes(segment)), false);
-    const original = westernEntries[relativePath] ?? sharedEntries[relativePath];
+    const original = westernEntries[relativePath] ?? sharedEntries[relativePath] ?? originalManifestPins[relativePath];
     const bytes = original === undefined
       ? await readFile(path.join(workspaceRoot, relativePath)) : Buffer.from(original);
     assert.equal(createHash("sha256").update(bytes).digest("hex"), digest, relativePath);
@@ -173,7 +192,7 @@ before(async () => {
     expected.set(relativePath, digest);
   }
   assert.equal(expected.size, 73);
-  assert.equal(originalUnchangedInputs.length, 58);
+  assert.equal(originalUnchangedInputs.length, 54);
   historicalCliPath = path.join(independentHistoricalRoot, "scripts", "verify-independent-domain-release-manifests.mjs");
   const cliBytes = await readFile(path.join(workspaceRoot, "scripts", "verify-independent-domain-release-manifests.mjs"));
   await mkdir(path.dirname(historicalCliPath), { recursive: true });
@@ -207,6 +226,22 @@ test("original Ziwei fixture rejects archive truncation and changed bytes", asyn
   const changed = Buffer.from(original); changed[Math.floor(changed.length / 2)] ^= 1;
   for (const bytes of [changed, original.subarray(0, -1), Buffer.alloc(0)]) {
     assert.throws(() => parseOriginalArchive(bytes), /Ziwei v2 original archive identity changed/u);
+  }
+});
+
+test("historical manifest-pin fixture rejects altered archives and preserves original dependency bytes", async () => {
+  const original = await readFile(path.join(workspaceRoot, originalManifestPinArchivePath));
+  const entries = parseOriginalManifestPinArchive(original);
+  assert.equal(Object.keys(entries).length, 4);
+  for (const relativePath of originalManifestPinPaths) {
+    const bytes = Buffer.from(entries[relativePath]);
+    assert.equal(JSON.parse(bytes).dependencies.zod, "4.4.3");
+    assert.notDeepEqual(await readFile(path.join(workspaceRoot, relativePath)), bytes);
+    assert.deepEqual(await readFile(path.join(independentHistoricalRoot, relativePath)), bytes);
+  }
+  const changed = Buffer.from(original); changed[Math.floor(changed.length / 2)] ^= 1;
+  for (const bytes of [changed, original.subarray(0, -1), Buffer.alloc(0)]) {
+    assert.throws(() => parseOriginalManifestPinArchive(bytes), /Historical manifest-pin archive identity changed/u);
   }
 });
 
