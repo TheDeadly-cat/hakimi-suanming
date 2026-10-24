@@ -41,9 +41,13 @@ const downstreamDraftRegistry = JSON.parse(fs.readFileSync(path.join(
 const composedDraftRegistry = composeSystemContractDraftRegistries(primaryDraftRegistry, downstreamDraftRegistry);
 assert.deepEqual(composedDraftRegistry.failures, []);
 // Fixtures activate optional downstream drafts individually, but every explicit
-// registry uses the same effective evidence dependency closure as the default.
+// registry uses the same effective evidence dependencies and security pins as
+// the default, without activating any additional downstream draft.
 const draftRegistry = {
   ...primaryDraftRegistry,
+  drafts: primaryDraftRegistry.drafts.map((draft) => composedDraftRegistry.registry.drafts.find(
+    (effective) => effective.packageName === draft.packageName
+  )),
   evidenceTools: composedDraftRegistry.registry.evidenceTools
 };
 const draftPackages = draftRegistry.drafts.filter((draft) => draft.presence === "required");
@@ -632,7 +636,7 @@ function expectFailure(root, pattern) {
   assert.match(failures.join("\n"), pattern);
 }
 
-test("downstream composition adds only the reviewed offline evidence dependencies without mutating historical inputs", () => {
+test("current composition applies only reviewed evidence dependencies and exact security pins without mutating history", () => {
   const primary = structuredClone(primaryDraftRegistry);
   const downstream = structuredClone(downstreamDraftRegistry);
   const beforePrimary = structuredClone(primary);
@@ -653,10 +657,57 @@ test("downstream composition adds only the reviewed offline evidence dependencie
     { ...tool, scriptDependencyPolicies: undefined },
     { ...originalTool, scriptDependencyPolicies: undefined }
   );
-  assert.deepEqual(result.registry.drafts, [...primary.drafts, ...downstream.drafts]);
+  const restoredDrafts = structuredClone(result.registry.drafts);
+  const updatedConsumers = [];
+  for (const draft of restoredDrafts) {
+    if (draft.dependencies?.zod === "4.6.7") {
+      updatedConsumers.push(draft.packageName);
+      draft.dependencies.zod = "4.4.3";
+    }
+  }
+  assert.deepEqual(updatedConsumers.sort(), [
+    "@hakimi/western-astrology-contracts-draft",
+    "@hakimi/western-astronomy-engine-adapter-draft",
+    "@hakimi/ziwei-doushu-contracts-draft",
+    "@hakimi/ziwei-iztro-adapter-draft",
+    "@hakimi/ziwei-workspace-artifact-draft"
+  ]);
+  assert.deepEqual(restoredDrafts, [...primary.drafts, ...downstream.drafts]);
   dependency.allowedBareImports.push("node:assert");
   assert.deepEqual(primary, beforePrimary);
   assert.deepEqual(downstream, beforeDownstream);
+});
+
+test("security pin composition rejects altered historical versions and missing or duplicate consumers", () => {
+  for (const mutate of [
+    (primary) => { primary.drafts.find((draft) => draft.packageName === "@hakimi/ziwei-doushu-contracts-draft").dependencies.zod = "^4.6.7"; },
+    (primary) => { primary.drafts.find((draft) => draft.packageName === "@hakimi/ziwei-doushu-contracts-draft").dependencies.zod = "4.6.7"; },
+    (primary) => { primary.drafts = primary.drafts.filter((draft) => draft.packageName !== "@hakimi/ziwei-doushu-contracts-draft"); },
+    (primary) => { primary.drafts.push(structuredClone(primary.drafts.find((draft) => draft.packageName === "@hakimi/ziwei-doushu-contracts-draft"))); }
+  ]) {
+    const primary = structuredClone(primaryDraftRegistry);
+    mutate(primary);
+    const snapshot = structuredClone(primary);
+    const result = composeSystemContractDraftRegistries(primary, downstreamDraftRegistry);
+    assert.match(result.failures.join("\n"), /reviewed Zod security update/u);
+    assert.strictEqual(result.registry, primary);
+    assert.deepEqual(primary, snapshot);
+  }
+});
+
+test("current draft dependency gates reject an old, ranged, or unregistered Zod pin", () => {
+  for (const version of ["4.4.3", "^4.6.7", "4.6.8"]) {
+    const root = createFixture();
+    const manifestPath = "packages/ziwei-doushu-contracts-draft/package.json";
+    const manifest = JSON.parse(fs.readFileSync(path.join(root, manifestPath), "utf8"));
+    manifest.dependencies.zod = version;
+    write(root, manifestPath, json(manifest));
+    const lock = JSON.parse(fs.readFileSync(path.join(root, "package-lock.json"), "utf8"));
+    lock.packages["packages/ziwei-doushu-contracts-draft"].dependencies.zod = version;
+    write(root, "package-lock.json", json(lock));
+    expectFailure(root, /must keep its exact isolated dependency allowlist/u);
+    expectFailure(root, /stale or widened packages\/ziwei-doushu-contracts-draft workspace entry/u);
+  }
 });
 
 test("downstream composition rejects unknown shapes, targets, imports, and duplicate amendments atomically", () => {

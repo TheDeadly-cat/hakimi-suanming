@@ -21,6 +21,8 @@ const primaryDraftRegistry = JSON.parse(fs.readFileSync(draftRegistryPath, "utf8
 const downstreamDraftRegistry = JSON.parse(fs.readFileSync(downstreamDraftRegistryPath, "utf8"));
 // The upstream registry bytes are historical evidence. This one reviewed
 // downstream amendment adds offline parsing dependencies without rewriting it.
+// The current composition also applies one exact Zod security update to the
+// five existing consumers; historical registry bytes and graph edges stay put.
 // Callers, entrypoints, draft targets, and production/browser policy cannot be
 // amended here. The normal evidence-tool validator still checks the full graph.
 export function composeSystemContractDraftRegistries(primary, downstream) {
@@ -86,6 +88,22 @@ export function composeSystemContractDraftRegistries(primary, downstream) {
   dependency.allowedLocalTargets.push(...amendment.addLocalTargets);
   tool.scriptDependencyPolicies.push(...amendment.newDependencyPolicies);
   registry.drafts.push(...structuredClone(downstream.drafts));
+  const zodSecurityConsumers = [
+    "@hakimi/ziwei-doushu-contracts-draft",
+    "@hakimi/western-astrology-contracts-draft",
+    "@hakimi/ziwei-iztro-adapter-draft",
+    "@hakimi/ziwei-workspace-artifact-draft",
+    "@hakimi/western-astronomy-engine-adapter-draft"
+  ];
+  for (const packageName of zodSecurityConsumers) {
+    const matches = registry.drafts.filter((draft) => draft.packageName === packageName);
+    if (matches.length !== 1 || matches[0].dependencies?.zod !== "4.4.3") {
+      fail(`reviewed Zod security update requires exactly one unchanged ${packageName} dependency at 4.4.3`);
+      continue;
+    }
+    matches[0].dependencies.zod = "4.6.7";
+  }
+  if (failures.length > 0) return { registry: primary, failures };
   Object.freeze(registry.drafts);
   return { registry: Object.freeze(registry), failures };
 }
