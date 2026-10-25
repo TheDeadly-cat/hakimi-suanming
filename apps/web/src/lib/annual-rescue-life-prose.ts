@@ -1,6 +1,6 @@
 import type { OutlookRescueObject, OutlookRescueRef, OutlookRescueTrace, OutlookRescueTraceBundle } from "./outlook-rescue-trace";
 
-export const ANNUAL_RESCUE_LIFE_PROSE_VERSION = "hakimi.annual-rescue-life-prose/0.2.0" as const;
+export const ANNUAL_RESCUE_LIFE_PROSE_VERSION = "hakimi.annual-rescue-life-prose/0.2.1" as const;
 export interface AnnualRescueLifeGroup {
   id: string;
   text: string;
@@ -49,6 +49,7 @@ function chainKey(item: OutlookRescueTrace): string {
 
 function chainMeaning(item: OutlookRescueTrace, helpers: readonly OutlookRescueObject[]): string {
   const protectedRole = role(item.protectedObjects, "protected"), obstacleRole = role(item.obstacles, "obstacle");
+  if (item.kind === "wealth_controls_owl" && !item.protectedObjects.length) return "明确的实际用途有机会收住不断增加的准备或指导。不过，这条配合自身尚未确认哪一项熟悉做法会直接受益，不能据此说原有事情已经推进。";
   if (item.kind === "output_bridges_peer_wealth") return "把各自已有的本领用到一件能共同完成的事情上，是这里的衔接线索；成果怎样使用、各自分到什么，仍需另行落实，不能认为分配上的牵扯已经消失。";
   if (item.kind === "wealth_moderates_resource") return "明确的实际用途有机会收拢继续增加的准备，让已经会做的部分进入使用；需要的资料、方法和帮助仍要保留。";
   if (item.kind === "combine_output_protect_official") return "与既定要求冲突的表达或改法，有被牵回可配合范围的空间，让已经明确的要求仍能按步骤落实；相互牵连还不等于冲突已经消失。";
@@ -98,7 +99,12 @@ export function buildAnnualRescueLifeProse(bundle: OutlookRescueTraceBundle): An
   const grouped = new Map<string, OutlookRescueTrace[]>();
   for (const item of bundle.items) {
     if (!item.helpers.length || !item.obstacles.length || !item.rescueRefs.length) throw new Error("救应生活解释缺少实际对象或原句引用。");
-    if (item.kind !== "output_bridges_peer_wealth" && !item.protectedObjects.length) throw new Error("救应生活解释缺少被保护的对象。");
+    // The producer may retain an uncounted owl-control candidate before a
+    // visible food object is established. That is an incomplete benefit, not
+    // a missing trace; do not invent a protected object or an effective rescue.
+    const owlCandidateWithoutProtectedObject = item.kind === "wealth_controls_owl"
+      && !item.countsAsSupport && !item.obstacleRelations.length;
+    if (item.kind !== "output_bridges_peer_wealth" && !owlCandidateWithoutProtectedObject && !item.protectedObjects.length) throw new Error("救应生活解释缺少被保护的对象。");
     const key = chainKey(item); grouped.set(key, [...(grouped.get(key) ?? []), item]);
   }
   const groups = [...grouped.values()].map((items, index): AnnualRescueLifeGroup => {

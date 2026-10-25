@@ -19,14 +19,14 @@ import { buildReadingContextRecord, resolveReadingContext } from "./local-readin
 import { buildContextualReadingBundle } from "./local-contextual-reading-record";
 import * as concreteProse from "./concrete-period-prose";
 
-async function fixture(kind: "B" | "A" | "child" | "A32" | "protect") {
-  const child = kind === "child", date = child ? "2019-12-22" : kind === "A"||kind === "A32" ? "1995-08-18" : kind === "protect"?"1957-09-13":"1995-05-18";
-  const chart = await calculateChart({ schemaVersion: "1.0.0", calendarType: "gregorian", date, time: child ? "11:23" : kind === "protect"?"00:26":"08:26",
-    timePrecision: "exact_minute", timeZone: "Asia/Shanghai", sex: child ? "female" : kind === "A" ? "unspecified" : "male", lunarLeapMonth: false,
+async function fixture(kind: "B" | "A" | "child" | "A32" | "protect" | "exploratory-child" | "exploratory-separated") {
+  const child = kind === "child", exploratoryChild=kind === "exploratory-child", separated=kind === "exploratory-separated", date = separated ? "1954-01-27" : exploratoryChild ? "2015-04-23" : child ? "2019-12-22" : kind === "A"||kind === "A32" ? "1995-08-18" : kind === "protect"?"1957-09-13":"1995-05-18";
+  const chart = await calculateChart({ schemaVersion: "1.0.0", calendarType: "gregorian", date, time: separated ? "13:52" : exploratoryChild ? "15:41" : child ? "11:23" : kind === "protect"?"00:26":"08:26",
+    timePrecision: "exact_minute", timeZone: "Asia/Shanghai", sex: child||separated ? "female" : kind === "A" ? "unspecified" : "male", lunarLeapMonth: false,
     location: { label: "Existing synthetic plain-reading fixture", latitude: null, longitude: null, precision: "unknown" }, sourceNote: "synthetic" }, WORKING_DEFAULT_RULE_PROFILE);
   const revision = storedRevisionRecordSchema.parse({ ...chart, schemaVersion: "1.0.0", id: crypto.randomUUID(), caseId: crypto.randomUUID(), revisionNumber: 1, createdAt: "2026-10-22T00:00:00Z" });
   const assessment = buildBaziPreliminaryAssessment(revision), comprehensive = buildBaziComprehensiveReading(revision, assessment);
-  const start = child ? 2030 : kind === "A" ? 2028 : ["A32","protect"].includes(kind)?2032:2026, end = kind === "B" ? 2035 : start;
+  const start = child ? 2030 : kind === "A" ? 2028 : ["A32","protect"].includes(kind)?2032:2026, end = kind === "B" ? 2035 : exploratoryChild ? 2027 : start;
   const annual = await buildLocalAnnualOutlookRange(revision, assessment, start, end);
   const annualDomains = { version: ANNUAL_DOMAIN_READING_VERSION, revisionId: revision.id, chartResultHash: revision.manifest.resultHash,
     includeHour: assessment.sourceBinding.includeHour, startYear: start, endYear: end, years: annual.years.map(year => buildAnnualDomainReading({ revision, assessment, year })) };
@@ -261,6 +261,81 @@ it("keeps child month headings and the shared scope in the same age context as t
     }
   }
 });
+
+it("does not promote inapplicable child job-change candidates into a shared adult recurrence",async()=>{
+  // Q08 is a new exploratory reading, now a known regression rather than a blind sample.
+  const input=await fixture("exploratory-child"),before=JSON.stringify(input),result=read(input);
+  const candidates=input.extras.keyMonthYears.flatMap(year=>year.reading.branches.flatMap(branch=>branch.periods.flatMap(period=>period.events
+    .filter(event=>event.category === "job_change"&&period.monthLabel === "寒露月"&&event.supportEvidenceIds.length)
+    .map(event=>({year:year.year,event})))));
+  expect(candidates.map(item=>item.year)).toEqual([2026,2027]);
+  for(const {event} of candidates){expect(event.level).toBe("not_applicable");expect(event.applicableIntervals).toEqual([]);}
+  expect(result.scopeText).not.toContain("共同月份规律");
+  expect(result.scopeText).not.toMatch(/本命工作位置|岗位|团队|换工作/u);
+  const months=result.branches.flatMap(branch=>branch.years.flatMap(year=>year.segments.flatMap(segment=>segment.monthWindows.flatMap(window=>window.members))));
+  expect(months.filter(month=>month.label === "寒露月")).toHaveLength(2);
+  expect(months).toHaveLength(24);
+  expect(JSON.stringify(input)).toBe(before);
+},60000);
+
+it("keeps applicable recurring months specific to actual work context and excludes non-work candidates",async()=>{
+  for(const work of ["employed","self_employed","seeking_work","student","caregiving","retired"] as const){
+    const note=researchNoteRecordSchema.parse({schemaVersion:"1.0.0",id:crypto.randomUUID(),caseId:b.revision.caseId,
+      anchor:{kind:"revision",revisionId:b.revision.id},bodyFormat:"markdown",body:await buildReadingContextRecord(b.revision,null,{work,relationship:"unspecified",fromYear:2026,toYear:2035,notes:""}),
+      tags:["阅读背景"],sourceRefs:[],lifecycle:"active",editVersion:1,createdAt:"2026-10-26T00:00:00Z",updatedAt:"2026-10-26T00:00:00Z"});
+    const resolved=await resolveReadingContext({revision:b.revision,records:[note]});
+    const contextual=buildContextualReadingBundle({revision:b.revision,assessment:b.assessment,comprehensive:b.extras.comprehensive,
+      annualDomains:b.annualDomains,context:resolved.latest,referenceYear:2026})!;
+    const source={...b,contextual},annualEvents=buildReadingAnnualEvents(source),annualLifeStories=buildReadingAnnualLifeStories({...source,annualEvents});
+    const keyMonthYears=[];for(const year of [2026,2027])keyMonthYears.push(await prepareKeyMonthYear({...source,annualEvents,annualLifeStories},year,[]));
+    const extras={...b.extras,contextual,annualEvents,annualLifeStories,keyMonthYears};
+    const report=buildBriefReadingReport(b.assessment,b.annual,extras)!,result=buildPlainTenYearReading({...b,report,extras});
+    const parts=result.branches.flatMap(branch=>branch.years.flatMap(year=>year.segments.flatMap(segment=>segment.monthWindows.flatMap(window=>window.members))));
+    expect(parts).toHaveLength(24);
+    if(["student","caregiving","retired"].includes(work)){
+      expect(result.scopeText).not.toContain("共同月份规律");
+      const original=keyMonthYears.flatMap(year=>year.reading.branches.flatMap(branch=>branch.periods.flatMap(period=>period.events))).filter(event=>event.category === "job_change");
+      expect(original.every(event=>event.level === "not_applicable")).toBe(true);
+    }else{
+      expect(result.scopeText).toContain("共同月份规律");
+      if(work === "employed")expect(result.scopeText).toContain("岗位、团队或工作安排");
+      if(work === "self_employed"){expect(result.scopeText).toContain("客户服务或合作安排");expect(result.scopeText).not.toContain("岗位、团队");}
+      if(work === "seeking_work"){expect(result.scopeText).toContain("求职方向、面试或岗位选择");expect(result.scopeText).not.toContain("不等于每年都要换工作");}
+    }
+  }
+},120000);
+
+it("keeps separated relationship scope and overview consistent with independently supported new contact",async()=>{
+  // Q05 is an exploratory input, retained as a known regression after review.
+  const input=await fixture("exploratory-separated");
+  const note=researchNoteRecordSchema.parse({schemaVersion:"1.0.0",id:crypto.randomUUID(),caseId:input.revision.caseId,
+    anchor:{kind:"revision",revisionId:input.revision.id},bodyFormat:"markdown",body:await buildReadingContextRecord(input.revision,null,{work:"retired",relationship:"separated",fromYear:2026,toYear:2026,notes:""}),
+    tags:["阅读背景"],sourceRefs:[],lifecycle:"active",editVersion:1,createdAt:"2026-10-26T00:00:00Z",updatedAt:"2026-10-26T00:00:00Z"});
+  const resolved=await resolveReadingContext({revision:input.revision,records:[note]});
+  const contextual=buildContextualReadingBundle({revision:input.revision,assessment:input.assessment,comprehensive:input.extras.comprehensive,
+    annualDomains:input.annualDomains,context:resolved.latest,referenceYear:2026})!;
+  const source={...input,contextual},annualEvents=buildReadingAnnualEvents(source),annualLifeStories=buildReadingAnnualLifeStories({...source,annualEvents});
+  const keyMonthYears=[await prepareKeyMonthYear({...source,annualEvents,annualLifeStories},2026,[])];
+  const extras={...input.extras,contextual,annualEvents,annualLifeStories,keyMonthYears};
+  const report=buildBriefReadingReport(input.assessment,input.annual,extras)!,result=buildPlainTenYearReading({...input,report,extras});
+  expect(result.scopeText).toContain("旧关系看必要联系、责任与交接");
+  expect(result.scopeText).toContain("另说明可能的新联系，不预设复合");
+  expect(result.scopeText).not.toContain("只说明必要联系");
+  for(const segment of result.branches[0]!.years[0]!.segments){
+    const relationship=segment.domains.find(domain=>domain.domain === "relationship")!;
+    expect(relationship.title).toBe("旧事交接与新的联系");
+    expect(relationship.text).toContain("可能重新认识合适的人");
+    expect(relationship.text).toContain("不等于旧关系一定恢复");
+    expect(relationship.verdict.label).toBe("联系与关系发展有线索");
+    const proof=segment.domainEvidence.find(domain=>domain.domain === "relationship")!.sentences.flatMap(sentence=>sentence.sources);
+    expect(proof.length).toBeGreaterThan(0);
+    const original=report.years[0]!.branches[0]!.segments.find(item=>item.id === segment.id)!;
+    const romance=original.eventTendencies.find(event=>event.category === "romance")!.original;
+    expect(romance.evidence.filter(item=>romance.supportEvidenceIds.includes(item.id)).some(item=>item.original.includes("地支六合"))).toBe(true);
+    expect(original.eventTendencies.find(event=>event.category === "commitment")!.level).toBe("not_applicable");
+  }
+  expect(report.yearOverview.find(domain=>domain.domain === "relationship")!.groups.map(group=>group.label)).toEqual(["联系与关系发展有线索"]);
+},60000);
 
 it("does not claim an annual opportunity from mixed protect-resource conditions without actual support",()=>{
   const result=read(protect),segment=result.branches[0]!.years[0]!.segments[0]!;

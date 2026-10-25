@@ -16,7 +16,7 @@ import { verifyKeyMonthYear } from "./key-month-event-source";
 import { selectKeyMonthEvents, type KeyMonthEventTendency, type KeyMonthEventEvidence, type KeyMonthEventTendencies } from "./key-month-event-tendencies";
 import { buildPlainFullReading, type PlainFullReading } from "./plain-full-reading";
 
-export const BRIEF_READING_REPORT_VERSION = "hakimi.brief-reading-report/0.7.0" as const;
+export const BRIEF_READING_REPORT_VERSION = "hakimi.brief-reading-report/0.7.1" as const;
 export type BriefReadingEventCategory = "promotion" | "job_change" | "money_inflow" | "money_loss" | "romance" | "commitment" | "separation";
 export type BriefReadingEventLevel = "clear" | "possible" | "weak" | "none" | "not_applicable";
 export interface BriefReadingEventItem extends BriefReadingYearOverviewItem {
@@ -164,7 +164,7 @@ function overviewGroup(domain: BriefReadingYearDomain, unknownSex: boolean): { i
     const separated = verdict.relationshipState === "separated";
     const labels = companion
       ? { progression: "同伴相处较易靠近", friction: "相处摩擦较易显现", adjustment: "相处节奏容易变化" }
-      : separated ? { progression: "旧关系事项有进展", friction: "旧关系事项易有分歧", adjustment: "旧关系安排容易变化" }
+      : separated ? { progression: "联系与关系发展有线索", friction: "旧关系事项易有分歧", adjustment: "旧关系安排容易变化" }
       : { progression: "感情较易推进", friction: "感情摩擦较易显现", adjustment: "关系安排容易变化" };
     const partial = unknownSex && !companion && verdict.lensIds.length === 1;
     return { id: `${verdict.focus}-${verdict.relationshipChange}${separated ? "-separated" : ""}${partial ? "-partial" : ""}`,

@@ -20,6 +20,7 @@ import { buildLocalReadingSnapshot } from "./local-reading-record";
 import { annualDomainFeedbackText } from "./local-annual-domain-record";
 import { prepareKeyMonthYear } from "./key-month-event-source";
 import { appendReadingExplanationIndex, readReadingExplanationIndex, READING_EXPLANATION_MARKER } from "./reading-explanation-index";
+import { createReadingSaveTiming } from "./reading-save-timing";
 
 async function fixture(unknown=false){
   const chart=await calculateChart({schemaVersion:"1.0.0",calendarType:"gregorian",date:unknown?"1995-08-18":"1995-05-18",time:"08:26",timePrecision:"exact_minute",sex:unknown?"unspecified":"male",timeZone:"Asia/Shanghai",lunarLeapMonth:false,
@@ -51,6 +52,18 @@ function expectPreservedArchiveWithIndex(exported: ReturnType<typeof buildLocalR
 beforeAll(async()=>{[b,u]=await Promise.all([fixture(),fixture(true)]);},60000);
 const han=(text:string)=>[...text.matchAll(/\p{Script=Han}/gu)].length;
 describe("brief report from unchanged complete reading sources",()=>{
+  it("observes report and evidence phases without changing complete reading or archive bytes",()=>{
+    const extras={...b.extras,explanationGeneratedAt:"2026-10-20T00:00:00.000Z"};
+    const before=JSON.stringify({assessment:b.assessment,annual:b.annual,extras});
+    const unobserved=buildLocalReadingReport(b.assessment,b.annual,extras);
+    const timing=createReadingSaveTiming(1);
+    const observed=buildLocalReadingReport(b.assessment,b.annual,extras,timing); timing.finish("succeeded");
+    expect(observed).toEqual(unobserved);
+    expect(JSON.stringify({assessment:b.assessment,annual:b.annual,extras})).toBe(before);
+    expect(timing.snapshot().stages.find(item=>item.stage==="report_generation")?.spans).toBe(2);
+    expect(timing.snapshot().stages.find(item=>item.stage==="evidence_index")).toMatchObject({status:"succeeded",spans:1});
+    expect(observed.reading+observed.archive).not.toContain("reading-save-timing");
+  });
   it("adopts a concrete pattern and ordered use without changing the backend weights or old annual answers",()=>{
     const before=JSON.stringify(b),report=buildBriefReadingReport(b.assessment,b.annual,b.extras)!;
     expect(report.natalConclusion?.pattern.headline).toBe("印格泄秀");

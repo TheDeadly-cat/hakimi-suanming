@@ -154,7 +154,7 @@ it("uses only exactly verified work and relationship fields, preserving six dist
   const relation:string[]=[];for(const state of ["single","partnered","married","separated"] as const)relation.push(segments(await contextFor("unspecified",state))[0]!.domains[2]!.text);
   expect(new Set(relation).size).toBe(4);expect(relation[3]).toContain("未结承诺");
   const separated=segments(await contextFor("unspecified","separated"))[0]!.domains[2]!;
-  expect(separated.verdict).toMatchObject({relationshipChange:"progression",relationshipState:"separated",label:"旧关系事项有进展"});
+  expect(separated.verdict).toMatchObject({relationshipChange:"progression",relationshipState:"separated",label:"联系与关系发展有线索"});
   expect(separated.verdict.label).not.toContain("感情有推进");
   const separatedEvents=segments(await contextFor("unspecified","separated"))[0]!.eventTendencies;
   expect(separatedEvents.find(item=>item.category==="commitment")!.level).toBe("not_applicable");

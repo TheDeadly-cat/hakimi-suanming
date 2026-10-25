@@ -9,7 +9,7 @@ import type { KeyMonthEventTendency, KeyMonthEventEvidence } from "./key-month-e
 import type { AnnualRelationshipTiming } from "./annual-relationship-timing";
 import type { OutlookRescueTraceBundle } from "./outlook-rescue-trace";
 
-export const CONCRETE_PERIOD_PROSE_VERSION = "hakimi.concrete-period-prose/0.4.0" as const;
+export const CONCRETE_PERIOD_PROSE_VERSION = "hakimi.concrete-period-prose/0.4.1" as const;
 export interface ConcreteLifeSentence {
   text:string; kind:"opportunity"|"caution"|"topic";
   ruleIds?:ConditionalContentRuleId[]; ruleDecisionIds?:string[];
@@ -40,13 +40,13 @@ export interface ConcretePeriodInput {
   lifeSignals?:{events:readonly (AnnualEventTendency|KeyMonthEventTendency)[];monthlyEvidence?:readonly KeyMonthEventEvidence[];
     relationshipTiming?:AnnualRelationshipTiming;rescueTrace?:OutlookRescueTraceBundle;horizon:"year"|"month"};
 }
-type Scene = { work: string; result: string; guidance: string; purchases: string; standard: string; shared: string; money: boolean };
+type Scene = { work: string; result: string; guidance: string; purchases: string; resourceReuseSaving?: string; standard: string; shared: string; money: boolean };
 function scene(age: LocalReadingAgeContext, role: ReadingContextWork = "unspecified"): Scene {
   if (age.stage === "young_child") return {work:"游戏和小活动",result:"拼搭或手工作品",guidance:"家人的示范",purchases:"玩具和活动用品",standard:"轮流、收拾和活动规则",shared:"玩具使用和活动分工",money:false};
   if (age.stage === "youth") return {work:"作业和小组活动",result:"作业或展示作品",guidance:"老师的讲解和练习",purchases:"文具、材料和活动用品",standard:"作业要求和活动规则",shared:"小组分工和材料使用",money:false};
   if (age.stage !== "adult" || age.segments.some(part => part.stage !== "adult")) return {work:"手头事情",result:"已经完成的任务",guidance:"说明和示范",purchases:"日常用品",standard:"事先约好的要求",shared:"时间安排和用品分配",money:false};
-  if (role === "retired") return {work:"兴趣活动和日常安排",result:"经验分享或兴趣作品",guidance:"兴趣课程和他人指导",purchases:"日常用品和兴趣器材",standard:"活动规则和预约安排",shared:"活动费用和家务分工",money:false};
-  if (role === "caregiving") return {work:"照料家人和家务",result:"照料计划和已经做完的家务",guidance:"照料方法和家人帮助",purchases:"照料用品和替班服务",standard:"照料时间和家人的约定",shared:"家务轮班和照料费用",money:false};
+  if (role === "retired") return {work:"兴趣活动和日常安排",result:"经验分享或兴趣作品",guidance:"兴趣课程和他人指导",purchases:"日常用品和兴趣器材",resourceReuseSaving:"能少一次用品或器材的重复添置",standard:"活动规则和预约安排",shared:"活动费用和家务分工",money:false};
+  if (role === "caregiving") return {work:"照料家人和家务",result:"照料计划和已经做完的家务",guidance:"照料方法和家人帮助",purchases:"照料用品和替班服务",resourceReuseSaving:"能少重复购买用品或追加替班服务",standard:"照料时间和家人的约定",shared:"家务轮班和照料费用",money:false};
   if (role === "student") return {work:"课程、考试准备和实践",result:"课程作业或实践作品",guidance:"课程讲解和导师指导",purchases:"教材、课程和实践材料",standard:"课程要求和提交期限",shared:"小组分工和材料费用",money:false};
   if (role === "seeking_work") return {work:"投递简历和面试准备",result:"简历、作品集或面试作业",guidance:"岗位学习和面试辅导",purchases:"培训、交通和求职工具",standard:"招聘要求和面试时间",shared:"求职帮助和培训费用",money:false};
   if (role === "self_employed") return {work:"接单和客户服务",result:"已交付的产品或服务",guidance:"专业培训和业务指导",purchases:"经营工具、设备和课程",standard:"合同要求和交货日期",shared:"合作分工、成本和利润",money:true};
@@ -94,7 +94,7 @@ function words(action: OutlookStemAction, domain: "career" | "wealth", s: Scene,
   const money = domain === "wealth", financial = ["正财", "偏财"].includes(action.tenGod), resource = ["正印", "偏印"].includes(action.tenGod), output = ["食神", "伤官"].includes(action.tenGod);
   const role = task?.preferredPathId === axis.pathId ? task.task : null;
   const table: Record<string, Omit<Words, "mechanism">> = money ? {
-    正印:{help:`买过的${s.purchases}更容易真正用起来，能少买一份或少上一轮课`,pressure:`购买${s.purchases}的钱可能先花出去，任务却还没做完，容易继续加钱或添置`,topic:`${s.purchases}的购买、报销或使用安排会成为具体事项`},
+    正印:{help:`买过的${s.purchases}更容易真正用起来，${s.resourceReuseSaving??"能少买一份或少上一轮课"}`,pressure:`购买${s.purchases}的钱可能先花出去，任务却还没做完，容易继续加钱或添置`,topic:`${s.purchases}的购买、报销或使用安排会成为具体事项`},
     偏印:{help:`现有工具有机会替代一项新购买，专项学习较能解决眼前的问题`,pressure:`换工具或换方法后又要买配件、补课程，旧东西也未必能停用`,topic:`可能试用新工具或课程，先核对是否与已有的重复`},
     食神:{help:s.money?`现有技能、产品或服务有继续被采用的机会；已有付费约定时，可接着做下一批或续单`:`现有作品和用品有继续使用的机会，少一次重做或重新购买`,pressure:`同一件事反复做，维护和补材料的费用增加；原有安排也可能中断`,topic:`旧物维护、下一批材料或继续使用的费用需要安排`},
     伤官:{help:`试做、演示或改版较可能被采用，已经买的材料和工具较能发挥作用`,pressure:`样品、试用或改版反复追加费用，原预算容易不够`,topic:`先花一笔钱做样品、试用或改版，是否采用还需确认`},

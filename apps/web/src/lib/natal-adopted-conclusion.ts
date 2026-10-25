@@ -9,7 +9,7 @@ import { buildBaziComprehensiveReading } from "../../../../packages/bazi-interpr
 import { buildNatalStructureDetail } from "../../../../packages/bazi-interpretation/src/natal-structure-detail";
 import { getWorkingBalance } from "../../../../packages/bazi-interpretation/src/structural-strength-assessment";
 
-export const NATAL_ADOPTED_CONCLUSION_VERSION = "hakimi.natal-adopted-conclusion/0.2.0" as const;
+export const NATAL_ADOPTED_CONCLUSION_VERSION = "hakimi.natal-adopted-conclusion/0.2.1" as const;
 export type NatalConclusionPurpose = "pattern" | "balance" | "seasonal";
 export interface NatalConclusionTarget {
   kind: "stem" | "element"; value: string; label: string;
@@ -122,6 +122,7 @@ export function buildNatalAdoptedConclusion({revision,assessment,comprehensive}:
     :["official-resource","killings-resource"].includes(path)?`首用${names(primary)}承接${path==="official-resource"?"官":"杀"}、支持日主，先保住执行与生身环节。`
     :path==="food-killings"?`首用${names(primary)}制杀${shallow?"，当前尤其要保护这条根浅而受印克的食神支点":"，七杀是被调节的对象，不是继续增加的首选"}。`
     :path==="resource-output"?`首用${names(primary)}泄秀${dual?"，同一食神还制约原有七杀，两个功能共享一个支点":"，把印的支持转成实际输出"}。`
+    :path==="resource-preservation"?`首用${names(primary)}支持日主，承担印食配合中的支持环节；食伤的产出作用分别保留，不能把增印直接等同于生财。`
     :path==="official-wealth"?`首用${names(primary)}为官提供配合，官的职责与财的负担分别保留。`
     :path==="hurting-resource"?`首用${names(primary)}制伤、扶身，伤官是需要配合的对象。`
     :primary.length?`首用${names(primary)}${primary.every(wealth)?"承接已有食伤产出":"负责产出与生财环节"}。`:"";

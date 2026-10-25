@@ -1,4 +1,5 @@
 import { buildPlainNatalCards, PLAIN_NATAL_SUMMARY_VERSION } from "./plain-natal-summary";
+import type { ReadingReportTiming } from "./reading-save-timing";
 import { buildPlainYearOverview, plainYearSummary, PLAIN_YEAR_OVERVIEW_VERSION } from "./plain-year-overview";
 import { plainOutlookCaption, PLAIN_OUTLOOK_READING_VERSION } from "./plain-outlook-reading";
 import { plainMonthlyPresentation, plainMonthlyRangeCaption, plainMonthlyPeriodHeadline } from "./plain-monthly-presentation";
@@ -22,7 +23,7 @@ import { buildMonthReadingRhythm, MONTH_READING_RHYTHM_VERSION } from "./local-m
 import { buildBriefReadingReport, type BriefReadingReport } from "./brief-reading-report";
 import { appendReadingExplanationIndex, buildReadingExplanationIndex } from "./reading-explanation-index";
 
-export const LOCAL_READING_EDITION_VERSION = "hakimi.local-reading-edition/0.22.0" as const;
+export const LOCAL_READING_EDITION_VERSION = "hakimi.local-reading-edition/0.22.1" as const;
 export interface LocalReadingReport { reading: string; archive: string; version: typeof LOCAL_READING_EDITION_VERSION }
 const unique = (items: readonly string[]) => [...new Set(items.filter((item) => item.trim()))];
 /** Conditions may share a note only when their complete sets of referring
@@ -571,16 +572,23 @@ function adoptedConclusionAndMonthEvidence(brief: BriefReadingReport, archive: s
 }
 
 export function buildLocalReadingReport(assessment: BaziPreliminaryAssessment, annual: LocalAnnualOutlook | null,
-  extras: LocalReadingSnapshotExtras = {}): LocalReadingReport {
-  const detailed=buildDetailedReadingReport(assessment,annual,extras);
-  const brief=buildBriefReadingReport(assessment,annual,extras);
+  extras: LocalReadingSnapshotExtras = {}, timing?: ReadingReportTiming): LocalReadingReport {
+  const measure: ReadingReportTiming["measure"] = timing ? timing.measure.bind(timing) : (_stage, task) => task();
+  const { detailed, brief } = measure("report_generation", () => ({
+    detailed: buildDetailedReadingReport(assessment,annual,extras), brief: buildBriefReadingReport(assessment,annual,extras)
+  }));
   if(!brief)return detailed;
-  const explanation = extras.sourceRevision ? buildReadingExplanationIndex({ report: brief, revision: extras.sourceRevision,
+  const archive = measure("evidence_index", () => {
+    const explanation = extras.sourceRevision ? buildReadingExplanationIndex({ report: brief, revision: extras.sourceRevision,
     assessment, synthesis: extras.synthesis, context: extras.contextual?.contextSource ?? null,
     generatedAt: extras.explanationGeneratedAt ?? new Date().toISOString(), reportVersion: LOCAL_READING_EDITION_VERSION,
     timeUncertainty: extras.explanationTimeUncertainty }) : null;
+    return explanation ? appendReadingExplanationIndex(detailed.archive, explanation) : detailed.archive;
+  });
+  return measure("report_generation", () => {
   const personal=brief.personalTexts.length?brief.personalTexts.flatMap((entry,index)=>[`### 个人原文${index+1} · ${entry.title.replace(/[\r\n]+/gu," ")}`,personalBlock(entry.text)]):["当前主报告没有已采用的个人修订原文。"];
-  return {version:LOCAL_READING_EDITION_VERSION,archive:explanation ? appendReadingExplanationIndex(detailed.archive, explanation) : detailed.archive,reading:["# 命理解读 · 大白话完整解读",brief.plainReading?.metrics.estimateNote ?? brief.metrics.estimateNote,brief.plainReading?.bodyText ?? brief.bodyText,
+  return {version:LOCAL_READING_EDITION_VERSION,archive,reading:["# 命理解读 · 大白话完整解读",brief.plainReading?.metrics.estimateNote ?? brief.metrics.estimateNote,brief.plainReading?.bodyText ?? brief.bodyText,
     "## 已采用的个人修订原文",...personal,"## 完整详细阅读（按需展开）",`主报告版本：${brief.version}；来源版本：${brief.sourceVersions.join("、")}`,
     ...adoptedConclusionAndMonthEvidence(brief,detailed.archive),...briefEventEvidence(brief,detailed.archive),nestDetailedReading(detailed.reading)].join("\n\n")};
+  });
 }

@@ -17,7 +17,7 @@ import { CONTEXTUAL_READING_VERSION } from "./local-contextual-reading";
 import { createAnnualRelationshipTimingBuilder } from "./annual-relationship-timing";
 import { CONDITIONAL_CONTENT_RULES_VERSION, type ConditionalContentAssessment } from "./conditional-content-rules";
 
-export const PLAIN_TEN_YEAR_READING_VERSION = "hakimi.plain-ten-year-reading/0.4.0" as const;
+export const PLAIN_TEN_YEAR_READING_VERSION = "hakimi.plain-ten-year-reading/0.4.1" as const;
 export interface PlainTenYearMonthWindow {
   id: string; branchId: string; annualSegmentId: string;
   startInstant: string; endExclusiveInstant: string;
@@ -74,14 +74,27 @@ function periodTitles(age:LocalReadingAgeContext,work?:ReadingContextWork,relati
   if(age.stage !== "adult")return{career:age.stage === "adult_transition"?"学习与生活安排":"日常事务",wealth:"时间与用品",relationship:"相处与关系"};
   const titles:Partial<Record<ReadingContextWork,[string,string]>>={student:["学习与发展","学习投入与日常开支"],retired:["经验与日常活动","日常开支"],caregiving:["家庭照料与事务","家庭开支"],seeking_work:["求职与准备","求职投入与日常开支"]};
   const [career,wealth]=titles[work??"unspecified"]??["事业","财运"];
-  return{career,wealth,relationship:relationship === "separated"?"旧关系交接":"感情"};
+  return{career,wealth,relationship:relationship === "separated"?"旧事交接与新的联系":"感情"};
 }
 function periodScope(age:LocalReadingAgeContext,work?:ReadingContextWork,relationship?:ReadingContextRelationship):string{
   if(age.stage === "young_child"||age.stage === "youth")return"儿童时段分别看学习活动、时间用品与家人同伴相处，不默认已有职业收入或成年婚恋安排。";
   if(age.stage !== "adult")return age.stage === "adult_transition"?"跨过成长阶段的时段，按已列年龄分别理解学习、生活安排和相处；成年段也须有对应的现实身份。":"年龄或时辰条件不足的时段，保持日常事务与相处语境，不推定职业、收入或关系身份。";
   const labels=periodTitles(age,work,relationship),known=work&&!["unspecified","employed","self_employed"].includes(work);
   const workScope=known?`已填写背景适用的时段分别看${labels.career}、${labels.wealth}与${labels.relationship}。`:"事业、财运与感情分别判断，一项受阻不代表其他方面也受阻；具体事项须有相应工作、款项或关系基础。";
-  return workScope+(relationship === "separated"?"分开或分居背景只说明必要联系、责任与交接，不预设复合。":relationship === "single"?"单身背景先看相识和联系，不把共同生活或婚事写成已经有的安排。":relationship === "partnered"||relationship === "married"?"已有关系看共同安排与责任，不把接触增加直接写成新恋情。":"关系状态未填写，接触、承诺等事项须结合现实基础；没有明显转折的时段只看日常相处。");
+  return workScope+(relationship === "separated"?"分开或分居背景下，旧关系看必要联系、责任与交接；出现独立的相识或靠近线索时，另说明可能的新联系，不预设复合。":relationship === "single"?"单身背景先看相识和联系，不把共同生活或婚事写成已经有的安排。":relationship === "partnered"||relationship === "married"?"已有关系看共同安排与责任，不把接触增加直接写成新恋情。":"关系状态未填写，接触、承诺等事项须结合现实基础；没有明显转折的时段只看日常相处。");
+}
+
+function recurringWorkScope(work:ReadingContextWork):string{
+  const scopes:Record<ReadingContextWork,string>={
+    employed:"在职时段可观察短期岗位、团队或工作安排的变化，不等于每年都要换工作",
+    self_employed:"自营或自由职业时段可观察客户服务或合作安排的变化，不等于每年都会更换客户或合作方",
+    seeking_work:"求职时段可观察求职方向、面试或岗位选择的调整，不代表已经入职或离职",
+    student:"学生时段只按学习项目、分工或实践安排理解，不预设已有岗位",
+    caregiving:"照料时段只按照料日程、替班或交接安排理解，不预设职业变动",
+    retired:"退休时段只按日常活动与参与安排理解，不预设重返工作",
+    unspecified:"现实身份未填写的时段先看任务与日常安排变化，只有确有工作背景时才对应岗位或团队变化"
+  };
+  return scopes[work];
 }
 
 function windowTopics(window: PlainTenYearMonthWindow): string {
@@ -186,20 +199,24 @@ export function buildPlainTenYearReading(input: BuildPlainTenYearReadingInput): 
     }
   }
   if (report.keyMonthReadings.some(reading => !preparedByYear.has(reading.year))) return fail("报告中的月份没有完整输入可核对。");
-  const recurringCounts=new Map<string,Set<number>>();
+  const recurringCounts=new Map<string,Set<number>>(),recurringWorkStates=new Map<string,Set<ReadingContextWork>>();
   const recurrenceKey=(prepared:PreparedKeyMonthYear,period:{monthLabel:string},event:KeyMonthEventTendency)=>{
-    if(event.category!=="job_change"||event.origin === "personal"||!event.supportEvidenceIds.length)return null;
+    if(event.category!=="job_change"||event.origin === "personal"||event.level === "not_applicable"||!event.supportEvidenceIds.length)return null;
     const evidence=prepared.reading.evidence.filter(item=>event.supportEvidenceIds.includes(item.id));
     // A pure month-pillar contact repeats with the same solar month. A current
     // authority action or other newly added mechanism is not collapsed here.
     return evidence.length&&evidence.every(item=>item.kind === "career_relation"&&item.origin === "month")?`${event.scope.branchId}|${period.monthLabel}|job_change`:null;
   };
   for(const prepared of preparedByYear.values())for(const branch of prepared.reading.branches)for(const period of branch.periods)for(const event of period.events){
-    const key=recurrenceKey(prepared,period,event);if(key){const years=recurringCounts.get(key)??new Set<number>();years.add(prepared.year);recurringCounts.set(key,years);}
+    const key=recurrenceKey(prepared,period,event);if(key){
+      const years=recurringCounts.get(key)??new Set<number>();years.add(prepared.year);recurringCounts.set(key,years);
+      const workStates=recurringWorkStates.get(key)??new Set<ReadingContextWork>();workStates.add(event.workState);recurringWorkStates.set(key,workStates);
+    }
   }
   const recurringKeys=new Set([...recurringCounts].filter(([,years])=>years.size>=2).map(([key])=>key));
   const recurringLabels=unique([...recurringKeys].map(key=>key.split("|")[1]!));
-  const recurringText=recurringLabels.length?`共同月份规律：${recurringLabels.join("、")}与本命工作位置的同一关系会逐年复现，可作为短期岗位、团队或工作安排变化的观察点，不等于每年都要换工作。下面只在年度也有变动线索、或本月另增其他实际作用时重点列出，全部逐月事实仍保留。`:"";
+  const recurringScopes=unique([...recurringKeys].flatMap(key=>[...(recurringWorkStates.get(key)??[])])).map(recurringWorkScope);
+  const recurringText=recurringLabels.length?`共同月份规律：${recurringLabels.join("、")}与本命月柱的同一关系会逐年复现。${recurringScopes.join("；")}。下面只在年度也有变动线索、或本月另增其他实际作用时重点列出，全部逐月事实仍保留。`:"";
   const personalTexts = structuredClone(report.personalTexts);
   const personalFor = (subjects: readonly string[]) => unique(subjects).flatMap(subjectId => {
     const entry = adopted.get(subjectId); if (!entry) return [];

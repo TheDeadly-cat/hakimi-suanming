@@ -18,7 +18,7 @@ import { buildLocalReadingAgeContext, type LocalReadingAgeContext, type LocalRea
 import { plainOutlookCaption, PLAIN_OUTLOOK_READING_VERSION } from "./plain-outlook-reading";
 import { buildAnnualEventTendencies, ANNUAL_EVENT_TENDENCIES_VERSION, type AnnualEventTendency } from "./annual-event-tendencies";
 
-export const BRIEF_ANNUAL_READING_VERSION = "hakimi.brief-annual-reading/0.3.0" as const;
+export const BRIEF_ANNUAL_READING_VERSION = "hakimi.brief-annual-reading/0.3.1" as const;
 export interface BuildBriefAnnualReadingInput {
   revision: RevisionRecord; assessment: BaziPreliminaryAssessment; year: LocalAnnualYear;
   events: LocalAnnualEventReading; story: AnnualLifeStory; contextual?: LocalContextualReadingBundle | null;
@@ -87,7 +87,7 @@ function domainVerdict(domain:AnnualReadingDomainId,pattern:OutlookAxisFinding,a
     const clash=eligible.some(signal=>signal.kind==="palace_contact"&&signal.relationType==="branch_six_clash");
     const friction=eligible.some(signal=>signal.relationType==="stem_clash")||background.some(signal=>signal.relationType==="branch_six_clash"||signal.relationType==="stem_clash");
     const change:BriefAnnualDomainVerdict["relationshipChange"]=!eligible.length?"insufficient":clash?"adjustment":friction?"friction":"progression";
-    const adult=s.stage==="adult",labels=adult?(state==="separated"?{progression:"旧关系事项有进展",friction:"旧关系事项易有分歧",adjustment:"旧关系安排易变动",insufficient:"旧关系变化线索不足"}
+    const adult=s.stage==="adult",labels=adult?(state==="separated"?{progression:"联系与关系发展有线索",friction:"旧关系事项易有分歧",adjustment:"旧关系安排易变动",insufficient:"旧关系变化线索不足"}
       :{progression:"感情有推进线索",friction:"关系推进伴随磨合",adjustment:"感情安排易有变动",insufficient:"感情变化线索不足"})
       :{progression:"共同活动更突出",friction:"相处易有磨合",adjustment:"相处安排易调整",insufficient:"相处变化线索不足"};
     const lensIds=active.filter(lens=>change==="insufficient"?false:change==="adjustment"?lens.eligible.some(signal=>signal.kind==="palace_contact"&&signal.relationType==="branch_six_clash")

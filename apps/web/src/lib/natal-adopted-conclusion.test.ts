@@ -13,7 +13,8 @@ beforeAll(async()=>{
     ["food","1970-12-08","08:26","male"],["official","1971-04-09","14:26","male"],
     ["protect","1957-09-13","00:26","male"],["moderate","1982-10-02","10:26","male"],
     ["joint","1944-08-09","04:26","male"],["R3","2019-12-22","11:23","female"],
-    ["gui26","2020-12-26","17:26","female"],["gui16","2020-12-16","17:26","female"]
+    ["gui26","2020-12-26","17:26","female"],["gui16","2020-12-16","17:26","female"],
+    ["Q01","2006-11-14","09:37","female"],["Q04","1981-06-02","21:16","male"]
   ] as const){
     const chart=await calculateChart({schemaVersion:"1.0.0",calendarType:"gregorian",date,time,timePrecision:"exact_minute",timeZone:"Asia/Shanghai",sex,lunarLeapMonth:false,
       location:{label:"Synthetic adopted-conclusion fixture",latitude:null,longitude:null,precision:"unknown"},sourceNote:"synthetic"},WORKING_DEFAULT_RULE_PROFILE);
@@ -24,6 +25,22 @@ beforeAll(async()=>{
 },60000);
 const result=(id:string)=>buildNatalAdoptedConclusion(cases.get(id)!);
 const stems=(value:ReturnType<typeof result>["firstChoice"])=>value.targets.filter(target=>target.kind==="stem").map(target=>target.value);
+it("keeps resource-preservation primary gods in their actual support role rather than assigning output or wealth production",()=>{
+  for(const id of ["Q01","Q04"]){
+    const input=cases.get(id)!,r=result(id);
+    expect(r.pattern.pathId).toBe("resource-preservation");
+    expect(r.firstChoice.targets.map(target=>target.tenGod)).toEqual(["偏印"]);
+    expect(r.firstChoice.decision).toContain("支持日主");
+    expect(r.firstChoice.decision).toContain("印食配合");
+    expect(r.firstChoice.decision).not.toMatch(/负责产出|生财环节/);
+    expect(r.firstChoice.evidence.some(text=>text.includes("印食取舍"))).toBe(true);
+    expect(stems(r.firstChoice)).toEqual(input.comprehensive.usefulGuidance!.answer.primaryStems);
+  }
+  const outputResult=result("B");
+  expect(outputResult.firstChoice.targets.map(target=>target.tenGod)).toEqual(["食神"]);
+  expect(outputResult.firstChoice.decision).toContain("泄秀");
+  expect(outputResult.firstChoice.decision).not.toContain("支持日主");
+});
 it("adopts B's actual Xin task without inventing strength or ranking gods by the raw weights",()=>{
   const input=cases.get("B")!,before=structuredClone(input),r=result("B");
   expect(r.pattern.pathId).toBe("resource-output");expect(r.pattern.decision).toContain("印格泄秀");

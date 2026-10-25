@@ -70,6 +70,22 @@ it("keeps separated relationship context about handover rather than resuming int
   }
 });
 
+it("keeps resource reuse savings in care and retirement contexts while retaining course savings for students",()=>{
+  const source=judgment([action("正印","assists")],"resource-output","assists"),before=JSON.stringify(source);
+  for(const [work,expected] of [["caregiving","能少重复购买用品或追加替班服务"],["retired","能少一次用品或器材的重复添置"]] as const){
+    const result=buildConcretePeriodProse({judgment:source,domain:"wealth",age,work});
+    expect(result.text).toContain(expected);expect(result.text).not.toContain("少上一轮课");
+    expect(result.facts).toHaveLength(1);
+    expect(result.facts[0]).toMatchObject({kind:"opportunity",actor:"正印",visibility:"visible",actionIndex:0,mechanism:"role:正印"});
+    const pressure=buildConcretePeriodProse({judgment:judgment([action("正印","obstructs")],"resource-output","obstructs"),domain:"wealth",age,work});
+    expect(pressure.facts.some(fact=>fact.kind === "opportunity")).toBe(false);
+    expect(pressure.text).toContain("钱可能先花出去");expect(pressure.text).not.toContain(expected);
+  }
+  const student=buildConcretePeriodProse({judgment:source,domain:"wealth",age,work:"student"});
+  expect(student.text).toContain("教材、课程和实践材料");expect(student.text).toContain("少上一轮课");
+  expect(JSON.stringify(source)).toBe(before);
+});
+
 it("narrows work/money captions when the comprehensive axis is favorable but these domains lack mapped support",()=>{
   for(const overall of ["assists","mixed"] as const)for(const patternEffect of ["obstructs","neutral","unresolved"] as const){
     const source=judgment([action("正印",patternEffect)],"resource-output",patternEffect);

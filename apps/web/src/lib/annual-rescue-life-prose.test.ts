@@ -68,6 +68,45 @@ it("retains an actual counter-effect and keeps a conditional one conditional", (
   expect(prose([conditional]).groups[0]!.text).not.toContain("同时存在");
 });
 
+it("describes a verified owl-control candidate without inventing a protected output", () => {
+  const owl = obj("owl", "resource", "偏印");
+  const candidate = trace("owl-candidate", { kind: "wealth_controls_owl", obstacles: [owl], protectedObjects: [],
+    obstacleRelations: [], countsAsSupport: false,
+    counterEffects: [{ operation: "generate", status: "conditional", from: helper, targets: [],
+      refs: [{ axisId: "owl-candidate", field: "unresolvedConditions", index: 0 }] }] });
+  const before = structuredClone(candidate), result = prose([candidate]);
+  expect(result.groups).toHaveLength(1);
+  expect(result.groups[0]!.text).toContain("明确的实际用途有机会收住不断增加的准备或指导");
+  expect(result.groups[0]!.text).toContain("这条配合自身尚未确认哪一项熟悉做法会直接受益");
+  expect(result.groups[0]!.text).toContain("是否能真正接上仍有条件");
+  expect(result.groups[0]!.text).toContain("当前不能把这项可能性当成已经发生");
+  expect(result.groups[0]!.text).not.toContain("让熟悉的做法和原有解决步骤留有继续发挥的空间");
+  expect(result.groups[0]!.traceIds).toEqual([candidate.id]);
+  expect(result.groups[0]!.rescueRefs).toEqual(candidate.rescueRefs);
+  expect(result.groups[0]!.basisRefs).toContainEqual(candidate.counterEffects[0]!.refs[0]);
+  expect(candidate).toEqual(before);
+
+  const protectedFood = obj("food", "output", "食神");
+  const specific = trace("owl-protection", { ...candidate, id: "owl-protection", protectedObjects: [protectedFood],
+    obstacleRelations: [{ operation: "control", from: owl, to: protectedFood, refs: [] }] });
+  const combined = prose([candidate, specific]);
+  expect(combined.groups).toHaveLength(2);
+  expect(combined.groups[1]!.text).toContain("让熟悉的做法和原有解决步骤留有继续发挥的空间");
+  expect(combined.groups[1]!.text).not.toContain("尚未确认哪一项熟悉做法");
+});
+
+it("continues rejecting incomplete protection chains and contradictory object-free owl support", () => {
+  for (const kind of ["counter_obstacle", "seasonal_stem_protection", "wealth_resource_protection", "wealth_protects_food",
+    "combine_output_protect_official", "wealth_moderates_resource"] as const) {
+    expect(() => prose([trace(kind, { kind, protectedObjects: [] })])).toThrow("缺少被保护的对象");
+  }
+  const candidate = trace("owl", { kind: "wealth_controls_owl", protectedObjects: [], obstacleRelations: [], countsAsSupport: false });
+  expect(() => prose([{ ...candidate, countsAsSupport: true }])).toThrow();
+  expect(() => prose([{ ...candidate, obstacleRelations: trace("edge").obstacleRelations }])).toThrow();
+  expect(() => prose([{ ...candidate, helpers: [] }])).toThrow("缺少实际对象或原句引用");
+  expect(() => prose([{ ...candidate, rescueRefs: [] }])).toThrow("缺少实际对象或原句引用");
+});
+
 
 it("keeps regular-wealth confirmation distinct from new-use pressure without changing rescue references or availability", () => {
   const regular = obj("wealth-obstacle", "wealth", "正财"), opportunity = { ...regular, tenGod: "偏财" };

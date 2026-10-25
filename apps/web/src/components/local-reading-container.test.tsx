@@ -9,7 +9,7 @@ import type { ResearchNoteRecord, RevisionRecord } from "@hakimi/contracts";
 import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
 import { CaseRepository, ResearchDatabase, ResearchRepository, researchRepository } from "@hakimi/storage";
 import { buildLocalAnnualOutlook, buildLocalAnnualOutlookRange, LOCAL_ANNUAL_OUTLOOK_VERSION, type LocalAnnualOutlook } from "../lib/local-annual-outlook";
-import { buildLocalReadingFeedback, LOCAL_READING_FEEDBACK_TAG } from "../lib/local-reading-record";
+import { buildLocalReadingFeedback, LOCAL_READING_FEEDBACK_TAG, LOCAL_READING_SNAPSHOT_TAG } from "../lib/local-reading-record";
 import { unpackReadingSnapshot as unpackStoredReading } from "../lib/local-reading-snapshot-codec";
 import { decodeReadingReportBundle } from "../lib/local-reading-report-bundle";
 import { buildStructuredReadingFeedback, buildReadingFeedbackReview, readingFeedbackSource, parseReadingFeedback, LOCAL_READING_REVIEW_TAG, type ReadingFeedbackDraft } from "../lib/local-reading-feedback";
@@ -33,6 +33,7 @@ import * as detailedOutlookModule from "../lib/local-detailed-outlook";
 import * as lifeStageStoryModule from "../lib/local-life-stage-story";
 import * as annualLifeStoryModule from "../lib/annual-life-story";
 import * as keyMonthSourceModule from "../lib/key-month-event-source";
+import { READING_SAVE_TIMING_PREFIX, type ReadingSaveTimingSnapshot } from "../lib/reading-save-timing";
 import { annualEventFeedbackText, annualEventFeedbackSubjectId } from "../lib/local-annual-event-record";
 import { annualLifeStoryFeedbackText, annualLifeStorySubjectId, annualLifeStoryFeedbackVersions } from "../lib/annual-life-story-record";
 
@@ -54,6 +55,7 @@ vi.mock("./chart-reading-workbench", () => ({
   ChartReadingWorkbench: (props: {
     revision: RevisionRecord; annualOutlook: LocalAnnualOutlook | null;
     synthesis?: LocalReadingSynthesis | null;
+    briefReport?: { keyMonthReadings: { year: number }[] } | null;
     reportLoading?: boolean; selectedYear?: number; onSelectYear?: (year: number) => void;
     extraFeedbackChoices?: { id: string; label: string; originalConclusion: string; sourceVersions?: string[] }[];
     onSaveReading?: () => Promise<void>; onExportReading?: () => void; onAddFeedback?: (draft: ReadingFeedbackDraft) => Promise<void>;
@@ -72,6 +74,7 @@ vi.mock("./chart-reading-workbench", () => ({
       <span data-testid="annual-window">{props.annualOutlook ? `${props.annualOutlook.startYear}-${props.annualOutlook.endYear}` : ""}</span>
       <span data-testid="annual-year-values">{JSON.stringify(props.annualOutlook?.years.map((item) => item.year) ?? [])}</span>
       <span data-testid="selected-year">{props.selectedYear}</span>
+      <span data-testid="published-month-years">{JSON.stringify(props.briefReport?.keyMonthReadings.map(item => item.year) ?? [])}</span>
       <button onClick={() => props.onSelectYear?.(2029)}>选择2029年</button>
       <button onClick={() => props.onSelectYear?.(2005)}>自由查询2005年</button>
       <span data-testid="report-loading">{String(props.reportLoading)}</span>
@@ -251,6 +254,7 @@ beforeEach(async () => {
 });
 afterEach(async () => {
   cleanup();
+  vi.unstubAllEnvs();
   vi.restoreAllMocks();
   vi.mocked(buildLocalAnnualOutlook).mockReset();
   vi.mocked(buildLocalAnnualOutlookRange).mockReset();
@@ -259,6 +263,152 @@ afterEach(async () => {
 });
 
 describe("reading container persistence and asynchronous publication", () => {
+  it("saves every prepared month without publishing an intermediate report, while explicit export still publishes all years", async () => {
+    await useActualAnnual();
+    const build = vi.spyOn(readingEditionModule, "buildLocalReadingReport");
+    render(<LocalReadingContainer {...propsFor(revisionA)} />);
+    await waitForPersonalReading();
+    fireEvent.click(workbench().getByRole("button", { name: "选择2029年" }));
+    await waitForPersonalReading();
+    // reportLoading covers background/personal replay; the lazy selected-month
+    // publication is a separate real operation and must also settle first.
+    while (!JSON.parse(screen.getByTestId("published-month-years").textContent!).includes(2029)) {
+      await act(async () => {
+        if (!pendingKeyMonths.size) await new Promise<void>(resolve => setTimeout(resolve, 0));
+        while (pendingKeyMonths.size) await Promise.allSettled([...pendingKeyMonths]);
+      });
+    }
+    const visibleYears = screen.getByTestId("published-month-years").textContent;
+    const selectedMonthText = screen.getByTestId("month-story-first-text").textContent;
+    const pack = snapshotCodecModule.packReadingSnapshot, entered = deferred<void>(), gate = deferred<void>();
+    vi.spyOn(snapshotCodecModule, "packReadingSnapshot").mockImplementationOnce(async text => {
+      entered.resolve(); await gate.promise; return pack(text);
+    });
+    fireEvent.click(workbench().getByRole("button", { name: "保存测试快照" }));
+    const pending = workbenchAction.pending!;
+    await act(async () => { await entered.promise; });
+    expect(build.mock.calls.at(-1)![2]?.keyMonthYears).toHaveLength(10);
+    expect(screen.getByTestId("published-month-years").textContent).toBe(visibleYears);
+    expect(screen.getByTestId("selected-year").textContent).toBe("2029");
+    expect(screen.getByTestId("month-story-first-text").textContent).toBe(selectedMonthText);
+    const expected = build.mock.results.at(-1)!.value;
+    await act(async () => { gate.resolve(); await pending; });
+    await waitForPersonalReading();
+    const records = await repository.listResearchNotesByCase(revisionA.caseId);
+    expect(records).toHaveLength(1);
+    expect(await decodeReadingReportBundle(await unpackStoredReading(records[0]!.body))).toEqual(expected);
+    expect(screen.getByTestId("selected-year").textContent).toBe("2029");
+    expect(screen.getByTestId("month-story-first-text").textContent).toBe(selectedMonthText);
+    fireEvent.click(workbench().getByRole("button", { name: "导出测试报告" }));
+    await waitForPersonalReading();
+    expect(JSON.parse(screen.getByTestId("published-month-years").textContent!)).toEqual(Array.from({ length: 10 }, (_, index) => 2026 + index));
+    expect(build.mock.calls.at(-1)![2]?.keyMonthYears).toHaveLength(10);
+    expect(screen.getByTestId("selected-year").textContent).toBe("2029");
+    expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(1);
+  }, 120_000);
+
+  it("times actual complete saves only when enabled and waits for the refreshed personal replay before publishing", async () => {
+    vi.stubEnv("VITE_READING_SAVE_DIAGNOSTICS", "1");
+    const log = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const receipts = () => log.mock.calls.filter(call => call[0] === READING_SAVE_TIMING_PREFIX)
+      .map(call => JSON.parse(call[1] as string) as ReadingSaveTimingSnapshot);
+    await useActualAnnual();
+    render(<LocalReadingContainer {...propsFor(revisionA)} />);
+    await waitForPersonalReading();
+    expect(screen.getByTestId("reading-save-diagnostics").textContent).toContain("尚未执行完整保存");
+    const replay = personalReadingModule.buildLocalPersonalReading, gate = deferred<void>();
+    let hold = true, replayEntered = false;
+    vi.spyOn(personalReadingModule, "buildLocalPersonalReading").mockImplementation(async input => {
+      if (hold && input.records.some(record => record.tags.includes(LOCAL_READING_SNAPSHOT_TAG))) {
+        replayEntered = true; await gate.promise;
+      }
+      return replay(input);
+    });
+    await saveCompleteSnapshot();
+    await waitFor(() => expect(replayEntered).toBe(true));
+    expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(1);
+    expect(receipts()).toEqual([]); // A completed write/list read is not a refreshed personal reading.
+    expect(JSON.parse(screen.getByTestId("reading-save-diagnostics").querySelector("pre")!.textContent!)).toMatchObject({ status: "running" });
+    hold = false;
+    await act(async () => { gate.resolve(); await gate.promise; });
+    await waitForPersonalReading();
+    await waitFor(() => expect(receipts()).toHaveLength(1));
+    await saveCompleteSnapshot();
+    await waitForPersonalReading();
+    await waitFor(() => expect(receipts()).toHaveLength(2));
+    for (const [index, receipt] of receipts().entries()) {
+      expect(receipt).toMatchObject({ sequence: index + 1, status: "succeeded", clock: "performance.now",
+        counts: { plannedYears: 10, preparedYears: 10, preparedMonths: 120, recordsRead: index + 1 } });
+      expect(receipt.stages.every(stage => stage.status === "succeeded")).toBe(true);
+      expect(receipt.stages.find(stage => stage.stage === "report_generation")?.spans).toBe(2);
+      expect(receipt.totalMs).toBeGreaterThanOrEqual(receipt.stages.reduce((sum, stage) => sum + stage.elapsedMs, 0) - 0.001);
+      expect(JSON.stringify(receipt)).not.toContain(revisionA.id);
+      expect(JSON.stringify(receipt)).not.toContain(revisionA.manifest.resultHash);
+    }
+    const records = await repository.listResearchNotesByCase(revisionA.caseId);
+    expect(records).toHaveLength(2);
+    for (const record of records) expect(await unpackStoredReading(record.body)).not.toContain("reading-save-timing");
+    expect(JSON.parse(screen.getByTestId("reading-save-diagnostics").querySelector("pre")!.textContent!)).toEqual(receipts()[1]);
+  }, 120_000);
+
+  it("keeps diagnostics disabled by default and records an enabled pre-write failure without its private text", async () => {
+    vi.stubEnv("VITE_READING_SAVE_DIAGNOSTICS", undefined);
+    const log = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    render(<LocalReadingContainer {...propsFor(revisionA)} />);
+    await waitForPersonalReading();
+    expect(screen.queryByTestId("reading-save-diagnostics")).toBeNull();
+    await saveCompleteSnapshot(/完整解读缺少/);
+    expect(log.mock.calls.filter(call => call[0] === READING_SAVE_TIMING_PREFIX)).toHaveLength(0);
+    cleanup();
+    vi.stubEnv("VITE_READING_SAVE_DIAGNOSTICS", "1");
+    // The existing empty annual fixture cannot be saved as a complete report.
+    render(<LocalReadingContainer {...propsFor(revisionA)} />);
+    await waitForPersonalReading();
+    await saveCompleteSnapshot(/完整解读缺少/);
+    const calls = log.mock.calls.filter(call => call[0] === READING_SAVE_TIMING_PREFIX);
+    expect(calls).toHaveLength(1);
+    const receipt = JSON.parse(calls[0]![1] as string) as ReadingSaveTimingSnapshot;
+    expect(receipt.status).toBe("failed");
+    expect(receipt.stages.find(item => item.stage === "preconditions")?.status).toBe("failed");
+    expect(receipt.stages.find(item => item.stage === "repository_write")?.status).toBe("not_started");
+    expect(JSON.stringify(receipt)).not.toContain(revisionA.id);
+    expect(await repository.listResearchNotesByCase(revisionA.caseId)).toEqual([]);
+    cleanup();
+    vi.stubEnv("DEV", false);
+    // Even an accidentally enabled build flag cannot add diagnostics to production.
+    render(<LocalReadingContainer {...propsFor(revisionA)} />);
+    await waitForPersonalReading();
+    await saveCompleteSnapshot(/完整解读缺少/);
+    expect(screen.queryByTestId("reading-save-diagnostics")).toBeNull();
+    expect(log.mock.calls.filter(call => call[0] === READING_SAVE_TIMING_PREFIX)).toHaveLength(1);
+  }, 60_000);
+
+  it("marks a mismatching post-save read as failed without retrying or altering the committed report", async () => {
+    vi.stubEnv("VITE_READING_SAVE_DIAGNOSTICS", "1");
+    const log = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    await useActualAnnual();
+    render(<LocalReadingContainer {...propsFor(revisionA)} />);
+    await waitForPersonalReading();
+    // The repository still commits the real report. Only the following read is
+    // stale, so this must fail diagnostics without pretending the write failed.
+    vi.mocked(researchRepository.listResearchNotesByCase).mockResolvedValueOnce([]);
+    await saveCompleteSnapshot();
+    await waitForPersonalReading();
+    const calls = log.mock.calls.filter(call => call[0] === READING_SAVE_TIMING_PREFIX);
+    expect(calls).toHaveLength(1);
+    const receipt = JSON.parse(calls[0]![1] as string) as ReadingSaveTimingSnapshot;
+    expect(receipt.status).toBe("failed");
+    expect(receipt.stages.find(item => item.stage === "repository_write")?.status).toBe("succeeded");
+    expect(receipt.stages.find(item => item.stage === "post_save_validation")?.status).toBe("failed");
+    expect(receipt.stages.find(item => item.stage === "page_refresh")?.status).toBe("not_started");
+    expect(researchRepository.createResearchNote).toHaveBeenCalledTimes(1);
+    const records = await repository.listResearchNotesByCase(revisionA.caseId);
+    expect(records).toHaveLength(1);
+    const saved = await decodeReadingReportBundle(await unpackStoredReading(records[0]!.body));
+    expect(saved?.reading).toContain("大白话完整解读");
+    expect(saved?.archive).toBeTruthy();
+    expect(getResearchJournalMutationSnapshot().status).toBe("idle");
+  }, 90_000);
   it("keeps annual and monthly publication pending until the actual personal adoption replay completes", async () => {
     await useActualAnnual();
     const assessment = buildBaziPreliminaryAssessment(revisionA);
@@ -322,8 +472,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(build).toHaveBeenCalledTimes(1);
     expect(summaries().length).toBeGreaterThan(0);
     expect(summaries().every((node) => !node.textContent?.includes(proposed))).toBe(true);
-    fireEvent.click(workbench().getByRole("button", { name: "保存测试快照" }));
-    await waitFor(() => expect(screen.getByTestId("save-status").textContent).toBe("测试保存成功"), { timeout: 15_000 });
+    await saveCompleteSnapshot();
     await waitFor(async () => expect((await repository.listResearchNotesByCase(revisionA.caseId)).some((note) => note.tags.includes("本地解读快照"))).toBe(true), { timeout: 15_000 });
     const records = await repository.listResearchNotesByCase(revisionA.caseId);
     const saved = records.find((note) => note.tags.includes("本地解读快照"))!;
@@ -416,8 +565,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(screen.getByTestId("selected-year").textContent).toBe("2029");
     expect(screen.getByTestId("annual-window").textContent).toBe("2028-2038");
     expect(buildLocalAnnualOutlookRange).toHaveBeenCalledTimes(calls);
-    fireEvent.click(workbench().getByRole("button", { name: "保存测试快照" }));
-    await waitFor(() => expect(screen.getByTestId("save-status").textContent).toBe("测试保存成功"), { timeout: 15_000 });
+    await saveCompleteSnapshot();
     const notes = await repository.listResearchNotesByCase(revisionA.caseId);
     expect(notes).toHaveLength(1);
     const text = await unpackReadingSnapshot(notes[0]!.body);
@@ -556,6 +704,7 @@ describe("reading container persistence and asynchronous publication", () => {
   }, 60_000);
   it("saves the selected monthly domain with its exact source text and period", async () => {
     render(<LocalReadingContainer {...propsFor(revisionA)} />);
+    await waitForPersonalReading();
     await waitFor(() => expect(workbench().getByRole("button", { name: "保存首个月度领域反馈" }).hasAttribute("disabled")).toBe(false));
     fireEvent.click(workbench().getByRole("button", { name: "保存首个月度领域反馈" }));
     await waitFor(() => expect(screen.getByTestId("save-status").textContent).toBe("测试保存成功"));
