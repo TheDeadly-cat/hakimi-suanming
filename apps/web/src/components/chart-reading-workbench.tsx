@@ -28,10 +28,22 @@ import { PlainYearOverviewPanel } from "./plain-year-overview-panel";
 import type { BriefReadingReport } from "../lib/brief-reading-report";
 import { BriefReadingReportPanel } from "./brief-reading-report-panel";
 import { revealReadingSection } from "./reading-section-navigation";
+import type { ReadingSaveStage } from "../lib/reading-save-timing";
 import { buildReadingFeedbackChoices, FEEDBACK_RATINGS, type FeedbackRating, type ReadingFeedbackDraft, type ReadingFeedbackChoice } from "../lib/local-reading-feedback";
 import "./chart-reading-workbench.css";
 
 export type { ReadingFeedbackDraft, ReadingFeedbackChoice } from "../lib/local-reading-feedback";
+
+export type ReadingSaveFeedback = { status: "idle" } | { status: "working"; stage: ReadingSaveStage }
+  | { status: "saved"; reportId: string; refreshIssue?: boolean }
+  | { status: "not_saved"; message: string; canExport: boolean }
+  | { status: "unconfirmed"; message: string };
+const SAVE_STAGE_LABELS: Record<ReadingSaveStage, string> = {
+  preconditions: "正在核对本次保存内容…", month_preparation: "正在整理完整年份和月份…",
+  report_generation: "正在生成并整理完整报告…", evidence_index: "正在整理报告中的结论与依据…",
+  encoding_compression: "正在整理完整报告的保存格式…", repository_write: "正在保存到本机…",
+  post_save_validation: "正在核对是否完整保存…", page_refresh: "报告已核对，正在更新本页…"
+};
 
 export interface ChartReadingWorkbenchProps {
   revision: RevisionRecord;
@@ -59,6 +71,8 @@ export interface ChartReadingWorkbenchProps {
   annualLoading?: boolean;
   annualError?: string | null;
   onSaveReading?: () => void | Promise<void>;
+  saveFeedback?: ReadingSaveFeedback;
+  onCheckSave?: () => void;
   onAddFeedback?: (feedback: ReadingFeedbackDraft) => void | Promise<void>;
   onEditBirthData?: () => void;
   onOpenDetails?: () => void;
@@ -241,7 +255,7 @@ function FeedbackForm({ assessment, annual, choices, target, onAddFeedback }: { 
   </section>;
 }
 
-function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive, synthesis, briefReport, explanationPanel, onPrepareCompleteReading, priorities, annualEvents, annualLifeStories, annualLifeStoryPersonalSources, extraFeedbackChoices = [], feedbackTarget, reportLoading = false, onExportReading, onExportArchive, selectedYear: controlledYear, onSelectYear, annualOutlook, lifeOutlook, timeline, annualLoading = false, annualError, onSaveReading, onAddFeedback, onEditBirthData, onOpenDetails, onOpenTransit, decorativeImageUrl }: ChartReadingWorkbenchProps) {
+function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive, synthesis, briefReport, explanationPanel, onPrepareCompleteReading, priorities, annualEvents, annualLifeStories, annualLifeStoryPersonalSources, extraFeedbackChoices = [], feedbackTarget, reportLoading = false, onExportReading, onExportArchive, selectedYear: controlledYear, onSelectYear, annualOutlook, lifeOutlook, timeline, annualLoading = false, annualError, onSaveReading, saveFeedback, onCheckSave, onAddFeedback, onEditBirthData, onOpenDetails, onOpenTransit, decorativeImageUrl }: ChartReadingWorkbenchProps) {
   const sectionId = useId();
   const [topic, setTopic] = useState<ReadingTopic>("self");
   const [axis, setAxis] = useState<ReadingAxis | null>(null);
@@ -307,12 +321,17 @@ function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive
       : seasonalScope === "phase" ? "古籍阶段条件" : seasonalScope === "month" ? "古籍月令段" : "古籍条文";
 
   async function saveReading() {
-    if (!onSaveReading || saveBusy.current) return;
+    if (!onSaveReading || saveBusy.current || saveFeedback?.status === "working" || saveFeedback?.status === "unconfirmed") return;
     saveBusy.current = true; setSaveState("pending"); setSaveError("");
     try { await onSaveReading(); setSaveState("saved"); }
     catch (error) { setSaveState("failed"); setSaveError(safeVisibleErrorMessage(error, "解读暂未保存，请先到解读记录核对。")); }
     finally { saveBusy.current = false; }
   }
+  const saving = saveFeedback ? saveFeedback.status === "working" : saveState === "pending";
+  const unconfirmed = saveFeedback?.status === "unconfirmed";
+  const saved = saveFeedback ? saveFeedback.status === "saved" : saveState === "saved";
+  const reportHref = `/reports?case=${encodeURIComponent(revision.caseId)}`
+    + (saveFeedback?.status === "saved" ? `&report=${encodeURIComponent(saveFeedback.reportId)}` : "");
   function topicKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     let next: number;
     if (event.key === "ArrowRight") next = (index + 1) % TOPICS.length;
@@ -333,14 +352,22 @@ function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive
         {onEditBirthData ? <button className="reading-button reading-button--secondary" type="button" onClick={onEditBirthData}><PencilLine size={17} aria-hidden="true" />编辑资料</button> : null}
         {onExportReading ? <button className="reading-button reading-button--secondary" type="button" disabled={reportLoading} onClick={onExportReading}><FileDown size={17} aria-hidden="true" />导出完整解读</button> : null}
         {onExportArchive ? <button className="reading-button reading-button--secondary" type="button" disabled={reportLoading} onClick={onExportArchive}><FileDown size={17} aria-hidden="true" />导出完整依据</button> : null}
-        {onSaveReading ? <button className="reading-button reading-button--primary" type="button" disabled={saveState === "pending" || reportLoading} onClick={() => { void saveReading(); }}>
-          {saveState === "pending" ? <LoaderCircle size={18} className="reading-spinner" aria-hidden="true" /> : saveState === "saved" ? <Check size={18} aria-hidden="true" /> : <Save size={18} aria-hidden="true" />}
-          {saveState === "pending" ? "正在保存" : saveState === "saved" ? "已保存解读" : "保存解读"}
+        {onSaveReading ? <button className="reading-button reading-button--primary" type="button" disabled={saving || unconfirmed || reportLoading} onClick={() => { void saveReading(); }}>
+          {saving ? <LoaderCircle size={18} className="reading-spinner" aria-hidden="true" /> : saved ? <Check size={18} aria-hidden="true" /> : <Save size={18} aria-hidden="true" />}
+          {saving ? "正在保存" : unconfirmed ? "保存结果待核对" : saved ? "已保存解读" : "保存解读"}
         </button> : null}
       </div>
-      {saveState === "failed" ? <p className="reading-save-error" role="alert">{saveError}</p> : null}
-      {saveState === "saved" ? <p className="reading-save-message" role="status">解读已保存到本机。<AppLink href={`/reports?case=${encodeURIComponent(revision.caseId)}`}>打开我的报告</AppLink></p> : null}
-      {reportLoading ? <p className="reading-save-message" role="status">正在整理大运与流月，完成后可保存完整解读。</p> : null}
+      {saveFeedback?.status === "working" ? <p className="reading-save-message" role="status">{SAVE_STAGE_LABELS[saveFeedback.stage]}请保持本页打开，无需重复点击。</p> : null}
+      {saveFeedback?.status === "not_saved" ? <p className="reading-save-error" role="alert">本次没有保存，原来的命盘和报告没有改动。{saveFeedback.message}
+        {saveFeedback.canExport && onExportReading && onExportArchive ? "可使用上方的“导出完整解读”和“导出完整依据”。"
+          : <AppLink href={reportHref}>查看已有报告</AppLink>}</p> : null}
+      {saveFeedback?.status === "unconfirmed" ? <p className="reading-save-error" role="alert">{saveFeedback.message}请勿重复保存。
+        {onCheckSave ? <button className="text-button" type="button" onClick={onCheckSave}>核对保存记录</button> : <AppLink href={reportHref}>查看保存记录</AppLink>}</p> : null}
+      {!saveFeedback && saveState === "failed" ? <p className="reading-save-error" role="alert">{saveError}</p> : null}
+      {saved ? <p className="reading-save-message" role="status">{saveFeedback?.status === "saved" ? "报告已保存并核对" : "报告已保存"}，下次可在“我的报告”中找到。
+        {saveFeedback?.status === "saved" && saveFeedback.refreshIssue ? "本页更新尚未完成，可以直接打开已保存的原文。" : null}
+        <AppLink href={reportHref}>{saveFeedback?.status === "saved" ? "打开已保存报告" : "打开我的报告"}</AppLink></p> : null}
+      {reportLoading && !saving ? <p className="reading-save-message" role="status">正在整理大运与流月，完成后可保存完整解读。</p> : null}
     </header>
 
     <div className="reading-workbench-columns">

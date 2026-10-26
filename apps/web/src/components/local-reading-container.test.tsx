@@ -11,7 +11,7 @@ import { CaseRepository, ResearchDatabase, ResearchRepository, researchRepositor
 import { buildLocalAnnualOutlook, buildLocalAnnualOutlookRange, LOCAL_ANNUAL_OUTLOOK_VERSION, type LocalAnnualOutlook } from "../lib/local-annual-outlook";
 import { buildLocalReadingFeedback, LOCAL_READING_FEEDBACK_TAG, LOCAL_READING_SNAPSHOT_TAG } from "../lib/local-reading-record";
 import { unpackReadingSnapshot as unpackStoredReading } from "../lib/local-reading-snapshot-codec";
-import { decodeReadingReportBundle } from "../lib/local-reading-report-bundle";
+import { decodeReadingReportBundle, ReadingReportCapacityError } from "../lib/local-reading-report-bundle";
 import { buildStructuredReadingFeedback, buildReadingFeedbackReview, readingFeedbackSource, parseReadingFeedback, LOCAL_READING_REVIEW_TAG, type ReadingFeedbackDraft } from "../lib/local-reading-feedback";
 import { PersonalReadingScope } from "./personal-reading-note";
 import { ContextualReadingScope } from "./contextual-reading-provider";
@@ -34,6 +34,7 @@ import * as lifeStageStoryModule from "../lib/local-life-stage-story";
 import * as annualLifeStoryModule from "../lib/annual-life-story";
 import * as keyMonthSourceModule from "../lib/key-month-event-source";
 import { READING_SAVE_TIMING_PREFIX, type ReadingSaveTimingSnapshot } from "../lib/reading-save-timing";
+import type { ReadingSaveFeedback } from "./chart-reading-workbench";
 import { annualEventFeedbackText, annualEventFeedbackSubjectId } from "../lib/local-annual-event-record";
 import { annualLifeStoryFeedbackText, annualLifeStorySubjectId, annualLifeStoryFeedbackVersions } from "../lib/annual-life-story-record";
 
@@ -59,6 +60,7 @@ vi.mock("./chart-reading-workbench", () => ({
     reportLoading?: boolean; selectedYear?: number; onSelectYear?: (year: number) => void;
     extraFeedbackChoices?: { id: string; label: string; originalConclusion: string; sourceVersions?: string[] }[];
     onSaveReading?: () => Promise<void>; onExportReading?: () => void; onAddFeedback?: (draft: ReadingFeedbackDraft) => Promise<void>;
+    saveFeedback?: ReadingSaveFeedback; onCheckSave?: () => void;
   }) => {
     const [message, setMessage] = useState("");
     const run = (callback: (() => Promise<void>) | undefined) => {
@@ -78,6 +80,7 @@ vi.mock("./chart-reading-workbench", () => ({
       <button onClick={() => props.onSelectYear?.(2029)}>选择2029年</button>
       <button onClick={() => props.onSelectYear?.(2005)}>自由查询2005年</button>
       <span data-testid="report-loading">{String(props.reportLoading)}</span>
+      <span data-testid="save-feedback">{JSON.stringify(props.saveFeedback)}</span>
       <div data-testid="synthesis">{props.synthesis ? JSON.stringify(props.synthesis) : ""}</div>
       <span data-testid="event-feedback-choices">{props.extraFeedbackChoices?.filter((choice) => choice.id.startsWith("event-")).map((choice) => choice.label).join("；")}</span>
       <span data-testid="month-story-choices">{JSON.stringify(props.extraFeedbackChoices?.filter((choice) => choice.id.startsWith("annual-month-story-")).map(({ id, sourceVersions }) => ({ id, sourceVersions })) ?? [])}</span>
@@ -92,6 +95,7 @@ vi.mock("./chart-reading-workbench", () => ({
       })}>保存当前年度总评反馈</button>
       <span data-testid="life-stage-year-choices">{JSON.stringify(props.extraFeedbackChoices?.filter((choice) => choice.id.startsWith("life-stage-year-")).map(({ id, sourceVersions }) => ({ id, sourceVersions })) ?? [])}</span>
       <button disabled={!props.onSaveReading} onClick={() => void run(props.onSaveReading)}>保存测试快照</button>
+      <button disabled={!props.onCheckSave} onClick={props.onCheckSave}>核对测试保存记录</button>
       <button disabled={!props.onExportReading} onClick={() => props.onExportReading?.()}>导出测试报告</button>
       <button disabled={!props.onAddFeedback} onClick={() => void run(() => props.onAddFeedback!({ originalConclusion: "原结论：关系主题活跃", actualSituation: "实际：本年主要换工作" }))}>保存测试反馈</button>
       {(["life-stage-story-", "life-stage-transition-"] as const).map((prefix) => <button key={prefix} disabled={!props.onAddFeedback || !props.extraFeedbackChoices?.some((choice) => choice.id.startsWith(prefix))} onClick={() => void run(() => {
@@ -263,6 +267,48 @@ afterEach(async () => {
 });
 
 describe("reading container persistence and asynchronous publication", () => {
+  it("shows actual save stages and confirms only the exact readback, while repeated calls cannot write twice", async () => {
+    await useActualAnnual();
+    const writeGate=deferred<void>(),readGate=deferred<void>(),writeEntered=deferred<void>(),readEntered=deferred<void>();
+    let written=false;
+    vi.mocked(researchRepository.createResearchNote).mockImplementation(async input=>{
+      writeEntered.resolve();await writeGate.promise;const record=await repository.createResearchNote(input);written=true;return record;
+    });
+    vi.mocked(researchRepository.listResearchNotesByCase).mockImplementation(async(id,options)=>{
+      if(written){readEntered.resolve();await readGate.promise;}return repository.listResearchNotesByCase(id,options);
+    });
+    render(<LocalReadingContainer {...propsFor(revisionA)}/>);await waitForPersonalReading();
+    const feedback=()=>JSON.parse(screen.getByTestId("save-feedback").textContent!) as ReadingSaveFeedback;
+    fireEvent.click(workbench().getByRole("button",{name:"保存测试快照"}));const pending=workbenchAction.pending!;
+    expect(feedback()).toMatchObject({status:"working",stage:"month_preparation"});
+    await act(async()=>{await writeEntered.promise;});expect(feedback()).toMatchObject({status:"working",stage:"repository_write"});
+    expect(getResearchJournalMutationSnapshot().status).toBe("writing");
+    fireEvent.click(workbench().getByRole("button",{name:"保存测试快照"}));
+    await waitFor(()=>expect(screen.getByTestId("save-status").textContent).toContain("请勿重复保存"));
+    expect(researchRepository.createResearchNote).toHaveBeenCalledTimes(1);
+    await act(async()=>{writeGate.resolve();await readEntered.promise;});
+    expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(1);
+    expect(feedback()).toMatchObject({status:"working",stage:"post_save_validation"});
+    expect(getResearchJournalMutationSnapshot().status).toBe("writing");
+    await act(async()=>{readGate.resolve();await pending;});await waitForPersonalReading();
+    await waitFor(()=>expect(feedback().status).toBe("saved"));
+    const records=await repository.listResearchNotesByCase(revisionA.caseId);
+    expect(feedback()).toMatchObject({status:"saved",reportId:records[0]!.id});
+    expect(researchRepository.createResearchNote).toHaveBeenCalledTimes(1);expect(getResearchJournalMutationSnapshot().status).toBe("idle");
+  },120_000);
+
+  it("reports a pre-write encoding rejection without changing old data and offers the already generated exports", async () => {
+    await useActualAnnual();
+    const old=await repository.createResearchNote({caseId:revisionA.caseId,anchor:{kind:"revision",revisionId:revisionA.id},body:"旧报告原文保持。",
+      tags:[LOCAL_READING_SNAPSHOT_TAG],sourceRefs:[],lifecycle:"active"});
+    render(<LocalReadingContainer {...propsFor(revisionA)}/>);await waitForPersonalReading();
+    vi.spyOn(snapshotCodecModule,"packReadingSnapshot").mockRejectedValueOnce(new ReadingReportCapacityError());
+    await saveCompleteSnapshot(/超过当前本机可保存的大小/);
+    expect(JSON.parse(screen.getByTestId("save-feedback").textContent!)).toMatchObject({status:"not_saved",canExport:true,message:expect.stringContaining("超过当前本机可保存的大小")});
+    expect(researchRepository.createResearchNote).not.toHaveBeenCalled();expect(await repository.listResearchNotesByCase(revisionA.caseId)).toEqual([old]);
+    expect(getResearchJournalMutationSnapshot().status).toBe("idle");
+  },90_000);
+
   it("saves every prepared month without publishing an intermediate report, while explicit export still publishes all years", async () => {
     await useActualAnnual();
     const build = vi.spyOn(readingEditionModule, "buildLocalReadingReport");
@@ -392,7 +438,7 @@ describe("reading container persistence and asynchronous publication", () => {
     // The repository still commits the real report. Only the following read is
     // stale, so this must fail diagnostics without pretending the write failed.
     vi.mocked(researchRepository.listResearchNotesByCase).mockResolvedValueOnce([]);
-    await saveCompleteSnapshot();
+    await saveCompleteSnapshot(/保存结果尚未确认/);
     await waitForPersonalReading();
     const calls = log.mock.calls.filter(call => call[0] === READING_SAVE_TIMING_PREFIX);
     expect(calls).toHaveLength(1);
@@ -407,7 +453,8 @@ describe("reading container persistence and asynchronous publication", () => {
     const saved = await decodeReadingReportBundle(await unpackStoredReading(records[0]!.body));
     expect(saved?.reading).toContain("大白话完整解读");
     expect(saved?.archive).toBeTruthy();
-    expect(getResearchJournalMutationSnapshot().status).toBe("idle");
+    expect(getResearchJournalMutationSnapshot()).toMatchObject({ status: "call_unknown", issue: { phase: "returned_unreconciled", targetId: records[0]!.id } });
+    expect(JSON.parse(screen.getByTestId("save-feedback").textContent!).status).toBe("unconfirmed");
   }, 90_000);
   it("keeps annual and monthly publication pending until the actual personal adoption replay completes", async () => {
     await useActualAnnual();
@@ -1144,11 +1191,15 @@ describe("reading container persistence and asynchronous publication", () => {
       await repository.createResearchNote(input);
       throw new Error("Synthetic acknowledgement lost after commit");
     });
-    render(<LocalReadingContainer {...propsFor(revisionA)} />);
+    const props=propsFor(revisionA);
+    render(<LocalReadingContainer {...props} />);
     await waitFor(() => expect(screen.getByTestId("annual-revision").textContent).toBe(revisionA.id));
     await waitForPersonalReading();
     await saveCompleteSnapshot(/保存结果尚未确认/);
     expect(getResearchJournalMutationSnapshot().status).toBe("call_unknown");
+    expect(JSON.parse(screen.getByTestId("save-feedback").textContent!).status).toBe("unconfirmed");
+    fireEvent.click(workbench().getByRole("button",{name:"核对测试保存记录"}));
+    expect(props.onOpenRecords).toHaveBeenCalledTimes(1);
     expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(1);
     await waitForPersonalReading();
     fireEvent.click(workbench().getByRole("button", { name: "保存测试快照" }));

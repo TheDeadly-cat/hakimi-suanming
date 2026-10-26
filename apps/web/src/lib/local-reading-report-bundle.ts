@@ -8,6 +8,15 @@ const incompleteUnicode = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF
 const shaPattern = /^[a-f0-9]{64}$/u;
 const errorMessage = "这份报告的阅读稿或完整档案未通过校验，原记录仍保留。";
 
+/** Writer-only capacity rejection; damaged saved reports keep the original reader error. */
+export class ReadingReportCapacityError extends Error {
+  readonly code = "reading_report_capacity";
+  constructor() {
+    super("完整报告超过当前本机可保存的大小，请分别导出完整解读和完整依据；已保存资料保持不变。");
+    this.name = "ReadingReportCapacityError";
+  }
+}
+
 export type ReadingReportBundle = Readonly<{ reading: string; archive: string; version: string }>;
 type TextPart = { text: string; utf8Bytes: number; sha256: string };
 type Envelope = { format: typeof READING_REPORT_BUNDLE_VERSION; version: string; reading: TextPart; archive: TextPart; sha256: string };
@@ -32,7 +41,7 @@ function identity(version: string, reading: TextPart, archive: TextPart): Uint8A
 }
 async function encodePart(text: string): Promise<TextPart> {
   const bytes = encoder.encode(text);
-  if (bytes.byteLength > MAX_BYTES) fail();
+  if (bytes.byteLength > MAX_BYTES) throw new ReadingReportCapacityError();
   return { text, utf8Bytes: bytes.byteLength, sha256: await digest(bytes) };
 }
 function validPart(value: unknown): value is TextPart {
@@ -51,13 +60,15 @@ export function isReadingReportBundle(text: string): boolean {
 }
 
 export async function encodeReadingReportBundle(input: ReadingReportBundle): Promise<string> {
-  if (!exactObject(input, ["reading", "archive", "version"]) || !validText(input.reading)
-    || !validText(input.archive) || !validVersion(input.version)) fail();
+  if (!exactObject(input, ["reading", "archive", "version"]) || typeof input.reading !== "string"
+    || typeof input.archive !== "string" || !validVersion(input.version)) fail();
+  if (input.reading.length > MAX_BYTES || input.archive.length > MAX_BYTES) throw new ReadingReportCapacityError();
+  if (!validText(input.reading) || !validText(input.archive)) fail();
   const [reading, archive] = await Promise.all([encodePart(input.reading), encodePart(input.archive)]);
   const envelope: Envelope = { format: READING_REPORT_BUNDLE_VERSION, version: input.version, reading, archive,
     sha256: await digest(identity(input.version, reading, archive)) };
   const result = `${READING_REPORT_BUNDLE_MARKER}\n${JSON.stringify(envelope)}`;
-  if (result.length > MAX_BYTES || encoder.encode(result).byteLength > MAX_BYTES) fail();
+  if (result.length > MAX_BYTES || encoder.encode(result).byteLength > MAX_BYTES) throw new ReadingReportCapacityError();
   return result;
 }
 

@@ -367,8 +367,8 @@ export function readReadingExplanationIndex(archive: string): ReadingExplanation
 function route(question: string): ReadingExplanationTopic | null {
   if (/旧报告|版本|更改|变化原因|前后报告|对照报告/u.test(question)) return "report_comparison";
   if (/时辰|出生时间|时间不准|边界|不确定/u.test(question)) return "uncertainty";
-  if (/月份|流月|关键月|这个月/u.test(question)) return "month";
-  if (/上一年|去年|不同|相比|比较|为什么.*年/u.test(question)) return "year_comparison";
+  if (/月份|流月|关键月|这个月|(?:^|[^0-9])(?:1[0-2]|[1-9])月/u.test(question)) return "month";
+  if (/上一年|去年|不同|相比|比较|对比|对照.*年|年.*对照|为什么.*年/u.test(question)) return "year_comparison";
   if (/事业|职业|工作|求职|晋升|退休/u.test(question)) return "career";
   if (/财|收入|钱|收益|工资|破财|发财/u.test(question)) return "wealth";
   if (/感情|婚姻|恋爱|关系|相处|结婚|离婚/u.test(question)) return "relationship";
@@ -376,11 +376,28 @@ function route(question: string): ReadingExplanationTopic | null {
   return null;
 }
 
+export function readingExplanationSearchQuery(question: string, branchId?: string): ReadingExplanationQuery {
+  const years = [...question.matchAll(/(?:19|20|21)\d{2}/gu)].map(match => Number(match[0]));
+  return { question, branchId, year: years[0], comparisonYear: years[1] ?? (route(question) === "year_comparison" && years[0] ? years[0] - 1 : undefined) };
+}
+
+export function readingDirectionLabel(direction: string | null): string {
+  switch (direction) {
+    case "favorable": return "支持较多";
+    case "pressured": return "阻力较多";
+    case "mixed": return "支持和阻力并存";
+    case "neutral": return "暂无明确倾向";
+    case "unknown": return "信息不足，尚不能判断";
+    case null: return "未单列倾向";
+    default: return "此项倾向未能识别，请查看原结论";
+  }
+}
+
 export function queryReadingExplanation(index: ReadingExplanationIndex, query: ReadingExplanationQuery): ReadingExplanationAnswer {
   const topic = query.topic ?? route(query.question ?? "") ?? "summary";
   const answer = (status: ReadingExplanationAnswer["status"], summary: string, conclusions: ReadingConclusion[], scopeNotes: string[] = []): ReadingExplanationAnswer => ({
     status, topic, summary, conclusions, sourceSubjects: unique(conclusions.flatMap(item => item.sourceSubjects)), scopeNotes });
-  if (!query.topic && query.question && !route(query.question)) return answer("unavailable", "这份报告尚不能回答这个问题。可以选择事业、收入、感情、年份对照、关键月份或出生时间。", []);
+  if (!query.topic && query.question && !route(query.question)) return answer("unavailable", "没有找到对应的报告专题。这里只查找已有报告，不是通用聊天；可查看事业、收入、感情、年份对照、关键月份或出生时间。", []);
   const detectedYears = [...(query.question ?? "").matchAll(/(?:19|20|21)\d{2}/gu)].map(match => Number(match[0]));
   const year = query.year ?? detectedYears[0];
   const branchIds = unique(index.conclusions.filter(item => item.scope.level === "year").map(item => item.scope.branchId ?? ""));
@@ -413,24 +430,26 @@ export function queryReadingExplanation(index: ReadingExplanationIndex, query: R
   }
   if (topic === "month") {
     if (!query.monthId && !year) return answer("needs_selection", "请选择年份和关键月份，再看该月对应领域的原判断与依据。", []);
-    if (branchIds.length > 1 && !query.branchId) return answer("needs_selection", "存在不同起运路径，请先选择路径，不能把各路径月份合为一个结论。", []);
+    if (branchIds.length > 1 && !query.branchId) return answer("needs_selection", "这份报告有两套结果，请在“先分别查看”中选择一套来阅读月份；选择仅用于查看，不代表确认哪套正确。", []);
     const selected = index.conclusions.filter(item => item.scope.level === "month" && inBranch(item)
       && (!year || item.scope.year === year) && (!query.monthId || item.stableId === query.monthId || item.stableId.includes(`:${query.monthId}:`)));
-    return answer(selected.length ? "answered" : "unavailable", selected.length ? "以下仅引用所选月份的原判断。" : "该月份尚未计算或不在本报告范围内。", selected, contextualNote);
+    const monthHint = query.question && /(?:^|[^0-9])(?:1[0-2]|[1-9])月/u.test(query.question) && !query.monthId
+      ? "报告按节令月分段，起止日不等于公历整月；请根据日期范围选择对应月份。" : "以下仅引用所选月份的原判断。";
+    return answer(selected.length ? "answered" : "unavailable", selected.length ? monthHint : "该月份尚未计算或不在本报告范围内。", selected, contextualNote);
   }
   if (topic === "year_comparison") {
-    const previousYear = query.comparisonYear ?? detectedYears[1] ?? (year ? year - 1 : undefined);
+    const previousYear = query.comparisonYear ?? detectedYears[1] ?? (!query.topic && year ? year - 1 : undefined);
     if (!year || !previousYear || year === previousYear) return answer("needs_selection", "请选择两个不同年份作对照。", []);
-    if (branchIds.length > 1 && !query.branchId) return answer("needs_selection", "请先选择同一条起运路径，再比较两个年份。", []);
+    if (branchIds.length > 1 && !query.branchId) return answer("needs_selection", "请在“先分别查看”中选择一套结果，再比较这套结果中的两个年份。", []);
     const left = index.conclusions.filter(item => item.scope.level === "year" && item.scope.year === previousYear && inBranch(item));
     const right = index.conclusions.filter(item => item.scope.level === "year" && item.scope.year === year && inBranch(item));
     if (!left.length || !right.length) return answer("unavailable", "至少一个年份不在已计算范围内，不能用邻年代替。", []);
-    const directions = unique(right.map(item => `${item.label}：${item.direction ?? "未单列方向"}`));
+    const directions = unique([...left, ...right].map(item => `${item.label}：${readingDirectionLabel(item.direction)}`));
     return answer("answered", `${previousYear} 与 ${year} 年分别比较事业、收入和关系；交运分段保留各自范围。${directions.join("；")}`, [...left, ...right], contextualNote);
   }
   if (topic === "summary") return answer("answered", "先看格局、喜用和三个生活领域的重点，完整原文与限制可逐项展开。",
     index.conclusions.filter(item => item.scope.level === "natal"), contextualNote);
-  if (year && branchIds.length > 1 && !query.branchId) return answer("needs_selection", "存在不同起运路径，请先选择路径，再阅读这一年的领域判断。", []);
+  if (year && branchIds.length > 1 && !query.branchId) return answer("needs_selection", "这份报告有两套结果，请在“先分别查看”中选择一套来阅读这一年；选择仅用于查看，不代表确认哪套正确。", []);
   const selected = index.conclusions.filter(item => item.domain === topic && (year ? item.scope.level === "year" && item.scope.year === year && inBranch(item) : item.scope.level === "natal"));
   return answer(selected.length ? "answered" : "unavailable", selected.length ? "以下来自这份报告的同一领域，不借其他领域的有利作用作结论。" : "当前范围没有这一领域的已计算结论。", selected, contextualNote);
 }

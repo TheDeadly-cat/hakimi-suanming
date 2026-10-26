@@ -14,7 +14,7 @@ import { composeAnnualEvents } from "../lib/local-annual-event-composition";
 import type { AnnualEventSegment } from "../lib/local-annual-event-reading";
 import { projectPriorityAnnualEvents, priorityEventKey } from "../lib/priority-annual-events";
 import { LOCAL_PERSONAL_READING_VERSION, type LocalPersonalReading } from "../lib/local-personal-reading";
-import { ChartReadingWorkbench } from "./chart-reading-workbench";
+import { ChartReadingWorkbench, type ReadingSaveFeedback } from "./chart-reading-workbench";
 import { ReadingPrioritiesPanel } from "./reading-priorities-panel";
 import { PersonalReadingProvider } from "./personal-reading-note";
 import { buildBaziComprehensiveReading } from "../../../../packages/bazi-interpretation/src/comprehensive-reading";
@@ -87,6 +87,43 @@ function personal(subjectId: string, originalConclusion: string, personalText: s
 }
 
 describe("priority-year event reading on actual charts", () => {
+  it("shows actual save phases without a percentage and opens the specifically confirmed report", () => {
+    const onSaveReading=vi.fn(), props={revision:b.revision,caseName:"合成保存状态",assessment:b.assessment,briefReport:bBackground.brief,onSaveReading};
+    const view=render(<ChartReadingWorkbench {...props} saveFeedback={{status:"working",stage:"month_preparation"}}/>);
+    const header=()=>within(view.container.querySelector<HTMLElement>(".reading-workbench-header")!);
+    expect(header().getByRole("status").textContent).toContain("正在整理完整年份和月份");
+    expect(header().getByRole("button",{name:"正在保存"}).hasAttribute("disabled")).toBe(true);
+    fireEvent.click(header().getByRole("button",{name:"正在保存"}));expect(onSaveReading).not.toHaveBeenCalled();
+    for(const [stage,label] of [["encoding_compression","正在整理完整报告的保存格式"],["post_save_validation","正在核对是否完整保存"]] as const){
+      view.rerender(<ChartReadingWorkbench {...props} saveFeedback={{status:"working",stage}}/>);
+      expect(header().getByRole("status").textContent).toContain(label);expect(header().getByRole("status").textContent).not.toContain("%");
+    }
+    const reportId="33333333-3333-4333-8333-333333333333";
+    view.rerender(<ChartReadingWorkbench {...props} saveFeedback={{status:"saved",reportId}}/>);
+    expect(header().getByRole("status").textContent).toContain("报告已保存并核对");
+    expect(header().getByRole("link",{name:"打开已保存报告"}).getAttribute("href")).toBe(`/reports?case=${b.revision.caseId}&report=${reportId}`);
+  });
+  it("distinguishes a pre-write rejection from an unconfirmed write and keeps the real review action available", () => {
+    const onSaveReading=vi.fn(),onCheckSave=vi.fn(),onExportReading=vi.fn(),onExportArchive=vi.fn();
+    const props={revision:b.revision,caseName:"合成保存边界",assessment:b.assessment,briefReport:bBackground.brief,onSaveReading,onCheckSave,onExportReading,onExportArchive};
+    const rejected:ReadingSaveFeedback={status:"not_saved",canExport:true,message:"完整报告内容已生成，可以先分别导出完整解读和完整依据留存。"};
+    const view=render(<ChartReadingWorkbench {...props} saveFeedback={rejected}/>);
+    const header=()=>within(view.container.querySelector<HTMLElement>(".reading-workbench-header")!);
+    expect(header().getByRole("alert").textContent).toContain("本次没有保存，原来的命盘和报告没有改动");
+    fireEvent.click(header().getByRole("button",{name:"导出完整解读"}));fireEvent.click(header().getByRole("button",{name:"导出完整依据"}));
+    expect(onExportReading).toHaveBeenCalledTimes(1);expect(onExportArchive).toHaveBeenCalledTimes(1);expect(onSaveReading).not.toHaveBeenCalled();
+    view.rerender(<ChartReadingWorkbench {...props} saveFeedback={{status:"unconfirmed",message:"保存结果尚未确认，已暂停继续写入。"}}/>);
+    expect(header().getByRole("alert").textContent).toContain("请勿重复保存");expect(header().getByRole("alert").textContent).not.toContain("本次没有保存");
+    expect(header().getByRole("button",{name:"保存结果待核对"}).hasAttribute("disabled")).toBe(true);
+    fireEvent.click(header().getByRole("button",{name:"保存结果待核对"}));expect(onSaveReading).not.toHaveBeenCalled();
+    fireEvent.click(header().getByRole("button",{name:"核对保存记录"}));expect(onCheckSave).toHaveBeenCalledTimes(1);
+  });
+  it("keeps a confirmed report accessible when only the current page refresh failed", () => {
+    render(<ChartReadingWorkbench revision={b.revision} caseName="合成刷新提示" assessment={b.assessment} briefReport={bBackground.brief}
+      saveFeedback={{status:"saved",reportId:"33333333-3333-4333-8333-333333333333",refreshIssue:true}}/>);
+    expect(screen.getByRole("link",{name:"打开已保存报告"})).toBeTruthy();
+    expect(screen.getByText(/本页更新尚未完成/).textContent).toContain("报告已保存并核对");
+  });
   it("keeps the explanation panel mounted across a transient missing brief report while a year changes", () => {
     const props = { revision: b.revision, caseName: "合成年份切换", assessment: b.assessment, annualOutlook: b.annual,
       priorities: b.priorities, annualEvents: b.events };

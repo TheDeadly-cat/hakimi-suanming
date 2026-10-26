@@ -1074,7 +1074,7 @@ export function CandidateSetPage({ candidateSetId }: CandidateSetPageProps) {
       <PageHeading
         eyebrow="Unknown hour candidate set"
         title={safeVisibleText(record.alias, "未命名候选组", 160)}
-        description="同一出生日期的 13 个代表性时间探针。它们彼此并列，只供校时与结构研究，不推断真实出生时刻。"
+        description="按同一出生日期的 13 个代表性时刻计算候选结果。它们彼此并列，不表示已经确定你的出生时间。"
         actions={(
           <>
             <AppLink href="/cases" className="secondary-action"><ArrowLeft aria-hidden="true" />返回案例库</AppLink>
@@ -1084,6 +1084,15 @@ export function CandidateSetPage({ candidateSetId }: CandidateSetPageProps) {
           </>
         )}
       />
+
+      {!isTrashed ? <aside className="candidate-set-export-boundary" aria-label="未知时辰资料已保存">
+        <Info aria-hidden="true" />
+        <div><strong>这份未知时辰资料已保存在本机</strong>
+          <p>尚未确定唯一命盘，暂未生成唯一的完整解读。你可以先分别查看下方候选结果；下次从“我的命盘”按名称重新打开。</p>
+          <AppLink href="/cases" className="secondary-action">回到我的命盘</AppLink>{" "}
+          <a href="#candidate-set-probes" className="secondary-action">先分别查看候选结果</a>
+        </div>
+      </aside> : null}
 
       <aside className="candidate-set-export-boundary" aria-label="候选组敏感文件交付边界">
         <Info aria-hidden="true" />

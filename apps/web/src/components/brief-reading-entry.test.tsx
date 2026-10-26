@@ -625,8 +625,8 @@ describe("brief reading as a readable, source-bound entry", () => {
     }
   });
 
-  it("keeps retired and separated contexts in their actual scope instead of silently restoring generic income or romantic progression", async () => {
-    const withContext = async (work: "retired" | "unspecified", relationship: "separated" | "unspecified") => {
+  it("keeps retired scenes and separates independently supported new contact from old relationship handover", async () => {
+    const withContext = async (work: "retired" | "unspecified", relationship: "separated" | "unspecified" | "married") => {
       const body = await buildReadingContextRecord(b.revision, null, { work, relationship, fromYear: 2026, toYear: 2035, notes: "合成背景" });
       const contextRecord = { ...note(b, body, 0), tags: ["阅读背景"] };
       const context = (await resolveReadingContext({ revision: b.revision, records: [contextRecord] })).latest;
@@ -645,18 +645,67 @@ describe("brief reading as a readable, source-bound entry", () => {
     expect(retired.eventTendencies.find(item => item.category === "money_inflow")!.text).not.toMatch(/工资|客户|任命|入职/);
     expect(() => buildBriefAnnualReading({ ...input, contextual: undefined })).toThrow(/背景/);
     const separated = await withContext("unspecified", "separated");
-    const relationship = buildBriefAnnualReading(separated.input).branches[0]!.segments[0]!.domains.find(domain => domain.domain === "relationship")!;
-    expect(relationship.verdict.label).toMatch(/旧|事项|交接|界限/);
-    expect(relationship.verdict.label).not.toMatch(/^感情.*推进/);
-    expect(buildBriefAnnualReading(separated.input).branches[0]!.segments[0]!.eventTendencies
-      .find(item => item.category === "commitment")!.level).toBe("not_applicable");
+    const separatedSegment = buildBriefAnnualReading(separated.input).branches[0]!.segments[0]!;
+    const relationship = separatedSegment.domains.find(domain => domain.domain === "relationship")!;
+    const romance = separatedSegment.eventTendencies.find(item => item.category === "romance")!;
+    expect(relationship.verdict).toMatchObject({ label: "联系与关系发展有线索", direction: "neutral",
+      relationshipChange: "progression", relationshipState: "separated", basis: "relationship_signals", actionIndexes: [] });
+    // Entry and hidden-to-visible are two descriptions of the same star layer,
+    // not independent votes that can turn a possible contact into certainty.
+    expect(romance).toMatchObject({ level: "possible", direction: "supported", relationshipState: "separated",
+      ruleIds: ["annual-event-tendency:relationship-romance:v1"], counterEvidenceIds: [] });
+    const support = romance.evidence.filter(item => romance.supportEvidenceIds.includes(item.id));
+    expect(support.map(item => ({ origin: item.origin, lensId: item.lensId, signalId: item.signalId }))).toEqual([
+      { origin: "year", lensId: "wealth", signalId: "year:entry:壬" },
+      { origin: "year", lensId: "wealth", signalId: "year:hidden-visible:壬" }
+    ]);
+    expect(support.every(item => item.nodeRef?.nodeType === "year" && item.nodeRef.nodeId === separated.input.year.transitNodeRef?.nodeId)).toBe(true);
+    expect(support.map(item => item.original)).toEqual([
+      "本年壬子透壬正财，在传统财星视角中增加一个可对照的明透角色。",
+      "原局年柱藏壬正财；本年壬子同字壬明透。这是不同时间层的同字对应，原局藏位仍保留。"
+    ]);
+    expect(relationship.text).toBe("可能有新的相识或持续联系；旧联系、交接或未结承诺需要另行处理。这不表示一定复合，也不表示一定开始新恋情。");
+    expect(romance.text).toBe("可能重新认识合适的人，或开始新的持续联络；这组线索不等于旧关系一定恢复。");
+    expect(separatedSegment.eventTendencies.find(item => item.category === "commitment")!.level).toBe("not_applicable");
     const synthesis = buildReadingSynthesis({ revision: b.revision, assessment: b.assessment, comprehensive: b.extras.comprehensive,
       life: b.extras.life, annual: b.annual, timeline: b.extras.timeline, contextual: separated.contextual });
     const report = buildBriefReadingReport(b.assessment, b.annual, { ...b.extras, synthesis, contextual: separated.contextual,
       annualEvents: separated.events, annualLifeStories: separated.stories })!;
     const overview = report.yearOverview.find(item => item.domain === "relationship")!;
     const group = overview.groups.find(item => item.items.some(period => period.year === 2032))!;
-    expect(group.label).toMatch(/旧|事项|交接|界限/);
-    expect(group.label).not.toMatch(/^感情.*推进/);
+    expect(group.label).toBe(relationship.verdict.label);
+    expect(group.items.map(item => item.year)).toEqual([2032]);
+    const plainYear = (year: number) => report.plainReading!.outlook.branches[0]!.years.find(item => item.year === year)!.segments[0]!;
+    const plainRelationship = plainYear(2032).domains.find(domain => domain.domain === "relationship")!;
+    expect(plainRelationship.title).toBe("旧事交接与新的联系");
+    expect(plainRelationship.headline).toBe(group.label);
+    expect(plainRelationship.text).toContain(romance.text);
+    const view = render(<BriefReadingReportPanel report={report} variant="years" />);
+    const visibleRelationship = within(screen.getByRole("article", { name: "2032年白话解读" })).getByText(plainRelationship.headline)
+      .closest<HTMLElement>('[data-plain-year-domain="relationship"]')!;
+    expect(visibleRelationship.textContent).toContain(romance.text);
+    expect(visibleRelationship.textContent).toContain("不等于旧关系一定恢复");
+
+    const forYear = (year: number) => buildBriefAnnualReading({ ...separated.input, year: b.annual.years.find(item => item.year === year)!,
+      events: separated.events.years.find(item => item.year === year)!, story: separated.stories.years.find(item => item.year === year)! }).branches[0]!.segments[0]!;
+    const quiet = forYear(2031);
+    expect(quiet.domains.find(domain => domain.domain === "relationship")!.verdict).toMatchObject({ direction: "unknown", relationshipChange: "insufficient" });
+    expect(quiet.eventTendencies.find(item => item.category === "romance")).toMatchObject({ level: "none", supportEvidenceIds: [] });
+    expect(overview.groups.flatMap(item => item.items).some(item => item.year === 2031)).toBe(false);
+    expect(plainYear(2031).domains.find(domain => domain.domain === "relationship")!.headline).toBe("本期未见独立突出的感情变化线索");
+    const oldHandover = forYear(2035), separation = oldHandover.eventTendencies.find(item => item.category === "separation")!;
+    expect(separation).toMatchObject({ level: "weak", relationshipState: "separated", ruleIds: ["annual-event-tendency:relationship-separation:v1"] });
+    expect(separation.evidence.filter(item => separation.supportEvidenceIds.includes(item.id)).map(item => item.original)).toEqual(["本年乙卯与原局日支酉有地支六冲。"]);
+    expect(separation.text).toContain("更接近旧事收尾，不是再次分手");
+    expect(oldHandover.eventTendencies.find(item => item.category === "romance")!.level).toBe("none");
+    expect(plainYear(2035).domains.find(domain => domain.domain === "relationship")!.headline).toBe("旧事交接或联系边界可能调整，线索较弱");
+    expect(plainYear(2035).domains.find(domain => domain.domain === "relationship")!.text).not.toContain("可能重新认识合适的人");
+    expect(within(screen.getByRole("article", { name: "2035年白话解读" })).getByText("旧事交接或联系边界可能调整，线索较弱")).toBeTruthy();
+    view.unmount();
+    const married = await withContext("unspecified", "married");
+    const marriedContact = buildBriefAnnualReading(married.input).branches[0]!.segments[0]!.eventTendencies.find(item => item.category === "romance")!;
+    expect(marriedContact.level).toBe("possible");
+    expect(marriedContact.text).toBe("现有伴侣间可能增加亲近、表达或共同活动，不把这些线索解释为新恋情。");
+    expect(marriedContact.text).not.toContain("可能重新认识合适的人");
   });
 });

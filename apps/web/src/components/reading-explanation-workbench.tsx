@@ -1,12 +1,13 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import type { ResearchNoteRecord, RevisionRecord } from "@hakimi/contracts";
-import { buildReadingTimeUncertainty, queryReadingExplanation, readReadingExplanationIndex,
+import { buildReadingTimeUncertainty, queryReadingExplanation, readReadingExplanationIndex, readingExplanationSearchQuery,
   type ReadingConclusion, type ReadingExplanationIndex, type ReadingExplanationQuery, type ReadingExplanationTopic,
   type ReadingTimeUncertainty } from "../lib/reading-explanation-index";
 import { decodeReadingReportBundle } from "../lib/local-reading-report-bundle";
 import { isPackedReadingSnapshot, unpackReadingSnapshot } from "../lib/local-reading-snapshot-codec";
 import { LOCAL_READING_SNAPSHOT_TAG } from "../lib/local-reading-record";
 import { safeVisibleErrorMessage } from "../lib/visible-text";
+import { ReadingBranchGuide } from "./reading-branch-guide";
 import "./reading-explanation-workbench.css";
 
 interface Props {
@@ -20,6 +21,9 @@ const topics: { id: ReadingExplanationTopic; label: string }[] = [
   { id: "uncertainty", label: "出生时间" }, { id: "report_comparison", label: "对照旧报告" }
 ];
 const formatTime = (value: string) => new Date(Date.parse(value) + 8 * 3_600_000).toISOString().slice(0, 16).replace("T", " ");
+export const readingMonthOptionLabel = (item: ReadingConclusion) => item.scope.startInstant && item.scope.endExclusiveInstant
+  && Number.isFinite(Date.parse(item.scope.startInstant)) && Number.isFinite(Date.parse(item.scope.endExclusiveInstant))
+  ? `${formatTime(item.scope.startInstant)}—${formatTime(item.scope.endExclusiveInstant)}前 · ${item.label}` : item.label;
 const scopeText = (item: ReadingConclusion) => item.scope.level === "natal" ? "本命整体倾向，不对应某个确定事件"
   : !item.scope.startInstant || !item.scope.endExclusiveInstant || !Number.isFinite(Date.parse(item.scope.startInstant)) || !Number.isFinite(Date.parse(item.scope.endExclusiveInstant))
     ? "当时未记录完整起止范围，不能补猜日期。"
@@ -95,7 +99,7 @@ export function ReadingExplanationWorkbench({ index, revision, records, onTimeUn
   const selected = selectedId ? index.conclusions.find(item => item.stableId === selectedId) : null;
   const shown = selected ? [selected] : summaryItems;
   const compact = !selected && (answer.topic === "summary" || (answer.topic === "month" && !query.monthId));
-  const choose = (topic: ReadingExplanationTopic) => { setSelectedId(null); setQuery({ topic,
+  const choose = (topic: ReadingExplanationTopic) => { setSelectedId(null); setQuery({ topic, branchId: query.branchId,
     ...(topic === "month" || topic === "year_comparison" ? { year: years[0], comparisonYear: years[1] } : {}) });
     if (topic === "month" && years[0]) onRequestYear?.(years[0]); };
   const months = index.conclusions.filter(item => item.scope.level === "month" && item.scope.year === (query.year ?? years[0])
@@ -105,22 +109,34 @@ export function ReadingExplanationWorkbench({ index, revision, records, onTimeUn
   </section>;
   return <section className="reading-explanation-workbench" aria-label="按问题阅读与查看依据">
     <p className="reading-explanation-intro">先看摘要，再选你关心的问题。每个专题都引用这份报告的原结论。</p>
-    <div className="reading-explanation-topics" aria-label="解读专题">{topics.map(topic => <button type="button" key={topic.id}
+    <div className="reading-explanation-topics" aria-label="解读专题">{topics.slice(0, 4).map(topic => <button type="button" key={topic.id}
       aria-pressed={answer.topic === topic.id && !selected} onClick={() => choose(topic.id)}>{topic.label}</button>)}</div>
-    <form className="reading-explanation-question" onSubmit={event => { event.preventDefault(); setSelectedId(null); setQuery({ question }); }}>
-      <label htmlFor={`${componentId}-question`}>想了解什么</label><div><input id={`${componentId}-question`} value={question} maxLength={500}
-        onChange={event => setQuestion(event.target.value)} placeholder="例如：为什么 2028 年与 2027 年不同？" /><button type="submit">查看回答</button></div>
+    <details open={topics.slice(4).some(topic => topic.id === answer.topic) || undefined}>
+      <summary>年份、月份与更多查看</summary>
+      <div className="reading-explanation-topics" aria-label="更多解读专题">{topics.slice(4).map(topic => <button type="button" key={topic.id}
+        aria-pressed={answer.topic === topic.id && !selected} onClick={() => choose(topic.id)}>{topic.label}</button>)}</div>
+    </details>
+    <form className="reading-explanation-question" onSubmit={event => {
+      event.preventDefault(); setSelectedId(null);
+      const next = readingExplanationSearchQuery(question, query.branchId); setQuery(next);
+      if (next.year && queryReadingExplanation(index, next).topic === "month") onRequestYear?.(next.year);
+    }}>
+      <label htmlFor={`${componentId}-question`}>在这份报告中查找</label><div><input id={`${componentId}-question`} value={question} maxLength={500}
+        onChange={event => setQuestion(event.target.value)} aria-describedby={`${componentId}-search-help`}
+        placeholder={`例如：${years[0] ?? "某"}年收入、对照两个年份、关键月份`} /><button type="submit">查找报告</button></div>
+      <p id={`${componentId}-search-help`}>查找已有结论，不是通用聊天。也可以直接点上方事业、收入或感情专题。</p>
     </form>
+    {!["summary", "uncertainty", "report_comparison"].includes(answer.topic) ? <ReadingBranchGuide index={index} branches={branches} selected={query.branchId}
+      needed={answer.status === "needs_selection" && !["summary", "uncertainty", "report_comparison"].includes(answer.topic)}
+      onChange={branchId => { setSelectedId(null); setQuery({ ...query, branchId, monthId: undefined }); }} /> : null}
     {!["summary", "uncertainty", "report_comparison"].includes(answer.topic) ? <div className="reading-explanation-selectors">
       <label>年份<select value={query.year ?? ""} onChange={event => { const year = event.target.value ? Number(event.target.value) : undefined;
-        setSelectedId(null); setQuery({ ...query, topic: answer.topic, year, monthId: undefined }); if (year && answer.topic === "month") onRequestYear?.(year); }}>
+        setSelectedId(null); setQuery({ ...query, question: undefined, topic: answer.topic, year, monthId: undefined }); if (year && answer.topic === "month") onRequestYear?.(year); }}>
         <option value="">本命整体</option>{years.map(year => <option key={year} value={year}>{year}年</option>)}</select></label>
-      {answer.topic === "year_comparison" ? <label>对照年份<select value={query.comparisonYear ?? ""} onChange={event => setQuery({ ...query, comparisonYear: Number(event.target.value) })}>
+      {answer.topic === "year_comparison" ? <label>对照年份<select value={query.comparisonYear ?? ""} onChange={event => setQuery({ ...query, question: undefined, topic: answer.topic, comparisonYear: event.target.value ? Number(event.target.value) : undefined })}>
         <option value="">选择年份</option>{years.map(year => <option key={year} value={year}>{year}年</option>)}</select></label> : null}
-      {branches.length > 1 ? <label>起运路径<select value={query.branchId ?? ""} onChange={event => { setSelectedId(null); setQuery({ ...query, branchId: event.target.value || undefined, monthId: undefined }); }}>
-        <option value="">请分别选择</option>{branches.map(branch => <option key={branch} value={branch}>{branch === "forward" ? "顺行" : branch === "backward" ? "逆行" : "已确定路径"}</option>)}</select></label> : null}
       {answer.topic === "month" ? <label>月份与领域<select value={query.monthId ?? ""} onChange={event => { setSelectedId(null); setQuery({ ...query, topic: "month", year: query.year ?? years[0], monthId: event.target.value || undefined }); }}>
-        <option value="">请选择一个月份</option>{months.map(month => <option key={month.stableId} value={month.stableId}>{month.label}</option>)}</select></label> : null}
+        <option value="">请选择一个月份</option>{months.map(month => <option key={month.stableId} value={month.stableId}>{readingMonthOptionLabel(month)}</option>)}</select></label> : null}
     </div> : null}
     {answer.topic === "report_comparison" ? <div className="reading-explanation-selectors"><label>选择旧报告<select value={oldId} onChange={event => setOldId(event.target.value)}>
       <option value="">选择已保存报告</option>{reports.map(record => <option key={record.id} value={record.id}>{formatTime(record.createdAt)} · 保存记录 {record.editVersion}</option>)}</select></label>

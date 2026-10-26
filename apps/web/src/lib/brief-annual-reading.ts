@@ -18,7 +18,7 @@ import { buildLocalReadingAgeContext, type LocalReadingAgeContext, type LocalRea
 import { plainOutlookCaption, PLAIN_OUTLOOK_READING_VERSION } from "./plain-outlook-reading";
 import { buildAnnualEventTendencies, ANNUAL_EVENT_TENDENCIES_VERSION, type AnnualEventTendency } from "./annual-event-tendencies";
 
-export const BRIEF_ANNUAL_READING_VERSION = "hakimi.brief-annual-reading/0.3.1" as const;
+export const BRIEF_ANNUAL_READING_VERSION = "hakimi.brief-annual-reading/0.3.2" as const;
 export interface BuildBriefAnnualReadingInput {
   revision: RevisionRecord; assessment: BaziPreliminaryAssessment; year: LocalAnnualYear;
   events: LocalAnnualEventReading; story: AnnualLifeStory; contextual?: LocalContextualReadingBundle | null;
@@ -228,15 +228,16 @@ function relationship(timing:AnnualRelationshipTiming,stage:LocalReadingAgeStage
   if(!signals.length)return {text:"本年暂无明确的新增感情变化线索。",signals};
   if(palaceClash&&palaceCombine)return {text:"关系既有靠近和推进的线索，也容易出现节奏变化。可能一边谈交往或共同生活的下一步，一边重新讨论联系频率、个人空间和原来的承诺。",signals};
   if(palaceClash)return {text:state==="single"?"相识后的交往节奏较易变化，可能改期约见、改变联系频率，或重新决定双方愿意靠近的程度。":state==="separated"?"未结事项或联系边界较易重议，可能调整交接方式、联络安排或各自生活的界限。":state==="married"?"共同生活安排较易变动，可能重议陪伴、家庭分工或原定计划，磨合与分歧更容易浮到台面。":state==="partnered"?"交往节奏与共同计划较易变化，可能调整见面安排、讨论承诺，或重新商量关系下一步。":"关系安排较易变动：单身可能改变联系或约见节奏；已有伴侣可能重议共同计划、陪伴安排或原来的承诺。",signals};
+  const separatedContact="可能有新的相识或持续联系；旧联系、交接或未结承诺需要另行处理。这不表示一定复合，也不表示一定开始新恋情。";
   if(palaceCombine){
     const backgroundClash=backgroundPalaceClash;
     const starClashLenses=backgroundStarClashLenses;
     const starClashScope=starClashLenses.length<timing.lenses.length?"其中一种关系视角还提示，既有期待或承诺容易出现分歧":"既有期待或承诺也容易出现分歧";
-    const progress=state==="single"?"已有相识更容易增加约见或持续交往，也可能谈到下一步关系。":state==="partnered"?"关系有进一步落实的线索，可能谈到共同生活、长期计划或更明确的承诺。":state==="married"?"共同生活计划更容易成为具体议题，可能落实家庭安排、陪伴或长期打算。":state==="separated"?"旧联系或共同事项可能再次推进，表现为重新联络、协商交接或明确今后的关系边界。":"感情有推进线索：单身可能增加约见或持续交往；已有伴侣可能谈共同生活、长期计划或承诺落实。";
+    const progress=state==="single"?"已有相识更容易增加约见或持续交往，也可能谈到下一步关系。":state==="partnered"?"关系有进一步落实的线索，可能谈到共同生活、长期计划或更明确的承诺。":state==="married"?"共同生活计划更容易成为具体议题，可能落实家庭安排、陪伴或长期打算。":state==="separated"?separatedContact:"感情有推进线索：单身可能增加约见或持续交往；已有伴侣可能谈共同生活、长期计划或承诺落实。";
     return {text:backgroundClash?`${progress}同时，原有相处节奏仍易变动，推进过程伴随磨合或计划重议。`:starClashLenses.length?`${progress}${starClashScope}。`:progress,signals};
   }
   if(has("stem_clash"))return {text:"彼此的期待或承诺容易碰撞，可能为交往节奏、关系定位或共同安排出现分歧。",signals};
-  const text=state==="single"?"可能出现新相识、持续联络或更明确的好感表达，交往有进一步发展的线索。":state==="partnered"?"关系意愿较容易摆到台面，可能讨论长期安排、共同生活或原有承诺的落实。":state==="married"?"原有承诺与共同生活容易成为具体议题，可能落实长期安排，也可能重新讨论陪伴和家庭分工。":state==="separated"?"旧联系或未结承诺可能再成为话题，表现为重新联络、协商交接或明确今后的关系界限。":"单身可能出现新相识、持续联系或明确好感；已有伴侣可能讨论共同生活、长期安排和承诺落实。";
+  const text=state==="single"?"可能出现新相识、持续联络或更明确的好感表达，交往有进一步发展的线索。":state==="partnered"?"关系意愿较容易摆到台面，可能讨论长期安排、共同生活或原有承诺的落实。":state==="married"?"原有承诺与共同生活容易成为具体议题，可能落实长期安排，也可能重新讨论陪伴和家庭分工。":state==="separated"?separatedContact:"单身可能出现新相识、持续联系或明确好感；已有伴侣可能讨论共同生活、长期安排和承诺落实。";
   return {text:text+(backgroundPalaceClash?"同时，既有相处节奏仍易变动，关系推进中可能出现磨合或计划反复。":backgroundStarClashLenses.length?"同时，该视角下既有期待或承诺也容易出现分歧。":""),signals};
 }
 /** Concise prose from the same exact inputs, never a new event or direction engine.

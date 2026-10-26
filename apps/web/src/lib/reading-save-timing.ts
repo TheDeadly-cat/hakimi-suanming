@@ -27,7 +27,7 @@ export interface ReadingReportTiming {
 
 /** One exclusive span at a time. Awaited wall time includes scheduling and shared in-flight work;
  * parallel month calculations are measured around all(), never summed as CPU time. */
-export function createReadingSaveTiming(sequence: number, now: () => number = () => performance.now()) {
+export function createReadingSaveTiming(sequence: number, now: () => number = () => performance.now(), onStage?: (stage: ReadingSaveStage) => void) {
   const started = now();
   let status: ReadingSaveStatus = "running", ended: number | null = null;
   let current: { stage: ReadingSaveStage; started: number } | null = null;
@@ -47,6 +47,7 @@ export function createReadingSaveTiming(sequence: number, now: () => number = ()
     const item = stages.find(item => item.stage === stage)!;
     item.status = "running"; item.spans += 1;
     current = { stage, started: now() };
+    onStage?.(stage);
   };
   const measure = <T>(stage: ReadingSaveStage, task: () => T): T => {
     start(stage);

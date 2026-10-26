@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AppLink } from "../lib/router";
 import { createReadingSourceCache } from "../lib/local-reading-source-cache";
 import { CONTEXTUAL_READING_VERSION } from "../lib/local-contextual-reading";
@@ -52,12 +52,12 @@ import { createReadingSaveTiming, publishReadingSaveTiming, type ReadingSaveOver
 import { buildBriefReadingReport } from "../lib/brief-reading-report";
 import { prepareKeyMonthYear, type PreparedKeyMonthYear, type KeyMonthEventSources } from "../lib/key-month-event-source";
 import { KEY_MONTH_EVENT_TENDENCIES_VERSION } from "../lib/key-month-event-tendencies";
-import { encodeReadingReportBundle } from "../lib/local-reading-report-bundle";
+import { encodeReadingReportBundle, ReadingReportCapacityError } from "../lib/local-reading-report-bundle";
 import { safeVisibleErrorMessage } from "../lib/visible-text";
 import { packReadingSnapshot } from "../lib/local-reading-snapshot-codec";
 import { buildReadingFeedbackChoices, buildStructuredReadingFeedback, buildReadingFeedbackReview, feedbackNoteReference,
   parseReadingFeedback, readFeedbackThread, readingFeedbackSource, LOCAL_READING_REVIEW_TAG, type ReadingFeedbackReviewDraft } from "../lib/local-reading-feedback";
-import { ChartReadingWorkbench, type ReadingFeedbackChoice } from "./chart-reading-workbench";
+import { ChartReadingWorkbench, type ReadingFeedbackChoice, type ReadingSaveFeedback } from "./chart-reading-workbench";
 import { PreparedFileDeliveryDialog, type PreparedFileArtifact } from "./prepared-file-delivery-dialog";
 import { DetailedOutlookPanel } from "./detailed-outlook-panel";
 import { ReadingSectionNavigation } from "./reading-section-navigation";
@@ -65,7 +65,7 @@ import { ReadingSavedRecord } from "./reading-saved-record";
 import { PersonalReadingProvider, PersonalReadingOverview } from "./personal-reading-note";
 import { ContextualReadingProvider } from "./contextual-reading-provider";
 import { ReadingContextPanel } from "./reading-context-panel";
-import { acquireResearchJournalMutation, lockResearchJournalMutationUnknown, releaseResearchJournalMutation } from "./research-journal-mutation-coordinator";
+import { acquireResearchJournalMutation, getResearchJournalMutationSnapshot, subscribeResearchJournalMutation, lockResearchJournalMutationUnknown, releaseResearchJournalMutation } from "./research-journal-mutation-coordinator";
 import mountainsUrl from "../assets/reading-mountains-v1.png";
 import "./local-reading-container.css";
 
@@ -79,13 +79,36 @@ interface Props {
   onOpenRecords: () => void;
 }
 
+interface CompleteSaveAttempt {
+  timing: ReadingSaveTiming;
+  record: ResearchNoteRecord | null;
+  body: string | null;
+  writeStarted: boolean;
+  verified: boolean;
+  reportPrepared: boolean;
+}
+function rejectedSaveFeedback(reason: unknown, reportPrepared: boolean): ReadingSaveFeedback {
+  const detail = safeVisibleErrorMessage(reason, "");
+  if (reportPrepared && (reason instanceof ReadingReportCapacityError || /容量|过长|超出.*保存/u.test(detail))) return { status: "not_saved", canExport: true,
+    message: "这份完整报告超过当前本机可保存的大小，请分别导出完整解读和完整依据，保留全部内容。" };
+  if (reportPrepared) return { status: "not_saved", canExport: true,
+    message: "完整报告内容已生成，可以先分别导出完整解读和完整依据留存。" };
+  if (/仍在整理|尚未.*完成|稍后|正在/u.test(detail)) return { status: "not_saved", canExport: false,
+    message: "请等本页内容整理完成后再保存；已有报告仍可打开。" };
+  if (/过大|过长|容量|超出.*范围/u.test(detail)) return { status: "not_saved", canExport: false,
+    message: "这份完整报告暂时超出当前支持范围，可以继续阅读本页或查看已有报告。" };
+  return { status: "not_saved", canExport: false, message: "请核对当前出生资料、生活背景和年份后再保存，也可先查看已有报告。" };
+}
+
 function LocalReadingContent(props: Props) {
   const { revision } = props;
   const active = useRef(true);
   const saveDiagnosticsEnabled = import.meta.env.DEV && import.meta.env.VITE_READING_SAVE_DIAGNOSTICS === "1";
   const [saveTimingSnapshot, setSaveTimingSnapshot] = useState<ReadingSaveTimingSnapshot | null>(null);
+  const [saveFeedback, setSaveFeedback] = useState<ReadingSaveFeedback>({ status: "idle" });
+  const mutation = useSyncExternalStore(subscribeResearchJournalMutation, getResearchJournalMutationSnapshot, getResearchJournalMutationSnapshot);
   const saveTimingSequence = useRef(0);
-  const saveTiming = useRef<{ timing: ReadingSaveTiming; record: ResearchNoteRecord | null } | null>(null);
+  const saveTiming = useRef<CompleteSaveAttempt | null>(null);
   const observeSaveRender = useCallback(<T,>(work: ReadingSaveOverlapWork, task: () => T): T => {
     const pending = saveTiming.current;
     return pending ? pending.timing.measureOverlappingRender(work, task) : task();
@@ -94,12 +117,16 @@ function LocalReadingContent(props: Props) {
     const pending = saveTiming.current;
     if (!pending) return;
     pending.timing.finish(status);
-    setSaveTimingSnapshot(pending.timing.snapshot());
-    publishReadingSaveTiming(pending.timing);
+    if (pending.verified && pending.record && active.current) {
+      setSaveFeedback({ status: "saved", reportId: pending.record.id, refreshIssue: status !== "succeeded" });
+    }
+    if (saveDiagnosticsEnabled) {
+      setSaveTimingSnapshot(pending.timing.snapshot());
+      publishReadingSaveTiming(pending.timing);
+    }
     saveTiming.current = null;
-  }, []);
-  useEffect(() => () => { finishSaveTiming("cancelled"); }, [finishSaveTiming]);
-  useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
+  }, [saveDiagnosticsEnabled]);
+  useEffect(() => { active.current = true; return () => { active.current = false; finishSaveTiming("cancelled"); }; }, [finishSaveTiming]);
   const assessmentResult = useMemo(() => {
     try { return { value: buildBaziPreliminaryAssessment(revision), error: null }; }
     catch (reason) { return { value: null, error: safeVisibleErrorMessage(reason, "当前命盘暂时无法生成本地解读。") }; }
@@ -434,25 +461,27 @@ function LocalReadingContent(props: Props) {
   }, [revision, annual, life, timeline, annualDomains]);
   const synthesis = synthesisResult.value, priorities = prioritiesResult.value;
   const readVersion = useRef(0);
-  const refreshRecords = useCallback(async (saved?: { timing: ReadingSaveTiming; record: ResearchNoteRecord | null }) => {
+  const refreshRecords = useCallback(async (saved?: CompleteSaveAttempt) => {
     const version = ++readVersion.current;
     saved?.timing.start("post_save_validation");
     setRecordsLoading(true);
     try {
       const notes = await researchRepository.listResearchNotesByCase(revision.caseId, { includeArchived: true });
-      if (!active.current || version !== readVersion.current) {
-        if (saved) finishSaveTiming("cancelled");
-        return;
-      }
       if (saved) {
         saved.timing.count({ recordsRead: notes.length });
         const stored = notes.find(note => note.id === saved.record?.id);
-        const verified = !!stored && !!saved.record && stored.caseId === saved.record.caseId
-          && JSON.stringify(stored.anchor) === JSON.stringify(saved.record.anchor) && stored.body === saved.record.body
-          && stored.editVersion === saved.record.editVersion && stored.lifecycle === saved.record.lifecycle;
-        // A diagnostic failure must not retry a committed write or change stored data.
-        if (!verified) finishSaveTiming("failed");
-        else { saved.timing.end(); saved.timing.start("page_refresh"); }
+        const verified = !!stored && !!saved.record && stored.caseId === revision.caseId && saved.record.caseId === revision.caseId
+          && stored.anchor.kind === "revision" && stored.anchor.revisionId === revision.id
+          && JSON.stringify(stored.anchor) === JSON.stringify(saved.record.anchor) && stored.body === saved.body && stored.body === saved.record.body
+          && stored.editVersion === saved.record.editVersion && stored.lifecycle === "active" && saved.record.lifecycle === "active"
+          && stored.tags.includes(LOCAL_READING_SNAPSHOT_TAG) && JSON.stringify(stored.tags) === JSON.stringify(saved.record.tags);
+        saved.verified = verified;
+        saved.timing.end(verified ? "succeeded" : "failed");
+        if (verified && active.current && version === readVersion.current) saved.timing.start("page_refresh");
+      }
+      if (!active.current || version !== readVersion.current) {
+        if (saved && saveTiming.current === saved) finishSaveTiming("cancelled");
+        return;
       }
       setCaseRecords(notes);
       setRecords(notes.filter((note) => note.anchor.kind === "revision" && note.anchor.revisionId === revision.id
@@ -460,7 +489,7 @@ function LocalReadingContent(props: Props) {
           || parseReadingContext(note.body).kind !== "legacy")));
       setRecordsError(null);
     } catch (reason) {
-      if (saved) finishSaveTiming("failed");
+      if (saved) { saved.verified = false; saved.timing.end("failed"); }
       if (active.current && version === readVersion.current) setRecordsError(safeVisibleErrorMessage(reason, "本地解读记录暂未读到。"));
     } finally { if (active.current && version === readVersion.current) setRecordsLoading(false); }
   }, [revision.caseId, revision.id, finishSaveTiming]);
@@ -520,27 +549,40 @@ function LocalReadingContent(props: Props) {
     setAnnualWindow((previous) => ({ kind: "stage", decadeId, sequence: previous.sequence + 1 }));
   };
 
-  const saveRecord = async (content: string | (() => Promise<string>), tag: string, additionalTags: string[] = [], timing?: ReadingSaveTiming) => {
+  const saveRecord = async (content: string | (() => Promise<string>), tag: string, additionalTags: string[] = [], attempt?: CompleteSaveAttempt) => {
     if (props.readOnly) throw new Error("请先恢复此命盘，再保存记录。");
     const operation = acquireResearchJournalMutation("note-save", revision.caseId);
     if (!operation) throw new Error("另一条记录正在保存或等待核对，请到解读记录中查看后再试。");
     try {
       const body = typeof content === "function" ? await content() : content;
       researchNoteRecordSchema.shape.body.parse(body);
+      if (attempt) attempt.body = body;
       if (!active.current) throw new Error("当前命盘已切换，请重新打开对应记录后保存。");
       try {
         const write = () => researchRepository.createResearchNote({ caseId: revision.caseId,
           anchor: { kind: "revision" as const, revisionId: revision.id }, body, tags: [tag, ...additionalTags], sourceRefs: [], lifecycle: "active" as const });
-        const record = timing ? await timing.measureAsync("repository_write", write) : await write();
-        if (timing && saveTiming.current?.timing === timing) saveTiming.current.record = record;
+        if (attempt) attempt.writeStarted = true;
+        const record = attempt ? await attempt.timing.measureAsync("repository_write", write) : await write();
+        if (attempt) attempt.record = record;
       } catch (reason) {
         lockResearchJournalMutationUnknown(operation, { targetKind: "research_note", targetId: null,
           action: tag, expectedState: `修订 ${revision.id}`, draftIdentity: `正文 ${body.length} 字符` },
           safeVisibleErrorMessage(reason, "保存结果尚未确认。"));
         throw new Error("保存结果尚未确认，已停止重复写入。请先到解读记录核对是否已有这条内容。");
       }
+      if (attempt) {
+        // Keep the existing write guard until the actual readback is bound to
+        // this request. A returned write is never retried after a failed read.
+        await refreshRecords(attempt);
+        if (!attempt.verified) {
+          lockResearchJournalMutationUnknown(operation, { targetKind: "research_note", targetId: attempt.record?.id ?? null,
+            action: tag, expectedState: `修订 ${revision.id}`, draftIdentity: `正文 ${body.length} 字符` },
+            "保存调用已返回，但读回记录尚未与本次内容核对一致。", "returned_unreconciled");
+          throw new Error("保存结果尚未确认，已停止重复写入。请先到解读记录核对是否已有这条内容。");
+        }
+      }
     } finally { releaseResearchJournalMutation(operation); }
-    await refreshRecords(timing && saveTiming.current?.timing === timing ? saveTiming.current : undefined);
+    if (!attempt) await refreshRecords();
   };
 
   const appendReview = async (root: ResearchNoteRecord, draft: ReadingFeedbackReviewDraft, expectedLatestId: string | null) => {
@@ -722,7 +764,7 @@ function LocalReadingContent(props: Props) {
   // derived personal/context/index state. This is not a browser-paint timestamp.
   useEffect(() => {
     const pending = saveTiming.current;
-    if (!pending?.record || pending.timing.snapshot().stages.find(stage => stage.stage === "page_refresh")?.status !== "running") return;
+    if (!pending?.record || !pending.verified || pending.timing.snapshot().stages.find(stage => stage.stage === "page_refresh")?.status !== "running") return;
     if (recordsError || personalError || contextError || contextualResult.error || briefResult.error || explanationResult.error || keyMonthError) {
       finishSaveTiming("failed"); return;
     }
@@ -730,24 +772,29 @@ function LocalReadingContent(props: Props) {
     if (records.some(record => record.id === pending.record!.id && record.body === pending.record!.body)) finishSaveTiming("succeeded");
   });
   const saveCompleteReport = async () => {
-    const timing = saveDiagnosticsEnabled ? createReadingSaveTiming(++saveTimingSequence.current) : undefined;
-    if (timing) {
-      finishSaveTiming("cancelled");
-      saveTiming.current = { timing, record: null };
-      timing.start("preconditions");
-      setSaveTimingSnapshot(timing.snapshot());
-    }
+    if (saveTiming.current) throw new Error("这份报告正在保存并核对，请勿重复保存。");
+    const timing = createReadingSaveTiming(++saveTimingSequence.current, undefined, stage => {
+      if (active.current) setSaveFeedback({ status: "working", stage });
+    });
+    const attempt: CompleteSaveAttempt = { timing, record: null, body: null, writeStarted: false, verified: false, reportPrepared: false };
+    saveTiming.current = attempt;
+    timing.start("preconditions");
+    if (saveDiagnosticsEnabled) setSaveTimingSnapshot(timing.snapshot());
     try {
       await saveRecord(async () => {
         const report = await prepareCompleteReport(timing, false);
-        timing?.count({ readingCharacters: report.reading.length, archiveCharacters: report.archive.length });
+        attempt.reportPrepared = true;
+        timing.count({ readingCharacters: report.reading.length, archiveCharacters: report.archive.length });
         const encode = async () => packReadingSnapshot(await encodeReadingReportBundle(report));
-        const body = timing ? await timing.measureAsync("encoding_compression", encode) : await encode();
-        timing?.count({ storedCharacters: body.length });
+        const body = await timing.measureAsync("encoding_compression", encode);
+        timing.count({ storedCharacters: body.length });
         return body;
-      }, LOCAL_READING_SNAPSHOT_TAG, [], timing);
+      }, LOCAL_READING_SNAPSHOT_TAG, [], attempt);
     } catch (error) {
-      if (timing && saveTiming.current?.timing === timing) finishSaveTiming("failed");
+      if (saveTiming.current === attempt) finishSaveTiming("failed");
+      if (active.current) setSaveFeedback(attempt.writeStarted || getResearchJournalMutationSnapshot().status === "call_unknown"
+        ? { status: "unconfirmed", message: "保存结果尚未确认，已暂停继续写入，请先核对保存记录。" }
+        : rejectedSaveFeedback(error, attempt.reportPrepared));
       throw error;
     }
   };
@@ -810,6 +857,8 @@ function LocalReadingContent(props: Props) {
       onExportReading={() => { void exportCompleteReport("reading"); }}
       onExportArchive={() => { void exportCompleteReport("archive"); }}
       onSaveReading={props.readOnly ? undefined : saveCompleteReport}
+      saveFeedback={mutation.status === "call_unknown" ? { status: "unconfirmed", message: "有一笔保存结果尚未确认，已暂停继续写入，请先核对保存记录。" } : saveFeedback}
+      onCheckSave={props.onOpenRecords}
       onAddFeedback={props.readOnly ? undefined : (draft) => {
         if (!draft.subjectId) return saveRecord(buildLocalReadingFeedback(assessment, draft.originalConclusion, draft.actualSituation), LOCAL_READING_FEEDBACK_TAG);
         const choice = buildReadingFeedbackChoices(assessment, annual, feedbackChoices).find((item) => item.id === draft.subjectId);

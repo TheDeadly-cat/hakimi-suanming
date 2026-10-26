@@ -10,6 +10,15 @@ function deferred<T>() {
 }
 
 describe("private complete-save phase timing", () => {
+  it("publishes only stages that actually start, preserving the real async wait and failure", async () => {
+    const phases:string[]=[], gate=deferred<void>(), timing=createReadingSaveTiming(1,()=>0,stage=>phases.push(stage));
+    timing.start("preconditions");timing.end();
+    const pending=timing.measureAsync("month_preparation",()=>gate.promise);
+    expect(phases).toEqual(["preconditions","month_preparation"]);
+    gate.reject(new Error("blocked month source"));await expect(pending).rejects.toThrow("blocked month source");timing.finish("failed");
+    expect(phases).toEqual(["preconditions","month_preparation"]);
+    expect(timing.snapshot().stages.find(item=>item.stage==="repository_write")?.status).toBe("not_started");
+  });
   it("attributes disjoint report work separately from its index and preserves unmeasured overhead", () => {
     let ms = 100; const timing = createReadingSaveTiming(1, () => ms);
     ms += 2;

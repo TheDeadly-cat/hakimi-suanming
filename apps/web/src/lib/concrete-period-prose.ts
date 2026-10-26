@@ -9,7 +9,7 @@ import type { KeyMonthEventTendency, KeyMonthEventEvidence } from "./key-month-e
 import type { AnnualRelationshipTiming } from "./annual-relationship-timing";
 import type { OutlookRescueTraceBundle } from "./outlook-rescue-trace";
 
-export const CONCRETE_PERIOD_PROSE_VERSION = "hakimi.concrete-period-prose/0.4.1" as const;
+export const CONCRETE_PERIOD_PROSE_VERSION = "hakimi.concrete-period-prose/0.4.2" as const;
 export interface ConcreteLifeSentence {
   text:string; kind:"opportunity"|"caution"|"topic";
   ruleIds?:ConditionalContentRuleId[]; ruleDecisionIds?:string[];
@@ -265,7 +265,9 @@ function differentiatedLifeProse(input:ConcretePeriodInput,contentRules:Conditio
   let headline="";
   if(input.domain === "relationship"){
     const romance=events.find(event=>event.category === "romance"),commitment=events.find(event=>event.category === "commitment"),separation=events.find(event=>event.category === "separation");
-    headline=romance&&commitment?lifeRank[romance.level]>lifeRank[commitment.level]?"先看认识和关系发展，承诺落实的线索稍弱":"关系有向明确承诺推进的线索"
+    headline=romance?.relationshipState === "separated"?"联系与关系发展有线索"
+      :!romance&&!commitment&&separation?.relationshipState === "separated"?separation.level === "weak"?"旧事交接或联系边界可能调整，线索较弱":"旧事交接或联系边界有调整线索"
+      :romance&&commitment?lifeRank[romance.level]>lifeRank[commitment.level]?"先看认识和关系发展，承诺落实的线索稍弱":"关系有向明确承诺推进的线索"
       :romance?"认识、联系或现有关系发展更突出":commitment?"共同生活与承诺落实更突出":separation?separation.level === "weak"?"相处安排有调整信号，结束关系的依据较弱":"关系分歧与是否继续成为重点":"本期未见独立突出的感情变化线索";
     for(const event of [romance,commitment,separation].filter((item):item is LifeEvent=>Boolean(item)))add(eventLine(event),event.category === "separation"?"caution":"opportunity",eventSources(event),event);
     const timing=signals.relationshipTiming;

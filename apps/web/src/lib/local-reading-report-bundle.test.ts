@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { decodeReadingReportBundle, encodeReadingReportBundle, READING_REPORT_BUNDLE_MARKER } from "./local-reading-report-bundle";
+import { decodeReadingReportBundle, encodeReadingReportBundle, READING_REPORT_BUNDLE_MARKER, ReadingReportCapacityError } from "./local-reading-report-bundle";
 import { packReadingSnapshot, unpackReadingSnapshot } from "./local-reading-snapshot-codec";
 
 const input = { reading: "# 阅读稿\r\n本人补充：原样 🌿 e\u0301\n<script>字面文本</script>", archive: "\ufeff# 完整档案\n原结论\u200b与引用全部保留。\r\n", version: "hakimi.local-reading-edition/0.1.0" };
@@ -49,7 +49,11 @@ describe("saved reading report bundle", () => {
   it("rejects invalid producer inputs and an envelope beyond the existing 8 MiB plaintext budget", async () => {
     await expect(encodeReadingReportBundle({ ...input, reading: "\ud800" })).rejects.toThrow();
     await expect(encodeReadingReportBundle({ ...input, version: "bad\nversion" })).rejects.toThrow();
-    await expect(encodeReadingReportBundle({ ...input, archive: "a".repeat(8 * 1024 * 1024) })).rejects.toThrow();
-    await expect(decodeReadingReportBundle(`${READING_REPORT_BUNDLE_MARKER}\n${"a".repeat(8 * 1024 * 1024)}`)).rejects.toThrow();
+    await expect(encodeReadingReportBundle({ ...input, archive: "a".repeat(8 * 1024 * 1024) })).rejects.toBeInstanceOf(ReadingReportCapacityError);
+    await expect(encodeReadingReportBundle({ ...input, archive: "a".repeat(8 * 1024 * 1024 + 1) })).rejects.toBeInstanceOf(ReadingReportCapacityError);
+    await expect(encodeReadingReportBundle({ ...input, archive: "甲".repeat(3_000_000) })).rejects.toBeInstanceOf(ReadingReportCapacityError);
+    const damaged = decodeReadingReportBundle(`${READING_REPORT_BUNDLE_MARKER}\n${"a".repeat(8 * 1024 * 1024)}`);
+    await expect(damaged).rejects.toThrow("原记录仍保留");
+    await expect(damaged).rejects.not.toBeInstanceOf(ReadingReportCapacityError);
   });
 });
