@@ -10,6 +10,15 @@ import { lookupConditionalContentRule, type ConditionalContentAssessment } from 
 export const READING_EXPLANATION_INDEX_VERSION = "hakimi.reading-explanation-index/0.1.0" as const;
 export const READING_EXPLANATION_MARKER = "<!-- hakimi-reading-explanation-index-v1 -->";
 const END_MARKER = "<!-- /hakimi-reading-explanation-index-v1 -->";
+export const READING_EXPLANATION_SHARED_VERSIONS_MARKER = "<!-- hakimi-reading-explanation-index-v2 -->";
+export const READING_EXPLANATION_SHARED_VERSIONS_FORMAT = "hakimi.reading-explanation-shared-arrays/2" as const;
+const SHARED_END_MARKER = "<!-- /hakimi-reading-explanation-index-v2 -->";
+const INDEX_MARKER_FAMILY = "<!-- hakimi-reading-explanation-index-";
+const MAX_INDEX_WIRE_CHARACTERS = 3_000_000;
+// Same byte budget as the existing report bundle/snapshot, checked before
+// expanding shared arrays. The wire limit and all semantic limits stay intact.
+const MAX_EXPANDED_INDEX_BYTES = 8 * 1024 * 1024;
+const utf8 = new TextEncoder();
 const boundedText = z.string().max(30_000);
 const texts = z.array(boundedText).max(500);
 const nullableText = boundedText.nullable();
@@ -128,7 +137,7 @@ export function buildReadingExplanationIndex(input: BuildReadingExplanationIndex
       ruleProfileDigest: revision.manifest.ruleProfileDigest, timeCalibration: clone(revision.timeCalibration),
       engineVersions: clone({ engine: revision.manifest.engine, timeZoneDatabase: revision.manifest.timeZoneDatabase ?? null }),
       context: clone(input.context ?? null), sourceVersions: unique([...report.sourceVersions, ...(report.plainReading?.sourceVersions ?? []), ...(synthesis?.sourceVersions ?? []), READING_EXPLANATION_INDEX_VERSION]),
-      reportVersion: input.reportVersion ?? "hakimi.local-reading-edition/0.22.1", inputRecordedAt: revision.createdAt },
+      reportVersion: input.reportVersion ?? "hakimi.local-reading-edition/0.22.2", inputRecordedAt: revision.createdAt },
     conclusions: [], sources: [...sources.values()].map(({ id, title, url, locator, excerpt, interpretation }) => ({ id, title, url, locator, excerpt, interpretation })),
     citationBindings: [], uncertainty: clone(input.timeUncertainty ?? unassessedReadingTime(revision)),
     limitations: unique([...assessment.limitations, ...(report.plainReading?.limitations ?? []), ...report.coverage.gaps,
@@ -238,23 +247,121 @@ export function validateReadingExplanationIndex(raw: unknown): ReadingExplanatio
   return value;
 }
 
+type SharedVersionsConclusion = Omit<ReadingConclusion, "sourceVersions" | "evidence"> & { sourceVersionsRef: number;
+  evidence: Omit<ReadingConclusion["evidence"], "limits" | "ruleApplications"> & { limitsRef: number } &
+    ({ ruleApplications: ReadingRuleApplication[]; ruleApplicationRefs?: never } | { ruleApplicationRefs: number[]; ruleApplications?: never }) };
+type SharedVersionsIndex = Omit<ReadingExplanationIndex, "conclusions"> & { conclusions: SharedVersionsConclusion[] };
+function shareIndexArrays(index: ReadingExplanationIndex, shareRules = true) {
+  const sourceVersionSets: string[][] = [], evidenceLimitSets: string[][] = [];
+  const ruleApplicationPool: ReadingRuleApplication[] = [];
+  const versions = new Map<string, number>(), limits = new Map<string, number>(), rules = new Map<string, number>();
+  const intern = <T>(values: T, pool: T[], positions: Map<string, number>) => {
+    const key = JSON.stringify(values);
+    let ref = positions.get(key);
+    if (ref === undefined) { ref = pool.length; positions.set(key, ref); pool.push(values); }
+    return ref;
+  };
+  const conclusions = index.conclusions.map(({ sourceVersions, evidence, ...conclusion }): SharedVersionsConclusion => {
+    const { limits: evidenceLimits, ...restEvidence } = evidence;
+    const limitsRef = intern(evidenceLimits, evidenceLimitSets, limits);
+    const { ruleApplications, ...withoutRules } = restEvidence;
+    const compactEvidence = shareRules ? { ...withoutRules, limitsRef,
+      ruleApplicationRefs: ruleApplications.map(rule => intern(rule, ruleApplicationPool, rules)) } : { ...restEvidence, limitsRef };
+    return { ...conclusion, evidence: compactEvidence,
+      sourceVersionsRef: intern(sourceVersions, sourceVersionSets, versions) };
+  });
+  return { format: READING_EXPLANATION_SHARED_VERSIONS_FORMAT, sourceVersionSets, evidenceLimitSets,
+    ...(shareRules ? { ruleApplicationPool } : {}),
+    index: { ...index, conclusions } satisfies SharedVersionsIndex };
+}
+const sharedVersionsEnvelopeSchema = z.object({ format: z.literal(READING_EXPLANATION_SHARED_VERSIONS_FORMAT),
+  sourceVersionSets: z.array(texts).max(2_500), evidenceLimitSets: z.array(texts).max(2_500),
+  ruleApplicationPool: z.array(applicationSchema).max(2_500 * 150).optional(), index: z.unknown() }).strict();
+const isObject = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
+function restoreSourceVersions(raw: unknown, payload: string): ReadingExplanationIndex {
+  const envelope = sharedVersionsEnvelopeSchema.parse(raw), compact = envelope.index;
+  if (!isObject(compact) || !Array.isArray(compact.conclusions) || compact.conclusions.length > 2_500) throw new Error("依据索引的共享版本结构无效。");
+  const poolBytes = envelope.sourceVersionSets.map(versions => utf8.encode(JSON.stringify(versions)).byteLength);
+  const limitBytes = envelope.evidenceLimitSets.map(limits => utf8.encode(JSON.stringify(limits)).byteLength);
+  const ruleBytes = envelope.ruleApplicationPool?.map(rule => utf8.encode(JSON.stringify(rule)).byteLength);
+  let expandedBytes = utf8.encode(JSON.stringify(compact)).byteLength;
+  const reference = (container: unknown, key: "sourceVersions" | "limits", poolSize: number) => {
+    if (!isObject(container) || Object.hasOwn(container, key) || !Object.hasOwn(container, `${key}Ref`)) throw new Error("依据索引的共享数组引用无效。");
+    const ref = container[`${key}Ref`];
+    if (typeof ref !== "number" || !Number.isSafeInteger(ref) || ref < 0 || ref >= poolSize) throw new Error("依据索引的共享数组引用无效。");
+    return ref;
+  };
+  // Only the declared version/limit arrays and complete rule applications use
+  // pools. Other data (including input/context) is never recursively decoded.
+  // Check each ref
+  // and its expansion cost before allocating any repeated arrays.
+  for (const conclusion of compact.conclusions) {
+    const ref = reference(conclusion, "sourceVersions", poolBytes.length);
+    const limitRef = reference((conclusion as Record<string, unknown>).evidence, "limits", limitBytes.length);
+    expandedBytes += poolBytes[ref]! - String(ref).length - 3; // sourceVersionsRef -> sourceVersions
+    expandedBytes += limitBytes[limitRef]! - String(limitRef).length - 3; // limitsRef -> limits
+    if (ruleBytes) {
+      const evidence = (conclusion as Record<string, unknown>).evidence as Record<string, unknown>;
+      if (Object.hasOwn(evidence, "ruleApplications") || !Array.isArray(evidence.ruleApplicationRefs)
+        || evidence.ruleApplicationRefs.length > 150) throw new Error("依据索引的共享规则引用无效。");
+      for (const ruleRef of evidence.ruleApplicationRefs) {
+        if (typeof ruleRef !== "number" || !Number.isSafeInteger(ruleRef) || ruleRef < 0 || ruleRef >= ruleBytes.length) throw new Error("依据索引的共享规则引用无效。");
+        expandedBytes += ruleBytes[ruleRef]! - String(ruleRef).length;
+      }
+      expandedBytes -= 3; // ruleApplicationRefs -> ruleApplications; brackets/commas are unchanged.
+    }
+  }
+  if (expandedBytes > MAX_EXPANDED_INDEX_BYTES) throw new Error("依据索引展开超出读取范围。");
+  const conclusions = compact.conclusions.map(value => {
+    const { sourceVersionsRef, evidence, ...conclusion } = value as Record<string, unknown>;
+    const { limitsRef, ...restEvidence } = evidence as Record<string, unknown>;
+    const { ruleApplicationRefs, ...withoutRuleRefs } = restEvidence;
+    const restoredEvidence = envelope.ruleApplicationPool ? { ...withoutRuleRefs,
+      ruleApplications: (ruleApplicationRefs as number[]).map(ref => structuredClone(envelope.ruleApplicationPool![ref]!)) } : restEvidence;
+    return { ...conclusion, sourceVersions: [...envelope.sourceVersionSets[sourceVersionsRef as number]!],
+      evidence: { ...restoredEvidence, limits: [...envelope.evidenceLimitSets[limitsRef as number]!] } };
+  });
+  const index = validateReadingExplanationIndex({ ...compact, conclusions });
+  // Reject unused/duplicate pool entries, alternate numbering or fields. This
+  // canonical rule is v2-only; the original v1 JSON acceptance is unchanged.
+  if (JSON.stringify(shareIndexArrays(index, envelope.ruleApplicationPool !== undefined)) !== payload) throw new Error("依据索引不是原保存结构。");
+  return index;
+}
+function indexMarkers(archive: string) {
+  // JSON payload strings escape newlines: marker-like literal data inside a
+  // conclusion or context must not be interpreted as a second v2 block.
+  return [...archive.matchAll(/^<!-- hakimi-reading-explanation-index-[^\r\n]*$/gm)];
+}
 export function appendReadingExplanationIndex(archive: string, index: ReadingExplanationIndex): string {
-  if (archive.includes(READING_EXPLANATION_MARKER)) throw new Error("报告已带有依据索引，不能覆盖原索引。");
-  const payload = JSON.stringify(validateReadingExplanationIndex(index));
-  if (payload.length > 3_000_000) throw new Error("本次依据索引过大，未保存不完整结果。");
-  return `${archive}\n\n${READING_EXPLANATION_MARKER}\n${payload}\n${END_MARKER}`;
+  if (archive.includes(INDEX_MARKER_FAMILY)) throw new Error("报告已带有依据索引，不能覆盖原索引。");
+  const checked = validateReadingExplanationIndex(index), payload = JSON.stringify(checked);
+  // Preserve the byte-for-byte v1 writer for reports that already fit.
+  if (payload.length <= MAX_INDEX_WIRE_CHARACTERS) return `${archive}\n\n${READING_EXPLANATION_MARKER}\n${payload}\n${END_MARKER}`;
+  if (utf8.encode(payload).byteLength > MAX_EXPANDED_INDEX_BYTES) throw new Error("本次依据索引展开过大，未保存不完整结果。");
+  const sharedPayload = JSON.stringify(shareIndexArrays(checked));
+  if (sharedPayload.length > MAX_INDEX_WIRE_CHARACTERS) throw new Error("本次依据索引过大，未保存不完整结果。");
+  return `${archive}\n\n${READING_EXPLANATION_SHARED_VERSIONS_MARKER}\n${sharedPayload}\n${SHARED_END_MARKER}`;
 }
 export function readReadingExplanationIndex(archive: string): ReadingExplanationIndex | null {
-  const position = archive.indexOf(READING_EXPLANATION_MARKER);
-  if (position < 0) return null;
-  if (archive.indexOf(READING_EXPLANATION_MARKER, position + READING_EXPLANATION_MARKER.length) >= 0) throw new Error("报告含有重复依据索引。");
-  const content = archive.slice(position + READING_EXPLANATION_MARKER.length);
-  if (!content.startsWith("\n") || !content.endsWith(`\n${END_MARKER}`)) throw new Error("依据索引不完整。");
-  const payload = content.slice(1, -(`\n${END_MARKER}`).length);
-  if (payload.length > 3_000_000) throw new Error("依据索引超出读取范围。");
+  const markers = indexMarkers(archive);
+  if (markers.length > 1) throw new Error("报告含有重复依据索引。");
+  const marker = markers[0]?.[0] ?? (archive.includes(READING_EXPLANATION_MARKER) ? READING_EXPLANATION_MARKER : null);
+  if (marker === null) {
+    if (archive.includes(INDEX_MARKER_FAMILY)) throw new Error("依据索引格式尚不支持。");
+    return null;
+  }
+  const shared = marker === READING_EXPLANATION_SHARED_VERSIONS_MARKER;
+  if (!shared && marker !== READING_EXPLANATION_MARKER) throw new Error("依据索引格式尚不支持。");
+  const position = markers[0]?.index ?? archive.indexOf(marker), endMarker = shared ? SHARED_END_MARKER : END_MARKER;
+  if (archive.slice(0, position).includes(INDEX_MARKER_FAMILY)) throw new Error("报告含有重复或不支持的依据索引。");
+  if (!shared && archive.indexOf(marker, position + marker.length) >= 0) throw new Error("报告含有重复依据索引。");
+  const content = archive.slice(position + marker.length);
+  if (!content.startsWith("\n") || !content.endsWith(`\n${endMarker}`)) throw new Error("依据索引不完整。");
+  const payload = content.slice(1, -(`\n${endMarker}`).length);
+  if (payload.length > MAX_INDEX_WIRE_CHARACTERS) throw new Error("依据索引超出读取范围。");
   const raw: unknown = JSON.parse(payload);
   if (JSON.stringify(raw) !== payload) throw new Error("依据索引不是原保存结构。");
-  return validateReadingExplanationIndex(raw);
+  return shared ? restoreSourceVersions(raw, payload) : validateReadingExplanationIndex(raw);
 }
 
 function route(question: string): ReadingExplanationTopic | null {
