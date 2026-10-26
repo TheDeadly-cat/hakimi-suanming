@@ -1,7 +1,7 @@
 import { useId, useMemo, useState } from "react";
 import { queryReadingExplanation, readingExplanationSearchQuery, type ReadingExplanationIndex, type ReadingExplanationQuery, type ReadingExplanationTopic } from "../lib/reading-explanation-index";
 import { formatDateTime } from "../lib/format";
-import { ReadingConclusionEvidence, readingMonthOptionLabel } from "./reading-explanation-workbench";
+import { ReadingConclusionEvidence, readingConclusionScopeText, readingMonthOptionLabel } from "./reading-explanation-workbench";
 import { ReadingBranchGuide } from "./reading-branch-guide";
 
 const topics: { id: ReadingExplanationTopic; label: string }[] = [
@@ -53,7 +53,10 @@ export function ReadingSavedExplanation({ index }: { index: ReadingExplanationIn
     <p role="status">{answer.summary}</p>{answer.scopeNotes.map((line, n) => <p key={n} className="reading-explanation-limit">{line}</p>)}
     {answer.topic === "uncertainty" ? <p>这里只保留当时记录的检查结果，打开本报告不会重新计算出生时间或替换原结论。</p> : null}
     <div className="reading-explanation-results">{answer.conclusions.map(conclusion => <article key={conclusion.stableId} data-saved-reading-conclusion={conclusion.stableId}>
-      <h3>{conclusion.label}</h3><p className="reading-explanation-original">{conclusion.text}</p>
+      <h3>{conclusion.label}</h3>
+      {conclusion.scope.level !== "natal" ? <p className="reading-explanation-scope">{readingConclusionScopeText(conclusion)}</p> : null}
+      <p className="reading-explanation-original">{conclusion.text}</p>
+      {conclusion.evidence.limits[0] ? <p className="reading-explanation-limit">{conclusion.evidence.limits[0]}</p> : null}
       <ReadingConclusionEvidence index={index} conclusion={conclusion}/>
     </article>)}</div>
   </section>;

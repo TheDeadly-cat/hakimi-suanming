@@ -86,6 +86,8 @@ it.each([false, true])("explains actual recorded direction conditions and search
   fireEvent.click(screen.getByRole("button", { name: "查找报告" }));
   expect(screen.getByText("逆行年段原文，保留自身压力。", { exact: true })).toBeTruthy();
   expect(screen.queryByText("顺行年段原文，具有自身机会。", { exact: true })).toBeNull();
+  expect(article("2028年 · 事业").textContent).toContain("2028-02-04 08:00起至2029-02-04 08:00前（北京时间）；逆行路径");
+  if (savedReport) expect(article("2028年 · 事业").textContent).toContain("合成适用限制：year:backward:2028:career");
   const yearControl = screen.getByLabelText(savedReport ? "保存范围内的年份" : "年份", { exact: true });
   expect((yearControl as HTMLSelectElement).value).toBe("2028");
   fireEvent.change(yearControl, { target: { value: "" } });

@@ -24,7 +24,7 @@ const formatTime = (value: string) => new Date(Date.parse(value) + 8 * 3_600_000
 export const readingMonthOptionLabel = (item: ReadingConclusion) => item.scope.startInstant && item.scope.endExclusiveInstant
   && Number.isFinite(Date.parse(item.scope.startInstant)) && Number.isFinite(Date.parse(item.scope.endExclusiveInstant))
   ? `${formatTime(item.scope.startInstant)}—${formatTime(item.scope.endExclusiveInstant)}前 · ${item.label}` : item.label;
-const scopeText = (item: ReadingConclusion) => item.scope.level === "natal" ? "本命整体倾向，不对应某个确定事件"
+export const readingConclusionScopeText = (item: ReadingConclusion) => item.scope.level === "natal" ? "本命整体倾向，不对应某个确定事件"
   : !item.scope.startInstant || !item.scope.endExclusiveInstant || !Number.isFinite(Date.parse(item.scope.startInstant)) || !Number.isFinite(Date.parse(item.scope.endExclusiveInstant))
     ? "当时未记录完整起止范围，不能补猜日期。"
     : `${formatTime(item.scope.startInstant)}起至${formatTime(item.scope.endExclusiveInstant)}前（北京时间）；${item.scope.branchId === "forward" ? "顺行路径" : item.scope.branchId === "backward" ? "逆行路径" : "已确定路径"}`;
@@ -43,7 +43,7 @@ function Evidence({ index, conclusion }: { index: ReadingExplanationIndex; concl
         {rule.limitations.length ? <><p>本项限制：</p>{list(rule.limitations, "")}</> : null}
       </div>) : <p>{conclusion.origin === "personal" ? "个人原文，不作自动规则背书。" : "未保存逐句的规则映射，不能把规则名称当作已经证明。"}</p>}
       <h4>支持与限制</h4>{list(conclusion.evidence.support, "未单列进一步支持。")}{list(conclusion.evidence.limits, "仍限于原报告所列条件。")}
-      <h4>适用范围</h4><p>{scopeText(conclusion)}</p><p>{conclusion.origin === "personal" ? "已采用个人原文" : conclusion.origin === "contextual" ? "包含已确认生活背景" : "本地规则解释"}</p>
+      <h4>适用范围</h4><p>{readingConclusionScopeText(conclusion)}</p><p>{conclusion.origin === "personal" ? "已采用个人原文" : conclusion.origin === "contextual" ? "包含已确认生活背景" : "本地规则解释"}</p>
       <h4>尚未确定</h4>{list(conclusion.evidence.unknowns, "没有新增的未定项；上述条件和范围仍然适用，事件并非已证实。")}
       {conclusion.evidence.citations.length ? <><h4>相关原文</h4>{conclusion.evidence.citations.map(id => {
         const source = index.sources.find(item => item.id === id)!;
@@ -161,7 +161,7 @@ export function ReadingExplanationWorkbench({ index, revision, records, onTimeUn
     {answer.changes?.length ? <dl>{answer.changes.map((change, i) => <div key={i}><dt>{change.label}</dt><dd>{change.detail}</dd></div>)}</dl> : null}
     <div className={answer.topic === "summary" && !selected ? "reading-explanation-summary" : "reading-explanation-results"}>
       {shown.map(conclusion => <article key={conclusion.stableId} data-reading-conclusion={conclusion.stableId}>
-        <h3>{conclusion.label}</h3>{conclusion.scope.level !== "natal" ? <p className="reading-explanation-scope">{scopeText(conclusion)}</p> : null}
+        <h3>{conclusion.label}</h3>{conclusion.scope.level !== "natal" ? <p className="reading-explanation-scope">{readingConclusionScopeText(conclusion)}</p> : null}
         <p className="reading-explanation-original">{compact && !conclusion.stableId.endsWith("/natal:pattern") ? excerpt(conclusion.text) : conclusion.text}</p>
         {compact ? <><p className="reading-explanation-limit">{conclusion.evidence.limits[0] ?? "保持原报告的条件与范围，不推定事件已经发生。"}</p>
           <button type="button" className="reading-text-button" onClick={() => setSelectedId(conclusion.stableId)}>读完整结论</button></> : null}
