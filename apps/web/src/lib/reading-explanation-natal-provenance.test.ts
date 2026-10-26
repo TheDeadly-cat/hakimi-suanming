@@ -8,7 +8,7 @@ import { NATAL_READING_RULE_APPLICATIONS_VERSION } from "../../../../packages/ba
 import { buildLocalLifeOutlook } from "./local-detailed-outlook";
 import { buildReadingSynthesis } from "./local-reading-synthesis";
 import { buildBriefReadingReport } from "./brief-reading-report";
-import { buildLocalReadingReport } from "./local-reading-edition";
+import { buildLocalReadingReport, LOCAL_READING_EDITION_VERSION } from "./local-reading-edition";
 import { buildReadingExplanationIndex, readReadingExplanationIndex, appendReadingExplanationIndex, resolveReadingCitationSupport } from "./reading-explanation-index";
 import { encodeReadingReportBundle, decodeReadingReportBundle } from "./local-reading-report-bundle";
 import { packReadingSnapshot, unpackReadingSnapshot } from "./local-reading-snapshot-codec";
@@ -121,14 +121,18 @@ it("retains the complete structured mapping through the real archive, bundle and
   expect(reopened).toEqual(saved);
   const restored = readReadingExplanationIndex(reopened!.archive)!;
   expect(restored).toEqual(index);
+  expect(index.sourceSnapshot.reportVersion).toBe(LOCAL_READING_EDITION_VERSION);
+  expect(saved.version).toBe(LOCAL_READING_EDITION_VERSION);
   for (const domain of ["career", "wealth", "relationships"]) {
     const evidence = restored.conclusions.find(item => item.stableId.endsWith(`/natal:${domain}`))!.evidence;
     expect(evidence.ruleApplications.length).toBeGreaterThan(0); expect(evidence.citations.length).toBeGreaterThan(0);
   }
   const legacy = structuredClone(index);
+  legacy.sourceSnapshot.reportVersion = "hakimi.local-reading-edition/0.22.2";
   for (const conclusion of legacy.conclusions) for (const rule of conclusion.evidence.ruleApplications) delete rule.provenance;
   const oldArchive = appendReadingExplanationIndex("原始旧档案文本", legacy);
   expect(readReadingExplanationIndex(oldArchive)).toEqual(legacy);
+  expect(readReadingExplanationIndex(oldArchive)!.sourceSnapshot.reportVersion).toBe("hakimi.local-reading-edition/0.22.2");
   expect(oldArchive.startsWith("原始旧档案文本")).toBe(true);
 });
 

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LOCAL_READING_EDITION_VERSION } from "./local-reading-version";
 import type { RevisionRecord } from "@hakimi/contracts";
 import { canonicalStringify } from "@hakimi/integrity";
 import type { BaziPreliminaryAssessment, PreliminarySource } from "../../../../packages/bazi-interpretation/src/preliminary-assessment";
@@ -137,7 +138,7 @@ export function buildReadingExplanationIndex(input: BuildReadingExplanationIndex
       ruleProfileDigest: revision.manifest.ruleProfileDigest, timeCalibration: clone(revision.timeCalibration),
       engineVersions: clone({ engine: revision.manifest.engine, timeZoneDatabase: revision.manifest.timeZoneDatabase ?? null }),
       context: clone(input.context ?? null), sourceVersions: unique([...report.sourceVersions, ...(report.plainReading?.sourceVersions ?? []), ...(synthesis?.sourceVersions ?? []), READING_EXPLANATION_INDEX_VERSION]),
-      reportVersion: input.reportVersion ?? "hakimi.local-reading-edition/0.22.2", inputRecordedAt: revision.createdAt },
+      reportVersion: input.reportVersion ?? LOCAL_READING_EDITION_VERSION, inputRecordedAt: revision.createdAt },
     conclusions: [], sources: [...sources.values()].map(({ id, title, url, locator, excerpt, interpretation }) => ({ id, title, url, locator, excerpt, interpretation })),
     citationBindings: [], uncertainty: clone(input.timeUncertainty ?? unassessedReadingTime(revision)),
     limitations: unique([...assessment.limitations, ...(report.plainReading?.limitations ?? []), ...report.coverage.gaps,
