@@ -347,24 +347,31 @@ function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive
     if (link) { try { requestBackground(decodeURIComponent(link.getAttribute("href")!.slice(1))); } catch { /* Keep native navigation. */ } }
   }}>
     <header className="reading-workbench-header">
-      <div className="reading-case-heading"><strong>{text(caseName, "我的命盘", 120)}</strong><span>{revision.input.calendarType === "lunar" ? "农历 " : ""}{text(revision.input.date)} {includeHour ? text(revision.input.time) : "时辰未定"}</span><span>{text(revision.input.timeZone)}</span></div>
+      <div className="reading-case-heading"><strong>{text(caseName, "我的命盘", 120)}</strong><span>{revision.input.calendarType === "lunar" ? "农历 " : ""}{text(revision.input.date)} {includeHour ? text(revision.input.time) : "时辰未定"}</span><span>{text(revision.input.timeZone)}</span>
+        {onEditBirthData ? <button className="reading-edit-data" type="button" onClick={onEditBirthData}><PencilLine size={16} aria-hidden="true" />编辑资料</button> : null}
+      </div>
       <div className="reading-header-actions">
-        {onEditBirthData ? <button className="reading-button reading-button--secondary" type="button" onClick={onEditBirthData}><PencilLine size={17} aria-hidden="true" />编辑资料</button> : null}
-        {onExportReading ? <button className="reading-button reading-button--secondary" type="button" disabled={reportLoading} onClick={onExportReading}><FileDown size={17} aria-hidden="true" />导出完整解读</button> : null}
-        {onExportArchive ? <button className="reading-button reading-button--secondary" type="button" disabled={reportLoading} onClick={onExportArchive}><FileDown size={17} aria-hidden="true" />导出完整依据</button> : null}
-        {onSaveReading ? <button className="reading-button reading-button--primary" type="button" disabled={saving || unconfirmed || reportLoading} onClick={() => { void saveReading(); }}>
+        {onSaveReading ? <button className="reading-button reading-button--primary" type="button" aria-describedby={`${sectionId}-save-scope`} disabled={saving || unconfirmed || reportLoading} onClick={() => { void saveReading(); }}>
           {saving ? <LoaderCircle size={18} className="reading-spinner" aria-hidden="true" /> : saved ? <Check size={18} aria-hidden="true" /> : <Save size={18} aria-hidden="true" />}
           {saving ? "正在保存" : unconfirmed ? "保存结果待核对" : saved ? "已保存解读" : "保存解读"}
         </button> : null}
+        {onExportReading || onExportArchive ? <details className="reading-export-menu">
+          <summary className="reading-button reading-button--secondary">更多<ChevronDown size={16} aria-hidden="true" /></summary>
+          <div className="reading-export-options">
+            {onExportReading ? <button className="reading-button reading-button--secondary" type="button" disabled={reportLoading} onClick={onExportReading}><FileDown size={17} aria-hidden="true" />导出完整解读</button> : null}
+            {onExportArchive ? <button className="reading-button reading-button--secondary" type="button" disabled={reportLoading} onClick={onExportArchive}><FileDown size={17} aria-hidden="true" />导出完整依据</button> : null}
+          </div>
+        </details> : null}
       </div>
+      {onSaveReading ? <p className="reading-save-scope" id={`${sectionId}-save-scope`}>保存完整报告：本命、全部年份与月份、计算分支和依据。</p> : null}
       {saveFeedback?.status === "working" ? <p className="reading-save-message" role="status">{SAVE_STAGE_LABELS[saveFeedback.stage]}请保持本页打开，无需重复点击。</p> : null}
       {saveFeedback?.status === "not_saved" ? <p className="reading-save-error" role="alert">本次没有保存，原来的命盘和报告没有改动。{saveFeedback.message}
-        {saveFeedback.canExport && onExportReading && onExportArchive ? "可使用上方的“导出完整解读”和“导出完整依据”。"
+        {saveFeedback.canExport && onExportReading && onExportArchive ? "可展开“更多”，分别导出完整解读和完整依据。"
           : <AppLink href={reportHref}>查看已有报告</AppLink>}</p> : null}
       {saveFeedback?.status === "unconfirmed" ? <p className="reading-save-error" role="alert">{saveFeedback.message}请勿重复保存。
         {onCheckSave ? <button className="text-button" type="button" onClick={onCheckSave}>核对保存记录</button> : <AppLink href={reportHref}>查看保存记录</AppLink>}</p> : null}
       {!saveFeedback && saveState === "failed" ? <p className="reading-save-error" role="alert">{saveError}</p> : null}
-      {saved ? <p className="reading-save-message" role="status">{saveFeedback?.status === "saved" ? "报告已保存并核对" : "报告已保存"}，下次可在“我的报告”中找到。
+      {saved ? <p className="reading-save-message" role="status">{saveFeedback?.status === "saved" ? "报告已保存并核对" : "报告已保存"}，已保存到本机。下次从“档案 → 已保存报告”找回完整报告原文。
         {saveFeedback?.status === "saved" && saveFeedback.refreshIssue ? "本页更新尚未完成，可以直接打开已保存的原文。" : null}
         <AppLink href={reportHref}>{saveFeedback?.status === "saved" ? "打开已保存报告" : "打开我的报告"}</AppLink></p> : null}
       {reportLoading && !saving ? <p className="reading-save-message" role="status">正在整理大运与流月，完成后可保存完整解读。</p> : null}
@@ -419,7 +426,8 @@ function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive
 
       <section className="reading-answer-column" id="reading-natal" tabIndex={-1} aria-labelledby={`${sectionId}-headline`}>
         <div className="reading-section-heading reading-answer-kicker"><h2>{boundBrief ? "主报告" : "本盘判断"}</h2><span>{boundBrief ? "先说结论，再看事业、财运、感情与年月" : "基于四柱结构的本地初步解读"}</span></div>
-        <h1 id={`${sectionId}-headline`} className="reading-main-headline">{text(pillars.day.stem)}{ELEMENTS[SYMBOL_ELEMENT[pillars.day.stem] ?? ""]}日主 · {text(workingBalance.label)}</h1>
+        <h1 id={`${sectionId}-headline`} className="reading-main-headline">先看懂这份命盘</h1>
+        <p className="reading-professional-label">本盘专业分类：{text(pillars.day.stem)}{ELEMENTS[SYMBOL_ELEMENT[pillars.day.stem] ?? ""]}日主 · {text(workingBalance.label)}</p>
         {explanationPanel ? <>{explanationPanel}{boundBrief ? <details className="reading-fold" onToggle={event => setCompleteNatalOpen(event.currentTarget.open)}>
           <summary>展开完整本命阅读</summary>{completeNatalOpen ? <BriefReadingReportPanel report={boundBrief} variant="summary" onSelectYear={(next) => { setYear(next); onSelectYear?.(next); }} /> : null}</details> : null}</>
           : boundBrief ? <BriefReadingReportPanel report={boundBrief} variant="summary" onSelectYear={(next) => { setYear(next); onSelectYear?.(next); }} /> : boundSynthesis ? <ReadingSynthesisPanel reading={boundSynthesis} variant="summary" plainCards={buildPlainNatalCards(boundSynthesis, boundComprehensive, { revision, referenceInstant: boundLife?.referenceInstant })} />

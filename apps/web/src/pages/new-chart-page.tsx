@@ -32,6 +32,7 @@ import {
 } from "../lib/active-rule-pack";
 import { useLocalAppSettings, type LocalAppSettings } from "../lib/local-app-settings";
 import "./new-chart-page.css";
+import "./birth-input-guidance.css";
 
 function scrollToWizardTop(): void {
   const reducedMotion = typeof window.matchMedia === "function" &&
@@ -1305,15 +1306,18 @@ export function NewChartPage(props: NewChartPageProps = {}) {
               <div className="section-intro"><p className="eyebrow">{simple ? "填写资料" : "步骤 2 / 4"}</p><h2 ref={stageHeadingRef} id="wizard-stage-title" tabIndex={-1}>{simple ? "先填写你的出生资料" : "录入出生资料"}</h2><p>按出生地当时的钟表时间填写；如果不知道时辰，可以选择未知时辰。</p></div>
               <div className="field-grid">
                 <label className="field"><span>输入历法</span><select value={form.calendarType} onChange={(event) => updateCalendarType(event.target.value as FormState["calendarType"])}><option value="gregorian">公历</option><option value="lunar">农历</option></select><small>切换历法会清空日期，防止同一串数字被静默换一种历法解释。</small></label>
-                <label className="field"><span>时间精度</span><select value={form.timePrecision} onChange={(event) => updateTimePrecision(event.target.value as FormState["timePrecision"])}><option value="exact_minute">精确到分钟</option><option value="exact_second">精确到秒 · 边界研究</option><option value="unknown_hour" disabled={revisionMode}>不知道出生时辰 · 查看候选命盘</option></select><small>{revisionMode ? "正式 Revision 只能保留精确时间；未知时辰请单独新建候选组。" : "不知道时辰也可以继续，不同时辰的结果会分别展示。"}</small></label>
+                <label className="field"><span>时间精度</span><select value={form.timePrecision} onChange={(event) => updateTimePrecision(event.target.value as FormState["timePrecision"])}><option value="exact_minute">知道具体时间 · 精确到分钟</option>{!simple || form.timePrecision === "exact_second" ? <option value="exact_second">精确到秒 · 边界研究</option> : null}<option value="unknown_hour" disabled={revisionMode}>不知道出生时辰 · 查看候选命盘</option></select><small>{revisionMode ? "正式 Revision 只能保留精确时间；未知时辰请单独新建候选组。" : "只知道一个时辰或大概范围？当前尚不支持范围输入，请先保留未知，不要猜一个精确时间。"}</small></label>
                 <label className="field"><span>{form.calendarType === "lunar" ? "农历日期" : "出生日期"} <em>必填</em></span>{form.calendarType === "gregorian" ? <input ref={dateInputRef} type="date" min="1900-01-01" max="2100-12-31" value={form.date} onChange={(event) => update("date", event.target.value)} autoComplete="off" required aria-invalid={validationField === "date" || undefined} aria-describedby={describedBy("birth-date-help", "date")} /> : <input ref={dateInputRef} type="text" inputMode="numeric" pattern="\d{4}-\d{2}-\d{2}" maxLength={10} value={form.date} onChange={(event) => update("date", event.target.value)} placeholder="例如 1995-07-23" autoComplete="off" required aria-invalid={validationField === "date" || undefined} aria-describedby={describedBy("birth-date-help", "date")} />}<small id="birth-date-help">{form.calendarType === "lunar" ? "按农历年、月、日填写 YYYY-MM-DD；不是转换后的公历日期。" : "按资料中的公历民用日期填写。"}</small></label>
                 {form.calendarType === "lunar" ? <label className={`lunar-leap-toggle${form.lunarLeapMonth ? " is-selected" : ""}`}><input type="checkbox" checked={form.lunarLeapMonth} onChange={(event) => update("lunarLeapMonth", event.target.checked)} /><span><strong>这是闰月</strong><small>仅当该农历年确有同名闰月时勾选；无效组合会明确拒绝。</small></span></label> : null}
                 <label className="field"><span>{simple ? "出生时间" : "民用时间"} {form.timePrecision === "exact_minute" || form.timePrecision === "exact_second" ? <em>必填</em> : null}</span><input ref={timeInputRef} type="time" step={form.timePrecision === "exact_second" ? 1 : 60} value={form.timePrecision === "exact_minute" || form.timePrecision === "exact_second" ? form.time : ""} disabled={form.timePrecision !== "exact_minute" && form.timePrecision !== "exact_second"} onChange={(event) => update("time", event.target.value)} required={form.timePrecision === "exact_minute" || form.timePrecision === "exact_second"} aria-invalid={validationField === "time" || undefined} aria-describedby={describedBy("birth-time-help", "time")} /><small id="birth-time-help">{form.timePrecision === "unknown_hour" ? "保持未知；不会写入任何伪造时刻。" : form.timePrecision === "exact_second" ? "秒级输入只用于节气、换日等边界研究，并原样保存。" : "请填写资料中真实记录的民用时间。"}</small></label>
-                {simple ? <label className="field"><span>出生地时区</span><select aria-label="出生地时区" value={COMMON_TIME_ZONES.some(([value]) => value === form.timeZone) ? form.timeZone : "custom"} onChange={(event) => update("timeZone", event.target.value === "custom" ? "" : event.target.value)}>{COMMON_TIME_ZONES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}<option value="custom">其他时区</option></select><small>中国大陆通常选北京时间；海外出生请选择当地时区。</small></label> : null}
+                {simple ? <label className="field"><span>出生地时区</span><select aria-label="出生地时区" value={COMMON_TIME_ZONES.some(([value]) => value === form.timeZone) ? form.timeZone : "custom"} onChange={(event) => update("timeZone", event.target.value === "custom" ? "" : event.target.value)}>{COMMON_TIME_ZONES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}<option value="custom">其他时区</option></select><small>请确认出生地当时使用的时区。城市名称不会自动更改这里的选择；历史夏令时歧义会单独提示。</small></label> : null}
                 {!simple || !COMMON_TIME_ZONES.some(([value]) => value === form.timeZone) ? <label className="field"><span>IANA 时区 <em>必填</em></span><input ref={timeZoneInputRef} list="iana-time-zones" value={form.timeZone} onChange={(event) => update("timeZone", event.target.value)} placeholder="Asia/Shanghai" autoComplete="off" autoCapitalize="off" spellCheck={false} maxLength={MAX_TIME_ZONE_CHARACTERS} required aria-invalid={validationField === "timeZone" || undefined} aria-describedby={describedBy("birth-time-zone-help", "timeZone")} /><small id="birth-time-zone-help">必须使用可识别的 IANA 名称；不用“北京时间”等简称猜测。</small></label> : null}
                 <label className="field"><span>出生性别</span><select value={form.sex} onChange={(event) => update("sex", event.target.value as FormState["sex"])}><option value="unspecified">未指定</option><option value="male">男</option><option value="female">女</option></select><small>用于计算大运顺逆；未指定时，年度解读分别列出条件分支。</small></label>
-                <label className="field"><span>{simple ? "出生城市（可选）" : "地点标签"}</span><span className="input-with-icon"><MapPin aria-hidden="true" /><input ref={locationLabelInputRef} value={form.locationLabel} onChange={(event) => update("locationLabel", event.target.value)} placeholder="例如：北京；可留空" autoComplete="off" maxLength={MAX_LOCATION_LABEL_CHARACTERS} aria-invalid={validationField === "locationLabel" || undefined} aria-describedby={describedBy("birth-location-help", "locationLabel")} /></span><small id="birth-location-help">最多 {MAX_LOCATION_LABEL_CHARACTERS} 个字符；城市用于记录，请同时确认上方时区。</small></label>
+                <label className="field"><span>{simple ? "出生城市（可选）" : "地点标签"}</span><span className="input-with-icon"><MapPin aria-hidden="true" /><input ref={locationLabelInputRef} value={form.locationLabel} onChange={(event) => update("locationLabel", event.target.value)} placeholder="例如：北京；可留空" autoComplete="off" maxLength={MAX_LOCATION_LABEL_CHARACTERS} aria-invalid={validationField === "locationLabel" || undefined} aria-describedby={describedBy("birth-location-help", "locationLabel")} /></span><small id="birth-location-help">城市只作资料记录，尚未自动识别时区或坐标。请单独确认出生地时区；最多 {MAX_LOCATION_LABEL_CHARACTERS} 个字符。</small></label>
               </div>
+              {simple ? <details className="wizard-technical-details"><summary>秒级时间设置（边界研究）</summary>
+                <label className="field"><span>钟表记录精度</span><select value={form.timePrecision} disabled={form.timePrecision === "unknown_hour"} onChange={(event) => updateTimePrecision(event.target.value as FormState["timePrecision"])}><option value="exact_minute">记录到分钟</option><option value="exact_second">记录到秒</option>{form.timePrecision === "unknown_hour" ? <option value="unknown_hour">出生时间未知</option> : null}</select><small>只在资料真实记录了秒数时使用。从分钟切换会先显示 00 秒，请按原记录核对；没有秒数记录请保留分钟精度。</small></label>
+              </details> : null}
               {simple ? <details className="wizard-technical-details"><summary>命盘名称与备注（可选）</summary>
               <label className="field">
                 <span>命盘名称（可选）</span>
@@ -1461,6 +1465,10 @@ export function NewChartPage(props: NewChartPageProps = {}) {
                 <div><dt>出生日期</dt><dd>{form.calendarType === "lunar" ? "农历" : "公历"} {form.date}{form.lunarLeapMonth ? "（闰月）" : ""}</dd></div>
                 <div><dt>出生时间</dt><dd>{form.timePrecision === "unknown_hour" ? "不知道时辰 · 将分别展示候选" : form.time}</dd></div>
                 <div><dt>出生地时区</dt><dd>{COMMON_TIME_ZONES.find(([value]) => value === form.timeZone)?.[1] ?? form.timeZone}</dd></div>
+                <div><dt>出生城市</dt><dd>{safeVisibleText(form.locationLabel, "未填写", MAX_LOCATION_LABEL_CHARACTERS)} · 只作记录，未自动识别时区</dd></div>
+                <div><dt>实际采用的时间</dt><dd>{form.timePrecision === "unknown_hour" ? "尚无唯一时间；各候选分别计算" : timePreview?.timeZoneResolution.selectedCandidate ? `${timePreview.timeZoneResolution.selectedCandidate.resolvedWallTime.replace("T", " ")}（公历，${timePreview.utcOffset}）` : "尚未确认唯一时间"}</dd></div>
+                {form.timePrecision !== "unknown_hour" && timePreview?.timeZoneResolution.selectedCandidate?.matchesInputWallTime === false ? <div><dt>本次时间调整</dt><dd>原钟表时间处于夏令时空档；按你选定的方案调整为上面的时间，原始填写仍保留。</dd></div> : null}
+                <div><dt>采用的换日方式</dt><dd>{dayBoundaryLabel(form.dayBoundary)} · 太阳时未用于本次排盘</dd></div>
                 <div><dt>大运顺逆依据</dt><dd>{form.sex === "male" ? "男" : form.sex === "female" ? "女" : "未指定 · 分别展示顺逆分支"}</dd></div>
               </dl> : null}
               <details className="wizard-technical-details" open={simple ? undefined : true}><summary>查看完整资料与排盘规则</summary>
@@ -1503,6 +1511,12 @@ export function NewChartPage(props: NewChartPageProps = {}) {
               </details>
               {candidateResult ? (
                 <div className="candidate-preview" aria-live="polite">
+                  <section className="birth-uncertainty-guide" aria-label="未知时辰的资料与下一步">
+                    <h3>出生时间还未确定</h3>
+                    <dl><div><dt>已经知道</dt><dd>{form.calendarType === "lunar" ? "农历" : "公历"} {form.date}，出生时间未知。</dd></div><div><dt>尚未确定</dt><dd>不能确定唯一的时柱及依赖它的解释；候选间的相似文字也不代表已经核实共同结论。</dd></div><div><dt>现在可以做</dt><dd>保存这份资料，之后从档案重新打开；或返回上一步补充实际时间。</dd></div></dl>
+                    <p>下面的代表时刻只用于分别计算，不是真实出生时间，也不会自动挑选一张主盘。</p>
+                  </section>
+                  <details className="wizard-technical-details" open={simple ? undefined : true}><summary>查看 13 个候选及计算详情</summary>
                   <div className="preview-heading"><div><p className="eyebrow">Unknown hour probes</p><h3>13 个代表性候选</h3></div><StatusPill tone="warning">{simple ? "时辰待确认" : "experimental_probe"}</StatusPill></div>
                   <div className="candidate-grid">
                     {candidateResult.candidates.map((candidate) => (
@@ -1515,6 +1529,7 @@ export function NewChartPage(props: NewChartPageProps = {}) {
                   </div>
                   <dl className="hash-preview"><div><dt>候选组哈希</dt><dd title={candidateResult.resultHash}>{shortHash(candidateResult.resultHash)}</dd></div><div><dt>规则哈希</dt><dd title={candidateResult.ruleProfileDigest}>{shortHash(candidateResult.ruleProfileDigest)}</dd></div></dl>
                   <ul className="warning-list">{candidateResult.warnings.map((warning, index) => <li key={`${index}-${warning}`}>{safeVisibleText(warning, "候选组返回了不可显示的警告。")}</li>)}</ul>
+                  </details>
                   <div className="info-panel"><Info aria-hidden="true" /><p>{simple ? "保存后可查看各时辰的候选命盘。出生时间仍保持未知，之后可以补充资料再判断。" : "候选会保存为独立 CandidateSetRecord，顶层继续保留 unknown_hour 与 time=null；任何代表探针或 DST 变体都不会写成真实出生时刻或主盘。"}</p></div>
                 </div>
               ) : !calculated ? (

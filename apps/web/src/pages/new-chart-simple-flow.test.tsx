@@ -80,7 +80,11 @@ describe("新建命盘的简化主流程", () => {
     expect(screen.getByLabelText(/出生时间/)).toHaveProperty("disabled", true);
     expect(screen.getByLabelText(/出生时间/)).toHaveProperty("value", "");
     fireEvent.click(screen.getByRole("button", { name: "生成我的命盘" }));
-    await screen.findByRole("heading", { name: "13 个代表性候选" }, { timeout: 10_000 });
+    await screen.findByRole("heading", { name: "出生时间还未确定" }, { timeout: 10_000 });
+    const candidateDetails = screen.getByText("查看 13 个候选及计算详情").closest("details")!;
+    expect(candidateDetails.open).toBe(false);
+    expect(screen.getByText(/不能确定唯一的时柱及依赖它的解释/)).toBeTruthy();
+    fireEvent.click(within(candidateDetails).getByText("查看 13 个候选及计算详情"));
 
     expect(calculate).toHaveBeenCalledTimes(1);
     expect(screen.getAllByRole("article")).toHaveLength(13);
@@ -139,6 +143,11 @@ describe("新建命盘的简化主流程", () => {
     await generateExact();
     expect(calculate.mock.calls[0]![0]).toMatchObject({ date, time, timeZone: "America/New_York" });
     expect(calculate.mock.calls[0]![2]).toMatchObject({ dstResolutionOverride: "later" });
+    const adoptedTime = screen.getByText("实际采用的时间").parentElement!;
+    expect(adoptedTime.textContent).toContain(date);
+    expect(adoptedTime.textContent).toContain(time === "02:30" ? "03:30" : "01:30");
+    expect(screen.getByText("出生时间").parentElement!.textContent).toContain(time);
+    if (time === "02:30") expect(screen.getByText(/原钟表时间处于夏令时空档/)).toBeTruthy();
     expect(await caseRepository.listCases()).toEqual([]);
     fireEvent.click(screen.getByRole("button", { name: "保存到本机并查看解读" }));
     await waitFor(() => expect(window.location.pathname).toMatch(/^\/cases\/[^/]+\/revisions\/[^/]+$/));
@@ -171,5 +180,23 @@ describe("新建命盘的简化主流程", () => {
     expect(create).toHaveBeenCalledTimes(1);
     expect(await caseRepository.listCases()).toHaveLength(1);
     expect(window.location.pathname).toBe("/new");
+  });
+
+  it("填写城市不更改时区，确认原始城市和真正采用的公历时间，秒级设置按需展开", async () => {
+    await openSimple();
+    const precision = screen.getByRole("combobox", { name: /时间精度/ });
+    expect(within(precision).queryByRole("option", { name: /精确到秒/ })).toBeNull();
+    expect(screen.getByText("秒级时间设置（边界研究）").closest("details")).toHaveProperty("open", false);
+    fireEvent.change(screen.getByRole("combobox", { name: "出生地时区" }), { target: { value: "America/New_York" } });
+    fireEvent.change(screen.getByLabelText(/出生城市（可选）/), { target: { value: "北京（合成标签）" } });
+    expect(screen.getByRole("combobox", { name: "出生地时区" })).toHaveProperty("value", "America/New_York");
+    expect(screen.getByText(/城市只作资料记录，尚未自动识别时区或坐标/)).toBeTruthy();
+    enterBirth();
+    await generateExact();
+    expect(screen.getByText("出生城市").parentElement!.textContent).toContain("北京（合成标签）");
+    expect(screen.getByText("实际采用的时间").parentElement!.textContent).toContain("1995-08-18 08:26");
+    expect(screen.getByText("实际采用的时间").parentElement!.textContent).toContain("-04:00");
+    expect(screen.getByText(/太阳时未用于本次排盘/)).toBeTruthy();
+    expect(await caseRepository.listCases()).toEqual([]);
   });
 });

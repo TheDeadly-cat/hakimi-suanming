@@ -71,8 +71,9 @@ async function verifyMobileHelpChrome(page: Page) {
   expect(helpBox!.height).toBeGreaterThanOrEqual(44);
 
   const mobileNavigation = page.getByRole("navigation", { name: "手机主导航" });
-  await expect(mobileNavigation.getByRole("link")).toHaveCount(5);
-  await expect(mobileNavigation.locator("[aria-current]")).toHaveCount(0);
+  await expect(mobileNavigation.getByRole("link")).toHaveCount(4);
+  await expect(mobileNavigation.locator("[aria-current]")).toHaveCount(1);
+  await expect(mobileNavigation.getByRole("link", { name: "我的", exact: true })).toHaveAttribute("aria-current", "page");
 
   await focusByKeyboard(page, mobileHelp);
   await expect(mobileHelp).toBeFocused();
@@ -105,7 +106,8 @@ test("200% 与 400% 等效 CSS 视口下核心流程重排且操作仍可达", a
   await openPage(page, "/", /今天从哪一张盘继续/);
   await expectDocumentReflow(page, 320);
   const mobileNavigation = page.getByRole("navigation", { name: "手机主导航" });
-  await expect(mobileNavigation.getByRole("link")).toHaveCount(5);
+  await expect(mobileNavigation.getByRole("link")).toHaveCount(4);
+  await expect(mobileNavigation.getByRole("link", { name: "首页", exact: true })).toHaveAttribute("aria-current", "page");
   await auditCurrentPage(page, "400% 等效工作台");
 
   await openPage(page, "/help", "帮助与安全边界");

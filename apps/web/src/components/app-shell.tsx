@@ -17,10 +17,12 @@ import { useLocalAppSettings } from "../lib/local-app-settings";
 import { AppLink } from "../lib/router";
 import { useOnlineStatus } from "../lib/use-online-status";
 import { PwaInstallBanner } from "./pwa-install-banner";
+import { AppFeedbackDetails } from "./app-feedback-details";
 import { parseChartRoute } from "../lib/transit-route";
 import readingMountainsUrl from "../assets/reading-mountains-v1.png";
 import "./app-shell-polish.css";
 import "./app-shell-reading.css";
+import "./app-shell-mobile-navigation.css";
 
 type NavItem = {
   href: string;
@@ -111,20 +113,27 @@ const navItems: NavItem[] = [
   }
 ];
 
-const createNavItem: NavItem = {
-  href: "/new",
-  label: "新建排盘",
-  shortLabel: "排盘",
-  icon: Plus,
-  match: (pathname) => pathname === "/new"
-};
-
 const mobileNavItems: NavItem[] = [
-  navItems[0]!,
-  navItems[1]!,
-  createNavItem,
-  navItems[2]!,
-  navItems[3]!
+  {
+    ...navItems[0]!,
+    label: "首页",
+    shortLabel: "首页",
+    match: (pathname) => pathname === "/" || pathname === "/new"
+  },
+  {
+    ...navItems[1]!,
+    label: "档案",
+    shortLabel: "档案",
+    match: (pathname) => isCaseWorkflowPath(pathname) || pathname === "/reports" || isCompareWorkflowPath(pathname)
+  },
+  { ...navItems[3]!, label: "学习", shortLabel: "学习" },
+  {
+    href: "/settings",
+    label: "我的",
+    shortLabel: "我的",
+    icon: Settings,
+    match: (pathname) => isSettingsPath(pathname) || pathname === "/help"
+  }
 ];
 
 type RouteContext = {
@@ -297,22 +306,17 @@ function MobileTopBar({ pathname, context, readingMode = false }: { pathname: st
   );
 }
 
-function MobileBottomNav({ pathname, readingMode = false }: { pathname: string; readingMode?: boolean }) {
+function MobileBottomNav({ pathname }: { pathname: string }) {
   return (
     <nav className="mobile-bottom-nav" aria-label="手机主导航">
-      {(readingMode ? [
-        { ...navItems[0]!, label: "首页", shortLabel: "首页" },
-        { ...navItems[1]!, label: "我的命盘", shortLabel: "我的命盘" },
-        createNavItem,
-        { href: "/reports", label: "我的报告", shortLabel: "我的报告", icon: FileText, match: (value: string) => value === "/reports" }
-      ] : mobileNavItems).map((item) => {
+      {mobileNavItems.map((item) => {
         const Icon = item.icon;
         const active = item.match(pathname);
         return (
           <AppLink
             key={item.href}
             href={item.href}
-            className={`mobile-nav-item ${item.href === createNavItem.href ? "mobile-nav-item--create" : ""} ${active ? "is-active" : ""}`}
+            className={`mobile-nav-item ${active ? "is-active" : ""}`}
             aria-label={item.label}
             aria-current={active ? "page" : undefined}
           >
@@ -529,11 +533,18 @@ export function AppShell({ pathname, search = "", children, onPreloadRoute }: Ap
           </div>
         ) : null}
         {readingMode ? null : <><PwaInstallBanner /><MemoizedResearchPreviewBoundary /><MemoizedCompactRouteContext context={routeContext} /></>}
+        {pathname === "/cases" || pathname === "/reports" ? (
+          <nav className="archive-section-nav" aria-label="档案内容">
+            <AppLink href="/cases" aria-current={pathname === "/cases" ? "page" : undefined}>命盘资料</AppLink>
+            <AppLink href="/reports" aria-current={pathname === "/reports" ? "page" : undefined}>已保存报告</AppLink>
+          </nav>
+        ) : null}
         <main ref={mainRef} className="app-main" id="main-content" tabIndex={-1} aria-label={`${routeContext.label}主要内容`}>
           {children}
         </main>
+        <AppFeedbackDetails pathname={pathname} search={search} />
       </div>
-      <MemoizedMobileBottomNav pathname={pathname} readingMode={readingMode} />
+      <MemoizedMobileBottomNav pathname={pathname} />
     </div>
   );
 }

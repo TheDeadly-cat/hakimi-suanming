@@ -16,10 +16,16 @@ export function ReadingBranchGuide({ index, branches, selected, onChange, needed
   const unspecified = index.sourceSnapshot.input.sex === "unspecified";
   const source = index.sourceSnapshot;
   return <aside className="reading-explanation-limit" aria-label="两套结果的原因与查看方式">
+    <strong>先分清：资料已记录，计算路径还未确定</strong>
+    <dl className="reading-branch-known-unknown">
+      <div><dt>已经知道</dt><dd>这里使用的是这份报告保存的出生资料和规则。</dd></div>
+      <div><dt>尚未确定</dt><dd>{knownRule && unspecified ? "性别未填写，当前规则不能据此确定大运顺序。" : "现有资料和规则不足以确认哪套路径适用。"} 两套结果都需保留。</dd></div>
+    </dl>
     <p>{knownRule && unspecified
       ? "这份报告的性别未填写。所用规则需要结合出生年的天干阴阳与性别确定大运顺序，因此保留两套计算结果。"
       : "这份报告保留了两套计算结果，尚不能据此指定其中一套适用于你。"}
       你可以先分别查看，或补充资料后再计算；查看某一套不代表已确认它正确。</p>
+    <p>下一步可以补充实际资料，或只查看某一套的解释；查看不会修改已保存报告。</p>
     <a href={`/cases/${encodeURIComponent(source.caseId)}/revisions/${encodeURIComponent(source.revisionId)}/revise`}>补充资料</a>
     <details open={needed || Boolean(selected) || undefined}>
       <summary>先分别查看</summary>

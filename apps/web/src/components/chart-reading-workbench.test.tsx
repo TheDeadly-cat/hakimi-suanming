@@ -87,6 +87,24 @@ function personal(subjectId: string, originalConclusion: string, personalText: s
 }
 
 describe("priority-year event reading on actual charts", () => {
+  it("keeps one primary save action and reveals complete exports only on request", async () => {
+    const onSaveReading = vi.fn(), onEditBirthData = vi.fn(), onExportReading = vi.fn();
+    const view = render(<ChartReadingWorkbench revision={b.revision} caseName="合成范围说明" assessment={b.assessment}
+      onSaveReading={onSaveReading} onEditBirthData={onEditBirthData} onExportReading={onExportReading} onExportArchive={vi.fn()} />);
+    const header = within(view.container.querySelector<HTMLElement>(".reading-workbench-header")!);
+    const save = header.getByRole("button", { name: "保存解读" });
+    expect(document.getElementById(save.getAttribute("aria-describedby")!)?.textContent).toContain("全部年份与月份、计算分支和依据");
+    expect(view.container.querySelector<HTMLDetailsElement>(".reading-export-menu")!.open).toBe(false);
+    await userEvent.click(header.getByRole("button", { name: "编辑资料" }));
+    expect(onEditBirthData).toHaveBeenCalledTimes(1);
+    await userEvent.click(header.getByText("更多"));
+    await userEvent.click(header.getByRole("button", { name: "导出完整解读" }));
+    expect(onExportReading).toHaveBeenCalledTimes(1);
+    await userEvent.click(header.getByText("更多"));
+    expect(view.container.querySelector<HTMLDetailsElement>(".reading-export-menu")!.open).toBe(false);
+    expect(onSaveReading).not.toHaveBeenCalled();
+    expect(screen.getByRole("heading", { name: "先看懂这份命盘" })).toBeTruthy();
+  });
   it("shows actual save phases without a percentage and opens the specifically confirmed report", () => {
     const onSaveReading=vi.fn(), props={revision:b.revision,caseName:"合成保存状态",assessment:b.assessment,briefReport:bBackground.brief,onSaveReading};
     const view=render(<ChartReadingWorkbench {...props} saveFeedback={{status:"working",stage:"month_preparation"}}/>);
@@ -110,6 +128,8 @@ describe("priority-year event reading on actual charts", () => {
     const view=render(<ChartReadingWorkbench {...props} saveFeedback={rejected}/>);
     const header=()=>within(view.container.querySelector<HTMLElement>(".reading-workbench-header")!);
     expect(header().getByRole("alert").textContent).toContain("本次没有保存，原来的命盘和报告没有改动");
+    expect(view.container.querySelector<HTMLDetailsElement>(".reading-export-menu")!.open).toBe(false);
+    fireEvent.click(header().getByText("更多"));
     fireEvent.click(header().getByRole("button",{name:"导出完整解读"}));fireEvent.click(header().getByRole("button",{name:"导出完整依据"}));
     expect(onExportReading).toHaveBeenCalledTimes(1);expect(onExportArchive).toHaveBeenCalledTimes(1);expect(onSaveReading).not.toHaveBeenCalled();
     view.rerender(<ChartReadingWorkbench {...props} saveFeedback={{status:"unconfirmed",message:"保存结果尚未确认，已暂停继续写入。"}}/>);

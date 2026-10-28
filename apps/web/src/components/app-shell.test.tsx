@@ -11,7 +11,7 @@ describe("AppShell candidate-set navigation", () => {
     );
 
     const desktopCases = within(screen.getByRole("navigation", { name: "主导航" })).getByRole("link", { name: "案例库" });
-    const mobileCases = within(screen.getByRole("navigation", { name: "手机主导航" })).getByRole("link", { name: "案例库" });
+    const mobileCases = within(screen.getByRole("navigation", { name: "手机主导航" })).getByRole("link", { name: "档案" });
     expect(screen.getByRole("complementary", { name: "研究台侧栏" })).toBeTruthy();
     expect(desktopCases.getAttribute("aria-current")).toBe("page");
     expect(mobileCases.getAttribute("aria-current")).toBe("page");
@@ -27,7 +27,7 @@ describe("AppShell candidate-set navigation", () => {
     const desktopCreate = within(screen.getByRole("complementary", { name: "命盘侧栏" }))
       .getByRole("link", { name: "新建排盘" });
     const mobileCreate = within(screen.getByRole("navigation", { name: "手机主导航" }))
-      .getByRole("link", { name: "新建排盘" });
+      .getByRole("link", { name: "首页" });
     expect(desktopCreate.getAttribute("aria-current")).toBe("page");
     expect(mobileCreate.getAttribute("aria-current")).toBe("page");
 
@@ -48,7 +48,7 @@ describe("AppShell candidate-set navigation", () => {
     expect(screen.getAllByRole("link", { name: "设置与诊断" }).every((link) => link.getAttribute("aria-current") === "page")).toBe(true);
   });
 
-  it("把帮助放在桌面页脚与手机顶栏，保持手机主导航固定五项", () => {
+  it("把帮助放在桌面页脚与手机顶栏，并归属固定四项导航中的我的", () => {
     render(
       <AppShell pathname="/help">
         <h1>帮助与安全边界</h1>
@@ -61,11 +61,12 @@ describe("AppShell candidate-set navigation", () => {
     expect(screen.getAllByRole("link", { name: "设置与诊断" }).every((link) => !link.hasAttribute("aria-current"))).toBe(true);
 
     const mobileNavigation = screen.getByRole("navigation", { name: "手机主导航" });
-    expect(within(mobileNavigation).getAllByRole("link")).toHaveLength(5);
-    expect(within(mobileNavigation).getAllByRole("link").every((link) => !link.hasAttribute("aria-current"))).toBe(true);
+    expect(within(mobileNavigation).getAllByRole("link")).toHaveLength(4);
+    expect(mobileNavigation.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
+    expect(within(mobileNavigation).getByRole("link", { name: "我的" }).getAttribute("aria-current")).toBe("page");
   });
 
-  it("让双案例子路由继续归属桌面与手机对照导航", () => {
+  it("双案例子路由保留桌面对照导航，并归属手机档案入口", () => {
     render(
       <AppShell pathname="/compare/pair">
         <h1>双案例结构研究</h1>
@@ -73,9 +74,39 @@ describe("AppShell candidate-set navigation", () => {
     );
 
     const desktopCompare = within(screen.getByRole("navigation", { name: "主导航" })).getByRole("link", { name: "对照台" });
-    const mobileCompare = within(screen.getByRole("navigation", { name: "手机主导航" })).getByRole("link", { name: "对照台" });
+    const mobileCompare = within(screen.getByRole("navigation", { name: "手机主导航" })).getByRole("link", { name: "档案" });
     expect(desktopCompare.getAttribute("aria-current")).toBe("page");
     expect(mobileCompare.getAttribute("aria-current")).toBe("page");
+  });
+
+  it("从阅读进入专业盘、学习与设置时，一级导航的名称和目的地保持不变", () => {
+    const chartPath = "/cases/11111111-1111-4111-8111-111111111111/revisions/22222222-2222-4222-8222-222222222222";
+    const { rerender } = render(<AppShell pathname={chartPath} search="?view=reading"><p>阅读内容</p></AppShell>);
+    const assertNavigation = (active: string) => {
+      const nav = screen.getByRole("navigation", { name: "手机主导航" });
+      expect(within(nav).getAllByRole("link").map((link) => [link.textContent, link.getAttribute("href")])).toEqual([
+        ["首页", "/"], ["档案", "/cases"], ["学习", "/knowledge"], ["我的", "/settings"]
+      ]);
+      expect(nav.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
+      expect(within(nav).getByRole("link", { name: active }).getAttribute("aria-current")).toBe("page");
+    };
+    assertNavigation("档案");
+    rerender(<AppShell pathname={chartPath} search="?view=structure"><p>专业盘</p></AppShell>);
+    assertNavigation("档案");
+    rerender(<AppShell pathname="/knowledge"><p>学习</p></AppShell>);
+    assertNavigation("学习");
+    rerender(<AppShell pathname="/settings/data"><p>本机数据</p></AppShell>);
+    assertNavigation("我的");
+  });
+
+  it("档案提供资料与保存时原文两个入口，报告页仍归属档案", () => {
+    const { rerender } = render(<AppShell pathname="/cases"><p>资料列表</p></AppShell>);
+    const nav = screen.getByRole("navigation", { name: "档案内容" });
+    expect(within(nav).getByRole("link", { name: "已保存报告" }).getAttribute("href")).toBe("/reports");
+    expect(within(nav).getByRole("link", { name: "命盘资料" }).getAttribute("aria-current")).toBe("page");
+    rerender(<AppShell pathname="/reports"><p>原文报告列表</p></AppShell>);
+    expect(within(screen.getByRole("navigation", { name: "档案内容" })).getByRole("link", { name: "已保存报告" }).getAttribute("aria-current")).toBe("page");
+    expect(within(screen.getByRole("navigation", { name: "手机主导航" })).getByRole("link", { name: "档案" }).getAttribute("aria-current")).toBe("page");
   });
 
   it("提供正文跳转，并在跨页面导航后把焦点移到主内容区", () => {

@@ -68,7 +68,8 @@ function fixture(): ReadingExplanationIndex {
     uncertainty: unassessedReadingTime(revision), limitations: ["UI测试中的结论不是计算准确率证据。"] });
 }
 function article(label: string) {
-  return screen.getByRole("heading", { name: label }).closest("article")!;
+  return screen.queryByRole("heading", { name: label })?.closest("article")
+    ?? [...document.querySelectorAll<HTMLElement>("article[data-reading-conclusion]")].find(node => node.querySelector(".reading-summary-professional-label")?.textContent === label)!;
 }
 
 it.each([false, true])("explains actual recorded direction conditions and searches only the current/saved report (saved=%s)", savedReport => {
@@ -166,13 +167,59 @@ async function saved(index: ReadingExplanationIndex, variant: "valid" | "case" |
     sourceRefs: [], lifecycle: "active", editVersion: 1, createdAt: "2026-10-25T00:00:00.000Z", updatedAt: "2026-10-25T00:00:00.000Z" });
 }
 
-it("shows the actual pattern judgment beyond the opening month background in the default summary", () => {
+it("does not truncate an unmapped pattern into a misleading first sentence and retains its full original", () => {
   const index = fixture(), pattern = index.conclusions.find(c => c.stableId.endsWith("/natal:pattern"))!;
   render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} />);
   expect(screen.getByRole("button", { name: "一页摘要" }).getAttribute("aria-pressed")).toBe("true");
+  expect(article(pattern.label).getAttribute("data-summary-state")).toBe("original_required");
+  expect(article(pattern.label).textContent).toContain("尚未有可核对的白话表达");
+  fireEvent.click(within(article(pattern.label)).getByRole("button", { name: "读完整结论" }));
   const text = article(pattern.label).querySelector("p.reading-explanation-original")!.textContent;
   expect(text).toBe(pattern.text);
   expect(text).toContain("当前主判：本盘的结构任务与实际限制一并保留。");
+});
+
+it("focuses a complete conclusion and returns to the same expanded summary card and scroll position", () => {
+  const index = fixture(), before = JSON.stringify(index);
+  const scroll = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+  const initialScrollY = Object.getOwnPropertyDescriptor(window, "scrollY");
+  Object.defineProperty(window, "scrollY", { configurable: true, value: 1234 });
+  try {
+    const view = render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} />);
+    const summary = article("收入开支 · 合成主线");
+    const condition = summary.querySelector("details")!;
+    fireEvent.click(within(summary).getByText("条件与术语"));
+    expect(condition.open).toBe(true);
+    const trigger = within(summary).getByRole("button", { name: "读完整结论" });
+    fireEvent.click(trigger);
+    expect(document.activeElement).toBe(view.container.querySelector(".reading-explanation-results h3"));
+    expect(view.container.querySelector<HTMLElement>(".reading-summary-groups")!.hidden).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "返回刚才的摘要" }));
+    expect(document.activeElement).toBe(trigger);
+    expect(condition.isConnected).toBe(true);
+    expect(condition.open).toBe(true);
+    expect(scroll).toHaveBeenLastCalledWith({ top: 1234, behavior: "instant" });
+    expect(JSON.stringify(index)).toBe(before);
+  } finally {
+    scroll.mockRestore();
+    if (initialScrollY) Object.defineProperty(window, "scrollY", initialScrollY);
+  }
+});
+
+it("returns to the same month list with the selected year and branch intact", () => {
+  const index = fixture();
+  const view = render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} />);
+  fireEvent.click(screen.getByText("年份、月份与更多查看"));
+  fireEvent.click(screen.getByRole("button", { name: "关键月份" }));
+  fireEvent.change(screen.getByLabelText("分别查看结果"), { target: { value: "forward" } });
+  const month = view.container.querySelector<HTMLElement>(".reading-explanation-results article")!;
+  const id = month.dataset.readingConclusion;
+  fireEvent.click(within(month).getByRole("button", { name: "读完整结论" }));
+  fireEvent.click(screen.getByRole("button", { name: "返回刚才的列表" }));
+  expect(screen.getByLabelText("年份")).toHaveProperty("value", "2028");
+  expect(screen.getByLabelText("分别查看结果")).toHaveProperty("value", "forward");
+  expect(document.activeElement?.closest("article")?.dataset.readingConclusion).toBe(id);
+  expect(document.activeElement?.textContent).toBe("读完整结论");
 });
 
 it("keeps the same full conclusion and its own evidence through summary, topic and details", async () => {
@@ -180,7 +227,8 @@ it("keeps the same full conclusion and its own evidence through summary, topic a
   render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} />);
   const summary = article(label);
   expect(summary.getAttribute("data-reading-conclusion")).toBe(id);
-  expect(within(summary).getByText("事业合成第一句。", { exact: true })).toBeTruthy();
+  expect(summary.getAttribute("data-summary-state")).toBe("original_required");
+  expect(within(summary).queryByText("事业合成第一句。", { exact: true })).toBeNull();
   expect(screen.queryByText("事业合成第一句。事业完整第二句必须保留。", { exact: true })).toBeNull();
   fireEvent.click(within(summary).getByRole("button", { name: "读完整结论" }));
   expect(article(label).getAttribute("data-reading-conclusion")).toBe(id);
@@ -193,6 +241,26 @@ it("keeps the same full conclusion and its own evidence through summary, topic a
   expect(within(topic).getByRole("link", { name: "事业合成来源" }).getAttribute("href")).toBe("https://example.invalid/career");
   expect(screen.queryByText("不可借给事业的财务摘录。", { exact: true })).toBeNull();
   expect(JSON.stringify(index)).toBe(original);
+});
+
+it("groups the overview into three tasks and opens and closes glossary help without losing the current conclusion", () => {
+  const index = fixture();
+  const pattern = index.conclusions.find(c => c.stableId.endsWith("/natal:pattern"))!;
+  pattern.label = "格局主判";
+  pattern.text = "本盘采用格局原结论。偏弱仅为当前分类，不是身体差。完整条件保留。";
+  render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} />);
+  for (const name of ["当前解释", "相关生活主题", "待确定事项"]) expect(screen.getByRole("region", { name })).toBeTruthy();
+  fireEvent.click(within(article(pattern.label)).getByRole("button", { name: "读完整结论" }));
+  const node = article(pattern.label);
+  fireEvent.click(within(node).getByText("解释这条里的术语"));
+  const trigger = within(node).getByRole("button", { name: "解释偏弱" });
+  fireEvent.click(trigger);
+  expect(screen.getByRole("complementary", { name: "偏弱的说明" }).textContent).toContain("不是身体弱或能力差");
+  fireEvent.keyDown(screen.getByRole("complementary", { name: "偏弱的说明" }), { key: "Escape" });
+  expect(screen.queryByRole("complementary", { name: "偏弱的说明" })).toBeNull();
+  expect(document.activeElement).toBe(trigger);
+  expect(node.querySelector(".reading-explanation-original")!.textContent).toBe(pattern.text);
+  expect(node.getAttribute("data-reading-conclusion")).toBe(pattern.stableId);
 });
 
 it("preserves adopted personal prose literally and does not display automatic citations as its support", async () => {

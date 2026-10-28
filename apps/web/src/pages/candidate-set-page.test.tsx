@@ -180,6 +180,11 @@ describe("CandidateSetPage", () => {
     expect(screen.getByText("这份未知时辰资料已保存在本机")).toBeTruthy();
     expect(screen.getByRole("link", { name: "回到我的命盘" }).getAttribute("href")).toBe("/cases");
     expect(screen.getByRole("link", { name: "先分别查看候选结果" }).getAttribute("href")).toBe("#candidate-set-probes");
+    const candidateDetails = screen.getByText("查看 13 个候选与计算详情").closest("details")!;
+    expect(candidateDetails.open).toBe(false);
+    expect(screen.getByText(/唯一的时柱及依赖它的解释/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("link", { name: "先分别查看候选结果" }));
+    expect(candidateDetails.open).toBe(true);
     expect(getCandidateSet).toHaveBeenCalledOnce();
     expect(getCandidateSet).toHaveBeenCalledWith(record.id);
     expect(screen.getByText((_, element) => element?.tagName === "P" && element.textContent?.includes("time = null") === true)).toBeTruthy();

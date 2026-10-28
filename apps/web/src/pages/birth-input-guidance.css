@@ -1,0 +1,33 @@
+.birth-uncertainty-guide {
+  padding: 18px;
+  border: 1px solid var(--line-200);
+  border-radius: 12px;
+  background: var(--paper-raised);
+  line-height: 1.65;
+}
+
+.birth-uncertainty-guide h3 { margin: 0 0 12px; }
+.birth-uncertainty-guide dl { display: grid; gap: 12px; margin: 0; }
+.birth-uncertainty-guide dt { color: var(--ink-650); font-size: 14px; }
+.birth-uncertainty-guide dd { margin: 3px 0 0; overflow-wrap: anywhere; }
+.birth-uncertainty-guide p { margin-bottom: 0; }
+.candidate-set-reading-details > summary {
+  min-height: 48px;
+  padding: 14px 16px;
+  cursor: pointer;
+  border: 1px solid var(--line-200);
+  border-radius: 8px;
+  background: var(--paper-raised);
+  font-weight: 600;
+}
+.candidate-set-reading-details > summary:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+.candidate-set-reading-details[open] > summary { margin-bottom: 20px; }
+.candidate-set-reading-details > section { margin-bottom: 24px; }
+.birth-uncertainty-guide .button-row { margin-top: 16px; }
+
+@media (max-width: 767px) {
+  .birth-uncertainty-guide { font-size: 16px; padding: 16px; }
+}
