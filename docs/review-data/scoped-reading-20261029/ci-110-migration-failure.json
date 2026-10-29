@@ -1,0 +1,683 @@
+{
+  "format": "hakimi-exact-head-migration-observation/1",
+  "capturedAt": "2026-10-29T05:00:18.293Z",
+  "repository": "TheDeadly-cat/hakimi-suanming",
+  "runId": 40817255215,
+  "requestedHead": "110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+  "actualCheckout": "8ae2a4600646722399683b260e224a60b6e7bb7b",
+  "runUrl": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40817255215",
+  "aggregate": {
+    "id": 123271792324,
+    "name": "Complete migration matrix",
+    "status": "completed",
+    "conclusion": "failure"
+  },
+  "totals": {
+    "total": 45,
+    "passed": 44,
+    "failed": 1,
+    "skipped": 0,
+    "interrupted": 0,
+    "retried": 0
+  },
+  "pollObservation": {
+    "snapshots": 18,
+    "minimumIntervalMs": 106762,
+    "allIntervalsAtLeast90Seconds": true
+  },
+  "suites": [
+    {
+      "suite": "cross-schema-upgrade",
+      "jobId": 123261123353,
+      "artifactId": 12872453981,
+      "sha256": "8f6d28152dd6900cc7cf4063ed10f3569500b06cbeed0ab998aa5302de30ecbb",
+      "jobConclusion": "success",
+      "strictResult": {
+        "suite": "cross-schema-upgrade",
+        "tests": 3,
+        "projects": [
+          "msedge"
+        ],
+        "complete": true,
+        "formalReleaseEvidence": false
+      },
+      "directory": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-110e87f/migration-cross-schema-upgrade-12872453981",
+      "checkout": {
+        "evidenceClass": "isolated-synthetic-migration-diagnostic",
+        "requestedBase": "2482941f46acafc6fe0b331f536db06a45710fc8",
+        "suite": "cross-schema-upgrade",
+        "workflowSha": "8ae2a4600646722399683b260e224a60b6e7bb7b",
+        "checkoutParents": "2482941f46acafc6fe0b331f536db06a45710fc8 110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+        "requestedHead": "110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+        "actualCheckout": "8ae2a4600646722399683b260e224a60b6e7bb7b",
+        "formalReleaseAuthorized": false
+      },
+      "counts": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0,
+        "interrupted": 0
+      },
+      "stats": {
+        "startTime": "2026-10-29T04:24:21.178Z",
+        "duration": 98567.698,
+        "expected": 3,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "strictVerification": {
+        "ok": true,
+        "result": {
+          "suite": "cross-schema-upgrade",
+          "tests": 3,
+          "projects": [
+            "msedge"
+          ],
+          "complete": true,
+          "formalReleaseEvidence": false
+        }
+      },
+      "rawResults": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-110e87f/migration-cross-schema-upgrade-12872453981/results.json",
+      "perBrowser": [
+        {
+          "project": "msedge",
+          "total": 3,
+          "passed": 3,
+          "failed": 0
+        }
+      ],
+      "testIdentities": [
+        {
+          "title": "v13-v14 当前旧页明确拒绝自动前向接管，源数据与控制记录不变",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v13-v14 所有旧页关闭后由浏览器自然激活，历史格式物化且源库不变",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v13-v14 新页面直接启动验证真实容量准入、索引和持久提交",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        }
+      ],
+      "failures": []
+    },
+    {
+      "suite": "cross-schema-v13-v15",
+      "jobId": 123261122966,
+      "artifactId": 12872824157,
+      "sha256": "9c698ce77bb36d192d6debee47f3af9be260e5ccd83a4584f59ceafeaa2d908e",
+      "jobConclusion": "success",
+      "strictResult": {
+        "suite": "cross-schema-v13-v15",
+        "tests": 6,
+        "projects": [
+          "msedge",
+          "chrome"
+        ],
+        "complete": true,
+        "formalReleaseEvidence": false
+      },
+      "directory": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-110e87f/migration-cross-schema-v13-v15-12872824157",
+      "checkout": {
+        "requestedBase": "2482941f46acafc6fe0b331f536db06a45710fc8",
+        "requestedHead": "110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+        "suite": "cross-schema-v13-v15",
+        "evidenceClass": "isolated-synthetic-migration-diagnostic",
+        "formalReleaseAuthorized": false,
+        "checkoutParents": "2482941f46acafc6fe0b331f536db06a45710fc8 110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+        "actualCheckout": "8ae2a4600646722399683b260e224a60b6e7bb7b",
+        "workflowSha": "8ae2a4600646722399683b260e224a60b6e7bb7b"
+      },
+      "counts": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "interrupted": 0
+      },
+      "stats": {
+        "startTime": "2026-10-29T04:24:43.074Z",
+        "duration": 206379.84900000002,
+        "expected": 6,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "strictVerification": {
+        "ok": true,
+        "result": {
+          "suite": "cross-schema-v13-v15",
+          "tests": 6,
+          "projects": [
+            "msedge",
+            "chrome"
+          ],
+          "complete": true,
+          "formalReleaseEvidence": false
+        }
+      },
+      "rawResults": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-110e87f/migration-cross-schema-v13-v15-12872824157/results.json",
+      "perBrowser": [
+        {
+          "project": "msedge",
+          "total": 3,
+          "passed": 3,
+          "failed": 0
+        },
+        {
+          "project": "chrome",
+          "total": 3,
+          "passed": 3,
+          "failed": 0
+        }
+      ],
+      "testIdentities": [
+        {
+          "title": "v13-v15 当前旧页明确拒绝自动前向接管，源数据与控制记录不变",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v13-v15 所有旧页关闭后由浏览器自然激活，历史格式物化且源库不变",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v13-v15 新页面直接启动验证真实容量准入、索引和持久提交",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v13-v15 当前旧页明确拒绝自动前向接管，源数据与控制记录不变",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v13-v15 所有旧页关闭后由浏览器自然激活，历史格式物化且源库不变",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v13-v15 新页面直接启动验证真实容量准入、索引和持久提交",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        }
+      ],
+      "failures": []
+    },
+    {
+      "suite": "cross-schema-v14-v15",
+      "jobId": 123261123274,
+      "artifactId": 12873531085,
+      "sha256": "bd2095d2c1d67485a30e9810852de362e24fc8fcd98c0803231688c98fb0549a",
+      "jobConclusion": "success",
+      "strictResult": {
+        "suite": "cross-schema-v14-v15",
+        "tests": 6,
+        "projects": [
+          "msedge",
+          "chrome"
+        ],
+        "complete": true,
+        "formalReleaseEvidence": false
+      },
+      "directory": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-110e87f/migration-cross-schema-v14-v15-12873531085",
+      "checkout": {
+        "actualCheckout": "8ae2a4600646722399683b260e224a60b6e7bb7b",
+        "evidenceClass": "isolated-synthetic-migration-diagnostic",
+        "checkoutParents": "2482941f46acafc6fe0b331f536db06a45710fc8 110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+        "formalReleaseAuthorized": false,
+        "requestedHead": "110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+        "suite": "cross-schema-v14-v15",
+        "workflowSha": "8ae2a4600646722399683b260e224a60b6e7bb7b",
+        "requestedBase": "2482941f46acafc6fe0b331f536db06a45710fc8"
+      },
+      "counts": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "interrupted": 0
+      },
+      "stats": {
+        "startTime": "2026-10-29T04:29:46.663Z",
+        "duration": 182789.36800000002,
+        "expected": 6,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "strictVerification": {
+        "ok": true,
+        "result": {
+          "suite": "cross-schema-v14-v15",
+          "tests": 6,
+          "projects": [
+            "msedge",
+            "chrome"
+          ],
+          "complete": true,
+          "formalReleaseEvidence": false
+        }
+      },
+      "rawResults": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-110e87f/migration-cross-schema-v14-v15-12873531085/results.json",
+      "perBrowser": [
+        {
+          "project": "msedge",
+          "total": 3,
+          "passed": 3,
+          "failed": 0
+        },
+        {
+          "project": "chrome",
+          "total": 3,
+          "passed": 3,
+          "failed": 0
+        }
+      ],
+      "testIdentities": [
+        {
+          "title": "v14-v15 当前旧页明确拒绝自动前向接管，源数据与控制记录不变",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v14-v15 所有旧页关闭后由浏览器自然激活，历史格式物化且源库不变",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v14-v15 新页面直接启动验证真实容量准入、索引和持久提交",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v14-v15 当前旧页明确拒绝自动前向接管，源数据与控制记录不变",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v14-v15 所有旧页关闭后由浏览器自然激活，历史格式物化且源库不变",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v14-v15 新页面直接启动验证真实容量准入、索引和持久提交",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        }
+      ],
+      "failures": []
+    },
+    {
+      "suite": "orphaned-v13-recovery",
+      "jobId": 123261123216,
+      "artifactId": 12873616623,
+      "sha256": "b8e3a31bf26577c8569dca66cce4d58a5db7775a16f9f7ad537b7c026e6afa38",
+      "jobConclusion": "success",
+      "strictResult": {
+        "suite": "orphaned-v13-recovery",
+        "tests": 4,
+        "projects": [
+          "msedge",
+          "chrome"
+        ],
+        "complete": true,
+        "formalReleaseEvidence": false
+      },
+      "directory": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-110e87f/migration-orphaned-v13-recovery-12873616623",
+      "checkout": {
+        "actualCheckout": "8ae2a4600646722399683b260e224a60b6e7bb7b",
+        "requestedHead": "110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+        "suite": "orphaned-v13-recovery",
+        "requestedBase": "2482941f46acafc6fe0b331f536db06a45710fc8",
+        "formalReleaseAuthorized": false,
+        "checkoutParents": "2482941f46acafc6fe0b331f536db06a45710fc8 110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+        "workflowSha": "8ae2a4600646722399683b260e224a60b6e7bb7b",
+        "evidenceClass": "isolated-synthetic-migration-diagnostic"
+      },
+      "counts": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "interrupted": 0
+      },
+      "stats": {
+        "startTime": "2026-10-29T04:35:48.164Z",
+        "duration": 195900.54400000002,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "strictVerification": {
+        "ok": true,
+        "result": {
+          "suite": "orphaned-v13-recovery",
+          "tests": 4,
+          "projects": [
+            "msedge",
+            "chrome"
+          ],
+          "complete": true,
+          "formalReleaseEvidence": false
+        }
+      },
+      "rawResults": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-110e87f/migration-orphaned-v13-recovery-12873616623/results.json",
+      "perBrowser": [
+        {
+          "project": "msedge",
+          "total": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "project": "chrome",
+          "total": 2,
+          "passed": 2,
+          "failed": 0
+        }
+      ],
+      "testIdentities": [
+        {
+          "title": "仅遗留精确 v13 数据库且无旧壳时，v15 只读救援并导出可预检 ZIP",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "仅遗留精确 v13 数据库且无旧壳时，v16 只读救援并导出可预检 ZIP",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "仅遗留精确 v13 数据库且无旧壳时，v15 只读救援并导出可预检 ZIP",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "仅遗留精确 v13 数据库且无旧壳时，v16 只读救援并导出可预检 ZIP",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        }
+      ],
+      "failures": []
+    },
+    {
+      "suite": "cross-schema-v13-v16",
+      "jobId": 123261123259,
+      "artifactId": 12873929246,
+      "sha256": "9b15f72103e39e224912d0fdde88a5ff79dea6e048e8951cc9fd52477b9a0583",
+      "jobConclusion": "failure",
+      "strictResult": null,
+      "directory": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-110e87f/migration-cross-schema-v13-v16-12873929246",
+      "checkout": {
+        "actualCheckout": "8ae2a4600646722399683b260e224a60b6e7bb7b",
+        "workflowSha": "8ae2a4600646722399683b260e224a60b6e7bb7b",
+        "requestedHead": "110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+        "evidenceClass": "isolated-synthetic-migration-diagnostic",
+        "suite": "cross-schema-v13-v16",
+        "requestedBase": "2482941f46acafc6fe0b331f536db06a45710fc8",
+        "checkoutParents": "2482941f46acafc6fe0b331f536db06a45710fc8 110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+        "formalReleaseAuthorized": false
+      },
+      "counts": {
+        "total": 26,
+        "passed": 25,
+        "failed": 1,
+        "skipped": 0,
+        "interrupted": 0
+      },
+      "stats": {
+        "startTime": "2026-10-29T04:32:08.002Z",
+        "duration": 1476677.262,
+        "expected": 25,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "strictVerification": {
+        "ok": false,
+        "error": "Unexpected result count: expected\n\n25 !== 26\n"
+      },
+      "rawResults": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-110e87f/migration-cross-schema-v13-v16-12873929246/results.json",
+      "perBrowser": [
+        {
+          "project": "msedge",
+          "total": 13,
+          "passed": 12,
+          "failed": 1
+        },
+        {
+          "project": "chrome",
+          "total": 13,
+          "passed": 13,
+          "failed": 0
+        }
+      ],
+      "testIdentities": [
+        {
+          "title": "双旧 v13 页中一页已确认、另一页仍在万条慢审计时，新 v16 worker 接管后自动收敛",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "首个 v16 试运行页在源冻结被慢旧页拖过时限后自动重试并完成收敛",
+          "project": "msedge",
+          "status": "failed",
+          "retry": 0
+        },
+        {
+          "title": "全新浏览器直接安装 v16 时从空 v13 建立完整目标并确认 clean epoch",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "富 v13 数据直升 v16 后，业务写入变 dirty、全审计恢复 clean、再次启动命中 cache",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v16 冻结多个 v13 页的真实写入，提交后旧页只收敛到 v16",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v16 影子容量不足时保留 v13、目标零创建且不发送 BOOT_OK",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v16 目标启动校验失败时隔离影子库并保持 v13 可恢复",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v16 目标完整审计摘要不符时删除目标并保留 v13",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v16 Dexie 迁移事务中止时回滚 shadow、mutationState 不留下半代",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v16 control 已提交但 BOOT_OK 中断时保持写锁，刷新后 clean 收敛",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "陈旧页面持有 v16 target versionchange 时超时失败关闭且不提交目标",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "dirty v16 全审计期间并发受支持写入使 CAS 失败，随后全审计恢复并命中 clean cache",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v16 隔离受阻后同 migrationId 只清理不续跑，新 migrationId 可长期重发",
+          "project": "msedge",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "双旧 v13 页中一页已确认、另一页仍在万条慢审计时，新 v16 worker 接管后自动收敛",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "首个 v16 试运行页在源冻结被慢旧页拖过时限后自动重试并完成收敛",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "全新浏览器直接安装 v16 时从空 v13 建立完整目标并确认 clean epoch",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "富 v13 数据直升 v16 后，业务写入变 dirty、全审计恢复 clean、再次启动命中 cache",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v16 冻结多个 v13 页的真实写入，提交后旧页只收敛到 v16",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v16 影子容量不足时保留 v13、目标零创建且不发送 BOOT_OK",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v16 目标启动校验失败时隔离影子库并保持 v13 可恢复",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v16 目标完整审计摘要不符时删除目标并保留 v13",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v16 Dexie 迁移事务中止时回滚 shadow、mutationState 不留下半代",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v16 control 已提交但 BOOT_OK 中断时保持写锁，刷新后 clean 收敛",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "陈旧页面持有 v16 target versionchange 时超时失败关闭且不提交目标",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "dirty v16 全审计期间并发受支持写入使 CAS 失败，随后全审计恢复并命中 clean cache",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        },
+        {
+          "title": "v16 隔离受阻后同 migrationId 只清理不续跑，新 migrationId 可长期重发",
+          "project": "chrome",
+          "status": "passed",
+          "retry": 0
+        }
+      ],
+      "failures": [
+        {
+          "title": "首个 v16 试运行页在源冻结被慢旧页拖过时限后自动重试并完成收敛",
+          "project": "msedge",
+          "annotations": [
+            {
+              "type": "browser-version",
+              "description": "msedge 156.0.4314.50"
+            }
+          ],
+          "status": "failed",
+          "error": {
+            "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatchObject\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\n\u001b[1mMatcher error\u001b[22m: \u001b[31mreceived\u001b[39m value must be a non-null object\n\nReceived has value: \u001b[31mnull\u001b[39m\n\nCall Log:\n- Timeout 90000ms exceeded while waiting on the predicate",
+            "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatchObject\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\n\u001b[1mMatcher error\u001b[22m: \u001b[31mreceived\u001b[39m value must be a non-null object\n\nReceived has value: \u001b[31mnull\u001b[39m\n\nCall Log:\n- Timeout 90000ms exceeded while waiting on the predicate\n    at activateTargetGeneration (D:\\a\\hakimi-suanming\\hakimi-suanming\\apps\\web\\e2e\\service-worker-cross-schema-v13-v16.spec.ts:344:5)\n    at D:\\a\\hakimi-suanming\\hakimi-suanming\\apps\\web\\e2e\\service-worker-cross-schema-v13-v16.spec.ts:1325:5",
+            "location": {
+              "file": "D:\\a\\hakimi-suanming\\hakimi-suanming\\apps\\web\\e2e\\service-worker-cross-schema-v13-v16.spec.ts",
+              "column": 5,
+              "line": 344
+            },
+            "snippet": "\u001b[0m \u001b[90m 342 |\u001b[39m     () \u001b[33m=>\u001b[39m cacheGeneration(readySourcePage\u001b[33m,\u001b[39m target)\u001b[33m,\u001b[39m\n \u001b[90m 343 |\u001b[39m     { timeout\u001b[33m:\u001b[39m \u001b[33mACTIVATION_TIMEOUT_MS\u001b[39m }\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 344 |\u001b[39m   )\u001b[33m.\u001b[39mtoMatchObject({\n \u001b[90m     |\u001b[39m     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 345 |\u001b[39m     bootAttempted\u001b[33m:\u001b[39m \u001b[36mfalse\u001b[39m\u001b[33m,\u001b[39m\n \u001b[90m 346 |\u001b[39m     bootConfirmed\u001b[33m:\u001b[39m \u001b[36mfalse\u001b[39m\u001b[33m,\u001b[39m\n \u001b[90m 347 |\u001b[39m     dbGeneration\u001b[33m:\u001b[39m target\u001b[33m.\u001b[39mdescriptor\u001b[33m.\u001b[39mdbGeneration\u001b[33m,\u001b[39m\u001b[0m"
+          },
+          "attachmentNames": [
+            "forward-migration-failure-control-state",
+            "screenshot",
+            "error-context",
+            "error-context",
+            "trace"
+          ]
+        }
+      ]
+    }
+  ],
+  "diagnosticComparison": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-110e87f/target-case-browser-observation-comparison.json",
+  "boundaries": {
+    "original3d094ebFailurePreserved": true,
+    "newTargetCasePassDoesNotProveHistoricalCauseOrRepair": true,
+    "instrumentedObservationNotEquivalentToUninstrumentedExecution": true,
+    "githubRerunRequested": false,
+    "testsExecutedByCollector": false,
+    "repositoryModifiedByCollector": false,
+    "formalReleaseAuthorized": false
+  }
+}

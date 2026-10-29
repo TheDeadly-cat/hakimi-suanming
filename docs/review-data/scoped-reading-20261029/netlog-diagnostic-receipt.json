@@ -1,0 +1,68 @@
+{
+  "format": "hakimi-local-netlog-install-diagnostic/1",
+  "baseHead": "110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+  "modifiedSource": "apps/web/e2e/service-worker-cross-schema-v13-v16.spec.ts",
+  "specSha256": "fbd034d538cf876c217658435ff580f5c4ff3342573b50f81a0914f69a5e1aeb",
+  "sourceChange": "Only bounded native NetLog diagnostics; application source, assertions, timeouts, retries and network behavior unchanged.",
+  "run": {
+    "head": "110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+    "modifiedSource": "apps/web/e2e/service-worker-cross-schema-v13-v16.spec.ts",
+    "startedAt": "2026-10-29T14:12:29.0303982Z",
+    "completedAt": "2026-10-29T14:13:57.7290387Z",
+    "exitCode": 1,
+    "grep": "首个 v16 试运行页在源冻结被慢旧页拖过时限后自动重试并完成收敛",
+    "project": "msedge",
+    "diagnosticSubset": true,
+    "fullMatrixAccepted": false
+  },
+  "tests": [
+    {
+      "title": "首个 v16 试运行页在源冻结被慢旧页拖过时限后自动重试并完成收敛",
+      "project": "msedge",
+      "status": "expected",
+      "annotations": [
+        {
+          "type": "browser-version",
+          "description": "msedge 156.0.4314.50"
+        },
+        {
+          "type": "browser-network-log",
+          "description": "browser-netlog.json; default redaction; 8 MiB rolling limit; isolated synthetic profile"
+        }
+      ],
+      "attempts": [
+        {
+          "status": "passed",
+          "duration": 21677,
+          "retry": 0
+        }
+      ]
+    }
+  ],
+  "netLog": {
+    "path": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-netlog-install-diagnostic\\test-results\\service-worker-cross-schem-09e21--试运行页在源冻结被慢旧页拖过时限后自动重试并完成收敛-msedge\\browser-netlog.json",
+    "bytes": 4820963,
+    "sha256": "f532aa95ae18632877a439520daf6987717bfe8bce58e08ae15172a7125ce300",
+    "completeJsonParsed": true,
+    "constantsPresent": true,
+    "eventCount": 31723,
+    "configuredMaxSizeMiB": 8,
+    "captureMode": "Default",
+    "errorNoBufferSpaceEvents": 0,
+    "osError10055Events": 0,
+    "containsBrowserBackgroundTraffic": true,
+    "fullRawLogCommitted": false
+  },
+  "checks": {
+    "typeScriptProgramExit": 0,
+    "frozenReleaseGovernanceExit": 0,
+    "currentIndexStatusExit": 0
+  },
+  "boundaries": {
+    "fullMatrixPassed": false,
+    "originalCiFailureReproduced": false,
+    "originalCiFailureFixed": false,
+    "oldCiRerun": false,
+    "fixedCandidateRelabelled": false
+  }
+}

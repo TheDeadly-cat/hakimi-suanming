@@ -2,7 +2,13 @@
   "format": "hakimi-local-source-boot-precondition-observation/1",
   "head": "3d094ebef8d302456b993b3deb928220d53cb10f",
   "localBrowser": "chrome 156.0.8078.49",
-  "originalCiBrowser": "chrome 151.0.7922.34",
+  "originalCiBrowser": "chrome 156.0.8078.74",
+  "browserIdentityCorrection": {
+    "previousDerivedValue": "chrome 151.0.7922.34",
+    "reason": "The previous value came from the trace User-Agent, not the launched browser product. Corrected from results.json browser-version annotations populated by context.browser().version().",
+    "evidence": "browser-version-correction.json",
+    "externalOriginalRetained": true
+  },
   "directory": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-3d094eb/chrome-single-case-diagnostic-02",
   "result": {
     "actualTestsExecuted": 1,

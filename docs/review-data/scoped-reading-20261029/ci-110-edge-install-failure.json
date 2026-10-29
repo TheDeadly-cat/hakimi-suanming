@@ -1,0 +1,119 @@
+{
+  "format": "hakimi-edge-target-install-failure-observation/1",
+  "head": "110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+  "actualCheckout": "8ae2a4600646722399683b260e224a60b6e7bb7b",
+  "runId": 40817255215,
+  "jobId": 123261123259,
+  "artifactId": 12873929246,
+  "project": "msedge",
+  "actualBrowserVersion": "156.0.4314.50",
+  "testTitle": "首个 v16 试运行页在源冻结被慢旧页拖过时限后自动重试并完成收敛",
+  "failure": {
+    "location": "apps/web/e2e/service-worker-cross-schema-v13-v16.spec.ts:344",
+    "callerLine": 1325,
+    "wait": "cacheGeneration(readySourcePage,target)",
+    "timeoutMs": 90000,
+    "received": null
+  },
+  "sourceBuild": "d0e255972d7c",
+  "targetBuild": "11f1b8717458",
+  "timeline": [
+    {
+      "at": 349423.68,
+      "event": "full document navigation to /new?demo=1"
+    },
+    {
+      "at": 350748.999,
+      "event": "new document snapshot",
+      "appBootReady": "true",
+      "swBootAck": "true",
+      "swUpdateChecked": "true",
+      "swControlled": "true",
+      "dbMigrationPhase": "committed"
+    },
+    {
+      "at": 354327.582,
+      "event": "explicit registration.update() evaluation starts",
+      "callId": "call@466"
+    },
+    {
+      "at": 354358.764,
+      "end": 354363.168,
+      "event": "network sw.js response",
+      "status": 200,
+      "returnedCacheVersion": "11f1b8717458",
+      "responseBodySha1": "9550fb3115aec0ab087bfef11ba3e045d51ab2c4.js"
+    },
+    {
+      "at": 354368.806,
+      "event": "explicit registration.update() evaluation returns"
+    },
+    {
+      "at": 354391.058,
+      "event": "target precache brand-mark.svg fetch",
+      "failure": "net::ERR_NO_BUFFER_SPACE",
+      "httpStatus": -1
+    },
+    {
+      "at": 354413.691,
+      "event": "first post-update cache census",
+      "visible": [
+        "hakimi-shell-d0e255972d7c"
+      ]
+    },
+    {
+      "at": 443339.67,
+      "event": "last cache census",
+      "visible": [
+        "hakimi-shell-d0e255972d7c"
+      ]
+    }
+  ],
+  "network": {
+    "records": 463,
+    "http200": 320,
+    "failedStatusMinus1": 143,
+    "failures": {
+      "net::ERR_NO_BUFFER_SPACE": 1,
+      "net::ERR_ABORTED": 142
+    },
+    "postUpdateRecords": 146,
+    "postUpdateSucceeded": [
+      "sw.js",
+      "/",
+      "manifest.webmanifest"
+    ],
+    "failedRequestsHaveNoCompletedResponse": true
+  },
+  "cache": {
+    "totalCensuses": 89,
+    "postUpdateCensuses": 88,
+    "targetCacheEverVisible": false
+  },
+  "sourceAtFailure": {
+    "swBootAck": "true",
+    "swBootSignalSent": "true",
+    "appBootReady": "true",
+    "dbMigrationPhase": "committed",
+    "journal": null,
+    "leases": []
+  },
+  "interpretation": {
+    "directEvidence": "Target script was fetched, then target precache fetches failed. This is before target trial boot and before the eight-second busy-peer injection.",
+    "sourceBoundInference": "sw.js:316 awaits cache.addAll(APP_SHELL); rejection reaches catch at sw.js:332 which deletes the incomplete CACHE_NAME. This matches the failed fetches and absence of target cache.",
+    "earlierAutomaticUpdateCoalescing": "Not supported by this trace: new-document update-checked was already true before the explicit call, and that call's interval includes a fresh HTTP200 target sw.js body.",
+    "unresolved": "The underlying reason for ERR_NO_BUFFER_SPACE is not established; do not infer physical memory exhaustion, storage quota, a repeatable OS cause, or a harmless flake."
+  },
+  "references": [
+    "migration-matrix-receipt.json",
+    "edge-failure-control-state.json",
+    "failed-edge-target-cache-trace/0-trace.network",
+    "failed-edge-target-cache-trace/update-network-and-calls.json",
+    "failed-edge-target-cache-trace/page-state-and-cache-summary.json"
+  ],
+  "actions": {
+    "codeEdited": false,
+    "testsRerun": false,
+    "historicalFailureOverwritten": false
+  }
+}

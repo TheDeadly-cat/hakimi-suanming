@@ -1,4 +1,4 @@
-import { lstat, mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { chromium, expect, test, type BrowserContext, type Page } from "@playwright/test";
@@ -165,9 +165,14 @@ async function launchFixtureContext(): Promise<BrowserContext> {
 
   const profilePath = await createFixtureTemporaryDirectory("hb-v13-v16-profile-");
   browserProfilePaths.add(profilePath);
+  const netLogPath = test.info().outputPath("browser-netlog.json");
+  await mkdir(path.dirname(netLogPath), { recursive: true });
   const context = await chromium.launchPersistentContext(profilePath, {
     channel,
     headless: true,
+    // Preserve socket-level evidence for precache failures that occur before
+    // the activation observer starts. Keep native network behavior unchanged.
+    args: [`--log-net-log=${netLogPath}`, "--net-log-capture-mode=Default", "--net-log-max-size-mb=8"],
     acceptDownloads: true,
     serviceWorkers: "allow",
     baseURL: switchServer.origin,
@@ -176,6 +181,9 @@ async function launchFixtureContext(): Promise<BrowserContext> {
   test.info().annotations.push({
     type: "browser-version",
     description: `${channel} ${context.browser()?.version() ?? "unknown"}`
+  }, {
+    type: "browser-network-log",
+    description: "browser-netlog.json; default redaction; 8 MiB rolling limit; isolated synthetic profile"
   });
   return context;
 }

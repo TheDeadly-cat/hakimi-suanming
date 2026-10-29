@@ -1,0 +1,26 @@
+{
+  "format": "hakimi-browser-version-observation-correction/1",
+  "recordedAt": "2026-10-29T05:05:09.346Z",
+  "corrects": "Earlier agent narrative and 3d094eb/local-chrome-bootstrap-analysis.json originalCiBrowser field mistook trace User-Agent 151.0.7922.34 for actual browser version.",
+  "authoritativeSource": "results.json browser-version annotations recorded by launchFixtureContext via context.browser().version()",
+  "runs": [
+    {
+      "head": "3d094ebef8d302456b993b3deb928220d53cb10f",
+      "runId": 40811328923,
+      "artifactId": 12871004888,
+      "chrome": "156.0.8078.74",
+      "msedge": "156.0.4314.50"
+    },
+    {
+      "head": "110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+      "runId": 40817255215,
+      "artifactId": 12873929246,
+      "chrome": "156.0.8078.74",
+      "msedge": "156.0.4314.50"
+    }
+  ],
+  "localSingleCaseChrome": "156.0.8078.49",
+  "browserUpgradeBetweenCiRunsObserved": false,
+  "oldFilesRetainedUnchanged": true,
+  "consequence": "Do not explain the new target-case pass as a browser upgrade or a repair of the old failure."
+}
