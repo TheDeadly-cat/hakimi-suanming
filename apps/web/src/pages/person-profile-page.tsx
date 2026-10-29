@@ -32,7 +32,7 @@ function checkBundle(bundle: CaseBundle, caseId: string): void {
     || bundle.revisions.some(revision => revision.caseId !== caseId)
     || new Set(bundle.revisions.map(revision => revision.id)).size !== bundle.revisions.length
     || !bundle.revisions.some(revision => revision.id === bundle.caseRecord.latestRevisionId)) {
-    throw new Error("档案与修订的归属不一致，暂未显示。请返回档案列表核对。");
+    throw new Error("档案与修订的归属不一致，暂未显示。请到全部资料管理核对。");
   }
 }
 
@@ -99,11 +99,12 @@ export function PersonProfilePage({ caseId }: { caseId: string }) {
   return <div className="page page--person-profile">
     <PageHeading eyebrow="个人档案" title={bundle ? `${alias}的档案` : "个人档案"}
       description="查看资料、每次修订，以及当时保存的解读。"
-      actions={<><AppLink href="/cases" className="secondary-action"><ArrowLeft aria-hidden="true" />返回档案列表</AppLink>
+      actions={<><AppLink href="/reports" className="secondary-action"><ArrowLeft aria-hidden="true" />返回档案列表</AppLink>
+        <AppLink href="/cases" className="secondary-action">全部资料管理</AppLink>
         <button type="button" className="secondary-action" disabled={active.status === "loading"} onClick={() => setRetry(value => value + 1)}><RefreshCw aria-hidden="true" />重新读取</button></>} />
     {active.status === "loading" ? <p role="status">正在读取这份档案…</p> : null}
-    {active.status === "missing" ? <p role="alert">这份档案不存在或已从当前浏览器删除，请返回档案列表核对。</p> : null}
-    {active.status === "trashed" ? <p role="alert">这份档案已移入回收站。请在档案列表的回收站恢复后再打开。</p> : null}
+    {active.status === "missing" ? <p role="alert">这份档案不存在或已从当前浏览器删除，请到全部资料管理核对。</p> : null}
+    {active.status === "trashed" ? <p role="alert">这份档案已移入回收站。请在全部资料管理的回收站恢复后再打开。<AppLink href="/cases" className="secondary-action">前往资料管理</AppLink></p> : null}
     {active.error ? <p role="alert" className="inline-error">{active.error}</p> : null}
     {bundle && latestRevision ? <>
       <section className="person-profile-section" aria-labelledby="person-profile-current">

@@ -124,6 +124,7 @@ const mobileNavItems: NavItem[] = [
   },
   {
     ...navItems[1]!,
+    href: "/reports",
     label: "档案",
     shortLabel: "档案",
     match: (pathname) => isCaseWorkflowPath(pathname) || pathname === "/reports" || isCompareWorkflowPath(pathname)

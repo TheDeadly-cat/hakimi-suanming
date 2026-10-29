@@ -1551,7 +1551,7 @@ export function CaseLibraryPage() {
                     <tr className={`${item.deletedAt ? "is-trashed " : ""}${isCandidate ? "is-candidate" : "is-formal"}`}>
                       <td data-label="研究记录" className="case-record-cell">
                         <span className="case-record-index" aria-hidden="true">{String(pageIndex * CASE_LIBRARY_PAGE_SIZE + itemIndex + 1).padStart(2, "0")}</span>
-                        <span className="case-record-copy"><strong>{!isCandidate && !item.deletedAt ? <AppLink className="case-profile-link" href={`/cases/${encodedItemId}`} aria-label={`${visibleAlias}的个人档案`}>{visibleAlias}</AppLink> : visibleAlias}</strong><small title={`稳定记录 ID：${safeLibraryText(item.id, "不可用", 160)}`}>{isCandidate ? "时辰待考" : "正式命盘"} · 本地匿名编号 {safeLibraryText(item.id.slice(0, 8), "不可用", 24)}{item.favorite ? " · 已收藏" : ""}</small></span>
+                        <span className="case-record-copy"><strong>{visibleAlias}</strong><small title={`稳定记录 ID：${safeLibraryText(item.id, "不可用", 160)}`}>{isCandidate ? "时辰待考" : "正式命盘"} · 本地匿名编号 {safeLibraryText(item.id.slice(0, 8), "不可用", 24)}{item.favorite ? " · 已收藏" : ""}</small></span>
                       </td>
                       <td data-label="标签">{visibleTags}</td>
                       <td data-label="研究命中">{deferredQuery.trim() ? <StatusPill tone={matchingNotes ? "info" : "neutral"}>{matchingNotes ? `${matchingNotes} 条笔记` : "记录字段"}</StatusPill> : <StatusPill tone={item.deletedAt || isCandidate ? "warning" : "info"}>{item.deletedAt ? "回收站" : isCandidate ? "时辰待考" : "正式命盘"}</StatusPill>}</td>

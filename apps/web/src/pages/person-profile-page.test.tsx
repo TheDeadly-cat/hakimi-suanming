@@ -31,6 +31,8 @@ describe("个人档案", () => {
       body: "这只是反馈", tags: [LOCAL_READING_FEEDBACK_TAG], sourceRefs: [], lifecycle: "active" });
     render(<PersonProfilePage caseId={first.caseRecord.id} />);
     expect(await screen.findByRole("heading", { name: "合成人甲的档案" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "返回档案列表" }).getAttribute("href")).toBe("/reports");
+    expect(screen.getByRole("link", { name: "全部资料管理" }).getAttribute("href")).toBe("/cases");
     expect(screen.getByRole("link", { name: "继续当前阅读" }).getAttribute("href")).toBe(`/cases/${first.caseRecord.id}/revisions/${updated.caseRecord.latestRevisionId}`);
     expect(screen.getByRole("link", { name: "按第 1 次资料阅读" }).getAttribute("href")).toContain(first.caseRecord.latestRevisionId);
     expect(screen.getByRole("link", { name: "按第 2 次资料阅读" }).getAttribute("href")).toContain(updated.caseRecord.latestRevisionId);
@@ -67,7 +69,8 @@ describe("个人档案", () => {
     expect(await screen.findByRole("heading", { name: "将被删除的人的档案" })).toBeTruthy();
     await act(async () => { await caseRepository.trashCase(person.caseRecord.id); });
     fireEvent.click(screen.getByRole("button", { name: "重新读取" }));
-    expect(await screen.findByRole("alert")).toHaveProperty("textContent", "这份档案已移入回收站。请在档案列表的回收站恢复后再打开。");
+    expect(await screen.findByRole("alert")).toHaveProperty("textContent", "这份档案已移入回收站。请在全部资料管理的回收站恢复后再打开。前往资料管理");
+    expect(screen.getByRole("link", { name: "前往资料管理" }).getAttribute("href")).toBe("/cases");
     expect(screen.queryByRole("link", { name: "继续当前阅读" })).toBeNull();
     expect(screen.queryByText("打开保存时原文 · 最新报告")).toBeNull();
   });
@@ -78,7 +81,7 @@ describe("个人档案", () => {
     expect(await screen.findByRole("heading", { name: "路由切换前的人的档案" })).toBeTruthy();
     view.rerender(<PersonProfilePage caseId="11111111-1111-4111-8111-111111111111" />);
     expect(screen.queryByRole("heading", { name: "路由切换前的人的档案" })).toBeNull();
-    expect(await screen.findByRole("alert")).toHaveProperty("textContent", "这份档案不存在或已从当前浏览器删除，请返回档案列表核对。");
+    expect(await screen.findByRole("alert")).toHaveProperty("textContent", "这份档案不存在或已从当前浏览器删除，请到全部资料管理核对。");
     vi.spyOn(caseRepository, "getCase").mockRejectedValueOnce(new Error("档案数据库暂不可读"));
     view.rerender(<PersonProfilePage caseId={person.caseRecord.id} />);
     expect(await screen.findByRole("alert")).toHaveProperty("textContent", "档案数据库暂不可读");
@@ -91,7 +94,7 @@ describe("个人档案", () => {
     const foreign = await saveText(other, "乙的原文不能泄入甲。");
     const readCase = vi.spyOn(caseRepository, "getCase").mockResolvedValueOnce(other);
     const view = render(<PersonProfilePage caseId={person.caseRecord.id} />);
-    expect(await screen.findByRole("alert")).toHaveProperty("textContent", "档案与修订的归属不一致，暂未显示。请返回档案列表核对。");
+    expect(await screen.findByRole("alert")).toHaveProperty("textContent", "档案与修订的归属不一致，暂未显示。请到全部资料管理核对。");
     expect(screen.queryByText("归属校验乙的档案")).toBeNull();
     readCase.mockRestore();
     vi.spyOn(researchRepository, "listResearchNotesByCase").mockResolvedValue([valid, foreign, { ...foreign, id: crypto.randomUUID(), caseId: person.caseRecord.id }]);

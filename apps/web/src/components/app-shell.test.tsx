@@ -15,6 +15,7 @@ describe("AppShell candidate-set navigation", () => {
     expect(screen.getByRole("complementary", { name: "研究台侧栏" })).toBeTruthy();
     expect(desktopCases.getAttribute("aria-current")).toBe("page");
     expect(mobileCases.getAttribute("aria-current")).toBe("page");
+    expect(mobileCases.getAttribute("href")).toBe("/reports");
   });
 
   it("为桌面新建、桌面设置和手机顶部设置暴露当前页面状态", () => {
@@ -85,11 +86,17 @@ describe("AppShell candidate-set navigation", () => {
     const assertNavigation = (active: string) => {
       const nav = screen.getByRole("navigation", { name: "手机主导航" });
       expect(within(nav).getAllByRole("link").map((link) => [link.textContent, link.getAttribute("href")])).toEqual([
-        ["首页", "/"], ["档案", "/cases"], ["学习", "/knowledge"], ["我的", "/settings"]
+        ["首页", "/"], ["档案", "/reports"], ["学习", "/knowledge"], ["我的", "/settings"]
       ]);
       expect(nav.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
       expect(within(nav).getByRole("link", { name: active }).getAttribute("aria-current")).toBe("page");
     };
+    assertNavigation("档案");
+    rerender(<AppShell pathname="/reports"><p>正式档案与报告</p></AppShell>);
+    assertNavigation("档案");
+    rerender(<AppShell pathname="/cases/11111111-1111-4111-8111-111111111111"><p>个人档案</p></AppShell>);
+    assertNavigation("档案");
+    rerender(<AppShell pathname="/cases"><p>全部资料管理</p></AppShell>);
     assertNavigation("档案");
     rerender(<AppShell pathname={chartPath} search="?view=structure"><p>专业盘</p></AppShell>);
     assertNavigation("档案");
