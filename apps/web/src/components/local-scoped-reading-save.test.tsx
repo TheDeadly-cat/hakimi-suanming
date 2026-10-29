@@ -1,9 +1,9 @@
 import "fake-indexeddb/auto";
 import type { ReactNode } from "react";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeAll, beforeEach, expect, it, vi } from "vitest";
 import { calculateChart } from "@hakimi/bazi-core";
-import type { RevisionRecord } from "@hakimi/contracts";
+import type { ResearchNoteRecord, RevisionRecord } from "@hakimi/contracts";
 import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
 import { CaseRepository, ResearchDatabase, ResearchRepository, researchRepository } from "@hakimi/storage";
 import { LocalReadingContainer } from "./local-reading-container";
@@ -13,6 +13,7 @@ import * as scopedModule from "../lib/scoped-reading-report";
 import { unpackReadingSnapshot } from "../lib/local-reading-snapshot-codec";
 import { READING_NAVIGATION_STORAGE_KEY } from "../lib/reading-navigation-context";
 import { queryReadingExplanation } from "../lib/reading-explanation-index";
+import * as saveTimingModule from "../lib/reading-save-timing";
 
 // Only replace the large surrounding narrative layout. Actual topic controls,
 // scope confirmation, container, producers, codec and repository remain real.
@@ -27,6 +28,7 @@ let chartA: Chart, chartB: Chart;
 let database: ResearchDatabase, repository: ResearchRepository, revisionA: RevisionRecord, revisionB: RevisionRecord;
 const preparations: ReturnType<typeof preparationModule.createReadingMonthPreparation>[] = [];
 const pendingMonths = new Set<Promise<unknown>>();
+let beforeMonthPublication: ((year: number) => Promise<void>) | null = null;
 function deferred<T = void>() {
   let resolve!: (value: T | PromiseLike<T>) => void;
   const promise = new Promise<T>(accept => { resolve = accept; });
@@ -65,11 +67,14 @@ beforeEach(async () => {
   window.sessionStorage.removeItem(READING_NAVIGATION_STORAGE_KEY);
   preparations.length = 0;
   pendingMonths.clear();
+  beforeMonthPublication = null;
   const factory = preparationModule.createReadingMonthPreparation;
   vi.spyOn(preparationModule, "createReadingMonthPreparation").mockImplementation((...args) => {
     const original = factory(...args);
     const preparation = { ...original, all: vi.fn(original.all), read: (year: number) => {
-      const pending = original.read(year);
+      const calculated = original.read(year);
+      const publication = beforeMonthPublication;
+      const pending = publication ? calculated.then(async value => { await publication(year); return value; }) : calculated;
       pendingMonths.add(pending);
       void pending.then(() => pendingMonths.delete(pending), () => pendingMonths.delete(pending));
       return pending;
@@ -137,29 +142,90 @@ it("cancels before confirmation without building or writing a report", async () 
 }, 60_000);
 
 it("saves only the opened month's exact conclusion through the real detail action, without preparing other years", async () => {
-  render(<LocalReadingContainer {...propsFor(revisionA)} />);
-  await waitForReady();
-  fireEvent.click(screen.getByRole("button", { name: "关键月份" }));
-  fireEvent.change(screen.getByLabelText("年份"), { target: { value: "2030" } });
-  await waitFor(() => expect(document.querySelectorAll(".reading-explanation-results article").length).toBeGreaterThan(0), { timeout: 30_000 });
-  const article = document.querySelector<HTMLElement>(".reading-explanation-results article")!;
-  const conclusionId = article.dataset.readingConclusion;
-  fireEvent.click(article.querySelector<HTMLButtonElement>(".reading-text-button")!);
-  expect((screen.getByLabelText("月份与领域") as HTMLSelectElement).value).toBe("");
-  await beginConfirmation(); confirm();
-  await waitFor(() => expect(getResearchJournalMutationSnapshot().status).not.toBe("writing"), { timeout: 30_000 });
-  expect(document.querySelector(".reading-scoped-save")?.textContent ?? "").not.toContain("本次没有保存");
-  await screen.findByRole("link", { name: "打开这份范围报告" }, { timeout: 30_000 });
-  const records = await repository.listResearchNotesByCase(revisionA.caseId);
-  expect(records).toHaveLength(1);
-  const report = await scopedModule.decodeScopedReadingReport(await unpackReadingSnapshot(records[0]!.body));
-  expect(report!.scope.selection).toMatchObject({ kind: "month", year: 2030, conclusionId });
-  expect(report!.index.conclusions).toHaveLength(1);
-  expect(report!.index.conclusions[0]!.stableId).toBe(conclusionId);
-  expect(report!.presentations[0]!.kind).toBe("month_preview");
-  expectNoFullPreparation();
+  const saveTimings: ReturnType<typeof saveTimingModule.createReadingSaveTiming>[] = [];
+  const createTiming = saveTimingModule.createReadingSaveTiming;
+  vi.spyOn(saveTimingModule, "createReadingSaveTiming").mockImplementation((...args) => {
+    const timing = createTiming(...args); saveTimings.push(timing); return timing;
+  });
+  const build = vi.spyOn(scopedModule, "buildScopedReadingReport");
+  let savedRecord: ResearchNoteRecord | undefined, readBackRecord: ResearchNoteRecord | undefined;
+  vi.mocked(researchRepository.createResearchNote).mockImplementation(async input => {
+    savedRecord = await repository.createResearchNote(input); return savedRecord;
+  });
+  vi.mocked(researchRepository.listResearchNotesByCase).mockImplementation(async (id, options) => {
+    const records = await repository.listResearchNotesByCase(id, options);
+    if (savedRecord) readBackRecord = records.find(record => record.id === savedRecord!.id);
+    return records;
+  });
+  const publishMonths = deferred();
+  const refreshMonthYears: number[] = [];
+  try {
+    render(<LocalReadingContainer {...propsFor(revisionA)} />);
+    await waitForReady();
+    const allowedMonthYears = new Set([...preparations.flatMap(preparation => preparation.ready().map(item => item.year)), 2030]);
+    fireEvent.click(screen.getByRole("button", { name: "关键月份" }));
+    fireEvent.change(screen.getByLabelText("年份"), { target: { value: "2030" } });
+    await waitFor(() => expect(document.querySelectorAll(".reading-explanation-results article").length).toBeGreaterThan(0), { timeout: 30_000 });
+    const article = document.querySelector<HTMLElement>(".reading-explanation-results article")!;
+    const conclusionId = article.dataset.readingConclusion;
+    expect(conclusionId).toContain("/month:locked:2030:");
+    fireEvent.click(article.querySelector<HTMLButtonElement>(".reading-text-button")!);
+    expect((screen.getByLabelText("月份与领域") as HTMLSelectElement).value).toBe("");
+    await beginConfirmation();
+    const confirmationButton = screen.getByRole<HTMLButtonElement>("button", { name: "确认保存这个范围" });
+    expect(confirmationButton.disabled, document.querySelector(".reading-scoped-save")?.textContent ?? "missing scope action").toBe(false);
+    // A verified write refreshes context/personal reading and prepares this year
+    // again. Hold only publication of that real result so the two completion
+    // phases cannot be confused with an initially idle mutation coordinator.
+    beforeMonthPublication = async year => { refreshMonthYears.push(year); await publishMonths.promise; };
+    confirm();
+    expect(getResearchJournalMutationSnapshot().status).toBe("writing");
+    await waitFor(() => {
+      expect(researchRepository.createResearchNote).toHaveBeenCalledTimes(1);
+      expect(savedRecord).toBeDefined();
+      expect(readBackRecord).toEqual(savedRecord);
+      expect(getResearchJournalMutationSnapshot().status).toBe("idle");
+      expect(saveTimings[0]?.snapshot().stages.find(stage => stage.stage === "post_save_validation")?.status).toBe("succeeded");
+      expect(refreshMonthYears).toEqual([2030]);
+    }, { timeout: 30_000 });
+    const records = await repository.listResearchNotesByCase(revisionA.caseId);
+    expect(records).toEqual([savedRecord]);
+    expect(pendingMonths.size).toBeGreaterThan(0);
+    expect(saveTimings[0]!.snapshot().stages.find(stage => stage.stage === "page_refresh")?.status).toBe("running");
+    expect(screen.queryByRole("link", { name: "打开这份范围报告" })).toBeNull();
+    expect(build).toHaveBeenCalledTimes(1);
+    const request = build.mock.calls[0]![0];
+    const original = queryReadingExplanation(request.index, request.query).conclusions;
+    expect(original).toHaveLength(1);
+    expect(original[0]!.stableId).toBe(conclusionId);
+    const report = await scopedModule.decodeScopedReadingReport(await unpackReadingSnapshot(records[0]!.body));
+    expect(report!.scope.selection).toMatchObject({ kind: "month", year: 2030, conclusionId });
+    expect(report!.index.conclusions).toEqual(original);
+    expect(report!.presentations[0]!.kind).toBe("month_preview");
+    // Await the real pending publication inside act, then observe only the
+    // current save action. Global role polling needlessly traverses all month
+    // options and the large evidence DOM while the refresh is still running.
+    await act(async () => { publishMonths.resolve(); await Promise.allSettled([...pendingMonths]); });
+    await waitFor(() => {
+      const action = document.querySelector<HTMLElement>(".reading-scoped-save");
+      expect(action).not.toBeNull();
+      expect(within(action!).getByRole("link", { name: "打开这份范围报告" })).toBeTruthy();
+    }, { timeout: 30_000 });
+    expect(saveTimings[0]!.snapshot().status).toBe("succeeded");
+    expect(getResearchJournalMutationSnapshot().status).toBe("idle");
+    expect(researchRepository.createResearchNote).toHaveBeenCalledTimes(1);
+    expect(await repository.listResearchNotesByCase(revisionA.caseId)).toEqual(records);
+    expect(preparations.flatMap(preparation => preparation.ready().map(item => item.year)).every(year => allowedMonthYears.has(year))).toBe(true);
+    expectNoFullPreparation();
+  } catch (error) {
+    process.stdout.write(JSON.stringify({ probe: "month-save-ui-terminal", journal: getResearchJournalMutationSnapshot(),
+      action: document.querySelector(".reading-scoped-save")?.textContent,
+      monthPending: pendingMonths.size, refreshMonthYears, timings: saveTimings.map(timing => timing.snapshot()),
+      writes: vi.mocked(researchRepository.createResearchNote).mock.calls.length, saved: !!savedRecord, readBackExact: !!savedRecord && JSON.stringify(readBackRecord) === JSON.stringify(savedRecord),
+      statuses: [...document.querySelectorAll('[role="status"], [role="alert"]')].map(node => node.textContent) }) + "\n");
+    throw error;
+  } finally { publishMonths.resolve(); }
 }, 60_000);
-
 it.each(["year", "topic", "revision", "cancel"] as const)("does not write when %s changes while real scope generation is pending", async action => {
   const entered = deferred(), gate = deferred(), original = scopedModule.buildScopedReadingReport;
   vi.spyOn(scopedModule, "buildScopedReadingReport").mockImplementation(async (...args) => {
