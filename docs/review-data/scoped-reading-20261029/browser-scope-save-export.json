@@ -1,0 +1,209 @@
+{
+  "environment": {
+    "browser": "Microsoft Edge headless",
+    "origin": "http://127.0.0.1:5243",
+    "source": "synthetic isolated state",
+    "currentPresentation": "0.1.3"
+  },
+  "errors": [],
+  "saved": [
+    {
+      "label": "forced-year",
+      "recordId": "0544539f-9ca8-4bf0-965f-4fc0d1b35704",
+      "before": 1,
+      "after": 2,
+      "oldRecordsUnchanged": true,
+      "storedCharacters": 8680,
+      "packed": true,
+      "sourceVersion": "hakimi.plain-summary/0.1.3",
+      "scope": {
+        "selection": {
+          "kind": "domain",
+          "domain": "wealth",
+          "year": 2030,
+          "branchId": "locked"
+        },
+        "title": "收入与开支 · 2030年 · 已确定路径",
+        "conclusionIds": [
+          "a866e7eb-7f72-4ef2-9fa9-dd3fd59ee79f/year:locked:2030:locked:2030-02-03T19:08:28.000Z:wealth",
+          "a866e7eb-7f72-4ef2-9fa9-dd3fd59ee79f/year:locked:2030:locked:2030-11-26T15:34:00.000Z:wealth"
+        ],
+        "segments": [
+          {
+            "level": "year",
+            "year": 2030,
+            "branchId": "locked",
+            "startInstant": "2030-02-03T19:08:28.000Z",
+            "endExclusiveInstant": "2030-11-26T15:34:00.000Z"
+          },
+          {
+            "level": "year",
+            "year": 2030,
+            "branchId": "locked",
+            "startInstant": "2030-11-26T15:34:00.000Z",
+            "endExclusiveInstant": "2031-02-04T00:58:19.000Z"
+          }
+        ],
+        "excludedScopeLabels": [
+          "未纳入本命、其他领域、其他年份及月份结论。",
+          "未纳入的内容不表示没有结论；这份快照不是完整十年报告。"
+        ],
+        "omittedConclusionCount": 74
+      },
+      "actualConclusionCount": 2,
+      "download": {
+        "label": "forced-year",
+        "recordId": "0544539f-9ca8-4bf0-965f-4fc0d1b35704",
+        "filename": "forced-year-hakimi-scoped-report-d808e139-0f68-42e9-821a-719284257460.txt",
+        "bytes": 32872,
+        "sha256": "6e625e1bc3b49fff46bee22fbcb1ad1271c0289f8bc15eb406c3ff45a81764e3",
+        "savedWireSha256": "6e625e1bc3b49fff46bee22fbcb1ad1271c0289f8bc15eb406c3ff45a81764e3",
+        "byteExact": true
+      }
+    },
+    {
+      "label": "forced-month",
+      "recordId": "1838425f-521d-4c6b-8162-b5515e5436c9",
+      "before": 2,
+      "after": 3,
+      "oldRecordsUnchanged": true,
+      "storedCharacters": 9636,
+      "packed": true,
+      "sourceVersion": "hakimi.plain-summary/0.1.3",
+      "scope": {
+        "selection": {
+          "kind": "month",
+          "conclusionId": "a866e7eb-7f72-4ef2-9fa9-dd3fd59ee79f/month:locked:2030:locked:1896376108000.590e25df9ea374afdd97230a818e4528da7ed241323c52c7371a2475f7e16e7b:1606404840000.95262f559aa6e9dea589fdb923f7ffeda53feccb3624ca754abe671d42450b53:2030-02-03T19:08:28.000Z:career",
+          "year": 2030,
+          "branchId": "locked"
+        },
+        "title": "立春月 · 事业 · 2030年 · 2030-02-04 03:08起至2030-03-05 21:03前（北京时间）· 已确定路径",
+        "conclusionIds": [
+          "a866e7eb-7f72-4ef2-9fa9-dd3fd59ee79f/month:locked:2030:locked:1896376108000.590e25df9ea374afdd97230a818e4528da7ed241323c52c7371a2475f7e16e7b:1606404840000.95262f559aa6e9dea589fdb923f7ffeda53feccb3624ca754abe671d42450b53:2030-02-03T19:08:28.000Z:career"
+        ],
+        "segments": [
+          {
+            "level": "month",
+            "year": 2030,
+            "branchId": "locked",
+            "startInstant": "2030-02-03T19:08:28.000Z",
+            "endExclusiveInstant": "2030-03-05T13:03:18.000Z"
+          }
+        ],
+        "excludedScopeLabels": [
+          "仅纳入所选这一条月份与领域结论；同月其他领域、本命及年度结论均未纳入。",
+          "未纳入的内容不表示没有结论；这份快照不是完整十年报告。"
+        ],
+        "omittedConclusionCount": 78
+      },
+      "actualConclusionCount": 1,
+      "download": {
+        "label": "forced-month",
+        "recordId": "1838425f-521d-4c6b-8162-b5515e5436c9",
+        "filename": "forced-month-hakimi-scoped-report-97939e97-c89e-40c4-8b2a-cf44a0e64d70.txt",
+        "bytes": 24193,
+        "sha256": "ea5473734476a9c80284d4ebb4ddd65a0b1a21e5aa9009f601e20e95610b528c",
+        "savedWireSha256": "ea5473734476a9c80284d4ebb4ddd65a0b1a21e5aa9009f601e20e95610b528c",
+        "byteExact": true
+      }
+    }
+  ],
+  "toolbars": [
+    {
+      "width": 360,
+      "cancelNoWrites": true,
+      "focusRestored": true,
+      "button": {
+        "x": 33,
+        "y": 346.640625,
+        "width": 154,
+        "height": 46
+      },
+      "footerTop": 768,
+      "overflow": {
+        "viewport": 360,
+        "body": 360,
+        "html": 360
+      }
+    },
+    {
+      "width": 390,
+      "cancelNoWrites": true,
+      "focusRestored": true,
+      "button": {
+        "x": 33,
+        "y": 346.640625,
+        "width": 154,
+        "height": 46
+      },
+      "footerTop": 768,
+      "overflow": {
+        "viewport": 390,
+        "body": 390,
+        "html": 390
+      }
+    }
+  ],
+  "cancelBeforeWrite": {
+    "noWrites": true,
+    "focusRestored": true
+  },
+  "profileLatest": {
+    "url": "http://127.0.0.1:5243/cases/2df6e31a-9371-4c4e-a4ee-336d756b684f",
+    "recordId": "1838425f-521d-4c6b-8162-b5515e5436c9",
+    "reportId": "97939e97-c89e-40c4-8b2a-cf44a0e64d70",
+    "conclusionId": "a866e7eb-7f72-4ef2-9fa9-dd3fd59ee79f/month:locked:2030:locked:1896376108000.590e25df9ea374afdd97230a818e4528da7ed241323c52c7371a2475f7e16e7b:1606404840000.95262f559aa6e9dea589fdb923f7ffeda53feccb3624ca754abe671d42450b53:2030-02-03T19:08:28.000Z:career",
+    "scoped": true,
+    "actualConclusionCount": 1
+  },
+  "reopen": {
+    "sameSavedText": true,
+    "sameRecords": true,
+    "url": "http://127.0.0.1:5243/reports?case=2df6e31a-9371-4c4e-a4ee-336d756b684f&report=1838425f-521d-4c6b-8162-b5515e5436c9",
+    "records": 3,
+    "yearUnchanged": true
+  },
+  "legacy012": {
+    "strictRead": true,
+    "sourceVersion": "hakimi.plain-summary/0.1.2",
+    "recordId": "af2e7559-04a5-4e2b-b4eb-c6a88ebe95ac",
+    "recordsUnchanged": true,
+    "storedBodySha256": "99b8349bd22a7ba4806047b422ea4edc138fff001374d3268efeb2292fa8752e",
+    "scope": {
+      "selection": {
+        "kind": "domain",
+        "domain": "wealth",
+        "year": 2030,
+        "branchId": "locked"
+      },
+      "title": "收入与开支 · 2030年 · 已确定路径",
+      "conclusionIds": [
+        "a866e7eb-7f72-4ef2-9fa9-dd3fd59ee79f/year:locked:2030:locked:2030-02-03T19:08:28.000Z:wealth",
+        "a866e7eb-7f72-4ef2-9fa9-dd3fd59ee79f/year:locked:2030:locked:2030-11-26T15:34:00.000Z:wealth"
+      ],
+      "segments": [
+        {
+          "level": "year",
+          "year": 2030,
+          "branchId": "locked",
+          "startInstant": "2030-02-03T19:08:28.000Z",
+          "endExclusiveInstant": "2030-11-26T15:34:00.000Z"
+        },
+        {
+          "level": "year",
+          "year": 2030,
+          "branchId": "locked",
+          "startInstant": "2030-11-26T15:34:00.000Z",
+          "endExclusiveInstant": "2031-02-04T00:58:19.000Z"
+        }
+      ],
+      "excludedScopeLabels": [
+        "未纳入本命、其他领域、其他年份及月份结论。",
+        "未纳入的内容不表示没有结论；这份快照不是完整十年报告。"
+      ],
+      "omittedConclusionCount": 74
+    },
+    "actualConclusionCount": 2
+  },
+  "completed": true
+}

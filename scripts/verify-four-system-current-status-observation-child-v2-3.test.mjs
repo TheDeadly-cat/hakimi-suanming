@@ -1,3 +1,4 @@
+import { assertCurrentFourSystemReportAndManifestDrift } from "./four-system-v22-history.test-fixture.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
@@ -56,8 +57,7 @@ const FAILED_PREFIX =
   "FOUR_SYSTEM_CURRENT_STATUS_OBSERVATION_CHILD_V2_3_MECHANICS_FAILED";
 
 test("current checkout and source v2.3 CLI cannot inherit a historical input context", async () => {
-  await assert.rejects(loadFourSystemCurrentStatusObservationChildV23(workspaceRoot),
-    { code: "MANIFEST_IDENTITY_DRIFT" });
+  await assertCurrentFourSystemReportAndManifestDrift(loadFourSystemCurrentStatusObservationChildV23, workspaceRoot);
   const run = spawnSync(process.execPath, [actualCliPath], {
     cwd: historicalInputs.root, env: sanitizedEnvironment(), encoding: "utf8", windowsHide: true
   });

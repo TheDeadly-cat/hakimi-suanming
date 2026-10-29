@@ -1,0 +1,266 @@
+{
+  "kind": "fixed_internal_ci_artifact_trial_delivery",
+  "deliveredAt": "2026-10-29T15:06:52.323Z",
+  "candidate": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/scoped-reading-20261029-daf5ff0-d580936a9fdd/origin5249",
+  "entryUrl": "http://127.0.0.1:5249/new",
+  "launcher": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\scoped-reading-20261029-daf5ff0-d580936a9fdd\\origin5249\\打开本轮试用.cmd",
+  "requestedHead": "daf5ff04cef49f8e38fe9ac31abd291c22250207",
+  "actualCheckoutCommit": "cc93953996e92acb4d482873a84fec0a0ca34531",
+  "baseCommit": "2482941f46acafc6fe0b331f536db06a45710fc8",
+  "gitMetadata": [
+    {
+      "sha": "daf5ff04cef49f8e38fe9ac31abd291c22250207",
+      "tree": "1f209001b296e70b786befbbd68ee9422fb37901",
+      "parents": [
+        "53327f927fd0051b0d13f2a2965a982737bee73d"
+      ]
+    },
+    {
+      "sha": "cc93953996e92acb4d482873a84fec0a0ca34531",
+      "tree": "1f209001b296e70b786befbbd68ee9422fb37901",
+      "parents": [
+        "2482941f46acafc6fe0b331f536db06a45710fc8",
+        "daf5ff04cef49f8e38fe9ac31abd291c22250207"
+      ]
+    }
+  ],
+  "sourceAndCheckoutTreesIdentical": true,
+  "actualCheckoutRef": "refs/remotes/pull/17/merge",
+  "sourceBindingClass": "github-actions-pr-merge-checkout-and-artifact-digest",
+  "runUrl": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40896529130",
+  "buildJobId": 123527034299,
+  "buildJobConclusion": "success",
+  "artifactId": 12907406527,
+  "artifactName": "quick-ci-default-v13-40896529130-1",
+  "artifactZipBytes": 4633671,
+  "artifactZipSha256": "47930c5d102bf2d38de90f784c9f2510bb361924a4def8c10a4ed45066692cfb",
+  "apiAndUploadLogDigestMatched": true,
+  "extractedAndCopiedFilesMatchedBeforeAndAfterSmoke": true,
+  "buildVersion": "d580936a9fdd",
+  "reportVersion": "0.22.3",
+  "presentationVersion": "hakimi.plain-summary/0.1.3",
+  "artifactIdentityManifestSha256": "ff2febda0ecc687fff5c92123722cb3ded98866d41973e4ac5a9cfc868c466ca",
+  "storageManifestDigest": "0f467690fb4d6fad692454a42262d3203ae57d53403c01c68efb61dbbafe1294",
+  "fingerprintFiles": [
+    {
+      "path": "index.html",
+      "bytes": 13433,
+      "sha256": "a825d2ac9be99abf83e62580c26f273d59caa61848b9d435934bd250803be158"
+    },
+    {
+      "path": "sw.js",
+      "bytes": 110367,
+      "sha256": "c93c7efbb9a308440a69a45d07b1fdc369cffe7bd8bcfe14a1fa7b7223fb9333"
+    },
+    {
+      "path": "manifest.webmanifest",
+      "bytes": 1719,
+      "sha256": "8c352d05c8fbeb2c864a44b98c01fbf4235a3385bb063c045b7b810de6222abb"
+    }
+  ],
+  "fileCount": 146,
+  "totalWebBytes": 15697381,
+  "storage": {
+    "expectedChannel": "default-v13",
+    "descriptor": {
+      "protocolVersion": 1,
+      "dbGeneration": "legacy-v13",
+      "databaseName": "hakimi-bazi-research",
+      "targetSchema": 13,
+      "minReadableSchema": 13,
+      "maxReadableSchema": 13,
+      "migrationId": null,
+      "acceptedCommittedMigrationIds": [
+        null
+      ],
+      "sourceGeneration": null,
+      "sourceDatabaseName": null,
+      "sourceSchema": null
+    },
+    "manifestVersion": 1,
+    "requiredTableCount": 16,
+    "requiredIndexCount": 0,
+    "manifestDigest": "0f467690fb4d6fad692454a42262d3203ae57d53403c01c68efb61dbbafe1294",
+    "buildVersion": "d580936a9fdd",
+    "evidenceId": "unbound-local-build",
+    "evidenceBound": false,
+    "hostingHeaderCount": 7
+  },
+  "smoke": {
+    "browserVersion": "156.0.4314.50",
+    "profile": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-final-ci-daf5ff0\\synthetic-edge-profile",
+    "syntheticOnly": true,
+    "checks": [
+      {
+        "name": "cold start and about identify CI build",
+        "status": "passed"
+      },
+      {
+        "name": "learning without a prior report opens /reports",
+        "status": "passed"
+      },
+      {
+        "name": "learning with an unavailable synthetic identity opens /reports",
+        "status": "passed"
+      },
+      {
+        "name": "synthetic case generated and saved through UI",
+        "status": "passed"
+      },
+      {
+        "name": "2028 income scope confirmed saved and read back",
+        "status": "passed",
+        "href": "/reports?case=e78331d4-2fe7-4c06-8cef-8d5aacdd2eea&report=08856753-cbdf-4403-97f9-5c0de27b7ec7",
+        "confirmation": "确认保存范围\n\n收入与开支 · 2028年 · 已确定路径 · 2 条原结论\n\n同时保留当时的白话、原文、条件、限制和依据。只保存在本机。\n\n本次未包含的内容与适用边界：\n\n未纳入本命、其他领域、其他年份及月份结论。\n未纳入的内容不表示没有结论；这份快照不是完整十年报告。\n确认保存这个范围\n取消"
+      },
+      {
+        "name": "learning search and validated return preserve current reading",
+        "status": "passed"
+      },
+      {
+        "name": "mobile archive entry /reports opens personal profile and original scope report",
+        "status": "passed",
+        "conclusionIds": [
+          "b50a1a6d-9247-401f-8e69-36e0c073917e/year:locked:2028:locked:2028-02-04T07:31:13.000Z:wealth",
+          "b50a1a6d-9247-401f-8e69-36e0c073917e/year:locked:2028:locked:2028-12-20T20:58:00.000Z:wealth"
+        ]
+      },
+      {
+        "name": "saved scope text remains identical after browser close and reopen",
+        "status": "passed"
+      },
+      {
+        "name": "profile scope reader has no 360px horizontal overflow",
+        "status": "passed"
+      }
+    ],
+    "learningFallbacks": {
+      "none": {
+        "href": "/reports",
+        "fixture": "fresh synthetic profile with no reading locator",
+        "openedUrl": "http://127.0.0.1:5249/reports"
+      },
+      "unavailable": {
+        "href": "/reports",
+        "fixture": "well-formed same-tab locator pointing to absent synthetic case/revision IDs",
+        "identity": [
+          "99999999-9999-4999-8999-999999999999",
+          "88888888-8888-4888-8888-888888888888",
+          "synthetic-absent-result",
+          "synthetic-absent-rule",
+          "synthetic-report",
+          "synthetic-source",
+          true
+        ],
+        "openedUrl": "http://127.0.0.1:5249/reports"
+      }
+    },
+    "consoleAndPageErrors": [],
+    "savedReportHref": "/reports?case=e78331d4-2fe7-4c06-8cef-8d5aacdd2eea&report=08856753-cbdf-4403-97f9-5c0de27b7ec7",
+    "savedConclusionIds": [
+      "b50a1a6d-9247-401f-8e69-36e0c073917e/year:locked:2028:locked:2028-02-04T07:31:13.000Z:wealth",
+      "b50a1a6d-9247-401f-8e69-36e0c073917e/year:locked:2028:locked:2028-12-20T20:58:00.000Z:wealth"
+    ],
+    "savedTextIdenticalAcrossBrowserRestart": true,
+    "screenshotInspection": "Profile 360px and both learning fallback 390px screenshots visually inspected; no horizontal overflow observed."
+  },
+  "portAvailableBeforeStart": true,
+  "newListener": {
+    "LocalAddress": "127.0.0.1",
+    "LocalPort": 5249,
+    "State": 2,
+    "OwningProcess": 39644
+  },
+  "originalListenersBefore": [
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 5248,
+      "State": 2,
+      "OwningProcess": 14104
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 5247,
+      "State": 2,
+      "OwningProcess": 11332
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 5246,
+      "State": 2,
+      "OwningProcess": 39864
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 5245,
+      "State": 2,
+      "OwningProcess": 42996
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 5244,
+      "State": 2,
+      "OwningProcess": 40572
+    }
+  ],
+  "originalListenersAfter": [
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 5248,
+      "State": 2,
+      "OwningProcess": 14104
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 5247,
+      "State": 2,
+      "OwningProcess": 11332
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 5246,
+      "State": 2,
+      "OwningProcess": 39864
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 5245,
+      "State": 2,
+      "OwningProcess": 42996
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 5244,
+      "State": 2,
+      "OwningProcess": 40572
+    }
+  ],
+  "originalListenersPreserved": true,
+  "original5202And5231": {
+    "before": [],
+    "after": [],
+    "noAttemptToStartStopOrAccessDailyData": true
+  },
+  "oldCandidatesAndProfiles": "Preserved; no old candidate/profile files written, installed, imported or migrated.",
+  "limits": [
+    "The CI built a temporary PR merge commit, not a standalone branch-head checkout.",
+    "Success of the Web build and storage-manifest jobs does not mean all CI passed; Formal expert admission reported failure; other CI jobs and aggregates are evaluated independently.",
+    "evidenceId remains unbound-local-build; this is an internal engineering candidate, not a formal source/rights/expert release attestation.",
+    "The protected TypeScript source file was not manually read, hashed, edited or submitted.",
+    "No local dist was used as CI artifact identity."
+  ],
+  "realParticipantCount": 0,
+  "expertReviewCount": 0,
+  "androidSdkAccepted": false,
+  "androidCompiledOrDeviceTested": false,
+  "repositoryChangedByThisPackagingTask": false,
+  "protectedFileManuallyReadHashedEditedOrSubmitted": false,
+  "evidenceFiles": [
+    "artifact-api-metadata.json",
+    "ci-checkout-upload-evidence.txt",
+    "candidate-preparation-receipt.json",
+    "final-fixed-smoke-result.json",
+    "listeners-before.json",
+    "listeners-after.json"
+  ]
+}

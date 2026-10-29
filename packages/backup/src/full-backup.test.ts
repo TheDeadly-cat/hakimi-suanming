@@ -93,7 +93,8 @@ import {
 } from "@hakimi/time-core";
 import {
   COMPATIBLE_TRANSIT_TIMELINE_VERSION_V1_1,
-  calculateTransitSnapshot
+  calculateTransitSnapshot,
+  calculateTransitSnapshotV1_2_0
 } from "@hakimi/transit-core";
 import {
   ADVANCED_CASE_QUERY,
@@ -1748,7 +1749,7 @@ describe("current-modelled-data full backup", () => {
     const source = repositories();
     const seeded = await seedModeledData(source.cases, source.research, "historical-transit-source");
     const revision = seeded.bundle.revisions.at(-1)!;
-    const snapshot = await calculateTransitSnapshot({
+    const snapshot = await calculateTransitSnapshotV1_2_0({
       revision,
       atInstant: "2025-03-12T04:00:00Z"
     });

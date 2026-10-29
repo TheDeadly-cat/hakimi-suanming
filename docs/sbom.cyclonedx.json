@@ -89,9 +89,9 @@
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/fflate@0.8.2",
+      "bom-ref": "pkg:npm/fflate@0.8.3",
       "name": "fflate",
-      "version": "0.8.2",
+      "version": "0.8.3",
       "scope": "required",
       "licenses": [
         {
@@ -100,17 +100,17 @@
           }
         }
       ],
-      "purl": "pkg:npm/fflate@0.8.2",
+      "purl": "pkg:npm/fflate@0.8.3",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "70f254e3b39a02809b834a41bf3b20a533e19a1a88e5e26387f248bbcb4f8f9abe4fb88bbd6fc901852a984eca381e11d59c8487305a210a50a5aadd045e73f0"
+          "content": "b5b64db89acbc06529df3b2106d772e16f8e47166e221f1ae629722044030b9ad8d5fdd4db424caf2d0b977581cd4e7c1192ac12e2455e16f9830bfc0ac3ef80"
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/fflate/-/fflate-0.8.2.tgz"
+          "url": "https://registry.npmjs.org/fflate/-/fflate-0.8.3.tgz"
         }
       ],
       "properties": [
@@ -274,9 +274,9 @@
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/moment@2.30.1",
+      "bom-ref": "pkg:npm/moment@2.31.0",
       "name": "moment",
-      "version": "2.30.1",
+      "version": "2.31.0",
       "scope": "required",
       "licenses": [
         {
@@ -285,17 +285,17 @@
           }
         }
       ],
-      "purl": "pkg:npm/moment@2.30.1",
+      "purl": "pkg:npm/moment@2.31.0",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "b849ad3616c33ab58f152fa176314205fcbd7f6628cb3469c1c97e0eaa42ead697db5173b132d055b315fd6ecfccd497eb1fdb842d73037736510e4dcc7ea1a3"
+          "content": "d1a70e4df32258e85e612e1ea166fcd3260c6ff24bbd5bfd4876ecd8f7a1683cdf506d01c3ce7948aca4d082939cf19ae7e5366e68b75baf25d7eb062d7fe9bf"
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/moment/-/moment-2.30.1.tgz"
+          "url": "https://registry.npmjs.org/moment/-/moment-2.31.0.tgz"
         }
       ],
       "properties": [
@@ -380,6 +380,41 @@
         {
           "name": "hakimi:packageLockPaths",
           "value": "node_modules/moment-timezone"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/pako@2.1.0",
+      "name": "pako",
+      "version": "2.1.0",
+      "scope": "required",
+      "licenses": [
+        {
+          "expression": "(MIT AND Zlib)"
+        }
+      ],
+      "purl": "pkg:npm/pako@2.1.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "c3e7ae7e26755ae25880f5db57f3cedcd08c11cdf1ab2964287ce9f1bc69d6e5b8a9a48d41493098b2c473790ab1fcfc96957517c1eddd4d429bef52ae8836ba"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/pako/-/pako-2.1.0.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "hakimi:licenseReview",
+          "value": "manual_review_required"
+        },
+        {
+          "name": "hakimi:packageLockPaths",
+          "value": "node_modules/pako"
         }
       ]
     },
@@ -496,9 +531,9 @@
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/zod@4.4.3",
+      "bom-ref": "pkg:npm/zod@4.6.7",
       "name": "zod",
-      "version": "4.4.3",
+      "version": "4.6.7",
       "scope": "required",
       "licenses": [
         {
@@ -507,17 +542,17 @@
           }
         }
       ],
-      "purl": "pkg:npm/zod@4.4.3",
+      "purl": "pkg:npm/zod@4.6.7",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "cad10d163209165d94c1882575eda37215b61f09b818914b0e249759d4eb25004837d15cca9ee7e0387124489634024c575fc1a967d6fe4920ef55037072724d"
+          "content": "83c5b60f6914e9af2e9ed734e777d7d6e5412b333bcaa0315bfdf3c24f37fba472176f9228eb95f9cd30043854c335753da19aa66647fab99c5333dffb7086c2"
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/zod/-/zod-4.4.3.tgz"
+          "url": "https://registry.npmjs.org/zod/-/zod-4.6.7.tgz"
         }
       ],
       "properties": [
@@ -538,18 +573,19 @@
       "dependsOn": [
         "pkg:npm/%40js-temporal/polyfill@0.5.1",
         "pkg:npm/dexie@4.4.4",
-        "pkg:npm/fflate@0.8.2",
+        "pkg:npm/fflate@0.8.3",
         "pkg:npm/html-to-image@1.11.13",
         "pkg:npm/jsbi@4.3.2",
         "pkg:npm/lucide-react@1.28.0",
         "pkg:npm/lunar-typescript@1.8.6",
         "pkg:npm/moment-timezone@0.5.48",
         "pkg:npm/moment-timezone@0.6.3",
-        "pkg:npm/moment@2.30.1",
+        "pkg:npm/moment@2.31.0",
+        "pkg:npm/pako@2.1.0",
         "pkg:npm/react-dom@19.2.8",
         "pkg:npm/react@19.2.8",
         "pkg:npm/scheduler@0.27.0",
-        "pkg:npm/zod@4.4.3"
+        "pkg:npm/zod@4.6.7"
       ]
     },
     {
@@ -563,7 +599,7 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/fflate@0.8.2",
+      "ref": "pkg:npm/fflate@0.8.3",
       "dependsOn": []
     },
     {
@@ -585,20 +621,24 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/moment@2.30.1",
+      "ref": "pkg:npm/moment@2.31.0",
       "dependsOn": []
     },
     {
       "ref": "pkg:npm/moment-timezone@0.5.48",
       "dependsOn": [
-        "pkg:npm/moment@2.30.1"
+        "pkg:npm/moment@2.31.0"
       ]
     },
     {
       "ref": "pkg:npm/moment-timezone@0.6.3",
       "dependsOn": [
-        "pkg:npm/moment@2.30.1"
+        "pkg:npm/moment@2.31.0"
       ]
+    },
+    {
+      "ref": "pkg:npm/pako@2.1.0",
+      "dependsOn": []
     },
     {
       "ref": "pkg:npm/react@19.2.8",
@@ -616,7 +656,7 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/zod@4.4.3",
+      "ref": "pkg:npm/zod@4.6.7",
       "dependsOn": []
     }
   ]

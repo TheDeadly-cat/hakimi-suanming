@@ -1,0 +1,11 @@
+{
+  "kind": "read_only_git_commit_tree_verification",
+  "requestedHead": "238bf2275a97650324af71624de4a83078e2963f",
+  "ciCheckoutCommit": "34a895cb2b3451b6900de22ff798869bc1008f87",
+  "baseCommit": "2482941f46acafc6fe0b331f536db06a45710fc8",
+  "headTree": "925a2718cd167b3d4ee30684bbd2b56de778885a",
+  "ciCheckoutTree": "925a2718cd167b3d4ee30684bbd2b56de778885a",
+  "equal": true,
+  "verification": "Fetched the exact CI merge commit, then read both committed Git tree identities. No protected working-tree source was manually read or hashed.",
+  "formalSourceRightsOrExpertApproval": false
+}

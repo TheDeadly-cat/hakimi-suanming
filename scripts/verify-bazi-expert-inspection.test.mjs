@@ -32,7 +32,7 @@ test("structure verifies the real selected packet without counting opinions or g
   assert.equal(result.output.commandRole, "packet_structure");
   assert.equal(result.output.status, "structure_verified");
   assert.equal(result.output.resolution.currentAvailable, true);
-  assert.equal(result.output.resolution.artifact.path, "content/bazi-strength-expert-review-packet.current.json");
+  assert.equal(result.output.resolution.artifact.path, "content/bazi-strength-expert-review-packet.current-v1.7.0.json");
   assert.equal("expertReviewProgress" in result.output.resolution, false);
   assert.equal(result.output.expertAdmissionAssessed, false);
   assert.equal(result.output.expertAdmissionAuthorized, false);

@@ -1,0 +1,18 @@
+{
+  "recordedAt": "2026-10-29T04:19:13.4921903Z",
+  "baseHead": "3d094ebef8d302456b993b3deb928220d53cb10f",
+  "changedFile": "apps/web/e2e/service-worker-cross-schema-v13-v16.spec.ts",
+  "finalFileSha256": "5e6ded2fd1966200f49e7437ade6240bb280cff2b7d9e937b18b36b07b6fa896",
+  "runtimeSourcesChanged": false,
+  "frozenSourcesChanged": false,
+  "originalActivationTimeoutMs": 90000,
+  "activationAssertionsChanged": false,
+  "explicitActivationCommandsAdded": false,
+  "originalSourcePagesClosed": false,
+  "diagnosticAttachmentFailurePreservesOriginalError": true,
+  "portCleanupReferences": "WeakRef; native channels and existing handlers retained",
+  "typecheckProgramExitCode": 0,
+  "releaseGovernanceExitCode": 0,
+  "finalObserverExecutedInLocalScenario": false,
+  "localRunBoundary": "The earlier local Chrome scenario stopped at source bootstrap before reaching the observer. Final cleanup/attachment changes have only typecheck, governance and code review evidence until remote E2E."
+}

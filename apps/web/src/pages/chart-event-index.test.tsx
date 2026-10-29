@@ -16,11 +16,21 @@ const input: BirthInput = {
 };
 const readEvents = researchRepository.listEventsByCase.bind(researchRepository);
 const createEvent = researchRepository.createEvent.bind(researchRepository);
+const readJournal = researchRepository.readResearchJournalSnapshot.bind(researchRepository);
+const pendingEventWork = new Set<Promise<unknown>>();
+function observeEventWork<T>(promise: Promise<T>): Promise<T> {
+  pendingEventWork.add(promise);
+  void promise.then(() => pendingEventWork.delete(promise), () => pendingEventWork.delete(promise));
+  return promise;
+}
 
 beforeEach(async () => {
   installLegacyV13BootGovernance();
   resetResearchJournalMutationCoordinatorForTests();
   await caseRepository.clearAll();
+  pendingEventWork.clear();
+  vi.spyOn(researchRepository, "createEvent").mockImplementation(payload => observeEventWork(createEvent(payload)));
+  vi.spyOn(researchRepository, "readResearchJournalSnapshot").mockImplementation((...args) => observeEventWork(readJournal(...args)));
   vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
 });
 afterEach(async () => {
@@ -60,6 +70,14 @@ function submitEvent(title: string) {
   fireEvent.click(editor.getByRole("button", { name: "添加事件" }));
 }
 async function savedEvent(caseId: string, title: string) {
+  // The real form announces success only after its create call and committed
+  // journal snapshot both settle. The independently gated parent event index
+  // is deliberately not awaited here: the tests below still verify its pending,
+  // failed and stale responses. Keep the DOM check as an assertion, not a
+  // one-second completion budget for the actual repository operations.
+  await act(async () => {
+    while (pendingEventWork.size) await Promise.allSettled([...pendingEventWork]);
+  });
   await screen.findByText("事件已链接到当前案例与修订。");
   const rows = await readEvents(caseId, { includeDeleted: true });
   expect(rows.filter(row => row.title === title)).toHaveLength(1);

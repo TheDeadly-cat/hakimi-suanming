@@ -2,7 +2,7 @@ import { AlertTriangle, Home, RefreshCw } from "lucide-react";
 import { Component, lazy, Suspense, useEffect, useRef, useState, type ErrorInfo, type ReactNode } from "react";
 import { AppShell } from "./components/app-shell";
 import type { AppBootFailure } from "./lib/app-boot-failure";
-import { CANDIDATE_SET_ROUTE, CASE_REVISE_ROUTE, CASE_REVISION_ROUTE } from "./lib/app-route-patterns";
+import { CANDIDATE_SET_ROUTE, CASE_PROFILE_ROUTE, CASE_REVISE_ROUTE, CASE_REVISION_ROUTE } from "./lib/app-route-patterns";
 import { CURRENT_RELEASE_ENGINEERING_IDENTITY } from "./lib/current-release";
 import { LocalAppSettingsProvider } from "./lib/local-app-settings";
 import { useAppLocation } from "./lib/router";
@@ -12,6 +12,8 @@ import { BootFailureRecoveryPage, type BootFailureRecoveryView } from "./pages/b
 const loadDashboardPage = () => import("./pages/dashboard-page");
 const loadNewChartPage = () => import("./pages/new-chart-page");
 const loadCaseLibraryPage = () => import("./pages/case-library-page");
+const loadPersonProfilePage = () => import("./pages/person-profile-page");
+const loadReadingReportsPage = () => import("./pages/reading-reports-page");
 const loadResearchQueryPage = () => import("./pages/research-query-page");
 const loadCandidateSetPage = () => import("./pages/candidate-set-page");
 const loadChartPage = () => import("./pages/chart-page");
@@ -28,6 +30,8 @@ const loadNotFoundPage = () => import("./pages/not-found-page");
 const DashboardPage = lazy(() => loadDashboardPage().then((module) => ({ default: module.DashboardPage })));
 const NewChartPage = lazy(() => loadNewChartPage().then((module) => ({ default: module.NewChartPage })));
 const CaseLibraryPage = lazy(() => loadCaseLibraryPage().then((module) => ({ default: module.CaseLibraryPage })));
+const PersonProfilePage = lazy(() => loadPersonProfilePage().then((module) => ({ default: module.PersonProfilePage })));
+const ReadingReportsPage = lazy(() => loadReadingReportsPage().then((module) => ({ default: module.ReadingReportsPage })));
 const ResearchQueryPage = lazy(() => loadResearchQueryPage().then((module) => ({ default: module.ResearchQueryPage })));
 const CandidateSetPage = lazy(() => loadCandidateSetPage().then((module) => ({ default: module.CandidateSetPage })));
 const ChartPage = lazy(() => loadChartPage().then((module) => ({ default: module.ChartPage })));
@@ -58,6 +62,7 @@ function loaderForPath(pathname: string): () => Promise<unknown> {
   if (pathname === "/new") return loadNewChartPage;
   if (pathname === "/cases/research") return loadResearchQueryPage;
   if (pathname === "/cases") return loadCaseLibraryPage;
+  if (pathname === "/reports") return loadReadingReportsPage;
   if (pathname === "/compare/pair") return loadPairResearchPage;
   if (pathname === "/compare") return loadComparePage;
   if (pathname === "/knowledge") return loadKnowledgePage;
@@ -69,6 +74,7 @@ function loaderForPath(pathname: string): () => Promise<unknown> {
   if (CANDIDATE_SET_ROUTE.test(pathname)) return loadCandidateSetPage;
   if (CASE_REVISE_ROUTE.test(pathname)) return loadNewChartPage;
   if (CASE_REVISION_ROUTE.test(pathname)) return loadChartPage;
+  if (CASE_PROFILE_ROUTE.test(pathname)) return loadPersonProfilePage;
   return loadNotFoundPage;
 }
 
@@ -78,9 +84,10 @@ export async function preloadAppRoute(pathname: string): Promise<void> {
 
 function resolvePage(pathname: string) {
   if (pathname === "/") return <DashboardPage />;
-  if (pathname === "/new") return <NewChartPage />;
+  if (pathname === "/new") return <NewChartPage presentation="simple" />;
   if (pathname === "/cases/research") return <ResearchQueryPage />;
   if (pathname === "/cases") return <CaseLibraryPage />;
+  if (pathname === "/reports") return <ReadingReportsPage />;
   if (pathname === "/compare/pair") return <PairResearchPage />;
   if (pathname === "/compare") return <ComparePage />;
   if (pathname === "/knowledge") return <KnowledgePage />;
@@ -94,10 +101,12 @@ function resolvePage(pathname: string) {
   if (candidateSetMatch) return <CandidateSetPage candidateSetId={candidateSetMatch[1].toLowerCase()} />;
 
   const reviseMatch = pathname.match(CASE_REVISE_ROUTE);
-  if (reviseMatch) return <NewChartPage caseId={reviseMatch[1].toLowerCase()} revisionId={reviseMatch[2].toLowerCase()} />;
+  if (reviseMatch) return <NewChartPage presentation="simple" caseId={reviseMatch[1].toLowerCase()} revisionId={reviseMatch[2].toLowerCase()} />;
 
   const chartMatch = pathname.match(CASE_REVISION_ROUTE);
   if (chartMatch) return <ChartPage caseId={chartMatch[1].toLowerCase()} revisionId={chartMatch[2].toLowerCase()} />;
+  const profileMatch = pathname.match(CASE_PROFILE_ROUTE);
+  if (profileMatch) return <PersonProfilePage caseId={profileMatch[1].toLowerCase()} />;
   return <NotFoundPage />;
 }
 
@@ -106,6 +115,7 @@ function resolvePageTitle(pathname: string, search: string): string {
   if (pathname === "/new") return "新建排盘";
   if (pathname === "/cases/research") return "专业研究检索";
   if (pathname === "/cases") return "案例库";
+  if (pathname === "/reports") return "我的报告";
   if (pathname === "/compare/pair") return "双案例结构研究";
   if (pathname === "/compare") return "正式命盘对照台";
   if (pathname === "/help") return "帮助与安全边界";
@@ -114,6 +124,7 @@ function resolvePageTitle(pathname: string, search: string): string {
   if (pathname === "/settings/transit-review-inbox") return "未核验审核收件箱";
   if (pathname === "/settings") return "设置与诊断";
   if (pathname === "/knowledge") {
+    if (!search || search === "?") return "读懂报告里的词";
     const view = new URLSearchParams(search).get("view");
     if (view === "rights") return "来源权利台账";
     if (view === "coverage") return "依据覆盖审计";
@@ -121,8 +132,10 @@ function resolvePageTitle(pathname: string, search: string): string {
   }
   if (CANDIDATE_SET_ROUTE.test(pathname)) return "未知时辰候选组";
   if (CASE_REVISE_ROUTE.test(pathname)) return "由历史修订派生新版";
+  if (CASE_PROFILE_ROUTE.test(pathname)) return "个人档案";
   if (CASE_REVISION_ROUTE.test(pathname)) {
     const view = new URLSearchParams(search).get("view");
+    if (view === "reading" || !search || search === "?") return "本盘判断";
     if (view === "overview") return "命盘概览";
     if (view === "transit") return "命盘运限";
     if (view === "research") return "命盘研读";
@@ -265,7 +278,7 @@ function RuntimeFailureShell({ failure }: { failure: Pick<AppBootFailure, "sourc
             <div>
               <p className="eyebrow">Runtime failure</p>
               <h1 id="runtime-failure-title">当前页面运行失败</h1>
-              <p>本次启动与离线版本确认已经完成；这个后续运行错误不会被误报为启动失败，也不会改写 Service Worker 的启动确认。</p>
+              <p>本次启动检查已经完成，当前页面在后续运行时发生错误。这个错误不会被误报为启动失败，也不会改写已有的启动确认。</p>
               <p>故障阶段：<code>{visibleFailureSource}</code>。为保护本地研究资料，这里不显示原始异常正文或调用栈。</p>
               <p><strong>请重新载入当前页面。</strong>如果重复出现，请先保留浏览器资料，再从一次正常启动的设置页导出完整备份。</p>
               <div className="app-runtime-failure-actions" aria-label="运行时故障恢复动作">

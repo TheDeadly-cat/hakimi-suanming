@@ -1,0 +1,155 @@
+{
+  "head": "110e87ffaba9d6eec576ed8de9dddea64d0989fe",
+  "runId": 40817255215,
+  "testTitle": "v16 冻结多个 v13 页的真实写入，提交后旧页只收敛到 v16",
+  "observations": [
+    {
+      "project": "msedge",
+      "browser": "msedge 156.0.4314.50",
+      "status": "passed",
+      "sourceBuild": "d0e255972d7c",
+      "targetBuild": "11f1b8717458",
+      "attachment": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-110e87f/automatic-forward-activation-msedge.json",
+      "testObservationEnabled": true,
+      "nativeMessageChannelAckListener": true,
+      "portCleanupUsesWeakReferences": true,
+      "bothSourceBootAcksTrue": true,
+      "acks": [
+        {
+          "page": "case",
+          "events": [
+            {
+              "at": "2026-10-29T04:42:40.577Z",
+              "event": "activation-ack",
+              "payload": {
+                "type": "REQUEST_INSTALLED_FORWARD_MIGRATION_ACTIVATION_ACK_V1",
+                "accepted": true,
+                "reason": "ALL_CLIENTS_DRAINED_BEFORE_SKIP_WAITING",
+                "requestId": "takeover-ec563689-ba1a-45ab-871c-d3dde60727c0",
+                "sourceBuildVersion": "d0e255972d7c",
+                "targetBuildVersion": "11f1b8717458"
+              }
+            }
+          ]
+        },
+        {
+          "page": "settings",
+          "events": [
+            {
+              "at": "2026-10-29T04:42:40.500Z",
+              "event": "activation-ack",
+              "payload": {
+                "type": "REQUEST_INSTALLED_FORWARD_MIGRATION_ACTIVATION_ACK_V1",
+                "accepted": false,
+                "reason": "TAKEOVER_SESSION_BUSY",
+                "requestId": "takeover-b84ac099-2f01-48e1-98bc-db82f1140365",
+                "sourceBuildVersion": "d0e255972d7c",
+                "targetBuildVersion": null
+              }
+            }
+          ]
+        }
+      ],
+      "targetActivatingObservedAt": "2026-10-29T04:42:40.594Z",
+      "acceptedAckToTargetActivatingMs": 17,
+      "targetActivatedEventCaptured": false,
+      "sourceRedundantObserved": true,
+      "finalPages": [
+        {
+          "page": "case",
+          "forward": "controller_changed",
+          "takeover": "activation_dispatched",
+          "active": "activating",
+          "waiting": null,
+          "installing": null
+        },
+        {
+          "page": "settings",
+          "forward": "controller_changed",
+          "takeover": "retry_scheduled",
+          "active": "activating",
+          "waiting": null,
+          "installing": null
+        }
+      ],
+      "workerErrors": 0,
+      "diagnosticErrors": 0,
+      "droppedEvents": 0
+    },
+    {
+      "project": "chrome",
+      "browser": "chrome 156.0.8078.74",
+      "status": "passed",
+      "sourceBuild": "d0e255972d7c",
+      "targetBuild": "11f1b8717458",
+      "attachment": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-110e87f/automatic-forward-activation-chrome.json",
+      "testObservationEnabled": true,
+      "nativeMessageChannelAckListener": true,
+      "portCleanupUsesWeakReferences": true,
+      "bothSourceBootAcksTrue": true,
+      "acks": [
+        {
+          "page": "case",
+          "events": [
+            {
+              "at": "2026-10-29T04:52:48.933Z",
+              "event": "activation-ack",
+              "payload": {
+                "type": "REQUEST_INSTALLED_FORWARD_MIGRATION_ACTIVATION_ACK_V1",
+                "accepted": true,
+                "reason": "ALL_CLIENTS_DRAINED_BEFORE_SKIP_WAITING",
+                "requestId": "takeover-51f6904b-5e22-49e9-b736-85c4e04a2ac8",
+                "sourceBuildVersion": "d0e255972d7c",
+                "targetBuildVersion": "11f1b8717458"
+              }
+            }
+          ]
+        },
+        {
+          "page": "settings",
+          "events": [
+            {
+              "at": "2026-10-29T04:52:48.862Z",
+              "event": "activation-ack",
+              "payload": {
+                "type": "REQUEST_INSTALLED_FORWARD_MIGRATION_ACTIVATION_ACK_V1",
+                "accepted": false,
+                "reason": "TAKEOVER_SESSION_BUSY",
+                "requestId": "takeover-cc2ee5a7-ba8d-4d37-9e1c-571b1b18a315",
+                "sourceBuildVersion": "d0e255972d7c",
+                "targetBuildVersion": null
+              }
+            }
+          ]
+        }
+      ],
+      "targetActivatingObservedAt": "2026-10-29T04:52:48.952Z",
+      "acceptedAckToTargetActivatingMs": 19,
+      "targetActivatedEventCaptured": false,
+      "sourceRedundantObserved": true,
+      "finalPages": [
+        {
+          "page": "case",
+          "forward": "controller_changed",
+          "takeover": "activation_dispatched",
+          "active": "activating",
+          "waiting": null,
+          "installing": null
+        },
+        {
+          "page": "settings",
+          "forward": "controller_changed",
+          "takeover": "retry_scheduled",
+          "active": "activating",
+          "waiting": null,
+          "installing": null
+        }
+      ],
+      "workerErrors": 0,
+      "diagnosticErrors": 0,
+      "droppedEvents": 0
+    }
+  ],
+  "originalCiBrowserVersions": "Both 3d094eb and 110e87f used chrome 156.0.8078.74 and msedge 156.0.4314.50; see browser-version-correction.json.",
+  "boundary": "Both new-head observed executions passed. This does not establish the cause or repair of the uninstrumented 3d094eb failure."
+}

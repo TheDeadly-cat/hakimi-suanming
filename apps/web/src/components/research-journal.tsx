@@ -26,6 +26,10 @@ import { buildResearchQuerySearch } from "../lib/research-query-route";
 import { createResearchQueryDraft } from "../lib/research-query-session";
 import { AppLink, navigate } from "../lib/router";
 import { buildChartSearch } from "../lib/transit-route";
+import { isPackedReadingSnapshot } from "../lib/local-reading-snapshot-codec";
+import { isScopedReadingReport, SCOPED_READING_REPORT_TAG } from "../lib/scoped-reading-report";
+import { LOCAL_READING_CASE_REVIEW_TAG, parseReadingCaseReview } from "../lib/reading-case-review";
+import { ReadingSavedRecord } from "./reading-saved-record";
 import {
   EventTimeMigrationDeriveError,
   EventTimeMigrationPanel,
@@ -59,6 +63,8 @@ type Citation = CitationRecord;
 type EventLifecycleFilter = "all" | "active" | "deleted";
 type EventFeedbackFilter = "all" | EventRecord["feedback"];
 type EventBindingFilter = "all" | "current_revision" | "current_node" | "unbound";
+const isCaseReviewNote = (note: ResearchNoteRecord) => note.tags.includes(LOCAL_READING_CASE_REVIEW_TAG) || parseReadingCaseReview(note.body).kind !== "legacy";
+const isScopedReadingNote = (note: ResearchNoteRecord) => note.tags.includes(SCOPED_READING_REPORT_TAG) || isScopedReadingReport(note.body);
 
 type JournalIndexState =
   | { requestCaseId: string; status: "loading"; message: null }
@@ -761,6 +767,8 @@ export function ResearchJournal({
 
   const saveNote = async (event: FormEvent) => {
     event.preventDefault();
+    if (editingNote && isScopedReadingNote(editingNote)) { setError("范围报告只读保留；补充内容请另写笔记或复盘，原报告不覆盖。"); return; }
+    if (editingNote && isCaseReviewNote(editingNote)) { setError("具体结论复盘只读保留；请在解读页追加更正，原记录不覆盖。"); return; }
     if (!noteBody.trim()) {
       setError("研究笔记不能为空。");
       return;
@@ -854,6 +862,12 @@ export function ResearchJournal({
   };
 
   const beginEditNote = (note: ResearchNoteRecord) => {
+    if (isScopedReadingNote(note)) { setError("范围报告只读保留；补充内容请另写笔记或复盘，原报告不覆盖。"); return; }
+    if (isCaseReviewNote(note)) { setError("具体结论复盘只读保留；请在解读页追加更正，原记录不覆盖。"); return; }
+    if (isPackedReadingSnapshot(note.body)) {
+      setError("完整解读快照只读保留；如需补充，请另写一条笔记或反馈。");
+      return;
+    }
     setEditingNote(note);
     setNoteBody(note.body);
     setNoteTags(note.tags.join("，"));
@@ -1327,16 +1341,19 @@ export function ResearchJournal({
           <div className="journal-list">
           {renderedNotes.map((note) => {
             const linkedCitations = citationsByTarget.researchNotes.get(note.id) ?? [];
+            const packedReading = isPackedReadingSnapshot(note.body) || isScopedReadingNote(note);
+            const caseReview = isCaseReviewNote(note);
             return <article key={note.id} className={note.lifecycle === "archived" ? "is-muted" : ""}>
               <header>
                 <div><strong>{noteAnchorLabel(note)}</strong><small>v{note.editVersion} · {note.lifecycle}</small></div>
                 <div className="journal-actions">
                   {citationIndexReady ? <AppLink className="icon-button" aria-label="为笔记添加知识引用" href={knowledgeResearchNoteHref(note.id)}><Link2 aria-hidden="true" /></AppLink> : null}
-                  <button ref={(element) => { if (element) noteEditButtonRefs.current.set(note.id, element); else noteEditButtonRefs.current.delete(note.id); }} type="button" className="icon-button" aria-label="编辑笔记" disabled={journalMutationActive} onClick={() => beginEditNote(note)}><Pencil aria-hidden="true" /></button>
+                  {!packedReading && !caseReview ? <button ref={(element) => { if (element) noteEditButtonRefs.current.set(note.id, element); else noteEditButtonRefs.current.delete(note.id); }} type="button" className="icon-button" aria-label="编辑笔记" disabled={journalMutationActive} onClick={() => beginEditNote(note)}><Pencil aria-hidden="true" /></button> : null}
                   <button type="button" className="icon-button" aria-label={note.lifecycle === "active" ? "归档笔记" : "恢复笔记"} disabled={journalMutationActive} onClick={() => void toggleNoteArchive(note)}>{note.lifecycle === "active" ? <Archive aria-hidden="true" /> : <RotateCcw aria-hidden="true" />}</button>
                 </div>
               </header>
-              <p>{note.body}</p>
+              {packedReading || caseReview ? <ReadingSavedRecord record={note} /> : <p>{note.body}</p>}
+              {caseReview ? <p>此复盘只读保留。需要补充或更正时，请回到解读页，围绕原结论追加一条记录。</p> : null}
               {note.tags.length ? <small className="journal-tags">{note.tags.join("、")}</small> : null}
               {linkedCitations.length ? <div className="journal-structured-citations"><small>知识引用 · {linkedCitations.length}</small>{linkedCitations.map((citation) => <AppLink key={citation.id} href={`/knowledge${buildKnowledgeSearch({ documentId: citation.documentId, sectionId: citation.locator.sectionId, lineNumber: citation.locator.startLine, citationId: citation.id, target: { kind: "research_note", noteId: note.id } })}`}><blockquote>{citation.quote}</blockquote></AppLink>)}</div> : null}
             </article>;

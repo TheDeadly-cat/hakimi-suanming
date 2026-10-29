@@ -1,0 +1,102 @@
+.brief-reading-report { color: #182b2c; min-width: 0; }
+.brief-reading-intro { display: flex; justify-content: space-between; gap: 16px; padding-bottom: 14px; color: #52655e; font-size: 14px; }
+.brief-reading-intro > span:last-child { color: #216b61; white-space: nowrap; }
+.brief-natal-conclusion { margin-bottom: 30px; }
+.brief-natal-conclusion > header > span { color: #52655e; font-size: 14px; }
+.brief-natal-conclusion h2 { font: 650 25px/1.6 var(--font-editorial,"SimSun",serif); margin: 6px 0 18px; text-wrap: pretty; }
+.brief-natal-conclusion dl { margin: 0; border-top: 2px solid #8aa99b; }
+.brief-natal-conclusion dl > div { display: grid; grid-template-columns: 5em minmax(0,1fr); gap: 18px; padding: 18px 0; border-bottom: 1px solid #d7ded3; }
+.brief-natal-conclusion dt { color: #216b61; font-size: 15px; line-height: 1.8; font-weight: 650; }
+.brief-natal-conclusion dd { margin: 0; }
+.brief-natal-conclusion h3 { margin: 0 0 8px; font-size: 18px; line-height: 1.6; }
+.brief-natal-basis { margin-top: 12px; }
+.brief-natal-basis h3 { margin-top: 20px; }
+.brief-natal-basis h4 { margin: 14px 0 6px; font-size: 16px; line-height: 1.7; }
+.brief-natal-basis blockquote { margin: 10px 0; padding-left: 14px; border-left: 2px solid #8aa99b; font-size: 16px; line-height: 1.85; }
+.brief-event-outlook { margin-bottom: 22px; }
+.brief-event-outlook > header { margin-bottom: 18px; }
+.brief-event-outlook > header > span { color: #52655e; font-size: 14px; font-variant-numeric: tabular-nums; }
+.brief-event-outlook h2 { font: 650 25px/1.6 var(--font-editorial,"SimSun",serif); margin: 6px 0; text-wrap: pretty; }
+.brief-event-outlook > header > p { color: #52655e; font-size: 14px; }
+.brief-event-list { border-top: 2px solid #8aa99b; }
+.brief-event-list > section { display: grid; grid-template-columns: 5em minmax(0,1fr); gap: 18px; padding: 20px 0; border-bottom: 1px solid #d7ded3; }
+.brief-event-list h3 { margin: 9px 0 0; color: #216b61; font-size: 17px; line-height: 1.6; }
+.brief-event-list h4 { margin: 10px 0 4px; color: #52655e; font-size: 14px; }
+.brief-event-date { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 12px; }
+.brief-event-date > a { font-weight: 650; font-size: 17px; }
+.brief-event-date > span { color: #52655e; font-size: 13px; line-height: 1.8; }
+.brief-event-item + .brief-event-item { margin-top: 16px; padding-top: 10px; border-top: 1px dashed #d7ded3; }
+.brief-key-months { margin: 12px 0; padding: 12px 14px; background: #f1f4ec; border-left: 2px solid #8aa99b; }
+.brief-key-months > section + section { margin-top: 16px; border-top: 1px solid #d7ded3; padding-top: 12px; }
+.brief-key-months h4 { margin: 0 0 8px; color: #235c52; font-size: 15px; line-height: 1.8; overflow-wrap: anywhere; }
+.brief-key-months h4 > span { display: block; font-size: 13px; color: #52655e; font-weight: 400; }
+.brief-key-months p.brief-key-months-empty { font-size: 14px; margin: 0; }
+.brief-event-evidence { padding-left: 12px; border-left: 2px solid #d7ded3; }
+.brief-event-list p.brief-event-empty { color: #66716e; font-size: 15px; margin-top: 8px; }
+.brief-event-outlook p.brief-event-note { margin-top: 14px; color: #52655e; font-size: 13px; }
+.brief-reading-background { margin-bottom: 22px; }
+.brief-reading-overview { margin: 0 0 28px; padding: 20px 22px; border: 1px solid #cbd9cb; background: #f1f5ee; }
+.brief-reading-overview > header > span { color: #52655e; font-size: 14px; font-variant-numeric: tabular-nums; }
+.brief-reading-overview h2 { font: 650 22px/1.6 var(--font-editorial,"SimSun",serif); margin: 4px 0 20px; }
+.brief-reading-overview > section + section { border-top: 1px solid #d3ded2; padding-top: 16px; margin-top: 14px; }
+.brief-reading-overview h3 { margin: 0 0 8px; color: #216b61; font-size: 17px; line-height: 1.6; }
+.brief-reading-overview dl { margin: 0; }
+.brief-reading-overview dl > div + div { margin-top: 8px; }
+.brief-reading-overview dt { font-size: 15px; line-height: 1.7; color: #263c32; font-weight: 650; }
+.brief-reading-overview dd { display: flex; flex-wrap: wrap; gap: 0 12px; margin: 0; }
+.brief-reading-year-link { display: inline-flex; align-items: center; min-height: 44px; color: #235c52; line-height: 1.7; font-size: 15px; text-decoration: underline; text-decoration-color: #9ab3a7; text-underline-offset: 4px; overflow-wrap: anywhere; }
+.brief-reading-year-link:hover { color: #143f35; text-decoration-color: currentColor; }
+.brief-reading-year-link:focus-visible { outline: 2px solid #216b61; outline-offset: 3px; }
+.brief-reading-overview p.brief-reading-overview-personal { margin-top: 10px; color: #52655e; font-size: 14px; }
+.brief-reading-domains { border-top: 1px solid #d7ded3; }
+.brief-reading-domains > section { display: grid; grid-template-columns: 3em minmax(0,1fr); gap: 18px; padding: 24px 0; border-bottom: 1px solid #d7ded3; }
+.brief-reading-domains > .brief-reading-domain--wide-title { grid-template-columns: 1fr; gap: 10px; }
+.brief-reading-domains h2 { margin: 3px 0 0; color: #216b61; font-size: 16px; }
+.brief-reading-domains h3, .brief-reading-current h3 { font-size: 19px; line-height: 1.65; margin: 0 0 8px; text-wrap: pretty; }
+.brief-reading-report p { line-height: 1.85; margin: 0 0 8px; font-size: 16px; color: #3f514a; overflow-wrap: anywhere; }
+.brief-reading-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: #216b61; font-size: 13px; text-underline-offset: 4px; }
+.brief-reading-link svg { flex-shrink: 0; }
+.brief-reading-link:focus-visible, .brief-reading-report summary:focus-visible { outline: 2px solid #216b61; outline-offset: 3px; }
+.brief-reading-current { margin: 24px 0 4px; padding: 20px 22px; border-left: 3px solid #8aa99b; background: #f1f4ec; }
+.brief-reading-current h2 { font-size: 14px; margin: 0 0 10px; color: #52655e; }
+.brief-reading-current > div + div { margin-top: 18px; border-top: 1px solid #d7ded3; padding-top: 16px; }
+.brief-reading-years-heading { margin-bottom: 24px; }
+.brief-reading-years-heading > span { color: #66716e; font-size: 13px; }
+.brief-reading-years-heading h2 { font: 650 26px/1.6 var(--font-editorial,"SimSun",serif); margin: 8px 0; }
+.brief-reading-years-heading > p { max-width: 46em; color: #52655e; font-size: 14px; }
+.brief-reading-year { padding: 22px 0 24px; border-top: 1px solid #d7ded3; }
+.brief-reading-year > header { display: flex; gap: 16px; align-items: start; justify-content: space-between; margin-bottom: 14px; }
+.brief-reading-year h3 { font: 650 30px/1.4 var(--font-editorial,"SimSun",serif); margin: 0; }
+.brief-reading-year h3 small { font: 400 15px/1.5 sans-serif; margin-left: 12px; color: #52655e; }
+.brief-reading-year p.brief-reading-year-focus { font-size: 13px; margin: 5px 0 0; color: #66716e; }
+.brief-reading-branch h4 { margin: 18px 0 10px; font-size: 15px; color: #216b61; }
+.brief-reading-segment + .brief-reading-segment { margin-top: 20px; border-top: 1px dashed #d7ded3; padding-top: 16px; }
+.brief-reading-period { display: flex; gap: 10px 22px; flex-wrap: wrap; margin-bottom: 14px; font-size: 13px; color: #52655e; }
+.brief-reading-period > span:first-child { font-weight: 650; color: #216b61; }
+.brief-reading-period:empty { display: none; }
+.brief-reading-segment dl { margin: 0; display: grid; gap: 10px; }
+.brief-reading-segment dl > div { display: grid; grid-template-columns: 4em minmax(0,1fr); gap: 16px; }
+.brief-reading-segment dt { color: #51665c; font-weight: 650; line-height: 1.85; font-size: 15px; }
+.brief-reading-segment dd { margin: 0; }
+.brief-reading-segment dd > strong { font-size: 16px; line-height: 1.8; }
+.brief-reading-personal { margin-top: 5px; }
+.brief-reading-personal > summary, .brief-reading-other-years > summary { min-height: 44px; padding-block: 10px; box-sizing: border-box; cursor: pointer; color: #216b61; font-size: 14px; line-height: 1.7; }
+.brief-reading-personal p { white-space: pre-wrap; }
+.brief-reading-personal h5 { font-size: 15px; margin: 16px 0 8px; }
+.brief-reading-other-years { border-top: 1px solid #d7ded3; }
+.brief-reading-other-years > summary { padding-block: 18px; }
+@media (max-width: 600px) {
+  .brief-natal-conclusion dl > div { grid-template-columns: 1fr; gap: 6px; }
+  .brief-natal-conclusion h2 { font-size: 23px; }
+  .brief-event-list > section { grid-template-columns: 1fr; gap: 4px; padding: 18px 0; }
+  .brief-event-list h3 { margin: 0; }
+  .brief-event-outlook h2 { font-size: 23px; }
+  .brief-reading-overview { padding: 18px 16px; }
+  .brief-reading-overview h2 { font-size: 20px; }
+  .brief-reading-domains > section { grid-template-columns: 1fr; gap: 8px; padding: 20px 0; }
+  .brief-reading-domains h3, .brief-reading-current h3 { font-size: 18px; }
+  .brief-reading-current { padding: 18px 16px; }
+  .brief-reading-year > header { flex-wrap: wrap; gap: 4px 12px; }
+  .brief-reading-segment dl > div { grid-template-columns: 3em minmax(0,1fr); gap: 12px; }
+  .brief-reading-years-heading h2 { font-size: 23px; }
+}

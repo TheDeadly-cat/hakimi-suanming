@@ -1,3 +1,4 @@
+import { assertCurrentFourSystemReportAndManifestDrift } from "./four-system-v22-history.test-fixture.mjs";
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -76,8 +77,7 @@ test("v2.2 archived input context rejects corruption, truncation and an empty ar
 });
 
 test("actual current checkout cannot inherit the archived v2.2 input context's private brand", async () => {
-  await assert.rejects(loadFourSystemCurrentStatusObservationChildV22(workspaceRoot),
-    { code: "MANIFEST_IDENTITY_DRIFT" });
+  await assertCurrentFourSystemReportAndManifestDrift(loadFourSystemCurrentStatusObservationChildV22, workspaceRoot);
 });
 
 test("v2.2 input context rejects replacement of restored lock and test-configuration inputs", async () => {

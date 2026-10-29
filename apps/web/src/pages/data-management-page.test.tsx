@@ -1,5 +1,7 @@
 ﻿import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act } from "@testing-library/react";
+import type { FullBackupWorkerRequest, FullBackupWorkerResponse } from "../lib/full-backup-worker-protocol";
 import { FullBackupError } from "@hakimi/backup";
 import {
   LOCAL_APP_SETTINGS_ID,
@@ -263,6 +265,27 @@ const verifiedReplacement = {
   expectedCurrentPayloadDigest: preparation.currentSafetyBackup.digests.payload
 };
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((accept) => { resolve = accept; });
+  return { promise, resolve };
+}
+
+const pickedBackup = (name = "incoming.json") => ({
+  name, size: 4096, type: "application/json", blob: new Blob(["{}"], { type: "application/json" })
+});
+const preparedImport = () => ({
+  preparation, sourceContainer: "json", sourceByteLength: 4096, decodedJsonByteLength: 4096,
+  canonicalJsonByteLength: 4096, payloadDigest: admittedPlan.payloadDigest
+});
+function expectNoPreflightWrites() {
+  for (const write of [mocks.applyVerifiedFullBackup, mocks.clearAll, mocks.saveResearcherProfile,
+    mocks.saveAppSettings, mocks.createAttachment, mocks.deleteAttachment, mocks.saveBlobFile]) {
+    expect(write).not.toHaveBeenCalled();
+  }
+  expect(window.localStorage.getItem("hakimi:backup-health:v1:lastFullBackupExportedAt")).toBeNull();
+}
+
 beforeEach(() => {
   vi.resetAllMocks();
   resetPreparedFileDeliveryCoordinatorForTests();
@@ -474,7 +497,8 @@ describe("DataManagementPage", () => {
     expect(mocks.prepareFullBackupImportOffMainThread).toHaveBeenCalledWith(
       expect.any(Blob),
       snapshot,
-      expect.objectContaining({ appVersion: expect.any(String) })
+      expect.objectContaining({ appVersion: expect.any(String) }),
+      expect.any(AbortSignal)
     );
     expect(mocks.readFullDataSnapshot).toHaveBeenCalledTimes(1);
     expect(mocks.listAttachments).not.toHaveBeenCalled();
@@ -607,7 +631,7 @@ describe("DataManagementPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "选择 ZIP / JSON 预检" }));
     await screen.findByRole("heading", { name: "预检通过，尚未写入" });
     expect(mocks.prepareFullBackupImportOffMainThread).toHaveBeenLastCalledWith(
-      expect.any(Blob), changedSnapshot, expect.objectContaining({ appVersion: expect.any(String) })
+      expect.any(Blob), changedSnapshot, expect.objectContaining({ appVersion: expect.any(String) }), expect.any(AbortSignal)
     );
     expect(screen.getByRole("button", { name: "先准备当前安全备份" })).toBeTruthy();
     expect(screen.getByLabelText(/我已确认安全备份文件保存成功并可以打开/)).toHaveProperty("checked", false);
@@ -949,6 +973,124 @@ describe("DataManagementPage", () => {
     fireEvent.click(await enterDeleteAllText(confirmation));
     await waitFor(() => expect(mocks.clearAll).toHaveBeenCalledTimes(1));
     expect(window.localStorage.getItem("hakimi:backup-health:v1:lastFullBackupExportedAt")).toBeNull();
+  });
+
+  it("慢预检使用真实 Worker 客户端取消并终止，忽略迟到消息且可立即重试", async () => {
+    const client = await vi.importActual<typeof import("../lib/full-backup-worker-client")>("../lib/full-backup-worker-client");
+    const requests: FullBackupWorkerRequest[] = [];
+    const worker = {
+      onmessage: null as Worker["onmessage"], onerror: null as Worker["onerror"], onmessageerror: null as Worker["onmessageerror"],
+      postMessage: vi.fn((message: FullBackupWorkerRequest) => { requests.push(message); }), terminate: vi.fn()
+    };
+    mocks.pickFile.mockResolvedValue(pickedBackup());
+    mocks.prepareFullBackupImportOffMainThread.mockImplementationOnce((blob, current, options, signal) =>
+      client.prepareFullBackupImportOffMainThread(blob, current, options, signal, {
+        forceWorker: true, createWorker: () => worker, createJobId: () => "cancel-preflight-test"
+      }));
+    render(<DataManagementPage />);
+    const choose = await screen.findByRole("button", { name: "选择 ZIP / JSON 预检" });
+    await waitFor(() => expect(choose).toHaveProperty("disabled", false));
+    fireEvent.click(choose);
+    await waitFor(() => expect(requests[0]?.type).toBe("prepare_import"));
+    const lateMessage = worker.onmessage;
+    fireEvent.click(screen.getByRole("button", { name: "取消预检" }));
+    await screen.findByText("已取消备份预检");
+    expect(requests.map((request) => request.type)).toEqual(["prepare_import", "cancel"]);
+    expect(worker.terminate).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(screen.getByRole("button", { name: "选择 ZIP / JSON 预检" })).toHaveProperty("disabled", false));
+    await act(async () => {
+      lateMessage?.call(worker as unknown as Worker, new MessageEvent("message", { data: {
+        ...requests[0], ...preparedImport(), type: "preparation_ready", sourceByteLength: 2
+      } as FullBackupWorkerResponse }));
+    });
+    expect(screen.queryByRole("heading", { name: "预检通过，尚未写入" })).toBeNull();
+    expect(mocks.assessStorageCapacity).not.toHaveBeenCalled();
+    expectNoPreflightWrites();
+    fireEvent.click(screen.getByRole("button", { name: "选择 ZIP / JSON 预检" }));
+    await screen.findByRole("heading", { name: "预检通过，尚未写入" });
+    expect(mocks.prepareFullBackupImportOffMainThread).toHaveBeenCalledTimes(2);
+    expectNoPreflightWrites();
+  });
+
+  it("取消任务的迟到完成不能发布结果或释放下一次预检的 busy", async () => {
+    const oldJob = deferred<ReturnType<typeof preparedImport>>();
+    const newJob = deferred<ReturnType<typeof preparedImport>>();
+    mocks.pickFile.mockResolvedValueOnce(pickedBackup("cancelled.json")).mockResolvedValueOnce(pickedBackup("retry.json"));
+    mocks.prepareFullBackupImportOffMainThread.mockReturnValueOnce(oldJob.promise).mockReturnValueOnce(newJob.promise);
+    render(<DataManagementPage />);
+    const choose = await screen.findByRole("button", { name: "选择 ZIP / JSON 预检" });
+    await waitFor(() => expect(choose).toHaveProperty("disabled", false));
+    fireEvent.click(choose);
+    await waitFor(() => expect(mocks.prepareFullBackupImportOffMainThread).toHaveBeenCalledTimes(1));
+    const oldSignal = mocks.prepareFullBackupImportOffMainThread.mock.calls[0]![3] as AbortSignal;
+    fireEvent.click(screen.getByRole("button", { name: "取消预检" }));
+    expect(oldSignal.aborted).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "选择 ZIP / JSON 预检" }));
+    await waitFor(() => expect(mocks.prepareFullBackupImportOffMainThread).toHaveBeenCalledTimes(2));
+    await act(async () => { oldJob.resolve(preparedImport()); await oldJob.promise; });
+    expect(screen.getByRole("button", { name: "正在预检" })).toHaveProperty("disabled", true);
+    expect(screen.queryByRole("heading", { name: "预检通过，尚未写入" })).toBeNull();
+    expect(mocks.assessStorageCapacity).not.toHaveBeenCalled();
+    await act(async () => { newJob.resolve(preparedImport()); await newJob.promise; });
+    await screen.findByRole("heading", { name: "预检通过，尚未写入" });
+    expect(screen.getByText(/retry\.json/)).toBeTruthy();
+    expect(screen.queryByText(/cancelled\.json/)).toBeNull();
+    expectNoPreflightWrites();
+  });
+
+  it.each(["picker", "snapshot", "capacity"] as const)("%s 等待期间取消后不再推进只读预检", async (phase) => {
+    const gate = deferred<unknown>();
+    mocks.pickFile.mockResolvedValue(pickedBackup());
+    if (phase === "picker") mocks.pickFile.mockReturnValueOnce(gate.promise);
+    if (phase === "snapshot") mocks.readFullDataSnapshot.mockReturnValueOnce(gate.promise);
+    if (phase === "capacity") mocks.assessStorageCapacity.mockReturnValueOnce(gate.promise);
+    render(<DataManagementPage />);
+    const choose = await screen.findByRole("button", { name: "选择 ZIP / JSON 预检" });
+    await waitFor(() => expect(choose).toHaveProperty("disabled", false));
+    fireEvent.click(choose);
+    const expectedCall = phase === "picker" ? mocks.pickFile : phase === "snapshot" ? mocks.readFullDataSnapshot : mocks.assessStorageCapacity;
+    await waitFor(() => expect(expectedCall).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole("button", { name: "取消预检" }));
+    await act(async () => {
+      gate.resolve(phase === "picker" ? pickedBackup() : phase === "snapshot" ? snapshot : admittedPlan);
+      await gate.promise;
+    });
+    expect(screen.getByRole("button", { name: "选择 ZIP / JSON 预检" })).toHaveProperty("disabled", false);
+    expect(screen.queryByRole("heading", { name: "预检通过，尚未写入" })).toBeNull();
+    if (phase !== "capacity") expect(mocks.prepareFullBackupImportOffMainThread).not.toHaveBeenCalled();
+    if (phase === "snapshot") expect(mocks.readFullDataSnapshot.mock.calls[0]![0].signal.aborted).toBe(true);
+    expectNoPreflightWrites();
+  });
+
+  it("卸载取消预检信号，迟到结果不会进入容量检查或写入", async () => {
+    const job = deferred<ReturnType<typeof preparedImport>>();
+    mocks.pickFile.mockResolvedValue(pickedBackup());
+    mocks.prepareFullBackupImportOffMainThread.mockReturnValueOnce(job.promise);
+    const view = render(<DataManagementPage />);
+    const choose = await screen.findByRole("button", { name: "选择 ZIP / JSON 预检" });
+    await waitFor(() => expect(choose).toHaveProperty("disabled", false));
+    fireEvent.click(choose);
+    await waitFor(() => expect(mocks.prepareFullBackupImportOffMainThread).toHaveBeenCalledTimes(1));
+    const signal = mocks.prepareFullBackupImportOffMainThread.mock.calls[0]![3] as AbortSignal;
+    view.unmount();
+    expect(signal.aborted).toBe(true);
+    await act(async () => { job.resolve(preparedImport()); await job.promise; });
+    expect(mocks.assessStorageCapacity).not.toHaveBeenCalled();
+    expectNoPreflightWrites();
+  });
+
+  it("取消接线保留 160 MiB 文件选择上限及正常预检入口", async () => {
+    // The real byte-limit parser is exercised separately in the Worker entry
+    // test; this fixture checks that the page does not narrow its picker gate.
+    mocks.pickFile.mockResolvedValue({ ...pickedBackup(), size: 160 * 1024 * 1024 });
+    render(<DataManagementPage />);
+    const choose = await screen.findByRole("button", { name: "选择 ZIP / JSON 预检" });
+    await waitFor(() => expect(choose).toHaveProperty("disabled", false));
+    fireEvent.click(choose);
+    await screen.findByRole("heading", { name: "预检通过，尚未写入" });
+    expect(mocks.pickFile).toHaveBeenCalledWith({ accept: ".zip,.json,application/zip,application/json", maxBytes: 160 * 1024 * 1024 });
+    expect(mocks.prepareFullBackupImportOffMainThread.mock.calls[0]![3]).toBeInstanceOf(AbortSignal);
+    expectNoPreflightWrites();
   });
 
   it("完整备份只读快照事务中可取消，且不启动 Worker、下载或备份健康标记", async () => {

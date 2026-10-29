@@ -52,8 +52,9 @@ async function verifyMobileHelpChrome(page: Page) {
   expect(helpBox!.height).toBeGreaterThanOrEqual(44);
 
   const mobileNavigation = page.getByRole("navigation", { name: "手机主导航" });
-  await expect(mobileNavigation.getByRole("link")).toHaveCount(5);
-  await expect(mobileNavigation.locator("[aria-current]")).toHaveCount(0);
+  await expect(mobileNavigation.getByRole("link")).toHaveCount(4);
+  await expect(mobileNavigation.locator("[aria-current]")).toHaveCount(1);
+  await expect(mobileNavigation.getByRole("link", { name: "我的", exact: true })).toHaveAttribute("aria-current", "page");
   await expectNoHorizontalOverflow(page);
 
   await focusByKeyboard(page, mobileHelp);

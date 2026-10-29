@@ -13,11 +13,13 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from
 import { type ReportExportPort, webReportExportPort } from "@hakimi/platform";
 import {
   REIDENTIFICATION_WARNING,
-  buildSingleChartResearchReport,
-  exportResearchCsv,
-  exportSingleChartResearchMarkdown,
-  type SingleChartResearchReport as SingleChartResearchReportModel
+  exportResearchCsv
 } from "@hakimi/research-export";
+import {
+  buildSingleChartCalendarFramePresentation,
+  exportSingleChartCalendarFrameMarkdown,
+  type SingleChartCalendarFramePresentation
+} from "../../../../packages/research-export/src/single-chart-calendar-frame";
 import { caseRepository, researchRepository } from "@hakimi/storage";
 import { shortHash } from "../lib/format";
 import { useExpertMode } from "../lib/expert-mode";
@@ -309,7 +311,7 @@ export function SingleChartReportExport({
   const sourceKey = JSON.stringify([caseId, revisionId]);
   const [stateSourceKey, setStateSourceKey] = useState(sourceKey);
   const [anonymized, setAnonymized] = useState(true);
-  const [report, setReport] = useState<SingleChartResearchReportModel | null>(null);
+  const [report, setReport] = useState<SingleChartCalendarFramePresentation | null>(null);
   const [activeAction, setActiveAction] = useState<ExportAction | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<ReportExportMessage | null>(null);
@@ -355,7 +357,8 @@ export function SingleChartReportExport({
   }, []);
 
   const sourceCurrent = stateSourceKey === sourceKey;
-  const visibleReport = sourceCurrent ? report : null;
+  const visiblePresentation = sourceCurrent ? report : null;
+  const visibleReport = visiblePresentation?.report ?? null;
   const visiblePreparedArtifact = sourceCurrent ? preparedArtifact : null;
   const visibleError = sourceCurrent ? error : null;
   const visibleMessage = sourceCurrent ? message : null;
@@ -440,11 +443,11 @@ export function SingleChartReportExport({
 
   const buildReport = async (mode: boolean) => {
     if (sourceBindingIssue) throw new Error(`导出来源绑定无效：${sourceBindingIssue}`);
-    const nextReport = await buildSingleChartResearchReport(
+    const nextReport = await buildSingleChartCalendarFramePresentation(
       await caseRepository.readSingleChartExportSnapshot(caseId, revisionId),
       { anonymized: mode }
     );
-    const bindingIssue = findSingleChartReportBindingIssue(nextReport);
+    const bindingIssue = findSingleChartReportBindingIssue(nextReport.report);
     if (bindingIssue) throw new Error(`报告绑定校验失败：${bindingIssue}`);
     return nextReport;
   };
@@ -495,7 +498,7 @@ export function SingleChartReportExport({
     const mode = anonymized;
     const currentReport = await buildReport(mode);
     if (!isCurrent()) return;
-    const output = exportSingleChartResearchMarkdown(currentReport);
+    const output = exportSingleChartCalendarFrameMarkdown(currentReport);
     const artifact = validateTextExportArtifact(output, "markdown");
     setPreparedArtifact({
       blob: artifact.blob,
@@ -826,7 +829,7 @@ export function SingleChartReportExport({
             {feedbackContent}
             {progressContent}
             <div className="single-chart-report-scroll" role="region" tabIndex={0} aria-label="单盘报告正文，可滚动">
-              <SingleChartReport ref={reportRef} report={visibleReport} />
+              <SingleChartReport ref={reportRef} report={visibleReport} calendarPresentation={visiblePresentation ?? undefined} />
             </div>
           </section>
         </div>

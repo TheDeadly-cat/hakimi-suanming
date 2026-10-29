@@ -52,9 +52,9 @@ if (isDirectEntry) {
   } else {
     try {
       const {
-        isVerifiedBaziKnowledgeCoreIdentityReboundBindingReadiness,
-        loadBaziKnowledgeCoreIdentityReboundBindingReadiness
-      } = await import("./bazi-knowledge-core-identity-rebound-binding-readiness-lib.mjs");
+        isVerifiedBaziDependencyReadinessV110: isVerifiedBaziKnowledgeCoreIdentityReboundBindingReadiness,
+        loadBaziDependencyReadinessV110: loadBaziKnowledgeCoreIdentityReboundBindingReadiness
+      } = await import("./bazi-dependency-identity-successor-lib.mjs");
       const result = await loadBaziKnowledgeCoreIdentityReboundBindingReadiness(workspaceRoot);
       if (!isVerifiedBaziKnowledgeCoreIdentityReboundBindingReadiness(result)) {
         const error = new Error("unbranded observation result");
@@ -63,7 +63,8 @@ if (isDirectEntry) {
       }
       process.stdout.write(`${OK_PREFIX} ${JSON.stringify({
         mechanicalObservationVerified:
-          result.knowledgeCoreIdentityReboundBindingReadinessMechanicallyVerified,
+          result.mechanicalObservationVerified,
+        currentBasisFilesVerified: result.currentBasisFilesVerified,
         ledgerId: result.ledgerId,
         ledgerDigest: result.ledgerDigest,
         artifact: result.artifact,

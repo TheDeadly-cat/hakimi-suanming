@@ -593,7 +593,7 @@ describe("ChartPage transit route", () => {
       deletedAt: revision.createdAt
     };
     vi.spyOn(caseRepository, "getCase").mockResolvedValue({ caseRecord, revisions: [revision] });
-    window.history.replaceState({}, "", `/cases/${caseRecord.id}/revisions/${revision.id}`);
+    window.history.replaceState({}, "", `/cases/${caseRecord.id}/revisions/${revision.id}?view=overview`);
 
     render(<ChartPage caseId={caseRecord.id} revisionId={revision.id} />);
 

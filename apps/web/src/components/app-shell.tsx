@@ -3,6 +3,7 @@ import {
   CircleHelp,
   Columns3,
   Database,
+  FileText,
   HardDrive,
   LayoutDashboard,
   Plus,
@@ -10,13 +11,18 @@ import {
   WifiOff
 } from "lucide-react";
 import { memo, type ReactNode, useEffect, useMemo, useRef } from "react";
-import { CANDIDATE_SET_ROUTE, CASE_REVISE_ROUTE, CASE_REVISION_ROUTE } from "../lib/app-route-patterns";
+import { CANDIDATE_SET_ROUTE, CASE_PROFILE_ROUTE, CASE_REVISE_ROUTE, CASE_REVISION_ROUTE } from "../lib/app-route-patterns";
 import { CURRENT_RELEASE_ENGINEERING_IDENTITY } from "../lib/current-release";
 import { useLocalAppSettings } from "../lib/local-app-settings";
 import { AppLink } from "../lib/router";
 import { useOnlineStatus } from "../lib/use-online-status";
 import { PwaInstallBanner } from "./pwa-install-banner";
+import { AppFeedbackDetails } from "./app-feedback-details";
+import { parseChartRoute } from "../lib/transit-route";
+import readingMountainsUrl from "../assets/reading-mountains-v1.png";
 import "./app-shell-polish.css";
+import "./app-shell-reading.css";
+import "./app-shell-mobile-navigation.css";
 
 type NavItem = {
   href: string;
@@ -54,6 +60,7 @@ function currentRoutePreloadPolicy(online: boolean): RoutePreloadPolicy {
 }
 
 function routePreloadFamily(pathname: string): string {
+  if (CASE_PROFILE_ROUTE.test(pathname)) return "/cases/:caseId";
   if (CANDIDATE_SET_ROUTE.test(pathname)) return "/candidate-sets/:candidateSetId";
   if (CASE_REVISE_ROUTE.test(pathname)) return "/cases/:caseId/revisions/:revisionId/revise";
   if (CASE_REVISION_ROUTE.test(pathname)) return "/cases/:caseId/revisions/:revisionId";
@@ -62,6 +69,7 @@ function routePreloadFamily(pathname: string): string {
 
 function isCaseWorkflowPath(pathname: string): boolean {
   return pathname === "/cases"
+    || CASE_PROFILE_ROUTE.test(pathname)
     || pathname === "/cases/research"
     || CANDIDATE_SET_ROUTE.test(pathname)
     || CASE_REVISION_ROUTE.test(pathname)
@@ -107,20 +115,28 @@ const navItems: NavItem[] = [
   }
 ];
 
-const createNavItem: NavItem = {
-  href: "/new",
-  label: "新建排盘",
-  shortLabel: "排盘",
-  icon: Plus,
-  match: (pathname) => pathname === "/new"
-};
-
 const mobileNavItems: NavItem[] = [
-  navItems[0]!,
-  navItems[1]!,
-  createNavItem,
-  navItems[2]!,
-  navItems[3]!
+  {
+    ...navItems[0]!,
+    label: "首页",
+    shortLabel: "首页",
+    match: (pathname) => pathname === "/" || pathname === "/new"
+  },
+  {
+    ...navItems[1]!,
+    href: "/reports",
+    label: "档案",
+    shortLabel: "档案",
+    match: (pathname) => isCaseWorkflowPath(pathname) || pathname === "/reports" || isCompareWorkflowPath(pathname)
+  },
+  { ...navItems[3]!, label: "学习", shortLabel: "学习" },
+  {
+    href: "/settings",
+    label: "我的",
+    shortLabel: "我的",
+    icon: Settings,
+    match: (pathname) => isSettingsPath(pathname) || pathname === "/help"
+  }
 ];
 
 type RouteContext = {
@@ -134,9 +150,12 @@ function routeContextForLocation(pathname: string, search: string): RouteContext
   if (pathname === "/new") return { group: "排盘工作流", label: "新建排盘" };
   if (pathname === "/cases/research") return { group: "案例工作流", label: "专业研究检索" };
   if (pathname === "/cases") return { group: "案例工作流", label: "案例库" };
+  if (CASE_PROFILE_ROUTE.test(pathname)) return { group: "个人档案", label: "资料与保存报告" };
+  if (pathname === "/reports") return { group: "命盘解读", label: "我的报告" };
   if (CANDIDATE_SET_ROUTE.test(pathname)) return { group: "案例工作流", label: "未知时辰候选组" };
   if (CASE_REVISE_ROUTE.test(pathname)) return { group: "案例工作流", label: "由历史修订派生新版" };
   if (CASE_REVISION_ROUTE.test(pathname)) {
+    if (parseChartRoute(search).view === "reading") return { group: "命盘解读", label: "本盘判断" };
     if (view === "overview") return { group: "案例工作流", label: "命盘概览" };
     if (view === "transit") return { group: "案例工作流", label: "命盘运限" };
     if (view === "research") return { group: "案例工作流", label: "命盘研读" };
@@ -145,6 +164,7 @@ function routeContextForLocation(pathname: string, search: string): RouteContext
   if (pathname === "/compare/pair") return { group: "核对工作流", label: "双案例结构研究" };
   if (pathname === "/compare") return { group: "核对工作流", label: "命盘结构对照台" };
   if (pathname === "/knowledge") {
+    if (!search || search === "?") return { group: "学习", label: "读懂报告里的词" };
     if (view === "rights") return { group: "知识工作流", label: "来源权利台账" };
     if (view === "coverage") return { group: "知识工作流", label: "依据覆盖审计" };
     return { group: "知识工作流", label: "个人典籍与引用" };
@@ -157,16 +177,34 @@ function routeContextForLocation(pathname: string, search: string): RouteContext
   return { group: "路径恢复", label: "页面未找到" };
 }
 
-function Brand() {
+function Brand({ reading = false }: { reading?: boolean }) {
   return (
-    <AppLink href="/" className="brand" aria-label="哈基米八字研究台首页">
+    <AppLink href="/" className="brand" aria-label={reading ? "哈基米八字首页" : "哈基米八字研究台首页"}>
       <img src="/brand-mark.svg" alt="" width="40" height="40" />
       <span>
         <strong>哈基米</strong>
-        <small>八字研究台</small>
+        <small>{reading ? "八字" : "八字研究台"}</small>
       </span>
     </AppLink>
   );
+}
+
+function ReadingSidebar({ pathname }: { pathname: string }) {
+  const chartPath = CASE_REVISION_ROUTE.test(pathname);
+  return <aside className="reading-sidebar" aria-label="命盘侧栏">
+    <AppLink href="/" className="brand" aria-label="哈基米八字首页">
+      <img src="/brand-mark.svg" alt="" width="44" height="44" /><span><strong>哈基米</strong><small>八字</small></span>
+    </AppLink>
+    <nav aria-label="主导航">
+      <AppLink href="/new" className={pathname === "/new" ? "is-active" : undefined} aria-current={pathname === "/new" ? "page" : undefined}><Plus aria-hidden="true" />新建排盘</AppLink>
+      <AppLink href="/cases" className={chartPath || pathname === "/cases" ? "is-active" : undefined} aria-current={pathname === "/cases" ? "page" : undefined}><Database aria-hidden="true" />我的命盘</AppLink>
+      <AppLink href="/reports" className={pathname === "/reports" ? "is-active" : undefined} aria-current={pathname === "/reports" ? "page" : undefined}><FileText aria-hidden="true" />我的报告</AppLink>
+    </nav>
+    <div className="reading-sidebar-bottom"><img src={readingMountainsUrl} alt="" aria-hidden="true" />
+      <p>知命而行<br />自在生活</p>
+      <AppLink href="/settings"><Settings aria-hidden="true" />设置</AppLink>
+    </div>
+  </aside>;
 }
 
 function DesktopSidebar({ pathname, context }: { pathname: string; context: RouteContext }) {
@@ -241,12 +279,12 @@ function DesktopSidebar({ pathname, context }: { pathname: string; context: Rout
   );
 }
 
-function MobileTopBar({ pathname, context }: { pathname: string; context: RouteContext }) {
+function MobileTopBar({ pathname, context, readingMode = false }: { pathname: string; context: RouteContext; readingMode?: boolean }) {
   const settingsActive = isSettingsPath(pathname);
   const helpActive = pathname === "/help";
   return (
     <header className="mobile-topbar">
-      <Brand />
+      <Brand reading={readingMode} />
       <div className="mobile-route-context" aria-label={`当前位置：${context.group}，${context.label}`}>
         <small>{context.group}</small>
         <strong>{context.label}</strong>
@@ -283,7 +321,7 @@ function MobileBottomNav({ pathname }: { pathname: string }) {
           <AppLink
             key={item.href}
             href={item.href}
-            className={`mobile-nav-item ${item.href === createNavItem.href ? "mobile-nav-item--create" : ""} ${active ? "is-active" : ""}`}
+            className={`mobile-nav-item ${active ? "is-active" : ""}`}
             aria-label={item.label}
             aria-current={active ? "page" : undefined}
           >
@@ -395,6 +433,11 @@ export function AppShell({ pathname, search = "", children, onPreloadRoute }: Ap
   const online = useOnlineStatus();
   const { settings } = useLocalAppSettings();
   const routeContext = useMemo(() => routeContextForLocation(pathname, search), [pathname, search]);
+  const readingMode = pathname === "/" || pathname === "/new" || pathname === "/cases" || pathname === "/reports"
+    || CASE_PROFILE_ROUTE.test(pathname)
+    || (pathname === "/knowledge" && (!search || search === "?"))
+    || CASE_REVISE_ROUTE.test(pathname)
+    || (CASE_REVISION_ROUTE.test(pathname) && parseChartRoute(search).view === "reading");
   const currentRouteFamily = useMemo(() => routePreloadFamily(pathname), [pathname]);
   const preloadPolicy = currentRoutePreloadPolicy(online);
   const focusNavigationKey = `${pathname}\u0000${routeContext.group}\u0000${routeContext.label}`;
@@ -456,7 +499,7 @@ export function AppShell({ pathname, search = "", children, onPreloadRoute }: Ap
 
   return (
     <div
-      className="app-shell"
+      className={`app-shell${readingMode ? " app-shell--reading" : ""}`}
       data-density={settings.preferredDensity}
       data-route-group={routeContext.group}
       data-route-context={routeContext.label}
@@ -484,8 +527,8 @@ export function AppShell({ pathname, search = "", children, onPreloadRoute }: Ap
       <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {online ? "浏览器报告当前在线。" : "浏览器报告当前离线；部分联网功能不可用。"}
       </span>
-      <MemoizedDesktopSidebar pathname={pathname} context={routeContext} />
-      <MemoizedMobileTopBar pathname={pathname} context={routeContext} />
+      {readingMode ? <ReadingSidebar pathname={pathname} /> : <MemoizedDesktopSidebar pathname={pathname} context={routeContext} />}
+      <MemoizedMobileTopBar pathname={pathname} context={routeContext} readingMode={readingMode} />
       <div className="app-column">
         {!online ? (
           <div className="global-status" role="note" data-offline-cache-verified="false">
@@ -496,12 +539,17 @@ export function AppShell({ pathname, search = "", children, onPreloadRoute }: Ap
             </span>
           </div>
         ) : null}
-        <PwaInstallBanner />
-        <MemoizedResearchPreviewBoundary />
-        <MemoizedCompactRouteContext context={routeContext} />
+        {readingMode ? null : <><PwaInstallBanner /><MemoizedResearchPreviewBoundary /><MemoizedCompactRouteContext context={routeContext} /></>}
+        {pathname === "/cases" || pathname === "/reports" ? (
+          <nav className="archive-section-nav" aria-label="档案内容">
+            <AppLink href="/cases" aria-current={pathname === "/cases" ? "page" : undefined}>命盘资料</AppLink>
+            <AppLink href="/reports" aria-current={pathname === "/reports" ? "page" : undefined}>已保存报告</AppLink>
+          </nav>
+        ) : null}
         <main ref={mainRef} className="app-main" id="main-content" tabIndex={-1} aria-label={`${routeContext.label}主要内容`}>
           {children}
         </main>
+        <AppFeedbackDetails pathname={pathname} search={search} />
       </div>
       <MemoizedMobileBottomNav pathname={pathname} />
     </div>

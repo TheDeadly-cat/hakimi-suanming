@@ -1,0 +1,74 @@
+{
+  "format": "hakimi-chrome-v16-failed-activation-trace-analysis/1",
+  "head": "3d094ebef8d302456b993b3deb928220d53cb10f",
+  "runId": 40811328923,
+  "jobId": 123242076583,
+  "artifactId": 12871004888,
+  "test": "v16 冻结多个 v13 页的真实写入，提交后旧页只收敛到 v16",
+  "project": "chrome",
+  "failure": {
+    "sourceBuild": "d0e255972d7c",
+    "targetBuild": "11f1b8717458",
+    "timeoutMs": 90000,
+    "location": "apps/web/e2e/service-worker-cross-schema-v13-v16.spec.ts:397"
+  },
+  "observed": {
+    "naturalPreSwitch": {
+      "callId": "call@980",
+      "monotonicTime": 808817.401,
+      "swBootAck": "true",
+      "appBootReady": "true",
+      "dbMigrationPhase": "committed"
+    },
+    "explicitUpdate": {
+      "callId": "call@984",
+      "monotonicTime": 808849.885
+    },
+    "completeTargetCache": {
+      "callId": "call@990",
+      "monotonicTime": 809366.529
+    },
+    "naturalStates": [
+      {
+        "at": 809383.054,
+        "phase": "retry_scheduled",
+        "forwardActivation": "drained",
+        "writeFrozen": true
+      },
+      {
+        "at": 810398.974,
+        "phase": "failed_closed_terminal",
+        "forwardActivation": "drained",
+        "writeFrozen": true
+      }
+    ],
+    "activeQuery": {
+      "attempts": 90,
+      "first": 809411.686,
+      "last": 899392.478,
+      "allResult": "d0e255972d7c"
+    },
+    "stableFinalSnapshot": {
+      "at": 899471.775,
+      "phase": "activation_dispatched",
+      "targetBuild": "11f1b8717458",
+      "forwardActivation": "drained",
+      "writeFrozen": true
+    },
+    "network": {
+      "records": 505,
+      "maxDurationMs": 269.202,
+      "lastReportedCompletion": 809178.957,
+      "failedOrIncompleteByTrace": 0,
+      "allRecordedNetworkEndedBeforeFirstActivePoll": true
+    }
+  },
+  "limits": [
+    "stable activation_dispatched first visible only at teardown snapshot; its dispatch time is unknown",
+    "target cache metadata is installation evidence, not activation completion",
+    "no CDP workerVersionUpdated/workerErrorReported, waiting/installing state, exact terminal reasonCode, or skipWaiting Promise result captured",
+    "no proven causal code defect; do not label as ACK race, timeout flake, long fetch, or deadlock"
+  ],
+  "sourceEdits": false,
+  "githubRerun": false
+}

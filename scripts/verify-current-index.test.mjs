@@ -252,7 +252,7 @@ test("real workspace loads the exact 25-family slim index with a checkpoint iden
   assert.equal(summary.selectedCurrentCount, 17);
   assert.equal(summary.currentUnavailableCount, 8);
   assert.equal(index.historyCheckpoint.familyCount, 25);
-  assert.equal(index.historyCheckpoint.memberCount, 79);
+  assert.equal(index.historyCheckpoint.memberCount, 82);
   assert.equal(summary.historyCheckpointIdentityMechanicallyVerified, true);
   assert.equal(summary.fullHistoryVerifiedByCurrentIndexLoad, false);
   assert.ok(index.entries.every((entry) => !Object.hasOwn(entry, "history")));
@@ -559,8 +559,8 @@ test("summary separates selected Bazi engineering inputs from unavailable aggreg
   assert.equal(summary.baziExpertReviewPacketCurrentAvailable, true);
   const packet = index.nonVersionedSelections.baziExpertReviewPacket;
   assert.equal(packet.currentAvailable, true);
-  assert.equal(packet.selectedCurrent.path, "content/bazi-strength-expert-review-packet.current.json");
-  assert.equal(packet.selectedCurrent.packetId, "hakimi.bazi.strength.expert-review-packet/1.6.0");
+  assert.equal(packet.selectedCurrent.path, "content/bazi-strength-expert-review-packet.current-v1.7.0.json");
+  assert.equal(packet.selectedCurrent.packetId, "hakimi.bazi.strength.expert-review-packet/1.7.0");
   assert.equal(packet.historicalAnchorVerifiedByCurrentLoad, false);
   assert.deepEqual(packet.driftReasons, []);
 });

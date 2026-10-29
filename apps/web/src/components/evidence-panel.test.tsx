@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { ChartFacts, RevisionRecord } from "@hakimi/contracts";
-import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
+import { calculateChart } from "@hakimi/bazi-core";
+import { revisionRecordSchema, type ChartFacts, type RevisionRecord } from "@hakimi/contracts";
+import { withDayBoundary, WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
 import { EvidencePanel } from "./evidence-panel";
 import type { MatrixField } from "./four-pillars-matrix";
 
@@ -82,6 +83,29 @@ const revision = {
     ruleProfileDigest: "b".repeat(64)
   }
 } as RevisionRecord;
+
+async function calculateRevision(dayBoundary: RevisionRecord["ruleProfile"]["calendar"]["dayBoundary"]) {
+  const chart = await calculateChart({
+    schemaVersion: "1.0.0",
+    calendarType: "gregorian",
+    date: "2024-02-05",
+    time: "00:30:00",
+    timePrecision: "exact_second",
+    timeZone: "Asia/Shanghai",
+    sex: "male",
+    lunarLeapMonth: false,
+    location: { label: "", latitude: null, longitude: null, precision: "unknown" },
+    sourceNote: ""
+  }, withDayBoundary(dayBoundary));
+  return revisionRecordSchema.parse({
+    ...chart,
+    schemaVersion: "1.0.0",
+    id: revisionId,
+    caseId,
+    revisionNumber: 1,
+    createdAt: "2026-08-01T00:00:00.000Z"
+  });
+}
 
 beforeEach(() => {
   listCitationsMock.mockReset();
@@ -175,12 +199,36 @@ describe("EvidencePanel 字段证据", () => {
     expect(screen.getByRole("button", { name: /重新读取两侧来源/ })).toBeTruthy();
   });
 
-  it("不可识别的换日规则不会被默认解释为午夜换日", () => {
+  it.each([
+    ["zi_start_23", "23:00 子初换日"],
+    ["midnight", "00:00 午夜换日"]
+  ] as const)("真实 %s 排盘可展示字段依据并绑定精确研究上下文", async (dayBoundary, label) => {
+    const calculated = await calculateRevision(dayBoundary);
+    const provenance = calculated.facts.fieldProvenance.find((entry) => entry.field === "pillars.day.hiddenStems")!;
+
+    render(<EvidencePanel revision={calculated} selection={{ pillar: "day", field: "hiddenStems" }} open onClose={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByText("本次通道读取完成")).toBeTruthy());
+    expect(calculated.ruleProfile.calendar.dayBoundary).toBe(dayBoundary);
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.getByText(new RegExp(label))).toBeTruthy();
+    expect(screen.getByTitle("pillars.day.hiddenStems")).toBeTruthy();
+    expect(screen.getByTitle(calculated.manifest.resultHash)).toBeTruthy();
+    expect(screen.getByText(provenance.algorithmId!)).toBeTruthy();
+    expect(listCitationsMock).toHaveBeenCalledWith(citationTarget);
+    const contextualLink = screen.getByRole("link", { name: /建立两遍只读复核上下文/ });
+    const contextualUrl = new URL(contextualLink.getAttribute("href")!, "https://hakimi.test");
+    expect(contextualUrl.searchParams.get("review")).toBe(`revision_field:${caseId}:${revisionId}:pillars.day.hiddenStems`);
+    expect(contextualUrl.searchParams.get("subject")).toBe("bazi.pillar.day.hidden-stems.v1");
+  });
+
+  it.each(["unsupported", "midnight_00", "split_zi"])("不可识别或未实现的换日规则 %s 不会被默认解释为午夜换日", async (dayBoundary) => {
+    const calculated = await calculateRevision("midnight");
     const invalidRevision = {
-      ...revision,
+      ...calculated,
       ruleProfile: {
-        ...revision.ruleProfile,
-        calendar: { ...revision.ruleProfile.calendar, dayBoundary: "unsupported" }
+        ...calculated.ruleProfile,
+        calendar: { ...calculated.ruleProfile.calendar, dayBoundary }
       }
     } as unknown as RevisionRecord;
 

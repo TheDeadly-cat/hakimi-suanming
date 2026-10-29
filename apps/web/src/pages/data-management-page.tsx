@@ -456,6 +456,7 @@ export function DataManagementPage() {
   const deleteTriggerRef = useRef<HTMLButtonElement>(null);
   const deleteBackupChoiceRef = useRef<HTMLInputElement>(null);
   const backupAbortRef = useRef<AbortController | null>(null);
+  const preflightAbortRef = useRef<AbortController | null>(null);
   const restoreSubmissionRef = useRef(false);
   const destructiveWriteReturnedRef = useRef(false);
   const operationLockRef = useRef<Operation | null>("loading");
@@ -471,6 +472,9 @@ export function DataManagementPage() {
       refreshEpochRef.current += 1;
       backupAbortRef.current?.abort();
       backupAbortRef.current = null;
+      const preflight = preflightAbortRef.current;
+      preflightAbortRef.current = null;
+      preflight?.abort();
     };
   }, []);
 
@@ -846,34 +850,57 @@ export function DataManagementPage() {
     setBackupFeedback({ tone: "info", title: "正在取消完整备份生成", message: "只读数据库事务或 Worker 会在当前不可中断步骤结束后尽快停止；当前不会写入数据库或备份标记。" });
   };
 
+  const cancelBackupPreflight = () => {
+    const controller = preflightAbortRef.current;
+    if (!controller) return;
+    // Retire this request before aborting: neither a late result nor its
+    // finally block may publish into, or unlock, a subsequent preflight.
+    preflightAbortRef.current = null;
+    controller.abort();
+    setPendingRestore(null);
+    setBackupFeedback({ tone: "info", title: "已取消备份预检", message: "已停止本次只读预检，未写入本地数据。可以重新选择备份文件。" });
+    finishOperation("preflight");
+    finishFeedback(backupFeedbackRef);
+  };
+
   const chooseBackup = async () => {
     if (!beginOperation("preflight")) return;
+    const controller = new AbortController();
+    preflightAbortRef.current = controller;
+    const isCurrent = () => mountedRef.current
+      && preflightAbortRef.current === controller && !controller.signal.aborted;
     // A confirmation must never survive a backup preflight/restore boundary and
     // later target a different attachment record that happens to reuse the ID.
     setAttachmentDeleteTarget(null);
+    setPendingRestore(null);
     setBackupFeedback({ tone: "info", title: "正在预检备份", message: "正在校验格式、版本、十六分区摘要、附件字节和关联；通过前不会写入本地数据库。" });
     try {
       const file = await pickFile({
         accept: ".zip,.json,application/zip,application/json",
         maxBytes: MAX_BACKUP_BYTES
       });
+      if (!isCurrent()) return;
       if (!file) {
         setBackupFeedback(null);
         return;
       }
       // The immutable Blob is cloned directly into the Worker. The main thread
       // never reads, inflates, decodes or JSON-parses the selected backup.
-      const currentSnapshot = await caseRepository.readFullDataSnapshot();
+      const currentSnapshot = await caseRepository.readFullDataSnapshot({ signal: controller.signal });
+      if (!isCurrent()) return;
       const prepared = await prepareFullBackupImportOffMainThread(
         file.blob,
         currentSnapshot,
-        { appVersion: APP_VERSION }
+        { appVersion: APP_VERSION },
+        controller.signal
       );
+      if (!isCurrent()) return;
       const admission = await assessStorageCapacity({
         operation: "full_restore",
         logicalPayloadBytes: prepared.canonicalJsonByteLength,
         payloadDigest: prepared.payloadDigest
       });
+      if (!isCurrent()) return;
       setPendingRestore({
         fileName: file.name,
         fileSize: file.size,
@@ -896,11 +923,15 @@ export function DataManagementPage() {
           : "备份结构预检通过，但浏览器容量准入未通过；当前不会写库。请释放空间或改用可提供可靠容量估算的浏览器后重新检查。"
       });
     } catch (reason) {
+      if (!isCurrent()) return;
       setPendingRestore(null);
       setBackupFeedback({ tone: "error", title: "备份预检未通过", message: errorMessage(reason, "文件未通过完整性预检；当前数据未被改动。") });
     } finally {
-      finishOperation("preflight");
-      finishFeedback(backupFeedbackRef);
+      if (preflightAbortRef.current === controller) {
+        preflightAbortRef.current = null;
+        finishOperation("preflight");
+        finishFeedback(backupFeedbackRef);
+      }
     }
   };
 
@@ -1691,6 +1722,11 @@ export function DataManagementPage() {
         </div>
 
         <div className="data-action-row">
+          {activeOperation === "preflight" ? (
+            <button type="button" className="secondary-action" onClick={cancelBackupPreflight}>
+              取消预检
+            </button>
+          ) : null}
           {activeOperation === "export_zip" || activeOperation === "export_json" ? (
             <button type="button" className="secondary-action" onClick={cancelBackupExport}>
               取消生成

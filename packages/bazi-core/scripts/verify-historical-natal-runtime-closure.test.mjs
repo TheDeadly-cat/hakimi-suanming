@@ -783,7 +783,7 @@ test("binds all actual Vite alias resolutions to attested physical sources", () 
 test("captures protected alias resolutions through the installed Web Vite lifecycle", () => withResolvedAliasFixture(async (fixture) => {
   const requireFromWeb = createRequire(path.resolve(PRODUCT_WORKSPACE_ROOT, "apps/web/package.json"));
   const vite = requireFromWeb("vite");
-  assert.equal(vite.version, "7.3.6");
+  assert.equal(vite.version, "7.3.7");
 
   const virtualEntryRequest = "virtual:historical-runtime-alias-resolution-entry";
   const virtualEntryId = `\0${virtualEntryRequest}`;

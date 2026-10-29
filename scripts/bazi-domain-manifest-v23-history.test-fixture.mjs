@@ -4,6 +4,7 @@ import { createRequire } from "node:module";
 import { cp, lstat, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { readBaziDependencyPredecessorOriginals } from "./bazi-dependency-predecessor.test-fixture.mjs";
 const REPOSITORY_ROOT = path.resolve(import.meta.dirname, "..");
 const { unzipSync } = createRequire(new URL("../packages/backup/package.json", import.meta.url))("fflate");
 const sha = bytes => createHash("sha256").update(bytes).digest("hex");
@@ -28,12 +29,13 @@ export async function createBaziDomainManifestV23HistoricalInputs() {
   }
   try {
     await cp(path.join(REPOSITORY_ROOT, "content"), path.join(root, "content"), { recursive: true, force: false, errorOnExist: true });
+    const oldInputs = await readBaziDependencyPredecessorOriginals();
     const manifest = JSON.parse(await readFile(path.join(root, "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.3.0.json"), "utf8"));
     const byPath = new Map(manifest.components.flatMap(c => c.files.map(f => [f.path, f])));
     assert.equal(byPath.size, 28);
     for (const file of byPath.values()) {
       if (file.path.startsWith("content/")) continue;
-      const bytes = file.path === "package-lock.json" ? lock : await readFile(path.join(REPOSITORY_ROOT, file.path));
+      const bytes = file.path === "package-lock.json" ? lock : oldInputs[file.path] ? Buffer.from(oldInputs[file.path]) : await readFile(path.join(REPOSITORY_ROOT, file.path));
       assert.equal(bytes.length, file.rawBytes, file.path); assert.equal(sha(bytes), file.sha256, file.path);
       const target = path.resolve(root, file.path);
       assert.equal(path.relative(root, target).startsWith("..") || path.isAbsolute(path.relative(root, target)), false);

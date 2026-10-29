@@ -1,7 +1,7 @@
 import type { LuckDirection } from "@hakimi/luck-core";
 import type { TransitNodeType } from "@hakimi/contracts";
 
-export const chartViews = ["overview", "structure", "transit", "research"] as const;
+export const chartViews = ["reading", "overview", "structure", "transit", "research"] as const;
 export type ChartView = (typeof chartViews)[number];
 
 export type TransitSelection = {
@@ -137,7 +137,8 @@ export function parseChartRoute(search: string): ChartRouteState {
     issues.push("图表链接包含未知参数，未知部分已忽略。");
   }
   const rawView = singleRouteValue(params, "view", "视图", issues);
-  const view = chartViews.includes(rawView as ChartView) ? rawView as ChartView : "structure";
+  const view = chartViews.includes(rawView as ChartView) ? rawView as ChartView
+    : params.size === 0 ? "reading" : "structure";
   if (rawView !== null && !chartViews.includes(rawView as ChartView)) issues.push("未知视图参数已忽略。");
 
   const rawAt = singleRouteValue(params, "at", "运限时间", issues);
@@ -188,7 +189,7 @@ export function buildChartSearch(
 ): string {
   if (!chartViews.includes(view)) throw new Error("无法生成未知的图表视图状态。");
   const params = new URLSearchParams();
-  if (view !== "structure") params.set("view", view);
+  params.set("view", view);
   if (view === "transit" || view === "research") {
     if (transit?.atInstant !== undefined && transit.atInstant !== null) {
       if (typeof transit.atInstant !== "string" || transit.atInstant.length === 0) {

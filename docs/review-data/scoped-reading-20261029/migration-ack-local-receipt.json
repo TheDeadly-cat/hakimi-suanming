@@ -1,0 +1,30 @@
+{
+  "headAtStart": "1fb610f15977be2390569a2d328b4d6a0e001453",
+  "headAtEnd": "1fb610f15977be2390569a2d328b4d6a0e001453",
+  "workingTree": "dirty",
+  "helperUnchangedDuringRun": true,
+  "helperSha256": "54117322F12668621AEE87281FCB89829B53F59B021BDC65EC05A735E042477F",
+  "stats": {
+    "startTime": "2026-10-29T01:30:43.954Z",
+    "duration": 67582.649,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "browserProduct": "Edg/156.0.4314.50",
+  "targetBuild": "fa6dd578078a",
+  "closingBoot": {
+    "ack": "true",
+    "signalSent": "true",
+    "generation": "research-v15-revision-calculation-receipts",
+    "schema": "15",
+    "phase": "committed"
+  },
+  "lifecycleAttachment": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-migration-ack\\historical-v14-v15-ack-run-01\\historical-fresh-boot-lifecycle.json",
+  "historicalRun": 40797822053,
+  "historicalResultChanged": false,
+  "githubJobsRerun": false,
+  "testRetries": 0,
+  "applicationTimeoutChanged": false
+}

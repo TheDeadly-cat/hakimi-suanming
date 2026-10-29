@@ -1,0 +1,20 @@
+.life-stage-years { margin-top: 32px; padding-top: 28px; border-top: 1px solid #cbd9d1; }
+.life-stage-years h3 { max-width: 26em; font-size: 24px; }
+.life-stage-years-intro, .life-stage-years-order { color: var(--reading-muted); font-size: 14px; line-height: 1.8; }
+.life-stage-years-order { margin: 26px 0 6px; }
+.life-stage-year { display: grid; grid-template-columns: 68px minmax(0, 1fr); gap: 24px; padding: 28px 0; border-bottom: 1px solid #dfe5de; }
+.life-stage-year-mark { padding-top: 3px; color: var(--reading-jade); }
+.life-stage-year-mark strong { display: block; font: 600 25px/1.4 var(--reading-serif); }
+.life-stage-year-mark span { font-size: 13px; }
+.life-stage-year-body { min-width: 0; }
+.life-stage-year-body h4 { margin: 0 0 8px; font: 600 20px/1.6 var(--reading-serif); text-wrap: balance; }
+.life-stage-year-body p { margin: 12px 0; color: #465653; font-size: 16px; line-height: 1.95; overflow-wrap: anywhere; }
+.life-stage-year-body .life-stage-year-period { margin: 0 0 18px; font-size: 12px; color: var(--reading-muted); }
+.life-stage-year-basis { margin-top: 16px; }
+.life-stage-year-basis h5 { margin: 16px 0 6px; font-size: 14px; }
+.life-stage-year-basis p, .life-stage-year-basis li, .life-stage-years-coverage p { font-size: 13px; line-height: 1.85; color: var(--reading-muted); }
+.life-stage-year-basis ul { padding-left: 20px; }
+.life-stage-year-actions { display: flex; flex-wrap: wrap; gap: 4px 24px; margin-top: 12px; }
+.life-stage-years-rest > summary { padding-block: 10px; }
+.life-stage-years :is(a, summary, button):focus-visible { outline: 2px solid var(--reading-jade); outline-offset: 3px; }
+@media (max-width: 700px) { .life-stage-year { grid-template-columns: minmax(0, 1fr); gap: 10px; } .life-stage-year-mark { display: flex; align-items: baseline; gap: 10px; } .life-stage-years h3 { font-size: 22px; } }

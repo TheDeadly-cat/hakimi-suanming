@@ -22,7 +22,7 @@ const input: BirthInput = {
 };
 
 beforeEach(async () => {
-  window.history.replaceState({}, "", "/knowledge");
+  window.history.replaceState({}, "", "/knowledge?view=library");
   await caseRepository.clearAll();
 });
 

@@ -1,0 +1,74 @@
+{
+  "recordType": "agent_validation_summary",
+  "date": "2026-10-29",
+  "source": "Delegated agent executions; summarized from tool stdout. Not a raw log or independently signed receipt.",
+  "tests": [
+    {
+      "files": [
+        "apps/web/src/components/reading-explanation-workbench.test.tsx",
+        "apps/web/src/lib/reading-month-preview.test.tsx"
+      ],
+      "passed": 47,
+      "note": "Final integrated workbench and month-preview run."
+    },
+    {
+      "files": [
+        "apps/web/src/lib/reading-plain-summary.test.ts",
+        "apps/web/src/lib/reading-explanation-storage.test.ts",
+        "apps/web/src/lib/reading-explanation-natal-provenance.test.ts"
+      ],
+      "passed": 32,
+      "durationSeconds": 4.29
+    },
+    {
+      "files": [
+        "apps/web/src/lib/reading-month-preview.test.tsx",
+        "apps/web/src/lib/reading-explanation-dual-branch.integration.test.ts",
+        "apps/web/src/lib/reading-adjacent-capacity.integration.test.ts"
+      ],
+      "passed": 20,
+      "durationSeconds": 60.52,
+      "note": "Includes 15 preview tests already included above; do not sum repeated tests."
+    }
+  ],
+  "capacity": {
+    "limitBytes": 8388608,
+    "originalFailure": "New per-month persisted binding exceeded the existing 3,000,000-character index limit. Replaced by nonserialized current-reading WeakMap bindings.",
+    "cases": [
+      {
+        "id": "Q07",
+        "bytes": 8256038,
+        "result": "saved_reopened"
+      },
+      {
+        "id": "C1",
+        "bytes": 8267379,
+        "result": "saved_reopened"
+      },
+      {
+        "id": "C2",
+        "bytes": 8454811,
+        "result": "rejected_before_write",
+        "snapshotWriteCalls": 0,
+        "separateExportsExact": true
+      },
+      {
+        "id": "C3",
+        "bytes": 8159592,
+        "result": "saved_reopened"
+      },
+      {
+        "id": "C4",
+        "bytes": 8089872,
+        "result": "saved_reopened"
+      }
+    ],
+    "oldRecordsUnchanged": true,
+    "oldV1ReadbackPreserved": true
+  },
+  "limits": [
+    "Not a full-workspace CI result",
+    "Not Android device validation",
+    "Saved plaintext presentation snapshots remain unimplemented"
+  ]
+}

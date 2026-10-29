@@ -1,0 +1,15 @@
+.contextual-reading-panel { margin: 12px 0 20px; color: #2e453a; min-width: 0; }
+.contextual-reading-panel h3 { font-family: "Noto Serif SC", "Songti SC", serif; font-size: 22px; line-height: 1.55; font-weight: 600; margin: 8px 0 12px; }
+.contextual-reading-panel p, .contextual-reading-panel li { line-height: 1.9; overflow-wrap: anywhere; white-space: pre-wrap; }
+.contextual-reading-panel .contextual-reading-context { color: #667a65; font-size: 13px; line-height: 1.7; margin: 0 0 8px; }
+.contextual-reading-verdict { font-size: 16px; color: #31533e; font-weight: 500; }
+.contextual-reading-examples { background: #f2f4e9; border: 1px solid #dce1cf; border-left: 3px solid #8aa17c; border-radius: 7px; padding: 14px 18px; margin: 16px 0; }
+.contextual-reading-panel h4 { font-size: 14px; margin: 0 0 9px; color: #556c50; }
+.contextual-reading-panel ul { padding-left: 20px; margin: 6px 0; }
+.contextual-reading-panel li + li { margin-top: 6px; }
+.contextual-reading-focus { margin: 18px 0; }
+.contextual-reading-basis { border-top: 1px solid #dfe2d5; padding-top: 12px; margin-top: 18px; font-size: 13px; color: #687362; }
+.contextual-reading-basis summary { cursor: pointer; color: #48664e; line-height: 1.7; }
+.contextual-reading-basis summary:focus-visible { outline: 2px solid #698d76; outline-offset: 4px; }
+.contextual-reading-panel .contextual-reading-version { font-size: 12px; color: #7a8274; }
+@media (max-width: 600px) { .contextual-reading-panel h3 { font-size: 20px; } .contextual-reading-verdict { font-size: 15px; } .contextual-reading-examples { padding: 12px 13px; } }

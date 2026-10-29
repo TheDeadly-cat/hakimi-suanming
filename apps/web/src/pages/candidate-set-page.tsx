@@ -23,6 +23,7 @@ import { formatDateTime, shortHash } from "../lib/format";
 import { AppLink, navigate, useAppLocation } from "../lib/router";
 import { safeVisibleErrorMessage, safeVisibleText } from "../lib/visible-text";
 import "./candidate-set-page.css";
+import "./birth-input-guidance.css";
 
 type CandidateSetPageProps = {
   candidateSetId: string;
@@ -697,6 +698,7 @@ export function CandidateSetPage({ candidateSetId }: CandidateSetPageProps) {
   } | null>(null);
   const exportInFlightRef = useRef(false);
   const migrationInFlightRef = useRef(false);
+  const candidateDetailsRef = useRef<HTMLDetailsElement>(null);
   const probeOverview = useMemo(() => {
     const candidates = state.record?.candidateSet.candidates;
     if (!candidates) return null;
@@ -1074,7 +1076,7 @@ export function CandidateSetPage({ candidateSetId }: CandidateSetPageProps) {
       <PageHeading
         eyebrow="Unknown hour candidate set"
         title={safeVisibleText(record.alias, "未命名候选组", 160)}
-        description="同一出生日期的 13 个代表性时间探针。它们彼此并列，只供校时与结构研究，不推断真实出生时刻。"
+        description="按同一出生日期的 13 个代表性时刻计算候选结果。它们彼此并列，不表示已经确定你的出生时间。"
         actions={(
           <>
             <AppLink href="/cases" className="secondary-action"><ArrowLeft aria-hidden="true" />返回案例库</AppLink>
@@ -1084,6 +1086,20 @@ export function CandidateSetPage({ candidateSetId }: CandidateSetPageProps) {
           </>
         )}
       />
+
+      {!isTrashed ? <aside className="candidate-set-export-boundary" aria-label="未知时辰资料已保存">
+        <Info aria-hidden="true" />
+        <div><strong>这份未知时辰资料已保存在本机</strong>
+          <p>尚未确定唯一命盘，暂未生成唯一的完整解读。下次从“档案”按名称重新打开这份资料。</p>
+          <dl className="birth-uncertainty-guide">
+            <div><dt>已经知道</dt><dd>{candidateSet.input.calendarType === "lunar" ? "农历" : "公历"} {safeVisibleText(candidateSet.input.date, "未识别日期", 40)}，出生时间保持未知。</dd></div>
+            <div><dt>尚未确定</dt><dd>唯一的时柱及依赖它的解释。13 个代表时刻是计算用的例子，不是真实出生时间。</dd></div>
+            <div><dt>下一步</dt><dd>可以先保留资料，之后补充时间；也可以展开候选了解不同时间下的结果，不需要挑选更好的一份。</dd></div>
+          </dl>
+          <AppLink href="/cases" className="secondary-action">回到我的命盘</AppLink>{" "}
+          <a href="#candidate-set-probes" className="secondary-action" onClick={() => { if (candidateDetailsRef.current) candidateDetailsRef.current.open = true; }}>先分别查看候选结果</a>
+        </div>
+      </aside> : null}
 
       <aside className="candidate-set-export-boundary" aria-label="候选组敏感文件交付边界">
         <Info aria-hidden="true" />
@@ -1114,6 +1130,8 @@ export function CandidateSetPage({ candidateSetId }: CandidateSetPageProps) {
         >{exportState.status === "busy" ? "正在准备候选组 JSON；尚未请求保存或下载。" : safeVisibleText(exportState.message, "候选组文件状态不可用。")}</p>
       ) : null}
 
+      <details key={record.id} ref={candidateDetailsRef} className="candidate-set-reading-details" open={window.location.hash.startsWith("#candidate-") || undefined}>
+      <summary>查看 13 个候选与计算详情</summary>
       <section className="candidate-set-overview" aria-labelledby="candidate-set-overview-title">
         <header className="candidate-set-overview__heading">
           <div>
@@ -1501,6 +1519,8 @@ export function CandidateSetPage({ candidateSetId }: CandidateSetPageProps) {
             : <li>当前快照未记录额外生成警告；这只表示生成器没有附加警告，不代表候选已被证实或可选为主盘。</li>}
         </ul>
       </section>
+
+      </details>
 
       <section
         className="candidate-set-research-slot"

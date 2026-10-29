@@ -32,6 +32,21 @@ import {
   loadBundledTimeZoneCalculationContext,
   type BundledTimeZoneCalculationContext
 } from "@hakimi/time-core";
+import {
+  TransitCoreError,
+  TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0,
+  calculateTransitSnapshotV1_2_0,
+  resolveTransitNodeRef as resolveFrozenV12TransitNodeRef,
+  verifyCompatibleTransitNodeRef as verifyFrozenV12CompatibleTransitNodeRef
+} from "./historical-transit-snapshot-executor-1.2.0";
+
+export {
+  TransitCoreError,
+  TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0,
+  TRANSIT_SNAPSHOT_TIME_ZONE_DATABASE_V1_2_0,
+  calculateTransitSnapshotV1_2_0,
+  type TransitCoreErrorCode
+} from "./historical-transit-snapshot-executor-1.2.0";
 
 function deepFreeze<T>(value: T): T {
   if (typeof value !== "object" || value === null || Object.isFrozen(value)) return value;
@@ -52,15 +67,15 @@ export type TransitCalculationEngineDescriptor = Readonly<{
 
 export const TRANSIT_CORE_ENGINE = Object.freeze({
   name: "hakimi-transit-core" as const,
-  version: "0.1.0" as const,
+  version: "0.2.0" as const,
   upstreamName: "lunar-typescript" as const,
   upstreamVersion: "1.8.6" as const,
   upstreamTagCommit: "0f3e95d15e31f1a7c7b93d624542649347328a20" as const,
   upstreamIntegrity: "sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA==" as const
 }) satisfies TransitCalculationEngineDescriptor;
 
-export const TRANSIT_TIMELINE_VERSION = "hakimi-transit:1.2.0" as const;
-export const TRANSIT_ALGORITHM_ID = "hakimi-transit-core:parallel-active-intervals:v2" as const;
+export const TRANSIT_TIMELINE_VERSION = "hakimi-transit:1.3.0" as const;
+export const TRANSIT_ALGORITHM_ID = "hakimi-transit-core:parallel-active-intervals:v3" as const;
 export const COMPATIBLE_TRANSIT_TIMELINE_VERSION_V1_1 = "hakimi-transit:1.1.0" as const;
 
 export type TransitSnapshotExecutorDescriptor = Readonly<{
@@ -76,7 +91,7 @@ export type HistoricalTransitSnapshotExecutor = Readonly<{
   calculateSnapshot: (rawInput: TransitSnapshotInput) => Promise<TransitSnapshot>;
 }>;
 
-export const TRANSIT_SNAPSHOT_TIME_ZONE_DATABASE_V1_2_0 = deepFreeze(
+export const TRANSIT_SNAPSHOT_TIME_ZONE_DATABASE_V1_3_0 = deepFreeze(
   timeZoneDatabaseSnapshotSchema.parse({
     schemaVersion: "1.0.0",
     kind: "bundled_iana_tzdb",
@@ -92,12 +107,14 @@ export const TRANSIT_SNAPSHOT_TIME_ZONE_DATABASE_V1_2_0 = deepFreeze(
   })
 );
 
-export const CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR = deepFreeze({
+export const TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_3_0 = deepFreeze({
   timelineVersion: TRANSIT_TIMELINE_VERSION,
   algorithmId: TRANSIT_ALGORITHM_ID,
   engine: TRANSIT_CORE_ENGINE,
-  timeZoneDatabase: TRANSIT_SNAPSHOT_TIME_ZONE_DATABASE_V1_2_0
+  timeZoneDatabase: TRANSIT_SNAPSHOT_TIME_ZONE_DATABASE_V1_3_0
 }) satisfies TransitSnapshotExecutorDescriptor;
+
+export const CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR = TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_3_0;
 
 const FIXED_EIGHT_OFFSET_MILLISECONDS = 8 * 60 * 60 * 1_000;
 const SECOND_MILLISECONDS = 1_000;
@@ -108,30 +125,6 @@ export type TransitSnapshotInput = {
   atInstant: string;
   manualDirection?: LuckDirection;
 };
-
-export type TransitCoreErrorCode =
-  | "INVALID_INSTANT"
-  | "UNSUPPORTED_RANGE"
-  | "RULE_SNAPSHOT_MISMATCH"
-  | "MANUAL_DIRECTION_REQUIRED"
-  | "MANUAL_DIRECTION_NOT_ALLOWED"
-  | "LOCAL_BOUNDARY_UNRESOLVED"
-  | "TZDB_LEGACY_UNIDENTIFIED"
-  | "TZDB_ARTIFACT_UNAVAILABLE"
-  | "TZDB_SNAPSHOT_MISMATCH"
-  | "INVALID_TRANSIT_INPUT"
-  | "TRANSIT_EXECUTOR_UNAVAILABLE"
-  | "TRANSIT_CONTEXT_MISMATCH"
-  | "TRANSIT_OUTPUT_MISMATCH"
-  | "STALE_NODE_REF"
-  | "UPSTREAM_DATA_ERROR";
-
-export class TransitCoreError extends Error {
-  constructor(readonly code: TransitCoreErrorCode, message: string, options?: ErrorOptions) {
-    super(message, options);
-    this.name = "TransitCoreError";
-  }
-}
 
 type Boundary = {
   epochMilliseconds: number;
@@ -364,10 +357,15 @@ function localDayStart(target: Temporal.PlainDateTime, dayBoundary: RevisionReco
   throw new TransitCoreError("LOCAL_BOUNDARY_UNRESOLVED", "早晚子时分流尚未进入运限时间轴。");
 }
 
-function localHourStart(target: Temporal.PlainDateTime): Temporal.PlainDateTime {
+function localHourStart(
+  target: Temporal.PlainDateTime,
+  dayBoundary: RevisionRecord["ruleProfile"]["calendar"]["dayBoundary"]
+): Temporal.PlainDateTime {
   let date = target.toPlainDate();
   let hour: number;
-  if (target.hour === 0) {
+  if (target.hour === 0 && dayBoundary === "midnight") {
+    hour = 0;
+  } else if (target.hour === 0) {
     date = date.subtract({ days: 1 });
     hour = 23;
   } else if (target.hour === 23) {
@@ -376,6 +374,23 @@ function localHourStart(target: Temporal.PlainDateTime): Temporal.PlainDateTime 
     hour = target.hour % 2 === 0 ? target.hour - 1 : target.hour;
   }
   return date.toPlainDateTime({ hour });
+}
+
+/** Walk factual hour boundaries, including midnight's change of day stem. */
+function shiftLocalHourBoundary(
+  boundary: Temporal.PlainDateTime,
+  steps: number,
+  dayBoundary: RevisionRecord["ruleProfile"]["calendar"]["dayBoundary"]
+): Temporal.PlainDateTime {
+  let shifted = boundary;
+  const direction = steps < 0 ? -1 : 1;
+  for (let index = 0; index < Math.abs(steps); index += 1) {
+    const isMidnightHalf = dayBoundary === "midnight" && (
+      direction === 1 ? shifted.hour === 23 || shifted.hour === 0 : shifted.hour === 0 || shifted.hour === 1
+    );
+    shifted = shifted.add({ hours: direction * (isMidnightHalf ? 1 : 2) });
+  }
+  return shifted;
 }
 
 function relativeStemTenGod(natalDayStem: string, ganZhi: string): string {
@@ -588,10 +603,13 @@ async function buildLocalTrack(
   const nodes: TransitNode[] = [];
   let activeError: TransitCoreError | null = null;
   for (let offset = -WINDOW_RADIUS; offset <= WINDOW_RADIUS; offset += 1) {
+    const dayBoundary = context.revision.ruleProfile.calendar.dayBoundary;
     const startPlain = nodeType === "day"
       ? activeStart.add({ days: offset })
-      : activeStart.add({ hours: offset * 2 });
-    const endPlain = nodeType === "day" ? startPlain.add({ days: 1 }) : startPlain.add({ hours: 2 });
+      : shiftLocalHourBoundary(activeStart, offset, dayBoundary);
+    const endPlain = nodeType === "day"
+      ? startPlain.add({ days: 1 })
+      : shiftLocalHourBoundary(startPlain, 1, dayBoundary);
     try {
       const startEpochMilliseconds = resolveLocalBoundary(
         startPlain,
@@ -940,7 +958,7 @@ async function calculateTransitSnapshotWithDescriptor(
     buildFixedTrack("year", yearBoundaries, context),
     buildFixedTrack("month", monthBoundaries, context),
     buildLocalTrack("day", localDayStart(targetLocalPlain, revision.ruleProfile.calendar.dayBoundary), context),
-    buildLocalTrack("hour", localHourStart(targetLocalPlain), context),
+    buildLocalTrack("hour", localHourStart(targetLocalPlain, revision.ruleProfile.calendar.dayBoundary), context),
     luck ? buildDayunTrack(luck, context) : Promise.resolve([]),
     xiaoyunTrackPromise
   ]);
@@ -1190,40 +1208,47 @@ async function verifyAndFreezeTransitSnapshotOutput(
   return deepFreeze(snapshot);
 }
 
-async function calculateTransitSnapshotV1_2_0(rawInput: TransitSnapshotInput): Promise<TransitSnapshot> {
+async function calculateTransitSnapshotV1_3_0(rawInput: TransitSnapshotInput): Promise<TransitSnapshot> {
   const input = parseHistoricalTransitSnapshotInput(rawInput);
   const snapshot = await calculateTransitSnapshotWithDescriptor(
     input,
-    CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR
+    TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_3_0
   );
   return verifyAndFreezeTransitSnapshotOutput(
     snapshot,
     input,
-    CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR
+    TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_3_0
   );
 }
 
-/** Current public calculation delegates to the frozen v1.2 slice. */
+/** Current public calculation delegates to the versioned v1.3 slice. */
 export async function calculateTransitSnapshot(rawInput: TransitSnapshotInput): Promise<TransitSnapshot> {
-  return calculateTransitSnapshotV1_2_0(rawInput);
+  return calculateTransitSnapshotV1_3_0(rawInput);
 }
 
 const HISTORICAL_TRANSIT_SNAPSHOT_EXECUTOR_V1_2 = Object.freeze({
   executorId: "hakimi-transit-core:transit-snapshot-executor:1.2.0",
-  descriptor: CURRENT_TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR,
+  descriptor: TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0,
   calculateSnapshot: Object.freeze(calculateTransitSnapshotV1_2_0)
+}) satisfies HistoricalTransitSnapshotExecutor;
+
+const HISTORICAL_TRANSIT_SNAPSHOT_EXECUTOR_V1_3 = Object.freeze({
+  executorId: "hakimi-transit-core:transit-snapshot-executor:1.3.0",
+  descriptor: TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_3_0,
+  calculateSnapshot: Object.freeze(calculateTransitSnapshotV1_3_0)
 }) satisfies HistoricalTransitSnapshotExecutor;
 
 /**
  * Append-only full TransitSnapshot replay registry.
  *
  * v1.1 is deliberately absent. Its retained allowlist proves only that an
- * individual node fact can be re-hashed from today's immutable v2 facts. No
+ * individual node fact can be re-hashed by the retained v1.2/v2 module. No
  * frozen full-snapshot implementation and complete engine descriptor survive,
  * so registering v1.1 here would overstate the available replay evidence.
  */
 export const HISTORICAL_TRANSIT_SNAPSHOT_EXECUTOR_REGISTRY:
 readonly HistoricalTransitSnapshotExecutor[] = Object.freeze([
+  HISTORICAL_TRANSIT_SNAPSHOT_EXECUTOR_V1_3,
   HISTORICAL_TRANSIT_SNAPSHOT_EXECUTOR_V1_2
 ]);
 
@@ -1315,8 +1340,7 @@ export function requireHistoricalTransitSnapshotExecutor(
 
 async function replayTransitNodeRef(
   rawRevision: RevisionRecord,
-  rawRef: TransitNodeRef,
-  allowCompatibleV11: boolean
+  rawRef: TransitNodeRef
 ): Promise<{ node: TransitNode; ref: TransitNodeRef }> {
   let revision: RevisionRecord;
   try {
@@ -1338,11 +1362,7 @@ async function replayTransitNodeRef(
       { cause }
     );
   }
-  const timelineAccepted = ref.timelineVersion === TRANSIT_TIMELINE_VERSION || (
-    allowCompatibleV11 &&
-    ref.timelineVersion === COMPATIBLE_TRANSIT_TIMELINE_VERSION_V1_1 &&
-    ref.algorithmId === TRANSIT_ALGORITHM_ID
-  );
+  const timelineAccepted = ref.timelineVersion === TRANSIT_TIMELINE_VERSION;
   if (
     ref.revisionId !== revision.id ||
     ref.chartResultHash !== revision.manifest.resultHash ||
@@ -1389,7 +1409,7 @@ async function replayTransitNodeRef(
   if (ref.nodeId !== `${Date.parse(node.startInstant)}.${expectedFactHash}`) {
     throw new TransitCoreError(
       "STALE_NODE_REF",
-      "Historical transit reference facts do not match the locked immutable v2 replay."
+      "Transit reference facts do not match the versioned v1.3 replay."
     );
   }
   return { node, ref };
@@ -1399,16 +1419,27 @@ export async function resolveTransitNodeRef(
   rawRevision: RevisionRecord,
   rawRef: TransitNodeRef
 ): Promise<TransitNode> {
-  return (await replayTransitNodeRef(rawRevision, rawRef, false)).node;
+  const parsed = transitNodeRefSchema.safeParse(rawRef);
+  if (parsed.success && parsed.data.timelineVersion === TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0.timelineVersion) {
+    return resolveFrozenV12TransitNodeRef(rawRevision, parsed.data);
+  }
+  return (await replayTransitNodeRef(rawRevision, rawRef)).node;
 }
 
 /**
  * Read/restore-only compatibility verification. Historical field values are
- * preserved; callers must not relabel an accepted v1.1 reference as v1.2.
+ * preserved; old v1.1/v2 and v1.2/v2 facts only use the frozen v1.2 module.
  */
 export async function verifyCompatibleTransitNodeRef(
   rawRevision: RevisionRecord,
   rawRef: TransitNodeRef
 ): Promise<TransitNodeRef> {
-  return (await replayTransitNodeRef(rawRevision, rawRef, true)).ref;
+  const parsed = transitNodeRefSchema.safeParse(rawRef);
+  if (parsed.success && (
+    parsed.data.timelineVersion === TRANSIT_SNAPSHOT_EXECUTOR_DESCRIPTOR_V1_2_0.timelineVersion ||
+    parsed.data.timelineVersion === COMPATIBLE_TRANSIT_TIMELINE_VERSION_V1_1
+  )) {
+    return verifyFrozenV12CompatibleTransitNodeRef(rawRevision, parsed.data);
+  }
+  return (await replayTransitNodeRef(rawRevision, rawRef)).ref;
 }

@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "syntheticFixtureOnly": true,
+  "backupMigrationTest": false,
+  "checks": [
+    {
+      "name": "cases",
+      "records": 1,
+      "unchanged": true
+    },
+    {
+      "name": "revisions",
+      "records": 1,
+      "unchanged": true
+    },
+    {
+      "name": "researchNotes",
+      "records": 1,
+      "unchanged": true
+    },
+    {
+      "name": "candidateSets",
+      "records": 1,
+      "unchanged": true
+    }
+  ],
+  "errors": []
+}

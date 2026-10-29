@@ -496,7 +496,7 @@ test("critical-source policy is canonical, collision-free, and spans harness plu
   assert.equal(new Set(paths.map((entry) => entry.toLocaleLowerCase("en-US"))).size, paths.length);
   assert.equal(criticalSourceIdentity.algorithm, SW_TWO_GENERATION_FIXTURE_CRITICAL_SOURCE_ALGORITHM);
   assert.equal(criticalSourceIdentity.domain, SW_TWO_GENERATION_FIXTURE_CRITICAL_SOURCE_DOMAIN);
-  assert.equal(criticalSourceIdentity.files.length, 21);
+  assert.equal(criticalSourceIdentity.files.length, 22);
   assert.equal(
     criticalSourceIdentity.files.some((entry) =>
       entry.path === "apps/web/sw-two-generation-artifact-identity.ts"
@@ -506,7 +506,7 @@ test("critical-source policy is canonical, collision-free, and spans harness plu
   );
   assert.equal(
     criticalSourceIdentity.files.filter((entry) => entry.role.startsWith("product_")).length,
-    9
+    10
   );
   assert.deepEqual(
     criticalSourceIdentity.files
@@ -515,6 +515,7 @@ test("critical-source policy is canonical, collision-free, and spans harness plu
     [
       "apps/web/public/sw.js",
       "apps/web/release-protocol.ts",
+      "apps/web/src/lib/app-failure-phase.ts",
       "apps/web/src/lib/release-controller-takeover-write-fence.ts",
       "apps/web/src/lib/release-database-coordinator.ts",
       "apps/web/src/lib/service-worker-takeover-retry.ts",
@@ -972,4 +973,16 @@ test("cross-Schema generated HTML must satisfy the actual unbound evidence guard
   assert.equal(evaluate(html("unbound-local-build")), "unbound-local-build");
   assert.throws(() => evaluate(html(`hre1-${"a".repeat(32)}`)), /must remain unbound/u);
   assert.throws(() => evaluate("<html></html>"), /must remain unbound/u);
+});
+// The old complete identity is retained as data, never reconstructed from current rows.
+test("the c0f9fdc source epoch cannot authorize the reading 0.21 fixture", async () => {
+  const bytes = await readFile(new URL("./fixtures/sw-critical-source-c0f9fdc.json", import.meta.url));
+  assert.equal(createHash("sha256").update(bytes).digest("hex"), "836fc1d1419be6d6030a387a6593a57bd48c5e8ff2e3945b67bd54d6878bbbdb");
+  const historical = JSON.parse(bytes);
+  assert.equal(createHash("sha256").update(historical.domain + "\0" + JSON.stringify(historical.files)).digest("hex"), historical.canonicalSha256);
+  assert.equal(historical.domain, "hakimi-sw-two-generation-critical-source-set-v1");
+  assert.equal(criticalSourceIdentity.domain, "hakimi-sw-two-generation-critical-source-set-v2");
+  assert.throws(() => assertSwTwoGenerationFixtureCriticalSourceIdentity(historical), /critical source identity drifted/u);
+  assert.doesNotThrow(() => assertSwTwoGenerationFixtureCriticalSourceIdentity(criticalSourceIdentity));
+  assert.ok(criticalSourceIdentity.files.some(file => file.path === "apps/web/src/lib/app-failure-phase.ts"));
 });

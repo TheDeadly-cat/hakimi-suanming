@@ -124,8 +124,8 @@
     {
       "path": "packages/contracts/src/index.ts",
       "packageManifestPath": "packages/contracts/package.json",
-      "lfUtf8Sha256": "674a3fe1e2b3cd4fc99e481a758966a320ddc3c1113a9471eba190851d15e041",
-      "byteLength": 244747,
+      "lfUtf8Sha256": "66871625480042a9af71582b838c9ca06a4f13b1e3cf730192c562e1b3993387",
+      "byteLength": 246996,
       "edges": [
         {
           "kind": "static-import",
@@ -302,7 +302,7 @@
       "packageName": "@hakimi/contracts",
       "version": "0.1.0",
       "exports": "./src/index.ts",
-      "lfUtf8Sha256": "6053a6b6ffd8baf0de20b5c6afed9a1bf8674dfce77fbbae4be5d6199a3a9801",
+      "lfUtf8Sha256": "c58276512f1e3b3d395c922b0ba9b3573952870e7be74b3cebd1e8bcb5add102",
       "byteLength": 200,
       "dependencies": [
         {
@@ -313,7 +313,7 @@
         },
         {
           "request": "zod",
-          "range": "4.4.3",
+          "range": "4.6.7",
           "targetKind": "external-package",
           "target": "node_modules/zod"
         }
@@ -498,13 +498,13 @@
     "scriptManifests": [
       {
         "path": "apps/web/package.json",
-        "lfUtf8Sha256": "8451d463a5a009a62df8821ad4a881940996db2f55ed2a858e1a7a31ad4b2784",
-        "byteLength": 3439
+        "lfUtf8Sha256": "f727f83500a10c83353cac5e014b7f0b2535bdbadf9b68537b93859b16a96457",
+        "byteLength": 3488
       },
       {
         "path": "package.json",
-        "lfUtf8Sha256": "2e4799d256c26a51b25e2e099a272cd4015df42bce5769d4758e99a1b9010725",
-        "byteLength": 32720
+        "lfUtf8Sha256": "abb5b1ddf99196206f422835a5ed330e85edcaeb69e701b36a426daed36f7ec0",
+        "byteLength": 32744
       }
     ],
     "rootBundleScripts": [
@@ -638,17 +638,17 @@
       "installPath": "node_modules/zod",
       "requestName": "zod",
       "packageName": "zod",
-      "version": "4.4.3",
-      "resolved": "https://registry.npmjs.org/zod/-/zod-4.4.3.tgz",
-      "integrity": "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==",
+      "version": "4.6.7",
+      "resolved": "https://registry.npmjs.org/zod/-/zod-4.6.7.tgz",
+      "integrity": "sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==",
       "dependencyEdges": [],
       "installedTree": {
-        "sha256": "2b90cab29a2eb252749affa67299a196c6fbf3f0952054e2c49fb65e5104988a",
-        "fileCount": 718,
+        "sha256": "a6687aa92401553be20105d60bc873e9d81e36c04641a8f9ce3ded705d50b863",
+        "fileCount": 840,
         "directoryCount": 29,
-        "byteLength": 4558122
+        "byteLength": 6148944
       }
     }
   ],
-  "overallSha256": "b59b9c83fb52e6965a10c6985a13599078bc3a69251a9d2188cda8f89bc50ff7"
+  "overallSha256": "8f7067020749edd7e7d5014ae22ca16769dc40fdcc16c73e0a9c7c81796ddd20"
 }

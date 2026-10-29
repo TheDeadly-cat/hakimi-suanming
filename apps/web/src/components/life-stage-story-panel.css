@@ -1,0 +1,26 @@
+.life-stage-story { max-width: 58em; padding-block: 10px 20px; }
+#reading-life-stage { scroll-margin-top: 82px; }
+#reading-life-stage:focus { outline: none; }
+.life-stage-original > p { font-size: 16px; line-height: 1.9; color: #465653; }
+.life-stage-story h3 { margin: 8px 0 12px; font: 650 27px/1.55 var(--reading-serif); text-wrap: balance; }
+.life-stage-story .life-stage-kicker { margin: 0; color: var(--reading-jade); font-size: 13px; line-height: 1.8; }
+.life-stage-story .life-stage-period { margin: 0 0 24px; color: var(--reading-muted); font-size: 12px; line-height: 1.8; }
+.life-stage-narrative p, .life-stage-transition > p, .life-stage-transition > section > p { margin: 14px 0; font-size: 16px; line-height: 1.95; color: #465653; }
+.life-stage-points { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px; margin: 24px 0; }
+.life-stage-points section { border-top: 2px solid #c5d9d0; padding-top: 16px; }
+.life-stage-points h4 { margin: 0 0 10px; font-size: 16px; color: var(--reading-jade); }
+.life-stage-points ul { padding-left: 20px; margin: 0; font-size: 15px; line-height: 1.9; color: #465653; }
+.life-stage-points li + li { margin-top: 8px; }
+.life-stage-story summary { display: flex; align-items: center; min-height: 44px; cursor: pointer; color: var(--reading-jade); font-size: 13px; font-weight: 600; }
+.life-stage-story summary::before { content: "▸"; margin-right: 8px; }
+.life-stage-story details[open] > summary::before { content: "▾"; }
+.life-stage-conditions p, .life-stage-conditions li { font-size: 13px; line-height: 1.9; color: var(--reading-muted); }
+.life-stage-conditions ul { padding-left: 20px; }
+.life-stage-transition { margin-top: 26px; padding: 24px 26px; background: #f0f4ed; border-left: 3px solid #7daba3; }
+.life-stage-transition h4 { margin: 8px 0 12px; font: 650 21px/1.65 var(--reading-serif); }
+.life-stage-transition p:not(.life-stage-kicker) { font-size: 16px; line-height: 1.95; color: #465653; }
+.life-stage-transition-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; }
+.life-stage-story a { display: inline-flex; align-items: center; min-height: 44px; color: var(--reading-jade); font-size: 13px; text-underline-offset: 4px; }
+.life-stage-personal-sources blockquote { margin-inline: 0; padding-left: 16px; border-left: 2px solid #7daba3; font-size: 16px; line-height: 1.9; }
+.life-stage-story :is(a, summary):focus-visible { outline: 2px solid var(--reading-jade); outline-offset: 3px; }
+@media (max-width: 700px) { .life-stage-points { grid-template-columns: minmax(0,1fr); gap: 22px; } .life-stage-transition { padding: 20px 18px; } .life-stage-story h3 { font-size: 23px; } }

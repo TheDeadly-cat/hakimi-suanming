@@ -8,6 +8,7 @@ import {
 } from "./lib/app-boot-failure";
 import { AppBootFailureLatch, type LatchedAppBootFailure } from "./lib/app-boot-failure-latch";
 import { runAppBootReadiness, type AppBootReadinessResult } from "./lib/app-boot-readiness";
+import { appFailurePhase } from "./lib/app-failure-phase";
 import {
   CURRENT_RELEASE_DATABASE,
   CURRENT_RELEASE_STORAGE_MANIFEST,
@@ -148,13 +149,17 @@ function reportBootFailure(source: AppBootFailureSource, reason: unknown): Latch
   return failure;
 }
 
+function currentFailurePhase(): "boot" | "runtime" {
+  return appFailurePhase({ appBootConfirmed, bootFailed, bootConfirmationSent, requiresReleaseInteractionConfirmation });
+}
+
 window.addEventListener("error", (event) => {
   const reason = event.error ?? new Error(event.message || "window error");
-  if (bootConfirmationSent) runtimeFailureLatch.report("window_error", reason);
+  if (currentFailurePhase() === "runtime") runtimeFailureLatch.report("window_error", reason);
   else reportBootFailure("window_error", reason);
 });
 window.addEventListener("unhandledrejection", (event) => {
-  if (bootConfirmationSent) runtimeFailureLatch.report("unhandled_rejection", event.reason);
+  if (currentFailurePhase() === "runtime") runtimeFailureLatch.report("unhandled_rejection", event.reason);
   else reportBootFailure("unhandled_rejection", event.reason);
 });
 
@@ -639,7 +644,7 @@ function RootApp({
     return () => { active = false; };
   }, [readiness, releaseConfirmationReady]);
   const handleRouteFailure = useCallback((error: Error): "boot" | "runtime" => {
-    if (bootConfirmationSent) {
+    if (currentFailurePhase() === "runtime") {
       runtimeFailureLatch.report("route", error);
       return "runtime";
     }

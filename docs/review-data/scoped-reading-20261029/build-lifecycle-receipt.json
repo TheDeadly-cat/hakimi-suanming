@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "recordType": "default_npm_lifecycle_phase_report",
+  "stage": "build",
+  "originalCommand": [
+    "npm",
+    "run",
+    "build"
+  ],
+  "runId": null,
+  "receiptId": null,
+  "packageIdentities": [
+    {
+      "path": "package.json",
+      "rawBytes": 32744,
+      "rawSha256": "abb5b1ddf99196206f422835a5ed330e85edcaeb69e701b36a426daed36f7ec0"
+    },
+    {
+      "path": "apps/web/package.json",
+      "rawBytes": 3488,
+      "rawSha256": "f727f83500a10c83353cac5e014b7f0b2535bdbadf9b68537b93859b16a96457"
+    }
+  ],
+  "planDigest": "f02638f7e78061c07a6012698afaccf6d626719b769b225bd7e6b0bfe5fa7347",
+  "startedAt": "2026-10-29T02:10:13.396Z",
+  "completedAt": "2026-10-29T02:11:04.530Z",
+  "terminal": true,
+  "authorization": {
+    "status": "allowed",
+    "blockers": []
+  },
+  "phases": [
+    {
+      "id": "governance",
+      "required": true,
+      "status": "failed",
+      "started": true,
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "startedAt": "2026-10-29T02:10:13.396Z",
+      "completedAt": "2026-10-29T02:10:36.177Z"
+    },
+    {
+      "id": "workspace-prebuild",
+      "required": true,
+      "status": "passed",
+      "started": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "startedAt": "2026-10-29T02:10:36.177Z",
+      "completedAt": "2026-10-29T02:10:38.088Z"
+    },
+    {
+      "id": "program",
+      "required": true,
+      "status": "passed",
+      "started": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "startedAt": "2026-10-29T02:10:38.088Z",
+      "completedAt": "2026-10-29T02:11:04.529Z"
+    },
+    {
+      "id": "workspace-postbuild",
+      "required": false,
+      "status": "not-configured",
+      "started": false,
+      "exitCode": null,
+      "signal": null,
+      "error": null,
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "root-post",
+      "required": false,
+      "status": "not-configured",
+      "started": false,
+      "exitCode": null,
+      "signal": null,
+      "error": null,
+      "startedAt": null,
+      "completedAt": null
+    }
+  ],
+  "programStarted": true,
+  "aggregateExitCode": 1,
+  "status": "failed"
+}

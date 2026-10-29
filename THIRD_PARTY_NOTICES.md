@@ -6,7 +6,9 @@ A declared license identifier is evidence from the lockfile, not a legal opinion
 
 ## Manual review queue
 
-No runtime dependency in this lockfile is currently outside the narrow standard-notice allowlist.
+| Package | Version | Declared license | Reason |
+| --- | --- | --- | --- |
+| pako | 2.1.0 | (MIT AND Zlib) | **MANUAL REVIEW REQUIRED.** Declared license is outside the narrow standard-notice allowlist. Human review is required before distribution. |
 
 ## Runtime dependency inventory
 
@@ -28,14 +30,14 @@ No runtime dependency in this lockfile is currently outside the narrow standard-
 - Locked artifact: https://registry.npmjs.org/dexie/-/dexie-4.4.4.tgz
 - Locked integrity: `sha512-jIwsYI8Os2hgnqc6O49YwFDKGc5v5QjGx0wPVp543ip1F53VFAKMLthV2pQosQcVTv3eAskTWYspOx195PM0FQ==`
 
-### `fflate` 0.8.2
+### `fflate` 0.8.3
 
 - Declared license: `MIT`
 - Review classification: Declared license is in the narrow standard-notice allowlist; this is not a compliance determination.
-- Package URL: `pkg:npm/fflate@0.8.2`
+- Package URL: `pkg:npm/fflate@0.8.3`
 - Lock path: `node_modules/fflate`
-- Locked artifact: https://registry.npmjs.org/fflate/-/fflate-0.8.2.tgz
-- Locked integrity: `sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==`
+- Locked artifact: https://registry.npmjs.org/fflate/-/fflate-0.8.3.tgz
+- Locked integrity: `sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==`
 
 ### `html-to-image` 1.11.13
 
@@ -73,14 +75,14 @@ No runtime dependency in this lockfile is currently outside the narrow standard-
 - Locked artifact: https://registry.npmjs.org/lunar-typescript/-/lunar-typescript-1.8.6.tgz
 - Locked integrity: `sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA==`
 
-### `moment` 2.30.1
+### `moment` 2.31.0
 
 - Declared license: `MIT`
 - Review classification: Declared license is in the narrow standard-notice allowlist; this is not a compliance determination.
-- Package URL: `pkg:npm/moment@2.30.1`
+- Package URL: `pkg:npm/moment@2.31.0`
 - Lock path: `node_modules/moment`
-- Locked artifact: https://registry.npmjs.org/moment/-/moment-2.30.1.tgz
-- Locked integrity: `sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==`
+- Locked artifact: https://registry.npmjs.org/moment/-/moment-2.31.0.tgz
+- Locked integrity: `sha512-0acOTfMiWOheYS4eoWb80yYMb/JLvVv9SHbs2PehaDzfUG0Bw855SKyk0IKTnPGa5+U2bmi3W68l1+sGLX/pvw==`
 
 ### `moment-timezone` 0.5.48
 
@@ -99,6 +101,15 @@ No runtime dependency in this lockfile is currently outside the narrow standard-
 - Lock path: `node_modules/moment-timezone`
 - Locked artifact: https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.6.3.tgz
 - Locked integrity: `sha512-pVEPA/HCFHHbwJ130ywnzYuZpkEGcP6Daa/OwNebpA18MybeFHmQilAGGovXgWijQ8vQtmud9jZrziUBgsykfg==`
+
+### `pako` 2.1.0
+
+- Declared license: `(MIT AND Zlib)`
+- Review classification: **MANUAL REVIEW REQUIRED.** Declared license is outside the narrow standard-notice allowlist. Human review is required before distribution.
+- Package URL: `pkg:npm/pako@2.1.0`
+- Lock path: `node_modules/pako`
+- Locked artifact: https://registry.npmjs.org/pako/-/pako-2.1.0.tgz
+- Locked integrity: `sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==`
 
 ### `react` 19.2.8
 
@@ -127,11 +138,11 @@ No runtime dependency in this lockfile is currently outside the narrow standard-
 - Locked artifact: https://registry.npmjs.org/scheduler/-/scheduler-0.27.0.tgz
 - Locked integrity: `sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==`
 
-### `zod` 4.4.3
+### `zod` 4.6.7
 
 - Declared license: `MIT`
 - Review classification: Declared license is in the narrow standard-notice allowlist; this is not a compliance determination.
-- Package URL: `pkg:npm/zod@4.4.3`
+- Package URL: `pkg:npm/zod@4.6.7`
 - Lock path: `node_modules/zod`
-- Locked artifact: https://registry.npmjs.org/zod/-/zod-4.4.3.tgz
-- Locked integrity: `sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==`
+- Locked artifact: https://registry.npmjs.org/zod/-/zod-4.6.7.tgz
+- Locked integrity: `sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==`

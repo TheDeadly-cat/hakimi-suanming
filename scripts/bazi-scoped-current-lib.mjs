@@ -82,7 +82,7 @@ const DEFINITIONS = Object.freeze({
     selectionKey: "baziExpertReviewPacket",
     artifactIdField: "packetId",
     semanticDigestField: "packetDigest",
-    pathPattern: /^content\/bazi-strength-expert-review-packet\.(?:v[0-9]+(?:\.[0-9]+){0,2}|current)\.json$/u
+    pathPattern: /^content\/bazi-strength-expert-review-packet\.(?:v[0-9]+(?:\.[0-9]+){0,2}|current|current-v1\.7\.0)\.json$/u
   })
 });
 
@@ -378,7 +378,17 @@ export async function loadBaziCurrentSourceRights(workspaceRoot = process.cwd())
 export async function loadBaziCurrentDomainManifest(workspaceRoot = process.cwd()) {
   const resolution = await resolvePurpose(workspaceRoot, BAZI_SCOPED_CURRENT_PURPOSES.domainManifest);
   let summary;
-  if (resolution.artifact.path === "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.4.0.json"
+  if (resolution.artifact.path === "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.6.0.json"
+    && resolution.selection.version === "2.6.0") {
+    const { loadBaziDependencyDomainManifestV26, getBaziDependencyDomainManifestV26Summary } =
+      await import("./bazi-dependency-identity-successor-lib.mjs");
+    summary = getBaziDependencyDomainManifestV26Summary(await loadBaziDependencyDomainManifestV26(workspaceRoot));
+  } else if (resolution.artifact.path === "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.5.0.json"
+    && resolution.selection.version === "2.5.0") {
+    const { loadBaziDomainReleaseManifestV25, getBaziDomainReleaseManifestV25Summary } =
+      await import("./bazi-domain-release-manifest-v2-5-lib.mjs");
+    summary = getBaziDomainReleaseManifestV25Summary(await loadBaziDomainReleaseManifestV25(workspaceRoot));
+  } else if (resolution.artifact.path === "content/domain-release/bazi.single-chart-report.v1.7.0.manifest.v2.4.0.json"
     && resolution.selection.version === "2.4.0") {
     const { loadBaziDomainReleaseManifestV24, getBaziDomainReleaseManifestV24Summary } =
       await import("./bazi-domain-release-manifest-v2-4-lib.mjs");
@@ -416,6 +426,10 @@ export async function loadBaziCurrentExpertReviewPacket(workspaceRoot = process.
   const snapshot = await rereadSelectedArtifact(workspaceRoot,
     index.nonVersionedSelections.baziExpertReviewPacket.selectedCurrent,
     BAZI_SCOPED_CURRENT_PURPOSES.expertReviewPacket);
+  if (snapshot.path === "content/bazi-strength-expert-review-packet.current-v1.7.0.json") {
+    const { verifyBaziDependencyExpertPacketV17 } = await import("./bazi-dependency-identity-successor-lib.mjs");
+    await verifyBaziDependencyExpertPacketV17(workspaceRoot);
+  }
   await loadCurrentExpertPacketInputClosure(workspaceRoot, index, snapshot);
   return resolution;
 }

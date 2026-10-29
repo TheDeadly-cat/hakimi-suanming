@@ -112,6 +112,8 @@ describe("App research query route", () => {
 
     expect(screen.queryByRole("heading", { name: "专业研究检索路由" })).toBeNull();
     expect(screen.getByRole("heading", { name: "当前页面运行失败" })).toBeTruthy();
+    expect(screen.getByRole("alert").textContent).toContain("本次启动检查已经完成，当前页面在后续运行时发生错误");
+    expect(screen.getByRole("alert").textContent).not.toContain("离线版本确认已经完成");
     expect(screen.getByRole("alert").textContent).toContain("不会被误报为启动失败");
     expect(screen.queryByText("启动完整性检查未通过")).toBeNull();
     expect(document.title).toBe("页面运行故障 · 哈基米八字研究台");
@@ -231,7 +233,8 @@ describe("App historical revision route", () => {
 
 describe("App chart title", () => {
   it.each([
-    ["", "命盘结构"],
+    ["", "本盘判断"],
+    ["?view=reading", "本盘判断"],
     ["?view=structure", "命盘结构"],
     ["?view=overview", "命盘概览"]
   ])("让 query %s 与 Chart 默认视图标题一致", async (search, title) => {

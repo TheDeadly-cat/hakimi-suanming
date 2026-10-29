@@ -1,0 +1,93 @@
+.detailed-outlook { --reading-ink: #182b2c; --reading-muted: #66716e; --reading-line: #deded5; --reading-jade: #216b61; --reading-serif: var(--font-editorial, "SimSun", serif); color: var(--reading-ink); background: #fbfaf6; padding: 36px 40px; border-top: 1px solid var(--reading-line); overflow-wrap: anywhere; }
+.detailed-outlook > section { max-width: 1080px; margin-inline: auto; }
+.detailed-outlook .monthly-outlook { margin-top: 40px; padding-top: 36px; border-top: 1px solid var(--reading-line); }
+.outlook-lead, .outlook-period-reading > p { max-width: 58em; font-size: 16px; line-height: 1.9; color: #465653; }
+.outlook-select-label { display: block; font-size: 13px; font-weight: 650; color: var(--reading-jade); margin: 22px 0 8px; }
+.outlook-select { max-width: 100%; width: 100%; min-height: 46px; padding: 10px 14px; border: 1px solid var(--reading-line); border-radius: 8px; background: #fffdf9; color: var(--reading-ink); font-size: 15px; }
+.outlook-period-overview { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 10px; margin: 24px 0; }
+.outlook-period-overview button { display: grid; gap: 7px; text-align: left; padding: 13px 14px; border: 1px solid var(--reading-line); border-top: 3px solid #a3afa9; border-radius: 7px; background: #fffdf9; color: var(--reading-ink); cursor: pointer; }
+.outlook-period-overview button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px var(--reading-jade); background: #e9f1eb; }
+.outlook-period-overview button[data-direction="较顺"] { border-top-color: #216b61; }
+.outlook-period-overview button[data-direction="有压力"] { border-top-color: #a14738; }
+.outlook-period-overview button[data-direction="利弊并见"] { border-top-color: #96713b; }
+.outlook-period-overview strong { font: 650 18px/1.4 var(--reading-serif); }
+.outlook-period-overview span { font-size: 12px; line-height: 1.6; }
+.outlook-annual-overview button { align-content: start; }
+.outlook-annual-overview .outlook-year-answer { font-size: 14px; line-height: 1.7; font-weight: 650; color: var(--reading-ink); }
+.outlook-annual-overview .outlook-year-direction { color: var(--reading-muted); }
+.outlook-period-reading { margin-top: 24px; }
+.outlook-reading-title { display: flex; align-items: start; justify-content: space-between; gap: 20px; }
+.outlook-reading-title h3 { margin: 0; font: 650 25px/1.5 var(--reading-serif); }
+.outlook-reading-title > span { flex-shrink: 0; font-size: 13px; font-weight: 650; color: var(--reading-jade); padding-top: 9px; }
+.detailed-outlook .outlook-period { font-size: 12px; line-height: 1.8; color: var(--reading-muted); }
+.outlook-theme-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); margin-top: 24px; gap: 28px; }
+.outlook-theme { border-top: 2px solid #c5d9d0; padding-top: 14px; }
+.outlook-theme h4 { margin: 0 0 10px; font-size: 16px; color: var(--reading-jade); }
+.outlook-theme p { font-size: 15px; line-height: 1.85; margin: 0; color: #465653; }
+.outlook-evidence { margin-top: 16px; }
+.outlook-judgment { margin-block: 24px; padding: 20px 22px; border-left: 3px solid #7daba3; background: #f0f4ed; }
+.outlook-judgment > h4 { margin: 0 0 18px; font: 650 20px/1.6 var(--reading-serif); }
+.outlook-axis-overview { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 22px; }
+.outlook-axis-overview h5, .outlook-axis-evidence h5, .outlook-judgment-segments h5 { font-size: 15px; margin: 0 0 9px; }
+.outlook-axis-overview h5 span { display: block; margin-top: 6px; font-weight: 500; font-size: 12px; color: var(--reading-jade); }
+.outlook-axis-overview p, .outlook-judgment-conflicts p, .outlook-judgment-segments p { margin: 0; font-size: 14px; line-height: 1.85; color: #465653; }
+.outlook-judgment-conflicts, .outlook-judgment-segments { margin-top: 20px; padding-top: 16px; border-top: 1px solid #c8d7cd; }
+.outlook-judgment-conflicts strong, .outlook-judgment-segments strong { display: block; font-size: 14px; line-height: 1.75; margin-bottom: 8px; }
+.outlook-judgment-segments article + article { margin-top: 16px; }
+.outlook-axis-evidence, .outlook-source { margin-top: 18px; }
+.outlook-source { font-size: 13px; line-height: 1.85; }
+.outlook-source a { color: var(--reading-jade); text-decoration: underline; }
+.outlook-source blockquote { margin: 10px 0; padding-left: 12px; border-left: 2px solid #a8c0b4; }
+.outlook-evidence summary { display: flex; align-items: center; min-height: 44px; gap: 10px; color: var(--reading-jade); font-weight: 600; font-size: 13px; cursor: pointer; }
+.outlook-evidence ul { padding-left: 22px; font-size: 13px; line-height: 1.9; color: var(--reading-muted); }
+.outlook-year-form { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+.outlook-year-form label { font-weight: 600; font-size: 14px; }
+.outlook-year-form input { width: 110px; min-height: 44px; padding: 8px 12px; border: 1px solid var(--reading-line); border-radius: 8px; background: #fffdf9; }
+.outlook-months { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 10px; margin-block: 24px; }
+.outlook-months button { text-align: left; border: 1px solid var(--reading-line); border-radius: 7px; padding: 13px 10px; background: transparent; cursor: pointer; color: var(--reading-ink); }
+.outlook-months button[aria-pressed="true"] { border-color: var(--reading-jade); background: #e9f1eb; }
+.outlook-months strong, .outlook-months small, .outlook-months span { display: block; }
+.outlook-months strong { font-size: 14px; }
+.outlook-months small { font-size: 11px; color: var(--reading-muted); margin: 7px 0; }
+.outlook-months span { font-size: 12px; color: var(--reading-jade); }
+.outlook-branches { border-left: 2px solid var(--reading-line); padding-left: 16px; font-size: 14px; line-height: 1.85; }
+.outlook-error { color: #a14738; font-size: 14px; }
+.annual-full-reading { margin-block: 28px 36px; padding-block: 24px 28px; border-block: 1px solid var(--reading-line); }
+.annual-influence-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 28px; margin-top: 24px; }
+.annual-influence-grid h4 { margin: 0 0 8px; color: var(--reading-jade); font-size: 15px; }
+.annual-influence-grid p, .annual-event-scenario > p, .annual-event-examples { margin: 0; font-size: 15px; line-height: 1.9; color: #465653; }
+.annual-event-scenarios { margin-top: 28px; }
+.annual-event-scenarios > h4 { margin-bottom: 8px; font: 650 21px/1.5 var(--reading-serif); }
+.annual-event-scenario { padding-block: 20px; border-top: 1px solid var(--reading-line); }
+.annual-event-scenario h5 { margin: 0 0 10px; font-size: 17px; color: var(--reading-jade); }
+.annual-event-examples { padding-left: 24px; margin-top: 10px; }
+.annual-event-examples li + li { margin-top: 6px; }
+.detailed-outlook :is(button,select,input,summary,a):focus-visible { outline: 2px solid var(--reading-jade); outline-offset: 3px; }
+.annual-domain-reading { margin-top: 20px; }
+.annual-domain-headline { margin: 0 0 10px; font: 650 22px/1.6 var(--reading-serif); color: var(--reading-ink); }
+.annual-domain-branch + .annual-domain-branch { margin-top: 32px; padding-top: 28px; border-top: 2px solid #c5d9d0; }
+.annual-domain-branch-label { margin: 0 0 16px; font: 650 20px/1.6 var(--reading-serif); color: var(--reading-jade); }
+.annual-domain-segment { margin-top: 24px; }
+.annual-domain-segment + .annual-domain-segment { margin-top: 34px; padding-top: 26px; border-top: 1px dashed var(--reading-line); }
+.annual-domain-segment-heading { padding: 14px 18px; border-left: 2px solid var(--reading-jade); background: #f0f4ed; }
+.annual-domain-background { margin: 0 0 5px; font: 650 17px/1.6 var(--reading-serif); }
+.annual-domain-segment-heading .outlook-period { margin: 0; }
+.annual-domain-caption { margin: 6px 0 0; font-size: 14px; line-height: 1.8; color: var(--reading-jade); }
+.annual-domain { padding-block: 24px; border-bottom: 1px solid var(--reading-line); max-width: 58em; }
+.annual-domain > .annual-domain-label { margin: 0 0 7px; font-size: 12px; color: var(--reading-jade); font-weight: 650; letter-spacing: .05em; }
+.annual-domain h5 { margin: 0 0 10px; font: 650 20px/1.6 var(--reading-serif); color: var(--reading-ink); }
+.annual-domain > p, .annual-domain-gaps p, .annual-original-evidence > p { margin: 10px 0; font-size: 15px; line-height: 1.9; color: #465653; }
+.annual-domain > .annual-domain-verdict { font-size: 16px; color: var(--reading-ink); }
+.annual-domain-points-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 26px; }
+.annual-domain-points h6 { margin: 16px 0 7px; font-size: 14px; color: var(--reading-jade); }
+.annual-domain-points ul { margin: 0; padding-left: 20px; color: #465653; font-size: 14px; line-height: 1.9; }
+.annual-domain-points li + li { margin-top: 6px; }
+.annual-domain-gaps { margin-top: 20px; padding-left: 16px; border-left: 2px solid var(--reading-line); }
+.annual-original-evidence { margin-top: 26px; }
+.annual-domain-feedback-link { display: inline-flex; align-items: center; min-height: 44px; margin-top: 8px; color: var(--reading-jade); font-size: 13px; text-underline-offset: 4px; }
+.annual-domain-reading :is(p,h4,h5,h6,li,time) { overflow-wrap: anywhere; }
+@media(max-width:1100px) { .outlook-months { grid-template-columns: repeat(4,minmax(0,1fr)); } }
+@media(max-width:700px) { .outlook-period-overview { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:700px) { .outlook-axis-overview { grid-template-columns: 1fr; gap: 18px; } .outlook-judgment { padding: 18px 16px; } }
+@media(max-width:700px) { .detailed-outlook { padding: 28px 18px; } .outlook-theme-grid, .annual-influence-grid { grid-template-columns: 1fr; gap: 22px; } .outlook-months { grid-template-columns: repeat(3,minmax(0,1fr)); } .outlook-reading-title { flex-wrap: wrap; gap: 4px; } .detailed-outlook .reading-section-heading { flex-wrap: wrap; } }
+@media(max-width:700px) { .annual-domain-points-grid { grid-template-columns: minmax(0,1fr); gap: 0; } .annual-domain-segment-heading { padding: 12px 14px; } .annual-domain h5 { font-size: 18px; } .annual-domain-headline { font-size: 20px; } }

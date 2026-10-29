@@ -1,4 +1,4 @@
-import { lstat, mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { chromium, expect, test, type BrowserContext, type Page } from "@playwright/test";
@@ -165,9 +165,14 @@ async function launchFixtureContext(): Promise<BrowserContext> {
 
   const profilePath = await createFixtureTemporaryDirectory("hb-v13-v16-profile-");
   browserProfilePaths.add(profilePath);
+  const netLogPath = test.info().outputPath("browser-netlog.json");
+  await mkdir(path.dirname(netLogPath), { recursive: true });
   const context = await chromium.launchPersistentContext(profilePath, {
     channel,
     headless: true,
+    // Preserve socket-level evidence for precache failures that occur before
+    // the activation observer starts. Keep native network behavior unchanged.
+    args: [`--log-net-log=${netLogPath}`, "--net-log-capture-mode=Default", "--net-log-max-size-mb=8"],
     acceptDownloads: true,
     serviceWorkers: "allow",
     baseURL: switchServer.origin,
@@ -176,6 +181,9 @@ async function launchFixtureContext(): Promise<BrowserContext> {
   test.info().annotations.push({
     type: "browser-version",
     description: `${channel} ${context.browser()?.version() ?? "unknown"}`
+  }, {
+    type: "browser-network-log",
+    description: "browser-netlog.json; default redaction; 8 MiB rolling limit; isolated synthetic profile"
   });
   return context;
 }
@@ -374,28 +382,129 @@ async function switchToTargetAndWaitForActivation(
     switchServer,
     sourceV13
   );
-  switchServer.setGeneration(target);
-  await natural.page.bringToFront();
-  await natural.page.evaluate(async () => {
-    const registration = await navigator.serviceWorker.getRegistration();
-    if (!registration) throw new Error("The confirmed v13 page has no Service Worker registration.");
-    await registration.update();
-  });
-  await expect.poll(() => cacheGeneration(natural.page, target), {
-    timeout: ACTIVATION_TIMEOUT_MS
-  }).toMatchObject({
-    bootAttempted: false,
-    bootConfirmed: false,
-    dbGeneration: target.descriptor.dbGeneration,
-    databaseName: target.descriptor.databaseName,
-    targetSchema: target.descriptor.targetSchema,
-    migrationId: target.descriptor.migrationId
-  });
-  await expect.poll(
-    () => workerBuildVersion(natural.page, "active"),
-    { timeout: ACTIVATION_TIMEOUT_MS }
-  ).toBe(target.version);
-  return { bridgePage: natural.page, problems: natural.problems };
+  const observations: Array<{ at: string; event: string; payload: unknown }> = [];
+  let droppedEvents = 0;
+  const record = (event: string, payload: unknown) => {
+    if (observations.length < 512) observations.push({ at: new Date().toISOString(), event, payload });
+    else droppedEvents += 1;
+  };
+  // Attach to an existing page. Diagnostics must not create another source
+  // client, promote a worker, retire a page, or extend the activation budget.
+  const session = await context.newCDPSession(natural.page);
+  session.on("ServiceWorker.workerRegistrationUpdated", payload => record("registration", payload));
+  session.on("ServiceWorker.workerVersionUpdated", payload => record("worker-version", payload));
+  session.on("ServiceWorker.workerErrorReported", payload => record("worker-error", payload));
+  const pageObservers: Array<{ page: Page; capture: () => Promise<unknown>; dispose: () => Promise<void> }> = [];
+  let failure: string | null = null;
+  try {
+    await session.send("ServiceWorker.enable");
+    for (const page of context.pages()) {
+      if (new URL(page.url()).origin !== switchServer.origin) continue;
+      const handle = await page.evaluateHandle(() => {
+        const events: Array<{ at: string; event: string; payload: unknown }> = [];
+        let droppedEvents = 0;
+        const record = (event: string, payload: unknown) => {
+          if (events.length < 128) events.push({ at: new Date().toISOString(), event, payload });
+          else droppedEvents += 1;
+        };
+        const attributes = ["data-app-boot-ready", "data-sw-boot-ack", "data-sw-takeover-preparation",
+          "data-sw-takeover-target-build", "data-db-forward-migration-activation", "data-db-controller-takeover-write-frozen"];
+        const states = () => Object.fromEntries(attributes.map(name => [name, document.documentElement.getAttribute(name)]));
+        const observer = new MutationObserver(() => record("page-state", states()));
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: attributes });
+        const NativeMessageChannel = window.MessageChannel;
+        const observedPorts: Array<WeakRef<MessagePort>> = [];
+        const ackTypes = new Set(["REQUEST_INSTALLED_GENERATION_ACTIVATION_ACK_V1", "REQUEST_INSTALLED_FORWARD_MIGRATION_ACTIVATION_ACK_V1"]);
+        const listener = (event: MessageEvent) => {
+          const message = event.data as Record<string, unknown> | null;
+          if (!message || !ackTypes.has(String(message.type))) return;
+          const bounded = (value: unknown) => typeof value === "string" ? value.slice(0, 256) : null;
+          record("activation-ack", { type: bounded(message.type), accepted: message.accepted === true,
+            reason: bounded(message.reason), requestId: bounded(message.requestId),
+            sourceBuildVersion: bounded(message.sourceBuildVersion), targetBuildVersion: bounded(message.targetBuildVersion) });
+        };
+        // Return the real native channel. Observe only; do not start a port,
+        // replace onmessage, alter a payload, or wait for/replay any response.
+        const observedMessageChannel = new Proxy(NativeMessageChannel, {
+          construct(target, args, newTarget) {
+            const channel = Reflect.construct(target, args, newTarget) as MessageChannel;
+            if (observedPorts.length < 64) {
+              channel.port1.addEventListener("message", listener);
+              observedPorts.push(new WeakRef(channel.port1));
+            }
+            return channel;
+          }
+        });
+        window.MessageChannel = observedMessageChannel;
+        record("page-state", states());
+        const worker = (value: ServiceWorker | null | undefined) => value ? { scriptURL: value.scriptURL, state: value.state } : null;
+        return {
+          capture: async () => {
+            const registration = await navigator.serviceWorker.getRegistration();
+            return { at: new Date().toISOString(), url: location.href, state: states(), events: [...events], droppedEvents,
+              buildVersion: document.querySelector<HTMLMetaElement>('meta[name="hakimi-build-version"]')?.content ?? null,
+              registration: registration ? { scope: registration.scope, active: worker(registration.active),
+                waiting: worker(registration.waiting), installing: worker(registration.installing) } : null,
+              controller: worker(navigator.serviceWorker.controller) };
+          },
+          dispose: () => {
+            observer.disconnect();
+            if (window.MessageChannel === observedMessageChannel) window.MessageChannel = NativeMessageChannel;
+            for (const port of observedPorts) port.deref()?.removeEventListener("message", listener);
+          }
+        };
+      });
+      pageObservers.push({ page, capture: () => handle.evaluate(value => value.capture()), dispose: async () => {
+        try { if (!page.isClosed()) await handle.evaluate(value => value.dispose()); }
+        finally { await handle.dispose(); }
+      } });
+    }
+    record("before-server-switch", await Promise.all(pageObservers.map(observer => observer.capture())));
+    switchServer.setGeneration(target);
+    await natural.page.bringToFront();
+    await natural.page.evaluate(async () => {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (!registration) throw new Error("The confirmed v13 page has no Service Worker registration.");
+      await registration.update();
+    });
+    await expect.poll(() => cacheGeneration(natural.page, target), {
+      timeout: ACTIVATION_TIMEOUT_MS
+    }).toMatchObject({
+      bootAttempted: false,
+      bootConfirmed: false,
+      dbGeneration: target.descriptor.dbGeneration,
+      databaseName: target.descriptor.databaseName,
+      targetSchema: target.descriptor.targetSchema,
+      migrationId: target.descriptor.migrationId
+    });
+    await expect.poll(
+      () => workerBuildVersion(natural.page, "active"),
+      { timeout: ACTIVATION_TIMEOUT_MS }
+    ).toBe(target.version);
+    return { bridgePage: natural.page, problems: natural.problems };
+  } catch (error) {
+    failure = error instanceof Error ? error.message : String(error);
+    throw error;
+  } finally {
+    for (const observer of pageObservers) {
+      try { record("final-page-state", await observer.capture()); }
+      catch (error) { record("page-observation-error", String(error)); }
+      finally { await observer.dispose().catch(error => record("observer-cleanup-error", String(error))); }
+    }
+    await session.detach().catch(error => record("cdp-detach-error", String(error)));
+    try {
+      await test.info().attach("automatic-forward-activation-observation", {
+        body: Buffer.from(JSON.stringify({ sourceBuild: sourceV13.version, targetBuild: target.version, failure,
+          testObservationEnabled: true, nativeMessageChannelAckListener: true, portCleanupUsesWeakReferences: true,
+          activationTimeoutMs: ACTIVATION_TIMEOUT_MS,
+          protocolMessagesChanged: false, sourcePagesClosed: false, droppedEvents, observations }, null, 2)),
+        contentType: "application/json"
+      });
+    } catch (error) {
+      if (failure === null) throw new Error("Automatic activation diagnostic attachment could not be written.", { cause: error });
+      console.error("Automatic activation diagnostic attachment failed; preserving original activation error:", error);
+    }
+  }
 }
 
 /**
@@ -1077,7 +1186,11 @@ test("双旧 v13 页中一页已确认、另一页仍在万条慢审计时，新
   const externalRequests = collectExternalRequests(context, switchServer.origin);
   try {
     const stable = await openStableBridge(context, switchServer, sourceV13);
-    const fixture = await readLegalCapacityCaseFixture(stable.page, sourceDescriptor.databaseName);
+    const fixture = await readLegalCapacityCaseFixture(
+      stable.page,
+      sourceDescriptor.databaseName,
+      page => createDemoCase(page, switchServer.origin)
+    );
     expect(await seedLegacyV13CapacityCases(
       stable.page,
       fixture,

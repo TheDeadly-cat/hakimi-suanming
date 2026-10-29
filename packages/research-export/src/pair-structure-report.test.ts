@@ -32,6 +32,7 @@ import {
   renderPairStructureAnonymousMarkdown,
   verifyPairStructureFullAuditEnvelope
 } from "./index";
+import { pairStructureAnonymousResearchReportSchema } from "./pair-structure-report";
 
 const TARGET_INSTANT = "2026-08-02T09:15:00.000Z";
 const CASE_IDS = [
@@ -129,6 +130,37 @@ beforeAll(async () => {
 });
 
 describe("pair structure research export", () => {
+  it("retains the anonymous export's UTF-16 text limits without changing its six-slot array contract", async () => {
+    const report = await buildPairStructureAnonymousResearchReport(projection);
+    const exact = structuredClone(report);
+    exact.participants[0].observations[0]!.label = "😀".repeat(80);
+    exact.participants[0].observations[0]!.value = "😀".repeat(500_000);
+    expect(pairStructureAnonymousResearchReportSchema.parse(exact)).toEqual(exact);
+    const over = structuredClone(exact);
+    over.participants[0].observations[0]!.label += "中";
+    const rejected = pairStructureAnonymousResearchReportSchema.safeParse(over);
+    expect(rejected.success).toBe(false);
+    if (rejected.success) throw new Error("Oversized anonymous label was accepted");
+    expect(rejected.error.issues[0]).toMatchObject({ code: "too_big", origin: "string", maximum: 160,
+      path: ["participants", 0, "observations", 0, "label"] });
+    const tooLargeValue = structuredClone(exact);
+    tooLargeValue.participants[0].observations[0]!.value += "中";
+    expect(pairStructureAnonymousResearchReportSchema.safeParse(tooLargeValue).success).toBe(false);
+    const transit = exact.participants[0].transit;
+    if (transit.status !== "resolved") throw new Error("Expected real resolved transit fixture");
+    const slot = transit.slots.find(item => item.status === "resolved");
+    if (!slot || slot.status !== "resolved") throw new Error("Expected real resolved transit slot");
+    slot.label = "😀".repeat(40);
+    slot.ganZhi = "😀"; // Preserve the old two-unit validator, not a new character rule.
+    expect(pairStructureAnonymousResearchReportSchema.parse(exact)).toEqual(exact);
+    slot.ganZhi += "中";
+    expect(pairStructureAnonymousResearchReportSchema.safeParse(exact).success).toBe(false);
+    const extraSlot = structuredClone(report);
+    if (extraSlot.participants[0].transit.status !== "resolved") throw new Error("Expected resolved transit");
+    extraSlot.participants[0].transit.slots.push(extraSlot.participants[0].transit.slots[0]!);
+    expect(pairStructureAnonymousResearchReportSchema.safeParse(extraSlot).success).toBe(false);
+  });
+
   it("冻结匿名报告 v1 的 76 项系统事实白名单与移除项", () => {
     const contract = JSON.parse(readFileSync(resolve(
       process.cwd(),

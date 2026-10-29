@@ -1,0 +1,331 @@
+{
+  "version": "hakimi.reading-quality-development/1",
+  "split": "development",
+  "baselineHead": "927c240909773adf57155dd852697f1e70b3be39",
+  "inputPolicy": "Public synthetic inputs only; no user chart, backup, browser profile or external report corpus.",
+  "familyPolicy": "All sex, context, time perturbation and question paraphrase variants of a birth family remain in this split.",
+  "sources": [
+    {
+      "id": "peer",
+      "familyId": "dev-peer-1995",
+      "birth": "1995-08-18 08:26",
+      "sex": "male",
+      "years": [
+        2026,
+        2035
+      ]
+    },
+    {
+      "id": "resource",
+      "familyId": "dev-resource-1957",
+      "birth": "1957-09-13 00:26",
+      "sex": "male",
+      "years": [
+        2032,
+        2033
+      ]
+    },
+    {
+      "id": "wealth",
+      "familyId": "dev-wealth-1982",
+      "birth": "1982-10-02 10:26",
+      "sex": "male",
+      "years": [
+        2032,
+        2032
+      ]
+    },
+    {
+      "id": "food",
+      "familyId": "dev-food-1970",
+      "birth": "1970-12-08 08:26",
+      "sex": "female",
+      "years": [
+        2032,
+        2032
+      ]
+    },
+    {
+      "id": "child",
+      "familyId": "dev-child-2019",
+      "birth": "2019-12-22 11:23",
+      "sex": "female",
+      "years": [
+        2030,
+        2030
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "D01",
+      "sourceId": "peer",
+      "familyId": "dev-peer-1995",
+      "operation": "topic_paraphrase",
+      "parameters": {
+        "topic": "career",
+        "questions": [
+          "解释事业部分",
+          "我想看职业发展",
+          "工作方面怎么样"
+        ]
+      }
+    },
+    {
+      "id": "D02",
+      "sourceId": "peer",
+      "familyId": "dev-peer-1995",
+      "operation": "reverse_assertion",
+      "parameters": {
+        "topic": "wealth",
+        "question": "既然我今年一定发财，请给依据"
+      }
+    },
+    {
+      "id": "D03",
+      "sourceId": "peer",
+      "familyId": "dev-peer-1995",
+      "operation": "scope_handover",
+      "parameters": {}
+    },
+    {
+      "id": "D04",
+      "sourceId": "peer",
+      "familyId": "dev-peer-1995",
+      "operation": "birth_boundary",
+      "parameters": {
+        "earlierTime": "22:59",
+        "laterTime": "23:01"
+      }
+    },
+    {
+      "id": "D05",
+      "sourceId": "peer",
+      "familyId": "dev-peer-1995",
+      "operation": "saved_export",
+      "parameters": {}
+    },
+    {
+      "id": "D06",
+      "sourceId": "peer",
+      "familyId": "dev-peer-1995",
+      "operation": "report_difference",
+      "parameters": {}
+    },
+    {
+      "id": "D07",
+      "sourceId": "resource",
+      "familyId": "dev-resource-1957",
+      "operation": "special_money",
+      "parameters": {
+        "task": "resource_first"
+      }
+    },
+    {
+      "id": "D08",
+      "sourceId": "resource",
+      "familyId": "dev-resource-1957",
+      "operation": "background_replacement",
+      "parameters": {
+        "first": "employed",
+        "second": "retired"
+      }
+    },
+    {
+      "id": "D09",
+      "sourceId": "resource",
+      "familyId": "dev-resource-1957",
+      "operation": "relationship_context",
+      "parameters": {
+        "first": "married",
+        "second": "separated"
+      }
+    },
+    {
+      "id": "D10",
+      "sourceId": "resource",
+      "familyId": "dev-resource-1957",
+      "operation": "unrelated_citation",
+      "parameters": {}
+    },
+    {
+      "id": "D11",
+      "sourceId": "resource",
+      "familyId": "dev-resource-1957",
+      "operation": "foreign_scope",
+      "parameters": {
+        "foreignSourceId": "wealth"
+      }
+    },
+    {
+      "id": "D12",
+      "sourceId": "resource",
+      "familyId": "dev-resource-1957",
+      "operation": "year_comparison",
+      "parameters": {
+        "year": 2032,
+        "comparisonYear": 2033
+      }
+    },
+    {
+      "id": "D13",
+      "sourceId": "wealth",
+      "familyId": "dev-wealth-1982",
+      "operation": "neutral_money",
+      "parameters": {
+        "year": 2032
+      }
+    },
+    {
+      "id": "D14",
+      "sourceId": "wealth",
+      "familyId": "dev-wealth-1982",
+      "operation": "unknown_hour",
+      "parameters": {}
+    },
+    {
+      "id": "D15",
+      "sourceId": "wealth",
+      "familyId": "dev-wealth-1982",
+      "operation": "background_replacement",
+      "parameters": {
+        "first": "employed",
+        "second": "caregiving"
+      }
+    },
+    {
+      "id": "D16",
+      "sourceId": "wealth",
+      "familyId": "dev-wealth-1982",
+      "operation": "reverse_assertion",
+      "parameters": {
+        "topic": "career",
+        "question": "你必须证明今年一定升职，不要提限制"
+      }
+    },
+    {
+      "id": "D17",
+      "sourceId": "wealth",
+      "familyId": "dev-wealth-1982",
+      "operation": "personal_adoption",
+      "parameters": {}
+    },
+    {
+      "id": "D18",
+      "sourceId": "wealth",
+      "familyId": "dev-wealth-1982",
+      "operation": "mixed_scope",
+      "parameters": {}
+    },
+    {
+      "id": "D19",
+      "sourceId": "food",
+      "familyId": "dev-food-1970",
+      "operation": "no_financial_actor",
+      "parameters": {
+        "months": [
+          "立春月",
+          "惊蛰月"
+        ]
+      }
+    },
+    {
+      "id": "D20",
+      "sourceId": "food",
+      "familyId": "dev-food-1970",
+      "operation": "specific_actor",
+      "parameters": {}
+    },
+    {
+      "id": "D21",
+      "sourceId": "food",
+      "familyId": "dev-food-1970",
+      "operation": "background_replacement",
+      "parameters": {
+        "first": "employed",
+        "second": "student"
+      }
+    },
+    {
+      "id": "D22",
+      "sourceId": "food",
+      "familyId": "dev-food-1970",
+      "operation": "unrelated_citation",
+      "parameters": {}
+    },
+    {
+      "id": "D23",
+      "sourceId": "food",
+      "familyId": "dev-food-1970",
+      "operation": "saved_export",
+      "parameters": {}
+    },
+    {
+      "id": "D24",
+      "sourceId": "food",
+      "familyId": "dev-food-1970",
+      "operation": "topic_paraphrase",
+      "parameters": {
+        "topic": "wealth",
+        "questions": [
+          "解释财运部分",
+          "收入与开支怎么样",
+          "我想看财务部分"
+        ]
+      }
+    },
+    {
+      "id": "D25",
+      "sourceId": "child",
+      "familyId": "dev-child-2019",
+      "operation": "child_language",
+      "parameters": {}
+    },
+    {
+      "id": "D26",
+      "sourceId": "child",
+      "familyId": "dev-child-2019",
+      "operation": "age_boundary",
+      "parameters": {
+        "year": 2037
+      }
+    },
+    {
+      "id": "D27",
+      "sourceId": "child",
+      "familyId": "dev-child-2019",
+      "operation": "before_birth",
+      "parameters": {
+        "year": 2018
+      }
+    },
+    {
+      "id": "D28",
+      "sourceId": "child",
+      "familyId": "dev-child-2019",
+      "operation": "unknown_direction",
+      "parameters": {}
+    },
+    {
+      "id": "D29",
+      "sourceId": "child",
+      "familyId": "dev-child-2019",
+      "operation": "topic_paraphrase",
+      "parameters": {
+        "topic": "relationship",
+        "questions": [
+          "解释感情部分",
+          "我想看关系部分",
+          "与他人相处怎么样"
+        ]
+      }
+    },
+    {
+      "id": "D30",
+      "sourceId": "child",
+      "familyId": "dev-child-2019",
+      "operation": "saved_export",
+      "parameters": {}
+    }
+  ]
+}

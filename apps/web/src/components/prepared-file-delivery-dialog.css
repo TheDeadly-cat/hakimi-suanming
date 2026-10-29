@@ -746,3 +746,146 @@
     color: CanvasText;
   }
 }
+
+/* The report presentation uses the same delivery state machine; only the
+   reading order and amount of initially visible detail are different. */
+.prepared-delivery-dialog[data-presentation="reading"] {
+  width: min(38rem, calc(100vw - 2rem));
+}
+
+.prepared-delivery-dialog[data-presentation="reading"] .prepared-delivery-header h2 {
+  font-size: clamp(1.3rem, 3vw, 1.65rem);
+  line-height: 1.3;
+}
+
+.prepared-reading-report {
+  margin: 1rem 1.25rem .35rem;
+  padding: 1.15rem;
+  border: 1px solid rgb(103 83 56 / 15%);
+  border-radius: .9rem;
+  background: rgb(255 255 255 / 70%);
+}
+
+.prepared-reading-report > strong {
+  display: block;
+  font-size: 1.08rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.prepared-reading-report p {
+  margin: .35rem 0 0;
+  line-height: 1.6;
+  color: #62574b;
+}
+
+.prepared-reading-report .prepared-reading-contents-label {
+  margin-top: .9rem;
+  color: #84786a;
+  font-size: .78rem;
+}
+
+.prepared-reading-report dl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  margin: 1rem 0 0;
+  padding-top: .85rem;
+  border-top: 1px solid rgb(103 83 56 / 12%);
+}
+
+.prepared-reading-report dt {
+  color: #84786a;
+  font-size: .78rem;
+}
+
+.prepared-reading-report dd {
+  margin: .25rem 0 0;
+  font-size: .88rem;
+  overflow-wrap: anywhere;
+}
+
+.prepared-reading-details > summary {
+  width: fit-content;
+  min-height: 2.5rem;
+  padding-block: .65rem;
+  color: #756b60;
+  font-size: .83rem;
+  cursor: pointer;
+}
+
+.prepared-reading-details,
+.prepared-reading-status {
+  margin-inline: 1.25rem;
+}
+
+.prepared-reading-details-body,
+.prepared-reading-status {
+  display: grid;
+  gap: .85rem;
+}
+
+.prepared-reading-status:empty {
+  display: none;
+}
+
+.prepared-reading-status p {
+  margin: 0;
+  font-size: .88rem;
+  line-height: 1.6;
+}
+
+.prepared-reading-status .prepared-reading-note {
+  color: #84786a;
+  font-size: .78rem;
+}
+
+.prepared-reading-check {
+  padding: .9rem;
+  border: 1px solid rgb(154 100 25 / 23%);
+  border-radius: .7rem;
+  background: rgb(250 242 221 / 60%);
+}
+
+.prepared-reading-check > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-top: .7rem;
+}
+
+.prepared-delivery-dialog[data-presentation="reading"] .prepared-delivery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+}
+
+.prepared-delivery-dialog[data-presentation="reading"] .prepared-delivery-action {
+  flex: 1 1 11rem;
+  min-height: 2.9rem;
+}
+
+.prepared-delivery-dialog[data-presentation="reading"] .prepared-delivery-close-action {
+  flex: 0 0 auto;
+  padding-inline: .7rem;
+  border: 0;
+  background: transparent;
+}
+
+.prepared-reading-details > summary:focus-visible {
+  outline: .2rem solid rgb(49 95 123 / 44%);
+  outline-offset: .2rem;
+}
+
+@media (max-width: 720px) {
+  .prepared-delivery-dialog[data-presentation="reading"] {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .prepared-reading-report dl {
+    grid-template-columns: minmax(0, 1fr);
+    gap: .7rem;
+  }
+}

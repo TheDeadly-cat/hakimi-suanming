@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import test from "node:test";
+import test, { after } from "node:test";
 import {
   assertBaziDomainReleaseManifestV24SemanticIdentity,
   BAZI_DOMAIN_RELEASE_MANIFEST_V2_4_RELATIVE_PATH,
@@ -18,7 +18,11 @@ import {
 } from "./bazi-domain-release-manifest-v2-4-lib.mjs";
 import { isVerifiedBaziDomainReleaseManifestV23, loadBaziDomainReleaseManifestV23 } from "./bazi-domain-release-manifest-v2-3-lib.mjs";
 import { createBaziDomainManifestV23HistoricalInputs } from "./bazi-domain-manifest-v23-history.test-fixture.mjs";
-const ROOT = path.resolve(import.meta.dirname, "..");
+import { createBaziDomainManifestV24HistoricalInputs } from "./bazi-domain-manifest-v24-history.test-fixture.mjs";
+const CURRENT_ROOT = path.resolve(import.meta.dirname, "..");
+const historicalInputs = await createBaziDomainManifestV24HistoricalInputs();
+const ROOT = historicalInputs.root;
+after(() => historicalInputs.cleanup());
 const sha = bytes => createHash("sha256").update(bytes).digest("hex");
 const code = expected => error => error?.code === expected;
 const clone = value => JSON.parse(JSON.stringify(value));
@@ -119,4 +123,8 @@ test("v2.4 still rejects the original dependency lock in a separate historical w
     await readFile(path.join(ROOT, BAZI_DOMAIN_RELEASE_MANIFEST_V2_4_RELATIVE_PATH)));
   await assert.rejects(loadBaziDomainReleaseManifestV24(historical.root), code("COMPONENT_FILE_IDENTITY_DRIFT"));
   assert.equal(isVerifiedBaziDomainReleaseManifestV23(await loadBaziDomainReleaseManifestV23(historical.root)), true);
+});
+
+test("historical v2.4 cannot authorize the current dependency lock", async () => {
+  await assert.rejects(loadBaziDomainReleaseManifestV24(CURRENT_ROOT), code("RAW_IDENTITY_MISMATCH"));
 });

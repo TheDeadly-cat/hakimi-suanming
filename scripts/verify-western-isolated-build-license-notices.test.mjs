@@ -20,6 +20,7 @@ import {
   verifyWesternIsolatedBuildLicenseNotices,
   verifyWesternIsolatedBuildLicenseSurface,
   verifyWesternLicenseNoticeEvidence,
+  verifyWesternHistoricalNoticeManifestBytes,
   withWesternHistoricalNoticeReplay
 } from "./western-isolated-build-license-notice-lib.mjs";
 
@@ -402,6 +403,25 @@ test("rejects changed or truncated historical archive bytes before materializing
   const changed = Buffer.from(original); changed[Math.floor(changed.length / 2)] ^= 1;
   for (const bytes of [changed, original.subarray(0, -1), Buffer.alloc(0)]) {
     assert.throws(() => parseWesternHistoricalNoticeArchive(bytes), /historical notice archive exact byte identity drifted/u);
+  }
+});
+
+test("historical replay accepts only the exact manifest security pin without widening its basis", () => {
+  const archive = readFileSync(path.join(workspaceRoot, "scripts/fixtures/western-notice-v1-original-inputs.zip"));
+  const original = Buffer.from(parseWesternHistoricalNoticeArchive(archive)["packages/western-astronomy-engine-adapter-draft/package.json"]);
+  const patched = Buffer.from(original.toString("utf8").replace('"zod": "4.4.3"', '"zod": "4.6.7"'));
+  assert.notDeepEqual(patched, original);
+  assert.doesNotThrow(() => verifyWesternHistoricalNoticeManifestBytes(original, original));
+  assert.doesNotThrow(() => verifyWesternHistoricalNoticeManifestBytes(patched, original));
+  for (const changed of [
+    patched.toString("utf8").replace('"zod": "4.6.7"', '"zod": "^4.6.7"'),
+    patched.toString("utf8").replace('"zod": "4.6.7"', '"zod": "4.6.8"'),
+    patched.toString("utf8").replace('"private": true', '"private": false'),
+    patched.toString("utf8").replace('"zod": "4.6.7"', '"zod": "4.6.7", "unreviewed": "1.0.0"'),
+    patched.toString("utf8") + "\n"
+  ]) {
+    assert.throws(() => verifyWesternHistoricalNoticeManifestBytes(Buffer.from(changed), original),
+      /exact reviewed Zod security pin update/u);
   }
 });
 

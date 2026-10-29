@@ -1,0 +1,39 @@
+{
+  "schema": "outlook-source-closure-capacity/1",
+  "head": "1fb610f15977be2390569a2d328b4d6a0e001453",
+  "workingTree": "dirty",
+  "indexFileSHA256": "7402DE5BCFBB229A82A1CC4EFE2DE7DA4D6DF86B5D517FF1EC0A2E9135064CF1",
+  "focusedSourceTests": 3,
+  "focusedCapacityTests": 3,
+  "unselectedCapacityTests": 2,
+  "limitsUnchanged": true,
+  "observations": [
+    {
+      "scenario": "C1-q07-context-2000",
+      "bundleBytes": 8267379,
+      "headroomBytes": 121229,
+      "status": "saved_and_reopened",
+      "snapshotWriteCalls": 1,
+      "oldRecordsUnchanged": true,
+      "repositoryReopened": true
+    },
+    {
+      "scenario": "Q07",
+      "bundleBytes": 8256038,
+      "headroomBytes": 132570,
+      "status": "saved_and_reopened",
+      "snapshotWriteCalls": null,
+      "oldRecordsUnchanged": true,
+      "repositoryReopened": true
+    },
+    {
+      "scenario": "C2-q07-adoption-12000",
+      "bundleBytes": 8454811,
+      "headroomBytes": -66203,
+      "status": "rejected_before_write",
+      "snapshotWriteCalls": 0,
+      "oldRecordsUnchanged": true,
+      "repositoryReopened": null
+    }
+  ]
+}

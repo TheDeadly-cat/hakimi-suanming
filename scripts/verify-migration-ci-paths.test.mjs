@@ -8,6 +8,7 @@ import test from "node:test";
 import { MIGRATION_SCENARIOS, verifyMigrationScenarioResult } from "./verify-migration-scenario-result.mjs";
 import {
   assertSwTwoGenerationFixtureCriticalSourceIdentity,
+  isExactSwTwoGenerationFixtureCriticalSourceIdentity,
   loadSwTwoGenerationFixtureCriticalSourceIdentity,
   SW_TWO_GENERATION_FIXTURE_EXPECTED_CRITICAL_SOURCES
 } from "../apps/web/sw-two-generation-fixture-source-identity.ts";
@@ -215,6 +216,7 @@ test("Git Windows checkout preserves raw SW and governance identities plus retai
   }
   git("false", "init", "--quiet");
   git("false", "add", "--", ...paths);
+  const inputIdentity = loadSwTwoGenerationFixtureCriticalSourceIdentity(inputRoot);
   async function checkout(label) {
     const outputRoot = path.join(temporaryRoot, label);
     await mkdir(outputRoot);
@@ -223,7 +225,16 @@ test("Git Windows checkout preserves raw SW and governance identities plus retai
   }
   const protectedRoot = await checkout("protected");
   const protectedIdentity = loadSwTwoGenerationFixtureCriticalSourceIdentity(protectedRoot);
-  assertSwTwoGenerationFixtureCriticalSourceIdentity(protectedIdentity);
+  // This checkout contract protects every current input byte. Intentional
+  // product changes do not renew the separate historical v2 source admission.
+  assert.deepEqual(protectedIdentity, inputIdentity, "Git checkout must preserve every critical input identity");
+  if (isExactSwTwoGenerationFixtureCriticalSourceIdentity(inputIdentity)) {
+    assertSwTwoGenerationFixtureCriticalSourceIdentity(protectedIdentity);
+  } else {
+    // A byte-faithful clone of newer sources must still fail the unchanged old
+    // frozen gate; its previous browser receipts cannot attest to new code.
+    assert.throws(() => assertSwTwoGenerationFixtureCriticalSourceIdentity(protectedIdentity), /critical source identity drifted/u);
+  }
   for (const relativePath of [modulePath, ...rawGovernanceInputs, ...retained]) {
     assert.deepEqual(await readFile(path.join(protectedRoot, relativePath)), originalBytes.get(relativePath), relativePath);
   }
@@ -239,6 +250,8 @@ test("Git Windows checkout preserves raw SW and governance identities plus retai
 test("application boot responsibility and build identity tests independently trigger Migration CI", () => {
   assert(filters.includes("apps/web/src/lib/app-boot-*"));
   for (const changedPath of [
+    "apps/web/src/lib/app-failure-phase.ts",
+    "apps/web/src/lib/app-failure-phase.test.ts",
     "apps/web/src/lib/app-boot-ready.ts",
     "apps/web/src/lib/app-boot-ready.test.ts",
     "apps/web/src/lib/app-boot-failure.ts",

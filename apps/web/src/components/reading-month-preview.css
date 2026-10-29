@@ -1,0 +1,8 @@
+.reading-month-preview { display: grid; gap: .45rem; min-width: 0; }
+.reading-month-preview p { margin: 0; overflow-wrap: anywhere; }
+.reading-month-preview-scope { color: var(--reading-muted); font-size: .85rem; line-height: 1.55; }
+.reading-month-preview-domain { display: flex; flex-wrap: wrap; align-items: baseline; gap: .45rem .8rem; }
+.reading-month-preview-domain span { color: var(--reading-muted); font-size: .82rem; }
+.reading-month-preview-meaning { line-height: 1.7; white-space: pre-wrap; }
+.reading-month-preview-condition { font-size: .9rem; line-height: 1.6; color: var(--reading-muted); }
+.reading-original-state { display: inline-block; margin: 0 0 .45rem; font-size: .82rem; font-weight: 600; color: var(--reading-muted); }

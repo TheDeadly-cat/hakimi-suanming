@@ -1,0 +1,32 @@
+.page--person-profile { max-width: 1120px; margin-inline: auto; }
+.page--person-profile .page-heading .page-heading__copy h1 { font-size: clamp(1.75rem, 3.5vw, 2.75rem); line-height: 1.25; }
+.person-profile-section { margin-top: 24px; padding: 24px; background: var(--paper-raised); border: 1px solid var(--line-200); border-radius: 12px; min-width: 0; }
+.person-profile-section > header { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+.person-profile-section h2 { margin: 0; font-size: 24px; }
+.person-profile-section .eyebrow { margin: 0 0 6px; }
+.person-profile-help, .person-profile-tags { color: var(--ink-650); line-height: 1.75; }
+.person-profile-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; padding-block: 16px; border-top: 1px solid var(--line-100); }
+.person-profile-facts dt { margin-bottom: 6px; color: var(--ink-650); font-size: 14px; }
+.person-profile-facts dd { margin: 0; line-height: 1.7; overflow-wrap: anywhere; }
+.person-profile-section summary { min-height: 44px; padding-block: 12px; cursor: pointer; line-height: 1.6; }
+.person-profile-section summary:focus-visible { outline: 2px solid var(--jade-600); outline-offset: 3px; }
+.person-profile-section .reading-saved-record { border-top: 1px solid var(--line-200); padding-block: 6px; }
+.person-profile-section .reading-saved-record > summary strong { margin-right: 16px; }
+.person-profile-section .reading-saved-record > summary time { color: var(--ink-650); }
+.person-profile-notes { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.75; }
+.person-profile-revisions { margin: 0; padding: 0; list-style: none; }
+.person-profile-revisions li { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; padding-block: 20px; border-top: 1px solid var(--line-100); }
+.person-profile-revisions h3 { font-size: 17px; margin: 0 0 8px; }
+.person-profile-revisions p { margin: 0 0 6px; line-height: 1.6; }
+.person-profile-revisions time { color: var(--ink-650); font-size: 14px; }
+@media(max-width: 650px) {
+  .page--person-profile .page-heading { gap: 16px; }
+  .page--person-profile .page-heading .page-actions { display: flex; flex-direction: row; justify-content: start; }
+  .page--person-profile .page-heading .page-actions .secondary-action { width: auto; flex: 0 1 auto; }
+  .person-profile-section { padding: 18px; }
+  .person-profile-facts { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .person-profile-section > header { align-items: start; gap: 14px; }
+  .person-profile-section > header .primary-action { width: 100%; justify-content: center; }
+  .person-profile-section .reading-saved-record > summary time { display: block; }
+  .person-profile-revisions li { align-items: start; flex-direction: column; }
+}

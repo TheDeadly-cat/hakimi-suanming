@@ -1,0 +1,23 @@
+{
+  "appId": "com.hakimi.bazi.internal",
+  "appName": "哈基米八字·内部验证",
+  "webDir": "../www",
+  "loggingBehavior": "none",
+  "zoomEnabled": true,
+  "android": {
+    "path": "../native",
+    "allowMixedContent": false,
+    "resolveServiceWorkerRequests": true,
+    "minWebViewVersion": 107
+  },
+  "server": {
+    "hostname": "localhost",
+    "androidScheme": "https",
+    "cleartext": false
+  },
+  "includePlugins": [],
+  "plugins": {
+    "CapacitorHttp": { "enabled": false },
+    "CapacitorCookies": { "enabled": false }
+  }
+}

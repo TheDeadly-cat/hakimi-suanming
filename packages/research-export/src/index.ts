@@ -1,4 +1,5 @@
 import {
+  utf16MinLength,
   caseRecordSchema,
   researchNoteRecordSchema,
   storedEventRecordSchema,
@@ -101,7 +102,7 @@ export const csvResearchExportDocumentSchema = z.strictObject({
   format: z.literal("csv"),
   mimeType: z.literal("text/csv;charset=utf-8"),
   fileExtension: z.literal(".csv"),
-  content: z.string().min(2).refine((value) => value.startsWith("\uFEFF"), "CSV 必须包含 UTF-8 BOM")
+  content: z.string().check(utf16MinLength(2)).refine((value) => value.startsWith("\uFEFF"), "CSV 必须包含 UTF-8 BOM")
 });
 
 export const researchExportDocumentSchema = z.discriminatedUnion("format", [

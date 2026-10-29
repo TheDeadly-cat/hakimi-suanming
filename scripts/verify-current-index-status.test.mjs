@@ -53,7 +53,7 @@ const STATUS_PATH = path.resolve(
 );
 const README_PATH = path.resolve(ROOT, CURRENT_INDEX_README_RELATIVE_PATH);
 const CLI = path.resolve(ROOT, "scripts", "verify-current-index-status.mjs");
-const EXPERT_CURRENT_PATH = "content/bazi-strength-expert-review-packet.current.json";
+const EXPERT_CURRENT_PATH = "content/bazi-strength-expert-review-packet.current-v1.7.0.json";
 
 function collectFixturePaths(value, output = new Set()) {
   if (value === null || typeof value !== "object") return output;
@@ -250,16 +250,16 @@ test("non-versioned Bazi expert packet projects its verified current binding wit
   assert.equal(packet.currentAvailable, true);
   assert.deepEqual(packet.selectedCurrent, index.nonVersionedSelections.baziExpertReviewPacket.selectedCurrent);
   assert.equal(packet.selectedCurrent.path, EXPERT_CURRENT_PATH);
-  assert.equal(packet.selectedCurrent.version, "1.6.0");
-  assert.equal(packet.selectedCurrent.packetId, "hakimi.bazi.strength.expert-review-packet/1.6.0");
+  assert.equal(packet.selectedCurrent.version, "1.7.0");
+  assert.equal(packet.selectedCurrent.packetId, "hakimi.bazi.strength.expert-review-packet/1.7.0");
   assert.equal(Object.isFrozen(packet.selectedCurrent), true);
   assert.equal(packet.historicalAnchorVerifiedByCurrentLoad, false);
   assert.deepEqual(packet.historicalAnchor, HISTORICAL_BAZI_EXPERT_REVIEW_PACKET);
   assert.deepEqual(packet.driftReasons, []);
-  assert.equal(projection.historyCheckpoint.path, "content/system-admission/history-checkpoint.v3.json");
-  assert.equal(projection.historyCheckpoint.checkpointId, "hakimi.repository/history-checkpoint/3.0.0");
+  assert.equal(projection.historyCheckpoint.path, "content/system-admission/history-checkpoint.v5.json");
+  assert.equal(projection.historyCheckpoint.checkpointId, "hakimi.repository/history-checkpoint/5.0.0");
   assert.equal(projection.historyCheckpoint.familyCount, 25);
-  assert.equal(projection.historyCheckpoint.memberCount, 79);
+  assert.equal(projection.historyCheckpoint.memberCount, 82);
   assert.equal(projection.historyCheckpoint.fullHistoryVerifiedByCurrentIndexLoad, false);
   assert.ok(Object.values(projection.authorityBoundary).every((value) => value === false));
 });
@@ -328,8 +328,8 @@ test("invalid expert selection data cannot obtain a verified status projection",
   const cases = [
     ["availability disagrees with selection", (packet) => { packet.currentAvailable = false; }],
     ["unapproved current path", (packet) => { packet.selectedCurrent.path = "content/another-expert-packet.current.json"; }],
-    ["unapproved current version", (packet) => { packet.selectedCurrent.version = "1.7.0"; }],
-    ["unapproved current packet identity", (packet) => { packet.selectedCurrent.packetId = "hakimi.bazi.strength.expert-review-packet/1.7.0"; }],
+    ["unapproved current version", (packet) => { packet.selectedCurrent.version = "1.8.0"; }],
+    ["unapproved current packet identity", (packet) => { packet.selectedCurrent.packetId = "hakimi.bazi.strength.expert-review-packet/1.8.0"; }],
     ["invalid byte count", (packet) => { packet.selectedCurrent.rawBytes = 0; }],
     ["rewritten historical anchor", (packet) => { packet.historicalAnchor.rawSha256 = "0".repeat(64); }],
     ["current read claims historical verification", (packet) => { packet.historicalAnchorVerifiedByCurrentLoad = true; }]

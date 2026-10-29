@@ -1,0 +1,188 @@
+{
+  "browser": "Microsoft Edge headless via Playwright",
+  "url": "http://127.0.0.1:5243/cases/2df6e31a-9371-4c4e-a4ee-336d756b684f/revisions/a866e7eb-7f72-4ef2-9fa9-dd3fd59ee79f",
+  "syntheticState": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-app-stage1/after-reading-state.json",
+  "viewports": [
+    {
+      "width": 360,
+      "height": 800,
+      "title": "本盘判断 · 哈基米八字研究台",
+      "incomeButton": {
+        "x": 239.328125,
+        "y": 548.640625,
+        "width": 102.65625,
+        "height": 74
+      },
+      "yearSelector": {
+        "x": 18,
+        "y": 748.640625,
+        "width": 324,
+        "height": 44
+      },
+      "firstCard": {
+        "x": 35,
+        "y": 911,
+        "width": 290,
+        "height": 289.9375
+      },
+      "defaultCards": 2,
+      "overflow": {
+        "viewport": 360,
+        "body": 360,
+        "html": 360
+      },
+      "fontSizeActual": "16px",
+      "navigationScreenshot": "after-navigation-360.png"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "title": "本盘判断 · 哈基米八字研究台",
+      "incomeButton": {
+        "x": 259.328125,
+        "y": 548.640625,
+        "width": 112.65625,
+        "height": 46
+      },
+      "yearSelector": {
+        "x": 18,
+        "y": 692.640625,
+        "width": 354,
+        "height": 44
+      },
+      "firstCard": {
+        "x": 35,
+        "y": 855,
+        "width": 320,
+        "height": 289.9375
+      },
+      "defaultCards": 2,
+      "overflow": {
+        "viewport": 390,
+        "body": 390,
+        "html": 390
+      },
+      "fontSizeActual": "16px",
+      "navigationScreenshot": "after-navigation-390.png"
+    },
+    {
+      "width": 430,
+      "height": 932,
+      "title": "本盘判断 · 哈基米八字研究台",
+      "incomeButton": {
+        "x": 286,
+        "y": 524.84375,
+        "width": 126,
+        "height": 46
+      },
+      "yearSelector": {
+        "x": 18,
+        "y": 668.84375,
+        "width": 394,
+        "height": 44
+      },
+      "firstCard": {
+        "x": 35,
+        "y": 831.203125,
+        "width": 360,
+        "height": 261.140625
+      },
+      "defaultCards": 2,
+      "overflow": {
+        "viewport": 430,
+        "body": 430,
+        "html": 430
+      },
+      "fontSizeActual": "16px",
+      "navigationScreenshot": "after-navigation-430.png"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "fontSize": 32,
+      "title": "本盘判断 · 哈基米八字研究台",
+      "incomeButton": {
+        "x": 259.328125,
+        "y": 581.40625,
+        "width": 112.65625,
+        "height": 186
+      },
+      "yearSelector": {
+        "x": 18,
+        "y": 1033.40625,
+        "width": 354,
+        "height": 66
+      },
+      "firstCard": {
+        "x": 35,
+        "y": 1339.84375,
+        "width": 320,
+        "height": 732.1875
+      },
+      "defaultCards": 2,
+      "overflow": {
+        "viewport": 390,
+        "body": 390,
+        "html": 390
+      },
+      "fontSizeActual": "32px",
+      "navigationScreenshot": "after-navigation-390-large-text.png"
+    }
+  ],
+  "flow": {
+    "originalReturn": {
+      "passed": true,
+      "conclusionId": "a866e7eb-7f72-4ef2-9fa9-dd3fd59ee79f/natal:use:primary-limit",
+      "focusRestored": true,
+      "expandedConditions": true,
+      "scrollBefore": 2300,
+      "scrollAfter": 2300
+    },
+    "crossTopic": {
+      "passed": true,
+      "sequence": [
+        "2030 income",
+        "career",
+        "months"
+      ],
+      "year": 2030,
+      "branch": null,
+      "monthItems": 39,
+      "firstTwo": [
+        {
+          "state": "producer_preview",
+          "scope": "2030年 · 2030-02-04 03:08起至2030-03-05 21:03前（北京时间）· 已确定路径",
+          "domain": "事业本月原文提要",
+          "meaning": "新合作和临时项目是重点",
+          "condition": "条件与限制：不能据此认定“跨18整段成人化；出生前编人生事件”。"
+        },
+        {
+          "state": "producer_preview",
+          "scope": "2030年 · 2030-02-04 03:08起至2030-03-05 21:03前（北京时间）· 已确定路径",
+          "domain": "财运本月原文提要",
+          "meaning": "现有收支安排是重点，增收线索不突出",
+          "condition": "条件与限制：不能据此认定“跨18整段成人化；出生前编人生事件”。"
+        }
+      ]
+    },
+    "refresh": {
+      "passed": true,
+      "topic": "month",
+      "year": 2030,
+      "branch": null
+    },
+    "crossRoute": {
+      "passed": true,
+      "sequence": [
+        "report",
+        "/knowledge",
+        "browser back",
+        "same report"
+      ],
+      "year": 2030,
+      "branch": null
+    }
+  },
+  "errors": [],
+  "completed": true
+}

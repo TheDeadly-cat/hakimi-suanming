@@ -29,7 +29,11 @@ import {
 import { sha256Hex } from "@hakimi/integrity";
 import { verifyRevisionSnapshotIntegrity } from "@hakimi/chart-integrity";
 import { calculatePillarRelations, RELATIONS_CORE_ENGINE } from "@hakimi/relations-core";
-import { calculateTransitSnapshot, TransitCoreError } from "@hakimi/transit-core";
+import {
+  calculateTransitSnapshot,
+  HISTORICAL_TRANSIT_SNAPSHOT_EXECUTOR_REGISTRY,
+  TransitCoreError
+} from "@hakimi/transit-core";
 
 export const COMPARISON_MIN_ITEMS = 2 as const;
 export const COMPARISON_MAX_ITEMS = 4 as const;
@@ -495,6 +499,80 @@ export async function calculateSynchronizedTransits(
   }));
 }
 
+/** Replay stored results only with an exact registered output identity. The
+ * upstream commit/integrity are bound by the complete ordered source refs,
+ * alongside the engine and timezone artifact; no version-only fallback. */
+async function replayStoredComparisonTransit(
+  item: ComparisonItem,
+  atInstant: string,
+  stored: SynchronizedTransitResult
+): Promise<SynchronizedTransitResult> {
+  if (stored.status === "error") {
+    // Error results contain no executor identity. Retain the existing strict
+    // error reproduction check rather than inventing a historical descriptor.
+    try {
+      return {
+        itemKey: item.key,
+        status: "resolved",
+        snapshot: await calculateTransitSnapshot({
+          revision: item.revision,
+          atInstant,
+          ...(item.manualDirection ? { manualDirection: item.manualDirection } : {})
+        })
+      };
+    } catch (cause) {
+      return {
+        itemKey: item.key,
+        status: "error",
+        code: cause instanceof TransitCoreError ? cause.code : "UNKNOWN_TRANSIT_ERROR",
+        message: cause instanceof Error ? cause.message : "同步运限计算失败。"
+      };
+    }
+  }
+  const snapshot = stored.snapshot;
+  const actualIdentity = await sha256Hex({
+    timelineVersion: snapshot.timelineVersion,
+    algorithmId: snapshot.manifest.algorithmId,
+    engineName: snapshot.manifest.engineName,
+    engineVersion: snapshot.manifest.engineVersion,
+    upstreamName: snapshot.manifest.upstreamName,
+    upstreamVersion: snapshot.manifest.upstreamVersion,
+    sourceRefs: snapshot.manifest.sourceRefs,
+    tzdbVersion: snapshot.tzdbVersion,
+    timeZoneDatabase: snapshot.timeZoneDatabase
+  });
+  for (const executor of HISTORICAL_TRANSIT_SNAPSHOT_EXECUTOR_REGISTRY) {
+    const { descriptor } = executor;
+    const expectedIdentity = await sha256Hex({
+      timelineVersion: descriptor.timelineVersion,
+      algorithmId: descriptor.algorithmId,
+      engineName: descriptor.engine.name,
+      engineVersion: descriptor.engine.version,
+      upstreamName: descriptor.engine.upstreamName,
+      upstreamVersion: descriptor.engine.upstreamVersion,
+      sourceRefs: [
+        `https://github.com/6tail/lunar-typescript/blob/${descriptor.engine.upstreamTagCommit}/src/lib/Lunar.ts`,
+        `https://github.com/6tail/lunar-typescript/blob/${descriptor.engine.upstreamTagCommit}/src/lib/XiaoYun.ts`,
+        `npm:${descriptor.engine.upstreamName}@${descriptor.engine.upstreamVersion}#integrity=${descriptor.engine.upstreamIntegrity}`,
+        `https://data.iana.org/time-zones/releases/tzdata${descriptor.timeZoneDatabase.ianaVersion}.tar.gz`
+      ],
+      tzdbVersion: descriptor.timeZoneDatabase.snapshotId,
+      timeZoneDatabase: descriptor.timeZoneDatabase
+    });
+    if (actualIdentity !== expectedIdentity) continue;
+    return {
+      itemKey: item.key,
+      status: "resolved",
+      snapshot: await executor.calculateSnapshot({
+        revision: item.revision,
+        atInstant,
+        ...(item.manualDirection ? { manualDirection: item.manualDirection } : {})
+      })
+    };
+  }
+  throw new TransitCoreError("TRANSIT_EXECUTOR_UNAVAILABLE", "保存的对照运限身份没有完整匹配的历史执行器。");
+}
+
 export async function comparisonItemsFromFormalSources(
   rawRequest: FormalComparisonRequest,
   rawSources: readonly FormalComparisonSource[]
@@ -617,14 +695,9 @@ export async function verifyFormalComparisonProjectionIntegrity(raw: unknown): P
     for (const [index, item] of projection.matrix.items.entries()) {
       const stored = projection.transits[index];
       try {
-        const recalculated = await calculateTransitSnapshot({
-          revision: item.revision,
-          atInstant: projection.targetInstant,
-          ...(item.manualDirection ? { manualDirection: item.manualDirection } : {})
-        });
-        const storedSnapshotDigest = stored?.status === "resolved" ? await sha256Hex(stored.snapshot) : null;
-        const recalculatedSnapshotDigest = await sha256Hex(recalculated);
-        if (stored?.status !== "resolved" || storedSnapshotDigest !== recalculatedSnapshotDigest) {
+        if (!stored) throw new FormalComparisonIntegrityError("transit", item.key);
+        const recalculated = await replayStoredComparisonTransit(item, projection.targetInstant, stored);
+        if (await sha256Hex(stored) !== await sha256Hex(recalculated)) {
           throw new FormalComparisonIntegrityError("transit", item.key);
         }
       } catch (cause) {
@@ -762,11 +835,16 @@ export async function verifyPairStructureResearchProjectionIntegrity(
       throw new PairStructureResearchIntegrityError();
     }
   }
-  const recalculatedTransits = await calculateSynchronizedTransits(items, projection.targetInstant);
   for (const [index, participant] of projection.participants.entries()) {
+    let recalculatedTransit: SynchronizedTransitResult;
+    try {
+      recalculatedTransit = await replayStoredComparisonTransit(items[index]!, projection.targetInstant, participant.transit);
+    } catch {
+      throw new PairStructureResearchIntegrityError();
+    }
     const [storedTransitDigest, recalculatedTransitDigest] = await Promise.all([
       sha256Hex(participant.transit),
-      sha256Hex(recalculatedTransits[index])
+      sha256Hex(recalculatedTransit)
     ]);
     if (storedTransitDigest !== recalculatedTransitDigest) throw new PairStructureResearchIntegrityError();
   }

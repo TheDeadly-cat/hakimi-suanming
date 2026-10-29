@@ -1,3 +1,4 @@
+import { assertCurrentFourSystemReportAndManifestDrift } from "./four-system-v22-history.test-fixture.mjs";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -56,8 +57,7 @@ before(async () => {
 after(async () => { await historicalInputs?.cleanup(); });
 
 test("current v2.6 loaders and source CLI cannot inherit historical Western closure success", async () => {
-  await assert.rejects(loadFourSystemCurrentStatusObservationChildV26(ROOT),
-    { code: "MANIFEST_IDENTITY_DRIFT" });
+  await assertCurrentFourSystemReportAndManifestDrift(loadFourSystemCurrentStatusObservationChildV26, ROOT);
   await assert.rejects(loadWesternIndependentEngineeringManifestV2(ROOT),
     { code: "CURRENT_SOURCE_DRIFT" });
   const run = spawnSync(process.execPath, [ACTUAL_CLI], {

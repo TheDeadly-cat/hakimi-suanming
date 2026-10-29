@@ -1,0 +1,22 @@
+.chart-page--reading { padding: 0; gap: 0; }
+.local-reading-document { min-width: 0; }
+.reading-extended-details { border-top: 1px solid #deded5; background: #fbfaf6; }
+.reading-extended-details > summary { padding: 22px 32px; min-height: 44px; cursor: pointer; color: #216b61; font-size: 16px; font-weight: 650; }
+.reading-extended-details > summary:focus-visible { outline: 2px solid #216b61; outline-offset: -4px; }
+.reading-section-navigation { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 4px 20px; padding: 4px 28px; border-bottom: 1px solid #deded5; background: #fbfaf6; }
+.reading-section-navigation a { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 6px; text-decoration: none; color: #50645e; font-size: 14px; border-bottom: 2px solid transparent; }
+.reading-section-navigation a[aria-current="location"] { color: #216b61; font-weight: 700; border-bottom-color: #216b61; }
+.reading-section-navigation a:focus-visible { outline: 2px solid #216b61; outline-offset: 2px; }
+.local-reading-document :is(#reading-natal,#reading-life,#reading-yearly,#reading-feedback,#reading-records) { scroll-margin-top: 74px; }
+.local-reading-document :is(#reading-natal,#reading-life,#reading-yearly,#reading-feedback,#reading-records):focus { outline: none; }
+.reading-saved-records { padding: 24px 32px 36px; border-top: 1px solid var(--line-200); }
+.reading-saved-records > div { display: flex; gap: 20px; justify-content: space-between; align-items: center; }
+.reading-saved-records h2 { margin: 0; font: 600 22px var(--font-editorial); }
+.reading-saved-records > p { color: var(--ink-600); font-size: 14px; }
+.reading-saved-records details { border-bottom: 1px solid var(--line-200); padding: 14px 0; }
+.reading-saved-records summary { cursor: pointer; min-height: 32px; }
+.reading-saved-records time { margin-left: 16px; color: var(--ink-600); font-size: 13px; }
+.reading-saved-records pre { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; line-height: 1.8; }
+.reading-unavailable, .reading-readonly { margin: 24px; }
+@media(max-width:767px) { .reading-saved-records { padding: 22px 18px; } .reading-saved-records > div { align-items: start; } }
+@media(max-width:767px) { .reading-section-navigation { position: static; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); padding: 4px 12px; gap: 0 10px; } .reading-section-navigation a { font-size: 13px; } .local-reading-document :is(#reading-natal,#reading-life,#reading-yearly,#reading-feedback,#reading-records) { scroll-margin-top: 80px; } }

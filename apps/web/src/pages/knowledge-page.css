@@ -4,6 +4,9 @@
   --knowledge-info: #4b7181;
   --knowledge-info-wash: rgba(75, 113, 129, 0.08);
 }
+.knowledge-learning-return { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-bottom: 12px; color: var(--jade-700); }
+.knowledge-learning-return svg { width: 18px; height: 18px; }
+.knowledge-learning-return:focus-visible { outline: 3px solid var(--jade-700); outline-offset: 3px; }
 
 .page--knowledge :is(
   .knowledge-import-receipt__body,

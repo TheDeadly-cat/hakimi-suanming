@@ -14,9 +14,10 @@ import { EvidenceCoverageReport } from "../components/evidence-coverage-report";
 import { PageHeading } from "../components/page-heading";
 import { SourceRightsLedger } from "../components/source-rights-ledger";
 import { StatusPill } from "../components/status-pill";
+import { ReadingLearningHome } from "../components/reading-learning-home";
 import { CURRENT_RELEASE_ENGINEERING_IDENTITY } from "../lib/current-release";
 import {
-  buildKnowledgeSearch,
+  buildKnowledgeSearch as buildExistingKnowledgeSearch,
   parseKnowledgeRoute,
   type KnowledgeCitationTargetContext,
   type KnowledgeRouteState
@@ -32,6 +33,9 @@ type Citation = CitationRecord;
 const KNOWLEDGE_LINES_PER_PAGE = 400;
 const KNOWLEDGE_IMPORTER_PANEL_ID = "knowledge-importer-panel";
 const KNOWLEDGE_DATE_FORMATTER = new Intl.DateTimeFormat("zh-CN", { dateStyle: "medium" });
+// An empty professional-library query must remain in the library now that the
+// bare /knowledge entry is the beginner glossary. Other query contracts stay exact.
+const buildKnowledgeSearch = (state: Partial<KnowledgeRouteState>) => buildExistingKnowledgeSearch(state) || "?view=library";
 const LocalSourceAwareReviewPanel = lazy(async () => {
   const module = await import("../components/local-source-aware-review-panel");
   return { default: module.LocalSourceAwareReviewPanel };
@@ -311,6 +315,11 @@ function accessibleKnowledgeHeadingLevel(markdownLevel: number): number {
 }
 
 export function KnowledgePage() {
+  const location = useAppLocation();
+  return !location.search || location.search === "?" ? <ReadingLearningHome /> : <KnowledgeLibraryPage />;
+}
+
+function KnowledgeLibraryPage() {
   const documentTitleId = useId();
   const sourceLedgerTitleId = useId();
   const citationEditorId = useId();
@@ -984,6 +993,7 @@ export function KnowledgePage() {
       data-public-release-authorized="false"
       data-expert-truth-claimed="false"
     >
+      <AppLink className="knowledge-learning-return" href="/knowledge"><ArrowLeft aria-hidden="true" />返回术语学习</AppLink>
       <div className="knowledge-masthead">
         <PageHeading
           eyebrow="Knowledge desk"
@@ -1012,7 +1022,7 @@ export function KnowledgePage() {
       </div>
 
       <nav className="knowledge-view-tabs" aria-label="知识与来源审计">
-        <AppLink className={route.view === "library" ? "is-active" : ""} aria-current={route.view === "library" ? "page" : undefined} href="/knowledge"><BookOpenText aria-hidden="true" /><span><strong>资料库</strong><small>{pageLoading ? "正在读取本地资料" : loadError ? "资料索引不可用" : `${documents.length} 份本地资料`}</small></span></AppLink>
+        <AppLink className={route.view === "library" ? "is-active" : ""} aria-current={route.view === "library" ? "page" : undefined} href="/knowledge?view=library"><BookOpenText aria-hidden="true" /><span><strong>资料库</strong><small>{pageLoading ? "正在读取本地资料" : loadError ? "资料索引不可用" : `${documents.length} 份本地资料`}</small></span></AppLink>
         <AppLink className={route.view === "rights" ? "is-active" : ""} aria-current={route.view === "rights" ? "page" : undefined} href={`/knowledge${buildKnowledgeSearch({ view: "rights" })}`}><FileKey2 aria-hidden="true" /><span><strong>来源台账</strong><small>许可、分发与来源门禁</small></span></AppLink>
         <AppLink className={route.view === "coverage" ? "is-active" : ""} aria-current={route.view === "coverage" ? "page" : undefined} href={`/knowledge${buildKnowledgeSearch({ view: "coverage" })}`}><ListChecks aria-hidden="true" /><span><strong>引用覆盖</strong><small>工程证据覆盖与缺口</small></span></AppLink>
       </nav>

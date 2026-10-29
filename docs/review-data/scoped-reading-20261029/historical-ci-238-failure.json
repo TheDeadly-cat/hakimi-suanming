@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "recordType": "historical_ci_failure_readonly_receipt",
+  "capturedAt": "2026-10-29T02:48:06.081Z",
+  "requestedHead": "238bf2275a97650324af71624de4a83078e2963f",
+  "runs": [
+    {
+      "runId": 40804785241,
+      "name": "Quick CI",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40804785241",
+      "requestedHead": "238bf2275a97650324af71624de4a83078e2963f",
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "observedCheckout": "34a895cb2b3451b6900de22ff798869bc1008f87",
+      "jobs": [
+        {
+          "jobId": 123221008718,
+          "name": "Node release evidence tools",
+          "conclusion": "failure"
+        },
+        {
+          "jobId": 123221008952,
+          "name": "Bazi current manifest and expert structure",
+          "conclusion": "success"
+        },
+        {
+          "jobId": 123221008986,
+          "name": "Default legacy-v13 Web build",
+          "conclusion": "success"
+        },
+        {
+          "jobId": 123221009022,
+          "name": "Full Vitest suite",
+          "conclusion": "success"
+        },
+        {
+          "jobId": 123221009046,
+          "name": "CI commands and test inventory",
+          "conclusion": "failure"
+        },
+        {
+          "jobId": 123221009098,
+          "name": "Bazi formal expert admission",
+          "conclusion": "failure"
+        },
+        {
+          "jobId": 123221009122,
+          "name": "Current index governance",
+          "conclusion": "success"
+        },
+        {
+          "jobId": 123221009138,
+          "name": "History checkpoint governance",
+          "conclusion": "success"
+        },
+        {
+          "jobId": 123221009167,
+          "name": "Node package artifact tools",
+          "conclusion": "success"
+        },
+        {
+          "jobId": 123221009219,
+          "name": "Full workspace typecheck",
+          "conclusion": "success"
+        },
+        {
+          "jobId": 123221009232,
+          "name": "Toolchain and boundaries",
+          "conclusion": "failure"
+        },
+        {
+          "jobId": 123221304826,
+          "name": "Built artifact manifest verification",
+          "conclusion": "success"
+        },
+        {
+          "jobId": 123224058765,
+          "name": "Default legacy-v13 engineering aggregate",
+          "conclusion": "failure"
+        },
+        {
+          "jobId": 123224085197,
+          "name": "Default legacy-v13 formal aggregate",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "runId": 40804785259,
+      "name": "Migration CI",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40804785259",
+      "requestedHead": "238bf2275a97650324af71624de4a83078e2963f",
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "observedCheckout": "34a895cb2b3451b6900de22ff798869bc1008f87",
+      "jobs": [
+        {
+          "jobId": 123221008942,
+          "name": "Migration / cross-schema-v13-v15",
+          "conclusion": "failure"
+        },
+        {
+          "jobId": 123221009206,
+          "name": "Migration / orphaned-v13-recovery",
+          "conclusion": "failure"
+        },
+        {
+          "jobId": 123221009228,
+          "name": "Migration / cross-schema-v13-v16",
+          "conclusion": "failure"
+        },
+        {
+          "jobId": 123221009289,
+          "name": "Migration / cross-schema-upgrade",
+          "conclusion": "failure"
+        },
+        {
+          "jobId": 123221009357,
+          "name": "Migration / cross-schema-v14-v15",
+          "conclusion": "failure"
+        },
+        {
+          "jobId": 123224320884,
+          "name": "Complete migration matrix",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "runId": 40804785194,
+      "name": "Historical governance",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40804785194",
+      "requestedHead": "238bf2275a97650324af71624de4a83078e2963f",
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "observedCheckout": "238bf2275a97650324af71624de4a83078e2963f",
+      "jobs": [
+        {
+          "jobId": 123221008784,
+          "name": "Complete current-governance history group",
+          "conclusion": "failure"
+        }
+      ]
+    }
+  ],
+  "successfulVitest": {
+    "jobId": 123221009022,
+    "testFilesPassed": 375,
+    "testFilesTotal": 375,
+    "testsPassed": 4542,
+    "testsTotal": 4542,
+    "durationSeconds": 547.23,
+    "countSource": "vitest-count-evidence.log",
+    "actualCheckout": "34a895cb2b3451b6900de22ff798869bc1008f87"
+  },
+  "failedNodeGroups": [
+    {
+      "jobId": 123221008718,
+      "group": "release-evidence",
+      "passed": 598,
+      "failed": 4,
+      "total": 602,
+      "failures": [
+        {
+          "file": "scripts/release-evidence.test.mjs",
+          "kind": "module_failure",
+          "name": "scripts/release-evidence.test.mjs",
+          "cause": "SW two-generation fixture critical source set drifted: SW two-generation fixture critical source identity drifted."
+        },
+        {
+          "file": "scripts/sw-two-generation-fixture-contract.test.mjs",
+          "line": 233,
+          "name": "fixture-only summary accepts the exact scenario, product, profile, and source matrix",
+          "cause": "false !== true; assertion at line 247. This error itself does not identify a particular changed file."
+        },
+        {
+          "file": "scripts/sw-two-generation-fixture-contract.test.mjs",
+          "line": 530,
+          "name": "the previous reviewed source identity cannot stand in for the current fixture scope",
+          "cause": "Got unwanted exception: SW two-generation fixture critical source identity drifted."
+        },
+        {
+          "file": "scripts/sw-two-generation-fixture-contract.test.mjs",
+          "line": 978,
+          "name": "the c0f9fdc source epoch cannot authorize the reading 0.21 fixture",
+          "cause": "Got unwanted exception: SW two-generation fixture critical source identity drifted."
+        }
+      ]
+    },
+    {
+      "jobId": 123221009046,
+      "group": "ci-contracts",
+      "passed": 73,
+      "failed": 1,
+      "total": 74,
+      "failures": [
+        {
+          "file": "scripts/verify-migration-ci-paths.test.mjs",
+          "line": 140,
+          "name": "Git Windows checkout preserves raw SW and governance identities plus retained mixed-newline files",
+          "cause": "SW two-generation fixture critical source identity drifted.; failing call at line 226. No separate newline-specific error is present."
+        }
+      ]
+    },
+    {
+      "jobId": 123221008784,
+      "group": "current-governance",
+      "passed": 593,
+      "failed": 1,
+      "total": 594,
+      "failures": [
+        {
+          "file": "scripts/verify-release-governance.test.mjs",
+          "kind": "module_failure",
+          "name": "scripts/verify-release-governance.test.mjs",
+          "cause": "SW two-generation fixture critical source set drifted: SW two-generation fixture critical source identity drifted."
+        }
+      ]
+    }
+  ],
+  "migration": {
+    "runId": 40804785259,
+    "jobIds": [
+      123221008942,
+      123221009206,
+      123221009228,
+      123221009289,
+      123221009357
+    ],
+    "firstFailedStep": "Run npm run check:release-governance",
+    "firstFailure": "SW two-generation fixture critical source set drifted: SW two-generation fixture critical source identity drifted.",
+    "browserSuitesSkipped": true,
+    "executedBrowserTestCount": 0,
+    "downstreamFailure": "MIGRATION_SCENARIO_RESULT_INCOMPLETE ENOENT: results.json was not generated",
+    "aggregateJobId": 123224320884,
+    "aggregateConclusion": "failure"
+  },
+  "otherFailures": {
+    "toolchainJobId": 123221009232,
+    "toolchainStep": "Verify release governance contracts",
+    "toolchainCause": "SW two-generation fixture critical source set drifted",
+    "engineeringAggregateJobId": 123224058765,
+    "engineeringAggregateCause": "Required upstream engineering evidence jobs failed",
+    "formalAggregateJobId": 123224085197,
+    "formalExpertJobId": 123221009098,
+    "independentFormalCause": "EXPERT_QUALIFICATION_RECEIPT_LOADER_UNAVAILABLE; qualifiedIndependentOpinions=0"
+  },
+  "diagnosis": "Observed engineering failures consistently implicate the frozen SW critical-source gate. The summary boolean assertion remains recorded as its own error; current source restoration and subsequent CI must confirm remediation. Migration browser execution did not occur. Expert admission is an independent failure.",
+  "evidenceFiles": [
+    "ci-terminal-summary.json",
+    "job-123221008718.log",
+    "job-123221009046.log",
+    "job-123221008784.log",
+    "vitest-count-evidence.log",
+    "release/release-evidence-QSLHW7/results.json",
+    "release/release-evidence-QSLHW7/events.jsonl",
+    "contracts/ci-contracts-YxEATE/results.json",
+    "contracts/ci-contracts-YxEATE/events.jsonl",
+    "history/current-governance-hVJqrd/results.json",
+    "history/current-governance-hVJqrd/events.jsonl",
+    "download-identities.json"
+  ],
+  "preservation": {
+    "rerun": false,
+    "attemptsChanged": false,
+    "old5247CandidateOrReceiptModified": false,
+    "repositorySourceOrDocsEdited": false,
+    "protectedFileManuallyReadHashedEdited": false
+  }
+}

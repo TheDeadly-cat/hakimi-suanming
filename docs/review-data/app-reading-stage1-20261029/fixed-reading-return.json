@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "before": {
+    "x": 35,
+    "y": 362.515625,
+    "width": 106,
+    "height": 46
+  },
+  "opened": {
+    "x": 18,
+    "y": 159.890625,
+    "width": 354,
+    "height": 32.75
+  },
+  "restored": {
+    "x": 35,
+    "y": 362.515625,
+    "width": 106,
+    "height": 46
+  },
+  "scrollBefore": 2428,
+  "scrollAfter": 2428,
+  "errors": []
+}

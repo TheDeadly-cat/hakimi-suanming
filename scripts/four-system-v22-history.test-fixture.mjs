@@ -99,3 +99,33 @@ export async function attachCurrentFourSystemCli(inputs, minorVersion) {
   assert.deepEqual(await readFile(cliPath), cliSource);
   return cliPath;
 }
+
+// The new report contract now rejects before the old Ziwei manifest guard.
+// Verify both real rejection boundaries without editing the real checkout or
+// changing historical assertions to accept an arbitrary failure code.
+export async function assertCurrentFourSystemReportAndManifestDrift(loader, actualRoot) {
+  await assert.rejects(loader(actualRoot), { code: "CURRENT_REPORT_SOURCE_CHANGED" });
+  const inputs = await createFourSystemV22HistoricalInputs();
+  try {
+    const { INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS } = await import("./independent-domain-release-manifest-lib.mjs");
+    const definition = INDEPENDENT_DOMAIN_MANIFEST_DEFINITIONS.find(entry => entry.systemId === "ziwei");
+    assert.ok(definition);
+    const files = new Set(definition.components.flatMap(component => component.files));
+    for (let minor = 2; minor <= 11; minor++) {
+      files.add(`content/system-admission/four-system-current-status-observation-child.v2.${minor}.0.json`);
+    }
+    for (const relativePath of files) {
+      assert.notEqual(relativePath, "apps/web/src/lib/local-user-data-cleanup.ts");
+      assert.equal(path.isAbsolute(relativePath) || relativePath.split("/").some(p => p === ".."), false);
+      const target = path.resolve(inputs.root, relativePath);
+      assert.equal(path.relative(inputs.root, target).startsWith(".."), false);
+      await mkdir(path.dirname(target), { recursive: true });
+      const bytes = await readFile(path.join(actualRoot, relativePath));
+      await writeFile(target, bytes);
+      assert.deepEqual(await readFile(target), bytes);
+    }
+    const originalReport = await readFile(path.join(inputs.root, "packages/research-export/src/single-chart-report.ts"));
+    assert.equal(sha256(originalReport), "43da8ce98eb0b09c061e6997dd140ffd3ad3dd597cb30720413fd67cf724d2dc");
+    await assert.rejects(loader(inputs.root), { code: "MANIFEST_IDENTITY_DRIFT" });
+  } finally { await inputs.cleanup(); }
+}

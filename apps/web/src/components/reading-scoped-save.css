@@ -1,0 +1,14 @@
+.reading-scoped-save { margin: 16px 0; padding: 14px; border: 1px solid var(--reading-line); border-radius: 10px; }
+.reading-scoped-save p { margin: 8px 0; overflow-wrap: anywhere; }
+.reading-scoped-save a { display: inline-block; margin-inline: 8px; }
+.reading-scope-confirmation { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--reading-line); }
+.reading-scope-confirmation h4 { margin: 0 0 8px; }
+.reading-scope-confirmation ul { padding-left: 22px; }
+.reading-scope-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.reading-scope-actions button { min-height: 48px; }
+.reading-explanation-workbench .reading-scoped-save .reading-button--primary,
+.reading-explanation-workbench .reading-scoped-save .reading-button--primary:hover {
+  color: #fff;
+  background: var(--reading-jade);
+  border-color: var(--reading-jade);
+}

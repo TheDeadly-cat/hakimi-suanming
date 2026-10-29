@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "recordType": "final_exact_head_ci_terminal_receipt",
+  "observedAt": "2026-10-29T03:34:54.996Z",
+  "requestedHead": "3d094ebef8d302456b993b3deb928220d53cb10f",
+  "gitCommitMetadata": [
+    {
+      "sha": "3d094ebef8d302456b993b3deb928220d53cb10f",
+      "tree": "8ae520df95f748738ac864cdd2444947feadaa05",
+      "parents": [
+        "6897b0fe0ad475e682b47be8462af7b887379f78"
+      ]
+    },
+    {
+      "sha": "486310312a1e877b81a5b034445b034e6f2f74fd",
+      "tree": "8ae520df95f748738ac864cdd2444947feadaa05",
+      "parents": [
+        "2482941f46acafc6fe0b331f536db06a45710fc8",
+        "3d094ebef8d302456b993b3deb928220d53cb10f"
+      ]
+    }
+  ],
+  "sourceAndPrMergeTreesIdentical": true,
+  "quick": {
+    "runId": 40811328827,
+    "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40811328827",
+    "event": "pull_request",
+    "runAttempt": 1,
+    "status": "completed",
+    "conclusion": "failure",
+    "actualCheckoutCommit": "486310312a1e877b81a5b034445b034e6f2f74fd",
+    "vitest": {
+      "jobId": 123242076835,
+      "conclusion": "success",
+      "testFilesPassed": 375,
+      "testFilesTotal": 375,
+      "testsPassed": 4545,
+      "testsFailed": 0,
+      "testsTotal": 4545,
+      "durationSeconds": 850.29,
+      "countEvidence": "vitest-count-checkout-evidence.log"
+    },
+    "engineeringAggregate": {
+      "jobId": 123246525396,
+      "conclusion": "success"
+    },
+    "formalAggregate": {
+      "jobId": 123246555816,
+      "conclusion": "failure"
+    },
+    "expertAdmission": {
+      "jobId": 123242076783,
+      "conclusion": "failure",
+      "error": "EXPERT_QUALIFICATION_RECEIPT_LOADER_UNAVAILABLE",
+      "qualifiedIndependentOpinions": 0,
+      "evidence": "formal-expert-error-evidence.log"
+    },
+    "failedJobs": [
+      {
+        "jobId": 123242076783,
+        "name": "Bazi formal expert admission"
+      },
+      {
+        "jobId": 123246555816,
+        "name": "Default legacy-v13 formal aggregate"
+      }
+    ],
+    "jobs": [
+      {
+        "jobId": 123242076617,
+        "name": "Node package artifact tools",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "jobId": 123242076664,
+        "name": "History checkpoint governance",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "jobId": 123242076717,
+        "name": "Bazi current manifest and expert structure",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "jobId": 123242076730,
+        "name": "Node release evidence tools",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "jobId": 123242076749,
+        "name": "Default legacy-v13 Web build",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "jobId": 123242076767,
+        "name": "CI commands and test inventory",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "jobId": 123242076783,
+        "name": "Bazi formal expert admission",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "jobId": 123242076798,
+        "name": "Current index governance",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "jobId": 123242076826,
+        "name": "Toolchain and boundaries",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "jobId": 123242076835,
+        "name": "Full Vitest suite",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "jobId": 123242076934,
+        "name": "Full workspace typecheck",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "jobId": 123242361620,
+        "name": "Built artifact manifest verification",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "jobId": 123246525396,
+        "name": "Default legacy-v13 engineering aggregate",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "jobId": 123246555816,
+        "name": "Default legacy-v13 formal aggregate",
+        "status": "completed",
+        "conclusion": "failure"
+      }
+    ]
+  },
+  "historicalGovernance": {
+    "runId": 40811329032,
+    "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40811329032",
+    "event": "pull_request",
+    "runAttempt": 1,
+    "status": "completed",
+    "conclusion": "success",
+    "actualCheckoutCommit": "3d094ebef8d302456b993b3deb928220d53cb10f",
+    "jobId": 123242076586,
+    "testsPassed": 841,
+    "testsFailed": 0,
+    "testsTotal": 841,
+    "releaseGovernanceFileTestsPassed": 248,
+    "countEvidence": "history-count-checkout-evidence.log"
+  },
+  "preservedCandidate": {
+    "origin": "http://127.0.0.1:5248",
+    "sourceHead": "9fd857108a977754ccbbc688c863cc3c4d07c431",
+    "actualCheckoutCommit": "031e93e99a7b1adeb33fa4023478511466513870",
+    "buildVersion": "18900d13f8ce",
+    "reportVersion": "0.22.3",
+    "presentationVersion": "hakimi.plain-summary/0.1.3",
+    "rebuilt": false,
+    "relabelledAsFinalHead": false,
+    "runtimeDeltaFromCandidateSource": 0,
+    "deltaEvidence": "runtime-delta-paths.json"
+  },
+  "boundary": {
+    "readOnly": true,
+    "noJobsRerun": true,
+    "noSourceOrRepositoryDocsChanged": true,
+    "noHistoricalFailureResultsRewritten": true,
+    "noCandidateOrDailyDataChanged": true,
+    "protectedFileManuallyReadHashedEdited": false,
+    "formalAdmissionGranted": false,
+    "expertApprovalGranted": false,
+    "migrationNotRecheckedInThisReceipt": true
+  },
+  "evidenceFiles": [
+    "git-commit-metadata.json",
+    "runtime-delta-paths.json",
+    "vitest-count-checkout-evidence.log",
+    "history-count-checkout-evidence.log",
+    "formal-expert-error-evidence.log"
+  ]
+}

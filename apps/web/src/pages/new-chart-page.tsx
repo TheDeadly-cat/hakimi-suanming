@@ -32,6 +32,7 @@ import {
 } from "../lib/active-rule-pack";
 import { useLocalAppSettings, type LocalAppSettings } from "../lib/local-app-settings";
 import "./new-chart-page.css";
+import "./birth-input-guidance.css";
 
 function scrollToWizardTop(): void {
   const reducedMotion = typeof window.matchMedia === "function" &&
@@ -40,6 +41,12 @@ function scrollToWizardTop(): void {
 }
 
 const steps = ["案例信息", "出生资料", "时间与规则", "检查生成"] as const;
+const COMMON_TIME_ZONES = [
+  ["Asia/Shanghai", "北京时间 · 中国大陆"], ["Asia/Hong_Kong", "香港时间"],
+  ["Asia/Taipei", "台北时间"], ["Asia/Singapore", "新加坡时间"], ["Asia/Tokyo", "日本时间"],
+  ["America/New_York", "美国东部时间 · 纽约"], ["America/Los_Angeles", "美国西部时间 · 洛杉矶"],
+  ["Europe/London", "英国时间 · 伦敦"], ["UTC", "世界协调时 · UTC"]
+] as const;
 const MAX_ALIAS_CHARACTERS = 80;
 const MAX_TAG_INPUT_CHARACTERS = 640;
 const MAX_SOURCE_NOTE_CHARACTERS = 500;
@@ -69,9 +76,9 @@ type RevisionSource = {
   revision: RevisionRecord;
 };
 
-type NewChartPageProps =
+type NewChartPageProps = { presentation?: "simple" | "advanced" } & (
   | { caseId?: never; revisionId?: never }
-  | { caseId: string; revisionId: string };
+  | { caseId: string; revisionId: string });
 
 type ValidationField = "alias" | "tags" | "sourceNote" | "date" | "time" | "timeZone" | "locationLabel" | "latitude" | "longitude";
 type WizardOperation = "generate" | "save";
@@ -209,6 +216,21 @@ function dayBoundaryLabel(dayBoundary: FormState["dayBoundary"]): string {
 
 function parseCoordinate(value: string): number | null {
   return value.trim() === "" ? null : Number(value);
+}
+
+function inspectSolarPreviewCoordinates(state: Pick<FormState, "latitude" | "longitude">) {
+  const latitude = parseCoordinate(state.latitude);
+  const longitude = parseCoordinate(state.longitude);
+  if (latitude === null && longitude === null) {
+    return { status: "empty", latitude: null, longitude: null, message: "未提供经纬度；填写成对坐标后可查看太阳时对照。" } as const;
+  }
+  if (latitude === null || longitude === null) {
+    return { status: "incomplete", latitude: null, longitude: null, message: "请同时填写纬度和经度，或将两项都留空；当前不生成太阳时对照。" } as const;
+  }
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+    return { status: "invalid", latitude: null, longitude: null, message: "请检查经纬度：纬度须在 -90 至 90，经度须在 -180 至 180 之间。" } as const;
+  }
+  return { status: "ready", latitude, longitude, message: "" } as const;
 }
 
 function parseTags(value: string): string[] {
@@ -404,6 +426,7 @@ function buildBirthInput(state: FormState): BirthInput {
 function buildBirthPreviewInput(state: FormState, mode: "calendar" | "time"): BirthInput {
   const calendarOnly = mode === "calendar";
   const hasExactTime = state.timePrecision === "exact_minute" || state.timePrecision === "exact_second";
+  const coordinates = calendarOnly ? null : inspectSolarPreviewCoordinates(state);
   return birthInputSchema.parse({
     schemaVersion: "1.0.0",
     calendarType: state.calendarType,
@@ -415,9 +438,9 @@ function buildBirthPreviewInput(state: FormState, mode: "calendar" | "time"): Bi
     lunarLeapMonth: state.calendarType === "lunar" && state.lunarLeapMonth,
     location: {
       label: "",
-      latitude: null,
-      longitude: null,
-      precision: "unknown"
+      latitude: coordinates?.latitude ?? null,
+      longitude: coordinates?.longitude ?? null,
+      precision: coordinates?.status === "ready" ? "coordinates" : "unknown"
     },
     sourceNote: ""
   });
@@ -425,6 +448,8 @@ function buildBirthPreviewInput(state: FormState, mode: "calendar" | "time"): Bi
 
 export function NewChartPage(props: NewChartPageProps = {}) {
   const location = useAppLocation();
+  const simple = props.presentation === "simple";
+  const initialStep = simple ? 1 : 0;
   const revisionMode = Boolean(props.caseId && props.revisionId);
   const useDemo = !revisionMode && new URLSearchParams(location.search).get("demo") === "1";
   const { settings: localAppSettings, ready: localAppSettingsReady } = useLocalAppSettings();
@@ -443,7 +468,9 @@ export function NewChartPage(props: NewChartPageProps = {}) {
   const [rulePackLoading, setRulePackLoading] = useState(!revisionMode);
   const [rulePackError, setRulePackError] = useState<string | null>(null);
   const [rulePackRetryVersion, setRulePackRetryVersion] = useState(0);
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(initialStep);
+  const displayedSteps = simple ? ["出生资料", "确认并查看"] : steps;
+  const displayedStep = simple ? (step === 3 ? 1 : 0) : step;
   const [error, setError] = useState<string | null>(null);
   const [validationField, setValidationField] = useState<ValidationField | null>(null);
   const [calculated, setCalculated] = useState<CalculatedChart | null>(null);
@@ -520,7 +547,7 @@ export function NewChartPage(props: NewChartPageProps = {}) {
       const nextForm = formStateFromRevision(source);
       setRevisionSource(source);
       setForm(nextForm);
-      setStep(0);
+      setStep(initialStep);
       setCalculated(null);
       setCandidateResult(null);
       setError(null);
@@ -593,6 +620,10 @@ export function NewChartPage(props: NewChartPageProps = {}) {
       timePreview: nextTimePreview
     };
   }, [form]);
+  const solarCoordinates = inspectSolarPreviewCoordinates(form);
+  const solarPreviewUnavailableMessage = solarCoordinates.status === "ready"
+    ? "请先确认有效民用时间及 DST 选择，再查看太阳时对照。"
+    : solarCoordinates.message;
   const activeRule = useMemo(() => resolveRuleProfileForFormSnapshot(
     form,
     revisionSource,
@@ -722,6 +753,11 @@ export function NewChartPage(props: NewChartPageProps = {}) {
       latitude: latitudeInputRef,
       longitude: longitudeInputRef
     }[field];
+    let parent = target.current?.parentElement;
+    while (parent) {
+      if (parent instanceof HTMLDetailsElement) parent.open = true;
+      parent = parent.parentElement;
+    }
     target.current?.focus();
   };
 
@@ -744,9 +780,9 @@ export function NewChartPage(props: NewChartPageProps = {}) {
     else setSaving(false);
   };
 
-  const validateCurrentStep = (): boolean => {
-    if (step === 0) {
-      if (!form.alias.trim()) {
+  const validateCurrentStep = (validationStep = step): boolean => {
+    if (validationStep === 0) {
+      if (!simple && !form.alias.trim()) {
         setError("请先填写案例别名。建议使用匿名编号或研究别名，不要填写不必要的真实姓名。");
         setValidationField("alias");
         focusValidationField("alias");
@@ -772,7 +808,7 @@ export function NewChartPage(props: NewChartPageProps = {}) {
         return false;
       }
     }
-    if (step === 1) {
+    if (validationStep === 1) {
       try {
         buildBirthInput(form);
       } catch (reason) {
@@ -799,13 +835,15 @@ export function NewChartPage(props: NewChartPageProps = {}) {
                     : issue?.message?.includes("时间")
                       ? "time"
                       : "date";
-        setError(safeVisibleText(issue?.message, "出生资料不完整。", 400));
+        setError(solarCoordinates.status === "invalid" && (field === "latitude" || field === "longitude")
+          ? solarCoordinates.message
+          : safeVisibleText(issue?.message, "出生资料不完整。", 400));
         setValidationField(field);
         focusValidationField(field);
         return false;
       }
     }
-    if (step === 2) {
+    if (validationStep === 2) {
       if (!calendarPreview) {
         setError("当前历法日期尚未完成可复算解析，请返回出生资料检查日期与闰月标记。");
         setValidationField(null);
@@ -827,8 +865,14 @@ export function NewChartPage(props: NewChartPageProps = {}) {
 
   const nextStep = () => {
     if (operationInFlightRef.current || writeCommittedRef.current) return;
-    if (!validateCurrentStep()) return;
-    setStep((current) => Math.min(current + 1, steps.length - 1));
+    if (simple) {
+      if (![0, 1, 2].every((value) => validateCurrentStep(value))) return;
+      setStep(3);
+      void generate();
+    } else {
+      if (!validateCurrentStep()) return;
+      setStep((current) => Math.min(current + 1, steps.length - 1));
+    }
     scrollToWizardTop();
   };
 
@@ -836,7 +880,7 @@ export function NewChartPage(props: NewChartPageProps = {}) {
     if (operationInFlightRef.current || writeCommittedRef.current) return;
     setError(null);
     setValidationField(null);
-    setStep((current) => Math.max(0, current - 1));
+    setStep((current) => simple ? 1 : Math.max(0, current - 1));
     scrollToWizardTop();
   };
 
@@ -970,7 +1014,7 @@ export function NewChartPage(props: NewChartPageProps = {}) {
       };
       mutationInvoked = true;
       const bundle = await caseRepository.createCase({
-        alias: form.alias.trim(),
+        alias: form.alias.trim() || `我的命盘 · ${form.date}`,
         tags: parsedTags,
         notes: "",
         calculated
@@ -1029,7 +1073,7 @@ export function NewChartPage(props: NewChartPageProps = {}) {
     try {
       mutationInvoked = true;
       const record = await caseRepository.createCandidateSet({
-        alias: form.alias.trim(),
+        alias: form.alias.trim() || `我的命盘 · ${form.date}`,
         tags: parsedTags,
         notes: "",
         candidateSet: candidateResult
@@ -1071,7 +1115,7 @@ export function NewChartPage(props: NewChartPageProps = {}) {
   const resetDemo = () => {
     if (!useDemo || revisionMode || operationInFlightRef.current || writeCommittedRef.current || commitReceiptIssue) return;
     setForm(demoState);
-    setStep(0);
+    setStep(initialStep);
     setCalculated(null);
     setCandidateResult(null);
     setError(null);
@@ -1079,7 +1123,7 @@ export function NewChartPage(props: NewChartPageProps = {}) {
     setCommitReceiptIssue(null);
     formEditedRef.current = false;
     ruleChoiceEditedRef.current = false;
-    window.setTimeout(() => aliasInputRef.current?.focus(), 0);
+    window.setTimeout(() => (simple ? dateInputRef : aliasInputRef).current?.focus(), 0);
   };
 
   const retryRevisionSource = () => {
@@ -1170,7 +1214,8 @@ export function NewChartPage(props: NewChartPageProps = {}) {
     <div
       className="page page--wizard"
       {...NEW_CHART_SAFETY_ATTRIBUTES}
-      data-active-step={step + 1}
+      data-active-step={displayedStep + 1}
+      data-presentation={simple ? "simple" : "advanced"}
       data-time-precision={form.timePrecision}
       data-workflow-mode={revisionMode ? "revision" : "new"}
     >
@@ -1179,7 +1224,7 @@ export function NewChartPage(props: NewChartPageProps = {}) {
         title={revisionMode ? "由历史修订派生新版" : "新建排盘"}
         description={revisionMode
           ? `以修订 R${revisionSource!.revision.revisionNumber} 的原始输入、时间校准和规则快照为起点。保存只会追加新 Revision，不覆盖历史版本，也不修改案例别名、标签或笔记。`
-          : "显式保存记录时会一并写入原始输入、历法转换、UTC 瞬时点、DST 决策、规则快照与确定性哈希。已支持公历、农历/闰月、IANA 校时与固定 +08 节气投影，全部结果仍标记为金标前的工程候选。"}
+          : "填写出生资料，生成命盘后即可阅读命局初判与未来十年的变化。资料保存在本机，之后可以补充反馈或创建修订。"}
       />
 
       {useDemo ? (
@@ -1194,7 +1239,7 @@ export function NewChartPage(props: NewChartPageProps = {}) {
       {!revisionMode && rulePackLoading ? <div className="info-panel" role="status"><LoaderCircle aria-hidden="true" /><p><strong>正在核对活动规则包</strong> 最终生成前会再次读取并执行完整性校验；当前可先填写资料。</p></div> : null}
       {!revisionMode && rulePackContext?.source === "installed" ? <div className="info-panel" role="status"><ShieldCheck aria-hidden="true" /><p><strong>活动规则包：{safeVisibleText(rulePackContext.title, "未命名规则包", 160)}</strong> 本次按精确 profile 与包摘要计算；包内审核属于作者自述，本机激活不等于来源认证。摘要 {shortHash(rulePackContext.packDigest)}。</p></div> : null}
 
-      <section className="wizard-command-bar" aria-label="当前录入状态">
+      {!simple ? <section className="wizard-command-bar" aria-label="当前录入状态">
         <div className="wizard-command-stage">
           <span>{String(step + 1).padStart(2, "0")}</span>
           <div><small>Active stage</small><strong>{steps[step]}</strong></div>
@@ -1205,19 +1250,19 @@ export function NewChartPage(props: NewChartPageProps = {}) {
           <div><dt>时间输入</dt><dd>{timeInputLabel}</dd></div>
           <div><dt>本地写入</dt><dd>{writeStateLabel}</dd></div>
         </dl>
-      </section>
+      </section> : <p className="wizard-local-note">无需注册 · 本机计算 · 确认后保存并查看解读</p>}
 
       <ol className="wizard-steps" aria-label="排盘步骤">
-        {steps.map((label, index) => (
-          <li key={label} className={index === step ? "is-active" : index < step ? "is-complete" : ""} aria-current={index === step ? "step" : undefined}>
-            {index < step ? (
+        {displayedSteps.map((label, index) => (
+          <li key={label} className={index === displayedStep ? "is-active" : index < displayedStep ? "is-complete" : ""} aria-current={index === displayedStep ? "step" : undefined}>
+            {index < displayedStep ? (
               <button
                 type="button"
                 className="wizard-step-return"
                 disabled={calculating || saving || writeCommitted || Boolean(commitReceiptIssue)}
                 aria-label={`返回步骤 ${index + 1}：${label}`}
                 title={`返回步骤 ${index + 1}`}
-                onClick={() => revisitCompletedStep(index)}
+                onClick={() => revisitCompletedStep(simple ? 1 : index)}
               >
                 <span><Check aria-hidden="true" /></span>
                 <strong>{label}</strong>
@@ -1236,7 +1281,7 @@ export function NewChartPage(props: NewChartPageProps = {}) {
         <fieldset className="wizard-stage" aria-labelledby="wizard-stage-title" disabled={calculating || saving || writeCommitted || Boolean(commitReceiptIssue)}>
           {step === 0 ? (
             <div className="form-section">
-              <div className="section-intro"><p className="eyebrow">步骤 1 / 4</p><h2 ref={stageHeadingRef} id="wizard-stage-title" tabIndex={-1}>{revisionMode ? "确认案例与修订来源" : "先给案例一个研究标识"}</h2><p>{revisionMode ? "别名与标签属于 Case 元数据，本流程只读展示，不会静默修改。资料来源说明属于出生输入，可随新修订调整。" : "别名、标签和笔记不参与排盘，也不进入结果哈希。"}</p></div>
+              <div className="section-intro"><p className="eyebrow">步骤 1 / 4</p><h2 ref={stageHeadingRef} id="wizard-stage-title" tabIndex={-1}>{revisionMode ? "确认案例与修订来源" : "给这张命盘起个名字"}</h2><p>{revisionMode ? "这里保留原来的名称与标签；本次更正出生资料时，会生成新版本。" : "使用姓名、昵称或别名都可以，方便下次找到这张命盘。"}</p></div>
               <label className="field">
                 <span>案例别名 <em>必填</em></span>
                 <input ref={aliasInputRef} value={form.alias} onChange={(event) => update("alias", event.target.value)} placeholder="例如：案例 A-017" autoFocus={!revisionMode} autoComplete="off" required maxLength={MAX_ALIAS_CHARACTERS} disabled={revisionMode} aria-invalid={validationField === "alias" || undefined} aria-describedby={describedBy("case-alias-help", "alias")} />
@@ -1258,19 +1303,44 @@ export function NewChartPage(props: NewChartPageProps = {}) {
 
           {step === 1 ? (
             <div className="form-section">
-              <div className="section-intro"><p className="eyebrow">步骤 2 / 4</p><h2 ref={stageHeadingRef} id="wizard-stage-title" tabIndex={-1}>录入出生资料</h2><p>保留用户填写的民用时间，再单独归一化时区与 DST；未知时辰不会被自动补成子时。</p></div>
+              <div className="section-intro"><p className="eyebrow">{simple ? "填写资料" : "步骤 2 / 4"}</p><h2 ref={stageHeadingRef} id="wizard-stage-title" tabIndex={-1}>{simple ? "先填写你的出生资料" : "录入出生资料"}</h2><p>按出生地当时的钟表时间填写；如果不知道时辰，可以选择未知时辰。</p></div>
               <div className="field-grid">
                 <label className="field"><span>输入历法</span><select value={form.calendarType} onChange={(event) => updateCalendarType(event.target.value as FormState["calendarType"])}><option value="gregorian">公历</option><option value="lunar">农历</option></select><small>切换历法会清空日期，防止同一串数字被静默换一种历法解释。</small></label>
-                <label className="field"><span>时间精度</span><select value={form.timePrecision} onChange={(event) => updateTimePrecision(event.target.value as FormState["timePrecision"])}><option value="exact_minute">精确到分钟</option><option value="exact_second">精确到秒 · 边界研究</option><option value="unknown_hour" disabled={revisionMode}>未知时辰 · 生成候选探针</option></select><small>{revisionMode ? "正式 Revision 只能保留精确时间；未知时辰请单独新建候选组。" : "未知时辰不会由 AI 或默认值猜测，而是并列代表性候选。"}</small></label>
+                <label className="field"><span>时间精度</span><select value={form.timePrecision} onChange={(event) => updateTimePrecision(event.target.value as FormState["timePrecision"])}><option value="exact_minute">知道具体时间 · 精确到分钟</option>{!simple || form.timePrecision === "exact_second" ? <option value="exact_second">精确到秒 · 边界研究</option> : null}<option value="unknown_hour" disabled={revisionMode}>不知道出生时辰 · 查看候选命盘</option></select><small>{revisionMode ? "正式 Revision 只能保留精确时间；未知时辰请单独新建候选组。" : "只知道一个时辰或大概范围？当前尚不支持范围输入，请先保留未知，不要猜一个精确时间。"}</small></label>
                 <label className="field"><span>{form.calendarType === "lunar" ? "农历日期" : "出生日期"} <em>必填</em></span>{form.calendarType === "gregorian" ? <input ref={dateInputRef} type="date" min="1900-01-01" max="2100-12-31" value={form.date} onChange={(event) => update("date", event.target.value)} autoComplete="off" required aria-invalid={validationField === "date" || undefined} aria-describedby={describedBy("birth-date-help", "date")} /> : <input ref={dateInputRef} type="text" inputMode="numeric" pattern="\d{4}-\d{2}-\d{2}" maxLength={10} value={form.date} onChange={(event) => update("date", event.target.value)} placeholder="例如 1995-07-23" autoComplete="off" required aria-invalid={validationField === "date" || undefined} aria-describedby={describedBy("birth-date-help", "date")} />}<small id="birth-date-help">{form.calendarType === "lunar" ? "按农历年、月、日填写 YYYY-MM-DD；不是转换后的公历日期。" : "按资料中的公历民用日期填写。"}</small></label>
                 {form.calendarType === "lunar" ? <label className={`lunar-leap-toggle${form.lunarLeapMonth ? " is-selected" : ""}`}><input type="checkbox" checked={form.lunarLeapMonth} onChange={(event) => update("lunarLeapMonth", event.target.checked)} /><span><strong>这是闰月</strong><small>仅当该农历年确有同名闰月时勾选；无效组合会明确拒绝。</small></span></label> : null}
-                <label className="field"><span>民用时间 {form.timePrecision === "exact_minute" || form.timePrecision === "exact_second" ? <em>必填</em> : null}</span><input ref={timeInputRef} type="time" step={form.timePrecision === "exact_second" ? 1 : 60} value={form.timePrecision === "exact_minute" || form.timePrecision === "exact_second" ? form.time : ""} disabled={form.timePrecision !== "exact_minute" && form.timePrecision !== "exact_second"} onChange={(event) => update("time", event.target.value)} required={form.timePrecision === "exact_minute" || form.timePrecision === "exact_second"} aria-invalid={validationField === "time" || undefined} aria-describedby={describedBy("birth-time-help", "time")} /><small id="birth-time-help">{form.timePrecision === "unknown_hour" ? "保持未知；不会写入任何伪造时刻。" : form.timePrecision === "exact_second" ? "秒级输入只用于节气、换日等边界研究，并原样保存。" : "请填写资料中真实记录的民用时间。"}</small></label>
-                <label className="field"><span>IANA 时区 <em>必填</em></span><input ref={timeZoneInputRef} list="iana-time-zones" value={form.timeZone} onChange={(event) => update("timeZone", event.target.value)} placeholder="Asia/Shanghai" autoComplete="off" autoCapitalize="off" spellCheck={false} maxLength={MAX_TIME_ZONE_CHARACTERS} required aria-invalid={validationField === "timeZone" || undefined} aria-describedby={describedBy("birth-time-zone-help", "timeZone")} /><small id="birth-time-zone-help">必须使用可识别的 IANA 名称；不用“北京时间”等简称猜测。</small></label>
-                <label className="field"><span>出生性别</span><select value={form.sex} onChange={(event) => update("sex", event.target.value as FormState["sex"])}><option value="unspecified">未指定</option><option value="male">男</option><option value="female">女</option></select><small>用于可审计的顺逆与运限规则；不会据此生成吉凶解释。</small></label>
-                <label className="field"><span>地点标签</span><span className="input-with-icon"><MapPin aria-hidden="true" /><input ref={locationLabelInputRef} value={form.locationLabel} onChange={(event) => update("locationLabel", event.target.value)} placeholder="例如：北京；可留空" autoComplete="off" maxLength={MAX_LOCATION_LABEL_CHARACTERS} aria-invalid={validationField === "locationLabel" || undefined} aria-describedby={describedBy("birth-location-help", "locationLabel")} /></span><small id="birth-location-help">最多 {MAX_LOCATION_LABEL_CHARACTERS} 个字符；当前不调用在线地点搜索。</small></label>
+                <label className="field"><span>{simple ? "出生时间" : "民用时间"} {form.timePrecision === "exact_minute" || form.timePrecision === "exact_second" ? <em>必填</em> : null}</span><input ref={timeInputRef} type="time" step={form.timePrecision === "exact_second" ? 1 : 60} value={form.timePrecision === "exact_minute" || form.timePrecision === "exact_second" ? form.time : ""} disabled={form.timePrecision !== "exact_minute" && form.timePrecision !== "exact_second"} onChange={(event) => update("time", event.target.value)} required={form.timePrecision === "exact_minute" || form.timePrecision === "exact_second"} aria-invalid={validationField === "time" || undefined} aria-describedby={describedBy("birth-time-help", "time")} /><small id="birth-time-help">{form.timePrecision === "unknown_hour" ? "保持未知；不会写入任何伪造时刻。" : form.timePrecision === "exact_second" ? "秒级输入只用于节气、换日等边界研究，并原样保存。" : "请填写资料中真实记录的民用时间。"}</small></label>
+                {simple ? <label className="field"><span>出生地时区</span><select aria-label="出生地时区" value={COMMON_TIME_ZONES.some(([value]) => value === form.timeZone) ? form.timeZone : "custom"} onChange={(event) => update("timeZone", event.target.value === "custom" ? "" : event.target.value)}>{COMMON_TIME_ZONES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}<option value="custom">其他时区</option></select><small>请确认出生地当时使用的时区。城市名称不会自动更改这里的选择；历史夏令时歧义会单独提示。</small></label> : null}
+                {!simple || !COMMON_TIME_ZONES.some(([value]) => value === form.timeZone) ? <label className="field"><span>IANA 时区 <em>必填</em></span><input ref={timeZoneInputRef} list="iana-time-zones" value={form.timeZone} onChange={(event) => update("timeZone", event.target.value)} placeholder="Asia/Shanghai" autoComplete="off" autoCapitalize="off" spellCheck={false} maxLength={MAX_TIME_ZONE_CHARACTERS} required aria-invalid={validationField === "timeZone" || undefined} aria-describedby={describedBy("birth-time-zone-help", "timeZone")} /><small id="birth-time-zone-help">必须使用可识别的 IANA 名称；不用“北京时间”等简称猜测。</small></label> : null}
+                <label className="field"><span>出生性别</span><select value={form.sex} onChange={(event) => update("sex", event.target.value as FormState["sex"])}><option value="unspecified">未指定</option><option value="male">男</option><option value="female">女</option></select><small>用于计算大运顺逆；未指定时，年度解读分别列出条件分支。</small></label>
+                <label className="field"><span>{simple ? "出生城市（可选）" : "地点标签"}</span><span className="input-with-icon"><MapPin aria-hidden="true" /><input ref={locationLabelInputRef} value={form.locationLabel} onChange={(event) => update("locationLabel", event.target.value)} placeholder="例如：北京；可留空" autoComplete="off" maxLength={MAX_LOCATION_LABEL_CHARACTERS} aria-invalid={validationField === "locationLabel" || undefined} aria-describedby={describedBy("birth-location-help", "locationLabel")} /></span><small id="birth-location-help">城市只作资料记录，尚未自动识别时区或坐标。请单独确认出生地时区；最多 {MAX_LOCATION_LABEL_CHARACTERS} 个字符。</small></label>
+              </div>
+              {simple ? <details className="wizard-technical-details"><summary>秒级时间设置（边界研究）</summary>
+                <label className="field"><span>钟表记录精度</span><select value={form.timePrecision} disabled={form.timePrecision === "unknown_hour"} onChange={(event) => updateTimePrecision(event.target.value as FormState["timePrecision"])}><option value="exact_minute">记录到分钟</option><option value="exact_second">记录到秒</option>{form.timePrecision === "unknown_hour" ? <option value="unknown_hour">出生时间未知</option> : null}</select><small>只在资料真实记录了秒数时使用。从分钟切换会先显示 00 秒，请按原记录核对；没有秒数记录请保留分钟精度。</small></label>
+              </details> : null}
+              {simple ? <details className="wizard-technical-details"><summary>命盘名称与备注（可选）</summary>
+              <label className="field">
+                <span>命盘名称（可选）</span>
+                <input ref={aliasInputRef} value={form.alias} onChange={(event) => update("alias", event.target.value)} placeholder="不填则按出生日期命名" autoComplete="off" maxLength={MAX_ALIAS_CHARACTERS} disabled={revisionMode} aria-invalid={validationField === "alias" || undefined} aria-describedby={describedBy("case-alias-help", "alias")} />
+                <span className="wizard-field-support"><small id="case-alias-help">{revisionMode ? "案例元数据只读；请回到案例库单独修改。" : `最多 ${MAX_ALIAS_CHARACTERS} 个字符；可用昵称，方便下次找到。`}</small><small className="wizard-field-counter" aria-label={`已输入 ${form.alias.length} 个字符，上限 ${MAX_ALIAS_CHARACTERS} 个`}>{form.alias.length}/{MAX_ALIAS_CHARACTERS}</small></span>
+              </label>
+              <label className="field">
+                <span>标签</span>
+                <input ref={tagsInputRef} value={form.tags} onChange={(event) => update("tags", event.target.value)} placeholder="用逗号分隔，例如：教学、待复核" autoComplete="off" maxLength={MAX_TAG_INPUT_CHARACTERS} disabled={revisionMode} aria-invalid={validationField === "tags" || undefined} aria-describedby={describedBy("case-tags-help", "tags")} />
+                <span className="wizard-field-support"><small id="case-tags-help">{revisionMode ? "标签保持当前 Case 值；本次保存不会更新标签。" : "最多 20 个标签；每个不超过 30 个字符，且不能重复。"}</small><small className="wizard-field-counter" data-state={parsedTags.length > 20 ? "over" : "ok"} aria-label={`当前解析为 ${parsedTags.length} 个标签`}>{parsedTags.length}/20 项</small></span>
+              </label>
+              <label className="field">
+                <span>资料来源说明</span>
+                <textarea ref={sourceNoteInputRef} value={form.sourceNote} onChange={(event) => update("sourceNote", event.target.value)} placeholder="例如：本人提供、古籍命例第几章；避免录入无关隐私。" rows={4} autoComplete="off" maxLength={MAX_SOURCE_NOTE_CHARACTERS} aria-invalid={validationField === "sourceNote" || undefined} aria-describedby={describedBy("case-source-note-help", "sourceNote")} />
+                <span className="wizard-field-support"><small id="case-source-note-help">最多 {MAX_SOURCE_NOTE_CHARACTERS} 个字符；避免录入无关隐私。</small><small className="wizard-field-counter" aria-label={`已输入 ${form.sourceNote.length} 个字符，上限 ${MAX_SOURCE_NOTE_CHARACTERS} 个`}>{form.sourceNote.length}/{MAX_SOURCE_NOTE_CHARACTERS}</small></span>
+              </label>
+              <div className="privacy-note"><Info aria-hidden="true" /><p><strong>默认本地</strong> 资料保存在这台设备的当前浏览器，之后可下载报告或备份。</p></div>
+              </details> : null}
+              <details className="wizard-technical-details" open={simple ? undefined : true}><summary>经纬度与太阳时对照（可选）</summary><div className="field-grid">
                 <label className="field"><span>纬度</span><input ref={latitudeInputRef} type="number" min="-90" max="90" step="any" value={form.latitude} onChange={(event) => update("latitude", event.target.value)} placeholder="例如 39.9042" aria-invalid={validationField === "latitude" || undefined} aria-describedby={describedBy("birth-latitude-help", "latitude")} /><small id="birth-latitude-help">经纬度需同时填写才生成太阳时对照。</small></label>
                 <label className="field"><span>经度</span><input ref={longitudeInputRef} type="number" min="-180" max="180" step="any" value={form.longitude} onChange={(event) => update("longitude", event.target.value)} placeholder="东经为正，例如 116.4074" aria-invalid={validationField === "longitude" || undefined} aria-describedby={describedBy("birth-longitude-help", "longitude")} /><small id="birth-longitude-help">只用于地方平/视太阳时对照，默认不改盘。</small></label>
-              </div>
+              </div><p>不填写也可正常排盘；当前太阳时仅作对照，不改变命盘。</p></details>
+              <details className="wizard-technical-details"><summary>查看出生资料的校验详情</summary>
               <section className="birth-input-ledger" aria-labelledby="birth-input-ledger-title">
                 <header className="birth-input-ledger__heading">
                   <div>
@@ -1324,46 +1394,47 @@ export function NewChartPage(props: NewChartPageProps = {}) {
                     <strong>{form.timePrecision === "unknown_hour" ? "候选内解析" : timePreview?.timeZoneResolution.kind === "unique" ? "唯一" : timePreview ? "需确认" : "待解析"}</strong>
                   </article>
 
-                  <article data-state={form.latitude.trim() && form.longitude.trim() ? "ready" : form.latitude.trim() || form.longitude.trim() ? "review" : "optional"}>
+                  <article data-state={solarCoordinates.status === "ready" ? "ready" : solarCoordinates.status === "empty" ? "optional" : "review"}>
                     <span className="birth-input-ledger__index">04</span>
                     <div>
                       <small>Location precision</small>
                       <h4>{form.latitude.trim() && form.longitude.trim()
                         ? `${form.latitude}, ${form.longitude}`
                         : safeVisibleText(form.locationLabel, "未提供地点", 120)}</h4>
-                      <p>{form.latitude.trim() && form.longitude.trim()
+                      <p>{solarCoordinates.status === "ready"
                         ? "经纬度已成对提供，只用于生成并列太阳时对照，默认不改盘。"
-                        : form.latitude.trim() || form.longitude.trim()
-                          ? "坐标只填写了一半；必须成对补全，否则进入下一步时会明确拒绝。"
+                        : solarCoordinates.status !== "empty"
+                          ? solarCoordinates.message
                           : form.locationLabel.trim()
                             ? "当前只有地点标签，不会在线查询或反推经纬度。"
                             : "地点可留空；系统不会根据时区自动猜测出生地点。"}</p>
                     </div>
-                    <strong>{form.latitude.trim() && form.longitude.trim() ? "坐标对照" : form.latitude.trim() || form.longitude.trim() ? "需成对填写" : form.locationLabel.trim() ? "城市标签" : "可留空"}</strong>
+                    <strong>{solarCoordinates.status === "ready" ? "坐标对照" : solarCoordinates.status === "invalid" ? "需检查坐标" : solarCoordinates.status === "incomplete" ? "需成对填写" : form.locationLabel.trim() ? "城市标签" : "可留空"}</strong>
                   </article>
                 </div>
               </section>
+              </details>
               <datalist id="iana-time-zones"><option value="Asia/Shanghai" /><option value="Asia/Hong_Kong" /><option value="Asia/Taipei" /><option value="Asia/Singapore" /><option value="Asia/Kathmandu" /><option value="America/New_York" /><option value="Europe/London" /><option value="Pacific/Kiritimati" /></datalist>
             </div>
           ) : null}
 
-          {step === 2 ? (
-            <div className="form-section calibration-section">
-              <div className="section-intro"><p className="eyebrow">步骤 3 / 4</p><h2 ref={stageHeadingRef} id="wizard-stage-title" tabIndex={-1}>确认时间基准与换日规则</h2><p>{form.timePrecision === "unknown_hour" ? "原始时辰保持未知；系统将生成同一民用日期中的 13 个代表性探针，不猜测哪一个更可能。" : "民用时、UTC 瞬时点和太阳时始终并列；空档或重叠时刻必须明确选择，不会静默改盘。"}</p></div>
+          {step === 2 || (simple && step === 1) ? (
+            <details className="form-section calibration-section wizard-technical-details" open={!simple || Boolean(timePreview && timePreview.timeZoneResolution.kind !== "unique")}><summary>时间校准与换日规则（通常无需更改）</summary>
+              {!simple ? <div className="section-intro"><p className="eyebrow">步骤 3 / 4</p><h2 ref={stageHeadingRef} id="wizard-stage-title" tabIndex={-1}>确认时间基准与换日规则</h2><p>{form.timePrecision === "unknown_hour" ? "我们会并列展示不同时辰的候选命盘，保留时辰未知的状态。" : "通常可保留默认换日方式。若出生时间遇到夏令时重叠或空档，请在下方选择对应情况。"}</p></div> : null}
               {form.timePrecision === "unknown_hour" ? (
                 <div className="unknown-hour-callout"><Clock3 aria-hidden="true" /><div><strong>未知时辰候选入口</strong><p>00:30 子段、01:30 丑时至 21:30 亥时，再加 23:30 子初，共 13 个代表点。DST 空档/重叠探针会保留为“需确认”，不会静默选偏移。</p></div></div>
               ) : (
-                <>
+                <details className="wizard-technical-details"><summary>查看时间换算与太阳时对照</summary>
                   <div className="calibration-table" role="table" aria-label="时间推导">
                     <div role="row" className="calibration-table-header"><span role="columnheader">推导项目</span><span role="columnheader">当前值</span><span role="columnheader">状态</span></div>
                     <div role="row"><span role="cell"><Clock3 aria-hidden="true" />原始{form.calendarType === "lunar" ? "农历" : "公历"}输入</span><strong role="cell">{form.date || "未填写"} {form.lunarLeapMonth ? "· 闰月 " : ""}{form.time || "--:--"}</strong><span role="cell"><StatusPill tone="info">原值保留</StatusPill></span></div>
                     <div role="row"><span role="cell">民用公历日期</span><strong role="cell">{calendarPreview?.resolvedGregorianDate ?? "待校验"}</strong><span role="cell"><StatusPill tone={calendarPreview?.inputCalendarType === "lunar" ? "info" : "neutral"}>{calendarPreview?.inputCalendarType === "lunar" ? "显式转换" : "原样"}</StatusPill></span></div>
                     <div role="row"><span role="cell">IANA 时区 / 偏移</span><strong role="cell">{safeVisibleText(form.timeZone, "时区不可显示", 120)} {safeVisibleText(timePreview?.utcOffset, "待确认", 40)}</strong><span role="cell"><StatusPill tone={timePreview?.normalizationStatus === "instant_resolved" ? "info" : "warning"}>{safeVisibleText(timePreview?.timeZoneResolution.status, "未解析", 80)}</StatusPill></span></div>
                     <div role="row"><span role="cell">UTC 瞬时点</span><strong role="cell">{timePreview?.utcInstant ?? "未选择有效瞬时点"}</strong><span role="cell"><StatusPill>{timePreview?.timeZoneResolution.candidates.length ?? 0} 个候选</StatusPill></span></div>
-                    <div role="row"><span role="cell">地方平太阳时</span><strong role="cell">{timePreview?.solarTime?.variants.find((item) => item.candidateChoice === timePreview.timeZoneResolution.selectedCandidate?.choice)?.meanSolarDateTime ?? "需要完整经纬度"}</strong><span role="cell"><StatusPill tone="info">仅对照</StatusPill></span></div>
-                    <div role="row"><span role="cell">地方视太阳时</span><strong role="cell">{timePreview?.solarTimePreview ?? "需要完整经纬度"}</strong><span role="cell"><StatusPill tone="info">未采用</StatusPill></span></div>
+                    <div role="row"><span role="cell">地方平太阳时</span><strong role="cell">{timePreview?.solarTime?.variants.find((item) => item.candidateChoice === timePreview.timeZoneResolution.selectedCandidate?.choice)?.meanSolarDateTime ?? solarPreviewUnavailableMessage}</strong><span role="cell"><StatusPill tone="info">仅对照</StatusPill></span></div>
+                    <div role="row"><span role="cell">地方视太阳时</span><strong role="cell">{timePreview?.solarTimePreview ?? solarPreviewUnavailableMessage}</strong><span role="cell"><StatusPill tone="info">未采用</StatusPill></span></div>
                   </div>
-                </>
+                </details>
               )}
               {(form.timePrecision === "exact_minute" || form.timePrecision === "exact_second") && timePreview && timePreview.timeZoneResolution.kind !== "unique" ? (
                 <fieldset className="choice-group">
@@ -1383,23 +1454,37 @@ export function NewChartPage(props: NewChartPageProps = {}) {
               {rulePackContext?.source === "installed" ? <p className="field-help">活动规则包按精确摘要使用，换日规则已锁定；如需改动，请先在设置页停用，再以工作默认规则显式派生。</p> : null}
               <div className="info-panel"><Info aria-hidden="true" /><p>{form.calendarType === "lunar" ? "农历日期先按固定版本历法表转换为公历日期，原农历年月日与闰月标记不会被覆盖。" : "公历日期保持原样。"} 年/月柱按同一 UTC 瞬时点投影到 lunar-typescript 的固定 +08 节气基准，日/时柱按 {safeVisibleText(form.timeZone, "时区不可显示", 120)} 本地民用时与显式换日规则生成；太阳时仍只并列预览。</p></div>
               {(form.timePrecision === "exact_minute" || form.timePrecision === "exact_second") && timePreview?.warnings.length ? <ul className="warning-list time-warning-list">{timePreview.warnings.map((warning, index) => <li key={`${index}-${warning}`}>{safeVisibleText(warning, "时间预览返回了不可显示的警告。")}</li>)}</ul> : null}
-            </div>
+            </details>
           ) : null}
 
           {step === 3 ? (
             <div className="form-section review-section">
-              <div className="section-intro"><p className="eyebrow">步骤 4 / 4</p><h2 ref={stageHeadingRef} id="wizard-stage-title" tabIndex={-1}>{form.timePrecision === "unknown_hour" ? "检查并生成候选探针" : "检查、生成并保存"}</h2><p>{form.timePrecision === "unknown_hour" ? "候选组保留“未知时辰”事实，不会选出或猜出一张主盘。" : "先计算，再决定是否写入案例库。计算失败不会留下半条记录。"}</p></div>
+              <div className="section-intro"><p className="eyebrow">{simple ? "核对命盘" : "步骤 4 / 4"}</p><h2 ref={stageHeadingRef} id="wizard-stage-title" tabIndex={-1}>{simple ? form.timePrecision === "unknown_hour" ? "确认候选命盘" : "确认出生资料与命盘" : form.timePrecision === "unknown_hour" ? "检查并生成候选探针" : "检查、生成并保存"}</h2><p>{form.timePrecision === "unknown_hour" ? "候选组保留“未知时辰”事实，不会选出或猜出一张主盘。" : "核对出生资料与四柱，点击保存后即可阅读命局和运势。"}</p></div>
+              {simple ? <dl className="review-list">
+                <div><dt>命盘名称</dt><dd>{safeVisibleText(form.alias || `我的命盘 · ${form.date}`, "我的命盘", 120)}</dd></div>
+                <div><dt>出生日期</dt><dd>{form.calendarType === "lunar" ? "农历" : "公历"} {form.date}{form.lunarLeapMonth ? "（闰月）" : ""}</dd></div>
+                <div><dt>出生时间</dt><dd>{form.timePrecision === "unknown_hour" ? "不知道时辰 · 将分别展示候选" : form.time}</dd></div>
+                <div><dt>出生地时区</dt><dd>{COMMON_TIME_ZONES.find(([value]) => value === form.timeZone)?.[1] ?? form.timeZone}</dd></div>
+                <div><dt>出生城市</dt><dd>{safeVisibleText(form.locationLabel, "未填写", MAX_LOCATION_LABEL_CHARACTERS)} · 只作记录，未自动识别时区</dd></div>
+                <div><dt>实际采用的时间</dt><dd>{form.timePrecision === "unknown_hour" ? "尚无唯一时间；各候选分别计算" : timePreview?.timeZoneResolution.selectedCandidate ? `${timePreview.timeZoneResolution.selectedCandidate.resolvedWallTime.replace("T", " ")}（公历，${timePreview.utcOffset}）` : "尚未确认唯一时间"}</dd></div>
+                {form.timePrecision !== "unknown_hour" && timePreview?.timeZoneResolution.selectedCandidate?.matchesInputWallTime === false ? <div><dt>本次时间调整</dt><dd>原钟表时间处于夏令时空档；按你选定的方案调整为上面的时间，原始填写仍保留。</dd></div> : null}
+                <div><dt>采用的换日方式</dt><dd>{dayBoundaryLabel(form.dayBoundary)} · 太阳时未用于本次排盘</dd></div>
+                <div><dt>大运顺逆依据</dt><dd>{form.sex === "male" ? "男" : form.sex === "female" ? "女" : "未指定 · 分别展示顺逆分支"}</dd></div>
+              </dl> : null}
+              <details className="wizard-technical-details" open={simple ? undefined : true}><summary>查看完整资料与排盘规则</summary>
               <dl className="review-list">
-                <div><dt>案例</dt><dd>{safeVisibleText(form.alias, "未命名案例", 120)}</dd></div>
+                <div><dt>案例</dt><dd>{safeVisibleText(form.alias || `我的命盘 · ${form.date}`, "未命名命盘", 120)}</dd></div>
                 <div><dt>标签</dt><dd>{parsedTags.length ? safeVisibleText(parsedTags.join("、"), "标签不可显示", 320) : "未设置标签"}</dd></div>
                 <div><dt>来源说明</dt><dd>{form.sourceNote.trim() ? safeVisibleText(form.sourceNote, "来源说明不可显示", MAX_SOURCE_NOTE_CHARACTERS) : "未填写来源说明"}</dd></div>
                 <div><dt>出生输入</dt><dd>{form.date} {form.lunarLeapMonth ? "闰月 · " : ""}{form.timePrecision === "unknown_hour" ? "时辰未知" : form.time} · {form.calendarType === "lunar" ? "农历" : "公历"} · {safeVisibleText(form.timeZone, "时区不可显示", 120)}</dd></div>
                 <div><dt>地点证据</dt><dd>{form.locationLabel.trim() ? safeVisibleText(form.locationLabel, "地点不可显示", MAX_LOCATION_LABEL_CHARACTERS) : "未提供地点标签"} · {form.latitude.trim() && form.longitude.trim() ? safeVisibleText(`${form.latitude}, ${form.longitude}`, "坐标不可显示", 120) : "未提供成对坐标"}</dd></div>
                 <div><dt>历法解析</dt><dd>{calendarPreview ? `${calendarPreview.inputCalendarType === "lunar" ? "转换至" : "保持"}公历 ${calendarPreview.resolvedGregorianDate} · 往返校验通过` : "日期尚未通过校验"}</dd></div>
                 <div><dt>时间归一化</dt><dd>{form.timePrecision === "unknown_hour" ? "13 个代表性探针各自解析；歧义保留待确认" : `${timePreview?.utcInstant ?? "尚未选择唯一瞬时点"} · ${timePreview?.utcOffset ?? "无偏移"}`}</dd></div>
-                <div><dt>太阳时</dt><dd>{form.timePrecision === "unknown_hour" ? "探针内可对照，仍不采用" : timePreview?.solarTimePreview ? `${timePreview.solarTimePreview} · 仅对照` : "未提供完整经纬度"}</dd></div>
+                <div><dt>太阳时</dt><dd>{form.timePrecision === "unknown_hour" ? "探针内可对照，仍不采用" : timePreview?.solarTimePreview ? `${timePreview.solarTimePreview} · 仅对照` : solarPreviewUnavailableMessage}</dd></div>
                 <div><dt>规则</dt><dd>{safeVisibleText(activeRule.label, "未命名规则", 160)} {safeVisibleText(activeRule.profileVersion, "版本不可显示", 80)} · {dayBoundaryLabel(form.dayBoundary)}{rulePackContext?.source === "installed" ? ` · 包 ${shortHash(rulePackContext.packDigest)}` : ""}</dd></div>
               </dl>
+              </details>
+              <details className="wizard-technical-details"><summary>查看计算与保存详情</summary>
               <div className="wizard-submit-contract" role="group" aria-label="生成与保存提交契约">
                 <div data-contract-state={candidateResult || calculated ? "ready" : "pending"}>
                   <small>01 · 生成阶段</small>
@@ -1423,9 +1508,16 @@ export function NewChartPage(props: NewChartPageProps = {}) {
                 </div>
                 <p>生成阶段始终零写入；保存调用一旦结果不确定，本页不会把异常解释为“未写入”，也不会开放重复提交。</p>
               </div>
+              </details>
               {candidateResult ? (
                 <div className="candidate-preview" aria-live="polite">
-                  <div className="preview-heading"><div><p className="eyebrow">Unknown hour probes</p><h3>13 个代表性候选</h3></div><StatusPill tone="warning">experimental_probe</StatusPill></div>
+                  <section className="birth-uncertainty-guide" aria-label="未知时辰的资料与下一步">
+                    <h3>出生时间还未确定</h3>
+                    <dl><div><dt>已经知道</dt><dd>{form.calendarType === "lunar" ? "农历" : "公历"} {form.date}，出生时间未知。</dd></div><div><dt>尚未确定</dt><dd>不能确定唯一的时柱及依赖它的解释；候选间的相似文字也不代表已经核实共同结论。</dd></div><div><dt>现在可以做</dt><dd>保存这份资料，之后从档案重新打开；或返回上一步补充实际时间。</dd></div></dl>
+                    <p>下面的代表时刻只用于分别计算，不是真实出生时间，也不会自动挑选一张主盘。</p>
+                  </section>
+                  <details className="wizard-technical-details" open={simple ? undefined : true}><summary>查看 13 个候选及计算详情</summary>
+                  <div className="preview-heading"><div><p className="eyebrow">Unknown hour probes</p><h3>13 个代表性候选</h3></div><StatusPill tone="warning">{simple ? "时辰待确认" : "experimental_probe"}</StatusPill></div>
                   <div className="candidate-grid">
                     {candidateResult.candidates.map((candidate) => (
                       <article key={candidate.candidateId} className={candidate.variants.length ? (candidate.status === "calculated" ? "" : "has-variants") : "is-unresolved"}>
@@ -1437,29 +1529,34 @@ export function NewChartPage(props: NewChartPageProps = {}) {
                   </div>
                   <dl className="hash-preview"><div><dt>候选组哈希</dt><dd title={candidateResult.resultHash}>{shortHash(candidateResult.resultHash)}</dd></div><div><dt>规则哈希</dt><dd title={candidateResult.ruleProfileDigest}>{shortHash(candidateResult.ruleProfileDigest)}</dd></div></dl>
                   <ul className="warning-list">{candidateResult.warnings.map((warning, index) => <li key={`${index}-${warning}`}>{safeVisibleText(warning, "候选组返回了不可显示的警告。")}</li>)}</ul>
-                  <div className="info-panel"><Info aria-hidden="true" /><p>候选会保存为独立 CandidateSetRecord，顶层继续保留 unknown_hour 与 time=null；任何代表探针或 DST 变体都不会写成真实出生时刻或主盘。</p></div>
+                  </details>
+                  <div className="info-panel"><Info aria-hidden="true" /><p>{simple ? "保存后可查看各时辰的候选命盘。出生时间仍保持未知，之后可以补充资料再判断。" : "候选会保存为独立 CandidateSetRecord，顶层继续保留 unknown_hour 与 time=null；任何代表探针或 DST 变体都不会写成真实出生时刻或主盘。"}</p></div>
                 </div>
               ) : !calculated ? (
-                <div className="generate-callout"><span className="spine-dot" /><div><h3>{form.timePrecision === "unknown_hour" ? "尚未生成候选组" : "尚未生成命盘"}</h3><p>{form.timePrecision === "unknown_hour" ? "点击“生成 13 个候选”，歧义时刻会保留为未解析，不影响其他探针。" : "点击“生成命盘”后，页面会调用当前本地历法适配层，并显示所有工程预览警告；生成本身不会写入案例库。"}</p></div></div>
+                <div className="generate-callout" hidden={simple && calculating}><span className="spine-dot" /><div><h3>{form.timePrecision === "unknown_hour" ? "尚未生成候选组" : "尚未生成命盘"}</h3><p>{form.timePrecision === "unknown_hour" ? "点击“生成 13 个候选”，歧义时刻会保留为未解析，不影响其他探针。" : "点击“生成命盘”后，页面会调用当前本地历法适配层，并显示所有工程预览警告；生成本身不会写入案例库。"}</p></div></div>
               ) : (
                 <div className="calculation-preview" aria-live="polite">
-                  <div className="preview-heading"><div><p className="eyebrow">计算完成</p><h3>四柱候选结果</h3></div><StatusPill tone="warning">工程预览</StatusPill></div>
+                  <div className="preview-heading"><div><p className="eyebrow">计算完成</p><h3>四柱候选结果</h3></div><StatusPill tone="info">保存后查看解读</StatusPill></div>
                   <div className="mini-pillars">
                     {Object.values(calculated.facts.pillars).map((pillar) => <div key={pillar.name}><small>{pillar.label}</small><strong>{pillar.stem}</strong><strong>{pillar.branch}</strong><span>{pillar.stemTenGod}</span></div>)}
                   </div>
+                  <details className="wizard-technical-details"><summary>查看计算依据与适用范围</summary>
                   <dl className="hash-preview"><div><dt>结果哈希</dt><dd title={calculated.manifest.resultHash}>{shortHash(calculated.manifest.resultHash)}</dd></div><div><dt>规则哈希</dt><dd title={calculated.manifest.ruleProfileDigest}>{shortHash(calculated.manifest.ruleProfileDigest)}</dd></div></dl>
                   <ul className="warning-list">{calculated.manifest.warnings.map((warning, index) => <li key={`${index}-${warning}`}>{safeVisibleText(warning, "计算结果返回了不可显示的警告。")}</li>)}</ul>
+                  </details>
                 </div>
               )}
             </div>
           ) : null}
 
-          {step === 3 ? (
+          {step === 3 && !simple ? (
             <div className="wizard-commit-state" data-state={commitState} data-certainty={commitReceiptIssue?.certainty ?? "not-applicable"} role="status" aria-live="polite" aria-atomic="true">
               <span className="wizard-commit-indicator" aria-hidden="true" />
               <div><strong>{commitStateTitle}</strong><small>{commitStateDescription}</small></div>
             </div>
           ) : null}
+
+          {step === 3 && simple && !commitReceiptIssue ? <p className="wizard-local-note" role="status">{calculating ? "正在根据出生资料生成命盘…" : saving ? "正在保存到本机…" : calculated || candidateResult ? "命盘已生成，核对后即可保存并查看解读。" : "请检查资料后重新生成命盘。"}</p> : null}
 
           {commitReceiptIssue ? (
             <div className="wizard-write-receipt-issue" data-certainty={commitReceiptIssue.certainty} role="alert" aria-labelledby="wizard-write-receipt-title">
@@ -1484,14 +1581,15 @@ export function NewChartPage(props: NewChartPageProps = {}) {
           {error ? <div className="inline-error" id="wizard-error" role="alert"><strong>还不能继续</strong><p>{safeVisibleText(error, "排盘流程未能继续。", 900)}</p></div> : null}
 
           <div className="wizard-actions">
-            <button type="button" className="secondary-action" onClick={previousStep} disabled={step === 0 || calculating || saving || writeCommitted || Boolean(commitReceiptIssue)}><ArrowLeft aria-hidden="true" />上一步</button>
+            <button type="button" className="secondary-action" onClick={previousStep} disabled={step === initialStep || calculating || saving || writeCommitted || Boolean(commitReceiptIssue)}><ArrowLeft aria-hidden="true" />上一步</button>
             <button type="submit" className="primary-action" disabled={calculating || saving || writeCommitted || Boolean(commitReceiptIssue)} aria-busy={calculating || saving}>
-              {step < 3 ? <>下一步 <ArrowRight aria-hidden="true" /></> : form.timePrecision === "unknown_hour" ? candidateResult ? <>{saving ? <LoaderCircle className="spin" aria-hidden="true" /> : <Save aria-hidden="true" />} {saving ? "正在保存候选组" : "保存并打开候选组"}</> : <>{calculating ? <LoaderCircle className="spin" aria-hidden="true" /> : <Clock3 aria-hidden="true" />} {calculating ? "正在生成候选" : "生成 13 个候选"}</> : !calculated ? <>{calculating ? <LoaderCircle className="spin" aria-hidden="true" /> : <Clock3 aria-hidden="true" />} {calculating ? "正在计算" : "生成命盘"}</> : <>{saving ? <LoaderCircle className="spin" aria-hidden="true" /> : <Save aria-hidden="true" />} {revisionMode ? saving ? "正在保存新修订" : "保存为新修订并打开" : saving ? "正在保存" : "保存并打开"}</>}
+              {step < 3 ? <>{simple ? "生成我的命盘" : "下一步"} <ArrowRight aria-hidden="true" /></> : form.timePrecision === "unknown_hour" ? candidateResult ? <>{saving ? <LoaderCircle className="spin" aria-hidden="true" /> : <Save aria-hidden="true" />} {saving ? "正在保存候选组" : "保存并打开候选组"}</> : <>{calculating ? <LoaderCircle className="spin" aria-hidden="true" /> : <Clock3 aria-hidden="true" />} {calculating ? "正在生成候选" : "生成 13 个候选"}</> : !calculated ? <>{calculating ? <LoaderCircle className="spin" aria-hidden="true" /> : <Clock3 aria-hidden="true" />} {calculating ? "正在计算" : "生成命盘"}</> : <>{saving ? <LoaderCircle className="spin" aria-hidden="true" /> : <Save aria-hidden="true" />} {revisionMode ? saving ? "正在保存新修订" : "保存为新修订并打开" : saving ? "正在保存" : simple ? "保存到本机并查看解读" : "保存并打开"}</>}
             </button>
           </div>
         </fieldset>
 
         <aside className="rule-snapshot" aria-label="当前规则快照">
+          <details className="wizard-technical-details"><summary>查看所用排盘规则</summary>
           <div className="snapshot-header"><p className="eyebrow">Rule snapshot</p><h2>当前规则快照</h2><StatusPill tone="warning">{safeVisibleText(activeRule.status, "状态不可用", 80)}</StatusPill></div>
           <dl>
             <div><dt>配置</dt><dd>{safeVisibleText(activeRule.profileId, "规则 ID 不可显示", 160)}</dd></div>
@@ -1505,6 +1603,7 @@ export function NewChartPage(props: NewChartPageProps = {}) {
             <div><dt>神煞</dt><dd>{activeRule.layers.shensha ? "开启" : "关闭"}</dd></div>
           </dl>
           <p className="snapshot-notice">{safeVisibleText(activeRule.notice, "当前规则没有可显示的说明。", 800)}</p>
+          </details>
         </aside>
       </form>
     </div>

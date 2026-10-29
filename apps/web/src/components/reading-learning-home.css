@@ -1,0 +1,39 @@
+.reading-learning-home { max-width: 1080px; margin-inline: auto; color: var(--ink-900); }
+.reading-learning-heading { max-width: 760px; margin-bottom: 24px; }
+.reading-learning-eyebrow { color: var(--jade-700); font-size: .85rem; font-weight: 700; letter-spacing: .08em; }
+.reading-learning-heading h1 { font-family: var(--font-editorial); font-size: clamp(1.7rem, 4vw, 2.4rem); line-height: 1.35; margin: 8px 0 12px; }
+.reading-learning-heading > p:not(.reading-learning-eyebrow) { color: var(--ink-650); line-height: 1.75; }
+.reading-learning-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; }
+.reading-learning-actions a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--jade-700); text-underline-offset: 4px; }
+.reading-learning-actions svg, .reading-learning-search svg { width: 20px; height: 20px; flex-shrink: 0; }
+.reading-learning-return { font-weight: 700; }
+.reading-learning-return-note { font-size: .9rem; }
+.reading-learning-search { max-width: 760px; }
+.reading-learning-search > label { display: block; font-weight: 700; margin-bottom: 8px; }
+.reading-learning-search > div { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 4px 12px; border: 1px solid var(--line-200); border-radius: 8px; background: var(--paper-raised); color: var(--ink-500); }
+.reading-learning-search input { width: 100%; min-width: 0; min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: var(--ink-900); font: inherit; }
+.reading-learning-search input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+.reading-learning-search button { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; padding: 0; border: 0; color: var(--jade-700); background: transparent; cursor: pointer; }
+.reading-learning-search > p, .reading-learning-count { font-size: .9rem; line-height: 1.6; color: var(--ink-650); }
+.reading-learning-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 12px; }
+.reading-learning-filters button, .reading-learning-empty button { min-height: 44px; padding: 8px 12px; border: 1px solid var(--line-200); border-radius: 6px; background: var(--paper-raised); color: var(--ink-900); font: inherit; cursor: pointer; }
+.reading-learning-filters button[aria-pressed="true"] { color: var(--paper-raised); background: var(--jade-700); border-color: var(--jade-700); }
+.reading-learning-home :is(a, input, button, summary):focus-visible { outline: 3px solid var(--jade-700); outline-offset: 3px; }
+.reading-learning-home :is(a, input, button, summary) { scroll-margin-block: 90px calc(2rem + env(safe-area-inset-bottom)); }
+.reading-learning-entries { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 12px; }
+.reading-learning-entries details { min-width: 0; border: 1px solid var(--line-200); border-radius: 8px; background: var(--paper-raised); overflow-wrap: anywhere; }
+.reading-learning-entries summary { min-height: 52px; padding: 12px 16px; cursor: pointer; color: var(--jade-700); }
+.reading-learning-entries summary > span { margin-left: 4px; font-size: 1.1rem; font-weight: 700; }
+.reading-learning-entries summary > small { margin-left: 12px; color: var(--ink-650); font-size: .8rem; }
+.reading-learning-definition { padding: 0 16px 16px; line-height: 1.8; }
+.reading-learning-definition > p { margin: 0 0 12px; }
+.reading-learning-example { padding-top: 12px; border-top: 1px solid var(--line-200); color: var(--ink-650); }
+.reading-learning-example strong { display: block; color: var(--ink-900); font-size: .9rem; margin-bottom: 4px; }
+.reading-learning-definition > p:last-child { margin-bottom: 0; }
+.reading-learning-empty { padding: 24px; border: 1px solid var(--line-200); border-radius: 8px; background: var(--paper-raised); }
+.reading-learning-empty h2 { font-size: 1.1rem; }
+.reading-learning-boundary { max-width: 760px; margin-top: 24px; font-size: .9rem; color: var(--ink-650); line-height: 1.75; }
+@media (max-width: 680px) {
+  .reading-learning-entries { grid-template-columns: minmax(0, 1fr); }
+  .reading-learning-heading { margin-bottom: 20px; }
+}

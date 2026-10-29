@@ -3642,6 +3642,10 @@ describe("single-chart report projection", () => {
       "utf8"
     );
     const frozenV17 = JSON.parse(frozenV17Text);
+    const currentTransitV13 = JSON.parse(readFileSync(
+      resolve(process.cwd(), "packages/research-export/src/golden/single-chart-report.contract.v1.7.transit-v1.3.json"),
+      "utf8"
+    ));
     expect(frozenV10.formatVersion).toBe("1.0.0");
     expect(frozenV10).not.toHaveProperty("events");
     expect(frozenV11.formatVersion).toBe("1.1.0");
@@ -3664,12 +3668,18 @@ describe("single-chart report projection", () => {
     expect(frozenV16.interpretationEvidence.boundary).not.toHaveProperty("admissionLedgerCopiesSourceText");
     expect(await sha256Hex(frozenV17Text)).toBe("aba357d98a99271cc9a9b2727ad1c7c516424c94b7cf34f765cb38b0e9a74b29");
     expect(frozenV17.formatVersion).toBe("1.7.0");
-    expect(projection).toEqual(frozenV17);
+    expect(currentTransitV13).toEqual({ ...frozenV17, calculationSource: {
+      ...frozenV17.calculationSource,
+      profileId: "hakimi-explicit-derived-replay:relations-0.1.0_luck-0.1.0_transit-1.3.0"
+    } });
+    expect(projection).toEqual(currentTransitV13);
 
     expect(projection.formatVersion).toBe("1.7.0");
     expect(projection.pillars).toEqual(frozenV16.pillars);
     expect(projection.rowLabels).toEqual(frozenV16.rowLabels);
-    expect(projection.calculationSource).toEqual(frozenV16.calculationSource);
+    expect(projection.calculationSource).toEqual({ ...frozenV16.calculationSource,
+      profileId: "hakimi-explicit-derived-replay:relations-0.1.0_luck-0.1.0_transit-1.3.0"
+    });
     expect(projection.interpretationEvidence.statementSequence)
       .toEqual(frozenV16.interpretationEvidence.statementSequence);
     expect(projection.interpretationEvidence.statementEvidence)
