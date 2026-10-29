@@ -1,0 +1,357 @@
+{
+  "format": "hakimi-exact-head-migration-terminal/1",
+  "head": "daf5ff04cef49f8e38fe9ac31abd291c22250207",
+  "actualCheckout": "cc93953996e92acb4d482873a84fec0a0ca34531",
+  "sourceAndCheckoutTree": "1f209001b296e70b786befbbd68ee9422fb37901",
+  "runId": 40896529112,
+  "runAttempt": 1,
+  "conclusion": "success",
+  "jobs": [
+    {
+      "id": 123527033983,
+      "name": "Migration / cross-schema-upgrade",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 123527034166,
+      "name": "Migration / cross-schema-v13-v15",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 123527034439,
+      "name": "Migration / orphaned-v13-recovery",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 123527034445,
+      "name": "Migration / cross-schema-v13-v16",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 123527034507,
+      "name": "Migration / cross-schema-v14-v15",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 123546274513,
+      "name": "Complete migration matrix",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "suites": [
+    {
+      "suite": "orphaned-v13-recovery",
+      "artifactId": 12909310542,
+      "zipBytes": 4886079,
+      "zipSha256": "57b468e83fbff76e242dc206fcf763427065f2237c06ae0776073985b81e35a4",
+      "actualCheckout": "cc93953996e92acb4d482873a84fec0a0ca34531",
+      "stats": {
+        "startTime": "2026-10-29T15:12:17.984Z",
+        "duration": 258111.241,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "originalScenarioIdentityVerifierExit": 0
+    },
+    {
+      "suite": "cross-schema-v13-v16",
+      "artifactId": 12908369276,
+      "zipBytes": 10679624,
+      "zipSha256": "a765c794d854e10f8d55995a77e9dbe318e296b179a73606b6efec32c92d6c5e",
+      "actualCheckout": "cc93953996e92acb4d482873a84fec0a0ca34531",
+      "stats": {
+        "startTime": "2026-10-29T15:07:18.586Z",
+        "duration": 1262112.267,
+        "expected": 26,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "originalScenarioIdentityVerifierExit": 0
+    },
+    {
+      "suite": "cross-schema-v13-v15",
+      "artifactId": 12908161610,
+      "zipBytes": 173642,
+      "zipSha256": "504e334cac1124cae645e54757ca4529eb8beecf72154384eff403202522221f",
+      "actualCheckout": "cc93953996e92acb4d482873a84fec0a0ca34531",
+      "stats": {
+        "startTime": "2026-10-29T15:00:09.636Z",
+        "duration": 182317.3,
+        "expected": 6,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "originalScenarioIdentityVerifierExit": 0
+    },
+    {
+      "suite": "cross-schema-v14-v15",
+      "artifactId": 12907078693,
+      "zipBytes": 173558,
+      "zipSha256": "21f4c0c7728a0c7d634461a2df08d0f5e9c10489231faae75ed3f2228ec9b9a9",
+      "actualCheckout": "cc93953996e92acb4d482873a84fec0a0ca34531",
+      "stats": {
+        "startTime": "2026-10-29T15:05:11.775Z",
+        "duration": 209429.982,
+        "expected": 6,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "originalScenarioIdentityVerifierExit": 0
+    },
+    {
+      "suite": "cross-schema-upgrade",
+      "artifactId": 12907077680,
+      "zipBytes": 116113,
+      "zipSha256": "fa6fd2565adf353c3c790c2482b38ff74e96699d8b526e5650dd654e4e863087",
+      "actualCheckout": "cc93953996e92acb4d482873a84fec0a0ca34531",
+      "stats": {
+        "startTime": "2026-10-29T14:59:54.946Z",
+        "duration": 97382.694,
+        "expected": 3,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "originalScenarioIdentityVerifierExit": 0
+    }
+  ],
+  "totalExpected": 45,
+  "totalUnexpected": 0,
+  "totalSkipped": 0,
+  "totalFlaky": 0,
+  "netLog": {
+    "fileCount": 26,
+    "allFilesCompleteJsonParsed": true,
+    "totalBytes": 132630510,
+    "noBufferSpaceEvents": 0,
+    "wsaenobufsEvents": 0,
+    "files": [
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-09e21--试运行页在源冻结被慢旧页拖过时限后自动重试并完成收敛-chrome\\browser-netlog.json",
+        "bytes": 5054533,
+        "sha256": "11e2dc0031baf3e723442e7d9588bc34ee2c0f1c9bd427321acc948ceb0ba44b",
+        "events": 32847,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-09e21--试运行页在源冻结被慢旧页拖过时限后自动重试并完成收敛-msedge\\browser-netlog.json",
+        "bytes": 4948196,
+        "sha256": "8b94d61e3f3dc1b1df2835e87777ed73db8b4064e024666ef58228908a489f19",
+        "events": 32539,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-15acc-6-目标启动校验失败时隔离影子库并保持-v13-可恢复-chrome\\browser-netlog.json",
+        "bytes": 4937163,
+        "sha256": "38b09ef449736e1cd54bd125b7786f3bcc35df9d15b9853292af9371752c298e",
+        "events": 32485,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-15acc-6-目标启动校验失败时隔离影子库并保持-v13-可恢复-msedge\\browser-netlog.json",
+        "bytes": 4913427,
+        "sha256": "4e5b59d1ca08d43cba0234d9638881dcba5e525e8d8001d0d86e1548a861c345",
+        "events": 32208,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-1b1f6--v16-目标完整审计摘要不符时删除目标并保留-v13-chrome\\browser-netlog.json",
+        "bytes": 4974859,
+        "sha256": "cd6c196703879b318ceb686b5d3772dabce8ce9aaae382c80fb1f1cf0099d0b9",
+        "events": 32543,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-1b1f6--v16-目标完整审计摘要不符时删除目标并保留-v13-msedge\\browser-netlog.json",
+        "bytes": 4868749,
+        "sha256": "5a0c53009f08c8eb5d612c72d0d06b2c4e313533a661378a7ad20d0a719369c5",
+        "events": 32344,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-4fb6d-S-失败，随后全审计恢复并命中-clean-cache-chrome\\browser-netlog.json",
+        "bytes": 5072111,
+        "sha256": "5852fef502c41c4823becad34f4adee0e8246c327ea057802a0b5d50badadefd",
+        "events": 33346,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-4fb6d-S-失败，随后全审计恢复并命中-clean-cache-msedge\\browser-netlog.json",
+        "bytes": 5102021,
+        "sha256": "2441c2d5e08671f4cef22da67e4831b596fa2b24f2222a33ac8f2473f9ae37d4",
+        "events": 33276,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-6c095--只清理不续跑，新-migrationId-可长期重发-chrome\\browser-netlog.json",
+        "bytes": 7653479,
+        "sha256": "221ccb05db84e93d5cc2f218c74197295ea45f8075571a17494974722d9682d4",
+        "events": 53238,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-6c095--只清理不续跑，新-migrationId-可长期重发-msedge\\browser-netlog.json",
+        "bytes": 8452738,
+        "sha256": "3036b2ae1ed64a5f698f380742f2c34803c26c8046e6251ee563b9744480a0a6",
+        "events": 57838,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-7472b-OOT-OK-中断时保持写锁，刷新后-clean-收敛-chrome\\browser-netlog.json",
+        "bytes": 4989277,
+        "sha256": "05a1625c19ed1b37a79b5be03af5a1988963e9434c535553eee48a45b94a5736",
+        "events": 32604,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-7472b-OOT-OK-中断时保持写锁，刷新后-clean-收敛-msedge\\browser-netlog.json",
+        "bytes": 4880545,
+        "sha256": "734e5a1bdf493af62281195453614660291487881c98b6f7eb6001d13cf0ebc0",
+        "events": 32438,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-a25cd-万条慢审计时，新-v16-worker-接管后自动收敛-chrome\\browser-netlog.json",
+        "bytes": 5192430,
+        "sha256": "3ea00f747902cfb88828cc0c90b74e11fe6ecadf85526cdc496293d55f0017ff",
+        "events": 33721,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-a25cd-万条慢审计时，新-v16-worker-接管后自动收敛-msedge\\browser-netlog.json",
+        "bytes": 5071282,
+        "sha256": "7807959cd40db40450471264a677cf453333b3a307ec51e09a9c83a7d6ae47fd",
+        "events": 33365,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-a752d-ty、全审计恢复-clean、再次启动命中-cache-chrome\\browser-netlog.json",
+        "bytes": 5232161,
+        "sha256": "a5265da831e051b63e8c3701dee9df176b97d37ce92388281529b61a41927978",
+        "events": 33990,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-a752d-ty、全审计恢复-clean、再次启动命中-cache-msedge\\browser-netlog.json",
+        "bytes": 5590237,
+        "sha256": "b3aba8ea4ae5e875c27f7742badee3880878c7ea382751a9b63ad8acd96dc43f",
+        "events": 34701,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-bc6f9-多个-v13-页的真实写入，提交后旧页只收敛到-v16-chrome\\browser-netlog.json",
+        "bytes": 5155690,
+        "sha256": "ccbf1d078ab2d259915fa87e7748f098cc16228bb6bef3c0326928aa1a4a50d3",
+        "events": 33309,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-bc6f9-多个-v13-页的真实写入，提交后旧页只收敛到-v16-msedge\\browser-netlog.json",
+        "bytes": 4906856,
+        "sha256": "8334ec372e974da769c4ccc736e0fe93fa456a9f0bbc0993230d48cc1ce458e0",
+        "events": 32620,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-c82e4-versionchange-时超时失败关闭且不提交目标-chrome\\browser-netlog.json",
+        "bytes": 4946815,
+        "sha256": "4a26e616144e1de0e2014f60a93eaf0f3c88942dc97d151992b700c9fa0ecb40",
+        "events": 32519,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-c82e4-versionchange-时超时失败关闭且不提交目标-msedge\\browser-netlog.json",
+        "bytes": 5001236,
+        "sha256": "10d1561b68efe8d65273ad9219e9881e4ee2aa2bd2c6d6b0ab03ed812bcf627d",
+        "events": 32772,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-d0656-不足时保留-v13、目标零创建且不发送-BOOT-OK-chrome\\browser-netlog.json",
+        "bytes": 4945248,
+        "sha256": "679ced234083070c4dce972015700bf4cc6463b93bfb89e260cdeaebfd9a007d",
+        "events": 32497,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-d0656-不足时保留-v13、目标零创建且不发送-BOOT-OK-msedge\\browser-netlog.json",
+        "bytes": 4877059,
+        "sha256": "dff242dc341060ac058d950da70a10d7cbe2d2c8e393e96c8c38490639bb5f9a",
+        "events": 32394,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-d3003--shadow、mutationState-不留下半代-chrome\\browser-netlog.json",
+        "bytes": 4994040,
+        "sha256": "76467df2461f376289475ff4f0b178731874e2d0f22f43f6bddf97f45aa0a59e",
+        "events": 32613,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-d3003--shadow、mutationState-不留下半代-msedge\\browser-netlog.json",
+        "bytes": 4871988,
+        "sha256": "06e1436005fed91f55bfeaa8c62293a94b314e993b2df7987fdef93c4626a97d",
+        "events": 32342,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-fb713-空-v13-建立完整目标并确认-clean-epoch-chrome\\browser-netlog.json",
+        "bytes": 2884223,
+        "sha256": "6c9d125770908b2d786f2fad24e217480ce78f9dc407f4a547629099cc10a0e5",
+        "events": 18502,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      },
+      {
+        "path": "migration-cross-schema-v13-v16-12908369276\\test-results\\service-worker-cross-schem-fb713-空-v13-建立完整目标并确认-clean-epoch-msedge\\browser-netlog.json",
+        "bytes": 3114147,
+        "sha256": "e39fa16e44d27c1d879a0564ff94411012e58f4adeaf9acb9cd200f8678b7277",
+        "events": 18916,
+        "noBufferSpaceEvents": 0,
+        "wsaenobufsEvents": 0
+      }
+    ]
+  },
+  "boundaries": {
+    "formalReleaseEvidence": false,
+    "historicalFailuresOverwritten": false,
+    "originalActivationRootCauseResolved": false,
+    "originalInstallRootCauseResolved": false,
+    "learningFallbackChangeIncluded": true
+  }
+}

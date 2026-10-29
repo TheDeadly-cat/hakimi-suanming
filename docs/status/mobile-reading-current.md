@@ -1,12 +1,12 @@
 # 手机阅读与 Android 当前状态
 
-2026-10-29 更新。当前本机内部试用入口为 **[5248 新候选](http://127.0.0.1:5248/new)**，构建 **`18900d13f8ce`**，报告 0.22.3、白话 0.1.3。双击 `%USERPROFILE%\HakimiBaziWorkbenchCandidates\scoped-reading-20261029-9fd8571-18900d13f8ce\origin5248\打开本轮试用.cmd` 可重新启动。它依赖本机现有 Node/Vite，不是通用安装包或 Android APK。
+2026-10-29 更新。当前本机内部试用入口为 **[5249 新候选](http://127.0.0.1:5249/new)**，构建 **`d580936a9fdd`**，报告 0.22.3、白话 0.1.3。双击 `%USERPROFILE%\HakimiBaziWorkbenchCandidates\scoped-reading-20261029-daf5ff0-d580936a9fdd\origin5249\打开本轮试用.cmd` 可重新启动。它依赖本机现有 Node/Vite，不是通用安装包或 Android APK。
 
 本轮源码在 `codex/event-index-candidate-20261011`，通过 [Draft PR #17](https://github.com/TheDeadly-cat/hakimi-suanming/pull/17) 审阅，基础分支仍为 `codex/journal-event-index-20261010`。独立工程工作继续推进；真人记录、SDK 许可和专家证据分别列为未完成项。
 
-工程结果按提交区分：最近已核清的 `53327f9` 完整 Vitest **4545/4545**、Quick 工程汇总、历史治理 **841/841** 和完整迁移 **45/45** 均通过；正式专家门槛仍失败。`110e87f` 的缓存安装失败和 `3d094eb` 的 Chrome 接管失败保留，根因尚未确定。后续学习返回入口修正的实时结果见 [PR 检查](https://github.com/TheDeadly-cat/hakimi-suanming/pull/17/checks)，不能套用旧提交结果。
+工程结果按提交区分：当前候选源码 `daf5ff0` 的完整 Vitest **4545/4545**、Quick 工程汇总、历史治理 **841/841** 和完整迁移 **45/45** 均已通过；正式专家门槛失败。`110e87f` 的缓存安装失败和 `3d094eb` 的 Chrome 接管失败保留，根因尚未确定。后续说明提交的实时结果见 [PR 检查](https://github.com/TheDeadly-cat/hakimi-suanming/pull/17/checks)，不能套用候选源码的通过结果。
 
-后续源码已把学习页无可返回身份时的“到档案看报告／重新选择报告”接到统一报告列表 `/reports`，有可用身份时仍精确返回原修订。**固定 5248 尚未包含这处入口修正**；下一固定包另行交付，不覆盖或改标本副本。
+本候选已把学习页无可返回身份时的“到档案看报告／重新选择报告”接到统一报告列表 `/reports`，有可用身份时仍精确返回原修订。新包已实际验证两种返回情况，旧 5248 继续保留原身份。
 
 ## 现在可以完成什么
 
@@ -22,17 +22,17 @@
 
 | 项目 | 身份与证据 |
 | --- | --- |
-| 功能源码 | `9fd857108a977754ccbbc688c863cc3c4d07c431` |
-| CI 实际检出 | PR 合并测试提交 `031e93e99a7b1adeb33fa4023478511466513870` |
-| 源码树核对 | 两者均为 `e5c55fee6ab0acfd092c9f5ec065a998b67d8988`，见[只读核对](../review-data/scoped-reading-20261029/ci-candidate-9fd-tree-binding.json) |
-| 构建来源 | [Quick CI 40808513399](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40808513399)，构建与产物合同任务成功；artifact `12869377067` |
-| 原下载 ZIP | 4,633,679 字节；SHA-256 `36b428749282da0aafbc7075c5b83d3b7b5966aa2e29f64f27e2e7cbcab4b39f` |
-| 固定产物 | 146 个文件，15,697,379 字节；下载、提取及复制后的资源一致 |
+| 功能源码 | `daf5ff04cef49f8e38fe9ac31abd291c22250207` |
+| CI 实际检出 | PR 合并测试提交 `cc93953996e92acb4d482873a84fec0a0ca34531` |
+| 源码树核对 | 两者均为 `1f209001b296e70b786befbbd68ee9422fb37901`，见[构建与检出回执](../review-data/scoped-reading-20261029/fixed-ci-candidate-daf-receipt.json) |
+| 构建来源 | [Quick CI 40896529130](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40896529130)，构建与产物合同任务成功；artifact `12907406527` |
+| 原下载 ZIP | 4,633,671 字节；SHA-256 `47930c5d102bf2d38de90f784c9f2510bb361924a4def8c10a4ed45066692cfb` |
+| 固定产物 | 146 个文件，15,697,381 字节；下载、提取及复制后的资源一致 |
 | 数据合同 | `legacy-v13 / schema 13 / migration null`；正式发布证据仍未绑定 |
 
-[固定候选交付回执](../review-data/scoped-reading-20261029/fixed-ci-candidate-9fd-receipt.json)记录真实关于版本、合成建档、指定年份范围保存、学习返回、个人档案找回、关闭 Edge 后同文重开和窄屏检查。七组检查通过，控制台及页面错误为零。**构建任务成功不等于整个 CI 通过，也不等于专家、权利或公开发布授权。** 后续测试及说明提交不重标固定包的来源，PR head 的 CI 单独报告。
+[固定候选交付回执](../review-data/scoped-reading-20261029/fixed-ci-candidate-daf-receipt.json)记录真实关于版本、学习页两种返回、合成建档、指定年份范围保存、学习返回原修订、个人档案找回、关闭 Edge 后同文重开和窄屏检查。九组检查通过，控制台及页面错误为零。**构建任务成功不等于整个 CI 通过，也不等于专家、权利或公开发布授权。** 后续说明提交不重标固定包的来源，PR head 的 CI 单独报告。
 
-原日常安装身份 `695fb91e98d6 / 0.22.0 / 5202` 保留。本轮没有启动或替换它，也没有导入日常资料。旧 5244、5245、5246、5247 候选及进程保留；`b57972ffe0ce`、`6d56d3d17c02` 都是历史副本，不是本轮默认入口。新地址使用独立浏览器资料区，旧资料仍留在原地址与原用户配置中。
+原日常安装身份 `695fb91e98d6 / 0.22.0 / 5202` 保留。本轮没有启动或替换它，也没有导入日常资料。旧 5244、5245、5246、5247、5248 候选及进程保留；`b57972ffe0ce`、`6d56d3d17c02`、`18900d13f8ce` 都是历史副本，不是本轮默认入口。5248 的[原交付回执](../review-data/scoped-reading-20261029/fixed-ci-candidate-9fd-receipt.json)仍保留。新地址使用独立浏览器资料区，旧资料仍留在原地址与原用户配置中。
 
 ## 保存、内容和回访证据
 
@@ -50,7 +50,9 @@
 
 ![确认当前范围后保存](../review-data/scoped-reading-20261029/scope-confirmation-390.png)
 
-![固定新候选关闭浏览器后找回原范围报告](../review-data/scoped-reading-20261029/fixed-9fd-profile-reopen-360.png)
+![固定新候选关闭浏览器后找回原范围报告](../review-data/scoped-reading-20261029/fixed-daf-profile-reopen-360.png)
+
+![关于页面确认真实构建 d580936a9fdd](../review-data/scoped-reading-20261029/fixed-daf-about-build-390.png)
 
 ## 工程检查和保留的失败
 
@@ -71,8 +73,9 @@
 - [浏览器身份更正](../review-data/scoped-reading-20261029/browser-version-correction.json)：`3d094eb` 与 `110e87f` 实际均为 Chrome 156.0.8078.74 / Edge 156.0.4314.50。之前的“Chrome 151”来自 trace 用户代理字符串的误读；现按 `browser().version()` 注释更正，原始 CI 产物和外部旧分析保留，不能用浏览器升级解释两轮差异。
 - 后续诊断在每个隔离 v13→v16 浏览器进程启动时保留默认脱敏、8 MiB 滚动上限的 `browser-netlog.json`，随既有测试产物保存，用于观察安装前的连接错误。它不重试失败请求、不改变网络特性、断言、超时或冻结应用源码。[本地一次 Edge 定点验证](../review-data/scoped-reading-20261029/netlog-diagnostic-receipt.json)的慢页场景通过，关闭后完整解析 4,820,963 字节、31,723 条事件，未出现 `ERR_NO_BUFFER_SPACE`；完整矩阵门槛正确拒绝单场景结果，命令退出 1。网络日志开关依据 [Chromium 官方说明](https://chromium.googlesource.com/website.git/+/show/HEAD/site/for-testers/providing-network-details/index.md)；这证明诊断实际可用，不证明原 CI 失败已修复。
 - `53327f9` 的[Quick 与历史治理](../review-data/scoped-reading-20261029/ci-533-quick-history-terminal.json)为 4545/4545、841/841，工程汇总通过；[完整迁移](../review-data/scoped-reading-20261029/ci-533-migration-success.json)为 45/45，零失败、跳过和重试，五套原场景身份校验通过。26 份新增网络日志全部可完整解析，本次没有 `ERR_NO_BUFFER_SPACE` 或 `os_error=10055`。此轮通过证明该提交的工程结果，不补写历史失败原因；学习返回入口修正不在该提交内。
+- 当前固定包源码 `daf5ff0` 的[Quick 与历史治理](../review-data/scoped-reading-20261029/ci-daf-quick-history-terminal.json)为 375 文件、4545/4545 和 841/841，工程汇总通过；[完整迁移](../review-data/scoped-reading-20261029/ci-daf-migration-success.json)为 45/45、零失败、跳过和重试，26 份网络日志完整可解析，未出现同一缓冲区错误。这些结果与当前候选源码对应，正式专家门槛仍失败；后续纯说明提交不改变固定包身份。
 
-固定副本保留 `9fd8571` 原源码身份。后续测试与说明提交的结果按 [PR 当前提交的检查](https://github.com/TheDeadly-cat/hakimi-suanming/pull/17/checks)逐项核对；完整工程验收须同时核对工程汇总、历史治理和完整迁移矩阵。新运行不能覆盖历史失败，旧 head 的通过也不能替代新 head。
+固定副本保留 `daf5ff0` 原源码身份。后续说明提交的结果按 [PR 当前提交的检查](https://github.com/TheDeadly-cat/hakimi-suanming/pull/17/checks)逐项核对；完整工程验收须同时核对工程汇总、历史治理和完整迁移矩阵。新运行不能覆盖历史失败，旧 head 的通过也不能替代新 head。
 
 ## 完整目标的状态
 
@@ -80,7 +83,7 @@
 | --- | --- |
 | NEXT-01 | 原 H1、ACK 等待及冻结入口修复已落实；当前提交的工程汇总、历史治理和完整迁移矩阵分别见 PR 检查，正式专家准入单列 |
 | NEXT-02 / 03 / 07 | 紧凑入口、月份预览、范围保持已实现并分别验证；不扩称 Android 恢复完成 |
-| NEXT-04 | 当前固定候选为 5248 / `18900d13f8ce`，明确绑定 CI 检出与同一源码树，README/PR/本入口统一 |
+| NEXT-04 | 当前固定候选为 5249 / `d580936a9fdd`，明确绑定 CI 检出与同一源码树，README/PR/本入口统一 |
 | NEXT-05 | 用户明确尚无五人任务记录，先完成工程交付；真人验收单独待办，不伪造观察 |
 | NEXT-06 | 六类合成工程编辑审阅及否定条件修复完成；读者独立复述含义与限制仍待真实记录 |
 | NEXT-08 / 09 | Web 当前范围保存、当时白话、列表/档案读回、导出、混合备份预检恢复已组成完整功能；原生进程中断仍待验 |

@@ -1,0 +1,162 @@
+{
+  "format": "hakimi-exact-head-quick-history-terminal/1",
+  "observedAt": "2026-10-29 15:11:07 UTC",
+  "requestedHead": "daf5ff04cef49f8e38fe9ac31abd291c22250207",
+  "actualQuickCheckout": "cc93953996e92acb4d482873a84fec0a0ca34531",
+  "actualHistoryCheckout": "daf5ff04cef49f8e38fe9ac31abd291c22250207",
+  "sourceAndQuickCheckoutTree": "1f209001b296e70b786befbbd68ee9422fb37901",
+  "quick": {
+    "runId": 40896529130,
+    "runAttempt": 1,
+    "conclusion": "failure",
+    "vitest": {
+      "jobId": 123527034486,
+      "filesPassed": 375,
+      "filesTotal": 375,
+      "passed": 4545,
+      "total": 4545,
+      "durationSeconds": 538.88
+    },
+    "engineeringAggregate": {
+      "id": 123532579126,
+      "name": "Default legacy-v13 engineering aggregate",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "formalAggregate": {
+      "id": 123532639601,
+      "name": "Default legacy-v13 formal aggregate",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    "jobs": [
+      {
+        "id": 123527034014,
+        "name": "Node package artifact tools",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 123527034292,
+        "name": "Node release evidence tools",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 123527034299,
+        "name": "Default legacy-v13 Web build",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 123527034350,
+        "name": "Bazi current manifest and expert structure",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 123527034407,
+        "name": "Bazi formal expert admission",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 123527034426,
+        "name": "Current index governance",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 123527034486,
+        "name": "Full Vitest suite",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 123527034496,
+        "name": "Full workspace typecheck",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 123527034545,
+        "name": "Toolchain and boundaries",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 123527034693,
+        "name": "CI commands and test inventory",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 123527035072,
+        "name": "History checkpoint governance",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 123527578093,
+        "name": "Built artifact manifest verification",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 123532579126,
+        "name": "Default legacy-v13 engineering aggregate",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 123532639601,
+        "name": "Default legacy-v13 formal aggregate",
+        "status": "completed",
+        "conclusion": "failure"
+      }
+    ]
+  },
+  "history": {
+    "runId": 40896529164,
+    "runAttempt": 1,
+    "jobId": 123527033710,
+    "conclusion": "success",
+    "result": {
+      "group": "current-governance",
+      "status": "passed",
+      "selectedFiles": 30,
+      "counts": {
+        "tests": 841,
+        "failed": 0,
+        "passed": 841,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "topLevel": 841,
+        "suites": 0
+      },
+      "missingFileResults": [],
+      "error": null,
+      "resultPath": "/home/runner/work/hakimi-suanming/hakimi-suanming/test-results/node-groups/current-governance-C9b4ub/results.json"
+    }
+  },
+  "expert": {
+    "jobId": 123527034407,
+    "error": "EXPERT_QUALIFICATION_RECEIPT_LOADER_UNAVAILABLE",
+    "originalOpinions": 0,
+    "qualifiedIndependentOpinions": 0
+  },
+  "boundaries": {
+    "migrationResultNotInferred": true,
+    "formalReleaseAuthorized": false,
+    "androidSdkAccepted": false,
+    "realParticipantRecords": 0
+  },
+  "evidence": [
+    "vitest-count-checkout-evidence.log",
+    "history-count-checkout-evidence.log",
+    "history-group-result.json",
+    "formal-expert-error-evidence.log",
+    "git-commit-metadata.json"
+  ]
+}
