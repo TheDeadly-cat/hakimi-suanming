@@ -1,0 +1,34 @@
+{
+  "status": "targeted_test_synchronization_complete",
+  "productionChanged": false,
+  "changedFile": "apps/web/src/components/local-scoped-reading-save.test.tsx",
+  "originalCi": { "commit": "9fd8571", "job": "123233059788", "result": "1 failed / 4544 passed", "rootCause": "UNKNOWN: original DOM excerpt omitted the save-action terminal state; no original CI rerun or replacement" },
+  "observedUnmodifiedBehavior": {
+    "environment": "local Windows Vitest/jsdom, synthetic data; not physical mobile performance",
+    "reportGenerationMs": 113.5415,
+    "encodingCompressionMs": 120.1466,
+    "repositoryWriteMs": 81.375,
+    "strictReadbackMs": 1.5373,
+    "pageRefreshMs": 16287.3144,
+    "preparedYearGenerations": [[2026], [2030], [2030]],
+    "log": "month-save-timing-probe.log"
+  },
+  "deterministicProof": [
+    "Real current-month detail action produces a defined enabled confirmation and journal enters writing",
+    "Exactly one repository write plus exact complete-object readback; post_save_validation succeeds",
+    "A real post-write 2030 month calculation is held before UI publication while journal is idle, stored record exists, page_refresh is running and no success link is shown",
+    "Release actual month promise inside React act; scope-local success link appears and real timing finishes succeeded",
+    "Decoded saved conclusion equals the entire originally selected month conclusion, not only its ID",
+    "Only initially prepared years plus 2030 allowed; all() never called; still one record and idle at completion",
+    "Failure diagnostic reports phase, write/readback state, scope feedback and pending months without dumping synthetic saved text"
+  ],
+  "tests": {
+    "command": ".\\node_modules\\.bin\\vitest.cmd run --config apps/web/vitest.config.ts apps/web/src/components/local-scoped-reading-save.test.tsx",
+    "passed": 13,
+    "failed": 0,
+    "durationSeconds": 66.86,
+    "testSeconds": 62.31,
+    "log": "month-save-final-file.log"
+  },
+  "limits": ["No production source adjustment", "No timeout increase, sleep, skip or deleted assertions", "No full suite rerun by this agent", "Original CI failure cause remains undetermined", "Existing fixed candidate package identity unchanged"]
+}

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "recordType": "source_ci_migration_observation",
+  "sourceHead": "9fd857108a977754ccbbc688c863cc3c4d07c431",
+  "runId": 40808513306,
+  "runUrl": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40808513306",
+  "jobs": [
+    {
+      "id": 123233060038,
+      "name": "Migration / orphaned-v13-recovery",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 123233060160,
+      "name": "Migration / cross-schema-v13-v16",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 123233060298,
+      "name": "Migration / cross-schema-upgrade",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 123233060358,
+      "name": "Migration / cross-schema-v14-v15",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 123233060375,
+      "name": "Migration / cross-schema-v13-v15",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 123240654161,
+      "name": "Complete migration matrix",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "sourceObservedBy": "GitHub connected job metadata",
+  "limits": "Job terminal success; test counts and formal release admission are separate."
+}

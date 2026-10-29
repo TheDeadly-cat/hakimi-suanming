@@ -1,0 +1,75 @@
+{
+  "schema": "synthetic-scoped-mixed-backup-receipts/1",
+  "generatedAt": "2026-10-29T02:14:24.482Z",
+  "tests": [
+    {
+      "scenario": "mixed-fresh-restore",
+      "result": "passed",
+      "databaseSchema": 13,
+      "zipBytes": 36023,
+      "zipSha256": "f274448b44aa720eeb721a0e9926d77aaa03575adeba7eb44f40fb0eb6f725cf",
+      "records": 3,
+      "reopened": true,
+      "byteExact": true,
+      "reexportDigestsEqual": true,
+      "digests": [
+        {
+          "id": "3716cf8f-132d-4abf-af29-5e1921aabe6e",
+          "bodyUtf8Bytes": 68,
+          "originalSha256": "3667f52152776250e6c0335a8bc6657371ed1387d1a16f82a71d7fe4a4839e4a",
+          "restoredSha256": "3667f52152776250e6c0335a8bc6657371ed1387d1a16f82a71d7fe4a4839e4a"
+        },
+        {
+          "id": "fedc6fc3-8bd1-4412-a45a-ecb14ce25121",
+          "bodyUtf8Bytes": 67917,
+          "originalSha256": "acba9adb9098f487e70755f0d4b0a578fd2d8f3c4c4fb7b599440d6070312ac5",
+          "restoredSha256": "acba9adb9098f487e70755f0d4b0a578fd2d8f3c4c4fb7b599440d6070312ac5"
+        },
+        {
+          "id": "deb85bbc-d2ee-4082-86db-715805a66100",
+          "bodyUtf8Bytes": 20049,
+          "originalSha256": "c6ad4966a3f5163984891153de21047551f3ce4e1b89e22315905aab321f7b5c",
+          "restoredSha256": "c6ad4966a3f5163984891153de21047551f3ce4e1b89e22315905aab321f7b5c"
+        }
+      ]
+    },
+    {
+      "scenario": "same-id-different-body",
+      "result": "rejected-before-write",
+      "replaceCalls": 0,
+      "oldRecordsUnchanged": true
+    },
+    {
+      "scenario": "revision-hash",
+      "result": "rejected-before-write",
+      "outerZipPreflight": "passed",
+      "replaceCalls": 0,
+      "destinationUnchanged": true,
+      "sourceUnchanged": true
+    },
+    {
+      "scenario": "revision-input",
+      "result": "rejected-before-write",
+      "outerZipPreflight": "passed",
+      "replaceCalls": 0,
+      "destinationUnchanged": true,
+      "sourceUnchanged": true
+    },
+    {
+      "scenario": "missing-marker",
+      "result": "rejected-before-write",
+      "outerZipPreflight": "passed",
+      "replaceCalls": 0,
+      "destinationUnchanged": true,
+      "sourceUnchanged": true
+    },
+    {
+      "scenario": "unknown-version",
+      "result": "rejected-before-write",
+      "outerZipPreflight": "passed",
+      "replaceCalls": 0,
+      "destinationUnchanged": true,
+      "sourceUnchanged": true
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "states": [
+    {
+      "state": "normal",
+      "color": "rgb(255, 255, 255)",
+      "background": "rgb(33, 107, 97)",
+      "contrast": 6.286751087029158
+    },
+    {
+      "state": "hover",
+      "color": "rgb(255, 255, 255)",
+      "background": "rgb(33, 107, 97)",
+      "contrast": 6.286751087029158
+    }
+  ]
+}

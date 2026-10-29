@@ -1,0 +1,106 @@
+{
+  "environment": {
+    "browser": "Microsoft Edge headless",
+    "origin": "http://127.0.0.1:5243",
+    "source": "isolated synthetic fixture",
+    "fontScaleMethod": "root font size 24px versus 16px"
+  },
+  "errors": [],
+  "checks": [
+    {
+      "name": "zero-report fixture from real UI",
+      "caseCountBefore": 1,
+      "caseCountAfter": 2,
+      "zeroCaseId": "98d8c9fa-4599-49e4-b774-14845b7958f5",
+      "alias": "我的命盘 · 1996-06-12",
+      "reportCount": 3,
+      "oldRecordsByteExact": true,
+      "candidateCount": 1
+    },
+    {
+      "name": "360-default",
+      "zeroProfileLinkHeight": 44,
+      "focusAboveFooter": true,
+      "reportsOverflow": {
+        "viewport": 360,
+        "document": 360,
+        "body": 360
+      },
+      "profileOverflow": {
+        "viewport": 360,
+        "document": 360,
+        "body": 360
+      },
+      "profileRoundtrip": true,
+      "currentReadingAndRevisions": true,
+      "managementCandidateVisible": true,
+      "trashAccessible": true,
+      "reportCount": 3,
+      "reportsByteExact": true
+    },
+    {
+      "name": "390-default",
+      "zeroProfileLinkHeight": 44,
+      "focusAboveFooter": true,
+      "reportsOverflow": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      },
+      "profileOverflow": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      },
+      "profileRoundtrip": true,
+      "currentReadingAndRevisions": true,
+      "managementCandidateVisible": true,
+      "trashAccessible": true,
+      "reportCount": 3,
+      "reportsByteExact": true
+    },
+    {
+      "name": "360-font150",
+      "zeroProfileLinkHeight": 100,
+      "focusAboveFooter": true,
+      "reportsOverflow": {
+        "viewport": 360,
+        "document": 360,
+        "body": 360
+      },
+      "profileOverflow": {
+        "viewport": 360,
+        "document": 360,
+        "body": 360
+      },
+      "profileRoundtrip": true,
+      "currentReadingAndRevisions": true,
+      "managementCandidateVisible": true,
+      "trashAccessible": true,
+      "reportCount": 3,
+      "reportsByteExact": true
+    },
+    {
+      "name": "390-font150",
+      "zeroProfileLinkHeight": 100,
+      "focusAboveFooter": true,
+      "reportsOverflow": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      },
+      "profileOverflow": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      },
+      "profileRoundtrip": true,
+      "currentReadingAndRevisions": true,
+      "managementCandidateVisible": true,
+      "trashAccessible": true,
+      "reportCount": 3,
+      "reportsByteExact": true
+    }
+  ],
+  "status": "passed"
+}

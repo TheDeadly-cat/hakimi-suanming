@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-29T02:50:07.4314540Z",
+  "method": "read-only git fetch and commit metadata",
+  "sourceHead": "9fd857108a977754ccbbc688c863cc3c4d07c431",
+  "actualPrMerge": "031e93e99a7b1adeb33fa4023478511466513870",
+  "sourceTree": "e5c55fee6ab0acfd092c9f5ec065a998b67d8988",
+  "mergeTree": "e5c55fee6ab0acfd092c9f5ec065a998b67d8988",
+  "sameTree": true,
+  "parents": [
+    "2482941f46acafc6fe0b331f536db06a45710fc8",
+    "9fd857108a977754ccbbc688c863cc3c4d07c431"
+  ],
+  "scope": "Git tree identity only; artifact and CI status recorded separately"
+}

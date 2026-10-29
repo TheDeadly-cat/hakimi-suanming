@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "recordType": "source_head_quick_ci_terminal_failure_receipt",
+  "capturedAt": "2026-10-29T03:04:54.314Z",
+  "requestedHead": "9fd857108a977754ccbbc688c863cc3c4d07c431",
+  "actualCheckoutCommit": "031e93e99a7b1adeb33fa4023478511466513870",
+  "runId": 40808513399,
+  "runAttempt": 1,
+  "runStatus": "completed",
+  "runConclusion": "failure",
+  "runUrl": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40808513399",
+  "vitest": {
+    "jobId": 123233059788,
+    "status": "completed",
+    "conclusion": "failure",
+    "filesPassed": 374,
+    "filesFailed": 1,
+    "filesTotal": 375,
+    "testsPassed": 4544,
+    "testsFailed": 1,
+    "testsTotal": 4545,
+    "durationSeconds": 894.16,
+    "failedFile": "apps/web/src/components/local-scoped-reading-save.test.tsx",
+    "failedTest": "saves only the opened month's exact conclusion through the real detail action, without preparing other years",
+    "error": "TestingLibraryElementError: Unable to find role=\"link\" and name \"打开这份范围报告\"",
+    "causeBoundary": "CI proves the expected saved-report link was not observed. This receipt does not decide whether the root cause is asynchronous timing, an application failure or the test harness."
+  },
+  "engineeringAggregate": {
+    "jobId": 123237667736,
+    "status": "completed",
+    "conclusion": "failure",
+    "requiredEngineeringFailureJobs": [
+      123233059788
+    ]
+  },
+  "formalAggregate": {
+    "jobId": 123237694405,
+    "status": "completed",
+    "conclusion": "failure"
+  },
+  "expertAdmission": {
+    "jobId": 123233059677,
+    "status": "completed",
+    "conclusion": "failure",
+    "error": "EXPERT_QUALIFICATION_RECEIPT_LOADER_UNAVAILABLE"
+  },
+  "jobs": [
+    {
+      "jobId": 123233059464,
+      "name": "Current index governance",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "jobId": 123233059677,
+      "name": "Bazi formal expert admission",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "jobId": 123233059689,
+      "name": "Node package artifact tools",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "jobId": 123233059692,
+      "name": "Bazi current manifest and expert structure",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "jobId": 123233059710,
+      "name": "Default legacy-v13 Web build",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "jobId": 123233059712,
+      "name": "History checkpoint governance",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "jobId": 123233059718,
+      "name": "Toolchain and boundaries",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "jobId": 123233059741,
+      "name": "Full workspace typecheck",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "jobId": 123233059747,
+      "name": "Node release evidence tools",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "jobId": 123233059788,
+      "name": "Full Vitest suite",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "jobId": 123233059798,
+      "name": "CI commands and test inventory",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "jobId": 123233272291,
+      "name": "Built artifact manifest verification",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "jobId": 123237667736,
+      "name": "Default legacy-v13 engineering aggregate",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "jobId": 123237694405,
+      "name": "Default legacy-v13 formal aggregate",
+      "status": "completed",
+      "conclusion": "failure"
+    }
+  ],
+  "evidenceFiles": [
+    "quick-vitest-terminal-error-evidence.log",
+    "formal-expert-error-evidence.log"
+  ],
+  "boundaries": {
+    "noRerun": true,
+    "noRepositoryChanges": true,
+    "noPriorCandidateOrReceiptOverwritten": true,
+    "passedIsolatedCandidateSmokeDoesNotOverrideFailedFullCi": true
+  }
+}

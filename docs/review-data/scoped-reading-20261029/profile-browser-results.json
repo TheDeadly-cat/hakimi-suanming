@@ -1,0 +1,29 @@
+{
+  "origin": "http://127.0.0.1:5243",
+  "profile": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-next13-profile\\synthetic-profile",
+  "syntheticOnly": true,
+  "errors": [],
+  "checks": [
+    "case-list person link opens matching profile and archive navigation remains active",
+    "latest and historical saved originals open without recalculation",
+    "continue-current-reading and browser back return to profile"
+  ],
+  "browserPlugin": "not available",
+  "startedAt": "2026-10-29T01:23:52.257Z",
+  "browser": "156.0.4314.50",
+  "caseId": "bd9b51e9-20a2-4f2c-b917-97fe85823acf",
+  "revisionId": "8a2b7f43-4a75-4ae6-846a-61196b798431",
+  "reports": {
+    "oldId": "65ab892e-2a31-430e-83df-f0f31b3b1ad5",
+    "latestId": "c3b92208-1a8b-4668-b1d1-2c6a3176bef7"
+  },
+  "overflow360": {
+    "width": 360,
+    "body": 360,
+    "html": 360
+  },
+  "title": "个人档案 · 哈基米八字研究台",
+  "url": "http://127.0.0.1:5243/cases/bd9b51e9-20a2-4f2c-b917-97fe85823acf",
+  "status": "passed",
+  "completedAt": "2026-10-29T01:23:57.364Z"
+}

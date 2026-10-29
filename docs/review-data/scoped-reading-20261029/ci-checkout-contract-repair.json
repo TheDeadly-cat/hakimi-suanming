@@ -1,0 +1,50 @@
+{
+  "schema": "ci-checkout-contract-repair/1",
+  "baseHead": "238bf2275a97650324af71624de4a83078e2963f",
+  "modifiedFiles": [
+    "scripts/verify-migration-ci-paths.test.mjs"
+  ],
+  "before": {
+    "failed": 1,
+    "selectedFileTests": 28,
+    "cause": "current case-library-page.tsx intentionally differs from historical v2 frozen product_mutation_ui; not ACK syntax",
+    "passed": 27
+  },
+  "after": {
+    "groupFiles": 5,
+    "passed": 74,
+    "groupTests": 74,
+    "skipped": 0,
+    "selectedFileTests": 28,
+    "failed": 0,
+    "cancelled": 0,
+    "todo": 0
+  },
+  "unchangedFormalModules": [
+    "apps/web/sw-two-generation-fixture-source-identity.ts",
+    "apps/web/e2e/full-backup-helpers.ts",
+    "apps/web/public/sw.js",
+    "apps/web/e2e/historical-schema-boundary-helpers.ts",
+    "scripts/sw-two-generation-fixture-contract.test.mjs",
+    "scripts/verify-release-governance.mjs"
+  ],
+  "historicalV2ExpectedSHAUpdated": false,
+  "historicalFrozenRejectionPreserved": true,
+  "checkoutByteEqualityAllCriticalPaths": true,
+  "negativeCheckoutRawDriftPreserved": true,
+  "negativeCheckoutNormalizedIdentityPreserved": true,
+  "oldGithubJobRerun": false,
+  "originalGroupResultPath": "C:\\Users\\Administrator\\.codex\\worktrees\\journal-event-index-20261010\\哈基米算命\\test-results\\node-groups\\ci-contracts-Szwi6S\\results.json",
+  "preservedGroupResultPath": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-migration-ack\\ci-contract-238bf22\\node-group-results\\results.json",
+  "movedFiles": [
+    {
+      "Name": "events.jsonl",
+      "SHA256": "575A28D8155401A434028F743DFB74B24F8B09398031C31B3F940D82C533737D"
+    },
+    {
+      "Name": "results.json",
+      "SHA256": "221C550A141D5A2A65B8FC8B510A0530E4AB4E0EFFACF163FC6D9549AC2E680B"
+    }
+  ],
+  "allMovedHashesMatched": true
+}

@@ -1,0 +1,151 @@
+{
+  "format": "hakimi-local-frozen-gate-repair-observation/1",
+  "recordedAt": "2026-10-29T02:47:54.7564594Z",
+  "observedHead": "9c4cd7183e9e4402b5cad2451abaae5aa7690998",
+  "workingTree": "local dirty tree; frozen set restored while archive-entry work proceeds outside it",
+  "sourceEditsByReviewer": [],
+  "formalFrozenSet": {
+    "domain": "hakimi-sw-two-generation-critical-source-set-v2",
+    "fileCount": 22,
+    "expectedSha256": "abd5e9c572f803a7ad5c48d06223f70e2e99e38948f8bb6a8382eb5539596cae",
+    "actualSha256": "abd5e9c572f803a7ad5c48d06223f70e2e99e38948f8bb6a8382eb5539596cae",
+    "officialAssertionPassed": true,
+    "unchangedBaselineFiles": [
+      {
+        "path": "apps/web/src/pages/case-library-page.tsx",
+        "size": 78562,
+        "sha256": "dea2d2c86bf80e7466fe1d21b0f534bba7546283195689c1e40bf8e95ff431c5",
+        "baseline": "1fb610f",
+        "byteEqual": true
+      },
+      {
+        "path": "apps/web/src/pages/case-library-page.css",
+        "size": 40034,
+        "sha256": "76fbccfc6669e98a86be3fed69abb0eaf9aa3ea244dcac2358f9ab11a3fec831",
+        "baseline": "1fb610f",
+        "byteEqual": true
+      },
+      {
+        "path": "apps/web/sw-two-generation-fixture-source-identity.ts",
+        "size": 13501,
+        "sha256": "26674aa5a53729ee15cd491b56519c5d0c646a9381f150aa1cba17fc863598bf",
+        "baseline": "1fb610f",
+        "byteEqual": true
+      },
+      {
+        "path": "scripts/sw-two-generation-fixture-contract.test.mjs",
+        "size": 51763,
+        "sha256": "d9bb98f551526b702bac1a0c7ebe034e197c99e2e12d9cf219aed3d6a96b06cc",
+        "baseline": "1fb610f",
+        "byteEqual": true
+      },
+      {
+        "path": "scripts/fixtures/sw-critical-source-c0f9fdc.json",
+        "size": 6757,
+        "sha256": "836fc1d1419be6d6030a387a6593a57bd48c5e8ff2e3945b67bd54d6878bbbdb",
+        "baseline": "1fb610f",
+        "byteEqual": true
+      },
+      {
+        "path": "scripts/verify-release-governance.mjs",
+        "size": 367320,
+        "sha256": "bbde4ae6ad080cf36cfce8f37a1b899a239e045563ad835863986cfec1a15f65",
+        "baseline": "1fb610f",
+        "byteEqual": true
+      },
+      {
+        "path": "scripts/verify-release-governance.test.mjs",
+        "size": 281550,
+        "sha256": "b8155ce9e171d2e8a62578e9a7e961a734f989792ad18c8f31b47cffdfbb9900",
+        "baseline": "1fb610f",
+        "byteEqual": true
+      },
+      {
+        "path": "apps/web/e2e/full-backup-helpers.ts",
+        "size": 18187,
+        "sha256": "18670023bcf0fe862084bf9bc81ca3af0c48f79c878e3c54acc217ed9743dd74",
+        "baseline": "1fb610f",
+        "byteEqual": true
+      }
+    ],
+    "identityReceipt": "frozen-identity-receipt.json"
+  },
+  "historicalEvidence": {
+    "runId": 40804785241,
+    "pullRequestHead": "238bf2275a97650324af71624de4a83078e2963f",
+    "actualMergeCheckout": "34a895cb2b3451b6900de22ff798869bc1008f87",
+    "jobId": 123221008718,
+    "artifactId": 12867736438,
+    "zipSha256": "3911b2e2712e48bb1187d6a030d4de6ac5182df349531dcc16811df7c376e417",
+    "preservedOutcome": "failed",
+    "failures": [
+      {
+        "file": "scripts/release-evidence.test.mjs",
+        "name": "/home/runner/work/hakimi-suanming/hakimi-suanming/scripts/release-evidence.test.mjs",
+        "line": 1,
+        "error": "test failed"
+      },
+      {
+        "file": "scripts/sw-two-generation-fixture-contract.test.mjs",
+        "name": "fixture-only summary accepts the exact scenario, product, profile, and source matrix",
+        "line": 233,
+        "error": "Expected values to be strictly equal:\n\nfalse !== true\n"
+      },
+      {
+        "file": "scripts/sw-two-generation-fixture-contract.test.mjs",
+        "name": "the previous reviewed source identity cannot stand in for the current fixture scope",
+        "line": 530,
+        "error": "Got unwanted exception.\nActual message: \"SW two-generation fixture critical source identity drifted.\""
+      },
+      {
+        "file": "scripts/sw-two-generation-fixture-contract.test.mjs",
+        "name": "the c0f9fdc source epoch cannot authorize the reading 0.21 fixture",
+        "line": 978,
+        "error": "Got unwanted exception.\nActual message: \"SW two-generation fixture critical source identity drifted.\""
+      }
+    ],
+    "historicalGovernanceJobId": 123221008784,
+    "historicalGovernanceFailure": "scripts/verify-release-governance.test.mjs module failure caused by critical source identity drift",
+    "checkoutJobId": 123221009046,
+    "checkoutFailure": "Git Windows checkout preserves raw SW and governance identities plus retained mixed-newline files",
+    "relatedOriginalArtifacts": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-ci238-final-readonly"
+  },
+  "localTests": [
+    {
+      "command": "node --test scripts/sw-two-generation-fixture-contract.test.mjs scripts/release-evidence.test.mjs",
+      "head": "9c4cd7183e9e4402b5cad2451abaae5aa7690998",
+      "startedAt": "2026-10-29T02:45:54.5177349Z",
+      "completedAt": "2026-10-29T02:46:58.1871676Z",
+      "tests": 166,
+      "passed": 166,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exitCode": 0,
+      "log": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-archive-entry/gate-repair/restored-release-evidence.log"
+    },
+    {
+      "command": "node --test scripts/verify-release-governance.test.mjs scripts/verify-migration-ci-paths.test.mjs",
+      "head": "9c4cd7183e9e4402b5cad2451abaae5aa7690998",
+      "startedAt": "2026-10-29T02:45:54.5275824Z",
+      "completedAt": "2026-10-29T02:45:57.6074988Z",
+      "tests": 276,
+      "passed": 276,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exitCode": 0,
+      "log": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-archive-entry/gate-repair/restored-history-checkout.log"
+    }
+  ],
+  "outcome": "All four historical Node release-evidence failures are locally closed; history governance and Windows checkout regression paths pass; historical CI remains failed.",
+  "boundaries": [
+    "No source or frozen fixture/SHA edits by this reviewer",
+    "No rerun of old GitHub jobs",
+    "No new browser/build/migration acceptance claimed",
+    "No full repository or whole Node group rerun",
+    "Protected cleanup source was not manually read or hashed"
+  ]
+}

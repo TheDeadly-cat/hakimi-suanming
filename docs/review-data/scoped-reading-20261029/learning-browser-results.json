@@ -1,0 +1,106 @@
+{
+  "browser": "Microsoft Edge headless via Playwright",
+  "source": "existing synthetic state",
+  "viewports": [
+    {
+      "width": 360,
+      "title": "读懂报告里的词 · 哈基米八字研究台",
+      "initialTerms": 31,
+      "searchBox": {
+        "x": 59,
+        "y": 341.3125,
+        "width": 272,
+        "height": 44
+      },
+      "overflow": {
+        "width": 360,
+        "body": 360,
+        "html": 360
+      },
+      "keyboardDisclosure": true,
+      "search": {
+        "query": "偏弱",
+        "count": 1,
+        "originalDefinition": true,
+        "readingExample": true
+      },
+      "emptyReset": true,
+      "timeBrowse": {
+        "count": 4,
+        "query": "流月",
+        "matched": "节令月"
+      },
+      "professionalTools": {
+        "library": true,
+        "importPanel": true,
+        "sourceRights": true,
+        "evidenceCoverage": true,
+        "writesPerformed": false
+      },
+      "returnToReport": {
+        "sameRoute": true,
+        "topic": "wealth",
+        "year": 2030
+      },
+      "largeText": {
+        "rootFontSize": 24,
+        "overflow": {
+          "width": 360,
+          "body": 360,
+          "html": 360
+        }
+      }
+    },
+    {
+      "width": 390,
+      "title": "读懂报告里的词 · 哈基米八字研究台",
+      "initialTerms": 31,
+      "searchBox": {
+        "x": 59,
+        "y": 341.3125,
+        "width": 302,
+        "height": 44
+      },
+      "overflow": {
+        "width": 390,
+        "body": 390,
+        "html": 390
+      },
+      "keyboardDisclosure": true,
+      "search": {
+        "query": "偏弱",
+        "count": 1,
+        "originalDefinition": true,
+        "readingExample": true
+      },
+      "emptyReset": true,
+      "timeBrowse": {
+        "count": 4,
+        "query": "流月",
+        "matched": "节令月"
+      },
+      "professionalTools": {
+        "library": true,
+        "importPanel": true,
+        "sourceRights": true,
+        "evidenceCoverage": true,
+        "writesPerformed": false
+      },
+      "returnToReport": {
+        "sameRoute": true,
+        "topic": "wealth",
+        "year": 2030
+      },
+      "largeText": {
+        "rootFontSize": 24,
+        "overflow": {
+          "width": 390,
+          "body": 390,
+          "html": 390
+        }
+      }
+    }
+  ],
+  "errors": [],
+  "completed": true
+}
