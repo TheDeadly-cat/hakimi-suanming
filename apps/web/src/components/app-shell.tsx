@@ -11,7 +11,7 @@ import {
   WifiOff
 } from "lucide-react";
 import { memo, type ReactNode, useEffect, useMemo, useRef } from "react";
-import { CANDIDATE_SET_ROUTE, CASE_REVISE_ROUTE, CASE_REVISION_ROUTE } from "../lib/app-route-patterns";
+import { CANDIDATE_SET_ROUTE, CASE_PROFILE_ROUTE, CASE_REVISE_ROUTE, CASE_REVISION_ROUTE } from "../lib/app-route-patterns";
 import { CURRENT_RELEASE_ENGINEERING_IDENTITY } from "../lib/current-release";
 import { useLocalAppSettings } from "../lib/local-app-settings";
 import { AppLink } from "../lib/router";
@@ -60,6 +60,7 @@ function currentRoutePreloadPolicy(online: boolean): RoutePreloadPolicy {
 }
 
 function routePreloadFamily(pathname: string): string {
+  if (CASE_PROFILE_ROUTE.test(pathname)) return "/cases/:caseId";
   if (CANDIDATE_SET_ROUTE.test(pathname)) return "/candidate-sets/:candidateSetId";
   if (CASE_REVISE_ROUTE.test(pathname)) return "/cases/:caseId/revisions/:revisionId/revise";
   if (CASE_REVISION_ROUTE.test(pathname)) return "/cases/:caseId/revisions/:revisionId";
@@ -68,6 +69,7 @@ function routePreloadFamily(pathname: string): string {
 
 function isCaseWorkflowPath(pathname: string): boolean {
   return pathname === "/cases"
+    || CASE_PROFILE_ROUTE.test(pathname)
     || pathname === "/cases/research"
     || CANDIDATE_SET_ROUTE.test(pathname)
     || CASE_REVISION_ROUTE.test(pathname)
@@ -147,6 +149,7 @@ function routeContextForLocation(pathname: string, search: string): RouteContext
   if (pathname === "/new") return { group: "排盘工作流", label: "新建排盘" };
   if (pathname === "/cases/research") return { group: "案例工作流", label: "专业研究检索" };
   if (pathname === "/cases") return { group: "案例工作流", label: "案例库" };
+  if (CASE_PROFILE_ROUTE.test(pathname)) return { group: "个人档案", label: "资料与保存报告" };
   if (pathname === "/reports") return { group: "命盘解读", label: "我的报告" };
   if (CANDIDATE_SET_ROUTE.test(pathname)) return { group: "案例工作流", label: "未知时辰候选组" };
   if (CASE_REVISE_ROUTE.test(pathname)) return { group: "案例工作流", label: "由历史修订派生新版" };
@@ -160,6 +163,7 @@ function routeContextForLocation(pathname: string, search: string): RouteContext
   if (pathname === "/compare/pair") return { group: "核对工作流", label: "双案例结构研究" };
   if (pathname === "/compare") return { group: "核对工作流", label: "命盘结构对照台" };
   if (pathname === "/knowledge") {
+    if (!search || search === "?") return { group: "学习", label: "读懂报告里的词" };
     if (view === "rights") return { group: "知识工作流", label: "来源权利台账" };
     if (view === "coverage") return { group: "知识工作流", label: "依据覆盖审计" };
     return { group: "知识工作流", label: "个人典籍与引用" };
@@ -429,6 +433,8 @@ export function AppShell({ pathname, search = "", children, onPreloadRoute }: Ap
   const { settings } = useLocalAppSettings();
   const routeContext = useMemo(() => routeContextForLocation(pathname, search), [pathname, search]);
   const readingMode = pathname === "/" || pathname === "/new" || pathname === "/cases" || pathname === "/reports"
+    || CASE_PROFILE_ROUTE.test(pathname)
+    || (pathname === "/knowledge" && (!search || search === "?"))
     || CASE_REVISE_ROUTE.test(pathname)
     || (CASE_REVISION_ROUTE.test(pathname) && parseChartRoute(search).view === "reading");
   const currentRouteFamily = useMemo(() => routePreloadFamily(pathname), [pathname]);

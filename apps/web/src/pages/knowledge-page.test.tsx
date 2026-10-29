@@ -120,7 +120,7 @@ vi.mock("../components/local-source-aware-review-panel", () => {
 });
 
 beforeEach(() => {
-  window.history.replaceState({}, "", "/knowledge");
+  window.history.replaceState({}, "", "/knowledge?view=library");
   Object.values(repositoryMocks).forEach((mock) => mock.mockReset());
   repositoryMocks.listDocuments.mockResolvedValue([documentRecord]);
   repositoryMocks.getDocument.mockResolvedValue(documentRecord);
@@ -319,7 +319,7 @@ describe("KnowledgePage", () => {
 
     expect((await screen.findByText(/“不存在” · 0 条定位结果/)).closest("[role='status']"))
       .toBeTruthy();
-    expect(screen.getByRole("link", { name: "清除检索" }).getAttribute("href")).toBe("/knowledge");
+    expect(screen.getByRole("link", { name: "清除检索" }).getAttribute("href")).toBe("/knowledge?view=library");
     expect(screen.queryByRole("link", { name: /藏干研究摘录/ })).toBeNull();
   });
 

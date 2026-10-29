@@ -179,7 +179,11 @@ describe("AppShell candidate-set navigation", () => {
     };
     assertSafetyIdentity(container.querySelector(".app-shell"));
     expect(screen.queryByLabelText("研究预览边界")).toBeNull();
-    rerender(<AppShell pathname="/knowledge"><h1>知识来源</h1></AppShell>);
+    rerender(<AppShell pathname="/knowledge"><h1>读懂报告里的词</h1></AppShell>);
+    assertSafetyIdentity(container.querySelector(".app-shell"));
+    expect(screen.queryByLabelText("研究预览边界")).toBeNull();
+    expect(container.querySelector(".app-shell--reading")).toBeTruthy();
+    rerender(<AppShell pathname="/knowledge" search="?view=library"><h1>知识来源</h1></AppShell>);
     assertSafetyIdentity(container.querySelector(".app-shell"));
     assertSafetyIdentity(screen.getByLabelText("研究预览边界"));
   });

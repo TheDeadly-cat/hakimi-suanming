@@ -2,7 +2,7 @@ import { AlertTriangle, Home, RefreshCw } from "lucide-react";
 import { Component, lazy, Suspense, useEffect, useRef, useState, type ErrorInfo, type ReactNode } from "react";
 import { AppShell } from "./components/app-shell";
 import type { AppBootFailure } from "./lib/app-boot-failure";
-import { CANDIDATE_SET_ROUTE, CASE_REVISE_ROUTE, CASE_REVISION_ROUTE } from "./lib/app-route-patterns";
+import { CANDIDATE_SET_ROUTE, CASE_PROFILE_ROUTE, CASE_REVISE_ROUTE, CASE_REVISION_ROUTE } from "./lib/app-route-patterns";
 import { CURRENT_RELEASE_ENGINEERING_IDENTITY } from "./lib/current-release";
 import { LocalAppSettingsProvider } from "./lib/local-app-settings";
 import { useAppLocation } from "./lib/router";
@@ -12,6 +12,7 @@ import { BootFailureRecoveryPage, type BootFailureRecoveryView } from "./pages/b
 const loadDashboardPage = () => import("./pages/dashboard-page");
 const loadNewChartPage = () => import("./pages/new-chart-page");
 const loadCaseLibraryPage = () => import("./pages/case-library-page");
+const loadPersonProfilePage = () => import("./pages/person-profile-page");
 const loadReadingReportsPage = () => import("./pages/reading-reports-page");
 const loadResearchQueryPage = () => import("./pages/research-query-page");
 const loadCandidateSetPage = () => import("./pages/candidate-set-page");
@@ -29,6 +30,7 @@ const loadNotFoundPage = () => import("./pages/not-found-page");
 const DashboardPage = lazy(() => loadDashboardPage().then((module) => ({ default: module.DashboardPage })));
 const NewChartPage = lazy(() => loadNewChartPage().then((module) => ({ default: module.NewChartPage })));
 const CaseLibraryPage = lazy(() => loadCaseLibraryPage().then((module) => ({ default: module.CaseLibraryPage })));
+const PersonProfilePage = lazy(() => loadPersonProfilePage().then((module) => ({ default: module.PersonProfilePage })));
 const ReadingReportsPage = lazy(() => loadReadingReportsPage().then((module) => ({ default: module.ReadingReportsPage })));
 const ResearchQueryPage = lazy(() => loadResearchQueryPage().then((module) => ({ default: module.ResearchQueryPage })));
 const CandidateSetPage = lazy(() => loadCandidateSetPage().then((module) => ({ default: module.CandidateSetPage })));
@@ -72,6 +74,7 @@ function loaderForPath(pathname: string): () => Promise<unknown> {
   if (CANDIDATE_SET_ROUTE.test(pathname)) return loadCandidateSetPage;
   if (CASE_REVISE_ROUTE.test(pathname)) return loadNewChartPage;
   if (CASE_REVISION_ROUTE.test(pathname)) return loadChartPage;
+  if (CASE_PROFILE_ROUTE.test(pathname)) return loadPersonProfilePage;
   return loadNotFoundPage;
 }
 
@@ -102,6 +105,8 @@ function resolvePage(pathname: string) {
 
   const chartMatch = pathname.match(CASE_REVISION_ROUTE);
   if (chartMatch) return <ChartPage caseId={chartMatch[1].toLowerCase()} revisionId={chartMatch[2].toLowerCase()} />;
+  const profileMatch = pathname.match(CASE_PROFILE_ROUTE);
+  if (profileMatch) return <PersonProfilePage caseId={profileMatch[1].toLowerCase()} />;
   return <NotFoundPage />;
 }
 
@@ -119,6 +124,7 @@ function resolvePageTitle(pathname: string, search: string): string {
   if (pathname === "/settings/transit-review-inbox") return "未核验审核收件箱";
   if (pathname === "/settings") return "设置与诊断";
   if (pathname === "/knowledge") {
+    if (!search || search === "?") return "读懂报告里的词";
     const view = new URLSearchParams(search).get("view");
     if (view === "rights") return "来源权利台账";
     if (view === "coverage") return "依据覆盖审计";
@@ -126,6 +132,7 @@ function resolvePageTitle(pathname: string, search: string): string {
   }
   if (CANDIDATE_SET_ROUTE.test(pathname)) return "未知时辰候选组";
   if (CASE_REVISE_ROUTE.test(pathname)) return "由历史修订派生新版";
+  if (CASE_PROFILE_ROUTE.test(pathname)) return "个人档案";
   if (CASE_REVISION_ROUTE.test(pathname)) {
     const view = new URLSearchParams(search).get("view");
     if (view === "reading" || !search || search === "?") return "本盘判断";
