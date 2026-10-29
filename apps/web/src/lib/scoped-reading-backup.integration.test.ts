@@ -75,7 +75,7 @@ beforeAll(async () => {
   sourceNotes = [
     await source.research.createResearchNote({ ...common, tags: [LOCAL_READING_SNAPSHOT_TAG], body: plainText }),
     await source.research.createResearchNote({ ...common, tags: [LOCAL_READING_SNAPSHOT_TAG], body: await packReadingSnapshot(await encodeReadingReportBundle(legacyReport)) }),
-    await source.research.createResearchNote({ ...common, tags: [LOCAL_READING_SNAPSHOT_TAG, SCOPED_READING_REPORT_TAG], body: await packReadingSnapshot(scopeEncoded) })
+    await source.research.createResearchNote({ ...common, tags: [LOCAL_READING_SNAPSHOT_TAG, SCOPED_READING_REPORT_TAG], body: await packReadingSnapshot(scopeEncoded, { forceEnvelope: true }) })
   ];
   original = await createFullBackup(source.cases, options);
   originalZip = createFullBackupArchive(original);
@@ -135,7 +135,7 @@ it("rejects a same-ID different valid scoped body before the actual replace tran
   const before = await destination.cases.readFullDataSnapshot(), changed = structuredClone(original.payload);
   const replacement = await buildScopedReadingReport({ index, query: { topic: "career" }, reportId: scopeReport.reportId,
     saveAttemptId: scopeReport.saveAttemptId, createdAt: clocks.report });
-  changed.researchNotes.find(note => note.id === sourceNotes[2]!.id)!.body = await packReadingSnapshot(await encodeScopedReadingReport(replacement));
+  changed.researchNotes.find(note => note.id === sourceNotes[2]!.id)!.body = await packReadingSnapshot(await encodeScopedReadingReport(replacement), { forceEnvelope: true });
   const incomingZip = await zipFor(changed);
   await preflightFullBackupFile(incomingZip); // The outer backup and report checksums are valid.
   const replace = vi.spyOn(destination.cases, "replaceFullDataSnapshot");
@@ -149,14 +149,14 @@ it("rejects a same-ID different valid scoped body before the actual replace tran
 it.each(["revision-hash", "revision-input", "missing-marker", "unknown-version"])("rejects %s in a valid outer ZIP before restoring any record", async defect => {
   const changed = structuredClone(original.payload), note = changed.researchNotes.find(item => item.id === sourceNotes[2]!.id)!;
   if (defect === "missing-marker") note.body = "已丢失专用标记，不能按普通原文恢复";
-  else if (defect === "unknown-version") note.body = await packReadingSnapshot(scopeEncoded.replace("scoped-v1", "scoped-v99"));
+  else if (defect === "unknown-version") note.body = await packReadingSnapshot(scopeEncoded.replace("scoped-v1", "scoped-v99"), { forceEnvelope: true });
   else {
     const forged = structuredClone(index);
     if (defect === "revision-hash") { forged.sourceSnapshot.chartResultHash = "f".repeat(64); forged.uncertainty.chartResultHash = "f".repeat(64); }
     else forged.sourceSnapshot.input.date = "1992-03-10";
     const report = await buildScopedReadingReport({ index: forged, query: { topic: "summary" }, reportId: scopeReport.reportId,
       saveAttemptId: scopeReport.saveAttemptId, createdAt: clocks.report });
-    note.body = await packReadingSnapshot(await encodeScopedReadingReport(report));
+    note.body = await packReadingSnapshot(await encodeScopedReadingReport(report), { forceEnvelope: true });
   }
   const incomingZip = await zipFor(changed);
   const checked = await preflightFullBackupFile(incomingZip);
