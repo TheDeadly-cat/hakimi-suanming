@@ -225,7 +225,12 @@ export function defineHistoricalSchemaBoundaryTests(
       const problems = collectConsoleProblems(page);
       await openTarget(browser, page);
       expect(await page.evaluate(() => sessionStorage.getItem("e2e-historical-capacity-admitted"))).toBe("true");
-      expect(await pageReleaseEvidence(page)).toMatchObject({ dbMigrationPhase: "committed", swBootAck: "true" });
+      // BOOT_OK being sent is not its asynchronous acknowledgement. Observe the
+      // real identity-bound ACK without changing the application's boot budget.
+      const readyPage = page;
+      await expect.poll(() => pageReleaseEvidence(readyPage)).toMatchObject({
+        dbMigrationPhase: "committed", swBootAck: "true", buildVersion: target.version, descriptor: targetDescriptor
+      });
       const before = await readNativeDatabase(page, sourceName);
       if (!before) throw new Error("Fresh historical target did not materialize its empty source.");
       expect(Object.values(before.rows).every(rows => rows.length === 0)).toBe(true);
