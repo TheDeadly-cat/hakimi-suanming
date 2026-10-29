@@ -94,7 +94,11 @@ describe("working strength stays consistent across current reading surfaces", ()
 
   it("shows the working answer first and retains raw weak numbers only as labelled comparison", async () => {
     render(<ChartReadingWorkbench revision={revision} caseName="合成结构旺衰" assessment={assessment} />);
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toContain(getWorkingBalance(assessment).label);
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("先看懂这份命盘");
+    const classification = screen.getByText(/^本盘专业分类：/u);
+    expect(classification.textContent).toContain(getWorkingBalance(assessment).label);
+    expect(classification.closest("details:not([open])")).toBeNull();
+    expect(classification.textContent).not.toContain(assessment.balance.baselineSummary);
     const axes = screen.getByText("格局、喜用与判断依据").closest("details")!;
     expect(axes.open).toBe(false);
     await userEvent.click(screen.getByText("格局、喜用与判断依据"));
