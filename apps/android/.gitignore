@@ -1,0 +1,16 @@
+www/
+www-staging-*/
+artifacts/
+native/internal-version.properties
+native/.gradle/
+native/.idea/
+native/local.properties
+native/build/
+native/app/build/
+native/app/src/main/assets/public/
+native/app/src/main/assets/capacitor.config.json
+native/app/src/main/assets/capacitor.plugins.json
+native/capacitor-cordova-android-plugins/
+*.jks
+*.keystore
+google-services.json

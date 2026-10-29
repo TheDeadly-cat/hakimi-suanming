@@ -1,0 +1,20 @@
+{
+  "name": "@hakimi/android-internal-tooling",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Isolated tools for the internal Android shell; not a root workspace.",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "sync": "node ../scripts/sync-native.mjs",
+    "doctor": "node ../scripts/doctor.mjs",
+    "assemble": "node ../scripts/assemble.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/core": "8.6.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.0"
+  }
+}
