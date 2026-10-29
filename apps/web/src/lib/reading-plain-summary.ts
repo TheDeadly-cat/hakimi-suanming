@@ -1,6 +1,7 @@
 import type { ReadingConclusion, ReadingExplanationIndex } from "./reading-explanation-index";
+import { frozenPlainConditionText, supportsFrozenPlainConditions } from "./plain-reading-condition";
 
-export const PLAIN_READING_CONTENT_VERSION = "hakimi.plain-summary/0.1.2" as const;
+export const PLAIN_READING_CONTENT_VERSION = "hakimi.plain-summary/0.1.3" as const;
 
 /** A display projection only. It never enters or upgrades a saved report contract. */
 export interface PlainReadingSummary {
@@ -167,6 +168,8 @@ export function buildPlainReadingSummary(index: ReadingExplanationIndex, conclus
   let projectionState: PlainReadingSummary["projectionState"] = "original_required";
   let plainTitle = domainTitle[conclusion.domain];
   const rules = conclusion.evidence.ruleApplications;
+  const canExplainConditions = supportsFrozenPlainConditions(conclusion.sourceVersions)
+    && supportsFrozenPlainConditions(index.sourceSnapshot.sourceVersions);
   if (conclusion.origin === "personal") {
     explanation = "这里采用了你保存的个人文字。打开后按原样阅读，不把它改写成自动计算或已证实的结论。";
     plainTitle = "你保存的个人理解";
@@ -222,7 +225,8 @@ export function buildPlainReadingSummary(index: ReadingExplanationIndex, conclus
     sourceConclusionId: conclusion.stableId, sourceRevisionId: index.sourceSnapshot.revisionId,
     sourceReportVersion: index.sourceSnapshot.reportVersion, sourceVersions: [...conclusion.sourceVersions],
     topic: conclusion.domain, scope: { ...conclusion.scope }, plainTitle, explanation,
-    conditions: conclusion.origin === "personal" ? [] : unique(rules.flatMap(rule => rule.limitations)),
+    conditions: conclusion.origin === "personal" ? [] : unique(rules.flatMap(rule => rule.limitations.map(raw =>
+      canExplainConditions ? frozenPlainConditionText(rule.ruleId, raw) : raw))),
     limitations: unique([boundary, ...conclusion.evidence.limits]), unknowns: [...conclusion.evidence.unknowns],
     observationQuestion: questions[conclusion.domain], nextAction: projectionState === "original_required" ? "查看原文及条件" : "读完整结论与条件",
     evidenceRefs: conclusion.origin === "personal" ? [] : index.citationBindings.filter(binding => binding.conclusionId === conclusion.stableId

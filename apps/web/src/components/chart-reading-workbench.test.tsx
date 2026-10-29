@@ -92,7 +92,7 @@ describe("priority-year event reading on actual charts", () => {
     const view = render(<ChartReadingWorkbench revision={b.revision} caseName="合成范围说明" assessment={b.assessment}
       onSaveReading={onSaveReading} onEditBirthData={onEditBirthData} onExportReading={onExportReading} onExportArchive={vi.fn()} />);
     const header = within(view.container.querySelector<HTMLElement>(".reading-workbench-header")!);
-    const save = header.getByRole("button", { name: "保存解读" });
+    const save = header.getByRole("button", { name: "保存完整报告" });
     expect(document.getElementById(save.getAttribute("aria-describedby")!)?.textContent).toContain("全部年份与月份、计算分支和依据");
     expect(view.container.querySelector<HTMLDetailsElement>(".reading-export-menu")!.open).toBe(false);
     await userEvent.click(header.getByRole("button", { name: "编辑资料" }));
@@ -110,8 +110,8 @@ describe("priority-year event reading on actual charts", () => {
     const view=render(<ChartReadingWorkbench {...props} saveFeedback={{status:"working",stage:"month_preparation"}}/>);
     const header=()=>within(view.container.querySelector<HTMLElement>(".reading-workbench-header")!);
     expect(header().getByRole("status").textContent).toContain("正在整理完整年份和月份");
-    expect(header().getByRole("button",{name:"正在保存"}).hasAttribute("disabled")).toBe(true);
-    fireEvent.click(header().getByRole("button",{name:"正在保存"}));expect(onSaveReading).not.toHaveBeenCalled();
+    expect(header().getByRole("button",{name:"正在保存完整报告"}).hasAttribute("disabled")).toBe(true);
+    fireEvent.click(header().getByRole("button",{name:"正在保存完整报告"}));expect(onSaveReading).not.toHaveBeenCalled();
     for(const [stage,label] of [["encoding_compression","正在整理完整报告的保存格式"],["post_save_validation","正在核对是否完整保存"]] as const){
       view.rerender(<ChartReadingWorkbench {...props} saveFeedback={{status:"working",stage}}/>);
       expect(header().getByRole("status").textContent).toContain(label);expect(header().getByRole("status").textContent).not.toContain("%");
@@ -134,8 +134,8 @@ describe("priority-year event reading on actual charts", () => {
     expect(onExportReading).toHaveBeenCalledTimes(1);expect(onExportArchive).toHaveBeenCalledTimes(1);expect(onSaveReading).not.toHaveBeenCalled();
     view.rerender(<ChartReadingWorkbench {...props} saveFeedback={{status:"unconfirmed",message:"保存结果尚未确认，已暂停继续写入。"}}/>);
     expect(header().getByRole("alert").textContent).toContain("请勿重复保存");expect(header().getByRole("alert").textContent).not.toContain("本次没有保存");
-    expect(header().getByRole("button",{name:"保存结果待核对"}).hasAttribute("disabled")).toBe(true);
-    fireEvent.click(header().getByRole("button",{name:"保存结果待核对"}));expect(onSaveReading).not.toHaveBeenCalled();
+    expect(header().getByRole("button",{name:"完整保存结果待核对"}).hasAttribute("disabled")).toBe(true);
+    fireEvent.click(header().getByRole("button",{name:"完整保存结果待核对"}));expect(onSaveReading).not.toHaveBeenCalled();
     fireEvent.click(header().getByRole("button",{name:"核对保存记录"}));expect(onCheckSave).toHaveBeenCalledTimes(1);
   });
   it("keeps a confirmed report accessible when only the current page refresh failed", () => {

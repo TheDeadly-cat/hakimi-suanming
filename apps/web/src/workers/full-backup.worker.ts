@@ -17,6 +17,7 @@ import {
   type FullBackupWorkerSerializedError
 } from "../lib/full-backup-worker-protocol";
 import { safeVisibleText } from "../lib/visible-text";
+import { validateScopedReadingBackup } from "../lib/scoped-reading-record";
 
 type WorkerScope = {
   onmessage: ((event: MessageEvent<FullBackupWorkerRequest>) => void) | null;
@@ -231,6 +232,8 @@ async function runJob(request: Exclude<FullBackupWorkerRequest, { type: "cancel"
       const decoded = decodeFullBackupFile(bytes);
       const incoming = await preflightFullBackup(decoded.json);
       assertNotCancelled(jobId);
+      await validateScopedReadingBackup(incoming.payload, request.currentSnapshot);
+      assertNotCancelled(jobId);
       const currentSafetyBackup = await createFullBackupFromSnapshot(
         request.currentSnapshot,
         request.options
@@ -255,6 +258,7 @@ async function runJob(request: Exclude<FullBackupWorkerRequest, { type: "cancel"
     }
 
     const verified = await verifyPreparedFullBackup(request.preparation);
+    await validateScopedReadingBackup(verified.incoming.payload, request.preparation.currentSafetyBackup.payload);
     assertNotCancelled(jobId);
     workerScope.postMessage({
       ...responseBase(jobId),

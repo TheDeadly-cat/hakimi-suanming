@@ -44,8 +44,10 @@ import { buildAnnualMonthStory, LOCAL_ANNUAL_MONTH_STORY_VERSION, type LocalAnnu
 import { annualMonthStoryEntries, annualMonthStorySubjectId, annualMonthStoryFeedbackText, annualMonthStoryFeedbackVersions } from "../lib/local-annual-month-story-record";
 import { buildLocalReadingFeedback, LOCAL_READING_FEEDBACK_TAG, LOCAL_READING_SNAPSHOT_TAG, type LocalReadingAnnualScenarios } from "../lib/local-reading-record";
 import { buildLocalReadingReport, LOCAL_READING_EDITION_VERSION } from "../lib/local-reading-edition";
-import { buildReadingExplanationIndex, type ReadingTimeUncertainty } from "../lib/reading-explanation-index";
-import { ReadingExplanationWorkbench } from "./reading-explanation-workbench";
+import { buildReadingExplanationIndex, type ReadingTimeUncertainty, type ReadingExplanationIndex } from "../lib/reading-explanation-index";
+import { ReadingExplanationWorkbench, type ReadingNavigationSelection } from "./reading-explanation-workbench";
+import { buildScopedReadingReport, describeScopedReadingScope, encodeScopedReadingReport, SCOPED_READING_REPORT_TAG, type ScopedReadingScope } from "../lib/scoped-reading-report";
+import { ReadingScopedSave } from "./reading-scoped-save";
 import { ReadingCaseReviewPanel } from "./reading-case-review-panel";
 import { createReadingMonthPreparation } from "../lib/reading-month-preparation";
 import { createReadingSaveTiming, publishReadingSaveTiming, type ReadingSaveOverlapWork, type ReadingSaveTiming, type ReadingSaveTimingSnapshot } from "../lib/reading-save-timing";
@@ -80,12 +82,24 @@ interface Props {
 }
 
 interface CompleteSaveAttempt {
+  kind: "complete" | "scoped";
+  tag: string;
   timing: ReadingSaveTiming;
   record: ResearchNoteRecord | null;
   body: string | null;
   writeStarted: boolean;
   verified: boolean;
   reportPrepared: boolean;
+}
+interface ScopedSaveRequest {
+  index: ReadingExplanationIndex;
+  selection: ReadingNavigationSelection;
+  token: object;
+  scope: ScopedReadingScope;
+  reportId: string;
+  saveAttemptId: string;
+  createdAt: string;
+  cancelled: boolean;
 }
 function rejectedSaveFeedback(reason: unknown, reportPrepared: boolean): ReadingSaveFeedback {
   const detail = safeVisibleErrorMessage(reason, "");
@@ -106,6 +120,10 @@ function LocalReadingContent(props: Props) {
   const saveDiagnosticsEnabled = import.meta.env.DEV && import.meta.env.VITE_READING_SAVE_DIAGNOSTICS === "1";
   const [saveTimingSnapshot, setSaveTimingSnapshot] = useState<ReadingSaveTimingSnapshot | null>(null);
   const [saveFeedback, setSaveFeedback] = useState<ReadingSaveFeedback>({ status: "idle" });
+  const [scopedFeedback, setScopedFeedback] = useState<ReadingSaveFeedback>({ status: "idle" });
+  const [scopedNotice, setScopedNotice] = useState("");
+  const [readingSelection, setReadingSelection] = useState<ReadingNavigationSelection>({ topic: "summary", isReady: false });
+  const [scopedRequest, setScopedRequest] = useState<ScopedSaveRequest | null>(null);
   const mutation = useSyncExternalStore(subscribeResearchJournalMutation, getResearchJournalMutationSnapshot, getResearchJournalMutationSnapshot);
   const saveTimingSequence = useRef(0);
   const saveTiming = useRef<CompleteSaveAttempt | null>(null);
@@ -118,7 +136,7 @@ function LocalReadingContent(props: Props) {
     if (!pending) return;
     pending.timing.finish(status);
     if (pending.verified && pending.record && active.current) {
-      setSaveFeedback({ status: "saved", reportId: pending.record.id, refreshIssue: status !== "succeeded" });
+      (pending.kind === "scoped" ? setScopedFeedback : setSaveFeedback)({ status: "saved", reportId: pending.record.id, refreshIssue: status !== "succeeded" });
     }
     if (saveDiagnosticsEnabled) {
       setSaveTimingSnapshot(pending.timing.snapshot());
@@ -474,7 +492,7 @@ function LocalReadingContent(props: Props) {
           && stored.anchor.kind === "revision" && stored.anchor.revisionId === revision.id
           && JSON.stringify(stored.anchor) === JSON.stringify(saved.record.anchor) && stored.body === saved.body && stored.body === saved.record.body
           && stored.editVersion === saved.record.editVersion && stored.lifecycle === "active" && saved.record.lifecycle === "active"
-          && stored.tags.includes(LOCAL_READING_SNAPSHOT_TAG) && JSON.stringify(stored.tags) === JSON.stringify(saved.record.tags);
+          && stored.tags.includes(saved.tag) && JSON.stringify(stored.tags) === JSON.stringify(saved.record.tags);
         saved.verified = verified;
         saved.timing.end(verified ? "succeeded" : "failed");
         if (verified && active.current && version === readVersion.current) saved.timing.start("page_refresh");
@@ -485,7 +503,7 @@ function LocalReadingContent(props: Props) {
       }
       setCaseRecords(notes);
       setRecords(notes.filter((note) => note.anchor.kind === "revision" && note.anchor.revisionId === revision.id
-        && (note.tags.includes(LOCAL_READING_SNAPSHOT_TAG) || note.tags.includes(LOCAL_READING_FEEDBACK_TAG) || note.tags.includes(LOCAL_READING_CONTEXT_TAG)
+        && (note.tags.includes(LOCAL_READING_SNAPSHOT_TAG) || note.tags.includes(SCOPED_READING_REPORT_TAG) || note.tags.includes(LOCAL_READING_FEEDBACK_TAG) || note.tags.includes(LOCAL_READING_CONTEXT_TAG)
           || parseReadingContext(note.body).kind !== "legacy")));
       setRecordsError(null);
     } catch (reason) {
@@ -728,6 +746,65 @@ function LocalReadingContent(props: Props) {
   const lastExplanation = useRef(explanationResult.value);
   if (explanationResult.value) lastExplanation.current = explanationResult.value;
   const displayedExplanation = explanationResult.value ?? (lastExplanation.current?.sourceSnapshot.revisionId === revision.id ? lastExplanation.current : null);
+  const scopeDescription = useMemo(() => {
+    if (!explanationResult.value || reportLoading || !readingSelection.isReady || !personalReadingReady) {
+      return { scope: null, error: "请等当前专题与资料核对完成后再保存。" };
+    }
+    try { return { scope: describeScopedReadingScope(explanationResult.value, readingSelection), error: "" }; }
+    catch (reason) { return { scope: null, error: safeVisibleErrorMessage(reason, "请选择一个明确的专题范围后保存。") }; }
+  }, [explanationResult.value, reportLoading, readingSelection, personalReadingReady]);
+  const currentScopedInput = useRef({ index: explanationResult.value, selection: readingSelection, token: reportInputToken, ready: !!scopeDescription.scope });
+  currentScopedInput.current = { index: explanationResult.value, selection: readingSelection, token: reportInputToken, ready: !!scopeDescription.scope };
+  const scopeRequestCurrent = (request: ScopedSaveRequest) => !request.cancelled && active.current && currentScopedInput.current.ready
+    && currentScopedInput.current.index === request.index && currentScopedInput.current.selection === request.selection
+    && currentScopedInput.current.token === request.token;
+  const prepareScopedSave = () => {
+    if (props.readOnly || mutation.status !== "idle" || saveTiming.current || !scopeDescription.scope || !explanationResult.value) return;
+    setScopedFeedback({ status: "idle" }); setScopedNotice("");
+    setScopedRequest({ index: explanationResult.value, selection: readingSelection, token: reportInputToken, scope: scopeDescription.scope,
+      reportId: crypto.randomUUID(), saveAttemptId: crypto.randomUUID(), createdAt: new Date().toISOString(), cancelled: false });
+  };
+  const cancelScopedSave = () => {
+    if (saveTiming.current?.kind === "scoped" && saveTiming.current.writeStarted) return;
+    if (scopedRequest) scopedRequest.cancelled = true;
+    setScopedRequest(null); setScopedNotice("已取消，本次未保存。当前阅读和旧报告仍保留。");
+  };
+  const saveScopedReport = async () => {
+    const request = scopedRequest;
+    if (!request || saveTiming.current || !scopeRequestCurrent(request)) return;
+    const timing = createReadingSaveTiming(++saveTimingSequence.current, undefined, stage => {
+      if (active.current) setScopedFeedback({ status: "working", stage });
+    });
+    const attempt: CompleteSaveAttempt = { kind: "scoped", tag: SCOPED_READING_REPORT_TAG,
+      timing, record: null, body: null, writeStarted: false, verified: false, reportPrepared: false };
+    saveTiming.current = attempt;
+    const requireCurrentScope = () => {
+      if (!scopeRequestCurrent(request)) throw new Error(request.cancelled ? "已取消，本次没有写入。" : "准备期间资料、背景或阅读范围已变化，本次没有保存旧请求。请重新确认当前范围。");
+    };
+    try {
+      await saveRecord(async () => {
+        requireCurrentScope();
+        const report = await timing.measureAsync("report_generation", () => buildScopedReadingReport({ index: request.index, query: request.selection,
+          reportId: request.reportId, saveAttemptId: request.saveAttemptId, createdAt: request.createdAt }));
+        requireCurrentScope(); attempt.reportPrepared = true;
+        timing.count({ readingCharacters: report.reading.length, plannedYears: 0, preparedYears: 0 });
+        // Old journal editors already preserve packed snapshots as read-only.
+        // Their report reader then rejects the scoped subtype explicitly.
+        const body = await timing.measureAsync("encoding_compression", async () => packReadingSnapshot(await encodeScopedReadingReport(report), { forceEnvelope: true }));
+        requireCurrentScope(); timing.count({ storedCharacters: body.length });
+        return body;
+      }, SCOPED_READING_REPORT_TAG, [LOCAL_READING_SNAPSHOT_TAG], attempt);
+      if (active.current) setScopedRequest(null);
+    } catch (reason) {
+      if (saveTiming.current === attempt) finishSaveTiming(request.cancelled ? "cancelled" : "failed");
+      if (active.current) setScopedFeedback(attempt.writeStarted || getResearchJournalMutationSnapshot().status === "call_unknown"
+        ? { status: "unconfirmed", message: "这次范围保存的结果尚未确认，已暂停继续写入。请核对已有报告，勿再次创建。" }
+        : request.cancelled ? { status: "idle" }
+          : { status: "not_saved", canExport: false, message: reason instanceof ReadingReportCapacityError
+            ? "这个范围仍超过当前可保存的大小。原文没有截断；请选择更小的范围后再保存，已有报告保持不变。"
+            : safeVisibleErrorMessage(reason, "所选范围暂未通过保存检查，原报告保持不变。") });
+    }
+  };
   const prepareCompleteReport = async (timing?: ReadingSaveTiming, publishPreparedMonths = true) => {
     requireCompleteReading();
     if (!briefResult.value || briefResult.error) throw new Error(briefResult.error ?? "完整主报告仍在整理，请稍后保存。");
@@ -776,7 +853,7 @@ function LocalReadingContent(props: Props) {
     const timing = createReadingSaveTiming(++saveTimingSequence.current, undefined, stage => {
       if (active.current) setSaveFeedback({ status: "working", stage });
     });
-    const attempt: CompleteSaveAttempt = { timing, record: null, body: null, writeStarted: false, verified: false, reportPrepared: false };
+    const attempt: CompleteSaveAttempt = { kind: "complete", tag: LOCAL_READING_SNAPSHOT_TAG, timing, record: null, body: null, writeStarted: false, verified: false, reportPrepared: false };
     saveTiming.current = attempt;
     timing.start("preconditions");
     if (saveDiagnosticsEnabled) setSaveTimingSnapshot(timing.snapshot());
@@ -846,6 +923,13 @@ function LocalReadingContent(props: Props) {
       comprehensive={comprehensive} synthesis={synthesis} briefReport={briefResult.value} priorities={priorities} annualEvents={annualEvents}
       explanationPanel={displayedExplanation ? <ReadingExplanationWorkbench index={displayedExplanation} revision={revision}
         records={caseRecords} onTimeUncertaintyChange={setTimeUncertainty} onRequestYear={selectYear} monthsLoading={keyMonthLoading}
+        onSelectionChange={setReadingSelection}
+        saveScopeAction={props.readOnly ? undefined : <ReadingScopedSave caseId={revision.caseId} scope={scopeDescription.scope}
+          unavailable={mutation.status !== "idle" && scopedFeedback.status !== "working" ? "另一项保存正在进行或等待核对，请先核对记录。" : scopeDescription.error}
+          confirmation={scopedRequest?.scope ?? null} confirmationStale={!!scopedRequest && !scopeRequestCurrent(scopedRequest)}
+          feedback={mutation.status === "call_unknown" ? { status: "unconfirmed", message: "有一笔写入结果尚未确认，请先核对已有记录。" } : scopedFeedback}
+          notice={scopedNotice} onPrepare={prepareScopedSave} onConfirm={() => { void saveScopedReport(); }} onCancel={cancelScopedSave}
+          canCancel={!saveTiming.current?.writeStarted} />}
         loading={!explanationResult.value || reportLoading} /> : undefined}
       onPrepareCompleteReading={() => { void prepareCompleteReport().catch(reason => setExportError(safeVisibleErrorMessage(reason, "完整年月暂未准备好，已保留当前专题。"))); }}
       annualLifeStories={navigationStories} annualLifeStoryPersonalSources={annualLifePersonalResult.value}
@@ -857,6 +941,7 @@ function LocalReadingContent(props: Props) {
       onExportReading={() => { void exportCompleteReport("reading"); }}
       onExportArchive={() => { void exportCompleteReport("archive"); }}
       onSaveReading={props.readOnly ? undefined : saveCompleteReport}
+      saveDisabled={scopedFeedback.status === "working" || mutation.status !== "idle"}
       saveFeedback={mutation.status === "call_unknown" ? { status: "unconfirmed", message: "有一笔保存结果尚未确认，已暂停继续写入，请先核对保存记录。" } : saveFeedback}
       onCheckSave={props.onOpenRecords}
       onAddFeedback={props.readOnly ? undefined : (draft) => {

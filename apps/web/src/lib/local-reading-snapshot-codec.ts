@@ -158,9 +158,9 @@ async function readBounded(stream: ReadableStream<Uint8Array>, maximum: number):
   for (const chunk of chunks) { result.set(chunk, offset); offset += chunk.byteLength; }
   return result;
 }
-export async function packReadingSnapshot(plainText: string): Promise<string> {
+export async function packReadingSnapshot(plainText: string, options: { forceEnvelope?: boolean } = {}): Promise<string> {
   if (isPackedReadingSnapshot(plainText)) throw new Error("这份解读已经使用保存格式，请先打开原文。");
-  if (plainText.length <= MAX_STORED_CHARACTERS) return plainText;
+  if (plainText.length <= MAX_STORED_CHARACTERS && !options.forceEnvelope) return plainText;
   if (incompleteUnicode.test(plainText)) throw new Error("解读含有不完整字符，请重新生成后保存。");
   if (typeof CompressionStream === "undefined") throw new Error("当前环境暂不能保存这份较长的解读，请先导出完整文件。");
   const bytes = encoder.encode(plainText);

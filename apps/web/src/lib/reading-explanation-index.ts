@@ -3,6 +3,7 @@ import { LOCAL_READING_EDITION_VERSION } from "./local-reading-version";
 import type { RevisionRecord } from "@hakimi/contracts";
 import { canonicalStringify } from "@hakimi/integrity";
 import type { BaziPreliminaryAssessment, PreliminarySource } from "../../../../packages/bazi-interpretation/src/preliminary-assessment";
+import { OUTLOOK_CLASSICAL_SOURCES, OUTLOOK_CLASSICAL_SOURCES_VERSION } from "../../../../packages/bazi-interpretation/src/outlook-classical-sources";
 import type { BriefReadingReport } from "./brief-reading-report";
 import type { LocalReadingSynthesis } from "./local-reading-synthesis";
 import type { ConcreteLifeSentence, ConcretePeriodFact } from "./concrete-period-prose";
@@ -225,6 +226,19 @@ export function buildReadingExplanationIndex(input: BuildReadingExplanationIndex
         direction: null, origin: topic.origin, sourceSubjects: topic.sourceSubjects,
         evidence: baseEvidence(sourceNotes(topic.sentences), unique([member.annualContrast, member.directionNote, report.plainReading!.outlook.scopeText]),
           [`流月 ${member.ganZhi}；${member.ageLabel}。`, ...periodFacts(topic.facts)], ruleApplications(topic.contentRules, topic.sentences, topic.facts)) }, [], "", topic.personalTextIds);
+    }
+  }
+  // Annual/monthly rules can cite an outlook passage absent from the natal
+  // assessment's smaller source set. Carry only those actually referenced
+  // catalog records; the original rule.sourceIds remain the precise binding.
+  const requiredRuleSources = new Set(index.conclusions.flatMap(item => item.evidence.ruleApplications.flatMap(rule => rule.sourceIds)));
+  const supplemental = OUTLOOK_CLASSICAL_SOURCES.filter(source => requiredRuleSources.has(source.id) && !sources.has(source.id));
+  if (supplemental.length) {
+    const addedIds = new Set(supplemental.map(source => source.id));
+    index.sources.push(...supplemental.map(({ id, title, url, locator, excerpt, interpretation }) => ({ id, title, url, locator, excerpt, interpretation })));
+    index.sourceSnapshot.sourceVersions = unique([...index.sourceSnapshot.sourceVersions, OUTLOOK_CLASSICAL_SOURCES_VERSION]);
+    for (const conclusion of index.conclusions) if (conclusion.evidence.ruleApplications.some(rule => rule.sourceIds.some(id => addedIds.has(id)))) {
+      conclusion.sourceVersions = unique([...conclusion.sourceVersions, OUTLOOK_CLASSICAL_SOURCES_VERSION]);
     }
   }
   const validated = validateReadingExplanationIndex(index);

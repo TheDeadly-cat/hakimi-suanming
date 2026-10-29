@@ -9,6 +9,7 @@ import { packReadingSnapshot, READING_SNAPSHOT_ENVELOPE } from "../lib/local-rea
 import { ResearchJournal } from "./research-journal";
 import { resetResearchJournalMutationCoordinatorForTests } from "./research-journal-mutation-coordinator";
 import { LOCAL_READING_CASE_REVIEW_TAG } from "../lib/reading-case-review";
+import { SCOPED_READING_REPORT_TAG } from "../lib/scoped-reading-report";
 
 describe("research journal complete reading records", () => {
   it("reads a packed snapshot without offering its envelope to the ordinary editor, while ordinary notes remain editable", async () => {
@@ -31,6 +32,8 @@ describe("research journal complete reading records", () => {
         body: "迁入的复盘原文，只能另行追加更正。", tags: [LOCAL_READING_CASE_REVIEW_TAG], sourceRefs: [], lifecycle: "active" });
       const markerReview = await repository.createResearchNote({ caseId: revision.caseId, anchor: { kind: "revision", revisionId: revision.id },
         body: "<!-- hakimi.reading-case-review/99\n{}\n-->\n\n尚不支持的历史复盘格式。", tags: [], sourceRefs: [], lifecycle: "active" });
+      const scoped = await repository.createResearchNote({ caseId: revision.caseId, anchor: { kind: "revision", revisionId: revision.id },
+        body: "<!-- hakimi.reading-report-bundle/scoped-v99 -->\n{}", tags: [SCOPED_READING_REPORT_TAG], sourceRefs: [], lifecycle: "active" });
       vi.spyOn(researchRepository, "readResearchJournalSnapshot").mockImplementation((...args) => repository.readResearchJournalSnapshot(...args));
       const update = vi.spyOn(researchRepository, "updateResearchNote").mockImplementation((...args) => repository.updateResearchNote(...args));
       const view = render(<ResearchJournal caseId={revision.caseId} revision={revision} selection={{ pillar: "day", field: "stem" }} />);
@@ -39,6 +42,13 @@ describe("research journal complete reading records", () => {
       expect(within(packedArticle).queryByRole("button", { name: "编辑笔记" })).toBeNull();
       expect(within(packedArticle).getByRole("button", { name: "归档笔记" })).toBeTruthy();
       expect(packedArticle.textContent?.includes(READING_SNAPSHOT_ENVELOPE)).toBe(false);
+      const scopedArticle = (await screen.findByText(SCOPED_READING_REPORT_TAG, { exact: true })).closest("article")!;
+      expect(within(scopedArticle).queryByRole("button", { name: "编辑笔记" })).toBeNull();
+      expect(within(scopedArticle).getByRole("button", { name: "归档笔记" })).toBeTruthy();
+      expect(scopedArticle.textContent).not.toContain(scoped.body);
+      await userEvent.click(within(scopedArticle).getByText("范围报告", { exact: true }));
+      expect(await within(scopedArticle).findByRole("alert")).toBeTruthy();
+      expect((await repository.listResearchNotesByCase(revision.caseId)).find(item => item.id === scoped.id)?.body).toBe(scoped.body);
       await userEvent.click(within(packedArticle).getByText("解读快照", { exact: true }));
       await waitFor(() => expect(packedArticle.querySelector("pre")?.textContent === plain).toBe(true));
       for (const original of [taggedReview, markerReview]) {

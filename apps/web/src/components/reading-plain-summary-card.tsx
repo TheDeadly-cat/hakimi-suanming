@@ -16,7 +16,7 @@ export function ReadingPlainSummaryCard({ index, conclusion, onOpen }: {
     <details className="reading-summary-conditions"><summary>条件与术语</summary>
       <ReadingGlossaryText text={conclusion.label} className="reading-summary-professional-label" />
       <p className="reading-explanation-limit">{summary.limitations[0]}</p>
-      <h4>成立条件与原文限制</h4>
+      <h4>条件与原文限制</h4>
       {summary.conditions.length || summary.limitations.length > 1 ? <ul>{[...new Set([...summary.conditions, ...summary.limitations.slice(1)])].map((text, i) => <li key={i}>{text}</li>)}</ul>
         : <p>本条未单列更多条件，不能据此认为它没有限制；请核对原结论。</p>}
       <h4>尚未确定</h4>{summary.unknowns.length ? <ul>{summary.unknowns.map((text, i) => <li key={i}>{text}</li>)}</ul> : <p>没有新增单列未定项；上述限制仍然适用。</p>}

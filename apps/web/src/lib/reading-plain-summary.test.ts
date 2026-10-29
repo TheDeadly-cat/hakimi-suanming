@@ -10,11 +10,14 @@ import { buildLocalLifeOutlook } from "./local-detailed-outlook";
 import { buildReadingSynthesis } from "./local-reading-synthesis";
 import { buildBriefReadingReport } from "./brief-reading-report";
 import { buildReadingExplanationIndex } from "./reading-explanation-index";
+import { CONDITIONAL_CONTENT_RULES } from "./conditional-content-rules";
+import { frozenPlainConditionText, supportsFrozenPlainConditions } from "./plain-reading-condition";
 
 const revisionId = "11111111-1111-4111-8111-111111111111";
 const currentProvenance = "hakimi.natal-reading-rule-applications/0.1.0";
 const currentConcrete = "hakimi.concrete-natal-prose/0.2.0";
 const currentAdopted = "hakimi.natal-adopted-conclusion/0.2.1";
+const currentConditions = "hakimi.conditional-content-rules/0.1.0";
 function fixture() {
   const conclusion: ReadingConclusion = {
     stableId: `${revisionId}/natal:career`, label: "专业积累与实际成果", text: "原文第一句不承担摘要。完整原文与限制必须保留。",
@@ -31,6 +34,65 @@ function fixture() {
       { conclusionId: `${revisionId}/natal:wealth`, sourceId: "unrelated-source" }] } as ReadingExplanationIndex;
   return { index, conclusion };
 }
+
+it("turns only source-bound forbidden inferences into restrictions while preserving original evidence", () => {
+  const { index, conclusion } = fixture();
+  conclusion.sourceVersions.push(currentConditions);
+  index.sourceSnapshot.sourceVersions.push(currentConditions);
+  const rule = conclusion.evidence.ruleApplications[0]!;
+  rule.ruleId = "age-scope";
+  rule.limitations = ["跨18整段成人化；出生前编人生事件", "真实发生保证或统计概率", "仍须核对真实年龄"];
+  conclusion.evidence.ruleApplications.push({ ...structuredClone(rule), ruleId: "role-direct-wealth",
+    limitations: ["任何正财都代表工资上涨", "实际发生保证、统计概率"] });
+  const before = JSON.stringify(index);
+  const result = buildPlainReadingSummary(index, conclusion);
+  expect(result.contentVersion).toBe("hakimi.plain-summary/0.1.3");
+  expect(result.conditions).toEqual([
+    "不能把跨过18岁的整段时间都按成人经历解释，也不能为出生前编写人生事件。",
+    "这些线索不保证事情实际发生，也不能用来表示发生概率。",
+    "仍须核对真实年龄",
+    "不能据此认定“任何正财都代表工资上涨”。"
+  ]);
+  expect(JSON.stringify(index)).toBe(before);
+  conclusion.origin = "personal";
+  expect(buildPlainReadingSummary(index, conclusion).conditions).toEqual([]);
+});
+
+it.each(["conclusion-missing", "snapshot-missing", "conclusion-unknown", "snapshot-unknown", "conclusion-mixed", "snapshot-mixed"])(
+  "preserves raw conditions when the source binding is %s", mismatch => {
+    const { index, conclusion } = fixture();
+    conclusion.sourceVersions.push(currentConditions);
+    index.sourceSnapshot.sourceVersions.push(currentConditions);
+    const rule = conclusion.evidence.ruleApplications[0]!;
+    rule.ruleId = "age-scope";
+    rule.limitations = ["跨18整段成人化；出生前编人生事件"];
+    const holder = mismatch.startsWith("conclusion") ? conclusion : index.sourceSnapshot;
+    if (mismatch.endsWith("missing")) holder.sourceVersions = holder.sourceVersions.filter(version => version !== currentConditions);
+    if (mismatch.endsWith("unknown")) holder.sourceVersions = holder.sourceVersions.map(version => version === currentConditions ? "hakimi.conditional-content-rules/99.0.0" : version);
+    if (mismatch.endsWith("mixed")) holder.sourceVersions.push("hakimi.conditional-content-rules/99.0.0");
+    const before = JSON.stringify(index);
+    expect(buildPlainReadingSummary(index, conclusion).conditions).toEqual(rule.limitations);
+    expect(JSON.stringify(index)).toBe(before);
+  });
+
+it("pins condition source versions and never borrows another rule's restriction", () => {
+  expect(supportsFrozenPlainConditions([currentConditions, "unrelated/1"])).toBe(true);
+  expect(supportsFrozenPlainConditions([currentConditions, currentConditions])).toBe(true);
+  expect(supportsFrozenPlainConditions([])).toBe(false);
+  expect(supportsFrozenPlainConditions([currentConditions, "hakimi.conditional-content-rules/0.2.0"])).toBe(false);
+  expect(frozenPlainConditionText("age-scope", "任何正财都代表工资上涨")).toBe("任何正财都代表工资上涨");
+  expect(frozenPlainConditionText("unknown-rule", "跨18整段成人化；出生前编人生事件")).toBe("跨18整段成人化；出生前编人生事件");
+  expect(frozenPlainConditionText("age-scope", "只有核实年龄后适用")).toBe("只有核实年龄后适用");
+  expect(frozenPlainConditionText("independent-event-evidence", "换运即换工作；mixed给每项事件添阻力")).toBe(
+    "不能把更换大运等同于换工作；整体判断同时有利有弊，也不表示每件事都一定有阻力。");
+});
+
+it.each(CONDITIONAL_CONTENT_RULES.flatMap(rule => rule.forbiddenInferences.map(raw => [rule.id, raw] as const)))(
+  "expresses the registered restriction %s / %s as a negative, never an assertion", (ruleId, raw) => {
+    const text = frozenPlainConditionText(ruleId, raw);
+    expect(text).not.toBe(raw);
+    expect(text).toMatch(/不能|不保证|不等于/);
+  });
 
 it("uses the recorded producer selection and retains all identity, conditions and own evidence without mutating the index", () => {
   const { index, conclusion } = fixture(), before = JSON.stringify(index);

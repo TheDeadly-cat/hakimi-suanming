@@ -2,6 +2,8 @@ import { z } from "zod";
 import { researchNoteRecordSchema, type ResearchNoteRecord } from "@hakimi/contracts";
 import { sha256BytesHex } from "@hakimi/integrity";
 import { isPackedReadingSnapshot, unpackReadingSnapshot } from "./local-reading-snapshot-codec";
+import { readScopedReadingRecord } from "./scoped-reading-record";
+import { SCOPED_READING_REPORT_TAG } from "./scoped-reading-report";
 import { decodeReadingReportBundle } from "./local-reading-report-bundle";
 import { LOCAL_READING_SNAPSHOT_TAG } from "./local-reading-record";
 import { parseReadingFeedback } from "./local-reading-feedback";
@@ -132,21 +134,24 @@ export function parseReadingCaseReview(body: string): ParsedReadingCaseReview {
 export async function loadReadingCaseReviewTargets(record: ResearchNoteRecord): Promise<ReadingCaseReviewTarget[]> {
   researchNoteRecordSchema.parse(record);
   if (!record.tags.includes(LOCAL_READING_SNAPSHOT_TAG) || record.anchor.kind !== "revision") return [];
-  const raw = isPackedReadingSnapshot(record.body) ? await unpackReadingSnapshot(record.body) : record.body;
-  const bundle = await decodeReadingReportBundle(raw);
-  if (!bundle) return [];
-  const index = readReadingExplanationIndex(bundle.archive);
+  const scoped = record.tags.includes(SCOPED_READING_REPORT_TAG) ? await readScopedReadingRecord(record) : null;
+  const raw = scoped ? "" : isPackedReadingSnapshot(record.body) ? await unpackReadingSnapshot(record.body) : record.body;
+  const bundle = scoped ? null : await decodeReadingReportBundle(raw);
+  if (!bundle && !scoped) return [];
+  const reportVersion = scoped?.source.reportVersion ?? bundle!.version;
+  const index = scoped?.index ?? readReadingExplanationIndex(bundle!.archive);
   if (!index) return [];
   if (index.sourceSnapshot.caseId !== record.caseId || index.sourceSnapshot.revisionId !== record.anchor.revisionId)
     throw new Error("报告中的命盘与保存位置不一致，不能建立复盘。");
-  if(index.sourceSnapshot.reportVersion!==bundle.version)throw new Error("报告版本与保存的结论索引不一致，不能建立复盘。");
+  if(index.sourceSnapshot.reportVersion!==reportVersion)throw new Error("报告版本与保存的结论索引不一致，不能建立复盘。");
   if (Date.parse(index.generatedAt) > Date.parse(record.createdAt)) throw new Error("报告生成时间晚于保存时间，需先核对原记录。");
   if (new Set(index.conclusions.map(item=>item.stableId)).size !== index.conclusions.length) throw new Error("报告中有重复结论标识，未自动选择。");
   const reportRef = await caseReviewNoteReference(record);
-  return index.conclusions.map(conclusion => targetSchema.parse({ reportRef, reportVersion: bundle.version, reportSavedAt: record.createdAt,
+  return index.conclusions.map(conclusion => targetSchema.parse({ reportRef, reportVersion, reportSavedAt: record.createdAt,
     indexVersion: index.version, generatedAt: index.generatedAt, sourceSnapshot: index.sourceSnapshot,
     uncertainty:index.uncertainty,indexLimitations:index.limitations,conclusion,
-    evidenceSources:index.sources.filter(source=>conclusion.evidence.citations.includes(source.id)),
+    evidenceSources:index.sources.filter(source=>conclusion.evidence.citations.includes(source.id)
+      || Boolean(scoped && conclusion.evidence.ruleApplications.some(rule=>rule.sourceIds.includes(source.id)))),
     citationBindings:index.citationBindings.filter(binding=>binding.conclusionId===conclusion.stableId) }) as unknown as ReadingCaseReviewTarget);
 }
 export async function resolveReadingCaseReviewTarget(record: ResearchNoteRecord, conclusionId: string): Promise<ReadingCaseReviewTarget> {

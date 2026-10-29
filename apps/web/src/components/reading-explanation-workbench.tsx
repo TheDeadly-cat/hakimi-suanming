@@ -1,4 +1,4 @@
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { ResearchNoteRecord, RevisionRecord } from "@hakimi/contracts";
 import { buildReadingTimeUncertainty, queryReadingExplanation, readReadingExplanationIndex, readingExplanationSearchQuery,
   type ReadingConclusion, type ReadingExplanationIndex, type ReadingExplanationQuery, type ReadingExplanationTopic,
@@ -6,6 +6,8 @@ import { buildReadingTimeUncertainty, queryReadingExplanation, readReadingExplan
 import { decodeReadingReportBundle } from "../lib/local-reading-report-bundle";
 import { isPackedReadingSnapshot, unpackReadingSnapshot } from "../lib/local-reading-snapshot-codec";
 import { LOCAL_READING_SNAPSHOT_TAG } from "../lib/local-reading-record";
+import { SCOPED_READING_REPORT_TAG } from "../lib/scoped-reading-report";
+import { frozenPlainConditionText, supportsFrozenPlainConditions } from "../lib/plain-reading-condition";
 import { safeVisibleErrorMessage } from "../lib/visible-text";
 import { readReadingNavigation, readingNavigationIdentity, readingTopicSelection, writeReadingNavigation } from "../lib/reading-navigation-context";
 import { ReadingBranchGuide } from "./reading-branch-guide";
@@ -23,6 +25,7 @@ interface Props {
   onTimeUncertaintyChange?: (value: ReadingTimeUncertainty) => void;
   onRequestYear?: (year: number) => void; monthsLoading?: boolean; loading?: boolean;
   onSelectionChange?: (selection: ReadingNavigationSelection) => void;
+  saveScopeAction?: ReactNode;
 }
 const topics: { id: ReadingExplanationTopic; label: string }[] = [
   { id: "summary", label: "一页摘要" }, { id: "career", label: "事业发展" }, { id: "wealth", label: "收入与开支" },
@@ -42,14 +45,21 @@ const logicalId = (id: string) => id.slice(id.indexOf("/") + 1);
 
 function Evidence({ index, conclusion }: { index: ReadingExplanationIndex; conclusion: ReadingConclusion }) {
   const [open, setOpen] = useState(false);
+  const ruleOnlySourceIds = [...new Set(conclusion.evidence.ruleApplications.flatMap(rule => rule.sourceIds))]
+    .filter(id => !conclusion.evidence.citations.includes(id));
   return <details className="reading-explanation-evidence" onToggle={event => setOpen(event.currentTarget.open)}>
     <summary>查看依据 · {conclusion.label}</summary>
     {open ? <div>
       <h4>本盘事实</h4>{list(conclusion.evidence.facts, "这一项没有额外列出计算事实；不从其他领域借用事实。")}
-      <h4>采用规则</h4>{conclusion.evidence.ruleApplications.length ? conclusion.evidence.ruleApplications.map((rule, i) => <div key={`${rule.ruleId}-${i}`}>
+      <h4>采用规则</h4>{conclusion.evidence.ruleApplications.length ? conclusion.evidence.ruleApplications.map((rule, i) => {
+        const limits = rule.limitations.map(raw => supportsFrozenPlainConditions(conclusion.sourceVersions)
+          && supportsFrozenPlainConditions(index.sourceSnapshot.sourceVersions) ? frozenPlainConditionText(rule.ruleId, raw) : raw);
+        const annotated = limits.some((text, n) => text !== rule.limitations[n]);
+        return <div key={`${rule.ruleId}-${i}`}>
         <strong>{rule.title}</strong><p>{rule.decision}</p>{list(rule.support, "此规则没有可单列的支持事实。")}
-        {rule.limitations.length ? <><p>本项限制：</p>{list(rule.limitations, "")}</> : null}
-      </div>) : <p>{conclusion.origin === "personal" ? "个人原文，不作自动规则背书。" : "未保存逐句的规则映射，不能把规则名称当作已经证明。"}</p>}
+        {rule.limitations.length ? <><p>{annotated ? "当前辅助解释 · 本项条件与禁止推断：" : "本项限制（原字句，不是实际发生的结论）："}</p>{list(limits, "")}
+          {annotated ? <details><summary>查看规则限制原字句</summary>{list(rule.limitations, "")}</details> : null}</> : null}
+      </div>; }) : <p>{conclusion.origin === "personal" ? "个人原文，不作自动规则背书。" : "未保存逐句的规则映射，不能把规则名称当作已经证明。"}</p>}
       <h4>支持与限制</h4>{list(conclusion.evidence.support, "未单列进一步支持。")}{list(conclusion.evidence.limits, "仍限于原报告所列条件。")}
       <h4>适用范围</h4><p>{readingConclusionScopeText(conclusion)}</p><p>{conclusion.origin === "personal" ? "已采用个人原文" : conclusion.origin === "contextual" ? "包含已确认生活背景" : "本地规则解释"}</p>
       <h4>尚未确定</h4>{list(conclusion.evidence.unknowns, "没有新增的未定项；上述条件和范围仍然适用，事件并非已证实。")}
@@ -57,6 +67,15 @@ function Evidence({ index, conclusion }: { index: ReadingExplanationIndex; concl
         const source = index.sources.find(item => item.id === id)!;
         return <blockquote key={id}><p>{source.excerpt}</p><cite>{/^https?:\/\//u.test(source.url) ? <a href={source.url} target="_blank" rel="noreferrer">{source.title}</a> : source.title} · {source.locator}</cite><p>{source.interpretation}</p></blockquote>;
       })}<p>原文关联不等于它已经证明整句现代生活解释；不把“有引用”当成语义验证。</p></> : null}
+      {ruleOnlySourceIds.length ? <details><summary>查看规则级来源</summary>
+        <p>以下说明所采用规则的出处，不属于本条生活解释的逐句验证。</p>
+        {ruleOnlySourceIds.map(id => {
+          const source = index.sources.find(item => item.id === id);
+          return source ? <blockquote key={id}><p>{source.excerpt}</p><cite>{/^https?:\/\//u.test(source.url)
+            ? <a href={source.url} target="_blank" rel="noreferrer">{source.title}</a> : source.title} · {source.locator}</cite><p>{source.interpretation}</p></blockquote>
+            : <p key={id}>原规则记录了来源编号 {id}；这份索引当时未保存对应材料，未用新版材料补写。</p>;
+        })}
+      </details> : null}
       <details><summary>当时的版本与来源编号</summary><p>生成：{formatTime(index.generatedAt)}；报告：{index.sourceSnapshot.reportVersion}</p>
         {list(conclusion.sourceSubjects, "未单列来源编号。")}{list(conclusion.sourceVersions, "未单列版本。")}</details>
     </div> : null}
@@ -69,7 +88,7 @@ export function ReadingExplanationWorkbench(props: Props) {
   return <ReadingExplanationContent key={identity} {...props} />;
 }
 
-function ReadingExplanationContent({ index, revision, records, onTimeUncertaintyChange, onRequestYear, onSelectionChange, monthsLoading, loading = false }: Props) {
+function ReadingExplanationContent({ index, revision, records, onTimeUncertaintyChange, onRequestYear, onSelectionChange, saveScopeAction, monthsLoading, loading = false }: Props) {
   const componentId = useId();
   const [query, setQuery] = useState<ReadingExplanationQuery>(() => loading ? { topic: "summary" } : readReadingNavigation(index, revision));
   const [navigationRestored, setNavigationRestored] = useState(!loading);
@@ -100,7 +119,7 @@ function ReadingExplanationContent({ index, revision, records, onTimeUncertainty
   const [oldError, setOldError] = useState("");
   const [timeState, setTimeState] = useState<"idle" | "busy">("idle");
   const [timeError, setTimeError] = useState("");
-  const reports = records.filter(record => record.tags.includes(LOCAL_READING_SNAPSHOT_TAG));
+  const reports = records.filter(record => record.tags.includes(LOCAL_READING_SNAPSHOT_TAG) && !record.tags.includes(SCOPED_READING_REPORT_TAG));
   const oldRecord = reports.find(record => record.id === oldId);
   const oldKey = oldRecord ? `${oldRecord.id}:${oldRecord.editVersion}:${oldRecord.body}` : "";
   useEffect(() => {
@@ -126,10 +145,12 @@ function ReadingExplanationContent({ index, revision, records, onTimeUncertainty
   }, [oldRecord, oldKey]);
   const previous = oldResult?.key === oldKey ? oldResult : null;
   const answer = useMemo(() => queryReadingExplanation(index, { ...query, previousIndex: previous?.index }), [index, query, previous]);
+  const selectedMonthId = answer.topic === "month" && selectedId && index.conclusions.some(item => item.stableId === selectedId && item.scope.level === "month")
+    ? selectedId : query.monthId;
   useEffect(() => {
     onSelectionChange?.({ topic: answer.topic, year: query.year, comparisonYear: query.comparisonYear,
-      branchId: query.branchId, monthId: query.monthId, isReady: navigationRestored && !loading && answer.status === "answered" && !(answer.topic === "month" && monthsLoading) });
-  }, [onSelectionChange, answer.topic, answer.status, query.year, query.comparisonYear, query.branchId, query.monthId, loading, monthsLoading, navigationRestored]);
+      branchId: query.branchId, monthId: selectedMonthId, isReady: navigationRestored && !loading && answer.status === "answered" && !(answer.topic === "month" && monthsLoading) });
+  }, [onSelectionChange, answer.topic, answer.status, query.year, query.comparisonYear, query.branchId, selectedMonthId, loading, monthsLoading, navigationRestored]);
   useEffect(() => {
     if (!loading && navigationRestored) writeReadingNavigation(index, revision, { ...query, topic: answer.topic });
   }, [index, revision, query, answer.topic, loading, navigationRestored]);
@@ -229,6 +250,7 @@ function ReadingExplanationContent({ index, revision, records, onTimeUncertainty
     {!["summary", "uncertainty", "report_comparison"].includes(answer.topic) ? <ReadingBranchGuide index={index} branches={branches} selected={query.branchId}
       needed={answer.status === "needs_selection"}
       onChange={branchId => { setSelectedId(null); setQuery({ ...query, branchId, monthId: undefined }); }} /> : null}
+    {saveScopeAction}
     <details open={topics.slice(6).some(topic => topic.id === answer.topic) || undefined}>
       <summary>出生时间与旧报告</summary>
       <div className="reading-explanation-topics" aria-label="更多解读专题">{topics.slice(6).map(topic => <button type="button" key={topic.id}

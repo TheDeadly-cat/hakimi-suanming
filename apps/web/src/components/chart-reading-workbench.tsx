@@ -71,6 +71,7 @@ export interface ChartReadingWorkbenchProps {
   annualLoading?: boolean;
   annualError?: string | null;
   onSaveReading?: () => void | Promise<void>;
+  saveDisabled?: boolean;
   saveFeedback?: ReadingSaveFeedback;
   onCheckSave?: () => void;
   onAddFeedback?: (feedback: ReadingFeedbackDraft) => void | Promise<void>;
@@ -255,7 +256,7 @@ function FeedbackForm({ assessment, annual, choices, target, onAddFeedback }: { 
   </section>;
 }
 
-function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive, synthesis, briefReport, explanationPanel, onPrepareCompleteReading, priorities, annualEvents, annualLifeStories, annualLifeStoryPersonalSources, extraFeedbackChoices = [], feedbackTarget, reportLoading = false, onExportReading, onExportArchive, selectedYear: controlledYear, onSelectYear, annualOutlook, lifeOutlook, timeline, annualLoading = false, annualError, onSaveReading, saveFeedback, onCheckSave, onAddFeedback, onEditBirthData, onOpenDetails, onOpenTransit, decorativeImageUrl }: ChartReadingWorkbenchProps) {
+function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive, synthesis, briefReport, explanationPanel, onPrepareCompleteReading, priorities, annualEvents, annualLifeStories, annualLifeStoryPersonalSources, extraFeedbackChoices = [], feedbackTarget, reportLoading = false, onExportReading, onExportArchive, selectedYear: controlledYear, onSelectYear, annualOutlook, lifeOutlook, timeline, annualLoading = false, annualError, onSaveReading, saveDisabled = false, saveFeedback, onCheckSave, onAddFeedback, onEditBirthData, onOpenDetails, onOpenTransit, decorativeImageUrl }: ChartReadingWorkbenchProps) {
   const sectionId = useId();
   const [topic, setTopic] = useState<ReadingTopic>("self");
   const [axis, setAxis] = useState<ReadingAxis | null>(null);
@@ -351,9 +352,9 @@ function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive
         {onEditBirthData ? <button className="reading-edit-data" type="button" onClick={onEditBirthData}><PencilLine size={16} aria-hidden="true" />编辑资料</button> : null}
       </div>
       <div className="reading-header-actions">
-        {onSaveReading ? <button className="reading-button reading-button--primary" type="button" aria-describedby={`${sectionId}-save-scope`} disabled={saving || unconfirmed || reportLoading} onClick={() => { void saveReading(); }}>
+        {onSaveReading ? <button className="reading-button reading-button--primary" type="button" aria-describedby={`${sectionId}-save-scope`} disabled={saveDisabled || saving || unconfirmed || reportLoading} onClick={() => { void saveReading(); }}>
           {saving ? <LoaderCircle size={18} className="reading-spinner" aria-hidden="true" /> : saved ? <Check size={18} aria-hidden="true" /> : <Save size={18} aria-hidden="true" />}
-          {saving ? "正在保存" : unconfirmed ? "保存结果待核对" : saved ? "已保存解读" : "保存解读"}
+          {saving ? "正在保存完整报告" : unconfirmed ? "完整保存结果待核对" : saved ? "已保存完整报告" : "保存完整报告"}
         </button> : null}
         {onExportReading || onExportArchive ? <details className="reading-export-menu">
           <summary className="reading-button reading-button--secondary">更多<ChevronDown size={16} aria-hidden="true" /></summary>
