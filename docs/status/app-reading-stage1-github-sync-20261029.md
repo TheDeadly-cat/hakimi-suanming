@@ -1,5 +1,7 @@
 # 手机阅读第一阶段：GitHub 同步范围
 
+这是第一阶段的历史记录。后续接续已恢复独立开发；当前范围、验证和未完成项见 [统一状态入口](mobile-reading-current.md)。本文末尾当时的整体 blocked 状态不再代表当前工作状态。
+
 2026-10-29。用户要求更新 GitHub 仓库。本次将已交付的六项第一阶段改动、阅读返回修复、摘要来源版本校验及配套验证资料纳入现有候选分支 `codex/event-index-candidate-20261011`，继续通过 [Draft PR #17](https://github.com/TheDeadly-cat/hakimi-suanming/pull/17) 审阅。PR 的基础分支仍为 `codex/journal-event-index-20261010`，不合并或改写 main。
 
 ## 用户可见变化

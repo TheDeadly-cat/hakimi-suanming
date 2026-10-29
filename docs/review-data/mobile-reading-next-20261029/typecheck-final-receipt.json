@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "recordType": "default_npm_lifecycle_phase_report",
+  "stage": "typecheck",
+  "originalCommand": [
+    "npm",
+    "run",
+    "typecheck"
+  ],
+  "runId": null,
+  "receiptId": null,
+  "packageIdentities": [
+    {
+      "path": "package.json",
+      "rawBytes": 32744,
+      "rawSha256": "abb5b1ddf99196206f422835a5ed330e85edcaeb69e701b36a426daed36f7ec0"
+    },
+    {
+      "path": "apps/web/package.json",
+      "rawBytes": 3488,
+      "rawSha256": "f727f83500a10c83353cac5e014b7f0b2535bdbadf9b68537b93859b16a96457"
+    }
+  ],
+  "planDigest": "5dadb3afced71bc3eb509d602c64d7fbff62d9daf17b2f1b698025c23cac99fd",
+  "startedAt": "2026-10-29T00:57:10.888Z",
+  "completedAt": "2026-10-29T00:57:36.925Z",
+  "terminal": true,
+  "authorization": {
+    "status": "allowed",
+    "blockers": []
+  },
+  "phases": [
+    {
+      "id": "governance",
+      "required": true,
+      "status": "failed",
+      "started": true,
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "startedAt": "2026-10-29T00:57:10.889Z",
+      "completedAt": "2026-10-29T00:57:33.640Z"
+    },
+    {
+      "id": "workspace-prebuild",
+      "required": false,
+      "status": "not-applicable",
+      "started": false,
+      "exitCode": null,
+      "signal": null,
+      "error": null,
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "program",
+      "required": true,
+      "status": "passed",
+      "started": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "startedAt": "2026-10-29T00:57:33.640Z",
+      "completedAt": "2026-10-29T00:57:36.924Z"
+    },
+    {
+      "id": "workspace-postbuild",
+      "required": false,
+      "status": "not-configured",
+      "started": false,
+      "exitCode": null,
+      "signal": null,
+      "error": null,
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "root-post",
+      "required": false,
+      "status": "not-configured",
+      "started": false,
+      "exitCode": null,
+      "signal": null,
+      "error": null,
+      "startedAt": null,
+      "completedAt": null
+    }
+  ],
+  "programStarted": true,
+  "aggregateExitCode": 1,
+  "status": "failed"
+}

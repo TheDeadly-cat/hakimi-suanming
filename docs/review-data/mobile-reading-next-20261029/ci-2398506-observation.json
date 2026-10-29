@@ -1,0 +1,162 @@
+{
+  "requestedHead": "2398506967e2eff43ce4d7c2b28e6868811cab2e",
+  "checks": [
+    {
+      "id": 123196842882,
+      "name": "Default legacy-v13 formal aggregate",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836680/job/123196842882"
+    },
+    {
+      "id": 123196812978,
+      "name": "Default legacy-v13 engineering aggregate",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836680/job/123196812978"
+    },
+    {
+      "id": 123192334819,
+      "name": "Built artifact manifest verification",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836680/job/123192334819"
+    },
+    {
+      "id": 123191983664,
+      "name": "Complete current-governance history group",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836701/job/123191983664"
+    },
+    {
+      "id": 123191982594,
+      "name": "History checkpoint governance",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836680/job/123191982594"
+    },
+    {
+      "id": 123191982580,
+      "name": "Migration / cross-schema-v13-v16",
+      "status": "in_progress",
+      "conclusion": null,
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836722/job/123191982580"
+    },
+    {
+      "id": 123191982492,
+      "name": "Migration / cross-schema-upgrade",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836722/job/123191982492"
+    },
+    {
+      "id": 123191982457,
+      "name": "Migration / cross-schema-v14-v15",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836722/job/123191982457"
+    },
+    {
+      "id": 123191982435,
+      "name": "Bazi current manifest and expert structure",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836680/job/123191982435"
+    },
+    {
+      "id": 123191982400,
+      "name": "CI commands and test inventory",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836680/job/123191982400"
+    },
+    {
+      "id": 123191982395,
+      "name": "Default legacy-v13 Web build",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836680/job/123191982395"
+    },
+    {
+      "id": 123191982393,
+      "name": "Migration / cross-schema-v13-v15",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836722/job/123191982393"
+    },
+    {
+      "id": 123191982339,
+      "name": "Current index governance",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836680/job/123191982339"
+    },
+    {
+      "id": 123191982320,
+      "name": "Bazi formal expert admission",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836680/job/123191982320"
+    },
+    {
+      "id": 123191982319,
+      "name": "Full workspace typecheck",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836680/job/123191982319"
+    },
+    {
+      "id": 123191982271,
+      "name": "Node release evidence tools",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836680/job/123191982271"
+    },
+    {
+      "id": 123191982241,
+      "name": "Full Vitest suite",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836680/job/123191982241"
+    },
+    {
+      "id": 123191982215,
+      "name": "Migration / orphaned-v13-recovery",
+      "status": "in_progress",
+      "conclusion": null,
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836722/job/123191982215"
+    },
+    {
+      "id": 123191982203,
+      "name": "Toolchain and boundaries",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836680/job/123191982203"
+    },
+    {
+      "id": 123191982065,
+      "name": "Node package artifact tools",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40795836680/job/123191982065"
+    }
+  ],
+  "vitest": {
+    "job": {
+      "id": 123191982241,
+      "head_sha": "2398506967e2eff43ce4d7c2b28e6868811cab2e",
+      "name": "Full Vitest suite",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "summaryLines": [
+      "2026-10-29T00:56:38.2875256Z  Test Files  366 passed (366)",
+      "2026-10-29T00:56:38.2908467Z       Tests  4387 passed (4387)",
+      "2026-10-29T00:56:38.2916098Z    Duration  808.65s (transform 15.31s, setup 41.99s, import 116.97s, tests 1163.41s, environment 241.41s)"
+    ],
+    "logTruncated": true
+  },
+  "scope": "Historical test-fix head only; does not validate the later mobile UI or Android commits.",
+  "capturedAt": "2026-10-29T00:59:06.665Z"
+}

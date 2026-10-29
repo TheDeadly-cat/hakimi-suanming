@@ -57,7 +57,7 @@ node apps/android/scripts/assemble.mjs
 | 错误构建身份 | `000000000000` 在复制前被拒绝 |
 | JDK / Gradle | Temurin `javac 21.0.12.1`；Gradle `8.14.3 --version` 成功；ZIP 和 wrapper 的官方 SHA-256 均匹配 |
 | Gradle 项目配置 | 未通过：Windows 中文路径被 AGP 拒绝；未关闭该保护 |
-| SDK 与许可 | 本轮没有安装 SDK，没有代用户接受许可；`doctor` 如实返回 `TOOLCHAIN_INCOMPLETE` |
+| SDK 与许可 | 用户本轮明确“暂不接受，先保留 Android 工程”；未下载或安装 SDK、未代用户接受许可；`doctor` 返回 `TOOLCHAIN_INCOMPLETE` |
 | APK | 未编译，未安装；新的 UI 候选尚未同步打包 |
 | 设备 / 生命周期 / 原生文件操作 | 全部 `NOT_RUN`；未连接或识别测试设备 |
 

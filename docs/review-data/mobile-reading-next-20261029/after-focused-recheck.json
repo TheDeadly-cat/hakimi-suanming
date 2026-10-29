@@ -1,0 +1,45 @@
+{
+  "largeText": {
+    "width": 390,
+    "height": 844,
+    "fontSize": 32,
+    "year": "2030",
+    "focused": true,
+    "yearBox": {
+      "x": 18,
+      "y": 642.40625,
+      "width": 354,
+      "height": 66
+    },
+    "footerBox": {
+      "x": 8,
+      "y": 750,
+      "width": 374,
+      "height": 86
+    },
+    "focusUnobscured": true
+  },
+  "monthPreview": {
+    "year": 2030,
+    "firstTwo": [
+      {
+        "state": "producer_preview",
+        "scope": "2030年 · 2030-02-04 03:08起至2030-03-05 21:03前（北京时间）· 已确定路径",
+        "domain": "事业本月原文提要",
+        "meaning": "新合作和临时项目是重点",
+        "condition": "条件与限制：不能据此认定“任何偏财都代表额外收入”。"
+      },
+      {
+        "state": "producer_preview",
+        "scope": "2030年 · 2030-02-04 03:08起至2030-03-05 21:03前（北京时间）· 已确定路径",
+        "domain": "财运本月原文提要",
+        "meaning": "现有收支安排是重点，增收线索不突出",
+        "condition": "条件与限制：只按本段时间内的实际年龄理解；出生前不编写人生事件，未满成年时不套用成人工作或婚恋情景。"
+      }
+    ],
+    "items": 39,
+    "noInternalAgePhrase": true
+  },
+  "errors": [],
+  "completed": true
+}
