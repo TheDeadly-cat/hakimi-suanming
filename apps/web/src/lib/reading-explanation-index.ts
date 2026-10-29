@@ -7,6 +7,7 @@ import type { BriefReadingReport } from "./brief-reading-report";
 import type { LocalReadingSynthesis } from "./local-reading-synthesis";
 import type { ConcreteLifeSentence, ConcretePeriodFact } from "./concrete-period-prose";
 import { lookupConditionalContentRule, type ConditionalContentAssessment } from "./conditional-content-rules";
+import { attachReadingMonthHeadline, bindReadingMonthHeadline } from "./reading-month-preview";
 
 export const READING_EXPLANATION_INDEX_VERSION = "hakimi.reading-explanation-index/0.1.0" as const;
 export const READING_EXPLANATION_MARKER = "<!-- hakimi-reading-explanation-index-v1 -->";
@@ -202,6 +203,7 @@ export function buildReadingExplanationIndex(input: BuildReadingExplanationIndex
         ...(domain.origin === "personal" ? { support: [], unknowns: ["这是明确采用的个人原文，不作为自动计算或古籍已证明的结论。"] } : {}) }
     }, domain.origin === "personal" ? [] : appliedSources, finalDomain?.sourceIds !== undefined ? `plainReading.domains.${domain.id}.sourceIds` : `synthesis.sections.${domain.id}.sourceIds`, domain.personalTextIds);
   }
+  const monthHeadlines = new Map<string, ReadingRuleApplication>();
   for (const branch of report.plainReading?.outlook.branches ?? []) for (const year of branch.years) for (const segment of year.segments) {
     const scope: ReadingConclusion["scope"] = { level: "year", year: year.year, branchId: branch.id, startInstant: segment.startInstant, endExclusiveInstant: segment.endExclusiveInstant };
     for (const domain of segment.domains) {
@@ -214,14 +216,23 @@ export function buildReadingExplanationIndex(input: BuildReadingExplanationIndex
             ...(domain.verdict.backgroundPressure ? ["同时保留较长期的压力背景，不能只读眼前有利作用。"] : [])], ruleApplications(producer?.contentRules, sentences)) }, [], "", domain.personalTextIds);
     }
     for (const window of segment.monthWindows) for (const member of window.members) for (const topic of member.topics) {
-      add(`month:${branch.id}:${year.year}:${member.periodId}:${topic.domain}`, { label: `${member.label} · ${topic.title}`, text: unique([topic.text, topic.summary]).join("\n\n"),
-        domain: topic.domain, scope: { ...scope, level: "month", startInstant: member.startInstant, endExclusiveInstant: member.endExclusiveInstant },
+      const key = `month:${branch.id}:${year.year}:${member.periodId}:${topic.domain}`;
+      const monthScope: ReadingConclusion["scope"] = { ...scope, level: "month", startInstant: member.startInstant, endExclusiveInstant: member.endExclusiveInstant };
+      if (topic.origin !== "personal") monthHeadlines.set(`${revision.id}/${key}`, bindReadingMonthHeadline({ key, scope: monthScope, domain: topic.domain,
+        title: topic.title, headline: topic.text, sourceSubjects: topic.sourceSubjects, producerVersion: report.plainReading!.outlook.version }));
+      add(key, { label: `${member.label} · ${topic.title}`, text: unique([topic.text, topic.summary]).join("\n\n"),
+        domain: topic.domain, scope: monthScope,
         direction: null, origin: topic.origin, sourceSubjects: topic.sourceSubjects,
         evidence: baseEvidence(sourceNotes(topic.sentences), unique([member.annualContrast, member.directionNote, report.plainReading!.outlook.scopeText]),
           [`流月 ${member.ganZhi}；${member.ageLabel}。`, ...periodFacts(topic.facts)], ruleApplications(topic.contentRules, topic.sentences, topic.facts)) }, [], "", topic.personalTextIds);
     }
   }
-  return validateReadingExplanationIndex(index);
+  const validated = validateReadingExplanationIndex(index);
+  for (const conclusion of validated.conclusions) {
+    const headline = monthHeadlines.get(conclusion.stableId);
+    if (headline) attachReadingMonthHeadline(conclusion, headline);
+  }
+  return validated;
 }
 
 export function resolveReadingCitationSupport(index: ReadingExplanationIndex, conclusionStableId: string, sourceId: string) {

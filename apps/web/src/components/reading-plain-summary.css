@@ -16,6 +16,17 @@
 .reading-glossary-note p { margin: 8px 0; }
 .reading-glossary-note button { min-height: 48px; }
 .reading-summary-uncertainty p { margin: 8px 0; }
+.reading-navigation-heading { scroll-margin-top: calc(160px + env(safe-area-inset-top)); }
+.reading-primary-topics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 12px 0; }
+.reading-primary-topics button { min-width: 0; overflow-wrap: anywhere; }
+.reading-primary-selectors { margin-top: 8px; }
+.reading-primary-selectors select { width: 100%; min-width: 0; }
+.reading-summary-more { grid-column: 1 / -1; min-width: 0; padding: 0 16px; border: 1px solid var(--reading-line); border-radius: 10px; }
+.reading-summary-more > summary, .reading-summary-uncertainty summary { min-height: 48px; padding: 10px 0; cursor: pointer; color: var(--reading-jade); }
+.reading-summary-more > article:last-child { border-bottom: 0; }
+@media (max-width: 767px) {
+  .reading-explanation-workbench :is(button, input, select, summary) { scroll-margin-bottom: calc(2rem + env(safe-area-inset-bottom)); }
+}
 @media (min-width: 900px) {
   .reading-summary-groups { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
   .reading-summary-uncertainty { grid-column: 1 / -1; }

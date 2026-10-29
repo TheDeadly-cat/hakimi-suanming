@@ -1,4 +1,4 @@
-import { beforeAll, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { calculateChart } from "@hakimi/bazi-core";
 import { researchNoteRecordSchema, storedRevisionRecordSchema, type RevisionRecord } from "@hakimi/contracts";
@@ -10,11 +10,14 @@ import { appendReadingExplanationIndex, unassessedReadingTime, validateReadingEx
 import { encodeReadingReportBundle } from "../lib/local-reading-report-bundle";
 import { packReadingSnapshot } from "../lib/local-reading-snapshot-codec";
 import { LOCAL_READING_SNAPSHOT_TAG } from "../lib/local-reading-record";
+import { READING_NAVIGATION_STORAGE_KEY, readReadingNavigation, readingNavigationIdentity, writeReadingNavigation } from "../lib/reading-navigation-context";
 
 let revision: RevisionRecord;
 const generatedAt = "2026-10-24T00:00:00.000Z";
 const reportVersion = "hakimi.local-reading-edition/0.22.0";
 const reportText = "# 合成旧报告原文\n\n## 条件\n本段保留标点与换行。\n{\"sourceSubjects\":\"这是个人文字，不是字段\"}\n";
+
+beforeEach(() => window.sessionStorage.removeItem(READING_NAVIGATION_STORAGE_KEY));
 
 beforeAll(async () => {
   // A real synthetic revision supplies identity only. Explicit UI conclusions
@@ -72,6 +75,157 @@ function article(label: string) {
     ?? [...document.querySelectorAll<HTMLElement>("article[data-reading-conclusion]")].find(node => node.querySelector(".reading-summary-professional-label")?.textContent === label)!;
 }
 
+function fixtureWith2030() {
+  const index = fixture();
+  const year = index.conclusions.find(item => item.scope.year === 2029 && item.scope.level === "year")!;
+  const month = index.conclusions.find(item => item.scope.year === 2029 && item.scope.level === "month")!;
+  for (const source of [year, month]) {
+    const item = structuredClone(source);
+    item.stableId = item.stableId.replaceAll("2029", "2030");
+    item.label = item.label.replaceAll("2029", "2030");
+    item.scope = { ...item.scope, year: 2030, startInstant: "2030-02-04T00:00:00.000Z",
+      endExclusiveInstant: item.scope.level === "year" ? "2031-02-04T00:00:00.000Z" : "2030-03-05T00:00:00.000Z" };
+    index.conclusions.push(item);
+    if (item.scope.level === "year") index.conclusions.push({ ...structuredClone(item), domain: "wealth",
+      stableId: `${revision.id}/year:forward:2030:wealth`, label: "2030年 · 收入", text: "2030年收入的独立原文与限制。" });
+  }
+  return index;
+}
+
+it("puts directly available topics and year before two initial cards while keeping all originals and limits expandable", () => {
+  const index = fixture();
+  const view = render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} />);
+  const groups = view.container.querySelector(".reading-summary-groups")!;
+  for (const label of ["事业发展", "收入与开支", "年份对照", "关键月份"]) {
+    const button = screen.getByRole("button", { name: label });
+    expect(button.compareDocumentPosition(groups) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  }
+  expect(screen.getByLabelText("年份", { exact: true }).compareDocumentPosition(groups) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(groups.querySelectorAll(":scope > section > article")).toHaveLength(2);
+  const more = view.container.querySelector<HTMLDetailsElement>(".reading-summary-more")!;
+  expect(more.open).toBe(false);
+  fireEvent.click(within(more).getByText("展开其余 3 条摘要、条件与原文"));
+  expect(within(groups as HTMLElement).getAllByRole("button", { name: "查看原文及条件" })).toHaveLength(5);
+  expect(groups.querySelectorAll("[data-reading-conclusion]")).toHaveLength(index.conclusions.filter(item => item.scope.level === "natal").length);
+  fireEvent.click(screen.getByText("展开这份报告的完整限制"));
+  expect(screen.getByText(index.limitations[0]!, { exact: true })).toBeTruthy();
+});
+
+it("retains 2030 and the chosen branch across income, career, months and overview without substituting the first year", () => {
+  const index = fixtureWith2030(), onRequestYear = vi.fn(), onSelectionChange = vi.fn();
+  render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} onRequestYear={onRequestYear} onSelectionChange={onSelectionChange} />);
+  fireEvent.click(screen.getByRole("button", { name: "收入与开支" }));
+  fireEvent.change(screen.getByLabelText("年份", { exact: true }), { target: { value: "2030" } });
+  expect(onSelectionChange.mock.lastCall?.[0].isReady).toBe(false);
+  fireEvent.change(screen.getByLabelText("分别查看结果"), { target: { value: "forward" } });
+  expect(screen.getByText("2030年收入的独立原文与限制。", { exact: true })).toBeTruthy();
+  for (const label of ["事业发展", "关键月份", "一页摘要", "收入与开支"]) {
+    fireEvent.click(screen.getByRole("button", { name: label }));
+    expect(screen.getByLabelText("年份", { exact: true })).toHaveProperty("value", "2030");
+    if (label !== "一页摘要") expect(screen.getByLabelText("分别查看结果")).toHaveProperty("value", "forward");
+  }
+  expect(onRequestYear.mock.calls).toEqual([[2030]]);
+  expect(onSelectionChange.mock.lastCall?.[0]).toMatchObject({ topic: "wealth", year: 2030, branchId: "forward", isReady: true });
+});
+
+it("restores same-tab navigation after unmount while retaining no input, question, prose or old-report contents", () => {
+  const index = fixtureWith2030(), onRequestYear = vi.fn();
+  const view = render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} />);
+  fireEvent.click(screen.getByRole("button", { name: "收入与开支" }));
+  fireEvent.change(screen.getByLabelText("分别查看结果"), { target: { value: "forward" } });
+  fireEvent.change(screen.getByLabelText("在这份报告中查找"), { target: { value: "2030年关键月份，私人备注不要保存" } });
+  fireEvent.click(screen.getByRole("button", { name: "查找报告" }));
+  const stored = window.sessionStorage.getItem(READING_NAVIGATION_STORAGE_KEY)!;
+  expect(stored.length).toBeLessThanOrEqual(4096);
+  for (const privateText of ["私人备注", index.conclusions[0]!.text, revision.input.date, "sourceNote", "previousIndex"]) expect(stored).not.toContain(privateText);
+  view.unmount();
+  render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} onRequestYear={onRequestYear} />);
+  expect(screen.getByRole("button", { name: "关键月份" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByLabelText("年份", { exact: true })).toHaveProperty("value", "2030");
+  expect(screen.getByLabelText("分别查看结果")).toHaveProperty("value", "forward");
+  expect(screen.getByLabelText("在这份报告中查找")).toHaveProperty("value", "");
+  expect(onRequestYear.mock.calls).toEqual([[2030]]);
+});
+
+it("resets stale navigation and an open conclusion when the revision changes", () => {
+  const index = fixtureWith2030();
+  const view = render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} />);
+  fireEvent.change(screen.getByLabelText("年份", { exact: true }), { target: { value: "2030" } });
+  fireEvent.click(within(article("合成格局主判")).getByRole("button", { name: "查看原文及条件" }));
+  const nextRevision = { ...revision, id: "33333333-3333-4333-8333-333333333333", revisionNumber: 2 };
+  const nextIndex = structuredClone(index);
+  nextIndex.sourceSnapshot.revisionId = nextRevision.id;
+  for (const item of nextIndex.conclusions) item.stableId = item.stableId.replace(revision.id, nextRevision.id);
+  view.rerender(<ReadingExplanationWorkbench index={nextIndex} revision={nextRevision} records={[]} />);
+  expect(screen.getByRole("button", { name: "一页摘要" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByLabelText("年份", { exact: true })).toHaveProperty("value", "");
+  expect(screen.queryByRole("button", { name: "返回刚才的摘要" })).toBeNull();
+});
+
+it("waits for the initial report range before validating restored navigation", () => {
+  const index = fixtureWith2030(), onRequestYear = vi.fn();
+  writeReadingNavigation(index, revision, { topic: "month", year: 2030, branchId: "forward" });
+  const stored = window.sessionStorage.getItem(READING_NAVIGATION_STORAGE_KEY);
+  const partial = { ...index, conclusions: index.conclusions.filter(item => item.scope.level === "natal") };
+  const view = render(<ReadingExplanationWorkbench index={partial} revision={revision} records={[]} loading onRequestYear={onRequestYear} />);
+  expect(window.sessionStorage.getItem(READING_NAVIGATION_STORAGE_KEY)).toBe(stored);
+  expect(onRequestYear).not.toHaveBeenCalled();
+  view.rerender(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} onRequestYear={onRequestYear} />);
+  expect(screen.getByRole("button", { name: "关键月份" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByLabelText("年份", { exact: true })).toHaveProperty("value", "2030");
+  expect(screen.getByLabelText("分别查看结果")).toHaveProperty("value", "forward");
+  expect(onRequestYear.mock.calls).toEqual([[2030]]);
+});
+
+it("retains the active selection when preparing months adds producer version coverage", () => {
+  const index = fixtureWith2030();
+  const view = render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} />);
+  fireEvent.change(screen.getByLabelText("年份", { exact: true }), { target: { value: "2030" } });
+  fireEvent.click(screen.getByRole("button", { name: "关键月份" }));
+  fireEvent.change(screen.getByLabelText("分别查看结果"), { target: { value: "forward" } });
+  const month = index.conclusions.find(item => item.scope.level === "month" && item.scope.year === 2030)!;
+  fireEvent.change(screen.getByLabelText("月份与领域"), { target: { value: month.stableId } });
+  const expanded = structuredClone(index);
+  expanded.sourceSnapshot.sourceVersions.push("synthetic-prepared-months/1");
+  view.rerender(<ReadingExplanationWorkbench index={expanded} revision={revision} records={[]} />);
+  expect(screen.getByRole("button", { name: "关键月份" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByLabelText("年份", { exact: true })).toHaveProperty("value", "2030");
+  expect(screen.getByLabelText("月份与领域")).toHaveProperty("value", month.stableId);
+  expect(screen.getByText(month.text, { exact: true })).toBeTruthy();
+});
+
+it("rejects stale source identities and validates stored years, branches and month range before restoring", () => {
+  const index = fixtureWith2030();
+  writeReadingNavigation(index, revision, { topic: "month", year: 2030, branchId: "forward" });
+  for (const field of ["reportVersion", "chartResultHash", "ruleProfileDigest", "revisionId", "caseId"] as const) {
+    const changed = structuredClone(index);
+    changed.sourceSnapshot[field] += "-changed";
+    expect(readReadingNavigation(changed, revision)).toEqual({ topic: "summary" });
+  }
+  const wrongMonth = index.conclusions.find(item => item.scope.level === "month" && item.scope.year === 2028)!.stableId;
+  window.sessionStorage.setItem(READING_NAVIGATION_STORAGE_KEY, JSON.stringify({ version: 1,
+    identity: readingNavigationIdentity(index, revision), selection: { topic: "month", year: 2030, branchId: "forward", monthId: wrongMonth } }));
+  expect(readReadingNavigation(index, revision)).toMatchObject({ topic: "month", year: 2030, branchId: "forward", monthId: undefined });
+  window.sessionStorage.setItem(READING_NAVIGATION_STORAGE_KEY, JSON.stringify({ version: 1,
+    identity: readingNavigationIdentity(index, revision), selection: { topic: "month", year: 2099, comparisonYear: 2098, branchId: "nonexistent", monthId: wrongMonth } }));
+  expect(readReadingNavigation(index, revision)).toMatchObject({ year: undefined, comparisonYear: undefined, branchId: undefined, monthId: undefined });
+});
+
+it("continues reading when tab storage is invalid or unavailable", () => {
+  const index = fixture();
+  for (const raw of ["{broken", "x".repeat(4097)]) {
+    window.sessionStorage.setItem(READING_NAVIGATION_STORAGE_KEY, raw);
+    expect(readReadingNavigation(index, revision)).toEqual({ topic: "summary" });
+  }
+  const get = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => { throw new Error("unavailable"); });
+  const set = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("unavailable"); });
+  try {
+    render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} />);
+    fireEvent.click(screen.getByRole("button", { name: "事业发展" }));
+    expect(screen.getByText("事业合成第一句。事业完整第二句必须保留。", { exact: true })).toBeTruthy();
+  } finally { get.mockRestore(); set.mockRestore(); }
+});
+
 it.each([false, true])("explains actual recorded direction conditions and searches only the current/saved report (saved=%s)", savedReport => {
   const index = fixture(), before = JSON.stringify(index);
   const view = render(savedReport ? <ReadingSavedExplanation index={index}/>
@@ -109,7 +263,7 @@ it.each([false, true])("renders each distinct year direction in Chinese without 
   const before = JSON.stringify(index);
   render(savedReport ? <ReadingSavedExplanation index={index}/> : <ReadingExplanationWorkbench index={index} revision={revision} records={[]}/>);
   expect(screen.queryByLabelText("分别查看结果")).toBeNull();
-  fireEvent.click(screen.getByText("年份、月份与更多查看"));
+  if (savedReport) fireEvent.click(screen.getByText("年份、月份与更多查看"));
   fireEvent.click(screen.getByRole("button", { name: "年份对照" }));
   const text = screen.getByRole("status").textContent!;
   for (const label of ["支持较多", "阻力较多", "支持和阻力并存", "暂无明确倾向", "信息不足，尚不能判断"]) expect(text).toContain(label);
@@ -172,8 +326,8 @@ it("does not truncate an unmapped pattern into a misleading first sentence and r
   render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} />);
   expect(screen.getByRole("button", { name: "一页摘要" }).getAttribute("aria-pressed")).toBe("true");
   expect(article(pattern.label).getAttribute("data-summary-state")).toBe("original_required");
-  expect(article(pattern.label).textContent).toContain("尚未有可核对的白话表达");
-  fireEvent.click(within(article(pattern.label)).getByRole("button", { name: "读完整结论" }));
+  expect(article(pattern.label).textContent).toContain("原文阅读");
+  fireEvent.click(within(article(pattern.label)).getByRole("button", { name: "查看原文及条件" }));
   const text = article(pattern.label).querySelector("p.reading-explanation-original")!.textContent;
   expect(text).toBe(pattern.text);
   expect(text).toContain("当前主判：本盘的结构任务与实际限制一并保留。");
@@ -186,11 +340,12 @@ it("focuses a complete conclusion and returns to the same expanded summary card 
   Object.defineProperty(window, "scrollY", { configurable: true, value: 1234 });
   try {
     const view = render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} />);
+    fireEvent.click(screen.getByText("展开其余 3 条摘要、条件与原文"));
     const summary = article("收入开支 · 合成主线");
     const condition = summary.querySelector("details")!;
     fireEvent.click(within(summary).getByText("条件与术语"));
     expect(condition.open).toBe(true);
-    const trigger = within(summary).getByRole("button", { name: "读完整结论" });
+    const trigger = within(summary).getByRole("button", { name: "查看原文及条件" });
     fireEvent.click(trigger);
     expect(document.activeElement).toBe(view.container.querySelector(".reading-explanation-results h3"));
     expect(view.container.querySelector<HTMLElement>(".reading-summary-groups")!.hidden).toBe(true);
@@ -209,7 +364,6 @@ it("focuses a complete conclusion and returns to the same expanded summary card 
 it("returns to the same month list with the selected year and branch intact", () => {
   const index = fixture();
   const view = render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} />);
-  fireEvent.click(screen.getByText("年份、月份与更多查看"));
   fireEvent.click(screen.getByRole("button", { name: "关键月份" }));
   fireEvent.change(screen.getByLabelText("分别查看结果"), { target: { value: "forward" } });
   const month = view.container.querySelector<HTMLElement>(".reading-explanation-results article")!;
@@ -230,7 +384,7 @@ it("keeps the same full conclusion and its own evidence through summary, topic a
   expect(summary.getAttribute("data-summary-state")).toBe("original_required");
   expect(within(summary).queryByText("事业合成第一句。", { exact: true })).toBeNull();
   expect(screen.queryByText("事业合成第一句。事业完整第二句必须保留。", { exact: true })).toBeNull();
-  fireEvent.click(within(summary).getByRole("button", { name: "读完整结论" }));
+  fireEvent.click(within(summary).getByRole("button", { name: "查看原文及条件" }));
   expect(article(label).getAttribute("data-reading-conclusion")).toBe(id);
   expect(within(article(label)).getByText(index.conclusions.find(c => c.stableId === id)!.text, { exact: true })).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: "事业发展" }));
@@ -250,7 +404,7 @@ it("groups the overview into three tasks and opens and closes glossary help with
   pattern.text = "本盘采用格局原结论。偏弱仅为当前分类，不是身体差。完整条件保留。";
   render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} />);
   for (const name of ["当前解释", "相关生活主题", "待确定事项"]) expect(screen.getByRole("region", { name })).toBeTruthy();
-  fireEvent.click(within(article(pattern.label)).getByRole("button", { name: "读完整结论" }));
+  fireEvent.click(within(article(pattern.label)).getByRole("button", { name: "查看原文及条件" }));
   const node = article(pattern.label);
   fireEvent.click(within(node).getByText("解释这条里的术语"));
   const trigger = within(node).getByRole("button", { name: "解释偏弱" });
@@ -297,7 +451,6 @@ it("requires an explicit direction for a year and displays only that branch with
 it("requests the selected month-year without inventing a direction or borrowing the annual one", () => {
   const index = fixture(), before = JSON.stringify(index), onRequestYear = vi.fn();
   render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} onRequestYear={onRequestYear} monthsLoading />);
-  fireEvent.click(screen.getByText("年份、月份与更多查看"));
   fireEvent.click(screen.getByRole("button", { name: "关键月份" }));
   expect(onRequestYear.mock.calls).toEqual([[2028]]);
   fireEvent.change(screen.getByLabelText("分别查看结果"), { target: { value: "forward" } });
@@ -316,7 +469,6 @@ it("requests the selected month-year without inventing a direction or borrowing 
 it("keeps the chosen month topic and year through loading, hides stale answers, and then opens the full new month", () => {
   const index = fixture(), before = JSON.stringify(index), onRequestYear = vi.fn();
   const view = render(<ReadingExplanationWorkbench index={index} revision={revision} records={[]} onRequestYear={onRequestYear} />);
-  fireEvent.click(screen.getByText("年份、月份与更多查看"));
   fireEvent.click(screen.getByRole("button", { name: "关键月份" }));
   fireEvent.change(screen.getByLabelText("分别查看结果"), { target: { value: "forward" } });
   const oldMonth = index.conclusions.find(c => c.scope.level === "month" && c.scope.year === 2028)!;
@@ -341,7 +493,8 @@ it("keeps the chosen month topic and year through loading, hides stale answers, 
   expect((screen.getByLabelText("年份", { exact: true }) as HTMLSelectElement).value).toBe("2029");
   expect((screen.getByLabelText("分别查看结果") as HTMLSelectElement).value).toBe("forward");
   expect((screen.getByLabelText("月份与领域") as HTMLSelectElement).value).toBe("");
-  expect(screen.queryByText(newMonth.text, { exact: true })).toBeNull();
+  expect(within(article(newMonth.label)).getByText("原文阅读", { exact: true })).toBeTruthy();
+  expect(within(article(newMonth.label)).getByText(newMonth.text, { exact: true })).toBeTruthy();
   expect(within(article(newMonth.label)).getByRole("button", { name: "读完整结论" })).toBeTruthy();
   fireEvent.change(screen.getByLabelText("月份与领域"), { target: { value: newMonth.stableId } });
   expect(article(newMonth.label).querySelector("p.reading-explanation-original")!.textContent).toBe(newMonth.text);
@@ -357,7 +510,7 @@ it("keeps the chosen month topic and year through loading, hides stale answers, 
 it.each(["case", "revision", "version", "time"] as const)("rejects a saved report with mismatched %s while retaining its exact original reading", async variant => {
   const index = fixture(), record = await saved(index, variant), before = JSON.stringify(record);
   const view = render(<ReadingExplanationWorkbench index={index} revision={revision} records={[record]} />);
-  fireEvent.click(screen.getByText("年份、月份与更多查看"));
+  fireEvent.click(screen.getByText("出生时间与旧报告"));
   fireEvent.click(screen.getByRole("button", { name: "对照旧报告" }));
   fireEvent.change(screen.getByLabelText("选择旧报告"), { target: { value: record.id } });
   await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("未用于来源对照"));
@@ -369,7 +522,7 @@ it.each(["case", "revision", "version", "time"] as const)("rejects a saved repor
 it("compares a genuinely matching saved index without recomputing or changing the stored record", async () => {
   const index = fixture(), record = await saved(index), before = JSON.stringify({ index, record });
   const view = render(<ReadingExplanationWorkbench index={index} revision={revision} records={[record]} />);
-  fireEvent.click(screen.getByText("年份、月份与更多查看"));
+  fireEvent.click(screen.getByText("出生时间与旧报告"));
   fireEvent.click(screen.getByRole("button", { name: "对照旧报告" }));
   fireEvent.change(screen.getByLabelText("选择旧报告"), { target: { value: record.id } });
   await waitFor(() => expect(screen.getByText("对应条目的原文没有变化。", { exact: true })).toBeTruthy());
@@ -381,7 +534,7 @@ it("compares a genuinely matching saved index without recomputing or changing th
 it("retains legacy report text without inventing missing provenance or comparing it to current conclusions", async () => {
   const index = fixture(), record = await saved(index, "legacy");
   const view = render(<ReadingExplanationWorkbench index={index} revision={revision} records={[record]} />);
-  fireEvent.click(screen.getByText("年份、月份与更多查看"));
+  fireEvent.click(screen.getByText("出生时间与旧报告"));
   fireEvent.click(screen.getByRole("button", { name: "对照旧报告" }));
   fireEvent.change(screen.getByLabelText("选择旧报告"), { target: { value: record.id } });
   await waitFor(() => expect(screen.getByText("这份旧报告没有保存逐条依据索引，无法可靠归因输入、规则或文案变化；下面保留当时原文。", { exact: true })).toBeTruthy());

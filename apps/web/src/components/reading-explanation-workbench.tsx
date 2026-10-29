@@ -7,16 +7,22 @@ import { decodeReadingReportBundle } from "../lib/local-reading-report-bundle";
 import { isPackedReadingSnapshot, unpackReadingSnapshot } from "../lib/local-reading-snapshot-codec";
 import { LOCAL_READING_SNAPSHOT_TAG } from "../lib/local-reading-record";
 import { safeVisibleErrorMessage } from "../lib/visible-text";
+import { readReadingNavigation, readingNavigationIdentity, readingTopicSelection, writeReadingNavigation } from "../lib/reading-navigation-context";
 import { ReadingBranchGuide } from "./reading-branch-guide";
 import { ReadingPlainSummaryCard } from "./reading-plain-summary-card";
+import { ReadingMonthPreview } from "./reading-month-preview";
 import { ReadingGlossaryHelp } from "./reading-glossary-text";
 import "./reading-explanation-workbench.css";
 import "./reading-plain-summary.css";
 
+export interface ReadingNavigationSelection {
+  topic: ReadingExplanationTopic; year?: number; comparisonYear?: number; branchId?: string; monthId?: string; isReady: boolean;
+}
 interface Props {
   index: ReadingExplanationIndex; revision: RevisionRecord; records: ResearchNoteRecord[];
   onTimeUncertaintyChange?: (value: ReadingTimeUncertainty) => void;
   onRequestYear?: (year: number) => void; monthsLoading?: boolean; loading?: boolean;
+  onSelectionChange?: (selection: ReadingNavigationSelection) => void;
 }
 const topics: { id: ReadingExplanationTopic; label: string }[] = [
   { id: "summary", label: "一页摘要" }, { id: "career", label: "事业发展" }, { id: "wealth", label: "收入与开支" },
@@ -58,9 +64,31 @@ function Evidence({ index, conclusion }: { index: ReadingExplanationIndex; concl
 }
 export { Evidence as ReadingConclusionEvidence };
 
-export function ReadingExplanationWorkbench({ index, revision, records, onTimeUncertaintyChange, onRequestYear, monthsLoading, loading = false }: Props) {
+export function ReadingExplanationWorkbench(props: Props) {
+  const identity = readingNavigationIdentity(props.index, props.revision) ?? `unmatched:${props.revision.id}`;
+  return <ReadingExplanationContent key={identity} {...props} />;
+}
+
+function ReadingExplanationContent({ index, revision, records, onTimeUncertaintyChange, onRequestYear, onSelectionChange, monthsLoading, loading = false }: Props) {
   const componentId = useId();
-  const [query, setQuery] = useState<ReadingExplanationQuery>({ topic: "summary" });
+  const [query, setQuery] = useState<ReadingExplanationQuery>(() => loading ? { topic: "summary" } : readReadingNavigation(index, revision));
+  const [navigationRestored, setNavigationRestored] = useState(!loading);
+  const restoredMonthYear = useRef(query.topic === "month" ? query.year : undefined);
+  useEffect(() => {
+    if (!loading && !navigationRestored) {
+      const restored = readReadingNavigation(index, revision);
+      restoredMonthYear.current = restored.topic === "month" ? restored.year : undefined;
+      setQuery(restored);
+      setNavigationRestored(true);
+    }
+  }, [index, revision, loading, navigationRestored]);
+  useEffect(() => {
+    if (navigationRestored && restoredMonthYear.current && onRequestYear) {
+      const year = restoredMonthYear.current;
+      restoredMonthYear.current = undefined;
+      onRequestYear(year);
+    }
+  }, [onRequestYear, navigationRestored]);
   const [question, setQuestion] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
@@ -98,16 +126,21 @@ export function ReadingExplanationWorkbench({ index, revision, records, onTimeUn
   }, [oldRecord, oldKey]);
   const previous = oldResult?.key === oldKey ? oldResult : null;
   const answer = useMemo(() => queryReadingExplanation(index, { ...query, previousIndex: previous?.index }), [index, query, previous]);
+  useEffect(() => {
+    onSelectionChange?.({ topic: answer.topic, year: query.year, comparisonYear: query.comparisonYear,
+      branchId: query.branchId, monthId: query.monthId, isReady: navigationRestored && !loading && answer.status === "answered" && !(answer.topic === "month" && monthsLoading) });
+  }, [onSelectionChange, answer.topic, answer.status, query.year, query.comparisonYear, query.branchId, query.monthId, loading, monthsLoading, navigationRestored]);
+  useEffect(() => {
+    if (!loading && navigationRestored) writeReadingNavigation(index, revision, { ...query, topic: answer.topic });
+  }, [index, revision, query, answer.topic, loading, navigationRestored]);
   const years = [...new Set(index.conclusions.flatMap(item => item.scope.year === null ? [] : [item.scope.year]))].sort((a, b) => a - b);
   const branches = [...new Set(index.conclusions.flatMap(item => item.scope.branchId ? [item.scope.branchId] : []))];
-  const summaryItems = answer.topic === "summary" ? answer.conclusions.filter(item => item.domain !== "natal"
-    || item.stableId.endsWith("/natal:pattern") || item.stableId === answer.conclusions.find(row => row.stableId.includes("/natal:use:"))?.stableId) : answer.conclusions;
+  const summaryItems = answer.conclusions;
   const selected = selectedId ? index.conclusions.find(item => item.stableId === selectedId) : null;
   useLayoutEffect(() => {
     if (loading || !pendingFocus.current) return;
     if (pendingFocus.current === "topic") {
-      const target = resultRef.current?.querySelector<HTMLElement>("h3")
-        ?? workbenchRef.current?.querySelector<HTMLElement>("h3") ?? workbenchRef.current;
+      const target = workbenchRef.current?.querySelector<HTMLElement>(".reading-navigation-heading") ?? workbenchRef.current;
       if (!target) return;
       pendingFocus.current = null;
       if (!target.hasAttribute("tabindex")) target.tabIndex = -1;
@@ -140,59 +173,50 @@ export function ReadingExplanationWorkbench({ index, revision, records, onTimeUn
     pendingFocus.current = "open";
     setSelectedId(conclusion.stableId);
   };
-  const choose = (topic: ReadingExplanationTopic) => { returnPoint.current = null; pendingFocus.current = "topic"; setSelectedId(null); setQuery({ topic, branchId: query.branchId,
-    ...(topic === "month" || topic === "year_comparison" ? { year: years[0], comparisonYear: years[1] } : {}) });
-    if (topic === "month" && years[0]) onRequestYear?.(years[0]); };
+  const choose = (topic: ReadingExplanationTopic) => {
+    returnPoint.current = null; pendingFocus.current = "topic"; setSelectedId(null);
+    const next = readingTopicSelection(index, query, topic);
+    setQuery(next);
+    if (topic === "month" && next.year) onRequestYear?.(next.year);
+  };
   const months = index.conclusions.filter(item => item.scope.level === "month" && item.scope.year === (query.year ?? years[0])
     && (!query.branchId || item.scope.branchId === query.branchId));
+  const summaryLead = summaryItems.find(item => item.stableId.endsWith("/natal:pattern")) ?? summaryItems.find(item => item.domain === "natal");
+  const summaryLife = summaryItems.find(item => item.domain !== "natal");
+  const moreSummaryItems = summaryItems.filter(item => item !== summaryLead && item !== summaryLife);
   const summaryOverview = answer.topic === "summary" ? <div className="reading-summary-groups" hidden={Boolean(selected)}>
       <section className="reading-summary-group" aria-label="当前解释">
         <h3>当前解释 · 先看本盘的配合</h3>
-        {summaryItems.filter(item => item.domain === "natal").map(conclusion => <ReadingPlainSummaryCard key={conclusion.stableId}
-          index={index} conclusion={conclusion} onOpen={trigger => openConclusion(conclusion, trigger)} />)}
-        {!summaryItems.some(item => item.domain === "natal") ? <p>这份报告未提供独立的格局与取用结论，可先看已有主题，不补造缺失结论。</p> : null}
+        {summaryLead ? <ReadingPlainSummaryCard index={index} conclusion={summaryLead} onOpen={trigger => openConclusion(summaryLead, trigger)} />
+          : <p>这份报告未提供独立的格局与取用结论，可先看已有主题，不补造缺失结论。</p>}
       </section>
       <section className="reading-summary-group" aria-label="相关生活主题">
-        <h3>相关主题 · 选一条继续读</h3>
-        {summaryItems.filter(item => item.domain !== "natal").map(conclusion => <ReadingPlainSummaryCard key={conclusion.stableId}
-          index={index} conclusion={conclusion} onOpen={trigger => openConclusion(conclusion, trigger)} />)}
+        <h3>相关主题 · 从一条开始</h3>
+        {summaryLife ? <ReadingPlainSummaryCard index={index} conclusion={summaryLife} onOpen={trigger => openConclusion(summaryLife, trigger)} /> : <p>可从上方选择已有专题。</p>}
       </section>
       <section className="reading-summary-group reading-summary-uncertainty" aria-label="待确定事项">
         <h3>待确定事项 · 这份解释的范围</h3>
-        <p>这里是本命整体解释；具体年份和月份需要另选对应范围。</p>
-        <p>{index.sourceSnapshot.includeHour ? "本盘使用了填写的出生时间，资料尚未经独立核实。" : "出生时刻仍有未定项；当前解释不补猜未确定的时柱。"}</p>
-        {branches.length > 1 ? <p>年度内容有多条路径，分别查看只表示阅读选择，不表示确认其中一条。</p> : null}
-        <button type="button" onClick={() => choose("uncertainty")}>查看出生时间的影响</button>
-        <details><summary>展开这份报告的完整限制</summary>{list(index.limitations, "未单列整体限制；每条结论的条件与未定项仍须分别核对。")}</details>
+        <p>{index.sourceSnapshot.includeHour ? "此处为本命整体解释；出生资料尚未经独立核实。" : "出生时刻仍有未定项；当前解释不补猜未确定的时柱。"}</p>
+        <details><summary>展开这份报告的完整限制</summary>
+          <p>具体年份和月份需要另选对应范围。</p>
+          {branches.length > 1 ? <p>年度内容有多条路径，分别查看只表示阅读选择，不表示确认其中一条。</p> : null}
+          {list(index.limitations, "未单列整体限制；每条结论的条件与未定项仍须分别核对。")}
+          <button type="button" onClick={() => choose("uncertainty")}>查看出生时间的影响</button>
+        </details>
       </section>
+      {moreSummaryItems.length ? <details className="reading-summary-more"><summary>展开其余 {moreSummaryItems.length} 条摘要、条件与原文</summary>
+        {moreSummaryItems.map(conclusion => <ReadingPlainSummaryCard key={conclusion.stableId} index={index} conclusion={conclusion}
+          onOpen={trigger => openConclusion(conclusion, trigger)} />)}
+      </details> : null}
     </div> : null;
   if (loading) return <section className="reading-explanation-workbench" aria-label="按问题阅读与查看依据" aria-busy="true">
     <p role="status">正在核对所选年份与当前资料，完成后继续显示你刚才选择的专题。</p>
   </section>;
   return <section className="reading-explanation-workbench" ref={workbenchRef} tabIndex={-1} aria-label="按问题阅读与查看依据">
-    {summaryOverview}
-    <p className="reading-explanation-intro">先理解一条解释，再看它的条件。带点线的术语可以点开说明，原结论与依据都保留。</p>
-    <div className="reading-explanation-topics" aria-label="解读专题">{topics.slice(0, 4).map(topic => <button type="button" key={topic.id}
+    <h3 className="reading-navigation-heading" tabIndex={-1}>想先看什么</h3>
+    <div className="reading-explanation-topics reading-primary-topics" aria-label="解读专题">{topics.slice(0, 6).map(topic => <button type="button" key={topic.id}
       aria-pressed={answer.topic === topic.id && !selected} onClick={() => choose(topic.id)}>{topic.label}</button>)}</div>
-    <details open={topics.slice(4).some(topic => topic.id === answer.topic) || undefined}>
-      <summary>年份、月份与更多查看</summary>
-      <div className="reading-explanation-topics" aria-label="更多解读专题">{topics.slice(4).map(topic => <button type="button" key={topic.id}
-        aria-pressed={answer.topic === topic.id && !selected} onClick={() => choose(topic.id)}>{topic.label}</button>)}</div>
-    </details>
-    <form className="reading-explanation-question" onSubmit={event => {
-      event.preventDefault(); returnPoint.current = null; pendingFocus.current = "topic"; setSelectedId(null);
-      const next = readingExplanationSearchQuery(question, query.branchId); setQuery(next);
-      if (next.year && queryReadingExplanation(index, next).topic === "month") onRequestYear?.(next.year);
-    }}>
-      <label htmlFor={`${componentId}-question`}>在这份报告中查找</label><div><input id={`${componentId}-question`} value={question} maxLength={500}
-        onChange={event => setQuestion(event.target.value)} aria-describedby={`${componentId}-search-help`}
-        placeholder={`例如：${years[0] ?? "某"}年收入、对照两个年份、关键月份`} /><button type="submit">查找报告</button></div>
-      <p id={`${componentId}-search-help`}>查找已有结论，不是通用聊天。也可以直接点上方事业、收入或感情专题。</p>
-    </form>
-    {!["summary", "uncertainty", "report_comparison"].includes(answer.topic) ? <ReadingBranchGuide index={index} branches={branches} selected={query.branchId}
-      needed={answer.status === "needs_selection" && !["summary", "uncertainty", "report_comparison"].includes(answer.topic)}
-      onChange={branchId => { setSelectedId(null); setQuery({ ...query, branchId, monthId: undefined }); }} /> : null}
-    {!["summary", "uncertainty", "report_comparison"].includes(answer.topic) ? <div className="reading-explanation-selectors">
+    {!["uncertainty", "report_comparison"].includes(answer.topic) ? <div className="reading-explanation-selectors reading-primary-selectors">
       <label>年份<select value={query.year ?? ""} onChange={event => { const year = event.target.value ? Number(event.target.value) : undefined;
         setSelectedId(null); setQuery({ ...query, question: undefined, topic: answer.topic, year, monthId: undefined }); if (year && answer.topic === "month") onRequestYear?.(year); }}>
         <option value="">本命整体</option>{years.map(year => <option key={year} value={year}>{year}年</option>)}</select></label>
@@ -201,6 +225,26 @@ export function ReadingExplanationWorkbench({ index, revision, records, onTimeUn
       {answer.topic === "month" ? <label>月份与领域<select value={query.monthId ?? ""} onChange={event => { setSelectedId(null); setQuery({ ...query, topic: "month", year: query.year ?? years[0], monthId: event.target.value || undefined }); }}>
         <option value="">请选择一个月份</option>{months.map(month => <option key={month.stableId} value={month.stableId}>{readingMonthOptionLabel(month)}</option>)}</select></label> : null}
     </div> : null}
+    {answer.topic === "summary" && query.year ? <p className="reading-explanation-limit">已选 {query.year} 年，点上方专题查看；概览仍为本命整体。</p> : null}
+    {!["summary", "uncertainty", "report_comparison"].includes(answer.topic) ? <ReadingBranchGuide index={index} branches={branches} selected={query.branchId}
+      needed={answer.status === "needs_selection"}
+      onChange={branchId => { setSelectedId(null); setQuery({ ...query, branchId, monthId: undefined }); }} /> : null}
+    <details open={topics.slice(6).some(topic => topic.id === answer.topic) || undefined}>
+      <summary>出生时间与旧报告</summary>
+      <div className="reading-explanation-topics" aria-label="更多解读专题">{topics.slice(6).map(topic => <button type="button" key={topic.id}
+        aria-pressed={answer.topic === topic.id && !selected} onClick={() => choose(topic.id)}>{topic.label}</button>)}</div>
+    </details>
+    {summaryOverview}
+    <form className="reading-explanation-question" onSubmit={event => {
+      event.preventDefault(); returnPoint.current = null; pendingFocus.current = "topic"; setSelectedId(null);
+      const next = readingExplanationSearchQuery(question, query.branchId); setQuery(next);
+      if (next.year && queryReadingExplanation(index, next).topic === "month") onRequestYear?.(next.year);
+    }}>
+      <label htmlFor={`${componentId}-question`}>在这份报告中查找</label><div><input id={`${componentId}-question`} value={question} maxLength={500}
+        onChange={event => setQuestion(event.target.value)} aria-describedby={`${componentId}-search-help`}
+        placeholder={`例如：${years[0] ?? "某"}年收入、对照两个年份、关键月份`} /><button type="submit">查找报告</button></div>
+      <p id={`${componentId}-search-help`}>查找已有结论，不是通用聊天。带点线的术语可以点开说明，原结论与依据都保留。</p>
+    </form>
     {answer.topic === "report_comparison" ? <div className="reading-explanation-selectors"><label>选择旧报告<select value={oldId} onChange={event => setOldId(event.target.value)}>
       <option value="">选择已保存报告</option>{reports.map(record => <option key={record.id} value={record.id}>{formatTime(record.createdAt)} · 保存记录 {record.editVersion}</option>)}</select></label>
       {oldKey && !previous && !oldError ? <p role="status">正在按当时的版本读取旧报告…</p> : null}
@@ -227,11 +271,10 @@ export function ReadingExplanationWorkbench({ index, revision, records, onTimeUn
         {returnPoint.current.topic === "summary" ? "返回刚才的摘要" : "返回刚才的列表"}
       </button> : null}
       {shown.map(conclusion => <article key={conclusion.stableId} data-reading-conclusion={conclusion.stableId}>
-        <h3 tabIndex={-1}>{conclusion.label}</h3>{conclusion.scope.level !== "natal" ? <p className="reading-explanation-scope">{readingConclusionScopeText(conclusion)}</p> : null}
-        <p className="reading-explanation-original">{compact ? "先选择这条月份结论，再连同适用条件阅读完整内容。" : conclusion.text}</p>
+        <h3 tabIndex={-1}>{conclusion.label}</h3>{conclusion.scope.level !== "natal" && !compact ? <p className="reading-explanation-scope">{readingConclusionScopeText(conclusion)}</p> : null}
+        {compact ? <ReadingMonthPreview index={index} conclusion={conclusion} /> : <p className="reading-explanation-original">{conclusion.text}</p>}
         {!compact ? <ReadingGlossaryHelp text={`${conclusion.label} ${conclusion.text}`} /> : null}
-        {compact ? <><p className="reading-explanation-limit">{conclusion.evidence.limits[0] ?? "保持原报告的条件与范围，不推定事件已经发生。"}</p>
-          <button type="button" className="reading-text-button" onClick={event => openConclusion(conclusion, event.currentTarget)}>读完整结论</button></> : null}
+        {compact ? <button type="button" className="reading-text-button" onClick={event => openConclusion(conclusion, event.currentTarget)}>读完整结论</button> : null}
         {answer.topic === "report_comparison" && previous?.index ? <details><summary>对照这条结论的旧原文</summary><p className="reading-explanation-original">
           {previous.index.conclusions.find(item => logicalId(item.stableId) === logicalId(conclusion.stableId))?.text ?? "旧报告没有同范围条目，不视为判断反转。"}</p></details> : null}
         <Evidence index={index} conclusion={conclusion} />

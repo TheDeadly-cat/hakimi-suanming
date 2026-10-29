@@ -57,6 +57,8 @@ it("does not borrow another domain, infer a template from prose, or overwrite a 
   conclusion.text = "官印相生，印格泄秀，一定升职。";
   const unmapped = buildPlainReadingSummary(index, conclusion);
   expect(unmapped.projectionState).toBe("original_required");
+  expect(unmapped.plainTitle).toBe(conclusion.label);
+  expect(unmapped.nextAction).toBe("查看原文及条件");
   expect(unmapped.explanation).not.toMatch(/一定升职|专业积累与实际产出/);
   conclusion.evidence.ruleApplications[0]!.provenance!.selection = "career/resource-output";
   conclusion.origin = "personal";
@@ -75,6 +77,7 @@ it("preserves a specific month and branch rather than projecting a natal or annu
   conclusion.direction = "unknown";
   const result = buildPlainReadingSummary(index, conclusion);
   expect(result.projectionState).toBe("original_required");
+  expect(result.plainTitle).toBe(conclusion.label);
   expect(result.scope).toEqual(conclusion.scope);
   expect(result.explanation).not.toContain("专业积累与实际产出");
   expect(() => buildPlainReadingSummary(index, { ...conclusion, stableId: "another-revision/natal:career" })).toThrow("当前索引");

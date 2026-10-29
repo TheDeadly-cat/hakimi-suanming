@@ -1,6 +1,6 @@
 import type { ReadingConclusion, ReadingExplanationIndex } from "./reading-explanation-index";
 
-export const PLAIN_READING_CONTENT_VERSION = "hakimi.plain-summary/0.1.1" as const;
+export const PLAIN_READING_CONTENT_VERSION = "hakimi.plain-summary/0.1.2" as const;
 
 /** A display projection only. It never enters or upgrades a saved report contract. */
 export interface PlainReadingSummary {
@@ -163,7 +163,7 @@ export function buildPlainReadingSummary(index: ReadingExplanationIndex, conclus
     throw new Error("白话摘要必须绑定当前索引中的原结论。");
   }
   const key = conclusion.stableId.slice(index.sourceSnapshot.revisionId.length + 1);
-  let explanation = "这条结论尚未有可核对的白话表达。请展开原文及条件，不用其他结论代替它。";
+  let explanation = "按原标题查看完整原文、成立条件与依据。";
   let projectionState: PlainReadingSummary["projectionState"] = "original_required";
   let plainTitle = domainTitle[conclusion.domain];
   const rules = conclusion.evidence.ruleApplications;
@@ -215,6 +215,7 @@ export function buildPlainReadingSummary(index: ReadingExplanationIndex, conclus
       }
     }
   }
+  if (projectionState === "original_required") plainTitle = conclusion.label;
   const boundary = domainLimit[conclusion.domain];
   const visibleText = `${conclusion.label} ${explanation} ${conclusion.text}`;
   return {
@@ -223,7 +224,7 @@ export function buildPlainReadingSummary(index: ReadingExplanationIndex, conclus
     topic: conclusion.domain, scope: { ...conclusion.scope }, plainTitle, explanation,
     conditions: conclusion.origin === "personal" ? [] : unique(rules.flatMap(rule => rule.limitations)),
     limitations: unique([boundary, ...conclusion.evidence.limits]), unknowns: [...conclusion.evidence.unknowns],
-    observationQuestion: questions[conclusion.domain], nextAction: "读完整结论与条件",
+    observationQuestion: questions[conclusion.domain], nextAction: projectionState === "original_required" ? "查看原文及条件" : "读完整结论与条件",
     evidenceRefs: conclusion.origin === "personal" ? [] : index.citationBindings.filter(binding => binding.conclusionId === conclusion.stableId
       && conclusion.evidence.citations.includes(binding.sourceId)).map(({ conclusionId, sourceId }) => ({ conclusionId, sourceId })),
     ruleRefs: conclusion.origin === "personal" ? [] : rules.map(rule => rule.ruleId),
