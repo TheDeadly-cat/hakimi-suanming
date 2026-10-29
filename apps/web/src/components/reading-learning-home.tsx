@@ -36,7 +36,7 @@ export function ReadingLearningHome() {
       <nav className="reading-learning-actions" aria-label="学习页面去向">
         {returnState.status === "ready" ? <AppLink className="reading-learning-return" href={returnState.href}><ArrowLeft aria-hidden="true" />返回刚才报告</AppLink>
           : returnState.status === "checking" ? <span role="status">正在确认返回位置…</span>
-            : <AppLink href="/cases">{returnState.status === "unavailable" ? "到档案重新选择报告" : "到档案看报告"}</AppLink>}
+            : <AppLink href="/reports">{returnState.status === "unavailable" ? "到档案重新选择报告" : "到档案看报告"}</AppLink>}
         <AppLink href="/knowledge?view=library"><BookOpenText aria-hidden="true" />资料管理与导入</AppLink>
       </nav>
       {returnState.status === "unavailable" ? <p className="reading-learning-return-note" role="status">刚才的报告已不可用，或本机暂时无法核对。词条仍可继续阅读。</p> : null}

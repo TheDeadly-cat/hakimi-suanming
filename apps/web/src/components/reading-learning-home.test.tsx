@@ -35,6 +35,7 @@ it("opens the existing 31 glossary entries directly without requiring a document
   expect(LEARNING_ENTRIES.every(entry => entry.group && entry.example.length > 10)).toBe(true);
   expect(screen.queryByRole("button", { name: "导入资料" })).toBeNull();
   expect(screen.getByRole("link", { name: "资料管理与导入" }).getAttribute("href")).toBe("/knowledge?view=library");
+  expect(screen.getByRole("link", { name: "到档案看报告" }).getAttribute("href")).toBe("/reports");
   expect(listDocuments).not.toHaveBeenCalled();
   expect(getCase).not.toHaveBeenCalled();
 });
@@ -95,7 +96,7 @@ it.each(["deleted", "missing-revision", "wrong-case", "result-changed", "profile
   render(<KnowledgePage />);
   await waitFor(() => expect(screen.getByText(/刚才的报告已不可用/)).toBeTruthy());
   expect(screen.queryByRole("link", { name: "返回刚才报告" })).toBeNull();
-  expect(screen.getByRole("link", { name: "到档案重新选择报告" }).getAttribute("href")).toBe("/cases");
+  expect(screen.getByRole("link", { name: "到档案重新选择报告" }).getAttribute("href")).toBe("/reports");
   expect(screen.getByRole("searchbox", { name: "搜索术语" })).toBeTruthy();
 });
 

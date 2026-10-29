@@ -4,7 +4,9 @@
 
 本轮源码在 `codex/event-index-candidate-20261011`，通过 [Draft PR #17](https://github.com/TheDeadly-cat/hakimi-suanming/pull/17) 审阅，基础分支仍为 `codex/journal-event-index-20261010`。独立工程工作继续推进；真人记录、SDK 许可和专家证据分别列为未完成项。
 
-工程结果按提交区分：最近已核清的 `110e87f` 完整 Vitest **4545/4545**、Quick 工程汇总和历史治理 **841/841** 通过；完整迁移仍为 **44/45**，Edge 在安装目标缓存时出现网络缓冲区错误，尚未进入慢旧页场景。此前 `3d094eb` 的 Chrome 接管失败另行保留，不能因本次该场景通过就称为已修复。后续提交的实时结果见 [PR 检查](https://github.com/TheDeadly-cat/hakimi-suanming/pull/17/checks)。
+工程结果按提交区分：最近已核清的 `53327f9` 完整 Vitest **4545/4545**、Quick 工程汇总、历史治理 **841/841** 和完整迁移 **45/45** 均通过；正式专家门槛仍失败。`110e87f` 的缓存安装失败和 `3d094eb` 的 Chrome 接管失败保留，根因尚未确定。后续学习返回入口修正的实时结果见 [PR 检查](https://github.com/TheDeadly-cat/hakimi-suanming/pull/17/checks)，不能套用旧提交结果。
+
+后续源码已把学习页无可返回身份时的“到档案看报告／重新选择报告”接到统一报告列表 `/reports`，有可用身份时仍精确返回原修订。**固定 5248 尚未包含这处入口修正**；下一固定包另行交付，不覆盖或改标本副本。
 
 ## 现在可以完成什么
 
@@ -42,6 +44,7 @@
 - 历史白话 0.1.2 范围记录保留为冻结夹具，新读器读回再编码逐字节相同。保存时文字不重算；后来添加的规则解释明确标为“当前辅助解释/标注”，原限制字句仍可查看。
 - [学习入口](../review-data/scoped-reading-20261029/learning-browser-results.json)、[个人档案](../review-data/scoped-reading-20261029/profile-browser-results.json)分别有浏览器路径验证。范围按钮曾存在悬停文字对比不足，原失败保留；[修复复验](../review-data/scoped-reading-20261029/scope-button-contrast.json)为 6.29:1。
 - [调整后的档案入口](../review-data/scoped-reading-20261029/archive-entry-browser-result.json)实测 360/390 宽及默认/150% 字体：真实建档后，零报告人名也可进入详情，列表往返、当前阅读、修订、时辰待考及回收站均可找到；原三份合成报告保持一致，点击区至少 44px，无横向溢出或页面错误。对应三个文件 21 项定向测试通过。
+- [学习返回与明确分支补验](../review-data/scoped-reading-20261029/learning-fallback-final-receipt.json)：无身份、失效身份均点击到实际报告列表；有效身份精确返回且刷新后保留 2030 年和明确分支。两分支各 36 条月份结论没有串用，列表中立春月与惊蛰月的事业预览各自含不同提要、范围和条件。通过真实表单新增修订后，默认摘要、年份与分支清空，原三份报告和全部旧修订内容不变。修订验证脚本最初遗漏展开折叠控件的失败记录保留，补上真实展开动作后复验通过；学习与报告列表两文件 21 项测试通过。
 
 以上浏览器检查均使用隔离合成资料，没有测试者参与，也没有 Android 真机结果。进程被杀后的未知保存核对和原生文件操作仍待单独验证。
 
@@ -67,6 +70,7 @@
 - `110e87f` 的[Quick 与历史治理](../review-data/scoped-reading-20261029/ci-110-quick-history-terminal.json)分别为 4545/4545 和 841/841，通过工程汇总；正式专家资格门槛仍失败。[完整迁移](../review-data/scoped-reading-20261029/ci-110-migration-failure.json)为 44/45、零跳过/重试。Edge“慢旧页拖过冻结时限后自动重试”场景在 90 秒内未观察到目标缓存；[原 trace](../review-data/scoped-reading-20261029/ci-110-edge-install-failure.json)确认已下载正确目标脚本，随后 `brand-mark.svg` 请求出现 `net::ERR_NO_BUFFER_SPACE`，另 142 个请求取消。安装失败后的缓存清理与观察到的元数据缺失相符；尚未执行八秒慢页注入，底层网络错误原因仍未确定。
 - [浏览器身份更正](../review-data/scoped-reading-20261029/browser-version-correction.json)：`3d094eb` 与 `110e87f` 实际均为 Chrome 156.0.8078.74 / Edge 156.0.4314.50。之前的“Chrome 151”来自 trace 用户代理字符串的误读；现按 `browser().version()` 注释更正，原始 CI 产物和外部旧分析保留，不能用浏览器升级解释两轮差异。
 - 后续诊断在每个隔离 v13→v16 浏览器进程启动时保留默认脱敏、8 MiB 滚动上限的 `browser-netlog.json`，随既有测试产物保存，用于观察安装前的连接错误。它不重试失败请求、不改变网络特性、断言、超时或冻结应用源码。[本地一次 Edge 定点验证](../review-data/scoped-reading-20261029/netlog-diagnostic-receipt.json)的慢页场景通过，关闭后完整解析 4,820,963 字节、31,723 条事件，未出现 `ERR_NO_BUFFER_SPACE`；完整矩阵门槛正确拒绝单场景结果，命令退出 1。网络日志开关依据 [Chromium 官方说明](https://chromium.googlesource.com/website.git/+/show/HEAD/site/for-testers/providing-network-details/index.md)；这证明诊断实际可用，不证明原 CI 失败已修复。
+- `53327f9` 的[Quick 与历史治理](../review-data/scoped-reading-20261029/ci-533-quick-history-terminal.json)为 4545/4545、841/841，工程汇总通过；[完整迁移](../review-data/scoped-reading-20261029/ci-533-migration-success.json)为 45/45，零失败、跳过和重试，五套原场景身份校验通过。26 份新增网络日志全部可完整解析，本次没有 `ERR_NO_BUFFER_SPACE` 或 `os_error=10055`。此轮通过证明该提交的工程结果，不补写历史失败原因；学习返回入口修正不在该提交内。
 
 固定副本保留 `9fd8571` 原源码身份。后续测试与说明提交的结果按 [PR 当前提交的检查](https://github.com/TheDeadly-cat/hakimi-suanming/pull/17/checks)逐项核对；完整工程验收须同时核对工程汇总、历史治理和完整迁移矩阵。新运行不能覆盖历史失败，旧 head 的通过也不能替代新 head。
 
