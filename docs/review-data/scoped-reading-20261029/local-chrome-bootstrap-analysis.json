@@ -1,0 +1,57 @@
+{
+  "format": "hakimi-local-source-boot-precondition-observation/1",
+  "head": "3d094ebef8d302456b993b3deb928220d53cb10f",
+  "localBrowser": "chrome 156.0.8078.49",
+  "originalCiBrowser": "chrome 151.0.7922.34",
+  "directory": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-3d094eb/chrome-single-case-diagnostic-02",
+  "result": {
+    "actualTestsExecuted": 1,
+    "failed": 1,
+    "exitCode": 1,
+    "retry": 0,
+    "failurePhase": "openStableBridge -> waitForServiceWorker before switchToTargetAndWaitForActivation",
+    "expectedBootSignalSent": "true",
+    "observedBootSignalSent": "false",
+    "timeoutMs": 25000
+  },
+  "finalRecordedHtml": {
+    "appBootReady": "true",
+    "dbMigrationPhase": "committed",
+    "swRegistered": "true",
+    "swBootSignalSent": "false",
+    "swReady": "attribute absent",
+    "swControlled": "attribute absent",
+    "swBootAck": "attribute absent",
+    "ariaBusy": "false",
+    "fixture": "source-a-v13"
+  },
+  "network": {
+    "recordCount": 48,
+    "non200Responses": 0,
+    "documentRequests": 1,
+    "swJs": {
+      "status": 200,
+      "durationMs": 21.414
+    }
+  },
+  "screenshot": "source page with boot confirmation overlay still visible",
+  "unknown": [
+    "navigator.serviceWorker.controller was not directly sampled",
+    "registration active/waiting/installing not directly sampled",
+    "document visibilityState and hasFocus not sampled",
+    "first claim and convergence necessity not established",
+    "which Promise.all member withheld swReady is not established",
+    "no worker lifecycle/error observer ran"
+  ],
+  "observationBoundary": {
+    "pageConsoleEventsInTrace": 0,
+    "newActivationHookReached": false,
+    "originalCiActivationFailureReproduced": false,
+    "additionalRun": false,
+    "sourceFrozenAfterDiagnostic": true
+  },
+  "references": [
+    "local-chrome-diagnostic-receipt.json",
+    "chrome-single-case-diagnostic-02/trace-expanded/source-boot-observation.json"
+  ]
+}

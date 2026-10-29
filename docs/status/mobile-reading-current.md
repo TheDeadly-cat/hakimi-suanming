@@ -4,6 +4,8 @@
 
 本轮源码在 `codex/event-index-candidate-20261011`，通过 [Draft PR #17](https://github.com/TheDeadly-cat/hakimi-suanming/pull/17) 审阅，基础分支仍为 `codex/journal-event-index-20261010`。独立工程工作继续推进；真人记录、SDK 许可和专家证据分别列为未完成项。
 
+工程结果按提交区分：`3d094eb` 的完整 Vitest、Quick 工程汇总和历史治理通过，但完整迁移为 **44/45**，一项 Chrome 新旧后台接管尚未通过。后续只增加该场景的观测，不把原因未定的失败改称已修复；当前提交的实时结果见 [PR 检查](https://github.com/TheDeadly-cat/hakimi-suanming/pull/17/checks)。
+
 ## 现在可以完成什么
 
 - 在摘要前选择事业、收入、感情、年份或月份；默认概览两张卡，其余原文、条件和依据可展开。2030 年跨专题、跨路由和刷新分别验证，不扩称原生生命周期已完成。
@@ -58,6 +60,10 @@
 - [238 历史 CI 终态](../review-data/scoped-reading-20261029/historical-ci-238-failure.json)：完整 Vitest 为 375 文件、4542/4542 通过，但整个工程汇总失败；五套迁移都在治理前置阶段失败，浏览器测试未执行。旧失败、产物与 5247 副本保留，不倒写为通过。
 - 功能源码 `9fd8571` 的[历史治理](https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40808513315)及[五套迁移与完整矩阵](../review-data/scoped-reading-20261029/ci-9fd-migration-success.json)通过，但其 [Quick CI 终态](../review-data/scoped-reading-20261029/historical-ci-9fd-quick-failure.json)仍有单月保存用例失败：4544/4545，未找到成功链接，工程汇总失败。其余 10 项独立工程检查通过；正式专家准入失败独立保留。
 - [单月保存阶段诊断](../review-data/scoped-reading-20261029/month-save-phase-diagnosis.json)确认：写入与严格读回后，成功提示还等待当前月份派生刷新；本地一次合成观察的刷新为 16.287 秒，不是真机性能结果。测试改为先证实一次写入与完整读回，再受控发布真实月份结果，最后断言成功链接和完整原月结论；13/13 通过，未修改生产逻辑、提高超时或跳过断言。原 CI 未记录完整保存状态，具体失败原因仍为 UNKNOWN，未重跑或覆盖原失败。
+- `3d094eb` 的[Quick 与历史治理终态](../review-data/scoped-reading-20261029/ci-3d-quick-history-terminal.json)：375 文件、4545/4545 Vitest 通过，原单月测试本轮通过；工程汇总通过，历史治理 841/841。正式专家门槛仍失败。
+- 同一提交的[迁移终态](../review-data/scoped-reading-20261029/ci-3d-migration-failure.json)为 44/45、零跳过/重试。Chrome 的多旧页面写入冻结用例在 90 秒内未观察到 v16 worker 接替 v13，完整矩阵失败。[原 trace 分析](../review-data/scoped-reading-20261029/ci-3d-chrome-activation-analysis.json)确认切换前两页已 ACK、目标缓存完整；一页最终记录接管已派发，但其派发时刻及后台事件结局未知，不能归因于已证明的偶发、长网络请求或死锁。
+- 为该自动接管路径增加有界 CDP、页面状态和透明原生消息 ACK 观察；保留原断言、90 秒时限、旧页面及冻结源码。类型检查和原治理校验通过。[一次本地 Chrome 156 诊断](../review-data/scoped-reading-20261029/local-chrome-activation-diagnostic.json)在更早的源页启动前置失败，尚未进入新增观察器；与原 CI Chrome 151 的激活失败分别保留，[前置分析](../review-data/scoped-reading-20261029/local-chrome-bootstrap-analysis.json)不推定未采集的 controller、可见性或焦点状态。
+- [最终诊断代码复核](../review-data/scoped-reading-20261029/activation-observer-final-review.json)保留原激活异常，避免附件失败覆盖它；清理仅通过弱引用访问原生端口，保持应用自身的端口与消息处理。最终观察器尚未在本地场景执行，实际覆盖以新提交远端 E2E 为准，不把类型检查当作已运行。
 
 固定副本保留 `9fd8571` 原源码身份。后续测试与说明提交的结果按 [PR 当前提交的检查](https://github.com/TheDeadly-cat/hakimi-suanming/pull/17/checks)逐项核对；完整工程验收须同时核对工程汇总、历史治理和完整迁移矩阵。新运行不能覆盖历史失败，旧 head 的通过也不能替代新 head。
 

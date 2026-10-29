@@ -1,0 +1,171 @@
+{
+  "format": "hakimi-observed-single-chrome-migration-diagnostic/1",
+  "capturedAt": "2026-10-29T04:08:42.172Z",
+  "head": "3d094ebef8d302456b993b3deb928220d53cb10f",
+  "modifiedSource": "apps/web/e2e/service-worker-cross-schema-v13-v16.spec.ts",
+  "specSha256": "915a2cc3522ba7f30209f0ba814afc15629f20c19de073c6e0aa640cd9388261",
+  "specStableDuringRun": true,
+  "sourceDiff": "only bounded CDP and page/ACK observation within switchToTargetAndWaitForActivation; unchanged activation assertions and 90000ms timeout",
+  "checks": {
+    "typecheck": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit --pretty false",
+      "exitCode": 0,
+      "completedAt": "2026-10-29T04:04:10.6314843Z"
+    },
+    "formalGovernance": {
+      "command": "node scripts/verify-release-governance.mjs",
+      "exitCode": 0,
+      "completedAt": "2026-10-29T04:04:08.7042123Z"
+    }
+  },
+  "originalCiAnalysis": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-3d094eb/chrome-v16-failure-trace-analysis.json",
+  "firstLaunch": {
+    "directory": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-3d094eb/chrome-single-case-diagnostic-01",
+    "outcome": "No tests found; 0 actual tests executed; start-anchor excluded full Playwright title"
+  },
+  "localRun": {
+    "directory": "C:/Users/Administrator/HakimiBaziWorkbenchCandidates/validation/20261029-final-ci-3d094eb/chrome-single-case-diagnostic-02",
+    "exit": {
+      "command": "node node_modules/@playwright/test/cli.js test --config apps/web/playwright.cross-schema-v13-v16.config.ts --project=chrome --grep multi-source-write-freeze-title",
+      "exitCode": 1,
+      "startedAt": "2026-10-29T04:05:17.0373909Z",
+      "completedAt": "2026-10-29T04:06:45.7833008Z",
+      "diagnosticSubset": true,
+      "fullMatrixAccepted": false,
+      "commandLabelIsAbbreviation": true,
+      "actualGrepPattern": "v16 冻结多个 v13 页的真实写入，提交后旧页只收敛到 v16"
+    },
+    "stats": {
+      "startTime": "2026-10-29T04:05:17.659Z",
+      "duration": 88104.575,
+      "expected": 0,
+      "skipped": 0,
+      "unexpected": 1,
+      "flaky": 0
+    },
+    "tests": [
+      {
+        "title": "v16 冻结多个 v13 页的真实写入，提交后旧页只收敛到 v16",
+        "file": "service-worker-cross-schema-v13-v16.spec.ts",
+        "line": 1493,
+        "project": "chrome",
+        "status": "unexpected",
+        "annotations": [
+          {
+            "type": "browser-version",
+            "description": "chrome 156.0.8078.49"
+          }
+        ],
+        "results": [
+          {
+            "status": "failed",
+            "retry": 0,
+            "duration": 27623,
+            "error": {
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('html')\nExpected: \u001b[32m\"\u001b[7mtru\u001b[27me\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mfals\u001b[27me\"\u001b[39m\nTimeout:  25000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveAttribute\" with timeout 25000ms\u001b[22m\n\u001b[2m  - waiting for locator('html')\u001b[22m\n\u001b[2m    53 × locator resolved to <html lang=\"zh-CN\" aria-busy=\"false\" data-db-schema=\"13\" data-target-schema=\"13\" data-migration-id=\"null\" data-sw-registered=\"true\" data-app-boot-ready=\"true\" data-db-generation=\"legacy-v13\" data-sw-boot-signal-sent=\"false\" data-expert-truth-claimed=\"false\" data-release-contract=\"legacy-v13\" data-e2e-cross-schema-fault=\"none\" data-preboot-recovery-mode=\"normal\" data-db-migration-phase=\"committed\" data-mutation-epoch-bypassed=\"false\" data-engineering-evidence-only=\"true\" data-public-release-authorize…>…</html>\u001b[22m\n\u001b[2m       - unexpected value \"false\"\u001b[22m\n",
+              "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('html')\nExpected: \u001b[32m\"\u001b[7mtru\u001b[27me\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mfals\u001b[27me\"\u001b[39m\nTimeout:  25000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveAttribute\" with timeout 25000ms\u001b[22m\n\u001b[2m  - waiting for locator('html')\u001b[22m\n\u001b[2m    53 × locator resolved to <html lang=\"zh-CN\" aria-busy=\"false\" data-db-schema=\"13\" data-target-schema=\"13\" data-migration-id=\"null\" data-sw-registered=\"true\" data-app-boot-ready=\"true\" data-db-generation=\"legacy-v13\" data-sw-boot-signal-sent=\"false\" data-expert-truth-claimed=\"false\" data-release-contract=\"legacy-v13\" data-e2e-cross-schema-fault=\"none\" data-preboot-recovery-mode=\"normal\" data-db-migration-phase=\"committed\" data-mutation-epoch-bypassed=\"false\" data-engineering-evidence-only=\"true\" data-public-release-authorize…>…</html>\u001b[22m\n\u001b[2m       - unexpected value \"false\"\u001b[22m\n\n    at waitForServiceWorker (C:\\Users\\Administrator\\.codex\\worktrees\\journal-event-index-20261010\\哈基米算命\\apps\\web\\e2e\\full-backup-helpers.ts:71:33)\n    at openStableBridge (C:\\Users\\Administrator\\.codex\\worktrees\\journal-event-index-20261010\\哈基米算命\\apps\\web\\e2e\\cross-schema-upgrade-helpers.ts:685:9)\n    at C:\\Users\\Administrator\\.codex\\worktrees\\journal-event-index-20261010\\哈基米算命\\apps\\web\\e2e\\service-worker-cross-schema-v13-v16.spec.ts:1497:20",
+              "location": {
+                "file": "C:\\Users\\Administrator\\.codex\\worktrees\\journal-event-index-20261010\\哈基米算命\\apps\\web\\e2e\\full-backup-helpers.ts",
+                "column": 33,
+                "line": 71
+              },
+              "snippet": "\u001b[90m   at \u001b[39mfull-backup-helpers.ts:71\n\n  69 |   // First claim replaces the frozen old document before it can send BOOT_OK.\n  70 |   // Locator assertions survive that navigation; evaluate only the ready page.\n> 71 |   await expect(documentElement).toHaveAttribute(\"data-sw-boot-signal-sent\", \"true\");\n     |                                 ^\n  72 |   await expect(documentElement).toHaveAttribute(\"data-sw-ready\", \"true\");\n  73 |   await expect(documentElement).toHaveAttribute(\"data-app-boot-ready\", \"true\");\n  74 |   await expect.poll(() => page.evaluate(() => ({"
+            },
+            "errors": [
+              {
+                "location": {
+                  "file": "C:\\Users\\Administrator\\.codex\\worktrees\\journal-event-index-20261010\\哈基米算命\\apps\\web\\e2e\\full-backup-helpers.ts",
+                  "column": 33,
+                  "line": 71
+                },
+                "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('html')\nExpected: \u001b[32m\"\u001b[7mtru\u001b[27me\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mfals\u001b[27me\"\u001b[39m\nTimeout:  25000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveAttribute\" with timeout 25000ms\u001b[22m\n\u001b[2m  - waiting for locator('html')\u001b[22m\n\u001b[2m    53 × locator resolved to <html lang=\"zh-CN\" aria-busy=\"false\" data-db-schema=\"13\" data-target-schema=\"13\" data-migration-id=\"null\" data-sw-registered=\"true\" data-app-boot-ready=\"true\" data-db-generation=\"legacy-v13\" data-sw-boot-signal-sent=\"false\" data-expert-truth-claimed=\"false\" data-release-contract=\"legacy-v13\" data-e2e-cross-schema-fault=\"none\" data-preboot-recovery-mode=\"normal\" data-db-migration-phase=\"committed\" data-mutation-epoch-bypassed=\"false\" data-engineering-evidence-only=\"true\" data-public-release-authorize…>…</html>\u001b[22m\n\u001b[2m       - unexpected value \"false\"\u001b[22m\n\n\n   at full-backup-helpers.ts:71\n\n  69 |   // First claim replaces the frozen old document before it can send BOOT_OK.\n  70 |   // Locator assertions survive that navigation; evaluate only the ready page.\n> 71 |   await expect(documentElement).toHaveAttribute(\"data-sw-boot-signal-sent\", \"true\");\n     |                                 ^\n  72 |   await expect(documentElement).toHaveAttribute(\"data-sw-ready\", \"true\");\n  73 |   await expect(documentElement).toHaveAttribute(\"data-app-boot-ready\", \"true\");\n  74 |   await expect.poll(() => page.evaluate(() => ({\n    at waitForServiceWorker (C:\\Users\\Administrator\\.codex\\worktrees\\journal-event-index-20261010\\哈基米算命\\apps\\web\\e2e\\full-backup-helpers.ts:71:33)\n    at openStableBridge (C:\\Users\\Administrator\\.codex\\worktrees\\journal-event-index-20261010\\哈基米算命\\apps\\web\\e2e\\cross-schema-upgrade-helpers.ts:685:9)\n    at C:\\Users\\Administrator\\.codex\\worktrees\\journal-event-index-20261010\\哈基米算命\\apps\\web\\e2e\\service-worker-cross-schema-v13-v16.spec.ts:1497:20"
+              }
+            ],
+            "attachments": [
+              {
+                "name": "screenshot",
+                "contentType": "image/png",
+                "path": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-final-ci-3d094eb\\chrome-single-case-diagnostic-02\\test-results\\service-worker-cross-schem-bc6f9-多个-v13-页的真实写入，提交后旧页只收敛到-v16-chrome\\test-failed-1.png"
+              },
+              {
+                "name": "error-context",
+                "contentType": "text/markdown",
+                "path": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-final-ci-3d094eb\\chrome-single-case-diagnostic-02\\test-results\\service-worker-cross-schem-bc6f9-多个-v13-页的真实写入，提交后旧页只收敛到-v16-chrome\\error-context.md"
+              },
+              {
+                "name": "error-context",
+                "contentType": "text/markdown",
+                "path": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-final-ci-3d094eb\\chrome-single-case-diagnostic-02\\test-results\\service-worker-cross-schem-bc6f9-多个-v13-页的真实写入，提交后旧页只收敛到-v16-chrome\\error-context.md"
+              },
+              {
+                "name": "trace",
+                "contentType": "application/zip",
+                "path": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-final-ci-3d094eb\\chrome-single-case-diagnostic-02\\test-results\\service-worker-cross-schem-bc6f9-多个-v13-页的真实写入，提交后旧页只收敛到-v16-chrome\\trace.zip"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "strictSubsetGate": {
+      "schemaVersion": 1,
+      "summaryType": "release_browser_test_summary",
+      "receiptId": "cross-schema-v13-v16",
+      "expectedTestsPerProject": 13,
+      "expectedProjectNames": [
+        "msedge",
+        "chrome"
+      ],
+      "fullResultStatus": "failed",
+      "strictGatePassed": false,
+      "unexpectedProjectNames": [],
+      "errors": [
+        "Cross-schema completion does not admit a filtered or repeated CLI invocation.",
+        "Cross-schema completion must contain every original title exactly once: msedge.",
+        "Cross-schema completion must contain every original title exactly once: chrome."
+      ],
+      "projects": [
+        {
+          "projectName": "msedge",
+          "discovered": 0,
+          "passed": 0,
+          "skipped": 0,
+          "failed": 0,
+          "timedOut": 0,
+          "interrupted": 0,
+          "unexpected": 0,
+          "flaky": 0,
+          "nonPassedExpectedStatus": 0,
+          "attempts": 0
+        },
+        {
+          "projectName": "chrome",
+          "discovered": 1,
+          "passed": 0,
+          "skipped": 0,
+          "failed": 1,
+          "timedOut": 0,
+          "interrupted": 0,
+          "unexpected": 1,
+          "flaky": 0,
+          "nonPassedExpectedStatus": 0,
+          "attempts": 1
+        }
+      ]
+    }
+  },
+  "observation": {
+    "activationObserverReached": false,
+    "ackHookInstalled": false,
+    "originalCiFailureReproduced": false,
+    "reason": "openStableBridge -> waitForServiceWorker failed first: source swBootSignalSent false after 25000ms although appBootReady true and database phase committed"
+  },
+  "boundaries": {
+    "actualBrowserScenariosRun": 1,
+    "retries": 0,
+    "oldGitHubJobsRerun": false,
+    "fullMatrixAcceptance": false,
+    "runtimeOrFrozenSourcesEdited": false,
+    "moreLocalRunsPerformed": false
+  }
+}

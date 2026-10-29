@@ -1,0 +1,1098 @@
+{
+  "format": "hakimi-exact-head-migration-observation/1",
+  "capturedAt": "2026-10-29T03:49:46.473Z",
+  "repository": "TheDeadly-cat/hakimi-suanming",
+  "runId": 40811328923,
+  "requestedHead": "3d094ebef8d302456b993b3deb928220d53cb10f",
+  "actualCheckout": "486310312a1e877b81a5b034445b034e6f2f74fd",
+  "runUrl": "https://github.com/TheDeadly-cat/hakimi-suanming/actions/runs/40811328923",
+  "aggregate": {
+    "id": 123251007854,
+    "name": "Complete migration matrix",
+    "status": "completed",
+    "conclusion": "failure",
+    "run_id": 40811328923,
+    "logs_url": null,
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1
+      },
+      {
+        "name": "Require every independent suite to succeed",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 2
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3
+      }
+    ]
+  },
+  "totals": {
+    "total": 45,
+    "passed": 44,
+    "failed": 1,
+    "skipped": 0,
+    "interrupted": 0,
+    "retried": 0
+  },
+  "pollObservation": {
+    "snapshots": 20,
+    "minimumIntervalMs": 72100,
+    "allIntervalsAtLeast60Seconds": true
+  },
+  "suites": [
+    {
+      "suite": "cross-schema-upgrade",
+      "jobId": 123242076407,
+      "artifactId": 12870018874,
+      "sha256": "b63ba3d9147999ce4bab283058489eda8552d782101ee47cf31e71ce2a856f5a",
+      "tests": 3,
+      "job": {
+        "id": 123242076407,
+        "name": "Migration / cross-schema-upgrade",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40811328923,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Record the actual checkout and requested PR identity",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run npm install --global npm@11.13.0",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Run npm ci",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Run npx playwright install chrome msedge",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Run npm run check:release-governance",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Run node --test scripts/verify-release-governance.test.mjs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Run npm run build:production-v13-to-v16:candidate",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 10
+          },
+          {
+            "name": "Run node scripts/verify-built-release-storage-manifest.mjs tmp/release-config-production-v13-to-v16 --expected-channel candidate",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 11
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-upgrade",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-v13-v15",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 13
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-v14-v15",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 14
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-v13-v16",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 15
+          },
+          {
+            "name": "Run npm run test:e2e:orphaned-v13-recovery",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 16
+          },
+          {
+            "name": "Require the reviewed browser and test identity set",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Preserve this isolated suite including failure diagnostics",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-node@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 35
+          },
+          {
+            "name": "Post Run actions/checkout@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 36
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 37
+          }
+        ]
+      },
+      "checkout": {
+        "requestedHead": "3d094ebef8d302456b993b3deb928220d53cb10f",
+        "workflowSha": "486310312a1e877b81a5b034445b034e6f2f74fd",
+        "actualCheckout": "486310312a1e877b81a5b034445b034e6f2f74fd",
+        "checkoutParents": "2482941f46acafc6fe0b331f536db06a45710fc8 3d094ebef8d302456b993b3deb928220d53cb10f",
+        "requestedBase": "2482941f46acafc6fe0b331f536db06a45710fc8",
+        "formalReleaseAuthorized": false,
+        "suite": "cross-schema-upgrade",
+        "evidenceClass": "isolated-synthetic-migration-diagnostic"
+      },
+      "counts": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0,
+        "interrupted": 0
+      },
+      "stats": {
+        "startTime": "2026-10-29T03:21:18.835Z",
+        "duration": 85534.612,
+        "expected": 3,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "runErrors": [],
+      "perBrowser": [
+        {
+          "project": "msedge",
+          "total": 3,
+          "passed": 3,
+          "failed": 0
+        }
+      ],
+      "strictVerification": {
+        "ok": true,
+        "result": {
+          "suite": "cross-schema-upgrade",
+          "tests": 3,
+          "projects": [
+            "msedge"
+          ],
+          "complete": true,
+          "formalReleaseEvidence": false
+        }
+      },
+      "rawResults": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-final-ci-3d094eb\\migration-cross-schema-upgrade-12870018874\\results.json",
+      "checkoutPath": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-final-ci-3d094eb\\migration-cross-schema-upgrade-12870018874\\checkout.json",
+      "zipBytes": 116082,
+      "failures": []
+    },
+    {
+      "suite": "cross-schema-v13-v15",
+      "jobId": 123242076549,
+      "artifactId": 12870916152,
+      "sha256": "d6276f769dc94d4684479d45613407d78b20b552848e3315e570e673d299b0d7",
+      "tests": 6,
+      "job": {
+        "id": 123242076549,
+        "name": "Migration / cross-schema-v13-v15",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40811328923,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Record the actual checkout and requested PR identity",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run npm install --global npm@11.13.0",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Run npm ci",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Run npx playwright install chrome msedge",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Run npm run check:release-governance",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Run node --test scripts/verify-release-governance.test.mjs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Run npm run build:production-v13-to-v16:candidate",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 10
+          },
+          {
+            "name": "Run node scripts/verify-built-release-storage-manifest.mjs tmp/release-config-production-v13-to-v16 --expected-channel candidate",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 11
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-upgrade",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 12
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-v13-v15",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-v14-v15",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 14
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-v13-v16",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 15
+          },
+          {
+            "name": "Run npm run test:e2e:orphaned-v13-recovery",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 16
+          },
+          {
+            "name": "Require the reviewed browser and test identity set",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Preserve this isolated suite including failure diagnostics",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-node@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 35
+          },
+          {
+            "name": "Post Run actions/checkout@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 36
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 37
+          }
+        ]
+      },
+      "checkout": {
+        "checkoutParents": "2482941f46acafc6fe0b331f536db06a45710fc8 3d094ebef8d302456b993b3deb928220d53cb10f",
+        "evidenceClass": "isolated-synthetic-migration-diagnostic",
+        "requestedBase": "2482941f46acafc6fe0b331f536db06a45710fc8",
+        "requestedHead": "3d094ebef8d302456b993b3deb928220d53cb10f",
+        "suite": "cross-schema-v13-v15",
+        "formalReleaseAuthorized": false,
+        "actualCheckout": "486310312a1e877b81a5b034445b034e6f2f74fd",
+        "workflowSha": "486310312a1e877b81a5b034445b034e6f2f74fd"
+      },
+      "counts": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "interrupted": 0
+      },
+      "stats": {
+        "startTime": "2026-10-29T03:20:55.150Z",
+        "duration": 195369.341,
+        "expected": 6,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "runErrors": [],
+      "perBrowser": [
+        {
+          "project": "msedge",
+          "total": 3,
+          "passed": 3,
+          "failed": 0
+        },
+        {
+          "project": "chrome",
+          "total": 3,
+          "passed": 3,
+          "failed": 0
+        }
+      ],
+      "strictVerification": {
+        "ok": true,
+        "result": {
+          "suite": "cross-schema-v13-v15",
+          "tests": 6,
+          "projects": [
+            "msedge",
+            "chrome"
+          ],
+          "complete": true,
+          "formalReleaseEvidence": false
+        }
+      },
+      "rawResults": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-final-ci-3d094eb\\migration-cross-schema-v13-v15-12870916152\\results.json",
+      "checkoutPath": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-final-ci-3d094eb\\migration-cross-schema-v13-v15-12870916152\\checkout.json",
+      "zipBytes": 173427,
+      "failures": []
+    },
+    {
+      "suite": "cross-schema-v14-v15",
+      "jobId": 123242076553,
+      "artifactId": 12871001996,
+      "sha256": "1525e019038bf79c69fe1a367be9205a5cecbd0400dece3fba08b94dc73d5fa6",
+      "tests": 6,
+      "job": {
+        "id": 123242076553,
+        "name": "Migration / cross-schema-v14-v15",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40811328923,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Record the actual checkout and requested PR identity",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run npm install --global npm@11.13.0",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Run npm ci",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Run npx playwright install chrome msedge",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Run npm run check:release-governance",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Run node --test scripts/verify-release-governance.test.mjs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Run npm run build:production-v13-to-v16:candidate",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 10
+          },
+          {
+            "name": "Run node scripts/verify-built-release-storage-manifest.mjs tmp/release-config-production-v13-to-v16 --expected-channel candidate",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 11
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-upgrade",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 12
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-v13-v15",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 13
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-v14-v15",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-v13-v16",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 15
+          },
+          {
+            "name": "Run npm run test:e2e:orphaned-v13-recovery",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 16
+          },
+          {
+            "name": "Require the reviewed browser and test identity set",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Preserve this isolated suite including failure diagnostics",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-node@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 35
+          },
+          {
+            "name": "Post Run actions/checkout@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 36
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 37
+          }
+        ]
+      },
+      "checkout": {
+        "requestedBase": "2482941f46acafc6fe0b331f536db06a45710fc8",
+        "actualCheckout": "486310312a1e877b81a5b034445b034e6f2f74fd",
+        "checkoutParents": "2482941f46acafc6fe0b331f536db06a45710fc8 3d094ebef8d302456b993b3deb928220d53cb10f",
+        "suite": "cross-schema-v14-v15",
+        "requestedHead": "3d094ebef8d302456b993b3deb928220d53cb10f",
+        "formalReleaseAuthorized": false,
+        "workflowSha": "486310312a1e877b81a5b034445b034e6f2f74fd",
+        "evidenceClass": "isolated-synthetic-migration-diagnostic"
+      },
+      "counts": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "interrupted": 0
+      },
+      "stats": {
+        "startTime": "2026-10-29T03:25:58.158Z",
+        "duration": 219954.294,
+        "expected": 6,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "runErrors": [],
+      "perBrowser": [
+        {
+          "project": "msedge",
+          "total": 3,
+          "passed": 3,
+          "failed": 0
+        },
+        {
+          "project": "chrome",
+          "total": 3,
+          "passed": 3,
+          "failed": 0
+        }
+      ],
+      "strictVerification": {
+        "ok": true,
+        "result": {
+          "suite": "cross-schema-v14-v15",
+          "tests": 6,
+          "projects": [
+            "msedge",
+            "chrome"
+          ],
+          "complete": true,
+          "formalReleaseEvidence": false
+        }
+      },
+      "rawResults": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-final-ci-3d094eb\\migration-cross-schema-v14-v15-12871001996\\results.json",
+      "checkoutPath": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-final-ci-3d094eb\\migration-cross-schema-v14-v15-12871001996\\checkout.json",
+      "zipBytes": 173659,
+      "failures": []
+    },
+    {
+      "suite": "orphaned-v13-recovery",
+      "jobId": 123242076622,
+      "artifactId": 12870583514,
+      "sha256": "4ef592a4fad53913ba696fe9929d7b774522a18cc3f129c13d06891ccda70ce6",
+      "tests": 4,
+      "job": {
+        "id": 123242076622,
+        "name": "Migration / orphaned-v13-recovery",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40811328923,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Record the actual checkout and requested PR identity",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run npm install --global npm@11.13.0",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Run npm ci",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Run npx playwright install chrome msedge",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Run npm run check:release-governance",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Run node --test scripts/verify-release-governance.test.mjs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Run npm run build:production-v13-to-v16:candidate",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 10
+          },
+          {
+            "name": "Run node scripts/verify-built-release-storage-manifest.mjs tmp/release-config-production-v13-to-v16 --expected-channel candidate",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 11
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-upgrade",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 12
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-v13-v15",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 13
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-v14-v15",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 14
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-v13-v16",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 15
+          },
+          {
+            "name": "Run npm run test:e2e:orphaned-v13-recovery",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "Require the reviewed browser and test identity set",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Preserve this isolated suite including failure diagnostics",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-node@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 35
+          },
+          {
+            "name": "Post Run actions/checkout@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 36
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 37
+          }
+        ]
+      },
+      "checkout": {
+        "requestedHead": "3d094ebef8d302456b993b3deb928220d53cb10f",
+        "formalReleaseAuthorized": false,
+        "workflowSha": "486310312a1e877b81a5b034445b034e6f2f74fd",
+        "actualCheckout": "486310312a1e877b81a5b034445b034e6f2f74fd",
+        "checkoutParents": "2482941f46acafc6fe0b331f536db06a45710fc8 3d094ebef8d302456b993b3deb928220d53cb10f",
+        "evidenceClass": "isolated-synthetic-migration-diagnostic",
+        "suite": "orphaned-v13-recovery",
+        "requestedBase": "2482941f46acafc6fe0b331f536db06a45710fc8"
+      },
+      "counts": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "interrupted": 0
+      },
+      "stats": {
+        "startTime": "2026-10-29T03:33:14.611Z",
+        "duration": 238928.749,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "runErrors": [],
+      "perBrowser": [
+        {
+          "project": "msedge",
+          "total": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "project": "chrome",
+          "total": 2,
+          "passed": 2,
+          "failed": 0
+        }
+      ],
+      "strictVerification": {
+        "ok": true,
+        "result": {
+          "suite": "orphaned-v13-recovery",
+          "tests": 4,
+          "projects": [
+            "msedge",
+            "chrome"
+          ],
+          "complete": true,
+          "formalReleaseEvidence": false
+        }
+      },
+      "rawResults": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-final-ci-3d094eb\\migration-orphaned-v13-recovery-12870583514\\results.json",
+      "checkoutPath": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-final-ci-3d094eb\\migration-orphaned-v13-recovery-12870583514\\checkout.json",
+      "zipBytes": 4895163,
+      "failures": []
+    },
+    {
+      "suite": "cross-schema-v13-v16",
+      "jobId": 123242076583,
+      "artifactId": 12871004888,
+      "sha256": "58728fa4b71476ab5f798059c099947f6f44862d9e34c692b8df35ee50b573e8",
+      "tests": 26,
+      "job": {
+        "id": 123242076583,
+        "name": "Migration / cross-schema-v13-v16",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_id": 40811328923,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Record the actual checkout and requested PR identity",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run npm install --global npm@11.13.0",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Run npm ci",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Run npx playwright install chrome msedge",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Run npm run check:release-governance",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Run node --test scripts/verify-release-governance.test.mjs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Run npm run build:production-v13-to-v16:candidate",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Run node scripts/verify-built-release-storage-manifest.mjs tmp/release-config-production-v13-to-v16 --expected-channel candidate",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-upgrade",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 12
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-v13-v15",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 13
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-v14-v15",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 14
+          },
+          {
+            "name": "Run npm run test:e2e:cross-schema-v13-v16",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 15
+          },
+          {
+            "name": "Run npm run test:e2e:orphaned-v13-recovery",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 16
+          },
+          {
+            "name": "Require the reviewed browser and test identity set",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 17
+          },
+          {
+            "name": "Preserve this isolated suite including failure diagnostics",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-node@v5",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 35
+          },
+          {
+            "name": "Post Run actions/checkout@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 36
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 37
+          }
+        ]
+      },
+      "checkout": {
+        "requestedBase": "2482941f46acafc6fe0b331f536db06a45710fc8",
+        "suite": "cross-schema-v13-v16",
+        "evidenceClass": "isolated-synthetic-migration-diagnostic",
+        "checkoutParents": "2482941f46acafc6fe0b331f536db06a45710fc8 3d094ebef8d302456b993b3deb928220d53cb10f",
+        "requestedHead": "3d094ebef8d302456b993b3deb928220d53cb10f",
+        "workflowSha": "486310312a1e877b81a5b034445b034e6f2f74fd",
+        "formalReleaseAuthorized": false,
+        "actualCheckout": "486310312a1e877b81a5b034445b034e6f2f74fd"
+      },
+      "counts": {
+        "total": 26,
+        "passed": 25,
+        "failed": 1,
+        "skipped": 0,
+        "interrupted": 0
+      },
+      "stats": {
+        "startTime": "2026-10-29T03:27:24.767Z",
+        "duration": 1192106.256,
+        "expected": 25,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "runErrors": [],
+      "perBrowser": [
+        {
+          "project": "msedge",
+          "total": 13,
+          "passed": 13,
+          "failed": 0
+        },
+        {
+          "project": "chrome",
+          "total": 13,
+          "passed": 12,
+          "failed": 1
+        }
+      ],
+      "strictVerification": {
+        "ok": false,
+        "error": "Unexpected result count: expected\n\n25 !== 26\n"
+      },
+      "rawResults": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-final-ci-3d094eb\\migration-cross-schema-v13-v16-12871004888\\results.json",
+      "checkoutPath": "C:\\Users\\Administrator\\HakimiBaziWorkbenchCandidates\\validation\\20261029-final-ci-3d094eb\\migration-cross-schema-v13-v16-12871004888\\checkout.json",
+      "zipBytes": 21780372,
+      "failures": [
+        {
+          "title": "v16 冻结多个 v13 页的真实写入，提交后旧页只收敛到 v16",
+          "file": "service-worker-cross-schema-v13-v16.spec.ts",
+          "line": 1398,
+          "project": "chrome",
+          "expectedStatus": "passed",
+          "status": "unexpected",
+          "results": [
+            {
+              "status": "failed",
+              "retry": 0,
+              "duration": 103395,
+              "startTime": "2026-10-29T03:40:41.459Z",
+              "errors": [
+                {
+                  "location": {
+                    "file": "D:\\a\\hakimi-suanming\\hakimi-suanming\\apps\\web\\e2e\\service-worker-cross-schema-v13-v16.spec.ts",
+                    "column": 5,
+                    "line": 397
+                  },
+                  "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m\"11f1b8717458\"\u001b[39m\nReceived: \u001b[31m\"d0e255972d7c\"\u001b[39m\n\nCall Log:\n- Timeout 90000ms exceeded while waiting on the predicate\n\n  395 |     () => workerBuildVersion(natural.page, \"active\"),\n  396 |     { timeout: ACTIVATION_TIMEOUT_MS }\n> 397 |   ).toBe(target.version);\n      |     ^\n  398 |   return { bridgePage: natural.page, problems: natural.problems };\n  399 | }\n  400 |\n    at switchToTargetAndWaitForActivation (D:\\a\\hakimi-suanming\\hakimi-suanming\\apps\\web\\e2e\\service-worker-cross-schema-v13-v16.spec.ts:397:5)\n    at D:\\a\\hakimi-suanming\\hakimi-suanming\\apps\\web\\e2e\\service-worker-cross-schema-v13-v16.spec.ts:1407:21"
+                }
+              ],
+              "attachments": [
+                {
+                  "name": "screenshot",
+                  "contentType": "image/png",
+                  "path": "D:\\a\\_temp\\hakimi-migration-40811328923-1-cross-schema-v13-v16\\test-results\\service-worker-cross-schem-bc6f9-多个-v13-页的真实写入，提交后旧页只收敛到-v16-chrome\\test-failed-1.png"
+                },
+                {
+                  "name": "screenshot",
+                  "contentType": "image/png",
+                  "path": "D:\\a\\_temp\\hakimi-migration-40811328923-1-cross-schema-v13-v16\\test-results\\service-worker-cross-schem-bc6f9-多个-v13-页的真实写入，提交后旧页只收敛到-v16-chrome\\test-failed-2.png"
+                },
+                {
+                  "name": "error-context",
+                  "contentType": "text/markdown",
+                  "path": "D:\\a\\_temp\\hakimi-migration-40811328923-1-cross-schema-v13-v16\\test-results\\service-worker-cross-schem-bc6f9-多个-v13-页的真实写入，提交后旧页只收敛到-v16-chrome\\error-context.md"
+                },
+                {
+                  "name": "error-context",
+                  "contentType": "text/markdown",
+                  "path": "D:\\a\\_temp\\hakimi-migration-40811328923-1-cross-schema-v13-v16\\test-results\\service-worker-cross-schem-bc6f9-多个-v13-页的真实写入，提交后旧页只收敛到-v16-chrome\\error-context.md"
+                },
+                {
+                  "name": "trace",
+                  "contentType": "application/zip",
+                  "path": "D:\\a\\_temp\\hakimi-migration-40811328923-1-cross-schema-v13-v16\\test-results\\service-worker-cross-schem-bc6f9-多个-v13-页的真实写入，提交后旧页只收敛到-v16-chrome\\trace.zip"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "boundaries": {
+    "historicalResultsRetained": true,
+    "readOnlyCollection": true,
+    "githubRerunRequested": false,
+    "testsExecutedByReviewer": false,
+    "repositoryModified": false,
+    "formalReleaseAuthorized": false
+  }
+}
