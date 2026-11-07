@@ -47,14 +47,14 @@ function ReadyMainRoute({ source, index, caseName, href }: { source: MainRoutePr
     <ReadingMainRouteCard model={model} caseName={caseName} range={overview.range} years={source.annual?.years.map(year => year.year) ?? []}
       editHref={`${href}/revise`}
       onRangeChange={range => select({ ...query, topic: "summary" }, { view: "main", range })}
-      onYearChange={year => { select({ topic: "summary", year, branchId: model.selectedBranchId ?? query.branchId }, { view: "main", range: "year" }); source.onRequestYear(year); }}
+      onYearChange={year => { select({ topic: "summary", year, branchId: model.selectedBranchId ?? query.branchId }, { view: "main", range: overview.range }); source.onRequestYear(year); }}
       onBranchChange={branchId => select({ ...query, topic: "summary", branchId }, { ...overview, view: "main" })}
-      onOpenYear={year => open({ topic: "summary", year, branchId: model.selectedBranchId ?? query.branchId }, { view: "main", range: "year", detail: { kind: "year", year } })}
+      onOpenYear={year => open({ topic: "summary", year: model.range.requestedStartYear ?? query.year ?? year, branchId: model.selectedBranchId ?? query.branchId },
+        { view: "main", range: overview.range, detail: { kind: "year", year } })}
       onOpenPeriods={(label, periods) => {
         const first = periods[0]; if (!first) return;
-        const span = periods.at(-1)!.year - first.year + 1;
-        open({ topic: "summary", year: first.year, branchId: model.selectedBranchId ?? query.branchId },
-          { view: "main", range: span === 1 ? "year" : span <= 3 ? "three_years" : "ten_years",
+        open({ topic: "summary", year: model.range.requestedStartYear ?? query.year ?? first.year, branchId: model.selectedBranchId ?? query.branchId },
+          { view: "main", range: overview.range,
             detail: { kind: label === "转折前后" ? "turn" : "stage", year: first.year,
               periods: periods.map(period => ({ year: period.year, startInstant: period.startInstant, endExclusiveInstant: period.endExclusiveInstant })) } });
       }} />

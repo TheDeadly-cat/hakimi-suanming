@@ -176,8 +176,10 @@ function ReadingExplanationContent({ index, revision, records, onTimeUncertainty
     } catch (reason) { return { value: null, error: safeVisibleErrorMessage(reason, "当前人物与走势来源未能对应，请重新打开这份资料。") }; } },
   [revision, mainRouteSource?.annual, mainRouteSource?.timeline, mainRouteSource?.includeHour, index, query.year, query.branchId, overview.range]);
   const mainRoute = mainRouteResult.value;
-  const validRouteDetail = routeDetail && mainRoute?.status === "ready" && routeDetail.year === query.year
-    && (routeDetail.kind === "year" || (routeDetail.kind === "turn"
+  const validRouteDetail = routeDetail && mainRoute?.status === "ready"
+    && routeDetail.year >= mainRoute.range.startYear! && routeDetail.year <= mainRoute.range.endYear!
+    && (routeDetail.kind === "year" ? index.conclusions.some(item => item.scope.level === "year"
+      && item.scope.year === routeDetail.year && item.scope.branchId === mainRoute.selectedBranchId) : (routeDetail.kind === "turn"
       ? mainRoute.turningPoints.some(point => routeDetail.periods?.length === 2
         && [point.before, point.after].every((link, n) => link.year === routeDetail.periods![n]!.year
           && link.startInstant === routeDetail.periods![n]!.startInstant && link.endExclusiveInstant === routeDetail.periods![n]!.endExclusiveInstant))
@@ -247,13 +249,13 @@ function ReadingExplanationContent({ index, revision, records, onTimeUncertainty
     setSelectedId(conclusion.stableId);
   };
   const choose = (topic: ReadingExplanationTopic) => {
-    if (mainVisible) mainReturn.current = { query: { ...query, year: mainRoute?.primaryYear ?? query.year,
+    if (mainVisible) mainReturn.current = { query: { ...query, year: query.year ?? mainRoute?.range.requestedStartYear ?? undefined,
       branchId: mainRoute?.selectedBranchId ?? query.branchId }, overview, detail: validRouteDetail,
       scrollY: window.scrollY, trigger: document.activeElement instanceof HTMLElement ? document.activeElement : null };
     returnPoint.current = null; pendingFocus.current = "topic"; setSelectedId(null);
     setRouteDetail(null);
     if (topic === "summary") setOverview(previous => ({ ...previous, view: "natal" }));
-    const from = mainVisible && mainRoute?.primaryYear ? { ...query, year: mainRoute.primaryYear,
+    const from = mainVisible && mainRoute?.primaryYear ? { ...query, year: validRouteDetail?.year ?? mainRoute.primaryYear,
       branchId: mainRoute.selectedBranchId ?? query.branchId } : query;
     const next = readingTopicSelection(index, from, topic);
     setQuery(next);
@@ -298,17 +300,18 @@ function ReadingExplanationContent({ index, revision, records, onTimeUncertainty
       editHref={mainRouteSource!.canEdit ? `/cases/${encodeURIComponent(revision.caseId)}/revisions/${encodeURIComponent(revision.id)}/revise` : undefined}
       years={mainRouteSource!.annual?.years.map(year => year.year) ?? []}
       onRangeChange={range => { setOverview(previous => ({ ...previous, range })); setRouteDetail(null); }}
-      onYearChange={year => { setQuery({ topic: "summary", year, branchId: query.branchId }); setOverview(previous => ({ ...previous, range: "year" })); setRouteDetail(null); }}
+      onYearChange={year => { setQuery({ topic: "summary", year, branchId: query.branchId }); setRouteDetail(null); }}
       onBranchChange={branchId => { setQuery({ ...query, branchId }); setRouteDetail(null); }}
       onOpenYear={(year, interval) => {
-        setQuery({ topic: "summary", year, branchId: mainRoute.selectedBranchId ?? query.branchId });
-        setOverview({ view: "main", range: "year" }); setRouteDetail({ kind: interval ? "stage" : "year", year, periods: interval ? [{ year, ...interval }] : undefined });
+        setQuery({ topic: "summary", year: mainRoute.range.requestedStartYear ?? query.year ?? year, branchId: mainRoute.selectedBranchId ?? query.branchId });
+        setOverview(previous => ({ ...previous, view: "main" })); setRouteDetail({ kind: interval ? "stage" : "year", year, periods: interval ? [{ year, ...interval }] : undefined });
         onRequestYear?.(year);
       }} onOpenPeriods={(label, periods) => {
         const first = periods[0]; if (!first) return;
-        const span = periods.at(-1)!.year - first.year + 1;
-        setQuery({ topic: "summary", year: first.year, branchId: mainRoute.selectedBranchId ?? query.branchId });
-        setOverview({ view: "main", range: span === 1 ? "year" : span <= 3 ? "three_years" : "ten_years" });
+        // Detail coordinates are subordinate to the selected overview window.
+        // Opening a one-year stage must not silently narrow a three-year view.
+        setQuery({ topic: "summary", year: mainRoute.range.requestedStartYear ?? query.year ?? first.year, branchId: mainRoute.selectedBranchId ?? query.branchId });
+        setOverview(previous => ({ ...previous, view: "main" }));
         setRouteDetail({ kind: label === "转折前后" ? "turn" : "stage", year: first.year, label, periods }); onRequestYear?.(first.year);
       }} /> : null}
     <h3 className="reading-navigation-heading" tabIndex={-1}>想先看什么</h3>

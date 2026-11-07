@@ -95,7 +95,8 @@ function validOverview(index: ReadingExplanationIndex, value: unknown, selection
   const yearConclusions = index.conclusions.filter(item => item.scope.level === "year" && item.scope.branchId !== null);
   const branches = [...new Set(yearConclusions.map(item => item.scope.branchId!))];
   const branch = selection.branchId ?? (branches.length === 1 ? branches[0] : undefined);
-  if (!branch || requested.year !== selection.year || !Number.isSafeInteger(requested.year)) return overview;
+  const endYear = selection.year + ({ year: 1, three_years: 3, ten_years: 10 }[overview.range]) - 1;
+  if (!branch || !Number.isSafeInteger(requested.year) || (requested.year as number) < selection.year || (requested.year as number) > endYear) return overview;
   if (requested.kind === "year") {
     if (requested.periods !== undefined || !yearConclusions.some(item => item.scope.year === requested.year && item.scope.branchId === branch)) return overview;
     return { ...overview, detail: { kind: "year", year: requested.year as number } };
@@ -105,7 +106,6 @@ function validOverview(index: ReadingExplanationIndex, value: unknown, selection
     || (requested.kind === "turn" && requested.periods.length !== 2)) return overview;
   const periods: NonNullable<ReadingOverviewDetail["periods"]> = [];
   const seen = new Set<string>();
-  const endYear = selection.year + ({ year: 1, three_years: 3, ten_years: 10 }[overview.range]) - 1;
   for (const entry of requested.periods) {
     if (!entry || typeof entry !== "object" || Array.isArray(entry)) return overview;
     const period = entry as Record<string, unknown>;
@@ -121,8 +121,8 @@ function validOverview(index: ReadingExplanationIndex, value: unknown, selection
     seen.add(key);
     periods.push({ year: period.year as number, startInstant: period.startInstant, endExclusiveInstant: period.endExclusiveInstant });
   }
-  if (periods[0]!.year !== selection.year) return overview;
-  return { ...overview, detail: { kind: requested.kind, year: selection.year, periods } };
+  if (periods[0]!.year !== requested.year) return overview;
+  return { ...overview, detail: { kind: requested.kind, year: requested.year as number, periods } };
 }
 
 // Display preferences share the same source identity as the existing reading

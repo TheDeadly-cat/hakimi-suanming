@@ -64,6 +64,22 @@ describe("main route navigation identity and detail coordinates", () => {
     expect(restored.periods![0]!.endExclusiveInstant).toBe(restored.periods![1]!.startInstant);
   });
 
+  it.each(["year", "stage", "turn"] as const)("keeps a later %s detail inside the original three-year overview", kind => {
+    const detail: ReadingOverviewDetail = { kind, year: 2028,
+      ...(kind === "year" ? {} : { periods: kind === "turn" ? [period(2028, 0), period(2028, 1)] : [period(2028, 0)] }) };
+    writeReadingNavigation(index, revision, { topic: "summary", year: 2026, branchId: "locked" });
+    writeReadingOverviewNavigation(index, revision, { view: "main", range: "three_years", detail });
+    expect(readReadingOverviewNavigation(index, revision)).toEqual({ view: "main", range: "three_years", detail });
+    expect(raw().selection.year).toBe(2026);
+  });
+
+  it("rejects a later detail outside the selected window without expanding that window", () => {
+    writeReadingNavigation(index, revision, { topic: "summary", year: 2026, branchId: "locked" });
+    writeReadingOverviewNavigation(index, revision, { view: "main", range: "three_years", detail: { kind: "year", year: 2029 } });
+    expect(readReadingOverviewNavigation(index, revision)).toEqual({ view: "main", range: "three_years" });
+    expect(raw().selection.year).toBe(2026);
+  });
+
   it.each(["duplicate", "altered-interval", "outside-range", "reversed", "partial-turn"] as const)("rejects %s rather than restoring an approximate detail", failure => {
     const detail: ReadingOverviewDetail = { kind: "stage", year: 2026, periods: [period(2026), period(2027)] };
     if (failure === "duplicate") detail.periods!.push(period(2027));

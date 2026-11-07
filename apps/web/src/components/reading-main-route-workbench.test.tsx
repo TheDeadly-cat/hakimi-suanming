@@ -1,7 +1,8 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ReactNode } from "react";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { calculateChart } from "@hakimi/bazi-core";
-import { storedRevisionRecordSchema, type RevisionRecord } from "@hakimi/contracts";
+import { caseRecordSchema, storedRevisionRecordSchema, type RevisionRecord } from "@hakimi/contracts";
 import { WORKING_DEFAULT_RULE_PROFILE } from "@hakimi/rule-profiles";
 import { buildBaziPreliminaryAssessment } from "../../../../packages/bazi-interpretation/src/preliminary-assessment";
 import { buildLocalAnnualOutlook, type LocalAnnualOutlook } from "../lib/local-annual-outlook";
@@ -9,8 +10,20 @@ import { buildReadingTimeline } from "../lib/local-reading-timeline";
 import type { LocalOutlookJudgment } from "../lib/local-outlook-judgment";
 import { READING_EXPLANATION_INDEX_VERSION, unassessedReadingTime, validateReadingExplanationIndex,
   type ReadingConclusion, type ReadingExplanationIndex } from "../lib/reading-explanation-index";
-import { READING_NAVIGATION_STORAGE_KEY } from "../lib/reading-navigation-context";
+import { READING_NAVIGATION_STORAGE_KEY, writeReadingNavigation, writeReadingOverviewNavigation,
+  readReadingOverviewNavigation } from "../lib/reading-navigation-context";
 import { ReadingExplanationWorkbench } from "./reading-explanation-workbench";
+import { describeScopedReadingScope } from "../lib/scoped-reading-report";
+import { DashboardMainRoute } from "./dashboard-main-route";
+import type { MainRoutePreviewInput } from "./local-reading-container";
+
+const previewFixture = vi.hoisted(() => ({ source: null as MainRoutePreviewInput | null }));
+// The same real chart/annual/timeline/index fixture feeds both real navigation
+// surfaces. Only the dashboard's async producer boundary is supplied directly;
+// its card actions, session context, router and reader handlers remain real.
+vi.mock("./local-reading-container", () => ({ LocalReadingContainer: ({ renderMainRoutePreview }: {
+  renderMainRoutePreview?: (source: MainRoutePreviewInput) => ReactNode;
+}) => previewFixture.source ? renderMainRoutePreview?.(previewFixture.source) : null }));
 
 type State = "caution" | "opportunity" | "favorable";
 let revision: RevisionRecord, nextRevision: RevisionRecord, uncertain: RevisionRecord;
@@ -34,6 +47,7 @@ beforeAll(async () => {
     .map(item => buildLocalAnnualOutlook(item, buildBaziPreliminaryAssessment(item), 2026)));
 });
 beforeEach(() => window.sessionStorage.removeItem(READING_NAVIGATION_STORAGE_KEY));
+afterEach(() => vi.restoreAllMocks());
 
 // Preserve real computed node identities, branch coverage and handover instants.
 // Only qualitative directions are explicit synthetic UI scenarios, not claims
@@ -92,6 +106,97 @@ const detailIds = () => [...detail().querySelectorAll<HTMLElement>("[data-route-
 const localTime = (value: string) => new Date(Date.parse(value) + 8 * 3_600_000).toISOString().slice(0, 16).replace("T", " ");
 
 describe("main-route integration in the reading workbench", () => {
+  it("U18 retains the explicitly selected range when changing the main route's start year", () => {
+    render(<ReadingExplanationWorkbench {...propsFor(scenario())} />);
+    fireEvent.change(main().getByLabelText("起始年份"), { target: { value: "2030" } });
+    expect(main().getByLabelText("查看范围")).toHaveProperty("value", "three_years");
+    expect(main().getByText("2030—2032年", { exact: true })).toBeTruthy();
+    fireEvent.change(main().getByLabelText("查看范围"), { target: { value: "ten_years" } });
+    fireEvent.change(main().getByLabelText("起始年份"), { target: { value: "2029" } });
+    expect(main().getByLabelText("查看范围")).toHaveProperty("value", "ten_years");
+    fireEvent.change(main().getByLabelText("查看范围"), { target: { value: "year" } });
+    fireEvent.change(main().getByLabelText("起始年份"), { target: { value: "2030" } });
+    expect(main().getByLabelText("查看范围")).toHaveProperty("value", "year");
+    expect(main().getByText("2030年", { exact: true, selector: "span" })).toBeTruthy();
+  });
+
+  it.each([0, 1])("U18 returns from dashboard stage %s through months to the original backward three-year route", async stageIndex => {
+    const source = scenario(parallelAnnual, (year, branch) => branch === "forward" || year !== 2030 ? "caution" : "favorable");
+    const props = propsFor(source, uncertain), onRequestYear = vi.fn();
+    writeReadingNavigation(props.index, uncertain, { topic: "summary", year: 2030, branchId: "backward" });
+    writeReadingOverviewNavigation(props.index, uncertain, { view: "main", range: "three_years" });
+    const caseRecord = caseRecordSchema.parse({ schemaVersion: "1.0.0", recordVersion: 2, id: uncertain.caseId,
+      alias: "合成 U18 人物B", tags: [], notes: "synthetic", favorite: false, deletedAt: null,
+      createdAt: uncertain.createdAt, updatedAt: uncertain.createdAt, latestRevisionId: uncertain.id, revisionCount: 1 });
+    const href = `/cases/${uncertain.caseId}/revisions/${uncertain.id}`;
+    const oldHref = window.location.pathname + window.location.search + window.location.hash;
+    const scroll = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    previewFixture.source = { ...props.mainRouteSource, revision: uncertain, index: props.index,
+      loading: false, error: null, onRequestYear };
+    try {
+      // Reopening first verifies the real reader restoration before its homepage
+      // counterpart reads the same context and produces the exact detail handoff.
+      render(<ReadingExplanationWorkbench {...props} onRequestYear={onRequestYear} />);
+      expect(main().getByText("2030—2032年", { exact: true })).toBeTruthy();
+      cleanup();
+      render(<DashboardMainRoute caseRecord={caseRecord} revision={uncertain} href={href} />);
+      await screen.findByText("2030—2032年", { exact: true });
+      const stages = within(main().getByRole("list", { name: "按实际时间排列的阶段与缺口" })).getAllByRole("button");
+      expect(stages.length).toBeGreaterThan(1);
+      fireEvent.click(stages[stageIndex]!);
+      expect(window.location.pathname).toBe(href);
+      cleanup();
+      render(<ReadingExplanationWorkbench {...props} onRequestYear={onRequestYear} />);
+      const ids = detailIds(), targetYear = stageIndex === 0 ? 2030 : 2031;
+      expect(ids.length).toBeGreaterThan(0);
+      expect(ids.every(id => id?.startsWith(uncertain.id) && id.includes(":backward:"))).toBe(true);
+      fireEvent.click(within(detail()).getByRole("button", { name: `看 ${targetYear} 年月份` }));
+      expect(onRequestYear).toHaveBeenLastCalledWith(targetYear);
+      expect(screen.getByLabelText("年份", { exact: true })).toHaveProperty("value", String(targetYear));
+      fireEvent.click(screen.getByRole("button", { name: "返回刚才的综合走势" }));
+      expect(main().getByLabelText("查看范围")).toHaveProperty("value", "three_years");
+      expect(main().getByLabelText("起始年份")).toHaveProperty("value", "2030");
+      expect(main().getByLabelText("查看路径")).toHaveProperty("value", "backward");
+      expect(main().getByText("2030—2032年", { exact: true })).toBeTruthy();
+      expect(detailIds()).toEqual(ids);
+      expect(readReadingOverviewNavigation(props.index, uncertain)).toMatchObject({ range: "three_years", detail: { kind: "stage", year: targetYear } });
+      cleanup();
+      render(<ReadingExplanationWorkbench {...props} onRequestYear={onRequestYear} />);
+      expect(main().getByText("2030—2032年", { exact: true })).toBeTruthy();
+      expect(detailIds()).toEqual(ids);
+    } finally { previewFixture.source = null; scroll.mockRestore(); window.history.replaceState(null, "", oldHref); }
+  });
+
+  it.each(["year", "later-stage"] as const)("keeps the %s detail's domain save bound to its year while preserving the main window", mode => {
+    vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    const source = scenario(parallelAnnual, (year, branch) => branch === "forward" || year !== 2030 ? "caution" : "favorable");
+    const props = propsFor(source, uncertain), onSelectionChange = vi.fn(), onRequestYear = vi.fn();
+    writeReadingNavigation(props.index, uncertain, { topic: "summary", year: 2030, branchId: "backward" });
+    writeReadingOverviewNavigation(props.index, uncertain, { view: "main", range: "three_years" });
+    const view = render(<ReadingExplanationWorkbench {...props} onSelectionChange={onSelectionChange} onRequestYear={onRequestYear} />);
+    if (mode === "year") fireEvent.click(main().getByRole("button", { name: "看 2030 年重点" }));
+    else fireEvent.click(within(main().getByRole("list", { name: "按实际时间排列的阶段与缺口" })).getAllByRole("button")[1]!);
+    const targetYear = mode === "year" ? 2030 : 2031, expectedIds = detailIds();
+    expect(onRequestYear).toHaveBeenLastCalledWith(targetYear);
+    expect(main().getByText("2030—2032年", { exact: true })).toBeTruthy();
+    // An onRequestYear-driven container refresh may replace the evidence index
+    // while preparing that year's months. Same identity must retain both views.
+    view.rerender(<ReadingExplanationWorkbench {...props} loading onSelectionChange={onSelectionChange} onRequestYear={onRequestYear} />);
+    view.rerender(<ReadingExplanationWorkbench {...props} index={{ ...props.index, generatedAt: "2026-11-08T00:00:00.000Z" }}
+      onSelectionChange={onSelectionChange} onRequestYear={onRequestYear} />);
+    expect(detailIds()).toEqual(expectedIds);
+    fireEvent.click(screen.getByRole("button", { name: "收入与开支" }));
+    const selection = onSelectionChange.mock.lastCall![0];
+    expect(selection).toMatchObject({ topic: "wealth", year: targetYear, branchId: "backward", isReady: true });
+    const scope = describeScopedReadingScope(props.index, selection);
+    expect(scope.selection).toMatchObject({ kind: "domain", domain: "wealth", year: targetYear, branchId: "backward" });
+    expect(scope.conclusionIds.every(id => props.index.conclusions.some(item => item.stableId === id && item.scope.year === targetYear
+      && item.scope.branchId === "backward" && item.domain === "wealth"))).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "返回刚才的综合走势" }));
+    expect(main().getByText("2030—2032年", { exact: true })).toBeTruthy();
+    expect(detailIds()).toEqual(expectedIds);
+  });
+
   it("names the actual missing direction input and offers the matching revision edit route", () => {
     const props = propsFor(scenario(parallelAnnual, (_year, branch) => branch === "forward" ? "caution" : "favorable"), uncertain);
     render(<ReadingExplanationWorkbench {...props} mainRouteSource={{ ...props.mainRouteSource, canEdit: true }} />);
@@ -144,14 +249,14 @@ describe("main-route integration in the reading workbench", () => {
 
   it("changes the actual main sentence and range with 2030 and clears the previously opened details", () => {
     const onRequestYear = vi.fn();
-    render(<ReadingExplanationWorkbench {...propsFor(scenario())} onRequestYear={onRequestYear} />);
+    render(<ReadingExplanationWorkbench {...propsFor(scenario(annual, year => year === 2026 ? "caution" : year >= 2030 ? "favorable" : "opportunity"))} onRequestYear={onRequestYear} />);
     fireEvent.click(main().getByRole("button", { name: "看 2026 年重点" }));
     expect(within(detail()).getByRole("heading", { name: "2026 年重点" })).toBeTruthy();
     expect(onRequestYear).toHaveBeenLastCalledWith(2026);
     fireEvent.change(main().getByLabelText("起始年份"), { target: { value: "2030" } });
     expect(main().getByRole("heading", { name: "整体较易推进。" })).toBeTruthy();
-    expect(main().getByText("2030年", { exact: true, selector: "span" })).toBeTruthy();
-    expect(main().getByLabelText("查看范围")).toHaveProperty("value", "year");
+    expect(main().getByText("2030—2032年", { exact: true })).toBeTruthy();
+    expect(main().getByLabelText("查看范围")).toHaveProperty("value", "three_years");
     expect(screen.queryByRole("region", { name: "所选年份原结论" })).toBeNull();
     fireEvent.click(main().getByRole("button", { name: "看 2030 年重点" }));
     expect(detailIds().every(id => id?.includes(":2030:"))).toBe(true);
