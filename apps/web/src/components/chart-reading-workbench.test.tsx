@@ -139,10 +139,19 @@ describe("priority-year event reading on actual charts", () => {
     fireEvent.click(header().getByRole("button",{name:"核对保存记录"}));expect(onCheckSave).toHaveBeenCalledTimes(1);
   });
   it("keeps a confirmed report accessible when only the current page refresh failed", () => {
-    render(<ChartReadingWorkbench revision={b.revision} caseName="合成刷新提示" assessment={b.assessment} briefReport={bBackground.brief}
-      saveFeedback={{status:"saved",reportId:"33333333-3333-4333-8333-333333333333",refreshIssue:true}}/>);
-    expect(screen.getByRole("link",{name:"打开已保存报告"})).toBeTruthy();
+    const onRetrySaveRefresh = vi.fn(), onSaveReading = vi.fn();
+    const props = { revision: b.revision, caseName: "合成刷新提示", assessment: b.assessment, briefReport: bBackground.brief, onRetrySaveRefresh, onSaveReading };
+    const view = render(<ChartReadingWorkbench {...props}
+      saveFeedback={{status:"saved",reportId:"33333333-3333-4333-8333-333333333333",refreshStatus:"pending"}}/>);
+    expect(screen.getByRole("link",{name:"打开已保存报告"}).getAttribute("href"))
+      .toBe(`/reports?case=${b.revision.caseId}&report=33333333-3333-4333-8333-333333333333`);
+    expect(screen.getByText(/正在更新本页，可以直接打开/)).toBeTruthy();
+    view.rerender(<ChartReadingWorkbench {...props}
+      saveFeedback={{status:"saved",reportId:"33333333-3333-4333-8333-333333333333",refreshStatus:"failed"}}/>);
     expect(screen.getByText(/本页更新尚未完成/).textContent).toContain("报告已保存并核对");
+    fireEvent.click(screen.getByRole("button", { name: "只重试本页更新" }));
+    expect(onRetrySaveRefresh).toHaveBeenCalledTimes(1);
+    expect(onSaveReading).not.toHaveBeenCalled();
   });
   it("keeps the explanation panel mounted across a transient missing brief report while a year changes", () => {
     const props = { revision: b.revision, caseName: "合成年份切换", assessment: b.assessment, annualOutlook: b.annual,

@@ -1,0 +1,556 @@
+{
+  "schema": "hakimi.main-route-copy-review/1",
+  "reviewDate": "2026-11-07",
+  "generatedAt": "2026-11-07T15:34:50.193Z",
+  "presentationVersion": "hakimi.main-route-reading/0.1.0",
+  "synthetic": true,
+  "humanReviewed": false,
+  "expertReviewed": false,
+  "fixtureNote": "合成生产者判断，沿用真实生产排盘的区间与身份结构；不是个人预测或真人理解结果。",
+  "explanationPolicy": "最多两项解释，记录实际条数；不为凑数添加无来源句子。",
+  "samples": [
+    {
+      "id": "continuous_support",
+      "scenario": "连续向好",
+      "headline": "整体较易推进。",
+      "explanations": [
+        "所示阶段只整理已计算的原判断；当前范围没有另外确认的转折。"
+      ],
+      "explanationCount": 1,
+      "keyCondition": "现有支持仍需保持；新增要求超出可用时间时，这条路线需要重新核对。",
+      "keyConditionPlain": null,
+      "sourceBinding": {
+        "caseId": "22222222-2222-4222-8222-222222222222",
+        "revisionId": "11111111-1111-4111-8111-111111111111",
+        "chartResultHash": "6ce71bd819a47c532b66c2dc3abab5ea1fdc82ad376e4e6d113277ea2a34b720",
+        "includeHour": true,
+        "ruleProfileDigest": "de6ff2661989f6557435c02ad84a5d3f33414d845663601f783a130cc9fdb727"
+      },
+      "sourceVersions": [
+        "hakimi.main-route-reading/0.1.0",
+        "hakimi.local-reading-timeline/0.3.0",
+        "hakimi.local-annual-outlook/0.9.0",
+        "hakimi.local-outlook-judgment/0.10.0",
+        "hakimi.outlook-model/0.8.0"
+      ],
+      "range": {
+        "mode": "three_years",
+        "startYear": 2026,
+        "endYear": 2028,
+        "requestedStartYear": 2026,
+        "requestedEndYear": 2028,
+        "label": "2026—2028年",
+        "coverageNote": null
+      },
+      "status": "ready",
+      "assumption": null,
+      "periods": [
+        {
+          "target": {
+            "year": 2026,
+            "branchId": "locked",
+            "startInstant": "2026-02-03T20:02:08.000Z",
+            "endExclusiveInstant": "2027-02-04T01:46:18.000Z"
+          },
+          "caption": "较顺",
+          "primaryAxis": "pattern",
+          "sourceStageId": "stage:locked:2026-02-03T20:02:08.000Z",
+          "sourceVersions": [
+            "hakimi.local-outlook-judgment/0.10.0",
+            "hakimi.outlook-model/0.8.0"
+          ],
+          "originalHeadline": "合成阶段：较顺",
+          "originalSummary": "合成主轴原文：favorable",
+          "conditions": [
+            "现有支持仍需保持；新增要求超出可用时间时，这条路线需要重新核对。"
+          ]
+        },
+        {
+          "target": {
+            "year": 2028,
+            "branchId": "locked",
+            "startInstant": "2028-12-20T20:58:00.000Z",
+            "endExclusiveInstant": "2029-02-03T13:20:47.000Z"
+          },
+          "caption": "较顺",
+          "primaryAxis": "pattern",
+          "sourceStageId": "stage:locked:2028-12-20T20:58:00.000Z",
+          "sourceVersions": [
+            "hakimi.local-outlook-judgment/0.10.0",
+            "hakimi.outlook-model/0.8.0"
+          ],
+          "originalHeadline": "合成阶段：较顺",
+          "originalSummary": "合成主轴原文：favorable",
+          "conditions": [
+            "现有支持仍需保持；新增要求超出可用时间时，这条路线需要重新核对。"
+          ]
+        }
+      ],
+      "nextTurningPoint": null,
+      "domainNotes": []
+    },
+    {
+      "id": "continuous_pressure",
+      "scenario": "连续承压",
+      "headline": "整体推进较费力。",
+      "explanations": [
+        "所示阶段只整理已计算的原判断；当前范围没有另外确认的转折。"
+      ],
+      "explanationCount": 1,
+      "keyCondition": "现有要求仍超过可用支持；支持未补齐前，不能将阻力当作已经解除。",
+      "keyConditionPlain": null,
+      "sourceBinding": {
+        "caseId": "22222222-2222-4222-8222-222222222222",
+        "revisionId": "11111111-1111-4111-8111-111111111111",
+        "chartResultHash": "6ce71bd819a47c532b66c2dc3abab5ea1fdc82ad376e4e6d113277ea2a34b720",
+        "includeHour": true,
+        "ruleProfileDigest": "de6ff2661989f6557435c02ad84a5d3f33414d845663601f783a130cc9fdb727"
+      },
+      "sourceVersions": [
+        "hakimi.main-route-reading/0.1.0",
+        "hakimi.local-reading-timeline/0.3.0",
+        "hakimi.local-annual-outlook/0.9.0",
+        "hakimi.local-outlook-judgment/0.10.0",
+        "hakimi.outlook-model/0.8.0"
+      ],
+      "range": {
+        "mode": "three_years",
+        "startYear": 2026,
+        "endYear": 2028,
+        "requestedStartYear": 2026,
+        "requestedEndYear": 2028,
+        "label": "2026—2028年",
+        "coverageNote": null
+      },
+      "status": "ready",
+      "assumption": null,
+      "periods": [
+        {
+          "target": {
+            "year": 2026,
+            "branchId": "locked",
+            "startInstant": "2026-02-03T20:02:08.000Z",
+            "endExclusiveInstant": "2027-02-04T01:46:18.000Z"
+          },
+          "caption": "较费力",
+          "primaryAxis": "pattern",
+          "sourceStageId": "stage:locked:2026-02-03T20:02:08.000Z",
+          "sourceVersions": [
+            "hakimi.local-outlook-judgment/0.10.0",
+            "hakimi.outlook-model/0.8.0"
+          ],
+          "originalHeadline": "合成阶段：有压力",
+          "originalSummary": "合成主轴原文：caution",
+          "conditions": [
+            "现有要求仍超过可用支持；支持未补齐前，不能将阻力当作已经解除。"
+          ]
+        },
+        {
+          "target": {
+            "year": 2028,
+            "branchId": "locked",
+            "startInstant": "2028-12-20T20:58:00.000Z",
+            "endExclusiveInstant": "2029-02-03T13:20:47.000Z"
+          },
+          "caption": "较费力",
+          "primaryAxis": "pattern",
+          "sourceStageId": "stage:locked:2028-12-20T20:58:00.000Z",
+          "sourceVersions": [
+            "hakimi.local-outlook-judgment/0.10.0",
+            "hakimi.outlook-model/0.8.0"
+          ],
+          "originalHeadline": "合成阶段：有压力",
+          "originalSummary": "合成主轴原文：caution",
+          "conditions": [
+            "现有要求仍超过可用支持；支持未补齐前，不能将阻力当作已经解除。"
+          ]
+        }
+      ],
+      "nextTurningPoint": null,
+      "domainNotes": []
+    },
+    {
+      "id": "pressure_then_opportunity",
+      "scenario": "先紧后松",
+      "headline": "先费力，随后出现改善窗口。",
+      "explanations": [
+        "下一处变化在2027年；可进入对应年份查看变化前后的依据。"
+      ],
+      "explanationCount": 1,
+      "keyCondition": "现有要求仍超过可用支持；支持未补齐前，不能将阻力当作已经解除。",
+      "keyConditionPlain": null,
+      "sourceBinding": {
+        "caseId": "22222222-2222-4222-8222-222222222222",
+        "revisionId": "11111111-1111-4111-8111-111111111111",
+        "chartResultHash": "6ce71bd819a47c532b66c2dc3abab5ea1fdc82ad376e4e6d113277ea2a34b720",
+        "includeHour": true,
+        "ruleProfileDigest": "de6ff2661989f6557435c02ad84a5d3f33414d845663601f783a130cc9fdb727"
+      },
+      "sourceVersions": [
+        "hakimi.main-route-reading/0.1.0",
+        "hakimi.local-reading-timeline/0.3.0",
+        "hakimi.local-annual-outlook/0.9.0",
+        "hakimi.local-outlook-judgment/0.10.0",
+        "hakimi.outlook-model/0.8.0"
+      ],
+      "range": {
+        "mode": "three_years",
+        "startYear": 2026,
+        "endYear": 2028,
+        "requestedStartYear": 2026,
+        "requestedEndYear": 2028,
+        "label": "2026—2028年",
+        "coverageNote": null
+      },
+      "status": "ready",
+      "assumption": null,
+      "periods": [
+        {
+          "target": {
+            "year": 2026,
+            "branchId": "locked",
+            "startInstant": "2026-02-03T20:02:08.000Z",
+            "endExclusiveInstant": "2027-02-04T01:46:18.000Z"
+          },
+          "caption": "较费力",
+          "primaryAxis": "pattern",
+          "sourceStageId": "stage:locked:2026-02-03T20:02:08.000Z",
+          "sourceVersions": [
+            "hakimi.local-outlook-judgment/0.10.0",
+            "hakimi.outlook-model/0.8.0"
+          ],
+          "originalHeadline": "合成阶段：有压力",
+          "originalSummary": "合成主轴原文：caution",
+          "conditions": [
+            "现有要求仍超过可用支持；支持未补齐前，不能将阻力当作已经解除。"
+          ]
+        },
+        {
+          "target": {
+            "year": 2027,
+            "branchId": "locked",
+            "startInstant": "2027-02-04T01:46:18.000Z",
+            "endExclusiveInstant": "2028-02-04T07:31:13.000Z"
+          },
+          "caption": "有机会但有条件",
+          "primaryAxis": "pattern",
+          "sourceStageId": "stage:locked:2027-02-04T01:46:18.000Z",
+          "sourceVersions": [
+            "hakimi.local-outlook-judgment/0.10.0",
+            "hakimi.outlook-model/0.8.0"
+          ],
+          "originalHeadline": "合成阶段：条件性",
+          "originalSummary": "合成主轴原文：opportunity",
+          "conditions": [
+            "需确认原有支持仍可使用。"
+          ]
+        },
+        {
+          "target": {
+            "year": 2028,
+            "branchId": "locked",
+            "startInstant": "2028-12-20T20:58:00.000Z",
+            "endExclusiveInstant": "2029-02-03T13:20:47.000Z"
+          },
+          "caption": "有机会但有条件",
+          "primaryAxis": "pattern",
+          "sourceStageId": "stage:locked:2028-12-20T20:58:00.000Z",
+          "sourceVersions": [
+            "hakimi.local-outlook-judgment/0.10.0",
+            "hakimi.outlook-model/0.8.0"
+          ],
+          "originalHeadline": "合成阶段：条件性",
+          "originalSummary": "合成主轴原文：opportunity",
+          "conditions": [
+            "需确认原有支持仍可使用。"
+          ]
+        }
+      ],
+      "nextTurningPoint": {
+        "atInstant": "2027-02-04T01:46:18.000Z",
+        "year": 2027,
+        "originalSummary": "由“有压力”转为“条件性”。前段依据：pattern合成原文：obstructs后段依据：pattern合成原文：assists"
+      },
+      "domainNotes": []
+    },
+    {
+      "id": "opportunity_then_pressure",
+      "scenario": "先顺后紧",
+      "headline": "前段有推进机会，随后阻力增加。",
+      "explanations": [
+        "下一处变化在2027年；可进入对应年份查看变化前后的依据。"
+      ],
+      "explanationCount": 1,
+      "keyCondition": "现有支持仍需保持；新增要求超出可用时间时，这条路线需要重新核对。",
+      "keyConditionPlain": null,
+      "sourceBinding": {
+        "caseId": "22222222-2222-4222-8222-222222222222",
+        "revisionId": "11111111-1111-4111-8111-111111111111",
+        "chartResultHash": "6ce71bd819a47c532b66c2dc3abab5ea1fdc82ad376e4e6d113277ea2a34b720",
+        "includeHour": true,
+        "ruleProfileDigest": "de6ff2661989f6557435c02ad84a5d3f33414d845663601f783a130cc9fdb727"
+      },
+      "sourceVersions": [
+        "hakimi.main-route-reading/0.1.0",
+        "hakimi.local-reading-timeline/0.3.0",
+        "hakimi.local-annual-outlook/0.9.0",
+        "hakimi.local-outlook-judgment/0.10.0",
+        "hakimi.outlook-model/0.8.0"
+      ],
+      "range": {
+        "mode": "three_years",
+        "startYear": 2026,
+        "endYear": 2028,
+        "requestedStartYear": 2026,
+        "requestedEndYear": 2028,
+        "label": "2026—2028年",
+        "coverageNote": null
+      },
+      "status": "ready",
+      "assumption": null,
+      "periods": [
+        {
+          "target": {
+            "year": 2026,
+            "branchId": "locked",
+            "startInstant": "2026-02-03T20:02:08.000Z",
+            "endExclusiveInstant": "2027-02-04T01:46:18.000Z"
+          },
+          "caption": "较顺",
+          "primaryAxis": "pattern",
+          "sourceStageId": "stage:locked:2026-02-03T20:02:08.000Z",
+          "sourceVersions": [
+            "hakimi.local-outlook-judgment/0.10.0",
+            "hakimi.outlook-model/0.8.0"
+          ],
+          "originalHeadline": "合成阶段：较顺",
+          "originalSummary": "合成主轴原文：favorable",
+          "conditions": [
+            "现有支持仍需保持；新增要求超出可用时间时，这条路线需要重新核对。"
+          ]
+        },
+        {
+          "target": {
+            "year": 2027,
+            "branchId": "locked",
+            "startInstant": "2027-02-04T01:46:18.000Z",
+            "endExclusiveInstant": "2028-02-04T07:31:13.000Z"
+          },
+          "caption": "较费力",
+          "primaryAxis": "pattern",
+          "sourceStageId": "stage:locked:2027-02-04T01:46:18.000Z",
+          "sourceVersions": [
+            "hakimi.local-outlook-judgment/0.10.0",
+            "hakimi.outlook-model/0.8.0"
+          ],
+          "originalHeadline": "合成阶段：有压力",
+          "originalSummary": "合成主轴原文：caution",
+          "conditions": [
+            "现有要求仍超过可用支持；支持未补齐前，不能将阻力当作已经解除。"
+          ]
+        },
+        {
+          "target": {
+            "year": 2028,
+            "branchId": "locked",
+            "startInstant": "2028-12-20T20:58:00.000Z",
+            "endExclusiveInstant": "2029-02-03T13:20:47.000Z"
+          },
+          "caption": "较费力",
+          "primaryAxis": "pattern",
+          "sourceStageId": "stage:locked:2028-12-20T20:58:00.000Z",
+          "sourceVersions": [
+            "hakimi.local-outlook-judgment/0.10.0",
+            "hakimi.outlook-model/0.8.0"
+          ],
+          "originalHeadline": "合成阶段：有压力",
+          "originalSummary": "合成主轴原文：caution",
+          "conditions": [
+            "现有要求仍超过可用支持；支持未补齐前，不能将阻力当作已经解除。"
+          ]
+        }
+      ],
+      "nextTurningPoint": {
+        "atInstant": "2027-02-04T01:46:18.000Z",
+        "year": 2027,
+        "originalSummary": "由“较顺”转为“有压力”。前段依据：pattern合成原文：assists后段依据：pattern合成原文：obstructs"
+      },
+      "domainNotes": []
+    },
+    {
+      "id": "domain_difference",
+      "scenario": "领域分化",
+      "headline": "有可推进的机会，能否落实仍取决于条件。",
+      "explanations": [
+        "2026年首段，事业支持较多，收入阻力较多。",
+        "所示阶段只整理已计算的原判断；当前范围没有另外确认的转折。"
+      ],
+      "explanationCount": 2,
+      "keyCondition": "需确认原有支持仍可使用。",
+      "keyConditionPlain": null,
+      "sourceBinding": {
+        "caseId": "22222222-2222-4222-8222-222222222222",
+        "revisionId": "11111111-1111-4111-8111-111111111111",
+        "chartResultHash": "6ce71bd819a47c532b66c2dc3abab5ea1fdc82ad376e4e6d113277ea2a34b720",
+        "includeHour": true,
+        "ruleProfileDigest": "de6ff2661989f6557435c02ad84a5d3f33414d845663601f783a130cc9fdb727"
+      },
+      "sourceVersions": [
+        "hakimi.main-route-reading/0.1.0",
+        "hakimi.local-reading-timeline/0.3.0",
+        "hakimi.local-annual-outlook/0.9.0",
+        "hakimi.local-outlook-judgment/0.10.0",
+        "hakimi.outlook-model/0.8.0"
+      ],
+      "range": {
+        "mode": "three_years",
+        "startYear": 2026,
+        "endYear": 2028,
+        "requestedStartYear": 2026,
+        "requestedEndYear": 2028,
+        "label": "2026—2028年",
+        "coverageNote": null
+      },
+      "status": "ready",
+      "assumption": null,
+      "periods": [
+        {
+          "target": {
+            "year": 2026,
+            "branchId": "locked",
+            "startInstant": "2026-02-03T20:02:08.000Z",
+            "endExclusiveInstant": "2027-02-04T01:46:18.000Z"
+          },
+          "caption": "有机会但有条件",
+          "primaryAxis": "pattern",
+          "sourceStageId": "stage:locked:2026-02-03T20:02:08.000Z",
+          "sourceVersions": [
+            "hakimi.local-outlook-judgment/0.10.0",
+            "hakimi.outlook-model/0.8.0"
+          ],
+          "originalHeadline": "合成阶段：条件性",
+          "originalSummary": "合成主轴原文：opportunity",
+          "conditions": [
+            "需确认原有支持仍可使用。"
+          ]
+        },
+        {
+          "target": {
+            "year": 2028,
+            "branchId": "locked",
+            "startInstant": "2028-12-20T20:58:00.000Z",
+            "endExclusiveInstant": "2029-02-03T13:20:47.000Z"
+          },
+          "caption": "有机会但有条件",
+          "primaryAxis": "pattern",
+          "sourceStageId": "stage:locked:2028-12-20T20:58:00.000Z",
+          "sourceVersions": [
+            "hakimi.local-outlook-judgment/0.10.0",
+            "hakimi.outlook-model/0.8.0"
+          ],
+          "originalHeadline": "合成阶段：条件性",
+          "originalSummary": "合成主轴原文：opportunity",
+          "conditions": [
+            "需确认原有支持仍可使用。"
+          ]
+        }
+      ],
+      "nextTurningPoint": null,
+      "domainNotes": [
+        {
+          "conclusionId": "11111111-1111-4111-8111-111111111111/synthetic:career",
+          "conclusionIds": [
+            "11111111-1111-4111-8111-111111111111/synthetic:career"
+          ],
+          "domain": "career",
+          "domainLabel": "事业",
+          "direction": "favorable",
+          "directionLabel": "支持较多",
+          "text": "事业已有推进支持，但仍需确认完成条件。",
+          "target": {
+            "year": 2026,
+            "branchId": "locked",
+            "startInstant": "2026-02-03T20:02:08.000Z",
+            "endExclusiveInstant": "2027-02-04T01:46:18.000Z"
+          },
+          "sourceSubjects": [
+            "synthetic:career:original"
+          ],
+          "sourceVersions": [
+            "hakimi.local-outlook-judgment/0.10.0",
+            "hakimi.outlook-model/0.8.0"
+          ],
+          "conditions": [
+            "career的原条件"
+          ]
+        },
+        {
+          "conclusionId": "11111111-1111-4111-8111-111111111111/synthetic:wealth",
+          "conclusionIds": [
+            "11111111-1111-4111-8111-111111111111/synthetic:wealth"
+          ],
+          "domain": "wealth",
+          "domainLabel": "收入",
+          "direction": "pressured",
+          "directionLabel": "阻力较多",
+          "text": "收入投入仍受牵制，不能因为事业推进就当作同步改善。",
+          "target": {
+            "year": 2026,
+            "branchId": "locked",
+            "startInstant": "2026-02-03T20:02:08.000Z",
+            "endExclusiveInstant": "2027-02-04T01:46:18.000Z"
+          },
+          "sourceSubjects": [
+            "synthetic:wealth:original"
+          ],
+          "sourceVersions": [
+            "hakimi.local-outlook-judgment/0.10.0",
+            "hakimi.outlook-model/0.8.0"
+          ],
+          "conditions": [
+            "wealth的原条件"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "input_disagreement",
+      "scenario": "资料分歧",
+      "headline": "从2026年起，不同资料假设的主判断出现分歧。",
+      "explanations": [
+        "出生性别未填写；当前规则需要结合出生年的天干阴阳与性别确定大运顺序。顺行和逆行是两种平行假设，不能拼成先后走势。"
+      ],
+      "explanationCount": 1,
+      "keyCondition": "出生性别未填写；当前规则需要结合出生年的天干阴阳与性别确定大运顺序。",
+      "keyConditionPlain": null,
+      "sourceBinding": {
+        "caseId": "22222222-2222-4222-8222-222222222222",
+        "revisionId": "11111111-1111-4111-8111-111111111111",
+        "chartResultHash": "40c871d9f509c1ffd7fc8db8648902f34c052814ac1d0e07dc58e1938814dd4f",
+        "includeHour": true,
+        "ruleProfileDigest": "de6ff2661989f6557435c02ad84a5d3f33414d845663601f783a130cc9fdb727"
+      },
+      "sourceVersions": [
+        "hakimi.main-route-reading/0.1.0",
+        "hakimi.local-reading-timeline/0.3.0",
+        "hakimi.local-annual-outlook/0.9.0",
+        "hakimi.local-outlook-judgment/0.10.0",
+        "hakimi.outlook-model/0.8.0"
+      ],
+      "range": {
+        "mode": "three_years",
+        "startYear": 2026,
+        "endYear": 2028,
+        "requestedStartYear": 2026,
+        "requestedEndYear": 2028,
+        "label": "2026—2028年",
+        "coverageNote": null
+      },
+      "status": "choose_branch",
+      "assumption": null,
+      "periods": [],
+      "nextTurningPoint": null,
+      "domainNotes": []
+    }
+  ]
+}

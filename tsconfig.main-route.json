@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [],
+  "files": [
+    "apps/web/src/lib/main-route-reading.ts",
+    "apps/web/src/lib/candidate-main-route.ts",
+    "apps/web/src/components/candidate-main-route-panel.tsx",
+    "apps/web/src/pages/candidate-set-page.tsx",
+    "apps/web/src/lib/use-dashboard-reading-context.ts",
+    "apps/web/src/lib/reading-navigation-context.ts",
+    "apps/web/src/components/reading-main-route-card.tsx",
+    "apps/web/src/components/reading-explanation-workbench.tsx",
+    "apps/web/src/components/local-reading-container.tsx",
+    "apps/web/src/pages/dashboard-page.tsx"
+  ]
+}

@@ -5,19 +5,21 @@ import { AppLink } from "../lib/router";
 import "./reading-scoped-save.css";
 
 export function ReadingScopedSave({ caseId, scope, unavailable, confirmation, confirmationStale, feedback, notice,
-  onPrepare, onConfirm, onCancel, canCancel }: {
+  onPrepare, onConfirm, onCancel, onRetryRefresh, canCancel }: {
   caseId: string; scope: ScopedReadingScope | null; unavailable: string;
   confirmation: ScopedReadingScope | null; confirmationStale: boolean;
   feedback: ReadingSaveFeedback; notice: string;
   onPrepare: () => void; onConfirm: () => void; onCancel: () => void; canCancel: boolean;
+  onRetryRefresh?: () => void;
 }) {
   const heading = useId();
   const prepareButton = useRef<HTMLButtonElement>(null);
   const busy = feedback.status === "working";
   const unknown = feedback.status === "unconfirmed";
+  const refreshing = feedback.status === "saved" && feedback.refreshStatus === "pending";
   return <div className="reading-scoped-save">
     <button ref={prepareButton} type="button" className="reading-button reading-button--primary"
-      disabled={!scope || !!unavailable || busy || unknown} onClick={onPrepare}>
+      disabled={!scope || !!unavailable || busy || unknown || refreshing} onClick={onPrepare}>
       {busy ? "正在保存所选范围" : unknown ? "保存结果待核对" : "保存当前阅读范围"}
     </button>
     <p>{unavailable || (scope ? `本次可保存：${scope.title}。保存前会再确认范围。` : "请选择一个专题和明确的时间范围后保存。")}</p>
@@ -39,8 +41,10 @@ export function ReadingScopedSave({ caseId, scope, unavailable, confirmation, co
       ? "正在读回核对这份报告。" : "正在整理所选范围与保存时的文字。"}无需重复点击。</p> : null}
     {feedback.status === "not_saved" ? <p role="alert">本次没有保存。{feedback.message}</p> : null}
     {unknown ? <p role="alert">{feedback.message}<AppLink href={`/reports?case=${encodeURIComponent(caseId)}`}>核对已有报告</AppLink></p> : null}
-    {feedback.status === "saved" ? <p role="status">范围报告已保存并核对。{feedback.refreshIssue ? "本页刷新尚未完成，保存事实已确认。" : ""}
-      <AppLink href={`/reports?case=${encodeURIComponent(caseId)}&report=${encodeURIComponent(feedback.reportId)}`}>打开这份范围报告</AppLink></p> : null}
+    {feedback.status === "saved" ? <p role="status">范围报告已保存并核对。{refreshing ? "正在更新本页，已保存的报告现在就能打开。" : ""}
+      {feedback.refreshStatus === "failed" || feedback.refreshIssue ? "本页更新尚未完成，报告仍已保存。" : ""}
+      <AppLink href={`/reports?case=${encodeURIComponent(caseId)}&report=${encodeURIComponent(feedback.reportId)}`}>打开这份范围报告</AppLink>
+      {feedback.refreshStatus === "failed" && onRetryRefresh ? <button type="button" className="reading-text-button" onClick={onRetryRefresh}>只重试本页更新</button> : null}</p> : null}
     {notice ? <p role="status">{notice}</p> : null}
   </div>;
 }

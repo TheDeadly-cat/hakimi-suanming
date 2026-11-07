@@ -15,6 +15,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { AppLink } from "../lib/router";
 import { useResearchSubjectPage } from "../lib/use-cases";
+import { useDashboardReadingContext } from "../lib/use-dashboard-reading-context";
 import { RECENT_SAVED_VIEW_INDEX_LIMIT, useRecentSavedViews } from "../lib/use-recent-saved-views";
 import { formatDateTime } from "../lib/format";
 import { safeVisibleText } from "../lib/visible-text";
@@ -28,7 +29,7 @@ import {
   presentBaziSavedView
 } from "../lib/research-workspace-presentation";
 import { PageHeading } from "../components/page-heading";
-import { StatusPill } from "../components/status-pill";
+import { DashboardMainRoute } from "../components/dashboard-main-route";
 import "./dashboard-page.css";
 
 const DASHBOARD_RECENT_SUBJECT_LIMIT = 4;
@@ -133,17 +134,6 @@ function dashboardSavedViewName(value: unknown): string {
   return safeVisibleText(value, "未命名保存视图", 120);
 }
 
-function dashboardTagsCaption(values: readonly string[]): string {
-  if (!values.length) return "尚未添加标签";
-  const visibleTags = values
-    .map((value) => safeVisibleText(value, "", 80))
-    .filter(Boolean);
-  if (!visibleTags.length) return "标签内容不可显示";
-  const displayedTags = visibleTags.slice(0, 12);
-  const remaining = visibleTags.length - displayedTags.length;
-  return `${displayedTags.join(" · ")}${remaining ? ` · 另 ${remaining} 项` : ""}`;
-}
-
 function shortDashboardReference(value: string): string {
   const visible = safeVisibleText(value, "不可显示", 240);
   return visible.length > 24 ? `${visible.slice(0, 12)}…${visible.slice(-8)}` : visible;
@@ -184,6 +174,7 @@ function dashboardBackupMarkerIssueDetail(marker: FullBackupExportMarkerInspecti
 
 export function DashboardPage() {
   const { subjects, total, loading, error, refresh: refreshSubjects } = useResearchSubjectPage(DASHBOARD_SUBJECT_PAGE_QUERY);
+  const { context: readingContext, refresh: refreshReadingContext } = useDashboardReadingContext();
   const {
     savedViews,
     loading: savedViewsLoading,
@@ -285,7 +276,6 @@ export function DashboardPage() {
   );
   const visibleSavedViews = orderedSavedViews.slice(0, DASHBOARD_RECENT_SAVED_VIEW_DISPLAY_LIMIT);
   const latest = subjectError ? undefined : orderedSubjects[0];
-  const latestPresentation = latest ? presentBaziResearchSubject(latest) : null;
   const [backupMarker, setBackupMarker] = useState<FullBackupExportMarkerInspection>(readDashboardBackupMarker);
   const lastFullBackupExportedAt = backupMarker.exportedAt;
   const backupMarkerUnavailable = backupMarker.status === "storage_unavailable"
@@ -333,6 +323,7 @@ export function DashboardPage() {
   const refreshDashboardIndexes = () => {
     void refreshSubjects();
     void refreshSavedViews();
+    void refreshReadingContext();
   };
 
   const recordsPulse = loading ? "读取中" : subjectError ? "不可用" : total;
@@ -421,15 +412,24 @@ export function DashboardPage() {
             icon: HardDriveDownload,
             tone: "attention"
           }
-        : latest && latestPresentation
+        : readingContext.status === "ready"
           ? {
-              href: latestPresentation.href,
+              href: readingContext.href,
               code: "CONTINUE",
-              title: `继续「${dashboardRecordAlias(latest.alias)}」`,
-              detail: `${latestPresentation.detail} · 继续阅读判断、年度变化与之前的反馈。`,
-              icon: latestPresentation.kind === "candidate_set" ? Layers3 : Database,
+              title: `继续「${dashboardRecordAlias(readingContext.caseRecord.alias)}」`,
+              detail: "继续上次查看的这份资料，人物和资料版本已核对。",
+              icon: Database,
               tone: "continue"
             }
+          : total > 0
+            ? {
+                href: "/reports",
+                code: "CHOOSE",
+                title: "选择要查看的人",
+                detail: "从档案选择一人后开始阅读。",
+                icon: FileSearch,
+                tone: "quiet"
+              }
           : {
               href: "/new?demo=1",
               code: "START",
@@ -440,6 +440,78 @@ export function DashboardPage() {
             };
   const DashboardNextActionIcon = dashboardNextAction.icon;
 
+  const currentReadingPanel = <section className="dashboard-reading-context" aria-labelledby="dashboard-reading-person-title" data-reading-context-state={readingContext.status}>
+        {readingContext.status === "ready" ? <>
+          <h1 className="sr-only" id="dashboard-reading-person-title">{dashboardRecordAlias(readingContext.caseRecord.alias)}</h1>
+          {readingContext.revision.id !== readingContext.caseRecord.latestRevisionId
+            ? <p className="dashboard-reading-history-note">这是上次查看的旧资料，不会自动切到新资料。</p> : null}
+          <DashboardMainRoute caseRecord={readingContext.caseRecord} revision={readingContext.revision} href={readingContext.href} />
+          <div className="dashboard-reading-context__actions">
+            <AppLink href={readingContext.href} className="secondary-action">继续阅读这份解读 <ArrowRight aria-hidden="true" /></AppLink>
+            <AppLink href="/reports" className="text-link">换一个人</AppLink>
+          </div>
+        </> : <>
+          <div>
+            <p className="eyebrow">当前查看的人</p>
+            <h1 id="dashboard-reading-person-title">{readingContext.status === "checking" ? "正在核对上次阅读" : "先选要查看的人"}</h1>
+            <p role="status">{readingContext.status === "checking" ? "核对完成后可继续上次的解读。"
+              : readingContext.status === "unavailable" ? "上次阅读的资料已不可用或暂时无法核对，请重新选择。"
+                : "还没有选定阅读人物。打开档案，选择你想了解的人。"}</p>
+          </div>
+          {readingContext.status !== "checking" ? <div className="dashboard-reading-context__actions">
+            <AppLink href="/reports" className="primary-action">选择要查看的人 <ArrowRight aria-hidden="true" /></AppLink>
+          </div> : null}
+        </>}
+      </section>;
+
+  const availabilityPanel = loading ? (
+        <div className="dashboard-skeleton" role="status" aria-label="正在读取本地案例">
+          <span />
+          <span />
+          <span />
+        </div>
+      ) : subjectError ? (
+        <section className="dashboard-library-unavailable" aria-labelledby="dashboard-library-unavailable-title">
+          <div className="empty-mark" aria-hidden="true"><Database /></div>
+          <div>
+            <p className="eyebrow">Case library unavailable</p>
+            <h1 id="dashboard-library-unavailable-title">没有把读取失败解释成空库</h1>
+            <p>首页未取得可靠的案例数量，因此不会建议新建记录或显示“暂无资料”。现有浏览器数据没有被清空、迁移或近似恢复。</p>
+            <div className="dashboard-library-error-detail" role="alert">
+              <strong>案例索引诊断</strong>
+              <p>{visibleSubjectError}</p>
+            </div>
+            <div className="button-row">
+              <button
+                type="button"
+                className="secondary-action dashboard-library-retry"
+                data-retry-scope="subject-and-saved-view-indexes"
+                disabled={loading || savedViewsLoading}
+                aria-busy={loading || savedViewsLoading}
+                onClick={refreshDashboardIndexes}
+              >
+                <RefreshCw aria-hidden="true" />{loading || savedViewsLoading ? "正在读取首页索引" : "重新读取首页索引"}
+              </button>
+              <AppLink href="/settings/data" className="secondary-action">检查数据与备份</AppLink>
+              <AppLink href="/help" className="text-link">查看本地数据说明</AppLink>
+            </div>
+          </div>
+        </section>
+      ) : total === 0 ? (
+        <section className="empty-workspace" aria-labelledby="empty-title">
+          <div className="empty-mark" aria-hidden="true"><Layers3 /></div>
+          <div>
+            <p className="eyebrow">欢迎使用免费初解试用版</p>
+            <h1 id="empty-title">建立你的第一张命盘</h1>
+            <p>填写出生日期和时间，就能查看命局特点与年度变化。也可以先载入合成示例，熟悉如何读解读、查看依据和留下反馈。</p>
+            <div className="button-row">
+              <AppLink href="/new" className="primary-action">建立我的档案</AppLink>
+              <AppLink href="/new?demo=1" className="secondary-action">载入演示值</AppLink>
+            </div>
+          </div>
+        </section>
+      ) : null;
+
   return (
     <div
       className="page page--dashboard"
@@ -449,10 +521,14 @@ export function DashboardPage() {
       data-backup-marker-status={backupMarker.status}
       data-backup-evidence-state={backupPanelStateClass}
       data-known-updates-after-export={String(knownUpdatesAfterBackup)}
-      data-dashboard-authority="index-summary-only"
+      data-dashboard-authority="source-bound-reading-and-index-summary"
       {...DASHBOARD_SAFETY_ATTRIBUTES}
       aria-busy={loading || savedViewsLoading}
     >
+      {loading || subjectError ? availabilityPanel
+        : readingContext.status === "ready" ? currentReadingPanel
+          : total === 0 && readingContext.status !== "checking" ? availabilityPanel : currentReadingPanel}
+      <details className="dashboard-overview-tools"><summary>工作台概览与资料统计</summary>
       <div className="dashboard-masthead">
         <PageHeading
           eyebrow="哈基米 · 八字"
@@ -466,7 +542,7 @@ export function DashboardPage() {
               <AppLink href="/cases" className="secondary-action">
                 <FileSearch aria-hidden="true" /> 我的命盘
               </AppLink>
-              <AppLink href="/new" className="primary-action">
+              <AppLink href="/new" className="secondary-action">
                 <FilePlus2 aria-hidden="true" /> 新建排盘
               </AppLink>
             </>}
@@ -486,6 +562,7 @@ export function DashboardPage() {
           </div>
         </dl>
       </div>
+      </details>
 
       <details className="dashboard-more-tools"><summary>资料管理与专业工具</summary>
       <div className="dashboard-route-guide">
@@ -533,80 +610,21 @@ export function DashboardPage() {
           <ArrowRight className="dashboard-route-card__arrow" aria-hidden="true" />
         </AppLink>
       </nav>
+          <section className="dashboard-panel dashboard-panel--actions" aria-labelledby="quick-action-title">
+            <div className="dashboard-panel-heading">
+              <div><p className="eyebrow">Local workflow</p><h2 id="quick-action-title">本机资料入口</h2></div>
+            </div>
+            <nav className="dashboard-quick-list" aria-label="本机资料操作">
+              <AppLink href="/cases?import=csv" className="dashboard-quick-row"><FileUp aria-hidden="true" /><span><strong>CSV 批量导入</strong><small>先映射、预检，再逐行写入</small></span><ArrowRight aria-hidden="true" /></AppLink>
+              <AppLink href="/settings/data" className="dashboard-quick-row"><HardDriveDownload aria-hidden="true" /><span><strong>完整备份与恢复</strong><small>十六分区、摘要和恢复前安全快照</small></span><ArrowRight aria-hidden="true" /></AppLink>
+            </nav>
+          </section>
       </details>
-
-      {loading ? (
-        <div className="dashboard-skeleton" role="status" aria-label="正在读取本地案例">
-          <span />
-          <span />
-          <span />
-        </div>
-      ) : subjectError ? (
-        <section className="dashboard-library-unavailable" aria-labelledby="dashboard-library-unavailable-title">
-          <div className="empty-mark" aria-hidden="true"><Database /></div>
-          <div>
-            <p className="eyebrow">Case library unavailable</p>
-            <h2 id="dashboard-library-unavailable-title">没有把读取失败解释成空库</h2>
-            <p>首页未取得可靠的案例数量，因此不会建议新建记录或显示“暂无资料”。现有浏览器数据没有被清空、迁移或近似恢复。</p>
-            <div className="dashboard-library-error-detail" role="alert">
-              <strong>案例索引诊断</strong>
-              <p>{visibleSubjectError}</p>
-            </div>
-            <div className="button-row">
-              <button
-                type="button"
-                className="secondary-action dashboard-library-retry"
-                data-retry-scope="subject-and-saved-view-indexes"
-                disabled={loading || savedViewsLoading}
-                aria-busy={loading || savedViewsLoading}
-                onClick={refreshDashboardIndexes}
-              >
-                <RefreshCw aria-hidden="true" />{loading || savedViewsLoading ? "正在读取首页索引" : "重新读取首页索引"}
-              </button>
-              <AppLink href="/settings/data" className="secondary-action">检查数据与备份</AppLink>
-              <AppLink href="/help" className="text-link">查看本地数据说明</AppLink>
-            </div>
-          </div>
-        </section>
-      ) : latest && latestPresentation ? (
-        <section className={`continue-research continue-research--${latestPresentation.kind}`} aria-labelledby="continue-title">
-          <div className="section-label"><span className="spine-dot" />继续阅读</div>
-          <div className="continue-row">
-            <div className="continue-row__copy">
-              <StatusPill tone={latestPresentation.kind === "candidate_set" ? "warning" : "info"}>{safeVisibleText(latestPresentation.status, "记录状态不可显示", 120)}</StatusPill>
-              <h2 id="continue-title">{dashboardRecordAlias(latest.alias)}</h2>
-              <dl className="continue-row__ledger" aria-label="继续研究记录绑定">
-                <div><dt>记录类型</dt><dd>{safeVisibleText(latestPresentation.detail, "记录类型不可显示", 160)}</dd></div>
-                <div><dt>标签</dt><dd>{dashboardTagsCaption(latest.tags)}</dd></div>
-                <div><dt>最近更新</dt><dd><time dateTime={latest.updatedAt}>{formatDateTime(latest.updatedAt)}</time></dd></div>
-                <div><dt>本地引用</dt><dd><code title={safeVisibleText(latest.id, "", 512)}>{shortDashboardReference(latest.id)}</code></dd></div>
-              </dl>
-            </div>
-            <AppLink href={latestPresentation.href} className="secondary-action">
-              {latestPresentation.kind === "candidate_set" ? "打开候选组" : "打开命盘"} <ArrowRight aria-hidden="true" />
-            </AppLink>
-          </div>
-        </section>
-      ) : (
-        <section className="empty-workspace" aria-labelledby="empty-title">
-          <div className="empty-mark" aria-hidden="true"><Layers3 /></div>
-          <div>
-            <p className="eyebrow">欢迎使用免费初解试用版</p>
-            <h2 id="empty-title">建立你的第一张命盘</h2>
-            <p>填写出生日期和时间，就能查看命局特点与年度变化。也可以先载入合成示例，熟悉如何读解读、查看依据和留下反馈。</p>
-            <div className="button-row">
-              <AppLink href="/new" className="primary-action">从空白开始</AppLink>
-              <AppLink href="/new?demo=1" className="secondary-action">载入演示值</AppLink>
-              <AppLink href="/cases?import=csv" className="secondary-action">导入 CSV</AppLink>
-            </div>
-          </div>
-        </section>
-      )}
 
       <div className="dashboard-grid">
         <section className="flat-section dashboard-recent" aria-labelledby="dashboard-recent-title">
           <div className="section-heading-row">
-            <div><p className="eyebrow">最近打开</p><h2 id="dashboard-recent-title">{loading ? "正在读取本地记录" : subjectError ? "案例库不可用" : total ? `${total} 条本地记录` : "等待第一条记录"}</h2></div>
+            <div><p className="eyebrow">最近更新的档案</p><h2 id="dashboard-recent-title">{loading ? "正在读取本地记录" : subjectError ? "案例库不可用" : total ? `${total} 条本地记录` : "等待第一条记录"}</h2></div>
             <AppLink href="/cases" className="text-link">查看案例库 <ArrowRight aria-hidden="true" /></AppLink>
           </div>
           {!loading && !subjectError && total > orderedSubjects.length ? <p className="dashboard-recent-scope">首页按更新时间仅展示最近 {orderedSubjects.length} 条；完整的 {total} 条记录请进入案例库核对。</p> : null}
@@ -699,15 +717,6 @@ export function DashboardPage() {
             <AppLink href="/cases/research" className="text-link">打开专业研究检索 <ArrowRight aria-hidden="true" /></AppLink>
           </section>
 
-          <section className="dashboard-panel dashboard-panel--actions" aria-labelledby="quick-action-title">
-            <div className="dashboard-panel-heading">
-              <div><p className="eyebrow">Local workflow</p><h2 id="quick-action-title">本机资料入口</h2></div>
-            </div>
-            <nav className="dashboard-quick-list" aria-label="本机资料操作">
-              <AppLink href="/cases?import=csv" className="dashboard-quick-row"><FileUp aria-hidden="true" /><span><strong>CSV 批量导入</strong><small>先映射、预检，再逐行写入</small></span><ArrowRight aria-hidden="true" /></AppLink>
-              <AppLink href="/settings/data" className="dashboard-quick-row"><HardDriveDownload aria-hidden="true" /><span><strong>完整备份与恢复</strong><small>十六分区、摘要和恢复前安全快照</small></span><ArrowRight aria-hidden="true" /></AppLink>
-            </nav>
-          </section>
         </aside>
       </div>
     </div>

@@ -12,6 +12,7 @@ import { caseRepository } from "@hakimi/storage";
 import { classifyStoredTimeZoneDatabaseForReplay, RUNTIME_TZDB_VERSION } from "@hakimi/time-core";
 import { BUNDLED_TZDB_ARTIFACT_REGISTRY } from "@hakimi/tzdb-core";
 import { PageHeading } from "../components/page-heading";
+import { CandidateMainRoutePanel } from "../components/candidate-main-route-panel";
 import {
   PreparedFileDeliveryDialog,
   type PreparedFileArtifact
@@ -1100,6 +1101,8 @@ export function CandidateSetPage({ candidateSetId }: CandidateSetPageProps) {
           <a href="#candidate-set-probes" className="secondary-action" onClick={() => { if (candidateDetailsRef.current) candidateDetailsRef.current.open = true; }}>先分别查看候选结果</a>
         </div>
       </aside> : null}
+
+      {!isTrashed ? <CandidateMainRoutePanel record={record} /> : null}
 
       <aside className="candidate-set-export-boundary" aria-label="候选组敏感文件交付边界">
         <Info aria-hidden="true" />

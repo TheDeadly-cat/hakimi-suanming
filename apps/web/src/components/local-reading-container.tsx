@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { AppLink } from "../lib/router";
 import { createReadingSourceCache } from "../lib/local-reading-source-cache";
 import { CONTEXTUAL_READING_VERSION } from "../lib/local-contextual-reading";
@@ -46,6 +46,7 @@ import { buildLocalReadingFeedback, LOCAL_READING_FEEDBACK_TAG, LOCAL_READING_SN
 import { buildLocalReadingReport, LOCAL_READING_EDITION_VERSION } from "../lib/local-reading-edition";
 import { buildReadingExplanationIndex, type ReadingTimeUncertainty, type ReadingExplanationIndex } from "../lib/reading-explanation-index";
 import { ReadingExplanationWorkbench, type ReadingNavigationSelection } from "./reading-explanation-workbench";
+import { readReadingNavigationYearSeed } from "../lib/reading-navigation-context";
 import { buildScopedReadingReport, describeScopedReadingScope, encodeScopedReadingReport, SCOPED_READING_REPORT_TAG, type ScopedReadingScope } from "../lib/scoped-reading-report";
 import { ReadingScopedSave } from "./reading-scoped-save";
 import { ReadingCaseReviewPanel } from "./reading-case-review-panel";
@@ -71,6 +72,17 @@ import { acquireResearchJournalMutation, getResearchJournalMutationSnapshot, sub
 import mountainsUrl from "../assets/reading-mountains-v1.png";
 import "./local-reading-container.css";
 
+export interface MainRoutePreviewInput {
+  revision: RevisionRecord;
+  index: ReadingExplanationIndex | null;
+  annual: LocalAnnualOutlook | null;
+  timeline: LocalReadingTimeline | null;
+  includeHour: boolean;
+  loading: boolean;
+  error: string | null;
+  onRequestYear: (year: number) => void;
+}
+
 interface Props {
   revision: RevisionRecord;
   caseName: string;
@@ -79,6 +91,7 @@ interface Props {
   onOpenDetails: () => void;
   onOpenTransit: () => void;
   onOpenRecords: () => void;
+  renderMainRoutePreview?: (input: MainRoutePreviewInput) => ReactNode;
 }
 
 interface CompleteSaveAttempt {
@@ -127,6 +140,8 @@ function LocalReadingContent(props: Props) {
   const mutation = useSyncExternalStore(subscribeResearchJournalMutation, getResearchJournalMutationSnapshot, getResearchJournalMutationSnapshot);
   const saveTimingSequence = useRef(0);
   const saveTiming = useRef<CompleteSaveAttempt | null>(null);
+  const pendingSaveRefresh = useRef<CompleteSaveAttempt | null>(null);
+  const verifiedSaves = useRef<Partial<Record<CompleteSaveAttempt["kind"], CompleteSaveAttempt>>>({});
   const observeSaveRender = useCallback(<T,>(work: ReadingSaveOverlapWork, task: () => T): T => {
     const pending = saveTiming.current;
     return pending ? pending.timing.measureOverlappingRender(work, task) : task();
@@ -135,15 +150,21 @@ function LocalReadingContent(props: Props) {
     const pending = saveTiming.current;
     if (!pending) return;
     pending.timing.finish(status);
-    if (pending.verified && pending.record && active.current) {
-      (pending.kind === "scoped" ? setScopedFeedback : setSaveFeedback)({ status: "saved", reportId: pending.record.id, refreshIssue: status !== "succeeded" });
-    }
     if (saveDiagnosticsEnabled) {
       setSaveTimingSnapshot(pending.timing.snapshot());
       publishReadingSaveTiming(pending.timing);
     }
     saveTiming.current = null;
   }, [saveDiagnosticsEnabled]);
+  const finishSaveRefresh = useCallback((status: "succeeded" | "failed") => {
+    const pending = pendingSaveRefresh.current;
+    if (!pending?.verified || !pending.record) return;
+    if (active.current) (pending.kind === "scoped" ? setScopedFeedback : setSaveFeedback)(previous =>
+      previous.status === "saved" && previous.reportId === pending.record!.id
+        ? { ...previous, refreshStatus: status } : previous);
+    pendingSaveRefresh.current = null;
+    if (saveTiming.current === pending) finishSaveTiming(status);
+  }, [finishSaveTiming]);
   useEffect(() => { active.current = true; return () => { active.current = false; finishSaveTiming("cancelled"); }; }, [finishSaveTiming]);
   const assessmentResult = useMemo(() => {
     try { return { value: buildBaziPreliminaryAssessment(revision), error: null }; }
@@ -162,12 +183,13 @@ function LocalReadingContent(props: Props) {
   const comprehensive = comprehensiveResult.value;
   const [referenceInstant] = useState(() => new Date().toISOString());
   const currentYear = new Date(referenceInstant).getFullYear();
-  const [queryYear, setQueryYear] = useState(currentYear);
+  const [initialReadingYear] = useState(() => readReadingNavigationYearSeed(revision) ?? currentYear);
+  const [queryYear, setQueryYear] = useState(initialReadingYear);
   const [selectedDecadeId, setSelectedDecadeId] = useState("");
   const [annualWindow, setAnnualWindow] = useState<
     { kind: "rolling"; startYear: number; endYear: number; sequence: number }
     | { kind: "stage"; decadeId: string; sequence: number }
-  >({ kind: "rolling", startYear: Math.min(currentYear, 2090), endYear: Math.min(currentYear, 2090) + 9, sequence: 0 });
+  >({ kind: "rolling", startYear: Math.min(initialReadingYear, 2091), endYear: Math.min(initialReadingYear, 2091) + 9, sequence: 0 });
   const [life, setLife] = useState<LocalLifeOutlook | null>(null);
   const [monthlyValue, setMonthly] = useState<LocalMonthlyOutlook | null>(null);
   const [lifeLoading, setLifeLoading] = useState(true);
@@ -481,6 +503,7 @@ function LocalReadingContent(props: Props) {
   const readVersion = useRef(0);
   const refreshRecords = useCallback(async (saved?: CompleteSaveAttempt) => {
     const version = ++readVersion.current;
+    let published = false;
     saved?.timing.start("post_save_validation");
     setRecordsLoading(true);
     try {
@@ -495,22 +518,48 @@ function LocalReadingContent(props: Props) {
           && stored.tags.includes(saved.tag) && JSON.stringify(stored.tags) === JSON.stringify(saved.record.tags);
         saved.verified = verified;
         saved.timing.end(verified ? "succeeded" : "failed");
-        if (verified && active.current && version === readVersion.current) saved.timing.start("page_refresh");
+        if (verified && active.current) {
+          saved.timing.start("page_refresh");
+          verifiedSaves.current[saved.kind] = saved;
+          pendingSaveRefresh.current = saved;
+          // The durable write and exact readback are the save boundary. Publish
+          // its link urgently; derived page work is a separate, retryable phase.
+          (saved.kind === "scoped" ? setScopedFeedback : setSaveFeedback)({ status: "saved", reportId: saved.record!.id, refreshStatus: "pending" });
+        }
       }
       if (!active.current || version !== readVersion.current) {
-        if (saved && saveTiming.current === saved) finishSaveTiming("cancelled");
+        if (saved && saveTiming.current === saved) {
+          if (active.current && saved.verified) finishSaveRefresh("failed");
+          else finishSaveTiming("cancelled");
+        }
         return;
       }
-      setCaseRecords(notes);
-      setRecords(notes.filter((note) => note.anchor.kind === "revision" && note.anchor.revisionId === revision.id
-        && (note.tags.includes(LOCAL_READING_SNAPSHOT_TAG) || note.tags.includes(SCOPED_READING_REPORT_TAG) || note.tags.includes(LOCAL_READING_FEEDBACK_TAG) || note.tags.includes(LOCAL_READING_CONTEXT_TAG)
-          || parseReadingContext(note.body).kind !== "legacy")));
-      setRecordsError(null);
+      const publishRecords = () => {
+        setCaseRecords(notes);
+        setRecords(notes.filter((note) => note.anchor.kind === "revision" && note.anchor.revisionId === revision.id
+          && (note.tags.includes(LOCAL_READING_SNAPSHOT_TAG) || note.tags.includes(SCOPED_READING_REPORT_TAG) || note.tags.includes(LOCAL_READING_FEEDBACK_TAG) || note.tags.includes(LOCAL_READING_CONTEXT_TAG)
+            || parseReadingContext(note.body).kind !== "legacy")));
+        setRecordsError(null);
+        setRecordsLoading(false);
+      };
+      if (saved?.verified || pendingSaveRefresh.current) startTransition(publishRecords);
+      else publishRecords();
+      published = true;
     } catch (reason) {
-      if (saved) { saved.verified = false; saved.timing.end("failed"); }
+      if (saved && !saved.verified) saved.timing.end("failed");
+      if (saved?.verified && pendingSaveRefresh.current === saved) finishSaveRefresh("failed");
       if (active.current && version === readVersion.current) setRecordsError(safeVisibleErrorMessage(reason, "本地解读记录暂未读到。"));
-    } finally { if (active.current && version === readVersion.current) setRecordsLoading(false); }
-  }, [revision.caseId, revision.id, finishSaveTiming]);
+    } finally { if (!published && active.current && version === readVersion.current) setRecordsLoading(false); }
+  }, [revision.caseId, revision.id, finishSaveTiming, finishSaveRefresh]);
+  const retrySavedRefresh = (kind: CompleteSaveAttempt["kind"]) => {
+    const saved = verifiedSaves.current[kind];
+    if (!active.current || !saved?.verified || !saved.record || saveTiming.current || pendingSaveRefresh.current) return;
+    pendingSaveRefresh.current = saved;
+    (kind === "scoped" ? setScopedFeedback : setSaveFeedback)({ status: "saved", reportId: saved.record.id, refreshStatus: "pending" });
+    // A failed projection cannot turn a verified save into an unknown write.
+    // This retry only reads records and rebuilds the page, never creates a note.
+    void refreshRecords();
+  };
   useEffect(() => { void refreshRecords(); }, [refreshRecords]);
   useEffect(() => {
     let current = true;
@@ -557,7 +606,7 @@ function LocalReadingContent(props: Props) {
   const selectYear = (year: number) => {
     setQueryYear(year);
     if (annualStartYear === null || annualEndYear === null || year < annualStartYear || year > annualEndYear) {
-      const startYear = Math.min(year, 2090);
+      const startYear = Math.min(year, 2091);
       setAnnualWindow((previous) => ({ kind: "rolling", startYear, endYear: startYear + 9, sequence: previous.sequence + 1 }));
     }
   };
@@ -759,7 +808,7 @@ function LocalReadingContent(props: Props) {
     && currentScopedInput.current.index === request.index && currentScopedInput.current.selection === request.selection
     && currentScopedInput.current.token === request.token;
   const prepareScopedSave = () => {
-    if (props.readOnly || mutation.status !== "idle" || saveTiming.current || !scopeDescription.scope || !explanationResult.value) return;
+    if (props.readOnly || mutation.status !== "idle" || saveTiming.current || pendingSaveRefresh.current || !scopeDescription.scope || !explanationResult.value) return;
     setScopedFeedback({ status: "idle" }); setScopedNotice("");
     setScopedRequest({ index: explanationResult.value, selection: readingSelection, token: reportInputToken, scope: scopeDescription.scope,
       reportId: crypto.randomUUID(), saveAttemptId: crypto.randomUUID(), createdAt: new Date().toISOString(), cancelled: false });
@@ -771,9 +820,9 @@ function LocalReadingContent(props: Props) {
   };
   const saveScopedReport = async () => {
     const request = scopedRequest;
-    if (!request || saveTiming.current || !scopeRequestCurrent(request)) return;
+    if (!request || saveTiming.current || pendingSaveRefresh.current || !scopeRequestCurrent(request)) return;
     const timing = createReadingSaveTiming(++saveTimingSequence.current, undefined, stage => {
-      if (active.current) setScopedFeedback({ status: "working", stage });
+      if (active.current && stage !== "page_refresh") setScopedFeedback({ status: "working", stage });
     });
     const attempt: CompleteSaveAttempt = { kind: "scoped", tag: SCOPED_READING_REPORT_TAG,
       timing, record: null, body: null, writeStarted: false, verified: false, reportPrepared: false };
@@ -840,18 +889,18 @@ function LocalReadingContent(props: Props) {
   // Finish at a React commit containing the refreshed records and their current
   // derived personal/context/index state. This is not a browser-paint timestamp.
   useEffect(() => {
-    const pending = saveTiming.current;
-    if (!pending?.record || !pending.verified || pending.timing.snapshot().stages.find(stage => stage.stage === "page_refresh")?.status !== "running") return;
+    const pending = pendingSaveRefresh.current;
+    if (!pending?.record || !pending.verified || recordsLoading) return;
     if (recordsError || personalError || contextError || contextualResult.error || briefResult.error || explanationResult.error || keyMonthError) {
-      finishSaveTiming("failed"); return;
+      finishSaveRefresh("failed"); return;
     }
     if (recordsLoading || reportLoading || keyMonthLoading || completePreparing || !personalReadingReady || !explanationResult.value) return;
-    if (records.some(record => record.id === pending.record!.id && record.body === pending.record!.body)) finishSaveTiming("succeeded");
+    if (records.some(record => record.id === pending.record!.id && record.body === pending.record!.body)) finishSaveRefresh("succeeded");
   });
   const saveCompleteReport = async () => {
-    if (saveTiming.current) throw new Error("这份报告正在保存并核对，请勿重复保存。");
+    if (saveTiming.current || pendingSaveRefresh.current) throw new Error("这份报告正在保存或更新本页，请勿重复保存。");
     const timing = createReadingSaveTiming(++saveTimingSequence.current, undefined, stage => {
-      if (active.current) setSaveFeedback({ status: "working", stage });
+      if (active.current && stage !== "page_refresh") setSaveFeedback({ status: "working", stage });
     });
     const attempt: CompleteSaveAttempt = { kind: "complete", tag: LOCAL_READING_SNAPSHOT_TAG, timing, record: null, body: null, writeStarted: false, verified: false, reportPrepared: false };
     saveTiming.current = attempt;
@@ -891,6 +940,13 @@ function LocalReadingContent(props: Props) {
 
   if (!assessment) return <section className="reading-unavailable" role="alert"><h1>命局解读暂不可用</h1>
     <p>{assessmentResult.error}</p><button className="secondary-action" onClick={props.onOpenDetails}>查看原始命盘</button></section>;
+  if (props.renderMainRoutePreview) return props.renderMainRoutePreview({
+    revision, index: explanationResult.value, annual, timeline, includeHour: assessment.sourceBinding.includeHour,
+    loading: reportLoading || keyMonthLoading || !explanationResult.value,
+    error: comprehensiveResult.error ?? annualError ?? lifeError ?? monthlyError ?? personalError ?? contextError
+      ?? contextualResult.error ?? storyError ?? timelineResult.error ?? briefResult.error ?? explanationResult.error ?? keyMonthError,
+    onRequestYear: selectYear
+  });
   return <PersonalReadingProvider reading={personalReading} onAdopt={props.readOnly ? undefined : adoptPersonalRevision}>
     <ContextualReadingProvider readings={contextual?.readings ?? []} contextRef={contextual?.contextSource.reference} referenceYear={contextual?.referenceYear} onFeedback={props.readOnly ? undefined : requestFeedback}>
     <div className="local-reading-document" aria-busy={reportLoading || completePreparing} onClickCapture={event => {
@@ -922,6 +978,7 @@ function LocalReadingContent(props: Props) {
     <ChartReadingWorkbench revision={revision} caseName={props.caseName} assessment={assessment}
       comprehensive={comprehensive} synthesis={synthesis} briefReport={briefResult.value} priorities={priorities} annualEvents={annualEvents}
       explanationPanel={displayedExplanation ? <ReadingExplanationWorkbench index={displayedExplanation} revision={revision}
+        mainRouteSource={{ caseName: props.caseName, annual, timeline, includeHour: assessment.sourceBinding.includeHour, canEdit: !props.readOnly }}
         records={caseRecords} onTimeUncertaintyChange={setTimeUncertainty} onRequestYear={selectYear} monthsLoading={keyMonthLoading}
         onSelectionChange={setReadingSelection}
         saveScopeAction={props.readOnly ? undefined : <ReadingScopedSave caseId={revision.caseId} scope={scopeDescription.scope}
@@ -929,6 +986,7 @@ function LocalReadingContent(props: Props) {
           confirmation={scopedRequest?.scope ?? null} confirmationStale={!!scopedRequest && !scopeRequestCurrent(scopedRequest)}
           feedback={mutation.status === "call_unknown" ? { status: "unconfirmed", message: "有一笔写入结果尚未确认，请先核对已有记录。" } : scopedFeedback}
           notice={scopedNotice} onPrepare={prepareScopedSave} onConfirm={() => { void saveScopedReport(); }} onCancel={cancelScopedSave}
+          onRetryRefresh={() => retrySavedRefresh("scoped")}
           canCancel={!saveTiming.current?.writeStarted} />}
         loading={!explanationResult.value || reportLoading} /> : undefined}
       onPrepareCompleteReading={() => { void prepareCompleteReport().catch(reason => setExportError(safeVisibleErrorMessage(reason, "完整年月暂未准备好，已保留当前专题。"))); }}
@@ -941,9 +999,10 @@ function LocalReadingContent(props: Props) {
       onExportReading={() => { void exportCompleteReport("reading"); }}
       onExportArchive={() => { void exportCompleteReport("archive"); }}
       onSaveReading={props.readOnly ? undefined : saveCompleteReport}
-      saveDisabled={scopedFeedback.status === "working" || mutation.status !== "idle"}
+      saveDisabled={scopedFeedback.status === "working" || !!pendingSaveRefresh.current || mutation.status !== "idle"}
       saveFeedback={mutation.status === "call_unknown" ? { status: "unconfirmed", message: "有一笔保存结果尚未确认，已暂停继续写入，请先核对保存记录。" } : saveFeedback}
       onCheckSave={props.onOpenRecords}
+      onRetrySaveRefresh={() => retrySavedRefresh("complete")}
       onAddFeedback={props.readOnly ? undefined : (draft) => {
         if (!draft.subjectId) return saveRecord(buildLocalReadingFeedback(assessment, draft.originalConclusion, draft.actualSituation), LOCAL_READING_FEEDBACK_TAG);
         const choice = buildReadingFeedbackChoices(assessment, annual, feedbackChoices).find((item) => item.id === draft.subjectId);

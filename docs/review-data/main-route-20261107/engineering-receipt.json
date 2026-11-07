@@ -1,0 +1,293 @@
+{
+  "schema": "hakimi.main-route-engineering-receipt/1",
+  "generatedAt": "2026-11-07T16:02:16.733706+00:00",
+  "baseCommit": "eeeba0acc1f68cda5cec5f78b6e8964c9706b38c",
+  "branch": "codex/main-route-20261107",
+  "scope": "guarded targeted engineering only; no final full application build, exact-head CI or human acceptance",
+  "testRuns": [
+    {
+      "artifact": "guarded-suite-final-run1.json",
+      "sha256": "04bbaf8931d2a44598f639cc3271aee73a23beb8d49329949cbd616e93528bf4",
+      "fileCount": 12,
+      "tests": 231,
+      "passed": 231,
+      "failed": 0,
+      "skipped": 0,
+      "files": [
+        {
+          "path": "apps/web/src/components/candidate-main-route-panel.test.tsx",
+          "status": "passed",
+          "tests": 5
+        },
+        {
+          "path": "apps/web/src/components/chart-reading-workbench.test.tsx",
+          "status": "passed",
+          "tests": 15
+        },
+        {
+          "path": "apps/web/src/components/local-reading-container.test.tsx",
+          "status": "passed",
+          "tests": 37
+        },
+        {
+          "path": "apps/web/src/components/local-scoped-reading-save.test.tsx",
+          "status": "passed",
+          "tests": 15
+        },
+        {
+          "path": "apps/web/src/components/reading-explanation-workbench.test.tsx",
+          "status": "passed",
+          "tests": 32
+        },
+        {
+          "path": "apps/web/src/components/reading-main-route-card.test.tsx",
+          "status": "passed",
+          "tests": 7
+        },
+        {
+          "path": "apps/web/src/components/reading-main-route-workbench.test.tsx",
+          "status": "passed",
+          "tests": 11
+        },
+        {
+          "path": "apps/web/src/pages/dashboard-page.test.tsx",
+          "status": "passed",
+          "tests": 24
+        },
+        {
+          "path": "apps/web/src/lib/candidate-main-route.test.ts",
+          "status": "passed",
+          "tests": 17
+        },
+        {
+          "path": "apps/web/src/lib/local-reading-timeline.test.ts",
+          "status": "passed",
+          "tests": 17
+        },
+        {
+          "path": "apps/web/src/lib/main-route-reading.test.ts",
+          "status": "passed",
+          "tests": 33
+        },
+        {
+          "path": "apps/web/src/lib/reading-navigation-context.test.ts",
+          "status": "passed",
+          "tests": 18
+        }
+      ]
+    },
+    {
+      "artifact": "guarded-compatibility-run1.json",
+      "sha256": "b8dc040a6ac8f7b01bb56178339def24d2ff889063cee4dbc545bee1a297b095",
+      "fileCount": 3,
+      "tests": 26,
+      "passed": 26,
+      "failed": 0,
+      "skipped": 0,
+      "files": [
+        {
+          "path": "apps/web/src/components/reading-saved-record.test.tsx",
+          "status": "passed",
+          "tests": 14
+        },
+        {
+          "path": "apps/web/src/components/reading-saved-scope.test.tsx",
+          "status": "passed",
+          "tests": 6
+        },
+        {
+          "path": "apps/web/src/lib/scoped-reading-backup.integration.test.ts",
+          "status": "passed",
+          "tests": 6
+        }
+      ]
+    }
+  ],
+  "totalDistinctFiles": 15,
+  "totalDistinctTests": 257,
+  "typecheck": {
+    "scope": "tsconfig.main-route.json with protected-source preload",
+    "exitCode": 0
+  },
+  "historicalSourceChecks": {
+    "sourceLock": "passed",
+    "runtimeClosure": "passed",
+    "workspaceSources": 10,
+    "guarded": true
+  },
+  "protectedBoundary": {
+    "source": "user full report section 10",
+    "runtimeGuard": "scripts/main-route-protected-source-guard.mjs",
+    "vitestGuard": "apps/web/vitest.main-route.config.ts",
+    "claim": "Named guarded command paths only; not an operating-system access audit",
+    "earlierFullRunDeviationRecorded": true,
+    "furtherFullBuild": "not_run",
+    "ci": "not_run"
+  },
+  "release": {
+    "line": "legacy-v13",
+    "schema": 13,
+    "migrationId": null,
+    "sdkLicenseAccepted": false,
+    "apkBuilt": false,
+    "humanParticipants": 0,
+    "formalAdmission": "not_granted"
+  },
+  "sources": [
+    {
+      "path": "apps/web/src/components/candidate-main-route-panel.css",
+      "rawCheckoutBytes": 2294,
+      "rawCheckoutSha256": "05064b208bdf1b95001408b54422c927ce0f6bec4a3f4760c1f9170a06d400a8"
+    },
+    {
+      "path": "apps/web/src/components/candidate-main-route-panel.test.tsx",
+      "rawCheckoutBytes": 7662,
+      "rawCheckoutSha256": "25285b197ecfa71b00235e2cbcdb8bd8042c33aee0d7b7695736a7605729bfa2"
+    },
+    {
+      "path": "apps/web/src/components/candidate-main-route-panel.tsx",
+      "rawCheckoutBytes": 9603,
+      "rawCheckoutSha256": "15663d47c25721b156e088c121eb9e646e10ab9d6ffc19c0e5d40ddf62767c60"
+    },
+    {
+      "path": "apps/web/src/components/chart-reading-workbench.css",
+      "rawCheckoutBytes": 22847,
+      "rawCheckoutSha256": "24bee8ad44f3789b9cf7d3d93f4619da5bb120da374f9da084bc96434cbb47c9"
+    },
+    {
+      "path": "apps/web/src/components/chart-reading-workbench.test.tsx",
+      "rawCheckoutBytes": 34006,
+      "rawCheckoutSha256": "9c75e988194e00bf86bedb56360a8b9b111c19fc3f253091bb1c7f82e953ef67"
+    },
+    {
+      "path": "apps/web/src/components/chart-reading-workbench.tsx",
+      "rawCheckoutBytes": 49962,
+      "rawCheckoutSha256": "69cd3b08cc6339bdacdd20f0752b380c574b4078003edfcd2c50f4946e25f6a3"
+    },
+    {
+      "path": "apps/web/src/components/dashboard-main-route.tsx",
+      "rawCheckoutBytes": 5697,
+      "rawCheckoutSha256": "d382ebc51e14a1f797bf90c7b3a1ac064664e7904191d91f8cf6f4c914bc0a7d"
+    },
+    {
+      "path": "apps/web/src/components/local-reading-container.css",
+      "rawCheckoutBytes": 2615,
+      "rawCheckoutSha256": "95edced9ee4eaf87e0ed5369b4789f9aaca27d9bc9fa8a9edd28698f4478cabd"
+    },
+    {
+      "path": "apps/web/src/components/local-reading-container.test.tsx",
+      "rawCheckoutBytes": 95754,
+      "rawCheckoutSha256": "a0e146a6d72b3f1e6af0ce23f095692559ee4300e12a84545934f9f250e3f124"
+    },
+    {
+      "path": "apps/web/src/components/local-reading-container.tsx",
+      "rawCheckoutBytes": 94962,
+      "rawCheckoutSha256": "c88315ff7f1cd550ff58e31c865a812bfa893fd33a3848d1bfcc34237ccf8e95"
+    },
+    {
+      "path": "apps/web/src/components/local-scoped-reading-save.test.tsx",
+      "rawCheckoutBytes": 24003,
+      "rawCheckoutSha256": "300fd91ef7f162db4852305649152deef4f03be06ddd460b7329c0259d91a0bc"
+    },
+    {
+      "path": "apps/web/src/components/reading-explanation-workbench.tsx",
+      "rawCheckoutBytes": 36316,
+      "rawCheckoutSha256": "bb4c7884e25b02f714ae66d48a0d136d41c52f8195e168007e6ff9d4b7c9838e"
+    },
+    {
+      "path": "apps/web/src/components/reading-main-route-card.css",
+      "rawCheckoutBytes": 3570,
+      "rawCheckoutSha256": "0e9e511b8fcf61b6c8320b4adcc64fcdc90f23d8cfede5333a1e5f64767dbe2a"
+    },
+    {
+      "path": "apps/web/src/components/reading-main-route-card.test.tsx",
+      "rawCheckoutBytes": 9925,
+      "rawCheckoutSha256": "9c41c51ff4c7a05f0e8656a29c3caf2d3f132e2d2faa2bb5744e307dd5a05b6f"
+    },
+    {
+      "path": "apps/web/src/components/reading-main-route-card.tsx",
+      "rawCheckoutBytes": 7270,
+      "rawCheckoutSha256": "452b52cb67936a75891706e4d8de9e25e8f6375858c88951b9f65550283eef92"
+    },
+    {
+      "path": "apps/web/src/components/reading-main-route-workbench.test.tsx",
+      "rawCheckoutBytes": 18578,
+      "rawCheckoutSha256": "68b8d9cf9c2ae2d55ae5364c036662db397e3dd7b83e413b9b470986d7826f4d"
+    },
+    {
+      "path": "apps/web/src/components/reading-scoped-save.tsx",
+      "rawCheckoutBytes": 3975,
+      "rawCheckoutSha256": "06c3e0d98501ad38aa3c052da2022f625b96c4b1a658d41a76c39d1e8613821c"
+    },
+    {
+      "path": "apps/web/src/lib/candidate-main-route.test.ts",
+      "rawCheckoutBytes": 12252,
+      "rawCheckoutSha256": "51f8d62db2a05230fcd64bc3a6dc835f0720076078c0acd1194e5336c9ab4f59"
+    },
+    {
+      "path": "apps/web/src/lib/candidate-main-route.ts",
+      "rawCheckoutBytes": 17775,
+      "rawCheckoutSha256": "94e9a2ac47984389a902549f8bfd3009aace2979d6265f3ee3bcf7fa35374840"
+    },
+    {
+      "path": "apps/web/src/lib/main-route-reading.test.ts",
+      "rawCheckoutBytes": 30836,
+      "rawCheckoutSha256": "debbcbc3d511d3fcc8f87ad68f69392ac00376ba771140a44f647aac6e1ae3ac"
+    },
+    {
+      "path": "apps/web/src/lib/main-route-reading.ts",
+      "rawCheckoutBytes": 27167,
+      "rawCheckoutSha256": "a20757f645403e118573682aa79c524d804f9dc19f771fb37b3b35e4b67e2797"
+    },
+    {
+      "path": "apps/web/src/lib/reading-navigation-context.test.ts",
+      "rawCheckoutBytes": 9711,
+      "rawCheckoutSha256": "759ccf5402967913b96ca0ee44dab7bcbd259364768a6feeeeb6240627e0f823"
+    },
+    {
+      "path": "apps/web/src/lib/reading-navigation-context.ts",
+      "rawCheckoutBytes": 11561,
+      "rawCheckoutSha256": "958a3545d1a356d8fd2dbf7142f4b88dfbe40b4c6a47d59f955b0424080c83d8"
+    },
+    {
+      "path": "apps/web/src/lib/use-dashboard-reading-context.ts",
+      "rawCheckoutBytes": 4240,
+      "rawCheckoutSha256": "a3b9fef885e49b73dce4a62bd162e6be5d5b4bdbe49bf0fd25ea5f54482f856c"
+    },
+    {
+      "path": "apps/web/src/pages/candidate-set-page.tsx",
+      "rawCheckoutBytes": 79938,
+      "rawCheckoutSha256": "758466c005dba9fc309a95dcc9f32929102379b24df53c555311c667b92df82e"
+    },
+    {
+      "path": "apps/web/src/pages/dashboard-page.css",
+      "rawCheckoutBytes": 34112,
+      "rawCheckoutSha256": "3160088f6414afb92f3175c507d83e0cb0531756776181747e0ee316ffd98457"
+    },
+    {
+      "path": "apps/web/src/pages/dashboard-page.test.tsx",
+      "rawCheckoutBytes": 22437,
+      "rawCheckoutSha256": "1fd81f9419aac653f6e9242c4ba6fa5fc0027b622534c18f20307d5b3a18c138"
+    },
+    {
+      "path": "apps/web/src/pages/dashboard-page.tsx",
+      "rawCheckoutBytes": 37760,
+      "rawCheckoutSha256": "38f0258765988bc059ffa6a4fe225700fe0669aa29b34125f255a8a18ea08e7d"
+    },
+    {
+      "path": "apps/web/vitest.main-route.config.ts",
+      "rawCheckoutBytes": 1880,
+      "rawCheckoutSha256": "f4e459469dae557c5e963fc2fb9b5d434d8e6505eca33c5188c4ef7a1d01eff1"
+    },
+    {
+      "path": "scripts/main-route-protected-source-guard.mjs",
+      "rawCheckoutBytes": 1287,
+      "rawCheckoutSha256": "6c3eb7aa14a312fecf31dd00616a3768aa6550320ff1c0d316088f9b71b6f538"
+    },
+    {
+      "path": "tsconfig.main-route.json",
+      "rawCheckoutBytes": 613,
+      "rawCheckoutSha256": "5d1a68de8757099b65416ca6a76cf6cff2d3c20d532525af6a94d167be076a1a"
+    }
+  ]
+}

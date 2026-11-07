@@ -1,0 +1,20 @@
+{
+  "discoveredIn": "C:/Users/Administrator/Downloads/哈基米八字_主走势复审测试与实施大纲_2026-11-07.md",
+  "section": "十、交给开发执行的任务说明",
+  "restriction": "禁止读取受限源文件，包括通过全仓构建间接读取。",
+  "beforeDiscovery": {
+    "fullTypecheckCommand": "governance failed; program passed",
+    "fullBuildCommand": "governance failed; workspace prebuild and build program passed",
+    "fullTest": "started; no complete test total; canceled on reading stricter instruction",
+    "devOrigin": "http://127.0.0.1:5250"
+  },
+  "afterDiscovery": {
+    "fullTestStopped": true,
+    "devServerStopped": true,
+    "browserClosed": true,
+    "noFurtherFullBuildOrTypecheck": true,
+    "guardedTestConfig": "apps/web/vitest.main-route.config.ts",
+    "guardedInitialResult": "3 files / 43 tests passed"
+  },
+  "evidenceUse": "Earlier full build is a retained process deviation, not authorization or a complete final delivery. Prior browser results describe the earlier working tree only."
+}
