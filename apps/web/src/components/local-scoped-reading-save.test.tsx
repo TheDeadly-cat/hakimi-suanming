@@ -38,6 +38,10 @@ const propsFor = (revision: RevisionRecord) => ({ revision, caseName: "合成范
   onEditBirthData: vi.fn(), onOpenDetails: vi.fn(), onOpenTransit: vi.fn(), onOpenRecords: vi.fn() });
 const scopeButton = () => document.querySelector<HTMLButtonElement>(".reading-scoped-save > button")!;
 async function waitForReady() {
+  // The new default trajectory is a browsing view, not a multi-year snapshot.
+  // Enter an explicitly saveable scope before exercising the save workflow.
+  await waitFor(() => expect(scopeButton() || screen.queryByRole("button", { name: "本命理解" })).toBeTruthy(), { timeout: 30_000 });
+  if (!scopeButton()) fireEvent.click(screen.getByRole("button", { name: "本命理解" }));
   await waitFor(() => expect(scopeButton()?.disabled).toBe(false), { timeout: 30_000 });
   // Initial on-demand month completion can replace the current evidence index.
   // Await that real publication before beginning a stable-input save attempt.
@@ -192,7 +196,9 @@ it("saves only the opened month's exact conclusion through the real detail actio
     expect(records).toEqual([savedRecord]);
     expect(pendingMonths.size).toBeGreaterThan(0);
     expect(saveTimings[0]!.snapshot().stages.find(stage => stage.stage === "page_refresh")?.status).toBe("running");
-    expect(screen.queryByRole("link", { name: "打开这份范围报告" })).toBeNull();
+    const savedLink = within(document.querySelector<HTMLElement>(".reading-scoped-save")!).getByRole("link", { name: "打开这份范围报告" });
+    expect(savedLink.getAttribute("href")).toBe(`/reports?case=${revisionA.caseId}&report=${savedRecord!.id}`);
+    expect(document.querySelector(".reading-scoped-save")?.textContent).toContain("范围报告已保存并核对。正在更新本页");
     expect(build).toHaveBeenCalledTimes(1);
     const request = build.mock.calls[0]![0];
     const original = queryReadingExplanation(request.index, request.query).conclusions;
@@ -225,6 +231,61 @@ it("saves only the opened month's exact conclusion through the real detail actio
       statuses: [...document.querySelectorAll('[role="status"], [role="alert"]')].map(node => node.textContent) }) + "\n");
     throw error;
   } finally { publishMonths.resolve(); }
+}, 60_000);
+it("keeps a verified report accessible after derived refresh fails and retries only the refresh", async () => {
+  render(<LocalReadingContainer {...propsFor(revisionA)} />);
+  await beginConfirmation();
+  let failRefresh = true;
+  beforeMonthPublication = async () => { if (failRefresh) throw new Error("synthetic page-only publication failure"); };
+  confirm();
+  const action = () => within(document.querySelector<HTMLElement>(".reading-scoped-save")!);
+  await waitFor(() => expect(action().getByRole("button", { name: "只重试本页更新" })).toBeTruthy(), { timeout: 30_000 });
+  const notes = await repository.listResearchNotesByCase(revisionA.caseId);
+  expect(notes).toHaveLength(1);
+  expect(action().getByRole("link", { name: "打开这份范围报告" }).getAttribute("href"))
+    .toBe(`/reports?case=${revisionA.caseId}&report=${notes[0]!.id}`);
+  expect(document.querySelector(".reading-scoped-save")?.textContent).toContain("本页更新尚未完成，报告仍已保存");
+  expect(document.querySelector(".reading-scoped-save")?.textContent).not.toContain("保存结果尚未确认");
+  expect(getResearchJournalMutationSnapshot().status).toBe("idle");
+  failRefresh = false;
+  fireEvent.click(action().getByRole("button", { name: "只重试本页更新" }));
+  await waitFor(() => {
+    expect(action().queryByRole("button", { name: "只重试本页更新" })).toBeNull();
+    expect(document.querySelector(".reading-scoped-save")?.textContent).not.toMatch(/正在更新本页|本页更新尚未完成/);
+  }, { timeout: 30_000 });
+  expect(action().getByRole("link", { name: "打开这份范围报告" })).toBeTruthy();
+  expect(researchRepository.createResearchNote).toHaveBeenCalledTimes(1);
+  expect(await repository.listResearchNotesByCase(revisionA.caseId)).toEqual(notes);
+  expectNoFullPreparation();
+}, 60_000);
+
+it("does not publish an old person's verified save after switching people during readback", async () => {
+  const gate = deferred(), entered = deferred();
+  let wrote = false;
+  vi.mocked(researchRepository.createResearchNote).mockImplementation(async input => {
+    const record = await repository.createResearchNote(input); wrote = true; return record;
+  });
+  vi.mocked(researchRepository.listResearchNotesByCase).mockImplementation(async (id, options) => {
+    const notes = await repository.listResearchNotesByCase(id, options);
+    if (wrote && id === revisionA.caseId) { entered.resolve(); await gate.promise; }
+    return notes;
+  });
+  const view = render(<LocalReadingContainer {...propsFor(revisionA)} />);
+  try {
+    await beginConfirmation(); confirm();
+    await act(async () => { await entered.promise; });
+    expect(screen.queryByRole("link", { name: "打开这份范围报告" })).toBeNull();
+    view.rerender(<LocalReadingContainer {...propsFor(revisionB)} />);
+    await act(async () => { gate.resolve(); });
+    await waitForReady();
+    expect(screen.getByTestId("current-revision").textContent).toBe(revisionB.id);
+    expect(screen.queryByRole("link", { name: "打开这份范围报告" })).toBeNull();
+    expect(document.querySelector(".reading-scoped-save")?.textContent).not.toContain("已保存并核对");
+    expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(1);
+    expect(await repository.listResearchNotesByCase(revisionB.caseId)).toHaveLength(0);
+    expect(researchRepository.createResearchNote).toHaveBeenCalledTimes(1);
+    expect(getResearchJournalMutationSnapshot().status).toBe("idle");
+  } finally { gate.resolve(); }
 }, 60_000);
 it.each(["year", "topic", "revision", "cancel"] as const)("does not write when %s changes while real scope generation is pending", async action => {
   const entered = deferred(), gate = deferred(), original = scopedModule.buildScopedReadingReport;

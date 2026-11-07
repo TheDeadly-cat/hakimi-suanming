@@ -1,5 +1,7 @@
 # 手机阅读与 Android 当前状态
 
+**2026-11-07 新一轮主走势工程：** [本轮实现、专项检查与受限源码边界](./main-route-20261107.md)。当前工作分支为 `codex/main-route-20261107`；最终完整包尚未交付。下文保留 10 月 29 日候选的独立身份和历史结果，不将它们套用到本轮新源码。
+
 2026-10-29 更新。当前本机内部试用入口为 **[5249 新候选](http://127.0.0.1:5249/new)**，构建 **`d580936a9fdd`**，报告 0.22.3、白话 0.1.3。双击 `%USERPROFILE%\HakimiBaziWorkbenchCandidates\scoped-reading-20261029-daf5ff0-d580936a9fdd\origin5249\打开本轮试用.cmd` 可重新启动。它依赖本机现有 Node/Vite，不是通用安装包或 Android APK。
 
 本轮源码在 `codex/event-index-candidate-20261011`，通过 [Draft PR #17](https://github.com/TheDeadly-cat/hakimi-suanming/pull/17) 审阅，基础分支仍为 `codex/journal-event-index-20261010`。独立工程工作继续推进；真人记录、SDK 许可和专家证据分别列为未完成项。

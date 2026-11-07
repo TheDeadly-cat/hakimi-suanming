@@ -9,7 +9,12 @@ import { LOCAL_READING_SNAPSHOT_TAG } from "../lib/local-reading-record";
 import { SCOPED_READING_REPORT_TAG } from "../lib/scoped-reading-report";
 import { frozenPlainConditionText, supportsFrozenPlainConditions } from "../lib/plain-reading-condition";
 import { safeVisibleErrorMessage } from "../lib/visible-text";
-import { readReadingNavigation, readingNavigationIdentity, readingTopicSelection, writeReadingNavigation } from "../lib/reading-navigation-context";
+import { readReadingNavigation, readingNavigationIdentity, readingTopicSelection, writeReadingNavigation,
+  readReadingOverviewNavigation, writeReadingOverviewNavigation, type ReadingOverviewDetail } from "../lib/reading-navigation-context";
+import { buildMainRouteReading } from "../lib/main-route-reading";
+import type { LocalAnnualOutlook } from "../lib/local-annual-outlook";
+import type { LocalReadingTimeline } from "../lib/local-reading-timeline";
+import { ReadingMainRouteCard } from "./reading-main-route-card";
 import { ReadingBranchGuide } from "./reading-branch-guide";
 import { ReadingPlainSummaryCard } from "./reading-plain-summary-card";
 import { ReadingMonthPreview } from "./reading-month-preview";
@@ -26,6 +31,7 @@ interface Props {
   onRequestYear?: (year: number) => void; monthsLoading?: boolean; loading?: boolean;
   onSelectionChange?: (selection: ReadingNavigationSelection) => void;
   saveScopeAction?: ReactNode;
+  mainRouteSource?: { caseName: string; annual: LocalAnnualOutlook | null; timeline: LocalReadingTimeline | null; includeHour: boolean; canEdit?: boolean };
 }
 const topics: { id: ReadingExplanationTopic; label: string }[] = [
   { id: "summary", label: "一页摘要" }, { id: "career", label: "事业发展" }, { id: "wealth", label: "收入与开支" },
@@ -42,6 +48,9 @@ export const readingConclusionScopeText = (item: ReadingConclusion) => item.scop
     : `${formatTime(item.scope.startInstant)}起至${formatTime(item.scope.endExclusiveInstant)}前（北京时间）；${item.scope.branchId === "forward" ? "顺行路径" : item.scope.branchId === "backward" ? "逆行路径" : "已确定路径"}`;
 const list = (items: readonly string[], empty: string) => items.length ? <ul>{items.map((text, i) => <li key={i}>{text}</li>)}</ul> : <p>{empty}</p>;
 const logicalId = (id: string) => id.slice(id.indexOf("/") + 1);
+type RouteDetail = ReadingOverviewDetail & { label?: string };
+const restoredRouteDetail = (detail?: ReadingOverviewDetail): RouteDetail | null => detail
+  ? { ...detail, label: detail.kind === "turn" ? "转折前后" : detail.kind === "stage" ? "所选阶段" : undefined } : null;
 
 function Evidence({ index, conclusion }: { index: ReadingExplanationIndex; conclusion: ReadingConclusion }) {
   const [open, setOpen] = useState(false);
@@ -88,16 +97,30 @@ export function ReadingExplanationWorkbench(props: Props) {
   return <ReadingExplanationContent key={identity} {...props} />;
 }
 
-function ReadingExplanationContent({ index, revision, records, onTimeUncertaintyChange, onRequestYear, onSelectionChange, saveScopeAction, monthsLoading, loading = false }: Props) {
+function ReadingExplanationContent({ index, revision, records, onTimeUncertaintyChange, onRequestYear, onSelectionChange, saveScopeAction, mainRouteSource, monthsLoading, loading = false }: Props) {
   const componentId = useId();
   const [query, setQuery] = useState<ReadingExplanationQuery>(() => loading ? { topic: "summary" } : readReadingNavigation(index, revision));
   const [navigationRestored, setNavigationRestored] = useState(!loading);
+  const [overview, setOverview] = useState(() => readReadingOverviewNavigation(index, revision));
+  const [routeDetail, setRouteDetail] = useState<RouteDetail | null>(() => restoredRouteDetail(readReadingOverviewNavigation(index, revision).detail));
+  const routeDetailRef = useRef<HTMLElement>(null);
+  const mainReturn = useRef<{ query: ReadingExplanationQuery; overview: ReturnType<typeof readReadingOverviewNavigation>;
+    detail: RouteDetail | null; scrollY: number; trigger: HTMLElement | null } | null>(null);
+  const restoreMainPosition = useRef(false);
+  useLayoutEffect(() => {
+    if (!loading && routeDetail && routeDetailRef.current) {
+      routeDetailRef.current.focus({ preventScroll: true });
+      routeDetailRef.current.scrollIntoView?.({ block: "start", behavior: "instant" });
+    }
+  }, [routeDetail, loading]);
   const restoredMonthYear = useRef(query.topic === "month" ? query.year : undefined);
   useEffect(() => {
     if (!loading && !navigationRestored) {
       const restored = readReadingNavigation(index, revision);
       restoredMonthYear.current = restored.topic === "month" ? restored.year : undefined;
       setQuery(restored);
+      setOverview(readReadingOverviewNavigation(index, revision));
+      setRouteDetail(restoredRouteDetail(readReadingOverviewNavigation(index, revision).detail));
       setNavigationRestored(true);
     }
   }, [index, revision, loading, navigationRestored]);
@@ -145,15 +168,44 @@ function ReadingExplanationContent({ index, revision, records, onTimeUncertainty
   }, [oldRecord, oldKey]);
   const previous = oldResult?.key === oldKey ? oldResult : null;
   const answer = useMemo(() => queryReadingExplanation(index, { ...query, previousIndex: previous?.index }), [index, query, previous]);
+  const mainVisible = Boolean(mainRouteSource && answer.topic === "summary" && overview.view === "main");
+  const mainRouteResult = useMemo(() => { try { return { value: mainRouteSource ? buildMainRouteReading({ revision, annual: mainRouteSource.annual,
+    timeline: mainRouteSource.timeline, includeHour: mainRouteSource.includeHour, explanationIndex: index,
+    selectedYear: query.year, range: overview.range,
+    branchId: query.branchId === "locked" || query.branchId === "forward" || query.branchId === "backward" ? query.branchId : undefined }) : null, error: null };
+    } catch (reason) { return { value: null, error: safeVisibleErrorMessage(reason, "当前人物与走势来源未能对应，请重新打开这份资料。") }; } },
+  [revision, mainRouteSource?.annual, mainRouteSource?.timeline, mainRouteSource?.includeHour, index, query.year, query.branchId, overview.range]);
+  const mainRoute = mainRouteResult.value;
+  const validRouteDetail = routeDetail && mainRoute?.status === "ready" && routeDetail.year === query.year
+    && (routeDetail.kind === "year" || (routeDetail.kind === "turn"
+      ? mainRoute.turningPoints.some(point => routeDetail.periods?.length === 2
+        && [point.before, point.after].every((link, n) => link.year === routeDetail.periods![n]!.year
+          && link.startInstant === routeDetail.periods![n]!.startInstant && link.endExclusiveInstant === routeDetail.periods![n]!.endExclusiveInstant))
+      : mainRoute.stages.some(stage => routeDetail.periods?.length && routeDetail.periods.every(period => stage.yearLinks.some(link =>
+        link.year === period.year && link.startInstant === period.startInstant && link.endExclusiveInstant === period.endExclusiveInstant)))))
+    ? routeDetail : null;
+  useLayoutEffect(() => {
+    if (!mainVisible || loading || !restoreMainPosition.current || !mainReturn.current) return;
+    const previous = mainReturn.current;
+    restoreMainPosition.current = false;
+    const target = previous.trigger?.isConnected ? previous.trigger
+      : workbenchRef.current?.querySelector<HTMLElement>(".reading-route-detail, .reading-main-route-primary");
+    target?.focus({ preventScroll: true });
+    window.scrollTo({ top: previous.scrollY, behavior: "instant" });
+  }, [mainVisible, loading, routeDetail]);
   const selectedMonthId = answer.topic === "month" && selectedId && index.conclusions.some(item => item.stableId === selectedId && item.scope.level === "month")
     ? selectedId : query.monthId;
   useEffect(() => {
     onSelectionChange?.({ topic: answer.topic, year: query.year, comparisonYear: query.comparisonYear,
-      branchId: query.branchId, monthId: selectedMonthId, isReady: navigationRestored && !loading && answer.status === "answered" && !(answer.topic === "month" && monthsLoading) });
-  }, [onSelectionChange, answer.topic, answer.status, query.year, query.comparisonYear, query.branchId, selectedMonthId, loading, monthsLoading, navigationRestored]);
+      branchId: query.branchId, monthId: selectedMonthId, isReady: !mainVisible && navigationRestored && !loading && answer.status === "answered" && !(answer.topic === "month" && monthsLoading) });
+  }, [onSelectionChange, answer.topic, answer.status, query.year, query.comparisonYear, query.branchId, selectedMonthId, loading, monthsLoading, navigationRestored, mainVisible]);
   useEffect(() => {
     if (!loading && navigationRestored) writeReadingNavigation(index, revision, { ...query, topic: answer.topic });
   }, [index, revision, query, answer.topic, loading, navigationRestored]);
+  useEffect(() => {
+    if (mainRouteSource && !loading && navigationRestored) writeReadingOverviewNavigation(index, revision,
+      { ...overview, detail: routeDetail ? { kind: routeDetail.kind, year: routeDetail.year, periods: routeDetail.periods } : undefined });
+  }, [index, revision, overview, routeDetail, loading, navigationRestored, Boolean(mainRouteSource)]);
   const years = [...new Set(index.conclusions.flatMap(item => item.scope.year === null ? [] : [item.scope.year]))].sort((a, b) => a - b);
   const branches = [...new Set(index.conclusions.flatMap(item => item.scope.branchId ? [item.scope.branchId] : []))];
   const summaryItems = answer.conclusions;
@@ -195,8 +247,15 @@ function ReadingExplanationContent({ index, revision, records, onTimeUncertainty
     setSelectedId(conclusion.stableId);
   };
   const choose = (topic: ReadingExplanationTopic) => {
+    if (mainVisible) mainReturn.current = { query: { ...query, year: mainRoute?.primaryYear ?? query.year,
+      branchId: mainRoute?.selectedBranchId ?? query.branchId }, overview, detail: validRouteDetail,
+      scrollY: window.scrollY, trigger: document.activeElement instanceof HTMLElement ? document.activeElement : null };
     returnPoint.current = null; pendingFocus.current = "topic"; setSelectedId(null);
-    const next = readingTopicSelection(index, query, topic);
+    setRouteDetail(null);
+    if (topic === "summary") setOverview(previous => ({ ...previous, view: "natal" }));
+    const from = mainVisible && mainRoute?.primaryYear ? { ...query, year: mainRoute.primaryYear,
+      branchId: mainRoute.selectedBranchId ?? query.branchId } : query;
+    const next = readingTopicSelection(index, from, topic);
     setQuery(next);
     if (topic === "month" && next.year) onRequestYear?.(next.year);
   };
@@ -205,7 +264,7 @@ function ReadingExplanationContent({ index, revision, records, onTimeUncertainty
   const summaryLead = summaryItems.find(item => item.stableId.endsWith("/natal:pattern")) ?? summaryItems.find(item => item.domain === "natal");
   const summaryLife = summaryItems.find(item => item.domain !== "natal");
   const moreSummaryItems = summaryItems.filter(item => item !== summaryLead && item !== summaryLife);
-  const summaryOverview = answer.topic === "summary" ? <div className="reading-summary-groups" hidden={Boolean(selected)}>
+  const summaryOverview = answer.topic === "summary" && !mainVisible ? <div className="reading-summary-groups" hidden={Boolean(selected)}>
       <section className="reading-summary-group" aria-label="当前解释">
         <h3>当前解释 · 先看本盘的配合</h3>
         {summaryLead ? <ReadingPlainSummaryCard index={index} conclusion={summaryLead} onOpen={trigger => openConclusion(summaryLead, trigger)} />
@@ -234,10 +293,36 @@ function ReadingExplanationContent({ index, revision, records, onTimeUncertainty
     <p role="status">正在核对所选年份与当前资料，完成后继续显示你刚才选择的专题。</p>
   </section>;
   return <section className="reading-explanation-workbench" ref={workbenchRef} tabIndex={-1} aria-label="按问题阅读与查看依据">
+    {mainVisible && mainRouteResult.error ? <p role="alert">{mainRouteResult.error}</p> : null}
+    {mainVisible && mainRoute ? <ReadingMainRouteCard model={mainRoute} caseName={mainRouteSource!.caseName} range={overview.range}
+      editHref={mainRouteSource!.canEdit ? `/cases/${encodeURIComponent(revision.caseId)}/revisions/${encodeURIComponent(revision.id)}/revise` : undefined}
+      years={mainRouteSource!.annual?.years.map(year => year.year) ?? []}
+      onRangeChange={range => { setOverview(previous => ({ ...previous, range })); setRouteDetail(null); }}
+      onYearChange={year => { setQuery({ topic: "summary", year, branchId: query.branchId }); setOverview(previous => ({ ...previous, range: "year" })); setRouteDetail(null); }}
+      onBranchChange={branchId => { setQuery({ ...query, branchId }); setRouteDetail(null); }}
+      onOpenYear={(year, interval) => {
+        setQuery({ topic: "summary", year, branchId: mainRoute.selectedBranchId ?? query.branchId });
+        setOverview({ view: "main", range: "year" }); setRouteDetail({ kind: interval ? "stage" : "year", year, periods: interval ? [{ year, ...interval }] : undefined });
+        onRequestYear?.(year);
+      }} onOpenPeriods={(label, periods) => {
+        const first = periods[0]; if (!first) return;
+        const span = periods.at(-1)!.year - first.year + 1;
+        setQuery({ topic: "summary", year: first.year, branchId: mainRoute.selectedBranchId ?? query.branchId });
+        setOverview({ view: "main", range: span === 1 ? "year" : span <= 3 ? "three_years" : "ten_years" });
+        setRouteDetail({ kind: label === "转折前后" ? "turn" : "stage", year: first.year, label, periods }); onRequestYear?.(first.year);
+      }} /> : null}
     <h3 className="reading-navigation-heading" tabIndex={-1}>想先看什么</h3>
-    <div className="reading-explanation-topics reading-primary-topics" aria-label="解读专题">{topics.slice(0, 6).map(topic => <button type="button" key={topic.id}
-      aria-pressed={answer.topic === topic.id && !selected} onClick={() => choose(topic.id)}>{topic.label}</button>)}</div>
-    {!["uncertainty", "report_comparison"].includes(answer.topic) ? <div className="reading-explanation-selectors reading-primary-selectors">
+    {!mainVisible && mainReturn.current ? <button type="button" className="reading-return-button" onClick={() => {
+      const previous = mainReturn.current; if (!previous) return;
+      pendingFocus.current = null; returnPoint.current = null; restoreMainPosition.current = true;
+      setQuery(previous.query); setOverview(previous.overview); setRouteDetail(previous.detail); setSelectedId(null);
+    }}>返回刚才的综合走势</button> : null}
+    <div className="reading-explanation-topics reading-primary-topics" aria-label="解读专题">
+      {mainRouteSource ? <button type="button" aria-pressed={mainVisible} onClick={() => { setQuery({ ...query, topic: "summary", question: undefined });
+        setOverview(previous => ({ ...previous, view: "main" })); setSelectedId(null); setRouteDetail(null); }}>综合走势</button> : null}
+      {topics.slice(0, 6).map(topic => <button type="button" key={topic.id}
+      aria-pressed={!mainVisible && answer.topic === topic.id && !selected} onClick={() => choose(topic.id)}>{mainRouteSource && topic.id === "summary" ? "本命理解" : topic.label}</button>)}</div>
+    {!mainVisible && !["uncertainty", "report_comparison"].includes(answer.topic) ? <div className="reading-explanation-selectors reading-primary-selectors">
       <label>年份<select value={query.year ?? ""} onChange={event => { const year = event.target.value ? Number(event.target.value) : undefined;
         setSelectedId(null); setQuery({ ...query, question: undefined, topic: answer.topic, year, monthId: undefined }); if (year && answer.topic === "month") onRequestYear?.(year); }}>
         <option value="">本命整体</option>{years.map(year => <option key={year} value={year}>{year}年</option>)}</select></label>
@@ -246,11 +331,24 @@ function ReadingExplanationContent({ index, revision, records, onTimeUncertainty
       {answer.topic === "month" ? <label>月份与领域<select value={query.monthId ?? ""} onChange={event => { setSelectedId(null); setQuery({ ...query, topic: "month", year: query.year ?? years[0], monthId: event.target.value || undefined }); }}>
         <option value="">请选择一个月份</option>{months.map(month => <option key={month.stableId} value={month.stableId}>{readingMonthOptionLabel(month)}</option>)}</select></label> : null}
     </div> : null}
-    {answer.topic === "summary" && query.year ? <p className="reading-explanation-limit">已选 {query.year} 年，点上方专题查看；概览仍为本命整体。</p> : null}
+    {!mainVisible && answer.topic === "summary" && query.year ? <p className="reading-explanation-limit">本命理解不对应某一年。{mainRouteSource ? "查看所选年份的变化，请切到综合走势或具体专题。" : `已选 ${query.year} 年，点上方专题查看；概览仍为本命整体。`}</p> : null}
     {!["summary", "uncertainty", "report_comparison"].includes(answer.topic) ? <ReadingBranchGuide index={index} branches={branches} selected={query.branchId}
       needed={answer.status === "needs_selection"}
       onChange={branchId => { setSelectedId(null); setQuery({ ...query, branchId, monthId: undefined }); }} /> : null}
-    {saveScopeAction}
+    {!mainVisible ? saveScopeAction : <p className="reading-explanation-limit">综合走势用于浏览时间变化。进入具体领域或月份后，可保存该范围；范围快照不包含整条多年主线。</p>}
+    {mainVisible && validRouteDetail ? <section className="reading-route-detail" aria-label="所选年份原结论" ref={routeDetailRef} tabIndex={-1}>
+      <h3>{validRouteDetail.label ?? `${validRouteDetail.year} 年重点`}</h3>
+      {validRouteDetail.periods?.map((period, n) => <p key={n}>{formatTime(period.startInstant)}起至{formatTime(period.endExclusiveInstant)}前（北京时间）</p>)}
+      <button type="button" onClick={() => choose("month")}>看 {validRouteDetail.year} 年月份</button>
+      {index.conclusions.filter(item => item.scope.level === "year"
+        && item.scope.branchId === mainRoute?.selectedBranchId
+        && (validRouteDetail.periods ? validRouteDetail.periods.some(period => item.scope.year === period.year
+          && item.scope.startInstant === period.startInstant && item.scope.endExclusiveInstant === period.endExclusiveInstant)
+          : item.scope.year === validRouteDetail.year))
+        .map(item => <article key={item.stableId} data-route-conclusion={item.stableId}><h4>{item.label}</h4>
+          <p>{readingConclusionScopeText(item)}</p><p>{item.text}</p><Evidence index={index} conclusion={item} /></article>)}
+      <p>选择上方事业、收入或感情，可保存对应年份的该领域原文；月份需要选择具体月份后保存。</p>
+    </section> : null}
     <details open={topics.slice(6).some(topic => topic.id === answer.topic) || undefined}>
       <summary>出生时间与旧报告</summary>
       <div className="reading-explanation-topics" aria-label="更多解读专题">{topics.slice(6).map(topic => <button type="button" key={topic.id}
@@ -284,11 +382,11 @@ function ReadingExplanationContent({ index, revision, records, onTimeUncertainty
       {index.uncertainty.offsetsMinutes.length ? <p>仅检查偏移分钟：{index.uncertainty.offsetsMinutes.join("、")}。变化柱位：{index.uncertainty.changedPillars.join("、") || "未见变化或仍有未完成样本"}。</p> : null}
       {timeError ? <p role="alert">{timeError}</p> : null}
     </div> : null}
-    <p role="status">{selected ? "以下是所选结论的完整原文。" : answer.summary}</p>
+    {!mainVisible ? <p role="status">{selected ? "以下是所选结论的完整原文。" : answer.summary}</p> : null}
     {monthsLoading && answer.topic === "month" ? <p role="status">正在按所选年份整理流月，已有本命与年度结论仍可阅读。</p> : null}
     {answer.scopeNotes.map((note, i) => <p className="reading-explanation-limit" key={i}>{note}</p>)}
     {answer.changes?.length ? <dl>{answer.changes.map((change, i) => <div key={i}><dt>{change.label}</dt><dd>{change.detail}</dd></div>)}</dl> : null}
-    {(!summaryOverview || selected) ? <div className="reading-explanation-results" ref={resultRef}>
+    {!mainVisible && (!summaryOverview || selected) ? <div className="reading-explanation-results" ref={resultRef}>
       {selected && returnPoint.current ? <button type="button" className="reading-return-button" onClick={() => { pendingFocus.current = "return"; setSelectedId(null); }}>
         {returnPoint.current.topic === "summary" ? "返回刚才的摘要" : "返回刚才的列表"}
       </button> : null}

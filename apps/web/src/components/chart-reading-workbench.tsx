@@ -35,7 +35,7 @@ import "./chart-reading-workbench.css";
 export type { ReadingFeedbackDraft, ReadingFeedbackChoice } from "../lib/local-reading-feedback";
 
 export type ReadingSaveFeedback = { status: "idle" } | { status: "working"; stage: ReadingSaveStage }
-  | { status: "saved"; reportId: string; refreshIssue?: boolean }
+  | { status: "saved"; reportId: string; refreshStatus?: "pending" | "succeeded" | "failed"; refreshIssue?: boolean }
   | { status: "not_saved"; message: string; canExport: boolean }
   | { status: "unconfirmed"; message: string };
 const SAVE_STAGE_LABELS: Record<ReadingSaveStage, string> = {
@@ -74,6 +74,7 @@ export interface ChartReadingWorkbenchProps {
   saveDisabled?: boolean;
   saveFeedback?: ReadingSaveFeedback;
   onCheckSave?: () => void;
+  onRetrySaveRefresh?: () => void;
   onAddFeedback?: (feedback: ReadingFeedbackDraft) => void | Promise<void>;
   onEditBirthData?: () => void;
   onOpenDetails?: () => void;
@@ -256,7 +257,7 @@ function FeedbackForm({ assessment, annual, choices, target, onAddFeedback }: { 
   </section>;
 }
 
-function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive, synthesis, briefReport, explanationPanel, onPrepareCompleteReading, priorities, annualEvents, annualLifeStories, annualLifeStoryPersonalSources, extraFeedbackChoices = [], feedbackTarget, reportLoading = false, onExportReading, onExportArchive, selectedYear: controlledYear, onSelectYear, annualOutlook, lifeOutlook, timeline, annualLoading = false, annualError, onSaveReading, saveDisabled = false, saveFeedback, onCheckSave, onAddFeedback, onEditBirthData, onOpenDetails, onOpenTransit, decorativeImageUrl }: ChartReadingWorkbenchProps) {
+function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive, synthesis, briefReport, explanationPanel, onPrepareCompleteReading, priorities, annualEvents, annualLifeStories, annualLifeStoryPersonalSources, extraFeedbackChoices = [], feedbackTarget, reportLoading = false, onExportReading, onExportArchive, selectedYear: controlledYear, onSelectYear, annualOutlook, lifeOutlook, timeline, annualLoading = false, annualError, onSaveReading, saveDisabled = false, saveFeedback, onCheckSave, onRetrySaveRefresh, onAddFeedback, onEditBirthData, onOpenDetails, onOpenTransit, decorativeImageUrl }: ChartReadingWorkbenchProps) {
   const sectionId = useId();
   const [topic, setTopic] = useState<ReadingTopic>("self");
   const [axis, setAxis] = useState<ReadingAxis | null>(null);
@@ -343,10 +344,7 @@ function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive
     event.preventDefault(); setTopic(TOPICS[next]!.id); tabRefs.current[next]?.focus();
   }
 
-  return <section className="chart-reading-workbench" aria-label="命盘与本地解读" onClickCapture={event => {
-    const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href^="#"]') : null;
-    if (link) { try { requestBackground(decodeURIComponent(link.getAttribute("href")!.slice(1))); } catch { /* Keep native navigation. */ } }
-  }}>
+  const reportHeader = (
     <header className="reading-workbench-header">
       <div className="reading-case-heading"><strong>{text(caseName, "我的命盘", 120)}</strong><span>{revision.input.calendarType === "lunar" ? "农历 " : ""}{text(revision.input.date)} {includeHour ? text(revision.input.time) : "时辰未定"}</span><span>{text(revision.input.timeZone)}</span>
         {onEditBirthData ? <button className="reading-edit-data" type="button" onClick={onEditBirthData}><PencilLine size={16} aria-hidden="true" />编辑资料</button> : null}
@@ -373,12 +371,15 @@ function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive
         {onCheckSave ? <button className="text-button" type="button" onClick={onCheckSave}>核对保存记录</button> : <AppLink href={reportHref}>查看保存记录</AppLink>}</p> : null}
       {!saveFeedback && saveState === "failed" ? <p className="reading-save-error" role="alert">{saveError}</p> : null}
       {saved ? <p className="reading-save-message" role="status">{saveFeedback?.status === "saved" ? "报告已保存并核对" : "报告已保存"}，已保存到本机。下次从“档案 → 已保存报告”找回完整报告原文。
-        {saveFeedback?.status === "saved" && saveFeedback.refreshIssue ? "本页更新尚未完成，可以直接打开已保存的原文。" : null}
-        <AppLink href={reportHref}>{saveFeedback?.status === "saved" ? "打开已保存报告" : "打开我的报告"}</AppLink></p> : null}
+        {saveFeedback?.status === "saved" && saveFeedback.refreshStatus === "pending" ? "正在更新本页，可以直接打开已保存的原文。" : null}
+        {saveFeedback?.status === "saved" && (saveFeedback.refreshStatus === "failed" || saveFeedback.refreshIssue) ? "本页更新尚未完成，报告仍已保存，可以直接打开原文。" : null}
+        <AppLink href={reportHref}>{saveFeedback?.status === "saved" ? "打开已保存报告" : "打开我的报告"}</AppLink>
+        {saveFeedback?.status === "saved" && saveFeedback.refreshStatus === "failed" && onRetrySaveRefresh
+          ? <button type="button" className="text-button" onClick={onRetrySaveRefresh}>只重试本页更新</button> : null}</p> : null}
       {reportLoading && !saving ? <p className="reading-save-message" role="status">正在整理大运与流月，完成后可保存完整解读。</p> : null}
     </header>
-
-    <div className="reading-workbench-columns">
+  );
+  const chartColumn = (
       <aside className="reading-chart-column" aria-label="命盘结构与运势">
         <section className="reading-pillars-section" aria-labelledby={`${sectionId}-pillars`}>
           <div className="reading-section-heading reading-section-heading--calendar"><h2 id={`${sectionId}-pillars`}>四柱命盘</h2><div><p>{text(revision.facts.calendar.solarText)}</p><p>{text(revision.facts.calendar.lunarText)}</p><p>时区 {text(revision.input.timeZone)}</p></div></div>
@@ -424,11 +425,21 @@ function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive
           {decorativeImageUrl ? <img className="reading-mountain-art" src={decorativeImageUrl} alt="" aria-hidden="true" loading="lazy" /> : null}
         </section>
       </aside>
+  );
+
+  return <section className={`chart-reading-workbench${explanationPanel ? " chart-reading-workbench--trajectory" : ""}`} aria-label="命盘与本地解读" onClickCapture={event => {
+    const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href^="#"]') : null;
+    if (link) { try { requestBackground(decodeURIComponent(link.getAttribute("href")!.slice(1))); } catch { /* Keep native navigation. */ } }
+  }}>
+    {!explanationPanel ? reportHeader : null}
+
+    <div className="reading-workbench-columns">
+      {!explanationPanel ? chartColumn : null}
 
       <section className="reading-answer-column" id="reading-natal" tabIndex={-1} aria-labelledby={`${sectionId}-headline`}>
         <div className="reading-section-heading reading-answer-kicker"><h2>{boundBrief ? "主报告" : "本盘判断"}</h2><span>{boundBrief ? "先说结论，再看事业、财运、感情与年月" : "基于四柱结构的本地初步解读"}</span></div>
-        <h1 id={`${sectionId}-headline`} className="reading-main-headline">先看懂这份命盘</h1>
-        <p className="reading-professional-label">本盘专业分类：{text(pillars.day.stem)}{ELEMENTS[SYMBOL_ELEMENT[pillars.day.stem] ?? ""]}日主 · {text(workingBalance.label)}</p>
+        <h1 id={`${sectionId}-headline`} className={explanationPanel ? "sr-only" : "reading-main-headline"}>{explanationPanel ? "当前人物的综合阅读" : "先看懂这份命盘"}</h1>
+        {!explanationPanel ? <p className="reading-professional-label">本盘专业分类：{text(pillars.day.stem)}{ELEMENTS[SYMBOL_ELEMENT[pillars.day.stem] ?? ""]}日主 · {text(workingBalance.label)}</p> : null}
         {explanationPanel ? <>{explanationPanel}{boundBrief ? <details className="reading-fold" onToggle={event => setCompleteNatalOpen(event.currentTarget.open)}>
           <summary>展开完整本命阅读</summary>{completeNatalOpen ? <BriefReadingReportPanel report={boundBrief} variant="summary" onSelectYear={(next) => { setYear(next); onSelectYear?.(next); }} /> : null}</details> : null}</>
           : boundBrief ? <BriefReadingReportPanel report={boundBrief} variant="summary" onSelectYear={(next) => { setYear(next); onSelectYear?.(next); }} /> : boundSynthesis ? <ReadingSynthesisPanel reading={boundSynthesis} variant="summary" plainCards={buildPlainNatalCards(boundSynthesis, boundComprehensive, { revision, referenceInstant: boundLife?.referenceInstant })} />
@@ -449,13 +460,16 @@ function ReadingWorkbenchContent({ revision, caseName, assessment, comprehensive
           </section>
         </div> : null}
         <details className="reading-fold reading-brief-axes"><summary>格局、喜用与判断依据</summary>
+        {explanationPanel ? <p className="reading-professional-label">本盘专业分类：{text(pillars.day.stem)}{ELEMENTS[SYMBOL_ELEMENT[pillars.day.stem] ?? ""]}日主 · {text(workingBalance.label)}</p> : null}
         {boundBrief?.natalConclusion ? <p className="reading-small-note">上方已给出本盘采用结论。以下保留原始格局、扶抑与调候条目，供展开对照。</p> : null}
         <div className="reading-axis-buttons" aria-label="三个判断角度">{AXES.map((item) => <button type="button" key={item.id} className={axis === item.id ? "is-active" : ""} aria-expanded={axis === item.id} aria-controls={`${sectionId}-axis`} onClick={() => setAxis((current) => current === item.id ? null : item.id)}><span>{item.label}<ChevronDown size={14} aria-hidden="true" /></span><strong>{text(item.id === "balance" ? workingBalance.label : item.id === "pattern" && structureChapter ? structureChapter.headline : assessment[item.id].headline)}</strong><small>{item.id === "seasonal" ? seasonalLabel : item.id === "balance" ? "当前工作判断" : structureChapter ? "格局主判断" : STATUS_LABELS[assessment[item.id].status]}</small></button>)}</div>
         <div id={`${sectionId}-axis`} hidden={axis === null}>{axis ? <AssessmentDetails axis={axis} assessment={assessment} comprehensive={boundComprehensive} /> : null}</div>
         </details>
         <a className="reading-full-report-link" href="#reading-full-report">{boundBrief ? "展开逐年判断与完整依据" : "继续读命局与重点年份"} <ArrowRight size={16} aria-hidden="true" /></a>
       </section>
+      {explanationPanel ? chartColumn : null}
     </div>
+    {explanationPanel ? reportHeader : null}
       <section className="reading-full-report" id="reading-full-report" tabIndex={-1} aria-label="命局详读与重点年份">
         {boundBrief && explanationPanel ? <details className="reading-fold" onToggle={event => { setCompleteYearsOpen(event.currentTarget.open); if (event.currentTarget.open) onPrepareCompleteReading?.(); }}>
           <summary>展开完整十年阅读与关键月份</summary>{completeYearsOpen ? <BriefReadingReportPanel report={boundBrief} variant="years" onSelectYear={(next) => { setYear(next); onSelectYear?.(next); }} /> : null}</details>

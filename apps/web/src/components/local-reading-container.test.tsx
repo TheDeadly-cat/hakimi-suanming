@@ -353,7 +353,7 @@ describe("reading container persistence and asynchronous publication", () => {
     expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(1);
   }, 120_000);
 
-  it("times actual complete saves only when enabled and waits for the refreshed personal replay before publishing", async () => {
+  it("confirms the complete save while enabled diagnostics wait for the separate personal replay", async () => {
     vi.stubEnv("VITE_READING_SAVE_DIAGNOSTICS", "1");
     const log = vi.spyOn(console, "info").mockImplementation(() => undefined);
     const receipts = () => log.mock.calls.filter(call => call[0] === READING_SAVE_TIMING_PREFIX)
@@ -372,7 +372,10 @@ describe("reading container persistence and asynchronous publication", () => {
     });
     await saveCompleteSnapshot();
     await waitFor(() => expect(replayEntered).toBe(true));
-    expect(await repository.listResearchNotesByCase(revisionA.caseId)).toHaveLength(1);
+    const verifiedNotes = await repository.listResearchNotesByCase(revisionA.caseId);
+    expect(verifiedNotes).toHaveLength(1);
+    expect(JSON.parse(screen.getByTestId("save-feedback").textContent!))
+      .toMatchObject({ status: "saved", reportId: verifiedNotes[0]!.id, refreshStatus: "pending" });
     expect(receipts()).toEqual([]); // A completed write/list read is not a refreshed personal reading.
     expect(JSON.parse(screen.getByTestId("reading-save-diagnostics").querySelector("pre")!.textContent!)).toMatchObject({ status: "running" });
     hold = false;
