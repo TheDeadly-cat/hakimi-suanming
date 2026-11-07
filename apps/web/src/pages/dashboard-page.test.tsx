@@ -138,7 +138,7 @@ describe("DashboardPage", () => {
     expect(within(selected).getByText("这是上次查看的旧资料，不会自动切到新资料。")).toBeTruthy();
   });
 
-  it.each([2030, 2045])("首页恢复 %s 年真实阅读管线，打开年份先保存准确范围且仅按需准备该年月份", async selectedYear => {
+  it.each([2030, 2045])("首页恢复 %s 年真实阅读管线，进入年度详情保留主线范围且仅按需准备该年月份", async selectedYear => {
     const original = await caseRepository.createCase({ alias: "首页真实管线合成盘", calculated: await calculateChart(exactInput, WORKING_DEFAULT_RULE_PROFILE) });
     rememberReading(original);
     const saved = JSON.parse(window.sessionStorage.getItem(READING_NAVIGATION_STORAGE_KEY)!);
@@ -168,15 +168,19 @@ describe("DashboardPage", () => {
     expect(card.compareDocumentPosition(document.querySelector(".dashboard-grid")!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getByRole("heading", { name: "读懂命局，看见岁运变化" }).closest("details")!.open).toBe(false);
     expect(result.range.label).toBe(`${selectedYear}—${selectedYear + 2}年`);
+    expect(within(card as HTMLElement).getByLabelText("查看范围")).toHaveProperty("value", "three_years");
     expect(result.domainNotes.length).toBeGreaterThanOrEqual(3);
     expect(allMonths.length).toBeGreaterThan(0);
     expect(allMonths.every(all => all.mock.calls.length === 0)).toBe(true);
     expect(new Set(preparedYears)).toEqual(new Set([selectedYear]));
     fireEvent.click(action);
     const selected = JSON.parse(window.sessionStorage.getItem(READING_NAVIGATION_STORAGE_KEY)!);
+    expect(selected.identity).toBe(saved.identity);
     expect(selected.selection).toMatchObject({ topic: "summary", year: selectedYear, branchId: "locked" });
-    expect(selected.presentation).toMatchObject({ view: "main", range: "year", mainRouteVersion: MAIN_ROUTE_READING_VERSION,
+    expect(selected.presentation).toMatchObject({ view: "main", range: "three_years", mainRouteVersion: MAIN_ROUTE_READING_VERSION,
       detail: { kind: "year", year: selectedYear } });
+    expect(within(card as HTMLElement).getByLabelText("查看范围")).toHaveProperty("value", "three_years");
+    expect(within(card as HTMLElement).getByText(`${selectedYear}—${selectedYear + 2}年`, { exact: true })).toBeTruthy();
     expect(navigate).toHaveBeenCalledExactlyOnceWith(`/cases/${original.caseRecord.id}/revisions/${original.caseRecord.latestRevisionId}`);
     expect(screen.queryByRole("button", { name: /保存完整报告|保存.*主线/ })).toBeNull();
     window.sessionStorage.clear();
